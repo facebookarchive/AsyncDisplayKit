@@ -93,10 +93,10 @@
   [_renderer size];
   NSRange stringRange = NSMakeRange(0, _attributedString.length);
   NSRange visibleRange = [_renderer visibleRange];
-  XCTAssertTrue(visibleRange.length < stringRange.length, @"Some truncation should occur if the constrained size is smaller than the previously calculated bounding size. String length %d, visible range %@", _attributedString.length, NSStringFromRange(visibleRange));
+  XCTAssertTrue(visibleRange.length < stringRange.length, @"Some truncation should occur if the constrained size is smaller than the previously calculated bounding size. String length %tu, visible range %@", _attributedString.length, NSStringFromRange(visibleRange));
   NSRange truncationRange = [_renderer truncationStringCharacterRange];
-  XCTAssertTrue(truncationRange.location == NSMaxRange(visibleRange), @"Truncation location (%d) should be after the end of the visible range (%d)", truncationRange.location, NSMaxRange(visibleRange));
-  XCTAssertTrue(truncationRange.length == _truncationString.length, @"Truncation string length (%d) should be the full length of the supplied truncation string (%@)", truncationRange.length, _truncationString.string);
+  XCTAssertTrue(truncationRange.location == NSMaxRange(visibleRange), @"Truncation location (%zd) should be after the end of the visible range (%zd)", truncationRange.location, NSMaxRange(visibleRange));
+  XCTAssertTrue(truncationRange.length == _truncationString.length, @"Truncation string length (%zd) should be the full length of the supplied truncation string (%@)", truncationRange.length, _truncationString.string);
 }
 
 /**

@@ -746,11 +746,11 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   };
 
   // verify initial
-  XCTAssertTrue(1 == node.retainCount, @"unexpected retain count:%d", node.retainCount);
+  XCTAssertTrue(1 == node.retainCount, @"unexpected retain count:%tu", node.retainCount);
 
   // verify increment
   [node retain];
-  XCTAssertTrue(2 == node.retainCount, @"unexpected retain count:%d", node.retainCount);
+  XCTAssertTrue(2 == node.retainCount, @"unexpected retain count:%tu", node.retainCount);
 
   // verify dealloc
   [node release];
@@ -768,15 +768,15 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   };
 
   // verify initial
-  XCTAssertTrue(1 == node.retainCount, @"unexpected retain count:%d", node.retainCount);
+  XCTAssertTrue(1 == node.retainCount, @"unexpected retain count:%tu", node.retainCount);
 
   UIView *v = [[UIView alloc] initWithFrame:CGRectZero];
   [v addSubview:node.view];
 
-  XCTAssertTrue(2 == node.retainCount, @"view should retain node when added. retain count:%d", node.retainCount);
+  XCTAssertTrue(2 == node.retainCount, @"view should retain node when added. retain count:%tu", node.retainCount);
 
   [node release];
-  XCTAssertTrue(1 == node.retainCount, @"unexpected retain count:%d", node.retainCount);
+  XCTAssertTrue(1 == node.retainCount, @"unexpected retain count:%tu", node.retainCount);
 
   [node.view removeFromSuperview];
   XCTAssertTrue(didDealloc, @"unexpected node lifetime:%@", node);

@@ -65,7 +65,7 @@ static UIImage *bogusImage() {
 
 - (NSString *)setContentsCounts
 {
-  return [NSString stringWithFormat:@"syncCount:%u, asyncCount:%u", _setContentsSyncCount, _setContentsAsyncCount];
+  return [NSString stringWithFormat:@"syncCount:%tu, asyncCount:%tu", _setContentsSyncCount, _setContentsAsyncCount];
 }
 
 - (BOOL)checkSetContentsCountsWithSyncCount:(NSUInteger)syncCount asyncCount:(NSUInteger)asyncCount
