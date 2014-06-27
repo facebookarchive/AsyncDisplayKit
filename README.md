@@ -6,15 +6,19 @@ Welcome to the AsyncDisplayKit beta!  Documentation — including this README �
 
 AsyncDisplayKit will be available on [CocoaPods](http://cocoapods.org/).  You can manually include it in your project's Podfile:
 
-`pod 'AsyncDisplayKit', :git => 'https://github.com/facebook/AsyncDisplayKit.git'`
+```ruby
+pod 'AsyncDisplayKit', :git => 'git@github.com:facebook/AsyncDisplayKit.git'
+```
 
 ## Usage
 
-`#import <AsyncDisplayKit/ASDisplayNode.h>`
+```objective-c
+#import <AsyncDisplayKit/ASDisplayNode.h>
+```
 
 ## Testing
 
-AsyncDisplayKit has extensive unit test coverage.  You may need to run `pod install` in the root AsyncDisplayKit directory to include OCMock.
+AsyncDisplayKit has extensive unit test coverage.  You'll need to run `pod install` in the root AsyncDisplayKit directory to set up OCMock.
 
 ## Contributing
 
@@ -22,4 +26,4 @@ See the CONTRIBUTING file for how to help out.
 
 ## License
 
-AsyncDisplayKit is BSD-licensed. We also provide an additional patent grant.
+AsyncDisplayKit is BSD-licensed.  We also provide an additional patent grant.
