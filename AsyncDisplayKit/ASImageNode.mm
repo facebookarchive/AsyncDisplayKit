@@ -1,0 +1,362 @@
+/* Copyright (c) 2014-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+#import "ASImageNode.h"
+
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
+#import <AsyncDisplayKit/_ASCoreAnimationExtras.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+
+#import "ASImageNode+CGExtras.h"
+
+@interface _ASImageNodeDrawParameters : NSObject
+
+@property (nonatomic, assign, readonly) BOOL cropEnabled;
+@property (nonatomic, assign) BOOL opaque;
+@property (nonatomic, retain) UIImage *image;
+@property (nonatomic, assign) CGRect bounds;
+@property (nonatomic, assign) CGFloat contentsScale;
+@property (nonatomic, assign) ASImageNodeTint tint;
+@property (nonatomic, retain) UIColor *backgroundColor;
+@property (nonatomic, assign) UIViewContentMode contentMode;
+@property (nonatomic, assign) CGRect cropRect;
+
+@end
+
+// TODO: eliminate explicit parameters with a set of keys copied from the node
+@implementation _ASImageNodeDrawParameters
+
+- (id)initWithCrop:(BOOL)cropEnabled opaque:(BOOL)opaque image:(UIImage *)image bounds:(CGRect)bounds contentsScale:(CGFloat)contentsScale backgroundColor:(UIColor *)backgroundColor tint:(ASImageNodeTint)tint contentMode:(UIViewContentMode)contentMode cropRect:(CGRect)cropRect
+{
+  self = [self init];
+  if (!self) return nil;
+
+  _cropEnabled = cropEnabled;
+  _opaque = opaque;
+  _image = [image retain];
+  _bounds = bounds;
+  _contentsScale = contentsScale;
+  _backgroundColor = [backgroundColor retain];
+  _tint = tint;
+  _contentMode = contentMode;
+  _cropRect = cropRect;
+
+  return self;
+}
+
+- (void)dealloc
+{
+  [_image release];
+  [_backgroundColor release];
+  [super dealloc];
+}
+
+- (NSString *)description
+{
+  return [NSString stringWithFormat:@"<%@ : %p image:%@ cropEnabled:%@ opaque:%@ bounds:%@ contentsScale:%.2f backgroundColor:%@ tint:%u contentMode:%@ cropRect:%@>", [self class], self, self.image, @(self.cropEnabled), @(self.opaque), NSStringFromCGRect(self.bounds), self.contentsScale, self.backgroundColor, self.tint, ASDisplayNodeNSStringFromUIContentMode(self.contentMode), NSStringFromCGRect(self.cropRect)];
+}
+
+@end
+
+
+@implementation ASImageNode
+{
+@private
+  UIImage *_image;
+
+  void (^_displayCompletionBlock)(BOOL canceled);
+  ASDN::RecursiveMutex _imageLock;
+
+  // Cropping.
+  BOOL _cropEnabled; // Defaults to YES.
+  ASImageNodeTint _tint;
+  CGRect _cropRect; // Defaults to CGRectMake(0.5, 0.5, 0, 0)
+  CGRect _cropDisplayBounds;
+}
+
+@synthesize image = _image;
+
+- (id)init
+{
+  if (!(self = [super init]))
+    return nil;
+
+  // TODO can this be removed?
+  self.contentsScale = [[UIScreen mainScreen] scale];
+  self.contentMode = UIViewContentModeScaleAspectFill;
+  self.opaque = YES;
+
+  _cropEnabled = YES;
+  _cropRect = CGRectMake(0.5, 0.5, 0, 0);
+  _cropDisplayBounds = CGRectNull;
+
+  return self;
+}
+
+- (void)dealloc
+{
+  [_displayCompletionBlock release];
+  [_image release];
+  [super dealloc];
+}
+
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+{
+  ASDN::MutexLocker l(_imageLock);
+  if (_image)
+    return _image.size;
+  else
+    return CGSizeZero;
+}
+
+- (void)setImage:(UIImage *)image
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_imageLock);
+  if (_image != image) {
+    [_image release];
+    _image = [image retain];
+    [self invalidateCalculatedSize];
+    [self setNeedsDisplay];
+  }
+}
+
+- (UIImage *)image
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_imageLock);
+  return [[_image retain] autorelease];
+}
+
+- (void)setTint:(ASImageNodeTint)tint
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_imageLock);
+  if (_tint != tint) {
+    _tint = tint;
+    [self setNeedsDisplay];
+  }
+}
+
+- (ASImageNodeTint)tint
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_imageLock);
+  return _tint;
+}
+
+- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
+{
+  BOOL hasValidCropBounds = _cropEnabled && !CGRectIsNull(_cropDisplayBounds) && !CGRectIsEmpty(_cropDisplayBounds);
+
+  return [[[_ASImageNodeDrawParameters alloc] initWithCrop:_cropEnabled
+                                                    opaque:self.opaque
+                                                     image:self.image
+                                                    bounds:(hasValidCropBounds ? _cropDisplayBounds : self.bounds)
+                                             contentsScale:self.contentsScaleForDisplay
+                                           backgroundColor:self.backgroundColor
+                                                      tint:self.tint
+                                               contentMode:self.contentMode
+                                                  cropRect:self.cropRect] autorelease];
+}
+
++ (UIImage *)displayWithParameters:(_ASImageNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
+{
+  UIImage *image = parameters.image;
+
+  if (!image) {
+    return nil;
+  }
+
+  ASDisplayNodeAssert(parameters.contentsScale > 0, @"invalid contentsScale at display time");
+
+  CGRect bounds = parameters.bounds;
+
+  CGFloat contentsScale = parameters.contentsScale;
+  UIViewContentMode contentMode = parameters.contentMode;
+  BOOL stretchable = !UIEdgeInsetsEqualToEdgeInsets(image.capInsets, UIEdgeInsetsZero);
+  CGSize imageSize = image.size;
+  CGSize imageSizeInPixels = CGSizeMake(imageSize.width * image.scale, imageSize.height * image.scale);
+  CGSize boundsSizeInPixels = CGSizeMake(floorf(bounds.size.width * contentsScale), floorf(bounds.size.height * contentsScale));
+
+  CGImageAlphaInfo alphaInfo = CGImageGetAlphaInfo(image.CGImage);
+  BOOL imageHasAlpha =    alphaInfo == kCGImageAlphaFirst
+                       || alphaInfo == kCGImageAlphaLast
+                       || alphaInfo == kCGImageAlphaPremultipliedFirst
+                       || alphaInfo == kCGImageAlphaPremultipliedLast;
+
+  BOOL contentModeSupported =    contentMode == UIViewContentModeScaleAspectFill
+                              || contentMode == UIViewContentModeScaleAspectFit;
+
+  CGSize backingSize;
+  CGRect imageDrawRect;
+
+  if (boundsSizeInPixels.width * contentsScale < 1.0f ||
+      boundsSizeInPixels.height * contentsScale < 1.0f ||
+      imageSizeInPixels.width < 1.0f ||
+      imageSizeInPixels.height < 1.0f) {
+    return nil;
+  }
+
+  // If we're not supposed to do any cropping, just decode image at original size
+  if (!parameters.cropEnabled || !contentModeSupported || stretchable) {
+    backingSize = imageSizeInPixels;
+    imageDrawRect = (CGRect){.size = backingSize};
+  } else {
+    ASCroppedImageBackingSizeAndDrawRectInBounds(imageSizeInPixels,
+                                                 boundsSizeInPixels,
+                                                 contentMode,
+                                                 parameters.cropRect,
+                                                 &backingSize,
+                                                 &imageDrawRect);
+  }
+
+  if (backingSize.width <= 0.0f ||
+      backingSize.height <= 0.0f ||
+      imageDrawRect.size.width <= 0.0f ||
+      imageDrawRect.size.height <= 0.0f) {
+    return nil;
+  }
+
+  // Use contentsScale of 1.0 and do the contentsScale handling in boundsSizeInPixels so ASCroppedImageBackingSizeAndDrawRectInBounds
+  // will do its rounding on pixel instead of point boundaries
+  UIGraphicsBeginImageContextWithOptions(backingSize, !imageHasAlpha, 1.0);
+
+  CGContextRef context = UIGraphicsGetCurrentContext();
+
+  [image drawInRect:imageDrawRect];
+
+  if (parameters.tint == ASImageNodeTintGreyscale) {
+    [[UIColor grayColor] setFill];
+    CGContextSetBlendMode(context, kCGBlendModeColor);
+    CGContextFillRect(context, (CGRect){.size = backingSize});
+  }
+
+  if (isCancelled()) {
+    UIGraphicsEndImageContext();
+    return nil;
+  }
+
+  UIImage *result = UIGraphicsGetImageFromCurrentImageContext();
+
+  UIGraphicsEndImageContext();
+
+  if (stretchable) {
+    return [image resizableImageWithCapInsets:image.capInsets resizingMode:image.resizingMode];
+  }
+
+  return result;
+}
+
+- (void)didDisappear
+{
+  self.contents = nil;
+  [super didDisappear];
+}
+
+- (void)willAppear
+{
+  [super willAppear];
+
+  if (!self.layer.contents)
+    [self setNeedsDisplay];
+}
+
+- (void)displayDidFinish
+{
+  [super displayDidFinish];
+
+  // If we've got a block to perform after displaying, do it.
+  if (self.image && _displayCompletionBlock) {
+
+    // FIXME: _displayCompletionBlock is not protected by lock
+    _displayCompletionBlock(NO);
+    [_displayCompletionBlock release];
+    _displayCompletionBlock = nil;
+  }
+}
+
+#pragma mark -
+- (void)setNeedsDisplayWithCompletion:(void (^)(BOOL canceled))displayCompletionBlock
+{
+  if (self.preventOrCancelDisplay) {
+    if (displayCompletionBlock)
+      displayCompletionBlock(YES);
+    return;
+  }
+
+  // Stash the block and call-site queue. We'll invoke it in -displayDidFinish.
+  // FIXME: _displayCompletionBlock not protected by lock
+  if (_displayCompletionBlock != displayCompletionBlock) {
+    [_displayCompletionBlock release];
+    _displayCompletionBlock = [displayCompletionBlock copy];
+  }
+
+  [self setNeedsDisplay];
+}
+
+#pragma mark - Cropping
+- (BOOL)cropEnabled
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  return _cropEnabled;
+}
+
+- (void)setCropEnabled:(BOOL)cropEnabled
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  [self setCropEnabled:cropEnabled recropImmediately:NO inBounds:self.bounds];
+}
+
+- (void)setCropEnabled:(BOOL)cropEnabled recropImmediately:(BOOL)recropImmediately inBounds:(CGRect)cropBounds
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  if (_cropEnabled == cropEnabled)
+    return;
+
+  _cropEnabled = cropEnabled;
+  _cropDisplayBounds = cropBounds;
+
+  // If we have an image to display, display it, respecting our recrop flag.
+  if (self.image)
+  {
+    if (recropImmediately)
+      [self displayImmediately];
+    else
+      [self setNeedsDisplay];
+  }
+}
+
+- (CGRect)cropRect
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  return _cropRect;
+}
+
+- (void)setCropRect:(CGRect)cropRect
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+
+  if (CGRectEqualToRect(_cropRect, cropRect))
+    return;
+
+  _cropRect = cropRect;
+
+  // TODO: this logic needs to be updated to respect cropRect.
+  CGSize boundsSize = self.bounds.size;
+  CGSize imageSize = self.image.size;
+
+  BOOL isCroppingImage = ((boundsSize.width < imageSize.width) || (boundsSize.height < imageSize.height));
+
+  // Re-display if we need to.
+  if (self.isViewLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
+    [self setNeedsDisplay];
+}
+
+@end
