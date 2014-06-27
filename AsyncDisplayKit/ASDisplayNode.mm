@@ -700,7 +700,10 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
         if (canUseViewAPI && sublayerIndex != NSNotFound) {
           [_view insertSubview:subnode.view atIndex:sublayerIndex];
         } else if (sublayerIndex != NSNotFound) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconversion"
           [_layer insertSublayer:subnode.layer atIndex:sublayerIndex];
+#pragma clang diagnostic pop
         }
       }
     }
@@ -840,7 +843,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDN::MutexLocker l(_propertyLock);
 
   if (idx > _subnodes.count || idx < 0) {
-    NSString *reason = [NSString stringWithFormat:@"Cannot insert a subnode at index %d. Count is %d", idx, _subnodes.count];
+    NSString *reason = [NSString stringWithFormat:@"Cannot insert a subnode at index %zd. Count is %zd", idx, _subnodes.count];
     @throw [NSException exceptionWithName:NSInvalidArgumentException reason:reason userInfo:nil];
   }
 

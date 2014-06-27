@@ -59,7 +59,7 @@
 
 - (NSString *)description
 {
-  return [NSString stringWithFormat:@"<%@ : %p image:%@ cropEnabled:%@ opaque:%@ bounds:%@ contentsScale:%.2f backgroundColor:%@ tint:%u contentMode:%@ cropRect:%@>", [self class], self, self.image, @(self.cropEnabled), @(self.opaque), NSStringFromCGRect(self.bounds), self.contentsScale, self.backgroundColor, self.tint, ASDisplayNodeNSStringFromUIContentMode(self.contentMode), NSStringFromCGRect(self.cropRect)];
+  return [NSString stringWithFormat:@"<%@ : %p image:%@ cropEnabled:%@ opaque:%@ bounds:%@ contentsScale:%.2f backgroundColor:%@ tint:%zd contentMode:%@ cropRect:%@>", [self class], self, self.image, @(self.cropEnabled), @(self.opaque), NSStringFromCGRect(self.bounds), self.contentsScale, self.backgroundColor, self.tint, ASDisplayNodeNSStringFromUIContentMode(self.contentMode), NSStringFromCGRect(self.cropRect)];
 }
 
 @end
