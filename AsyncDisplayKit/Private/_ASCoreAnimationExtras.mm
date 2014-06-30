@@ -119,7 +119,7 @@ NSString *const ASDisplayNodeCAContentsGravityFromUIContentMode(UIViewContentMod
       return UIContentModeCAGravityLUT[i].string;
     }
   }
-  ASDisplayNodeCAssert(contentMode == UIViewContentModeRedraw, @"Encountered an unknown contentMode %ld. Is this a new version of iOS?", contentMode);
+  ASDisplayNodeCAssert(contentMode == UIViewContentModeRedraw, @"Encountered an unknown contentMode %zd. Is this a new version of iOS?", contentMode);
   // Redraw is ok to return nil.
   return nil;
 }
