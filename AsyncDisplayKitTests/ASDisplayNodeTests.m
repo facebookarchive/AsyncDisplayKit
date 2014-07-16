@@ -183,7 +183,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
 
   XCTAssertEqual(NO, node.isLayerBacked, @"default isLayerBacked broken without view");
-  node.isLayerBacked = isLayerBacked;
+  node.layerBacked = isLayerBacked;
   XCTAssertEqual(isLayerBacked, node.isLayerBacked, @"setIsLayerBacked: broken");
 
   // Assert that the values can be fetched from the node before the view is realized.
@@ -274,7 +274,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
   [self executeOffThread:^{
     node = [[ASDisplayNode alloc] init];
-    node.isLayerBacked = isLayerBacked;
+    node.layerBacked = isLayerBacked;
 
     node.contents = (id)[self bogusImage].CGImage;
     node.clipsToBounds = YES;
@@ -840,7 +840,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   DeclareNodeNamed(c);
 
   for (ASDisplayNode *n in @[parent, a, b, c]) {
-    n.isLayerBacked = isLayerBacked;
+    n.layerBacked = isLayerBacked;
   }
 
   [parent addSubnode:a];
@@ -1103,7 +1103,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   DeclareNodeNamed(c);
 
   for (ASDisplayNode *v in @[parent, a, b, c]) {
-    v.isLayerBacked = isLayerBacked;
+    v.layerBacked = isLayerBacked;
   }
 
   // Load parent
@@ -1113,7 +1113,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 
   // Add another subnode to test creation after parent is loaded
   DeclareNodeNamed(d);
-  d.isLayerBacked = isLayerBacked;
+  d.layerBacked = isLayerBacked;
   if (loaded) {
     XCTAssertFalse(d.isViewLoaded, @"Should not yet be loaded");
   }
@@ -1358,7 +1358,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   DeclareNodeNamed(c);
 
   for (ASDisplayNode *v in @[parent, a, b, c]) {
-    v.isLayerBacked = isLayerBacked;
+    v.layerBacked = isLayerBacked;
   }
 
   [parent addSubnode:b];
@@ -1438,7 +1438,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   DeclareNodeNamed(c);
 
   for (ASDisplayNode *n in @[parent, a, b, c]) {
-    n.isLayerBacked = isLayerBacked;
+    n.layerBacked = isLayerBacked;
   }
 
   [parent addSubnode:a];
@@ -1493,7 +1493,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 - (void)checkBackgroundColorOpaqueRelationshipWithViewLoaded:(BOOL)loaded layerBacked:(BOOL)isLayerBacked
 {
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
-  node.isLayerBacked = isLayerBacked;
+  node.layerBacked = isLayerBacked;
 
   if (loaded) {
     // Force load
@@ -1577,9 +1577,9 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   ASDisplayNode *parent = [[ASDisplayNode alloc] init];
 
   ASDisplayNode *a = [[[ASDisplayNode alloc] init] autorelease];
-  a.isLayerBacked = YES;
+  a.layerBacked = YES;
   ASDisplayNode *b = [[[ASDisplayNode alloc] init] autorelease];
-  b.isLayerBacked = YES;
+  b.layerBacked = YES;
   b.frame = CGRectMake(0, 0, 100, 123);
   ASDisplayNode *c = [[[ASDisplayNode alloc] init] autorelease];
 
@@ -1611,7 +1611,7 @@ static bool stringContainsPointer(NSString *description, const void *p) {
 - (void)checkNameInDescriptionIsLayerBacked:(BOOL)isLayerBacked
 {
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
-  node.isLayerBacked = isLayerBacked;
+  node.layerBacked = isLayerBacked;
 
   XCTAssertFalse([node.description rangeOfString:@"name"].location != NSNotFound, @"Shouldn't reference 'name' in description");
   node.name = @"big troll eater name";

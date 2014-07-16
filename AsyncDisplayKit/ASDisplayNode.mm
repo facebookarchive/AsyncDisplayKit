@@ -302,12 +302,12 @@ _OBJC_SUPPORTED_INLINE_REFCNT_WITH_DEALLOC2MAIN(_retainCount);
   return _flags.isSynchronous;
 }
 
-- (void)setIsSynchronous:(BOOL)flag
+- (void)setSynchronous:(BOOL)flag
 {
   _flags.isSynchronous = flag;
 }
 
-- (void)setIsLayerBacked:(BOOL)isLayerBacked
+- (void)setLayerBacked:(BOOL)isLayerBacked
 {
   if (![self.class layerBackedNodesEnabled]) return;
 

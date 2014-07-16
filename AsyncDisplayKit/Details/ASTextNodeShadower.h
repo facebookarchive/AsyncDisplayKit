@@ -37,16 +37,16 @@ static inline UIEdgeInsets ASDNEdgeInsetsInvert(UIEdgeInsets insets)
   * @discussion A positive width will move the shadow to the right.
   *             A positive height will move the shadow downwards.
   */
-@property (nonatomic, assign, readonly) CGSize shadowOffset;
+@property (nonatomic, readonly, assign) CGSize shadowOffset;
 
 //! CGColor in which the shadow is drawn
-@property (nonatomic, assign, readonly) CGColorRef shadowColor;
+@property (nonatomic, readonly, assign) CGColorRef shadowColor;
 
 //! Alpha of the shadow
-@property (nonatomic, assign, readonly) CGFloat shadowOpacity;
+@property (nonatomic, readonly, assign) CGFloat shadowOpacity;
 
 //! Radius, in pixels
-@property (nonatomic, assign, readonly) CGFloat shadowRadius;
+@property (nonatomic, readonly, assign) CGFloat shadowRadius;
 
 /**
   * @abstract The edge insets which represent shadow padding

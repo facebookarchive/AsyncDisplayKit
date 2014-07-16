@@ -302,7 +302,7 @@
 }
 
 #pragma mark - Cropping
-- (BOOL)cropEnabled
+- (BOOL)isCropEnabled
 {
   ASDisplayNodeAssertThreadAffinity(self);
   return _cropEnabled;

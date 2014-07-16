@@ -38,7 +38,7 @@ typedef NSUInteger ASControlNodeEvent;
  @abstract Indicates whether or not the receiver is enabled.
  @discussion Specify YES to make the control enabled; otherwise, specify NO to make it disabled. The default value is YES. If the enabled state is NO, the control ignores touch events and subclasses may draw differently.
  */
-@property (nonatomic, readwrite, assign, getter=isEnabled) BOOL enabled;
+@property (nonatomic, assign, getter=isEnabled) BOOL enabled;
 
 /**
  @abstract Indicates whether or not the receiver is highlighted.

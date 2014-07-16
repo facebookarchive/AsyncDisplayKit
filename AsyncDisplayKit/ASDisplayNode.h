@@ -29,16 +29,16 @@
 - (id)initWithLayerClass:(Class)layerClass;
 
 // If this view is strictly synchronous (ie wraps a non _ASDisplayView view)
-@property (nonatomic, readonly) BOOL isSynchronous;
+@property (nonatomic, readonly, assign, getter=isSynchronous) BOOL synchronous;
 
 // The view property is lazily initialized, similar to UIViewController.
 // The first access to it must be on the main thread, and should only be used on the main thread thereafter as well.
 // To go the other direction, use ASViewToDisplayNode() in ASDisplayNodeExtras.h
 @property (nonatomic, readonly, retain) UIView *view;
-@property (atomic, readonly, assign) BOOL isViewLoaded;  // Also YES if isLayerBacked == YES && self.layer != nil.  Rename to isBackingLoaded?
+@property (atomic, readonly, assign, getter=isViewLoaded) BOOL viewLoaded;  // Also YES if isLayerBacked == YES && self.layer != nil.  Rename to isBackingLoaded?
 
 // If this node does not have an associated view, instead relying directly upon a layer
-@property (nonatomic, assign) BOOL isLayerBacked;
+@property (nonatomic, assign, getter=isLayerBacked) BOOL layerBacked;
 // The same restrictions apply as documented above about the view property. To go the other direction, use ASLayerToDisplayNode() in ASDisplayNodeExtras.h
 @property (nonatomic, readonly, retain) CALayer *layer;
 
@@ -131,7 +131,7 @@
 
  Note: this has nothing to do with CALayer@drawsAsynchronously
  */
-@property (nonatomic) BOOL displaysAsynchronously;
+@property (nonatomic, assign) BOOL displaysAsynchronously;
 
 /**
  @abstract

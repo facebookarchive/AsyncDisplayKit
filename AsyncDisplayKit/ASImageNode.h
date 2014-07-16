@@ -23,7 +23,7 @@ typedef NS_ENUM(NSUInteger, ASImageNodeTint) {
 
 #pragma mark - Cropping
 //! @abstract Indicates whether efficient cropping of the receiver is enabled. Defaults to YES. See -setCropEnabled:recropImmediately:inBounds: for more information.
-@property (nonatomic, assign) BOOL cropEnabled;
+@property (nonatomic, assign, getter=isCropEnabled) BOOL cropEnabled;
 
 /**
  @abstract Enables or disables efficient cropping.
