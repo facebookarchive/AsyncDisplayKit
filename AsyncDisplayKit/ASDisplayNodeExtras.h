@@ -9,8 +9,8 @@
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
 
-#import "ASBaseDefines.h"
-#import "ASDisplayNode.h"
+#import <AsyncDisplayKit/ASBaseDefines.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 

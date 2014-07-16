@@ -8,10 +8,9 @@
 
 #import <pthread.h>
 
+#import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
-
-#import "ASAssert.h"
-#import "ASThread.h"
+#import <AsyncDisplayKit/ASThread.h>
 
 //
 // The following methods either must or can be overriden by subclasses of ASDisplayNode.
