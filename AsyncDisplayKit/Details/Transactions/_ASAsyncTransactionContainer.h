@@ -32,12 +32,12 @@ typedef NS_ENUM(NSUInteger, ASAsyncTransactionContainerState) {
 
  @default NO
  */
-@property (nonatomic, assign, getter = asyncdisplaykit_isAsyncTransactionContainer, setter = asyncdisplaykit_setAsyncTransactionContainer:) BOOL asyncdisplaykit_asyncTransactionContainer;
+@property (nonatomic, assign, getter=asyncdisplaykit_isAsyncTransactionContainer, setter=asyncdisplaykit_setAsyncTransactionContainer:) BOOL asyncdisplaykit_asyncTransactionContainer;
 
 /**
  @summary The current state of the receiver; indicates if it is currently performing asynchronous operations or if all operations have finished/canceled.
  */
-@property (nonatomic, assign, readonly) ASAsyncTransactionContainerState asyncdisplaykit_asyncTransactionContainerState;
+@property (nonatomic, readonly, assign) ASAsyncTransactionContainerState asyncdisplaykit_asyncTransactionContainerState;
 
 /**
  @summary Cancels all async transactions on the receiver.
@@ -58,13 +58,13 @@ typedef NS_ENUM(NSUInteger, ASAsyncTransactionContainerState) {
  did not already exist. This method will always return an open, uncommitted transaction.
  @desc asyncdisplaykit_isAsyncTransactionContainer does not need to be YES for this to return a transaction.
  */
-@property (nonatomic, retain, readonly) _ASAsyncTransaction *asyncdisplaykit_asyncTransaction;
+@property (nonatomic, readonly, retain) _ASAsyncTransaction *asyncdisplaykit_asyncTransaction;
 
 /**
  @summary Goes up the superlayer chain until it finds the first layer with asyncdisplaykit_isAsyncTransactionContainer=YES (including the receiver) and returns it.
  Returns nil if no parent container is found.
  */
-@property (nonatomic, retain, readonly) CALayer *asyncdisplaykit_parentTransactionContainer;
+@property (nonatomic, readonly, retain) CALayer *asyncdisplaykit_parentTransactionContainer;
 @end
 
 @interface UIView (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>

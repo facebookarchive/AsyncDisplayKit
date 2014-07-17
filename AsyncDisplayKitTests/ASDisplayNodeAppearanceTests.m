@@ -132,7 +132,7 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   DeclareNodeNamed(n);
   DeclareViewNamed(superview);
 
-  n.isLayerBacked = isLayerBacked;
+  n.layerBacked = isLayerBacked;
 
   if (isLayerBacked) {
     [superview.layer addSublayer:n.layer];
@@ -179,7 +179,7 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   DeclareNodeNamed(ab);
 
   for (ASDisplayNode *n in @[parent, a, b, aa, ab]) {
-    n.isLayerBacked = isLayerBacked;
+    n.layerBacked = isLayerBacked;
     if (isViewLoaded)
       [n layer];
   }
@@ -273,7 +273,7 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   DeclareNodeNamed(layerBackedNode);
   DeclareNodeNamed(viewBackedNode);
 
-  layerBackedNode.isLayerBacked = YES;
+  layerBackedNode.layerBacked = YES;
 
   UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectZero];
   [parentSynchronousNode addSubnode:layerBackedNode];
@@ -326,7 +326,7 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   DeclareNodeNamed(childSubnode);
 
   for (ASDisplayNode *n in @[parentA, parentB, child, childSubnode]) {
-    n.isLayerBacked = isLayerBacked;
+    n.layerBacked = isLayerBacked;
   }
 
   [parentA addSubnode:child];

@@ -56,18 +56,18 @@ typedef NS_ENUM(NSUInteger, ASAsyncTransactionState) {
 /**
  The dispatch queue that the completion blocks will be called on.
  */
-@property (nonatomic, retain, readonly) dispatch_queue_t callbackQueue;
+@property (nonatomic, readonly, retain) dispatch_queue_t callbackQueue;
 
 /**
  A block that is called when the transaction is completed.
  */
-@property (nonatomic, copy, readonly) asyncdisplaykit_async_transaction_completion_block_t completionBlock;
+@property (nonatomic, readonly, copy) asyncdisplaykit_async_transaction_completion_block_t completionBlock;
 
 /**
  The state of the transaction.
  @see ASAsyncTransactionState
  */
-@property (nonatomic, readonly) ASAsyncTransactionState state;
+@property (nonatomic, readonly, assign) ASAsyncTransactionState state;
 
 /**
  @summary Adds a synchronous operation to the transaction.  The execution block will be executed immediately.

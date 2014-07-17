@@ -52,12 +52,12 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 /**
  @abstract If the text node is truncated. Text must have been sized first.
  */
-@property (nonatomic, assign, readonly, getter = isTruncated) BOOL truncated;
+@property (nonatomic, readonly, assign, getter=isTruncated) BOOL truncated;
 
 /**
  @abstract The number of lines in the text. Text must have been sized first.
  */
-@property (nonatomic, assign, readonly) NSUInteger lineCount;
+@property (nonatomic, readonly, assign) NSUInteger lineCount;
 
 #pragma mark - Shadow
 

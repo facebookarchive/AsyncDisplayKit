@@ -38,6 +38,6 @@
  @summary Set to YES to indicate to a sublayer that this is where highlight overlay layers (for pressed states) should
  be added so that the highlight won't be clipped by a neighboring layer.
  */
-@property (nonatomic, assign, setter = as_setAllowsHighlightDrawing:) BOOL as_allowsHighlightDrawing;
+@property (nonatomic, assign, setter=as_setAllowsHighlightDrawing:) BOOL as_allowsHighlightDrawing;
 
 @end

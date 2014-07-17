@@ -23,7 +23,7 @@
 + (Class)viewClass;
 
 // Returns YES if a cache node, defaults to NO
-@property (nonatomic, assign, readonly, getter = isCacheNode) BOOL cacheNode;
+@property (nonatomic, assign, readonly, getter=isCacheNode) BOOL cacheNode;
 
 // Returns array of cached strict descendants (excludes self). if this is not a cacheNode, returns nil
 @property (nonatomic, copy, readonly) NSArray *cachedNodes;
@@ -89,7 +89,7 @@
 @property (nonatomic, assign, readonly) CGFloat contentsScaleForDisplay;
 
 // Whether the view or layer of this display node is currently in a window
-@property (nonatomic, readonly, assign, getter = isInWindow) BOOL inWindow;
+@property (nonatomic, readonly, assign, getter=isInWindow) BOOL inWindow;
 
 // The function that gets called for each display node in -recursiveDescription
 - (NSString *)descriptionForRecursiveDescription;

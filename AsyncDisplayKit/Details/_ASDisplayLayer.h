@@ -55,7 +55,7 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 
  @default NO
  */
-@property (atomic, assign, getter = isDisplaySuspended) BOOL displaySuspended;
+@property (atomic, assign, getter=isDisplaySuspended) BOOL displaySuspended;
 
 /**
  @summary Bypasses asynchronous rendering and performs a blocking display immediately on the current thread.
