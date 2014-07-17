@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASDisplayNode.h"
+#import <AsyncDisplayKit/ASDisplayNode.h>
 
 /**
  @abstract Kinds of events possible for control nodes.

@@ -11,11 +11,10 @@
 // These methods must never be called or overridden by other classes.
 //
 
-#import <AsyncDisplayKit/ASDisplayNode.h>
-
 #import "_ASDisplayLayer.h"
 #import "_AS-objc-internal.h"
 #import "ASDisplayNodeExtraIvars.h"
+#import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
 
