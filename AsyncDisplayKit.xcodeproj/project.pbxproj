@@ -111,6 +111,7 @@
 		058D0A82195D060300B7D73C /* ASAssert.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D0A43195D058D00B7D73C /* ASAssert.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		058D0A83195D060300B7D73C /* ASBaseDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D0A44195D058D00B7D73C /* ASBaseDefines.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		058D0A84195D060300B7D73C /* ASDisplayNodeExtraIvars.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D0A45195D058D00B7D73C /* ASDisplayNodeExtraIvars.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
 /* End PBXBuildFile section */
 
@@ -218,6 +219,7 @@
 		058D0A43195D058D00B7D73C /* ASAssert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASAssert.h; sourceTree = "<group>"; };
 		058D0A44195D058D00B7D73C /* ASBaseDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBaseDefines.h; sourceTree = "<group>"; };
 		058D0A45195D058D00B7D73C /* ASDisplayNodeExtraIvars.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDisplayNodeExtraIvars.h; sourceTree = "<group>"; };
+		6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AsyncDisplayKit.h; sourceTree = "<group>"; };
 		EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AsyncDisplayKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAD7085290B84183BD13BA1A /* Pods-AsyncDisplayKitTests.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.xcconfig"; path = "Pods/Pods-AsyncDisplayKitTests.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -292,6 +294,7 @@
 				058D09DE195D050800B7D73C /* ASImageNode.mm */,
 				058D09DF195D050800B7D73C /* ASTextNode.h */,
 				058D09E0195D050800B7D73C /* ASTextNode.mm */,
+				6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */,
 				058D09E1195D050800B7D73C /* Details */,
 				058D0A01195D050800B7D73C /* Private */,
 				058D09B2195D04C000B7D73C /* Supporting Files */,
@@ -460,6 +463,7 @@
 				058D0A6A195D05EC00B7D73C /* _ASAsyncTransactionContainer+Private.h in Headers */,
 				058D0A6B195D05EC00B7D73C /* _ASAsyncTransactionContainer.h in Headers */,
 				058D0A6C195D05EC00B7D73C /* _ASAsyncTransactionContainer.m in Headers */,
+				6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */,
 				058D0A6D195D05EC00B7D73C /* _ASAsyncTransactionGroup.h in Headers */,
 				058D0A6E195D05EC00B7D73C /* _ASAsyncTransactionGroup.m in Headers */,
 				058D0A6F195D05EC00B7D73C /* UIView+ASConvenience.h in Headers */,
