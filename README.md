@@ -13,7 +13,7 @@ pod 'AsyncDisplayKit', :git => 'git@github.com:facebook/AsyncDisplayKit.git'
 ## Usage
 
 ```objective-c
-#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 ```
 
 ## Testing
