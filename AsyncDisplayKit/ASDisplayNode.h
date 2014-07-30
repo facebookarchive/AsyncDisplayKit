@@ -19,7 +19,7 @@
 - (id)init;
 
 // Alternative initializer.  Provide any UIView subclass, such as UIScrollView, and the ASDisplayNode's view will be of that type.
-// If viewClass is not a subclass of ASDisplayNodeAsyncView, it will still render synchronously and -layout and touch handling methods on the node will not be called.
+// If viewClass is not a subclass of _ASDisplayView, it will still render synchronously and -layout and touch handling methods on the node will not be called.
 // The view instance will be created with alloc/init.
 - (id)initWithViewClass:(Class)viewClass;
 

@@ -22,7 +22,7 @@
 
 @interface _ASPendingState : NSObject <ASDisplayNodeViewProperties, ASDisplayProperties>
 
-// Supports all of the properties included the ASDisplayNodeView protocol
+// Supports all of the properties included in the ASDisplayNodeViewProperties protocol
 
 - (void)applyToView:(UIView *)view;
 - (void)applyToLayer:(CALayer *)layer;
