@@ -20,18 +20,18 @@
 
 - (void)testAttributeCleansing
 {
-  NSMutableAttributedString *testString = [[NSMutableAttributedString alloc] initWithString:@"Test" attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12.0]}];
+  UIFont *font = [UIFont systemFontOfSize:12.0];
+  NSMutableAttributedString *testString = [[NSMutableAttributedString alloc] initWithString:@"Test" attributes:@{NSFontAttributeName:font}];
   CFRange cfRange = CFRangeMake(0, testString.length);
   CGColorRef blueColor = CGColorRetain([UIColor blueColor].CGColor);
   CFAttributedStringSetAttribute((CFMutableAttributedStringRef)testString,
                                  cfRange,
                                  kCTForegroundColorAttributeName,
                                  blueColor);
-  NSAttributedString *expectedCleansedString = [[NSAttributedString alloc] initWithString:@"Test" attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12.0],
-                                                                                                               NSForegroundColorAttributeName:[UIColor colorWithCGColor:blueColor]}];
+  UIColor *color = [UIColor colorWithCGColor:blueColor];
 
   NSAttributedString *actualCleansedString = ASCleanseAttributedStringOfCoreTextAttributes(testString);
-  XCTAssertTrue([expectedCleansedString isEqualToAttributedString:actualCleansedString], @"Expected the %@ core text attribute to be cleansed from the string %@", kCTForegroundColorFromContextAttributeName, actualCleansedString);
+  XCTAssertTrue([[actualCleansedString attribute:NSForegroundColorAttributeName atIndex:0 effectiveRange:NULL] isEqual:color], @"Expected the %@ core text attribute to be cleansed from the string %@\n Should match %@", kCTForegroundColorFromContextAttributeName, actualCleansedString, color);
   CGColorRelease(blueColor);
 }
 

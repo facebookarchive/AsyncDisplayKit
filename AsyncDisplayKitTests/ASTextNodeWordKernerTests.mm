@@ -12,6 +12,8 @@
 #import "ASTextNodeTypes.h"
 #import "ASTextNodeWordKerner.h"
 
+#pragma mark - Tests
+
 @interface ASTextNodeWordKernerTests : XCTestCase
 
 @property (nonatomic, readwrite, strong) ASTextNodeWordKerner *layoutManagerDelegate;
@@ -24,6 +26,7 @@
 
 - (void)setUp
 {
+  [super setUp];
   _layoutManagerDelegate = [[ASTextNodeWordKerner alloc] init];
   _components.layoutManager.delegate = _layoutManagerDelegate;
 }
@@ -70,24 +73,30 @@
 - (void)testSpaceBoundingBoxForNoWordKerning
 {
   CGSize size = CGSizeMake(200, 200);
-  NSDictionary *attributes = @{NSFontAttributeName : [UIFont systemFontOfSize:12]};
+  UIFont *font = [UIFont systemFontOfSize:12.0];
+  NSDictionary *attributes = @{NSFontAttributeName : font};
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:@" " attributes:attributes];
   _components = ASTextKitComponentsCreate(attributedString, size);
+  CGFloat expectedWidth = [@" " sizeWithAttributes:@{ NSFontAttributeName : font }].width;
 
   CGRect boundingBox = [_layoutManagerDelegate layoutManager:_components.layoutManager boundingBoxForControlGlyphAtIndex:0 forTextContainer:_components.textContainer proposedLineFragment:CGRectZero glyphPosition:CGPointZero characterIndex:0];
-  XCTAssertTrue(boundingBox.size.width == 4, @"Word kerning shouldn't alter the default width of 4px. Encountered space width was %f", boundingBox.size.width);
+  XCTAssertTrue(boundingBox.size.width == expectedWidth, @"Word kerning shouldn't alter the default width of %f. Encountered space width was %f", expectedWidth, boundingBox.size.width);
 }
 
 - (void)testSpaceBoundingBoxForWordKerning
 {
   CGSize size = CGSizeMake(200, 200);
-  NSDictionary *attributes = @{ASTextNodeWordKerningAttributeName: @".5",
-                               NSFontAttributeName : [UIFont systemFontOfSize:12]};
+  UIFont *font = [UIFont systemFontOfSize:12];
+
+  CGFloat kernValue = 0.5;
+  NSDictionary *attributes = @{ASTextNodeWordKerningAttributeName: @(kernValue),
+                               NSFontAttributeName : font};
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:@" " attributes:attributes];
   _components = ASTextKitComponentsCreate(attributedString, size);
+  CGFloat expectedWidth = [@" " sizeWithAttributes:@{ NSFontAttributeName : font }].width + kernValue;
 
   CGRect boundingBox = [_layoutManagerDelegate layoutManager:_components.layoutManager boundingBoxForControlGlyphAtIndex:0 forTextContainer:_components.textContainer proposedLineFragment:CGRectZero glyphPosition:CGPointZero characterIndex:0];
-  XCTAssertTrue(boundingBox.size.width == 4.5, @"Word kerning shouldn't alter the default width of 4px. Encountered space width was %f", boundingBox.size.width);
+  XCTAssertTrue(boundingBox.size.width == expectedWidth, @"Word kerning shouldn't alter the default width of %f. Encountered space width was %f", expectedWidth, boundingBox.size.width);
 }
 
 - (NSInteger)_layoutManagerShouldGenerateGlyphs
@@ -104,6 +113,7 @@
   NSInteger glyphsToChange = [_layoutManagerDelegate layoutManager:_components.layoutManager shouldGenerateGlyphs:glyphs properties:glyphProperties characterIndexes:characterIndexes font:NULL forGlyphRange:stringRange];
   free(characterIndexes);
   free(glyphProperties);
+  free(glyphs);
   return glyphsToChange;
 }
 
