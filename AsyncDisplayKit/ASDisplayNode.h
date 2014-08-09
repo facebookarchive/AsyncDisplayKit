@@ -130,7 +130,7 @@
  *
  * @param size The current size of the receiver.
  *
- * @return A new size that fits the receiver’s subviews.
+ * @return A new size that fits the receiver's subviews.
  *
  * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the 
  * constraint and the result.
@@ -256,12 +256,12 @@
 - (void)removeFromSupernode;
 
 /** 
- * @abstract The receiver’s immediate subnodes.
+ * @abstract The receiver's immediate subnodes.
  */
 @property (nonatomic, readonly, retain) NSArray *subnodes;
 
 /** 
- * @abstract The receiver’s supernode.
+ * @abstract The receiver's supernode.
  */
 @property (nonatomic, readonly, assign) ASDisplayNode *supernode;
 
@@ -384,10 +384,10 @@
  *
  * @discussion Includes the "slop" factor specified with hitTestSlop.
  *
- * @param point A point that is in the receiver’s local coordinate system (bounds).
+ * @param point A point that is in the receiver's local coordinate system (bounds).
  * @param event The event that warranted a call to this method.
  *
- * @return YES if point is inside the receiver’s bounds; otherwise, NO.
+ * @return YES if point is inside the receiver's bounds; otherwise, NO.
  */
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event;
 
@@ -396,7 +396,7 @@
 
 
 /** 
- * @abstract Converts a point from the receiver’s coordinate system to that of the specified node.
+ * @abstract Converts a point from the receiver's coordinate system to that of the specified node.
  *
  * @param point A point specified in the local coordinate system (bounds) of the receiver.
  * @param node The node into whose coordinate system point is to be converted.
@@ -418,7 +418,7 @@
 
 
 /** 
- * @abstract Converts a rectangle from the receiver’s coordinate system to that of another view.
+ * @abstract Converts a rectangle from the receiver's coordinate system to that of another view.
  *
  * @param rect A rectangle specified in the local coordinate system (bounds) of the receiver.
  * @param node The node that is the target of the conversion operation.
@@ -445,7 +445,7 @@
 /**
  * @abstract Return a description of the node hierarchy
  *
- * @discussion For debugging: (lldb) po [node recursiveDescription]
+ * @discussion For debugging: (lldb) po [node displayNodeRecursiveDescription]
  */
 - (NSString *)displayNodeRecursiveDescription;
 
