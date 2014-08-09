@@ -79,10 +79,10 @@
  Add a subnode, but have it size asynchronously on a background queue.
  @param subnode The unsized subnode to insert into the view hierarchy
  @param completion The completion callback will be called on the main queue after the subnode has been inserted in place of the placeholder.
- @return  A placeholder node is inserted into the hierarchy where the node will be. The placeholder can be moved around in the hiercharchy while the view is sizing. Once sizing is complete on the background queue, this placeholder will be removed and the
+ @return A placeholder node is inserted into the hierarchy where the node will be. The placeholder can be moved around in the hierarchy while the view is sizing. Once sizing is complete on the background queue, this placeholder will be removed and the replacement swapped in.
  */
 - (ASDisplayNode *)addSubnodeAsynchronously:(ASDisplayNode *)subnode
-                              completion:(void(^)(ASDisplayNode *replacement))completion;
+                                 completion:(void(^)(ASDisplayNode *replacement))completion;
 
 - (void)replaceSubnodeAsynchronously:(ASDisplayNode *)subnode
                             withNode:(ASDisplayNode *)replacementSubnode
