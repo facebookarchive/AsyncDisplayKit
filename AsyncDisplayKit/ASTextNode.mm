@@ -117,8 +117,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     _shadowOpacity = [super shadowOpacity];
     _shadowRadius = [super shadowRadius];
 
-    // Enable user interaction for text node, as ASControlNode disables it by default.
-    self.userInteractionEnabled = YES;
+    // Disable user interaction for text node by default.
+    self.userInteractionEnabled = NO;
     self.needsDisplayOnBoundsChange = YES;
 
     _truncationMode = NSLineBreakByWordWrapping;
