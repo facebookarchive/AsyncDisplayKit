@@ -59,7 +59,7 @@ Hierarchies can be created in a similar way as UIKit:
 	dispatch_async(background_queue, ^{
 		
 		s = [[ASDisplayNode alloc] init];
-		[n addSubNode:s];
+		[n addSubnode:s];
 		
 	});
 
@@ -75,6 +75,7 @@ A node may be backed by a view or layer, which must take place on the main threa
 		// The properties you set earlier will be preserved
 		// v.frame is {0, 40, 100, 100}
 		// v.backgroundColor is green
+		
 	});
 	
 Besides _ASDisplayNode_, AsyncDisplayKit has UIKit equivalent classes:
