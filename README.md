@@ -33,7 +33,16 @@ Start by importing the header:
 
 	#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-An _ASDisplayNode_ is an abstraction over _UIView_ and _CALayer_ that allows you to perform calculations about a view hierarchy off the main thread. The node API is designed to be as similar as possible to UIView.
+An _ASDisplayNode_ is an abstraction over _UIView_ and _CALayer_ that allows you to perform all standard view- and layer-related tasks (layout, sizing calculations, view hierarchy management), moving expensive work off the main thread and with additional optimisations. More specifically, with node-based hierarchy, you can:
+
+- offload more-complex layout code to the background
+- enable layer-backing (on nodes that don't require touch handling)
+- enable subtree precompositing
+- create entire view hierarchies over multiple runloops
+
+and do all of this in advance and in the background, so complex content is ready to go by the time the user scrolls to it.
+
+The node API is designed to be as similar as possible to UIView.
 
 _ASDisplayNode_ can be allocated, initialized and its properties can be set all on a background thread.
 
@@ -75,6 +84,15 @@ Besides _ASDisplayNode_, AsyncDisplayKit has UIKit equivalent classes:
 - _ASImageNode_: a UIImageView equivalent
 
 Node-aware UITableView and UICollectionView implementations are currently planned, but not yet implemented.
+
+
+## Subclassing
+
+To make your own nodes, start with the subclasses header
+
+	#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+
+The [header](https://github.com/facebook/AsyncDisplayKit/blob/master/AsyncDisplayKit/ASDisplayNode%2BSubclasses.h) contains possible and recommanded methods to override.
 
 
 ## Documentation 
