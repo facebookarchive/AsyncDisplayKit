@@ -126,7 +126,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
     // The common case is for a text node to be non-opaque and blended over some background.
     self.opaque = NO;
-    self.backgroundColor = [UIColor whiteColor];
+    self.backgroundColor = [UIColor clearColor];
 
     // Accessibility
     self.isAccessibilityElement = YES;
