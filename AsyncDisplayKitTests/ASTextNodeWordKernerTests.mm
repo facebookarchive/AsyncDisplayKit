@@ -81,7 +81,7 @@
 
   CGRect boundingBox = [_layoutManagerDelegate layoutManager:_components.layoutManager boundingBoxForControlGlyphAtIndex:0 forTextContainer:_components.textContainer proposedLineFragment:CGRectZero glyphPosition:CGPointZero characterIndex:0];
     
-  XCTAssertEqualWithAccuracy(boundingBox.size.width, expectedWidth, 0.000001, @"Word kerning shouldn't alter the default width of %f. Encountered space width was %f", expectedWidth, boundingBox.size.width);
+  XCTAssertEqualWithAccuracy(boundingBox.size.width, expectedWidth, FLT_EPSILON, @"Word kerning shouldn't alter the default width of %f. Encountered space width was %f", expectedWidth, boundingBox.size.width);
 }
 
 - (void)testSpaceBoundingBoxForWordKerning
@@ -97,7 +97,7 @@
   CGFloat expectedWidth = [@" " sizeWithAttributes:@{ NSFontAttributeName : font }].width + kernValue;
 
   CGRect boundingBox = [_layoutManagerDelegate layoutManager:_components.layoutManager boundingBoxForControlGlyphAtIndex:0 forTextContainer:_components.textContainer proposedLineFragment:CGRectZero glyphPosition:CGPointZero characterIndex:0];
-  XCTAssertEqualWithAccuracy(boundingBox.size.width, expectedWidth, 0.000001, @"Word kerning shouldn't alter the default width of %f. Encountered space width was %f", expectedWidth, boundingBox.size.width);
+  XCTAssertEqualWithAccuracy(boundingBox.size.width, expectedWidth, FLT_EPSILON, @"Word kerning shouldn't alter the default width of %f. Encountered space width was %f", expectedWidth, boundingBox.size.width);
 }
 
 - (NSInteger)_layoutManagerShouldGenerateGlyphs
