@@ -13,19 +13,19 @@
 
 
 /**
- * An _ASDisplayNode_ is an abstraction over _UIView_ and _CALayer_ that allows you to perform calculations about a view 
- * hierarchy off the main thread.
+ * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
+ * hierarchy off the main thread, and could do rendering off the main thread as well.
  *
- * The node API is designed to be as similar as possible to _UIView_.
+ * The node API is designed to be as similar as possible to `UIView`.
  *
  * TODO add more details + example
  *
  * ## Subclassing
  *
- * _ASDisplayNode_ can be subclassed to create a new UI element. The subclass header _ASDisplayNode+Subclasses_ provides 
+ * `ASDisplayNode` can be subclassed to create a new UI element. The subclass header `ASDisplayNode+Subclasses` provides
  * necessary declarations and conveniences.
  *
- * Commons reasons to subclass includes making a _UIView_ property available and receiving a callback after async 
+ * Commons reasons to subclass includes making a `UIView` property available and receiving a callback after async
  * display.
  *
  */
