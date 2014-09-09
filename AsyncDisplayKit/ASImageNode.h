@@ -12,6 +12,9 @@ typedef NS_ENUM(NSUInteger, ASImageNodeTint) {
   ASImageNodeTintNormal = 0,
   ASImageNodeTintGreyscale,
 };
+
+typedef UIImage *(^asimagenode_modification_block_t)(UIImage *);
+
 // FIXME: This class should not derive from ASControlNode once ASButtonNode is implemented.
 @interface ASImageNode : ASControlNode
 
@@ -40,6 +43,11 @@ typedef NS_ENUM(NSUInteger, ASImageNodeTint) {
  */
 @property (nonatomic, readwrite, assign) CGRect cropRect;
 
+/**
+ @abstract An optional block which can perform drawing operations on {@ref image} during the display phase.
+ @discussion Can be used to add image effects (such as rounding, adding borders, or other pattern overlays) without extraneous display calls.
+ */
+@property (nonatomic, readwrite, copy) asimagenode_modification_block_t imageModificationBlock;
 
 #pragma mark -
 /**

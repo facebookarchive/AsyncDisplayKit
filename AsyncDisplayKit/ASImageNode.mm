@@ -26,13 +26,14 @@
 @property (nonatomic, retain) UIColor *backgroundColor;
 @property (nonatomic, assign) UIViewContentMode contentMode;
 @property (nonatomic, assign) CGRect cropRect;
+@property (nonatomic, copy) asimagenode_modification_block_t imageModificationBlock;
 
 @end
 
 // TODO: eliminate explicit parameters with a set of keys copied from the node
 @implementation _ASImageNodeDrawParameters
 
-- (id)initWithCrop:(BOOL)cropEnabled opaque:(BOOL)opaque image:(UIImage *)image bounds:(CGRect)bounds contentsScale:(CGFloat)contentsScale backgroundColor:(UIColor *)backgroundColor tint:(ASImageNodeTint)tint contentMode:(UIViewContentMode)contentMode cropRect:(CGRect)cropRect
+- (id)initWithCrop:(BOOL)cropEnabled opaque:(BOOL)opaque image:(UIImage *)image bounds:(CGRect)bounds contentsScale:(CGFloat)contentsScale backgroundColor:(UIColor *)backgroundColor tint:(ASImageNodeTint)tint contentMode:(UIViewContentMode)contentMode cropRect:(CGRect)cropRect imageModificationBlock:(asimagenode_modification_block_t)imageModificationBlock
 {
   self = [self init];
   if (!self) return nil;
@@ -46,6 +47,7 @@
   _tint = tint;
   _contentMode = contentMode;
   _cropRect = cropRect;
+  _imageModificationBlock = [imageModificationBlock copy];
 
   return self;
 }
@@ -54,6 +56,7 @@
 {
   [_image release];
   [_backgroundColor release];
+  [_imageModificationBlock release];
   [super dealloc];
 }
 
@@ -103,6 +106,7 @@
 {
   [_displayCompletionBlock release];
   [_image release];
+  [_imageModificationBlock release];
   [super dealloc];
 }
 
@@ -163,7 +167,9 @@
                                            backgroundColor:self.backgroundColor
                                                       tint:self.tint
                                                contentMode:self.contentMode
-                                                  cropRect:self.cropRect] autorelease];
+                                                  cropRect:self.cropRect
+                                    imageModificationBlock:self.imageModificationBlock
+    ] autorelease];
 }
 
 + (UIImage *)displayWithParameters:(_ASImageNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
@@ -246,6 +252,10 @@
   UIImage *result = UIGraphicsGetImageFromCurrentImageContext();
 
   UIGraphicsEndImageContext();
+
+  if (parameters.imageModificationBlock != NULL) {
+    result = parameters.imageModificationBlock(result);
+  }
 
   if (stretchable) {
     return [image resizableImageWithCapInsets:image.capInsets resizingMode:image.resizingMode];
