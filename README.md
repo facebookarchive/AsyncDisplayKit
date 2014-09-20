@@ -9,6 +9,10 @@ Welcome to the AsyncDisplayKit beta!  Documentation — including this README �
 
 AsyncDisplayKit is a library for smooth asynchronous user interfaces on iOS.
 
+[![Version](http://img.shields.io/cocoapods/v/AsyncDisplayKit.svg)](http://cocoapods.org/?q=AsyncDisplayKit)
+[![Platform](http://img.shields.io/cocoapods/p/AsyncDisplayKit.svg)]()
+[![License](http://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
+
 UIKit traditionally only runs on the main thread. This includes expensive tasks like text sizing and rendering, as well as image decoding. 
 
 AsyncDisplayKit can handle all of the expensive parts asynchronously on a background thread, caching the values before actual views are created, and finally laying out views or layers efficiently on the main thread.
