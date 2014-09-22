@@ -64,9 +64,8 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 
   NSMutableArray *_swizzleCleanupBlocks;
 
-  NSCountedSet *_willAppearCounts;
-  NSCountedSet *_willDisappearCounts;
-  NSCountedSet *_didDisappearCounts;
+  NSCountedSet *_willEnterHierarchyCounts;
+  NSCountedSet *_didExitHierarchyCounts;
 
 }
 
@@ -77,20 +76,15 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   _swizzleCleanupBlocks = [[NSMutableArray alloc] init];
 
   // Using this instead of mocks. Count # of times method called
-  _willAppearCounts = [[NSCountedSet alloc] init];
-  _willDisappearCounts = [[NSCountedSet alloc] init];
-  _didDisappearCounts = [[NSCountedSet alloc] init];
+  _willEnterHierarchyCounts = [[NSCountedSet alloc] init];
+  _didExitHierarchyCounts = [[NSCountedSet alloc] init];
 
-  dispatch_block_t cleanupBlock = modifyMethodByAddingPrologueBlockAndReturnCleanupBlock([ASDisplayNode class], @selector(willAppear), ^(id blockSelf){
-    [_willAppearCounts addObject:blockSelf];
+  dispatch_block_t cleanupBlock = modifyMethodByAddingPrologueBlockAndReturnCleanupBlock([ASDisplayNode class], @selector(willEnterHierarchy), ^(id blockSelf){
+    [_willEnterHierarchyCounts addObject:blockSelf];
   });
   [_swizzleCleanupBlocks addObject:cleanupBlock];
-  cleanupBlock = modifyMethodByAddingPrologueBlockAndReturnCleanupBlock([ASDisplayNode class], @selector(didDisappear), ^(id blockSelf){
-    [_didDisappearCounts addObject:blockSelf];
-  });
-  [_swizzleCleanupBlocks addObject:cleanupBlock];
-  cleanupBlock = modifyMethodByAddingPrologueBlockAndReturnCleanupBlock([ASDisplayNode class], @selector(willDisappear), ^(id blockSelf){
-    [_willDisappearCounts addObject:blockSelf];
+  cleanupBlock = modifyMethodByAddingPrologueBlockAndReturnCleanupBlock([ASDisplayNode class], @selector(didExitHierarchy), ^(id blockSelf){
+    [_didExitHierarchyCounts addObject:blockSelf];
   });
   [_swizzleCleanupBlocks addObject:cleanupBlock];
 }
@@ -106,12 +100,10 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   [_swizzleCleanupBlocks release];
   _swizzleCleanupBlocks = nil;
 
-  [_willAppearCounts release];
-  _willAppearCounts = nil;
-  [_willDisappearCounts release];
-  _willDisappearCounts = nil;
-  [_didDisappearCounts release];
-  _didDisappearCounts = nil;
+  [_willEnterHierarchyCounts release];
+  _willEnterHierarchyCounts = nil;
+  [_didExitHierarchyCounts release];
+  _didExitHierarchyCounts = nil;
 }
 
 - (void)testAppearanceMethodsCalledWithRootNodeInWindowLayer
@@ -140,14 +132,12 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
     [superview addSubview:n.view];
   }
 
-  XCTAssertEqual([_willAppearCounts countForObject:n], 0u, @"willAppear erroneously called");
-  XCTAssertEqual([_willDisappearCounts countForObject:n], 0u, @"willDisppear erroneously called");
-  XCTAssertEqual([_didDisappearCounts countForObject:n], 0u, @"didDisappear erroneously called");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:n], 0u, @"willEnterHierarchy erroneously called");
+  XCTAssertEqual([_didExitHierarchyCounts countForObject:n], 0u, @"didExitHierarchy erroneously called");
 
   [window addSubview:superview];
-  XCTAssertEqual([_willAppearCounts countForObject:n], 1u, @"willAppear not called when node's view added to hierarchy");
-  XCTAssertEqual([_willDisappearCounts countForObject:n], 0u, @"willDisppear erroneously called");
-  XCTAssertEqual([_didDisappearCounts countForObject:n], 0u, @"didDisappear erroneously called");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:n], 1u, @"willEnterHierarchy not called when node's view added to hierarchy");
+  XCTAssertEqual([_didExitHierarchyCounts countForObject:n], 0u, @"didExitHierarchy erroneously called");
 
   XCTAssertTrue(n.inWindow, @"Node should be visible");
 
@@ -159,9 +149,8 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 
   XCTAssertFalse(n.inWindow, @"Node should be not visible");
 
-  XCTAssertEqual([_willAppearCounts countForObject:n], 1u, @"willAppear not called when node's view added to hierarchy");
-  XCTAssertEqual([_willDisappearCounts countForObject:n], 1u, @"willDisppear erroneously called");
-  XCTAssertEqual([_didDisappearCounts countForObject:n], 1u, @"didDisappear erroneously called");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:n], 1u, @"willEnterHierarchy not called when node's view added to hierarchy");
+  XCTAssertEqual([_didExitHierarchyCounts countForObject:n], 1u, @"didExitHierarchy erroneously called");
 
   [superview release];
   [window release];
@@ -198,11 +187,11 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
     [window addSubview:parent.view];
   }
 
-  XCTAssertEqual([_willAppearCounts countForObject:parent], 1u, @"Should have -willAppear called once");
-  XCTAssertEqual([_willAppearCounts countForObject:a], 1u, @"Should have -willAppear called once");
-  XCTAssertEqual([_willAppearCounts countForObject:b], 0u, @"Should not have appeared yet");
-  XCTAssertEqual([_willAppearCounts countForObject:aa], 0u, @"Should not have appeared yet");
-  XCTAssertEqual([_willAppearCounts countForObject:ab], 0u, @"Should not have appeared yet");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:parent], 1u, @"Should have -willEnterHierarchy called once");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:a], 1u, @"Should have -willEnterHierarchy called once");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:b], 0u, @"Should not have appeared yet");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:aa], 0u, @"Should not have appeared yet");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:ab], 0u, @"Should not have appeared yet");
 
   XCTAssertTrue(parent.inWindow, @"Should be visible");
   XCTAssertTrue(a.inWindow, @"Should be visible");
@@ -221,23 +210,17 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   XCTAssertTrue(aa.inWindow, @"Nothing should be visible");
   XCTAssertTrue(ab.inWindow, @"Nothing should be visible");
 
-  XCTAssertEqual([_willAppearCounts countForObject:parent], 1u, @"Should have -willAppear called once");
-  XCTAssertEqual([_willAppearCounts countForObject:a], 1u, @"Should have -willAppear called once");
-  XCTAssertEqual([_willAppearCounts countForObject:b], 1u, @"Should have -willAppear called once");
-  XCTAssertEqual([_willAppearCounts countForObject:aa], 1u, @"Should have -willAppear called once");
-  XCTAssertEqual([_willAppearCounts countForObject:ab], 1u, @"Should have -willAppear called once");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:parent], 1u, @"Should have -willEnterHierarchy called once");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:a], 1u, @"Should have -willEnterHierarchy called once");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:b], 1u, @"Should have -willEnterHierarchy called once");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:aa], 1u, @"Should have -willEnterHierarchy called once");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:ab], 1u, @"Should have -willEnterHierarchy called once");
 
   if (isLayerBacked) {
     [parent.layer removeFromSuperlayer];
   } else {
     [parent.view removeFromSuperview];
   }
-
-  XCTAssertEqual([_willDisappearCounts countForObject:parent], 1u, @"Should disappear properly");
-  XCTAssertEqual([_willDisappearCounts countForObject:a], 1u, @"Should disappear properly");
-  XCTAssertEqual([_willDisappearCounts countForObject:b], 1u, @"Should disappear properly");
-  XCTAssertEqual([_willDisappearCounts countForObject:aa], 1u, @"Should disappear properly");
-  XCTAssertEqual([_willDisappearCounts countForObject:ab], 1u, @"Should disappear properly");
 
   XCTAssertFalse(parent.inWindow, @"Nothing should be visible");
   XCTAssertFalse(a.inWindow, @"Nothing should be visible");
@@ -338,8 +321,8 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   XCTAssertFalse(childSubnode.inWindow, @"Should not yet be visible");
   XCTAssertFalse(childSubnode.inWindow, @"Should not yet be visible");
 
-  XCTAssertEqual([_willAppearCounts countForObject:child], 0u, @"Should not have -willAppear called");
-  XCTAssertEqual([_willAppearCounts countForObject:childSubnode], 0u, @"Should not have -willAppear called");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:child], 0u, @"Should not have -willEnterHierarchy called");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:childSubnode], 0u, @"Should not have -willEnterHierarchy called");
 
   if (isLayerBacked) {
     [window.layer addSublayer:parentA.layer];
@@ -354,8 +337,8 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   XCTAssertTrue(child.inWindow, @"Should be visible after parent added to window");
   XCTAssertTrue(childSubnode.inWindow, @"Should be visible after parent added to window");
 
-  XCTAssertEqual([_willAppearCounts countForObject:child], 1u, @"Should have -willAppear called once");
-  XCTAssertEqual([_willAppearCounts countForObject:childSubnode], 1u, @"Should have -willAppear called once");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:child], 1u, @"Should have -willEnterHierarchy called once");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:childSubnode], 1u, @"Should have -willEnterHierarchy called once");
 
   // Move subnode from A to B
   if (useManualDisable) {
@@ -372,9 +355,7 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
     ASDisplayNodeEnableHierarchyNotifications(child);
   }
 
-  XCTAssertEqual([_willAppearCounts countForObject:child], 1u, @"Should not have -willAppear called when moving child around in hierarchy");
-  XCTAssertEqual([_willDisappearCounts countForObject:child], 0u, @"Should not have -willDisappear called when moving child around in hierarchy");
-  XCTAssertEqual([_willDisappearCounts countForObject:childSubnode], 0u, @"Subnode should not have -willDisappear called when moving parent (child) around in hierarchy");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:child], 1u, @"Should not have -willEnterHierarchy called when moving child around in hierarchy");
 
   // Move subnode back to A
   if (useManualDisable) {
@@ -392,15 +373,12 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   }
 
 
-  XCTAssertEqual([_willAppearCounts countForObject:child], 1u, @"Should not have -willAppear called when moving child around in hierarchy");
-  XCTAssertEqual([_willDisappearCounts countForObject:child], 0u, @"Should not have -willDisappear called when moving child around in hierarchy");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:child], 1u, @"Should not have -willEnterHierarchy called when moving child around in hierarchy");
 
   // Finally, remove subnode
   [child removeFromSupernode];
 
-  XCTAssertEqual([_willAppearCounts countForObject:child], 1u, @"Should appear and disappear just once");
-  XCTAssertEqual([_willDisappearCounts countForObject:child], 1u, @"Should appear and disappear just once");
-  XCTAssertEqual([_willDisappearCounts countForObject:childSubnode], 1u, @"Should appear and disappear just once");
+  XCTAssertEqual([_willEnterHierarchyCounts countForObject:child], 1u, @"Should appear and disappear just once");
 
   // Make sure that we don't leave these unbalanced
   XCTAssertFalse([child __visibilityNotificationsDisabled], @"Unbalanced visibility notifications calls");
@@ -442,9 +420,8 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 {
   DeclareNodeNamed(n);
 
-  XCTAssertThrows([n willAppear], @"Should not allow manually calling appearance methods.");
-  XCTAssertThrows([n willDisappear], @"Should not allow manually calling appearance methods.");
-  XCTAssertThrows([n didDisappear], @"Should not allow manually calling appearance methods.");
+  XCTAssertThrows([n willEnterHierarchy], @"Should not allow manually calling appearance methods.");
+  XCTAssertThrows([n didExitHierarchy], @"Should not allow manually calling appearance methods.");
 }
 
 @end

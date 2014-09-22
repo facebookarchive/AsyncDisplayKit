@@ -7,11 +7,16 @@
  */
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
-#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
-#import <AsyncDisplayKit/ASControlNode.h>
-#import <AsyncDisplayKit/ASImageNode.h>
-#import <AsyncDisplayKit/ASTextNode.h>
+@interface ASCellNode : ASDisplayNode
 
-#import <AsyncDisplayKit/ASTableView.h>
-#import <AsyncDisplayKit/ASCellNode.h>
+// TODO expose some UITableViewCell things for configuration, eg, separator style
+
+@end
+
+
+@interface ASTextCellNode : ASCellNode
+
+@property (nonatomic, copy) NSString *text;
+
+@end

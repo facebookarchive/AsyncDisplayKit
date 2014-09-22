@@ -157,7 +157,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   NSString *truncationString = [_composedTruncationString string];
   if (plainString.length > 50)
     plainString = [[plainString substringToIndex:50] stringByAppendingString:@"\u2026"];
-  return [NSString stringWithFormat:@"<%@: %p; text = \"%@\"; truncation string = \"%@\"; frame = %@>", self.class, self, plainString, truncationString, self.isViewLoaded ? NSStringFromCGRect(self.layer.frame) : nil];
+  return [NSString stringWithFormat:@"<%@: %p; text = \"%@\"; truncation string = \"%@\"; frame = %@>", self.class, self, plainString, truncationString, self.nodeLoaded ? NSStringFromCGRect(self.layer.frame) : nil];
 }
 
 #pragma mark - ASDisplayNode
@@ -192,7 +192,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
                     fminf(ceilPixelValue(renderSizePlusShadowPadding.height), constrainedSize.height));
 }
 
-- (void)willAppear
+- (void)willEnterHierarchy
 {
   CALayer *layer = self.layer;
   if (!layer.contents) {
@@ -200,7 +200,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     // set.
     [layer setNeedsDisplay];
   }
-  [super willAppear];
+  [super willEnterHierarchy];
 }
 
 - (void)displayDidFinish
@@ -215,7 +215,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   [self _invalidateRenderer];
 }
 
-- (void)didDisappear
+- (void)didExitHierarchy
 {
   // We nil out the contents and kill our renderer to prevent the very large
   // memory overhead of maintaining these for all text nodes.  They can be
@@ -224,7 +224,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
   [self _invalidateRenderer];
 
-  [super didDisappear];
+  [super didExitHierarchy];
 }
 
 - (void)didLoad

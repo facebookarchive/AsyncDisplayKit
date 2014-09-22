@@ -50,12 +50,12 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
 #define XCTAssertNodesLoaded(nodes ...) \
 for (ASDisplayNode *n in @[ nodes ]) {\
-  XCTAssertTrue(n.isViewLoaded, @"%@ should be loaded", n.name);\
+  XCTAssertTrue(n.nodeLoaded, @"%@ should be loaded", n.name);\
 }
 
 #define XCTAssertNodesNotLoaded(nodes ...) \
 for (ASDisplayNode *n in @[ nodes ]) {\
-  XCTAssertFalse(n.isViewLoaded, @"%@ should not be loaded", n.name);\
+  XCTAssertFalse(n.nodeLoaded, @"%@ should not be loaded", n.name);\
 }
 
 
@@ -121,7 +121,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 - (void)checkValuesMatchDefaults:(ASDisplayNode *)node isLayerBacked:(BOOL)isLayerBacked
 {
   NSString *targetName = isLayerBacked ? @"layer" : @"view";
-  NSString *hasLoadedView = node.isViewLoaded ? @"with view" : [NSString stringWithFormat:@"after loading %@", targetName];
+  NSString *hasLoadedView = node.nodeLoaded ? @"with view" : [NSString stringWithFormat:@"after loading %@", targetName];
 
   id rgbBlackCGColorIdPtr = (id)[UIColor colorWithRed:0 green:0 blue:0 alpha:1].CGColor;
 
@@ -190,7 +190,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   [self checkValuesMatchDefaults:node isLayerBacked:isLayerBacked];
 
   [node layer]; // Force either view or layer loading
-  XCTAssertTrue(node.isViewLoaded, @"Didn't load view");
+  XCTAssertTrue(node.nodeLoaded, @"Didn't load view");
 
   // Assert that the values can be fetched from the node after the view is realized.
   [self checkValuesMatchDefaults:node isLayerBacked:isLayerBacked];
@@ -220,7 +220,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 - (void)checkValuesMatchSetValues:(ASDisplayNode *)node isLayerBacked:(BOOL)isLayerBacked
 {
   NSString *targetName = isLayerBacked ? @"layer" : @"view";
-  NSString *hasLoadedView = node.isViewLoaded ? @"with view" : [NSString stringWithFormat:@"after loading %@", targetName];
+  NSString *hasLoadedView = node.nodeLoaded ? @"with view" : [NSString stringWithFormat:@"after loading %@", targetName];
 
   XCTAssertEqual(isLayerBacked, node.isLayerBacked, @"isLayerBacked broken %@", hasLoadedView);
   XCTAssertEqualObjects((id)[self bogusImage].CGImage, (id)node.contents, @"contents broken %@", hasLoadedView);
@@ -853,7 +853,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 
   DeclareNodeNamed(d);
   if (loaded) {
-    XCTAssertFalse(d.isViewLoaded, @"Should not yet be loaded");
+    XCTAssertFalse(d.nodeLoaded, @"Should not yet be loaded");
   }
 
   // Shut the type mismatch up
@@ -1049,8 +1049,8 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertTrue(replaceMe.supernode == parent, @"didn't remove old node");
   XCTAssertTrue(first.supernode == nil, @"oops, added node too soon");
   XCTAssertTrue(second.supernode == nil, @"oops, added node too soon");
-  XCTAssertFalse(first.isViewLoaded, @"first view loaded too soon");
-  XCTAssertFalse(second.isViewLoaded, @"second view loaded too soon");
+  XCTAssertFalse(first.nodeLoaded, @"first view loaded too soon");
+  XCTAssertFalse(second.nodeLoaded, @"second view loaded too soon");
 
   // Allow first to complete, but verify that the nodes are nil, indicating cancellation (asserts are in blocks above)
   dispatch_semaphore_signal(allowFirst);
@@ -1115,7 +1115,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   DeclareNodeNamed(d);
   d.layerBacked = isLayerBacked;
   if (loaded) {
-    XCTAssertFalse(d.isViewLoaded, @"Should not yet be loaded");
+    XCTAssertFalse(d.nodeLoaded, @"Should not yet be loaded");
   }
 
   // Shut the type mismatch up
@@ -1542,7 +1542,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   ASDisplayNode *scrollNode = [[ASDisplayNode alloc] initWithViewClass:[UIScrollView class]];
 
   XCTAssertFalse(scrollNode.isLayerBacked, @"Can't be layer backed");
-  XCTAssertFalse(scrollNode.isViewLoaded, @"Shouldn't have a view yet");
+  XCTAssertFalse(scrollNode.nodeLoaded, @"Shouldn't have a view yet");
 
   scrollNode.frame = CGRectMake(12, 52, 100, 53);
   scrollNode.alpha = 0.5;
@@ -1557,7 +1557,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   ASDisplayNode *transformNode = [[ASDisplayNode alloc] initWithLayerClass:[CATransformLayer class]];
 
   XCTAssertTrue(transformNode.isLayerBacked, @"Created with layer class => should be layer-backed by default");
-  XCTAssertFalse(transformNode.isViewLoaded, @"Shouldn't have a view yet");
+  XCTAssertFalse(transformNode.nodeLoaded, @"Shouldn't have a view yet");
 
   transformNode.frame = CGRectMake(12, 52, 100, 53);
   transformNode.alpha = 0.5;

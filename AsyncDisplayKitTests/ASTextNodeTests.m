@@ -91,7 +91,7 @@
 {
   for (NSInteger i = 10; i < 500; i += 50) {
     CGSize constrainedSize = CGSizeMake(i, i);
-    CGSize calculatedSize = [_textNode sizeToFit:constrainedSize];
+    CGSize calculatedSize = [_textNode measure:constrainedSize];
     XCTAssertTrue(calculatedSize.width <= constrainedSize.width, @"Calculated width (%f) should be less than or equal to constrained width (%f)", calculatedSize.width, constrainedSize.width);
     XCTAssertTrue(calculatedSize.height <= constrainedSize.height, @"Calculated height (%f) should be less than or equal to constrained height (%f)", calculatedSize.height, constrainedSize.height);
   }
@@ -101,8 +101,8 @@
 {
   for (NSInteger i = 10; i < 500; i += 50) {
     CGSize constrainedSize = CGSizeMake(i, i);
-    CGSize calculatedSize = [_textNode sizeToFit:constrainedSize];
-    CGSize recalculatedSize = [_textNode sizeToFit:calculatedSize];
+    CGSize calculatedSize = [_textNode measure:constrainedSize];
+    CGSize recalculatedSize = [_textNode measure:calculatedSize];
 
     XCTAssertTrue(CGSizeEqualToSize(calculatedSize, recalculatedSize), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
   }
@@ -112,8 +112,8 @@
 {
   for (CGFloat i = 10; i < 500; i *= 1.3) {
     CGSize constrainedSize = CGSizeMake(i, i);
-    CGSize calculatedSize = [_textNode sizeToFit:constrainedSize];
-    CGSize recalculatedSize = [_textNode sizeToFit:calculatedSize];
+    CGSize calculatedSize = [_textNode measure:constrainedSize];
+    CGSize recalculatedSize = [_textNode measure:calculatedSize];
 
     XCTAssertTrue(CGSizeEqualToSize(calculatedSize, recalculatedSize), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
   }
@@ -141,7 +141,7 @@
   ASTextNodeTestDelegate *delegate = [ASTextNodeTestDelegate new];
   _textNode.delegate = delegate;
 
-  [_textNode sizeToFit:CGSizeMake(100, 100)];
+  [_textNode measure:CGSizeMake(100, 100)];
   NSRange returnedLinkRange;
   NSString *returnedAttributeName;
   NSString *returnedLinkAttributeValue = [_textNode linkAttributeValueAtPoint:CGPointMake(3, 3) attributeName:&returnedAttributeName range:&returnedLinkRange];
@@ -163,7 +163,7 @@
   ASTextNodeTestDelegate *delegate = [ASTextNodeTestDelegate new];
   _textNode.delegate = delegate;
 
-  CGSize calculatedSize = [_textNode sizeToFit:CGSizeMake(100, 100)];
+  CGSize calculatedSize = [_textNode measure:CGSizeMake(100, 100)];
   NSRange returnedLinkRange = NSMakeRange(NSNotFound, 0);
   NSRange expectedRange = NSMakeRange(NSNotFound, 0);
   NSString *returnedAttributeName;

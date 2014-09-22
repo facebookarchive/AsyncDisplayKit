@@ -83,9 +83,7 @@ Besides _ASDisplayNode_, AsyncDisplayKit has UIKit equivalent classes:
 - _ASControlNode_: a UIButton equivalent
 - _ASTextNode_: a UITextView equivalent, with features like tap highlights, custom truncation strings, gradients, shadows, and tappable links.
 - _ASImageNode_: a UIImageView equivalent
-
-Node-aware UITableView and UICollectionView implementations are currently planned, but not yet implemented.
-
+- _ASTableView_: a UITableView subclass that uses nodes instead of cells
 
 ## Subclassing
 

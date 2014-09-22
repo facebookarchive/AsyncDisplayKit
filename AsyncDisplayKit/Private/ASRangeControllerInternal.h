@@ -6,12 +6,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/ASDisplayNode.h>
-#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import "ASCellNode.h"
 
-#import <AsyncDisplayKit/ASControlNode.h>
-#import <AsyncDisplayKit/ASImageNode.h>
-#import <AsyncDisplayKit/ASTextNode.h>
+@interface ASCellNode (ASRangeController)
 
-#import <AsyncDisplayKit/ASTableView.h>
-#import <AsyncDisplayKit/ASCellNode.h>
+@property (nonatomic, copy) NSIndexPath *asyncdisplaykit_indexPath;
+
+@end

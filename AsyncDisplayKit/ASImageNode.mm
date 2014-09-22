@@ -264,15 +264,15 @@
   return result;
 }
 
-- (void)didDisappear
+- (void)didExitHierarchy
 {
   self.contents = nil;
-  [super didDisappear];
+  [super didExitHierarchy];
 }
 
-- (void)willAppear
+- (void)willEnterHierarchy
 {
-  [super willAppear];
+  [super willEnterHierarchy];
 
   if (!self.layer.contents)
     [self setNeedsDisplay];
@@ -365,7 +365,7 @@
   BOOL isCroppingImage = ((boundsSize.width < imageSize.width) || (boundsSize.height < imageSize.height));
 
   // Re-display if we need to.
-  if (self.isViewLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
+  if (self.nodeLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
     [self setNeedsDisplay];
 }
 

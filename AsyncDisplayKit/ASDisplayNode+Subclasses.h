@@ -8,90 +8,268 @@
 
 #import <pthread.h>
 
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASThread.h>
 
-//
-// The following methods either must or can be overriden by subclasses of ASDisplayNode.
-// These methods should never be called directly by other classes.
-//
+
+/**
+ * The subclass header _ASDisplayNode+Subclasses_ defines the following methods that either must or can be overriden by
+ * subclasses of ASDisplayNode.
+ *
+ * These methods should never be called directly by other classes.
+ *
+ * ## Drawing
+ *
+ * Implement one of +displayAsyncLayer:parameters:isCancelled: or +drawRect:withParameters:isCancelled: to provide
+ * drawing for your node.
+ *
+ * Use -drawParametersForAsyncLayer: to copy any properties that are involved in drawing into an immutable object for
+ * use on the display queue. The display and drawRect implementations *MUST* be thread-safe, as they can be called on
+ * the displayQueue (asynchronously) or the main thread (synchronously/displayImmediately).
+ *
+ * Class methods that require passing in copies of the values are used to minimize the need for locking around instance
+ * variable access, and the possibility of the asynchronous display pass grabbing an inconsistent state across multiple
+ * variables.
+ */
 
 @interface ASDisplayNode (ASDisplayNodeSubclasses)
 
-// the view class to use when creating a new display node instance. Defaults to _ASDisplayView.
-+ (Class)viewClass;
 
-// Returns YES if a cache node, defaults to NO
-@property (nonatomic, assign, readonly, getter=isCacheNode) BOOL cacheNode;
+/** @name View Configuration */
 
-// Returns array of cached strict descendants (excludes self). if this is not a cacheNode, returns nil
-@property (nonatomic, copy, readonly) NSArray *cachedNodes;
-
-// Returns the parent cache node, if any. node caching must be enabled
-@property (nonatomic, assign, readonly) ASDisplayNode *superCacheNode;
-
-// Called on the main thread immediately after self.view is created.  Best time to add gesture recognizers to the view.
-- (void)didLoad;
-
-// Called on the main thread by the view's -layoutSubviews.  Layout all subnodes or subviews in this method.
-- (void)layout;
-
-// Called on the main thread by the view's -layoutSubviews, after -layout.  Gives a chance for subclasses to perform actions after the subclass and superclass have finished laying out.
-- (void)layoutDidFinish;
-
-// Subclasses that override should expect this method to be called on a non-main thread.  The returned size is cached by
-// ASDisplayNode for quick access during -layout, via -calculatedSize.  Other expensive work that needs to be done
-// before display can be performed here, and using ivars to cache any valuable intermediate results is encouraged.  This
-// method should not be called directly outside of ASDisplayNode; use -sizeToFit: or -calculatedSize instead.
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize;
-
-// Subclasses should call this method to invalidate the previously measured and cached size for the display node, when the contents of
-// the node change in such a way as to require measuring it again.
-- (void)invalidateCalculatedSize;
-
-// Subclasses should implement -display if the layer's contents will be set directly to an arbitrary buffer (e.g. decoded JPEG).
-// Called on a background thread, some time after the view has been created.  This method is called if -drawInContext: is not implemented.
-- (void)display;
-
-// Subclasses should implement if a backing store / context is desired.  Called on a background thread, some time after the view has been created.
-- (void)drawInContext:(CGContextRef)ctx;
 
 /**
- @abstract Indicates that the receiver has finished displaying.
- @discussion Subclasses may override this method to be notified when display (asynchronous or synchronous) has completed.
+ * @return The view class to use when creating a new display node instance. Defaults to _ASDisplayView.
+ */
++ (Class)viewClass;
+
+
+/** @name Properties */
+
+
+/**
+ * @abstract The scale factor to apply to the rendering.
+ *
+ * @discussion Use setNeedsDisplayAtScale: to set a value and then after display, the display node will set the layer's
+ * contentsScale. This is to prevent jumps when re-rasterizing at a different contentsScale.
+ * Read this property if you need to know the future contentsScale of your layer, eg in drawParameters.
+ *
+ * @see setNeedsDisplayAtScale:
+ */
+@property (nonatomic, assign, readonly) CGFloat contentsScaleForDisplay;
+
+/**
+ * @abstract Whether the view or layer of this display node is currently in a window
+ */
+@property (nonatomic, readonly, assign, getter=isInWindow) BOOL inWindow;
+
+
+/** @name View Lifecycle */
+
+
+/**
+ * @abstract Called on the main thread immediately after self.view is created.
+ *
+ * @discussion This is the best time to add gesture recognizers to the view.
+ */
+- (void)didLoad;
+
+
+/** @name Layout */
+
+
+/**
+ * @abstract Called on the main thread by the view's -layoutSubviews.
+ *
+ * @discussion Subclasses override this method to layout all subnodes or subviews.
+ */
+- (void)layout;
+
+/**
+ * @abstract Called on the main thread by the view's -layoutSubviews, after -layout.
+ *
+ * @discussion Gives a chance for subclasses to perform actions after the subclass and superclass have finished laying
+ * out.
+ */
+- (void)layoutDidFinish;
+
+
+/** @name Sizing */
+
+
+/**
+ * @abstract Return the calculated size.
+ *
+ * @discussion Subclasses that override should expect this method to be called on a non-main thread. The returned size
+ * is cached by ASDisplayNode for quick access during -layout, via -calculatedSize. Other expensive work that needs to
+ * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
+ * encouraged.
+ *
+ * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedSize instead.
+ */
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize;
+
+/**
+ * @abstract Invalidate previously measured and cached size.
+ *
+ * @discussion Subclasses should call this method to invalidate the previously measured and cached size for the display
+ * node, when the contents of the node change in such a way as to require measuring it again.
+ */
+- (void)invalidateCalculatedSize;
+
+
+/** @name Drawing */
+
+
+/**
+ * @summary Delegate method to draw layer contents into a CGBitmapContext. The current UIGraphics context will be set
+ * to an appropriate context.
+ *
+ * @param parameters An object describing all of the properties you need to draw. Return this from
+ * -drawParametersForAsyncLayer:
+ * @param isCancelled Execute this block to check whether the current drawing operation has been cancelled to avoid
+ * unnecessary work. A return value of YES means cancel drawing and return.
+ * @param isRasterizing YES if the layer is being rasterized into another layer, in which case drawRect: probably wants
+ * to avoid doing things like filling its bounds with a zero-alpha color to clear the backing store.
+ *
+ * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
+ */
++ (void)drawRect:(CGRect)bounds
+  withParameters:(id<NSObject>)parameters
+     isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
+   isRasterizing:(BOOL)isRasterizing;
+
+/**
+ * @summary Delegate override to provide new layer contents as a UIImage.
+ *
+ * @param parameters An object describing all of the properties you need to draw. Return this from
+ * -drawParametersForAsyncLayer:
+ * @param isCancelled Execute this block to check whether the current drawing operation has been cancelled to avoid
+ * unnecessary work. A return value of YES means cancel drawing and return.
+ *
+ * @return A UIImage with contents that are ready to display on the main thread. Make sure that the image is already
+ * decoded before returning it here.
+ *
+ * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
+ */
++ (UIImage *)displayWithParameters:(id<NSObject>)parameters
+                       isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock;
+
+/**
+ * @abstract Delegate override for drawParameters
+ *
+ * @note Called on the main thread only
+ */
+- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
+
+/**
+ * @abstract Indicates that the receiver has finished displaying.
+ *
+ * @discussion Subclasses may override this method to be notified when display (asynchronous or synchronous) has
+ * completed.
  */
 - (void)displayDidFinish;
 
-- (void)asyncdisplaykit_asyncTransactionContainerStateDidChange;
 
-// Subclasses may optionally implement the touch handling methods.
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event;
-- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer;
-
-// Override to make this node respond differently to touches: hide touches from subviews, send all touches to certain subviews (hit area maximizing), etc.
-// Returns a UIView, not ASDisplayNode, for two reasons:
-// 1) allows sending events to plain UIViews that don't have attached nodes, 2) hitTest: is never called before the views are created.
-- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event;
-
-// Subclasses should override this if they don't want their contentsScale changed. This changes an internal property
+/**
+ * @abstract Marks the receiver's bounds as needing to be redrawn, with a scale value.
+ *
+ * @discussion Subclasses should override this if they don't want their contentsScale changed.
+ *
+ * @note This changes an internal property.
+ * @see contentsScaleForDisplay
+ */
 - (void)setNeedsDisplayAtScale:(CGFloat)contentsScale;
 
-// Recursively calls setNeedsDisplayAtScale: on subnodes. Note that only the node tree is walked, not the view or layer trees.
-// Subclasses may override this if they require modifying the scale set on their child nodes.
+/**
+ * @abstract Recursively calls setNeedsDisplayAtScale: on subnodes.
+ *
+ * @discussion Subclasses may override this if they require modifying the scale set on their child nodes.
+ *
+ * @note Only the node tree is walked, not the view or layer trees.
+ *
+ * @see setNeedsDisplayAtScale:
+ * @see contentsScaleForDisplay
+ */
 - (void)recursivelySetNeedsDisplayAtScale:(CGFloat)contentsScale;
 
-// Use setNeedsDisplayAtScale: and then after display, the display node will set the layer's contentsScale. This is to prevent jumps when re-rasterizing at a different contentsScale.
-// Read this property if you need to know the future contentsScale of your layer, eg in drawParameters
-@property (nonatomic, assign, readonly) CGFloat contentsScaleForDisplay;
 
-// Whether the view or layer of this display node is currently in a window
-@property (nonatomic, readonly, assign, getter=isInWindow) BOOL inWindow;
+/** @name Touch handling */
 
-// The function that gets called for each display node in -recursiveDescription
+
+/**
+ * @abstract Tells the node when touches began in its view.
+ *
+ * @param touches A set of UITouch instances.
+ * @param event A UIEvent associated with the touch.
+ */
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
+
+/**
+ * @abstract Tells the node when touches moved in its view.
+ *
+ * @param touches A set of UITouch instances.
+ * @param event A UIEvent associated with the touch.
+ */
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
+
+/**
+ * @abstract Tells the node when touches ended in its view.
+ *
+ * @param touches A set of UITouch instances.
+ * @param event A UIEvent associated with the touch.
+ */
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
+
+/**
+ * @abstract Tells the node when touches was cancelled in its view.
+ *
+ * @param touches A set of UITouch instances.
+ * @param event A UIEvent associated with the touch.
+ */
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event;
+
+
+/** @name Managing Gesture Recognizers */
+
+
+/**
+ * @abstract Asks the node if a gesture recognizer should continue tracking touches.
+ *
+ * @param gestureRecognizer A gesture recognizer trying to recognize a gesture.
+ */
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer;
+
+
+/** @name Hit Testing */
+
+
+/**
+ * @abstract Returns the view that contains the point.
+ *
+ * @discussion Override to make this node respond differently to touches: (e.g. hide touches from subviews, send all
+ * touches to certain subviews (hit area maximizing), etc.)
+ *
+ * @param point A point specified in the node's local coordinate system (bounds).
+ * @param event The event that warranted a call to this method.
+ *
+ * @return Returns a UIView, not ASDisplayNode, for two reasons:
+ * 1) allows sending events to plain UIViews that don't have attached nodes,
+ * 2) hitTest: is never called before the views are created.
+ */
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event;
+
+
+/** Description */
+
+
+/**
+ * @abstract Return a description of the node
+ *
+ * @discussion The function that gets called for each display node in -recursiveDescription
+ */
 - (NSString *)descriptionForRecursiveDescription;
 
 @end
@@ -102,5 +280,5 @@
 - (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass;
 @end
 
-#define ASDisplayNodeAssertThreadAffinity(viewNode)   ASDisplayNodeAssert(!viewNode || ASDisplayNodeThreadIsMain() || !(viewNode).isViewLoaded, @"Incorrect display node thread affinity")
-#define ASDisplayNodeCAssertThreadAffinity(viewNode) ASDisplayNodeCAssert(!viewNode || ASDisplayNodeThreadIsMain() || !(viewNode).isViewLoaded, @"Incorrect display node thread affinity")
+#define ASDisplayNodeAssertThreadAffinity(viewNode)   ASDisplayNodeAssert(!viewNode || ASDisplayNodeThreadIsMain() || !(viewNode).nodeLoaded, @"Incorrect display node thread affinity")
+#define ASDisplayNodeCAssertThreadAffinity(viewNode) ASDisplayNodeCAssert(!viewNode || ASDisplayNodeThreadIsMain() || !(viewNode).nodeLoaded, @"Incorrect display node thread affinity")
