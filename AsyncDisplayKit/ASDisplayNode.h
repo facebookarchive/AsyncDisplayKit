@@ -10,6 +10,7 @@
 
 #import "_ASAsyncTransactionContainer.h"
 #import "ASBaseDefines.h"
+#import "ASDealloc2MainObject.h"
 
 
 /**
@@ -28,7 +29,7 @@
  *
  */
 
-@interface ASDisplayNode : NSObject
+@interface ASDisplayNode : ASDealloc2MainObject
 
 
 /** @name Initializing a node object */

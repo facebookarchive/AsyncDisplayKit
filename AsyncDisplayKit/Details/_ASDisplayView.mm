@@ -19,11 +19,15 @@
 
 @interface _ASDisplayView ()
 @property (nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
+
+// Keep the node alive while its view is active.  If you create a view, add its layer to a layer hierarchy, then release
+// the view, the layer retains the view to prevent a crash.  This replicates this behaviour for the node abstraction.
+@property (nonatomic, retain, readwrite) ASDisplayNode *keepalive_node;
 @end
 
 @implementation _ASDisplayView
 {
-  ASDisplayNode *_node;  // Though UIView has a .node property added via category, since we can add an ivar to a subclass, use that for performance.
+  __unsafe_unretained ASDisplayNode *_node;  // Though UIView has a .node property added via category, since we can add an ivar to a subclass, use that for performance.
   BOOL _inHitTest;
   BOOL _inPointInside;
 }
@@ -66,10 +70,10 @@
   // view).
   UIView *currentSuperview = self.superview;
   if (!currentSuperview && newSuperview) {
-    [_node retain];
+    self.keepalive_node = _node;
   }
   else if (currentSuperview && !newSuperview) {
-    [_node release];
+    self.keepalive_node = nil;
   }
 }
 

@@ -104,12 +104,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   return self;
 }
 
-- (void)dealloc
-{
-  [_controlEventDispatchTable release];
-  [super dealloc];
-}
-
 #pragma mark - ASDisplayNode Overrides
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -251,7 +245,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
         // Create the dispatch table for this event.
         eventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeTargetDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries
         [_controlEventDispatchTable setObject:eventDispatchTable forKey:eventKey];
-        [eventDispatchTable release];
       }
 
       // Have we seen this target before for this event?
@@ -262,7 +255,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
         // Nope. Create an actions array for it.
         targetActions = [[NSMutableArray alloc] initWithCapacity:kASControlNodeActionDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
         [eventDispatchTable setObject:targetActions forKey:targetKey];
-        [targetActions release];
       }
 
       // Add the action message.
@@ -299,7 +291,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       [targets addObject:_ASControlNodeTargetForTargetKey(targetKey)];
   }
 
-  return [targets autorelease];
+  return targets;
 }
 
 - (void)removeTarget:(id)target action:(SEL)action forControlEvents:(ASControlNodeEvent)controlEventMask
@@ -397,7 +389,7 @@ id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEv
 
 id<NSCopying> _ASControlNodeTargetKeyForTarget(id target)
 {
-  return (target ? [NSValue valueWithPointer:target] : [NSNull null]);
+  return (target ? [NSValue valueWithPointer:(__bridge const void *)(target)] : [NSNull null]);
 }
 
 id _ASControlNodeTargetForTargetKey(id<NSCopying> targetKey)

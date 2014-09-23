@@ -7,28 +7,27 @@ Pod::Spec.new do |spec|
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
   spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.0beta' }
 
-  # these files mustn't be compiled with ARC enabled
-  mrr_source_files = [
-      'AsyncDisplayKit/ASDisplayNode.mm',
-      'AsyncDisplayKit/ASControlNode.m',
-      'AsyncDisplayKit/ASImageNode.mm',
-      'AsyncDisplayKit/Details/_ASDisplayView.mm',
-      'AsyncDisplayKit/Private/_ASPendingState.m',
-    ]
-
   spec.public_header_files = [
       'AsyncDisplayKit/*.h',
       'AsyncDisplayKit/Details/**/*.h',
       'Base/*.h'
   ]
 
-  spec.source_files = ['AsyncDisplayKit/**/*.{h,m,mm}', 'Base/*.{h,m}']
-  spec.exclude_files = mrr_source_files
+  spec.source_files = [
+      'AsyncDisplayKit/**/*.{h,m,mm}',
+      'Base/*.{h,m}'
+  ]
 
+  # ASDealloc2MainObject must be compiled with MRR
   spec.requires_arc = true
-  spec.subspec 'no-arc' do |mrr|
+  spec.exclude_files = ['AsyncDisplayKit/Details/ASDealloc2MainObject.m']
+  spec.subspec 'ASDealloc2MainObject' do |mrr|
     mrr.requires_arc = false
-    mrr.source_files = mrr_source_files
+    mrr.source_files = [
+      'AsyncDisplayKit/Private/_AS-objc-internal.h',
+      'AsyncDisplayKit/Details/ASDealloc2MainObject.h',
+      'AsyncDisplayKit/Details/ASDealloc2MainObject.m',
+    ]
   end
 
   spec.social_media_url = 'https://twitter.com/fbOpenSource'

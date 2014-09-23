@@ -185,23 +185,6 @@
   return self;
 }
 
-- (void)dealloc
-{
-  [contents release];
-  [name release];
-  if (NULL != shadowColor)
-    CFRelease(shadowColor);
-  if (NULL != borderColor)
-    CFRelease(borderColor);
-  if (NULL != backgroundColor)
-    CFRelease(backgroundColor);
-  [accessibilityLabel release];
-  [accessibilityHint release];
-  [accessibilityValue release];
-  [accessibilityLanguage release];
-  [super dealloc];
-}
-
 - (CALayer *)layer
 {
   ASDisplayNodeAssert(NO, @"One shouldn't call node.layer when the view isn't loaded, but we're returning nil to not crash if someone is still doing this");
@@ -288,8 +271,7 @@
     return;
   }
 
-  [contents release];
-  contents = [newContents retain];
+  contents = newContents;
   _flags.setContents = YES;
 }
 
@@ -420,14 +402,13 @@
 {
   _flags.setName = YES;
   if (name != newName) {
-    [name release];
     name = [newName copy];
   }
 }
 
 - (NSString *)asyncdisplaykit_name
 {
-  return [[name retain] autorelease];
+  return name;
 }
 
 - (BOOL)isAccessibilityElement
@@ -443,39 +424,36 @@
 
 - (NSString *)accessibilityLabel
 {
-  return [[accessibilityLabel retain] autorelease];
+  return accessibilityLabel;
 }
 
 - (void)setAccessibilityLabel:(NSString *)newAccessibilityLabel
 {
   _flags.setAccessibilityLabel = YES;
   if (accessibilityLabel != newAccessibilityLabel) {
-    [accessibilityLabel release];
     accessibilityLabel = [newAccessibilityLabel copy];
   }
 }
 
 - (NSString *)accessibilityHint
 {
-  return [[accessibilityHint retain] autorelease];
+  return accessibilityHint;
 }
 
 - (void)setAccessibilityHint:(NSString *)newAccessibilityHint
 {
   _flags.setAccessibilityHint = YES;
-  [accessibilityHint release];
   accessibilityHint = [newAccessibilityHint copy];
 }
 
 - (NSString *)accessibilityValue
 {
-  return [[accessibilityValue retain] autorelease];
+  return accessibilityValue;
 }
 
 - (void)setAccessibilityValue:(NSString *)newAccessibilityValue
 {
   _flags.setAccessibilityValue = YES;
-  [accessibilityValue release];
   accessibilityValue = [newAccessibilityValue copy];
 }
 
@@ -503,16 +481,13 @@
 
 - (NSString *)accessibilityLanguage
 {
-  return [[accessibilityLanguage retain] autorelease];
+  return accessibilityLanguage;
 }
 
 - (void)setAccessibilityLanguage:(NSString *)newAccessibilityLanguage
 {
   _flags.setAccessibilityLanguage = YES;
-  if(accessibilityLanguage != newAccessibilityLanguage) {
-    [accessibilityLanguage release];
-    accessibilityLanguage = [newAccessibilityLanguage retain];
-  }
+  accessibilityLanguage = newAccessibilityLanguage;
 }
 
 - (BOOL)accessibilityElementsHidden

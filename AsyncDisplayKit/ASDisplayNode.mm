@@ -81,7 +81,7 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
     return nil;
 
   ASDisplayNodeAssert([viewClass isSubclassOfClass:[UIView class]], @"should initialize with a subclass of UIView");
-  _viewClass = [viewClass retain];
+  _viewClass = viewClass;
   _flags.isSynchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
 
   return self;
@@ -94,7 +94,7 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 
   ASDisplayNodeAssert([layerClass isSubclassOfClass:[CALayer class]], @"should initialize with a subclass of CALayer");
 
-  _layerClass = [layerClass retain];
+  _layerClass = layerClass;
   _flags.isSynchronous = ![layerClass isSubclassOfClass:[_ASDisplayLayer class]];
 
   _flags.isLayerBacked = YES;
@@ -123,14 +123,6 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
   return self;
 }
 
-#if __has_feature(objc_arc)
-#warning This file must be compiled without ARC. Use -fno-objc-arc (or convert project to MRR).
-#endif
-
-#if !__has_feature(objc_arc)
-_OBJC_SUPPORTED_INLINE_REFCNT_WITH_DEALLOC2MAIN(_retainCount);
-#endif
-
 - (void)dealloc
 {
   ASDisplayNodeAssertMainThread();
@@ -147,28 +139,18 @@ _OBJC_SUPPORTED_INLINE_REFCNT_WITH_DEALLOC2MAIN(_retainCount);
   for (ASDisplayNode *subnode in _subnodes)
     [subnode __setSupernode:nil];
 
-  [_viewClass release];
-  [_subnodes release];
-
-  [_view release];
   _view = nil;
   _subnodes = nil;
   if (_flags.isLayerBacked) {
     _layer.delegate = nil;
   }
-  [_layer release];
   _layer = nil;
 
   [self __setSupernode:nil];
-  [_pendingViewState release];
   _pendingViewState = nil;
-  [_replaceAsyncSentinel release];
   _replaceAsyncSentinel = nil;
 
-  [_displaySentinel release];
   _displaySentinel = nil;
-
-  [super dealloc];
 }
 
 #pragma mark - UIResponder overrides
@@ -230,7 +212,7 @@ _OBJC_SUPPORTED_INLINE_REFCNT_WITH_DEALLOC2MAIN(_retainCount);
     }
     _view = [[_viewClass alloc] init];
     _view.asyncdisplaykit_node = self;
-    _layer = [_view.layer retain];
+    _layer = _view.layer;
   }
   _layer.asyncdisplaykit_node = self;
 #if DEBUG
@@ -671,8 +653,6 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   if (subnodeIndex == NSNotFound)
     return;
 
-  [subnode retain];
-
   ASDisplayNode *oldParent = [subnode _deallocSafeSupernode];
   // Disable appearance methods during move between supernodes, but make sure we restore their state after we do our thing
   BOOL isMovingEquivalentParents = disableNotificationsForMovingBetweenParents(oldParent, self);
@@ -715,7 +695,6 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   }
 
   [subnode __setSupernode:self];
-  [subnode release];
 }
 
 - (void)replaceSubnode:(ASDisplayNode *)oldSubnode withSubnode:(ASDisplayNode *)replacementSubnode
@@ -882,7 +861,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertMainThread();
 
-  for (ASDisplayNode *node in [[_subnodes copy] autorelease]) {
+  for (ASDisplayNode *node in [_subnodes copy]) {
     [self _addSubnodeSubviewOrSublayer:node];
   }
 }
@@ -1040,14 +1019,14 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
-  return [[_subnodes copy] autorelease];
+  return [_subnodes copy];
 }
 
 - (ASDisplayNode *)supernode
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
-  return [[_supernode retain] autorelease];
+  return _supernode;
 }
 
 // This is a thread-method to return the supernode without causing it to be retained autoreleased.  See -_removeSubnode: for details.
@@ -1255,7 +1234,6 @@ static NSInteger incrementIfFound(NSInteger i) {
     [_pendingViewState applyToView:_view];
   }
 
-  [_pendingViewState release];
   _pendingViewState = nil;
 
   // TODO: move this into real pending state
@@ -1393,7 +1371,7 @@ static void _recursiveSetPreventOrCancelDisplay(ASDisplayNode *node, CALayer *la
   if (!_replaceAsyncSentinel) {
     _replaceAsyncSentinel = [[ASSentinel alloc] init];
   }
-  return [[_replaceAsyncSentinel retain] autorelease];
+  return _replaceAsyncSentinel;
 }
 
 // Calls completion with nil to indicated cancellation
@@ -1505,7 +1483,7 @@ static void _recursiveSetPreventOrCancelDisplay(ASDisplayNode *node, CALayer *la
     }
   }];
 
-  return [placeholder autorelease];
+  return placeholder;
 }
 
 @end
@@ -1560,7 +1538,7 @@ static void _recursiveSetPreventOrCancelDisplay(ASDisplayNode *node, CALayer *la
 
 - (NSString *)_recursiveDescriptionHelperWithIndent:(NSString *)indent
 {
-  NSMutableString *subtree = [[[[indent stringByAppendingString: self.descriptionForRecursiveDescription] stringByAppendingString:@"\n"] mutableCopy] autorelease];
+  NSMutableString *subtree = [[[indent stringByAppendingString: self.descriptionForRecursiveDescription] stringByAppendingString:@"\n"] mutableCopy];
   for (ASDisplayNode *n in self.subnodes) {
     [subtree appendString:[n _recursiveDescriptionHelperWithIndent:[indent stringByAppendingString:@" | "]]];
   }
