@@ -317,7 +317,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (NSInteger)rangeControllerSections:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
-  return [_asyncDataSource numberOfSectionsInTableView:self];
+  if ([_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableView:)]) {
+    return [_asyncDataSource numberOfSectionsInTableView:self];
+  } else {
+    return 1;
+  }
 }
 
 - (NSInteger)rangeController:(ASRangeController *)rangeController rowsInSection:(NSInteger)section
