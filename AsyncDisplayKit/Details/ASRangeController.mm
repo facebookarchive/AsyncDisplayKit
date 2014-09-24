@@ -304,8 +304,10 @@ static BOOL ASRangeIsValid(NSRange range)
 - (void)updateVisibleNodeIndexPaths
 {
   NSArray *indexPaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
-  [self setVisibleRange:NSMakeRange([self indexForIndexPath:[indexPaths firstObject]],
-                                    indexPaths.count)];
+  if (indexPaths.count) {
+    [self setVisibleRange:NSMakeRange([self indexForIndexPath:[indexPaths firstObject]],
+                                      indexPaths.count)];
+  }
 
   _queuedRangeUpdate = NO;
 }
