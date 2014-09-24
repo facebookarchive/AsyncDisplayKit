@@ -585,8 +585,9 @@ static BOOL ASIndexPathsAreSequential(NSIndexPath *first, NSIndexPath *second)
 {
   // sanity-check input
   // TODO this is proof-of-concept-quality, expand validation when fleshing out update / editing support
-  BOOL indexPathsAreValid = ASIndexPathsAreSequential([self indexPathForIndex:_totalNodeCount - 1],
-                                                      [indexPaths firstObject]);
+  NSIndexPath *lastNode = (_totalNodeCount > 0) ? [self indexPathForIndex:_totalNodeCount - 1] : nil;
+  BOOL indexPathsAreValid = ((lastNode && ASIndexPathsAreSequential(lastNode, [indexPaths firstObject])) ||
+                             [[indexPaths firstObject] isEqual:[NSIndexPath indexPathForRow:0 inSection:0]]);
   if (!indexPaths || !indexPaths.count || !indexPathsAreValid) {
     ASDisplayNodeAssert(NO, @"invalid argument");
     return;
