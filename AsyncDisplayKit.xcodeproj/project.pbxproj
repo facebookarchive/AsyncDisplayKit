@@ -118,7 +118,7 @@
 		058D0A82195D060300B7D73C /* ASAssert.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D0A43195D058D00B7D73C /* ASAssert.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		058D0A83195D060300B7D73C /* ASBaseDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D0A44195D058D00B7D73C /* ASBaseDefines.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		058D0A84195D060300B7D73C /* ASDisplayNodeExtraIvars.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D0A45195D058D00B7D73C /* ASDisplayNodeExtraIvars.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		05A6D05A19D0EB64002DD95E /* ASDealloc2MainObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 05A6D05819D0EB64002DD95E /* ASDealloc2MainObject.h */; };
+		05A6D05A19D0EB64002DD95E /* ASDealloc2MainObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 05A6D05819D0EB64002DD95E /* ASDealloc2MainObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05A6D05B19D0EB64002DD95E /* ASDealloc2MainObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 05A6D05919D0EB64002DD95E /* ASDealloc2MainObject.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
@@ -454,6 +454,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				05A6D05A19D0EB64002DD95E /* ASDealloc2MainObject.h in Headers */,
 				058D0A47195D05CB00B7D73C /* ASControlNode.h in Headers */,
 				058D0A48195D05CB00B7D73C /* ASControlNode.m in Headers */,
 				058D0A49195D05CB00B7D73C /* ASControlNode+Subclasses.h in Headers */,
@@ -464,7 +465,6 @@
 				058D0A4E195D05CB00B7D73C /* ASDisplayNodeExtras.mm in Headers */,
 				058D0A4F195D05CB00B7D73C /* ASImageNode.h in Headers */,
 				058D0A50195D05CB00B7D73C /* ASImageNode.mm in Headers */,
-				05A6D05A19D0EB64002DD95E /* ASDealloc2MainObject.h in Headers */,
 				058D0A51195D05CB00B7D73C /* ASTextNode.h in Headers */,
 				058D0A52195D05CB00B7D73C /* ASTextNode.mm in Headers */,
 				055F1A3819ABD413004DAFF1 /* ASRangeController.h in Headers */,
