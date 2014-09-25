@@ -1,11 +1,11 @@
 Pod::Spec.new do |spec|
   spec.name         = 'AsyncDisplayKit'
-  spec.version      = '1.0beta'
+  spec.version      = '1.0-beta2'
   spec.license      =  { :type => 'BSD' }
   spec.homepage     = 'https://github.com/facebook/AsyncDisplayKit'
   spec.authors      = { 'Nadine Salter' => 'nadi@fb.com', 'Scott Goodson' => 'scottg@fb.com' }
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
-  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.0beta' }
+  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.0-beta2' }
 
   spec.public_header_files = [
       'AsyncDisplayKit/*.h',
