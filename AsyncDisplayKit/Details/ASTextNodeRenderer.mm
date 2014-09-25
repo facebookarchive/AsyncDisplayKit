@@ -74,6 +74,10 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
 {
   ASDN::MutexLocker l(_textKitLock);
 
+  // Concurrently initialising TextKit components crashes (rdar://18448377) so we use a global lock.  :(
+  static ASDN::StaticMutex mutex = ASDISPLAYNODE_MUTEX_INITIALIZER;
+  ASDN::StaticMutexLocker gl(mutex);
+
   // Create the TextKit component stack with our default configuration.
   _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
   _layoutManager = [[NSLayoutManager alloc] init];
@@ -88,6 +92,8 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
   _textContainer.lineBreakMode = _truncationMode;
 
   [_layoutManager addTextContainer:_textContainer];
+
+  ASDN::StaticMutexUnlocker gu(mutex);
 
   [self _invalidateLayout];
 }
