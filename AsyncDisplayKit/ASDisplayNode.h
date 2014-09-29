@@ -222,32 +222,6 @@
 - (void)replaceSubnode:(ASDisplayNode *)subnode withSubnode:(ASDisplayNode *)replacementSubnode;
 
 /** 
- * @abstract Add a subnode, but have it size asynchronously on a background queue.
- *
- * @param subnode The unsized subnode to insert into the view hierarchy
- * @param completion The completion callback will be called on the main queue after the subnode has been inserted in 
- * place of the placeholder.
- *
- * @return A placeholder node is inserted into the hierarchy where the node will be. The placeholder can be moved around 
- * in the hiercharchy while the view is sizing. Once sizing is complete on the background queue, this placeholder will 
- * be removed and the replacement will be put at its place.
- */
-- (ASDisplayNode *)addSubnodeAsynchronously:(ASDisplayNode *)subnode
-                              completion:(void(^)(ASDisplayNode *replacement))completion;
-
-/** 
- * @abstract Replace a subnode, but have it size asynchronously on a background queue.
- *
- * @param subnode A subnode of self.
- * @param replacementSubnode A node with which to replace subnode.
- * @param completion The completion callback will be called on the main queue after the replacementSubnode has replaced 
- * subnode.
- */
-- (void)replaceSubnodeAsynchronously:(ASDisplayNode *)subnode
-                            withNode:(ASDisplayNode *)replacementSubnode
-                          completion:(void(^)(BOOL cancelled, ASDisplayNode *replacement, ASDisplayNode *oldSubnode))completion;
-
-/** 
  * @abstract Remove this node from its supernode.
  *
  * @discussion The node's view will be automatically removed from the supernode's view.
