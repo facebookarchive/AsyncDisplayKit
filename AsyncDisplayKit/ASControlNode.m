@@ -16,7 +16,6 @@
 
 // Initial capacities for dispatch tables.
 #define kASControlNodeEventDispatchTableInitialCapacity 4
-#define kASControlNodeTargetDispatchTableInitialCapacity 2
 #define kASControlNodeActionDispatchTableInitialCapacity 4
 
 @interface ASControlNode ()
@@ -43,7 +42,7 @@
     ...
    }
    */
-  __block NSMutableDictionary *_controlEventDispatchTable;
+  NSMutableDictionary *_controlEventDispatchTable;
 }
 
 // Read-write overrides.
@@ -51,37 +50,21 @@
 @property (nonatomic, readwrite, assign, getter=isTracking) BOOL tracking;
 @property (nonatomic, readwrite, assign, getter=isTouchInside) BOOL touchInside;
 
-/**
- @abstract Indicates whether the receiver is interested in receiving touches.
- */
+//! @abstract Indicates whether the receiver is interested in receiving touches.
 - (BOOL)_isInterestedInTouches;
 
 /**
- @abstract Returns a key to be used in _controlEventDispatchTable that identifies the control event.
- @param controlEvent A control event.
- @result A key for use in _controlEventDispatchTable.
+  @abstract Returns a key to be used in _controlEventDispatchTable that identifies the control event.
+  @param controlEvent A control event.
+  @result A key for use in _controlEventDispatchTable.
  */
 id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEvent);
 
 /**
- @abstract Returns a key to be used inside the dictionaries within _controlEventDispatchTable that identifies the target.
- @param target A target. May safely be nil.
- @result A key for use in in the dictionaries within _controlEventDispatchTable.
- */
-id<NSCopying> _ASControlNodeTargetKeyForTarget(id target);
-
-/**
- @abstract Returns the target for invocation from a given targetKey.
- @param targetKey A target key created with _ASControlNodeTargetKeyForTarget(). May not be nil.
- @result The target, or nil if no target was originally used.
- */
-id _ASControlNodeTargetForTargetKey(id<NSCopying> targetKey);
-
-/**
- @abstract Enumerates the ASControlNode events included mask, invoking the block for each event.
- @param mask An ASControlNodeEvent mask.
- @param block The block to be invoked for each ASControlNodeEvent included in mask.
- @param anEvent An even that is included in mask.
+  @abstract Enumerates the ASControlNode events included mask, invoking the block for each event.
+  @param mask An ASControlNodeEvent mask.
+  @param block The block to be invoked for each ASControlNodeEvent included in mask.
+  @param anEvent An even that is included in mask.
  */
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent));
 
@@ -222,10 +205,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   return YES;
 }
 
-#pragma mark - Control Attributes
-
-#pragma mark - Tracking Touches
-
 #pragma mark - Action Messages
 - (void)addTarget:(id)target action:(SEL)action forControlEvents:(ASControlNodeEvent)controlEventMask
 {
@@ -238,23 +217,22 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     {
       // Do we already have an event table for this control event?
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMutableDictionary *eventDispatchTable = [_controlEventDispatchTable objectForKey:eventKey];
+      NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:eventKey];
       // Create it if necessary.
       if (!eventDispatchTable)
       {
         // Create the dispatch table for this event.
-        eventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeTargetDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries
+        eventDispatchTable = [NSMapTable weakToStrongObjectsMapTable];
         [_controlEventDispatchTable setObject:eventDispatchTable forKey:eventKey];
       }
 
       // Have we seen this target before for this event?
-      id<NSCopying> targetKey = _ASControlNodeTargetKeyForTarget(target);
-      NSMutableArray *targetActions = [eventDispatchTable objectForKey:targetKey];
+      NSMutableArray *targetActions = [eventDispatchTable objectForKey:target];
       if (!targetActions)
       {
         // Nope. Create an actions array for it.
         targetActions = [[NSMutableArray alloc] initWithCapacity:kASControlNodeActionDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
-        [eventDispatchTable setObject:targetActions forKey:targetKey];
+        [eventDispatchTable setObject:targetActions forKey:target];
       }
 
       // Add the action message.
@@ -271,12 +249,12 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSParameterAssert(controlEvent != 0 && controlEvent != ASControlNodeEventAllEvents);
 
   // Grab the event dispatch table for this event.
-  NSDictionary *eventDispatchTable = [_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)];
+  NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)];
   if (!eventDispatchTable)
     return nil;
 
-  // Grab and return the actions for this target.
-  return [eventDispatchTable objectForKey:_ASControlNodeTargetKeyForTarget(target)];
+  // Return the actions for this target.
+  return [eventDispatchTable objectForKey:target];
 }
 
 - (NSSet *)allTargets
@@ -284,11 +262,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSMutableSet *targets = [[NSMutableSet alloc] init];
 
   // Look at each event...
-  for (NSDictionary *eventDispatchTable in [_controlEventDispatchTable allValues])
+  for (NSMapTable *eventDispatchTable in [_controlEventDispatchTable allValues])
   {
     // and each event's targets...
-    for (id <NSCopying> targetKey in eventDispatchTable)
-      [targets addObject:_ASControlNodeTargetForTargetKey(targetKey)];
+    for (id target in eventDispatchTable)
+      [targets addObject:target];
   }
 
   return targets;
@@ -304,15 +282,15 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     {
       // Grab the dispatch table for this event (if we have it).
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMutableDictionary *eventDispatchTable = [_controlEventDispatchTable objectForKey:eventKey];
+      NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:eventKey];
       if (!eventDispatchTable)
         return;
 
       void (^removeActionFromTarget)(id <NSCopying> targetKey, SEL action) = ^
-        (id <NSCopying> targetKey, SEL theAction)
+        (id aTarget, SEL theAction)
         {
           // Grab the targetActions for this target.
-          NSMutableArray *targetActions = [eventDispatchTable objectForKey:targetKey];
+          NSMutableArray *targetActions = [eventDispatchTable objectForKey:aTarget];
 
           // Remove action if we have it.
           if (theAction)
@@ -324,7 +302,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
           // If there are no actions left, remove this target entry.
           if ([targetActions count] == 0)
           {
-            [eventDispatchTable removeObjectForKey:targetKey];
+            [eventDispatchTable removeObjectForKey:aTarget];
 
             // If there are no targets for this event anymore, remove it.
             if ([eventDispatchTable count] == 0)
@@ -337,11 +315,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       if (!target)
       {
         // Look at every target, removing target-pairs that have action (or all of its actions).
-        for (id <NSCopying> targetKey in eventDispatchTable)
-          removeActionFromTarget(targetKey, action);
+        for (id aTarget in eventDispatchTable)
+          removeActionFromTarget(aTarget, action);
       }
       else
-        removeActionFromTarget(_ASControlNodeTargetKeyForTarget(target), action);
+        removeActionFromTarget(target, action);
     });
 }
 
@@ -354,13 +332,12 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEvents, ^
     (ASControlNodeEvent controlEvent)
     {
-      NSDictionary *eventDispatchTable = [_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)];
+      NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)];
 
       // For each target interested in this event...
-      for (id <NSCopying> targetKey in eventDispatchTable)
+      for (id target in eventDispatchTable)
       {
-        id target = _ASControlNodeTargetForTargetKey(targetKey);
-        NSArray *targetActions = [eventDispatchTable objectForKey:targetKey];
+        NSArray *targetActions = [eventDispatchTable objectForKey:target];
 
         // Invoke each of the actions on target.
         for (NSString *actionMessage in targetActions)
@@ -385,16 +362,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEvent)
 {
   return [NSNumber numberWithInteger:controlEvent];
-}
-
-id<NSCopying> _ASControlNodeTargetKeyForTarget(id target)
-{
-  return (target ? [NSValue valueWithPointer:(__bridge const void *)(target)] : [NSNull null]);
-}
-
-id _ASControlNodeTargetForTargetKey(id<NSCopying> targetKey)
-{
-  return (targetKey != [NSNull null] ? [(NSValue *)targetKey pointerValue] : nil);
 }
 
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent))
