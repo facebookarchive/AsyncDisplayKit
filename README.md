@@ -110,3 +110,5 @@ See the CONTRIBUTING file for how to help out.
 ## License
 
 AsyncDisplayKit is BSD-licensed.  We also provide an additional patent grant.
+
+The files in the /examples directory are licensed under a separate license as specified in each file.
