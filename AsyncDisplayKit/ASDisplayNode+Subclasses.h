@@ -262,7 +262,17 @@
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event;
 
 
-/** Description */
+/** @name Observing node-related changes */
+
+
+// Called just before the view is added to a superview.
+- (void)willEnterHierarchy;
+
+// Called after the view is removed from the window.
+- (void)didExitHierarchy;
+
+
+/** @name Description */
 
 
 /**

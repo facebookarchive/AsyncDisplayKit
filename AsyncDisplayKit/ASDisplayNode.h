@@ -239,16 +239,6 @@
 @property (nonatomic, readonly, assign) ASDisplayNode *supernode;
 
 
-/** @name Observing node-related changes */
-
-
-// Called just before the view is added to a superview.
-- (void)willEnterHierarchy;
-
-// Called after the view is removed from the window.
-- (void)didExitHierarchy;
-
-
 /** @name Drawing and Updating the View */
 
 
