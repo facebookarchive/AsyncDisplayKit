@@ -214,7 +214,7 @@ static BOOL ASRangeIsValid(NSRange range)
 
   // if this node is in the view hierarchy, moving it will cause a redisplay, so we disable hierarchy notifications.
   // if it *isn't* in the view hierarchy, we need it to receive those notifications to trigger its first display.
-  BOOL nodeIsInHierarchy = (node.view.superview != nil);
+  BOOL nodeIsInHierarchy = node.inWindow;
 
   if (nodeIsInHierarchy)
     ASDisplayNodeDisableHierarchyNotifications(node);
