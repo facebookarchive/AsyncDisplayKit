@@ -24,13 +24,13 @@
 
 @implementation ASTextNodeTestDelegate
 
-- (void)richTextNode:(ASTextNode *)richTextNode tappedLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point textRange:(NSRange)textRange
+- (void)textNode:(ASTextNode *)textNode tappedLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point textRange:(NSRange)textRange
 {
   _tappedLinkAttribute = attribute;
   _tappedLinkValue = value;
 }
 
-- (BOOL)richTextNode:(ASTextNode *)richTextNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value
+- (BOOL)textNode:(ASTextNode *)textNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value
 {
   return YES;
 }

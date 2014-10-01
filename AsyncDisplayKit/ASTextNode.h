@@ -160,44 +160,44 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 @optional
 
 /**
- @abstract Indicates to the delegate that a link was tapped within a rich text node.
- @param richTextNode The ASTextNode containing the link that was tapped.
+ @abstract Indicates to the delegate that a link was tapped within a text node.
+ @param textNode The ASTextNode containing the link that was tapped.
  @param attribute The attribute that was tapped. Will not be nil.
  @param value The value of the tapped attribute.
- @param point The point within richTextNode, in richTextNode's coordinate system, that was tapped.
+ @param point The point within textNode, in textNode's coordinate system, that was tapped.
  */
-- (void)richTextNode:(ASTextNode *)richTextNode tappedLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point textRange:(NSRange)textRange;
+- (void)textNode:(ASTextNode *)textNode tappedLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point textRange:(NSRange)textRange;
 
 /**
- @abstract Indicates to the delegate that a link was tapped within a rich text node.
- @param richTextNode The ASTextNode containing the link that was tapped.
+ @abstract Indicates to the delegate that a link was tapped within a text node.
+ @param textNode The ASTextNode containing the link that was tapped.
  @param attribute The attribute that was tapped. Will not be nil.
  @param value The value of the tapped attribute.
- @param point The point within richTextNode, in richTextNode's coordinate system, that was tapped.
+ @param point The point within textNode, in textNode's coordinate system, that was tapped.
  */
-- (void)richTextNode:(ASTextNode *)richTextNode longPressedLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point textRange:(NSRange)textRange;
+- (void)textNode:(ASTextNode *)textNode longPressedLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point textRange:(NSRange)textRange;
 
-//! @abstract Called when the rich text node's truncation string has been tapped.
-- (void)richTextNodeTappedTruncationToken:(ASTextNode *)richTextNode;
+//! @abstract Called when the text node's truncation string has been tapped.
+- (void)textNodeTappedTruncationToken:(ASTextNode *)textNode;
 
 /**
- @abstract Indicates to the rich text node if an attribute should be considered a link.
- @param richTextNode The rich text node containing the entity attribute.
+ @abstract Indicates to the text node if an attribute should be considered a link.
+ @param textNode The text node containing the entity attribute.
  @param attribute The attribute that was tapped. Will not be nil.
  @param value The value of the tapped attribute.
  @discussion If not implemented, the default value is NO.
  @return YES if the entity attribute should be a link, NO otherwise.
  */
-- (BOOL)richTextNode:(ASTextNode *)richTextNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value;
+- (BOOL)textNode:(ASTextNode *)textNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value;
 
 /**
- @abstract Indicates to the rich text node if an attribute is a valid long-press target
- @param richTextNode The rich text node containing the entity attribute.
+ @abstract Indicates to the text node if an attribute is a valid long-press target
+ @param textNode The text node containing the entity attribute.
  @param attribute The attribute that was tapped. Will not be nil.
  @param value The value of the tapped attribute.
  @discussion If not implemented, the default value is NO.
  @return YES if the entity attribute should be treated as a long-press target, NO otherwise.
  */
-- (BOOL)richTextNode:(ASTextNode *)richTextNode shouldLongPressLinkAttribute:(NSString *)attribute value:(id)value;
+- (BOOL)textNode:(ASTextNode *)textNode shouldLongPressLinkAttribute:(NSString *)attribute value:(id)value;
 
 @end

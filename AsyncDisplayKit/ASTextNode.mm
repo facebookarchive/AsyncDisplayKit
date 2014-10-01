@@ -430,8 +430,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
       // Check if delegate implements optional method, if not assume NO.
       // Should the text be highlightable/touchable?
-      if (![_delegate respondsToSelector:@selector(richTextNode:shouldHighlightLinkAttribute:value:)] ||
-          ![_delegate richTextNode:self shouldHighlightLinkAttribute:name value:value]) {
+      if (![_delegate respondsToSelector:@selector(textNode:shouldHighlightLinkAttribute:value:)] ||
+          ![_delegate textNode:self shouldHighlightLinkAttribute:name value:value]) {
         value = nil;
         name = nil;
       }
@@ -477,8 +477,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     }
 
     // Ask our delegate if a long-press on an attribute is relevant
-    if ([self.delegate respondsToSelector:@selector(richTextNode:shouldLongPressLinkAttribute:value:)]) {
-      return [self.delegate richTextNode:self shouldLongPressLinkAttribute:_highlightedLinkAttributeName value:_highlightedLinkAttributeValue];
+    if ([self.delegate respondsToSelector:@selector(textNode:shouldLongPressLinkAttribute:value:)]) {
+      return [self.delegate textNode:self shouldLongPressLinkAttribute:_highlightedLinkAttributeName value:_highlightedLinkAttributeValue];
     }
 
     // Otherwise we are good to go.
@@ -703,14 +703,14 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 {
   [super touchesEnded:touches withEvent:event];
 
-  if ([self _pendingLinkTap] && [_delegate respondsToSelector:@selector(richTextNode:tappedLinkAttribute:value:atPoint:textRange:)]) {
+  if ([self _pendingLinkTap] && [_delegate respondsToSelector:@selector(textNode:tappedLinkAttribute:value:atPoint:textRange:)]) {
     CGPoint point = [[touches anyObject] locationInView:self.view];
-    [_delegate richTextNode:self tappedLinkAttribute:_highlightedLinkAttributeName value:_highlightedLinkAttributeValue atPoint:point textRange:_highlightRange];
+    [_delegate textNode:self tappedLinkAttribute:_highlightedLinkAttributeName value:_highlightedLinkAttributeValue atPoint:point textRange:_highlightRange];
   }
 
   if ([self _pendingTruncationTap]) {
-    if ([_delegate respondsToSelector:@selector(richTextNodeTappedTruncationToken:)]) {
-      [_delegate richTextNodeTappedTruncationToken:self];
+    if ([_delegate respondsToSelector:@selector(textNodeTappedTruncationToken:)]) {
+      [_delegate textNodeTappedTruncationToken:self];
     }
   }
 
@@ -728,9 +728,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 {
   // Respond to long-press when it begins, not when it ends.
   if (longPressRecognizer.state == UIGestureRecognizerStateBegan) {
-    if ([self.delegate respondsToSelector:@selector(richTextNode:longPressedLinkAttribute:value:atPoint:textRange:)]) {
+    if ([self.delegate respondsToSelector:@selector(textNode:longPressedLinkAttribute:value:atPoint:textRange:)]) {
       CGPoint touchPoint = [_longPressGestureRecognizer locationInView:self.view];
-      [self.delegate richTextNode:self longPressedLinkAttribute:_highlightedLinkAttributeName value:_highlightedLinkAttributeValue atPoint:touchPoint textRange:_highlightRange];
+      [self.delegate textNode:self longPressedLinkAttribute:_highlightedLinkAttributeName value:_highlightedLinkAttributeValue atPoint:touchPoint textRange:_highlightRange];
     }
   }
 }
