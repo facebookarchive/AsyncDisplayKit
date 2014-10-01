@@ -128,6 +128,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     self.opaque = NO;
     self.backgroundColor = [UIColor clearColor];
 
+    self.linkAttributeNames = @[ NSLinkAttributeName ];
+
     // Accessibility
     self.isAccessibilityElement = YES;
     self.accessibilityTraits = UIAccessibilityTraitStaticText;

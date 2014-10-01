@@ -121,7 +121,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 #pragma mark - Actions
 
 /**
- @abstract The set of attribute names to consider links.
+ @abstract The set of attribute names to consider links.  Defaults to NSLinkAttributeName.
  */
 @property (nonatomic, copy) NSArray *linkAttributeNames;
 
