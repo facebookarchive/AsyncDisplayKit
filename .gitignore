@@ -16,3 +16,7 @@ Pods
 
 DerivedData
 build
+
+docs/_site
+docs/htdocs
+docs/.sass-cache
