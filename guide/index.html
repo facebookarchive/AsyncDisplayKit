@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Getting started &mdash; AsyncDisplayKit</title>
+    <meta name="description" content="Smooth asynchronous user interfaces for iOS apps.">
+
+    <link rel="stylesheet" href="/AsyncDisplayKit/css/main.css">
+    <link rel="canonical" href="http://facebook.github.io/AsyncDisplayKit/guide/">
+</head>
+
+
+    <body>
+
+        <header class="site-header">
+
+<div class="wrapper">
+
+    <a class="site-title" href="/AsyncDisplayKit/">AsyncDisplayKit</a>
+
+    <nav class="site-nav">
+    <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+        <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+        <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+        <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+    </a>
+
+    <div class="trigger">
+        <a class="page-link page-link-active" href="/AsyncDisplayKit/guide">guide</a>
+        <a class="page-link" href="https://github.com/facebook/AsyncDisplayKit">github</a>
+    </div>
+    </nav>
+
+</div>
+
+</header>
+
+
+        <div class="page-content">
+            <div class="wrapper">
+                <div class="post">
+
+    <header class="post-header">
+    <h1 class="post-title">
+        Getting started
+        <a class="edit-page-link" href="https://github.com/facebook/AsyncDisplayKit/tree/master/docs/guide/1-introduction.md" target="_blank">[edit]</a>
+    </h1>
+    </header>
+
+    <article class="post-content">
+    <h2>Concepts</h2>
+
+<p>AsyncDisplayKit&#39;s basic unit is the <em>node</em>.  ASDisplayNode is an abstraction
+over UIView, which in turn is an abstraction over CALayer.  Unlike views, which
+can only be used on the main thread, nodes are thread-safe:  you can
+instantiate and configure entire hierarchies of them in parallel on background
+threads.</p>
+
+<p>To keep its user interface smooth and responsive, your app should render at 60
+frames per second &mdash; the gold standard on iOS.  This means the main thread
+has one-sixtieth of a second to push each frame.  That&#39;s 16 milliseconds to
+execute all layout and drawing code!  And because of system overhead, your code
+usually has less than ten milliseconds to run before it causes a frame drop.</p>
+
+<p>AsyncDisplayKit lets you move image decoding, text sizing and rendering, and
+other expensive UI operations off the main thread.  It has other tricks up its
+sleeve too... but we&#39;ll get to that later.  :]</p>
+
+<h2>Nodes as drop-in view replacements</h2>
+
+<p>If you&#39;re used to working with views, you already know how to use nodes.  The
+node API is similar to UIView&#39;s, with some additional conveniences &mdash; for
+example, you can access common CALayer properties directly.  To add a node to
+an existing view or layer hierarchy, use its <code>node.view</code> or <code>node.layer</code>.</p>
+
+<p>AsyncDisplayKit includes several powerful components:</p>
+
+<ul>
+<li> <em>ASDisplayNode</em>.  Counterpart to UIView &mdash; subclass to make custom nodes.</li>
+<li> <em>ASControlNode</em>.  Analogous to UIControl &mdash; subclass to make buttons.</li>
+<li> <em>ASImageNode</em>.  Like UIImageView &mdash; decodes images asynchronously.</li>
+<li> <em>ASTextNode</em>.  Like UITextView &mdash; built on TextKit with full-featured
+rich text support.</li>
+<li> <em>ASTableView</em>.  UITableView subclass that supports nodes.</li>
+</ul>
+
+<p>You can use these as drop-in replacements for their UIKit counterparts.  While
+ASDK works most effectively with fully node-based hierarchies, even replacing
+individual views with nodes can improve performance.</p>
+
+<p>Let&#39;s look at an example.</p>
+
+<p>We&#39;ll start out by using nodes synchronously on the main thread &mdash; the
+same way you already use views.  This code is a familiar sight in custom view
+controller <code>-loadView</code> implementations:</p>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="n">_imageView</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">UIImageView</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+<span class="n">_imageView</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIImage</span> <span class="nl">imageNamed</span><span class="p">:</span><span class="s">@&quot;hello&quot;</span><span class="p">];</span>
+<span class="n">_imageView</span><span class="p">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">CGRectMake</span><span class="p">(</span><span class="mf">10.0f</span><span class="p">,</span> <span class="mf">10.0f</span><span class="p">,</span> <span class="mf">40.0f</span><span class="p">,</span> <span class="mf">40.0f</span><span class="p">);</span>
+<span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">view</span> <span class="nl">addSubview</span><span class="p">:</span><span class="n">_imageView</span><span class="p">];</span>
+</code></pre></div>
+<p>We can replace it with the following node-based code:</p>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="n">_imageNode</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASImageNode</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+<span class="n">_imageNode</span><span class="p">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">lightGrayColor</span><span class="p">];</span>
+<span class="n">_imageNode</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIImage</span> <span class="nl">imageNamed</span><span class="p">:</span><span class="s">@&quot;hello&quot;</span><span class="p">];</span>
+<span class="n">_imageNode</span><span class="p">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">CGRectMake</span><span class="p">(</span><span class="mf">10.0f</span><span class="p">,</span> <span class="mf">10.0f</span><span class="p">,</span> <span class="mf">40.0f</span><span class="p">,</span> <span class="mf">40.0f</span><span class="p">);</span>
+<span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">view</span> <span class="nl">addSubview</span><span class="p">:</span><span class="n">_imageNode</span><span class="p">.</span><span class="n">view</span><span class="p">];</span>
+</code></pre></div>
+<p>This doesn&#39;t take advantage of ASDK&#39;s asynchronous sizing and layout
+functionality, but it&#39;s already an improvement.  The first block of code
+synchronously decodes <code>hello.png</code> on the main thread; the second starts
+decoding the image on a background thread, possibly on a different CPU core.</p>
+
+<p>(Note that we&#39;re setting a placeholder background colour on the node, &quot;holding
+its place&quot; onscreen until the real content appears.  This works well with
+images but less so with text &mdash; people expect text to appear instantly,
+with images loading in after a slight delay.  We&#39;ll discuss techniques to
+improve this later on.)</p>
+
+<h2>Button nodes</h2>
+
+<p>ASImageNode and ASTextNode both inherit from ASControlNode, so you can use them
+as buttons.  Let&#39;s say we&#39;re making a music player and we want to add a
+(non-skeuomorphic, iOS 7-style) shuffle button:</p>
+
+<p><a href="/AsyncDisplayKit/assets/guide/1-shuffle.png"><img src="/AsyncDisplayKit/assets/guide/1-shuffle-crop.png" alt="shuffle"></a></p>
+
+<p>Our view controller will look something like this:</p>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">viewDidLoad</span>
+<span class="p">{</span>
+  <span class="p">[</span><span class="nb">super</span> <span class="n">viewDidLoad</span><span class="p">];</span>
+
+  <span class="c1">// attribute a string</span>
+  <span class="bp">NSDictionary</span> <span class="o">*</span><span class="n">attrs</span> <span class="o">=</span> <span class="l">@{</span>
+                          <span class="nl">NSFontAttributeName</span><span class="p">:</span> <span class="p">[</span><span class="bp">UIFont</span> <span class="nl">systemFontOfSize</span><span class="p">:</span><span class="mf">12.0f</span><span class="p">],</span>
+                          <span class="nl">NSForegroundColorAttributeName</span><span class="p">:</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">redColor</span><span class="p">],</span>
+                          <span class="l">}</span><span class="p">;</span>
+  <span class="bp">NSAttributedString</span> <span class="o">*</span><span class="n">string</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">NSAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString</span><span class="p">:</span><span class="s">@&quot;shuffle&quot;</span>
+                                                               <span class="nl">attributes</span><span class="p">:</span><span class="n">attrs</span><span class="p">];</span>
+
+  <span class="c1">// create the node</span>
+  <span class="n">_shuffleNode</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASTextNode</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+  <span class="n">_shuffleNode</span><span class="p">.</span><span class="n">attributedString</span> <span class="o">=</span> <span class="n">string</span><span class="p">;</span>
+
+  <span class="c1">// configure the button</span>
+  <span class="n">_shuffleNode</span><span class="p">.</span><span class="n">userInteractionEnabled</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span> <span class="c1">// opt into touch handling</span>
+  <span class="p">[</span><span class="n">_shuffleNode</span> <span class="nl">addTarget</span><span class="p">:</span><span class="nb">self</span>
+                   <span class="nl">action</span><span class="p">:</span><span class="k">@selector</span><span class="p">(</span><span class="nl">buttonTapped</span><span class="p">:)</span>
+         <span class="nl">forControlEvents</span><span class="p">:</span><span class="n">ASControlNodeEventTouchUpInside</span><span class="p">];</span>
+
+  <span class="c1">// size all the things</span>
+  <span class="bp">CGRect</span> <span class="n">b</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">view</span><span class="p">.</span><span class="n">bounds</span><span class="p">;</span> <span class="c1">// convenience</span>
+  <span class="bp">CGSize</span> <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="n">_shuffleNode</span> <span class="nl">measure</span><span class="p">:</span><span class="n">CGSizeMake</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">FLT_MAX</span><span class="p">)];</span>
+  <span class="bp">CGPoint</span> <span class="n">origin</span> <span class="o">=</span> <span class="n">CGPointMake</span><span class="p">(</span><span class="n">roundf</span><span class="p">(</span> <span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span> <span class="o">-</span> <span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0f</span> <span class="p">),</span>
+                               <span class="n">roundf</span><span class="p">(</span> <span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0f</span> <span class="p">));</span>
+  <span class="n">_shuffleNode</span><span class="p">.</span><span class="n">frame</span> <span class="o">=</span> <span class="p">(</span><span class="bp">CGRect</span><span class="p">){</span> <span class="n">origin</span><span class="p">,</span> <span class="n">size</span> <span class="p">};</span>
+
+  <span class="c1">// add to our view</span>
+  <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">view</span> <span class="nl">addSubview</span><span class="p">:</span><span class="n">_shuffleNode</span><span class="p">.</span><span class="n">view</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">buttonTapped:</span><span class="p">(</span><span class="kt">id</span><span class="p">)</span><span class="nv">sender</span>
+<span class="p">{</span>
+  <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;tapped!&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This works as you would expect.  Unfortunately, this button is only 14&frac12;
+points tall &mdash; nowhere the standard 44&times;44 minimum tap target size
+&mdash; and it&#39;s very difficult to tap.  We could solve this by subclassing the
+text node and overriding <code>-hitTest:withEvent:</code>.  We could even force the text
+view to have a minimum height during layout.  But wouldn&#39;t it be nice if there
+were a more elegant way?</p>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c">  <span class="c1">// size all the things</span>
+  <span class="cm">/* ... */</span>
+
+  <span class="c1">// make the tap target taller</span>
+  <span class="n">CGFloat</span> <span class="n">extendY</span> <span class="o">=</span> <span class="n">roundf</span><span class="p">(</span> <span class="p">(</span><span class="mf">44.0f</span> <span class="o">-</span> <span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0f</span> <span class="p">);</span>
+  <span class="n">_shuffleNode</span><span class="p">.</span><span class="n">hitTestSlop</span> <span class="o">=</span> <span class="n">UIEdgeInsetsMake</span><span class="p">(</span><span class="o">-</span><span class="n">extendY</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="o">-</span><span class="n">extendY</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">);</span>
+</code></pre></div>
+<p>Et voilà!  <em>Hit-test slops</em> work on all nodes, and are a nice example of what
+this new abstraction enables.</p>
+
+<p>Next up, making your own nodes!</p>
+
+    </article>
+
+    <div class="docs-prevnext">
+        
+        
+        <a class="docs-next" href="/AsyncDisplayKit/guide/2/">next &rarr;</a>
+        
+    </div>
+
+</div>
+
+            </div>
+        </div>
+
+        <footer class="site-footer">
+
+<div class="wrapper">
+    <div class="footer-col-wrapper">
+        <div class="footer-col  footer-col-left">
+            <p class="text">a Facebook &amp; Instagram collaboration &#x2665;</p>
+        </div>
+
+        <div class="footer-col  footer-col-right">
+            <p class="text">
+            &copy; 2014 Facebook Inc (<a href="/AsyncDisplayKit/license/">CC-BY-4.0</a>)
+            </p>
+        </div>
+    </div>
+
+</div>
+
+</footer>
+
+
+    </body>
+
+</html>

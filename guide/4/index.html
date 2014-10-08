@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Making the most of AsyncDisplayKit &mdash; AsyncDisplayKit</title>
+    <meta name="description" content="Smooth asynchronous user interfaces for iOS apps.">
+
+    <link rel="stylesheet" href="/AsyncDisplayKit/css/main.css">
+    <link rel="canonical" href="http://facebook.github.io/AsyncDisplayKit/guide/4/">
+</head>
+
+
+    <body>
+
+        <header class="site-header">
+
+<div class="wrapper">
+
+    <a class="site-title" href="/AsyncDisplayKit/">AsyncDisplayKit</a>
+
+    <nav class="site-nav">
+    <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+        <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+        <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+        <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+    </a>
+
+    <div class="trigger">
+        <a class="page-link page-link-active" href="/AsyncDisplayKit/guide">guide</a>
+        <a class="page-link" href="https://github.com/facebook/AsyncDisplayKit">github</a>
+    </div>
+    </nav>
+
+</div>
+
+</header>
+
+
+        <div class="page-content">
+            <div class="wrapper">
+                <div class="post">
+
+    <header class="post-header">
+    <h1 class="post-title">
+        Making the most of AsyncDisplayKit
+        <a class="edit-page-link" href="https://github.com/facebook/AsyncDisplayKit/tree/master/docs/guide/4-making-the-most-of-asdk.md" target="_blank">[edit]</a>
+    </h1>
+    </header>
+
+    <article class="post-content">
+    <h2>A note on optimisation</h2>
+
+<p>AsyncDisplayKit is powerful and flexible, but it is not a panacea.  If your app
+has a complex image- or text-heavy user interface, ASDK can definitely help
+improve its performance &mdash; but if you&#39;re blocking the main thread on
+network requests, you should consider rearchitecting a few things first.  :]</p>
+
+<p>So why is it worthwhile to change the way we do view layout and rendering,
+given that UIKit has always been locked to the main thread and performant iOS
+apps have been shipping since iPhone&#39;s launch?</p>
+
+<h3>Modern animations</h3>
+
+<p>Until iOS 7, static animations (à la <code>+[UIView
+animateWithDuration:animations:]</code>) were the standard.  The post-skeuomorphism
+redesign brought with it highly-interactive, physics-based animations, with
+springs joining the ranks of constant animation functions like
+<code>UIViewAnimationOptionCurveEaseInOut</code>.</p>
+
+<p>Classic animations aren&#39;t actually executed in your app.  They&#39;re executed
+out-of-process, in the high-priority Core Animation render server.  Thanks to
+pre-emptive multitasking, an app can block its main thread continuously without
+causing the animation to drop a single frame.</p>
+
+<p>Critically, dynamic animations can&#39;t be offloaded the same way, and both
+<a href="https://github.com/facebook/pop">pop</a> and UIKit Dynamics execute physics
+simulations on your app&#39;s main thread.  This is because executing arbitrary
+code in the render server would introduce unacceptable latency, even if it
+could be done securely.</p>
+
+<p>Physics-based animations are often interactive, letting you start an animation
+and interrupt it before it completes.  Paper lets you fling objects across the
+screen and catch them before they land, or grab a view that&#39;s being pulled by a
+spring and tear it off.  This requires processing touch events and updating
+animation targets in realtime &mdash; even short delays for inter-process
+communication would shatter the illusion.</p>
+
+<p>(Fun fact:  Inertial scrolling is also a physics animation!  UIScrollView has
+always implemented its animations on the main thread, which is why stuttery
+scrolling is the hallmark of a slow app.)</p>
+
+<h3>The main-thread bottleneck</h3>
+
+<p>Physics animations aren&#39;t the only thing that need to happen on the main
+thread.  The main thread&#39;s <a href="https://developer.apple.com/library/ios/documentation/cocoa/conceptual/multithreading/runloopmanagement/runloopmanagement.html">run
+loop</a>
+is responsible for handling touch events and initiating drawing operations
+&mdash; and with UIKit in the mix, it also has to render text, decode images,
+and do any other custom drawing (e.g., using Core Graphics).</p>
+
+<p>If an iteration of the main thread&#39;s run loop takes too long, it will drop an
+animation frame and may fail to handle touch events in time.  Each iteration of
+the run loop must complete within 16ms in order to drive 60fps animations, and
+your own code typically has less than 10ms to execute.  This means that the
+best way to keep your app smooth and responsive is to do as little work on the
+main thread as possible.</p>
+
+<p>What&#39;s more, the main thread only executes on one core!  Single-threaded view
+hierarchies can&#39;t take advantage of the multicore CPUs in all modern iOS
+devices.  This is important for more than just performance reasons &mdash; it&#39;s
+also critical for battery life.  Running the CPU on all cores for a short time
+is preferable to running one core for an extended amount of time:  if the
+processor can <em>race to sleep</em> by finishing its work and idling faster, it can
+spend more time in a low-power mode, improving battery life.</p>
+
+<h2>When to go asynchronous</h2>
+
+<p>AsyncDisplayKit really shines when used fully asynchronously, shifting both
+measurement and rendering passes off the main thread and onto multiple cores.
+This requires a completely node-based hierarchy.  Just as degrading from
+UIViews to CALayers disables view-specific functionality like touch handling
+from that point on, degrading from nodes to views disables async behaviour.</p>
+
+<p>You don&#39;t, however, need to convert your app&#39;s entire view hierarchy to nodes.
+In fact, you shouldn&#39;t!  Asynchronously bringing up your app&#39;s core UI, like
+navigation elements or tab bars, would be a very confusing experience.  Those
+elements of your apps can still be nodes, but should be fully synchronous to
+guarantee a fully-usable interface as quickly as possible.  (This is why
+UIWindow has no node equivalent.)</p>
+
+<p>There are two key situations where asynchronous hierarchies excel:</p>
+
+<ol>
+<li><p><em>Parallelisation</em>.  Measuring and rendering UITableViewCells (or your app&#39;s
+equivalent, e.g., story cards in Paper) are embarrassingly parallel
+problems.  Table cells typically have a fixed width and variable height
+determined by their contents &mdash; the argument to <code>-measure:</code> for one
+cell doesn&#39;t depend on any other cells&#39; calculations, so we can enqueue an
+arbitrary number of cell measurement passes at once.</p></li>
+<li><p><em>Preloading</em>.  An app with five tabs should synchronously load the first
+one so content is ready to go as quickly as possible.  Once this is
+complete and the CPU is idle, why not asynchronously prepare the other tabs
+so the user doesn&#39;t have to wait?  This is inconvenient with views, but
+very easy with nodes.</p></li>
+</ol>
+
+<p>Paper&#39;s asynchronous rendering starts at the story strip.  You should profile
+your app and watch how people use it in the wild to decide what combination of
+synchrony and asynchrony yields the best user experience.</p>
+
+<h2>Additional optimisations</h2>
+
+<p>Complex hierarchies &mdash; even when rendered asynchronously &mdash; can
+impose a cost because of the sheer number of views involved.  Working around
+this can be painful, but AsyncDisplayKit makes it easy!</p>
+
+<ul>
+<li><p><em>Layer-backing</em>.  In some cases, you can substantially improve your app&#39;s
+performance by using layers instead of views.  Manually converting
+view-based code to layers is laborious due to the difference in APIs.
+Worse, if at some point you need to enable touch handling or other
+view-specific functionality, you have to manually convert everything back
+(and risk regressions!).</p>
+
+<p>With nodes, converting an entire subtree from views to layers is as simple
+as...</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">rootNode.layerBacked = YES;
+</code></pre></div>
+<p>...and if you need to go back, it&#39;s as simple as deleting one line.  We
+recommend enabling layer-backing as a matter of course in any custom node
+that doesn&#39;t need touch handling.</p></li>
+<li><p><em>Precompositing</em>.  Flattening an entire view hierarchy into a single layer
+also improves performance, but comes with a hit to maintainability and
+hierarchy-based reasoning.  Nodes can do this for you too!</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">rootNode.shouldRasterizeDescendants = YES;
+</code></pre></div>
+<p>...will cause the entire node hierarchy from that point on to be rendered
+into one layer.</p></li>
+</ul>
+
+<p>Next up:  AsyncDisplayKit, under the hood.</p>
+
+    </article>
+
+    <div class="docs-prevnext">
+        
+        <a class="docs-prev" href="/AsyncDisplayKit/guide/3/">&larr; prev</a>
+        
+        
+        <a class="docs-next" href="/AsyncDisplayKit/guide/5/">next &rarr;</a>
+        
+    </div>
+
+</div>
+
+            </div>
+        </div>
+
+        <footer class="site-footer">
+
+<div class="wrapper">
+    <div class="footer-col-wrapper">
+        <div class="footer-col  footer-col-left">
+            <p class="text">a Facebook &amp; Instagram collaboration &#x2665;</p>
+        </div>
+
+        <div class="footer-col  footer-col-right">
+            <p class="text">
+            &copy; 2014 Facebook Inc (<a href="/AsyncDisplayKit/license/">CC-BY-4.0</a>)
+            </p>
+        </div>
+    </div>
+
+</div>
+
+</footer>
+
+
+    </body>
+
+</html>
