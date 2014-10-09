@@ -32,7 +32,7 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 @protected
   ASDN::RecursiveMutex _propertyLock;  // Protects access to the _view, _pendingViewState, _subnodes, _supernode, _renderingSubnodes, and other properties which are accessed from multiple threads.
 
-  ASDisplayNode *_supernode;
+  ASDisplayNode * __weak _supernode;
 
   ASSentinel *_displaySentinel;
   ASSentinel *_replaceAsyncSentinel;

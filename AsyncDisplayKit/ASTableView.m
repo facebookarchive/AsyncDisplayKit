@@ -47,8 +47,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 @end
 
 @implementation _ASTableViewProxy {
-  id<NSObject> _target;
-  ASTableView *_interceptor;
+  id<NSObject> __weak _target;
+  ASTableView * __weak _interceptor;
 }
 
 - (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASTableView *)interceptor
@@ -140,7 +140,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)setDelegate:(id<UITableViewDelegate>)delegate
 {
-  ASDisplayNodeAssert(NO, @"ASTableView uses asyncDelegate, not UITableView's delegate property.");
+  // Our UIScrollView superclass sets its delegate to nil on dealloc. Only assert if we get a non-nil value here.
+  ASDisplayNodeAssert(delegate == nil, @"ASTableView uses asyncDelegate, not UITableView's delegate property.");
 }
 
 - (void)setAsyncDataSource:(id<ASTableViewDataSource>)asyncDataSource

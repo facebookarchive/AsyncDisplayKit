@@ -783,6 +783,32 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [v release];
 }
 
+- (void)testAddingSubnodeDoesNotCreateRetainCycle
+{
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+
+  __block BOOL didDealloc = NO;
+  node.willDeallocBlock = ^(ASDisplayNode *n){
+    didDealloc = YES;
+  };
+
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+
+  // verify initial
+  XCTAssertTrue(1 == node.retainCount, @"unexpected retain count:%tu", node.retainCount);
+  XCTAssertTrue(1 == subnode.retainCount, @"unexpected retain count:%tu", subnode.retainCount);
+
+  [node addSubnode:subnode];
+  XCTAssertTrue(2 == subnode.retainCount, @"node should retain subnode when added. retain count:%tu", node.retainCount);
+  XCTAssertTrue(1 == node.retainCount, @"subnode should not retain node when added. retain count:%tu", node.retainCount);
+
+  [subnode release];
+  XCTAssertTrue(1 == subnode.retainCount, @"subnode should be retained by node. retain count:%tu", subnode.retainCount);
+
+  [node release];
+  XCTAssertTrue(didDealloc, @"unexpected node lifetime:%@", node);
+}
+
 - (void)testMainThreadDealloc
 {
   __block BOOL didDealloc = NO;

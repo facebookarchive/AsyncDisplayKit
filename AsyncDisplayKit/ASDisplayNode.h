@@ -236,7 +236,7 @@
 /** 
  * @abstract The receiver's supernode.
  */
-@property (nonatomic, readonly, assign) ASDisplayNode *supernode;
+@property (nonatomic, readonly, weak) ASDisplayNode *supernode;
 
 
 /** @name Drawing and Updating the View */
