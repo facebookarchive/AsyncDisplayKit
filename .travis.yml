@@ -1,0 +1,9 @@
+language: objective-c
+before_install:
+  - gem update cocoapods
+xcode_workspace: AsyncDisplayKit.xcworkspace
+xcode_scheme: AsyncDisplayKit
+xcode_sdk:
+  - iphonesimulator7.0
+  - iphonesimulator7.1
+  - iphonesimulator8.0
