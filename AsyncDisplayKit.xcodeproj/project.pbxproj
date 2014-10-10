@@ -120,6 +120,7 @@
 		058D0A84195D060300B7D73C /* ASDisplayNodeExtraIvars.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D0A45195D058D00B7D73C /* ASDisplayNodeExtraIvars.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05A6D05A19D0EB64002DD95E /* ASDealloc2MainObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 05A6D05819D0EB64002DD95E /* ASDealloc2MainObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05A6D05B19D0EB64002DD95E /* ASDealloc2MainObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 05A6D05919D0EB64002DD95E /* ASDealloc2MainObject.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		3C9C128519E616EF00E942A0 /* ASTableViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C9C128419E616EF00E942A0 /* ASTableViewTests.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
 /* End PBXBuildFile section */
@@ -238,6 +239,7 @@
 		058D0A45195D058D00B7D73C /* ASDisplayNodeExtraIvars.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDisplayNodeExtraIvars.h; sourceTree = "<group>"; };
 		05A6D05819D0EB64002DD95E /* ASDealloc2MainObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASDealloc2MainObject.h; path = ../Details/ASDealloc2MainObject.h; sourceTree = "<group>"; };
 		05A6D05919D0EB64002DD95E /* ASDealloc2MainObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASDealloc2MainObject.m; path = ../Details/ASDealloc2MainObject.m; sourceTree = "<group>"; };
+		3C9C128419E616EF00E942A0 /* ASTableViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableViewTests.m; sourceTree = "<group>"; };
 		6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AsyncDisplayKit.h; sourceTree = "<group>"; };
 		EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AsyncDisplayKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAD7085290B84183BD13BA1A /* Pods-AsyncDisplayKitTests.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.xcconfig"; path = "Pods/Pods-AsyncDisplayKitTests.xcconfig"; sourceTree = "<group>"; };
@@ -344,6 +346,7 @@
 				058D0A30195D057000B7D73C /* ASDisplayNodeTestsHelper.h */,
 				058D0A31195D057000B7D73C /* ASDisplayNodeTestsHelper.m */,
 				058D0A32195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m */,
+				3C9C128419E616EF00E942A0 /* ASTableViewTests.m */,
 				058D0A33195D057000B7D73C /* ASTextNodeCoreTextAdditionsTests.m */,
 				058D0A34195D057000B7D73C /* ASTextNodeRendererTests.m */,
 				058D0A35195D057000B7D73C /* ASTextNodeShadowerTests.m */,
@@ -688,6 +691,7 @@
 				058D0A39195D057000B7D73C /* ASDisplayNodeAppearanceTests.m in Sources */,
 				058D0A41195D057000B7D73C /* ASTextNodeWordKernerTests.mm in Sources */,
 				058D0A40195D057000B7D73C /* ASTextNodeTests.m in Sources */,
+				3C9C128519E616EF00E942A0 /* ASTableViewTests.m in Sources */,
 				058D0A38195D057000B7D73C /* ASDisplayLayerTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
