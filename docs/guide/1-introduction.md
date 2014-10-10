@@ -128,11 +128,11 @@ Our view controller will look something like this:
 ```
 
 This works as you would expect.  Unfortunately, this button is only 14&frac12;
-points tall &mdash; nowhere the standard 44&times;44 minimum tap target size
-&mdash; and it's very difficult to tap.  We could solve this by subclassing the
-text node and overriding `-hitTest:withEvent:`.  We could even force the text
-view to have a minimum height during layout.  But wouldn't it be nice if there
-were a more elegant way?
+points tall &mdash; nowhere near the standard 44&times;44 minimum tap target
+size &mdash; and it's very difficult to tap.  We could solve this by
+subclassing the text node and overriding `-hitTest:withEvent:`.  We could even
+force the text view to have a minimum height during layout.  But wouldn't it be
+nice if there were a more elegant way?
 
 ```objective-c
   // size all the things

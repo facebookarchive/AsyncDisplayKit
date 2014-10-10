@@ -30,8 +30,13 @@ if you're using Swift:
 ```
 
 AsyncDisplayKit Nodes are a thread-safe abstraction layer over UIViews and
-CALayers.  You can construct entire node hierarchies in parallel, or
-instantiate and size a single node on a background thread:
+CALayers:
+
+![logo]({{ site.baseurl }}/assets/node-view-layer.png)
+
+You can construct entire node hierarchies in parallel, or instantiate and size
+a single node on a background thread &mdash; for example, you could do
+something like this in a UIViewController:
 
 ```objective-c
 dispatch_async(_backgroundQueue, ^{
@@ -60,6 +65,6 @@ blocking the main thread.
 ### Learn more
 
 * Read the [Getting Started guide]({{ site.baseurl }}/guide)
-* Check out [sample projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples)
+* Get the [sample projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples)
 * Browse the [API reference]({{ site.baseurl }}/appledoc)
 * Watch the [NSLondon talk](http://www.youtube.com/watch?v=h4QDbgB7RLo)
