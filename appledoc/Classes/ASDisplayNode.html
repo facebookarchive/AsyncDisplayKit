@@ -189,9 +189,9 @@
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Converting Between View Coordinate Systems">Converting Between View Coordinate Systems</a></span></li>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_UIViewBridge Methods">UIViewBridge Methods</a></span></li>
-	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_ASDisplayNodeSubclasses Methods">ASDisplayNodeSubclasses Methods</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_UIViewBridge Methods">UIViewBridge Methods</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Debugging Methods">Debugging Methods</a></span></li>
 	
@@ -372,6 +372,24 @@ necessary declarations and conveniences.</p>
 
 <p>Commons reasons to subclass includes making a <code>UIView</code> property available and receiving a callback after async
 display.</p>
+
+<p>The subclass header <em>ASDisplayNode+Subclasses</em> defines the following methods that either must or can be overriden by
+subclasses of ASDisplayNode.</p>
+
+<p>These methods should never be called directly by other classes.</p>
+
+<h2>Drawing</h2>
+
+<p>Implement one of +displayAsyncLayer:parameters:isCancelled: or +drawRect:withParameters:isCancelled: to provide
+drawing for your node.</p>
+
+<p>Use <a href="#//api/name/drawParametersForAsyncLayer:">drawParametersForAsyncLayer:</a> to copy any properties that are involved in drawing into an immutable object for
+use on the display queue. The display and drawRect implementations <em>MUST</em> be thread-safe, as they can be called on
+the displayQueue (asynchronously) or the main thread (synchronously/<a href="#//api/name/displayImmediately">displayImmediately</a>).</p>
+
+<p>Class methods that require passing in copies of the values are used to minimize the need for locking around instance
+variable access, and the possibility of the a<a href="#//api/name/synchronous">synchronous</a> display pass grabbing an inconsistent state across multiple
+variables.</p>
 
 <h2>UIView bridge</h2>
 
@@ -636,26 +654,6 @@ or <a href="#//api/name/layer">layer</a> property is accessed).</p>
 						</ul>
 						
 						
-						<a title="UIViewBridge Methods" name="task_UIViewBridge Methods"></a>
-						<h3 class="subsubtitle task-title">UIViewBridge Methods</h3>
-
-						<ul class="task-list">
-							<li>
-	<span class="tooltip">
-		<code><a href="#//api/name/backgroundColor">&nbsp;&nbsp;backgroundColor</a></code>
-	</span>
-	<span class="task-item-suffix">property</span>
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/contentMode">&nbsp;&nbsp;contentMode</a></code>
-	</span>
-	<span class="task-item-suffix">property</span>
-	
-</li>
-						</ul>
-						
-						
 						<a title="ASDisplayNodeSubclasses Methods" name="task_ASDisplayNodeSubclasses Methods"></a>
 						<h3 class="subsubtitle task-title">ASDisplayNodeSubclasses Methods</h3>
 
@@ -785,6 +783,26 @@ or <a href="#//api/name/layer">layer</a> property is accessed).</p>
 		<code><a href="#//api/name/descriptionForRecursiveDescription">&ndash;&nbsp;descriptionForRecursiveDescription</a></code>
 	</span>
 	
+	
+</li>
+						</ul>
+						
+						
+						<a title="UIViewBridge Methods" name="task_UIViewBridge Methods"></a>
+						<h3 class="subsubtitle task-title">UIViewBridge Methods</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/backgroundColor">&nbsp;&nbsp;backgroundColor</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/contentMode">&nbsp;&nbsp;contentMode</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
 	
 </li>
 						</ul>
@@ -1012,8 +1030,8 @@ contentMode for your content while it&rsquo;s being re-rendered.</p>
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
 		<p>Use <a href="#//api/name/setNeedsDisplayAtScale:">setNeedsDisplayAtScale:</a> to set a value and then after display, the display node will set the layer&rsquo;s
-contentsScale. This is to prevent jumps when re-rasterizing at a different contentsScale.
-Read this property if you need to know the future contentsScale of your <a href="#//api/name/layer">layer</a>, eg in drawParameters.</p>
+<a href="#//api/name/contentsScale">contentsScale</a>. This is to prevent jumps when re-rasterizing at a different <a href="#//api/name/contentsScale">contentsScale</a>.
+Read this property if you need to know the future <a href="#//api/name/contentsScale">contentsScale</a> of your <a href="#//api/name/layer">layer</a>, eg in drawParameters.</p>
 	</div>
 	
 	
@@ -1444,7 +1462,7 @@ progress.</p>
 	
     
 
-	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign) ASDisplayNode *supernode</code></div>
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, weak) ASDisplayNode *supernode</code></div>
 
     
 	
@@ -1567,7 +1585,7 @@ well.</p></div>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>@summary Delegate override to provide new <a href="#//api/name/layer">layer</a> contents as a UIImage.</p>
+		<p>@summary Delegate override to provide new <a href="#//api/name/layer">layer</a> <a href="#//api/name/contents">contents</a> as a UIImage.</p>
 	</div>		
 	
     
@@ -1597,7 +1615,7 @@ unnecessary work. A return value of YES means cancel drawing and return.</p></dd
 	
 	<div class="method-subsection return">
 		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>A UIImage with contents that are ready to display on the main thread. Make sure that the image is already
+		<p>A UIImage with <a href="#//api/name/contents">contents</a> that are ready to display on the main thread. Make sure that the image is already
 decoded before returning it here.</p>
 	</div>
 	
@@ -1631,7 +1649,7 @@ decoded before returning it here.</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>@summary Delegate method to draw <a href="#//api/name/layer">layer</a> contents into a CGBitmapContext. The current UIGraphics context will be set
+		<p>@summary Delegate method to draw <a href="#//api/name/layer">layer</a> <a href="#//api/name/contents">contents</a> into a CGBitmapContext. The current UIGraphics context will be set
 to an appropriate context.</p>
 	</div>		
 	
@@ -1653,7 +1671,7 @@ to an appropriate context.</p>
 		<dl class="argument-def parameter-def">
 			<dt><em>isRasterizing</em></dt>
 			<dd><p>YES if the <a href="#//api/name/layer">layer</a> is being rasterized into another <a href="#//api/name/layer">layer</a>, in which case drawRect: probably wants
-to avoid doing things like filling its bounds with a zero-alpha color to clear the backing store.</p></dd>
+to avoid doing things like filling its <a href="#//api/name/bounds">bounds</a> with a zero<a href="#//api/name/alpha">alpha</a> color to clear the backing store.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
@@ -2367,7 +2385,7 @@ completed.</p>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>point</em></dt>
-			<dd><p>A point specified in the node&rsquo;s local coordinate system (bounds).</p></dd>
+			<dd><p>A point specified in the node&rsquo;s local coordinate system (<a href="#//api/name/bounds">bounds</a>).</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
@@ -2765,7 +2783,7 @@ even if there are other non-displaynode views.</p>
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
 		<p>Subclasses should call this method to invalidate the previously measured and cached size for the display
-node, when the contents of the node change in such a way as to require measuring it again.</p>
+node, when the <a href="#//api/name/contents">contents</a> of the node change in such a way as to require measuring it again.</p>
 	</div>
 	
 	
@@ -3197,7 +3215,7 @@ If replacementSubnode is nil, this method will throw an exception</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>Marks the receiver&rsquo;s bounds as needing to be redrawn, with a scale value.</p>
+		<p>Marks the receiver&rsquo;s <a href="#//api/name/bounds">bounds</a> as needing to be redrawn, with a scale value.</p>
 	</div>		
 	
     
@@ -3214,7 +3232,7 @@ If replacementSubnode is nil, this method will throw an exception</p>
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>Subclasses should override this if they don&rsquo;t want their contentsScale changed.</p><div class="note"><p><strong>Note:</strong> This changes an internal property.</p></div>
+		<p>Subclasses should override this if they don&rsquo;t want their <a href="#//api/name/contentsScale">contentsScale</a> changed.</p><div class="note"><p><strong>Note:</strong> This changes an internal property.</p></div>
 	</div>
 	
 	
@@ -3462,7 +3480,7 @@ If replacementSubnode is nil, this method will throw an exception</p>
 				<div id="footer">
 					<hr />
 					<div class="footer-copyright">
-						<p><span class="copyright">&copy; 2014 Facebook. All rights reserved. (Last updated: 2014-10-07)</span><br />
+						<p><span class="copyright">&copy; 2014 Facebook. All rights reserved. (Last updated: 2014-10-10)</span><br />
 						
 						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2 (build 963)</a>.</span></p>
 						

@@ -70,8 +70,13 @@ if you&#39;re using Swift:</p>
 <div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="cp">#import &lt;AsyncDisplayKit/AsyncDisplayKit.h&gt;</span>
 </code></pre></div>
 <p>AsyncDisplayKit Nodes are a thread-safe abstraction layer over UIViews and
-CALayers.  You can construct entire node hierarchies in parallel, or
-instantiate and size a single node on a background thread:</p>
+CALayers:</p>
+
+<p><img src="/AsyncDisplayKit/assets/node-view-layer.png" alt="logo"></p>
+
+<p>You can construct entire node hierarchies in parallel, or instantiate and size
+a single node on a background thread &mdash; for example, you could do
+something like this in a UIViewController:</p>
 <div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="n">dispatch_async</span><span class="p">(</span><span class="n">_backgroundQueue</span><span class="p">,</span> <span class="o">^</span><span class="p">{</span>
   <span class="n">ASTextNode</span> <span class="o">*</span><span class="n">node</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASTextNode</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
   <span class="n">node</span><span class="p">.</span><span class="n">attributedString</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">NSAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString</span><span class="p">:</span><span class="s">@&quot;hello!&quot;</span>
@@ -98,7 +103,7 @@ blocking the main thread.</p>
 
 <ul>
 <li>Read the <a href="/AsyncDisplayKit/guide">Getting Started guide</a></li>
-<li>Check out <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">sample projects</a></li>
+<li>Get the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">sample projects</a></li>
 <li>Browse the <a href="/AsyncDisplayKit/appledoc">API reference</a></li>
 <li>Watch the <a href="http://www.youtube.com/watch?v=h4QDbgB7RLo">NSLondon talk</a></li>
 </ul>

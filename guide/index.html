@@ -170,11 +170,11 @@ as buttons.  Let&#39;s say we&#39;re making a music player and we want to add a
 <span class="p">}</span>
 </code></pre></div>
 <p>This works as you would expect.  Unfortunately, this button is only 14&frac12;
-points tall &mdash; nowhere the standard 44&times;44 minimum tap target size
-&mdash; and it&#39;s very difficult to tap.  We could solve this by subclassing the
-text node and overriding <code>-hitTest:withEvent:</code>.  We could even force the text
-view to have a minimum height during layout.  But wouldn&#39;t it be nice if there
-were a more elegant way?</p>
+points tall &mdash; nowhere near the standard 44&times;44 minimum tap target
+size &mdash; and it&#39;s very difficult to tap.  We could solve this by
+subclassing the text node and overriding <code>-hitTest:withEvent:</code>.  We could even
+force the text view to have a minimum height during layout.  But wouldn&#39;t it be
+nice if there were a more elegant way?</p>
 <div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c">  <span class="c1">// size all the things</span>
   <span class="cm">/* ... */</span>
 
