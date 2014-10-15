@@ -47,6 +47,22 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
   return (superclassIMP != subclassIMP);
 }
 
+CGFloat ASDisplayNodeScreenScale()
+{
+  static CGFloat screenScale = 0.0;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    if ([NSThread isMainThread]) {
+      screenScale = [[UIScreen mainScreen] scale];
+    } else {
+      dispatch_sync(dispatch_get_main_queue(), ^{
+        screenScale = [[UIScreen mainScreen] scale];
+      });
+    }
+  });
+  return screenScale;
+}
+
 + (void)initialize
 {
   if (self == [ASDisplayNode class]) {
@@ -74,14 +90,44 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
   return [_ASDisplayLayer class];
 }
 
-#pragma mark - NSObject Overrides
+#pragma mark - Lifecycle
+
+// Avoid recursive loops if a subclass implements an init method that calls -initWith*Class:
+- (void)_initializeInstance
+{
+  _contentsScaleForDisplay = ASDisplayNodeScreenScale();
+  
+  _displaySentinel = [[ASSentinel alloc] init];
+  
+  _flags.inWindow = NO;
+  _flags.displaysAsynchronously = YES;
+  
+  // As an optimization, it may be worth a caching system that performs these checks once per class in +initialize (see above).
+  _flags.implementsDisplay = [[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] || [self.class respondsToSelector:@selector(displayWithParameters:isCancelled:)];
+  
+  _flags.hasClassDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
+  _flags.hasWillDisplayAsyncLayer = ([self respondsToSelector:@selector(willDisplayAsyncLayer:)] ? 1 : 0);
+  _flags.hasDrawParametersForAsyncLayer = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
+}
+
+- (id)init
+{
+  if (!(self = [super init]))
+    return nil;
+  
+  [self _initializeInstance];
+  
+  return self;
+}
 
 - (id)initWithViewClass:(Class)viewClass
 {
-  if (!(self = [self init]))
+  if (!(self = [super init]))
     return nil;
 
   ASDisplayNodeAssert([viewClass isSubclassOfClass:[UIView class]], @"should initialize with a subclass of UIView");
+  
+  [self _initializeInstance];
   _viewClass = viewClass;
   _flags.isSynchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
 
@@ -90,36 +136,15 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 
 - (id)initWithLayerClass:(Class)layerClass
 {
-  if (!(self = [self init]))
+  if (!(self = [super init]))
     return nil;
-
+  
   ASDisplayNodeAssert([layerClass isSubclassOfClass:[CALayer class]], @"should initialize with a subclass of CALayer");
 
+  [self _initializeInstance];
   _layerClass = layerClass;
   _flags.isSynchronous = ![layerClass isSubclassOfClass:[_ASDisplayLayer class]];
-
   _flags.isLayerBacked = YES;
-
-  return self;
-}
-
-- (id)init
-{
-  self = [super init];
-  if (!self) return nil;
-
-  _contentsScaleForDisplay = [[UIScreen mainScreen] scale];
-
-  _displaySentinel = [[ASSentinel alloc] init];
-
-  _flags.inWindow = NO;
-  _flags.displaysAsynchronously = YES;
-
-  _flags.implementsDisplay = [[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] || [self.class respondsToSelector:@selector(displayWithParameters:isCancelled:)];
-
-  _flags.hasWillDisplayAsyncLayer = ([self respondsToSelector:@selector(willDisplayAsyncLayer:)] ? 1 : 0);
-  _flags.hasClassDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
-  _flags.hasDrawParametersForAsyncLayer = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
 
   return self;
 }
@@ -142,9 +167,8 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 
   _view = nil;
   _subnodes = nil;
-  if (_flags.isLayerBacked) {
+  if (_flags.isLayerBacked)
     _layer.delegate = nil;
-  }
   _layer = nil;
 
   [self __setSupernode:nil];

@@ -65,6 +65,22 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
   return self;
 }
 
+- (void)dealloc
+{
+  [self teardownAllNodes];
+}
+
+- (void)teardownAllNodes
+{
+  for (ASCellNode *node in _nodes.allValues) {
+    [node removeFromSupernode];
+    [node.view removeFromSuperview];
+  }
+  [_nodes removeAllObjects];
+  _nodes = nil;
+
+}
+
 + (dispatch_queue_t)sizingQueue
 {
   static dispatch_queue_t sizingQueue = NULL;
@@ -255,16 +271,7 @@ static BOOL ASRangeIsValid(NSRange range)
   /*
    * teardown
    */
-  for (ASCellNode *node in _nodes.objectEnumerator) {
-    [node removeFromSupernode];
-    [node.view removeFromSuperview];
-  }
-  [_nodes removeAllObjects];
-  _nodes = nil;
-
-  for (UIView *view in [[ASRangeController workingView] subviews]) {
-    [view removeFromSuperview];
-  }
+  [self teardownAllNodes];
 
   /*
    * setup

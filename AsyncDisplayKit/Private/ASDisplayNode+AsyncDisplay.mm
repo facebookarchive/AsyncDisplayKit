@@ -23,7 +23,9 @@
 #if ASDISPLAYNODE_DELAY_DISPLAY
 static long __ASDisplayLayerMaxConcurrentDisplayCount = 1;
 #else
-static long __ASDisplayLayerMaxConcurrentDisplayCount = 1024; // essentially no limit until we determine a good value.
+// Basing this off of CPU core count would make sense, but first some experimentation should be done to understand
+// if having more ready-to-run work keeps the CPU clock up (or other interesting scheduler effects).
+static long __ASDisplayLayerMaxConcurrentDisplayCount = 8;
 #endif
 static dispatch_semaphore_t __ASDisplayLayerConcurrentDisplaySemaphore;
 

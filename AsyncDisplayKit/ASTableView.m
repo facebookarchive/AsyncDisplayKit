@@ -355,10 +355,10 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (newSectionCount > sectionCount) {
     NSRange range = NSMakeRange(sectionCount, newSectionCount - sectionCount);
     NSIndexSet *sections = [NSIndexSet indexSetWithIndexesInRange:range];
-    [super insertSections:sections withRowAnimation:UITableViewRowAnimationAutomatic];
+    [super insertSections:sections withRowAnimation:UITableViewRowAnimationNone];
   }
 
-  [super insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
+  [super insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
 
   [super endUpdates];
 }
