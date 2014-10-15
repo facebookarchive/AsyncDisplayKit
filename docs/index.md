@@ -18,7 +18,7 @@ it's just as powerful with UIKit Dynamics and conventional app designs.
 ASDK is available on [CocoaPods](http://cocoapods.org).  Add the following to your Podfile:
 
 ```ruby
-pod 'AsyncDisplayKit', '~> 1.0'
+pod 'AsyncDisplayKit'
 ```
 
 Import the framework header, or create an [Objective-C bridging
