@@ -11,6 +11,8 @@
 		050E7C7619D22E19004363C2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050E7C7519D22E19004363C2 /* ViewController.swift */; };
 		05DDD8DB19D2336300013C30 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 05DDD8DA19D2336300013C30 /* Default-568h@2x.png */; };
 		4690009EF79C47BBA8FDBAD4 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2ACC614D420B4E90B7EE3BCE /* libPods.a */; };
+		6C5053DB19EE266A00E385DE /* Default-667h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C5053D919EE266A00E385DE /* Default-667h@2x.png */; };
+		6C5053DC19EE266A00E385DE /* Default-736h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C5053DA19EE266A00E385DE /* Default-736h@3x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +23,8 @@
 		05DDD8DA19D2336300013C30 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Default-568h@2x.png"; sourceTree = "<group>"; };
 		05DDD8DC19D2341D00013C30 /* AsyncDisplayKit-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AsyncDisplayKit-Bridging-Header.h"; sourceTree = "<group>"; };
 		2ACC614D420B4E90B7EE3BCE /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		6C5053D919EE266A00E385DE /* Default-667h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-667h@2x.png"; sourceTree = SOURCE_ROOT; };
+		6C5053DA19EE266A00E385DE /* Default-736h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-736h@3x.png"; sourceTree = SOURCE_ROOT; };
 		841652076B3E9351337AA7C7 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		E3EE87D12CE3EF73FAE2EF02 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -71,6 +75,8 @@
 				05DDD8DC19D2341D00013C30 /* AsyncDisplayKit-Bridging-Header.h */,
 				050E7C7219D22E19004363C2 /* Info.plist */,
 				05DDD8DA19D2336300013C30 /* Default-568h@2x.png */,
+				6C5053D919EE266A00E385DE /* Default-667h@2x.png */,
+				6C5053DA19EE266A00E385DE /* Default-736h@3x.png */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -152,6 +158,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				05DDD8DB19D2336300013C30 /* Default-568h@2x.png in Resources */,
+				6C5053DB19EE266A00E385DE /* Default-667h@2x.png in Resources */,
+				6C5053DC19EE266A00E385DE /* Default-736h@3x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
