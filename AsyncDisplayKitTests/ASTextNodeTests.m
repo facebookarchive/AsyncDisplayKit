@@ -8,8 +8,6 @@
 
 #import <CoreText/CoreText.h>
 
-#import <OCMock/OCMock.h>
-
 #import <AsyncDisplayKit/ASTextNode.h>
 
 #import <XCTest/XCTest.h>

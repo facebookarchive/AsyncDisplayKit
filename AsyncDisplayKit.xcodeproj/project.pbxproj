@@ -195,7 +195,6 @@
 				<string>058D09C5195D04C000B7D73C</string>
 				<string>058D09AE195D04C000B7D73C</string>
 				<string>058D09AD195D04C000B7D73C</string>
-				<string>FD40E2760492F0CAAEAD552D</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -385,7 +384,6 @@
 				<string>058D09AF195D04C000B7D73C</string>
 				<string>058D09BD195D04C000B7D73C</string>
 				<string>058D09C0195D04C000B7D73C</string>
-				<string>EFA731F0396842FF8AB635EE</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -505,7 +503,6 @@
 				<string>058D09C1195D04C000B7D73C</string>
 				<string>058D09C4195D04C000B7D73C</string>
 				<string>058D09BF195D04C000B7D73C</string>
-				<string>DB7121BCD50849C498C886FB</string>
 			</array>
 			<key>isa</key>
 			<string>PBXFrameworksBuildPhase</string>
@@ -531,11 +528,9 @@
 			<string>058D09D2195D04C000B7D73C</string>
 			<key>buildPhases</key>
 			<array>
-				<string>2E61B6A0DB0F436A9DDBE86F</string>
 				<string>058D09B8195D04C000B7D73C</string>
 				<string>058D09B9195D04C000B7D73C</string>
 				<string>058D09BA195D04C000B7D73C</string>
-				<string>3B9D88CDF51B429C8409E4B6</string>
 			</array>
 			<key>buildRules</key>
 			<array/>
@@ -929,8 +924,6 @@
 		</dict>
 		<key>058D09D3195D04C000B7D73C</key>
 		<dict>
-			<key>baseConfigurationReference</key>
-			<string>FB07EABBCF28656C6297BC2D</string>
 			<key>buildSettings</key>
 			<dict>
 				<key>FRAMEWORK_SEARCH_PATHS</key>
@@ -954,6 +947,13 @@
 				<string>$(TARGET_NAME)</string>
 				<key>WRAPPER_EXTENSION</key>
 				<string>xctest</string>
+				<key>OTHER_LDFLAGS</key>
+				<array>
+					<string>$(inherited)</string>
+					<string>-framework</string>
+					<string>XCTest</string>
+					<string>-ObjC</string>
+				</array>
 			</dict>
 			<key>isa</key>
 			<string>XCBuildConfiguration</string>
@@ -962,8 +962,6 @@
 		</dict>
 		<key>058D09D4195D04C000B7D73C</key>
 		<dict>
-			<key>baseConfigurationReference</key>
-			<string>D3779BCFF841AD3EB56537ED</string>
 			<key>buildSettings</key>
 			<dict>
 				<key>FRAMEWORK_SEARCH_PATHS</key>
@@ -982,6 +980,13 @@
 				<string>$(TARGET_NAME)</string>
 				<key>WRAPPER_EXTENSION</key>
 				<string>xctest</string>
+				<key>OTHER_LDFLAGS</key>
+				<array>
+					<string>$(inherited)</string>
+					<string>-framework</string>
+					<string>XCTest</string>
+					<string>-ObjC</string>
+				</array>
 			</dict>
 			<key>isa</key>
 			<string>XCBuildConfiguration</string>
@@ -3312,60 +3317,6 @@
 				<string>-fno-objc-arc</string>
 			</dict>
 		</dict>
-		<key>2E61B6A0DB0F436A9DDBE86F</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array/>
-			<key>inputPaths</key>
-			<array/>
-			<key>isa</key>
-			<string>PBXShellScriptBuildPhase</string>
-			<key>name</key>
-			<string>Check Pods Manifest.lock</string>
-			<key>outputPaths</key>
-			<array/>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-			<key>shellPath</key>
-			<string>/bin/sh</string>
-			<key>shellScript</key>
-			<string>diff "${PODS_ROOT}/../Podfile.lock" "${PODS_ROOT}/Manifest.lock" &gt; /dev/null
-if [[ $? != 0 ]] ; then
-    cat &lt;&lt; EOM
-error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.
-EOM
-    exit 1
-fi
-</string>
-			<key>showEnvVarsInLog</key>
-			<string>0</string>
-		</dict>
-		<key>3B9D88CDF51B429C8409E4B6</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array/>
-			<key>inputPaths</key>
-			<array/>
-			<key>isa</key>
-			<string>PBXShellScriptBuildPhase</string>
-			<key>name</key>
-			<string>Copy Pods Resources</string>
-			<key>outputPaths</key>
-			<array/>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-			<key>shellPath</key>
-			<string>/bin/sh</string>
-			<key>shellScript</key>
-			<string>"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-resources.sh"
-</string>
-			<key>showEnvVarsInLog</key>
-			<string>0</string>
-		</dict>
 		<key>3C9C128419E616EF00E942A0</key>
 		<dict>
 			<key>fileEncoding</key>
@@ -3415,70 +3366,6 @@ fi
 					<string>Public</string>
 				</array>
 			</dict>
-		</dict>
-		<key>D3779BCFF841AD3EB56537ED</key>
-		<dict>
-			<key>includeInIndex</key>
-			<string>1</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>text.xcconfig</string>
-			<key>name</key>
-			<string>Pods-AsyncDisplayKitTests.release.xcconfig</string>
-			<key>path</key>
-			<string>Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.release.xcconfig</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>DB7121BCD50849C498C886FB</key>
-		<dict>
-			<key>fileRef</key>
-			<string>EFA731F0396842FF8AB635EE</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
-		<key>EFA731F0396842FF8AB635EE</key>
-		<dict>
-			<key>explicitFileType</key>
-			<string>archive.ar</string>
-			<key>includeInIndex</key>
-			<string>0</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>path</key>
-			<string>libPods-AsyncDisplayKitTests.a</string>
-			<key>sourceTree</key>
-			<string>BUILT_PRODUCTS_DIR</string>
-		</dict>
-		<key>FB07EABBCF28656C6297BC2D</key>
-		<dict>
-			<key>includeInIndex</key>
-			<string>1</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>text.xcconfig</string>
-			<key>name</key>
-			<string>Pods-AsyncDisplayKitTests.debug.xcconfig</string>
-			<key>path</key>
-			<string>Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.debug.xcconfig</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>FD40E2760492F0CAAEAD552D</key>
-		<dict>
-			<key>children</key>
-			<array>
-				<string>FB07EABBCF28656C6297BC2D</string>
-				<string>D3779BCFF841AD3EB56537ED</string>
-			</array>
-			<key>isa</key>
-			<string>PBXGroup</string>
-			<key>name</key>
-			<string>Pods</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
 		</dict>
 	</dict>
 	<key>rootObject</key>
