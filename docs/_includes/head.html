@@ -14,4 +14,11 @@
 
     <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
     <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
+
+    <script>
+        if (location.host == "facebook.github.io") {
+            // get outta here
+            location = 'http://asyncdisplaykit.org';
+        }
+    </script>
 </head>
