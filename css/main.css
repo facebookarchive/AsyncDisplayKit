@@ -64,10 +64,10 @@ h1, h2, h3, h4, h5, h6 {
  * Links
  */
 a {
-  color: #2a7ae2;
+  color: #21b6ff;
   text-decoration: none; }
   a:visited {
-    color: #1756a9; }
+    color: #008ed3; }
   a:hover {
     color: #111111;
     text-decoration: underline; }
@@ -92,9 +92,9 @@ pre,
 code {
   font-family: Monaco, monospace;
   font-size: 14px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid #afe4ff;
   border-radius: 3px;
-  background-color: #eef; }
+  background-color: #fafdff; }
 
 code {
   padding: 1px 5px; }
@@ -328,29 +328,27 @@ pre {
 /**
  * Syntax highlighting styles
  */
+/* not official Xcode colors, but looks better on the web */
 .highlight {
   background: #fff; }
   .highlight .c {
-    color: #998;
+    color: #008d14;
     font-style: italic; }
   .highlight .err {
     color: #a61717;
     background-color: #e3d2d2; }
   .highlight .k {
-    font-weight: bold; }
-  .highlight .o {
-    font-weight: bold; }
+    color: #103ffb; }
   .highlight .cm {
-    color: #998;
+    color: #008d14;
     font-style: italic; }
   .highlight .cp {
-    color: #999;
-    font-weight: bold; }
+    color: #b72748; }
   .highlight .c1 {
-    color: #998;
+    color: #008d14;
     font-style: italic; }
   .highlight .cs {
-    color: #999;
+    color: #008d14;
     font-weight: bold;
     font-style: italic; }
   .highlight .gd {
@@ -382,55 +380,45 @@ pre {
   .highlight .gt {
     color: #aa0000; }
   .highlight .kc {
-    font-weight: bold; }
+    color: orange; }
   .highlight .kd {
-    font-weight: bold; }
+    color: orange; }
   .highlight .kp {
-    font-weight: bold; }
+    color: #008d14; }
   .highlight .kr {
-    font-weight: bold; }
+    color: #008d14; }
   .highlight .kt {
-    color: #458;
-    font-weight: bold; }
+    color: #103ffb; }
   .highlight .m {
-    color: #009999; }
+    color: orange; }
   .highlight .s {
-    color: #dd1144; }
+    color: #b72748; }
   .highlight .na {
-    color: teal; }
+    color: orange; }
   .highlight .nb {
-    color: #0086b3; }
+    color: #103ffb; }
   .highlight .nc {
-    color: #458;
-    font-weight: bold; }
+    color: #3a95ba; }
   .highlight .no {
-    color: teal; }
+    color: orange; }
   .highlight .ni {
-    color: purple; }
+    color: orange; }
   .highlight .ne {
-    color: #900;
-    font-weight: bold; }
-  .highlight .nf {
-    color: #900;
-    font-weight: bold; }
+    color: orange; }
   .highlight .nn {
-    color: #555555; }
+    color: orange; }
   .highlight .nt {
-    color: navy; }
-  .highlight .nv {
-    color: teal; }
-  .highlight .ow {
-    font-weight: bold; }
+    color: orange; }
   .highlight .w {
     color: #bbbbbb; }
-  .highlight .mf {
-    color: #009999; }
   .highlight .mh {
-    color: #009999; }
+    color: black; }
   .highlight .mi {
-    color: #009999; }
+    color: black; }
   .highlight .mo {
-    color: #009999; }
+    color: black; }
+  .highlight .il {
+    color: black; }
   .highlight .sb {
     color: #dd1144; }
   .highlight .sc {
@@ -448,18 +436,18 @@ pre {
   .highlight .sx {
     color: #dd1144; }
   .highlight .sr {
-    color: #009926; }
+    color: orange; }
   .highlight .s1 {
-    color: #dd1144; }
+    color: #b72748; }
   .highlight .ss {
-    color: #990073; }
+    color: #b72748; }
   .highlight .bp {
-    color: #999999; }
+    color: #3a95ba; }
   .highlight .vc {
-    color: teal; }
+    color: #3a95ba; }
   .highlight .vg {
-    color: teal; }
+    color: black; }
   .highlight .vi {
-    color: teal; }
-  .highlight .il {
-    color: #009999; }
+    color: orange; }
+  .highlight .nl {
+    color: #3a95ba; }

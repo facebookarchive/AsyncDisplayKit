@@ -60,14 +60,6 @@
 	
 	<option value="//api/name/allTargets">&nbsp;&nbsp;&nbsp;&nbsp;- allTargets</option>
 	
-	<option value="//api/name/beginTrackingWithTouch:withEvent:">&nbsp;&nbsp;&nbsp;&nbsp;- beginTrackingWithTouch:withEvent:</option>
-	
-	<option value="//api/name/cancelTrackingWithEvent:">&nbsp;&nbsp;&nbsp;&nbsp;- cancelTrackingWithEvent:</option>
-	
-	<option value="//api/name/continueTrackingWithTouch:withEvent:">&nbsp;&nbsp;&nbsp;&nbsp;- continueTrackingWithTouch:withEvent:</option>
-	
-	<option value="//api/name/endTrackingWithTouch:withEvent:">&nbsp;&nbsp;&nbsp;&nbsp;- endTrackingWithTouch:withEvent:</option>
-	
 	<option value="//api/name/removeTarget:action:forControlEvents:">&nbsp;&nbsp;&nbsp;&nbsp;- removeTarget:action:forControlEvents:</option>
 	
 	<option value="//api/name/sendActionsForControlEvents:withEvent:">&nbsp;&nbsp;&nbsp;&nbsp;- sendActionsForControlEvents:withEvent:</option>
@@ -87,8 +79,6 @@
 
 
 <li role="treeitem" id="task_treeitem"><span class="nodisclosure"></span><span class="sectionName"><a href="#tasks">Tasks</a></span><ul>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_ForSubclassesEyesOnly Methods">ForSubclassesEyesOnly Methods</a></span></li>
 	
 </ul></li>
 
@@ -119,14 +109,6 @@
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/addTarget:action:forControlEvents:">addTarget:action:forControlEvents:</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/allTargets">allTargets</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/beginTrackingWithTouch:withEvent:">beginTrackingWithTouch:withEvent:</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/cancelTrackingWithEvent:">cancelTrackingWithEvent:</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/continueTrackingWithTouch:withEvent:">continueTrackingWithTouch:withEvent:</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/endTrackingWithTouch:withEvent:">endTrackingWithTouch:withEvent:</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/removeTarget:action:forControlEvents:">removeTarget:action:forControlEvents:</a></span></li>
 	
@@ -182,7 +164,7 @@
 						
 						
 						
-						<h3 class="subsubtitle task-title">Other Methods</h3>
+						
 
 						<ul class="task-list">
 							<li>
@@ -236,38 +218,6 @@
 </li><li>
 	<span class="tooltip">
 		<code><a href="#//api/name/sendActionsForControlEvents:withEvent:">&ndash;&nbsp;sendActionsForControlEvents:withEvent:</a></code>
-	</span>
-	
-	
-</li>
-						</ul>
-						
-						
-						<a title="ForSubclassesEyesOnly Methods" name="task_ForSubclassesEyesOnly Methods"></a>
-						<h3 class="subsubtitle task-title">ForSubclassesEyesOnly Methods</h3>
-
-						<ul class="task-list">
-							<li>
-	<span class="tooltip">
-		<code><a href="#//api/name/beginTrackingWithTouch:withEvent:">&ndash;&nbsp;beginTrackingWithTouch:withEvent:</a></code>
-	</span>
-	
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/continueTrackingWithTouch:withEvent:">&ndash;&nbsp;continueTrackingWithTouch:withEvent:</a></code>
-	</span>
-	
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/cancelTrackingWithEvent:">&ndash;&nbsp;cancelTrackingWithEvent:</a></code>
-	</span>
-	
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/endTrackingWithTouch:withEvent:">&ndash;&nbsp;endTrackingWithTouch:withEvent:</a></code>
 	</span>
 	
 	
@@ -617,215 +567,6 @@
 </div>
 						
 						<div class="section-method">
-	<a name="//api/name/beginTrackingWithTouch:withEvent:" title="beginTrackingWithTouch:withEvent:"></a>
-	<h3 class="subsubtitle method-title">beginTrackingWithTouch:withEvent:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Sent to the control when <a href="#//api/name/tracking">tracking</a> begins.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (BOOL)beginTrackingWithTouch:(id)<em>touch</em> withEvent:(id)<em>touchEvent</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>touch</em></dt>
-			<dd><p>The touch on the receiving control.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>touchEvent</em></dt>
-			<dd><p>An event object encapsulating the information specific to the user event.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	<div class="method-subsection return">
-		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>YES if the receiver should respond continuously (respond when touch is dragged); NO otherwise.</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode+Subclasses.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/cancelTrackingWithEvent:" title="cancelTrackingWithEvent:"></a>
-	<h3 class="subsubtitle method-title">cancelTrackingWithEvent:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Sent to the control when <a href="#//api/name/tracking">tracking</a> should be cancelled.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (void)cancelTrackingWithEvent:(id)<em>touchEvent</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>touchEvent</em></dt>
-			<dd><p>An event object encapsulating the information specific to the user event. This parameter may be nil, indicating that the cancelation was caused by something other than an event, such as the display node being removed from its supernode.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode+Subclasses.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/continueTrackingWithTouch:withEvent:" title="continueTrackingWithTouch:withEvent:"></a>
-	<h3 class="subsubtitle method-title">continueTrackingWithTouch:withEvent:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Sent continuously to the control as it tracks a touch within the control&rsquo;s bounds.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (BOOL)continueTrackingWithTouch:(id)<em>touch</em> withEvent:(id)<em>touchEvent</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>touch</em></dt>
-			<dd><p>The touch on the receiving control.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>touchevent</em></dt>
-			<dd><p>An event object encapsulating the information specific to the user event.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	<div class="method-subsection return">
-		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>YES if touch <a href="#//api/name/tracking">tracking</a> should continue; NO otherwise.</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode+Subclasses.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/endTrackingWithTouch:withEvent:" title="endTrackingWithTouch:withEvent:"></a>
-	<h3 class="subsubtitle method-title">endTrackingWithTouch:withEvent:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Sent to the control when the last touch completely ends, telling it to stop <a href="#//api/name/tracking">tracking</a>.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (void)endTrackingWithTouch:(id)<em>touch</em> withEvent:(id)<em>touchEvent</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>touch</em></dt>
-			<dd><p>The touch that ended.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>touchEvent</em></dt>
-			<dd><p>An event object encapsulating the information specific to the user event.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode+Subclasses.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
 	<a name="//api/name/removeTarget:action:forControlEvents:" title="removeTarget:action:forControlEvents:"></a>
 	<h3 class="subsubtitle method-title">removeTarget:action:forControlEvents:</h3>
 	
@@ -950,7 +691,7 @@
 				<div id="footer">
 					<hr />
 					<div class="footer-copyright">
-						<p><span class="copyright">&copy; 2014 Facebook. All rights reserved. (Last updated: 2014-10-10)</span><br />
+						<p><span class="copyright">&copy; 2014 Facebook. All rights reserved. (Last updated: 2014-10-14)</span><br />
 						
 						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2 (build 963)</a>.</span></p>
 						
