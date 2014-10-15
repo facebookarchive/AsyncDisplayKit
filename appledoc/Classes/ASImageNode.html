@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="html/html; charset=utf-8" />
-		<title>ASTextNodeDelegate Protocol Reference</title>
+		<title>ASImageNode Class Reference</title>
 		<meta id="xcode-display" name="xcode-display" content="render"/>
 		<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
 		<link rel="stylesheet" type="text/css" media="print" href="../css/stylesPrint.css" />
@@ -16,7 +16,7 @@
 			</div>
 			
 			<div id="title" role="banner">
-				<h1 class="hideInXcode">ASTextNodeDelegate Protocol Reference</h1>
+				<h1 class="hideInXcode">ASImageNode Class Reference</h1>
 			</div>
 			<ul id="headerButtons" role="toolbar">
 				<li id="toc_button">
@@ -35,19 +35,22 @@
 	
 	
 	
+	<option value="properties">Properties</option>
+	
+	<option value="//api/name/cropRect">&nbsp;&nbsp;&nbsp;&nbsp;cropRect</option>
+	
+	<option value="//api/name/imageModificationBlock">&nbsp;&nbsp;&nbsp;&nbsp;imageModificationBlock</option>
+	
+	
 	
 	
 	
 	
 	<option value="instance_methods">Instance Methods</option>
 	
-	<option value="//api/name/textNode:longPressedLinkAttribute:value:atPoint:textRange:">&nbsp;&nbsp;&nbsp;&nbsp;- textNode:longPressedLinkAttribute:value:atPoint:textRange:</option>
+	<option value="//api/name/setCropEnabled:recropImmediately:inBounds:">&nbsp;&nbsp;&nbsp;&nbsp;- setCropEnabled:recropImmediately:inBounds:</option>
 	
-	<option value="//api/name/textNode:shouldHighlightLinkAttribute:value:">&nbsp;&nbsp;&nbsp;&nbsp;- textNode:shouldHighlightLinkAttribute:value:</option>
-	
-	<option value="//api/name/textNode:shouldLongPressLinkAttribute:value:">&nbsp;&nbsp;&nbsp;&nbsp;- textNode:shouldLongPressLinkAttribute:value:</option>
-	
-	<option value="//api/name/textNode:tappedLinkAttribute:value:atPoint:textRange:">&nbsp;&nbsp;&nbsp;&nbsp;- textNode:tappedLinkAttribute:value:atPoint:textRange:</option>
+	<option value="//api/name/setNeedsDisplayWithCompletion:">&nbsp;&nbsp;&nbsp;&nbsp;- setNeedsDisplayWithCompletion:</option>
 	
 	
 	
@@ -69,19 +72,23 @@
 
 
 
+<li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#properties">Properties</a></span><ul>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/cropRect">cropRect</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/imageModificationBlock">imageModificationBlock</a></span></li>
+	
+</ul></li>
+
 
 
 
 
 <li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#instance_methods">Instance Methods</a></span><ul>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/textNode:longPressedLinkAttribute:value:atPoint:textRange:">textNode:longPressedLinkAttribute:value:atPoint:textRange:</a></span></li>
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/setCropEnabled:recropImmediately:inBounds:">setCropEnabled:recropImmediately:inBounds:</a></span></li>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/textNode:shouldHighlightLinkAttribute:value:">textNode:shouldHighlightLinkAttribute:value:</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/textNode:shouldLongPressLinkAttribute:value:">textNode:shouldLongPressLinkAttribute:value:</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/textNode:tappedLinkAttribute:value:atPoint:textRange:">textNode:tappedLinkAttribute:value:atPoint:textRange:</a></span></li>
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/setNeedsDisplayWithCompletion:">setNeedsDisplayWithCompletion:</a></span></li>
 	
 </ul></li>
 
@@ -90,7 +97,7 @@
 		</nav>
 		<article>
 			<div id="contents" class="isShowingTOC" role="main">
-				<a title="ASTextNodeDelegate Protocol Reference" name="top"></a>
+				<a title="ASImageNode Class Reference" name="top"></a>
 				<div class="main-navigation navigation-top">
 					<ul>
 	<li><a href="../index.html">Index</a></li>
@@ -99,18 +106,18 @@
 				</div>
 				<div id="header">
 					<div class="section-header">
-						<h1 class="title title-header">ASTextNodeDelegate Protocol Reference</h1>
+						<h1 class="title title-header">ASImageNode Class Reference</h1>
 					</div>		
 				</div>
 				<div id="container">	
 					
 					<div class="section section-specification"><table cellspacing="0"><tbody>
 						<tr>
-	<td class="specification-title">Conforms to</td>
-	<td class="specification-value">NSObject</td>
+	<td class="specification-title">Inherits from</td>
+	<td class="specification-value"><a href="../Classes/ASControlNode.html">ASControlNode</a> : <a href="../Classes/ASDisplayNode.html">ASDisplayNode</a> : ASDealloc2MainObject</td>
 </tr><tr>
 	<td class="specification-title">Declared in</td>
-	<td class="specification-value">ASTextNode.h</td>
+	<td class="specification-value">ASImageNode.h</td>
 </tr>
 						</tbody></table></div>
 					
@@ -130,25 +137,25 @@
 						<ul class="task-list">
 							<li>
 	<span class="tooltip">
-		<code><a href="#//api/name/textNode:tappedLinkAttribute:value:atPoint:textRange:">&ndash;&nbsp;textNode:tappedLinkAttribute:value:atPoint:textRange:</a></code>
+		<code><a href="#//api/name/setCropEnabled:recropImmediately:inBounds:">&ndash;&nbsp;setCropEnabled:recropImmediately:inBounds:</a></code>
 	</span>
 	
 	
 </li><li>
 	<span class="tooltip">
-		<code><a href="#//api/name/textNode:longPressedLinkAttribute:value:atPoint:textRange:">&ndash;&nbsp;textNode:longPressedLinkAttribute:value:atPoint:textRange:</a></code>
+		<code><a href="#//api/name/cropRect">&nbsp;&nbsp;cropRect</a></code>
 	</span>
-	
+	<span class="task-item-suffix">property</span>
 	
 </li><li>
 	<span class="tooltip">
-		<code><a href="#//api/name/textNode:shouldHighlightLinkAttribute:value:">&ndash;&nbsp;textNode:shouldHighlightLinkAttribute:value:</a></code>
+		<code><a href="#//api/name/imageModificationBlock">&nbsp;&nbsp;imageModificationBlock</a></code>
 	</span>
-	
+	<span class="task-item-suffix">property</span>
 	
 </li><li>
 	<span class="tooltip">
-		<code><a href="#//api/name/textNode:shouldLongPressLinkAttribute:value:">&ndash;&nbsp;textNode:shouldLongPressLinkAttribute:value:</a></code>
+		<code><a href="#//api/name/setNeedsDisplayWithCompletion:">&ndash;&nbsp;setNeedsDisplayWithCompletion:</a></code>
 	</span>
 	
 	
@@ -161,6 +168,94 @@
 					
 					
 					
+					<div class="section section-methods">
+						<a title="Properties" name="properties"></a>
+						<h2 class="subtitle subtitle-methods">Properties</h2>
+						
+						<div class="section-method">
+	<a name="//api/name/cropRect" title="cropRect"></a>
+	<h3 class="subsubtitle method-title">cropRect</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>A value that controls how the receiver&rsquo;s efficient cropping is aligned.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, assign) CGRect cropRect</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>This value defines a rectangle that is to be featured by the receiver. The rectangle is specified as a &ldquo;unit rectangle,&rdquo; using percentages of the source image&rsquo;s width and height, e.g. CGRectMake(0.5, 0, 0.5, 1.0) will feature the full right half a photo. If the cropRect is empty, the content mode of the receiver will be used to determine its dimensions, and only the cropRect&rsquo;s origin will be used for positioning. The default value of this property is CGRectMake(0.5, 0.5, 0.0, 0.0).</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASImageNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/imageModificationBlock" title="imageModificationBlock"></a>
+	<h3 class="subsubtitle method-title">imageModificationBlock</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>An optional block which can perform drawing operations on {@ref image} during the display phase.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, copy) asimagenode_modification_block_t imageModificationBlock</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Can be used to add image effects (such as rounding, adding borders, or other pattern overlays) without extraneous display calls.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASImageNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+					</div>
+					
 					
 					
 					
@@ -170,18 +265,18 @@
 						<h2 class="subtitle subtitle-methods">Instance Methods</h2>
 						
 						<div class="section-method">
-	<a name="//api/name/textNode:longPressedLinkAttribute:value:atPoint:textRange:" title="textNode:longPressedLinkAttribute:value:atPoint:textRange:"></a>
-	<h3 class="subsubtitle method-title">textNode:longPressedLinkAttribute:value:atPoint:textRange:</h3>
+	<a name="//api/name/setCropEnabled:recropImmediately:inBounds:" title="setCropEnabled:recropImmediately:inBounds:"></a>
+	<h3 class="subsubtitle method-title">setCropEnabled:recropImmediately:inBounds:</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>Indicates to the delegate that a link was tapped within a text node.</p>
+		<p>Enables or disables efficient cropping.</p>
 	</div>		
 	
     
 
-	<div class="method-subsection method-declaration"><code>- (void)textNode:(id)<em>textNode</em> longPressedLinkAttribute:(id)<em>attribute</em> value:(id)<em>value</em> atPoint:(id)<em>point</em> textRange:(id)<em>textRange</em></code></div>
+	<div class="method-subsection method-declaration"><code>- (void)setCropEnabled:(id)<em>cropEnabled</em> recropImmediately:(id)<em>recropImmediately</em> inBounds:(id)<em>cropBounds</em></code></div>
 
     
 	
@@ -189,89 +284,23 @@
 		<h4 class="method-subtitle parameter-title">Parameters</h4>
 		
 		<dl class="argument-def parameter-def">
-			<dt><em>textNode</em></dt>
-			<dd><p>The <a href="../Classes/ASTextNode.html">ASTextNode</a> containing the link that was tapped.</p></dd>
+			<dt><em>cropEnabled</em></dt>
+			<dd><p>YES to efficiently crop the receiver&rsquo;s contents such that contents outside of its bounds are not included; NO otherwise.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
-			<dt><em>attribute</em></dt>
-			<dd><p>The attribute that was tapped. Will not be nil.</p></dd>
+			<dt><em>recropImmediately</em></dt>
+			<dd><p>If the receiver has an image, YES to redisplay the receiver immediately; NO otherwise.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
-			<dt><em>value</em></dt>
-			<dd><p>The value of the tapped attribute.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>point</em></dt>
-			<dd><p>The point within textNode, in textNode&rsquo;s coordinate system, that was tapped.</p></dd>
+			<dt><em>cropBounds</em></dt>
+			<dd><p>The bounds into which the receiver will be cropped. Useful if bounds are to change in response to cropping (but have not yet done so).</p></dd>
 		</dl>
 		
 	</div>
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASTextNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/textNode:shouldHighlightLinkAttribute:value:" title="textNode:shouldHighlightLinkAttribute:value:"></a>
-	<h3 class="subsubtitle method-title">textNode:shouldHighlightLinkAttribute:value:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Indicates to the text node if an attribute should be considered a link.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (BOOL)textNode:(id)<em>textNode</em> shouldHighlightLinkAttribute:(id)<em>attribute</em> value:(id)<em>value</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>textNode</em></dt>
-			<dd><p>The text node containing the entity attribute.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>attribute</em></dt>
-			<dd><p>The attribute that was tapped. Will not be nil.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>value</em></dt>
-			<dd><p>The value of the tapped attribute.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	<div class="method-subsection return">
-		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>YES if the entity attribute should be a link, NO otherwise.</p>
-	</div>
 	
 	
 	
@@ -279,7 +308,7 @@
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>If not implemented, the default value is NO.</p>
+		<p>Efficient cropping is only performed when the receiver&rsquo;s view&rsquo;s contentMode is UIViewContentModeScaleAspectFill. By default, cropping is enabled. The crop alignment may be controlled via cropAlignmentFactor.</p>
 	</div>
 	
 	
@@ -290,25 +319,25 @@
 	
 	<div class="method-subsection declared-in-section">
 		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASTextNode.h</code><br />
+		<code class="declared-in-ref">ASImageNode.h</code><br />
 	</div>				
 	
 	
 </div>
 						
 						<div class="section-method">
-	<a name="//api/name/textNode:shouldLongPressLinkAttribute:value:" title="textNode:shouldLongPressLinkAttribute:value:"></a>
-	<h3 class="subsubtitle method-title">textNode:shouldLongPressLinkAttribute:value:</h3>
+	<a name="//api/name/setNeedsDisplayWithCompletion:" title="setNeedsDisplayWithCompletion:"></a>
+	<h3 class="subsubtitle method-title">setNeedsDisplayWithCompletion:</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>Indicates to the text node if an attribute is a valid long-press target</p>
+		<p>Marks the receiver as needing display and performs a block after display has finished.</p>
 	</div>		
 	
     
 
-	<div class="method-subsection method-declaration"><code>- (BOOL)textNode:(id)<em>textNode</em> shouldLongPressLinkAttribute:(id)<em>attribute</em> value:(id)<em>value</em></code></div>
+	<div class="method-subsection method-declaration"><code>- (void)setNeedsDisplayWithCompletion:(id)<em>displayCompletionBlock</em></code></div>
 
     
 	
@@ -316,28 +345,18 @@
 		<h4 class="method-subtitle parameter-title">Parameters</h4>
 		
 		<dl class="argument-def parameter-def">
-			<dt><em>textNode</em></dt>
-			<dd><p>The text node containing the entity attribute.</p></dd>
+			<dt><em>displayCompletionBlock</em></dt>
+			<dd><p>The block to be performed after display has finished.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
-			<dt><em>attribute</em></dt>
-			<dd><p>The attribute that was tapped. Will not be nil.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>value</em></dt>
-			<dd><p>The value of the tapped attribute.</p></dd>
+			<dt><em>canceled</em></dt>
+			<dd><p>YES if display was prevented or canceled (via preventOrCancelDisplay); NO otherwise.</p></dd>
 		</dl>
 		
 	</div>
 	
 	
-	
-	<div class="method-subsection return">
-		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>YES if the entity attribute should be treated as a long-press target, NO otherwise.</p>
-	</div>
 	
 	
 	
@@ -345,7 +364,7 @@
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>If not implemented, the default value is NO.</p>
+		<p>displayCompletionBlock will be performed on the main-thread. If <code>preventOrCancelDisplay</code> is YES, <code>displayCompletionBlock</code> is will be performed immediately and <code>YES</code> will be passed for <code>canceled</code>.</p>
 	</div>
 	
 	
@@ -356,68 +375,7 @@
 	
 	<div class="method-subsection declared-in-section">
 		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASTextNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/textNode:tappedLinkAttribute:value:atPoint:textRange:" title="textNode:tappedLinkAttribute:value:atPoint:textRange:"></a>
-	<h3 class="subsubtitle method-title">textNode:tappedLinkAttribute:value:atPoint:textRange:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Indicates to the delegate that a link was tapped within a text node.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (void)textNode:(id)<em>textNode</em> tappedLinkAttribute:(id)<em>attribute</em> value:(id)<em>value</em> atPoint:(id)<em>point</em> textRange:(id)<em>textRange</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>textNode</em></dt>
-			<dd><p>The <a href="../Classes/ASTextNode.html">ASTextNode</a> containing the link that was tapped.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>attribute</em></dt>
-			<dd><p>The attribute that was tapped. Will not be nil.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>value</em></dt>
-			<dd><p>The value of the tapped attribute.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>point</em></dt>
-			<dd><p>The point within textNode, in textNode&rsquo;s coordinate system, that was tapped.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASTextNode.h</code><br />
+		<code class="declared-in-ref">ASImageNode.h</code><br />
 	</div>				
 	
 	
