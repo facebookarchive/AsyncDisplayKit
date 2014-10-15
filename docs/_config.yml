@@ -1,8 +1,8 @@
 # Site settings
 title: AsyncDisplayKit
 description: Smooth asynchronous user interfaces for iOS apps.
-baseurl: "/AsyncDisplayKit"
-url: "http://facebook.github.io"
+baseurl: ""
+url: "http://asyncdisplaykit.org"
 
 # Build settings
 highlighter: pygments
