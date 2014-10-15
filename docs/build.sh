@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+HEADERS=`ls ../AsyncDisplayKit/*.h | grep -v Subclasses`
+
 rm -rf htdocs appledoc
 
 jekyll build --destination htdocs
@@ -14,7 +16,7 @@ appledoc \
     --project-company Facebook \
     --company-id "com.facebook" \
     --output appledoc \
-    ../AsyncDisplayKit/*.h
+    $HEADERS
 
 mv appledoc/html htdocs/appledoc
 
