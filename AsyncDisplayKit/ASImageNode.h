@@ -13,7 +13,7 @@ typedef NS_ENUM(NSUInteger, ASImageNodeTint) {
   ASImageNodeTintGreyscale,
 };
 
-typedef UIImage *(^asimagenode_modification_block_t)(UIImage *);
+typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
 
 // FIXME: This class should not derive from ASControlNode once ASButtonNode is implemented.
 @interface ASImageNode : ASControlNode
