@@ -322,6 +322,19 @@
  */
 - (void)recursiveSetPreventOrCancelDisplay:(BOOL)flag;
 
+/**
+ * @abstract Calls -reclaimMemory on the receiver and its subnode hierarchy.
+ *
+ * @discussion Clears backing stores and other memory-intensive intermediates.
+ * If the node is removed from a visible hierarchy and then re-added, it will automatically trigger a new asynchronous display,
+ * as long as preventOrCancelDisplay is not set.
+ * If the node remains in the hierarchy throughout, -setNeedsDisplay is required to trigger a new asynchronous display.
+ *
+ * @see preventOrCancelDisplay and setNeedsDisplay
+ */
+
+- (void)recursivelyReclaimMemory;
+
 
 /** @name Hit Testing */
 

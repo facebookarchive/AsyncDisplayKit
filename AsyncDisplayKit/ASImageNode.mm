@@ -246,20 +246,6 @@
   return result;
 }
 
-- (void)didExitHierarchy
-{
-  self.contents = nil;
-  [super didExitHierarchy];
-}
-
-- (void)willEnterHierarchy
-{
-  [super willEnterHierarchy];
-
-  if (!self.layer.contents)
-    [self setNeedsDisplay];
-}
-
 - (void)displayDidFinish
 {
   [super displayDidFinish];

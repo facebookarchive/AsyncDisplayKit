@@ -81,9 +81,9 @@
 {
   BOOL visible = newWindow != nil;
   if (visible && !_node.inWindow) {
-    [_node __appear];
+    [_node __enterHierarchy];
   } else if (!visible && _node.inWindow) {
-    [_node __disappear];
+    [_node __exitHierarchy];
   }
 }
 

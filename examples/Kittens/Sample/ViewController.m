@@ -59,7 +59,8 @@ static const NSInteger kLitterSize = 20;
   return self;
 }
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
   [super viewDidLoad];
 
   [self.view addSubview:_tableView];

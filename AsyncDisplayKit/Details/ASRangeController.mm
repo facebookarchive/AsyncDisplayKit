@@ -192,6 +192,11 @@ static BOOL ASRangeIsValid(NSRange range)
 
   [node recursiveSetPreventOrCancelDisplay:YES];
   [node.view removeFromSuperview];
+  
+  // since this class usually manages large or infinite data sets, the working range
+  // directly bounds memory usage by requiring redrawing any content that falls outside the range.
+  [node recursivelyReclaimMemory];
+  
   [_workingIndexPaths removeObject:node.asyncdisplaykit_indexPath];
 }
 
@@ -209,21 +214,11 @@ static BOOL ASRangeIsValid(NSRange range)
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node && view, @"invalid argument, did you mean -removeNodeFromWorkingView:?");
 
-  // use an explicit transaction to force CoreAnimation to display nodes in order
+  // use an explicit transaction to force CoreAnimation to display nodes in the order they are added.
   [CATransaction begin];
 
-  // if this node is in the view hierarchy, moving it will cause a redisplay, so we disable hierarchy notifications.
-  // if it *isn't* in the view hierarchy, we need it to receive those notifications to trigger its first display.
-  BOOL nodeIsInHierarchy = node.inWindow;
-
-  if (nodeIsInHierarchy)
-    ASDisplayNodeDisableHierarchyNotifications(node);
-
   [view addSubview:node.view];
-
-  if (nodeIsInHierarchy)
-    ASDisplayNodeEnableHierarchyNotifications(node);
-
+  
   [CATransaction commit];
 }
 

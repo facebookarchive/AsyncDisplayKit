@@ -61,8 +61,8 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
     unsigned displaysAsynchronously:1;
     unsigned shouldRasterizeDescendants:1;
     unsigned visibilityNotificationsDisabled:visibilityNotificationsDisabledBits;
-    unsigned isInAppear:1;
-    unsigned isInDisappear:1;
+    unsigned isInEnterHierarchy:1;
+    unsigned isInExitHierarchy:1;
     unsigned inWindow:1;
     unsigned hasWillDisplayAsyncLayer:1;
     unsigned hasDrawParametersForAsyncLayer:1;
@@ -102,10 +102,10 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 - (void)__incrementVisibilityNotificationsDisabled;
 - (void)__decrementVisibilityNotificationsDisabled;
 
-// Call willAppear if necessary and set inWindow = YES if visibility notifications are enabled on all of its parents
-- (void)__appear;
-// Call willDisappear / didDisappear if necessary and set inWindow = NO if visibility notifications are enabled on all of its parents
-- (void)__disappear;
+// Call willEnterHierarchy if necessary and set inWindow = YES if visibility notifications are enabled on all of its parents
+- (void)__enterHierarchy;
+// Call didExitHierarchy if necessary and set inWindow = NO if visibility notifications are enabled on all of its parents
+- (void)__exitHierarchy;
 
 // Returns the ancestor node that rasterizes descendants, or nil if none.
 - (ASDisplayNode *)__rasterizedContainerNode;

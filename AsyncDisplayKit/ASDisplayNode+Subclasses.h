@@ -179,6 +179,7 @@
  * @discussion Subclasses should override this if they don't want their contentsScale changed.
  *
  * @note This changes an internal property.
+ * -setNeedsDisplay is also available to trigger display without changing contentsScaleForDisplay.
  * @see contentsScaleForDisplay
  */
 - (void)setNeedsDisplayAtScale:(CGFloat)contentsScale;
@@ -270,6 +271,11 @@
 
 // Called after the view is removed from the window.
 - (void)didExitHierarchy;
+
+// Called by -recursivelyReclaimMemory.  Provides an opportunity to clear backing store and other memory-intensive intermediates,
+// such as text layout managers or downloaded content that can be written to a disk cache.
+// Base class implements self.contents = nil, clearing any backing store, for asynchronous regeneration when needed.
+- (void)reclaimMemory;
 
 
 /** @name Description */

@@ -194,17 +194,6 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
                     fminf(ceilPixelValue(renderSizePlusShadowPadding.height), constrainedSize.height));
 }
 
-- (void)willEnterHierarchy
-{
-  CALayer *layer = self.layer;
-  if (!layer.contents) {
-    // This can happen on occasion that the layer will not display unless this
-    // set.
-    [layer setNeedsDisplay];
-  }
-  [super willEnterHierarchy];
-}
-
 - (void)displayDidFinish
 {
   [super displayDidFinish];
@@ -217,16 +206,13 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   [self _invalidateRenderer];
 }
 
-- (void)didExitHierarchy
+- (void)reclaimMemory
 {
-  // We nil out the contents and kill our renderer to prevent the very large
+  // We discard the backing store and renderer to prevent the very large
   // memory overhead of maintaining these for all text nodes.  They can be
   // regenerated when layout is necessary.
-  self.contents = nil;
-
+  [super reclaimMemory];      // ASDisplayNode will set layer.contents = nil
   [self _invalidateRenderer];
-
-  [super didExitHierarchy];
 }
 
 - (void)didLoad

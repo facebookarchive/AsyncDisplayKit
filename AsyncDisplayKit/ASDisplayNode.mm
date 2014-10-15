@@ -56,6 +56,7 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
   // Subclasses should never override these
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyReclaimMemory)), @"Subclass %@ must not override recursivelyReclaimMemory method", NSStringFromClass(self));
 }
 
 + (BOOL)layerBackedNodesEnabled
@@ -575,9 +576,9 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
 {
   if (event == kCAOnOrderIn) {
-    [self __appear];
+    [self __enterHierarchy];
   } else if (event == kCAOnOrderOut) {
-    [self __disappear];
+    [self __exitHierarchy];
   }
 
   ASDisplayNodeAssert(_flags.isLayerBacked, @"We shouldn't get called back here if there is no layer");
@@ -948,40 +949,45 @@ static NSInteger incrementIfFound(NSInteger i) {
   return NO;
 }
 
-- (void)__appear
+- (void)__enterHierarchy
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(!_flags.isInAppear, @"Should not cause recursive __appear");
+  ASDisplayNodeAssert(!_flags.isInEnterHierarchy, @"Should not cause recursive __enterHierarchy");
   if (!self.inWindow && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
     self.inWindow = YES;
-    _flags.isInAppear = YES;
+    _flags.isInEnterHierarchy = YES;
     if (self.shouldRasterizeDescendants) {
       // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
       [self _recursiveWillEnterHierarchy];
     } else {
       [self willEnterHierarchy];
     }
-    _flags.isInAppear = NO;
+    _flags.isInEnterHierarchy = NO;
+    
+    CALayer *layer = self.layer;
+    if (!self.layer.contents) {
+      [layer setNeedsDisplay];
+    }
   }
 }
 
-- (void)__disappear
+- (void)__exitHierarchy
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(!_flags.isInDisappear, @"Should not cause recursive __disappear");
+  ASDisplayNodeAssert(!_flags.isInExitHierarchy, @"Should not cause recursive __exitHierarchy");
   if (self.inWindow && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
     self.inWindow = NO;
 
     [self.asyncLayer cancelAsyncDisplay];
 
-    _flags.isInDisappear = YES;
+    _flags.isInExitHierarchy = YES;
     if (self.shouldRasterizeDescendants) {
       // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
       [self _recursiveDidExitHierarchy];
     } else {
       [self didExitHierarchy];
     }
-    _flags.isInDisappear = NO;
+    _flags.isInExitHierarchy = NO;
   }
 }
 
@@ -991,9 +997,9 @@ static NSInteger incrementIfFound(NSInteger i) {
     return;
   }
 
-  _flags.isInAppear = YES;
+  _flags.isInEnterHierarchy = YES;
   [self willEnterHierarchy];
-  _flags.isInAppear = NO;
+  _flags.isInEnterHierarchy = NO;
 
   for (ASDisplayNode *subnode in self.subnodes) {
     [subnode _recursiveWillEnterHierarchy];
@@ -1006,9 +1012,9 @@ static NSInteger incrementIfFound(NSInteger i) {
     return;
   }
 
-  _flags.isInDisappear = YES;
+  _flags.isInExitHierarchy = YES;
   [self didExitHierarchy];
-  _flags.isInDisappear = NO;
+  _flags.isInExitHierarchy = NO;
 
   for (ASDisplayNode *subnode in self.subnodes) {
     [subnode _recursiveDidExitHierarchy];
@@ -1077,15 +1083,28 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)willEnterHierarchy
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(_flags.isInAppear, @"You should never call -willEnterHierarchy directly. Appearance is automatically managed by ASDisplayNode");
-  ASDisplayNodeAssert(!_flags.isInDisappear, @"ASDisplayNode inconsistency. __appear and __disappear are mutually exclusive");
+  ASDisplayNodeAssert(_flags.isInEnterHierarchy, @"You should never call -willEnterHierarchy directly. Appearance is automatically managed by ASDisplayNode");
+  ASDisplayNodeAssert(!_flags.isInExitHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
 }
 
 - (void)didExitHierarchy
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(_flags.isInDisappear, @"You should never call -didExitHierarchy directly. Appearance is automatically managed by ASDisplayNode");
-  ASDisplayNodeAssert(!_flags.isInAppear, @"ASDisplayNode inconsistency. __appear and __disappear are mutually exclusive");
+  ASDisplayNodeAssert(_flags.isInExitHierarchy, @"You should never call -didExitHierarchy directly. Appearance is automatically managed by ASDisplayNode");
+  ASDisplayNodeAssert(!_flags.isInEnterHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
+}
+
+- (void)reclaimMemory
+{
+  self.layer.contents = nil;
+}
+
+- (void)recursivelyReclaimMemory
+{
+  for (ASDisplayNode *subnode in self.subnodes) {
+    [subnode recursivelyReclaimMemory];
+  }
+  [self reclaimMemory];
 }
 
 - (void)layout
