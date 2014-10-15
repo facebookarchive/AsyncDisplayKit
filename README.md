@@ -55,9 +55,9 @@ blocking the main thread.
 
 ### Learn more
 
-* Read the [Getting Started guide](http://facebook.github.io/AsyncDisplayKit/guide/)
+* Read the [Getting Started guide](http://asyncdisplaykit.org/guide/)
 * Get the [sample projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples)
-* Browse the [API reference](http://facebook.github.io/AsyncDisplayKit/appledoc/)
+* Browse the [API reference](http://asyncdisplaykit.org/appledoc/)
 * Watch the [NSLondon talk](http://www.youtube.com/watch?v=h4QDbgB7RLo)
 
 ## Testing
