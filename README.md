@@ -58,7 +58,7 @@ blocking the main thread.
 * Read the [Getting Started guide](http://asyncdisplaykit.org/guide/)
 * Get the [sample projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples)
 * Browse the [API reference](http://asyncdisplaykit.org/appledoc/)
-* Watch the [NSLondon talk](http://www.youtube.com/watch?v=h4QDbgB7RLo)
+* Watch the [NSLondon talk](http://vimeo.com/103589245)
 
 ## Testing
 
