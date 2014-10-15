@@ -74,7 +74,7 @@
  *
  * @discussion This is the best time to add gesture recognizers to the view.
  */
-- (void)didLoad;
+- (void)didLoad ASDISPLAYNODE_REQUIRES_SUPER;
 
 
 /** @name Layout */

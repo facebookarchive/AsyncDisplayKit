@@ -90,6 +90,10 @@
 #define __has_feature(x) 0 // Compatibility with non-clang compilers.
 #endif
 
+#ifndef __has_attribute      // Optional.
+#define __has_attribute(x) 0 // Compatibility with non-clang compilers.
+#endif
+
 #ifndef NS_CONSUMED
 #if __has_feature(attribute_ns_consumed)
 #define NS_CONSUMED __attribute__((ns_consumed))
@@ -129,3 +133,11 @@
 // http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
 #define ASDISPLAYNODE_TO_STRING(str) #str
 #define ASDISPLAYNODE_TO_UNICODE_STRING(str) @ASDISPLAYNODE_TO_STRING(str)
+
+#ifndef ASDISPLAYNODE_REQUIRES_SUPER
+#if __has_attribute(objc_requires_super)
+#define ASDISPLAYNODE_REQUIRES_SUPER __attribute__((objc_requires_super))
+#else
+#define ASDISPLAYNODE_REQUIRES_SUPER
+#endif
+#endif
