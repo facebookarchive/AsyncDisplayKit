@@ -1,5 +1,7 @@
 language: objective-c
 before_install:
+  - brew update
+  - brew reinstall xctool
   - gem update cocoapods
 xcode_workspace: AsyncDisplayKit.xcworkspace
 xcode_scheme: AsyncDisplayKit
