@@ -22,7 +22,7 @@
  *
  * ## Drawing
  *
- * Implement one of +displayAsyncLayer:parameters:isCancelled: or +drawRect:withParameters:isCancelled: to provide
+ * Implement one of +displayWithParameters:isCancelled: or +drawRect:withParameters:isCancelled: to provide
  * drawing for your node.
  *
  * Use -drawParametersForAsyncLayer: to copy any properties that are involved in drawing into an immutable object for
