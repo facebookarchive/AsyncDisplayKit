@@ -8,13 +8,21 @@
 
 #import <AsyncDisplayKit/ASControlNode.h>
 
+
+/**
+ * The subclass header _ASControlNode+Subclasses_ defines methods to be
+ * overridden by custom nodes that subclass ASControlNode.
+ *
+ * These methods should never be called directly by other classes.
+ */
+
 @interface ASControlNode (Subclassing)
 
 /**
  @abstract Sends action messages for the given control events.
  @param controlEvents A bitmask whose set flags specify the control events for which action messages are sent. See "Control Events" in ASControlNode.h for bitmask constants.
- @param event An event object encapsulating the information specific to the user event.
- @disucssion ASControlNode implements this method to send all action messages associated with controlEvents. The list of targets is constructed from prior invocations of addTarget:action:forControlEvents:.
+ @param touchEvent An event object encapsulating the information specific to the user event.
+ @discussion ASControlNode implements this method to send all action messages associated with controlEvents. The list of targets is constructed from prior invocations of addTarget:action:forControlEvents:.
  */
 - (void)sendActionsForControlEvents:(ASControlNodeEvent)controlEvents withEvent:(UIEvent *)touchEvent;
 
@@ -29,7 +37,7 @@
 /**
  @abstract Sent continuously to the control as it tracks a touch within the control's bounds.
  @param touch The touch on the receiving control.
- @param touchevent An event object encapsulating the information specific to the user event.
+ @param touchEvent An event object encapsulating the information specific to the user event.
  @result YES if touch tracking should continue; NO otherwise.
  */
 - (BOOL)continueTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)touchEvent;

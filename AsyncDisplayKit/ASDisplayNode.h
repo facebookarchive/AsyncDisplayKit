@@ -127,7 +127,7 @@
 /** 
  * @abstract Asks the node to calculate and return the size that best fits its subnodes.
  *
- * @param size The current size of the receiver.
+ * @param constrainedSize The maximum size the receiver should fit in.
  *
  * @return A new size that fits the receiver's subviews.
  *
@@ -316,6 +316,8 @@
 /** 
  * @abstract Prevent the node and its descendants' layer from displaying.
  *
+ * @param flag YES if display should be prevented or cancelled; NO otherwise.
+ *
  * @see preventOrCancelDisplay
  */
 - (void)recursiveSetPreventOrCancelDisplay:(BOOL)flag;
@@ -409,10 +411,14 @@
 @end
 
 
+/**
+ * Convenience methods for debugging.
+ */
+
 @interface ASDisplayNode (Debugging)
 
 /**
- * @abstract Return a description of the node hierarchy
+ * @abstract Return a description of the node hierarchy.
  *
  * @discussion For debugging: (lldb) po [node displayNodeRecursiveDescription]
  */

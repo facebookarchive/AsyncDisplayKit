@@ -8,11 +8,26 @@
 
 #import <AsyncDisplayKit/ASControlNode.h>
 
+/**
+ * Image tints.
+ */
 typedef NS_ENUM(NSUInteger, ASImageNodeTint) {
+  /**
+   * No tint.
+   */
   ASImageNodeTintNormal = 0,
+
+  /**
+   * Display the image in greyscale.
+   */
   ASImageNodeTintGreyscale,
 };
 
+/**
+ * Image modification block.  Use to transform an image before display.
+ *
+ * @param image The image to be displayed.
+ */
 typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
 
 /**
@@ -91,10 +106,8 @@ typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
  * display has finished.
  *
  * @param displayCompletionBlock The block to be performed after display has
- * finished.
- *
- * @param canceled YES if display was prevented or canceled (via
- * preventOrCancelDisplay); NO otherwise.
+ * finished.  Its `canceled` property will be YES if display was prevented or
+ * canceled (via preventOrCancelDisplay); NO otherwise.
  * 
  * @discussion displayCompletionBlock will be performed on the main-thread. If
  * `preventOrCancelDisplay` is YES, `displayCompletionBlock` is will be

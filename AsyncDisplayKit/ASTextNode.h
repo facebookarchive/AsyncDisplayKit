@@ -10,8 +10,18 @@
 
 @protocol ASTextNodeDelegate;
 
+/**
+ * Highlight styles.
+ */
 typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
+  /**
+   * Highlight style for text on a light background.
+   */
   ASTextNodeHighlightStyleLight,
+
+  /**
+   * Highlight style for text on a dark background.
+   */
   ASTextNodeHighlightStyleDark
 };
 
@@ -146,6 +156,10 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 
 /**
  @abstract Set the range of text to highlight, with optional animation.
+
+ @param highlightRange The range of text to highlight.
+
+ @param animated Whether the text should be highlighted with an animation.
  */
 - (void)setHighlightRange:(NSRange)highlightRange animated:(BOOL)animated;
 
@@ -156,6 +170,9 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 
 @end
 
+/**
+ * @abstract Text node delegate.
+ */
 @protocol ASTextNodeDelegate <NSObject>
 @optional
 
@@ -165,6 +182,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @param attribute The attribute that was tapped. Will not be nil.
  @param value The value of the tapped attribute.
  @param point The point within textNode, in textNode's coordinate system, that was tapped.
+ @param textRange The range of highlighted text.
  */
 - (void)textNode:(ASTextNode *)textNode tappedLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point textRange:(NSRange)textRange;
 
@@ -174,6 +192,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @param attribute The attribute that was tapped. Will not be nil.
  @param value The value of the tapped attribute.
  @param point The point within textNode, in textNode's coordinate system, that was tapped.
+ @param textRange The range of highlighted text.
  */
 - (void)textNode:(ASTextNode *)textNode longPressedLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point textRange:(NSRange)textRange;
 

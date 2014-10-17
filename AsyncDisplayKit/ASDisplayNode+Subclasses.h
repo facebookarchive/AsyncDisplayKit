@@ -102,6 +102,8 @@
 /**
  * @abstract Return the calculated size.
  *
+ * @param constrainedSize The maximum size the receiver should fit in.
+ *
  * @discussion Subclasses that override should expect this method to be called on a non-main thread. The returned size
  * is cached by ASDisplayNode for quick access during -layout, via -calculatedSize. Other expensive work that needs to
  * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
@@ -127,9 +129,10 @@
  * @summary Delegate method to draw layer contents into a CGBitmapContext. The current UIGraphics context will be set
  * to an appropriate context.
  *
+ * @param bounds Region to draw in.
  * @param parameters An object describing all of the properties you need to draw. Return this from
  * -drawParametersForAsyncLayer:
- * @param isCancelled Execute this block to check whether the current drawing operation has been cancelled to avoid
+ * @param isCancelledBlock Execute this block to check whether the current drawing operation has been cancelled to avoid
  * unnecessary work. A return value of YES means cancel drawing and return.
  * @param isRasterizing YES if the layer is being rasterized into another layer, in which case drawRect: probably wants
  * to avoid doing things like filling its bounds with a zero-alpha color to clear the backing store.
@@ -146,7 +149,7 @@
  *
  * @param parameters An object describing all of the properties you need to draw. Return this from
  * -drawParametersForAsyncLayer:
- * @param isCancelled Execute this block to check whether the current drawing operation has been cancelled to avoid
+ * @param isCancelledBlock Execute this block to check whether the current drawing operation has been cancelled to avoid
  * unnecessary work. A return value of YES means cancel drawing and return.
  *
  * @return A UIImage with contents that are ready to display on the main thread. Make sure that the image is already
@@ -159,6 +162,8 @@
 
 /**
  * @abstract Delegate override for drawParameters
+ *
+ * @param layer The layer that will be drawn into.
  *
  * @note Called on the main thread only
  */
@@ -176,16 +181,20 @@
 /**
  * @abstract Marks the receiver's bounds as needing to be redrawn, with a scale value.
  *
+ * @param contentsScale The scale at which the receiver should be drawn.
+ *
  * @discussion Subclasses should override this if they don't want their contentsScale changed.
  *
  * @note This changes an internal property.
  * -setNeedsDisplay is also available to trigger display without changing contentsScaleForDisplay.
- * @see contentsScaleForDisplay
+ * @see -setNeedsDisplay, contentsScaleForDisplay
  */
 - (void)setNeedsDisplayAtScale:(CGFloat)contentsScale;
 
 /**
  * @abstract Recursively calls setNeedsDisplayAtScale: on subnodes.
+ *
+ * @param contentsScale The scale at which the receiver's subnode hierarchy should be drawn.
  *
  * @discussion Subclasses may override this if they require modifying the scale set on their child nodes.
  *

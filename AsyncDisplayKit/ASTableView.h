@@ -84,7 +84,11 @@
 /**
  * Similar to -tableView:cellForRowAtIndexPath:.
  *
- * Return a node for display at this indexpath.  Must be thread-safe (can be called on the main thread or a background
+ * @param tableView The sender.
+ *
+ * @param indexPath The index path of the requested node.
+ *
+ * @returns a node for display at this indexpath.  Must be thread-safe (can be called on the main thread or a background
  * queue) and should not implement reuse (it will be called once per row).  Unlike UITableView's version, this method
  * is not called when the row is about to display.
  */
