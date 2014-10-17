@@ -210,6 +210,10 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
   NSParameterAssert(action);
   NSParameterAssert(controlEventMask != 0);
+  
+  // Convert nil to [NSNull null] so that it can be used as a key for NSMapTable.
+  if (!target)
+    target = [NSNull null];
 
   // Enumerate the events in the mask, adding the target-action pair for each control event included in controlEventMask
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEventMask, ^
@@ -346,7 +350,10 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
           // Hand off to UIApplication to send the action message.
           // This also handles sending to the first responder is target is nil.
-          [[UIApplication sharedApplication] sendAction:action to:target from:self forEvent:event];
+          if (target == [NSNull null])
+            [[UIApplication sharedApplication] sendAction:action to:nil from:self forEvent:event];
+          else
+            [[UIApplication sharedApplication] sendAction:action to:target from:self forEvent:event];
         }
       }
     });
