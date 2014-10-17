@@ -8,15 +8,24 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+/**
+ * Generic cell node.  Subclass ASCellNode instead of <ASDisplayNode> to use <ASTableView>.
+ */
 @interface ASCellNode : ASDisplayNode
 
-// TODO expose some UITableViewCell things for configuration, eg, separator style
+// TODO expose some UITableViewCell properties for configuration, eg, separator style
 
 @end
 
 
+/**
+ * Simple label-style cell node.  Read its source for an example of custom <ASCellNode>s.
+ */
 @interface ASTextCellNode : ASCellNode
 
+/**
+ * Text to display.
+ */
 @property (nonatomic, copy) NSString *text;
 
 @end
