@@ -8,7 +8,7 @@
 
 #import <AsyncDisplayKit/ASControlNode.h>
 
-@interface ASControlNode (ForSubclassesEyesOnly)
+@interface ASControlNode (Subclassing)
 
 /**
  @abstract Sends action messages for the given control events.

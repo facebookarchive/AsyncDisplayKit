@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-HEADERS=`ls ../AsyncDisplayKit/*.h | grep -v Subclasses`
+HEADERS=`ls ../AsyncDisplayKit/*.h`
 
 rm -rf htdocs appledoc
 
@@ -12,6 +12,7 @@ appledoc \
     --create-html \
     --exit-threshold 2 \
     --no-repeat-first-par \
+    --no-merge-categories \
     --project-name AsyncDisplayKit \
     --project-company Facebook \
     --company-id "com.facebook" \

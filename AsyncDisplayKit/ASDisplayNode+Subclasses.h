@@ -34,7 +34,7 @@
  * variables.
  */
 
-@interface ASDisplayNode (ASDisplayNodeSubclasses)
+@interface ASDisplayNode (Subclassing)
 
 
 /** @name View Configuration */
