@@ -26,6 +26,8 @@
 					<select id="jumpTo">
 	<option value="top">Jump To&#133;</option>
 	
+	<option value="overview">Overview</option>
+	
 	
 	
 	
@@ -37,9 +39,15 @@
 	
 	<option value="properties">Properties</option>
 	
+	<option value="//api/name/cropEnabled">&nbsp;&nbsp;&nbsp;&nbsp;cropEnabled</option>
+	
 	<option value="//api/name/cropRect">&nbsp;&nbsp;&nbsp;&nbsp;cropRect</option>
 	
+	<option value="//api/name/image">&nbsp;&nbsp;&nbsp;&nbsp;image</option>
+	
 	<option value="//api/name/imageModificationBlock">&nbsp;&nbsp;&nbsp;&nbsp;imageModificationBlock</option>
+	
+	<option value="//api/name/tint">&nbsp;&nbsp;&nbsp;&nbsp;tint</option>
 	
 	
 	
@@ -61,6 +69,8 @@
 		<nav id="tocContainer" class="isShowingTOC">
 			<ul id="toc" role="tree">
 				
+<li role="treeitem"><span class="nodisclosure"></span><span class="sectionName"><a href="#overview">Overview</a></span></li>
+
 
 
 
@@ -74,9 +84,15 @@
 
 <li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#properties">Properties</a></span><ul>
 	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/cropEnabled">cropEnabled</a></span></li>
+	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/cropRect">cropRect</a></span></li>
 	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/image">image</a></span></li>
+	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/imageModificationBlock">imageModificationBlock</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/tint">tint</a></span></li>
 	
 </ul></li>
 
@@ -124,6 +140,14 @@
                     
                     
 					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>Supports cropping, tinting, and arbitrary <a href="#//api/name/image">image</a> modification blocks.</p>
+					</div>
+					
+					
+					
 					
 					
 					<div class="section section-tasks">
@@ -136,6 +160,24 @@
 
 						<ul class="task-list">
 							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/image">&nbsp;&nbsp;image</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/tint">&nbsp;&nbsp;tint</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/cropEnabled">&nbsp;&nbsp;cropEnabled</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
 	<span class="tooltip">
 		<code><a href="#//api/name/setCropEnabled:recropImmediately:inBounds:">&ndash;&nbsp;setCropEnabled:recropImmediately:inBounds:</a></code>
 	</span>
@@ -173,6 +215,48 @@
 						<h2 class="subtitle subtitle-methods">Properties</h2>
 						
 						<div class="section-method">
+	<a name="//api/name/cropEnabled" title="cropEnabled"></a>
+	<h3 class="subsubtitle method-title">cropEnabled</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Indicates whether efficient cropping of the receiver is enabled.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, getter=isCropEnabled) BOOL cropEnabled</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Defaults to YES. See <a href="#//api/name/setCropEnabled:recropImmediately:inBounds:">setCropEnabled:recropImmediately:inBounds:</a> for more
+information.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASImageNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
 	<a name="//api/name/cropRect" title="cropRect"></a>
 	<h3 class="subsubtitle method-title">cropRect</h3>
 	
@@ -196,7 +280,56 @@
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>This value defines a rectangle that is to be featured by the receiver. The rectangle is specified as a &ldquo;unit rectangle,&rdquo; using percentages of the source image&rsquo;s width and height, e.g. CGRectMake(0.5, 0, 0.5, 1.0) will feature the full right half a photo. If the cropRect is empty, the content mode of the receiver will be used to determine its dimensions, and only the cropRect&rsquo;s origin will be used for positioning. The default value of this property is CGRectMake(0.5, 0.5, 0.0, 0.0).</p>
+		<p>This value defines a rectangle that is to be featured by the
+receiver. The rectangle is specified as a &ldquo;unit rectangle,&rdquo; using
+percentages of the source image&rsquo;s width and height, e.g. CGRectMake(0.5, 0,
+0.5, 1.0) will feature the full right half a photo. If the cropRect is
+empty, the content mode of the receiver will be used to determine its
+dimensions, and only the cropRect&rsquo;s origin will be used for positioning. The
+default value of this property is CGRectMake(0.5, 0.5, 0.0, 0.0).</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASImageNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/image" title="image"></a>
+	<h3 class="subsubtitle method-title">image</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>The image to display.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (atomic, retain) UIImage *image</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>The node will efficiently display stretchable images by using
+the layer&rsquo;s contentsCenter property.  Non-stretchable images work too, of
+course.</p>
 	</div>
 	
 	
@@ -220,7 +353,8 @@
 	
 	
 	<div class="method-subsection brief-description">
-		<p>An optional block which can perform drawing operations on {@ref image} during the display phase.</p>
+		<p>An optional block which can perform drawing operations on <a href="#//api/name/image">image</a>
+during the display phase.</p>
 	</div>		
 	
     
@@ -237,8 +371,45 @@
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>Can be used to add image effects (such as rounding, adding borders, or other pattern overlays) without extraneous display calls.</p>
+		<p>Can be used to add <a href="#//api/name/image">image</a> effects (such as rounding, adding
+borders, or other pattern overlays) without extraneous display calls.</p>
 	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASImageNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/tint" title="tint"></a>
+	<h3 class="subsubtitle method-title">tint</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Simple way to tint the <a href="#//api/name/image">image</a>.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASImageNodeTint tint</code></div>
+
+    
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -285,17 +456,20 @@
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>cropEnabled</em></dt>
-			<dd><p>YES to efficiently crop the receiver&rsquo;s contents such that contents outside of its bounds are not included; NO otherwise.</p></dd>
+			<dd><p>YES to efficiently crop the receiver&rsquo;s contents such that
+contents outside of its bounds are not included; NO otherwise.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>recropImmediately</em></dt>
-			<dd><p>If the receiver has an image, YES to redisplay the receiver immediately; NO otherwise.</p></dd>
+			<dd><p>If the receiver has an <a href="#//api/name/image">image</a>, YES to redisplay the
+receiver immediately; NO otherwise.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>cropBounds</em></dt>
-			<dd><p>The bounds into which the receiver will be cropped. Useful if bounds are to change in response to cropping (but have not yet done so).</p></dd>
+			<dd><p>The bounds into which the receiver will be cropped. Useful
+if bounds are to change in response to cropping (but have not yet done so).</p></dd>
 		</dl>
 		
 	</div>
@@ -308,7 +482,9 @@
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>Efficient cropping is only performed when the receiver&rsquo;s view&rsquo;s contentMode is UIViewContentModeScaleAspectFill. By default, cropping is enabled. The crop alignment may be controlled via cropAlignmentFactor.</p>
+		<p>Efficient cropping is only performed when the receiver&rsquo;s view&rsquo;s
+contentMode is UIViewContentModeScaleAspectFill. By default, cropping is
+enabled. The crop alignment may be controlled via cropAlignmentFactor.</p>
 	</div>
 	
 	
@@ -332,7 +508,8 @@
 	
 	
 	<div class="method-subsection brief-description">
-		<p>Marks the receiver as needing display and performs a block after display has finished.</p>
+		<p>Marks the receiver as needing display and performs a block after
+display has finished.</p>
 	</div>		
 	
     
@@ -346,12 +523,14 @@
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>displayCompletionBlock</em></dt>
-			<dd><p>The block to be performed after display has finished.</p></dd>
+			<dd><p>The block to be performed after display has
+finished.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>canceled</em></dt>
-			<dd><p>YES if display was prevented or canceled (via preventOrCancelDisplay); NO otherwise.</p></dd>
+			<dd><p>YES if display was prevented or canceled (via
+preventOrCancelDisplay); NO otherwise.</p></dd>
 		</dl>
 		
 	</div>
@@ -364,7 +543,9 @@
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>displayCompletionBlock will be performed on the main-thread. If <code>preventOrCancelDisplay</code> is YES, <code>displayCompletionBlock</code> is will be performed immediately and <code>YES</code> will be passed for <code>canceled</code>.</p>
+		<p>displayCompletionBlock will be performed on the main-thread. If
+<code>preventOrCancelDisplay</code> is YES, <code>displayCompletionBlock</code> is will be
+performed immediately and <code>YES</code> will be passed for <code>canceled</code>.</p>
 	</div>
 	
 	
