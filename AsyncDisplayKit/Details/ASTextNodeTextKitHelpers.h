@@ -23,7 +23,7 @@ typedef struct {
   @abstract Creates the stack of TextKit components.
   @param attributedSeedString The attributed string to sed the returned text storage with, or nil to receive an blank text storage.
   @param textContainerSize The size of the text-container. Typically, size specifies the constraining width of the layout, and FLT_MAX for height. Pass CGSizeZero if these components will be hooked up to a UITextView, which will manage the text container's size itself.
-  @return A {@ref ASTextKitComponents} containing the created components. The text view component will be nil.
+  @return A `ASTextKitComponents` containing the created components. The text view component will be nil.
   @discussion The returned components will be hooked up together, so they are ready for use as a system upon return.
  */
 extern ASTextKitComponents ASTextKitComponentsCreate(NSAttributedString *attributedSeedString, CGSize textContainerSize);

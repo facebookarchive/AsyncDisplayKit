@@ -37,7 +37,7 @@ typedef struct {
 /**
  * Notify the receiver that the visible range has been updated.
  *
- * @see -rangeControllerVisibleNodeIndexPaths:
+ * @see [ASRangeControllerDelegate rangeControllerVisibleNodeIndexPaths:]
  */
 - (void)visibleNodeIndexPathsDidChange;
 

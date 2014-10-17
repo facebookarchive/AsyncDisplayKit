@@ -15,10 +15,10 @@
 /**
   @abstract Attempts to fetch an image with the given URL from the cache.
   @param URL The URL of the image to retrieve from the cache.
-  @param callbackQueue The queue to call {@ref completion} on. If this value is nil, @{ref completion} will be invoked on the main-queue.
+  @param callbackQueue The queue to call `completion` on. If this value is nil, @{ref completion} will be invoked on the main-queue.
   @param completion The block to be called when the cache has either hit or missed.
   @param imageFromCache The image that was retrieved from the cache, if the image could be retrieved; nil otherwise.
-  @discussion If {@ref URL} is nil, {@ref completion} will be invoked immediately with a nil image.
+  @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image.
  */
 - (void)fetchCachedImageWithURL:(NSURL *)URL
                   callbackQueue:(dispatch_queue_t)callbackQueue
@@ -32,14 +32,14 @@
 /**
   @abstract Downloads an image with the given URL.
   @param URL The URL of the image to download.
-  @param callbackQueue The queue to call {@ref downloadProgressBlock} and {@ref completion} on. If this value is nil, both blocks will be invoked on the main-queue.
-  @param downloadProgressBlock The block to be invoked when the download of {@ref URL} progresses.
+  @param callbackQueue The queue to call `downloadProgressBlock` and `completion` on. If this value is nil, both blocks will be invoked on the main-queue.
+  @param downloadProgressBlock The block to be invoked when the download of `URL` progresses.
   @param progress The progress of the download, in the range of (0.0, 1.0), inclusive.
   @param completion The block to be invoked when the download has completed, or has failed.
   @param image The image that was downloaded, if the image could be successfully downloaded; nil otherwise.
-  @param error An error describing why the download of {@ref URL} failed, if the download failed; nil otherwise.
-  @discussion If {@ref URL} is nil, {@ref completion} will be invoked immediately with a nil image and an error describing why the download failed.
-  @result An opaque identifier to be used in canceling the download, via {@ref cancelImageDownloadForIdentifier:}. You must retain the identifier if you wish to use it later.
+  @param error An error describing why the download of `URL` failed, if the download failed; nil otherwise.
+  @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image and an error describing why the download failed.
+  @result An opaque identifier to be used in canceling the download, via `cancelImageDownloadForIdentifier:`. You must retain the identifier if you wish to use it later.
  */
 - (id)downloadImageWithURL:(NSURL *)URL
              callbackQueue:(dispatch_queue_t)callbackQueue
@@ -48,8 +48,8 @@
 
 /**
   @abstract Cancels an image download.
-  @param downloadIdentifier The opaque download identifier object returned from {@ref downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:}.
-  @discussion This method has no effect if {@ref downloadIdentifier} is nil.
+  @param downloadIdentifier The opaque download identifier object returned from `downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:`.
+  @discussion This method has no effect if `downloadIdentifier` is nil.
  */
 - (void)cancelImageDownloadForIdentifier:(id)downloadIdentifier;
 

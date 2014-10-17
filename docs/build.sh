@@ -13,6 +13,7 @@ appledoc \
     --exit-threshold 2 \
     --no-repeat-first-par \
     --no-merge-categories \
+    --explicit-crossref \
     --project-name AsyncDisplayKit \
     --project-company Facebook \
     --company-id "com.facebook" \

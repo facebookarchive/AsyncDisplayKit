@@ -137,7 +137,7 @@
  * @warning Subclasses must not override this; it caches results from -calculateSizeThatFits:.  Calling this method may 
  * be expensive if result is not cached.
  *
- * @see calculateSizeThatFits:
+ * @see [ASDisplayNode(Subclassing) calculateSizeThatFits:]
  */
 - (CGSize)measure:(CGSize)constrainedSize;
 
@@ -310,8 +310,6 @@
  *
  * If a setNeedsDisplay occurs while preventOrCancelDisplay is YES, and preventOrCancelDisplay is set to NO, then the 
  * layer will be automatically displayed.
- *
- * @see displayWasCancelled
  */
 @property (nonatomic, assign) BOOL preventOrCancelDisplay;
 
@@ -433,7 +431,7 @@
  *
  * After the view is created, the properties pass through to the view directly as if called on the main thread.
  *
- * @see UIView and CALayer for documentation on these common properties.
+ * See UIView and CALayer for documentation on these common properties.
  */
 @interface ASDisplayNode (UIViewBridge)
 
