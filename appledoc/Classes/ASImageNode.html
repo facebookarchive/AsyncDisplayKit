@@ -143,7 +143,7 @@
 					<div class="section section-overview">
 						<a title="Overview" name="overview"></a>
 						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p>Supports cropping, tinting, and arbitrary <a href="#//api/name/image">image</a> modification blocks.</p>
+						<p>Supports cropping, tinting, and arbitrary image modification blocks.</p>
 					</div>
 					
 					
@@ -238,7 +238,7 @@
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>Defaults to YES. See <a href="#//api/name/setCropEnabled:recropImmediately:inBounds:">setCropEnabled:recropImmediately:inBounds:</a> for more
+		<p>Defaults to YES. See -setCropEnabled:recropImmediately:inBounds: for more
 information.</p>
 	</div>
 	
@@ -353,7 +353,7 @@ course.</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>An optional block which can perform drawing operations on <a href="#//api/name/image">image</a>
+		<p>An optional block which can perform drawing operations on image
 during the display phase.</p>
 	</div>		
 	
@@ -371,7 +371,7 @@ during the display phase.</p>
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>Can be used to add <a href="#//api/name/image">image</a> effects (such as rounding, adding
+		<p>Can be used to add image effects (such as rounding, adding
 borders, or other pattern overlays) without extraneous display calls.</p>
 	</div>
 	
@@ -396,7 +396,7 @@ borders, or other pattern overlays) without extraneous display calls.</p>
 	
 	
 	<div class="method-subsection brief-description">
-		<p>Simple way to tint the <a href="#//api/name/image">image</a>.</p>
+		<p>Simple way to tint the image.</p>
 	</div>		
 	
     
@@ -462,7 +462,7 @@ contents outside of its bounds are not included; NO otherwise.</p></dd>
 		
 		<dl class="argument-def parameter-def">
 			<dt><em>recropImmediately</em></dt>
-			<dd><p>If the receiver has an <a href="#//api/name/image">image</a>, YES to redisplay the
+			<dd><p>If the receiver has an image, YES to redisplay the
 receiver immediately; NO otherwise.</p></dd>
 		</dl>
 		
@@ -524,13 +524,8 @@ display has finished.</p>
 		<dl class="argument-def parameter-def">
 			<dt><em>displayCompletionBlock</em></dt>
 			<dd><p>The block to be performed after display has
-finished.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>canceled</em></dt>
-			<dd><p>YES if display was prevented or canceled (via
-preventOrCancelDisplay); NO otherwise.</p></dd>
+finished.  Its <code>canceled</code> property will be YES if display was prevented or
+canceled (via preventOrCancelDisplay); NO otherwise.</p></dd>
 		</dl>
 		
 	</div>
