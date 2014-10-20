@@ -210,6 +210,11 @@ CGFloat ASDisplayNodeScreenScale()
   return YES;
 }
 
+- (void)__exitedHierarchy
+{
+
+}
+
 - (void)_loadViewOrLayerIsLayerBacked:(BOOL)isLayerBacked
 {
   ASDN::MutexLocker l(_propertyLock);
@@ -1116,6 +1121,8 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_flags.isInExitHierarchy, @"You should never call -didExitHierarchy directly. Appearance is automatically managed by ASDisplayNode");
   ASDisplayNodeAssert(!_flags.isInEnterHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
+
+  [self __exitedHierarchy];
 }
 
 - (void)reclaimMemory

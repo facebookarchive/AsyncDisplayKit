@@ -90,6 +90,7 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;
 - (BOOL)__shouldSize;
+- (void)__exitedHierarchy;
 
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
