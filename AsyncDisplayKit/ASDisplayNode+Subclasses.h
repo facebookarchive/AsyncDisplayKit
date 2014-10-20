@@ -175,7 +175,7 @@
  * @discussion Subclasses may override this method to be notified when display (asynchronous or synchronous) has
  * completed.
  */
-- (void)displayDidFinish;
+- (void)displayDidFinish ASDISPLAYNODE_REQUIRES_SUPER;
 
 
 /**
@@ -276,15 +276,15 @@
 
 
 // Called just before the view is added to a superview.
-- (void)willEnterHierarchy;
+- (void)willEnterHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
 
 // Called after the view is removed from the window.
-- (void)didExitHierarchy;
+- (void)didExitHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
 
 // Called by -recursivelyReclaimMemory.  Provides an opportunity to clear backing store and other memory-intensive intermediates,
 // such as text layout managers or downloaded content that can be written to a disk cache.
 // Base class implements self.contents = nil, clearing any backing store, for asynchronous regeneration when needed.
-- (void)reclaimMemory;
+- (void)reclaimMemory ASDISPLAYNODE_REQUIRES_SUPER;
 
 
 /** @name Description */
