@@ -275,15 +275,23 @@
 /** @name Observing node-related changes */
 
 
-// Called just before the view is added to a superview.
+/**
+ * Called just before the view is added to a superview.
+ */
 - (void)willEnterHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
 
-// Called after the view is removed from the window.
+/**
+ * Called after the view is removed from the window.
+ */
 - (void)didExitHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
 
-// Called by -recursivelyReclaimMemory.  Provides an opportunity to clear backing store and other memory-intensive intermediates,
-// such as text layout managers or downloaded content that can be written to a disk cache.
-// Base class implements self.contents = nil, clearing any backing store, for asynchronous regeneration when needed.
+/**
+ * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
+ * or downloaded content that can be written to a disk cache.
+ *
+ * @discussion Called by -recursivelyReclaimMemory.   Base class implements self.contents = nil, clearing any backing
+ * store, for asynchronous regeneration when needed.
+ */
 - (void)reclaimMemory ASDISPLAYNODE_REQUIRES_SUPER;
 
 
