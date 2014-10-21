@@ -47,7 +47,7 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
   return (superclassIMP != subclassIMP);
 }
 
-static CGFloat ASDisplayNodeScreenScale()
+CGFloat ASDisplayNodeScreenScale()
 {
   static CGFloat screenScale = 0.0;
   static dispatch_once_t onceToken;
