@@ -106,35 +106,35 @@
 
 - (void)setImage:(UIImage *)image
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_imageLock);
   if (_image != image) {
     _image = image;
-    [self invalidateCalculatedSize];
-    [self setNeedsDisplay];
+    ASDisplayNodePerformBlockOnMainThread(^{
+      [self invalidateCalculatedSize];
+      [self setNeedsDisplay];
+    });
   }
 }
 
 - (UIImage *)image
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_imageLock);
   return _image;
 }
 
 - (void)setTint:(ASImageNodeTint)tint
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_imageLock);
   if (_tint != tint) {
     _tint = tint;
-    [self setNeedsDisplay];
+    ASDisplayNodePerformBlockOnMainThread(^{
+      [self setNeedsDisplay];
+    });
   }
 }
 
 - (ASImageNodeTint)tint
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_imageLock);
   return _tint;
 }
@@ -281,19 +281,16 @@
 #pragma mark - Cropping
 - (BOOL)isCropEnabled
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   return _cropEnabled;
 }
 
 - (void)setCropEnabled:(BOOL)cropEnabled
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   [self setCropEnabled:cropEnabled recropImmediately:NO inBounds:self.bounds];
 }
 
 - (void)setCropEnabled:(BOOL)cropEnabled recropImmediately:(BOOL)recropImmediately inBounds:(CGRect)cropBounds
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   if (_cropEnabled == cropEnabled)
     return;
 
@@ -303,23 +300,22 @@
   // If we have an image to display, display it, respecting our recrop flag.
   if (self.image)
   {
-    if (recropImmediately)
-      [self displayImmediately];
-    else
-      [self setNeedsDisplay];
+    ASDisplayNodePerformBlockOnMainThread(^{
+      if (recropImmediately)
+        [self displayImmediately];
+      else
+        [self setNeedsDisplay];
+    });
   }
 }
 
 - (CGRect)cropRect
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   return _cropRect;
 }
 
 - (void)setCropRect:(CGRect)cropRect
 {
-  ASDisplayNodeAssertThreadAffinity(self);
-
   if (CGRectEqualToRect(_cropRect, cropRect))
     return;
 
@@ -332,8 +328,10 @@
   BOOL isCroppingImage = ((boundsSize.width < imageSize.width) || (boundsSize.height < imageSize.height));
 
   // Re-display if we need to.
-  if (self.nodeLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
-    [self setNeedsDisplay];
+  ASDisplayNodePerformBlockOnMainThread(^{
+    if (self.nodeLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
+      [self setNeedsDisplay];
+  });
 }
 
 @end

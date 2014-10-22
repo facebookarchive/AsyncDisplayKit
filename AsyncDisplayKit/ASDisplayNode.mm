@@ -63,6 +63,17 @@ CGFloat ASDisplayNodeScreenScale()
   return screenScale;
 }
 
+void ASDisplayNodePerformBlockOnMainThread(void (^block)())
+{
+  if ([NSThread isMainThread]) {
+    block();
+  } else {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      block();
+    });
+  }
+}
+
 + (void)initialize
 {
   if (self == [ASDisplayNode class]) {

@@ -138,15 +138,7 @@ static const CGFloat kInnerPadding = 10.0f;
                              return;
 
                            // set our image node's data
-                           if (_imageNode.nodeLoaded) {
-                             dispatch_sync(dispatch_get_main_queue(), ^{
-                               // once the node's view is loaded, the node should only be used on the main thread
-                               _imageNode.image = [UIImage imageWithData:data];
-                             });
-                           } else {
-                             // if the node hasn't loaded, we can use it on a background thread
-                             _imageNode.image = [UIImage imageWithData:data];
-                           }
+                           _imageNode.image = [UIImage imageWithData:data];
                          }];
 }
 
