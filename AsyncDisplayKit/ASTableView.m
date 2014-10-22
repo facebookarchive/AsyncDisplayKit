@@ -346,21 +346,22 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController didSizeNodesWithIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  [UIView performWithoutAnimation:^{
+    [super beginUpdates];
 
-  [super beginUpdates];
+    // -insertRowsAtIndexPaths:: is insufficient; UITableView also needs to be notified of section changes
+    NSInteger sectionCount = [super numberOfSections];
+    NSInteger newSectionCount = [_rangeController numberOfSizedSections];
+    if (newSectionCount > sectionCount) {
+      NSRange range = NSMakeRange(sectionCount, newSectionCount - sectionCount);
+      NSIndexSet *sections = [NSIndexSet indexSetWithIndexesInRange:range];
+      [super insertSections:sections withRowAnimation:UITableViewRowAnimationNone];
+    }
 
-  // -insertRowsAtIndexPaths:: is insufficient; UITableView also needs to be notified of section changes
-  NSInteger sectionCount = [super numberOfSections];
-  NSInteger newSectionCount = [_rangeController numberOfSizedSections];
-  if (newSectionCount > sectionCount) {
-    NSRange range = NSMakeRange(sectionCount, newSectionCount - sectionCount);
-    NSIndexSet *sections = [NSIndexSet indexSetWithIndexesInRange:range];
-    [super insertSections:sections withRowAnimation:UITableViewRowAnimationNone];
-  }
+    [super insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
 
-  [super insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-
-  [super endUpdates];
+    [super endUpdates];
+  }];
 }
 
 
