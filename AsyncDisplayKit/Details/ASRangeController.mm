@@ -524,6 +524,10 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
 
 - (void)sizeNextBlock
 {
+  // can't size anything if we don't have a delegate
+  if (!_delegate)
+    return;
+
   // concurrently size as many nodes as the CPU allows
   static const NSInteger blockSize = [[NSProcessInfo processInfo] processorCount];
   NSRange sizingRange = NSMakeRange(_sizedNodeCount, MIN(blockSize, _totalNodeCount - _sizedNodeCount));
