@@ -63,6 +63,8 @@
 	
 	<option value="//api/name/descriptionForRecursiveDescription">&nbsp;&nbsp;&nbsp;&nbsp;- descriptionForRecursiveDescription</option>
 	
+	<option value="//api/name/didExitHierarchy">&nbsp;&nbsp;&nbsp;&nbsp;- didExitHierarchy</option>
+	
 	<option value="//api/name/didLoad">&nbsp;&nbsp;&nbsp;&nbsp;- didLoad</option>
 	
 	<option value="//api/name/displayDidFinish">&nbsp;&nbsp;&nbsp;&nbsp;- displayDidFinish</option>
@@ -79,6 +81,8 @@
 	
 	<option value="//api/name/layoutDidFinish">&nbsp;&nbsp;&nbsp;&nbsp;- layoutDidFinish</option>
 	
+	<option value="//api/name/reclaimMemory">&nbsp;&nbsp;&nbsp;&nbsp;- reclaimMemory</option>
+	
 	<option value="//api/name/recursivelySetNeedsDisplayAtScale:">&nbsp;&nbsp;&nbsp;&nbsp;- recursivelySetNeedsDisplayAtScale:</option>
 	
 	<option value="//api/name/setNeedsDisplayAtScale:">&nbsp;&nbsp;&nbsp;&nbsp;- setNeedsDisplayAtScale:</option>
@@ -90,6 +94,8 @@
 	<option value="//api/name/touchesEnded:withEvent:">&nbsp;&nbsp;&nbsp;&nbsp;- touchesEnded:withEvent:</option>
 	
 	<option value="//api/name/touchesMoved:withEvent:">&nbsp;&nbsp;&nbsp;&nbsp;- touchesMoved:withEvent:</option>
+	
+	<option value="//api/name/willEnterHierarchy">&nbsp;&nbsp;&nbsp;&nbsp;- willEnterHierarchy</option>
 	
 	
 	
@@ -124,6 +130,8 @@
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Managing Gesture Recognizers">Managing Gesture Recognizers</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Hit Testing">Hit Testing</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Observing node-related changes">Observing node-related changes</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Description">Description</a></span></li>
 	
@@ -161,6 +169,8 @@
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/descriptionForRecursiveDescription">descriptionForRecursiveDescription</a></span></li>
 	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/didExitHierarchy">didExitHierarchy</a></span></li>
+	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/didLoad">didLoad</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/displayDidFinish">displayDidFinish</a></span></li>
@@ -177,6 +187,8 @@
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/layoutDidFinish">layoutDidFinish</a></span></li>
 	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/reclaimMemory">reclaimMemory</a></span></li>
+	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/recursivelySetNeedsDisplayAtScale:">recursivelySetNeedsDisplayAtScale:</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/setNeedsDisplayAtScale:">setNeedsDisplayAtScale:</a></span></li>
@@ -188,6 +200,8 @@
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/touchesEnded:withEvent:">touchesEnded:withEvent:</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/touchesMoved:withEvent:">touchesMoved:withEvent:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/willEnterHierarchy">willEnterHierarchy</a></span></li>
 	
 </ul></li>
 
@@ -436,6 +450,32 @@ variables.</p>
 							<li>
 	<span class="tooltip">
 		<code><a href="#//api/name/hitTest:withEvent:">&ndash;&nbsp;hitTest:withEvent:</a></code>
+	</span>
+	
+	
+</li>
+						</ul>
+						
+						
+						<a title="Observing node-related changes" name="task_Observing node-related changes"></a>
+						<h3 class="subsubtitle task-title">Observing node-related changes</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/willEnterHierarchy">&ndash;&nbsp;willEnterHierarchy</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/didExitHierarchy">&ndash;&nbsp;didExitHierarchy</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/reclaimMemory">&ndash;&nbsp;reclaimMemory</a></code>
 	</span>
 	
 	
@@ -841,6 +881,42 @@ encouraged.</p><div class="note"><p><strong>Note:</strong> This method should no
 </div>
 						
 						<div class="section-method">
+	<a name="//api/name/didExitHierarchy" title="didExitHierarchy"></a>
+	<h3 class="subsubtitle method-title">didExitHierarchy</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Called after the view is removed from the window.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)didExitHierarchy</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode+Subclasses.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
 	<a name="//api/name/didLoad" title="didLoad"></a>
 	<h3 class="subsubtitle method-title">didLoad</h3>
 	
@@ -1210,6 +1286,49 @@ out.</p>
 </div>
 						
 						<div class="section-method">
+	<a name="//api/name/reclaimMemory" title="reclaimMemory"></a>
+	<h3 class="subsubtitle method-title">reclaimMemory</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
+or downloaded content that can be written to a disk cache.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)reclaimMemory</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Called by -recursivelyReclaimMemory.   Base class implements self.contents = nil, clearing any backing
+store, for asynchronous regeneration when needed.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode+Subclasses.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
 	<a name="//api/name/recursivelySetNeedsDisplayAtScale:" title="recursivelySetNeedsDisplayAtScale:"></a>
 	<h3 class="subsubtitle method-title">recursivelySetNeedsDisplayAtScale:</h3>
 	
@@ -1536,6 +1655,42 @@ out.</p>
 	
 </div>
 						
+						<div class="section-method">
+	<a name="//api/name/willEnterHierarchy" title="willEnterHierarchy"></a>
+	<h3 class="subsubtitle method-title">willEnterHierarchy</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Called just before the view is added to a superview.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)willEnterHierarchy</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode+Subclasses.h</code><br />
+	</div>				
+	
+	
+</div>
+						
 					</div>
 					
 					
@@ -1554,7 +1709,7 @@ out.</p>
 				<div id="footer">
 					<hr />
 					<div class="footer-copyright">
-						<p><span class="copyright">&copy; 2014 Facebook. All rights reserved. (Last updated: 2014-10-17)</span><br />
+						<p><span class="copyright">&copy; 2014 Facebook. All rights reserved. (Last updated: 2014-10-22)</span><br />
 						
 						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2 (build 963)</a>.</span></p>
 						
