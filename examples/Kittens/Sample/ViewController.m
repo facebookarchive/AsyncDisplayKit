@@ -56,6 +56,8 @@ static const NSInteger kLitterSize = 20;
   }
   _kittenDataSource = kittenDataSource;
 
+    UIImageView *image = [[UIImageView alloc] init];
+    [image sizeThatFits:CGSizeMake(30, 30)];
   return self;
 }
 
