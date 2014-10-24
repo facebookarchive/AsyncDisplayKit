@@ -48,6 +48,7 @@
 @property (nonatomic, getter=isHidden)                  BOOL hidden;
 @property (nonatomic, assign)                           BOOL autoresizesSubviews;
 @property (nonatomic, assign)                           UIViewAutoresizing autoresizingMask;
+@property (nonatomic, retain)                           UIColor *tintColor;
 @property (nonatomic, assign)                           CGFloat alpha;
 @property (nonatomic, assign)                           CGRect bounds;
 @property (nonatomic, assign)                           UIViewContentMode contentMode;

@@ -364,6 +364,25 @@
   _setToLayer(backgroundColor, backgroundColor.CGColor);
 }
 
+- (UIColor *)tintColor
+{
+    _bridge_prologue;
+    ASDisplayNodeAssert(!_flags.isLayerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+    return _getFromViewOnly(tintColor);
+}
+
+- (void)setTintColor:(UIColor *)color
+{
+    _bridge_prologue;
+    ASDisplayNodeAssert(!_flags.isLayerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+    _setToViewOnly(tintColor, color);
+}
+
+- (void)tintColorDidChange
+{
+    // ignore this, allow subclasses to be notified
+}
+
 - (CGColorRef)shadowColor
 {
   _bridge_prologue;

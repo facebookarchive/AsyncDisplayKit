@@ -61,6 +61,7 @@
     int setAutoresizingMask:1;
     int setBounds:1;
     int setBackgroundColor:1;
+    int setTintColor:1;
     int setContents:1;
     int setHidden:1;
     int setAlpha:1;
@@ -109,6 +110,7 @@
 @synthesize edgeAntialiasingMask=edgeAntialiasingMask;
 @synthesize autoresizesSubviews=autoresizesSubviews;
 @synthesize autoresizingMask=autoresizingMask;
+@synthesize tintColor=tintColor;
 @synthesize alpha=alpha;
 @synthesize contentMode=contentMode;
 @synthesize anchorPoint=anchorPoint;
@@ -148,6 +150,7 @@
   opaque = YES;
   bounds = CGRectZero;
   backgroundColor = nil;
+  tintColor = [UIColor colorWithRed:0.0 green:0.478 blue:1.0 alpha:1.0];
   contents = nil;
   isHidden = NO;
   needsDisplayOnBoundsChange = NO;
@@ -263,6 +266,12 @@
   CGColorRelease(backgroundColor);
   backgroundColor = CGColorRetain(color);
   _flags.setBackgroundColor = YES;
+}
+
+- (void)setTintColor:(UIColor *)newTintColor
+{
+  tintColor = newTintColor;
+  _flags.setTintColor = YES;
 }
 
 - (void)setContents:(id)newContents
@@ -651,6 +660,9 @@
 
   if (_flags.setBackgroundColor)
     layer.backgroundColor = backgroundColor;
+
+  if (_flags.setTintColor)
+    view.tintColor = self.tintColor;
 
   if (_flags.setOpaque)
     view.layer.opaque = opaque;
