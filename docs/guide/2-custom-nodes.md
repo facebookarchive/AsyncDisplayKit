@@ -202,8 +202,9 @@ For example, this node will draw a rainbow:
 
 This could easily be extended to support vertical rainbows too, by adding a
 `vertical` property to the node, exporting it in
-`-drawParametersForAsyncLayer:`, and referencing it in `+drawRect::::`.
-More-complex nodes can be supported in much the same way.
+`-drawParametersForAsyncLayer:`, and referencing it in
+`+drawRect:withParameters:isCancelled:isRasterizing:`. More-complex nodes can
+be supported in much the same way.
 
 For more on custom nodes, check out the [subclassing
 header](https://github.com/facebook/AsyncDisplayKit/blob/master/AsyncDisplayKit/ASDisplayNode%2BSubclasses.h)
