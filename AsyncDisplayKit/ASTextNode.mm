@@ -554,6 +554,12 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
         for (NSValue *rectValue in highlightRects) {
           CGRect rendererRect = [[self class] _adjustRendererRect:rectValue.CGRectValue forShadowPadding:_shadower.shadowPadding];
           CGRect highlightedRect = [self.layer convertRect:rendererRect toLayer:highlightTargetLayer];
+
+          // We set our overlay layer's frame to the bounds of the highlight target layer.
+          // Offset highlight rects to avoid double-counting target layer's bounds.origin.
+          highlightedRect.origin.x -= highlightTargetLayer.bounds.origin.x;
+          highlightedRect.origin.y -= highlightTargetLayer.bounds.origin.y;
+          
           [converted addObject:[NSValue valueWithCGRect:highlightedRect]];
         }
 
