@@ -418,8 +418,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
       // Check if delegate implements optional method, if not assume NO.
       // Should the text be highlightable/touchable?
-      if (![_delegate respondsToSelector:@selector(textNode:shouldHighlightLinkAttribute:value:)] ||
-          ![_delegate textNode:self shouldHighlightLinkAttribute:name value:value]) {
+      if (![_delegate respondsToSelector:@selector(textNode:shouldHighlightLinkAttribute:value:atPoint:)] ||
+          ![_delegate textNode:self shouldHighlightLinkAttribute:name value:value atPoint:point]) {
         value = nil;
         name = nil;
       }
@@ -465,8 +465,11 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     }
 
     // Ask our delegate if a long-press on an attribute is relevant
-    if ([self.delegate respondsToSelector:@selector(textNode:shouldLongPressLinkAttribute:value:)]) {
-      return [self.delegate textNode:self shouldLongPressLinkAttribute:_highlightedLinkAttributeName value:_highlightedLinkAttributeValue];
+    if ([self.delegate respondsToSelector:@selector(textNode:shouldLongPressLinkAttribute:value:atPoint:)]) {
+      return [self.delegate textNode:self
+        shouldLongPressLinkAttribute:_highlightedLinkAttributeName
+                               value:_highlightedLinkAttributeValue
+                             atPoint:[gestureRecognizer locationInView:self.view]];
     }
 
     // Otherwise we are good to go.
