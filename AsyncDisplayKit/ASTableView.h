@@ -108,6 +108,7 @@
 @optional
 
 - (void)tableView:(UITableView *)tableView willDisplayNode:(ASCellNode *)cellNode insideCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void)tableView:(UITableView *)tableView willDisplayNodeForRowAtIndexPath:(NSIndexPath *)indexPath;
 - (void)tableView:(UITableView *)tableView didEndDisplayingNodeForRowAtIndexPath:(NSIndexPath*)indexPath;
 
 @end
