@@ -285,8 +285,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   [_rangeController visibleNodeIndexPathsDidChange];
 
-  if ([_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)]) {
-    [_asyncDelegate tableView:self willDisplayNodeForRowAtIndexPath:indexPath];
+  if ([_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNode:insideCell:forRowAtIndexPath:)]) {
+    [_asyncDelegate tableView:self willDisplayNode:[_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath] insideCell:cell forRowAtIndexPath:indexPath];
   }
 }
 
