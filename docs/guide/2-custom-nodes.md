@@ -154,10 +154,11 @@ drawing API diverges substantially from UIView's.  Instead of implementing
     `-drawParametersForAsyncLayer:`.  This method will always be called on the
     main thread.
 
-3.  Implement either `+drawRect::::` or `+displayWithParameters::`.  Note that
-    these are *class* methods that will not have access to your node's state
-    &mdash; only the draw parameters object.  They can be called on any thread
-    and must be thread-safe.
+3.  Implement either `+drawRect:withParameters:isCancelled:isRasterizing:` or
+    `+displayWithParameters:isCancelled:`.  Note that these are *class* methods
+    that will not have access to your node's state &mdash; only the draw
+    parameters object.  They can be called on any thread and must be
+    thread-safe.
 
 For example, this node will draw a rainbow:
 
@@ -201,8 +202,9 @@ For example, this node will draw a rainbow:
 
 This could easily be extended to support vertical rainbows too, by adding a
 `vertical` property to the node, exporting it in
-`-drawParametersForAsyncLayer:`, and referencing it in `+drawRect::::`.
-More-complex nodes can be supported in much the same way.
+`-drawParametersForAsyncLayer:`, and referencing it in
+`+drawRect:withParameters:isCancelled:isRasterizing:`. More-complex nodes can
+be supported in much the same way.
 
 For more on custom nodes, check out the [subclassing
 header](https://github.com/facebook/AsyncDisplayKit/blob/master/AsyncDisplayKit/ASDisplayNode%2BSubclasses.h)
