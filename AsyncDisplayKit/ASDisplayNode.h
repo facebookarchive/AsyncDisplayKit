@@ -474,6 +474,9 @@
 */
 @property (atomic, retain)           UIColor *backgroundColor;              // default=nil
 
+@property (atomic, retain)           UIColor *tintColor;                    // default=Blue
+- (void)tintColorDidChange;     // Notifies the node when the tintColor has changed.
+
 /**
  * @abstract A flag used to determine how a node lays out its content when its bounds change.
  *
