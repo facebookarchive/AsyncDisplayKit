@@ -351,6 +351,15 @@ static BOOL ASRangeIsValid(NSRange range)
   }
 }
 
+- (void)configureTableViewCell:(UITableViewCell *)cell forIndexPath:(NSIndexPath *)indexPath
+{
+  [self configureContentView:cell.contentView forIndexPath:indexPath];
+
+  ASCellNode *node = [self sizedNodeForIndexPath:indexPath];
+  cell.backgroundColor = node.backgroundColor;
+  cell.selectionStyle = node.selectionStyle;
+}
+
 - (void)configureContentView:(UIView *)contentView forIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *newNode = [self sizedNodeForIndexPath:indexPath];

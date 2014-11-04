@@ -31,6 +31,9 @@
   if (!(self = [super init]))
     return nil;
 
+  // use UITableViewCell defaults
+  _selectionStyle = UITableViewCellSelectionStyleDefault;
+
   return self;
 }
 

@@ -51,6 +51,15 @@ typedef struct {
 - (NSInteger)numberOfSizedRowsInSection:(NSInteger)section;
 
 /**
+ * Configure the specified UITableViewCell's content view, and apply properties from ASCellNode.
+ *
+ * @param cell UITableViewCell to configure.
+ *
+ * @param indexPath Index path for the node of interest.
+ */
+- (void)configureTableViewCell:(UITableViewCell *)cell forIndexPath:(NSIndexPath *)indexPath;
+
+/**
  * Add the sized node for `indexPath` as a subview of `contentView`.
  *
  * @param contentView UIView to add a (sized) node's view to.

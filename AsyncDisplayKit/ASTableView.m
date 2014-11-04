@@ -261,7 +261,7 @@ static BOOL _isInterceptedSelector(SEL sel)
     cell = [[_ASTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
   }
 
-  [_rangeController configureContentView:cell.contentView forIndexPath:indexPath];
+  [_rangeController configureTableViewCell:cell forIndexPath:indexPath];
 
   return cell;
 }
