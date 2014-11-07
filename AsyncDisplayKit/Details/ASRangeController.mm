@@ -74,7 +74,9 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
 {
   for (ASCellNode *node in _nodes.allValues) {
     [node removeFromSupernode];
-    [node.view removeFromSuperview];
+
+    if (node.nodeLoaded)
+      [node.view removeFromSuperview];
   }
   [_nodes removeAllObjects];
   _nodes = nil;
