@@ -274,7 +274,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
-  return [self indexPathsForVisibleItems];
+  return [[self indexPathsForVisibleItems] sortedArrayUsingSelector:@selector(compare:)];
 }
 
 - (CGSize)rangeControllerViewportSize:(ASRangeController *)rangeController
