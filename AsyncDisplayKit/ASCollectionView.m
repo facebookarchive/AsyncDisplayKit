@@ -170,6 +170,11 @@ static BOOL _isInterceptedSelector(SEL sel)
   [_rangeController appendNodesWithIndexPaths:indexPaths];
 }
 
+- (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [_rangeController calculatedSizeForNodeAtIndexPath:indexPath];
+}
+
 #pragma mark Assertions.
 
 - (void)throwUnimplementedException

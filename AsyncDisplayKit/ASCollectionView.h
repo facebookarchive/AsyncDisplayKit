@@ -67,6 +67,13 @@
  */
 - (void)appendNodesWithIndexPaths:(NSArray *)indexPaths;
 
+/**
+ * Query the sized node at `indexPath` for its calculatedSize.
+ *
+ * @param indexPath The index path for the node of interest.
+ */
+- (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+
 @end
 
 
