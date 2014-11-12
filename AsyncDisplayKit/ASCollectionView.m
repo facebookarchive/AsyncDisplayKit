@@ -313,8 +313,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (CGSize)rangeController:(ASRangeController *)rangeController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertNotMainThread();
-  //FIXME: Assuming vertical scroll
-  return CGSizeMake(self.bounds.size.width, FLT_MAX);
+  CGSize contentSize = [self.collectionViewLayout collectionViewContentSize];
+  CGSize viewSize = self.bounds.size;
+  CGFloat constrainedWidth = viewSize.width == contentSize.width ? viewSize.width : FLT_MAX;
+  CGFloat constrainedHeight = viewSize.height == contentSize.height ? viewSize.height : FLT_MAX;
+  return CGSizeMake(constrainedWidth, constrainedHeight);
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didSizeNodesWithIndexPaths:(NSArray *)indexPaths
