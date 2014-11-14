@@ -483,15 +483,41 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   return transform;
 }
 
-static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possibleAncestor, ASDisplayNode *possibleDescendent)
+static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *ancestorNode, ASDisplayNode *descendantNode)
 {
-  ASDisplayNode *supernode = possibleDescendent;
-  while (supernode) {
-    if (supernode == possibleAncestor) {
-      return YES;
+  ASDisplayNode *supernode = descendantNode;
+  UIView *superview;
+
+  do {
+    if (supernode) {
+      if (supernode == ancestorNode) {
+        return YES;
+      }
+
+      // Set `supernode` to `supernode.supernode`
+      if (supernode.supernode) {
+        supernode = supernode.supernode;
+        superview = nil;
+      }
+
+      // Set `superview` to `supernode.view.superview`
+      else if (!supernode.isLayerBacked && supernode.nodeLoaded) {
+        superview = supernode.view.superview;
+        supernode = nil;
+      }
     }
-    supernode = supernode.supernode;
-  }
+
+    // Set `superview` to `superview.superview`
+    else if (superview) {
+      superview = superview.superview;
+    }
+
+    // Cast `superview` to `supernode` if possible.
+    if (!supernode && superview && [superview isKindOfClass:[_ASDisplayView class]]) {
+      supernode = ASViewToDisplayNode(superview);
+      superview = nil;
+    }
+  } while (supernode || superview);
 
   return NO;
 }
@@ -505,16 +531,42 @@ static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possible
  */
 static inline ASDisplayNode *_ASDisplayNodeFindClosestCommonAncestor(ASDisplayNode *node1, ASDisplayNode *node2)
 {
-  ASDisplayNode *possibleAncestor = node1;
-  while (possibleAncestor) {
-    if (_ASDisplayNodeIsAncestorOfDisplayNode(possibleAncestor, node2)) {
-      break;
-    }
-    possibleAncestor = possibleAncestor.supernode;
-  }
+  ASDisplayNode *ancestorNode = node1;
+  UIView *ancestorView;
 
-  ASDisplayNodeCAssertNotNil(possibleAncestor, @"Could not find a common ancestor between node1: %@ and node2: %@", node1, node2);
-  return possibleAncestor;
+  do {
+    if (ancestorNode) {
+      if (_ASDisplayNodeIsAncestorOfDisplayNode(ancestorNode, node2)) {
+        break;
+      }
+
+      // Set `ancestorNode` to `ancestorNode.supernode`
+      if (ancestorNode.supernode) {
+        ancestorNode = ancestorNode.supernode;
+        ancestorView = nil;
+      }
+
+      // Set `ancestorView` to `ancestorNode.view.superview`
+      else if (!ancestorNode.isLayerBacked && ancestorNode.nodeLoaded) {
+        ancestorView = ancestorNode.view.superview;
+        ancestorNode = nil;
+      }
+    }
+
+    // Set `ancestorView` to `ancestorView.superview`
+    else if (ancestorView) {
+      ancestorView = ancestorView.superview;
+    }
+
+    // Cast `ancestorView` to `ancestorNode` if possible.
+    if (!ancestorNode && ancestorView && [ancestorView isKindOfClass:[_ASDisplayView class]]) {
+      ancestorNode = ASViewToDisplayNode(ancestorView);
+      ancestorView = nil;
+    }
+  } while (ancestorNode || ancestorView);
+
+  ASDisplayNodeCAssertNotNil(ancestorNode, @"Could not find a common ancestor between node1: %@ and node2: %@", node1, node2);
+  return ancestorNode;
 }
 
 static inline ASDisplayNode *_getRootNode(ASDisplayNode *node)
