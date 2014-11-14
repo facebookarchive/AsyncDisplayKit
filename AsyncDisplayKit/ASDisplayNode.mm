@@ -579,7 +579,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
   node = node ? node : _getRootNode(self);
 
   // Calculate transform to map points between coordinate spaces
-  CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(self, node);
+  CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(node, self);
   CGAffineTransform flattenedTransform = CATransform3DGetAffineTransform(nodeTransform);
   ASDisplayNodeAssertTrue(CATransform3DIsAffine(nodeTransform));
 
