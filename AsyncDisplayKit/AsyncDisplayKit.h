@@ -13,5 +13,7 @@
 #import <AsyncDisplayKit/ASImageNode.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 
+#import <AsyncDisplayKit/ASMultiplexImageNode.h>
+
 #import <AsyncDisplayKit/ASTableView.h>
 #import <AsyncDisplayKit/ASCellNode.h>

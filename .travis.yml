@@ -3,9 +3,8 @@ before_install:
   - brew update
   - brew reinstall xctool
   - gem update cocoapods
-xcode_workspace: AsyncDisplayKit.xcworkspace
-xcode_scheme: AsyncDisplayKit
-xcode_sdk:
-  - iphonesimulator7.0
-  - iphonesimulator7.1
-  - iphonesimulator8.0
+  - xcrun simctl list
+env:
+  - TEST_OS=7.1
+  - TEST_OS=8.0
+script: xctool -workspace AsyncDisplayKit.xcworkspace -scheme AsyncDisplayKit -sdk iphonesimulator8.0 -destination "platform=iOS Simulator,OS=${TEST_OS},name=iPhone 5" build test

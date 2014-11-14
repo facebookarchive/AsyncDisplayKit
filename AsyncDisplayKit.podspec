@@ -20,6 +20,9 @@ Pod::Spec.new do |spec|
       'Base/*.{h,m}'
   ]
 
+  spec.frameworks = 'AssetsLibrary'
+  spec.weak_frameworks = 'Photos'
+
   # ASDealloc2MainObject must be compiled with MRR
   spec.requires_arc = true
   spec.exclude_files = ['AsyncDisplayKit/Details/ASDealloc2MainObject.m']
