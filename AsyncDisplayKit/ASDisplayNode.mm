@@ -535,7 +535,6 @@ static inline ASDisplayNode *_ASDisplayNodeFindClosestCommonAncestor(ASDisplayNo
   UIView *ancestorView;
 
   do {
-    NSLog(@"ancestorNode: %@\nancestorView: %@", ancestorNode, ancestorView);
     if (ancestorNode) {
       if (_ASDisplayNodeIsAncestorOfDisplayNode(ancestorNode, node2)) {
         break;
