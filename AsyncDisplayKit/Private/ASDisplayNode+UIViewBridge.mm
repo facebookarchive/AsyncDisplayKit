@@ -78,6 +78,18 @@
   _setToViewOrLayer(opacity, newAlpha, alpha, newAlpha);
 }
 
+- (CGFloat)cornerRadius
+{
+  _bridge_prologue;
+  return _getFromLayer(cornerRadius);
+}
+
+-(void)setCornerRadius:(CGFloat)newCornerRadius
+{
+  _bridge_prologue;
+  _setToLayer(cornerRadius, newCornerRadius);
+}
+
 - (CGFloat)contentsScale
 {
   _bridge_prologue;

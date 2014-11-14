@@ -22,6 +22,7 @@
   CGColorRef backgroundColor;
   id contents;
   CGFloat alpha;
+  CGFloat cornerRadius;
   UIViewContentMode contentMode;
   CGPoint anchorPoint;
   CGPoint position;
@@ -65,6 +66,7 @@
     int setContents:1;
     int setHidden:1;
     int setAlpha:1;
+    int setCornerRadius:1;
     int setContentMode:1;
     int setNeedsDisplay:1;
     int setAnchorPoint:1;
@@ -112,6 +114,7 @@
 @synthesize autoresizingMask=autoresizingMask;
 @synthesize tintColor=tintColor;
 @synthesize alpha=alpha;
+@synthesize cornerRadius=cornerRadius;
 @synthesize contentMode=contentMode;
 @synthesize anchorPoint=anchorPoint;
 @synthesize position=position;
@@ -156,6 +159,7 @@
   needsDisplayOnBoundsChange = NO;
   autoresizesSubviews = YES;
   alpha = 1.0f;
+  cornerRadius = 0.0f;
   contentMode = UIViewContentModeScaleToFill;
   _flags.needsDisplay = NO;
   anchorPoint = CGPointMake(0.5, 0.5);
@@ -294,6 +298,12 @@
 {
   alpha = newAlpha;
   _flags.setAlpha = YES;
+}
+
+- (void)setCornerRadius:(CGFloat)newCornerRadius
+{
+  cornerRadius = newCornerRadius;
+  _flags.setCornerRadius = YES;
 }
 
 - (void)setContentMode:(UIViewContentMode)newContentMode
@@ -573,6 +583,9 @@
   if (_flags.setAlpha)
     layer.opacity = alpha;
 
+  if (_flags.setCornerRadius)
+    layer.cornerRadius = cornerRadius;
+
   if (_flags.setContentMode)
     layer.contentsGravity = ASDisplayNodeCAContentsGravityFromUIContentMode(contentMode);
 
@@ -672,6 +685,9 @@
 
   if (_flags.setAlpha)
     view.alpha = alpha;
+
+  if (_flags.setCornerRadius)
+    layer.cornerRadius = cornerRadius;
 
   if (_flags.setContentMode)
     view.contentMode = contentMode;

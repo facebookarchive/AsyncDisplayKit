@@ -461,6 +461,7 @@
 @property (atomic, assign)           CGPoint anchorPoint;                   // default={0.5, 0.5}
 @property (atomic, assign)           CGFloat zPosition;                     // default=0.0
 @property (atomic, assign)           CGPoint position;                      // default=CGPointZero
+@property (atomic, assign)           CGFloat cornerRadius;                  // default=0.0
 @property (atomic, assign)           CGFloat contentsScale;                 // default=1.0f. See @contentsScaleForDisplay for more info
 @property (atomic, assign)           CATransform3D transform;               // default=CATransform3DIdentity
 @property (atomic, assign)           CATransform3D subnodeTransform;        // default=CATransform3DIdentity
