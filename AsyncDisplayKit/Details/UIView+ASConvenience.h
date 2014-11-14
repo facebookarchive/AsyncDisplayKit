@@ -19,6 +19,7 @@
 @property (nonatomic, assign) CGPoint anchorPoint;
 @property (nonatomic, retain) id contents;
 @property (nonatomic, assign) CGFloat contentsScale;
+@property (nonatomic, assign) CGFloat scale;
 @property (nonatomic, assign) CATransform3D transform;
 @property (nonatomic, assign) CATransform3D sublayerTransform;
 @property (nonatomic, assign) BOOL needsDisplayOnBoundsChange;
