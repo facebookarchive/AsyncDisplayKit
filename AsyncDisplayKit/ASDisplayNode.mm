@@ -347,6 +347,34 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   return _flags.isLayerBacked;
 }
 
+- (CGFloat)scale
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return self.transform.m11;
+}
+
+- (void)setScale:(CGFloat)newScale
+{
+  ASDN::MutexLocker l(_propertyLock);
+
+  CATransform3D transform = self.transform;
+  const CGFloat scale = self.scale;
+
+  // Use identity transform when scale is zero.
+  if (scale == 0) {
+    CGFloat m34 = transform.m34;
+    transform = CATransform3DIdentity;
+    transform.m34 = m34;
+  }
+
+  // Find the relative scale to apply to the transform.
+  else {
+    newScale /= scale;
+  }
+
+  self.transform = CATransform3DScale(transform, newScale, newScale, newScale);
+}
+
 #pragma mark -
 
 - (CGSize)measure:(CGSize)constrainedSize

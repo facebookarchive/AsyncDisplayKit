@@ -80,6 +80,12 @@
  */
 @property (nonatomic, readonly, assign, getter=isSynchronous) BOOL synchronous;
 
+/**
+ * @abstract The node's transform's scale.
+ *
+ * @discussion Defaults to 1.0.
+ */
+@property (atomic, assign) CGFloat scale;
 
 /** @name Getting view and layer */
 
