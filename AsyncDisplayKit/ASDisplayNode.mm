@@ -349,18 +349,30 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (CGFloat)scale
 {
+  ASDN::MutexLocker l(_propertyLock);
   return self.transform.m11;
 }
 
-- (void)setScale:(CGFloat)scale
+- (void)setScale:(CGFloat)newScale
 {
-  // Ensure scale is never exactly zero.
-  if (scale == 0) { scale = 1e-6; }
+  ASDN::MutexLocker l(_propertyLock);
+
+  CATransform3D transform = self.transform;
+  const CGFloat scale = self.scale;
+
+  // Use identity transform when scale is zero.
+  if (scale == 0) {
+    CGFloat m34 = transform.m34;
+    transform = CATransform3DIdentity;
+    transform.m34 = m34;
+  }
 
   // Find the relative scale to apply to the transform.
-  scale /= self.scale;
+  else {
+    newScale /= scale;
+  }
 
-  self.transform = CATransform3DScale(self.transform, scale, scale, scale);
+  self.transform = CATransform3DScale(transform, newScale, newScale, newScale);
 }
 
 #pragma mark -
