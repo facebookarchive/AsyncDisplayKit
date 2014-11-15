@@ -73,7 +73,6 @@
     int setContentsScale:1;
     int setTransform:1;
     int setSublayerTransform:1;
-    int setScale:1;
     int setUserInteractionEnabled:1;
     int setExclusiveTouch:1;
     int setShadowColor:1;
