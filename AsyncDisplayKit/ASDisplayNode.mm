@@ -354,7 +354,12 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (void)setScale:(CGFloat)scale
 {
+  // Ensure scale is never exactly zero.
+  if (scale == 0) { scale = 1e-6; }
+
+  // Find the relative scale to apply to the transform.
   scale /= self.scale;
+
   self.transform = CATransform3DScale(self.transform, scale, scale, scale);
 }
 
