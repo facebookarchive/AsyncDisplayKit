@@ -354,7 +354,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (void)setScale:(CGFloat)scale
 {
-  self.transform = CATransform3DScale(CATransform3DIdentity, scale, scale, scale);
+  scale /= self.scale;
+  self.transform = CATransform3DScale(self.transform, scale, scale, scale);
 }
 
 #pragma mark -
