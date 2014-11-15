@@ -80,6 +80,12 @@
  */
 @property (nonatomic, readonly, assign, getter=isSynchronous) BOOL synchronous;
 
+/**
+ * @abstract The node's transform's scale.
+ *
+ * @discussion Defaults to 1.0.
+ */
+@property (atomic, assign) CGFloat scale;
 
 /** @name Getting view and layer */
 
@@ -464,7 +470,6 @@
 @property (atomic, assign)           CGFloat contentsScale;                 // default=1.0f. See @contentsScaleForDisplay for more info
 @property (atomic, assign)           CATransform3D transform;               // default=CATransform3DIdentity
 @property (atomic, assign)           CATransform3D subnodeTransform;        // default=CATransform3DIdentity
-@property (atomic, assign)           CGFloat scale;                         // default=1.0
 @property (atomic, copy)             NSString *name;                        // default=nil. Use this to tag your layers in the server-recurse-description / pca or for your own purposes
 
 /**

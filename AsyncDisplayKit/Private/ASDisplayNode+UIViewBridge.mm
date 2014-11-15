@@ -268,22 +268,6 @@
   _setToLayer(sublayerTransform, newSubnodeTransform);
 }
 
-- (CGFloat)scale
-{
-  _bridge_prologue;
-  return __loaded ? [[_layer valueForKeyPath:@"transform.scale"] floatValue] : self.pendingViewState.scale;
-}
-
-- (void)setScale:(CGFloat)newScale
-{
-  _bridge_prologue;
-  if (__loaded) {
-    [_layer setValue:[NSNumber numberWithFloat:newScale] forKeyPath:@"transform.scale"];
-  } else {
-    self.pendingViewState.scale = newScale;
-  }
-}
-
 - (id)contents
 {
   _bridge_prologue;

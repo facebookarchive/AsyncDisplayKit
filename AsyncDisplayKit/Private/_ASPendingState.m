@@ -27,7 +27,6 @@
   CGPoint position;
   CGFloat zPosition;
   CGFloat contentsScale;
-  CGFloat scale;
   CATransform3D transform;
   CATransform3D sublayerTransform;
   CGColorRef shadowColor;
@@ -119,7 +118,6 @@
 @synthesize position=position;
 @synthesize zPosition=zPosition;
 @synthesize contentsScale=contentsScale;
-@synthesize scale=scale;
 @synthesize transform=transform;
 @synthesize sublayerTransform=sublayerTransform;
 @synthesize userInteractionEnabled=userInteractionEnabled;
@@ -341,12 +339,6 @@
   _flags.setSublayerTransform = YES;
 }
 
-- (void)setScale:(CGFloat)newScale
-{
-  scale = newScale;
-  _flags.setScale = YES;
-}
-
 - (void)setUserInteractionEnabled:(BOOL)flag
 {
   userInteractionEnabled = flag;
@@ -564,9 +556,6 @@
   if (_flags.setSublayerTransform)
     layer.sublayerTransform = sublayerTransform;
 
-  if (_flags.setScale)
-    [layer setValue:[NSNumber numberWithFloat:scale] forKeyPath:@"transform.scale"];
-
   if (_flags.setContents)
     layer.contents = contents;
 
@@ -663,9 +652,6 @@
 
   if (_flags.setSublayerTransform)
     layer.sublayerTransform = sublayerTransform;
-
-  if (_flags.setScale)
-    [layer setValue:[NSNumber numberWithFloat:scale] forKeyPath:@"transform.scale"];
 
   if (_flags.setContents)
     layer.contents = contents;

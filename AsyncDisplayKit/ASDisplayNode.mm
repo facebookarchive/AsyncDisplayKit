@@ -347,6 +347,16 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   return _flags.isLayerBacked;
 }
 
+- (CGFloat)scale
+{
+  return self.transform.m11;
+}
+
+- (void)setScale:(CGFloat)scale
+{
+  self.transform = CATransform3DScale(CATransform3DIdentity, scale, scale, scale);
+}
+
 #pragma mark -
 
 - (CGSize)measure:(CGSize)constrainedSize
