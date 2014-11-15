@@ -81,6 +81,12 @@
 @property (nonatomic, readonly, assign, getter=isSynchronous) BOOL synchronous;
 
 
+/**
+ * @discussion Set this when you need this node's +viewClass or +layerClass
+ * to be used with an initializer other than -init.
+ */
+@property (nonatomic, copy) id(^loadNode)();
+
 /** @name Getting view and layer */
 
 

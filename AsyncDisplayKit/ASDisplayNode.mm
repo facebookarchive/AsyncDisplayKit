@@ -115,7 +115,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   
   // As an optimization, it may be worth a caching system that performs these checks once per class in +initialize (see above).
   _flags.implementsDisplay = [[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] || [self.class respondsToSelector:@selector(displayWithParameters:isCancelled:)];
-  
+
+  _flags.hasLoadNodeBlock = NO;
   _flags.hasClassDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
   _flags.hasWillDisplayAsyncLayer = ([self respondsToSelector:@selector(willDisplayAsyncLayer:)] ? 1 : 0);
   _flags.hasDrawParametersForAsyncLayer = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
@@ -244,14 +245,14 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
       _layerClass = [self.class layerClass];
     }
 
-    _layer = [[_layerClass alloc] init];
+    _layer = _flags.hasLoadNodeBlock ? _loadNode() : [[_layerClass alloc] init];
     _layer.delegate = self;
   } else {
     TIME_SCOPED(_debugTimeToCreateView);
     if (!_viewClass) {
       _viewClass = [self.class viewClass];
     }
-    _view = [[_viewClass alloc] init];
+    _view = _flags.hasLoadNodeBlock ? _loadNode() : [[_viewClass alloc] init];
     _view.asyncdisplaykit_node = self;
     _layer = _view.layer;
   }
@@ -345,6 +346,17 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 {
   ASDN::MutexLocker l(_propertyLock);
   return _flags.isLayerBacked;
+}
+
+- (id (^)())loadNode
+{
+  return _loadNode;
+}
+
+- (void)setLoadNode:(id (^)())block
+{
+  _flags.hasLoadNodeBlock = (block != nil);
+  _loadNode = block;
 }
 
 #pragma mark -

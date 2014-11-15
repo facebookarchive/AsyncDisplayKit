@@ -51,6 +51,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
   Class _layerClass;
   UIView *_view;
   CALayer *_layer;
+  id(^_loadNode)();
 
   _ASPendingState *_pendingViewState;
 
@@ -66,6 +67,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
     unsigned isInEnterHierarchy:1;
     unsigned isInExitHierarchy:1;
     unsigned inWindow:1;
+    unsigned hasLoadNodeBlock:1;
     unsigned hasWillDisplayAsyncLayer:1;
     unsigned hasDrawParametersForAsyncLayer:1;
     unsigned hasClassDisplay:1;
