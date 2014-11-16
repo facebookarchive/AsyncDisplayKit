@@ -267,25 +267,29 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
       id viewOrLayer = _loadBlock();
 
       if ([viewOrLayer isKindOfClass:[CALayer class]]) {
+        ASDisplayNodeAssert(isLayerBacked, @"The block you passed to initWithLoadBlock: returned a layer when a view was expected.");
         _layer = viewOrLayer;
         [self _initializeLayerClass:[viewOrLayer class]];
       }
 
       else if ([viewOrLayer isKindOfClass:[UIView class]]) {
+        ASDisplayNodeAssert(!isLayerBacked, @"The block you passed to initWithLoadBlock: returned a view when a layer was expected.");
         _view = viewOrLayer;
         [self _initializeViewClass:[viewOrLayer class]];
       }
 
       else {
-        ASDisplayNodeAssert(NO, @"The block you pass to initWithLoadBlock: must return either a UIView or CALayer.");
+        ASDisplayNodeAssert(NO, @"The block you passed to initWithLoadBlock: must return either a UIView or CALayer.");
       }
     }
 
     else if (isLayerBacked) {
+      ASDisplayNodeAssert(_viewClass, @"_layerClass must set.");
       _layer = [[_layerClass alloc] init];
     }
 
     else {
+      ASDisplayNodeAssert(_viewClass, @"_viewClass must set.");
       _view = [[_viewClass alloc] init];
     }
 
