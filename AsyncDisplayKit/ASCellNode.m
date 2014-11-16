@@ -11,6 +11,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASRangeControllerInternal.h"
 #import "ASTextNode.h"
+#import "ASDisplayNodeExtras.h"
 
 
 #pragma mark -
@@ -35,6 +36,12 @@
   _selectionStyle = UITableViewCellSelectionStyleDefault;
 
   return self;
+}
+
+- (ASDisplayNode *)supernode
+{
+  // ASCellNode -> UITableViewCellContentView -> _ASTableViewCell -> UITableViewWrapperView -> ASTableView
+  return self.nodeLoaded ? ASViewToDisplayNode(self.view.superview.superview.superview.superview) : nil;
 }
 
 - (void)setLayerBacked:(BOOL)layerBacked
