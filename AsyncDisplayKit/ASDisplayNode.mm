@@ -140,6 +140,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
     return nil;
   
   [self _initializeInstance];
+  [self _initializeViewClass:[self.class viewClass]];
   
   return self;
 }
@@ -264,26 +265,37 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
     if (_loadBlock) {
       id viewOrLayer = _loadBlock();
+
       if ([viewOrLayer isKindOfClass:[CALayer class]]) {
         _layer = viewOrLayer;
         [self _initializeLayerClass:[viewOrLayer class]];
-      } else if ([viewOrLayer isKindOfClass:[UIView class]]) {
+      }
+
+      else if ([viewOrLayer isKindOfClass:[UIView class]]) {
         _view = viewOrLayer;
         [self _initializeViewClass:[viewOrLayer class]];
-      } else {
+      }
+
+      else {
         ASDisplayNodeAssert(NO, @"The block you pass to initWithLoadBlock: must return either a UIView or CALayer.");
       }
-    } else if (isLayerBacked) {
+    }
+
+    else if (isLayerBacked) {
       _layer = [[_layerClass alloc] init];
-    } else {
+    }
+
+    else {
       _view = [[_viewClass alloc] init];
     }
 
-    if (isLayerBacked) {
-      _layer.delegate = self;
-    } else {
+    if (_view) {
       _view.asyncdisplaykit_node = self;
       _layer = _view.layer;
+    }
+
+    else {
+      _layer.delegate = self;
     }
   }
 
@@ -325,7 +337,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   if (!_layer) {
     ASDisplayNodeAssertMainThread();
 
-    if (!_flags.isLayerBacked) {
+    if (_viewClass) {
       return self.view.layer;
     }
     [self _loadViewOrLayerIsLayerBacked:YES];
@@ -370,6 +382,12 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssert(!_view && !_layer, @"Cannot change isLayerBacked after layer or view has loaded");
   if (isLayerBacked != _flags.isLayerBacked && !_view && !_layer) {
     _flags.isLayerBacked = isLayerBacked;
+
+    // Ensure _layerClass is initialized.
+    if (_flags.isLayerBacked) {
+      _viewClass = nil;
+      [self _initializeLayerClass:[self.class layerClass]];
+    }
   }
 }
 
