@@ -284,12 +284,12 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
     }
 
     else if (isLayerBacked) {
-      ASDisplayNodeAssert(_viewClass, @"_layerClass must set.");
+      ASDisplayNodeAssert(_layerClass, @"_layerClass must be set.");
       _layer = [[_layerClass alloc] init];
     }
 
     else {
-      ASDisplayNodeAssert(_viewClass, @"_viewClass must set.");
+      ASDisplayNodeAssert(_viewClass, @"_viewClass must be set.");
       _view = [[_viewClass alloc] init];
     }
 
