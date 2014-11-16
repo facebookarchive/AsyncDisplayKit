@@ -115,11 +115,22 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   
   // As an optimization, it may be worth a caching system that performs these checks once per class in +initialize (see above).
   _flags.implementsDisplay = [[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] || [self.class respondsToSelector:@selector(displayWithParameters:isCancelled:)];
-
-  _flags.hasLoadNodeBlock = NO;
   _flags.hasClassDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
   _flags.hasWillDisplayAsyncLayer = ([self respondsToSelector:@selector(willDisplayAsyncLayer:)] ? 1 : 0);
   _flags.hasDrawParametersForAsyncLayer = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
+}
+
+- (void)_initializeViewClass:(Class)viewClass
+{
+  _viewClass = viewClass;
+  _flags.isSynchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
+}
+
+- (void)_initializeLayerClass:(Class)layerClass
+{
+  _layerClass = layerClass;
+  _flags.isSynchronous = ![layerClass isSubclassOfClass:[_ASDisplayLayer class]];
+  _flags.isLayerBacked = YES;
 }
 
 - (id)init
@@ -140,8 +151,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssert([viewClass isSubclassOfClass:[UIView class]], @"should initialize with a subclass of UIView");
   
   [self _initializeInstance];
-  _viewClass = viewClass;
-  _flags.isSynchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
+  [self _initializeViewClass:viewClass];
 
   return self;
 }
@@ -154,9 +164,18 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssert([layerClass isSubclassOfClass:[CALayer class]], @"should initialize with a subclass of CALayer");
 
   [self _initializeInstance];
-  _layerClass = layerClass;
-  _flags.isSynchronous = ![layerClass isSubclassOfClass:[_ASDisplayLayer class]];
-  _flags.isLayerBacked = YES;
+  [self _initializeLayerClass:layerClass];
+
+  return self;
+}
+
+- (id)initWithLoadBlock:(id(^)())loadBlock
+{
+  if (!(self = [super init]))
+    return nil;
+
+  [self _initializeInstance];
+  _loadBlock = loadBlock;
 
   return self;
 }
@@ -239,23 +258,34 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
     return;
   }
 
-  if (isLayerBacked) {
+  {
     TIME_SCOPED(_debugTimeToCreateView);
-    if (!_layerClass) {
-      _layerClass = [self.class layerClass];
+
+    if (_loadBlock) {
+      id viewOrLayer = _loadBlock();
+      if ([viewOrLayer isKindOfClass:[CALayer class]]) {
+        _layer = viewOrLayer;
+        [self _initializeLayerClass:[viewOrLayer class]];
+      } else if ([viewOrLayer isKindOfClass:[UIView class]]) {
+        _view = viewOrLayer;
+        [self _initializeViewClass:[viewOrLayer class]];
+      } else {
+        ASDisplayNodeAssert(NO, @"The block you pass to initWithLoadBlock: must return either a UIView or CALayer.");
+      }
+    } else if (isLayerBacked) {
+      _layer = [[_layerClass alloc] init];
+    } else {
+      _view = [[_viewClass alloc] init];
     }
 
-    _layer = _flags.hasLoadNodeBlock ? _loadNode() : [[_layerClass alloc] init];
-    _layer.delegate = self;
-  } else {
-    TIME_SCOPED(_debugTimeToCreateView);
-    if (!_viewClass) {
-      _viewClass = [self.class viewClass];
+    if (isLayerBacked) {
+      _layer.delegate = self;
+    } else {
+      _view.asyncdisplaykit_node = self;
+      _layer = _view.layer;
     }
-    _view = _flags.hasLoadNodeBlock ? _loadNode() : [[_viewClass alloc] init];
-    _view.asyncdisplaykit_node = self;
-    _layer = _view.layer;
   }
+
   _layer.asyncdisplaykit_node = self;
 #if DEBUG
   _layer.name = self.description;
@@ -346,17 +376,6 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 {
   ASDN::MutexLocker l(_propertyLock);
   return _flags.isLayerBacked;
-}
-
-- (id (^)())loadNode
-{
-  return _loadNode;
-}
-
-- (void)setLoadNode:(id (^)())block
-{
-  _flags.hasLoadNodeBlock = (block != nil);
-  _loadNode = block;
 }
 
 #pragma mark -
