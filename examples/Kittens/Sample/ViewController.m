@@ -16,7 +16,7 @@
 #import "BlurbNode.h"
 #import "KittenNode.h"
 
-static const NSInteger kLitterSize = 20;
+static const NSInteger kLitterSize = 2000000;
 
 
 @interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
@@ -55,7 +55,6 @@ static const NSInteger kLitterSize = 20;
     [kittenDataSource addObject:[NSValue valueWithCGSize:size]];
   }
   _kittenDataSource = kittenDataSource;
-
   return self;
 }
 

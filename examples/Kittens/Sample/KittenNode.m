@@ -141,7 +141,7 @@ static const CGFloat kInnerPadding = 10.0f;
                            _imageNode.image = [UIImage imageWithData:data];
                          }];
 }
-
+//运行在后台线程
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   CGSize imageSize = CGSizeMake(kImageSize, kImageSize);
@@ -153,6 +153,7 @@ static const CGFloat kInnerPadding = 10.0f;
   return CGSizeMake(constrainedSize.width, requiredHeight + 2 * kOuterPadding);
 }
 
+// 运行在主线程
 - (void)layout
 {
   CGFloat pixelHeight = 1.0f / [[UIScreen mainScreen] scale];
