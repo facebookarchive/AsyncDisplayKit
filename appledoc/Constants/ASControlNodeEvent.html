@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="html/html; charset=utf-8" />
-		<title>ASTextNodeHighlightStyle Constants Reference</title>
+		<title>ASControlNodeEvent Constants Reference</title>
 		<meta id="xcode-display" name="xcode-display" content="render"/>
 		<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
 		<link rel="stylesheet" type="text/css" media="print" href="../css/stylesPrint.css" />
@@ -16,7 +16,7 @@
 			</div>
 			
 			<div id="title" role="banner">
-				<h1 class="hideInXcode">ASTextNodeHighlightStyle Constants Reference</h1>
+				<h1 class="hideInXcode">ASControlNodeEvent Constants Reference</h1>
 			</div>
 			<ul id="headerButtons" role="toolbar">
 				<li id="toc_button">
@@ -45,7 +45,7 @@
 		</nav>
 		<article>
 			<div id="contents" class="isShowingTOC" role="main">
-				<a title="ASTextNodeHighlightStyle Constants Reference" name="top"></a>
+				<a title="ASControlNodeEvent Constants Reference" name="top"></a>
 				<div class="main-navigation navigation-top">
 					<ul>
 	<li><a href="../index.html">Index</a></li>
@@ -54,7 +54,7 @@
 				</div>
 				<div id="header">
 					<div class="section-header">
-						<h1 class="title title-header">ASTextNodeHighlightStyle Constants Reference</h1>
+						<h1 class="title title-header">ASControlNodeEvent Constants Reference</h1>
 					</div>		
 				</div>
 				<div id="container">	
@@ -62,7 +62,7 @@
 					<div class="section section-specification"><table cellspacing="0"><tbody>
 						<tr>
 	<td class="specification-title">Declared in</td>
-	<td class="specification-value">ASTextNode.h</td>
+	<td class="specification-value">ASControlNode.h</td>
 </tr>
 						</tbody></table></div>
 					
@@ -74,11 +74,11 @@
 					
                     
                     
-                    <h3 class="subsubtitle method-title">ASTextNodeHighlightStyle</h3>
+                    <h3 class="subsubtitle method-title">ASControlNodeEvent</h3>
                     
 					
 					<div class="section section-overview">
-                        <p>Highlight styles.</p>
+                        <p>These events are identical to their UIControl counterparts.</p>
 					</div>
 					
 					
@@ -86,11 +86,23 @@
                         <!-- display enum values -->
                         
                         <h4 class="method-subtitle">Definition</h4>
-                        <code>typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle ) {<br/>
+                        <code>typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent ) {<br/>
                             
-                            &nbsp;&nbsp; <a href="">ASTextNodeHighlightStyleLight</a>,<br/>
+                            &nbsp;&nbsp; <a href="">ASControlNodeEventTouchDown</a> = 1 &lt; &lt; 0,<br/>
                             
-                            &nbsp;&nbsp; <a href="">ASTextNodeHighlightStyleDark</a>,<br/>
+                            &nbsp;&nbsp; <a href="">ASControlNodeEventTouchDownRepeat</a> = 1 &lt; &lt; 1,<br/>
+                            
+                            &nbsp;&nbsp; <a href="">ASControlNodeEventTouchDragInside</a> = 1 &lt; &lt; 2,<br/>
+                            
+                            &nbsp;&nbsp; <a href="">ASControlNodeEventTouchDragOutside</a> = 1 &lt; &lt; 3,<br/>
+                            
+                            &nbsp;&nbsp; <a href="">ASControlNodeEventTouchUpInside</a> = 1 &lt; &lt; 4,<br/>
+                            
+                            &nbsp;&nbsp; <a href="">ASControlNodeEventTouchUpOutside</a> = 1 &lt; &lt; 5,<br/>
+                            
+                            &nbsp;&nbsp; <a href="">ASControlNodeEventTouchCancel</a> = 1 &lt; &lt; 6,<br/>
+                            
+                            &nbsp;&nbsp; <a href="">ASControlNodeEventAllEvents</a> = 0 xFFFFFFFF,<br/>
                             
                             };</code>
                     
@@ -100,11 +112,11 @@
                         <h4 class="method-subtitle">Constants</h4>
                         <dl class="termdef">
                             
-                            <dt><a name="" title="ASTextNodeHighlightStyleLight"></a><code>ASTextNodeHighlightStyleLight</code></dt>
+                            <dt><a name="" title="ASControlNodeEventTouchDown"></a><code>ASControlNodeEventTouchDown</code></dt>
 <dd>
 
 
-<p>Highlight style for text on a light background.</p>
+<p>Kinds of events possible for control nodes.</p>
 
 
 
@@ -112,16 +124,16 @@
 
     
 	<p>
-		Declared In <code class="declared-in-ref">ASTextNode.h</code>.
+		Declared In <code class="declared-in-ref">ASControlNode.h</code>.
 	</p>
 	
 </dd>
                             
-                            <dt><a name="" title="ASTextNodeHighlightStyleDark"></a><code>ASTextNodeHighlightStyleDark</code></dt>
+                            <dt><a name="" title="ASControlNodeEventTouchDownRepeat"></a><code>ASControlNodeEventTouchDownRepeat</code></dt>
 <dd>
 
 
-<p>Highlight style for text on a dark background.</p>
+<p>Kinds of events possible for control nodes.</p>
 
 
 
@@ -129,7 +141,109 @@
 
     
 	<p>
-		Declared In <code class="declared-in-ref">ASTextNode.h</code>.
+		Declared In <code class="declared-in-ref">ASControlNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASControlNodeEventTouchDragInside"></a><code>ASControlNodeEventTouchDragInside</code></dt>
+<dd>
+
+
+<p>Kinds of events possible for control nodes.</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASControlNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASControlNodeEventTouchDragOutside"></a><code>ASControlNodeEventTouchDragOutside</code></dt>
+<dd>
+
+
+<p>Kinds of events possible for control nodes.</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASControlNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASControlNodeEventTouchUpInside"></a><code>ASControlNodeEventTouchUpInside</code></dt>
+<dd>
+
+
+<p>Kinds of events possible for control nodes.</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASControlNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASControlNodeEventTouchUpOutside"></a><code>ASControlNodeEventTouchUpOutside</code></dt>
+<dd>
+
+
+<p>Kinds of events possible for control nodes.</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASControlNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASControlNodeEventTouchCancel"></a><code>ASControlNodeEventTouchCancel</code></dt>
+<dd>
+
+
+<p>Kinds of events possible for control nodes.</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASControlNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASControlNodeEventAllEvents"></a><code>ASControlNodeEventAllEvents</code></dt>
+<dd>
+
+
+<p>Kinds of events possible for control nodes.</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASControlNode.h</code>.
 	</p>
 	
 </dd>
@@ -146,7 +260,7 @@
                     
                     <div class="method-subsection declared-in-section">
                         <h4 class="method-subtitle">Declared In</h4>
-                        <code class="declared-in-ref">ASTextNode.h</code><br />
+                        <code class="declared-in-ref">ASControlNode.h</code><br />
                     </div>				
                     
                     

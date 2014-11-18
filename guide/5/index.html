@@ -120,10 +120,12 @@ view-backed nodes also participate in asynchronous display.</p>
 
 <p>What does this mean for your custom nodes?</p>
 
-<p>You can implement methods like <code>-touchesBegan::</code> / <code>Moved::</code> / <code>Ended::</code> /
-<code>Cancelled::</code> in your nodes exactly as you would in a UIView subclass.  If you
-find you need a subclass hook that hasn&#39;t already been provided, please file an
-issue on GitHub &mdash; or add it yourself and submit a pull request!</p>
+<p>You can implement methods like <code>-touchesBegan:withEvent:</code> /
+<code>touchesMoved:withEvent:</code> / <code>touchesEnded:withEvent:</code> /
+<code>touchesCancelled:withEvent:</code> in your nodes exactly as you would in a UIView
+subclass.  If you find you need a subclass hook that hasn&#39;t already been
+provided, please file an issue on GitHub &mdash; or add it yourself and submit a
+pull request!</p>
 
 <p>If you need to interact or configure your node&#39;s underlying view or layer,
 don&#39;t do so in <code>-init</code>.  Instead, override <code>-didLoad</code> and check if you&#39;re

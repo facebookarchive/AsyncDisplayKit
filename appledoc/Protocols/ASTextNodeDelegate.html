@@ -45,9 +45,9 @@
 	
 	<option value="//api/name/textNode:longPressedLinkAttribute:value:atPoint:textRange:">&nbsp;&nbsp;&nbsp;&nbsp;- textNode:longPressedLinkAttribute:value:atPoint:textRange:</option>
 	
-	<option value="//api/name/textNode:shouldHighlightLinkAttribute:value:">&nbsp;&nbsp;&nbsp;&nbsp;- textNode:shouldHighlightLinkAttribute:value:</option>
+	<option value="//api/name/textNode:shouldHighlightLinkAttribute:value:atPoint:">&nbsp;&nbsp;&nbsp;&nbsp;- textNode:shouldHighlightLinkAttribute:value:atPoint:</option>
 	
-	<option value="//api/name/textNode:shouldLongPressLinkAttribute:value:">&nbsp;&nbsp;&nbsp;&nbsp;- textNode:shouldLongPressLinkAttribute:value:</option>
+	<option value="//api/name/textNode:shouldLongPressLinkAttribute:value:atPoint:">&nbsp;&nbsp;&nbsp;&nbsp;- textNode:shouldLongPressLinkAttribute:value:atPoint:</option>
 	
 	<option value="//api/name/textNode:tappedLinkAttribute:value:atPoint:textRange:">&nbsp;&nbsp;&nbsp;&nbsp;- textNode:tappedLinkAttribute:value:atPoint:textRange:</option>
 	
@@ -81,9 +81,9 @@
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/textNode:longPressedLinkAttribute:value:atPoint:textRange:">textNode:longPressedLinkAttribute:value:atPoint:textRange:</a></span></li>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/textNode:shouldHighlightLinkAttribute:value:">textNode:shouldHighlightLinkAttribute:value:</a></span></li>
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/textNode:shouldHighlightLinkAttribute:value:atPoint:">textNode:shouldHighlightLinkAttribute:value:atPoint:</a></span></li>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/textNode:shouldLongPressLinkAttribute:value:">textNode:shouldLongPressLinkAttribute:value:</a></span></li>
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/textNode:shouldLongPressLinkAttribute:value:atPoint:">textNode:shouldLongPressLinkAttribute:value:atPoint:</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/textNode:tappedLinkAttribute:value:atPoint:textRange:">textNode:tappedLinkAttribute:value:atPoint:textRange:</a></span></li>
 	
@@ -148,13 +148,13 @@
 	
 </li><li>
 	<span class="tooltip">
-		<code><a href="#//api/name/textNode:shouldHighlightLinkAttribute:value:">&ndash;&nbsp;textNode:shouldHighlightLinkAttribute:value:</a></code>
+		<code><a href="#//api/name/textNode:shouldHighlightLinkAttribute:value:atPoint:">&ndash;&nbsp;textNode:shouldHighlightLinkAttribute:value:atPoint:</a></code>
 	</span>
 	
 	
 </li><li>
 	<span class="tooltip">
-		<code><a href="#//api/name/textNode:shouldLongPressLinkAttribute:value:">&ndash;&nbsp;textNode:shouldLongPressLinkAttribute:value:</a></code>
+		<code><a href="#//api/name/textNode:shouldLongPressLinkAttribute:value:atPoint:">&ndash;&nbsp;textNode:shouldLongPressLinkAttribute:value:atPoint:</a></code>
 	</span>
 	
 	
@@ -242,8 +242,8 @@
 </div>
 						
 						<div class="section-method">
-	<a name="//api/name/textNode:shouldHighlightLinkAttribute:value:" title="textNode:shouldHighlightLinkAttribute:value:"></a>
-	<h3 class="subsubtitle method-title">textNode:shouldHighlightLinkAttribute:value:</h3>
+	<a name="//api/name/textNode:shouldHighlightLinkAttribute:value:atPoint:" title="textNode:shouldHighlightLinkAttribute:value:atPoint:"></a>
+	<h3 class="subsubtitle method-title">textNode:shouldHighlightLinkAttribute:value:atPoint:</h3>
 	
 	
 	
@@ -253,7 +253,7 @@
 	
     
 
-	<div class="method-subsection method-declaration"><code>- (BOOL)textNode:(id)<em>textNode</em> shouldHighlightLinkAttribute:(id)<em>attribute</em> value:(id)<em>value</em></code></div>
+	<div class="method-subsection method-declaration"><code>- (BOOL)textNode:(id)<em>textNode</em> shouldHighlightLinkAttribute:(id)<em>attribute</em> value:(id)<em>value</em> atPoint:(id)<em>point</em></code></div>
 
     
 	
@@ -273,6 +273,11 @@
 		<dl class="argument-def parameter-def">
 			<dt><em>value</em></dt>
 			<dd><p>The value of the tapped attribute.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>point</em></dt>
+			<dd><p>The point within textNode, in textNode&rsquo;s coordinate system, that was touched to trigger a highlight.</p></dd>
 		</dl>
 		
 	</div>
@@ -308,8 +313,8 @@
 </div>
 						
 						<div class="section-method">
-	<a name="//api/name/textNode:shouldLongPressLinkAttribute:value:" title="textNode:shouldLongPressLinkAttribute:value:"></a>
-	<h3 class="subsubtitle method-title">textNode:shouldLongPressLinkAttribute:value:</h3>
+	<a name="//api/name/textNode:shouldLongPressLinkAttribute:value:atPoint:" title="textNode:shouldLongPressLinkAttribute:value:atPoint:"></a>
+	<h3 class="subsubtitle method-title">textNode:shouldLongPressLinkAttribute:value:atPoint:</h3>
 	
 	
 	
@@ -319,7 +324,7 @@
 	
     
 
-	<div class="method-subsection method-declaration"><code>- (BOOL)textNode:(id)<em>textNode</em> shouldLongPressLinkAttribute:(id)<em>attribute</em> value:(id)<em>value</em></code></div>
+	<div class="method-subsection method-declaration"><code>- (BOOL)textNode:(id)<em>textNode</em> shouldLongPressLinkAttribute:(id)<em>attribute</em> value:(id)<em>value</em> atPoint:(id)<em>point</em></code></div>
 
     
 	
@@ -339,6 +344,11 @@
 		<dl class="argument-def parameter-def">
 			<dt><em>value</em></dt>
 			<dd><p>The value of the tapped attribute.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>point</em></dt>
+			<dd><p>The point within textNode, in textNode&rsquo;s coordinate system, that was long-pressed.</p></dd>
 		</dl>
 		
 	</div>
@@ -457,7 +467,7 @@
 				<div id="footer">
 					<hr />
 					<div class="footer-copyright">
-						<p><span class="copyright">&copy; 2014 Facebook. All rights reserved. (Last updated: 2014-10-22)</span><br />
+						<p><span class="copyright">&copy; 2014 Facebook. All rights reserved. (Last updated: 2014-11-17)</span><br />
 						
 						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2 (build 963)</a>.</span></p>
 						

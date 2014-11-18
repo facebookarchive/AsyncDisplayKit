@@ -211,10 +211,11 @@ class should be able to store any state your node needs to draw itself
 <li><p>Return a configured instance of your draw parameters class in
 <code>-drawParametersForAsyncLayer:</code>.  This method will always be called on the
 main thread.</p></li>
-<li><p>Implement either <code>+drawRect::::</code> or <code>+displayWithParameters::</code>.  Note that
-these are <em>class</em> methods that will not have access to your node&#39;s state
-&mdash; only the draw parameters object.  They can be called on any thread
-and must be thread-safe.</p></li>
+<li><p>Implement either <code>+drawRect:withParameters:isCancelled:isRasterizing:</code> or
+<code>+displayWithParameters:isCancelled:</code>.  Note that these are <em>class</em> methods
+that will not have access to your node&#39;s state &mdash; only the draw
+parameters object.  They can be called on any thread and must be
+thread-safe.</p></li>
 </ol>
 
 <p>For example, this node will draw a rainbow:</p>
@@ -256,8 +257,9 @@ and must be thread-safe.</p></li>
 </code></pre></div>
 <p>This could easily be extended to support vertical rainbows too, by adding a
 <code>vertical</code> property to the node, exporting it in
-<code>-drawParametersForAsyncLayer:</code>, and referencing it in <code>+drawRect::::</code>.
-More-complex nodes can be supported in much the same way.</p>
+<code>-drawParametersForAsyncLayer:</code>, and referencing it in
+<code>+drawRect:withParameters:isCancelled:isRasterizing:</code>. More-complex nodes can
+be supported in much the same way.</p>
 
 <p>For more on custom nodes, check out the <a href="https://github.com/facebook/AsyncDisplayKit/blob/master/AsyncDisplayKit/ASDisplayNode%2BSubclasses.h">subclassing
 header</a>

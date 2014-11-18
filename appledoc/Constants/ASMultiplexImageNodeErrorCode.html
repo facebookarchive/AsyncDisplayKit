@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="html/html; charset=utf-8" />
-		<title>ASDisplayNode(Debugging) Category Reference</title>
+		<title>ASMultiplexImageNodeErrorCode Constants Reference</title>
 		<meta id="xcode-display" name="xcode-display" content="render"/>
 		<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
 		<link rel="stylesheet" type="text/css" media="print" href="../css/stylesPrint.css" />
@@ -16,7 +16,7 @@
 			</div>
 			
 			<div id="title" role="banner">
-				<h1 class="hideInXcode">ASDisplayNode(Debugging) Category Reference</h1>
+				<h1 class="hideInXcode">ASMultiplexImageNodeErrorCode Constants Reference</h1>
 			</div>
 			<ul id="headerButtons" role="toolbar">
 				<li id="toc_button">
@@ -26,24 +26,7 @@
 					<select id="jumpTo">
 	<option value="top">Jump To&#133;</option>
 	
-	<option value="overview">Overview</option>
 	
-	
-	
-	
-	<option value="tasks">Tasks</option>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<option value="instance_methods">Instance Methods</option>
-	
-	<option value="//api/name/displayNodeRecursiveDescription">&nbsp;&nbsp;&nbsp;&nbsp;- displayNodeRecursiveDescription</option>
 	
 	
 	
@@ -54,35 +37,15 @@
 		<nav id="tocContainer" class="isShowingTOC">
 			<ul id="toc" role="tree">
 				
-<li role="treeitem"><span class="nodisclosure"></span><span class="sectionName"><a href="#overview">Overview</a></span></li>
 
 
-
-
-<li role="treeitem" id="task_treeitem"><span class="nodisclosure"></span><span class="sectionName"><a href="#tasks">Tasks</a></span><ul>
-	
-</ul></li>
-
-
-
-
-
-
-
-
-
-<li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#instance_methods">Instance Methods</a></span><ul>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/displayNodeRecursiveDescription">displayNodeRecursiveDescription</a></span></li>
-	
-</ul></li>
 
 
 			</ul>
 		</nav>
 		<article>
 			<div id="contents" class="isShowingTOC" role="main">
-				<a title="ASDisplayNode(Debugging) Category Reference" name="top"></a>
+				<a title="ASMultiplexImageNodeErrorCode Constants Reference" name="top"></a>
 				<div class="main-navigation navigation-top">
 					<ul>
 	<li><a href="../index.html">Index</a></li>
@@ -91,7 +54,7 @@
 				</div>
 				<div id="header">
 					<div class="section-header">
-						<h1 class="title title-header">ASDisplayNode(Debugging) Category Reference</h1>
+						<h1 class="title title-header">ASMultiplexImageNodeErrorCode Constants Reference</h1>
 					</div>		
 				</div>
 				<div id="container">	
@@ -99,99 +62,93 @@
 					<div class="section section-specification"><table cellspacing="0"><tbody>
 						<tr>
 	<td class="specification-title">Declared in</td>
-	<td class="specification-value">ASDisplayNode.h</td>
+	<td class="specification-value">ASMultiplexImageNode.h</td>
 </tr>
 						</tbody></table></div>
 					
                     
                     
 					
+					
+					
+					
+                    
+                    
+                    <h3 class="subsubtitle method-title">ASMultiplexImageNodeErrorCode</h3>
+                    
+					
 					<div class="section section-overview">
-						<a title="Overview" name="overview"></a>
-						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p>Convenience methods for debugging.</p>
+                        <p>ASMultiplexImageNode error codes.</p>
 					</div>
 					
 					
-					
-					
-					
-					<div class="section section-tasks">
-						<a title="Tasks" name="tasks"></a>
-						<h2 class="subtitle subtitle-tasks">Tasks</h2>
-						
-						
-						
-						
+                    <div class="section">
+                        <!-- display enum values -->
+                        
+                        <h4 class="method-subtitle">Definition</h4>
+                        <code>typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode ) {<br/>
+                            
+                            &nbsp;&nbsp; <a href="">ASMultiplexImageNodeErrorCodeNoSourceForImage</a> = 0,<br/>
+                            
+                            &nbsp;&nbsp; <a href="">ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged</a>,<br/>
+                            
+                            };</code>
+                    
+                    </div>
+                    
+                    <div class="section section-methods">
+                        <h4 class="method-subtitle">Constants</h4>
+                        <dl class="termdef">
+                            
+                            <dt><a name="" title="ASMultiplexImageNodeErrorCodeNoSourceForImage"></a><code>ASMultiplexImageNodeErrorCodeNoSourceForImage</code></dt>
+<dd>
 
-						<ul class="task-list">
-							<li>
-	<span class="tooltip">
-		<code><a href="#//api/name/displayNodeRecursiveDescription">&ndash;&nbsp;displayNodeRecursiveDescription</a></code>
-	</span>
-	
-	
-</li>
-						</ul>
-						
-					</div>
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					<div class="section section-methods">
-						<a title="Instance Methods" name="instance_methods"></a>
-						<h2 class="subtitle subtitle-methods">Instance Methods</h2>
-						
-						<div class="section-method">
-	<a name="//api/name/displayNodeRecursiveDescription" title="displayNodeRecursiveDescription"></a>
-	<h3 class="subsubtitle method-title">displayNodeRecursiveDescription</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Return a description of the node hierarchy.</p>
-	</div>		
-	
-    
 
-	<div class="method-subsection method-declaration"><code>- (NSString *)displayNodeRecursiveDescription</code></div>
+<p>Indicates that the data source didn&rsquo;t provide a source for an image identifier.</p>
+
+
+
+
 
     
+	<p>
+		Declared In <code class="declared-in-ref">ASMultiplexImageNode.h</code>.
+	</p>
 	
+</dd>
+                            
+                            <dt><a name="" title="ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged"></a><code>ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged</code></dt>
+<dd>
+
+
+<p>Indicates that the best image identifier changed before a download for a worse identifier began.</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASMultiplexImageNode.h</code>.
+	</p>
 	
-	
-	
-	
-	
-	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<p>For debugging: (lldb) po [node displayNodeRecursiveDescription]</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASDisplayNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-					</div>
-					
-					
+</dd>
+                            
+                        </dl>
+                    </div>
+                    
+                    
+                    
+                    
+
+                    
+                    
+                    
+                    <div class="method-subsection declared-in-section">
+                        <h4 class="method-subtitle">Declared In</h4>
+                        <code class="declared-in-ref">ASMultiplexImageNode.h</code><br />
+                    </div>				
+                    
                     
                     
                     
