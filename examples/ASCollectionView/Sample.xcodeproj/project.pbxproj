@@ -16,7 +16,7 @@
 
 /* Begin PBXFileReference section */
 		2DBAEE96397BB913350C4530 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
-		AC3C4A5E1A11F47200143C57 /* CollectionViewSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CollectionViewSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC3C4A5E1A11F47200143C57 /* Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3C4A621A11F47200143C57 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC3C4A631A11F47200143C57 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		AC3C4A651A11F47200143C57 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -52,7 +52,7 @@
 		AC3C4A551A11F47200143C57 = {
 			isa = PBXGroup;
 			children = (
-				AC3C4A601A11F47200143C57 /* CollectionViewSample */,
+				AC3C4A601A11F47200143C57 /* Sample */,
 				AC3C4A5F1A11F47200143C57 /* Products */,
 				90A2B9C5397C46134C8A793B /* Pods */,
 				D6E38FF0CB18E3F55CF06437 /* Frameworks */,
@@ -62,12 +62,12 @@
 		AC3C4A5F1A11F47200143C57 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AC3C4A5E1A11F47200143C57 /* CollectionViewSample.app */,
+				AC3C4A5E1A11F47200143C57 /* Sample.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AC3C4A601A11F47200143C57 /* CollectionViewSample */ = {
+		AC3C4A601A11F47200143C57 /* Sample */ = {
 			isa = PBXGroup;
 			children = (
 				AC3C4A651A11F47200143C57 /* AppDelegate.h */,
@@ -77,7 +77,7 @@
 				AC3C4A8D1A11F80C00143C57 /* Images.xcassets */,
 				AC3C4A611A11F47200143C57 /* Supporting Files */,
 			);
-			path = CollectionViewSample;
+			path = Sample;
 			sourceTree = "<group>";
 		};
 		AC3C4A611A11F47200143C57 /* Supporting Files */ = {
@@ -100,9 +100,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AC3C4A5D1A11F47200143C57 /* CollectionViewSample */ = {
+		AC3C4A5D1A11F47200143C57 /* Sample */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AC3C4A811A11F47200143C57 /* Build configuration list for PBXNativeTarget "CollectionViewSample" */;
+			buildConfigurationList = AC3C4A811A11F47200143C57 /* Build configuration list for PBXNativeTarget "Sample" */;
 			buildPhases = (
 				F868CFBB21824CC9521B6588 /* Check Pods Manifest.lock */,
 				AC3C4A5A1A11F47200143C57 /* Sources */,
@@ -114,9 +114,9 @@
 			);
 			dependencies = (
 			);
-			name = CollectionViewSample;
-			productName = CollectionViewSample;
-			productReference = AC3C4A5E1A11F47200143C57 /* CollectionViewSample.app */;
+			name = Sample;
+			productName = Sample;
+			productReference = AC3C4A5E1A11F47200143C57 /* Sample.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -133,7 +133,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AC3C4A591A11F47200143C57 /* Build configuration list for PBXProject "CollectionViewSample" */;
+			buildConfigurationList = AC3C4A591A11F47200143C57 /* Build configuration list for PBXProject "Sample" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -146,7 +146,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AC3C4A5D1A11F47200143C57 /* CollectionViewSample */,
+				AC3C4A5D1A11F47200143C57 /* Sample */,
 			);
 		};
 /* End PBXProject section */
@@ -292,7 +292,7 @@
 			baseConfigurationReference = 2DBAEE96397BB913350C4530 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				INFOPLIST_FILE = CollectionViewSample/Info.plist;
+				INFOPLIST_FILE = Sample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -305,7 +305,7 @@
 			baseConfigurationReference = CD1ABB23007FEDB31D8C1978 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				INFOPLIST_FILE = CollectionViewSample/Info.plist;
+				INFOPLIST_FILE = Sample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -316,7 +316,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AC3C4A591A11F47200143C57 /* Build configuration list for PBXProject "CollectionViewSample" */ = {
+		AC3C4A591A11F47200143C57 /* Build configuration list for PBXProject "Sample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AC3C4A7F1A11F47200143C57 /* Debug */,
@@ -325,7 +325,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AC3C4A811A11F47200143C57 /* Build configuration list for PBXNativeTarget "CollectionViewSample" */ = {
+		AC3C4A811A11F47200143C57 /* Build configuration list for PBXNativeTarget "Sample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AC3C4A821A11F47200143C57 /* Debug */,
