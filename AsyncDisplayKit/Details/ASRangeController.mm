@@ -14,8 +14,8 @@
 #import "ASRangeControllerInternal.h"
 
 typedef NS_ENUM(NSInteger, ASScrollDirection) {
-  ASScrollDirectionUp,
-  ASScrollDirectionDown,
+  ASScrollDirectionBackward,
+  ASScrollDirectionForward,
 };
 
 @interface ASRangeController () {
@@ -283,7 +283,7 @@ static BOOL ASRangeIsValid(NSRange range)
   _visibleRange = _workingRange = NSMakeRange(NSNotFound, 0);
   _sizedNodeCount = 0;
   _nodeSizes = [NSMutableArray array];
-  _scrollDirection = ASScrollDirectionDown;
+  _scrollDirection = ASScrollDirectionForward;
   _workingIndexPaths = [NSMutableOrderedSet orderedSet];
 
   // don't bother sizing if the data source is empty
@@ -413,34 +413,38 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
   ASDisplayNodeCAssert(NSMaxRange(visibleRange) <= nodeSizes.count, @"nodes can't be visible until they're sized");
 
   // extend the visible range by enough nodes to fill at least the requested number of screenfuls
-  // NB.  this logic assumes (UITableView-style) vertical scrolling and would need to be changed for ASCollectionView
+  // NB.  this logic assumes there is no overlap between nodes. It also doesn't
+  // take spacing between nodes into account.
+  CGFloat viewportArea = viewport.width * viewport.height;
   CGFloat minUpperBufferSize, minLowerBufferSize;
   switch (scrollDirection) {
-    case ASScrollDirectionUp:
-      minUpperBufferSize = viewport.height * params.leadingBufferScreenfuls;
-      minLowerBufferSize = viewport.height * params.trailingBufferScreenfuls;
+    case ASScrollDirectionBackward:
+      minUpperBufferSize = viewportArea * params.leadingBufferScreenfuls;
+      minLowerBufferSize = viewportArea * params.trailingBufferScreenfuls;
       break;
 
-    case ASScrollDirectionDown:
-      minUpperBufferSize = viewport.height * params.trailingBufferScreenfuls;
-      minLowerBufferSize = viewport.height * params.leadingBufferScreenfuls;
+    case ASScrollDirectionForward:
+      minUpperBufferSize = viewportArea * params.trailingBufferScreenfuls;
+      minLowerBufferSize = viewportArea * params.leadingBufferScreenfuls;
       break;
   }
 
   // "top" buffer (above the screen, if we're scrolling vertically)
   NSInteger upperBuffer = 0;
-  CGFloat upperBufferHeight = 0.0f;
-  for (NSInteger idx = visibleRange.location - 1; idx >= 0 && upperBufferHeight < minUpperBufferSize; idx--) {
+  CGFloat upperBufferArea = 0.0f;
+  for (NSInteger idx = visibleRange.location - 1; idx >= 0 && upperBufferArea < minUpperBufferSize; idx--) {
     upperBuffer++;
-    upperBufferHeight += [nodeSizes[idx] CGSizeValue].height;
+    CGSize nodeSize = [nodeSizes[idx] CGSizeValue];
+    upperBufferArea += nodeSize.width * nodeSize.height;
   }
 
   // "bottom" buffer (below the screen, if we're scrolling vertically)
   NSInteger lowerBuffer = 0;
-  CGFloat lowerBufferHeight = 0.0f;
-  for (NSInteger idx = NSMaxRange(visibleRange); idx < nodeSizes.count && lowerBufferHeight < minLowerBufferSize; idx++) {
+  CGFloat lowerBufferArea = 0.0f;
+  for (NSInteger idx = NSMaxRange(visibleRange); idx < nodeSizes.count && lowerBufferArea < minLowerBufferSize; idx++) {
     lowerBuffer++;
-    lowerBufferHeight += [nodeSizes[idx] CGSizeValue].height;
+    CGSize nodeSize = [nodeSizes[idx] CGSizeValue];
+    lowerBufferArea += nodeSize.width * nodeSize.height;
   }
 
   return NSMakeRange(visibleRange.location - upperBuffer,
@@ -459,9 +463,9 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
   // figure out where we're going, because that's where the bulk of the working range needs to be
   NSInteger scrollDelta = _visibleRange.location - previouslyVisible.location;
   if (scrollDelta < 0)
-    _scrollDirection = ASScrollDirectionUp;
+    _scrollDirection = ASScrollDirectionBackward;
   if (scrollDelta > 0)
-    _scrollDirection = ASScrollDirectionDown;
+    _scrollDirection = ASScrollDirectionForward;
 
   [self recalculateWorkingRange];
 }
