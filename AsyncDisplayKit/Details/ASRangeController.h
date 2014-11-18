@@ -12,8 +12,8 @@
 
 typedef struct {
   // working range buffers, on either side of scroll
-  NSInteger trailingBufferScreenfuls;
-  NSInteger leadingBufferScreenfuls;
+  CGFloat trailingBufferScreenfuls;
+  CGFloat leadingBufferScreenfuls;
 } ASRangeTuningParameters;
 
 @protocol ASRangeControllerDelegate;

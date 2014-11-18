@@ -60,8 +60,8 @@ need to be pruned quickly.
 ```objective-c
 ASRangeController *rangeController = [[ASRangeController alloc] init];
 rangeController.tuningParameters = (ASRangeTuningParameters){
-  .leadingBufferScreenfuls = 2; // two screenfuls in the direction of scroll
-  .trailingBufferScreenfuls = 1; // one screenful in the other direction
+  .leadingBufferScreenfuls = 2.0f; // two screenfuls in the direction of scroll
+  .trailingBufferScreenfuls = 0.5f; // one-half screenful in the other direction
 };
 ```
 

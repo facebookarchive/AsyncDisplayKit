@@ -58,8 +58,8 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
     return nil;
 
   _tuningParameters = {
-    .trailingBufferScreenfuls = 1,
-    .leadingBufferScreenfuls = 2,
+    .trailingBufferScreenfuls = 1.0f,
+    .leadingBufferScreenfuls = 2.0f,
   };
 
   return self;
