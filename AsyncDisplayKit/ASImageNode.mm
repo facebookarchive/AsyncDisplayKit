@@ -335,3 +335,30 @@
 }
 
 @end
+
+
+#pragma mark - Extras
+extern asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat borderWidth, UIColor *borderColor)
+{
+  return ^(UIImage *originalImage) {
+    UIGraphicsBeginImageContextWithOptions(originalImage.size, NO, originalImage.scale);
+    UIBezierPath *roundOutline = [UIBezierPath bezierPathWithOvalInRect:(CGRect){CGPointZero, originalImage.size}];
+
+    // Make the image round
+    [roundOutline addClip];
+
+    // Draw the original image
+    [originalImage drawAtPoint:CGPointZero];
+
+    // Draw a border on top.
+    if (borderWidth > 0.0) {
+      [borderColor setStroke];
+      CGContextSetLineWidth(UIGraphicsGetCurrentContext(), borderWidth);
+      [roundOutline stroke];
+    }
+
+    UIImage *modifiedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return modifiedImage;
+  };
+}
