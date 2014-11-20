@@ -542,6 +542,11 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
   return CATransform3DConcat(transformToGlobal, transformToLocal);
 }
 
+- (BOOL)isDescendantOfNode:(ASDisplayNode *)node
+{
+  return _ASDisplayNodeIsAncestorOfDisplayNode(node, self);
+}
+
 - (CGPoint)convertPoint:(CGPoint)point fromNode:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertThreadAffinity(self);

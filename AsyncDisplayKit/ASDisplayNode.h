@@ -228,6 +228,11 @@
  */
 - (void)removeFromSupernode;
 
+/**
+ * @abstract Returns whether this node is equal to or a descendant of the given node.
+ */
+- (BOOL)isDescendantOfNode:(ASDisplayNode *)node;
+
 /** 
  * @abstract The receiver's immediate subnodes.
  */
