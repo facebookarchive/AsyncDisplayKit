@@ -14,7 +14,7 @@
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 
-@interface ViewController () <ASMultiplexImageNodeDataSource, ASMultiplexImageNodeDelegate, ASImageDownloaderProtocol>
+@interface ViewController () <ASMultiplexImageNodeDataSource, ASMultiplexImageNodeDelegate>
 {
   ASMultiplexImageNode *_imageNode;
 
@@ -33,7 +33,7 @@
 
 
   // multiplex image node!
-  _imageNode = [[ASMultiplexImageNode alloc] initWithCache:nil downloader:self];
+  _imageNode = [[ASMultiplexImageNode alloc] initWithCache:nil downloader:[[ASBasicImageDownloader alloc] init]];
   _imageNode.dataSource = self;
   _imageNode.delegate = self;
 
@@ -126,52 +126,6 @@
     _textLabel.text = [_textLabel.text stringByAppendingString:@".  tap to reload"];
     _textLabel.userInteractionEnabled = YES;
   }
-}
-
-
-#pragma mark -
-#pragma mark ASImageDownloaderProtocol.
-
-- (id)downloadImageWithURL:(NSURL *)URL
-             callbackQueue:(dispatch_queue_t)callbackQueue
-     downloadProgressBlock:(void (^)(CGFloat progress))downloadProgressBlock
-                completion:(void (^)(CGImageRef image, NSError *error))completion
-{
-  // if no callback queue is supplied, run on the main thread
-  if (callbackQueue == nil) {
-    callbackQueue = dispatch_get_main_queue();
-  }
-
-  // call completion blocks
-  void (^handler)(NSURLResponse *, NSData *, NSError *) = ^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-    // add an artificial delay
-    usleep(1.0 * USEC_PER_SEC);
-
-    // ASMultiplexImageNode callbacks
-    dispatch_async(callbackQueue, ^{
-      if (downloadProgressBlock) {
-        downloadProgressBlock(1.0f);
-      }
-
-      if (completion) {
-        completion([[UIImage imageWithData:data] CGImage], connectionError);
-      }
-    });
-  };
-
-  // let NSURLConnection do the heavy lifting
-  NSURLRequest *request = [NSURLRequest requestWithURL:URL];
-  [NSURLConnection sendAsynchronousRequest:request
-                                     queue:[[NSOperationQueue alloc] init]
-                         completionHandler:handler];
-
-  // return nil, don't support cancellation
-  return nil;
-}
-
-- (void)cancelImageDownloadForIdentifier:(id)downloadIdentifier
-{
-  // no-op, don't support cancellation
 }
 
 @end
