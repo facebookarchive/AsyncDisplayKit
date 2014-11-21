@@ -37,19 +37,19 @@
 /**
  * The delegate, which must conform to the <ASNetworkImageNodeDelegate> protocol.
  */
-@property (atomic, assign, readwrite) id<ASNetworkImageNodeDelegate> delegate;
+@property (atomic, weak, readwrite) id<ASNetworkImageNodeDelegate> delegate;
 
 /**
  * A placeholder image to display while the URL is loading.
  */
-@property (atomic, retain, readwrite) UIImage *defaultImage;
+@property (atomic, strong, readwrite) UIImage *defaultImage;
 
 /**
  * The URL of a new image to download and display.
  *
  * @discussion Changing this property will reset the displayed image to a placeholder (<defaultImage>) while loading.
  */
-@property (atomic, retain, readwrite) NSURL *URL;
+@property (atomic, strong, readwrite) NSURL *URL;
 
 /**
  * Download and display a new image.

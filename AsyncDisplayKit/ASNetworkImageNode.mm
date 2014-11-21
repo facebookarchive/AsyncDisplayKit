@@ -191,26 +191,28 @@
         });
       }
     } else {
-      // The delegate must be retained, as nothing prevents it from being deallocated during the delay before completionBlock is executed.
-      // Clients (the delegate) /should/ set our delegate property to nil in their -dealloc, but don't always do this.
-      __block id<ASNetworkImageNodeDelegate> delegate = _delegate;
-
+      __weak __typeof__(self) weakSelf = self;
       void (^finished)(CGImageRef) = ^(CGImageRef responseImage) {
+        __typeof__(self) strongSelf = weakSelf;
+        if (strongSelf == nil) {
+          return;
+        }
+
         {
-          ASDN::MutexLocker l(_lock);
+          ASDN::MutexLocker l(strongSelf->_lock);
 
           if (responseImage != NULL) {
-            _imageLoaded = YES;
-            self.image = [UIImage imageWithCGImage:responseImage];
+            strongSelf->_imageLoaded = YES;
+            strongSelf.image = [UIImage imageWithCGImage:responseImage];
           }
 
-          _imageDownload = nil;
+          strongSelf->_imageDownload = nil;
 
-          _cacheUUID = nil;
+          strongSelf->_cacheUUID = nil;
         }
 
         if (responseImage != NULL) {
-          [delegate imageNode:self didLoadImage:self.image];
+          [strongSelf->_delegate imageNode:self didLoadImage:self.image];
         }
       };
 
