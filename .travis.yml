@@ -7,4 +7,9 @@ before_install:
 env:
   - TEST_OS=7.1
   - TEST_OS=8.1
-script: xctool -workspace AsyncDisplayKit.xcworkspace -scheme AsyncDisplayKit -sdk iphonesimulator8.1 -destination "platform=iOS Simulator,OS=${TEST_OS},name=iPhone 5" build test
+script: ./build.sh $TEST_OS
+
+# whitelist
+branches:
+  only:
+    - master
