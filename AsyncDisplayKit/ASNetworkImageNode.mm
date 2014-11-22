@@ -212,7 +212,7 @@
         }
 
         if (responseImage != NULL) {
-          [strongSelf->_delegate imageNode:self didLoadImage:self.image];
+          [strongSelf->_delegate imageNode:self didLoadImage:strongSelf.image];
         }
       };
 
