@@ -16,6 +16,13 @@ typedef struct {
   CGFloat leadingBufferScreenfuls;
 } ASRangeTuningParameters;
 
+typedef NS_ENUM(NSInteger, ASScrollDirection) {
+  ASScrollDirectionBackward,
+  ASScrollDirectionForward,
+};
+
+typedef NSRange (^asrangecontroller_working_range_calculation_block_t)(ASRangeTuningParameters params, ASScrollDirection scrollDirection, NSRange visibleRange, NSArray *nodeSizes, CGSize viewport);
+
 @protocol ASRangeControllerDelegate;
 
 
@@ -98,6 +105,13 @@ typedef struct {
  * Defaults to a trailing buffer of one screenful and a leading buffer of two screenfuls.
  */
 @property (nonatomic, assign) ASRangeTuningParameters tuningParameters;
+
+/**
+ * @abstract An optional block which can perform custom calculation for working range.
+ *
+ * @discussion Can be used to provide custom working range logic for custom layouts.
+ */
+@property (nonatomic, readwrite, copy) asrangecontroller_working_range_calculation_block_t workingRangeCalculationBlock;
 
 @end
 
