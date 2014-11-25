@@ -437,6 +437,27 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _contentsScaleForDisplay = contentsScaleForDisplay;
 }
 
+- (void)display
+{
+  ASDisplayNodeAssertMainThread();
+
+  // rendering a backing store requires a node be laid out
+  [self layout];
+
+  for (ASDisplayNode *node in self.subnodes) {
+    [node display];
+  }
+
+  CALayer *layer = [self isLayerBacked] ? self.layer : self.view.layer;
+
+  if (layer.contents) {
+    return;
+  }
+
+  [layer setNeedsDisplay];
+  [layer displayIfNeeded];
+}
+
 - (void)displayImmediately
 {
   ASDisplayNodeAssertMainThread();
