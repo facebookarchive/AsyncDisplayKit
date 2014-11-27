@@ -3,9 +3,13 @@ before_install:
   - brew update
   - brew reinstall xctool
   - gem update cocoapods
-xcode_workspace: AsyncDisplayKit.xcworkspace
-xcode_scheme: AsyncDisplayKit
-xcode_sdk:
-  - iphonesimulator7.0
-  - iphonesimulator7.1
-  - iphonesimulator8.0
+  - xcrun simctl list
+env:
+  - TEST_OS=7.1
+  - TEST_OS=8.1
+script: ./build.sh $TEST_OS
+
+# whitelist
+branches:
+  only:
+    - master

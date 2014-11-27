@@ -12,8 +12,8 @@
 
 typedef struct {
   // working range buffers, on either side of scroll
-  NSInteger trailingBufferScreenfuls;
-  NSInteger leadingBufferScreenfuls;
+  CGFloat trailingBufferScreenfuls;
+  CGFloat leadingBufferScreenfuls;
 } ASRangeTuningParameters;
 
 @protocol ASRangeControllerDelegate;
@@ -26,7 +26,7 @@ typedef struct {
  * a working range, and is responsible for handling AsyncDisplayKit machinery (sizing cell nodes, enqueueing and
  * cancelling their asynchronous layout and display, and so on).
  */
-@interface ASRangeController : NSObject
+@interface ASRangeController : ASDealloc2MainObject
 
 /**
  * Notify the receiver that its delegate's data source has been set or changed.  This is like -[UITableView reloadData]
@@ -49,6 +49,15 @@ typedef struct {
  */
 - (NSInteger)numberOfSizedSections;
 - (NSInteger)numberOfSizedRowsInSection:(NSInteger)section;
+
+/**
+ * Configure the specified UITableViewCell's content view, and apply properties from ASCellNode.
+ *
+ * @param cell UITableViewCell to configure.
+ *
+ * @param indexPath Index path for the node of interest.
+ */
+- (void)configureTableViewCell:(UITableViewCell *)cell forIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Add the sized node for `indexPath` as a subview of `contentView`.

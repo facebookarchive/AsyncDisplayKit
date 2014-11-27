@@ -19,6 +19,8 @@
 #import "ASThread.h"
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
+CGFloat ASDisplayNodeScreenScale();
+void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 
 @class _ASPendingState;
 

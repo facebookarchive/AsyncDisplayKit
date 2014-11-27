@@ -1,11 +1,11 @@
 Pod::Spec.new do |spec|
   spec.name         = 'AsyncDisplayKit'
-  spec.version      = '1.0'
+  spec.version      = '1.0.1'
   spec.license      =  { :type => 'BSD' }
   spec.homepage     = 'http://asyncdisplaykit.org'
   spec.authors      = { 'Nadine Salter' => 'nadi@fb.com', 'Scott Goodson' => 'scottg@fb.com' }
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
-  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.0' }
+  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.0.1' }
 
   spec.documentation_url = 'http://asyncdisplaykit.org/appledoc/'
 
@@ -19,6 +19,9 @@ Pod::Spec.new do |spec|
       'AsyncDisplayKit/**/*.{h,m,mm}',
       'Base/*.{h,m}'
   ]
+
+  spec.frameworks = 'AssetsLibrary'
+  spec.weak_frameworks = 'Photos'
 
   # ASDealloc2MainObject must be compiled with MRR
   spec.requires_arc = true

@@ -22,6 +22,7 @@
   CGColorRef backgroundColor;
   id contents;
   CGFloat alpha;
+  CGFloat cornerRadius;
   UIViewContentMode contentMode;
   CGPoint anchorPoint;
   CGPoint position;
@@ -61,9 +62,11 @@
     int setAutoresizingMask:1;
     int setBounds:1;
     int setBackgroundColor:1;
+    int setTintColor:1;
     int setContents:1;
     int setHidden:1;
     int setAlpha:1;
+    int setCornerRadius:1;
     int setContentMode:1;
     int setNeedsDisplay:1;
     int setAnchorPoint:1;
@@ -109,7 +112,9 @@
 @synthesize edgeAntialiasingMask=edgeAntialiasingMask;
 @synthesize autoresizesSubviews=autoresizesSubviews;
 @synthesize autoresizingMask=autoresizingMask;
+@synthesize tintColor=tintColor;
 @synthesize alpha=alpha;
+@synthesize cornerRadius=cornerRadius;
 @synthesize contentMode=contentMode;
 @synthesize anchorPoint=anchorPoint;
 @synthesize position=position;
@@ -148,11 +153,13 @@
   opaque = YES;
   bounds = CGRectZero;
   backgroundColor = nil;
+  tintColor = [UIColor colorWithRed:0.0 green:0.478 blue:1.0 alpha:1.0];
   contents = nil;
   isHidden = NO;
   needsDisplayOnBoundsChange = NO;
   autoresizesSubviews = YES;
   alpha = 1.0f;
+  cornerRadius = 0.0f;
   contentMode = UIViewContentModeScaleToFill;
   _flags.needsDisplay = NO;
   anchorPoint = CGPointMake(0.5, 0.5);
@@ -265,6 +272,12 @@
   _flags.setBackgroundColor = YES;
 }
 
+- (void)setTintColor:(UIColor *)newTintColor
+{
+  tintColor = newTintColor;
+  _flags.setTintColor = YES;
+}
+
 - (void)setContents:(id)newContents
 {
   if (contents == newContents) {
@@ -285,6 +298,12 @@
 {
   alpha = newAlpha;
   _flags.setAlpha = YES;
+}
+
+- (void)setCornerRadius:(CGFloat)newCornerRadius
+{
+  cornerRadius = newCornerRadius;
+  _flags.setCornerRadius = YES;
 }
 
 - (void)setContentMode:(UIViewContentMode)newContentMode
@@ -564,6 +583,9 @@
   if (_flags.setAlpha)
     layer.opacity = alpha;
 
+  if (_flags.setCornerRadius)
+    layer.cornerRadius = cornerRadius;
+
   if (_flags.setContentMode)
     layer.contentsGravity = ASDisplayNodeCAContentsGravityFromUIContentMode(contentMode);
 
@@ -652,6 +674,9 @@
   if (_flags.setBackgroundColor)
     layer.backgroundColor = backgroundColor;
 
+  if (_flags.setTintColor)
+    view.tintColor = self.tintColor;
+
   if (_flags.setOpaque)
     view.layer.opaque = opaque;
 
@@ -660,6 +685,9 @@
 
   if (_flags.setAlpha)
     view.alpha = alpha;
+
+  if (_flags.setCornerRadius)
+    layer.cornerRadius = cornerRadius;
 
   if (_flags.setContentMode)
     view.contentMode = contentMode;

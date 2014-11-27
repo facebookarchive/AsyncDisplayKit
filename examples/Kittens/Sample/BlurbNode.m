@@ -85,7 +85,7 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
                                textNodeSize.height);
 }
 
-- (BOOL)textNode:(ASTextNode *)richTextNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value
+- (BOOL)textNode:(ASTextNode *)richTextNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point
 {
   // opt into link highlighting -- tap and hold the link to try it!  must enable highlighting on a layer, see -didLoad
   return YES;

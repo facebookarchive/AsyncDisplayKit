@@ -27,8 +27,11 @@ typedef NS_ENUM(NSUInteger, ASImageNodeTint) {
  * Image modification block.  Use to transform an image before display.
  *
  * @param image The image to be displayed.
+ *
+ * @returns A transformed image.
  */
 typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
+
 
 /**
  * @abstract Draws images.
@@ -49,8 +52,6 @@ typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
  * @abstract Simple way to tint the image.
  */
 @property (nonatomic, assign) ASImageNodeTint tint;
-
-#pragma mark - Cropping
 
 /**
  * @abstract Indicates whether efficient cropping of the receiver is enabled.
@@ -100,7 +101,6 @@ typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
  */
 @property (nonatomic, readwrite, copy) asimagenode_modification_block_t imageModificationBlock;
 
-#pragma mark -
 /**
  * @abstract Marks the receiver as needing display and performs a block after
  * display has finished.
@@ -116,3 +116,20 @@ typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
 - (void)setNeedsDisplayWithCompletion:(void (^)(BOOL canceled))displayCompletionBlock;
 
 @end
+
+
+ASDISPLAYNODE_EXTERN_C_BEGIN
+
+/**
+ * @abstract Image modification block that rounds (and optionally adds a border to) an image.
+ *
+ * @param borderWidth The width of the round border to draw, or zero if no border is desired.
+ * @param borderColor What colour border to draw.
+ *
+ * @see <imageModificationBlock>
+ *
+ * @returns An ASImageNode image modification block.
+ */
+asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat borderWidth, UIColor *borderColor);
+
+ASDISPLAYNODE_EXTERN_C_END

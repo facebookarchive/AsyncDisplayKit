@@ -213,4 +213,11 @@
   [_node asyncdisplaykit_asyncTransactionContainerStateDidChange];
 }
 
+- (void)tintColorDidChange
+{
+    [super tintColorDidChange];
+    
+    [_node tintColorDidChange];
+}
+
 @end

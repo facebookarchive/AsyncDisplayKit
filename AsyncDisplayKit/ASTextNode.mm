@@ -418,8 +418,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
       // Check if delegate implements optional method, if not assume NO.
       // Should the text be highlightable/touchable?
-      if (![_delegate respondsToSelector:@selector(textNode:shouldHighlightLinkAttribute:value:)] ||
-          ![_delegate textNode:self shouldHighlightLinkAttribute:name value:value]) {
+      if (![_delegate respondsToSelector:@selector(textNode:shouldHighlightLinkAttribute:value:atPoint:)] ||
+          ![_delegate textNode:self shouldHighlightLinkAttribute:name value:value atPoint:point]) {
         value = nil;
         name = nil;
       }
@@ -465,8 +465,11 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     }
 
     // Ask our delegate if a long-press on an attribute is relevant
-    if ([self.delegate respondsToSelector:@selector(textNode:shouldLongPressLinkAttribute:value:)]) {
-      return [self.delegate textNode:self shouldLongPressLinkAttribute:_highlightedLinkAttributeName value:_highlightedLinkAttributeValue];
+    if ([self.delegate respondsToSelector:@selector(textNode:shouldLongPressLinkAttribute:value:atPoint:)]) {
+      return [self.delegate textNode:self
+        shouldLongPressLinkAttribute:_highlightedLinkAttributeName
+                               value:_highlightedLinkAttributeValue
+                             atPoint:[gestureRecognizer locationInView:self.view]];
     }
 
     // Otherwise we are good to go.
@@ -517,12 +520,24 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
         weakHighlightLayer.opacity = 0.0;
 
+        CFTimeInterval beginTime = CACurrentMediaTime();
+        CABasicAnimation *possibleFadeIn = (CABasicAnimation *)[weakHighlightLayer animationForKey:@"opacity"];
+        if (possibleFadeIn) {
+          // Calculate when we should begin fading out based on the end of the fade in animation,
+          // Also check to make sure that the new begin time hasn't already passed
+          CGFloat newBeginTime = (possibleFadeIn.beginTime + possibleFadeIn.duration);
+          if (newBeginTime > beginTime) {
+            beginTime = newBeginTime;
+          }
+        }
+        
         CABasicAnimation *fadeOut = [CABasicAnimation animationWithKeyPath:@"opacity"];
         fadeOut.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-        fadeOut.fromValue = @(((CALayer *)weakHighlightLayer.presentationLayer).opacity);
+        fadeOut.fromValue = possibleFadeIn.toValue ?: @(((CALayer *)weakHighlightLayer.presentationLayer).opacity);
         fadeOut.toValue = @0.0;
         fadeOut.fillMode = kCAFillModeBoth;
         fadeOut.duration = ASTextNodeHighlightFadeOutDuration;
+        fadeOut.beginTime = beginTime;
 
         dispatch_block_t prev = [CATransaction completionBlock];
         [CATransaction setCompletionBlock:^{
@@ -554,6 +569,11 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
         for (NSValue *rectValue in highlightRects) {
           CGRect rendererRect = [[self class] _adjustRendererRect:rectValue.CGRectValue forShadowPadding:_shadower.shadowPadding];
           CGRect highlightedRect = [self.layer convertRect:rendererRect toLayer:highlightTargetLayer];
+
+          // We set our overlay layer's frame to the bounds of the highlight target layer.
+          // Offset highlight rects to avoid double-counting target layer's bounds.origin.
+          highlightedRect.origin.x -= highlightTargetLayer.bounds.origin.x;
+          highlightedRect.origin.y -= highlightTargetLayer.bounds.origin.y;
           [converted addObject:[NSValue valueWithCGRect:highlightedRect]];
         }
 
@@ -569,6 +589,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
           fadeIn.fromValue = @0.0;
           fadeIn.toValue = @(overlayLayer.opacity);
           fadeIn.duration = ASTextNodeHighlightFadeInDuration;
+          fadeIn.beginTime = CACurrentMediaTime();
 
           [overlayLayer addAnimation:fadeIn forKey:fadeIn.keyPath];
         }

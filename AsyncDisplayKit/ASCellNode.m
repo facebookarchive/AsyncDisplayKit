@@ -31,7 +31,16 @@
   if (!(self = [super init]))
     return nil;
 
+  // use UITableViewCell defaults
+  _selectionStyle = UITableViewCellSelectionStyleDefault;
+
   return self;
+}
+
+- (void)setLayerBacked:(BOOL)layerBacked
+{
+  // ASRangeController expects ASCellNodes to be view-backed.  (Layer-backing is supported on ASCellNode subnodes.)
+  ASDisplayNodeAssert(!layerBacked, @"ASCellNode does not support layer-backing.");
 }
 
 // TODO consider making this property an associated object in ASRangeController.mm

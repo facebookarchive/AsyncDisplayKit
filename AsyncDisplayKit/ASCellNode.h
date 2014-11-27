@@ -13,7 +13,11 @@
  */
 @interface ASCellNode : ASDisplayNode
 
-// TODO expose some UITableViewCell properties for configuration, eg, separator style
+/*
+ * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
+ */
+//@property (atomic, retain) UIColor *backgroundColor;
+@property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
 @end
 

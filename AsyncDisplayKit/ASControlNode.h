@@ -12,7 +12,7 @@
   @abstract Kinds of events possible for control nodes.
   @discussion These events are identical to their UIControl counterparts.
  */
-enum _ASControlNodeEvent
+typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent)
 {
   ASControlNodeEventTouchDown         = 1 << 0,
   ASControlNodeEventTouchDownRepeat   = 1 << 1,
@@ -24,7 +24,7 @@ enum _ASControlNodeEvent
 
   ASControlNodeEventAllEvents         = 0xFFFFFFFF
 };
-typedef NSUInteger ASControlNodeEvent;
+
 
 /**
   @abstract ASControlNode is the base class for control nodes (such as buttons), or nodes that track touches to invoke targets with action messages.

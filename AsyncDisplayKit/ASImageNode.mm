@@ -8,10 +8,11 @@
 
 #import "ASImageNode.h"
 
-#import <AsyncDisplayKit/_ASDisplayLayer.h>
 #import <AsyncDisplayKit/_ASCoreAnimationExtras.h>
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 
 #import "ASImageNode+CGExtras.h"
 
@@ -83,7 +84,7 @@
     return nil;
 
   // TODO can this be removed?
-  self.contentsScale = [[UIScreen mainScreen] scale];
+  self.contentsScale = ASDisplayNodeScreenScale();
   self.contentMode = UIViewContentModeScaleAspectFill;
   self.opaque = YES;
 
@@ -105,35 +106,35 @@
 
 - (void)setImage:(UIImage *)image
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_imageLock);
   if (_image != image) {
     _image = image;
-    [self invalidateCalculatedSize];
-    [self setNeedsDisplay];
+    ASDisplayNodePerformBlockOnMainThread(^{
+      [self invalidateCalculatedSize];
+      [self setNeedsDisplay];
+    });
   }
 }
 
 - (UIImage *)image
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_imageLock);
   return _image;
 }
 
 - (void)setTint:(ASImageNodeTint)tint
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_imageLock);
   if (_tint != tint) {
     _tint = tint;
-    [self setNeedsDisplay];
+    ASDisplayNodePerformBlockOnMainThread(^{
+      [self setNeedsDisplay];
+    });
   }
 }
 
 - (ASImageNodeTint)tint
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_imageLock);
   return _tint;
 }
@@ -280,19 +281,16 @@
 #pragma mark - Cropping
 - (BOOL)isCropEnabled
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   return _cropEnabled;
 }
 
 - (void)setCropEnabled:(BOOL)cropEnabled
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   [self setCropEnabled:cropEnabled recropImmediately:NO inBounds:self.bounds];
 }
 
 - (void)setCropEnabled:(BOOL)cropEnabled recropImmediately:(BOOL)recropImmediately inBounds:(CGRect)cropBounds
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   if (_cropEnabled == cropEnabled)
     return;
 
@@ -302,23 +300,22 @@
   // If we have an image to display, display it, respecting our recrop flag.
   if (self.image)
   {
-    if (recropImmediately)
-      [self displayImmediately];
-    else
-      [self setNeedsDisplay];
+    ASDisplayNodePerformBlockOnMainThread(^{
+      if (recropImmediately)
+        [self displayImmediately];
+      else
+        [self setNeedsDisplay];
+    });
   }
 }
 
 - (CGRect)cropRect
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   return _cropRect;
 }
 
 - (void)setCropRect:(CGRect)cropRect
 {
-  ASDisplayNodeAssertThreadAffinity(self);
-
   if (CGRectEqualToRect(_cropRect, cropRect))
     return;
 
@@ -331,8 +328,37 @@
   BOOL isCroppingImage = ((boundsSize.width < imageSize.width) || (boundsSize.height < imageSize.height));
 
   // Re-display if we need to.
-  if (self.nodeLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
-    [self setNeedsDisplay];
+  ASDisplayNodePerformBlockOnMainThread(^{
+    if (self.nodeLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
+      [self setNeedsDisplay];
+  });
 }
 
 @end
+
+
+#pragma mark - Extras
+extern asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat borderWidth, UIColor *borderColor)
+{
+  return ^(UIImage *originalImage) {
+    UIGraphicsBeginImageContextWithOptions(originalImage.size, NO, originalImage.scale);
+    UIBezierPath *roundOutline = [UIBezierPath bezierPathWithOvalInRect:(CGRect){CGPointZero, originalImage.size}];
+
+    // Make the image round
+    [roundOutline addClip];
+
+    // Draw the original image
+    [originalImage drawAtPoint:CGPointZero];
+
+    // Draw a border on top.
+    if (borderWidth > 0.0) {
+      [borderColor setStroke];
+      CGContextSetLineWidth(UIGraphicsGetCurrentContext(), borderWidth);
+      [roundOutline stroke];
+    }
+
+    UIImage *modifiedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return modifiedImage;
+  };
+}
