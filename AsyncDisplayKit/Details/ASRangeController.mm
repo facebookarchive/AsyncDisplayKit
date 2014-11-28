@@ -42,6 +42,9 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
   NSRange _visibleRange;
   NSRange _workingRange;
   NSMutableOrderedSet *_workingIndexPaths;
+  
+  // queue of index paths waiting to be reloaded
+  NSMutableArray *_pendingReloadIndexPaths;
 }
 
 @end
@@ -73,14 +76,19 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
 - (void)teardownAllNodes
 {
   for (ASCellNode *node in _nodes.allValues) {
-    [node removeFromSupernode];
-
-    if (node.nodeLoaded)
-      [node.view removeFromSuperview];
+    [self tearDownNode:node];
   }
   [_nodes removeAllObjects];
   _nodes = nil;
 
+}
+
+- (void) tearDownNode:(ASCellNode *)node
+{
+  [node removeFromSupernode];
+  
+  if (node.nodeLoaded)
+    [node.view removeFromSuperview];
 }
 
 + (dispatch_queue_t)sizingQueue
@@ -176,6 +184,20 @@ static BOOL ASRangeIsValid(NSRange range)
     }
   }
 
+  return result;
+}
+
+- (NSArray *)indexPathsForSection:(NSInteger) section
+{
+  ASDisplayNodeAssert(section >= 0 && section < _sectionCounts.count, @"invalid argument");
+
+  NSInteger sectionCount = [_sectionCounts[section] integerValue];
+  NSMutableArray *result = [NSMutableArray arrayWithCapacity:sectionCount];
+
+  for (NSInteger row = 0; row < sectionCount; row++) {
+    [result addObject:[NSIndexPath indexPathForRow:row inSection:section]];
+  }
+  
   return result;
 }
 
@@ -285,6 +307,7 @@ static BOOL ASRangeIsValid(NSRange range)
   _nodeSizes = [NSMutableArray array];
   _scrollDirection = ASScrollDirectionForward;
   _workingIndexPaths = [NSMutableOrderedSet orderedSet];
+  _pendingReloadIndexPaths = [NSMutableArray array];
 
   // don't bother sizing if the data source is empty
   if (_totalNodeCount > 0) {
@@ -521,6 +544,11 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
 #pragma mark -
 #pragma mark Async sizing.
 
+- (BOOL)isSizing
+{
+  return _pendingReloadIndexPaths.count > 0 || _sizedNodeCount < _totalNodeCount;
+}
+
 - (ASCellNode *)sizedNodeForIndexPath:(NSIndexPath *)indexPath
 {
   if ([self indexForIndexPath:indexPath] >= _sizedNodeCount) {
@@ -543,18 +571,37 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
   if (!_delegate)
     return;
 
+  // evict pending reloads for nodes that haven't even been sized yet
+  // do it here because there is no sizing pass running and _sizedNodeCount is up-to-date
+  [_pendingReloadIndexPaths filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+    return [self indexForIndexPath:evaluatedObject] < _sizedNodeCount;
+  }]];
+  
   // concurrently size as many nodes as the CPU allows
   static const NSInteger blockSize = [[NSProcessInfo processInfo] processorCount];
-  NSRange sizingRange = NSMakeRange(_sizedNodeCount, MIN(blockSize, _totalNodeCount - _sizedNodeCount));
+  NSArray *reloadIndexPaths = [_pendingReloadIndexPaths subarrayWithRange:NSMakeRange(0, MIN(_pendingReloadIndexPaths.count, blockSize))];
+  NSRange sizingRange = NSMakeRange(_sizedNodeCount, MIN(blockSize - reloadIndexPaths.count, _totalNodeCount - _sizedNodeCount));
 
   // manage sizing on a throwaway background queue; we'll be blocking it
   dispatch_async(dispatch_queue_create(NULL, DISPATCH_QUEUE_CONCURRENT), ^{
     dispatch_group_t group = dispatch_group_create();
 
-    NSArray *indexPaths = [self indexPathsForRange:sizingRange];
+    // index path -> reloaded node mapping
+    NSMutableArray *outdatedNodes = [NSMutableArray arrayWithCapacity:reloadIndexPaths.count];
+    NSArray *indexPaths = reloadIndexPaths;
+    NSArray *sizingIndexPaths = nil;
+    if (ASRangeIsValid(sizingRange)) {
+      sizingIndexPaths = [self indexPathsForRange:sizingRange];
+      indexPaths = [indexPaths arrayByAddingObjectsFromArray:sizingIndexPaths];
+    }
     for (NSIndexPath *indexPath in indexPaths) {
       ASCellNode *node = [_delegate rangeController:self nodeForIndexPath:indexPath];
       node.asyncdisplaykit_indexPath = indexPath;
+      
+      if (ASCellNode *outdatedNode = _nodes[indexPath]) {
+        // outdated nodes will be torn down on main thread
+        [outdatedNodes addObject:outdatedNode];
+      }
       _nodes[indexPath] = node;
 
       dispatch_group_async(group, [ASRangeController sizingQueue], ^{
@@ -569,22 +616,37 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
     dispatch_async(dispatch_get_main_queue(), ^{
       // update sized node information
       _sizedNodeCount = NSMaxRange(sizingRange);
+
+      // tear down all outdated nodes
+      ASDisplayNodeAssert(outdatedNodes.count == reloadIndexPaths.count, @"logic error");
+      for (ASCellNode *outdatedNode in outdatedNodes) {
+        [self tearDownNode:outdatedNode];
+      }
+      [outdatedNodes removeAllObjects];
+      
       for (NSIndexPath *indexPath in indexPaths) {
         ASCellNode *node = _nodes[indexPath];
         _nodeSizes[[self indexForIndexPath:indexPath]] = [NSValue valueWithCGSize:node.calculatedSize];
       }
       ASDisplayNodeAssert(_nodeSizes.count == _sizedNodeCount, @"logic error");
 
+      // shrink pending reloads
+      [_pendingReloadIndexPaths removeObjectsInRange:NSMakeRange(0, reloadIndexPaths.count)];
       // update the working range
       if (ASRangeIsValid(_visibleRange)) {
         [self recalculateWorkingRange];
       }
 
       // delegateify
-      [_delegate rangeController:self didSizeNodesWithIndexPaths:indexPaths];
-
+      if (sizingIndexPaths != nil) {
+        [_delegate rangeController:self didSizeNodesWithIndexPaths:sizingIndexPaths];
+      }
+      if (reloadIndexPaths.count > 0) {
+        [_delegate rangeController:self didReloadNodesWithIndexPaths:reloadIndexPaths];
+      }
+      
       // kick off the next block
-      if (_sizedNodeCount < _totalNodeCount) {
+      if (self.isSizing) {
         [self performSelector:@selector(sizeNextBlock) withObject:NULL afterDelay:0];
       }
     });
@@ -602,6 +664,17 @@ static BOOL ASIndexPathsAreSequential(NSIndexPath *first, NSIndexPath *second)
   return row || section;
 }
 
+static void ASRunOnMainThread(void (^block)())
+{
+  if (![NSThread isMainThread]) {
+    dispatch_sync(dispatch_get_main_queue(), ^{
+      block();
+    });
+  } else {
+    block();
+  }
+}
+
 - (void)appendNodesWithIndexPaths:(NSArray *)indexPaths
 {
   // sanity-check input
@@ -616,7 +689,7 @@ static BOOL ASIndexPathsAreSequential(NSIndexPath *first, NSIndexPath *second)
 
   // update all the things
   void (^updateBlock)() = ^{
-    BOOL isSizing = (_sizedNodeCount < _totalNodeCount);
+    BOOL isSizing = self.isSizing;
     NSInteger expectedTotalNodeCount = _totalNodeCount + indexPaths.count;
 
     [self recalculateDataSourceCounts];
@@ -629,14 +702,42 @@ static BOOL ASIndexPathsAreSequential(NSIndexPath *first, NSIndexPath *second)
   };
 
   // trampoline to main if necessary, we don't have locks on _sectionCounts / _sectionOffsets / _totalNodeCount
-  if (![NSThread isMainThread]) {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-      updateBlock();
-    });
-  } else {
-    updateBlock();
-  }
+  ASRunOnMainThread(updateBlock);
 }
 
+- (void)reloadSections:(NSIndexSet *)sections
+{
+  if (!sections || !sections.count) {
+    ASDisplayNodeAssert(NO, @"invalid argument");
+    return;
+  }
+  
+  NSMutableArray *indexPaths = [NSMutableArray array];
+  [sections enumerateIndexesUsingBlock:^(NSUInteger section, BOOL *stop) {
+    [indexPaths addObjectsFromArray:[self indexPathsForSection:section]];
+  }];
+  
+  [self reloadNodesAtIndexPaths:indexPaths];
+}
+
+- (void)reloadNodesAtIndexPaths:(NSArray *)indexPaths
+{
+  if (!indexPaths || !indexPaths.count) {
+    ASDisplayNodeAssert(NO, @"invalid argument");
+    return;
+  }
+
+  void (^updateBlock)() = ^{
+    BOOL isSizing = self.isSizing;
+    
+    [_pendingReloadIndexPaths addObjectsFromArray:indexPaths];
+    
+    if (!isSizing) {
+      [self sizeNextBlock];
+    }
+  };
+  
+  ASRunOnMainThread(updateBlock);
+}
 
 @end

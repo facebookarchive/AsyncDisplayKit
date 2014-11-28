@@ -88,6 +88,20 @@ typedef struct {
 - (void)appendNodesWithIndexPaths:(NSArray *)indexPaths;
 
 /**
+ * Notify the receiver that its data source has been updated to change nodes in specified sections.
+ *
+ * @param sections NSIndexSet identifying the sections to reload.
+ */
+- (void)reloadSections:(NSIndexSet *)sections;
+
+/**
+ * Notify the receiver that its data source has been updated to change specified nodes.
+ *
+ * @param indexPaths Array of NSIndexPaths identifying the nodes to reload.
+ */
+- (void)reloadNodesAtIndexPaths:(NSArray *)indexPath;
+
+/**
  * Delegate and ultimate data source.  Must not be nil.
  */
 @property (nonatomic, weak) id<ASRangeControllerDelegate> delegate;
@@ -169,5 +183,14 @@ typedef struct {
  * @param indexPaths Array of NSIndexPaths for the newly-sized nodes.
  */
 - (void)rangeController:(ASRangeController *)rangeController didSizeNodesWithIndexPaths:(NSArray *)indexPaths;
+
+/**
+ * Notifies the receiver that the specified nodes have been reloaded, sized and thus ready for display.
+ *
+ * @param rangeController Sender.
+ * 
+ * @param indexPaths Array of NSIndexPaths for the newly-reloaded nodes.
+ */
+- (void)rangeController:(ASRangeController *)rangeController didReloadNodesWithIndexPaths:(NSArray *)indexPaths;
 
 @end

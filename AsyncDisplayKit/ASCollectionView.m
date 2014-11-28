@@ -170,6 +170,16 @@ static BOOL _isInterceptedSelector(SEL sel)
   [_rangeController appendNodesWithIndexPaths:indexPaths];
 }
 
+- (void)reloadSections:(NSIndexSet *)sections
+{
+  [_rangeController reloadSections:sections];
+}
+
+- (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
+{
+  [_rangeController reloadNodesAtIndexPaths:indexPaths];
+}
+
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   return [_rangeController calculatedSizeForNodeAtIndexPath:indexPath];
@@ -194,11 +204,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   [self throwUnimplementedException];
 }
 
-- (void)reloadSections:(NSIndexSet *)sections
-{
-  [self throwUnimplementedException];
-}
-
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   [self throwUnimplementedException];
@@ -210,11 +215,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
-{
-  [self throwUnimplementedException];
-}
-
-- (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
   [self throwUnimplementedException];
 }
@@ -337,6 +337,12 @@ static BOOL _isInterceptedSelector(SEL sel)
       [super insertItemsAtIndexPaths:indexPaths];
     } completion:nil];
   }];
+}
+
+- (void)rangeController:(ASRangeController *)rangeController didReloadNodesWithIndexPaths:(NSArray *)indexPaths
+{
+  ASDisplayNodeAssertMainThread();
+  [super reloadItemsAtIndexPaths:indexPaths];
 }
 
 @end

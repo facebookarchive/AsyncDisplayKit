@@ -42,20 +42,18 @@
 - (void)reloadData;
 
 /**
- * WARNING:  ASCollectionView's update/editing support is not yet implemented.  Use of these methods will fire an assertion.
+ * WARNING:  ASCollectionView's editing support is not yet implemented.  Use of these methods will fire an assertion.
  *
- * This initial version of ASCollectionView only supports appending nodes (see below).  If you'd like to see full-fledged
- * support for data source updates and interactive editing, please file a GitHub issue -- AsyncDisplayKit can do it,
+ * ASCollectionView only supports appending and updating nodes (see below).  If you'd like to see full-fledged
+ * support for data source interactive editing, please file a GitHub issue -- AsyncDisplayKit can do it,
  * we just haven't built it out yet.  :]
  */
 //- (void)insertSections:(NSIndexSet *)sections;
 //- (void)deleteSections:(NSIndexSet *)sections;
-//- (void)reloadSections:(NSIndexSet *)sections;
 //- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
 //
 //- (void)insertItemsAtIndexPaths:(NSArray *)indexPaths;
 //- (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths;
-//- (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths;
 //- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 /**
