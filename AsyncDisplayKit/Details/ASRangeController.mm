@@ -571,11 +571,8 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
   if (!_delegate)
     return;
 
-  // evict pending reloads for nodes that haven't even been sized yet
-  // do it here because there is no sizing pass running and _sizedNodeCount is up-to-date
-  [_pendingReloadIndexPaths filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
-    return [self indexForIndexPath:evaluatedObject] < _sizedNodeCount;
-  }]];
+  // optimize here because there is no sizing pass running and _sizedNodeCount is up-to-date
+  [self optimizePendingReloadIndexPaths];
   
   // concurrently size as many nodes as the CPU allows
   static const NSInteger blockSize = [[NSProcessInfo processInfo] processorCount];
@@ -651,6 +648,44 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
       }
     });
   });
+}
+
+- (void)optimizePendingReloadIndexPaths
+{
+  ASDisplayNodeAssertMainThread();
+  if (_pendingReloadIndexPaths.count == 0) {
+    return;
+  }
+  
+  NSMutableArray *optimizedIndexPaths = [NSMutableArray array];
+  // index path -> priority mapping
+  NSMutableDictionary *priorities = [NSMutableDictionary dictionary];
+  
+  // deduplicate, evict index path of nodes that haven't been sized yet and calcuate priority of each one
+  for (NSIndexPath *indexPath in _pendingReloadIndexPaths) {
+    NSInteger index = [self indexForIndexPath:indexPath];
+    BOOL isExist = [optimizedIndexPaths containsObject:indexPath];
+    BOOL isSized = index < _sizedNodeCount;
+    if (!isExist && isSized) {
+      [optimizedIndexPaths addObject:indexPath];
+      
+      NSInteger priority = 0;
+      if (NSLocationInRange(index, _workingRange)) {
+        priority++;
+      }
+      if (NSLocationInRange(index, _visibleRange)) {
+        priority++;
+      }
+      priorities[indexPath] = [NSNumber numberWithInteger:priority];
+    }
+  }
+  
+  // sort index paths in descending order of their prioritiy, so hight priority ones will be consumed first
+  [optimizedIndexPaths sortUsingComparator:^NSComparisonResult(id lhs, id rhs) {
+    return [priorities[rhs] compare:priorities[lhs]];
+  }];
+  
+  _pendingReloadIndexPaths = optimizedIndexPaths;
 }
 
 
