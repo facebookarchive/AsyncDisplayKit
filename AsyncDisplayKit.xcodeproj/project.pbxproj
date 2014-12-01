@@ -17,6 +17,8 @@
 		051943151A1575670030A7D0 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943141A1575670030A7D0 /* Photos.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		052EE0661A159FEF002C6279 /* ASMultiplexImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		052EE06B1A15A0D8002C6279 /* TestResources in Resources */ = {isa = PBXBuildFile; fileRef = 052EE06A1A15A0D8002C6279 /* TestResources */; };
+		054963491A1EA066000F8E56 /* ASBasicImageDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = 054963471A1EA066000F8E56 /* ASBasicImageDownloader.h */; };
+		0549634A1A1EA066000F8E56 /* ASBasicImageDownloader.mm in Sources */ = {isa = PBXBuildFile; fileRef = 054963481A1EA066000F8E56 /* ASBasicImageDownloader.mm */; };
 		055B9FA81A1C154B00035D6D /* ASNetworkImageNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 055B9FA61A1C154B00035D6D /* ASNetworkImageNode.h */; };
 		055B9FA91A1C154B00035D6D /* ASNetworkImageNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 055B9FA71A1C154B00035D6D /* ASNetworkImageNode.mm */; };
 		055F1A3419ABD3E3004DAFF1 /* ASTableView.h in Headers */ = {isa = PBXBuildFile; fileRef = 055F1A3219ABD3E3004DAFF1 /* ASTableView.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -172,6 +174,8 @@
 		052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASMultiplexImageNodeTests.m; sourceTree = "<group>"; };
 		052EE06A1A15A0D8002C6279 /* TestResources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = TestResources; sourceTree = "<group>"; };
 		053011A719B9882B00A9F2D0 /* ASRangeControllerInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ASRangeControllerInternal.h; sourceTree = "<group>"; };
+		054963471A1EA066000F8E56 /* ASBasicImageDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBasicImageDownloader.h; sourceTree = "<group>"; };
+		054963481A1EA066000F8E56 /* ASBasicImageDownloader.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASBasicImageDownloader.mm; sourceTree = "<group>"; };
 		055B9FA61A1C154B00035D6D /* ASNetworkImageNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASNetworkImageNode.h; sourceTree = "<group>"; };
 		055B9FA71A1C154B00035D6D /* ASNetworkImageNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASNetworkImageNode.mm; sourceTree = "<group>"; };
 		055F1A3219ABD3E3004DAFF1 /* ASTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASTableView.h; sourceTree = "<group>"; };
@@ -418,6 +422,8 @@
 				058D09E3195D050800B7D73C /* _ASDisplayLayer.mm */,
 				058D09E4195D050800B7D73C /* _ASDisplayView.h */,
 				058D09E5195D050800B7D73C /* _ASDisplayView.mm */,
+				054963471A1EA066000F8E56 /* ASBasicImageDownloader.h */,
+				054963481A1EA066000F8E56 /* ASBasicImageDownloader.mm */,
 				058D09E6195D050800B7D73C /* ASHighlightOverlayLayer.h */,
 				058D09E7195D050800B7D73C /* ASHighlightOverlayLayer.mm */,
 				058D09E8195D050800B7D73C /* ASMutableAttributedStringBuilder.h */,
@@ -568,6 +574,7 @@
 				0516FA3D1A15563400B4EBED /* ASLog.h in Headers */,
 				058D0A83195D060300B7D73C /* ASBaseDefines.h in Headers */,
 				058D0A84195D060300B7D73C /* ASDisplayNodeExtraIvars.h in Headers */,
+				054963491A1EA066000F8E56 /* ASBasicImageDownloader.h in Headers */,
 				05F20AA41A15733C00DCA68A /* ASImageProtocols.h in Headers */,
 				058D0A71195D05F800B7D73C /* _AS-objc-internal.h in Headers */,
 				058D0A72195D05F800B7D73C /* _ASCoreAnimationExtras.h in Headers */,
@@ -724,6 +731,7 @@
 				058D0A28195D050800B7D73C /* ASDisplayNode+AsyncDisplay.mm in Sources */,
 				058D0A21195D050800B7D73C /* NSMutableAttributedString+TextKitAdditions.m in Sources */,
 				058D0A25195D050800B7D73C /* UIView+ASConvenience.m in Sources */,
+				0549634A1A1EA066000F8E56 /* ASBasicImageDownloader.mm in Sources */,
 				058D0A14195D050800B7D73C /* ASDisplayNode.mm in Sources */,
 				058D0A1B195D050800B7D73C /* ASMutableAttributedStringBuilder.m in Sources */,
 				058D0A2B195D050800B7D73C /* ASImageNode+CGExtras.m in Sources */,

@@ -22,7 +22,7 @@ static const CGFloat kInnerPadding = 10.0f;
 {
   CGSize _kittenSize;
 
-  ASImageNode *_imageNode;
+  ASNetworkImageNode *_imageNode;
   ASTextNode *_textNode;
   ASDisplayNode *_divider;
 }
@@ -74,8 +74,11 @@ static const CGFloat kInnerPadding = 10.0f;
   _kittenSize = size;
 
   // kitten image, with a purple background colour serving as placeholder
-  _imageNode = [[ASImageNode alloc] init];
+  _imageNode = [[ASNetworkImageNode alloc] initWithCache:nil downloader:[[ASBasicImageDownloader alloc] init]];
   _imageNode.backgroundColor = [UIColor purpleColor];
+  _imageNode.URL = [NSURL URLWithString:[NSString stringWithFormat:@"http://placekitten.com/%zd/%zd",
+                                                                   (NSInteger)roundl(_kittenSize.width),
+                                                                   (NSInteger)roundl(_kittenSize.height)]];
   [self addSubnode:_imageNode];
 
   // lorem ipsum text, plus some nice styling
@@ -88,9 +91,6 @@ static const CGFloat kInnerPadding = 10.0f;
   _divider = [[ASDisplayNode alloc] init];
   _divider.backgroundColor = [UIColor lightGrayColor];
   [self addSubnode:_divider];
-
-  // download a placekitten of the requested size
-  [self fetchKitten];
 
   return self;
 }
@@ -121,25 +121,6 @@ static const CGFloat kInnerPadding = 10.0f;
 
   return @{ NSFontAttributeName: font,
             NSParagraphStyleAttributeName: style };
-}
-
-- (void)fetchKitten
-{
-  NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-
-  NSInteger width = roundl(_kittenSize.width);
-  NSInteger height = roundl(_kittenSize.height);
-
-  NSURL *kittenURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://placekitten.com/%zd/%zd", width, height]];
-  [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:kittenURL]
-                                     queue:queue
-                         completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-                           if (connectionError || !data || !data.length)
-                             return;
-
-                           // set our image node's data
-                           _imageNode.image = [UIImage imageWithData:data];
-                         }];
 }
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
