@@ -13,11 +13,6 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASRangeControllerInternal.h"
 
-typedef NS_ENUM(NSInteger, ASScrollDirection) {
-  ASScrollDirectionBackward,
-  ASScrollDirectionForward,
-};
-
 @interface ASRangeController () {
   // index path -> node mapping
   NSMutableDictionary *_nodes;
@@ -472,11 +467,21 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
 
 - (void)recalculateWorkingRange
 {
-  NSRange workingRange = ASCalculateWorkingRange(_tuningParameters,
-                                                 _scrollDirection,
-                                                 _visibleRange,
-                                                 _nodeSizes,
-                                                 [_delegate rangeControllerViewportSize:self]);
+  NSRange workingRange;
+  if (self.workingRangeCalculationBlock != NULL) {
+    workingRange = self.workingRangeCalculationBlock(_tuningParameters,
+                                                     _scrollDirection,
+                                                     _visibleRange,
+                                                     _nodeSizes,
+                                                     [_delegate rangeControllerViewportSize:self]);
+  } else {
+    workingRange = ASCalculateWorkingRange(_tuningParameters,
+                                           _scrollDirection,
+                                           _visibleRange,
+                                           _nodeSizes,
+                                           [_delegate rangeControllerViewportSize:self]);
+  }
+  
   [self setWorkingRange:workingRange];
 }
 

@@ -165,6 +165,16 @@ static BOOL _isInterceptedSelector(SEL sel)
   _rangeController.tuningParameters = tuningParameters;
 }
 
+- (asrangecontroller_working_range_calculation_block_t)workingRangeCalculationBlock
+{
+  return _rangeController.workingRangeCalculationBlock;
+}
+
+- (void)setWorkingRangeCalculationBlock:(asrangecontroller_working_range_calculation_block_t)workingRangeCalculationBlock
+{
+  _rangeController.workingRangeCalculationBlock = workingRangeCalculationBlock;
+}
+
 - (void)appendNodesWithIndexPaths:(NSArray *)indexPaths
 {
   [_rangeController appendNodesWithIndexPaths:indexPaths];
