@@ -440,13 +440,10 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 - (void)display
 {
   ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(self.nodeLoaded, @"backing store must be loaded before calling -display");
 
   // rendering a backing store requires a node be laid out
-  [self layout];
-
-  for (ASDisplayNode *node in self.subnodes) {
-    [node display];
-  }
+  [self __layout];
 
   CALayer *layer = [self isLayerBacked] ? self.layer : self.view.layer;
 
@@ -456,6 +453,15 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
   [layer setNeedsDisplay];
   [layer displayIfNeeded];
+}
+
+- (void)recursivelyDisplay
+{
+  for (ASDisplayNode *node in self.subnodes) {
+    [node recursivelyDisplay];
+  }
+
+  [self display];
 }
 
 - (void)displayImmediately
