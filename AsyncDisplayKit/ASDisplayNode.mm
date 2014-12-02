@@ -121,12 +121,26 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _flags.hasDrawParametersForAsyncLayer = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
 }
 
+- (void)_initializeViewClass:(Class)viewClass
+{
+  _viewClass = viewClass;
+  _flags.isSynchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
+}
+
+- (void)_initializeLayerClass:(Class)layerClass
+{
+  _layerClass = layerClass;
+  _flags.isSynchronous = ![layerClass isSubclassOfClass:[_ASDisplayLayer class]];
+  _flags.isLayerBacked = YES;
+}
+
 - (id)init
 {
   if (!(self = [super init]))
     return nil;
   
   [self _initializeInstance];
+  [self _initializeViewClass:[self.class viewClass]];
   
   return self;
 }
@@ -139,8 +153,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssert([viewClass isSubclassOfClass:[UIView class]], @"should initialize with a subclass of UIView");
   
   [self _initializeInstance];
-  _viewClass = viewClass;
-  _flags.isSynchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
+  [self _initializeViewClass:viewClass];
 
   return self;
 }
@@ -153,9 +166,18 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssert([layerClass isSubclassOfClass:[CALayer class]], @"should initialize with a subclass of CALayer");
 
   [self _initializeInstance];
-  _layerClass = layerClass;
-  _flags.isSynchronous = ![layerClass isSubclassOfClass:[_ASDisplayLayer class]];
-  _flags.isLayerBacked = YES;
+  [self _initializeLayerClass:layerClass];
+
+  return self;
+}
+
+- (id)initWithLoadBlock:(id(^)())loadBlock
+{
+  if (!(self = [super init]))
+    return nil;
+
+  [self _initializeInstance];
+  _loadBlock = loadBlock;
 
   return self;
 }
@@ -238,23 +260,49 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
     return;
   }
 
-  if (isLayerBacked) {
+  {
     TIME_SCOPED(_debugTimeToCreateView);
-    if (!_layerClass) {
-      _layerClass = [self.class layerClass];
+
+    if (_loadBlock) {
+      id viewOrLayer = _loadBlock();
+
+      if ([viewOrLayer isKindOfClass:[CALayer class]]) {
+        ASDisplayNodeAssert(isLayerBacked, @"The block you passed to initWithLoadBlock: returned a layer when a view was expected.");
+        _layer = viewOrLayer;
+        [self _initializeLayerClass:[viewOrLayer class]];
+      }
+
+      else if ([viewOrLayer isKindOfClass:[UIView class]]) {
+        ASDisplayNodeAssert(!isLayerBacked, @"The block you passed to initWithLoadBlock: returned a view when a layer was expected.");
+        _view = viewOrLayer;
+        [self _initializeViewClass:[viewOrLayer class]];
+      }
+
+      else {
+        ASDisplayNodeAssert(NO, @"The block you passed to initWithLoadBlock: must return either a UIView or CALayer.");
+      }
     }
 
-    _layer = [[_layerClass alloc] init];
-    _layer.delegate = self;
-  } else {
-    TIME_SCOPED(_debugTimeToCreateView);
-    if (!_viewClass) {
-      _viewClass = [self.class viewClass];
+    else if (isLayerBacked) {
+      ASDisplayNodeAssert(_layerClass, @"_layerClass must be set.");
+      _layer = [[_layerClass alloc] init];
     }
-    _view = [[_viewClass alloc] init];
-    _view.asyncdisplaykit_node = self;
-    _layer = _view.layer;
+
+    else {
+      ASDisplayNodeAssert(_viewClass, @"_viewClass must be set.");
+      _view = [[_viewClass alloc] init];
+    }
+
+    if (_view) {
+      _view.asyncdisplaykit_node = self;
+      _layer = _view.layer;
+    }
+
+    else {
+      _layer.delegate = self;
+    }
   }
+
   _layer.asyncdisplaykit_node = self;
 #if DEBUG
   _layer.name = self.description;
@@ -293,7 +341,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   if (!_layer) {
     ASDisplayNodeAssertMainThread();
 
-    if (!_flags.isLayerBacked) {
+    if (_viewClass) {
       return self.view.layer;
     }
     [self _loadViewOrLayerIsLayerBacked:YES];
@@ -338,6 +386,12 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssert(!_view && !_layer, @"Cannot change isLayerBacked after layer or view has loaded");
   if (isLayerBacked != _flags.isLayerBacked && !_view && !_layer) {
     _flags.isLayerBacked = isLayerBacked;
+
+    // Ensure _layerClass is initialized.
+    if (_flags.isLayerBacked) {
+      _viewClass = nil;
+      [self _initializeLayerClass:[self.class layerClass]];
+    }
   }
 }
 
