@@ -63,6 +63,17 @@
 //- (void)setEditing:(BOOL)editing animated:(BOOL)animated;
 
 /**
+ * Updating nodes is supported via these reload methods.
+ *
+ * Since nodes are not reused internally, updating a node means swapping a new one with the existing one.
+ * The asyndDataSource must be updated to return the new nodes before this method is called.
+ * 
+ * Row animation is not supported yet.
+ */
+//- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
+//- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
+
+/**
  * Append nodes.
  *
  * As with UITableView, the asyncDataSource must be updated to reflect the new nodes before this method is called.

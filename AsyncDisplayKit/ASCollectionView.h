@@ -57,6 +57,15 @@
 //- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 /**
+ * Updating nodes is supported via these reload methods. 
+ *
+ * Since nodes are not reused internally, updating a node means swapping a new one with the existing one.
+ * The asyndDataSource must be updated to return the new nodes before this method is called.
+ */
+//- (void)reloadSections:(NSIndexSet *)sections;
+//- (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths;
+
+/**
  * Append nodes.
  *
  * As with UICollectionView, the asyncDataSource must be updated to reflect the new nodes before this method is called.
