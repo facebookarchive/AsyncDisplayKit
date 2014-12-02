@@ -699,17 +699,6 @@ static BOOL ASIndexPathsAreSequential(NSIndexPath *first, NSIndexPath *second)
   return row || section;
 }
 
-static void ASRunOnMainThread(void (^block)())
-{
-  if (![NSThread isMainThread]) {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-      block();
-    });
-  } else {
-    block();
-  }
-}
-
 - (void)appendNodesWithIndexPaths:(NSArray *)indexPaths
 {
   // sanity-check input
@@ -737,7 +726,7 @@ static void ASRunOnMainThread(void (^block)())
   };
 
   // trampoline to main if necessary, we don't have locks on _sectionCounts / _sectionOffsets / _totalNodeCount
-  ASRunOnMainThread(updateBlock);
+  ASDisplayNodePerformBlockOnMainThread(updateBlock);
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
@@ -772,7 +761,7 @@ static void ASRunOnMainThread(void (^block)())
     }
   };
   
-  ASRunOnMainThread(updateBlock);
+  ASDisplayNodePerformBlockOnMainThread(updateBlock);
 }
 
 @end
