@@ -184,6 +184,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _replaceAsyncSentinel = nil;
 
   _displaySentinel = nil;
+
+  _pendingDisplayNodes = nil;
 }
 
 #pragma mark - UIResponder overrides
@@ -270,6 +272,10 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
     TIME_SCOPED(_debugTimeForDidLoad);
     [self didLoad];
   }
+
+  if (self.placeholderEnabled) {
+    [self _setupPlaceholderLayer];
+  }
 }
 
 - (UIView *)view
@@ -349,6 +355,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 - (CGSize)measure:(CGSize)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
 
   if (![self __shouldSize])
     return CGSizeZero;
@@ -365,6 +372,18 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
   ASDisplayNodeAssertTrue(_size.width >= 0.0);
   ASDisplayNodeAssertTrue(_size.height >= 0.0);
+
+  // we generate placeholders at measure: time so that a node is guaranteed to have a placeholder ready to go
+  if (self.placeholderEnabled && [self displaysAsynchronously]) {
+    if (!_placeholderImage) {
+      _placeholderImage = [self placeholderImage];
+    }
+
+    if (_placeholderLayer) {
+      _placeholderLayer.contents = (id)_placeholderImage.CGImage;
+    }
+  }
+
   return _size;
 }
 
@@ -448,8 +467,10 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 {
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
-  if (CGRectEqualToRect(_layer.bounds, CGRectZero))
+  if (CGRectEqualToRect(_layer.bounds, CGRectZero)) {
     return;     // Performing layout on a zero-bounds view often results in frame calculations with negative sizes after applying margins, which will cause measure: on subnodes to assert.
+  }
+  _placeholderLayer.frame = _layer.bounds;
   [self layout];
   [self layoutDidFinish];
 }
@@ -1091,6 +1112,60 @@ static NSInteger incrementIfFound(NSInteger i) {
   _supernode = supernode;
 }
 
+// Track that a node will be displayed as part of the current node hierarchy.
+// The node sending the message should usually be passed as the parameter, similar to the delegation pattern.
+- (void)_pendingNodeWillDisplay:(ASDisplayNode *)node
+{
+  ASDN::MutexLocker l(_propertyLock);
+
+  [_pendingDisplayNodes addObject:node];
+}
+
+// Notify that a node that was pending display finished
+// The node sending the message should usually be passed as the parameter, similar to the delegation pattern.
+- (void)_pendingNodeDidDisplay:(ASDisplayNode *)node
+{
+  ASDN::MutexLocker l(_propertyLock);
+
+  [_pendingDisplayNodes removeObject:node];
+
+  // only trampoline if there is a placeholder and nodes are done displaying
+  if ([self _pendingDisplayNodesHaveFinished] && _placeholderLayer.superlayer) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [self _tearDownPlaceholderLayer];
+    });
+  }
+}
+
+// Helper method to check that all nodes that the current node is waiting to display are finished
+// Use this method to check to remove any placeholder layers
+- (BOOL)_pendingDisplayNodesHaveFinished
+{
+  return _pendingDisplayNodes.count == 0;
+}
+
+// Helper method to summarize whether or not the node run through the display process
+- (BOOL)_implementsDisplay
+{
+  return _flags.implementsDrawRect == YES || _flags.implementsImageDisplay == YES;
+}
+
+- (void)_setupPlaceholderLayer
+{
+  ASDisplayNodeAssertMainThread();
+
+  _placeholderLayer = [CALayer layer];
+  // do not set to CGFLOAT_MAX in the case that something needs to be overtop the placeholder
+  _placeholderLayer.zPosition = 9999.0;
+}
+
+- (void)_tearDownPlaceholderLayer
+{
+  ASDisplayNodeAssertMainThread();
+
+  [_placeholderLayer removeFromSuperlayer];
+}
+
 #pragma mark - For Subclasses
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
@@ -1109,6 +1184,11 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertThreadAffinity(self);
   return _constrainedSize;
+}
+
+- (UIImage *)placeholderImage
+{
+  return nil;
 }
 
 - (void)invalidateCalculatedSize
@@ -1142,6 +1222,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)reclaimMemory
 {
   self.layer.contents = nil;
+  _placeholderLayer.contents = nil;
 }
 
 - (void)recursivelyReclaimMemory
@@ -1159,10 +1240,36 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (void)displayWillStart
 {
+  // in case current node takes longer to display than it's subnodes, treat it as a dependent node
+  [self _pendingNodeWillDisplay:self];
+
+  [_supernode subnodeDisplayWillStart:self];
+
+  if (_placeholderImage && _placeholderLayer) {
+    _placeholderLayer.contents = (id)_placeholderImage.CGImage;
+    [self.layer addSublayer:_placeholderLayer];
+  }
 }
 
 - (void)displayDidFinish
 {
+  [self _pendingNodeDidDisplay:self];
+
+  [_supernode subnodeDisplayDidFinish:self];
+
+  if (_placeholderLayer && [self _pendingDisplayNodesHaveFinished]) {
+    [self _tearDownPlaceholderLayer];
+  }
+}
+
+- (void)subnodeDisplayWillStart:(ASDisplayNode *)subnode
+{
+  [self _pendingNodeWillDisplay:subnode];
+}
+
+- (void)subnodeDisplayDidFinish:(ASDisplayNode *)subnode
+{
+  [self _pendingNodeDidDisplay:subnode];
 }
 
 - (void)setNeedsDisplayAtScale:(CGFloat)contentsScale
@@ -1394,6 +1501,14 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   _flags.displaySuspended = flag;
 
   self.asyncLayer.displaySuspended = flag;
+
+  if ([self _implementsDisplay]) {
+    if (flag) {
+      [_supernode subnodeDisplayDidFinish:self];
+    } else {
+      [_supernode subnodeDisplayWillStart:self];
+    }
+  }
 }
 
 - (BOOL)isInHierarchy

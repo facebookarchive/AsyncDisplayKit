@@ -14,6 +14,7 @@
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 #import <AsyncDisplayKit/ASTextNodeCoreTextAdditions.h>
 #import <AsyncDisplayKit/ASTextNodeTextKitHelpers.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
 #import "ASTextNodeRenderer.h"
 #import "ASTextNodeShadower.h"
@@ -135,6 +136,11 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     self.accessibilityTraits = UIAccessibilityTraitStaticText;
 
     _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
+
+    // Placeholders
+    self.placeholderEnabled = YES;
+    _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
+    _placeholderInsets = UIEdgeInsetsMake(1.0, 0.0, 1.0, 0.0);
   }
 
   return self;
@@ -664,6 +670,43 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 {
   CGRect frame = [[self _renderer] frameForTextRange:textRange];
   return [self.class _adjustRendererRect:frame forShadowPadding:self.shadowPadding];
+}
+
+#pragma mark - Placeholders
+
+- (void)setPlaceholderColor:(UIColor *)placeholderColor
+{
+  _placeholderColor = placeholderColor;
+
+  // prevent placeholders if we don't have a color
+  self.placeholderEnabled = placeholderColor != nil;
+}
+
+- (UIImage *)placeholderImage
+{
+  CGSize size = self.calculatedSize;
+  UIGraphicsBeginImageContext(size);
+  [self.placeholderColor setFill];
+
+  ASTextNodeRenderer *renderer = [self _renderer];
+  NSRange textRange = [renderer visibleRange];
+
+  // cap height is both faster and creates less subpixel blending
+  NSArray *lineRects = [self _rectsForTextRange:textRange measureOption:ASTextNodeRendererMeasureOptionLineHeight];
+
+  // fill each line with the placeholder color
+  for (NSValue *rectValue in lineRects) {
+    CGRect lineRect = [rectValue CGRectValue];
+    CGRect fillBounds = UIEdgeInsetsInsetRect(lineRect, self.placeholderInsets);
+
+    if (fillBounds.size.width > 0.0 && fillBounds.size.height > 0.0) {
+      UIRectFill(fillBounds);
+    }
+  }
+
+  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  return image;
 }
 
 #pragma mark - Touch Handling

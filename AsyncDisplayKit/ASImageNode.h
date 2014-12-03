@@ -54,6 +54,11 @@ typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
 @property (nonatomic, assign) ASImageNodeTint tint;
 
 /**
+ @abstract The placeholder color.
+ */
+@property (nonatomic, strong) UIColor *placeholderColor;
+
+/**
  * @abstract Indicates whether efficient cropping of the receiver is enabled.
  *
  * @discussion Defaults to YES. See -setCropEnabled:recropImmediately:inBounds: for more
