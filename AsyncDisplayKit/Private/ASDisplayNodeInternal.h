@@ -61,7 +61,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
     unsigned layerBacked:1;
     unsigned displaysAsynchronously:1;
     unsigned shouldRasterizeDescendants:1;
-    unsigned preventOrCancelDisplay:1;
+    unsigned displaySuspended:1;
 
     // whether custom drawing is enabled
     unsigned implementsDrawRect:1;

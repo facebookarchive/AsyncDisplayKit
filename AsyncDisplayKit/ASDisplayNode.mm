@@ -1326,7 +1326,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   _pendingViewState = nil;
 
   // TODO: move this into real pending state
-  if (_flags.preventOrCancelDisplay) {
+  if (_flags.displaySuspended) {
     self.asyncLayer.displaySuspended = YES;
   }
   if (!_flags.displaysAsynchronously) {
@@ -1359,12 +1359,12 @@ static NSInteger incrementIfFound(NSInteger i) {
   return nil;
 }
 
-- (void)recursiveSetPreventOrCancelDisplay:(BOOL)flag
+- (void)recursivelySetDisplaySuspended:(BOOL)flag
 {
-  _recursiveSetPreventOrCancelDisplay(self, nil, flag);
+  _recursivelySetDisplaySuspended(self, nil, flag);
 }
 
-static void _recursiveSetPreventOrCancelDisplay(ASDisplayNode *node, CALayer *layer, BOOL flag)
+static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer, BOOL flag)
 {
   // If there is no layer, but node whose its view is loaded, then we can traverse down its layer hierarchy.  Otherwise we must stick to the node hierarchy to avoid loading views prematurely.  Note that for nodes that haven't loaded their views, they can't possibly have subviews/sublayers, so we don't need to traverse the layer hierarchy for them.
   if (!layer && node && node.nodeLoaded) {
@@ -1377,29 +1377,29 @@ static void _recursiveSetPreventOrCancelDisplay(ASDisplayNode *node, CALayer *la
   }
 
   // Set the flag on the node.  If this is a pure layer (no node) then this has no effect (plain layers don't support preventing/cancelling display).
-  node.preventOrCancelDisplay = flag;
+  node.displaySuspended = flag;
 
   if (layer && !node.shouldRasterizeDescendants) {
     // If there is a layer, recurse down the layer hierarchy to set the flag on descendants.  This will cover both layer-based and node-based children.
     for (CALayer *sublayer in layer.sublayers) {
-      _recursiveSetPreventOrCancelDisplay(nil, sublayer, flag);
+      _recursivelySetDisplaySuspended(nil, sublayer, flag);
     }
   } else {
     // If there is no layer (view not loaded yet) or this node rasterizes descendants (there won't be a layer tree to traverse), recurse down the subnode hierarchy to set the flag on descendants.  This covers only node-based children, but for a node whose view is not loaded it can't possibly have nodeless children.
     for (ASDisplayNode *subnode in node.subnodes) {
-      _recursiveSetPreventOrCancelDisplay(subnode, nil, flag);
+      _recursivelySetDisplaySuspended(subnode, nil, flag);
     }
   }
 }
 
-- (BOOL)preventOrCancelDisplay
+- (BOOL)displaySuspended
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
-  return _flags.preventOrCancelDisplay;
+  return _flags.displaySuspended;
 }
 
-- (void)setPreventOrCancelDisplay:(BOOL)flag
+- (void)setDisplaySuspended:(BOOL)flag
 {
   ASDisplayNodeAssertThreadAffinity(self);
 
@@ -1409,10 +1409,10 @@ static void _recursiveSetPreventOrCancelDisplay(ASDisplayNode *node, CALayer *la
 
   ASDN::MutexLocker l(_propertyLock);
 
-  if (_flags.preventOrCancelDisplay == flag)
+  if (_flags.displaySuspended == flag)
     return;
 
-  _flags.preventOrCancelDisplay = flag;
+  _flags.displaySuspended = flag;
 
   self.asyncLayer.displaySuspended = flag;
 }

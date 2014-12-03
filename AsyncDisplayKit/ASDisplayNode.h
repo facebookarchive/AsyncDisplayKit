@@ -319,31 +319,31 @@
  * progress.
  *
  * Defaults to NO. Does not control display for any child or descendant nodes; for that, use 
- * -recursiveSetPreventOrCancelDisplay:.
+ * -recursivelySetDisplaySuspended:.
  *
- * If a setNeedsDisplay occurs while preventOrCancelDisplay is YES, and preventOrCancelDisplay is set to NO, then the 
+ * If a setNeedsDisplay occurs while displaySuspended is YES, and displaySuspended is set to NO, then the 
  * layer will be automatically displayed.
  */
-@property (nonatomic, assign) BOOL preventOrCancelDisplay;
+@property (nonatomic, assign) BOOL displaySuspended;
 
 /** 
  * @abstract Prevent the node and its descendants' layer from displaying.
  *
  * @param flag YES if display should be prevented or cancelled; NO otherwise.
  *
- * @see preventOrCancelDisplay
+ * @see displaySuspended
  */
-- (void)recursiveSetPreventOrCancelDisplay:(BOOL)flag;
+- (void)recursivelySetDisplaySuspended:(BOOL)flag;
 
 /**
  * @abstract Calls -reclaimMemory on the receiver and its subnode hierarchy.
  *
  * @discussion Clears backing stores and other memory-intensive intermediates.
  * If the node is removed from a visible hierarchy and then re-added, it will automatically trigger a new asynchronous display,
- * as long as preventOrCancelDisplay is not set.
+ * as long as displaySuspended is not set.
  * If the node remains in the hierarchy throughout, -setNeedsDisplay is required to trigger a new asynchronous display.
  *
- * @see preventOrCancelDisplay and setNeedsDisplay
+ * @see displaySuspended and setNeedsDisplay
  */
 
 - (void)recursivelyReclaimMemory;
