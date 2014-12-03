@@ -25,14 +25,15 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 @class _ASPendingState;
 
 // Allow 2^n increments of begin disabling hierarchy notifications
-#define visibilityNotificationsDisabledBits 4
+#define VISIBILITY_NOTIFICATIONS_DISABLED_BITS 4
 
 #define TIME_DISPLAYNODE_OPS (DEBUG || PROFILE)
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
 {
 @protected
-  ASDN::RecursiveMutex _propertyLock;  // Protects access to the _view, _pendingViewState, _subnodes, _supernode, _renderingSubnodes, and other properties which are accessed from multiple threads.
+  // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.
+  ASDN::RecursiveMutex _propertyLock;
 
   ASDisplayNode * __weak _supernode;
 
@@ -55,20 +56,24 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
   _ASPendingState *_pendingViewState;
 
   struct {
-    unsigned implementsDisplay:1;
-    unsigned isSynchronous:1;
-    unsigned isLayerBacked:1;
-    unsigned sizeCalculated:1;
-    unsigned preventOrCancelDisplay:1;
+    // public properties
+    unsigned synchronous:1;
+    unsigned layerBacked:1;
     unsigned displaysAsynchronously:1;
     unsigned shouldRasterizeDescendants:1;
-    unsigned visibilityNotificationsDisabled:visibilityNotificationsDisabledBits;
-    unsigned isInEnterHierarchy:1;
-    unsigned isInExitHierarchy:1;
-    unsigned inWindow:1;
-    unsigned hasWillDisplayAsyncLayer:1;
-    unsigned hasDrawParametersForAsyncLayer:1;
-    unsigned hasClassDisplay:1;
+    unsigned displaySuspended:1;
+
+    // whether custom drawing is enabled
+    unsigned implementsDrawRect:1;
+    unsigned implementsImageDisplay:1;
+    unsigned implementsDrawParameters:1;
+
+    // internal state
+    unsigned isMeasured:1;
+    unsigned isEnteringHierarchy:1;
+    unsigned isExitingHierarchy:1;
+    unsigned isInHierarchy:1;
+    unsigned visibilityNotificationsDisabled:VISIBILITY_NOTIFICATIONS_DISABLED_BITS;
   } _flags;
 
   ASDisplayNodeExtraIvars _extra;
@@ -97,17 +102,17 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 
-// The visibility state of the node.  Changed before calling willAppear, willDisappear, and didDisappear.
-@property (nonatomic, readwrite, assign, getter = isInWindow) BOOL inWindow;
+// Changed before calling willEnterHierarchy / didExitHierarchy.
+@property (nonatomic, readwrite, assign, getter = isInHierarchy) BOOL inHierarchy;
 
-// Private API for helper funcitons / unit tests. Use ASDisplayNodeDisableHierarchyNotifications() to control this.
+// Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
 - (BOOL)__visibilityNotificationsDisabled;
 - (void)__incrementVisibilityNotificationsDisabled;
 - (void)__decrementVisibilityNotificationsDisabled;
 
-// Call willEnterHierarchy if necessary and set inWindow = YES if visibility notifications are enabled on all of its parents
+// Call willEnterHierarchy if necessary and set inHierarchy = YES if visibility notifications are enabled on all of its parents
 - (void)__enterHierarchy;
-// Call didExitHierarchy if necessary and set inWindow = NO if visibility notifications are enabled on all of its parents
+// Call didExitHierarchy if necessary and set inHierarchy = NO if visibility notifications are enabled on all of its parents
 - (void)__exitHierarchy;
 
 // Returns the ancestor node that rasterizes descendants, or nil if none.

@@ -186,7 +186,7 @@
 - (BOOL)isUserInteractionEnabled
 {
   _bridge_prologue;
-  if (_flags.isLayerBacked) return NO;
+  if (_flags.layerBacked) return NO;
   return _getFromViewOnly(userInteractionEnabled);
 }
 
@@ -319,28 +319,28 @@
 - (BOOL)autoresizesSubviews
 {
   _bridge_prologue;
-  ASDisplayNodeAssert(!_flags.isLayerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+  ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
   return _getFromViewOnly(autoresizesSubviews);
 }
 
 - (void)setAutoresizesSubviews:(BOOL)flag
 {
   _bridge_prologue;
-  ASDisplayNodeAssert(!_flags.isLayerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+  ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
   _setToViewOnly(autoresizesSubviews, flag);
 }
 
 - (UIViewAutoresizing)autoresizingMask
 {
   _bridge_prologue;
-  ASDisplayNodeAssert(!_flags.isLayerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+  ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
   return _getFromViewOnly(autoresizingMask);
 }
 
 - (void)setAutoresizingMask:(UIViewAutoresizing)mask
 {
   _bridge_prologue;
-  ASDisplayNodeAssert(!_flags.isLayerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+  ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
   _setToViewOnly(autoresizingMask, mask);
 }
 
@@ -379,14 +379,14 @@
 - (UIColor *)tintColor
 {
     _bridge_prologue;
-    ASDisplayNodeAssert(!_flags.isLayerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+    ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
     return _getFromViewOnly(tintColor);
 }
 
 - (void)setTintColor:(UIColor *)color
 {
     _bridge_prologue;
-    ASDisplayNodeAssert(!_flags.isLayerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+    ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
     _setToViewOnly(tintColor, color);
 }
 

@@ -187,7 +187,7 @@ static BOOL ASRangeIsValid(NSRange range)
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node, @"invalid argument");
 
-  [node recursiveSetPreventOrCancelDisplay:YES];
+  [node recursivelySetDisplaySuspended:YES];
   [node.view removeFromSuperview];
 
   // since this class usually manages large or infinite data sets, the working range
@@ -526,7 +526,7 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
   ASCellNode *sizedNode = _nodes[[NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section]];
   ASDisplayNodeAssert(sizedNode, @"this node should be sized but doesn't even exist");
   ASDisplayNodeAssert([sizedNode.asyncdisplaykit_indexPath isEqual:indexPath], @"this node has the wrong index path");
-  [sizedNode recursiveSetPreventOrCancelDisplay:NO];
+  [sizedNode recursivelySetDisplaySuspended:NO];
   return sizedNode;
 }
 

@@ -103,22 +103,19 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 #pragma mark - Lifecycle
 
-// Avoid recursive loops if a subclass implements an init method that calls -initWith*Class:
 - (void)_initializeInstance
 {
   _contentsScaleForDisplay = ASDisplayNodeScreenScale();
   
   _displaySentinel = [[ASSentinel alloc] init];
   
-  _flags.inWindow = NO;
+  _flags.isInHierarchy = NO;
   _flags.displaysAsynchronously = YES;
   
   // As an optimization, it may be worth a caching system that performs these checks once per class in +initialize (see above).
-  _flags.implementsDisplay = [[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] || [self.class respondsToSelector:@selector(displayWithParameters:isCancelled:)];
-  
-  _flags.hasClassDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
-  _flags.hasWillDisplayAsyncLayer = ([self respondsToSelector:@selector(willDisplayAsyncLayer:)] ? 1 : 0);
-  _flags.hasDrawParametersForAsyncLayer = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
+  _flags.implementsDrawRect = ([[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
+  _flags.implementsImageDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
+  _flags.implementsDrawParameters = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
 }
 
 - (id)init
@@ -140,7 +137,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   
   [self _initializeInstance];
   _viewClass = viewClass;
-  _flags.isSynchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
+  _flags.synchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
 
   return self;
 }
@@ -154,8 +151,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
   [self _initializeInstance];
   _layerClass = layerClass;
-  _flags.isSynchronous = ![layerClass isSubclassOfClass:[_ASDisplayLayer class]];
-  _flags.isLayerBacked = YES;
+  _flags.synchronous = ![layerClass isSubclassOfClass:[_ASDisplayLayer class]];
+  _flags.layerBacked = YES;
 
   return self;
 }
@@ -178,7 +175,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
   _view = nil;
   _subnodes = nil;
-  if (_flags.isLayerBacked)
+  if (_flags.layerBacked)
     _layer.delegate = nil;
   _layer = nil;
 
@@ -277,8 +274,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (UIView *)view
 {
-  ASDisplayNodeAssert(!_flags.isLayerBacked, @"Call to -view undefined on layer-backed nodes");
-  if (_flags.isLayerBacked) {
+  ASDisplayNodeAssert(!_flags.layerBacked, @"Call to -view undefined on layer-backed nodes");
+  if (_flags.layerBacked) {
     return nil;
   }
   if (!_view) {
@@ -293,7 +290,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   if (!_layer) {
     ASDisplayNodeAssertMainThread();
 
-    if (!_flags.isLayerBacked) {
+    if (!_flags.layerBacked) {
       return self.view.layer;
     }
     [self _loadViewOrLayerIsLayerBacked:YES];
@@ -304,10 +301,10 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 // Returns nil if our view is not an _ASDisplayView, but will create it if necessary.
 - (_ASDisplayView *)ensureAsyncView
 {
-  return _flags.isSynchronous ? nil:(_ASDisplayView *)self.view;
+  return _flags.synchronous ? nil : (_ASDisplayView *)self.view;
 }
 
-// Returns nil if the layer is not an _ASDisplayLayer; will not create the view if nil
+// Returns nil if the layer is not an _ASDisplayLayer; will not create the layer if nil.
 - (_ASDisplayLayer *)asyncLayer
 {
   ASDN::MutexLocker l(_propertyLock);
@@ -317,17 +314,17 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 - (BOOL)isNodeLoaded
 {
   ASDN::MutexLocker l(_propertyLock);
-  return (_view != nil || (_flags.isLayerBacked && _layer != nil));
+  return (_view != nil || (_flags.layerBacked && _layer != nil));
 }
 
 - (BOOL)isSynchronous
 {
-  return _flags.isSynchronous;
+  return _flags.synchronous;
 }
 
 - (void)setSynchronous:(BOOL)flag
 {
-  _flags.isSynchronous = flag;
+  _flags.synchronous = flag;
 }
 
 - (void)setLayerBacked:(BOOL)isLayerBacked
@@ -336,15 +333,15 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
   ASDN::MutexLocker l(_propertyLock);
   ASDisplayNodeAssert(!_view && !_layer, @"Cannot change isLayerBacked after layer or view has loaded");
-  if (isLayerBacked != _flags.isLayerBacked && !_view && !_layer) {
-    _flags.isLayerBacked = isLayerBacked;
+  if (isLayerBacked != _flags.layerBacked && !_view && !_layer) {
+    _flags.layerBacked = isLayerBacked;
   }
 }
 
 - (BOOL)isLayerBacked
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _flags.isLayerBacked;
+  return _flags.layerBacked;
 }
 
 #pragma mark -
@@ -360,10 +357,10 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   //  - we haven't already
   //  - the width is different from the last time
   //  - the height is different from the last time
-  if (!_flags.sizeCalculated || !CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
+  if (!_flags.isMeasured || !CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
     _size = [self calculateSizeThatFits:constrainedSize];
     _constrainedSize = constrainedSize;
-    _flags.sizeCalculated = YES;
+    _flags.isMeasured = YES;
   }
 
   ASDisplayNodeAssertTrue(_size.width >= 0.0);
@@ -387,7 +384,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssertThreadAffinity(self);
 
   // Can't do this for synchronous nodes (using layers that are not _ASDisplayLayer and so we can't control display prevention/cancel)
-  if (_flags.isSynchronous)
+  if (_flags.synchronous)
     return;
 
   ASDN::MutexLocker l(_propertyLock);
@@ -467,7 +464,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 - (void)displayImmediately
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(!_flags.isSynchronous, @"this method is designed for asynchronous mode only");
+  ASDisplayNodeAssert(!_flags.synchronous, @"this method is designed for asynchronous mode only");
 
   [[self asyncLayer] displayImmediately];
 }
@@ -631,6 +628,10 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 
 #pragma mark - _ASDisplayLayerDelegate
 
+- (void)willDisplayAsyncLayer:(_ASDisplayLayer *)layer
+{
+}
+
 - (void)didDisplayAsyncLayer:(_ASDisplayLayer *)layer
 {
   // Subclass hook.
@@ -648,7 +649,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
     [self __exitHierarchy];
   }
 
-  ASDisplayNodeAssert(_flags.isLayerBacked, @"We shouldn't get called back here if there is no layer");
+  ASDisplayNodeAssert(_flags.layerBacked, @"We shouldn't get called back here if there is no layer");
   return (id<CAAction>)[NSNull null];
 }
 
@@ -657,9 +658,9 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASDisplayNode *to)
 {
   if (!from || !to) return NO;
-  if (from->_flags.isSynchronous) return NO;
-  if (to->_flags.isSynchronous) return NO;
-  if (from->_flags.inWindow != to->_flags.inWindow) return NO;
+  if (from->_flags.synchronous) return NO;
+  if (to->_flags.synchronous) return NO;
+  if (from->_flags.isInHierarchy != to->_flags.isInHierarchy) return NO;
   return YES;
 }
 
@@ -960,14 +961,14 @@ static NSInteger incrementIfFound(NSInteger i) {
   [_supernode _removeSubnode:self];
 
   if (ASDisplayNodeThreadIsMain()) {
-    if (_flags.isLayerBacked) {
+    if (_flags.layerBacked) {
       [_layer removeFromSuperlayer];
     } else {
       [_view removeFromSuperview];
     }
   } else {
     dispatch_async(dispatch_get_main_queue(), ^{
-      if (_flags.isLayerBacked) {
+      if (_flags.layerBacked) {
         [_layer removeFromSuperlayer];
       } else {
         [_view removeFromSuperview];
@@ -985,7 +986,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)__incrementVisibilityNotificationsDisabled
 {
   ASDN::MutexLocker l(_propertyLock);
-  const size_t maxVisibilityIncrement = (1ULL<<visibilityNotificationsDisabledBits) - 1ULL;
+  const size_t maxVisibilityIncrement = (1ULL<<VISIBILITY_NOTIFICATIONS_DISABLED_BITS) - 1ULL;
   ASDisplayNodeAssert(_flags.visibilityNotificationsDisabled < maxVisibilityIncrement, @"Oops, too many increments of the visibility notifications API");
   if (_flags.visibilityNotificationsDisabled < maxVisibilityIncrement)
     _flags.visibilityNotificationsDisabled++;
@@ -1019,17 +1020,17 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)__enterHierarchy
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(!_flags.isInEnterHierarchy, @"Should not cause recursive __enterHierarchy");
-  if (!self.inWindow && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
-    self.inWindow = YES;
-    _flags.isInEnterHierarchy = YES;
+  ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"Should not cause recursive __enterHierarchy");
+  if (!self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
+    self.inHierarchy = YES;
+    _flags.isEnteringHierarchy = YES;
     if (self.shouldRasterizeDescendants) {
       // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
       [self _recursiveWillEnterHierarchy];
     } else {
       [self willEnterHierarchy];
     }
-    _flags.isInEnterHierarchy = NO;
+    _flags.isEnteringHierarchy = NO;
     
     CALayer *layer = self.layer;
     if (!self.layer.contents) {
@@ -1041,20 +1042,20 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)__exitHierarchy
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(!_flags.isInExitHierarchy, @"Should not cause recursive __exitHierarchy");
-  if (self.inWindow && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
-    self.inWindow = NO;
+  ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"Should not cause recursive __exitHierarchy");
+  if (self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
+    self.inHierarchy = NO;
 
     [self.asyncLayer cancelAsyncDisplay];
 
-    _flags.isInExitHierarchy = YES;
+    _flags.isExitingHierarchy = YES;
     if (self.shouldRasterizeDescendants) {
       // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
       [self _recursiveDidExitHierarchy];
     } else {
       [self didExitHierarchy];
     }
-    _flags.isInExitHierarchy = NO;
+    _flags.isExitingHierarchy = NO;
   }
 }
 
@@ -1064,9 +1065,9 @@ static NSInteger incrementIfFound(NSInteger i) {
     return;
   }
 
-  _flags.isInEnterHierarchy = YES;
+  _flags.isEnteringHierarchy = YES;
   [self willEnterHierarchy];
-  _flags.isInEnterHierarchy = NO;
+  _flags.isEnteringHierarchy = NO;
 
   for (ASDisplayNode *subnode in self.subnodes) {
     [subnode _recursiveWillEnterHierarchy];
@@ -1079,9 +1080,9 @@ static NSInteger incrementIfFound(NSInteger i) {
     return;
   }
 
-  _flags.isInExitHierarchy = YES;
+  _flags.isExitingHierarchy = YES;
   [self didExitHierarchy];
-  _flags.isInExitHierarchy = NO;
+  _flags.isExitingHierarchy = NO;
 
   for (ASDisplayNode *subnode in self.subnodes) {
     [subnode _recursiveDidExitHierarchy];
@@ -1139,7 +1140,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // This will cause -measure: to actually compute the size instead of returning the previously cached size
-  _flags.sizeCalculated = NO;
+  _flags.isMeasured = NO;
 }
 
 - (void)didLoad
@@ -1150,15 +1151,15 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)willEnterHierarchy
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(_flags.isInEnterHierarchy, @"You should never call -willEnterHierarchy directly. Appearance is automatically managed by ASDisplayNode");
-  ASDisplayNodeAssert(!_flags.isInExitHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
+  ASDisplayNodeAssert(_flags.isEnteringHierarchy, @"You should never call -willEnterHierarchy directly. Appearance is automatically managed by ASDisplayNode");
+  ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
 }
 
 - (void)didExitHierarchy
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(_flags.isInExitHierarchy, @"You should never call -didExitHierarchy directly. Appearance is automatically managed by ASDisplayNode");
-  ASDisplayNodeAssert(!_flags.isInEnterHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
+  ASDisplayNodeAssert(_flags.isExitingHierarchy, @"You should never call -didExitHierarchy directly. Appearance is automatically managed by ASDisplayNode");
+  ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
 
   [self __exitedHierarchy];
 }
@@ -1316,7 +1317,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   // for the view/layer are still valid.
   ASDN::MutexLocker l(_propertyLock);
 
-  if (_flags.isLayerBacked) {
+  if (_flags.layerBacked) {
     [_pendingViewState applyToLayer:_layer];
   } else {
     [_pendingViewState applyToView:_view];
@@ -1325,7 +1326,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   _pendingViewState = nil;
 
   // TODO: move this into real pending state
-  if (_flags.preventOrCancelDisplay) {
+  if (_flags.displaySuspended) {
     self.asyncLayer.displaySuspended = YES;
   }
   if (!_flags.displaysAsynchronously) {
@@ -1358,12 +1359,12 @@ static NSInteger incrementIfFound(NSInteger i) {
   return nil;
 }
 
-- (void)recursiveSetPreventOrCancelDisplay:(BOOL)flag
+- (void)recursivelySetDisplaySuspended:(BOOL)flag
 {
-  _recursiveSetPreventOrCancelDisplay(self, nil, flag);
+  _recursivelySetDisplaySuspended(self, nil, flag);
 }
 
-static void _recursiveSetPreventOrCancelDisplay(ASDisplayNode *node, CALayer *layer, BOOL flag)
+static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer, BOOL flag)
 {
   // If there is no layer, but node whose its view is loaded, then we can traverse down its layer hierarchy.  Otherwise we must stick to the node hierarchy to avoid loading views prematurely.  Note that for nodes that haven't loaded their views, they can't possibly have subviews/sublayers, so we don't need to traverse the layer hierarchy for them.
   if (!layer && node && node.nodeLoaded) {
@@ -1376,60 +1377,60 @@ static void _recursiveSetPreventOrCancelDisplay(ASDisplayNode *node, CALayer *la
   }
 
   // Set the flag on the node.  If this is a pure layer (no node) then this has no effect (plain layers don't support preventing/cancelling display).
-  node.preventOrCancelDisplay = flag;
+  node.displaySuspended = flag;
 
   if (layer && !node.shouldRasterizeDescendants) {
     // If there is a layer, recurse down the layer hierarchy to set the flag on descendants.  This will cover both layer-based and node-based children.
     for (CALayer *sublayer in layer.sublayers) {
-      _recursiveSetPreventOrCancelDisplay(nil, sublayer, flag);
+      _recursivelySetDisplaySuspended(nil, sublayer, flag);
     }
   } else {
     // If there is no layer (view not loaded yet) or this node rasterizes descendants (there won't be a layer tree to traverse), recurse down the subnode hierarchy to set the flag on descendants.  This covers only node-based children, but for a node whose view is not loaded it can't possibly have nodeless children.
     for (ASDisplayNode *subnode in node.subnodes) {
-      _recursiveSetPreventOrCancelDisplay(subnode, nil, flag);
+      _recursivelySetDisplaySuspended(subnode, nil, flag);
     }
   }
 }
 
-- (BOOL)preventOrCancelDisplay
+- (BOOL)displaySuspended
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
-  return _flags.preventOrCancelDisplay;
+  return _flags.displaySuspended;
 }
 
-- (void)setPreventOrCancelDisplay:(BOOL)flag
+- (void)setDisplaySuspended:(BOOL)flag
 {
   ASDisplayNodeAssertThreadAffinity(self);
 
   // Can't do this for synchronous nodes (using layers that are not _ASDisplayLayer and so we can't control display prevention/cancel)
-  if (_flags.isSynchronous)
+  if (_flags.synchronous)
     return;
 
   ASDN::MutexLocker l(_propertyLock);
 
-  if (_flags.preventOrCancelDisplay == flag)
+  if (_flags.displaySuspended == flag)
     return;
 
-  _flags.preventOrCancelDisplay = flag;
+  _flags.displaySuspended = flag;
 
   self.asyncLayer.displaySuspended = flag;
 }
 
-- (BOOL)isInWindow
+- (BOOL)isInHierarchy
 {
   ASDisplayNodeAssertThreadAffinity(self);
 
   ASDN::MutexLocker l(_propertyLock);
-  return _flags.inWindow;
+  return _flags.isInHierarchy;
 }
 
-- (void)setInWindow:(BOOL)inWindow
+- (void)setInHierarchy:(BOOL)inHierarchy
 {
   ASDisplayNodeAssertThreadAffinity(self);
 
   ASDN::MutexLocker l(_propertyLock);
-  _flags.inWindow = inWindow;
+  _flags.isInHierarchy = inHierarchy;
 }
 
 + (dispatch_queue_t)asyncSizingQueue
@@ -1507,7 +1508,7 @@ static void _recursiveSetPreventOrCancelDisplay(ASDisplayNode *node, CALayer *la
 
 - (NSString *)debugDescription
 {
-  NSString *notableTargetDesc = (_flags.isLayerBacked ? @" [layer]" : @" [view]");
+  NSString *notableTargetDesc = (_flags.layerBacked ? @" [layer]" : @" [view]");
   if (_view && _viewClass) { // Nonstandard view is loaded
     notableTargetDesc = [NSString stringWithFormat:@" [%@ : %p]", _view.class, _view];
   } else if (_layer && _layerClass) { // Nonstandard layer is loaded

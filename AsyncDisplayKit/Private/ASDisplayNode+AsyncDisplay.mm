@@ -72,7 +72,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
 - (NSObject *)drawParameters
 {
-  if (_flags.hasDrawParametersForAsyncLayer) {
+  if (_flags.implementsDrawParameters) {
     return [self drawParametersForAsyncLayer:self.asyncLayer];
   }
 
@@ -197,7 +197,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
       return image;
     };
-  } else if (_flags.hasClassDisplay) {
+  } else if (_flags.implementsImageDisplay) {
     // Capture drawParameters from delegate on main thread
     id drawParameters = [self drawParameters];
 
@@ -213,7 +213,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       return result;
     };
 
-  } else if (_flags.implementsDisplay) {
+  } else if (_flags.implementsDrawRect) {
 
     CGRect bounds = self.bounds;
     if (CGRectIsEmpty(bounds)) {
@@ -317,9 +317,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
   if (displayBlock != NULL) {
     // Call willDisplay immediately in either case
-    if (_flags.hasWillDisplayAsyncLayer) {
-      [self willDisplayAsyncLayer:self.asyncLayer];
-    }
+    [self willDisplayAsyncLayer:self.asyncLayer];
 
     if (asynchronously) {
       [transaction addOperationWithBlock:displayBlock queue:[_ASDisplayLayer displayQueue] completion:completionBlock];
