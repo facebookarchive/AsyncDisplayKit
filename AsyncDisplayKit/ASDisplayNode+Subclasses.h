@@ -63,7 +63,7 @@
 /**
  * @abstract Whether the view or layer of this display node is currently in a window
  */
-@property (nonatomic, readonly, assign, getter=isInWindow) BOOL inWindow;
+@property (nonatomic, readonly, assign, getter=isInHierarchy) BOOL inHierarchy;
 
 
 /** @name View Lifecycle */

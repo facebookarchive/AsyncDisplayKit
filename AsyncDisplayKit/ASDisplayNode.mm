@@ -109,7 +109,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   
   _displaySentinel = [[ASSentinel alloc] init];
   
-  _flags.isInWindow = NO;
+  _flags.isInHierarchy = NO;
   _flags.displaysAsynchronously = YES;
   
   // As an optimization, it may be worth a caching system that performs these checks once per class in +initialize (see above).
@@ -660,7 +660,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   if (!from || !to) return NO;
   if (from->_flags.synchronous) return NO;
   if (to->_flags.synchronous) return NO;
-  if (from->_flags.isInWindow != to->_flags.isInWindow) return NO;
+  if (from->_flags.isInHierarchy != to->_flags.isInHierarchy) return NO;
   return YES;
 }
 
@@ -1021,8 +1021,8 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"Should not cause recursive __enterHierarchy");
-  if (!self.inWindow && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
-    self.inWindow = YES;
+  if (!self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
+    self.inHierarchy = YES;
     _flags.isEnteringHierarchy = YES;
     if (self.shouldRasterizeDescendants) {
       // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
@@ -1043,8 +1043,8 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"Should not cause recursive __exitHierarchy");
-  if (self.inWindow && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
-    self.inWindow = NO;
+  if (self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
+    self.inHierarchy = NO;
 
     [self.asyncLayer cancelAsyncDisplay];
 
@@ -1417,20 +1417,20 @@ static void _recursiveSetPreventOrCancelDisplay(ASDisplayNode *node, CALayer *la
   self.asyncLayer.displaySuspended = flag;
 }
 
-- (BOOL)isInWindow
+- (BOOL)isInHierarchy
 {
   ASDisplayNodeAssertThreadAffinity(self);
 
   ASDN::MutexLocker l(_propertyLock);
-  return _flags.isInWindow;
+  return _flags.isInHierarchy;
 }
 
-- (void)setInWindow:(BOOL)inWindow
+- (void)setInHierarchy:(BOOL)inHierarchy
 {
   ASDisplayNodeAssertThreadAffinity(self);
 
   ASDN::MutexLocker l(_propertyLock);
-  _flags.isInWindow = inWindow;
+  _flags.isInHierarchy = inHierarchy;
 }
 
 + (dispatch_queue_t)asyncSizingQueue

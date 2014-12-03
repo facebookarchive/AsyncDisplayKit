@@ -72,7 +72,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
     unsigned isMeasured:1;
     unsigned isEnteringHierarchy:1;
     unsigned isExitingHierarchy:1;
-    unsigned isInWindow:1;
+    unsigned isInHierarchy:1;
     unsigned visibilityNotificationsDisabled:VISIBILITY_NOTIFICATIONS_DISABLED_BITS;
   } _flags;
 
@@ -102,17 +102,17 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 
-// The visibility state of the node.  Changed before calling willAppear, willDisappear, and didDisappear.
-@property (nonatomic, readwrite, assign, getter = isInWindow) BOOL inWindow;
+// Changed before calling willEnterHierarchy / didExitHierarchy.
+@property (nonatomic, readwrite, assign, getter = isInHierarchy) BOOL inHierarchy;
 
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
 - (BOOL)__visibilityNotificationsDisabled;
 - (void)__incrementVisibilityNotificationsDisabled;
 - (void)__decrementVisibilityNotificationsDisabled;
 
-// Call willEnterHierarchy if necessary and set inWindow = YES if visibility notifications are enabled on all of its parents
+// Call willEnterHierarchy if necessary and set inHierarchy = YES if visibility notifications are enabled on all of its parents
 - (void)__enterHierarchy;
-// Call didExitHierarchy if necessary and set inWindow = NO if visibility notifications are enabled on all of its parents
+// Call didExitHierarchy if necessary and set inHierarchy = NO if visibility notifications are enabled on all of its parents
 - (void)__exitHierarchy;
 
 // Returns the ancestor node that rasterizes descendants, or nil if none.
