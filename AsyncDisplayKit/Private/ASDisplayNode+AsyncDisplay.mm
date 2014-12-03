@@ -22,11 +22,14 @@
 
 #if ASDISPLAYNODE_DELAY_DISPLAY
 static long __ASDisplayLayerMaxConcurrentDisplayCount = 1;
+#define ASDN_DELAY_FOR_DISPLAY() usleep( (long)(0.1 * USEC_PER_SEC) )
 #else
 // Basing this off of CPU core count would make sense, but first some experimentation should be done to understand
 // if having more ready-to-run work keeps the CPU clock up (or other interesting scheduler effects).
 static long __ASDisplayLayerMaxConcurrentDisplayCount = 8;
+#define ASDN_DELAY_FOR_DISPLAY()
 #endif
+
 static dispatch_semaphore_t __ASDisplayLayerConcurrentDisplaySemaphore;
 
 /*
@@ -48,11 +51,6 @@ static void __ASDisplayLayerIncrementConcurrentDisplayCount(BOOL displayIsAsync,
 
     dispatch_semaphore_wait(__ASDisplayLayerConcurrentDisplaySemaphore, DISPATCH_TIME_FOREVER);
   }
-
-#if ASDISPLAYNODE_DELAY_DISPLAY
-  usleep( (long)(0.05 * USEC_PER_SEC) );
-#endif
-
 }
 
 /*
@@ -173,11 +171,12 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
     displayBlock = ^id{
       __ASDisplayLayerIncrementConcurrentDisplayCount(asynchronous, rasterizing);
-
       if (isCancelledBlock()) {
         __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
         return nil;
       }
+
+      ASDN_DELAY_FOR_DISPLAY();
 
       UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, contentsScaleForDisplay);
 
@@ -208,6 +207,8 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
         return nil;
       }
 
+      ASDN_DELAY_FOR_DISPLAY();
+
       UIImage *result = [nodeClass displayWithParameters:drawParameters isCancelled:isCancelledBlock];
       __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
       return result;
@@ -227,12 +228,12 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
     displayBlock = ^id{
       __ASDisplayLayerIncrementConcurrentDisplayCount(asynchronous, rasterizing);
-
-      // Short-circuit to be efficient in the case where we've already started a different -display.
       if (isCancelledBlock()) {
         __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
         return nil;
       }
+
+      ASDN_DELAY_FOR_DISPLAY();
 
       if (!rasterizing) {
         UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, contentsScaleForDisplay);
