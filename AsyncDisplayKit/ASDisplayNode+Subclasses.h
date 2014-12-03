@@ -170,6 +170,14 @@
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
 
 /**
+ * @abstract Indicates that the receiver is about to display.
+ *
+ * @discussion Subclasses may override this method to be notified when display (asynchronous or synchronous) is
+ * about to begin.
+ */
+- (void)displayWillStart ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
  * @abstract Indicates that the receiver has finished displaying.
  *
  * @discussion Subclasses may override this method to be notified when display (asynchronous or synchronous) has
