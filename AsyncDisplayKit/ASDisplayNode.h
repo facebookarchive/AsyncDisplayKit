@@ -74,7 +74,7 @@
 
 
 /** 
- * @abstract Returns whether the view is synchronous.
+ * @abstract Returns whether the node is synchronous.
  *
  * @return NO if the node wraps a _ASDisplayView, YES otherwise.
  */
@@ -98,7 +98,7 @@
 /** 
  * @abstract Returns whether a node's backing view or layer is loaded.
  *
- * @return YES if a view is loaded, or if isLayerBacked is YES and layer is not nil; NO otherwise.
+ * @return YES if a view is loaded, or if layerBacked is YES and layer is not nil; NO otherwise.
  */
 @property (atomic, readonly, assign, getter=isNodeLoaded) BOOL nodeLoaded;
 
