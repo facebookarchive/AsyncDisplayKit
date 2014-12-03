@@ -22,3 +22,5 @@ docs/htdocs
 docs/.sass-cache
 
 *.swp
+
+*.lock
