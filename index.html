@@ -109,12 +109,25 @@ something like this in a UIViewController:</p>
   <span class="p">});</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>You can use <code>ASImageNode</code> and <code>ASTextNode</code> as drop-in replacements for
-UIImageView and UITextView, or <a href="https://github.com/facebook/AsyncDisplayKit/blob/master/AsyncDisplayKit/ASDisplayNode%2BSubclasses.h">create your own
+<p>AsyncDisplayKit at a glance:</p>
+
+<ul>
+<li><code>ASImageNode</code> and <code>ASTextNode</code> are drop-in replacements for UIImageView and
+UITextView.</li>
+<li><code>ASMultiplexImageNode</code> can load and display progressively higher-quality
+variants of an image over a slow cell network, letting you quickly show a
+low-resolution photo while the full size downloads.</li>
+<li><code>ASNetworkImageNode</code> is a simpler, single-image counterpart to the Multiplex
+node.</li>
+<li><code>ASTableView</code> and <code>ASCollectionView</code> are a node-aware UITableView and
+UICollectionView, respectively, that can asynchronously preload cell nodes
+&mdash; from loading network data to rendering &mdash; all without blocking
+the main thread.</li>
+</ul>
+
+<p>You can also easily <a href="https://github.com/facebook/AsyncDisplayKit/blob/master/AsyncDisplayKit/ASDisplayNode%2BSubclasses.h">create your own
 nodes</a>
-to implement node hierarchies or custom drawing.  <code>ASTableView</code> is a node-aware
-UITableView subclass that can asynchronously preload cell nodes without
-blocking the main thread.</p>
+to implement node hierarchies or custom drawing.</p>
 
 <p><br /></p>
 

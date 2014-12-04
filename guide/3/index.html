@@ -120,8 +120,8 @@ working range, but heavyweight nodes like Facebook stories are expensive and
 need to be pruned quickly.</p>
 <div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="n">ASRangeController</span> <span class="o">*</span><span class="n">rangeController</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASRangeController</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
 <span class="n">rangeController</span><span class="p">.</span><span class="n">tuningParameters</span> <span class="o">=</span> <span class="p">(</span><span class="n">ASRangeTuningParameters</span><span class="p">){</span>
-  <span class="p">.</span><span class="n">leadingBufferScreenfuls</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// two screenfuls in the direction of scroll</span>
-  <span class="p">.</span><span class="n">trailingBufferScreenfuls</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// one screenful in the other direction</span>
+  <span class="p">.</span><span class="n">leadingBufferScreenfuls</span> <span class="o">=</span> <span class="mf">2.0f</span><span class="p">;</span> <span class="c1">// two screenfuls in the direction of scroll</span>
+  <span class="p">.</span><span class="n">trailingBufferScreenfuls</span> <span class="o">=</span> <span class="mf">0.5f</span><span class="p">;</span> <span class="c1">// one-half screenful in the other direction</span>
 <span class="p">};</span>
 </code></pre></div>
 <p>If you use a working range, you should profile your app and consider tuning it

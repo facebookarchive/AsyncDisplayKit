@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="html/html; charset=utf-8" />
-		<title>ASMultiplexImageNodeDataSource Protocol Reference</title>
+		<title>ASNetworkImageNodeDelegate Protocol Reference</title>
 		<meta id="xcode-display" name="xcode-display" content="render"/>
 		<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
 		<link rel="stylesheet" type="text/css" media="print" href="../css/stylesPrint.css" />
@@ -16,7 +16,7 @@
 			</div>
 			
 			<div id="title" role="banner">
-				<h1 class="hideInXcode">ASMultiplexImageNodeDataSource Protocol Reference</h1>
+				<h1 class="hideInXcode">ASNetworkImageNodeDelegate Protocol Reference</h1>
 			</div>
 			<ul id="headerButtons" role="toolbar">
 				<li id="toc_button">
@@ -41,9 +41,9 @@
 	
 	<option value="instance_methods">Instance Methods</option>
 	
-	<option value="//api/name/multiplexImageNode:URLForImageIdentifier:">&nbsp;&nbsp;&nbsp;&nbsp;- multiplexImageNode:URLForImageIdentifier:</option>
+	<option value="//api/name/imageNode:didLoadImage:">&nbsp;&nbsp;&nbsp;&nbsp;- imageNode:didLoadImage:</option>
 	
-	<option value="//api/name/multiplexImageNode:imageForImageIdentifier:">&nbsp;&nbsp;&nbsp;&nbsp;- multiplexImageNode:imageForImageIdentifier:</option>
+	<option value="//api/name/imageNodeDidFinishDecoding:">&nbsp;&nbsp;&nbsp;&nbsp;- imageNodeDidFinishDecoding:</option>
 	
 	
 	
@@ -71,9 +71,9 @@
 
 <li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#instance_methods">Instance Methods</a></span><ul>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/multiplexImageNode:URLForImageIdentifier:">multiplexImageNode:URLForImageIdentifier:</a></span></li>
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/imageNode:didLoadImage:">imageNode:didLoadImage:</a></span></li>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/multiplexImageNode:imageForImageIdentifier:">multiplexImageNode:imageForImageIdentifier:</a></span></li>
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/imageNodeDidFinishDecoding:">imageNodeDidFinishDecoding:</a></span></li>
 	
 </ul></li>
 
@@ -82,7 +82,7 @@
 		</nav>
 		<article>
 			<div id="contents" class="isShowingTOC" role="main">
-				<a title="ASMultiplexImageNodeDataSource Protocol Reference" name="top"></a>
+				<a title="ASNetworkImageNodeDelegate Protocol Reference" name="top"></a>
 				<div class="main-navigation navigation-top">
 					<ul>
 	<li><a href="../index.html">Index</a></li>
@@ -91,7 +91,7 @@
 				</div>
 				<div id="header">
 					<div class="section-header">
-						<h1 class="title title-header">ASMultiplexImageNodeDataSource Protocol Reference</h1>
+						<h1 class="title title-header">ASNetworkImageNodeDelegate Protocol Reference</h1>
 					</div>		
 				</div>
 				<div id="container">	
@@ -102,7 +102,7 @@
 	<td class="specification-value">NSObject</td>
 </tr><tr>
 	<td class="specification-title">Declared in</td>
-	<td class="specification-value">ASMultiplexImageNode.h</td>
+	<td class="specification-value">ASNetworkImageNode.h</td>
 </tr>
 						</tbody></table></div>
 					
@@ -122,13 +122,13 @@
 						<ul class="task-list">
 							<li>
 	<span class="tooltip">
-		<code><a href="#//api/name/multiplexImageNode:imageForImageIdentifier:">&ndash;&nbsp;multiplexImageNode:imageForImageIdentifier:</a></code>
+		<code><a href="#//api/name/imageNode:didLoadImage:">&ndash;&nbsp;imageNode:didLoadImage:</a></code>
 	</span>
 	
-	
+	<span class="task-item-suffix">required method</span>
 </li><li>
 	<span class="tooltip">
-		<code><a href="#//api/name/multiplexImageNode:URLForImageIdentifier:">&ndash;&nbsp;multiplexImageNode:URLForImageIdentifier:</a></code>
+		<code><a href="#//api/name/imageNodeDidFinishDecoding:">&ndash;&nbsp;imageNodeDidFinishDecoding:</a></code>
 	</span>
 	
 	
@@ -150,18 +150,18 @@
 						<h2 class="subtitle subtitle-methods">Instance Methods</h2>
 						
 						<div class="section-method">
-	<a name="//api/name/multiplexImageNode:URLForImageIdentifier:" title="multiplexImageNode:URLForImageIdentifier:"></a>
-	<h3 class="subsubtitle method-title">multiplexImageNode:URLForImageIdentifier:</h3>
+	<a name="//api/name/imageNode:didLoadImage:" title="imageNode:didLoadImage:"></a>
+	<h3 class="subsubtitle method-title">imageNode:didLoadImage:</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>An image URL for the specified identifier.</p>
+		<p>Notification that the image node finished downloading an image.</p>
 	</div>		
 	
     
 
-	<div class="method-subsection method-declaration"><code>- (NSURL *)multiplexImageNode:(id)<em>imageNode</em> URLForImageIdentifier:(id)<em>imageIdentifier</em></code></div>
+	<div class="method-subsection method-declaration"><code>- (void)imageNode:(id)<em>imageNode</em> didLoadImage:(id)<em>image</em></code></div>
 
     
 	
@@ -174,18 +174,13 @@
 		</dl>
 		
 		<dl class="argument-def parameter-def">
-			<dt><em>imageIdentifier</em></dt>
-			<dd><p>The identifier for the image that will be downloaded.</p></dd>
+			<dt><em>image</em></dt>
+			<dd><p>The newly-loaded image.</p></dd>
 		</dl>
 		
 	</div>
 	
 	
-	
-	<div class="method-subsection return">
-		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>An NSURL for the image identified by <code>imageIdentifier</code>, or nil if none is available.</p>
-	</div>
 	
 	
 	
@@ -193,8 +188,7 @@
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>Supported URLs include assets-library, Photo framework URLs (ph://), HTTP, HTTPS, and FTP URLs.  If the
-image is already available to the data source, it should be provided via <a href="#//api/name/multiplexImageNode:imageForImageIdentifier:">[ASMultiplexImageNodeDataSource multiplexImageNode:imageForImageIdentifier:]</a> instead.</p>
+		<p>Called on a background queue.</p>
 	</div>
 	
 	
@@ -205,25 +199,25 @@ image is already available to the data source, it should be provided via <a href
 	
 	<div class="method-subsection declared-in-section">
 		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASMultiplexImageNode.h</code><br />
+		<code class="declared-in-ref">ASNetworkImageNode.h</code><br />
 	</div>				
 	
 	
 </div>
 						
 						<div class="section-method">
-	<a name="//api/name/multiplexImageNode:imageForImageIdentifier:" title="multiplexImageNode:imageForImageIdentifier:"></a>
-	<h3 class="subsubtitle method-title">multiplexImageNode:imageForImageIdentifier:</h3>
+	<a name="//api/name/imageNodeDidFinishDecoding:" title="imageNodeDidFinishDecoding:"></a>
+	<h3 class="subsubtitle method-title">imageNodeDidFinishDecoding:</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>An image for the specified identifier.</p>
+		<p>Notification that the image node finished decoding an image.</p>
 	</div>		
 	
     
 
-	<div class="method-subsection method-declaration"><code>- (UIImage *)multiplexImageNode:(id)<em>imageNode</em> imageForImageIdentifier:(id)<em>imageIdentifier</em></code></div>
+	<div class="method-subsection method-declaration"><code>- (void)imageNodeDidFinishDecoding:(id)<em>imageNode</em></code></div>
 
     
 	
@@ -235,29 +229,13 @@ image is already available to the data source, it should be provided via <a href
 			<dd><p>The sender.</p></dd>
 		</dl>
 		
-		<dl class="argument-def parameter-def">
-			<dt><em>imageIdentifier</em></dt>
-			<dd><p>The identifier for the image that should be returned.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	<div class="method-subsection return">
-		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>A UIImage corresponding to <code>imageIdentifier</code>, or nil if none is available.</p>
 	</div>
 	
 	
 	
 	
 	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<p>If the image is already available to the data source, this method should be used in lieu of providing the
-URL to the image via -multiplexImageNode:URLForImageIdentifier:.</p>
-	</div>
+	
 	
 	
 	
@@ -267,7 +245,7 @@ URL to the image via -multiplexImageNode:URLForImageIdentifier:.</p>
 	
 	<div class="method-subsection declared-in-section">
 		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASMultiplexImageNode.h</code><br />
+		<code class="declared-in-ref">ASNetworkImageNode.h</code><br />
 	</div>				
 	
 	

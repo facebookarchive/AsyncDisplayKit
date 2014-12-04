@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="html/html; charset=utf-8" />
-		<title>ASMultiplexImageNodeDataSource Protocol Reference</title>
+		<title>ASCollectionViewDataSource Protocol Reference</title>
 		<meta id="xcode-display" name="xcode-display" content="render"/>
 		<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
 		<link rel="stylesheet" type="text/css" media="print" href="../css/stylesPrint.css" />
@@ -16,7 +16,7 @@
 			</div>
 			
 			<div id="title" role="banner">
-				<h1 class="hideInXcode">ASMultiplexImageNodeDataSource Protocol Reference</h1>
+				<h1 class="hideInXcode">ASCollectionViewDataSource Protocol Reference</h1>
 			</div>
 			<ul id="headerButtons" role="toolbar">
 				<li id="toc_button">
@@ -25,6 +25,8 @@
 				<li id="jumpto_button" role="navigation">
 					<select id="jumpTo">
 	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
 	
 	
 	
@@ -41,9 +43,7 @@
 	
 	<option value="instance_methods">Instance Methods</option>
 	
-	<option value="//api/name/multiplexImageNode:URLForImageIdentifier:">&nbsp;&nbsp;&nbsp;&nbsp;- multiplexImageNode:URLForImageIdentifier:</option>
-	
-	<option value="//api/name/multiplexImageNode:imageForImageIdentifier:">&nbsp;&nbsp;&nbsp;&nbsp;- multiplexImageNode:imageForImageIdentifier:</option>
+	<option value="//api/name/collectionView:nodeForItemAtIndexPath:">&nbsp;&nbsp;&nbsp;&nbsp;- collectionView:nodeForItemAtIndexPath:</option>
 	
 	
 	
@@ -54,6 +54,8 @@
 		<nav id="tocContainer" class="isShowingTOC">
 			<ul id="toc" role="tree">
 				
+<li role="treeitem"><span class="nodisclosure"></span><span class="sectionName"><a href="#overview">Overview</a></span></li>
+
 
 
 
@@ -71,9 +73,7 @@
 
 <li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#instance_methods">Instance Methods</a></span><ul>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/multiplexImageNode:URLForImageIdentifier:">multiplexImageNode:URLForImageIdentifier:</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/multiplexImageNode:imageForImageIdentifier:">multiplexImageNode:imageForImageIdentifier:</a></span></li>
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/collectionView:nodeForItemAtIndexPath:">collectionView:nodeForItemAtIndexPath:</a></span></li>
 	
 </ul></li>
 
@@ -82,7 +82,7 @@
 		</nav>
 		<article>
 			<div id="contents" class="isShowingTOC" role="main">
-				<a title="ASMultiplexImageNodeDataSource Protocol Reference" name="top"></a>
+				<a title="ASCollectionViewDataSource Protocol Reference" name="top"></a>
 				<div class="main-navigation navigation-top">
 					<ul>
 	<li><a href="../index.html">Index</a></li>
@@ -91,7 +91,7 @@
 				</div>
 				<div id="header">
 					<div class="section-header">
-						<h1 class="title title-header">ASMultiplexImageNodeDataSource Protocol Reference</h1>
+						<h1 class="title title-header">ASCollectionViewDataSource Protocol Reference</h1>
 					</div>		
 				</div>
 				<div id="container">	
@@ -99,15 +99,23 @@
 					<div class="section section-specification"><table cellspacing="0"><tbody>
 						<tr>
 	<td class="specification-title">Conforms to</td>
-	<td class="specification-value">NSObject</td>
+	<td class="specification-value"><a href="../Protocols/ASCommonCollectionViewDataSource.html">ASCommonCollectionViewDataSource</a><br />NSObject</td>
 </tr><tr>
 	<td class="specification-title">Declared in</td>
-	<td class="specification-value">ASMultiplexImageNode.h</td>
+	<td class="specification-value">ASCollectionView.h</td>
 </tr>
 						</tbody></table></div>
 					
                     
                     
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>This is a node-based UICollectionViewDataSource.</p>
+					</div>
+					
+					
 					
 					
 					
@@ -122,16 +130,10 @@
 						<ul class="task-list">
 							<li>
 	<span class="tooltip">
-		<code><a href="#//api/name/multiplexImageNode:imageForImageIdentifier:">&ndash;&nbsp;multiplexImageNode:imageForImageIdentifier:</a></code>
+		<code><a href="#//api/name/collectionView:nodeForItemAtIndexPath:">&ndash;&nbsp;collectionView:nodeForItemAtIndexPath:</a></code>
 	</span>
 	
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/multiplexImageNode:URLForImageIdentifier:">&ndash;&nbsp;multiplexImageNode:URLForImageIdentifier:</a></code>
-	</span>
-	
-	
+	<span class="task-item-suffix">required method</span>
 </li>
 						</ul>
 						
@@ -150,18 +152,18 @@
 						<h2 class="subtitle subtitle-methods">Instance Methods</h2>
 						
 						<div class="section-method">
-	<a name="//api/name/multiplexImageNode:URLForImageIdentifier:" title="multiplexImageNode:URLForImageIdentifier:"></a>
-	<h3 class="subsubtitle method-title">multiplexImageNode:URLForImageIdentifier:</h3>
+	<a name="//api/name/collectionView:nodeForItemAtIndexPath:" title="collectionView:nodeForItemAtIndexPath:"></a>
+	<h3 class="subsubtitle method-title">collectionView:nodeForItemAtIndexPath:</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>An image URL for the specified identifier.</p>
+		<p>Similar to -collectionView:cellForItemAtIndexPath:.</p>
 	</div>		
 	
     
 
-	<div class="method-subsection method-declaration"><code>- (NSURL *)multiplexImageNode:(id)<em>imageNode</em> URLForImageIdentifier:(id)<em>imageIdentifier</em></code></div>
+	<div class="method-subsection method-declaration"><code>- (ASCellNode *)collectionView:(id)<em>collectionView</em> nodeForItemAtIndexPath:(id)<em>indexPath</em></code></div>
 
     
 	
@@ -169,13 +171,13 @@
 		<h4 class="method-subtitle parameter-title">Parameters</h4>
 		
 		<dl class="argument-def parameter-def">
-			<dt><em>imageNode</em></dt>
-			<dd><p>The sender.</p></dd>
+			<dt><em>indexPath</em></dt>
+			<dd><p>The index path of the requested node.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
-			<dt><em>imageIdentifier</em></dt>
-			<dd><p>The identifier for the image that will be downloaded.</p></dd>
+			<dt><em>collection</em></dt>
+			<dd><p>The sender.</p></dd>
 		</dl>
 		
 	</div>
@@ -184,18 +186,14 @@
 	
 	<div class="method-subsection return">
 		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>An NSURL for the image identified by <code>imageIdentifier</code>, or nil if none is available.</p>
+		<p>a node for display at this indexpath.  Must be thread-safe (can be called on the main thread or a background
+queue) and should not implement reuse (it will be called once per row).  Unlike UICollectionView&rsquo;s version, this method
+is not called when the row is about to display.</p>
 	</div>
 	
 	
 	
 	
-	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<p>Supported URLs include assets-library, Photo framework URLs (ph://), HTTP, HTTPS, and FTP URLs.  If the
-image is already available to the data source, it should be provided via <a href="#//api/name/multiplexImageNode:imageForImageIdentifier:">[ASMultiplexImageNodeDataSource multiplexImageNode:imageForImageIdentifier:]</a> instead.</p>
-	</div>
 	
 	
 	
@@ -205,69 +203,7 @@ image is already available to the data source, it should be provided via <a href
 	
 	<div class="method-subsection declared-in-section">
 		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASMultiplexImageNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/multiplexImageNode:imageForImageIdentifier:" title="multiplexImageNode:imageForImageIdentifier:"></a>
-	<h3 class="subsubtitle method-title">multiplexImageNode:imageForImageIdentifier:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>An image for the specified identifier.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (UIImage *)multiplexImageNode:(id)<em>imageNode</em> imageForImageIdentifier:(id)<em>imageIdentifier</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>imageNode</em></dt>
-			<dd><p>The sender.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>imageIdentifier</em></dt>
-			<dd><p>The identifier for the image that should be returned.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	<div class="method-subsection return">
-		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>A UIImage corresponding to <code>imageIdentifier</code>, or nil if none is available.</p>
-	</div>
-	
-	
-	
-	
-	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<p>If the image is already available to the data source, this method should be used in lieu of providing the
-URL to the image via -multiplexImageNode:URLForImageIdentifier:.</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASMultiplexImageNode.h</code><br />
+		<code class="declared-in-ref">ASCollectionView.h</code><br />
 	</div>				
 	
 	
