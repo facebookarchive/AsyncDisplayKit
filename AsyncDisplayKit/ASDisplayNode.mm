@@ -630,6 +630,8 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 
 - (void)willDisplayAsyncLayer:(_ASDisplayLayer *)layer
 {
+  // Subclass hook.
+  [self displayWillStart];
 }
 
 - (void)didDisplayAsyncLayer:(_ASDisplayLayer *)layer
@@ -1180,6 +1182,10 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)layout
 {
   ASDisplayNodeAssertMainThread();
+}
+
+- (void)displayWillStart
+{
 }
 
 - (void)displayDidFinish

@@ -172,9 +172,9 @@ static inline BOOL _shouldUpdateAfterChangedImageIdentifiers(id loadedIdentifier
 }
 
 #pragma mark - ASDisplayNode Overrides
-- (void)didExitHierarchy
+- (void)reclaimMemory
 {
-  [super didExitHierarchy]; // This actually clears the contents, so we need to do this first for our displayedImageIdentifier to be meaningful.
+  [super reclaimMemory]; // This actually clears the contents, so we need to do this first for our displayedImageIdentifier to be meaningful.
   [self _setDisplayedImageIdentifier:nil withImage:nil];
 
   if (_downloadIdentifier) {
@@ -184,9 +184,9 @@ static inline BOOL _shouldUpdateAfterChangedImageIdentifiers(id loadedIdentifier
   }
 }
 
-- (void)willEnterHierarchy
+- (void)displayWillStart
 {
-  [super willEnterHierarchy];
+  [super displayWillStart];
 
   if(_canceledImageDownload) {
     [self _updatedImageIdentifiers];

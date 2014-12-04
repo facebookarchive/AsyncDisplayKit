@@ -122,9 +122,9 @@
   return _delegate;
 }
 
-- (void)didExitHierarchy
+- (void)reclaimMemory
 {
-  [super didExitHierarchy];
+  [super reclaimMemory];
 
   {
     ASDN::MutexLocker l(_lock);
@@ -135,9 +135,9 @@
   }
 }
 
-- (void)willEnterHierarchy
+- (void)displayWillStart
 {
-  [super willEnterHierarchy];
+  [super displayWillStart];
 
   {
     ASDN::MutexLocker l(_lock);
