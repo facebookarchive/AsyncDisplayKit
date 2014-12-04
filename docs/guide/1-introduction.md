@@ -30,14 +30,15 @@ node API is similar to UIView's, with some additional conveniences &mdash; for
 example, you can access common CALayer properties directly.  To add a node to
 an existing view or layer hierarchy, use its `node.view` or `node.layer`.
 
-AsyncDisplayKit includes several powerful components:
+AsyncDisplayKit's core components include:
 
 *  *ASDisplayNode*.  Counterpart to UIView &mdash; subclass to make custom nodes.
 *  *ASControlNode*.  Analogous to UIControl &mdash; subclass to make buttons.
 *  *ASImageNode*.  Like UIImageView &mdash; decodes images asynchronously.
 *  *ASTextNode*.  Like UITextView &mdash; built on TextKit with full-featured
    rich text support.
-*  *ASTableView*.  UITableView subclass that supports nodes.
+*  *ASTableView* and *ASCollectionView*.  UITableView and UICollectionView
+   subclasses that support nodes.
 
 You can use these as drop-in replacements for their UIKit counterparts.  While
 ASDK works most effectively with fully node-based hierarchies, even replacing

@@ -263,7 +263,7 @@
 #pragma mark -
 - (void)setNeedsDisplayWithCompletion:(void (^)(BOOL canceled))displayCompletionBlock
 {
-  if (self.preventOrCancelDisplay) {
+  if (self.displaySuspended) {
     if (displayCompletionBlock)
       displayCompletionBlock(YES);
     return;

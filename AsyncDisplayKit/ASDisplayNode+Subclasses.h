@@ -63,7 +63,7 @@
 /**
  * @abstract Whether the view or layer of this display node is currently in a window
  */
-@property (nonatomic, readonly, assign, getter=isInWindow) BOOL inWindow;
+@property (nonatomic, readonly, assign, getter=isInHierarchy) BOOL inHierarchy;
 
 
 /** @name View Lifecycle */
@@ -168,6 +168,14 @@
  * @note Called on the main thread only
  */
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
+
+/**
+ * @abstract Indicates that the receiver is about to display.
+ *
+ * @discussion Subclasses may override this method to be notified when display (asynchronous or synchronous) is
+ * about to begin.
+ */
+- (void)displayWillStart ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Indicates that the receiver has finished displaying.

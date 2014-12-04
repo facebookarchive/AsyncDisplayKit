@@ -139,7 +139,7 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:n], 1u, @"willEnterHierarchy not called when node's view added to hierarchy");
   XCTAssertEqual([_didExitHierarchyCounts countForObject:n], 0u, @"didExitHierarchy erroneously called");
 
-  XCTAssertTrue(n.inWindow, @"Node should be visible");
+  XCTAssertTrue(n.inHierarchy, @"Node should be visible");
 
   if (isLayerBacked) {
     [n.layer removeFromSuperlayer];
@@ -147,7 +147,7 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
     [n.view removeFromSuperview];
   }
 
-  XCTAssertFalse(n.inWindow, @"Node should be not visible");
+  XCTAssertFalse(n.inHierarchy, @"Node should be not visible");
 
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:n], 1u, @"willEnterHierarchy not called when node's view added to hierarchy");
   XCTAssertEqual([_didExitHierarchyCounts countForObject:n], 1u, @"didExitHierarchy erroneously called");
@@ -175,11 +175,11 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 
   [parent addSubnode:a];
 
-  XCTAssertFalse(parent.inWindow, @"Nothing should be visible");
-  XCTAssertFalse(a.inWindow, @"Nothing should be visible");
-  XCTAssertFalse(b.inWindow, @"Nothing should be visible");
-  XCTAssertFalse(aa.inWindow, @"Nothing should be visible");
-  XCTAssertFalse(ab.inWindow, @"Nothing should be visible");
+  XCTAssertFalse(parent.inHierarchy, @"Nothing should be visible");
+  XCTAssertFalse(a.inHierarchy, @"Nothing should be visible");
+  XCTAssertFalse(b.inHierarchy, @"Nothing should be visible");
+  XCTAssertFalse(aa.inHierarchy, @"Nothing should be visible");
+  XCTAssertFalse(ab.inHierarchy, @"Nothing should be visible");
 
   if (isLayerBacked) {
     [window.layer addSublayer:parent.layer];
@@ -193,22 +193,22 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:aa], 0u, @"Should not have appeared yet");
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:ab], 0u, @"Should not have appeared yet");
 
-  XCTAssertTrue(parent.inWindow, @"Should be visible");
-  XCTAssertTrue(a.inWindow, @"Should be visible");
-  XCTAssertFalse(b.inWindow, @"Nothing should be visible");
-  XCTAssertFalse(aa.inWindow, @"Nothing should be visible");
-  XCTAssertFalse(ab.inWindow, @"Nothing should be visible");
+  XCTAssertTrue(parent.inHierarchy, @"Should be visible");
+  XCTAssertTrue(a.inHierarchy, @"Should be visible");
+  XCTAssertFalse(b.inHierarchy, @"Nothing should be visible");
+  XCTAssertFalse(aa.inHierarchy, @"Nothing should be visible");
+  XCTAssertFalse(ab.inHierarchy, @"Nothing should be visible");
 
   // Add to an already-visible node should make the node visible
   [parent addSubnode:b];
   [a insertSubnode:aa atIndex:0];
   [a insertSubnode:ab aboveSubnode:aa];
 
-  XCTAssertTrue(parent.inWindow, @"Should be visible");
-  XCTAssertTrue(a.inWindow, @"Should be visible");
-  XCTAssertTrue(b.inWindow, @"Should be visible after adding to visible parent");
-  XCTAssertTrue(aa.inWindow, @"Nothing should be visible");
-  XCTAssertTrue(ab.inWindow, @"Nothing should be visible");
+  XCTAssertTrue(parent.inHierarchy, @"Should be visible");
+  XCTAssertTrue(a.inHierarchy, @"Should be visible");
+  XCTAssertTrue(b.inHierarchy, @"Should be visible after adding to visible parent");
+  XCTAssertTrue(aa.inHierarchy, @"Nothing should be visible");
+  XCTAssertTrue(ab.inHierarchy, @"Nothing should be visible");
 
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:parent], 1u, @"Should have -willEnterHierarchy called once");
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:a], 1u, @"Should have -willEnterHierarchy called once");
@@ -222,11 +222,11 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
     [parent.view removeFromSuperview];
   }
 
-  XCTAssertFalse(parent.inWindow, @"Nothing should be visible");
-  XCTAssertFalse(a.inWindow, @"Nothing should be visible");
-  XCTAssertFalse(b.inWindow, @"Nothing should be visible");
-  XCTAssertFalse(aa.inWindow, @"Nothing should be visible");
-  XCTAssertFalse(ab.inWindow, @"Nothing should be visible");
+  XCTAssertFalse(parent.inHierarchy, @"Nothing should be visible");
+  XCTAssertFalse(a.inHierarchy, @"Nothing should be visible");
+  XCTAssertFalse(b.inHierarchy, @"Nothing should be visible");
+  XCTAssertFalse(aa.inHierarchy, @"Nothing should be visible");
+  XCTAssertFalse(ab.inHierarchy, @"Nothing should be visible");
 }
 
 - (void)testAppearanceMethodsNoLayer
@@ -262,36 +262,36 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   [parentSynchronousNode addSubnode:layerBackedNode];
   [parentSynchronousNode addSubnode:viewBackedNode];
 
-  XCTAssertFalse(parentSynchronousNode.inWindow, @"Should not yet be visible");
-  XCTAssertFalse(layerBackedNode.inWindow, @"Should not yet be visible");
-  XCTAssertFalse(viewBackedNode.inWindow, @"Should not yet be visible");
+  XCTAssertFalse(parentSynchronousNode.inHierarchy, @"Should not yet be visible");
+  XCTAssertFalse(layerBackedNode.inHierarchy, @"Should not yet be visible");
+  XCTAssertFalse(viewBackedNode.inHierarchy, @"Should not yet be visible");
 
   [window addSubview:parentSynchronousNode.view];
 
   // This is a known case that isn't supported
-  XCTAssertFalse(parentSynchronousNode.inWindow, @"Synchronous views are not currently marked visible");
+  XCTAssertFalse(parentSynchronousNode.inHierarchy, @"Synchronous views are not currently marked visible");
 
-  XCTAssertTrue(layerBackedNode.inWindow, @"Synchronous views' subviews should get marked visible");
-  XCTAssertTrue(viewBackedNode.inWindow, @"Synchronous views' subviews should get marked visible");
+  XCTAssertTrue(layerBackedNode.inHierarchy, @"Synchronous views' subviews should get marked visible");
+  XCTAssertTrue(viewBackedNode.inHierarchy, @"Synchronous views' subviews should get marked visible");
 
   // Try moving a node to/from a synchronous node in the window with the node API
   // Setup
   [layerBackedNode removeFromSupernode];
   [viewBackedNode removeFromSupernode];
-  XCTAssertFalse(layerBackedNode.inWindow, @"aoeu");
-  XCTAssertFalse(viewBackedNode.inWindow, @"aoeu");
+  XCTAssertFalse(layerBackedNode.inHierarchy, @"aoeu");
+  XCTAssertFalse(viewBackedNode.inHierarchy, @"aoeu");
 
   // now move to synchronous node
   [parentSynchronousNode addSubnode:layerBackedNode];
   [parentSynchronousNode insertSubnode:viewBackedNode aboveSubnode:layerBackedNode];
-  XCTAssertTrue(layerBackedNode.inWindow, @"Synchronous views' subviews should get marked visible");
-  XCTAssertTrue(viewBackedNode.inWindow, @"Synchronous views' subviews should get marked visible");
+  XCTAssertTrue(layerBackedNode.inHierarchy, @"Synchronous views' subviews should get marked visible");
+  XCTAssertTrue(viewBackedNode.inHierarchy, @"Synchronous views' subviews should get marked visible");
 
   [parentSynchronousNode.view removeFromSuperview];
 
-  XCTAssertFalse(parentSynchronousNode.inWindow, @"Should not have changed");
-  XCTAssertFalse(layerBackedNode.inWindow, @"Should have been marked invisible when synchronous superview was removed from the window");
-  XCTAssertFalse(viewBackedNode.inWindow, @"Should have been marked invisible when synchronous superview was removed from the window");
+  XCTAssertFalse(parentSynchronousNode.inHierarchy, @"Should not have changed");
+  XCTAssertFalse(layerBackedNode.inHierarchy, @"Should have been marked invisible when synchronous superview was removed from the window");
+  XCTAssertFalse(viewBackedNode.inHierarchy, @"Should have been marked invisible when synchronous superview was removed from the window");
 
   [window release];
   [parentSynchronousNode release];
@@ -315,11 +315,11 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   [parentA addSubnode:child];
   [child addSubnode:childSubnode];
 
-  XCTAssertFalse(parentA.inWindow, @"Should not yet be visible");
-  XCTAssertFalse(parentB.inWindow, @"Should not yet be visible");
-  XCTAssertFalse(child.inWindow, @"Should not yet be visible");
-  XCTAssertFalse(childSubnode.inWindow, @"Should not yet be visible");
-  XCTAssertFalse(childSubnode.inWindow, @"Should not yet be visible");
+  XCTAssertFalse(parentA.inHierarchy, @"Should not yet be visible");
+  XCTAssertFalse(parentB.inHierarchy, @"Should not yet be visible");
+  XCTAssertFalse(child.inHierarchy, @"Should not yet be visible");
+  XCTAssertFalse(childSubnode.inHierarchy, @"Should not yet be visible");
+  XCTAssertFalse(childSubnode.inHierarchy, @"Should not yet be visible");
 
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:child], 0u, @"Should not have -willEnterHierarchy called");
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:childSubnode], 0u, @"Should not have -willEnterHierarchy called");
@@ -332,10 +332,10 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
     [window addSubview:parentB.view];
   }
 
-  XCTAssertTrue(parentA.inWindow, @"Should be visible after added to window");
-  XCTAssertTrue(parentB.inWindow, @"Should be visible after added to window");
-  XCTAssertTrue(child.inWindow, @"Should be visible after parent added to window");
-  XCTAssertTrue(childSubnode.inWindow, @"Should be visible after parent added to window");
+  XCTAssertTrue(parentA.inHierarchy, @"Should be visible after added to window");
+  XCTAssertTrue(parentB.inHierarchy, @"Should be visible after added to window");
+  XCTAssertTrue(child.inHierarchy, @"Should be visible after parent added to window");
+  XCTAssertTrue(childSubnode.inHierarchy, @"Should be visible after parent added to window");
 
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:child], 1u, @"Should have -willEnterHierarchy called once");
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:childSubnode], 1u, @"Should have -willEnterHierarchy called once");

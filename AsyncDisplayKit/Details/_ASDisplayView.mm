@@ -80,9 +80,9 @@
 - (void)willMoveToWindow:(UIWindow *)newWindow
 {
   BOOL visible = newWindow != nil;
-  if (visible && !_node.inWindow) {
+  if (visible && !_node.inHierarchy) {
     [_node __enterHierarchy];
-  } else if (!visible && _node.inWindow) {
+  } else if (!visible && _node.inHierarchy) {
     [_node __exitHierarchy];
   }
 }

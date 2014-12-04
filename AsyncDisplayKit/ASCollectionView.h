@@ -35,6 +35,13 @@
 @property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters;
 
 /**
+ * @abstract An optional block which can perform custom calculation for working range.
+ *
+ * @discussion Can be used to provide custom working range logic for custom layouts.
+ */
+@property (nonatomic, assign) asrangecontroller_working_range_calculation_block_t workingRangeCalculationBlock;
+
+/**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
  * @warning This method is substantially more expensive than UICollectionView's version.

@@ -107,10 +107,10 @@ typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
  *
  * @param displayCompletionBlock The block to be performed after display has
  * finished.  Its `canceled` property will be YES if display was prevented or
- * canceled (via preventOrCancelDisplay); NO otherwise.
+ * canceled (via displaySuspended); NO otherwise.
  * 
  * @discussion displayCompletionBlock will be performed on the main-thread. If
- * `preventOrCancelDisplay` is YES, `displayCompletionBlock` is will be
+ * `displaySuspended` is YES, `displayCompletionBlock` is will be
  * performed immediately and `YES` will be passed for `canceled`.
  */
 - (void)setNeedsDisplayWithCompletion:(void (^)(BOOL canceled))displayCompletionBlock;

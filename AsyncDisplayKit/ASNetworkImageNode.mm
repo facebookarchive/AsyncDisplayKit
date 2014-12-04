@@ -8,8 +8,9 @@
 
 #import "ASNetworkImageNode.h"
 
-#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
-#import <AsyncDisplayKit/ASThread.h>
+#import "ASBasicImageDownloader.h"
+#import "ASDisplayNode+Subclasses.h"
+#import "ASThread.h"
 
 
 @interface ASNetworkImageNode ()
@@ -49,7 +50,7 @@
 
 - (instancetype)init
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [self initWithCache:nil downloader:[[ASBasicImageDownloader alloc] init]];
 }
 
 - (void)dealloc
@@ -122,9 +123,9 @@
   return _delegate;
 }
 
-- (void)didExitHierarchy
+- (void)reclaimMemory
 {
-  [super didExitHierarchy];
+  [super reclaimMemory];
 
   {
     ASDN::MutexLocker l(_lock);
@@ -135,9 +136,9 @@
   }
 }
 
-- (void)willEnterHierarchy
+- (void)displayWillStart
 {
-  [super willEnterHierarchy];
+  [super displayWillStart];
 
   {
     ASDN::MutexLocker l(_lock);

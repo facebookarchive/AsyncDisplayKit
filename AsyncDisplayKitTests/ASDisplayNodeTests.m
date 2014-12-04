@@ -149,7 +149,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(3.f, node.shadowRadius, @"default shadowRadius broken %@", hasLoadedView);
   XCTAssertEqual(0.0f, node.borderWidth, @"default borderWidth broken %@", hasLoadedView);
   XCTAssertEqualObjects(rgbBlackCGColorIdPtr, (id)node.borderColor, @"default borderColor broken %@", hasLoadedView);
-  XCTAssertEqual(NO, node.preventOrCancelDisplay, @"default preventOrCancelDisplay broken %@", hasLoadedView);
+  XCTAssertEqual(NO, node.displaySuspended, @"default displaySuspended broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.displaysAsynchronously, @"default displaysAsynchronously broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.asyncdisplaykit_asyncTransactionContainer, @"default asyncdisplaykit_asyncTransactionContainer broken %@", hasLoadedView);
   XCTAssertEqualObjects(nil, node.name, @"default name broken %@", hasLoadedView);
@@ -245,8 +245,8 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(.5f, node.shadowRadius, @"shadowRadius broken %@", hasLoadedView);
   XCTAssertEqual(.5f, node.borderWidth, @"borderWidth broken %@", hasLoadedView);
   XCTAssertEqual([[UIColor orangeColor] CGColor], node.borderColor, @"borderColor broken %@", hasLoadedView);
-  XCTAssertEqual(YES, node.preventOrCancelDisplay, @"preventOrCancelDisplay broken %@", hasLoadedView);
-  XCTAssertEqual(NO, node.displaysAsynchronously, @"preventOrCancelDisplay broken %@", hasLoadedView);
+  XCTAssertEqual(YES, node.displaySuspended, @"displaySuspended broken %@", hasLoadedView);
+  XCTAssertEqual(NO, node.displaysAsynchronously, @"displaySuspended broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.asyncdisplaykit_asyncTransactionContainer, @"asyncTransactionContainer broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.userInteractionEnabled, @"userInteractionEnabled broken %@", hasLoadedView);
   XCTAssertEqual((BOOL)!isLayerBacked, node.exclusiveTouch, @"exclusiveTouch broken %@", hasLoadedView);
@@ -298,7 +298,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
     node.shadowRadius = .5f;
     node.borderWidth = .5f;
     node.borderColor = [[UIColor orangeColor] CGColor];
-    node.preventOrCancelDisplay = YES;
+    node.displaySuspended = YES;
     node.displaysAsynchronously = NO;
     node.asyncdisplaykit_asyncTransactionContainer = YES;
     node.userInteractionEnabled = NO;
