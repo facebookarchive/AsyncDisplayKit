@@ -13,6 +13,45 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASRangeControllerInternal.h"
 
+@interface ASDisplayNode (ASRangeController)
+
+- (void)display;
+- (void)recursivelyDisplay;
+
+@end
+
+@implementation ASDisplayNode (ASRangeController)
+
+- (void)display
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(self.nodeLoaded, @"backing store must be loaded before calling -display");
+
+  CALayer *layer = self.layer;
+
+  // rendering a backing store requires a node be laid out
+  [layer setNeedsLayout];
+  [layer layoutIfNeeded];
+
+  if (layer.contents) {
+    return;
+  }
+
+  [layer setNeedsDisplay];
+  [layer displayIfNeeded];
+}
+
+- (void)recursivelyDisplay
+{
+  for (ASDisplayNode *node in self.subnodes) {
+    [node recursivelyDisplay];
+  }
+
+  [self display];
+}
+
+@end
+
 @interface ASRangeController () {
   // index path -> node mapping
   NSMutableDictionary *_nodes;

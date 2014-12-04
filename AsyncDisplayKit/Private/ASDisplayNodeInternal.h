@@ -115,6 +115,9 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 // Call didExitHierarchy if necessary and set inHierarchy = NO if visibility notifications are enabled on all of its parents
 - (void)__exitHierarchy;
 
+// Display the node's view/layer immediately on the current thread, bypassing the background thread rendering. Will be deprecated.
+- (void)displayImmediately;
+
 // Returns the ancestor node that rasterizes descendants, or nil if none.
 - (ASDisplayNode *)__rasterizedContainerNode;
 
