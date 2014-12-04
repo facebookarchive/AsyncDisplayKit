@@ -8,8 +8,9 @@
 
 #import "ASNetworkImageNode.h"
 
-#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
-#import <AsyncDisplayKit/ASThread.h>
+#import "ASBasicImageDownloader.h"
+#import "ASDisplayNode+Subclasses.h"
+#import "ASThread.h"
 
 
 @interface ASNetworkImageNode ()
@@ -49,7 +50,7 @@
 
 - (instancetype)init
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [self initWithCache:nil downloader:[[ASBasicImageDownloader alloc] init]];
 }
 
 - (void)dealloc
