@@ -31,13 +31,13 @@
 
 #pragma mark -
 /**
- * NSURLSessionTask lacks a `userInfo` property, so add this association ourselves.
+ * NSURLSessionDownloadTask lacks a `userInfo` property, so add this association ourselves.
  */
-@interface NSURLSessionTask (ASBasicImageDownloader)
+@interface NSURLRequest (ASBasicImageDownloader)
 @property (nonatomic, strong) ASBasicImageDownloaderMetadata *asyncdisplaykit_metadata;
 @end
 
-@implementation NSURLSessionTask (ASBasicImageDownloader)
+@implementation NSURLRequest (ASBasicImageDownloader)
 static const char *kMetadataKey = NSStringFromClass(ASBasicImageDownloaderMetadata.class).UTF8String;
 - (void)setAsyncdisplaykit_metadata:(ASBasicImageDownloaderMetadata *)asyncdisplaykit_metadata
 {
@@ -85,14 +85,14 @@ static const char *kMetadataKey = NSStringFromClass(ASBasicImageDownloaderMetada
                 completion:(void (^)(CGImageRef, NSError *))completion
 {
   // create download task
-  NSURLSessionTask *task = [_session downloadTaskWithURL:URL];
+  NSURLSessionDownloadTask *task = [_session downloadTaskWithURL:URL];
 
   // associate metadata with it
   ASBasicImageDownloaderMetadata *metadata = [[ASBasicImageDownloaderMetadata alloc] init];
   metadata.callbackQueue = callbackQueue ?: dispatch_get_main_queue();
   metadata.downloadProgressBlock = downloadProgressBlock;
   metadata.completionBlock = completion;
-  task.asyncdisplaykit_metadata = metadata;
+  task.originalRequest.asyncdisplaykit_metadata = metadata;
 
   // start downloading
   [task resume];
@@ -107,8 +107,8 @@ static const char *kMetadataKey = NSStringFromClass(ASBasicImageDownloaderMetada
     return;
   }
 
-  ASDisplayNodeAssert([downloadIdentifier isKindOfClass:NSURLSessionTask.class], @"unexpected downloadIdentifier");
-  NSURLSessionTask *task = (NSURLSessionTask *)downloadIdentifier;
+  ASDisplayNodeAssert([downloadIdentifier isKindOfClass:NSURLSessionDownloadTask.class], @"unexpected downloadIdentifier");
+  NSURLSessionDownloadTask *task = (NSURLSessionDownloadTask *)downloadIdentifier;
 
   [task cancel];
 }
@@ -121,7 +121,7 @@ static const char *kMetadataKey = NSStringFromClass(ASBasicImageDownloaderMetada
                                       totalBytesWritten:(int64_t)totalBytesWritten
                               totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
 {
-  ASBasicImageDownloaderMetadata *metadata = downloadTask.asyncdisplaykit_metadata;
+  ASBasicImageDownloaderMetadata *metadata = downloadTask.originalRequest.asyncdisplaykit_metadata;
   if (metadata.downloadProgressBlock) {
     metadata.downloadProgressBlock((CGFloat)totalBytesWritten / (CGFloat)totalBytesExpectedToWrite);
   }
@@ -133,7 +133,7 @@ static const char *kMetadataKey = NSStringFromClass(ASBasicImageDownloaderMetada
 {
   UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:location]];
 
-  ASBasicImageDownloaderMetadata *metadata = downloadTask.asyncdisplaykit_metadata;
+  ASBasicImageDownloaderMetadata *metadata = downloadTask.originalRequest.asyncdisplaykit_metadata;
   if (metadata.completionBlock) {
     dispatch_async(metadata.callbackQueue, ^{
       metadata.completionBlock(image.CGImage, nil);
@@ -142,10 +142,10 @@ static const char *kMetadataKey = NSStringFromClass(ASBasicImageDownloaderMetada
 }
 
 // invoked unconditionally
-- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionDownloadTask *)task
                            didCompleteWithError:(NSError *)error
 {
-  ASBasicImageDownloaderMetadata *metadata = task.asyncdisplaykit_metadata;
+  ASBasicImageDownloaderMetadata *metadata = task.originalRequest.asyncdisplaykit_metadata;
   if (metadata && error) {
     dispatch_async(metadata.callbackQueue, ^{
       metadata.completionBlock(NULL, error);
