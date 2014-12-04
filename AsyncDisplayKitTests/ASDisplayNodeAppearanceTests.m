@@ -33,7 +33,7 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   void (^blockCopied)(id) = [block copy];
   void (^blockActualSwizzle)(id) = [^(id swizzedSelf){
     blockCopied(swizzedSelf);
-    originalImp(swizzedSelf, originalSelector);
+    ((void(*)(id, SEL))originalImp)(swizzedSelf, originalSelector);
   } copy];
   originalImp = class_replaceMethodWithBlock(class, originalSelector, blockActualSwizzle);
   void (^cleanupBlock)(void) = ^{
