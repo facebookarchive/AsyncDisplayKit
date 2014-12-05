@@ -139,20 +139,32 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   if (_asyncDataSource == asyncDataSource)
     return;
-  
-  _asyncDataSource = asyncDataSource;
-  _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
-  super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
+
+  if (asyncDataSource == nil) {
+    _asyncDataSource = nil;
+    _proxyDataSource = nil;
+    super.dataSource = nil;
+  } else {
+    _asyncDataSource = asyncDataSource;
+    _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
+    super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
+  }
 }
 
 - (void)setAsyncDelegate:(id<ASCollectionViewDelegate>)asyncDelegate
 {
   if (_asyncDelegate == asyncDelegate)
     return;
-  
-  _asyncDelegate = asyncDelegate;
-  _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
-  super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+
+  if (asyncDelegate == nil) {
+    _asyncDelegate = nil;
+    _proxyDelegate = nil;
+    super.delegate = nil;
+  } else {
+    _asyncDelegate = asyncDelegate;
+    _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
+    super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+  }
 }
 
 - (ASRangeTuningParameters)rangeTuningParameters

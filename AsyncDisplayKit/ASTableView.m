@@ -149,9 +149,15 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (_asyncDataSource == asyncDataSource)
     return;
 
-  _asyncDataSource = asyncDataSource;
-  _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
-  super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
+  if (asyncDataSource == nil) {
+    _asyncDataSource = nil;
+    _proxyDataSource = nil;
+    super.dataSource = nil;
+  } else {
+    _asyncDataSource = asyncDataSource;
+    _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
+    super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
+  }
 }
 
 - (void)setAsyncDelegate:(id<ASTableViewDelegate>)asyncDelegate
@@ -159,9 +165,15 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (_asyncDelegate == asyncDelegate)
     return;
 
-  _asyncDelegate = asyncDelegate;
-  _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
-  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+  if (asyncDelegate == nil) {
+    _asyncDelegate = nil;
+    _proxyDelegate = nil;
+    super.delegate = nil;
+  } else {
+    _asyncDelegate = asyncDelegate;
+    _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
+    super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+  }
 }
 
 - (ASRangeTuningParameters)rangeTuningParameters
