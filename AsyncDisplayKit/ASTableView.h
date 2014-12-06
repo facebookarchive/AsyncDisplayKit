@@ -42,10 +42,10 @@
 - (void)reloadData;
 
 /**
- * WARNING:  ASTableView's update/editing support is not yet implemented.  Use of these methods will fire an assertion.
+ * WARNING:  ASTableView's editing support is not yet implemented.  Use of these methods will fire an assertion.
  *
- * This initial version of ASTableView only supports appending nodes (see below).  If you'd like to see full-fledged
- * support for data source updates and interactive editing, please file a GitHub issue -- AsyncDisplayKit can do it,
+ * ASTableView only supports appending and updating nodes (see below).  If you'd like to see full-fledged
+ * support for data source interactive editing, please file a GitHub issue -- AsyncDisplayKit can do it,
  * we just haven't built it out yet.  :]
  */
 //- (void)beginUpdates;
@@ -53,16 +53,25 @@
 //
 //- (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
 //- (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
-//- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
 //- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
 //
 //- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 //- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
-//- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 //- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 //
 //- (void)setEditing:(BOOL)editing;
 //- (void)setEditing:(BOOL)editing animated:(BOOL)animated;
+
+/**
+ * Updating nodes is supported via these reload methods.
+ *
+ * Since nodes are not reused internally, updating a node means swapping a new one with the existing one.
+ * The asyndDataSource must be updated to return the new nodes before this method is called.
+ * 
+ * Row animation is not supported yet.
+ */
+//- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
+//- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
  * Append nodes.

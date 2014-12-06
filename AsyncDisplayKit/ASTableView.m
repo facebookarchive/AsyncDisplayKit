@@ -191,6 +191,17 @@ static BOOL _isInterceptedSelector(SEL sel)
   [_rangeController appendNodesWithIndexPaths:indexPaths];
 }
 
+- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [_rangeController reloadSections:sections];
+}
+
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [_rangeController reloadNodesAtIndexPaths:indexPaths];
+}
+
+
 #pragma mark Assertions.
 
 - (void)throwUnimplementedException
@@ -220,11 +231,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   [self throwUnimplementedException];
 }
 
-- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
-{
-  [self throwUnimplementedException];
-}
-
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   [self throwUnimplementedException];
@@ -236,11 +242,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
-{
-  [self throwUnimplementedException];
-}
-
-- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
   [self throwUnimplementedException];
 }
@@ -374,6 +375,12 @@ static BOOL _isInterceptedSelector(SEL sel)
 
     [super endUpdates];
   }];
+}
+
+- (void)rangeController:(ASRangeController *)rangeController didReloadNodesWithIndexPaths:(NSArray *)indexPaths
+{
+  ASDisplayNodeAssertMainThread();
+  [super reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
 }
 
 
