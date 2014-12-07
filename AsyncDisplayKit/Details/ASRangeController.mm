@@ -117,6 +117,10 @@
 
 }
 
+- (void)cancelSizeNextBlock{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(sizeNextBlock) object:nil];
+}
+
 + (dispatch_queue_t)sizingQueue
 {
   static dispatch_queue_t sizingQueue = NULL;
@@ -296,6 +300,7 @@ static BOOL ASRangeIsValid(NSRange range)
    * teardown
    */
   [self teardownAllNodes];
+  [self cancelSizeNextBlock];
 
   /*
    * setup
