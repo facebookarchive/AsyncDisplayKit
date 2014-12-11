@@ -43,13 +43,15 @@ static BOOL _isInterceptedSelector(SEL sel)
  * everything else leaves AsyncDisplayKit safely and arrives at the original intended data source and delegate.
  */
 @interface _ASTableViewProxy : NSProxy
+
+@property (nonatomic, weak, readonly) id<NSObject> target;
+@property (nonatomic, weak, readonly) ASTableView *interceptor;
+
 - (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASTableView *)interceptor;
+
 @end
 
-@implementation _ASTableViewProxy {
-  id<NSObject> __weak _target;
-  ASTableView * __weak _interceptor;
-}
+@implementation _ASTableViewProxy
 
 - (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASTableView *)interceptor
 {
@@ -58,7 +60,7 @@ static BOOL _isInterceptedSelector(SEL sel)
     return nil;
   }
 
-  ASDisplayNodeAssert(target, @"target must not be nil");
+  // ASDisplayNodeAssert(target, @"target must not be nil");
   ASDisplayNodeAssert(interceptor, @"interceptor must not be nil");
 
   _target = target;
@@ -119,7 +121,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _rangeController = [[ASRangeController alloc] init];
   _rangeController.delegate = self;
-
+  [self setAsyncDelegate:nil];
+  
   return self;
 }
 
@@ -162,18 +165,14 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)setAsyncDelegate:(id<ASTableViewDelegate>)asyncDelegate
 {
-  if (_asyncDelegate == asyncDelegate)
+  if (_asyncDelegate == asyncDelegate &&
+      _proxyDelegate.target == _asyncDelegate &&
+      _proxyDelegate.interceptor == self)
     return;
-
-  if (asyncDelegate == nil) {
-    _asyncDelegate = nil;
-    _proxyDelegate = nil;
-    super.delegate = nil;
-  } else {
-    _asyncDelegate = asyncDelegate;
-    _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
-    super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
-  }
+  
+  _asyncDelegate = asyncDelegate;
+  _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
+  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
 }
 
 - (ASRangeTuningParameters)rangeTuningParameters
