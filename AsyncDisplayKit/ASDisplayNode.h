@@ -69,6 +69,13 @@
  */
 - (id)initWithLayerClass:(Class)layerClass;
 
+/** 
+ * @abstract Alternative initializer with a block that returns a new instance of a node's backing view or layer.
+ *
+ * @param loadBlock This block must create a new UIView or CALayer and return it.
+ */
+- (id)initWithLoadBlock:(id(^)())loadBlock;
+
 
 /** @name Properties */
 

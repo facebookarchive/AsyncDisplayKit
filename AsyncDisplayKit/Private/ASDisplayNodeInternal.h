@@ -51,6 +51,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
   Class _layerClass;
   UIView *_view;
   CALayer *_layer;
+  id(^_loadBlock)();
 
   _ASPendingState *_pendingViewState;
 
