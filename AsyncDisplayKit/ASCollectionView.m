@@ -135,7 +135,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   [_dataController reloadData];
 
-  // It is required
   [super reloadData];
 }
 

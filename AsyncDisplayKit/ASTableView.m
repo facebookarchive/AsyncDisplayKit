@@ -186,7 +186,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   [_dataController reloadData];
 
-  // It is required
   [super reloadData];
 }
 
@@ -295,7 +294,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   return [_dataController numberOfRowsInSection:section];
 }
-
 
 - (ASScrollDirection)scrollDirection
 {

@@ -392,21 +392,21 @@
 
 - (UIColor *)tintColor
 {
-  _bridge_prologue;
-  ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
-  return _getFromViewOnly(tintColor);
+    _bridge_prologue;
+    ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+    return _getFromViewOnly(tintColor);
 }
 
 - (void)setTintColor:(UIColor *)color
 {
-  _bridge_prologue;
-  ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
-  _setToViewOnly(tintColor, color);
+    _bridge_prologue;
+    ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+    _setToViewOnly(tintColor, color);
 }
 
 - (void)tintColorDidChange
 {
-  // ignore this, allow subclasses to be notified
+    // ignore this, allow subclasses to be notified
 }
 
 - (CGColorRef)shadowColor
