@@ -9,20 +9,11 @@
 #import "ASCellNode.h"
 
 #import "ASDisplayNode+Subclasses.h"
-#import "ASRangeControllerInternal.h"
 #import "ASTextNode.h"
 
 
 #pragma mark -
 #pragma mark ASCellNode
-
-@interface ASCellNode () {
-  // used by ASRangeController machinery
-  NSIndexPath *_asyncdisplaykit_indexPath;
-}
-
-@end
-
 
 @implementation ASCellNode
 
@@ -41,20 +32,6 @@
 {
   // ASRangeController expects ASCellNodes to be view-backed.  (Layer-backing is supported on ASCellNode subnodes.)
   ASDisplayNodeAssert(!layerBacked, @"ASCellNode does not support layer-backing.");
-}
-
-// TODO consider making this property an associated object in ASRangeController.mm
-- (NSIndexPath *)asyncdisplaykit_indexPath
-{
-  return _asyncdisplaykit_indexPath;
-}
-
-- (void)setAsyncdisplaykit_indexPath:(NSIndexPath *)asyncdisplaykit_indexPath
-{
-  if (_asyncdisplaykit_indexPath == asyncdisplaykit_indexPath)
-    return;
-
-  _asyncdisplaykit_indexPath = [asyncdisplaykit_indexPath copy];
 }
 
 @end

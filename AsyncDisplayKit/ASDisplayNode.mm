@@ -13,8 +13,8 @@
 #import <objc/runtime.h>
 
 #import "_ASAsyncTransaction.h"
-#import "_ASPendingState.h"
 #import "_ASDisplayView.h"
+#import "_ASPendingState.h"
 #import "_ASScopeTimer.h"
 #import "ASDisplayNodeExtras.h"
 

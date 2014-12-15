@@ -181,8 +181,7 @@
                        || alphaInfo == kCGImageAlphaPremultipliedLast;
 
   BOOL contentModeSupported =    contentMode == UIViewContentModeScaleAspectFill
-                              || contentMode == UIViewContentModeScaleAspectFit
-                              || contentMode == UIViewContentModeCenter;
+                              || contentMode == UIViewContentModeScaleAspectFit;
 
   CGSize backingSize;
   CGRect imageDrawRect;

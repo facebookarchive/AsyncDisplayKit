@@ -867,8 +867,6 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   return [[self _renderer] lineCount];
 }
 
-#pragma mark - Truncation Message
-
 - (void)_invalidateTruncationString
 {
   _composedTruncationString = [self _prepareTruncationStringForDrawing:[self _composedTruncationString]];

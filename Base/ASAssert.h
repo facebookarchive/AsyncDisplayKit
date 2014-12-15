@@ -28,6 +28,7 @@
 
 #define ASDisplayNodeAssertImplementedBySubclass() ASDisplayNodeAssertWithSignal(NO, nil, @"This method must be implemented by subclass %@", [self class]);
 #define ASDisplayNodeAssertNotInstantiable() ASDisplayNodeAssertWithSignal(NO, nil, @"This class is not instantiable.");
+#define ASDisplayNodeAssertNotSupported() ASDisplayNodeAssertWithSignal(NO, nil, @"This method is not supported by class %@", [self class]);
 
 #define ASDisplayNodeAssertMainThread() ASDisplayNodeAssertWithSignal([NSThread isMainThread], nil, @"This method must be called on the main thread")
 #define ASDisplayNodeCAssertMainThread() ASDisplayNodeCAssertWithSignal([NSThread isMainThread], nil, @"This function must be called on the main thread")

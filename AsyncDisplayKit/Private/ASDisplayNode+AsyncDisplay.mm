@@ -309,7 +309,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       if (stretchable) {
         ASDisplayNodeSetupLayerContentsWithResizableImage(_layer, image);
       } else {
-        _layer.contentsScale = self.contentsScale;
+        _layer.contentsScale = image.scale;
         _layer.contents = (id)image.CGImage;
       }
       [self didDisplayAsyncLayer:self.asyncLayer];
