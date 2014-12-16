@@ -13,6 +13,7 @@
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
 #import "ASImageNode+CGExtras.h"
 
@@ -91,6 +92,7 @@
   _cropEnabled = YES;
   _cropRect = CGRectMake(0.5, 0.5, 0, 0);
   _cropDisplayBounds = CGRectNull;
+  _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
 
   return self;
 }
@@ -139,6 +141,14 @@
   return _tint;
 }
 
+- (void)setPlaceholderColor:(UIColor *)placeholderColor
+{
+  _placeholderColor = placeholderColor;
+
+  // prevent placeholders if we don't have a color
+  self.placeholderEnabled = placeholderColor != nil;
+}
+
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
 {
   BOOL hasValidCropBounds = _cropEnabled && !CGRectIsNull(_cropDisplayBounds) && !CGRectIsEmpty(_cropDisplayBounds);
@@ -181,7 +191,8 @@
                        || alphaInfo == kCGImageAlphaPremultipliedLast;
 
   BOOL contentModeSupported =    contentMode == UIViewContentModeScaleAspectFill
-                              || contentMode == UIViewContentModeScaleAspectFit;
+                              || contentMode == UIViewContentModeScaleAspectFit
+                              || contentMode == UIViewContentModeCenter;
 
   CGSize backingSize;
   CGRect imageDrawRect;

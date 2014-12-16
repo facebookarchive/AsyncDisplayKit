@@ -9,19 +9,9 @@
 #import <Foundation/Foundation.h>
 
 #import <AsyncDisplayKit/ASCellNode.h>
-
-typedef struct {
-  // working range buffers, on either side of scroll
-  CGFloat trailingBufferScreenfuls;
-  CGFloat leadingBufferScreenfuls;
-} ASRangeTuningParameters;
-
-typedef NS_ENUM(NSInteger, ASScrollDirection) {
-  ASScrollDirectionBackward,
-  ASScrollDirectionForward,
-};
-
-typedef NSRange (^asrangecontroller_working_range_calculation_block_t)(ASRangeTuningParameters params, ASScrollDirection scrollDirection, NSRange visibleRange, NSArray *nodeSizes, CGSize viewport);
+#import <AsyncDisplayKit/ASDataController.h>
+#import <AsyncDisplayKit/ASFlowLayoutController.h>
+#import <AsyncDisplayKit/ASLayoutController.h>
 
 @protocol ASRangeControllerDelegate;
 
@@ -33,85 +23,30 @@ typedef NSRange (^asrangecontroller_working_range_calculation_block_t)(ASRangeTu
  * a working range, and is responsible for handling AsyncDisplayKit machinery (sizing cell nodes, enqueueing and
  * cancelling their asynchronous layout and display, and so on).
  */
-@interface ASRangeController : ASDealloc2MainObject
-
-/**
- * Notify the receiver that its delegate's data source has been set or changed.  This is like -[UITableView reloadData]
- * but drastically more expensive, as it destroys the working range and all cached nodes.
- */
-- (void)rebuildData;
+@interface ASRangeController : ASDealloc2MainObject <ASDataControllerDelegate>
 
 /**
  * Notify the receiver that the visible range has been updated.
  *
  * @see [ASRangeControllerDelegate rangeControllerVisibleNodeIndexPaths:]
  */
-- (void)visibleNodeIndexPathsDidChange;
-
-/**
- * ASTableView is only aware of nodes that have already been sized.
- *
- * Custom ASCellNode implementations are encouraged to have "realistic placeholders", since they can only be onscreen if
- * they have enough data for layout.  E.g., try setting all subnodes' background colours to [UIColor lightGrayColor].
- */
-- (NSInteger)numberOfSizedSections;
-- (NSInteger)numberOfSizedRowsInSection:(NSInteger)section;
-
-/**
- * Configure the specified UITableViewCell's content view, and apply properties from ASCellNode.
- *
- * @param cell UITableViewCell to configure.
- *
- * @param indexPath Index path for the node of interest.
- */
-- (void)configureTableViewCell:(UITableViewCell *)cell forIndexPath:(NSIndexPath *)indexPath;
+- (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(enum ASScrollDirection)scrollDirection;
 
 /**
  * Add the sized node for `indexPath` as a subview of `contentView`.
  *
  * @param contentView UIView to add a (sized) node's view to.
  *
- * @param indexPath Index path for the node to be added.
+ * @param node The ASCellNode to be added.
  */
-- (void)configureContentView:(UIView *)contentView forIndexPath:(NSIndexPath *)indexPath;
-
-/**
- * Query the sized node at `indexPath` for its calculatedSize.
- *
- * @param indexPath The index path for the node of interest.
- *
- * TODO:  Currently we disallow direct access to ASCellNode outside ASRangeController since touching the node's view can
- *        break async display.  We should expose the node anyway, possibly with an assertion guarding against external
- *        use of the view property, so ASCellNode can support configuration for UITableViewCell properties (selection
- *        style, separator style, etc.) and ASTableView can query that data.
- */
-- (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
-
-/**
- * Notify the receiver that its data source has been updated to append the specified nodes.
- *
- * @param indexPaths Array of NSIndexPaths for the newly-sized nodes.
- */
-- (void)appendNodesWithIndexPaths:(NSArray *)indexPaths;
+- (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node;
 
 /**
  * Delegate and ultimate data source.  Must not be nil.
  */
 @property (nonatomic, weak) id<ASRangeControllerDelegate> delegate;
 
-/**
- * Tuning parameters for the working range.
- *
- * Defaults to a trailing buffer of one screenful and a leading buffer of two screenfuls.
- */
-@property (nonatomic, assign) ASRangeTuningParameters tuningParameters;
-
-/**
- * @abstract An optional block which can perform custom calculation for working range.
- *
- * @discussion Can be used to provide custom working range logic for custom layouts.
- */
-@property (nonatomic, readwrite, copy) asrangecontroller_working_range_calculation_block_t workingRangeCalculationBlock;
+@property (nonatomic, strong) id<ASLayoutController> layoutController;
 
 @end
 
@@ -136,52 +71,28 @@ typedef NSRange (^asrangecontroller_working_range_calculation_block_t)(ASRangeTu
 - (CGSize)rangeControllerViewportSize:(ASRangeController *)rangeController;
 
 /**
- * @param rangeController Sender.
- *
- * @returns The number of total sections.
- *
- * @discussion <ASTableView> forwards this method to its data source.
+ * Fetch nodes at specific index paths.
  */
-- (NSInteger)rangeControllerSections:(ASRangeController *)rangeController;
+- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths;
 
 /**
- * @param rangeController Sender.
- *
- * @param section Section.
- *
- * @returns The number of rows in `section`.
- *
- * @discussion <ASTableView> forwards this method to its data source.
+ * Called for nodes insertion.
  */
-- (NSInteger)rangeController:(ASRangeController *)rangeController rowsInSection:(NSInteger)section;
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths;
 
 /**
- * @param rangeController Sender.
- *
- * @param indexPath Index path for the node of interest.
- * 
- * @returns A new <ASCellNode> corresponding to `indexPath`.
- *
- * @discussion <ASTableView> forwards this method to its data source.
+ * Called for nodes deletion.
  */
-- (ASCellNode *)rangeController:(ASRangeController *)rangeController nodeForIndexPath:(NSIndexPath *)indexPath;
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths;
 
 /**
- * @param rangeController Sender.
- *
- * @param indexPath Node to be sized.
- *
- * @returns Sizing constraints for the node at `indexPath`, to be used as an argument to <[ASDisplayNode measure:]>.
+ * Called for section insertion.
  */
-- (CGSize)rangeController:(ASRangeController *)rangeController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet;
 
 /**
- * Notifies the receiver that the specified nodes have been sized and are ready for display.
- *
- * @param rangeController Sender.
- *
- * @param indexPaths Array of NSIndexPaths for the newly-sized nodes.
+ * Called for section deletion.
  */
-- (void)rangeController:(ASRangeController *)rangeController didSizeNodesWithIndexPaths:(NSArray *)indexPaths;
+- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet;
 
 @end

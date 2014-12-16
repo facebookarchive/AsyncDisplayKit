@@ -185,6 +185,24 @@
  */
 - (void)displayDidFinish ASDISPLAYNODE_REQUIRES_SUPER;
 
+/**
+ * @abstract Indicates that the receiver is about to display its subnodes. This method is not called if there are no
+ * subnodes present.
+ *
+ * @discussion Subclasses may override this method to be notified when subnode display (asynchronous or synchronous) is
+ * about to begin.
+ */
+- (void)subnodeDisplayWillStart:(ASDisplayNode *)subnode ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Indicates that the receiver is finished displaying its subnodes. This method is not called if there are
+ * no subnodes present.
+ *
+ * @discussion Subclasses may override this method to be notified when subnode display (asynchronous or synchronous) is
+ * about to begin.
+ */
+- (void)subnodeDisplayDidFinish:(ASDisplayNode *)subnode ASDISPLAYNODE_REQUIRES_SUPER;
+
 
 /**
  * @abstract Marks the receiver's bounds as needing to be redrawn, with a scale value.
@@ -301,6 +319,26 @@
  * store, for asynchronous regeneration when needed.
  */
 - (void)reclaimMemory ASDISPLAYNODE_REQUIRES_SUPER;
+
+
+/** @name Placeholders */
+
+/**
+ * @abstract Optionally provide an image to serve as the placeholder for the backing store while the contents are being
+ * displayed.
+ *
+ * @discussion
+ * Subclasses may override this method and return an image to use as the placeholder. Take caution as there may be a
+ * time and place where this method is called on a background thread. Note that -[UIImage imageNamed:] is not thread
+ * safe when using image assets.
+ *
+ * To retrieve the CGSize to do any image drawing, use the node's calculatedSize property.
+ *
+ * Defaults to nil.
+ *
+ * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
+ */
+- (UIImage *)placeholderImage;
 
 
 /** @name Description */

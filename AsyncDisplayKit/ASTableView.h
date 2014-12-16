@@ -41,37 +41,36 @@
  */
 - (void)reloadData;
 
-/**
- * WARNING:  ASTableView's update/editing support is not yet implemented.  Use of these methods will fire an assertion.
- *
- * This initial version of ASTableView only supports appending nodes (see below).  If you'd like to see full-fledged
- * support for data source updates and interactive editing, please file a GitHub issue -- AsyncDisplayKit can do it,
- * we just haven't built it out yet.  :]
- */
-//- (void)beginUpdates;
-//- (void)endUpdates;
-//
-//- (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
-//- (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
-//- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
-//- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
-//
-//- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
-//- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
-//- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
-//- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
-//
-//- (void)setEditing:(BOOL)editing;
-//- (void)setEditing:(BOOL)editing animated:(BOOL)animated;
 
 /**
- * Append nodes.
+ * We don't support the these methods for animation yet.
  *
- * As with UITableView, the asyncDataSource must be updated to reflect the new nodes before this method is called.
- *
- * @param indexPaths Ordered array of index paths corresponding to the nodes to be added.
+ * TODO: support animations.
  */
-- (void)appendNodesWithIndexPaths:(NSArray *)indexPaths;
+- (void)beginUpdates;
+- (void)endUpdates;
+
+/**
+ * Section updating.
+ *
+ * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
+ * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
+ */
+- (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
+- (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
+- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
+
+/**
+ * Row updating.
+ *
+ * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
+ * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
+ */
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
+- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 @end
 

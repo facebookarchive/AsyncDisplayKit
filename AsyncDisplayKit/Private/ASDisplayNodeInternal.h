@@ -53,6 +53,12 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
   UIView *_view;
   CALayer *_layer;
 
+  UIImage *_placeholderImage;
+  CALayer *_placeholderLayer;
+
+  // keeps track of nodes/subnodes that have not finished display, used with placeholders
+  NSMutableSet *_pendingDisplayNodes;
+
   _ASPendingState *_pendingViewState;
 
   struct {
