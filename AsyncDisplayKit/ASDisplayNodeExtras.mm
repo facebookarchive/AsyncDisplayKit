@@ -122,6 +122,15 @@ extern id ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c)
   });
 }
 
+#pragma mark - Placeholders
+
+UIColor *ASDisplayNodeDefaultPlaceholderColor()
+{
+  return [UIColor colorWithWhite:0.95 alpha:1.0];
+}
+
+#pragma mark - Hierarchy Notifications
+
 void ASDisplayNodeDisableHierarchyNotifications(ASDisplayNode *node)
 {
   [node __incrementVisibilityNotificationsDisabled];

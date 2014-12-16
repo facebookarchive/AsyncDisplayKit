@@ -330,6 +330,14 @@
 
 - (void)recursivelyReclaimMemory;
 
+/**
+ * @abstract Toggle displaying a placeholder over the node that covers content until the node and all subnodes are
+ * displayed.
+ *
+ * @discussion Defaults to NO.
+ */
+@property (nonatomic, assign) BOOL placeholderEnabled;
+
 
 /** @name Hit Testing */
 
