@@ -36,7 +36,7 @@
   if ([_delegate respondsToSelector:@selector(dataController:willInsertSectionsAtIndexSet:)]) { \
     [_delegate dataController:self willInsertSectionsAtIndexSet:indexSet]; \
   } \
-  [_nodes insertObjects:sections atIndexes:indexSet]; \
+  [multidimensionalArray insertObjects:sections atIndexes:indexSet]; \
   if ([_delegate respondsToSelector:@selector(dataController:didInsertSectionsAtIndexSet:)]) { \
     [_delegate dataController:self didInsertSectionsAtIndexSet:indexSet]; \
   } \
@@ -47,8 +47,8 @@
   if ([_delegate respondsToSelector:@selector(dataController:willDeleteSectionsAtIndexSet:)]) { \
     [_delegate dataController:self willDeleteSectionsAtIndexSet:indexSet]; \
   } \
-  [_nodes removeObjectsAtIndexes:indexSet]; \
-  if ([_delegate respondsToSelector:@selector(dataController:willDeleteSectionsAtIndexSet:)]) { \
+  [multidimensionalArray removeObjectsAtIndexes:indexSet]; \
+  if ([_delegate respondsToSelector:@selector(dataController:didDeleteSectionsAtIndexSet:)]) { \
     [_delegate dataController:self didDeleteSectionsAtIndexSet:indexSet]; \
   } \
 }
