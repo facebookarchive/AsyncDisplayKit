@@ -260,7 +260,7 @@
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet {
   [self updateOnMainThreadWithBlock:^{
     [_layoutController deleteSectionsAtIndexSet:indexSet];
-    [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet];
+    [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet];
   }];
 }
 
