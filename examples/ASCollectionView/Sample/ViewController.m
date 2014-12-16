@@ -23,6 +23,18 @@
 
 @implementation ViewController
 
++ (dispatch_queue_t)dataProcessingQueue
+{
+  static dispatch_queue_t dataProcessingQueue = NULL;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    dataProcessingQueue = dispatch_queue_create("com.facebook.AsyncDisplayKit.ASCollectionView.ViewController", DISPATCH_QUEUE_SERIAL);
+    dispatch_set_target_queue(dataProcessingQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+  });
+
+  return dataProcessingQueue;
+}
+
 #pragma mark -
 #pragma mark UIViewController.
 
@@ -47,6 +59,10 @@
   [super viewDidLoad];
   
   [self.view addSubview:_collectionView];
+
+  dispatch_async([ViewController dataProcessingQueue], ^{
+    [_collectionView initializeData];
+  });
 }
 
 - (void)viewWillLayoutSubviews

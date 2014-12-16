@@ -136,6 +136,12 @@ static BOOL _isInterceptedSelector(SEL sel)
   return self;
 }
 
+#pragma mark - Public Methods.
+
+- (void)initializeData {
+  [_dataController initializeData];
+}
+
 #pragma mark -
 #pragma mark Overrides.
 
@@ -182,11 +188,9 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-- (void)reloadData
+- (void)rebuildData
 {
-  [_dataController reloadData];
-
-  [super reloadData];
+  [_dataController rebuildData];
 }
 
 - (ASRangeTuningParameters)rangeTuningParameters

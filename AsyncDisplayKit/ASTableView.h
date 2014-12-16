@@ -35,12 +35,19 @@
 @property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters;
 
 /**
- * Reload everything from scratch, destroying the working range and all cached nodes.
+ * Intialize data loading, which will fetch all data from asyncDataSource.
  *
- * @warning This method is substantially more expensive than UITableView's version.
+ * @warning This method is substantially more expensive than UITableView's version, and  suggested to be invoked from background.
  */
-- (void)reloadData;
+- (void)initializeData;
 
+/**
+ * Rebuild everything from scratch, destroying the working range and all cached nodes.
+ * It is corresponding to the UITableView's reloadData, and is thread-safe.
+ *
+ * @warning This method is substantially more expensive than UITableView's reloadData.
+ */
+- (void)rebuildData;
 
 /**
  * We don't support the these methods for animation yet.

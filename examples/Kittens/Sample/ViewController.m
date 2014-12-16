@@ -32,6 +32,17 @@ static const NSInteger kLitterSize = 20;
 
 @implementation ViewController
 
++ (dispatch_queue_t)dataProcessingQueue {
+  static dispatch_queue_t dataProcessingQueue;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    dataProcessingQueue = dispatch_queue_create("com.facebook.AsyncDisplayKit.Kittens.ViewController", DISPATCH_QUEUE_SERIAL);
+    dispatch_set_target_queue(dataProcessingQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+  });
+
+  return dataProcessingQueue;
+}
+
 #pragma mark -
 #pragma mark UIViewController.
 
@@ -64,6 +75,10 @@ static const NSInteger kLitterSize = 20;
   [super viewDidLoad];
 
   [self.view addSubview:_tableView];
+
+  dispatch_async([ViewController dataProcessingQueue], ^{
+    [_tableView initializeData];
+  });
 }
 
 - (void)viewWillLayoutSubviews

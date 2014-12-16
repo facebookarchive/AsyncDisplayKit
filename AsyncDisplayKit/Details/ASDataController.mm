@@ -11,6 +11,7 @@
 
 #define INSERT_NODES(multidimensionalArray, indexPath, elements) \
 { \
+  ASDisplayNodeAssert(self.dataInitialized, @"Data is required to be initailized before updating"); \
   if ([_delegate respondsToSelector:@selector(dataController:willInsertNodes:atIndexPaths:)]) { \
     [_delegate dataController:self willInsertNodes:elements atIndexPaths:indexPath]; \
   } \
@@ -22,6 +23,7 @@
 
 #define DELETE_NODES(multidimensionalArray, indexPath) \
 { \
+  ASDisplayNodeAssert(self.dataInitialized, @"Data is required to be initailized before updating"); \
   if ([_delegate respondsToSelector:@selector(dataController:willDeleteNodesAtIndexPaths:)]) { \
     [_delegate dataController:self willDeleteNodesAtIndexPaths:indexPath]; \
   } \
@@ -33,6 +35,7 @@
 
 #define INSERT_SECTIONS(multidimensionalArray, indexSet, sections) \
 { \
+  ASDisplayNodeAssert(self.dataInitialized, @"Data is required to be initailized before updating"); \
   if ([_delegate respondsToSelector:@selector(dataController:willInsertSectionsAtIndexSet:)]) { \
     [_delegate dataController:self willInsertSectionsAtIndexSet:indexSet]; \
   } \
@@ -44,6 +47,7 @@
 
 #define DELETE_SECTIONS(multidimensionalArray, indexSet) \
 { \
+  ASDisplayNodeAssert(self.dataInitialized, @"Data is required to be initailized before updating"); \
   if ([_delegate respondsToSelector:@selector(dataController:willDeleteSectionsAtIndexSet:)]) { \
     [_delegate dataController:self willDeleteSectionsAtIndexSet:indexSet]; \
   } \
@@ -78,6 +82,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   NSMutableArray *_nodes;
 }
 
+@property (atomic, readwrite, assign) BOOL dataInitialized;
+
 @end
 
 @implementation ASDataController
@@ -85,6 +91,7 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 - (instancetype)init {
   if (self = [super init]) {
     _nodes = [NSMutableArray array];
+    self.dataInitialized = NO;
   }
 
   return self;
@@ -177,29 +184,6 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   ASDisplayNodeAssertMainThread();
   block();
 #endif
-}
-
-#pragma mark - Initial Data Loading
-
-- (void)initialDataLoading {
-  NSMutableArray *indexPaths = [NSMutableArray array];
-
-  NSUInteger sectionNum = [_dataSource dataControllerNumberOfSections:self];
-
-  // insert sections
-  [self insertSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionNum)]];
-
-  for (NSUInteger i = 0; i < sectionNum; i++) {
-    NSIndexPath *indexPath = [[NSIndexPath alloc] initWithIndex:i];
-
-    NSUInteger rowNum = [_dataSource dataController:self rowsInSection:i];
-    for (NSUInteger j = 0; j < rowNum; j++) {
-      [indexPaths addObject:[indexPath indexPathByAddingIndex:j]];
-    }
-  }
-
-  // insert elements
-  [self insertRowsAtIndexPaths:indexPaths];
 }
 
 #pragma mark - Data Update
@@ -381,7 +365,17 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   });
 }
 
-- (void)reloadData {
+- (void)initializeData {
+  self.dataInitialized = YES;
+
+  [self rebuildData];
+}
+
+- (void)rebuildData {
+  if (!self.dataInitialized) {
+    return;
+  }
+
   // Fetching data in calling thread
   NSMutableArray *updatedNodes = [[NSMutableArray alloc] init];
   NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] init];
