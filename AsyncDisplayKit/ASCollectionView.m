@@ -314,7 +314,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
+  ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
+  ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+  return node;
 }
 
 - (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
