@@ -121,12 +121,7 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node && view, @"invalid argument, did you mean -removeNodeFromWorkingRange:?");
 
-  // use an explicit transaction to force CoreAnimation to display nodes in the order they are added.
-  [CATransaction begin];
-
   [view addSubview:node.view];
-
-  [CATransaction commit];
 }
 
 #pragma mark -
