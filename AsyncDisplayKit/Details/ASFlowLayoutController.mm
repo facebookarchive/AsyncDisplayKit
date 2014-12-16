@@ -47,7 +47,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 }
 
 - (void)deleteNodesAtIndexPaths:(NSArray *)indexPaths {
-  [indexPaths enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
+  [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
     std::vector<CGSize> &v = _nodeSizes[indexPath.section];
     v.erase(v.begin() + indexPath.row);
   }];
