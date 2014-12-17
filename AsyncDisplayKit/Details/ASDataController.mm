@@ -402,13 +402,7 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
     [self syncUpdateDataWithBlock:^{
 
       NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_nodes);
-
-      // sort indexPath in reverse order to avoid messing up the index when inserting in several batches
-      NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingComparator:^NSComparisonResult(NSIndexPath *obj1, NSIndexPath *obj2) {
-        return [obj2 compare:obj1];
-      }];
-
-      DELETE_NODES(_nodes, sortedIndexPaths);
+      DELETE_NODES(_nodes, indexPaths);
 
       NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, _nodes.count)];
       DELETE_SECTIONS(_nodes, indexSet);
