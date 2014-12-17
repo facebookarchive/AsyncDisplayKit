@@ -88,9 +88,9 @@
  */
 @property (nonatomic, weak) id<ASDataControllerDelegate> delegate;
 
-/** @name Initial loading */
+/** @name Initialize data */
 
-- (void)initialDataLoading;
+- (void)initializeData;
 
 /** @name Data Updating */
 
@@ -110,7 +110,7 @@
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
-- (void)reloadData;
+- (void)rebuildData;
 
 /** @name Data Querying */
 
