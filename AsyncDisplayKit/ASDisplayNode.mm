@@ -374,7 +374,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssertTrue(_size.height >= 0.0);
 
   // we generate placeholders at measure: time so that a node is guaranteed to have a placeholder ready to go
-  if (self.placeholderEnabled && [self displaysAsynchronously]) {
+  // also if a node has no size, it should not have a placeholder
+  if (self.placeholderEnabled && [self displaysAsynchronously] && !CGSizeEqualToSize(_size, CGSizeZero)) {
     if (!_placeholderImage) {
       _placeholderImage = [self placeholderImage];
     }
