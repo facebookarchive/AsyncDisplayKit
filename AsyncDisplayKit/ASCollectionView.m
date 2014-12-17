@@ -45,13 +45,15 @@ static BOOL _isInterceptedSelector(SEL sel)
  * everything else leaves AsyncDisplayKit safely and arrives at the original intended data source and delegate.
  */
 @interface _ASCollectionViewProxy : NSProxy
+
+@property (nonatomic, weak, readonly) id<NSObject> target;
+@property (nonatomic, weak, readonly) ASCollectionView *interceptor;
+
 - (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASCollectionView *)interceptor;
+
 @end
 
-@implementation _ASCollectionViewProxy {
-  id<NSObject> __weak _target;
-  ASCollectionView * __weak _interceptor;
-}
+@implementation _ASCollectionViewProxy
 
 - (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASCollectionView *)interceptor
 {
@@ -59,8 +61,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (!self) {
     return nil;
   }
-  
-  ASDisplayNodeAssert(target, @"target must not be nil");
+
   ASDisplayNodeAssert(interceptor, @"interceptor must not be nil");
   
   _target = target;
@@ -124,7 +125,9 @@ static BOOL _isInterceptedSelector(SEL sel)
   _dataController.dataSource = self;
   
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
-  
+
+  [self setAsyncDelegate:nil];
+
   return self;
 }
 
@@ -167,7 +170,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)setAsyncDelegate:(id<ASCollectionViewDelegate>)asyncDelegate
 {
-  if (_asyncDelegate == asyncDelegate)
+  if (_asyncDelegate == asyncDelegate &&
+      _proxyDelegate.target == _asyncDelegate &&
+      _proxyDelegate.interceptor == self)
     return;
 
   if (asyncDelegate == nil) {
