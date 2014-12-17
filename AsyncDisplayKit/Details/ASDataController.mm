@@ -339,10 +339,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths {
-  // sort indexPath in revse order to avoid messing up the index when deleting
-  NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingComparator:^NSComparisonResult(NSIndexPath *obj1, NSIndexPath *obj2) {
-    return [obj2 compare:obj1];
-  }];
+  // sort indexPath in order to avoid messing up the index when deleting
+  NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
 
   dispatch_async([ASDataController sizingQueue], ^{
     [self asyncUpdateDataWithBlock:^{
