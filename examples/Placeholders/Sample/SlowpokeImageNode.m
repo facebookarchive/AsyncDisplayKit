@@ -28,6 +28,7 @@ static CGFloat const kASDKLogoAspectRatio = 2.79;
 {
   if (self = [super init]) {
     self.placeholderEnabled = YES;
+    self.fadeOutPlaceholder = YES;
   }
   return self;
 }
@@ -46,7 +47,10 @@ static CGFloat const kASDKLogoAspectRatio = 2.79;
 {
   CGSize size = self.calculatedSize;
   UIGraphicsBeginImageContext(size);
+  [[UIColor whiteColor] setFill];
   [[UIColor colorWithWhite:0.9 alpha:1] setStroke];
+
+  UIRectFill((CGRect){CGPointZero, size});
 
   UIBezierPath *path = [UIBezierPath bezierPath];
   [path moveToPoint:CGPointZero];
