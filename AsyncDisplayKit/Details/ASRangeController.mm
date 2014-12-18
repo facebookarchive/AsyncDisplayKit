@@ -11,7 +11,9 @@
 #import "ASAssert.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASRangeControllerInternal.h"
+#import "ASLayoutController.h"
+
+#import "ASMultiDimensionalArrayUtils.h"
 
 @interface ASDisplayNode (ASRangeController)
 
@@ -53,170 +55,35 @@
 @end
 
 @interface ASRangeController () {
-  // index path -> node mapping
-  NSMutableDictionary *_nodes;
-
-  // array of boxed CGSizes.  _nodeSizes.count == the number of nodes that have been sized
-  // TODO optimise this, perhaps by making _nodes an array
-  NSMutableArray *_nodeSizes;
-
-  // consumer data source information
-  NSArray *_sectionCounts;
-  NSInteger _totalNodeCount;
-
-  // used for global <-> section.row mapping.  _sectionOffsets[section] is the index at which the section starts
-  NSArray *_sectionOffsets;
-
-  // sized data source information
-  NSInteger _sizedNodeCount;
-
-  // ranges
+  NSSet *_workingRangeIndexPaths;
+  NSSet *_workingRangeNodes;
+  
   BOOL _queuedRangeUpdate;
+
   ASScrollDirection _scrollDirection;
-  NSRange _visibleRange;
-  NSRange _workingRange;
-  NSMutableOrderedSet *_workingIndexPaths;
 }
 
 @end
 
-
 @implementation ASRangeController
 
-#pragma mark -
-#pragma mark Lifecycle.
+- (instancetype)init {
+  if (self = [super init]) {
 
-- (instancetype)init
-{
-  if (!(self = [super init]))
-    return nil;
-
-  _tuningParameters = {
-    .trailingBufferScreenfuls = 1.0f,
-    .leadingBufferScreenfuls = 2.0f,
-  };
+    _workingRangeIndexPaths = [NSSet set];
+  }
 
   return self;
 }
 
-- (void)dealloc
-{
-  [self teardownAllNodes];
-}
-
-- (void)teardownAllNodes
-{
-  for (ASCellNode *node in _nodes.allValues) {
-    [node removeFromSupernode];
-
-    if (node.nodeLoaded)
-      [node.view removeFromSuperview];
-  }
-  [_nodes removeAllObjects];
-  _nodes = nil;
-
-}
-
-- (void)cancelSizeNextBlock{
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(sizeNextBlock) object:nil];
-}
-
-+ (dispatch_queue_t)sizingQueue
-{
-  static dispatch_queue_t sizingQueue = NULL;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    sizingQueue = dispatch_queue_create("com.facebook.AsyncDisplayKit.ASRangeController.sizingQueue", DISPATCH_QUEUE_CONCURRENT);
-    // we use the highpri queue to prioritize UI rendering over other async operations
-    dispatch_set_target_queue(sizingQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
-  });
-
-  return sizingQueue;
-}
-
-
-#pragma mark -
-#pragma mark Helpers.
-
-static NSOrderedSet *ASCopySetMinusSet(NSOrderedSet *minuend, NSOrderedSet *subtrahend)
-{
-  NSMutableOrderedSet *difference = [minuend mutableCopy];
-  [difference minusOrderedSet:subtrahend];
-  return difference;
-}
-
-// useful for debugging:  working range, buffer sizes, and visible range
-__attribute__((unused)) static NSString *ASWorkingRangeDebugDescription(NSRange workingRange, NSRange visibleRange)
-{
-  NSInteger visibleRangeLastElement = NSMaxRange(visibleRange) - 1;
-  NSInteger workingRangeLastElement = NSMaxRange(workingRange) - 1;
-  return [NSString stringWithFormat:@"[%zd(%zd) [%zd, %zd] (%zd)%zd]",
-          workingRange.location,
-          visibleRange.location - workingRange.location,
-          visibleRange.location,
-          visibleRangeLastElement,
-          workingRangeLastElement - visibleRangeLastElement,
-          workingRangeLastElement];
-}
-
-#pragma mark NSRange <-> NSIndexPath.
-
-static BOOL ASRangeIsValid(NSRange range)
-{
-  return range.location != NSNotFound && range.length > 0;
-}
-
-- (NSIndexPath *)indexPathForIndex:(NSInteger)index
-{
-  ASDisplayNodeAssert(index < _totalNodeCount, @"invalid argument");
-
-  for (NSInteger section = _sectionCounts.count - 1; section >= 0; section--) {
-    NSInteger offset = [_sectionOffsets[section] integerValue];
-    if (offset <= index) {
-      return [NSIndexPath indexPathForRow:index - offset inSection:section];
-    }
-  }
-
-  ASDisplayNodeAssert(NO, @"logic error");
-  return nil;
-}
-
-- (NSArray *)indexPathsForRange:(NSRange)range
-{
-  ASDisplayNodeAssert(ASRangeIsValid(range) && NSMaxRange(range) <= _totalNodeCount, @"invalid argument");
-
-  NSMutableArray *result = [NSMutableArray arrayWithCapacity:range.length];
-
-  NSIndexPath *indexPath = [self indexPathForIndex:range.location];
-  for (NSInteger i = range.location; i < NSMaxRange(range); i++) {
-    [result addObject:indexPath];
-
-    if (indexPath.row + 1 >= [_sectionCounts[indexPath.section] integerValue]) {
-      indexPath = [NSIndexPath indexPathForRow:0 inSection:indexPath.section + 1];
-    } else {
-      indexPath = [NSIndexPath indexPathForRow:indexPath.row + 1 inSection:indexPath.section];
-    }
-  }
-
-  return result;
-}
-
-- (NSInteger)indexForIndexPath:(NSIndexPath *)indexPath
-{
-  NSInteger index = [_sectionOffsets[indexPath.section] integerValue] + indexPath.row;
-  ASDisplayNodeAssert(index < _totalNodeCount, @"invalid argument");
-  return index;
-}
-
-#pragma mark View manipulation.
+#pragma mark - View manipulation.
 
 - (void)discardNode:(ASCellNode *)node
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node, @"invalid argument");
 
-  NSInteger index = [self indexForIndexPath:node.asyncdisplaykit_indexPath];
-  if (NSLocationInRange(index, _workingRange)) {
+  if ([_workingRangeNodes containsObject:node]) {
     // move the node's view to the working range area, so its rendering persists
     [self addNodeToWorkingRange:node];
   } else {
@@ -236,8 +103,6 @@ static BOOL ASRangeIsValid(NSRange range)
   // since this class usually manages large or infinite data sets, the working range
   // directly bounds memory usage by requiring redrawing any content that falls outside the range.
   [node recursivelyReclaimMemory];
-
-  [_workingIndexPaths removeObject:node.asyncdisplaykit_indexPath];
 }
 
 - (void)addNodeToWorkingRange:(ASCellNode *)node
@@ -249,8 +114,6 @@ static BOOL ASRangeIsValid(NSRange range)
   [node.view removeFromSuperview];
 
   [node recursivelyDisplay];
-
-  [_workingIndexPaths addObject:node.asyncdisplaykit_indexPath];
 }
 
 - (void)moveNode:(ASCellNode *)node toView:(UIView *)view
@@ -258,71 +121,19 @@ static BOOL ASRangeIsValid(NSRange range)
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node && view, @"invalid argument, did you mean -removeNodeFromWorkingRange:?");
 
-  // use an explicit transaction to force CoreAnimation to display nodes in the order they are added.
-  [CATransaction begin];
-
   [view addSubview:node.view];
-
-  [CATransaction commit];
 }
-
 
 #pragma mark -
 #pragma mark API.
 
-- (void)recalculateDataSourceCounts
+- (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
 {
-  // data source information (_sectionCounts, _sectionOffsets, _totalNodeCount) is not currently thread-safe
-  ASDisplayNodeAssertMainThread();
+  _scrollDirection = scrollDirection;
 
-  NSInteger sections = [_delegate rangeControllerSections:self];
-
-  NSMutableArray *sectionCounts = [NSMutableArray arrayWithCapacity:sections];
-  for (NSInteger section = 0; section < sections; section++) {
-    sectionCounts[section] = @([_delegate rangeController:self rowsInSection:section]);
-  }
-
-  NSMutableArray *sectionOffsets = [NSMutableArray arrayWithCapacity:sections];
-  NSInteger offset = 0;
-  for (NSInteger section = 0; section < sections; section++) {
-    sectionOffsets[section] = @(offset);
-    offset += [sectionCounts[section] integerValue];
-  }
-
-  _sectionCounts = sectionCounts;
-  _sectionOffsets = sectionOffsets;
-  _totalNodeCount = offset;
-}
-
-- (void)rebuildData
-{
-  /*
-   * teardown
-   */
-  [self teardownAllNodes];
-  [self cancelSizeNextBlock];
-
-  /*
-   * setup
-   */
-  [self recalculateDataSourceCounts];
-  _nodes = [NSMutableDictionary dictionaryWithCapacity:_totalNodeCount];
-  _visibleRange = _workingRange = NSMakeRange(NSNotFound, 0);
-  _sizedNodeCount = 0;
-  _nodeSizes = [NSMutableArray array];
-  _scrollDirection = ASScrollDirectionForward;
-  _workingIndexPaths = [NSMutableOrderedSet orderedSet];
-
-  // don't bother sizing if the data source is empty
-  if (_totalNodeCount > 0) {
-    [self sizeNextBlock];
-  }
-}
-
-- (void)visibleNodeIndexPathsDidChange
-{
-  if (_queuedRangeUpdate)
+  if (_queuedRangeUpdate) {
     return;
+  }
 
   // coalesce these events -- handling them multiple times per runloop is noisy and expensive
   _queuedRangeUpdate = YES;
@@ -334,67 +145,50 @@ static BOOL ASRangeIsValid(NSRange range)
 
 - (void)updateVisibleNodeIndexPaths
 {
+  if (!_queuedRangeUpdate) {
+    return;
+  }
+
   NSArray *indexPaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
-  if (indexPaths.count) {
-    [self setVisibleRange:NSMakeRange([self indexForIndexPath:[indexPaths firstObject]],
-                                      indexPaths.count)];
+  CGSize viewportSize = [_delegate rangeControllerViewportSize:self];
+
+  if ([_layoutController shouldUpdateWorkingRangesForVisibleIndexPath:indexPaths viewportSize:viewportSize]) {
+    [_layoutController setVisibleNodeIndexPaths:indexPaths];
+    NSSet *workingRangeIndexPaths = [_layoutController workingRangeIndexPathsForScrolling:_scrollDirection viewportSize:viewportSize];
+    NSSet *visibleRangeIndexPaths = [NSSet setWithArray:indexPaths];
+
+    NSMutableSet *removedIndexPaths = [_workingRangeIndexPaths mutableCopy];
+    [removedIndexPaths minusSet:workingRangeIndexPaths];
+    [removedIndexPaths minusSet:visibleRangeIndexPaths];
+    if (removedIndexPaths.count) {
+      NSArray *removedNodes = [_delegate rangeController:self nodesAtIndexPaths:[removedIndexPaths allObjects]];
+      [removedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+        [self removeNodeFromWorkingRange:node];
+      }];
+    }
+
+    NSMutableSet *addedIndexPaths = [workingRangeIndexPaths mutableCopy];
+    [addedIndexPaths minusSet:_workingRangeIndexPaths];
+    [addedIndexPaths minusSet:visibleRangeIndexPaths];
+    if (addedIndexPaths.count) {
+      NSArray *addedNodes = [_delegate rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
+      [addedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+        [self addNodeToWorkingRange:node];
+      }];
+    }
+
+    _workingRangeIndexPaths = workingRangeIndexPaths;
+    _workingRangeNodes = [NSSet setWithArray:[_delegate rangeController:self nodesAtIndexPaths:[workingRangeIndexPaths allObjects]]];
   }
 
   _queuedRangeUpdate = NO;
 }
 
-- (NSInteger)numberOfSizedSections
+- (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)cellNode
 {
-  // short-circuit if we haven't started sizing
-  if (_sizedNodeCount == 0)
-    return 0;
+  [cellNode recursivelySetDisplaySuspended:NO];
 
-  NSIndexPath *lastSizedIndex = [self indexPathForIndex:_sizedNodeCount - 1];
-  NSInteger sizedSectionCount = lastSizedIndex.section + 1;
-
-  ASDisplayNodeAssert(sizedSectionCount <= _sectionCounts.count, @"logic error");
-  return sizedSectionCount;
-}
-
-- (NSInteger)numberOfSizedRowsInSection:(NSInteger)section
-{
-  // short-circuit if we haven't started sizing
-  if (_sizedNodeCount == 0)
-    return 0;
-
-  if (section > _sectionCounts.count) {
-    ASDisplayNodeAssert(NO, @"this isn't even a valid section");
-    return 0;
-  }
-
-  NSIndexPath *lastSizedIndex = [self indexPathForIndex:_sizedNodeCount - 1];
-  if (section > lastSizedIndex.section) {
-    ASDisplayNodeAssert(NO, @"this section hasn't been sized yet");
-    return 0;
-  } else if (section == lastSizedIndex.section) {
-    // we're still sizing this section, return the count we have
-    return lastSizedIndex.row + 1;
-  } else {
-    // we've already sized beyond this section, return the full count
-    return [_sectionCounts[section] integerValue];
-  }
-}
-
-- (void)configureTableViewCell:(UITableViewCell *)cell forIndexPath:(NSIndexPath *)indexPath
-{
-  [self configureContentView:cell.contentView forIndexPath:indexPath];
-
-  ASCellNode *node = [self sizedNodeForIndexPath:indexPath];
-  cell.backgroundColor = node.backgroundColor;
-  cell.selectionStyle = node.selectionStyle;
-}
-
-- (void)configureContentView:(UIView *)contentView forIndexPath:(NSIndexPath *)indexPath
-{
-  ASCellNode *newNode = [self sizedNodeForIndexPath:indexPath];
-  ASDisplayNodeAssert(newNode, @"this node hasn't been sized yet!");
-
-  if (newNode.view.superview == contentView) {
+  if (cellNode.view.superview == contentView) {
     // this content view is already correctly configured
     return;
   }
@@ -411,269 +205,58 @@ static BOOL ASRangeIsValid(NSRange range)
     }
   }
 
-  [self moveNode:newNode toView:contentView];
+  [self moveNode:cellNode toView:contentView];
 }
 
-- (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
-{
-  // TODO add an assertion (here or in ASTableView) that the calculated size isn't bogus (eg must be < tableview width)
-  ASCellNode *node = [self sizedNodeForIndexPath:indexPath];
-  return node.calculatedSize;
-}
+#pragma mark - ASDataControllerDelegete
 
-
-#pragma mark -
-#pragma mark Working range.
-
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters
-{
-  _tuningParameters = tuningParameters;
-
-  if (ASRangeIsValid(_visibleRange)) {
-    [self recalculateWorkingRange];
-  }
-}
-
-static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollDirection scrollDirection,
-                                       NSRange visibleRange, NSArray *nodeSizes, CGSize viewport)
-{
-  ASDisplayNodeCAssert(NSMaxRange(visibleRange) <= nodeSizes.count, @"nodes can't be visible until they're sized");
-
-  // extend the visible range by enough nodes to fill at least the requested number of screenfuls
-  // NB.  this logic assumes there is no overlap between nodes. It also doesn't
-  // take spacing between nodes into account.
-  CGFloat viewportArea = viewport.width * viewport.height;
-  CGFloat minUpperBufferSize, minLowerBufferSize;
-  switch (scrollDirection) {
-    case ASScrollDirectionBackward:
-      minUpperBufferSize = viewportArea * params.leadingBufferScreenfuls;
-      minLowerBufferSize = viewportArea * params.trailingBufferScreenfuls;
-      break;
-
-    case ASScrollDirectionForward:
-      minUpperBufferSize = viewportArea * params.trailingBufferScreenfuls;
-      minLowerBufferSize = viewportArea * params.leadingBufferScreenfuls;
-      break;
-  }
-
-  // "top" buffer (above the screen, if we're scrolling vertically)
-  NSInteger upperBuffer = 0;
-  CGFloat upperBufferArea = 0.0f;
-  for (NSInteger idx = visibleRange.location - 1; idx >= 0 && upperBufferArea < minUpperBufferSize; idx--) {
-    upperBuffer++;
-    CGSize nodeSize = [nodeSizes[idx] CGSizeValue];
-    upperBufferArea += nodeSize.width * nodeSize.height;
-  }
-
-  // "bottom" buffer (below the screen, if we're scrolling vertically)
-  NSInteger lowerBuffer = 0;
-  CGFloat lowerBufferArea = 0.0f;
-  for (NSInteger idx = NSMaxRange(visibleRange); idx < nodeSizes.count && lowerBufferArea < minLowerBufferSize; idx++) {
-    lowerBuffer++;
-    CGSize nodeSize = [nodeSizes[idx] CGSizeValue];
-    lowerBufferArea += nodeSize.width * nodeSize.height;
-  }
-
-  return NSMakeRange(visibleRange.location - upperBuffer,
-                     visibleRange.length + upperBuffer + lowerBuffer);
-}
-
-- (void)setVisibleRange:(NSRange)visibleRange
-{
-  if (NSEqualRanges(_visibleRange, visibleRange))
-    return;
-
-  ASDisplayNodeAssert(ASRangeIsValid(visibleRange), @"invalid argument");
-  NSRange previouslyVisible = ASRangeIsValid(_visibleRange) ? _visibleRange : visibleRange;
-  _visibleRange = visibleRange;
-
-  // figure out where we're going, because that's where the bulk of the working range needs to be
-  NSInteger scrollDelta = _visibleRange.location - previouslyVisible.location;
-  if (scrollDelta < 0)
-    _scrollDirection = ASScrollDirectionBackward;
-  if (scrollDelta > 0)
-    _scrollDirection = ASScrollDirectionForward;
-
-  [self recalculateWorkingRange];
-}
-
-- (void)recalculateWorkingRange
-{
-  NSRange workingRange;
-  if (self.workingRangeCalculationBlock != NULL) {
-    workingRange = self.workingRangeCalculationBlock(_tuningParameters,
-                                                     _scrollDirection,
-                                                     _visibleRange,
-                                                     _nodeSizes,
-                                                     [_delegate rangeControllerViewportSize:self]);
+/**
+ * Dispatch to main thread for updating ranges.
+ * We are considering to move it to background queue if we could call recursive display in background thread.
+ */
+- (void)updateOnMainThreadWithBlock:(dispatch_block_t)block {
+  if ([NSThread isMainThread]) {
+    block();
   } else {
-    workingRange = ASCalculateWorkingRange(_tuningParameters,
-                                           _scrollDirection,
-                                           _visibleRange,
-                                           _nodeSizes,
-                                           [_delegate rangeControllerViewportSize:self]);
-  }
-
-  [self setWorkingRange:workingRange];
-}
-
-- (void)setWorkingRange:(NSRange)newWorkingRange
-{
-  if (NSEqualRanges(_workingRange, newWorkingRange))
-    return;
-
-  // the working range is a superset of the visible range, but we only care about offscreen nodes
-  ASDisplayNodeAssert(NSEqualRanges(_visibleRange, NSIntersectionRange(_visibleRange, newWorkingRange)), @"logic error");
-  NSOrderedSet *visibleIndexPaths = [NSOrderedSet orderedSetWithArray:[self indexPathsForRange:_visibleRange]];
-  NSOrderedSet *oldWorkingIndexPaths = ASCopySetMinusSet(_workingIndexPaths, visibleIndexPaths);
-  NSOrderedSet *newWorkingIndexPaths = ASCopySetMinusSet([NSOrderedSet orderedSetWithArray:[self indexPathsForRange:newWorkingRange]], visibleIndexPaths);
-
-  // update bookkeeping for visible nodes; these will be removed from the working range later in -configureContentView::
-  [_workingIndexPaths minusOrderedSet:visibleIndexPaths];
-
-  // evict nodes that have left the working range (i.e., those that are in the old working range but not the new one)
-  NSOrderedSet *removedIndexPaths = ASCopySetMinusSet(oldWorkingIndexPaths, newWorkingIndexPaths);
-  for (NSIndexPath *indexPath in removedIndexPaths) {
-    ASCellNode *node = [self sizedNodeForIndexPath:indexPath];
-    ASDisplayNodeAssert(node, @"an unsized node should never have entered the working range");
-    [self removeNodeFromWorkingRange:node];
-  }
-
-  // add nodes that have entered the working range (i.e., those that are in the new working range but not the old one)
-  NSOrderedSet *addedIndexPaths = ASCopySetMinusSet(newWorkingIndexPaths, oldWorkingIndexPaths);
-  for (NSIndexPath *indexPath in addedIndexPaths) {
-    // if a node in the working range is still sizing, the sizing logic will add it to the working range for us later
-    ASCellNode *node = [self sizedNodeForIndexPath:indexPath];
-    if (node) {
-      [self addNodeToWorkingRange:node];
-    } else {
-      ASDisplayNodeAssert(_sizedNodeCount != _totalNodeCount, @"logic error");
-    }
-  }
-
-  _workingRange = newWorkingRange;
-}
-
-
-#pragma mark -
-#pragma mark Async sizing.
-
-- (ASCellNode *)sizedNodeForIndexPath:(NSIndexPath *)indexPath
-{
-  if ([self indexForIndexPath:indexPath] >= _sizedNodeCount) {
-    // this node hasn't been sized yet
-    return nil;
-  }
-
-  // work around applebug:  a UIMutableIndexPath with row r and section s is not considered equal to an NSIndexPath with
-  //                        row r and section s, so we cannot use the provided indexPath directly as a dictionary index.
-  ASCellNode *sizedNode = _nodes[[NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section]];
-  ASDisplayNodeAssert(sizedNode, @"this node should be sized but doesn't even exist");
-  ASDisplayNodeAssert([sizedNode.asyncdisplaykit_indexPath isEqual:indexPath], @"this node has the wrong index path");
-  [sizedNode recursivelySetDisplaySuspended:NO];
-  return sizedNode;
-}
-
-- (void)sizeNextBlock
-{
-  // can't size anything if we don't have a delegate
-  if (!_delegate)
-    return;
-
-  // concurrently size as many nodes as the CPU allows
-  static const NSInteger blockSize = [[NSProcessInfo processInfo] processorCount];
-  NSRange sizingRange = NSMakeRange(_sizedNodeCount, MIN(blockSize, _totalNodeCount - _sizedNodeCount));
-
-  // manage sizing on a throwaway background queue; we'll be blocking it
-  dispatch_async(dispatch_queue_create(NULL, DISPATCH_QUEUE_CONCURRENT), ^{
-    dispatch_group_t group = dispatch_group_create();
-
-    NSArray *indexPaths = [self indexPathsForRange:sizingRange];
-    for (NSIndexPath *indexPath in indexPaths) {
-      ASCellNode *node = [_delegate rangeController:self nodeForIndexPath:indexPath];
-      node.asyncdisplaykit_indexPath = indexPath;
-      _nodes[indexPath] = node;
-
-      dispatch_group_async(group, [ASRangeController sizingQueue], ^{
-        [node measure:[_delegate rangeController:self constrainedSizeForNodeAtIndexPath:indexPath]];
-        node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
-      });
-    }
-
-    // wait for all sizing to finish, then bounce back to main
-    // TODO consider using a semaphore here -- we currently don't size nodes while updating the working range
-    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
     dispatch_async(dispatch_get_main_queue(), ^{
-      // update sized node information
-      _sizedNodeCount = NSMaxRange(sizingRange);
-      for (NSIndexPath *indexPath in indexPaths) {
-        ASCellNode *node = _nodes[indexPath];
-        _nodeSizes[[self indexForIndexPath:indexPath]] = [NSValue valueWithCGSize:node.calculatedSize];
-      }
-      ASDisplayNodeAssert(_nodeSizes.count == _sizedNodeCount, @"logic error");
-
-      // update the working range
-      if (ASRangeIsValid(_visibleRange)) {
-        [self recalculateWorkingRange];
-      }
-
-      // delegateify
-      [_delegate rangeController:self didSizeNodesWithIndexPaths:indexPaths];
-
-      // kick off the next block
-      if (_sizedNodeCount < _totalNodeCount) {
-        [self performSelector:@selector(sizeNextBlock) withObject:NULL afterDelay:0];
-      }
+      block();
     });
-  });
-}
-
-
-#pragma mark -
-#pragma mark Editing.
-
-static BOOL ASIndexPathsAreSequential(NSIndexPath *first, NSIndexPath *second)
-{
-  BOOL row = (second.row == first.row + 1 && second.section == first.section);
-  BOOL section = (second.row == 0 && second.section == first.section + 1);
-  return row || section;
-}
-
-- (void)appendNodesWithIndexPaths:(NSArray *)indexPaths
-{
-  // sanity-check input
-  // TODO this is proof-of-concept-quality, expand validation when fleshing out update / editing support
-  NSIndexPath *lastNode = (_totalNodeCount > 0) ? [self indexPathForIndex:_totalNodeCount - 1] : nil;
-  BOOL indexPathsAreValid = ((lastNode && ASIndexPathsAreSequential(lastNode, [indexPaths firstObject])) ||
-                             [[indexPaths firstObject] isEqual:[NSIndexPath indexPathForRow:0 inSection:0]]);
-  if (!indexPaths || !indexPaths.count || !indexPathsAreValid) {
-    ASDisplayNodeAssert(NO, @"invalid argument");
-    return;
-  }
-
-  // update all the things
-  void (^updateBlock)() = ^{
-    BOOL isSizing = (_sizedNodeCount < _totalNodeCount);
-    NSInteger expectedTotalNodeCount = _totalNodeCount + indexPaths.count;
-
-    [self recalculateDataSourceCounts];
-    ASDisplayNodeAssert(_totalNodeCount == expectedTotalNodeCount, @"data source error");
-
-    if (!isSizing) {
-      // the last sizing pass completely finished, start a new one
-      [self sizeNextBlock];
-    }
-  };
-
-  // trampoline to main if necessary, we don't have locks on _sectionCounts / _sectionOffsets / _totalNodeCount
-  if (![NSThread isMainThread]) {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-      updateBlock();
-    });
-  } else {
-    updateBlock();
   }
 }
 
+- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths {
+  ASDisplayNodeAssert(nodes.count == indexPaths.count, @"Invalid index path");
+
+  NSMutableArray *nodeSizes = [NSMutableArray arrayWithCapacity:nodes.count];
+  [nodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+    [nodeSizes addObject:[NSValue valueWithCGSize:node.calculatedSize]];
+  }];
+
+  [self updateOnMainThreadWithBlock:^{
+    [_layoutController insertNodesAtIndexPaths:indexPaths withSizes:nodeSizes];
+    [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths];
+  }];
+}
+
+- (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths {
+  [self updateOnMainThreadWithBlock:^{
+    [_layoutController deleteNodesAtIndexPaths:indexPaths];
+    [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths];
+  }];
+}
+
+- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet {
+  [self updateOnMainThreadWithBlock:^{
+    [_layoutController insertSectionsAtIndexSet:indexSet];
+    [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet];
+  }];
+}
+
+- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet {
+  [self updateOnMainThreadWithBlock:^{
+    [_layoutController deleteSectionsAtIndexSet:indexSet];
+    [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet];
+  }];
+}
 
 @end

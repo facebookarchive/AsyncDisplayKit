@@ -35,13 +35,6 @@
 @property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters;
 
 /**
- * @abstract An optional block which can perform custom calculation for working range.
- *
- * @discussion Can be used to provide custom working range logic for custom layouts.
- */
-@property (nonatomic, assign) asrangecontroller_working_range_calculation_block_t workingRangeCalculationBlock;
-
-/**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
  * @warning This method is substantially more expensive than UICollectionView's version.
@@ -49,30 +42,26 @@
 - (void)reloadData;
 
 /**
- * WARNING:  ASCollectionView's update/editing support is not yet implemented.  Use of these methods will fire an assertion.
+ * Section updating.
  *
- * This initial version of ASCollectionView only supports appending nodes (see below).  If you'd like to see full-fledged
- * support for data source updates and interactive editing, please file a GitHub issue -- AsyncDisplayKit can do it,
- * we just haven't built it out yet.  :]
+ * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI table
+ * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
  */
-//- (void)insertSections:(NSIndexSet *)sections;
-//- (void)deleteSections:(NSIndexSet *)sections;
-//- (void)reloadSections:(NSIndexSet *)sections;
-//- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
-//
-//- (void)insertItemsAtIndexPaths:(NSArray *)indexPaths;
-//- (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths;
-//- (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths;
-//- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
+- (void)insertSections:(NSIndexSet *)sections;
+- (void)deleteSections:(NSIndexSet *)sections;
+- (void)reloadSections:(NSIndexSet *)sections;
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 /**
- * Append nodes.
+ * Items updating.
  *
- * As with UICollectionView, the asyncDataSource must be updated to reflect the new nodes before this method is called.
- *
- * @param indexPaths Ordered array of index paths corresponding to the nodes to be added.
+ * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI table
+ * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
  */
-- (void)appendNodesWithIndexPaths:(NSArray *)indexPaths;
+- (void)insertItemsAtIndexPaths:(NSArray *)indexPaths;
+- (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths;
+- (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths;
+- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 /**
  * Query the sized node at `indexPath` for its calculatedSize.

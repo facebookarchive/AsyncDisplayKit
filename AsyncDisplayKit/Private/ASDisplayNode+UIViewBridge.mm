@@ -11,6 +11,7 @@
 #import "ASAssert.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASEqualityHelpers.h"
 
 /**
  * The following macros are conveniences to help in the common tasks related to the bridging that ASDisplayNode does to UIView and CALayer.
@@ -179,8 +180,14 @@
 
 - (void)setOpaque:(BOOL)newOpaque
 {
+  BOOL prevOpaque = self.opaque;
+
   _bridge_prologue;
   _setToLayer(opaque, newOpaque);
+
+  if (prevOpaque != newOpaque) {
+    [self setNeedsDisplay];
+  }
 }
 
 - (BOOL)isUserInteractionEnabled
@@ -370,10 +377,17 @@
   return [UIColor colorWithCGColor:_getFromLayer(backgroundColor)];
 }
 
-- (void)setBackgroundColor:(UIColor *)backgroundColor
+- (void)setBackgroundColor:(UIColor *)newBackgroundColor
 {
+  UIColor *prevBackgroundColor = self.backgroundColor;
+
   _bridge_prologue;
-  _setToLayer(backgroundColor, backgroundColor.CGColor);
+  _setToLayer(backgroundColor, newBackgroundColor.CGColor);
+
+  // Note: This check assumes that the colors are within the same color space.
+  if (!ASObjectIsEqual(prevBackgroundColor, newBackgroundColor)) {
+    [self setNeedsDisplay];
+  }
 }
 
 - (UIColor *)tintColor
