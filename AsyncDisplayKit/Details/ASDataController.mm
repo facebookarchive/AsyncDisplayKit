@@ -205,22 +205,40 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 #pragma mark - Data Update
 
 - (void)insertSections:(NSIndexSet *)indexSet {
-  NSMutableArray *sectionArray = [[NSMutableArray alloc] initWithCapacity:indexSet.count];
-  for (NSUInteger i = 0; i < indexSet.count; i++) {
-    NSUInteger rowNum = [_dataSource dataController:self rowsInSection:i];
-    NSMutableArray *rows = [[NSMutableArray alloc] initWithCapacity:rowNum];
+  __block int nodeTotalCnt = 0;
+  NSMutableArray *nodeCounts = [NSMutableArray arrayWithCapacity:indexSet.count];
+  [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+    NSUInteger cnt = [_dataSource dataController:self rowsInSection:idx];
+    [nodeCounts addObject:@(cnt)];
+    nodeTotalCnt += cnt;
+  }];
 
-    for (NSUInteger j = 0; j < rowNum; j++) {
-      ASCellNode *node = [_dataSource dataController:self nodeAtIndexPath:[NSIndexPath indexPathForItem:j inSection:i]];
-      [rows addObject:node];
+  NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:nodeTotalCnt];
+  NSMutableArray *indexPaths = [NSMutableArray arrayWithCapacity:nodeTotalCnt];
+
+  __block NSUInteger idx = 0;
+  [indexSet enumerateIndexesUsingBlock:^(NSUInteger sectionIdx, BOOL *stop) {
+    NSUInteger cnt = [nodeCounts[idx++] unsignedIntegerValue];
+
+    for (int i = 0; i < cnt; i++) {
+      NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sectionIdx];
+      [indexPaths addObject:indexPath];
+
+      ASCellNode *node = [_dataSource dataController:self nodeAtIndexPath:indexPath];
+      [nodes addObject:node];
     }
-    [sectionArray addObject:rows];
-  }
+  }];
 
   dispatch_async([[self class] sizingQueue], ^{
-    [self asyncUpdateDataWithBlock:^{
+    [self syncUpdateDataWithBlock:^{
+      NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:indexSet.count];
+      for (NSUInteger i = 0; i < indexSet.count; i++) {
+        [sectionArray addObject:[NSMutableArray array]];
+      }
       INSERT_SECTIONS(_nodes , indexSet, sectionArray);
     }];
+
+    [self _insertNodes:nodes atIndexPaths:indexPaths];
   });
 }
 

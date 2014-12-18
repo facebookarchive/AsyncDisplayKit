@@ -57,7 +57,8 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   __block int cnt = 0;
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
     NSArray *nodes = sections[cnt++];
-    std::vector<CGSize> v(nodes.count);
+    std::vector<CGSize> v;
+    v.reserve(nodes.count);
 
     for (int i = 0; i < nodes.count; i++) {
       v.push_back([nodes[i] CGSizeValue]);
