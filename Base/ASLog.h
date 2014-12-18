@@ -8,8 +8,8 @@
 
 #pragma once
 
-#define ASMultiplexImageNodeLogDebug NSLog
-#define ASMultiplexImageNodeCLogDebug NSLog
+#define ASMultiplexImageNodeLogDebug(...)
+#define ASMultiplexImageNodeCLogDebug(...)
 
-#define ASMultiplexImageNodeLogError NSLog
-#define ASMultiplexImageNodeCLogError NSLog
+#define ASMultiplexImageNodeLogError(...)
+#define ASMultiplexImageNodeCLogError(...)
