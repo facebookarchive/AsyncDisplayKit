@@ -33,12 +33,12 @@
 
 #define INSERT_SECTIONS(multidimensionalArray, indexSet, sections) \
 { \
-  if ([_delegate respondsToSelector:@selector(dataController:willInsertSectionsAtIndexSet:)]) { \
-    [_delegate dataController:self willInsertSectionsAtIndexSet:indexSet]; \
+  if ([_delegate respondsToSelector:@selector(dataController:willInsertSections:atIndexSet:)]) { \
+    [_delegate dataController:self willInsertSections:sections atIndexSet:indexSet]; \
   } \
   [multidimensionalArray insertObjects:sections atIndexes:indexSet]; \
-  if ([_delegate respondsToSelector:@selector(dataController:didInsertSectionsAtIndexSet:)]) { \
-    [_delegate dataController:self didInsertSectionsAtIndexSet:indexSet]; \
+  if ([_delegate respondsToSelector:@selector(dataController:didInsertSections:atIndexSet:)]) { \
+    [_delegate dataController:self didInsertSections:sections atIndexSet:indexSet]; \
   } \
 }
 
@@ -205,15 +205,40 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 #pragma mark - Data Update
 
 - (void)insertSections:(NSIndexSet *)indexSet {
-  NSMutableArray *sectionArray = [[NSMutableArray alloc] initWithCapacity:indexSet.count];
-  for (int i = 0; i < indexSet.count; i++) {
-    [sectionArray addObject:[[NSMutableArray alloc] init]];
-  }
+  __block int nodeTotalCnt = 0;
+  NSMutableArray *nodeCounts = [NSMutableArray arrayWithCapacity:indexSet.count];
+  [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+    NSUInteger cnt = [_dataSource dataController:self rowsInSection:idx];
+    [nodeCounts addObject:@(cnt)];
+    nodeTotalCnt += cnt;
+  }];
+
+  NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:nodeTotalCnt];
+  NSMutableArray *indexPaths = [NSMutableArray arrayWithCapacity:nodeTotalCnt];
+
+  __block NSUInteger idx = 0;
+  [indexSet enumerateIndexesUsingBlock:^(NSUInteger sectionIdx, BOOL *stop) {
+    NSUInteger cnt = [nodeCounts[idx++] unsignedIntegerValue];
+
+    for (int i = 0; i < cnt; i++) {
+      NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sectionIdx];
+      [indexPaths addObject:indexPath];
+
+      ASCellNode *node = [_dataSource dataController:self nodeAtIndexPath:indexPath];
+      [nodes addObject:node];
+    }
+  }];
 
   dispatch_async([[self class] sizingQueue], ^{
-    [self asyncUpdateDataWithBlock:^{
+    [self syncUpdateDataWithBlock:^{
+      NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:indexSet.count];
+      for (NSUInteger i = 0; i < indexSet.count; i++) {
+        [sectionArray addObject:[NSMutableArray array]];
+      }
       INSERT_SECTIONS(_nodes , indexSet, sectionArray);
     }];
+
+    [self _insertNodes:nodes atIndexPaths:indexPaths];
   });
 }
 

@@ -245,9 +245,21 @@
   }];
 }
 
-- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet {
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet {
+  ASDisplayNodeAssert(sections.count == indexSet.count, @"Invalid sections");
+
+  NSMutableArray *sectionNodeSizes = [NSMutableArray arrayWithCapacity:sections.count];
+
+  [sections enumerateObjectsUsingBlock:^(NSArray *nodes, NSUInteger idx, BOOL *stop) {
+    NSMutableArray *nodeSizes = [NSMutableArray arrayWithCapacity:nodes.count];
+    [nodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+      [nodeSizes addObject:[NSValue valueWithCGSize:node.calculatedSize]];
+    }];
+    [sectionNodeSizes addObject:nodeSizes];
+  }];
+
   [self updateOnMainThreadWithBlock:^{
-    [_layoutController insertSectionsAtIndexSet:indexSet];
+    [_layoutController insertSections:sectionNodeSizes atIndexSet:indexSet];
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet];
   }];
 }
