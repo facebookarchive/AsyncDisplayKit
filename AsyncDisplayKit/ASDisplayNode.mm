@@ -116,6 +116,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _flags.implementsDrawRect = ([[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
   _flags.implementsImageDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
   _flags.implementsDrawParameters = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
+
+  _fadeAnimationDuration = 0.1;
 }
 
 - (id)init
@@ -1133,7 +1135,19 @@ static NSInteger incrementIfFound(NSInteger i) {
   // only trampoline if there is a placeholder and nodes are done displaying
   if ([self _pendingDisplayNodesHaveFinished] && _placeholderLayer.superlayer) {
     dispatch_async(dispatch_get_main_queue(), ^{
-      [self _tearDownPlaceholderLayer];
+      void (^cleanupBlock)() = ^{
+        [self _tearDownPlaceholderLayer];
+      };
+
+      if (self.placeholderFadesOut) {
+        [CATransaction begin];
+        [CATransaction setCompletionBlock:cleanupBlock];
+        [CATransaction setAnimationDuration:_fadeAnimationDuration];
+        _placeholderLayer.opacity = 0.0;
+        [CATransaction commit];
+      } else {
+        cleanupBlock();
+      }
     });
   }
 }
@@ -1257,10 +1271,6 @@ static NSInteger incrementIfFound(NSInteger i) {
   [self _pendingNodeDidDisplay:self];
 
   [_supernode subnodeDisplayDidFinish:self];
-
-  if (_placeholderLayer && [self _pendingDisplayNodesHaveFinished]) {
-    [self _tearDownPlaceholderLayer];
-  }
 }
 
 - (void)subnodeDisplayWillStart:(ASDisplayNode *)subnode

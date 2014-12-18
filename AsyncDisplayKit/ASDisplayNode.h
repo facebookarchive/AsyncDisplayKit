@@ -338,6 +338,13 @@
  */
 @property (nonatomic, assign) BOOL placeholderEnabled;
 
+/**
+ * @abstract Toggle to fade-out the placeholder when a node's contents are finished displaying.
+ *
+ * @discussion Defaults to NO.
+ */
+@property (nonatomic, assign) BOOL placeholderFadesOut;
+
 
 /** @name Hit Testing */
 
