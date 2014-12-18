@@ -53,9 +53,17 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   }];
 }
 
-- (void)insertSectionsAtIndexSet:(NSIndexSet *)indexSet {
+- (void)insertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet {
+  __block int cnt = 0;
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    _nodeSizes.insert(_nodeSizes.begin() + idx, std::vector<CGSize>());
+    NSArray *nodes = sections[cnt++];
+    std::vector<CGSize> v(nodes.count);
+
+    for (int i = 0; i < nodes.count; i++) {
+      v.push_back([nodes[i] CGSizeValue]);
+    }
+
+    _nodeSizes.insert(_nodeSizes.begin() + idx, v);
   }];
 }
 

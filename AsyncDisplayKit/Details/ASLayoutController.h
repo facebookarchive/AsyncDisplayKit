@@ -28,7 +28,7 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
 
 - (void)deleteNodesAtIndexPaths:(NSArray *)indexPaths;
 
-- (void)insertSectionsAtIndexSet:(NSIndexSet *)indexSet;
+- (void)insertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet;
 
 - (void)deleteSectionsAtIndexSet:(NSIndexSet *)indexSet;
 

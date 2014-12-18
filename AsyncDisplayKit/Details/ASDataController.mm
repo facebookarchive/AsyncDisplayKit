@@ -33,12 +33,12 @@
 
 #define INSERT_SECTIONS(multidimensionalArray, indexSet, sections) \
 { \
-  if ([_delegate respondsToSelector:@selector(dataController:willInsertSectionsAtIndexSet:)]) { \
-    [_delegate dataController:self willInsertSectionsAtIndexSet:indexSet]; \
+  if ([_delegate respondsToSelector:@selector(dataController:willInsertSections:atIndexSet:)]) { \
+    [_delegate dataController:self willInsertSections:sections atIndexSet:indexSet]; \
   } \
   [multidimensionalArray insertObjects:sections atIndexes:indexSet]; \
-  if ([_delegate respondsToSelector:@selector(dataController:didInsertSectionsAtIndexSet:)]) { \
-    [_delegate dataController:self didInsertSectionsAtIndexSet:indexSet]; \
+  if ([_delegate respondsToSelector:@selector(dataController:didInsertSections:atIndexSet:)]) { \
+    [_delegate dataController:self didInsertSections:sections atIndexSet:indexSet]; \
   } \
 }
 
@@ -206,8 +206,15 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 
 - (void)insertSections:(NSIndexSet *)indexSet {
   NSMutableArray *sectionArray = [[NSMutableArray alloc] initWithCapacity:indexSet.count];
-  for (int i = 0; i < indexSet.count; i++) {
-    [sectionArray addObject:[[NSMutableArray alloc] init]];
+  for (NSUInteger i = 0; i < indexSet.count; i++) {
+    NSUInteger rowNum = [_dataSource dataController:self rowsInSection:i];
+    NSMutableArray *rows = [[NSMutableArray alloc] initWithCapacity:rowNum];
+
+    for (NSUInteger j = 0; j < rowNum; j++) {
+      ASCellNode *node = [_dataSource dataController:self nodeAtIndexPath:[NSIndexPath indexPathForItem:j inSection:i]];
+      [rows addObject:node];
+    }
+    [sectionArray addObject:rows];
   }
 
   dispatch_async([[self class] sizingQueue], ^{

@@ -57,8 +57,8 @@
 /**
  Called for insertion of sections.
  */
-- (void)dataController:(ASDataController *)dataController willInsertSectionsAtIndexSet:(NSIndexSet *)indexSet;
-- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet;
+- (void)dataController:(ASDataController *)dataController willInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet;
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet;
 
 /**
  Called for deletion of sections.
