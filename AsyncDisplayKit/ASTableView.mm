@@ -13,6 +13,8 @@
 #import "ASFlowLayoutController.h"
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
+#import "ASDisplayNodeInternal.h"
+
 
 
 #pragma mark -
@@ -185,14 +187,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)reloadData
 {
   [_dataController reloadData];
-
-  if ([NSThread isMainThread]) {
+  ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
-  } else {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [super reloadData];
-    });
-  }
+  });
 }
 
 - (ASRangeTuningParameters)rangeTuningParameters
