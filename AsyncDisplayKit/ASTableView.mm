@@ -361,9 +361,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASDisplayNodeAssertMainThread();
 
   [UIView performWithoutAnimation:^{
-    [super beginUpdates];
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-    [super endUpdates];
   }];
 }
 
@@ -371,9 +369,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASDisplayNodeAssertMainThread();
 
   [UIView performWithoutAnimation:^{
-    [super beginUpdates];
     [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-    [super endUpdates];
   }];
 }
 
@@ -381,9 +377,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASDisplayNodeAssertMainThread();
 
   [UIView performWithoutAnimation:^{
-    [super beginUpdates];
     [super insertSections:indexSet withRowAnimation:UITableViewRowAnimationNone];
-    [super endUpdates];
   }];
 }
 
@@ -391,9 +385,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASDisplayNodeAssertMainThread();
 
   [UIView performWithoutAnimation:^{
-    [super beginUpdates];
     [super deleteSections:indexSet withRowAnimation:UITableViewRowAnimationNone];
-    [super endUpdates];
   }];
 }
 

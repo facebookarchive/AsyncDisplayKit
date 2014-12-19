@@ -213,18 +213,12 @@
 
 #pragma mark - ASDataControllerDelegete
 
-/**
- * Dispatch to main thread for updating ranges.
- * We are considering to move it to background queue if we could call recursive display in background thread.
- */
-- (void)updateOnMainThreadWithBlock:(dispatch_block_t)block {
-  if ([NSThread isMainThread]) {
-    block();
-  } else {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      block();
-    });
-  }
+- (void)dataController:(ASDataController *)dataController willInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths {
+  ASDisplayNodePerformBlockOnMainThread(^{
+    if ([_delegate respondsToSelector:@selector(rangeController:willInsertNodesAtIndexPaths:)]) {
+      [_delegate rangeController:self willInsertNodesAtIndexPaths:indexPaths];
+    }
+  });
 }
 
 - (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths {
@@ -235,19 +229,35 @@
     [nodeSizes addObject:[NSValue valueWithCGSize:node.calculatedSize]];
   }];
 
-  [self updateOnMainThreadWithBlock:^{
+  ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController insertNodesAtIndexPaths:indexPaths withSizes:nodeSizes];
     [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths];
     _workingRangeIsValid = NO;
-  }];
+  });
+}
+
+- (void)dataController:(ASDataController *)dataController willDeleteNodesAtIndexPaths:(NSArray *)indexPaths {
+  ASDisplayNodePerformBlockOnMainThread(^{
+    if ([_delegate respondsToSelector:@selector(rangeController:willDeleteNodesAtIndexPaths:)]) {
+      [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths];
+    }
+  });
 }
 
 - (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths {
-  [self updateOnMainThreadWithBlock:^{
+  ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController deleteNodesAtIndexPaths:indexPaths];
     [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths];
     _workingRangeIsValid = NO;
-  }];
+  });
+}
+
+- (void)dataController:(ASDataController *)dataController willInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet {
+  ASDisplayNodePerformBlockOnMainThread(^{
+    if ([_delegate respondsToSelector:@selector(rangeController:willInsertSectionsAtIndexSet:)]) {
+      [_delegate rangeController:self willInsertSectionsAtIndexSet:indexSet];
+    }
+  });
 }
 
 - (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet {
@@ -263,19 +273,27 @@
     [sectionNodeSizes addObject:nodeSizes];
   }];
 
-  [self updateOnMainThreadWithBlock:^{
+  ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController insertSections:sectionNodeSizes atIndexSet:indexSet];
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet];
     _workingRangeIsValid = NO;
-  }];
+  });
+}
+
+- (void)dataController:(ASDataController *)dataController willDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet {
+  ASDisplayNodePerformBlockOnMainThread(^{
+    if ([_delegate respondsToSelector:@selector(rangeController:willDeleteSectionsAtIndexSet:)]) {
+      [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet];
+    }
+  });
 }
 
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet {
-  [self updateOnMainThreadWithBlock:^{
+  ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController deleteSectionsAtIndexSet:indexSet];
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet];
     _workingRangeIsValid = NO;
-  }];
+  });
 }
 
 @end

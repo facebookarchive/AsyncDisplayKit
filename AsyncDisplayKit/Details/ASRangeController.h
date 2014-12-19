@@ -95,4 +95,26 @@
  */
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet;
 
+@optional
+
+/**
+ * Called before nodes insertion.
+ */
+- (void)rangeController:(ASRangeController *)rangeController willInsertNodesAtIndexPaths:(NSArray *)indexPaths;
+
+/**
+ * Called before nodes deletion.
+ */
+- (void)rangeController:(ASRangeController *)rangeController willDeleteNodesAtIndexPaths:(NSArray *)indexPaths;
+
+/**
+ * Called before section insertion.
+ */
+- (void)rangeController:(ASRangeController *)rangeController willInsertSectionsAtIndexSet:(NSIndexSet *)indexSet;
+
+/**
+ * Called before section deletion.
+ */
+- (void)rangeController:(ASRangeController *)rangeController willDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet;
+
 @end
