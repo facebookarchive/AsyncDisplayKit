@@ -135,7 +135,13 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   [_dataController reloadData];
 
-  [super reloadData];
+  if ([NSThread isMainThread]) {
+    [super reloadData];
+  } else {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [super reloadData];
+    });
+  }
 }
 
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
