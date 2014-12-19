@@ -12,6 +12,7 @@
 #import "ASFlowLayoutController.h"
 #import "ASRangeController.h"
 #import "ASDataController.h"
+#import "ASDisplayNodeInternal.h"
 
 
 #pragma mark -
@@ -135,7 +136,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   [_dataController reloadData];
 
-  [super reloadData];
+  ASDisplayNodePerformBlockOnMainThread(^{
+    [super reloadData];
+  });
 }
 
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
