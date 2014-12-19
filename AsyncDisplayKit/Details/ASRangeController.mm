@@ -57,6 +57,7 @@
 @interface ASRangeController () {
   NSSet *_workingRangeIndexPaths;
   NSSet *_workingRangeNodes;
+  BOOL _workingRangeIsValid;
   
   BOOL _queuedRangeUpdate;
 
@@ -71,6 +72,7 @@
   if (self = [super init]) {
 
     _workingRangeIndexPaths = [NSSet set];
+    _workingRangeIsValid = YES;
   }
 
   return self;
@@ -157,7 +159,7 @@
     NSSet *workingRangeIndexPaths = [_layoutController workingRangeIndexPathsForScrolling:_scrollDirection viewportSize:viewportSize];
     NSSet *visibleRangeIndexPaths = [NSSet setWithArray:indexPaths];
 
-    NSMutableSet *removedIndexPaths = [_workingRangeIndexPaths mutableCopy];
+    NSMutableSet *removedIndexPaths = _workingRangeIsValid ? [_workingRangeIndexPaths mutableCopy] : [NSMutableSet set];
     [removedIndexPaths minusSet:workingRangeIndexPaths];
     [removedIndexPaths minusSet:visibleRangeIndexPaths];
     if (removedIndexPaths.count) {
@@ -179,6 +181,7 @@
 
     _workingRangeIndexPaths = workingRangeIndexPaths;
     _workingRangeNodes = [NSSet setWithArray:[_delegate rangeController:self nodesAtIndexPaths:[workingRangeIndexPaths allObjects]]];
+    _workingRangeIsValid = YES;
   }
 
   _queuedRangeUpdate = NO;
@@ -235,6 +238,7 @@
   [self updateOnMainThreadWithBlock:^{
     [_layoutController insertNodesAtIndexPaths:indexPaths withSizes:nodeSizes];
     [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths];
+    _workingRangeIsValid = NO;
   }];
 }
 
@@ -242,6 +246,7 @@
   [self updateOnMainThreadWithBlock:^{
     [_layoutController deleteNodesAtIndexPaths:indexPaths];
     [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths];
+    _workingRangeIsValid = NO;
   }];
 }
 
@@ -261,6 +266,7 @@
   [self updateOnMainThreadWithBlock:^{
     [_layoutController insertSections:sectionNodeSizes atIndexSet:indexSet];
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet];
+    _workingRangeIsValid = NO;
   }];
 }
 
@@ -268,6 +274,7 @@
   [self updateOnMainThreadWithBlock:^{
     [_layoutController deleteSectionsAtIndexSet:indexSet];
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet];
+    _workingRangeIsValid = NO;
   }];
 }
 
