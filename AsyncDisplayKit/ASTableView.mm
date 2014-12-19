@@ -186,10 +186,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)reloadData
 {
-  [_dataController reloadData];
   ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
   });
+  [_dataController reloadData];
 }
 
 - (ASRangeTuningParameters)rangeTuningParameters
