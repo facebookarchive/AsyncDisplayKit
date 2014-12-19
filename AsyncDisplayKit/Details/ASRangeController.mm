@@ -57,6 +57,7 @@
 @interface ASRangeController () {
   NSSet *_workingRangeIndexPaths;
   NSSet *_workingRangeNodes;
+  BOOL _workingRangeIsValid;
   
   BOOL _queuedRangeUpdate;
 
@@ -71,6 +72,7 @@
   if (self = [super init]) {
 
     _workingRangeIndexPaths = [NSSet set];
+    _workingRangeIsValid = YES;
   }
 
   return self;
@@ -121,12 +123,7 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node && view, @"invalid argument, did you mean -removeNodeFromWorkingRange:?");
 
-  // use an explicit transaction to force CoreAnimation to display nodes in the order they are added.
-  [CATransaction begin];
-
   [view addSubview:node.view];
-
-  [CATransaction commit];
 }
 
 #pragma mark -
@@ -162,7 +159,7 @@
     NSSet *workingRangeIndexPaths = [_layoutController workingRangeIndexPathsForScrolling:_scrollDirection viewportSize:viewportSize];
     NSSet *visibleRangeIndexPaths = [NSSet setWithArray:indexPaths];
 
-    NSMutableSet *removedIndexPaths = [_workingRangeIndexPaths mutableCopy];
+    NSMutableSet *removedIndexPaths = _workingRangeIsValid ? [_workingRangeIndexPaths mutableCopy] : [NSMutableSet set];
     [removedIndexPaths minusSet:workingRangeIndexPaths];
     [removedIndexPaths minusSet:visibleRangeIndexPaths];
     if (removedIndexPaths.count) {
@@ -184,6 +181,7 @@
 
     _workingRangeIndexPaths = workingRangeIndexPaths;
     _workingRangeNodes = [NSSet setWithArray:[_delegate rangeController:self nodesAtIndexPaths:[workingRangeIndexPaths allObjects]]];
+    _workingRangeIsValid = YES;
   }
 
   _queuedRangeUpdate = NO;
@@ -240,6 +238,7 @@
   [self updateOnMainThreadWithBlock:^{
     [_layoutController insertNodesAtIndexPaths:indexPaths withSizes:nodeSizes];
     [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths];
+    _workingRangeIsValid = NO;
   }];
 }
 
@@ -247,13 +246,27 @@
   [self updateOnMainThreadWithBlock:^{
     [_layoutController deleteNodesAtIndexPaths:indexPaths];
     [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths];
+    _workingRangeIsValid = NO;
   }];
 }
 
-- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet {
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet {
+  ASDisplayNodeAssert(sections.count == indexSet.count, @"Invalid sections");
+
+  NSMutableArray *sectionNodeSizes = [NSMutableArray arrayWithCapacity:sections.count];
+
+  [sections enumerateObjectsUsingBlock:^(NSArray *nodes, NSUInteger idx, BOOL *stop) {
+    NSMutableArray *nodeSizes = [NSMutableArray arrayWithCapacity:nodes.count];
+    [nodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+      [nodeSizes addObject:[NSValue valueWithCGSize:node.calculatedSize]];
+    }];
+    [sectionNodeSizes addObject:nodeSizes];
+  }];
+
   [self updateOnMainThreadWithBlock:^{
-    [_layoutController insertSectionsAtIndexSet:indexSet];
+    [_layoutController insertSections:sectionNodeSizes atIndexSet:indexSet];
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet];
+    _workingRangeIsValid = NO;
   }];
 }
 
@@ -261,6 +274,7 @@
   [self updateOnMainThreadWithBlock:^{
     [_layoutController deleteSectionsAtIndexSet:indexSet];
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet];
+    _workingRangeIsValid = NO;
   }];
 }
 

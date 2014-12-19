@@ -116,6 +116,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _flags.implementsDrawRect = ([[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
   _flags.implementsImageDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
   _flags.implementsDrawParameters = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
+
+  _fadeAnimationDuration = 0.1;
 }
 
 - (id)init
@@ -374,7 +376,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssertTrue(_size.height >= 0.0);
 
   // we generate placeholders at measure: time so that a node is guaranteed to have a placeholder ready to go
-  if (self.placeholderEnabled && [self displaysAsynchronously]) {
+  // also if a node has no size, it should not have a placeholder
+  if (self.placeholderEnabled && [self displaysAsynchronously] && _size.width > 0.0 && _size.height > 0.0) {
     if (!_placeholderImage) {
       _placeholderImage = [self placeholderImage];
     }
@@ -1132,7 +1135,19 @@ static NSInteger incrementIfFound(NSInteger i) {
   // only trampoline if there is a placeholder and nodes are done displaying
   if ([self _pendingDisplayNodesHaveFinished] && _placeholderLayer.superlayer) {
     dispatch_async(dispatch_get_main_queue(), ^{
-      [self _tearDownPlaceholderLayer];
+      void (^cleanupBlock)() = ^{
+        [self _tearDownPlaceholderLayer];
+      };
+
+      if (self.placeholderFadesOut) {
+        [CATransaction begin];
+        [CATransaction setCompletionBlock:cleanupBlock];
+        [CATransaction setAnimationDuration:_fadeAnimationDuration];
+        _placeholderLayer.opacity = 0.0;
+        [CATransaction commit];
+      } else {
+        cleanupBlock();
+      }
     });
   }
 }
@@ -1256,10 +1271,6 @@ static NSInteger incrementIfFound(NSInteger i) {
   [self _pendingNodeDidDisplay:self];
 
   [_supernode subnodeDisplayDidFinish:self];
-
-  if (_placeholderLayer && [self _pendingDisplayNodesHaveFinished]) {
-    [self _tearDownPlaceholderLayer];
-  }
 }
 
 - (void)subnodeDisplayWillStart:(ASDisplayNode *)subnode

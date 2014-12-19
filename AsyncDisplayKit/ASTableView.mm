@@ -13,6 +13,8 @@
 #import "ASFlowLayoutController.h"
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
+#import "ASDisplayNodeInternal.h"
+
 
 
 #pragma mark -
@@ -185,8 +187,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)reloadData
 {
   [_dataController reloadData];
-
-  [super reloadData];
+  ASDisplayNodePerformBlockOnMainThread(^{
+    [super reloadData];
+  });
 }
 
 - (ASRangeTuningParameters)rangeTuningParameters
@@ -397,7 +400,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark - ASDataControllerDelegate
 
 - (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath {
-  return [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
+  ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
+  ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+  return node;
 }
 
 - (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath {

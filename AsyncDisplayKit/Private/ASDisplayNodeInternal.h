@@ -61,6 +61,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 
   _ASPendingState *_pendingViewState;
 
+  NSTimeInterval _fadeAnimationDuration;
+
   struct {
     // public properties
     unsigned synchronous:1;
