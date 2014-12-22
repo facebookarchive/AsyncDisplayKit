@@ -134,11 +134,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)reloadData
 {
-  [_dataController reloadData];
-
   ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
   });
+  [_dataController reloadData];
 }
 
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
@@ -348,10 +347,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-
 #pragma mark -
 #pragma mark ASRangeControllerDelegate.
-
 
 - (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController
 {
@@ -372,36 +369,28 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths {
   ASDisplayNodeAssertMainThread();
   [UIView performWithoutAnimation:^{
-    [self performBatchUpdates:^{
-      [super insertItemsAtIndexPaths:indexPaths];
-    } completion:nil];
+    [super insertItemsAtIndexPaths:indexPaths];
   }];
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths {
   ASDisplayNodeAssertMainThread();
   [UIView performWithoutAnimation:^{
-    [self performBatchUpdates:^{
-      [super deleteItemsAtIndexPaths:indexPaths];
-    } completion:nil];
+    [super deleteItemsAtIndexPaths:indexPaths];
   }];
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet {
   ASDisplayNodeAssertMainThread();
   [UIView performWithoutAnimation:^{
-    [self performBatchUpdates:^{
-      [super insertSections:indexSet];
-    } completion:nil];
+    [super insertSections:indexSet];
   }];
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet {
   ASDisplayNodeAssertMainThread();
   [UIView performWithoutAnimation:^{
-    [self performBatchUpdates:^{
-      [super deleteSections:indexSet];
-    } completion:nil];
+    [super deleteSections:indexSet];
   }];
 }
 
