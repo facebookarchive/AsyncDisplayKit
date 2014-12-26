@@ -378,13 +378,14 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   // The reloading operation required reloading the data
   // Loading data in the calling thread
   NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+  [indexPaths sortedArrayUsingSelector:@selector(compare:)];
   [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
     [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
   }];
 
   dispatch_async([ASDataController sizingQueue], ^{
     [self syncUpdateDataWithBlock:^{
-      DELETE_NODES(_nodes, nodes);
+      DELETE_NODES(_nodes, indexPaths);
     }];
 
     [self _insertNodes:nodes atIndexPaths:indexPaths];
@@ -399,7 +400,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
       DELETE_NODES(_nodes, indexPaths);
 
       // Don't re-calculate size for moving
-      INSERT_NODES(_nodes, indexPaths, nodes);
+      NSArray *newIndexPaths = [NSArray arrayWithObject:newIndexPath];
+      INSERT_NODES(_nodes, newIndexPaths, nodes);
     }];
   });
 }
