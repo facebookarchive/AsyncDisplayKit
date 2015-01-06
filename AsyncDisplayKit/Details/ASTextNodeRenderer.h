@@ -60,8 +60,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeRendererMeasureOption) {
  * Draw the renderer's text content into the bounds provided.
  *
  * @param bounds The rect in which to draw the contents of the renderer.
- * @param isRasterizing If YES, the renderer will not draw its background color
- * within the bounds.
+ * @param context The CGContext in which to draw the contents of the renderer.
  *
  * @discussion Note that if a shadow is to be drawn, then the text will actually
  * draw inside a region that is inset from the bounds provided.  Use
@@ -72,7 +71,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeRendererMeasureOption) {
  * You may want to consider triggering this cost before hitting the draw method
  * if you are sensitive to this cost in drawInRect...
  */
-- (void)drawInRect:(CGRect)bounds isRasterizing:(BOOL)isRasterizing;
+- (void)drawInRect:(CGRect)bounds inContext:(CGContextRef)context;
 
 #pragma mark - Layout
 
