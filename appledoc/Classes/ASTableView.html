@@ -48,7 +48,11 @@
 	
 	<option value="instance_methods">Instance Methods</option>
 	
-	<option value="//api/name/appendNodesWithIndexPaths:">&nbsp;&nbsp;&nbsp;&nbsp;- appendNodesWithIndexPaths:</option>
+	<option value="//api/name/beginUpdates">&nbsp;&nbsp;&nbsp;&nbsp;- beginUpdates</option>
+	
+	<option value="//api/name/insertRowsAtIndexPaths:withRowAnimation:">&nbsp;&nbsp;&nbsp;&nbsp;- insertRowsAtIndexPaths:withRowAnimation:</option>
+	
+	<option value="//api/name/insertSections:withRowAnimation:">&nbsp;&nbsp;&nbsp;&nbsp;- insertSections:withRowAnimation:</option>
 	
 	<option value="//api/name/reloadData">&nbsp;&nbsp;&nbsp;&nbsp;- reloadData</option>
 	
@@ -86,7 +90,11 @@
 
 <li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#instance_methods">Instance Methods</a></span><ul>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/appendNodesWithIndexPaths:">appendNodesWithIndexPaths:</a></span></li>
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/beginUpdates">beginUpdates</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/insertRowsAtIndexPaths:withRowAnimation:">insertRowsAtIndexPaths:withRowAnimation:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/insertSections:withRowAnimation:">insertSections:withRowAnimation:</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/reloadData">reloadData</a></span></li>
 	
@@ -160,7 +168,19 @@ pre-rendering instead of synchronously loading UITableViewCells.</p>
 	
 </li><li>
 	<span class="tooltip">
-		<code><a href="#//api/name/appendNodesWithIndexPaths:">&ndash;&nbsp;appendNodesWithIndexPaths:</a></code>
+		<code><a href="#//api/name/beginUpdates">&ndash;&nbsp;beginUpdates</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/insertSections:withRowAnimation:">&ndash;&nbsp;insertSections:withRowAnimation:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/insertRowsAtIndexPaths:withRowAnimation:">&ndash;&nbsp;insertRowsAtIndexPaths:withRowAnimation:</a></code>
 	</span>
 	
 	
@@ -229,30 +249,20 @@ pre-rendering instead of synchronously loading UITableViewCells.</p>
 						<h2 class="subtitle subtitle-methods">Instance Methods</h2>
 						
 						<div class="section-method">
-	<a name="//api/name/appendNodesWithIndexPaths:" title="appendNodesWithIndexPaths:"></a>
-	<h3 class="subsubtitle method-title">appendNodesWithIndexPaths:</h3>
+	<a name="//api/name/beginUpdates" title="beginUpdates"></a>
+	<h3 class="subsubtitle method-title">beginUpdates</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>Append nodes.</p>
+		<p>We don&rsquo;t support the these methods for animation yet.</p>
 	</div>		
 	
     
 
-	<div class="method-subsection method-declaration"><code>- (void)appendNodesWithIndexPaths:(id)<em>indexPaths</em></code></div>
+	<div class="method-subsection method-declaration"><code>- (void)beginUpdates</code></div>
 
     
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>indexPaths</em></dt>
-			<dd><p>Ordered array of index paths corresponding to the nodes to be added.</p></dd>
-		</dl>
-		
-	</div>
 	
 	
 	
@@ -262,7 +272,91 @@ pre-rendering instead of synchronously loading UITableViewCells.</p>
 	
 	<div class="method-subsection discussion-section">
 		<h4 class="method-subtitle">Discussion</h4>
-		<p>As with UITableView, the asyncDataSource must be updated to reflect the new nodes before this method is called.</p>
+		<p>TODO: support animations.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASTableView.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/insertRowsAtIndexPaths:withRowAnimation:" title="insertRowsAtIndexPaths:withRowAnimation:"></a>
+	<h3 class="subsubtitle method-title">insertRowsAtIndexPaths:withRowAnimation:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Row updating.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)insertRowsAtIndexPaths:(id)<em>indexPaths</em> withRowAnimation:(id)<em>animation</em></code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
+view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASTableView.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/insertSections:withRowAnimation:" title="insertSections:withRowAnimation:"></a>
+	<h3 class="subsubtitle method-title">insertSections:withRowAnimation:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Section updating.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)insertSections:(id)<em>sections</em> withRowAnimation:(id)<em>animation</em></code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
+view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.</p>
 	</div>
 	
 	
@@ -338,7 +432,7 @@ pre-rendering instead of synchronously loading UITableViewCells.</p>
 				<div id="footer">
 					<hr />
 					<div class="footer-copyright">
-						<p><span class="copyright">&copy; 2014 Facebook. All rights reserved. (Last updated: 2014-12-03)</span><br />
+						<p><span class="copyright">&copy; 2015 Facebook. All rights reserved. (Last updated: 2015-01-05)</span><br />
 						
 						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2 (build 963)</a>.</span></p>
 						
