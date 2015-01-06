@@ -151,21 +151,25 @@
 #pragma mark - Event Handling + UIResponder Overrides
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
+  [super touchesBegan:touches withEvent:event];
   [_node touchesBegan:touches withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
+  [super touchesMoved:touches withEvent:event];
   [_node touchesMoved:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
+  [super touchesEnded:touches withEvent:event];
   [_node touchesEnded:touches withEvent:event];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
+  [super touchesCancelled:touches withEvent:event];
   [_node touchesCancelled:touches withEvent:event];
 }
 
