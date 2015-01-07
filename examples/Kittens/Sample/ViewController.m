@@ -16,7 +16,7 @@
 #import "BlurbNode.h"
 #import "KittenNode.h"
 
-static const NSInteger kLitterSize = 5000;
+static const NSInteger kLitterSize = 20;
 
 
 @interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
