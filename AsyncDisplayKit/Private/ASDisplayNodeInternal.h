@@ -22,6 +22,14 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 CGFloat ASDisplayNodeScreenScale();
 void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 
+typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
+  ASDisplayNodeMethodOverrideNone = 0,
+  ASDisplayNodeMethodOverrideTouchesBegan     = 1 << 0,
+  ASDisplayNodeMethodOverrideTouchesCancelled = 1 << 1,
+  ASDisplayNodeMethodOverrideTouchesEnded     = 1 << 2,
+  ASDisplayNodeMethodOverrideTouchesMoved     = 1 << 3
+};
+
 @class _ASPendingState;
 
 // Allow 2^n increments of begin disabling hierarchy notifications
@@ -101,6 +109,9 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 
 // Creates a pendingViewState if one doesn't exist. Allows setting view properties on a bg thread before there is a view.
 @property (atomic, retain, readonly) _ASPendingState *pendingViewState;
+
+// Bitmask to check which methods an object overrides.
+@property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
 
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;

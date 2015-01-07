@@ -151,26 +151,38 @@
 #pragma mark - Event Handling + UIResponder Overrides
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  [super touchesBegan:touches withEvent:event];
-  [_node touchesBegan:touches withEvent:event];
+    if (_node.methodOverrides & ASDisplayNodeMethodOverrideTouchesBegan) {
+        [_node touchesBegan:touches withEvent:event];
+    } else {
+        [super touchesBegan:touches withEvent:event];
+    }
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  [super touchesMoved:touches withEvent:event];
-  [_node touchesMoved:touches withEvent:event];
+    if (_node.methodOverrides & ASDisplayNodeMethodOverrideTouchesMoved) {
+        [_node touchesMoved:touches withEvent:event];
+    } else {
+        [super touchesMoved:touches withEvent:event];
+    }
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  [super touchesEnded:touches withEvent:event];
-  [_node touchesEnded:touches withEvent:event];
+    if (_node.methodOverrides & ASDisplayNodeMethodOverrideTouchesEnded) {
+        [_node touchesEnded:touches withEvent:event];
+    } else {
+        [super touchesEnded:touches withEvent:event];
+    }
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  [super touchesCancelled:touches withEvent:event];
-  [_node touchesCancelled:touches withEvent:event];
+    if (_node.methodOverrides & ASDisplayNodeMethodOverrideTouchesCancelled) {
+        [_node touchesCancelled:touches withEvent:event];
+    } else {
+        [super touchesCancelled:touches withEvent:event];
+    }
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
