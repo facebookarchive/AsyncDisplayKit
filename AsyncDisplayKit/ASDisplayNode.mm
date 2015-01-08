@@ -51,16 +51,23 @@ CGFloat ASDisplayNodeScreenScale()
 {
   static CGFloat screenScale = 0.0;
   static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    if ([NSThread isMainThread]) {
-      screenScale = [[UIScreen mainScreen] scale];
-    } else {
-      dispatch_sync(dispatch_get_main_queue(), ^{
-        screenScale = [[UIScreen mainScreen] scale];
-      });
-    }
+  ASDispatchOnceOnMainThread(&onceToken, ^{
+    screenScale = [[UIScreen mainScreen] scale];
   });
   return screenScale;
+}
+
+void ASDispatchOnceOnMainThread(dispatch_once_t *predicate, dispatch_block_t block)
+{
+  if ([NSThread isMainThread]) {
+    dispatch_once(predicate, block);
+  } else {
+    if (DISPATCH_EXPECT(*predicate == 0L, NO)) {
+      dispatch_sync(dispatch_get_main_queue(), ^{
+        dispatch_once(predicate, block);
+      });
+    }
+  }
 }
 
 void ASDisplayNodePerformBlockOnMainThread(void (^block)())
