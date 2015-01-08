@@ -238,7 +238,7 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
       INSERT_SECTIONS(_nodes , indexSet, sectionArray);
     }];
 
-    [self _insertNodes:nodes atIndexPaths:indexPaths];
+    [self _batchInsertNodes:nodes atIndexPaths:indexPaths];
   });
 }
 
@@ -278,7 +278,7 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
     }];
 
     // reinsert the elements
-    [self _insertNodes:updatedNodes atIndexPaths:updatedIndexPaths];
+    [self _batchInsertNodes:updatedNodes atIndexPaths:updatedIndexPaths];
   });
 }
 
@@ -344,23 +344,29 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   }
 }
 
-- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths {
+- (void)_batchInsertNodes:(NSArray *)nodes
+             atIndexPaths:(NSArray *)indexPaths {
   NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
 
+  // Processing in batches
+  for (NSUInteger i = 0; i < indexPaths.count; i += blockSize) {
+    NSRange batchedRange = NSMakeRange(i, MIN(indexPaths.count - i, blockSize));
+    NSArray *batchedIndexPaths = [indexPaths subarrayWithRange:batchedRange];
+    NSArray *batchedNodes = [nodes subarrayWithRange:batchedRange];
+
+    [self _insertNodes:batchedNodes atIndexPaths:batchedIndexPaths];
+  }
+}
+
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths {
   // sort indexPath to avoid messing up the index when inserting in several batches
   NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
-
-  // Processing in batches
-  for (NSUInteger i = 0; i < sortedIndexPaths.count; i += blockSize) {
-    NSArray *batchedIndexPaths = [sortedIndexPaths subarrayWithRange:NSMakeRange(i, MIN(sortedIndexPaths.count - i, blockSize))];
-    NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:batchedIndexPaths.count];
-
-    [batchedIndexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-      [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
-    }];
-
-    [self _insertNodes:nodes atIndexPaths:batchedIndexPaths];
+  NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+  for (NSUInteger i = 0; i < sortedIndexPaths.count; i++) {
+    [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:sortedIndexPaths[i]]];
   }
+
+  [self _batchInsertNodes:nodes atIndexPaths:indexPaths];
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths {
@@ -378,16 +384,17 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   // The reloading operation required reloading the data
   // Loading data in the calling thread
   NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+  [indexPaths sortedArrayUsingSelector:@selector(compare:)];
   [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
     [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
   }];
 
   dispatch_async([ASDataController sizingQueue], ^{
     [self syncUpdateDataWithBlock:^{
-      DELETE_NODES(_nodes, nodes);
+      DELETE_NODES(_nodes, indexPaths);
     }];
 
-    [self _insertNodes:nodes atIndexPaths:indexPaths];
+    [self _batchInsertNodes:nodes atIndexPaths:indexPaths];
   });
 }
 
@@ -399,7 +406,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
       DELETE_NODES(_nodes, indexPaths);
 
       // Don't re-calculate size for moving
-      INSERT_NODES(_nodes, indexPaths, nodes);
+      NSArray *newIndexPaths = [NSArray arrayWithObject:newIndexPath];
+      INSERT_NODES(_nodes, newIndexPaths, nodes);
     }];
   });
 }
@@ -442,7 +450,7 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 
     }];
 
-    [self _insertNodes:updatedNodes atIndexPaths:updatedIndexPaths];
+    [self _batchInsertNodes:updatedNodes atIndexPaths:updatedIndexPaths];
   });
 }
 

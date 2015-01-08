@@ -118,6 +118,21 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _flags.implementsDrawParameters = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
 
   _fadeAnimationDuration = 0.1;
+
+  ASDisplayNodeMethodOverrides overrides = ASDisplayNodeMethodOverrideNone;
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesBegan:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesBegan;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesMoved:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesMoved;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesCancelled:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesCancelled;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesEnded:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
+  }
+  _methodOverrides = overrides;
 }
 
 - (id)init
@@ -1303,50 +1318,22 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  ASDisplayNodeAssertMainThread();
-
-  if (!_view)
-    return;
-
-  // If we reach the base implementation, forward up the view hierarchy.
-  UIView *superview = _view.superview;
-  [superview touchesBegan:touches withEvent:event];
+    // subclass hook
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  ASDisplayNodeAssertMainThread();
-
-  if (!_view)
-    return;
-
-  // If we reach the base implementation, forward up the view hierarchy.
-  UIView *superview = _view.superview;
-  [superview touchesMoved:touches withEvent:event];
+    // subclass hook
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  ASDisplayNodeAssertMainThread();
-
-  if (!_view)
-    return;
-
-  // If we reach the base implementation, forward up the view hierarchy.
-  UIView *superview = _view.superview;
-  [superview touchesEnded:touches withEvent:event];
+    // subclass hook
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  ASDisplayNodeAssertMainThread();
-
-  if (!_view)
-    return;
-
-  // If we reach the base implementation, forward up the view hierarchy.
-  UIView *superview = _view.superview;
-  [superview touchesCancelled:touches withEvent:event];
+    // subclass hook
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer

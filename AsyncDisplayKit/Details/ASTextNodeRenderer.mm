@@ -578,11 +578,10 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
 
 #pragma mark - Drawing
 
-- (void)drawInRect:(CGRect)bounds isRasterizing:(BOOL)isRasterizing
+- (void)drawInRect:(CGRect)bounds inContext:(CGContextRef)context
 {
-  CGContextRef context = UIGraphicsGetCurrentContext();
   ASDisplayNodeAssert(context, @"This is no good without a context.");
-
+  UIGraphicsPushContext(context);
   CGContextSaveGState(context);
 
   [self _initializeTextKitComponentsIfNeeded];
@@ -594,6 +593,7 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
   }
 
   CGContextRestoreGState(context);
+  UIGraphicsPopContext();
 }
 
 #pragma mark - String Ranges

@@ -338,7 +338,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
   // Draw text
   bounds.origin = parameters.textOrigin;
-  [parameters.renderer drawInRect:bounds isRasterizing:isRasterizing];
+  [parameters.renderer drawInRect:bounds inContext:context];
 
   CGContextRestoreGState(context);
 }

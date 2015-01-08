@@ -362,32 +362,37 @@ static BOOL _isInterceptedSelector(SEL sel)
   return self.bounds.size;
 }
 
-- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths {
+- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
+{
   return [_dataController nodesAtIndexPaths:indexPaths];
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths {
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths
+{
   ASDisplayNodeAssertMainThread();
   [UIView performWithoutAnimation:^{
     [super insertItemsAtIndexPaths:indexPaths];
   }];
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths {
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths
+{
   ASDisplayNodeAssertMainThread();
   [UIView performWithoutAnimation:^{
     [super deleteItemsAtIndexPaths:indexPaths];
   }];
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet {
+- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet
+{
   ASDisplayNodeAssertMainThread();
   [UIView performWithoutAnimation:^{
     [super insertSections:indexSet];
   }];
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet {
+- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet
+{
   ASDisplayNodeAssertMainThread();
   [UIView performWithoutAnimation:^{
     [super deleteSections:indexSet];
