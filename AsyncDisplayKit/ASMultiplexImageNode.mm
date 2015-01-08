@@ -70,7 +70,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // Networking.
   id _downloadIdentifier;
-  BOOL _canceledImageDownload;
 }
 
 //! @abstract Read-write redeclaration of property declared in ASMultiplexImageNode.h.
@@ -78,16 +77,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 //! @abstract The image identifier that's being loaded by _loadNextImageWithCompletion:.
 @property (nonatomic, readwrite, copy) id loadingImageIdentifier;
-
-/**
-  @abstract Indicates whether a change from one array of image identifiers to another should prompt the receiver to update its loaded image.
-  @param loadedIdentifier The image identifier that's currently loaded, or nil if no identifier is loaded yet.
-  @param loadingImageIdentifier The image identifier that's currently loading, or nil if no identifier is loading.
-  @param oldIdentifiers An array of image identifiers that were previously managed, or nil if no identifiers were managed before.
-  @param newIdentifiers The array of new image identifiers.
-  @result YES if the receiver should update its loaded image as a consequence of the newly assigned identifiers; NO otherwise.
- */
-static inline BOOL _shouldUpdateAfterChangedImageIdentifiers(id loadedIdentifier, id loadingImageIdentifier, NSArray *oldIdentifiers, NSArray *newIdentifiers);
 
 /**
   @abstract Returns the next image identifier that should be downloaded.
@@ -180,7 +169,6 @@ static inline BOOL _shouldUpdateAfterChangedImageIdentifiers(id loadedIdentifier
   if (_downloadIdentifier) {
     [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
     _downloadIdentifier = nil;
-    _canceledImageDownload = YES;
   }
 }
 
@@ -188,10 +176,7 @@ static inline BOOL _shouldUpdateAfterChangedImageIdentifiers(id loadedIdentifier
 {
   [super displayWillStart];
 
-  if(_canceledImageDownload) {
-    [self _updatedImageIdentifiers];
-    _canceledImageDownload = NO;
-  }
+  [self _loadImageIdentifiers];
 }
 
 - (void)displayDidFinish
@@ -268,24 +253,16 @@ static inline BOOL _shouldUpdateAfterChangedImageIdentifiers(id loadedIdentifier
     OSSpinLockUnlock(&_imageIdentifiersLock);
     return;
   }
-
-  NSArray *oldImageIdentifiers = [[NSArray alloc] initWithArray:_imageIdentifiers];
-
+  
   _imageIdentifiers = [imageIdentifiers copy];
-
-  // Kick off image loading and display, if the identifiers have substantively changed.
-  BOOL shouldUpdateAfterChangedImageIdentifiers = _shouldUpdateAfterChangedImageIdentifiers(self.loadedImageIdentifier, self.loadingImageIdentifier, oldImageIdentifiers, _imageIdentifiers);
-
   OSSpinLockUnlock(&_imageIdentifiersLock);
-
-  if (shouldUpdateAfterChangedImageIdentifiers) {
-    [self _updatedImageIdentifiers];
-  }
 }
 
 - (void)reloadImageIdentifierSources
 {
-  [self _updatedImageIdentifiers];
+  // setting this to nil makes the node think it has not downloaded any images
+  _loadedImageIdentifier = nil;
+  [self _loadImageIdentifiers];
 }
 
 #pragma mark -
@@ -325,18 +302,10 @@ static inline BOOL _shouldUpdateAfterChangedImageIdentifiers(id loadedIdentifier
   _downloadIdentifier = downloadIdentifier;
 }
 
+
 #pragma mark - Image Loading Machinery
-static inline BOOL _shouldUpdateAfterChangedImageIdentifiers(id loadedIdentifier, id loadingImageIdentifier, NSArray *oldIdentifiers, NSArray *newIdentifiers)
-{
-  // If we're loading an identifier, we need to update if it isn't permitted to load anymore.
-  if (loadingImageIdentifier)
-    return ![newIdentifiers containsObject:loadingImageIdentifier];
 
-  // We're not loading, so we need to update unless we've already loaded the best identifier.
-  return ![[newIdentifiers firstObject] isEqual:loadedIdentifier];
-}
-
-- (void)_updatedImageIdentifiers
+- (void)_loadImageIdentifiers
 {
   // Kill any in-flight downloads.
   [self _setDownloadIdentifier:nil];

@@ -50,7 +50,7 @@
   _textLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:22.0f];
 
   // tap to reload
-  UITapGestureRecognizer *gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(start)];
+  UITapGestureRecognizer *gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(reload:)];
   [_textLabel addGestureRecognizer:gr];
 
 
@@ -92,8 +92,12 @@
   _textLabel.text = @"loading…";
   _textLabel.userInteractionEnabled = NO;
 
-  _imageNode.imageIdentifiers = nil;
   _imageNode.imageIdentifiers = @[ @"best", @"medium", @"worst" ]; // go!
+}
+
+- (void)reload:(id)sender {
+  [self start];
+  [_imageNode reloadImageIdentifierSources];
 }
 
 

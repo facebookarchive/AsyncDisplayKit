@@ -108,6 +108,7 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
   [[[mockDataSource expect] andReturn:testImage] multiplexImageNode:imageNode imageForImageIdentifier:imageIdentifier];
 
   imageNode.imageIdentifiers = @[imageIdentifier];
+  [imageNode reloadImageIdentifierSources];
 
   [mockDataSource verify];
 
@@ -153,8 +154,9 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
     completionBlock([self _testImage].CGImage);
   }] fetchCachedImageWithURL:[OCMArg any] callbackQueue:[OCMArg any] completion:[OCMArg any]];
 
-  // Kick off loading.
   imageNode.imageIdentifiers = @[imageIdentifier];
+  // Kick off loading.
+  [imageNode reloadImageIdentifierSources];
 
   // Verify the data source.
   [mockDataSource verify];
@@ -189,6 +191,7 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
   }] multiplexImageNode:[OCMArg any] imageForImageIdentifier:[OCMArg any]];
 
   imageNode.imageIdentifiers = @[highResIdentifier];
+  [imageNode reloadImageIdentifierSources];
 
   // At this point, we should have the high-res identifier loaded and the DS should have been hit once.
   XCTAssertEqualObjects(imageNode.loadedImageIdentifier, highResIdentifier, @"High res identifier should be loaded.");
@@ -197,10 +200,11 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
   // Add the low res identifier.
   NSNumber *lowResIdentifier = @1;
   imageNode.imageIdentifiers = @[highResIdentifier, lowResIdentifier];
+  [imageNode reloadImageIdentifierSources];
 
-  // At this point the high-res should still be loaded, and the data source should not have been hit.
+  // At this point the high-res should still be loaded, and the data source should have been hit again
   XCTAssertEqualObjects(imageNode.loadedImageIdentifier, highResIdentifier, @"High res identifier should be loaded.");
-  XCTAssertTrue(dataSourceHits == 1, @"Unexpected DS hit count");
+  XCTAssertTrue(dataSourceHits == 2, @"Unexpected DS hit count");
 
   imageNode.delegate = nil;
   imageNode.dataSource = nil;
@@ -226,6 +230,7 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
   }] multiplexImageNode:[OCMArg any] imageForImageIdentifier:[OCMArg any]];
 
   imageNode.imageIdentifiers = @[lowResIdentifier];
+  [imageNode reloadImageIdentifierSources];
 
   // At this point, we should have the low-res identifier loaded and the DS should have been hit once.
   XCTAssertEqualObjects(imageNode.loadedImageIdentifier, lowResIdentifier, @"Low res identifier should be loaded.");
@@ -234,6 +239,7 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
   // Add the low res identifier.
   NSNumber *highResIdentifier = @2;
   imageNode.imageIdentifiers = @[highResIdentifier, lowResIdentifier];
+  [imageNode reloadImageIdentifierSources];
 
   // At this point the high-res should be loaded, and the data source should been hit twice.
   XCTAssertEqualObjects(imageNode.loadedImageIdentifier, highResIdentifier, @"High res identifier should be loaded.");
@@ -282,6 +288,7 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
   }] multiplexImageNode:[OCMArg any] imageForImageIdentifier:[OCMArg any]];
 
   imageNode.imageIdentifiers = imageIdentifiers;
+  [imageNode reloadImageIdentifierSources];
 
   XCTAssertTrue(loadedImageCount == identifierCount, @"Expected to load the same number of identifiers we supplied");
 
@@ -331,8 +338,9 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
   [[mockDelegate expect] multiplexImageNode:imageNode didUpdateImage:[OCMArg any] withIdentifier:imageIdentifier fromImage:nil withIdentifier:nil];
   imageNode.delegate = mockDelegate;
 
-  // Kick off loading.
   imageNode.imageIdentifiers = @[imageIdentifier];
+  // Kick off loading.
+  [imageNode reloadImageIdentifierSources];
 
   // Wait until the image is loaded.
   ASRunRunLoopUntilBlockIsTrue(^BOOL{
