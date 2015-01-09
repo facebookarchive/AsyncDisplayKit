@@ -267,7 +267,7 @@
 
   [sections enumerateObjectsUsingBlock:^(NSArray *nodes, NSUInteger idx, BOOL *stop) {
     NSMutableArray *nodeSizes = [NSMutableArray arrayWithCapacity:nodes.count];
-    [nodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+    [nodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx2, BOOL *stop2) {
       [nodeSizes addObject:[NSValue valueWithCGSize:node.calculatedSize]];
     }];
     [sectionNodeSizes addObject:nodeSizes];

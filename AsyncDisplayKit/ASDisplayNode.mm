@@ -57,7 +57,7 @@ CGFloat ASDisplayNodeScreenScale()
   return screenScale;
 }
 
-void ASDispatchOnceOnMainThread(dispatch_once_t *predicate, dispatch_block_t block)
+static void ASDispatchOnceOnMainThread(dispatch_once_t *predicate, dispatch_block_t block)
 {
   if ([NSThread isMainThread]) {
     dispatch_once(predicate, block);
