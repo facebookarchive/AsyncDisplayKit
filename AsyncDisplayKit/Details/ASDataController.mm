@@ -71,7 +71,6 @@
 #define ENABLE_BACKGROUND_UPDATE 0
 
 const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
-const static NSUInteger kASDataControllerAnimationOptionNone = 0;
 
 static void *kASSizingQueueContext = &kASSizingQueueContext;
 static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
@@ -186,7 +185,7 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 
 #pragma mark - Initial Data Loading
 
-- (void)initialDataLoading {
+- (void)initialDataLoadingWithAnimationOption:(ASDataControllerAnimationOptions)animationOption {
   NSMutableArray *indexPaths = [NSMutableArray array];
 
   NSUInteger sectionNum = [_dataSource dataControllerNumberOfSections:self];
@@ -204,7 +203,7 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   }
 
   // insert elements
-  [self insertRowsAtIndexPaths:indexPaths withAnimationOption:kASDataControllerAnimationOptionNone];
+  [self insertRowsAtIndexPaths:indexPaths withAnimationOption:animationOption];
 }
 
 #pragma mark - Data Update
@@ -305,13 +304,13 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   });
 }
 
-- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection {
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
   dispatch_async([ASDataController sizingQueue], ^{
     [self asyncUpdateDataWithBlock:^{
       // remove elements
       NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_nodes, [NSIndexSet indexSetWithIndex:section]);
       NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, indexPaths);
-      DELETE_NODES(_nodes, indexPaths, kASDataControllerAnimationOptionNone);
+      DELETE_NODES(_nodes, indexPaths, animationOption);
 
       // update the section of indexpaths
       NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:newSection];
@@ -321,7 +320,7 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
       }];
 
       // Don't re-calculate size for moving
-      INSERT_NODES(_nodes, updatedIndexPaths, nodes, kASDataControllerAnimationOptionNone);
+      INSERT_NODES(_nodes, updatedIndexPaths, nodes, animationOption);
     }];
   });
 }
@@ -423,21 +422,21 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   });
 }
 
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath {
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
   dispatch_async([ASDataController sizingQueue], ^{
     [self asyncUpdateDataWithBlock:^{
       NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, [NSArray arrayWithObject:indexPath]);
       NSArray *indexPaths = [NSArray arrayWithObject:indexPath];
-      DELETE_NODES(_nodes, indexPaths, kASDataControllerAnimationOptionNone);
+      DELETE_NODES(_nodes, indexPaths, animationOption);
 
       // Don't re-calculate size for moving
       NSArray *newIndexPaths = [NSArray arrayWithObject:newIndexPath];
-      INSERT_NODES(_nodes, newIndexPaths, nodes, kASDataControllerAnimationOptionNone);
+      INSERT_NODES(_nodes, newIndexPaths, nodes, animationOption);
     }];
   });
 }
 
-- (void)reloadData {
+- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption {
   // Fetching data in calling thread
   NSMutableArray *updatedNodes = [[NSMutableArray alloc] init];
   NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] init];
@@ -458,10 +457,10 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
     [self syncUpdateDataWithBlock:^{
 
       NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_nodes);
-      DELETE_NODES(_nodes, indexPaths, kASDataControllerAnimationOptionNone);
+      DELETE_NODES(_nodes, indexPaths, animationOption);
 
       NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, _nodes.count)];
-      DELETE_SECTIONS(_nodes, indexSet, kASDataControllerAnimationOptionNone);
+      DELETE_SECTIONS(_nodes, indexSet, animationOption);
 
 
       // Insert section
@@ -471,11 +470,11 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
         [sections addObject:[[NSMutableArray alloc] init]];
       }
 
-      INSERT_SECTIONS(_nodes, [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, sectionNum)], sections, kASDataControllerAnimationOptionNone);
+      INSERT_SECTIONS(_nodes, [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, sectionNum)], sections, animationOption);
 
     }];
 
-    [self _batchInsertNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:kASDataControllerAnimationOptionNone];
+    [self _batchInsertNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOption];
   });
 }
 

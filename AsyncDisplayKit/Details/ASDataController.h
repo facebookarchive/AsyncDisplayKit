@@ -98,7 +98,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 /** @name Initial loading */
 
-- (void)initialDataLoading;
+- (void)initialDataLoadingWithAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
 /** @name Data Updating */
 
@@ -112,7 +112,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)reloadSections:(NSIndexSet *)sections withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
-- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
@@ -120,9 +120,9 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
 
-- (void)reloadData;
+- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
 
 /** @name Data Querying */
 
