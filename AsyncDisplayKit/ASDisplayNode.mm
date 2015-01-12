@@ -1282,7 +1282,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 
   [_supernode subnodeDisplayWillStart:self];
 
-  if (_placeholderImage && _placeholderLayer) {
+  if (_placeholderImage && _placeholderLayer && self.layer.contents == nil) {
     _placeholderLayer.contents = (id)_placeholderImage.CGImage;
     [self.layer addSublayer:_placeholderLayer];
   }
