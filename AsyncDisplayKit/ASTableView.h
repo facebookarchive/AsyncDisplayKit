@@ -53,8 +53,8 @@
 /**
  * Section updating.
  *
- * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
- * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
+ * All operations are synchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
+ * view will be updated synchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
  */
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
 - (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
@@ -64,8 +64,8 @@
 /**
  * Row updating.
  *
- * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
- * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
+ * All operations are synchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
+ * view will be updated synchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
  */
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
