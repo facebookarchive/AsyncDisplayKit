@@ -196,8 +196,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   ASDisplayNodeAssert(renderSizePlusShadowPadding.width >= 0, @"Calculated width for text with shadow padding (%f) is too  narrow", constrainedSizeForText.width);
   ASDisplayNodeAssert(renderSizePlusShadowPadding.height >= 0, @"Calculated height for text with shadow padding (%f) is too short", constrainedSizeForText.height);
 
-  return CGSizeMake(fminf(ceilPixelValue(renderSizePlusShadowPadding.width), constrainedSize.width),
-                    fminf(ceilPixelValue(renderSizePlusShadowPadding.height), constrainedSize.height));
+  return CGSizeMake(MIN(ceilPixelValue(renderSizePlusShadowPadding.width), constrainedSize.width),
+                    MIN(ceilPixelValue(renderSizePlusShadowPadding.height), constrainedSize.height));
 }
 
 - (void)displayDidFinish
