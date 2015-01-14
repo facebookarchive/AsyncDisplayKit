@@ -158,6 +158,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 - (instancetype)init
 {
   ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [self initWithCache:nil downloader:nil]; // satisfy compiler
 }
 
 #pragma mark - ASDisplayNode Overrides
