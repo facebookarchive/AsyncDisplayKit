@@ -46,8 +46,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  * @discussion If `cache` is nil, the receiver will not attempt to retrieve images from a cache before downloading them.
  * @returns An initialized ASMultiplexImageNode.
  */
-- (instancetype)initWithCache:(id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader;
-- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithCache:(id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader NS_DESIGNATED_INITIALIZER;
 
 /**
  * @abstract The delegate, which must conform to the <ASMultiplexImageNodeDelegate> protocol.
