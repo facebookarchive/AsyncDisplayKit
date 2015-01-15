@@ -62,6 +62,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // Image flags.
   BOOL _downloadsIntermediateImages; // Defaults to NO.
+  BOOL _haltLoadingOnError;          // Defaults to NO.
   OSSpinLock _imageIdentifiersLock;
   NSArray *_imageIdentifiers;
   id _loadedImageIdentifier;
@@ -588,9 +589,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 #pragma mark -
 - (void)_finishedLoadingImage:(UIImage *)image forIdentifier:(id)imageIdentifier error:(NSError *)error
 {
-  // If we failed to load, we stop the loading process.
+  // If we failed to load and _haltLoadingOnError is YES, we stop the loading process.
   // Note that if we bailed before we began downloading because the best identifier changed, we don't bail, but rather just begin loading the best image identifier.
-  if (error && error.code != ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged)
+  if (_haltLoadingOnError && error && error.code != ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged)
     return;
 
   OSSpinLockLock(&_imageIdentifiersLock);
