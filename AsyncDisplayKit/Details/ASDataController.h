@@ -6,6 +6,8 @@
 @class ASCellNode;
 @class ASDataController;
 
+typedef NSUInteger ASDataControllerAnimationOptions;
+
 /**
  Data source for data controller
  It will be invoked in the same thread as the api call of ASDataController.
@@ -43,28 +45,34 @@
 @optional
 
 /**
+ Called for batch update.
+ */
+- (void)dataControllerBeginUpdates:(ASDataController *)dataController;
+- (void)dataControllerEndUpdates:(ASDataController *)dataController;
+
+/**
  Called for insertion of elements.
  */
-- (void)dataController:(ASDataController *)dataController willInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths;
-- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths;
+- (void)dataController:(ASDataController *)dataController willInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
 /**
  Called for deletion of elements.
  */
-- (void)dataController:(ASDataController *)dataController willDeleteNodesAtIndexPaths:(NSArray *)indexPaths;
-- (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths;
+- (void)dataController:(ASDataController *)dataController willDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
 /**
  Called for insertion of sections.
  */
-- (void)dataController:(ASDataController *)dataController willInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet;
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet;
+- (void)dataController:(ASDataController *)dataController willInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
 /**
  Called for deletion of sections.
  */
-- (void)dataController:(ASDataController *)dataController willDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet;
-- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet;
+- (void)dataController:(ASDataController *)dataController willDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
 @end
 
@@ -90,27 +98,31 @@
 
 /** @name Initial loading */
 
-- (void)initialDataLoading;
+- (void)initialDataLoadingWithAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
 /** @name Data Updating */
 
-- (void)insertSections:(NSIndexSet *)sections;
+- (void)beginUpdates;
 
-- (void)deleteSections:(NSIndexSet *)sections;
+- (void)endUpdates;
 
-- (void)reloadSections:(NSIndexSet *)sections;
+- (void)insertSections:(NSIndexSet *)sections withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
-- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
+- (void)deleteSections:(NSIndexSet *)sections withAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
 
-- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths;
+- (void)reloadSections:(NSIndexSet *)sections withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
-- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths;
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
 
-- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths;
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
+- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
 
-- (void)reloadData;
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
+
+- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
 
 /** @name Data Querying */
 

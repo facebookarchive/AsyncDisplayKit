@@ -189,7 +189,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
   });
-  [_dataController reloadData];
+  [_dataController reloadDataWithAnimationOption:UITableViewRowAnimationNone];
 }
 
 - (ASRangeTuningParameters)rangeTuningParameters
@@ -213,7 +213,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)beginUpdates
 {
-  [self throwUnimplementedException];
+  [_dataController beginUpdates];
 }
 
 - (void)endUpdates
@@ -223,42 +223,42 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController insertSections:sections];
+  [_dataController insertSections:sections withAnimationOption:animation];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController deleteSections:sections];
+  [_dataController deleteSections:sections withAnimationOption:animation];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController reloadSections:sections];
+  [_dataController reloadSections:sections withAnimationOption:animation];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
-  [_dataController moveSection:section toSection:newSection];
+  [_dataController moveSection:section toSection:newSection withAnimationOption:UITableViewRowAnimationNone];
 }
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController insertRowsAtIndexPaths:indexPaths];
+  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOption:animation];
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController deleteRowsAtIndexPaths:indexPaths];
+  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOption:animation];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController reloadRowsAtIndexPaths:indexPaths];
+  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOption:animation];
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
-  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
+  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOption:UITableViewRowAnimationNone];
 }
 
 #pragma mark -
@@ -341,6 +341,16 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASRangeControllerDelegate.
 
+- (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController {
+  ASDisplayNodeAssertMainThread();
+  [super beginUpdates];
+}
+
+- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController {
+  ASDisplayNodeAssertMainThread();
+  [super endUpdates];
+}
+
 - (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
@@ -358,40 +368,32 @@ static BOOL _isInterceptedSelector(SEL sel)
   return self.bounds.size;
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
 
-  [UIView performWithoutAnimation:^{
-    [super insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-  }];
+  [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
 
-  [UIView performWithoutAnimation:^{
-    [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-  }];
+  [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet
+- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
 
-  [UIView performWithoutAnimation:^{
-    [super insertSections:indexSet withRowAnimation:UITableViewRowAnimationNone];
-  }];
+  [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet
+- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
 
-  [UIView performWithoutAnimation:^{
-    [super deleteSections:indexSet withRowAnimation:UITableViewRowAnimationNone];
-  }];
+  [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
 }
 
 #pragma mark - ASDataControllerDelegate
