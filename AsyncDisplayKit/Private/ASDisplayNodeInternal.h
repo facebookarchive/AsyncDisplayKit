@@ -56,6 +56,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
 
+  ASDisplayNodeViewBlock _viewBlock;
+  ASDisplayNodeLayerBlock _layerBlock;
   Class _viewClass;
   Class _layerClass;
   UIView *_view;

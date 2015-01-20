@@ -12,6 +12,8 @@
 #import "ASBaseDefines.h"
 #import "ASDealloc2MainObject.h"
 
+typedef UIView *(^ASDisplayNodeViewBlock)();
+typedef CALayer *(^ASDisplayNodeLayerBlock)();
 
 /**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
@@ -68,6 +70,22 @@
  * The layer instance will be created with alloc/init.
  */
 - (id)initWithLayerClass:(Class)layerClass;
+
+/**
+ * @abstract Alternative initializer with a block to create the backing view.
+ *
+ * @return An ASDisplayNode instance that loads its view with the given block that is guaranteed to run on the main
+ * queue. The view will render synchronously and -layout and touch handling methods on the node will not be called.
+ */
+- (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock;
+
+/**
+ * @abstract Alternative initializer with a block to create the backing layer.
+ *
+ * @return An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main
+ * queue. The layer will render synchronously and -layout and touch handling methods on the node will not be called.
+ */
+- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock;
 
 
 /** @name Properties */
