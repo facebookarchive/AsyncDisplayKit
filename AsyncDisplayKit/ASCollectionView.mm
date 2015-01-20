@@ -352,6 +352,12 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASRangeControllerDelegate.
 
+- (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController {
+}
+
+- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController {
+}
+
 - (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
