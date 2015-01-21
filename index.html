@@ -104,7 +104,7 @@ something like this in a UIViewController:</p>
   <span class="n">node</span><span class="p">.</span><span class="n">frame</span> <span class="o">=</span> <span class="p">(</span><span class="bp">CGRect</span><span class="p">){</span> <span class="n">CGPointZero</span><span class="p">,</span> <span class="n">node</span><span class="p">.</span><span class="n">calculatedSize</span> <span class="p">};</span>
 
   <span class="c1">// self.view isn&#39;t a node, so we can only use it on the main thread</span>
-  <span class="n">dispatch_sync</span><span class="p">(</span><span class="n">dispatch_get_main_queue</span><span class="p">(),</span> <span class="o">^</span><span class="p">{</span>
+  <span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_main_queue</span><span class="p">(),</span> <span class="o">^</span><span class="p">{</span>
     <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">view</span> <span class="nl">addSubview</span><span class="p">:</span><span class="n">node</span><span class="p">.</span><span class="n">view</span><span class="p">];</span>
   <span class="p">});</span>
 <span class="p">});</span>
