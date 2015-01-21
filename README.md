@@ -50,7 +50,7 @@ dispatch_async(_backgroundQueue, ^{
   node.frame = (CGRect){ CGPointZero, node.calculatedSize };
 
   // self.view isn't a node, so we can only use it on the main thread
-  dispatch_sync(dispatch_get_main_queue(), ^{
+  dispatch_async(dispatch_get_main_queue(), ^{
     [self.view addSubview:node.view];
   });
 });
