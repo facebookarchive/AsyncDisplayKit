@@ -62,7 +62,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // Image flags.
   BOOL _downloadsIntermediateImages; // Defaults to NO.
-  BOOL _haltLoadingOnError;          // Defaults to NO.
+  BOOL _haltsLoadingOnError;         // Defaults to NO.
   OSSpinLock _imageIdentifiersLock;
   NSArray *_imageIdentifiers;
   id _loadedImageIdentifier;
@@ -355,11 +355,11 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
   OSSpinLockLock(&_imageIdentifiersLock);
 
-  id _currentImageIdentifier = _failedImageIdentifier != nil ? _failedImageIdentifier : _loadedImageIdentifier;
+  id currentImageIdentifier = _failedImageIdentifier != nil ? _failedImageIdentifier : _loadedImageIdentifier;
     
   // If we've already loaded the best identifier, we've got nothing else to do.
   id bestImageIdentifier = ([_imageIdentifiers count] > 0) ? _imageIdentifiers[0] : nil;
-  if (!bestImageIdentifier || [_currentImageIdentifier isEqual:bestImageIdentifier]) {
+  if (!bestImageIdentifier || [currentImageIdentifier isEqual:bestImageIdentifier]) {
     OSSpinLockUnlock(&_imageIdentifiersLock);
     return nil;
   }
@@ -372,7 +372,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   }
   // Otherwise, load progressively.
   else {
-    NSUInteger currentIndex = [_imageIdentifiers indexOfObject:_currentImageIdentifier];
+    NSUInteger currentIndex = [_imageIdentifiers indexOfObject:currentImageIdentifier];
 
     // If nothing has loaded yet, load the worst identifier.
     if (currentIndex == NSNotFound) {
@@ -592,10 +592,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 #pragma mark -
 - (void)_finishedLoadingImage:(UIImage *)image forIdentifier:(id)imageIdentifier error:(NSError *)error
 {
-  // If we failed to load and _haltLoadingOnError is YES, we stop the loading process.
+  // If we failed to load and _haltsLoadingOnError is YES, we stop the loading process.
   // Note that if we bailed before we began downloading because the best identifier changed, we don't bail, but rather just begin loading the best image identifier.
   if (error && error.code != ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged) {
-    if (_haltLoadingOnError) {
+    if (_haltsLoadingOnError) {
       return;
     }
     _failedImageIdentifier = imageIdentifier;
