@@ -294,7 +294,9 @@
 
 - (void)dataController:(ASDataController *)dataController willDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
   ASDisplayNodePerformBlockOnMainThread(^{
+    if ([_delegate respondsToSelector:@selector(rangeController:willDeleteSectionsAtIndexSet:withAnimationOption:)]) {
       [_delegate rangeController:self willDeleteSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
+    }
   });
 }
 
