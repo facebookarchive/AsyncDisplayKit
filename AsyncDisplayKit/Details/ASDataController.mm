@@ -282,7 +282,7 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   NSMutableArray *updatedNodes = [[NSMutableArray alloc] init];
 
   [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    NSUInteger rowNum = [_dataSource dataController:self rowsInSection:sections.count];
+    NSUInteger rowNum = [_dataSource dataController:self rowsInSection:idx];
 
     NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
     for (NSUInteger i = 0; i < rowNum; i++) {
