@@ -28,6 +28,8 @@
 		055F1A3C19ABD43F004DAFF1 /* ASCellNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 055F1A3A19ABD43F004DAFF1 /* ASCellNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		055F1A3D19ABD43F004DAFF1 /* ASCellNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 055F1A3B19ABD43F004DAFF1 /* ASCellNode.m */; };
 		0574D5E219C110940097DC25 /* ASTableViewProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = 0574D5E119C110610097DC25 /* ASTableViewProtocols.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0587F9BD1A7309ED00AFF0BA /* ASEditableTextNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 0587F9BB1A7309ED00AFF0BA /* ASEditableTextNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0587F9BE1A7309ED00AFF0BA /* ASEditableTextNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0587F9BC1A7309ED00AFF0BA /* ASEditableTextNode.mm */; };
 		058D09B0195D04C000B7D73C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
 		058D09BE195D04C000B7D73C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09BD195D04C000B7D73C /* XCTest.framework */; };
 		058D09BF195D04C000B7D73C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
@@ -193,6 +195,8 @@
 		055F1A3A19ABD43F004DAFF1 /* ASCellNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCellNode.h; sourceTree = "<group>"; };
 		055F1A3B19ABD43F004DAFF1 /* ASCellNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCellNode.m; sourceTree = "<group>"; };
 		0574D5E119C110610097DC25 /* ASTableViewProtocols.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ASTableViewProtocols.h; sourceTree = "<group>"; };
+		0587F9BB1A7309ED00AFF0BA /* ASEditableTextNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASEditableTextNode.h; sourceTree = "<group>"; };
+		0587F9BC1A7309ED00AFF0BA /* ASEditableTextNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASEditableTextNode.mm; sourceTree = "<group>"; };
 		058D09AC195D04C000B7D73C /* libAsyncDisplayKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAsyncDisplayKit.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		058D09AF195D04C000B7D73C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		058D09B3195D04C000B7D73C /* AsyncDisplayKit-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AsyncDisplayKit-Prefix.pch"; sourceTree = "<group>"; };
@@ -369,6 +373,8 @@
 				058D09D7195D050800B7D73C /* ASControlNode+Subclasses.h */,
 				058D09DF195D050800B7D73C /* ASTextNode.h */,
 				058D09E0195D050800B7D73C /* ASTextNode.mm */,
+				0587F9BB1A7309ED00AFF0BA /* ASEditableTextNode.h */,
+				0587F9BC1A7309ED00AFF0BA /* ASEditableTextNode.mm */,
 				058D09DD195D050800B7D73C /* ASImageNode.h */,
 				058D09DE195D050800B7D73C /* ASImageNode.mm */,
 				0516FA3E1A1563D200B4EBED /* ASMultiplexImageNode.h */,
@@ -605,6 +611,7 @@
 				055B9FA81A1C154B00035D6D /* ASNetworkImageNode.h in Headers */,
 				054963491A1EA066000F8E56 /* ASBasicImageDownloader.h in Headers */,
 				AC3C4A541A113EEC00143C57 /* ASCollectionViewProtocols.h in Headers */,
+				0587F9BD1A7309ED00AFF0BA /* ASEditableTextNode.h in Headers */,
 				05F20AA41A15733C00DCA68A /* ASImageProtocols.h in Headers */,
 				058D0A71195D05F800B7D73C /* _AS-objc-internal.h in Headers */,
 				058D0A72195D05F800B7D73C /* _ASCoreAnimationExtras.h in Headers */,
@@ -761,6 +768,7 @@
 				058D0A1A195D050800B7D73C /* ASHighlightOverlayLayer.mm in Sources */,
 				464052231A3F83C40061C0BA /* ASFlowLayoutController.mm in Sources */,
 				058D0A28195D050800B7D73C /* ASDisplayNode+AsyncDisplay.mm in Sources */,
+				0587F9BE1A7309ED00AFF0BA /* ASEditableTextNode.mm in Sources */,
 				058D0A21195D050800B7D73C /* NSMutableAttributedString+TextKitAdditions.m in Sources */,
 				058D0A25195D050800B7D73C /* UIView+ASConvenience.m in Sources */,
 				0549634A1A1EA066000F8E56 /* ASBasicImageDownloader.mm in Sources */,
