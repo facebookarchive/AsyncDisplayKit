@@ -69,6 +69,11 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
 @property (nonatomic, readwrite, assign) BOOL downloadsIntermediateImages;
 
 /**
+ * @abstract Indicates that the receiver should stop loading if it encounters an error while loading an intermediate image identifier. Defaults to NO.
+ */
+@property (nonatomic, readwrite, assign) BOOL haltsLoadingOnError;
+
+/**
  * @abstract An array of identifiers representing various versions of an image for ASMultiplexImageNode to display.
  *
  * @discussion An identifier can be any object that conforms to NSObject and NSCopying.  The array should be in
