@@ -13,6 +13,8 @@
 #import <AsyncDisplayKit/ASImageNode.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 
+#import <AsyncDisplayKit/ASEditableTextNode.h>
+
 #import <AsyncDisplayKit/ASBasicImageDownloader.h>
 #import <AsyncDisplayKit/ASMultiplexImageNode.h>
 #import <AsyncDisplayKit/ASNetworkImageNode.h>
