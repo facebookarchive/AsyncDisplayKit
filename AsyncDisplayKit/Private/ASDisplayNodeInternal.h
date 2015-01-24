@@ -142,6 +142,12 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 // Returns the ancestor node that rasterizes descendants, or nil if none.
 - (ASDisplayNode *)__rasterizedContainerNode;
 
+// Alternative initialiser for backing with a custom view class.  Supports asynchronous display with _ASDisplayView subclasses.
+- (id)initWithViewClass:(Class)viewClass;
+
+// Alternative initialiser for backing with a custom layer class.  Supports asynchronous display with _ASDisplayLayer subclasses.
+- (id)initWithLayerClass:(Class)layerClass;
+
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
 
 @end

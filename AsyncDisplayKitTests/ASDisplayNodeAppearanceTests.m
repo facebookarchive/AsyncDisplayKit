@@ -49,6 +49,8 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 
 @interface ASDisplayNode (PrivateStuffSoWeDontPullInCPPInternalH)
 - (BOOL)__visibilityNotificationsDisabled;
+- (id)initWithViewClass:(Class)viewClass;
+- (id)initWithLayerClass:(Class)layerClass;
 @end
 
 @interface ASDisplayNodeAppearanceTests : XCTestCase
