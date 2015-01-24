@@ -149,6 +149,8 @@
 		AC3C4A511A1139C100143C57 /* ASCollectionView.h in Headers */ = {isa = PBXBuildFile; fileRef = AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC3C4A521A1139C100143C57 /* ASCollectionView.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC3C4A501A1139C100143C57 /* ASCollectionView.mm */; };
 		AC3C4A541A113EEC00143C57 /* ASCollectionViewProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = AC3C4A531A113EEC00143C57 /* ASCollectionViewProtocols.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D785F6631A74327E00291744 /* ASScrollNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.mm */; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
 /* End PBXBuildFile section */
 
@@ -294,6 +296,8 @@
 		AC3C4A501A1139C100143C57 /* ASCollectionView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASCollectionView.mm; sourceTree = "<group>"; };
 		AC3C4A531A113EEC00143C57 /* ASCollectionViewProtocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionViewProtocols.h; sourceTree = "<group>"; };
 		D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.release.xcconfig"; sourceTree = "<group>"; };
+		D785F6601A74327E00291744 /* ASScrollNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASScrollNode.h; sourceTree = "<group>"; };
+		D785F6611A74327E00291744 /* ASScrollNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASScrollNode.mm; sourceTree = "<group>"; };
 		EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AsyncDisplayKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB07EABBCF28656C6297BC2D /* Pods-AsyncDisplayKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -389,6 +393,8 @@
 				AC3C4A501A1139C100143C57 /* ASCollectionView.mm */,
 				055F1A3A19ABD43F004DAFF1 /* ASCellNode.h */,
 				055F1A3B19ABD43F004DAFF1 /* ASCellNode.m */,
+				D785F6601A74327E00291744 /* ASScrollNode.h */,
+				D785F6611A74327E00291744 /* ASScrollNode.mm */,
 				058D09E1195D050800B7D73C /* Details */,
 				058D0A01195D050800B7D73C /* Private */,
 				058D09B2195D04C000B7D73C /* Supporting Files */,
@@ -611,6 +617,7 @@
 				055B9FA81A1C154B00035D6D /* ASNetworkImageNode.h in Headers */,
 				054963491A1EA066000F8E56 /* ASBasicImageDownloader.h in Headers */,
 				AC3C4A541A113EEC00143C57 /* ASCollectionViewProtocols.h in Headers */,
+				D785F6621A74327E00291744 /* ASScrollNode.h in Headers */,
 				0587F9BD1A7309ED00AFF0BA /* ASEditableTextNode.h in Headers */,
 				05F20AA41A15733C00DCA68A /* ASImageProtocols.h in Headers */,
 				058D0A71195D05F800B7D73C /* _AS-objc-internal.h in Headers */,
@@ -788,6 +795,7 @@
 				058D0A29195D050800B7D73C /* ASDisplayNode+DebugTiming.mm in Sources */,
 				058D0A22195D050800B7D73C /* _ASAsyncTransaction.m in Sources */,
 				055F1A3919ABD413004DAFF1 /* ASRangeController.mm in Sources */,
+				D785F6631A74327E00291744 /* ASScrollNode.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

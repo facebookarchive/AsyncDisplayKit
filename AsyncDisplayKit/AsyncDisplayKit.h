@@ -20,3 +20,5 @@
 #import <AsyncDisplayKit/ASTableView.h>
 #import <AsyncDisplayKit/ASCollectionView.h>
 #import <AsyncDisplayKit/ASCellNode.h>
+
+#import <AsyncDisplayKit/ASScrollNode.h>
