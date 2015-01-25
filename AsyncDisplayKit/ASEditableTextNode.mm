@@ -49,8 +49,8 @@
 
   // TextKit.
   ASDN::RecursiveMutex _textKitLock;
-  ASTextKitComponents _textKitComponents;
-  ASTextKitComponents _placeholderTextKitComponents;
+  ASTextKitComponents *_textKitComponents;
+  ASTextKitComponents *_placeholderTextKitComponents;
   // Forwards NSLayoutManagerDelegate methods related to word kerning
   ASTextNodeWordKerner *_wordKerner;
 
@@ -133,7 +133,7 @@
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  ASTextKitComponents displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
+  ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
   CGSize textSize = ASTextKitComponentsSizeForConstrainedWidth(displayedComponents, constrainedSize.width);
   return CGSizeMake(constrainedSize.width, fminf(textSize.height, constrainedSize.height));
 }
