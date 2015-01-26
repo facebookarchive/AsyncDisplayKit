@@ -196,6 +196,19 @@ static BOOL _isInterceptedSelector(SEL sel)
   return [[_dataController nodeAtIndexPath:indexPath] calculatedSize];
 }
 
+- (NSArray *)visibleNodes
+{
+  NSArray *indexPaths = [self indexPathsForVisibleItems];
+  NSMutableArray *visibleNodes = [[NSMutableArray alloc] init];
+
+  [indexPaths enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    ASCellNode *visibleNode = [self nodeForItemAtIndexPath:obj];
+    [visibleNodes addObject:visibleNode];
+  }];
+
+  return visibleNodes;
+}
+
 #pragma mark Assertions.
 
 - (void)insertSections:(NSIndexSet *)sections
@@ -238,6 +251,10 @@ static BOOL _isInterceptedSelector(SEL sel)
   [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOption:kASCollectionViewAnimationNone];
 }
 
+- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController nodeAtIndexPath:indexPath];
+}
 
 #pragma mark -
 #pragma mark Intercepted selectors.
