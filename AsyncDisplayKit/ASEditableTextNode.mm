@@ -74,12 +74,12 @@
   _displayingPlaceholder = YES;
 
   // Create the scaffolding for the text view.
-  _textKitComponents = ASTextKitComponentsCreate(nil, CGSizeZero);
+  _textKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
   _textKitComponents.layoutManager.delegate = self;
   _wordKerner = [[ASTextNodeWordKerner alloc] init];
 
   // Create the placeholder scaffolding.
-  _placeholderTextKitComponents = ASTextKitComponentsCreate(nil, CGSizeZero);
+  _placeholderTextKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
   _placeholderTextKitComponents.layoutManager.delegate = self;
 
   return self;
@@ -134,7 +134,7 @@
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
-  CGSize textSize = ASTextKitComponentsSizeForConstrainedWidth(displayedComponents, constrainedSize.width);
+  CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
   return CGSizeMake(constrainedSize.width, fminf(textSize.height, constrainedSize.height));
 }
 

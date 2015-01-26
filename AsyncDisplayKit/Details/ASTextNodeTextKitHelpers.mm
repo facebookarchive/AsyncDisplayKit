@@ -10,26 +10,8 @@
 
 @implementation ASTextKitComponents
 
-@end
-
-#pragma mark - Convenience
-
-CGSize ASTextKitComponentsSizeForConstrainedWidth(ASTextKitComponents *components, CGFloat constrainedWidth)
-{
-  // If our text-view's width is already the constrained width, we can use our existing TextKit stack for this sizing calculation.
-  // Otherwise, we create a temporary stack to size for `constrainedWidth`.
-  if (CGRectGetWidth(components.textView.bounds) != constrainedWidth) {
-    components = ASTextKitComponentsCreate(components.textStorage, CGSizeMake(constrainedWidth, FLT_MAX));
-  }
-
-  // Force glyph generation and layout, which may not have happened yet (and isn't triggered by -usedRectForTextContainer:).
-  [components.layoutManager ensureLayoutForTextContainer:components.textContainer];
-  CGSize textSize = [components.layoutManager usedRectForTextContainer:components.textContainer].size;
-
-  return textSize;
-}
-
-ASTextKitComponents *ASTextKitComponentsCreate(NSAttributedString *attributedSeedString, CGSize textContainerSize)
++ (ASTextKitComponents *)componentsWithAttributedSeedString:(NSAttributedString *)attributedSeedString
+                                          textContainerSize:(CGSize)textContainerSize
 {
   ASTextKitComponents *components = [[ASTextKitComponents alloc] init];
 
@@ -45,3 +27,22 @@ ASTextKitComponents *ASTextKitComponentsCreate(NSAttributedString *attributedSee
 
   return components;
 }
+
+- (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth
+{
+  ASTextKitComponents *components = self;
+
+  // If our text-view's width is already the constrained width, we can use our existing TextKit stack for this sizing calculation.
+  // Otherwise, we create a temporary stack to size for `constrainedWidth`.
+  if (CGRectGetWidth(components.textView.bounds) != constrainedWidth) {
+    components = [ASTextKitComponents componentsWithAttributedSeedString:components.textStorage textContainerSize:CGSizeMake(constrainedWidth, FLT_MAX)];
+  }
+
+  // Force glyph generation and layout, which may not have happened yet (and isn't triggered by -usedRectForTextContainer:).
+  [components.layoutManager ensureLayoutForTextContainer:components.textContainer];
+  CGSize textSize = [components.layoutManager usedRectForTextContainer:components.textContainer].size;
+
+  return textSize;
+}
+
+@end
