@@ -17,7 +17,7 @@
 @interface ASTextNodeWordKernerTests : XCTestCase
 
 @property (nonatomic, readwrite, strong) ASTextNodeWordKerner *layoutManagerDelegate;
-@property (nonatomic, readwrite, assign) ASTextKitComponents components;
+@property (nonatomic, readwrite, assign) ASTextKitComponents *components;
 @property (nonatomic, readwrite, copy) NSAttributedString *attributedString;
 
 @end
@@ -37,7 +37,7 @@
   NSDictionary *attributes = nil;
   NSString *seedString = @"Hello world";
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:seedString attributes:attributes];
-  _components = ASTextKitComponentsCreate(attributedString, size);
+  _components = [ASTextKitComponents componentsWithAttributedSeedString:attributedString textContainerSize:size];
 }
 
 - (void)setupTextKitComponentsWithWordKerning
@@ -46,7 +46,7 @@
   NSDictionary *attributes = @{ASTextNodeWordKerningAttributeName: @".5"};
   NSString *seedString = @"Hello world";
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:seedString attributes:attributes];
-  _components = ASTextKitComponentsCreate(attributedString, size);
+  _components = [ASTextKitComponents componentsWithAttributedSeedString:attributedString textContainerSize:size];
 }
 
 - (void)setupTextKitComponentsWithWordKerningDifferentFontSizes
@@ -59,7 +59,7 @@
   UIFont *normalFont = [UIFont systemFontOfSize:12];
   [attributedString addAttribute:NSFontAttributeName value:bigFont range:NSMakeRange(0, 1)];
   [attributedString addAttribute:NSFontAttributeName value:normalFont range:NSMakeRange(1, 1)];
-  _components = ASTextKitComponentsCreate(attributedString, size);
+  _components = [ASTextKitComponents componentsWithAttributedSeedString:attributedString textContainerSize:size];
 }
 
 - (void)testSomeGlyphsToChangeIfWordKerning
@@ -76,7 +76,7 @@
   UIFont *font = [UIFont systemFontOfSize:12.0];
   NSDictionary *attributes = @{NSFontAttributeName : font};
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:@" " attributes:attributes];
-  _components = ASTextKitComponentsCreate(attributedString, size);
+  _components = [ASTextKitComponents componentsWithAttributedSeedString:attributedString textContainerSize:size];
   CGFloat expectedWidth = [@" " sizeWithAttributes:@{ NSFontAttributeName : font }].width;
 
   CGRect boundingBox = [_layoutManagerDelegate layoutManager:_components.layoutManager boundingBoxForControlGlyphAtIndex:0 forTextContainer:_components.textContainer proposedLineFragment:CGRectZero glyphPosition:CGPointZero characterIndex:0];
@@ -93,7 +93,7 @@
   NSDictionary *attributes = @{ASTextNodeWordKerningAttributeName: @(kernValue),
                                NSFontAttributeName : font};
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:@" " attributes:attributes];
-  _components = ASTextKitComponentsCreate(attributedString, size);
+  _components = [ASTextKitComponents componentsWithAttributedSeedString:attributedString textContainerSize:size];
   CGFloat expectedWidth = [@" " sizeWithAttributes:@{ NSFontAttributeName : font }].width + kernValue;
 
   CGRect boundingBox = [_layoutManagerDelegate layoutManager:_components.layoutManager boundingBoxForControlGlyphAtIndex:0 forTextContainer:_components.textContainer proposedLineFragment:CGRectZero glyphPosition:CGPointZero characterIndex:0];
@@ -137,7 +137,7 @@
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:seedString attributes:attributes];
   UIFont *normalFont = [UIFont systemFontOfSize:12];
   [attributedString addAttribute:NSFontAttributeName value:normalFont range:NSMakeRange(0, 1)];
-  _components = ASTextKitComponentsCreate(attributedString, size);
+  _components = [ASTextKitComponents componentsWithAttributedSeedString:attributedString textContainerSize:size];
 
   CGPoint glyphPosition = CGPointMake(42, 54);
 

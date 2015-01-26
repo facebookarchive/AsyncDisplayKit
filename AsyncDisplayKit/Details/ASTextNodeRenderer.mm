@@ -505,7 +505,8 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
   CGRect lastLineRect = [_layoutManager lineFragmentRectForGlyphAtIndex:lastVisibleGlyphIndex effectiveRange:NULL];
 
   // Calculate the bounding rectangle for the truncation message
-  ASTextKitComponents truncationComponents = ASTextKitComponentsCreate(_truncationString, constrainedRect.size);
+  ASTextKitComponents *truncationComponents = [ASTextKitComponents componentsWithAttributedSeedString:_truncationString
+                                                                                    textContainerSize:constrainedRect.size];
 
   // Size the truncation message
   [truncationComponents.layoutManager ensureLayoutForTextContainer:truncationComponents.textContainer];
