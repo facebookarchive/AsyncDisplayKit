@@ -8,6 +8,15 @@
 
 #import "ASTextNodeTextKitHelpers.h"
 
+@interface ASTextKitComponents ()
+
+// read-write redeclarations
+@property (nonatomic, strong, readwrite) NSTextStorage *textStorage;
+@property (nonatomic, strong, readwrite) NSTextContainer *textContainer;
+@property (nonatomic, strong, readwrite) NSLayoutManager *layoutManager;
+
+@end
+
 @implementation ASTextKitComponents
 
 + (ASTextKitComponents *)componentsWithAttributedSeedString:(NSAttributedString *)attributedSeedString

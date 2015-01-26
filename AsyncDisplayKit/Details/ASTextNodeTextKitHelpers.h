@@ -31,9 +31,9 @@
  */
 - (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth;
 
-@property (nonatomic, strong) NSTextStorage *textStorage;
-@property (nonatomic, strong) NSTextContainer *textContainer;
-@property (nonatomic, strong) NSLayoutManager *layoutManager;
+@property (nonatomic, strong, readonly) NSTextStorage *textStorage;
+@property (nonatomic, strong, readonly) NSTextContainer *textContainer;
+@property (nonatomic, strong, readonly) NSLayoutManager *layoutManager;
 @property (nonatomic, strong) UITextView *textView;
 
 @end
