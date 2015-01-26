@@ -20,7 +20,7 @@
   id<ASImageDownloaderProtocol> _downloader;
 
   // Only access any of these with _lock.
-  id<ASNetworkImageNodeDelegate> _delegate;
+  __weak id<ASNetworkImageNodeDelegate> _delegate;
 
   NSURL *_URL;
   UIImage *_defaultImage;
@@ -213,7 +213,7 @@
         }
 
         if (responseImage != NULL) {
-          [strongSelf->_delegate imageNode:self didLoadImage:strongSelf.image];
+          [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
         }
       };
 
