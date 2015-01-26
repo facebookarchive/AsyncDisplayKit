@@ -48,6 +48,12 @@ static UIImage *bogusImage() {
 @end
 
 
+@interface ASDisplayNode (HackForTests)
+- (id)initWithViewClass:(Class)viewClass;
+- (id)initWithLayerClass:(Class)layerClass;
+@end
+
+
 @interface _ASDisplayLayerTestLayer : _ASDisplayLayer
 {
   BOOL _isInCancelAsyncDisplay;
