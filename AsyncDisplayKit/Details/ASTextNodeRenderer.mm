@@ -29,6 +29,7 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
   NSAttributedString *_attributedString;
   NSAttributedString *_truncationString;
   NSLineBreakMode _truncationMode;
+  NSUInteger _maximumLineCount;
   NSRange _truncationCharacterRange;
   NSRange _visibleRange;
 
@@ -45,6 +46,7 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
 - (instancetype)initWithAttributedString:(NSAttributedString *)attributedString
                         truncationString:(NSAttributedString *)truncationString
                           truncationMode:(NSLineBreakMode)truncationMode
+                        maximumLineCount:(NSUInteger)maximumLineCount
                          constrainedSize:(CGSize)constrainedSize
 {
   if (self = [super init]) {
@@ -52,6 +54,8 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
     _truncationString = truncationString;
     _truncationMode = truncationMode;
     _truncationCharacterRange = NSMakeRange(NSNotFound, truncationString.length);
+    
+    _maximumLineCount = maximumLineCount;
 
     _constrainedSize = constrainedSize;
   }
@@ -90,6 +94,8 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
   _textContainer.lineFragmentPadding = 0;
   // Translate our truncation mode into a line break mode on the container
   _textContainer.lineBreakMode = _truncationMode;
+  // Set maximum number of lines
+  _textContainer.maximumNumberOfLines = _maximumLineCount;
 
   [_layoutManager addTextContainer:_textContainer];
 
