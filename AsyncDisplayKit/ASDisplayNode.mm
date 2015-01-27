@@ -1723,24 +1723,40 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 
 // We use associated objects as a last resort if our view is not a _ASDisplayView ie it doesn't have the _node ivar to write to
 
-static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
+static const char *ASDisplayNodeAssociatedViewNodeKey = "ASAssociatedViewNode";
 
 @implementation UIView (ASDisplayNodeInternal)
 @dynamic asyncdisplaykit_node;
 
 - (void)setAsyncdisplaykit_node:(ASDisplayNode *)node
 {
-  objc_setAssociatedObject(self, ASDisplayNodeAssociatedNodeKey, node, OBJC_ASSOCIATION_ASSIGN); // Weak reference to avoid cycle, since the node retains the view.
+  // Weak reference to avoid cycle, since the node retains the view.
+  objc_setAssociatedObject(self, ASDisplayNodeAssociatedViewNodeKey, node, OBJC_ASSOCIATION_ASSIGN);
 }
 
 - (ASDisplayNode *)asyncdisplaykit_node
 {
-  ASDisplayNode *node = objc_getAssociatedObject(self, ASDisplayNodeAssociatedNodeKey);
+  ASDisplayNode *node = objc_getAssociatedObject(self, ASDisplayNodeAssociatedViewNodeKey);
   return node;
 }
 
 @end
 
+static const char *ASDisplayNodeAssociatedLayerNodeKey = "ASAssociatedLayerNode";
+
 @implementation CALayer (ASDisplayNodeInternal)
 @dynamic asyncdisplaykit_node;
+
+- (void)setAsyncdisplaykit_node:(ASDisplayNode *)node
+{
+  // Weak reference to avoid cycle, since the node retains the layer.
+  objc_setAssociatedObject(self, ASDisplayNodeAssociatedLayerNodeKey, node, OBJC_ASSOCIATION_ASSIGN);
+}
+
+- (ASDisplayNode *)asyncdisplaykit_node
+{
+  ASDisplayNode *node = objc_getAssociatedObject(self, ASDisplayNodeAssociatedLayerNodeKey);
+  return node;
+}
+
 @end
