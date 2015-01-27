@@ -347,13 +347,18 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
         for (NSString *actionMessage in targetActions)
         {
           SEL action = NSSelectorFromString(actionMessage);
+          id responder = target;
 
-          // Hand off to UIApplication to send the action message.
-          // This also handles sending to the first responder is target is nil.
-          if (target == [NSNull null])
-            [[UIApplication sharedApplication] sendAction:action to:nil from:self forEvent:event];
-          else
-            [[UIApplication sharedApplication] sendAction:action to:target from:self forEvent:event];
+          // NSNull means that a nil target was set, so start at self and travel the responder chain
+          if (responder == [NSNull null]) {
+            // if the target cannot perform the action, travel the responder chain to try to find something that does
+            responder = [self.view targetForAction:action withSender:self];
+          }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+          [responder performSelector:action withObject:self withObject:event];
+#pragma clang diagnostic pop
         }
       }
     });

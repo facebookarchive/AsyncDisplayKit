@@ -241,13 +241,6 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _pendingDisplayNodes = nil;
 }
 
-#pragma mark - UIResponder overrides
-
-- (UIResponder *)nextResponder
-{
-  return self.view.superview;
-}
-
 #pragma mark - Core
 
 - (ASDisplayNode *)__rasterizedContainerNode
