@@ -198,6 +198,24 @@ static BOOL _isInterceptedSelector(SEL sel)
   _layoutController.tuningParameters = tuningParameters;
 }
 
+- (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController nodeAtIndexPath:indexPath];
+}
+
+- (NSArray *)visibleNodes
+{
+  NSArray *indexPaths = [self indexPathsForVisibleRows];
+  NSMutableArray *visibleNodes = [[NSMutableArray alloc] init];
+
+  [indexPaths enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    ASCellNode *visibleNode = [self nodeForRowAtIndexPath:obj];
+    [visibleNodes addObject:visibleNode];
+  }];
+
+  return visibleNodes;
+}
+
 #pragma mark Assertions.
 
 - (void)throwUnimplementedException

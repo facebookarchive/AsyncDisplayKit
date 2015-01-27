@@ -64,6 +64,22 @@
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 /**
+ * Similar to -cellForItemAtIndexPath:.
+ *
+ * @param indexPath The index path of the requested node.
+ *
+ * @returns a node for display at this indexpath.
+ */
+- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Similar to -visibleCells.
+ *
+ * @returns an array containing the nodes being displayed on screen.
+ */
+- (NSArray *)visibleNodes;
+
+/**
  * Query the sized node at `indexPath` for its calculatedSize.
  *
  * @param indexPath The index path for the node of interest.

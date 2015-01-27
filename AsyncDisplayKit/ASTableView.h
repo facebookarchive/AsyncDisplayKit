@@ -72,6 +72,22 @@
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
+/**
+ * Similar to -cellForRowAtIndexPath:.
+ * 
+ * @param indexPath The index path of the requested node.
+ *
+ * @returns a node for display at this indexpath.
+ */
+- (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Similar to -visibleCells.
+ *
+ * @returns an array containing the nodes being displayed on screen.
+ */
+- (NSArray *)visibleNodes;
+
 @end
 
 
