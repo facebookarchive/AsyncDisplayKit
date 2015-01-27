@@ -26,6 +26,10 @@
 
 - (void)display
 {
+  if (![self __shouldLoadViewOrLayer]) {
+    return;
+  }
+
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(self.nodeLoaded, @"backing store must be loaded before calling -display");
 
@@ -45,6 +49,10 @@
 
 - (void)recursivelyDisplay
 {
+  if (![self __shouldLoadViewOrLayer]) {
+    return;
+  }
+  
   for (ASDisplayNode *node in self.subnodes) {
     [node recursivelyDisplay];
   }
