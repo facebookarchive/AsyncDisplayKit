@@ -18,6 +18,7 @@
 @property (nonatomic, copy, readwrite) NSAttributedString *attributedString;
 @property (nonatomic, copy, readwrite) NSAttributedString *truncationString;
 @property (nonatomic, readwrite, assign) NSLineBreakMode truncationMode;
+@property (nonatomic, readwrite, assign) NSUInteger maximumLineCount;
 @property (nonatomic, readwrite, assign) CGFloat lineSpacing;
 
 @property (nonatomic, readwrite, assign) CGSize constrainedSize;
@@ -50,6 +51,7 @@
   _renderer = [[ASTextNodeRenderer alloc] initWithAttributedString:_attributedString
                                                       truncationString:_truncationString
                                                         truncationMode:_truncationMode
+                                                      maximumLineCount:_maximumLineCount
                                                        constrainedSize:_constrainedSize];
 
 }
@@ -69,6 +71,19 @@
   CGSize size = [_renderer size];
   NSInteger numberOfLines = size.height / _lineSpacing;
   XCTAssertTrue(numberOfLines == 1 , @"If constrained height (%f) is float max, then there should only be one line of text. Size %@", _constrainedSize.width, NSStringFromCGSize(size));
+}
+
+- (void)testMaximumLineCount
+{
+    NSArray *lines = [NSArray arrayWithObjects:@"Hello!", @"world!", @"foo", @"bar", @"baz", nil];
+    _maximumLineCount = 2;
+    for (int i = 0; i <= [lines count]; i++) {
+        NSString *line = [[lines subarrayWithRange:NSMakeRange(0, i)] componentsJoinedByString:@"\n"];
+        _attributedString   = [[NSAttributedString alloc] initWithString:line];
+        [self setUpRenderer];
+        [_renderer size];
+        XCTAssertTrue(_renderer.lineCount <= _maximumLineCount, @"The line count %tu after rendering should be no larger than the maximum line count %tu", _renderer.lineCount, _maximumLineCount);
+    }
 }
 
 - (void)testNoTruncationIfEnoughSpace
@@ -124,7 +139,6 @@
   [_renderer enumerateTextIndexesAtPosition:CGPointZero usingBlock:^(NSUInteger characterIndex, CGRect glyphBoundingRect, BOOL *stop) {
     XCTFail(@"Shouldn't be any text indexes to enumerate");
   }];
-
 }
 
 @end

@@ -54,6 +54,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeRendererMeasureOption) {
 - (instancetype)initWithAttributedString:(NSAttributedString *)attributedString
                         truncationString:(NSAttributedString *)truncationString
                           truncationMode:(NSLineBreakMode)truncationMode
+                        maximumLineCount:(NSUInteger)maximumLineCount
                          constrainedSize:(CGSize)constrainedSize;
 #pragma mark - Drawing
 /*

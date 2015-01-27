@@ -243,6 +243,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     _renderer = [[ASTextNodeRenderer alloc] initWithAttributedString:_attributedString
                                                         truncationString:_composedTruncationString
                                                           truncationMode:_truncationMode
+                                                        maximumLineCount:_maximumLineCount
                                                          constrainedSize:constrainedSize];
   }
   return _renderer;
@@ -903,6 +904,15 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 - (BOOL)isTruncated
 {
   return [[self _renderer] truncationStringCharacterRange].location != NSNotFound;
+}
+
+- (void)setMaximumLineCount:(NSUInteger)maximumLineCount
+{
+    if (_maximumLineCount != maximumLineCount) {
+        _maximumLineCount = maximumLineCount;
+        [self _invalidateRenderer];
+        [self setNeedsDisplay];
+    }
 }
 
 - (NSUInteger)lineCount
