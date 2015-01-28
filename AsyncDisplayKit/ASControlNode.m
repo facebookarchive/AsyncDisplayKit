@@ -368,7 +368,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (BOOL)_isInterestedInTouches
 {
   // We're only interested in touches if we're enabled and we've got targets to talk to.
-  return self.enabled && ([_controlEventDispatchTable count] > 0);
+  return self.enabled;
 }
 
 id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEvent)
