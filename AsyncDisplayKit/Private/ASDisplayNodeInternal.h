@@ -120,6 +120,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 - (BOOL)__shouldSize;
 - (void)__exitedHierarchy;
 
+// Core implementation of -measure:. Must be called with _propertyLock held.
+- (CGSize)__measure:(CGSize)constrainedSize;
+
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 

@@ -438,8 +438,13 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (CGSize)measure:(CGSize)constrainedSize
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
+  return [self __measure:constrainedSize];
+}
+
+- (CGSize)__measure:(CGSize)constrainedSize
+{
+  ASDisplayNodeAssertThreadAffinity(self);
 
   if (![self __shouldSize])
     return CGSizeZero;
@@ -459,7 +464,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
   // we generate placeholders at measure: time so that a node is guaranteed to have a placeholder ready to go
   // also if a node has no size, it should not have a placeholder
-  if (self.placeholderEnabled && [self displaysAsynchronously] && _size.width > 0.0 && _size.height > 0.0) {
+  if (self.placeholderEnabled && [self _displaysAsynchronously] && _size.width > 0.0 && _size.height > 0.0) {
     if (!_placeholderImage) {
       _placeholderImage = [self placeholderImage];
     }
@@ -474,8 +479,17 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (BOOL)displaysAsynchronously
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
+  return [self _displaysAsynchronously];
+}
+
+/**
+ * Core implementation of -displaysAsynchronously. 
+ * Must be called with _propertyLock held.
+ */
+- (BOOL)_displaysAsynchronously
+{
+  ASDisplayNodeAssertThreadAffinity(self);
   if (self.isSynchronous) {
     return NO;
   } else {
