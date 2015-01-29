@@ -113,8 +113,8 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   } else {
     ASDisplayNodeAssert(scrollDirection == ASScrollDirectionNone || scrollDirection == ASScrollDirectionUp || scrollDirection == ASScrollDirectionDown, @"Invalid scroll direction");
 
-    int backScreens = scrollDirection == ASScrollDirectionUp ? self.tuningParameters.leadingBufferScreenfuls : self.tuningParameters.trailingBufferScreenfuls;
-    int frontScreens = scrollDirection == ASScrollDirectionUp ? self.tuningParameters.trailingBufferScreenfuls : self.tuningParameters.leadingBufferScreenfuls;
+    CGFloat backScreens = scrollDirection == ASScrollDirectionUp ? self.tuningParameters.leadingBufferScreenfuls : self.tuningParameters.trailingBufferScreenfuls;
+    CGFloat frontScreens = scrollDirection == ASScrollDirectionUp ? self.tuningParameters.trailingBufferScreenfuls : self.tuningParameters.leadingBufferScreenfuls;
 
     startIter = ASFindIndexForRange(_nodeSizes, _visibleRangeStartPos, - backScreens * viewportSize.height, _layoutDirection);
     endIter = ASFindIndexForRange(_nodeSizes, _visibleRangeEndPos, frontScreens * viewportSize.height, _layoutDirection);
