@@ -2,6 +2,7 @@
 
 #import <UIKit/UIKit.h>
 
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 typedef struct {
   CGFloat leadingBufferScreenfuls;
@@ -16,6 +17,11 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
   ASScrollDirectionDown,
 };
 
+typedef NS_ENUM(NSInteger, ASLayoutRange) {
+  ASLayoutRangeRender,
+  ASLayoutRangePreload
+};
+
 @protocol ASLayoutController <NSObject>
 
 /**
@@ -23,7 +29,7 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
  *
  * Defaults to a trailing buffer of one screenful and a leading buffer of two screenfuls.
  */
-@property (nonatomic, assign) ASRangeTuningParameters tuningParameters;
+- (ASRangeTuningParameters)tuningParametersForRange:(ASLayoutRange)range;
 
 - (void)insertNodesAtIndexPaths:(NSArray *)indexPaths withSizes:(NSArray *)nodeSizes;
 
@@ -35,8 +41,14 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
 
 - (void)setVisibleNodeIndexPaths:(NSArray *)indexPaths;
 
-- (BOOL)shouldUpdateForVisibleIndexPath:(NSArray *)indexPath viewportSize:(CGSize)viewportSize;
+- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize range:(ASLayoutRange)range;
 
-- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize;
+- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize range:(ASLayoutRange)range;
+
+@property (nonatomic, assign) ASRangeTuningParameters tuningParameters ASDISPLAYNODE_DEPRECATED;
+
+- (BOOL)shouldUpdateForVisibleIndexPath:(NSArray *)indexPath viewportSize:(CGSize)viewportSize ASDISPLAYNODE_DEPRECATED;
+
+- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize ASDISPLAYNODE_DEPRECATED;
 
 @end

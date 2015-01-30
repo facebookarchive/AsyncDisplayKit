@@ -201,14 +201,24 @@ static BOOL _isInterceptedSelector(SEL sel)
   [_dataController reloadDataWithAnimationOption:UITableViewRowAnimationNone];
 }
 
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRange:(ASLayoutRange)range
+{
+  [_layoutController setTuningParameters:tuningParameters forRange:range];
+}
+
+- (ASRangeTuningParameters)tuningParametersForRange:(ASLayoutRange)range
+{
+  return [_layoutController tuningParametersForRange:range];
+}
+
 - (ASRangeTuningParameters)rangeTuningParameters
 {
-  return _layoutController.tuningParameters;
+  return [self tuningParametersForRange:ASLayoutRangeRender];
 }
 
 - (void)setRangeTuningParameters:(ASRangeTuningParameters)tuningParameters
 {
-  _layoutController.tuningParameters = tuningParameters;
+  [self setTuningParameters:tuningParameters forRange:ASLayoutRangeRender];
 }
 
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath

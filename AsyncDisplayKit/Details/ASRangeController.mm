@@ -162,9 +162,9 @@
   NSArray *indexPaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
   CGSize viewportSize = [_delegate rangeControllerViewportSize:self];
 
-  if ([_layoutController shouldUpdateForVisibleIndexPath:indexPaths viewportSize:viewportSize]) {
+  if ([_layoutController shouldUpdateForVisibleIndexPaths:indexPaths viewportSize:viewportSize range:ASLayoutRangeRender]) {
     [_layoutController setVisibleNodeIndexPaths:indexPaths];
-    NSSet *workingRangeIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize];
+    NSSet *workingRangeIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize range:ASLayoutRangeRender];
     NSSet *visibleRangeIndexPaths = [NSSet setWithArray:indexPaths];
 
     NSMutableSet *removedIndexPaths = _workingRangeIsValid ? [_workingRangeIndexPaths mutableCopy] : [NSMutableSet set];
