@@ -16,8 +16,8 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   std::pair<int, int> _visibleRangeStartPos;
   std::pair<int, int> _visibleRangeEndPos;
 
-  std::pair<int, int> _workingRangeStartPos;
-  std::pair<int, int> _workingRangeEndPos;
+  std::pair<int, int> _rangeStartPos;
+  std::pair<int, int> _rangeEndPos;
 }
 
 @end
@@ -74,7 +74,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   }];
 }
 
-- (BOOL)shouldUpdateWorkingRangesForVisibleIndexPath:(NSArray *)indexPaths
+- (BOOL)shouldUpdateForVisibleIndexPath:(NSArray *)indexPaths
                                         viewportSize:(CGSize)viewportSize {
   if (!indexPaths.count) {
     return NO;
@@ -83,12 +83,12 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   std::pair<int, int> startPos, endPos;
   ASFindIndexPathRange(indexPaths, startPos, endPos);
 
-  if (_workingRangeStartPos >= startPos || _workingRangeEndPos <= endPos) {
+  if (_rangeStartPos >= startPos || _rangeEndPos <= endPos) {
     return YES;
   }
 
-  return ASFlowLayoutDistance(startPos, _visibleRangeStartPos, _nodeSizes) > ASFlowLayoutDistance(_visibleRangeStartPos, _workingRangeStartPos, _nodeSizes) * kASFlowLayoutControllerRefreshingThreshold ||
-         ASFlowLayoutDistance(endPos, _visibleRangeEndPos, _nodeSizes) > ASFlowLayoutDistance(_visibleRangeEndPos, _workingRangeEndPos, _nodeSizes) * kASFlowLayoutControllerRefreshingThreshold;
+  return ASFlowLayoutDistance(startPos, _visibleRangeStartPos, _nodeSizes) > ASFlowLayoutDistance(_visibleRangeStartPos, _rangeStartPos, _nodeSizes) * kASFlowLayoutControllerRefreshingThreshold ||
+         ASFlowLayoutDistance(endPos, _visibleRangeEndPos, _nodeSizes) > ASFlowLayoutDistance(_visibleRangeEndPos, _rangeEndPos, _nodeSizes) * kASFlowLayoutControllerRefreshingThreshold;
 }
 
 - (void)setVisibleNodeIndexPaths:(NSArray *)indexPaths {
@@ -98,7 +98,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 /**
  * IndexPath array for the element in the working range.
  */
-- (NSSet *)workingRangeIndexPathsForScrolling:(enum ASScrollDirection)scrollDirection
+- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection
                                  viewportSize:(CGSize)viewportSize {
   std::pair<int, int> startIter, endIter;
 

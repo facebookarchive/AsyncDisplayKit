@@ -19,7 +19,7 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
 @protocol ASLayoutController <NSObject>
 
 /**
- * Tuning parameters for the working range.
+ * Tuning parameters for the range.
  *
  * Defaults to a trailing buffer of one screenful and a leading buffer of two screenfuls.
  */
@@ -35,9 +35,8 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
 
 - (void)setVisibleNodeIndexPaths:(NSArray *)indexPaths;
 
-- (BOOL)shouldUpdateWorkingRangesForVisibleIndexPath:(NSArray *)indexPath
-                                        viewportSize:(CGSize)viewportSize;
+- (BOOL)shouldUpdateForVisibleIndexPath:(NSArray *)indexPath viewportSize:(CGSize)viewportSize;
 
-- (NSSet *)workingRangeIndexPathsForScrolling:(enum ASScrollDirection)scrollDirection
-                                 viewportSize:(CGSize)viewportSize;
+- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize;
+
 @end
