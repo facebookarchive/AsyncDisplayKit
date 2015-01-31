@@ -46,7 +46,6 @@
 }
 
 // Read-write overrides.
-@property (nonatomic, readwrite, assign, getter=isHighlighted) BOOL highlighted;
 @property (nonatomic, readwrite, assign, getter=isTracking) BOOL tracking;
 @property (nonatomic, readwrite, assign, getter=isTouchInside) BOOL touchInside;
 
