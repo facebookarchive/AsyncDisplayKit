@@ -155,7 +155,7 @@
 
   return [[_ASImageNodeDrawParameters alloc] initWithCrop:_cropEnabled
                                                    opaque:self.opaque
-                                                    image:self.image
+                                                    image:self.highlighted && self.highlightedImage ? self.highlightedImage : self.image
                                                    bounds:(hasValidCropBounds ? _cropDisplayBounds : self.bounds)
                                             contentsScale:self.contentsScaleForDisplay
                                           backgroundColor:self.backgroundColor
@@ -344,7 +344,13 @@
       [self setNeedsDisplay];
   });
 }
-
+-(void)setHighlighted:(BOOL)highlighted {
+  BOOL oldValue = self.highlighted;
+  [super setHighlighted:highlighted];
+  if (oldValue != highlighted && self.highlightedImage) {
+    [self setNeedsDisplay];
+  }
+}
 @end
 
 

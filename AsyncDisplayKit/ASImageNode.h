@@ -49,6 +49,16 @@ typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
 @property (atomic, retain) UIImage *image;
 
 /**
+ * @abstract The image to display when highlighted.
+ *
+ * @discussion The node will efficiently display stretchable images by using
+ * the layer's contentsCenter property.  Non-stretchable images work too, of
+ * course.
+ */
+@property (atomic, retain) UIImage *highlightedImage;
+
+
+/**
  * @abstract Simple way to tint the image.
  */
 @property (nonatomic, assign) ASImageNodeTint tint;
