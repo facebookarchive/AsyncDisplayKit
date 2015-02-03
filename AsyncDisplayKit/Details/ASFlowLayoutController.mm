@@ -1,4 +1,10 @@
-//  Copyright 2004-present Facebook. All Rights Reserved.
+/* Copyright (c) 2014-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
 
 #import "ASFlowLayoutController.h"
 
@@ -33,17 +39,14 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
   _layoutDirection = layoutDirection;
 
-  _tuningParameterMap = {
-    {
-      // Render
-      .leadingBufferScreenfuls = 1,
-      .trailingBufferScreenfuls = 1
-    },
-    {
-      // Preload
-      .leadingBufferScreenfuls = 2,
-      .trailingBufferScreenfuls = 2
-    }
+  _tuningParameterMap = std::vector<ASRangeTuningParameters>(2);
+  _tuningParameterMap[ASLayoutRangeTypePreload] = {
+    .leadingBufferScreenfuls = 2,
+    .trailingBufferScreenfuls = 1
+  };
+  _tuningParameterMap[ASLayoutRangeTypeRender] = {
+    .leadingBufferScreenfuls = 3,
+    .trailingBufferScreenfuls = 2
   };
 
   return self;
@@ -51,28 +54,28 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
 #pragma mark - Tuning Parameters
 
-- (ASRangeTuningParameters)tuningParametersForRange:(ASLayoutRange)range
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(range < _tuningParameterMap.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  return _tuningParameterMap[range];
+  ASDisplayNodeAssert(rangeType < _tuningParameterMap.size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  return _tuningParameterMap[rangeType];
 }
 
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRange:(ASLayoutRange)range
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(range < _tuningParameterMap.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  _tuningParameterMap[range] = tuningParameters;
+  ASDisplayNodeAssert(rangeType < _tuningParameterMap.size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  _tuningParameterMap[rangeType] = tuningParameters;
 }
 
 // Support for the deprecated tuningParameters property
 - (ASRangeTuningParameters)tuningParameters
 {
-  return [self tuningParametersForRange:ASLayoutRangeRender];
+  return [self tuningParametersForRangeType:ASLayoutRangeTypeRender];
 }
 
 // Support for the deprecated tuningParameters property
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters
 {
-  [self setTuningParameters:tuningParameters forRange:ASLayoutRangeRender];
+  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
 }
 
 #pragma mark - Editing
@@ -120,7 +123,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
 #pragma mark - Visible Indices
 
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize range:(ASLayoutRange)range
+- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
 {
   if (!indexPaths.count) {
     return NO;
@@ -128,9 +131,9 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
   std::pair<int, int> rangeStartPos, rangeEndPos;
 
-  if (range < _rangeStartPos.size() && range < _rangeEndPos.size()) {
-    rangeStartPos = _rangeStartPos[range];
-    rangeEndPos = _rangeEndPos[range];
+  if (rangeType < _rangeStartPos.size() && rangeType < _rangeEndPos.size()) {
+    rangeStartPos = _rangeStartPos[rangeType];
+    rangeEndPos = _rangeEndPos[rangeType];
   }
 
   std::pair<int, int> startPos, endPos;
@@ -147,7 +150,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 - (BOOL)shouldUpdateForVisibleIndexPath:(NSArray *)indexPaths
                                         viewportSize:(CGSize)viewportSize
 {
-  return [self shouldUpdateForVisibleIndexPaths:indexPaths viewportSize:viewportSize range:ASLayoutRangeRender];
+  return [self shouldUpdateForVisibleIndexPaths:indexPaths viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
 }
 
 - (void)setVisibleNodeIndexPaths:(NSArray *)indexPaths
@@ -159,7 +162,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
  * IndexPath array for the element in the working range.
  */
 
-- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize range:(ASLayoutRange)range
+- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
 {
   CGFloat viewportScreenMetric;
   ASScrollDirection leadingDirection;
@@ -176,12 +179,12 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
     leadingDirection = ASScrollDirectionUp;
   }
 
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRange:range];
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType];
   CGFloat backScreens = scrollDirection == leadingDirection ? tuningParameters.leadingBufferScreenfuls : tuningParameters.trailingBufferScreenfuls;
   CGFloat frontScreens = scrollDirection == leadingDirection ? tuningParameters.trailingBufferScreenfuls : tuningParameters.leadingBufferScreenfuls;
 
-  std::pair<int, int> startIter = ASFindIndexForRange(_nodeSizes, _visibleRangeStartPos, - backScreens * viewportSize.height, _layoutDirection);
-  std::pair<int, int> endIter = ASFindIndexForRange(_nodeSizes, _visibleRangeEndPos, frontScreens * viewportSize.height, _layoutDirection);
+  std::pair<int, int> startIter = ASFindIndexForRange(_nodeSizes, _visibleRangeStartPos, - backScreens * viewportScreenMetric, _layoutDirection);
+  std::pair<int, int> endIter = ASFindIndexForRange(_nodeSizes, _visibleRangeEndPos, frontScreens * viewportScreenMetric, _layoutDirection);
 
   NSMutableSet *indexPathSet = [[NSMutableSet alloc] init];
 
@@ -203,7 +206,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 - (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection
                                  viewportSize:(CGSize)viewportSize
 {
-  return [self indexPathsForScrolling:scrollDirection viewportSize:viewportSize range:ASLayoutRangeRender];
+  return [self indexPathsForScrolling:scrollDirection viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
 }
 
 #pragma mark - Utility

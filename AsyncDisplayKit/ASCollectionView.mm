@@ -199,24 +199,24 @@ static BOOL _isInterceptedSelector(SEL sel)
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
 }
 
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRange:(ASLayoutRange)range
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  [_layoutController setTuningParameters:tuningParameters forRange:range];
+  [_layoutController setTuningParameters:tuningParameters forRangeType:rangeType];
 }
 
-- (ASRangeTuningParameters)tuningParametersForRange:(ASLayoutRange)range
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [_layoutController tuningParametersForRange:range];
+  return [_layoutController tuningParametersForRangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)rangeTuningParameters
 {
-  return [self tuningParametersForRange:ASLayoutRangeRender];
+  return [self tuningParametersForRangeType:ASLayoutRangeTypeRender];
 }
 
 - (void)setRangeTuningParameters:(ASRangeTuningParameters)tuningParameters
 {
-  [self setTuningParameters:tuningParameters forRange:ASLayoutRangeRender];
+  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
 }
 
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath

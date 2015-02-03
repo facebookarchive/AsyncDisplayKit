@@ -186,6 +186,14 @@
 - (void)displayDidFinish ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
+ * @abstract Indicates that the node should fetch any external data, such as images.
+ *
+ * @discussion Subclasses may override this method to be notified when they should begin to fetch data. Fetching
+ * should be done asynchronously. The node is also responsible for managing the memory of any data.
+ */
+- (void)fetchRemoteData ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
  * @abstract Indicates that the receiver is about to display its subnodes. This method is not called if there are no
  * subnodes present.
  *
@@ -312,13 +320,20 @@
 - (void)didExitHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
- * or downloaded content that can be written to a disk cache.
+ * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers.
  *
- * @discussion Called by -recursivelyReclaimMemory.   Base class implements self.contents = nil, clearing any backing
+ * @discussion Called by -recursivelyClearRendering. Base class implements self.contents = nil, clearing any backing
  * store, for asynchronous regeneration when needed.
  */
-- (void)reclaimMemory ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)clearRendering ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * Provides an opportunity to clear any remote data for only the current node.
+ *
+ * @discussion This will not clear data recursively for all subnodes. Either call -recursivelyClearRemoteData or
+ * selectively clear remote data.
+ */
+- (void)clearRemoteData ASDISPLAYNODE_REQUIRES_SUPER;
 
 
 /** @name Placeholders */

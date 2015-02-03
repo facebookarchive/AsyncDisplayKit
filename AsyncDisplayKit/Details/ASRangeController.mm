@@ -11,62 +11,16 @@
 #import "ASAssert.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASLayoutController.h"
-
 #import "ASMultiDimensionalArrayUtils.h"
-
-@interface ASDisplayNode (ASRangeController)
-
-- (void)display;
-- (void)recursivelyDisplay;
-
-@end
-
-@implementation ASDisplayNode (ASRangeController)
-
-- (void)display
-{
-  if (![self __shouldLoadViewOrLayer]) {
-    return;
-  }
-
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(self.nodeLoaded, @"backing store must be loaded before calling -display");
-
-  CALayer *layer = self.layer;
-
-  // rendering a backing store requires a node be laid out
-  [layer setNeedsLayout];
-  [layer layoutIfNeeded];
-
-  if (layer.contents) {
-    return;
-  }
-
-  [layer setNeedsDisplay];
-  [layer displayIfNeeded];
-}
-
-- (void)recursivelyDisplay
-{
-  if (![self __shouldLoadViewOrLayer]) {
-    return;
-  }
-  
-  for (ASDisplayNode *node in self.subnodes) {
-    [node recursivelyDisplay];
-  }
-
-  [self display];
-}
-
-@end
+#import "ASRenderRangeDelegate.h"
+#import "ASPreloadRangeDelegate.h"
 
 @interface ASRangeController () {
-  NSSet *_workingRangeIndexPaths;
-  NSSet *_workingRangeNodes;
-  BOOL _workingRangeIsValid;
-  
+  BOOL _rangeIsValid;
+
+  // keys should be ASLayoutRangeTypes and values NSSets containing NSIndexPaths
+  NSMutableDictionary *_rangeTypeIndexPaths;
+  NSDictionary *_rangeTypeDelegates;
   BOOL _queuedRangeUpdate;
 
   ASScrollDirection _scrollDirection;
@@ -79,63 +33,32 @@
 - (instancetype)init {
   if (self = [super init]) {
 
-    _workingRangeIndexPaths = [NSSet set];
-    _workingRangeIsValid = YES;
+    _rangeIsValid = YES;
+    _rangeTypeIndexPaths = [[NSMutableDictionary alloc] init];
+
+    _rangeTypeDelegates = @{
+                            @(ASLayoutRangeTypeRender): [[ASRenderRangeDelegate alloc] init],
+                            @(ASLayoutRangeTypePreload): [[ASPreloadRangeDelegate alloc] init],
+                            };
   }
 
   return self;
 }
 
-#pragma mark - View manipulation.
 
-- (void)discardNode:(ASCellNode *)node
-{
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(node, @"invalid argument");
-
-  if ([_workingRangeNodes containsObject:node]) {
-    // move the node's view to the working range area, so its rendering persists
-    [self addNodeToWorkingRange:node];
-  } else {
-    // this node isn't in the working range, remove it from the view hierarchy
-    [self removeNodeFromWorkingRange:node];
-  }
-}
-
-- (void)removeNodeFromWorkingRange:(ASCellNode *)node
-{
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(node, @"invalid argument");
-
-  [node recursivelySetDisplaySuspended:YES];
-  [node.view removeFromSuperview];
-
-  // since this class usually manages large or infinite data sets, the working range
-  // directly bounds memory usage by requiring redrawing any content that falls outside the range.
-  [node recursivelyReclaimMemory];
-}
-
-- (void)addNodeToWorkingRange:(ASCellNode *)node
-{
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(node, @"invalid argument");
-
-  // if node is in the working range it should not actively be in view
-  [node.view removeFromSuperview];
-
-  [node recursivelyDisplay];
-}
+#pragma mark - View manipulation
 
 - (void)moveNode:(ASCellNode *)node toView:(UIView *)view
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(node && view, @"invalid argument, did you mean -removeNodeFromWorkingRange:?");
+  ASDisplayNodeAssert(node, @"Cannot move a nil node to a view");
+  ASDisplayNodeAssert(view, @"Cannot move a node to a non-existent view");
 
   [view addSubview:node.view];
 }
 
-#pragma mark -
-#pragma mark API.
+
+#pragma mark - API
 
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
 {
@@ -159,40 +82,62 @@
     return;
   }
 
-  NSArray *indexPaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
+  NSArray *visibleNodePaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
+  NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
   CGSize viewportSize = [_delegate rangeControllerViewportSize:self];
 
-  if ([_layoutController shouldUpdateForVisibleIndexPaths:indexPaths viewportSize:viewportSize range:ASLayoutRangeRender]) {
-    [_layoutController setVisibleNodeIndexPaths:indexPaths];
-    NSSet *workingRangeIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize range:ASLayoutRangeRender];
-    NSSet *visibleRangeIndexPaths = [NSSet setWithArray:indexPaths];
+  // the layout controller needs to know what the current visible indices are to calculate range offsets
+  [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
 
-    NSMutableSet *removedIndexPaths = _workingRangeIsValid ? [_workingRangeIndexPaths mutableCopy] : [NSMutableSet set];
-    [removedIndexPaths minusSet:workingRangeIndexPaths];
-    [removedIndexPaths minusSet:visibleRangeIndexPaths];
-    if (removedIndexPaths.count) {
-      NSArray *removedNodes = [_delegate rangeController:self nodesAtIndexPaths:[removedIndexPaths allObjects]];
-      [removedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-        [self removeNodeFromWorkingRange:node];
-      }];
+  for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
+    ASLayoutRangeType rangeType = (ASLayoutRangeType)i;
+    id rangeKey = @(rangeType);
+
+    // this delegate decide what happens when a node is added or removed from a range
+    id<ASRangeDelegate> rangeDelegate = _rangeTypeDelegates[rangeKey];
+
+    if ([_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths viewportSize:viewportSize rangeType:rangeType]) {
+      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize rangeType:rangeType];
+
+      // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
+      NSMutableSet *removedIndexPaths = _rangeIsValid ? [[_rangeTypeIndexPaths objectForKey:rangeKey] mutableCopy] : [NSMutableSet set];
+      [removedIndexPaths minusSet:indexPaths];
+      [removedIndexPaths minusSet:visibleNodePathsSet];
+      if (removedIndexPaths.count) {
+        NSArray *removedNodes = [_delegate rangeController:self nodesAtIndexPaths:[removedIndexPaths allObjects]];
+        [removedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+          [rangeDelegate node:node exitedRangeType:rangeType];
+        }];
+      }
+
+      // Notify to add indexpaths that are not currently in _rangeTypeIndexPaths
+      NSMutableSet *addedIndexPaths = [indexPaths mutableCopy];
+      [addedIndexPaths minusSet:[_rangeTypeIndexPaths objectForKey:rangeKey]];
+
+      // The preload range (for example) should include nodes that are visible
+      if ([self shouldRemoveVisibleNodesFromRangeType:rangeType]) {
+        [addedIndexPaths minusSet:visibleNodePathsSet];
+      }
+
+      if (addedIndexPaths.count) {
+        NSArray *addedNodes = [_delegate rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
+        [addedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+          [rangeDelegate node:node enteredRangeType:rangeType];
+        }];
+      }
+
+      // set the range indexpaths so that we can remove/add on the next update pass
+      [_rangeTypeIndexPaths setObject:indexPaths forKey:rangeKey];
     }
-
-    NSMutableSet *addedIndexPaths = [workingRangeIndexPaths mutableCopy];
-    [addedIndexPaths minusSet:_workingRangeIndexPaths];
-    [addedIndexPaths minusSet:visibleRangeIndexPaths];
-    if (addedIndexPaths.count) {
-      NSArray *addedNodes = [_delegate rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
-      [addedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-        [self addNodeToWorkingRange:node];
-      }];
-    }
-
-    _workingRangeIndexPaths = workingRangeIndexPaths;
-    _workingRangeNodes = [NSSet setWithArray:[_delegate rangeController:self nodesAtIndexPaths:[workingRangeIndexPaths allObjects]]];
-    _workingRangeIsValid = YES;
   }
 
+  _rangeIsValid = YES;
   _queuedRangeUpdate = NO;
+}
+
+- (BOOL)shouldRemoveVisibleNodesFromRangeType:(ASLayoutRangeType)rangeType
+{
+  return rangeType != ASLayoutRangeTypePreload;
 }
 
 - (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)cellNode
@@ -204,20 +149,14 @@
     return;
   }
 
+  // clean the content view
   for (UIView *view in contentView.subviews) {
-    ASDisplayNode *node = view.asyncdisplaykit_node;
-    if (node) {
-      // plunk this node back into the working range, if appropriate
-      ASDisplayNodeAssert([node isKindOfClass:[ASCellNode class]], @"invalid node");
-      [self discardNode:(ASCellNode *)node];
-    } else {
-      // if it's not a node, it's something random UITableView added to the hierarchy.  kill it.
-      [view removeFromSuperview];
-    }
+    [view removeFromSuperview];
   }
 
   [self moveNode:cellNode toView:contentView];
 }
+
 
 #pragma mark - ASDataControllerDelegete
 
@@ -252,7 +191,7 @@
   ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController insertNodesAtIndexPaths:indexPaths withSizes:nodeSizes];
     [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
-    _workingRangeIsValid = NO;
+    _rangeIsValid = NO;
   });
 }
 
@@ -268,7 +207,7 @@
   ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController deleteNodesAtIndexPaths:indexPaths];
     [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
-    _workingRangeIsValid = NO;
+    _rangeIsValid = NO;
   });
 }
 
@@ -296,7 +235,7 @@
   ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController insertSections:sectionNodeSizes atIndexSet:indexSet];
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
-    _workingRangeIsValid = NO;
+    _rangeIsValid = NO;
   });
 }
 
@@ -312,7 +251,7 @@
   ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController deleteSectionsAtIndexSet:indexSet];
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
-    _workingRangeIsValid = NO;
+    _rangeIsValid = NO;
   });
 }
 

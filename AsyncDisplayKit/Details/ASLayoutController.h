@@ -1,8 +1,15 @@
-//  Copyright 2004-present Facebook. All Rights Reserved.
+/* Copyright (c) 2014-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
 
 #import <UIKit/UIKit.h>
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
+#import <AsyncDisplayKit/ASLayoutRangeType.h>
 
 typedef struct {
   CGFloat leadingBufferScreenfuls;
@@ -17,11 +24,6 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
   ASScrollDirectionDown,
 };
 
-typedef NS_ENUM(NSInteger, ASLayoutRange) {
-  ASLayoutRangeRender,
-  ASLayoutRangePreload
-};
-
 @protocol ASLayoutController <NSObject>
 
 /**
@@ -29,7 +31,7 @@ typedef NS_ENUM(NSInteger, ASLayoutRange) {
  *
  * Defaults to a trailing buffer of one screenful and a leading buffer of two screenfuls.
  */
-- (ASRangeTuningParameters)tuningParametersForRange:(ASLayoutRange)range;
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
 
 - (void)insertNodesAtIndexPaths:(NSArray *)indexPaths withSizes:(NSArray *)nodeSizes;
 
@@ -41,9 +43,9 @@ typedef NS_ENUM(NSInteger, ASLayoutRange) {
 
 - (void)setVisibleNodeIndexPaths:(NSArray *)indexPaths;
 
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize range:(ASLayoutRange)range;
+- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType;
 
-- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize range:(ASLayoutRange)range;
+- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType;
 
 @property (nonatomic, assign) ASRangeTuningParameters tuningParameters ASDISPLAYNODE_DEPRECATED;
 

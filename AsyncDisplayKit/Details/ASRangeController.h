@@ -20,7 +20,7 @@
  * Working range controller.
  *
  * Used internally by ASTableView and potentially by a future ASCollectionView.  Observes the visible range, maintains
- * a working range, and is responsible for handling AsyncDisplayKit machinery (sizing cell nodes, enqueueing and
+ * a working range, and is responsible for handling AsyncDisplayKit machinery (sizing cell nodes,x enqueueing and
  * cancelling their asynchronous layout and display, and so on).
  */
 @interface ASRangeController : ASDealloc2MainObject <ASDataControllerDelegate>
