@@ -1751,3 +1751,26 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 @implementation CALayer (ASDisplayNodeInternal)
 @dynamic asyncdisplaykit_node;
 @end
+
+
+@implementation UIView (AsyncDisplayKit)
+
+- (void)addSubnode:(ASDisplayNode *)node
+{
+  if (node.layerBacked) {
+    [self.layer addSublayer:node.layer];
+  } else {
+    [self addSubview:node.view];
+  }
+}
+
+@end
+
+@implementation CALayer (AsyncDisplayKit)
+
+- (void)addSubnode:(ASDisplayNode *)node
+{
+  [self addSublayer:node.layer];
+}
+
+@end

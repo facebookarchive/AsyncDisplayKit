@@ -51,7 +51,7 @@
 {
   [super viewDidLoad];
 
-  [self.view addSubview:_textNode.view];
+  [self.view addSubnode:_textNode];
 
   [self.view addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)]];
 }

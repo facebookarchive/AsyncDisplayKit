@@ -520,3 +520,19 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  */
 @interface ASDisplayNode (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>
 @end
+
+
+@interface UIView (AsyncDisplayKit)
+/**
+ * Convenience method, equivalent to [view addSubview:node.view] or [view.layer addSublayer:node.layer] if layer-backed.
+ */
+- (void)addSubnode:(ASDisplayNode *)node;
+@end
+
+
+@interface CALayer (AsyncDisplayKit)
+/**
+ * Convenience method, equivalent to [layer addSublayer:node.layer].
+ */
+- (void)addSubnode:(ASDisplayNode *)node;
+@end
