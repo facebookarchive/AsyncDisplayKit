@@ -8,16 +8,13 @@
 
 #import "ASScrollNode.h"
 
-#import "ASDisplayNodeInternal.h"
-
 @implementation ASScrollNode
 
 - (instancetype)init
 {
-  if (!(self = [super initWithViewClass:UIScrollView.class]))
-    return nil;
-
-  return self;
+  return [super initWithViewBlock:^UIView *{
+    return [[UIScrollView alloc] init];
+  }];
 }
 
 @end
