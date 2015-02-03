@@ -73,7 +73,7 @@ static const CGFloat kInnerPadding = 10.0f;
 
   _kittenSize = size;
 
-  // kitten image, with a purple background colour serving as placeholder
+  // kitten image, with a solid background colour serving as placeholder
   _imageNode = [[ASNetworkImageNode alloc] init];
   _imageNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
   _imageNode.URL = [NSURL URLWithString:[NSString stringWithFormat:@"http://placekitten.com/%zd/%zd",
