@@ -89,8 +89,8 @@
   // this placeholder will cover all subnodes while they are displaying, just a like a stage curtain!
   _postNode.placeholderEnabled = NO;
 
-  [self.view addSubview:_imageNode.view];
-  [self.view addSubview:_postNode.view];
+  [self.view addSubnode:_imageNode];
+  [self.view addSubnode:_postNode];
 }
 
 

@@ -61,7 +61,7 @@
 {
   [super viewDidLoad];
 
-  [self.view addSubview:_imageNode.view];
+  [self.view addSubnode:_imageNode];
   [self.view addSubview:_textLabel];
 
   [self start];
