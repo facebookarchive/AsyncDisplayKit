@@ -373,3 +373,20 @@ extern asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(
     return modifiedImage;
   };
 }
+
+extern asimagenode_modification_block_t ASImageNodeTintColorModificationBlock(UIColor *color)
+{
+  return ^(UIImage *originalImage) {
+    UIGraphicsBeginImageContextWithOptions(originalImage.size, NO, originalImage.scale);
+    
+    // Set color and render template
+    [color setFill];
+    UIImage *templateImage = [originalImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    [templateImage drawAtPoint:CGPointZero];
+    
+    UIImage *modifiedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return modifiedImage;
+  };
+}
+

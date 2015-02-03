@@ -137,4 +137,16 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
  */
 asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat borderWidth, UIColor *borderColor);
 
+/**
+ * @abstract Image modification block that applies a tint color à la UIImage configured with
+ * renderingMode set to UIImageRenderingModeAlwaysTemplate.
+ *
+ * @param tintColor The color to tint the image.
+ *
+ * @see <imageModificationBlock>
+ *
+ * @returns An ASImageNode image modification block.
+ */
+asimagenode_modification_block_t ASImageNodeTintColorModificationBlock(UIColor *color);
+
 ASDISPLAYNODE_EXTERN_C_END
