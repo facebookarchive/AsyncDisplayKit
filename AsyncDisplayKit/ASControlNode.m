@@ -226,7 +226,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       if (!eventDispatchTable)
       {
         // Create the dispatch table for this event.
-        eventDispatchTable = [NSMapTable weakToStrongObjectsMapTable];
+        eventDispatchTable = [NSMapTable strongToStrongObjectsMapTable];
         [_controlEventDispatchTable setObject:eventDispatchTable forKey:eventKey];
       }
 
