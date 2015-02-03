@@ -39,7 +39,7 @@
   _imageNode.delegate = self;
 
   // placeholder colour
-  _imageNode.backgroundColor = [UIColor lightGrayColor];
+  _imageNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
 
   // load low-quality images before high-quality images
   _imageNode.downloadsIntermediateImages = YES;
