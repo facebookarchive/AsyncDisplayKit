@@ -234,7 +234,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)endUpdates
 {
-  [self throwUnimplementedException];
+  [_dataController endUpdates];
 }
 
 
