@@ -220,13 +220,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark Assertions
 
-- (void)throwUnimplementedException
-{
-  [[NSException exceptionWithName:@"UnimplementedException"
-                           reason:@"ASTableView's grouped updates aren't currently supported yet, please call the insert/delete function directly."
-                         userInfo:nil] raise];
-}
-
 - (void)beginUpdates
 {
   [_dataController beginUpdates];
