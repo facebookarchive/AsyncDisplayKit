@@ -78,7 +78,7 @@
 /**
  * End updates.
  */
-- (void)rangeControllerEndUpdates:(ASRangeController * )rangeController;
+- (void)rangeControllerEndUpdates:(ASRangeController * )rangeController completion:(void (^)(BOOL))completion ;
 
 /**
  * Fetch nodes at specific index paths.
