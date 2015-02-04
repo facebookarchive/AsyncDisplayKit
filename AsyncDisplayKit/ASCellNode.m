@@ -28,6 +28,15 @@
   return self;
 }
 
+- (UIView *)cellView
+{
+  UIView *contentView = self.view.superview;
+  if (contentView != nil) {
+    return contentView.superview;
+  }
+  return nil;
+}
+
 - (void)setLayerBacked:(BOOL)layerBacked
 {
   // ASRangeController expects ASCellNodes to be view-backed.  (Layer-backing is supported on ASCellNode subnodes.)
