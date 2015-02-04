@@ -22,6 +22,8 @@
 /**
  * @abstract Returns the UICollectionViewCell or UITableViewCell if the node is currently
  * visible in either a ASCollectionView or ASTableView, respectively.
+ *
+ * @discussion Assumes the ASCellNode is being used with an ASCollectionView or ASTableView.
  */
 @property (nonatomic, readonly, retain) UIView *cellView;
 
