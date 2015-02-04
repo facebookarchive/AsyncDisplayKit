@@ -38,7 +38,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 
           // used for ASRangeController visibility updates
           sel == @selector(tableView:willDisplayCell:forRowAtIndexPath:) ||
-          sel == @selector(tableView:didEndDisplayingCell:forRowAtIndexPath:)
+          sel == @selector(tableView:didEndDisplayingCell:forRowAtIndexPath:) ||
+
+          // used for batch fetching API
+          sel == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
           );
 }
 
@@ -112,6 +115,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASRangeController *_rangeController;
 
   BOOL _asyncDataFetchingEnabled;
+
+  ASBatchContext *_batchContext;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -149,6 +154,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
   _asyncDataSourceLocked = NO;
+
+  _leadingScreensForBatching = 1.0;
+  _batchContext = [[ASBatchContext alloc] init];
 
   return self;
 }
@@ -366,6 +374,51 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNodeForRowAtIndexPath:)]) {
     [_asyncDelegate tableView:self didEndDisplayingNodeForRowAtIndexPath:indexPath];
+  }
+}
+
+
+#pragma mark - 
+#pragma mark Batch Fetching
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+{
+  [self handleBatchFetchScrollingToOffset:*targetContentOffset];
+
+  if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
+    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
+  }
+}
+
+- (BOOL)shouldFetchBatch
+{
+  if ([self.asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)]) {
+    return [self.asyncDelegate shouldBatchFetchForTableView:self];
+  } else {
+    return YES;
+  }
+}
+
+- (void)handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
+{
+  // Bail if we are already fetching, the delegate doesn't care, or we're told not to fetch
+  if ([_batchContext isFetching] ||
+      ![self.asyncDelegate respondsToSelector:@selector(tableView:beginBatchFetchingWithContext:)] ||
+      ![self shouldFetchBatch]) {
+    return;
+  }
+
+  CGFloat viewHeight = CGRectGetHeight(self.bounds);
+  CGFloat triggerDistance = viewHeight * _leadingScreensForBatching;
+  CGFloat offset = targetOffset.y;
+  CGFloat contentHeight = self.contentSize.height;
+
+  // Determine if the offset that we are headed to is within the number of screens we have defined
+  // ASTableView supports tail loading only currently, hence the check against ASScrollDirectionUp
+  if ([self scrollDirection] == ASScrollDirectionUp &&
+      contentHeight - (viewHeight + offset) <= triggerDistance) {
+    [_batchContext beginBatchFetching];
+    [self.asyncDelegate tableView:self beginBatchFetchingWithContext:_batchContext];
   }
 }
 
