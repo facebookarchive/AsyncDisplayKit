@@ -18,6 +18,8 @@
 
 static const NSInteger kLitterSize = 20;
 
+static const NSUInteger kButtonHeight = 50;
+
 
 @interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
 {
@@ -25,12 +27,30 @@ static const NSInteger kLitterSize = 20;
 
   // array of boxed CGSizes corresponding to placekitten kittens
   NSArray *_kittenDataSource;
+
+  UIButton *_testButton;
 }
 
 @end
 
 
 @implementation ViewController
+
+#pragma mark - Testing
+
+- (UIButton *)_createLoadingButtonWithTitle:(NSString *)title {
+  UIButton *button = [[UIButton alloc] init];
+  [button setTitle:title forState:UIControlStateNormal];
+  button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:16.0f];
+  [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+  [button sizeToFit];
+
+  button.layer.borderWidth=1.0f;
+  button.layer.borderColor=[[UIColor lightGrayColor] CGColor];
+  button.layer.cornerRadius = 8.0f;
+
+  return button;
+}
 
 #pragma mark -
 #pragma mark UIViewController.
@@ -45,6 +65,15 @@ static const NSInteger kLitterSize = 20;
   _tableView.asyncDataSource = self;
   _tableView.asyncDelegate = self;
 
+  _kittenDataSource = [self createKittenDataSource];
+
+  _testButton = [self _createLoadingButtonWithTitle:@"Reload Data"];
+  [_testButton addTarget:self action:@selector(testButtonPressed) forControlEvents:UIControlEventTouchDown];
+
+  return self;
+}
+
+- (NSArray *)createKittenDataSource {
   // populate our "data source" with some random kittens
   NSMutableArray *kittenDataSource = [NSMutableArray arrayWithCapacity:kLitterSize];
   for (NSInteger i = 0; i < kLitterSize; i++) {
@@ -54,9 +83,15 @@ static const NSInteger kLitterSize = 20;
 
     [kittenDataSource addObject:[NSValue valueWithCGSize:size]];
   }
-  _kittenDataSource = kittenDataSource;
 
-  return self;
+  return kittenDataSource;
+}
+
+- (void)testButtonPressed {
+  _kittenDataSource = [self createKittenDataSource];
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    [_tableView reloadData];
+  });
 }
 
 - (void)viewDidLoad
@@ -64,18 +99,22 @@ static const NSInteger kLitterSize = 20;
   [super viewDidLoad];
 
   [self.view addSubview:_tableView];
+
+  [self.view addSubview:_testButton];
 }
 
 - (void)viewWillLayoutSubviews
 {
-  _tableView.frame = self.view.bounds;
+  CGRect bounds = self.view.bounds;
+  _tableView.frame = CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height - kButtonHeight);
+
+  _testButton.frame = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - kButtonHeight, bounds.size.width, kButtonHeight);
 }
 
 - (BOOL)prefersStatusBarHidden
 {
   return YES;
 }
-
 
 #pragma mark -
 #pragma mark Kittens.
