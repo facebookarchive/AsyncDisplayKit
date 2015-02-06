@@ -88,8 +88,8 @@ static const NSUInteger kButtonHeight = 50;
 }
 
 - (void)testButtonPressed {
-  _kittenDataSource = [self createKittenDataSource];
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    _kittenDataSource = [self createKittenDataSource];
     [_tableView reloadData];
   });
 }
