@@ -38,7 +38,10 @@ static BOOL _isInterceptedSelector(SEL sel)
           
           // used for ASRangeController visibility updates
           sel == @selector(collectionView:willDisplayCell:forItemAtIndexPath:) ||
-          sel == @selector(collectionView:didEndDisplayingCell:forItemAtIndexPath:)
+          sel == @selector(collectionView:didEndDisplayingCell:forItemAtIndexPath:) ||
+
+          // used for batch fetching API
+          sel == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
           );
 }
 
@@ -103,6 +106,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   NSMutableArray *_batchUpdateBlocks;
 
   BOOL _asyncDataFetchingEnabled;
+
+  ASBatchContext *_batchContext;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -136,6 +141,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   _dataController = [[ASDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
   _dataController.delegate = _rangeController;
   _dataController.dataSource = self;
+
+  _batchContext = [[ASBatchContext alloc] init];
 
   _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
@@ -358,6 +365,63 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
     [_asyncDelegate collectionView:self didEndDisplayingNodeForItemAtIndexPath:indexPath];
+  }
+}
+
+
+#pragma mark -
+#pragma mark Batch Fetching
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+{
+  [self handleBatchFetchScrollingToOffset:*targetContentOffset];
+
+  if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
+    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
+  }
+}
+
+- (BOOL)shouldFetchBatch
+{
+  if ([self.asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)]) {
+    return [self.asyncDelegate shouldBatchFetchForCollectionView:self];
+  } else {
+    return YES;
+  }
+}
+
+- (void)handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
+{
+  ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
+
+  // Bail if we are already fetching, the delegate doesn't care, or we're told not to fetch
+  if ([_batchContext isFetching] ||
+      ![self.asyncDelegate respondsToSelector:@selector(collectionView:beginBatchFetchingWithContext:)] ||
+      ![self shouldFetchBatch]) {
+    return;
+  }
+
+  ASScrollDirection scrollDirection = [self scrollDirection];
+  CGFloat viewSize, offset, contentSize;
+
+  if (scrollDirection == ASScrollDirectionUp) {
+    viewSize = CGRectGetHeight(self.bounds);
+    offset = targetOffset.y;
+    contentSize = self.contentSize.height;
+  } else { // horizontal
+    viewSize = CGRectGetWidth(self.bounds);
+    offset = targetOffset.x;
+    contentSize = self.contentSize.width;
+  }
+
+  CGFloat triggerDistance = viewSize * _leadingScreensForBatching;
+
+  // Determine if the offset that we are headed to is within the number of screens we have defined
+  // ASCollectionView supports tail loading only currently, hence the check against Up and Left
+  BOOL supportedBatchScrollDirection = scrollDirection == ASScrollDirectionUp || ASScrollDirectionLeft;
+  if (supportedBatchScrollDirection && contentSize - (viewSize + offset) <= triggerDistance) {
+    [_batchContext beginBatchFetching];
+    [self.asyncDelegate collectionView:self beginBatchFetchingWithContext:_batchContext];
   }
 }
 

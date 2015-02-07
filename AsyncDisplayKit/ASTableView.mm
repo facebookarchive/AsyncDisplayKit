@@ -401,6 +401,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
 {
+  ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
+
   // Bail if we are already fetching, the delegate doesn't care, or we're told not to fetch
   if ([_batchContext isFetching] ||
       ![self.asyncDelegate respondsToSelector:@selector(tableView:beginBatchFetchingWithContext:)] ||

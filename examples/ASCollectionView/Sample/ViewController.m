@@ -65,7 +65,7 @@
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  NSString *text = [NSString stringWithFormat:@"[%ld.%ld] says hi", indexPath.section, indexPath.item];
+  NSString *text = [NSString stringWithFormat:@"[%zd.%zd] says hi", indexPath.section, indexPath.item];
   ASTextCellNode *node = [[ASTextCellNode alloc] init];
   node.text = text;
   node.backgroundColor = [UIColor lightGrayColor];
@@ -78,13 +78,21 @@
   return 300;
 }
 
-- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView {
+- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView
+{
   // lock the data source
   // The data source should not be change until it is unlocked.
 }
 
-- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView {
+- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView
+{
   // unlock the data source to enable data source updating.
+}
+
+- (void)collectionView:(UICollectionView *)collectionView beginBatchFetchingWithContext:(ASBatchContext *)context
+{
+  NSLog(@"fetch additional content");
+  [context completeBatchFetching:YES];
 }
 
 @end

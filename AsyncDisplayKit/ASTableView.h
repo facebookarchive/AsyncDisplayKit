@@ -64,7 +64,7 @@
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled;
 
 /**
- * The number of screens left to scroll before the delegate -tableView:shouldBeginBatchFetchingWithContext: is called.
+ * The number of screens left to scroll before the delegate -tableView:beginBatchFetchingWithContext: is called.
  *
  * Defaults to one screenful.
  */
