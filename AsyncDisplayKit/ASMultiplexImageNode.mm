@@ -62,13 +62,11 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // Image flags.
   BOOL _downloadsIntermediateImages; // Defaults to NO.
-  BOOL _haltsLoadingOnError;         // Defaults to NO.
   OSSpinLock _imageIdentifiersLock;
   NSArray *_imageIdentifiers;
   id _loadedImageIdentifier;
   id _loadingImageIdentifier;
   id _displayedImageIdentifier;
-  id _failedImageIdentifier;         // Reset to nil whenever an image is successfully loaded
 
   // Networking.
   id _downloadIdentifier;
@@ -355,11 +353,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
   OSSpinLockLock(&_imageIdentifiersLock);
 
-  id currentImageIdentifier = _failedImageIdentifier != nil ? _failedImageIdentifier : _loadedImageIdentifier;
-    
   // If we've already loaded the best identifier, we've got nothing else to do.
   id bestImageIdentifier = ([_imageIdentifiers count] > 0) ? _imageIdentifiers[0] : nil;
-  if (!bestImageIdentifier || [currentImageIdentifier isEqual:bestImageIdentifier]) {
+  if (!bestImageIdentifier || [_loadedImageIdentifier isEqual:bestImageIdentifier]) {
     OSSpinLockUnlock(&_imageIdentifiersLock);
     return nil;
   }
@@ -372,15 +368,15 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   }
   // Otherwise, load progressively.
   else {
-    NSUInteger currentIndex = [_imageIdentifiers indexOfObject:currentImageIdentifier];
+    NSUInteger loadedIndex = [_imageIdentifiers indexOfObject:_loadedImageIdentifier];
 
     // If nothing has loaded yet, load the worst identifier.
-    if (currentIndex == NSNotFound) {
+    if (loadedIndex == NSNotFound) {
       nextImageIdentifierToDownload = [_imageIdentifiers lastObject];
     }
     // Otherwise, load the next best identifier (if there is one)
-    else if (currentIndex > 0) {
-      nextImageIdentifierToDownload = _imageIdentifiers[currentIndex - 1];
+    else if (loadedIndex > 0) {
+      nextImageIdentifierToDownload = _imageIdentifiers[loadedIndex - 1];
     }
   }
 
@@ -592,16 +588,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 #pragma mark -
 - (void)_finishedLoadingImage:(UIImage *)image forIdentifier:(id)imageIdentifier error:(NSError *)error
 {
-  // If we failed to load and _haltsLoadingOnError is YES, we stop the loading process.
+  // If we failed to load, we stop the loading process.
   // Note that if we bailed before we began downloading because the best identifier changed, we don't bail, but rather just begin loading the best image identifier.
-  if (error && error.code != ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged) {
-    if (_haltsLoadingOnError) {
-      return;
-    }
-    _failedImageIdentifier = imageIdentifier;
-  } else {
-      _failedImageIdentifier = nil;
-  }
+  if (error && error.code != ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged)
+    return;
 
   OSSpinLockLock(&_imageIdentifiersLock);
   NSUInteger imageIdentifierCount = [_imageIdentifiers count];
