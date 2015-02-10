@@ -110,6 +110,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASFlowLayoutController *_layoutController;
 
   ASRangeController *_rangeController;
+
+  BOOL _asyncDataFetchingEnabled;
 }
 
 @property (atomic, assign) BOOL asyncDataSouceLocked;
@@ -123,6 +125,12 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
 {
+  return [self initWithFrame:frame style:style asyncDataFetching:NO];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
+{
+
   if (!(self = [super initWithFrame:frame style:style]))
     return nil;
 
@@ -132,13 +140,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   _rangeController.layoutController = _layoutController;
   _rangeController.delegate = self;
 
-  _dataController = [[ASDataController alloc] init];
+  _dataController = [[ASDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
   _dataController.dataSource = self;
   _dataController.delegate = _rangeController;
 
   _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
 
+  _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
   _asyncDataSouceLocked = NO;
 
   return self;
@@ -168,6 +177,9 @@ static BOOL _isInterceptedSelector(SEL sel)
     _proxyDataSource = nil;
     super.dataSource = nil;
   } else {
+    ASDisplayNodeAssert(!_asyncDataFetchingEnabled || ([asyncDataSource respondsToSelector:@selector(tableViewLockDataSourceForDataUpdating:)] &&
+                                                       [asyncDataSource respondsToSelector:@selector(tableViewUnlockDataSourceForDataUpdating:)]),
+                        @"The asyncDataSource need to implements \"tableViewLockDataSourceForDataUpdating\" and \"tableViewUnlockDataSourceForDataUpdating\" to handle data fetching in async mode.");
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;

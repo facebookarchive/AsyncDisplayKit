@@ -35,6 +35,11 @@
 @property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters;
 
 /**
+ * Initializer.
+ */
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled;
+
+/**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
  * @warning This method is substantially more expensive than UICollectionView's version.

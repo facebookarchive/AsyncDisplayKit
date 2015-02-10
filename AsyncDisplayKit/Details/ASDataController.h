@@ -119,6 +119,11 @@ typedef NSUInteger ASDataControllerAnimationOptions;
  */
 @property (nonatomic, weak) id<ASDataControllerDelegate> delegate;
 
+/**
+ Designated iniailizer.
+ */
+- (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled;
+
 /** @name Initial loading */
 
 - (void)initialDataLoadingWithAnimationOption:(ASDataControllerAnimationOptions)animationOption;

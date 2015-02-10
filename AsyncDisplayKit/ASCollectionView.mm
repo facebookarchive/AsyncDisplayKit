@@ -101,6 +101,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   BOOL _performingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
+
+  BOOL _asyncDataFetchingEnabled;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -114,6 +116,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
+  return [self initWithFrame:frame collectionViewLayout:layout asyncDataFetching:NO];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled
+{
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
 
@@ -126,13 +133,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
 
-  _dataController = [[ASDataController alloc] init];
+  _dataController = [[ASDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
   _dataController.delegate = _rangeController;
   _dataController.dataSource = self;
 
   _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
 
+  _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
   _asyncDataSourceLocked = NO;
 
   _performingBatchUpdates = NO;

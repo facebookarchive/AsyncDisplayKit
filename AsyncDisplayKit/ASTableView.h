@@ -35,6 +35,11 @@
 @property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters;
 
 /**
+ * initializer.
+ */
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled;
+
+/**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
  * @warning This method is substantially more expensive than UITableView's version.
