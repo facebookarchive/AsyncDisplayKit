@@ -3,6 +3,19 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
 
+/**
+ Enable the data fetching in async mode.
+
+ If enabled, we will fetch data through `dataController:nodeAtIndexPath:` and `dataController:rowsInSection:` in background thread.
+ Otherwise, the methods will be invoked synchronically in calling thread.
+
+ Enabling data fetching in async mode could avoid blocking main thread while allocating cell on main thread, which is frequently reported
+ issue for handing large scale data. On another hand, the application code will take the responsibility to avoid data inconsistence. 
+ Specifically, we will lock the data source through `dataControllerLockDataSourceForDataUpdating`, and unlock it by `dataControllerUnlockDataSourceForDataUpdating`
+ after the data fetching. The application should not update the data source while the data source is locked.
+ */
+#define ENABLE_ASYNC_DATA_FETCHING 1
+
 @class ASCellNode;
 @class ASDataController;
 
@@ -27,12 +40,22 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 /**
  Fetch the number of rows in specific section.
  */
-- (NSUInteger)dataController:(ASDataController *)dataControllre rowsInSection:(NSUInteger)section;
+- (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section;
 
 /**
  Fetch the number of sections.
  */
 - (NSUInteger)dataControllerNumberOfSections:(ASDataController *)dataController;
+
+/**
+ Lock the data source for data fetching.
+ */
+- (void)dataControllerLockDataSourceForDataUpdating;
+
+/**
+ Unlock the data source after data fetching.
+ */
+- (void)dataControllerUnlockDataSourceForDataUpdating;
 
 @end
 

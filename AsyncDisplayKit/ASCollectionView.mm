@@ -103,6 +103,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   NSMutableArray *_batchUpdateBlocks;
 }
 
+@property (atomic, assign) BOOL asyncDataSourceLocked;
+
 @end
 
 @implementation ASCollectionView
@@ -130,6 +132,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+
+  _asyncDataSourceLocked = NO;
 
   _performingBatchUpdates = NO;
   _batchUpdateBlocks = [NSMutableArray array];
@@ -372,6 +376,26 @@ static BOOL _isInterceptedSelector(SEL sel)
     return [_asyncDataSource numberOfSectionsInCollectionView:self];
   } else {
     return 1;
+  }
+}
+
+- (void)dataControllerLockDataSourceForDataUpdating
+{
+  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has already been locked");
+
+  self.asyncDataSourceLocked = YES;
+  if ([_asyncDataSource respondsToSelector:@selector(collectionViewLockDataSourceForDataUpdating:)]) {
+    [_asyncDataSource collectionViewLockDataSourceForDataUpdating:self];
+  }
+}
+
+- (void)dataControllerUnlockDataSourceForDataUpdating
+{
+  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has alredy been unlocked !");
+
+  self.asyncDataSourceLocked = NO;
+  if ([_asyncDataSource respondsToSelector:@selector(collectionViewUnlockDataSourceForDataUpdating:)]) {
+    [_asyncDataSource collectionViewUnlockDataSourceForDataUpdating:self];
   }
 }
 

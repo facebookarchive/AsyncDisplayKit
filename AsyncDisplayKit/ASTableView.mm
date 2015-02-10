@@ -112,6 +112,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASRangeController *_rangeController;
 }
 
+@property (atomic, assign) BOOL asyncDataSouceLocked;
+
 @end
 
 @implementation ASTableView
@@ -136,6 +138,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+
+  _asyncDataSouceLocked = NO;
 
   return self;
 }
@@ -423,6 +427,28 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   return CGSizeMake(self.bounds.size.width, FLT_MAX);
+}
+
+- (void)dataControllerLockDataSourceForDataUpdating
+{
+  ASDisplayNodeAssert(!self.asyncDataSouceLocked, @"The data source has already been locked !");
+
+  self.asyncDataSouceLocked = YES;
+
+  if ([_asyncDataSource respondsToSelector:@selector(tableViewLockDataSourceForDataUpdating:)]) {
+    [_asyncDataSource tableViewLockDataSourceForDataUpdating:self];
+  }
+}
+
+- (void)dataControllerUnlockDataSourceForDataUpdating
+{
+  ASDisplayNodeAssert(self.asyncDataSouceLocked, @"The data source has already been unlocked !");
+
+  self.asyncDataSouceLocked = NO;
+
+  if ([_asyncDataSource respondsToSelector:@selector(tableViewUnlockDataSourceForDataUpdating:)]) {
+    [_asyncDataSource tableViewUnlockDataSourceForDataUpdating:self];
+  }
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataControllre rowsInSection:(NSUInteger)section

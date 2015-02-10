@@ -107,6 +107,26 @@
  */
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
+@optional
+
+/**
+ * Indicator to lock the data source for data loading in asyn mode.
+ * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistence or exception
+ * due to the data access in async mode.
+ *
+ * @param tableView The sender.
+ */
+- (void)collectionViewLockDataSourceForDataUpdating:(ASCollectionView *)collectionView;
+
+/**
+ * Indicator to unlock the data source for data loading in asyn mode.
+ * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistence or exception
+ * due to the data access in async mode.
+ *
+ * @param tableView The sender.
+ */
+- (void)collectionViewUnlockDataSourceForDataUpdating:(ASCollectionView *)collectionView;
+
 @end
 
 

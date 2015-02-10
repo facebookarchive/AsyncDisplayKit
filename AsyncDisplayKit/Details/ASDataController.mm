@@ -10,6 +10,18 @@
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASDisplayNodeInternal.h"
 
+#ifdef ENABLE_ASYNC_DATA_FETCHING
+  #define BEGIN_DATA_FETCHING \
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{ \
+      [_dataSource dataControllerLockDataSourceForDataUpdating];
+  #define END_DATA_FETCHING \
+      [_dataSource dataControllerUnlockDataSourceForDataUpdating]; \
+    });
+#else
+  #define BEGIN_DATA_FETCHING
+  #define END_DATA_FETCHING
+#endif
+
 #define INSERT_NODES(multidimensionalArray, indexPath, elements, animationOption) \
 { \
   if ([_delegate respondsToSelector:@selector(dataController:willInsertNodes:atIndexPaths:withAnimationOption:)]) { \
@@ -131,7 +143,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Initial Data Loading
 
-- (void)initialDataLoadingWithAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+- (void)initialDataLoadingWithAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
+  BEGIN_DATA_FETCHING
+
   NSMutableArray *indexPaths = [NSMutableArray array];
 
   NSUInteger sectionNum = [_dataSource dataControllerNumberOfSections:self];
@@ -150,6 +165,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
   // insert elements
   [self insertRowsAtIndexPaths:indexPaths withAnimationOption:animationOption];
+
+  END_DATA_FETCHING
 }
 
 #pragma mark - Data Update
@@ -187,6 +204,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)insertSections:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
+  BEGIN_DATA_FETCHING
+
   __block int nodeTotalCnt = 0;
   NSMutableArray *nodeCounts = [NSMutableArray arrayWithCapacity:indexSet.count];
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
@@ -222,6 +241,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
     [self _batchInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOption];
   });
+
+  END_DATA_FETCHING
 }
 
 - (void)deleteSections:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
@@ -239,6 +260,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)reloadSections:(NSIndexSet *)sections withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
+  BEGIN_DATA_FETCHING
+
   // We need to keep data query on data source in the calling thread.
   NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] init];
   NSMutableArray *updatedNodes = [[NSMutableArray alloc] init];
@@ -264,6 +287,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // reinsert the elements
     [self _batchInsertNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOption];
   });
+
+  END_DATA_FETCHING
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOption:(ASDataControllerAnimationOptions)animationOption
@@ -349,6 +374,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
+  BEGIN_DATA_FETCHING
+
   // sort indexPath to avoid messing up the index when inserting in several batches
   NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
   NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
@@ -357,6 +384,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }
 
   [self _batchInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOption];
+
+  END_DATA_FETCHING
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
@@ -373,6 +402,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
+  BEGIN_DATA_FETCHING
+
   // The reloading operation required reloading the data
   // Loading data in the calling thread
   NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
@@ -388,6 +419,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
     [self _batchInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOption];
   });
+
+  END_DATA_FETCHING
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOption:(ASDataControllerAnimationOptions)animationOption
@@ -407,6 +440,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
+  BEGIN_DATA_FETCHING
+
   // Fetching data in calling thread
   NSMutableArray *updatedNodes = [[NSMutableArray alloc] init];
   NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] init];
@@ -446,6 +481,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
     [self _batchInsertNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOption];
   });
+
+  END_DATA_FETCHING
 }
 
 #pragma mark - Data Querying
