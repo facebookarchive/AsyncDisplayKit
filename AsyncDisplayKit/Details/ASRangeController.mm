@@ -227,9 +227,9 @@
   });
 }
 
-- (void)dataControllerEndUpdates:(ASDataController *)dataController {
+- (void)dataControllerEndUpdates:(ASDataController *)dataController completion:(void (^)(BOOL))completion {
   ASDisplayNodePerformBlockOnMainThread(^{
-    [_delegate rangeControllerEndUpdates:self];
+    [_delegate rangeControllerEndUpdates:self completion:completion];
   });
 }
 

@@ -54,29 +54,13 @@
   } \
 }
 
-//
-// The background update is not fully supported yet, although it is trivial to fix it. The underline
-// problem is we need to do the profiling between the main thread updating and background updating,
-// and then decided which way to go.
-//
-// For background update, we could avoid the multi-dimensinonal array operation (insertion / deletion)
-// on main thread. However, the sideback is we need to dispatch_sync to lock main thread for data query,
-// although it is running on a concurrent queue and should be fast enough.
-//
-// For main thread update, we need to do the multi-dimensional operations (insertion / deletion) on
-// main thread, but we will gain the performance in data query. Considering data query is much more
-// frequent than data updating, so we keep it on main thread for the initial version.
-//
-//
-#define ENABLE_BACKGROUND_UPDATE 0
-
 const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
 
 static void *kASSizingQueueContext = &kASSizingQueueContext;
-static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 
 @interface ASDataController () {
   NSMutableArray *_nodes;
+  NSMutableArray *_pendingBlocks;
 }
 
 @property (atomic, assign) NSUInteger batchUpdateCounter;
@@ -88,6 +72,7 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 - (instancetype)init {
   if (self = [super init]) {
     _nodes = [NSMutableArray array];
+    _pendingBlocks = [NSMutableArray array];
     _batchUpdateCounter = 0;
   }
 
@@ -124,63 +109,24 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   return kASSizingQueueContext == dispatch_get_specific(kASSizingQueueContext);
 }
 
-/**
- * Concurrent queue for query / updating the cached data.
- * The data query is more frequent than the data updating, so we use dispatch_sync for reading, and dispatch_barrier_async for writing.
- */
-+ (dispatch_queue_t)dataUpdatingQueue
-{
-  static dispatch_queue_t dataUpdatingQueue = NULL;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    dataUpdatingQueue = dispatch_queue_create("com.facebook.AsyncDisplayKit.ASDataController.dataUpdatingQueue", DISPATCH_QUEUE_CONCURRENT);
-    dispatch_queue_set_specific(dataUpdatingQueue, kASDataUpdatingQueueContext, kASDataUpdatingQueueContext, NULL);
-  });
-
-  return dataUpdatingQueue;
-}
-
-+ (BOOL)isDataUpdatingQueue {
-  return kASDataUpdatingQueueContext == dispatch_get_specific(kASDataUpdatingQueueContext);
-}
-
 - (void)asyncUpdateDataWithBlock:(dispatch_block_t)block {
-#if ENABLE_BACKGROUND_UPDATE
-  dispatch_barrier_async([ASDataController dataUpdatingQueue], ^{
-    block();
-  });
-#else
   dispatch_async(dispatch_get_main_queue(), ^{
-    block();
+    if (_batchUpdateCounter) {
+      [_pendingBlocks addObject:block];
+    } else {
+      block();
+    }
   });
-#endif
 }
 
 - (void)syncUpdateDataWithBlock:(dispatch_block_t)block {
-#if ENABLE_BACKGROUND_UPDATE
-  dispatch_barrier_sync([ASDataController dataUpdatingQueue], ^{
-    block();
-  });
-#else
   dispatch_sync(dispatch_get_main_queue(), ^{
-    block();
-  });
-#endif
-}
-
-- (void)queryDataWithBlock:(dispatch_block_t)block {
-#if ENABLE_BACKGROUND_UPDATE
-  if ([ASDataController isDataUpdatingQueue]) {
-    block();
-  } else {
-    dispatch_sync([ASDataController dataUpdatingQueue], ^{
+    if (_batchUpdateCounter) {
+      [_pendingBlocks addObject:block];
+    } else {
       block();
-    });
-  }
-#else
-  ASDisplayNodeAssertMainThread();
-  block();
-#endif
+    }
+  });
 }
 
 #pragma mark - Initial Data Loading
@@ -208,25 +154,39 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 
 #pragma mark - Data Update
 
-- (void)beginUpdates {
+- (void)beginUpdates
+{
   dispatch_async([[self class] sizingQueue], ^{
     [self asyncUpdateDataWithBlock:^{
       _batchUpdateCounter++;
-      [_delegate dataControllerBeginUpdates:self];
     }];
   });
 }
 
 - (void)endUpdates {
+  [self endUpdatesWithCompletion:NULL];
+}
+
+- (void)endUpdatesWithCompletion:(void (^)(BOOL))completion
+{
   dispatch_async([[self class] sizingQueue], ^{
-    [self asyncUpdateDataWithBlock:^{
+    dispatch_async(dispatch_get_main_queue(), ^{
       _batchUpdateCounter--;
-      [_delegate dataControllerEndUpdates:self];
-    }];
+
+      if (!_batchUpdateCounter) {
+        [_delegate dataControllerBeginUpdates:self];
+        [_pendingBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
+          block();
+        }];
+        [_pendingBlocks removeAllObjects];
+        [_delegate dataControllerEndUpdates:self completion:completion];
+      }
+    });
   });
 }
 
-- (void)insertSections:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+- (void)insertSections:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
   __block int nodeTotalCnt = 0;
   NSMutableArray *nodeCounts = [NSMutableArray arrayWithCapacity:indexSet.count];
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
@@ -264,7 +224,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   });
 }
 
-- (void)deleteSections:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+- (void)deleteSections:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
   dispatch_async([[self class] sizingQueue], ^{
     [self asyncUpdateDataWithBlock:^{
       // remove elements
@@ -276,7 +237,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   });
 }
 
-- (void)reloadSections:(NSIndexSet *)sections withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+- (void)reloadSections:(NSIndexSet *)sections withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
   // We need to keep data query on data source in the calling thread.
   NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] init];
   NSMutableArray *updatedNodes = [[NSMutableArray alloc] init];
@@ -304,7 +266,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   });
 }
 
-- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
   dispatch_async([ASDataController sizingQueue], ^{
     [self asyncUpdateDataWithBlock:^{
       // remove elements
@@ -327,7 +290,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 
 - (void)_insertNodes:(NSArray *)nodes
         atIndexPaths:(NSArray *)indexPaths
- withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+ withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
   if (!nodes.count) {
     return;
   }
@@ -369,7 +333,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 
 - (void)_batchInsertNodes:(NSArray *)nodes
              atIndexPaths:(NSArray *)indexPaths
-     withAnimationOptions:(ASDataControllerAnimationOptions)animationOption {
+     withAnimationOptions:(ASDataControllerAnimationOptions)animationOption
+{
   NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
 
   // Processing in batches
@@ -382,7 +347,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   }
 }
 
-- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
   // sort indexPath to avoid messing up the index when inserting in several batches
   NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
   NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
@@ -393,7 +359,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   [self _batchInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOption];
 }
 
-- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
   // sort indexPath in order to avoid messing up the index when deleting
   NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
 
@@ -404,7 +371,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   });
 }
 
-- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
   // The reloading operation required reloading the data
   // Loading data in the calling thread
   NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
@@ -422,7 +390,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   });
 }
 
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
   dispatch_async([ASDataController sizingQueue], ^{
     [self asyncUpdateDataWithBlock:^{
       NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, [NSArray arrayWithObject:indexPath]);
@@ -436,7 +405,8 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
   });
 }
 
-- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption {
+- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption
+{
   // Fetching data in calling thread
   NSMutableArray *updatedNodes = [[NSMutableArray alloc] init];
   NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] init];
@@ -480,44 +450,28 @@ static void *kASDataUpdatingQueueContext = &kASDataUpdatingQueueContext;
 
 #pragma mark - Data Querying
 
-- (NSUInteger)numberOfSections {
-  __block NSUInteger sectionNum;
-
-  [self queryDataWithBlock:^{
-    sectionNum = [_nodes count];
-  }];
-
-  return sectionNum;
+- (NSUInteger)numberOfSections
+{
+  ASDisplayNodeAssertMainThread();
+  return [_nodes count];
 }
 
-- (NSUInteger)numberOfRowsInSection:(NSUInteger)section {
-  __block NSUInteger rowNum;
-
-  [self queryDataWithBlock:^{
-    rowNum = [_nodes[section] count];
-  }];
-
-  return rowNum;
+- (NSUInteger)numberOfRowsInSection:(NSUInteger)section
+{
+  ASDisplayNodeAssertMainThread();
+  return [_nodes[section] count];
 }
 
-- (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath {
-  __block ASCellNode *node;
-
-  [self queryDataWithBlock:^{
-    node = _nodes[indexPath.section][indexPath.row];
-  }];
-
-  return node;
+- (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertMainThread();
+  return _nodes[indexPath.section][indexPath.row];
 }
 
-- (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths {
-  __block NSArray *arr = nil;
-
-  [self queryDataWithBlock:^{
-    arr = ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, indexPaths);
-  }];
-
-  return arr;
+- (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths
+{
+  ASDisplayNodeAssertMainThread();
+  return ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, indexPaths);
 }
 
 @end

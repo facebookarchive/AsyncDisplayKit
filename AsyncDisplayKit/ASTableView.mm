@@ -216,10 +216,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   return visibleNodes;
 }
 
-
-#pragma mark -
-#pragma mark Assertions
-
 - (void)beginUpdates
 {
   [_dataController beginUpdates];
@@ -360,10 +356,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   [super beginUpdates];
 }
 
-- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController
+- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
   [super endUpdates];
+
+  if (completion) {
+    completion(YES);
+  }
 }
 
 - (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController

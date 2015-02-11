@@ -98,6 +98,9 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASDataController *_dataController;
   ASRangeController *_rangeController;
   ASFlowLayoutController *_layoutController;
+
+  BOOL _performingBatchUpdates;
+  NSMutableArray *_batchUpdateBlocks;
 }
 
 @end
@@ -127,6 +130,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+
+  _performingBatchUpdates = NO;
+  _batchUpdateBlocks = [NSMutableArray array];
 
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
   
@@ -210,6 +216,13 @@ static BOOL _isInterceptedSelector(SEL sel)
 }
 
 #pragma mark Assertions.
+
+- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  [_dataController beginUpdates];
+  updates();
+  [_dataController endUpdatesWithCompletion:completion];
+}
 
 - (void)insertSections:(NSIndexSet *)sections
 {
@@ -366,9 +379,25 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark ASRangeControllerDelegate.
 
 - (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController {
+  ASDisplayNodeAssertMainThread();
+  _performingBatchUpdates = YES;
 }
 
-- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController {
+- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion {
+  ASDisplayNodeAssertMainThread();
+
+  [super performBatchUpdates:^{
+    [_batchUpdateBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
+      block();
+    }];
+  } completion:^(BOOL finished) {
+    if (completion) {
+      completion(finished);
+    }
+  }];
+
+  [_batchUpdateBlocks removeAllObjects];
+  _performingBatchUpdates = NO;
 }
 
 - (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController
@@ -391,33 +420,60 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
-  [UIView performWithoutAnimation:^{
-    [super insertItemsAtIndexPaths:indexPaths];
-  }];
+  if (_performingBatchUpdates) {
+    [_batchUpdateBlocks addObject:^{
+      [super insertItemsAtIndexPaths:indexPaths];
+    }];
+  } else {
+    [UIView performWithoutAnimation:^{
+      [super insertItemsAtIndexPaths:indexPaths];
+    }];
+  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
-  [UIView performWithoutAnimation:^{
-    [super deleteItemsAtIndexPaths:indexPaths];
-  }];
+
+  if (_performingBatchUpdates) {
+    [_batchUpdateBlocks addObject:^{
+      [super deleteItemsAtIndexPaths:indexPaths];
+    }];
+  } else {
+    [UIView performWithoutAnimation:^{
+      [super deleteItemsAtIndexPaths:indexPaths];
+    }];
+  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
-  [UIView performWithoutAnimation:^{
-    [super insertSections:indexSet];
-  }];
+
+  if (_performingBatchUpdates) {
+    [_batchUpdateBlocks addObject:^{
+      [super insertSections:indexSet];
+    }];
+  } else {
+    [UIView performWithoutAnimation:^{
+      [super insertSections:indexSet];
+    }];
+  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
-  [UIView performWithoutAnimation:^{
-    [super deleteSections:indexSet];
-  }];
+
+  if (_performingBatchUpdates) {
+    [_batchUpdateBlocks addObject:^{
+      [super deleteSections:indexSet];
+    }];
+  } else {
+    [UIView performWithoutAnimation:^{
+      [super deleteSections:indexSet];
+    }];
+  }
 }
 
 @end
