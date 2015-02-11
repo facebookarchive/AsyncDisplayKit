@@ -87,7 +87,7 @@
   // TODO can this be removed?
   self.contentsScale = ASDisplayNodeScreenScale();
   self.contentMode = UIViewContentModeScaleAspectFill;
-  self.opaque = YES;
+  self.opaque = NO;
 
   _cropEnabled = YES;
   _cropRect = CGRectMake(0.5, 0.5, 0, 0);
