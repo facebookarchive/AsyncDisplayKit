@@ -99,7 +99,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASRangeController *_rangeController;
   ASFlowLayoutController *_layoutController;
 
-  BOOL _batchUpdateFlag;
+  BOOL _performingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
 }
 
@@ -131,7 +131,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
 
-  _batchUpdateFlag = NO;
+  _performingBatchUpdates = NO;
   _batchUpdateBlocks = [NSMutableArray array];
 
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
@@ -380,7 +380,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController {
   ASDisplayNodeAssertMainThread();
-  _batchUpdateFlag = YES;
+  _performingBatchUpdates = YES;
 }
 
 - (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion {
@@ -397,7 +397,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   }];
 
   [_batchUpdateBlocks removeAllObjects];
-  _batchUpdateFlag = NO;
+  _performingBatchUpdates = NO;
 }
 
 - (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController
@@ -420,7 +420,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
-  if (_batchUpdateFlag) {
+  if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
       [super insertItemsAtIndexPaths:indexPaths];
     }];
@@ -435,7 +435,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
 
-  if (_batchUpdateFlag) {
+  if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
       [super deleteItemsAtIndexPaths:indexPaths];
     }];
@@ -450,7 +450,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
 
-  if (_batchUpdateFlag) {
+  if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
       [super insertSections:indexSet];
     }];
@@ -465,7 +465,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
 
-  if (_batchUpdateFlag) {
+  if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
       [super deleteSections:indexSet];
     }];
