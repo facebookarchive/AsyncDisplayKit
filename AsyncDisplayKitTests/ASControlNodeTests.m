@@ -40,6 +40,13 @@
 - (void)action:(id)sender event:(UIEvent *)event { self.hits++; }
 @end
 
+@interface ASGestureController : ReceiverController
+@end
+@implementation ASGestureController
+- (void)onGesture:(UIGestureRecognizer *)recognizer { self.hits++; }
+- (void)action:(id)sender { self.hits++; }
+@end
+
 @interface ASControlNodeTests : XCTestCase
 
 @end
@@ -109,6 +116,17 @@
   [controller.view addSubview:view];
   [node sendActionsForControlEvents:EVENT withEvent:nil];
   XCTAssert(controller.hits == 1, @"Controller did not receive the action event");
+}
+
+- (void)testTouchesWorkWithGestures {
+  ASGestureController *controller = [[ASGestureController alloc] init];
+  ASControlNode *node = [[ASControlNode alloc] init];
+  [node addTarget:controller action:@selector(action:) forControlEvents:ASControlNodeEventTouchUpInside];
+  [node.view addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:controller action:@selector(onGesture:)]];
+  [controller.view addSubnode:node];
+
+  [node sendActionsForControlEvents:EVENT withEvent:nil];
+  XCTAssert(controller.hits == 1, @"Controller did not receive the tap event");
 }
 
 @end
