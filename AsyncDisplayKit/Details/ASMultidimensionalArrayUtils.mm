@@ -71,6 +71,8 @@ void ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(NSMutableArray *mutab
     [arr insertObjects:[elements subarrayWithRange:NSMakeRange(idx - indexSet.count, indexSet.count)]
              atIndexes:indexSet];
   });
+
+  ASDisplayNodeCAssert(curIdx == indexPaths.count, @"Indexpth is out of range");
 }
 
 void ASDeleteElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths) {
@@ -84,6 +86,8 @@ void ASDeleteElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutable
   ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(mutableArray, indexPaths, curIdx, indexPath, [indexPaths[0] length], ^(NSMutableArray *arr, NSIndexSet *indexSet, NSUInteger idx) {
     [arr removeObjectsAtIndexes:indexSet];
   });
+
+  ASDisplayNodeCAssert(curIdx == indexPaths.count, @"Indexpth is out of range");
 }
 
 NSArray *ASFindElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths) {
@@ -98,6 +102,8 @@ NSArray *ASFindElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutab
   ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(mutableArray, indexPaths, curIdx, indexPath, [indexPaths[0] length], ^(NSMutableArray *arr, NSIndexSet *indexSet, NSUInteger idx) {
     [deletedElements addObjectsFromArray:[arr objectsAtIndexes:indexSet]];
   });
+
+  ASDisplayNodeCAssert(curIdx == indexPaths.count, @"Indexpth is out of range");
 
   return deletedElements;
 }
