@@ -36,6 +36,14 @@
 
 /**
  * Initializer.
+ *
+ * @discussion If asyncDataFetching is enabled, the `AScollectionView` will fetch data through `collectionView:numberOfRowsInSection:` and
+ * `collectionView:nodeForRowAtIndexPath:` in async mode from background thread. Otherwise, the methods will be invoked synchronically
+ * from calling thread.
+ * Enabling asyncDataFetching could avoid blocking main thread for `ASCellNode` allocation, which is frequently reported issue for
+ * large scale data. On another hand, the application code need take the responsibility to avoid data inconsistence. Specifically,
+ * we will lock the data source through `collectionViewLockDataSource`, and unlock it by `collectionViewUnlockDataSource` after the data fetching.
+ * The application should not update the data source while the data source is locked, to keep data consistence.
  */
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled;
 
@@ -112,25 +120,23 @@
  */
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
-@optional
-
 /**
- * Indicator to lock the data source for data loading in asyn mode.
+ * Indicator to lock the data source for data fetching in asyn mode.
  * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistence or exception
  * due to the data access in async mode.
  *
- * @param tableView The sender.
+ * @param collectionView The sender.
  */
-- (void)collectionViewLockDataSourceForDataUpdating:(ASCollectionView *)collectionView;
+- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView;
 
 /**
- * Indicator to unlock the data source for data loading in asyn mode.
+ * Indicator to unlock the data source for data fetching in asyn mode.
  * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistence or exception
  * due to the data access in async mode.
  *
- * @param tableView The sender.
+ * @param collectionView The sender.
  */
-- (void)collectionViewUnlockDataSourceForDataUpdating:(ASCollectionView *)collectionView;
+- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView;
 
 @end
 

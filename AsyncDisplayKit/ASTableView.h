@@ -36,6 +36,14 @@
 
 /**
  * initializer.
+ * 
+ * @discussion If asyncDataFetching is enabled, the `ASTableView` will fetch data through `tableView:numberOfRowsInSection:` and
+ * `tableView:nodeForRowAtIndexPath:` in async mode from background thread. Otherwise, the methods will be invoked synchronically 
+ * from calling thread.
+ * Enabling asyncDataFetching could avoid blocking main thread for `ASCellNode` allocation, which is frequently reported issue for 
+ * large scale data. On another hand, the application code need take the responsibility to avoid data inconsistence. Specifically, 
+ * we will lock the data source through `tableViewLockDataSource`, and unlock it by `tableViewUnlockDataSource` after the data fetching. 
+ * The application should not update the data source while the data source is locked, to keep data consistence.
  */
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled;
 
@@ -114,25 +122,23 @@
  */
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath;
 
-@optional
-
 /**
- * Indicator to lock the data source for data loading in asyn mode.
+ * Indicator to lock the data source for data fetching in asyn mode.
  * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistence or exception
  * due to the data access in async mode.
  *
  * @param tableView The sender.
  */
-- (void)tableViewLockDataSourceForDataUpdating:(ASTableView *)tableView;
+- (void)tableViewLockDataSource:(ASTableView *)tableView;
 
 /**
- * Indicator to unlock the data source for data loading in asyn mode. 
+ * Indicator to unlock the data source for data fetching in asyn mode.
  * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistence or exception
  * due to the data access in async mode.
  *
  * @param tableView The sender.
  */
-- (void)tableViewUnlockDataSourceForDataUpdating:(ASTableView *)tableView;
+- (void)tableViewUnlockDataSource:(ASTableView *)tableView;
 
 @end
 

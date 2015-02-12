@@ -114,7 +114,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   BOOL _asyncDataFetchingEnabled;
 }
 
-@property (atomic, assign) BOOL asyncDataSouceLocked;
+@property (atomic, assign) BOOL asyncDataSourceLocked;
 
 @end
 
@@ -148,7 +148,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
 
   _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
-  _asyncDataSouceLocked = NO;
+  _asyncDataSourceLocked = NO;
 
   return self;
 }
@@ -177,9 +177,6 @@ static BOOL _isInterceptedSelector(SEL sel)
     _proxyDataSource = nil;
     super.dataSource = nil;
   } else {
-    ASDisplayNodeAssert(!_asyncDataFetchingEnabled || ([asyncDataSource respondsToSelector:@selector(tableViewLockDataSourceForDataUpdating:)] &&
-                                                       [asyncDataSource respondsToSelector:@selector(tableViewUnlockDataSourceForDataUpdating:)]),
-                        @"The asyncDataSource need to implements \"tableViewLockDataSourceForDataUpdating\" and \"tableViewUnlockDataSourceForDataUpdating\" to handle data fetching in async mode.");
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
@@ -441,25 +438,25 @@ static BOOL _isInterceptedSelector(SEL sel)
   return CGSizeMake(self.bounds.size.width, FLT_MAX);
 }
 
-- (void)dataControllerLockDataSourceForDataUpdating
+- (void)dataControllerLockDataSource
 {
-  ASDisplayNodeAssert(!self.asyncDataSouceLocked, @"The data source has already been locked !");
+  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has already been locked !");
 
-  self.asyncDataSouceLocked = YES;
+  self.asyncDataSourceLocked = YES;
 
-  if ([_asyncDataSource respondsToSelector:@selector(tableViewLockDataSourceForDataUpdating:)]) {
-    [_asyncDataSource tableViewLockDataSourceForDataUpdating:self];
+  if ([_asyncDataSource respondsToSelector:@selector(tableViewLockDataSource:)]) {
+    [_asyncDataSource tableViewLockDataSource:self];
   }
 }
 
-- (void)dataControllerUnlockDataSourceForDataUpdating
+- (void)dataControllerUnlockDataSource
 {
-  ASDisplayNodeAssert(self.asyncDataSouceLocked, @"The data source has already been unlocked !");
+  ASDisplayNodeAssert(self.asyncDataSourceLocked, @"The data source has already been unlocked !");
 
-  self.asyncDataSouceLocked = NO;
+  self.asyncDataSourceLocked = NO;
 
-  if ([_asyncDataSource respondsToSelector:@selector(tableViewUnlockDataSourceForDataUpdating:)]) {
-    [_asyncDataSource tableViewUnlockDataSourceForDataUpdating:self];
+  if ([_asyncDataSource respondsToSelector:@selector(tableViewUnlockDataSource:)]) {
+    [_asyncDataSource tableViewUnlockDataSource:self];
   }
 }
 

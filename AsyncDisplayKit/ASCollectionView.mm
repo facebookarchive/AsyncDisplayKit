@@ -387,23 +387,23 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-- (void)dataControllerLockDataSourceForDataUpdating
+- (void)dataControllerLockDataSource
 {
   ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has already been locked");
 
   self.asyncDataSourceLocked = YES;
-  if ([_asyncDataSource respondsToSelector:@selector(collectionViewLockDataSourceForDataUpdating:)]) {
-    [_asyncDataSource collectionViewLockDataSourceForDataUpdating:self];
+  if ([_asyncDataSource respondsToSelector:@selector(collectionViewLockDataSource:)]) {
+    [_asyncDataSource collectionViewLockDataSource:self];
   }
 }
 
-- (void)dataControllerUnlockDataSourceForDataUpdating
+- (void)dataControllerUnlockDataSource
 {
   ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has alredy been unlocked !");
 
   self.asyncDataSourceLocked = NO;
-  if ([_asyncDataSource respondsToSelector:@selector(collectionViewUnlockDataSourceForDataUpdating:)]) {
-    [_asyncDataSource collectionViewUnlockDataSourceForDataUpdating:self];
+  if ([_asyncDataSource respondsToSelector:@selector(collectionViewUnlockDataSource:)]) {
+    [_asyncDataSource collectionViewUnlockDataSource:self];
   }
 }
 
