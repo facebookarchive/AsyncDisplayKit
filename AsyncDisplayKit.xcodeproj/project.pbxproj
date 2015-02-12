@@ -416,22 +416,22 @@
 		058D09C5195D04C000B7D73C /* AsyncDisplayKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				2911485B1A77147A005D0878 /* ASControlNodeTests.m */,
 				058D0A2D195D057000B7D73C /* ASDisplayLayerTests.m */,
 				058D0A2E195D057000B7D73C /* ASDisplayNodeAppearanceTests.m */,
 				058D0A2F195D057000B7D73C /* ASDisplayNodeTests.m */,
 				058D0A30195D057000B7D73C /* ASDisplayNodeTestsHelper.h */,
 				058D0A31195D057000B7D73C /* ASDisplayNodeTestsHelper.m */,
-				058D0A32195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m */,
 				052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */,
+				058D0A32195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m */,
 				3C9C128419E616EF00E942A0 /* ASTableViewTests.m */,
 				058D0A33195D057000B7D73C /* ASTextNodeCoreTextAdditionsTests.m */,
 				058D0A34195D057000B7D73C /* ASTextNodeRendererTests.m */,
 				058D0A35195D057000B7D73C /* ASTextNodeShadowerTests.m */,
 				058D0A36195D057000B7D73C /* ASTextNodeTests.m */,
 				058D0A37195D057000B7D73C /* ASTextNodeWordKernerTests.mm */,
-				052EE06A1A15A0D8002C6279 /* TestResources */,
 				058D09C6195D04C000B7D73C /* Supporting Files */,
-				2911485B1A77147A005D0878 /* ASControlNodeTests.m */,
+				052EE06A1A15A0D8002C6279 /* TestResources */,
 			);
 			path = AsyncDisplayKitTests;
 			sourceTree = "<group>";
