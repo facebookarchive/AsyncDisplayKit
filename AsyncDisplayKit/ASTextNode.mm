@@ -228,6 +228,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   // If we are view-backed, support gesture interaction.
   if (!self.isLayerBacked) {
     _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(_handleLongPress:)];
+    _longPressGestureRecognizer.cancelsTouchesInView = NO;
     _longPressGestureRecognizer.delegate = self;
     [self.view addGestureRecognizer:_longPressGestureRecognizer];
   }
