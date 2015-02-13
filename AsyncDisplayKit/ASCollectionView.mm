@@ -13,6 +13,7 @@
 #import "ASRangeController.h"
 #import "ASDataController.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASBatchFetching.h"
 
 const static NSUInteger kASCollectionViewAnimationNone = 0;
 
@@ -143,6 +144,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   _dataController.dataSource = self;
 
   _batchContext = [[ASBatchContext alloc] init];
+
+  _leadingScreensForBatching = 1.0;
 
   _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
@@ -386,7 +389,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   if ([self.asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)]) {
     return [self.asyncDelegate shouldBatchFetchForCollectionView:self];
   } else {
-    return YES;
+    // if the delegate does not respond to this method, there is no point in starting to fetch
+    return [self.asyncDelegate respondsToSelector:@selector(collectionView:beginBatchFetchingWithContext:)];
   }
 }
 
@@ -394,32 +398,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
 
-  // Bail if we are already fetching, the delegate doesn't care, or we're told not to fetch
-  if ([_batchContext isFetching] ||
-      ![self.asyncDelegate respondsToSelector:@selector(collectionView:beginBatchFetchingWithContext:)] ||
-      ![self shouldFetchBatch]) {
+  if (![self shouldFetchBatch]) {
     return;
   }
 
-  ASScrollDirection scrollDirection = [self scrollDirection];
-  CGFloat viewSize, offset, contentSize;
-
-  if (scrollDirection == ASScrollDirectionUp) {
-    viewSize = CGRectGetHeight(self.bounds);
-    offset = targetOffset.y;
-    contentSize = self.contentSize.height;
-  } else { // horizontal
-    viewSize = CGRectGetWidth(self.bounds);
-    offset = targetOffset.x;
-    contentSize = self.contentSize.width;
-  }
-
-  CGFloat triggerDistance = viewSize * _leadingScreensForBatching;
-
-  // Determine if the offset that we are headed to is within the number of screens we have defined
-  // ASCollectionView supports tail loading only currently, hence the check against Up and Left
-  BOOL supportedBatchScrollDirection = scrollDirection == ASScrollDirectionUp || ASScrollDirectionLeft;
-  if (supportedBatchScrollDirection && contentSize - (viewSize + offset) <= triggerDistance) {
+  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
     [_batchContext beginBatchFetching];
     [self.asyncDelegate collectionView:self beginBatchFetchingWithContext:_batchContext];
   }

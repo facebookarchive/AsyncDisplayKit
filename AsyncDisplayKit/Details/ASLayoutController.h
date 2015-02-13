@@ -10,19 +10,13 @@
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
+#import "ASScrollDirection.h"
+
 
 typedef struct {
   CGFloat leadingBufferScreenfuls;
   CGFloat trailingBufferScreenfuls;
 } ASRangeTuningParameters;
-
-typedef NS_ENUM(NSInteger, ASScrollDirection) {
-  ASScrollDirectionNone,
-  ASScrollDirectionRight,
-  ASScrollDirectionLeft,
-  ASScrollDirectionUp,
-  ASScrollDirectionDown,
-};
 
 @protocol ASLayoutController <NSObject>
 

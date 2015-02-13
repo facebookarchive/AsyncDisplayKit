@@ -14,7 +14,7 @@
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
 #import "ASDisplayNodeInternal.h"
-
+#import "ASBatchFetching.h"
 
 
 #pragma mark -
@@ -395,7 +395,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   if ([self.asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)]) {
     return [self.asyncDelegate shouldBatchFetchForTableView:self];
   } else {
-    return YES;
+    // if the delegate does not respond to this method, there is no point in starting to fetch
+    return [self.asyncDelegate respondsToSelector:@selector(tableView:beginBatchFetchingWithContext:)];
   }
 }
 
@@ -403,22 +404,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
 
-  // Bail if we are already fetching, the delegate doesn't care, or we're told not to fetch
-  if ([_batchContext isFetching] ||
-      ![self.asyncDelegate respondsToSelector:@selector(tableView:beginBatchFetchingWithContext:)] ||
-      ![self shouldFetchBatch]) {
+  if (![self shouldFetchBatch]) {
     return;
   }
 
-  CGFloat viewHeight = CGRectGetHeight(self.bounds);
-  CGFloat triggerDistance = viewHeight * _leadingScreensForBatching;
-  CGFloat offset = targetOffset.y;
-  CGFloat contentHeight = self.contentSize.height;
-
-  // Determine if the offset that we are headed to is within the number of screens we have defined
-  // ASTableView supports tail loading only currently, hence the check against ASScrollDirectionUp
-  if ([self scrollDirection] == ASScrollDirectionUp &&
-      contentHeight - (viewHeight + offset) <= triggerDistance) {
+  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
     [_batchContext beginBatchFetching];
     [self.asyncDelegate tableView:self beginBatchFetchingWithContext:_batchContext];
   }

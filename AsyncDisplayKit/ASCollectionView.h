@@ -185,7 +185,7 @@
  * If not implemented, the collectionView assumes that it should notify its asyncDelegate when batch fetching
  * should occur.
  */
-- (BOOL)shouldBatchFetchForCollectionView:(UICollectionView *)collectionView;
+- (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView;
 
 /**
  * Receive a message that the collectionView is near the end of its data set and more data should be fetched if 
@@ -200,7 +200,7 @@
  * UICollectionView currently only supports batch events for tail loads. If you require a head load, consider
  * implementing a UIRefreshControl.
  */
-- (void)collectionView:(UICollectionView *)collectionView beginBatchFetchingWithContext:(ASBatchContext *)context;
+- (void)collectionView:(ASCollectionView *)collectionView beginBatchFetchingWithContext:(ASBatchContext *)context;
 
 @end
 

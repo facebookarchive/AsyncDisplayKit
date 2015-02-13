@@ -145,6 +145,9 @@
 		292C59A31A956527007E5DD6 /* ASRangeHandlerRender.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		292C59A41A956527007E5DD6 /* ASRangeHandlerRender.mm in Sources */ = {isa = PBXBuildFile; fileRef = 292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */; };
 		299DA1A91A828D2900162D41 /* ASBatchContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 299DA1A71A828D2900162D41 /* ASBatchContext.h */; };
+		296A0A2E1A9516B2005ACEAA /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		296A0A2F1A9516B2005ACEAA /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */; };
+		296A0A351A951ABF005ACEAA /* ASBatchFetchingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 296A0A341A951ABF005ACEAA /* ASBatchFetchingTests.m */; };
 		299DA1A91A828D2900162D41 /* ASBatchContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 299DA1A71A828D2900162D41 /* ASBatchContext.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		299DA1AA1A828D2900162D41 /* ASBatchContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 299DA1A81A828D2900162D41 /* ASBatchContext.m */; };
 		3C9C128519E616EF00E942A0 /* ASTableViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C9C128419E616EF00E942A0 /* ASTableViewTests.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -299,6 +302,10 @@
 		292C599C1A956527007E5DD6 /* ASRangeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeHandler.h; sourceTree = "<group>"; };
 		292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeHandlerRender.h; sourceTree = "<group>"; };
 		292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRangeHandlerRender.mm; sourceTree = "<group>"; };
+		296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBatchFetching.h; sourceTree = "<group>"; };
+		296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBatchFetching.m; sourceTree = "<group>"; };
+		296A0A311A951715005ACEAA /* ASScrollDirection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASScrollDirection.h; path = AsyncDisplayKit/Details/ASScrollDirection.h; sourceTree = SOURCE_ROOT; };
+		296A0A341A951ABF005ACEAA /* ASBatchFetchingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBatchFetchingTests.m; sourceTree = "<group>"; };
 		299DA1A71A828D2900162D41 /* ASBatchContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBatchContext.h; sourceTree = "<group>"; };
 		299DA1A81A828D2900162D41 /* ASBatchContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBatchContext.m; sourceTree = "<group>"; };
 		3C9C128419E616EF00E942A0 /* ASTableViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableViewTests.m; sourceTree = "<group>"; };
@@ -432,6 +439,7 @@
 		058D09C5195D04C000B7D73C /* AsyncDisplayKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				296A0A341A951ABF005ACEAA /* ASBatchFetchingTests.m */,
 				2911485B1A77147A005D0878 /* ASControlNodeTests.m */,
 				058D0A2D195D057000B7D73C /* ASDisplayLayerTests.m */,
 				058D0A2E195D057000B7D73C /* ASDisplayNodeAppearanceTests.m */,
@@ -472,6 +480,8 @@
 				054963481A1EA066000F8E56 /* ASBasicImageDownloader.mm */,
 				299DA1A71A828D2900162D41 /* ASBatchContext.h */,
 				299DA1A81A828D2900162D41 /* ASBatchContext.m */,
+				296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */,
+				296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */,
 				464052191A3F83C40061C0BA /* ASDataController.h */,
 				4640521A1A3F83C40061C0BA /* ASDataController.mm */,
 				05A6D05819D0EB64002DD95E /* ASDealloc2MainObject.h */,
@@ -497,6 +507,7 @@
 				292C599C1A956527007E5DD6 /* ASRangeHandler.h */,
 				292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */,
 				292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */,
+				296A0A311A951715005ACEAA /* ASScrollDirection.h */,
 				058D09EA195D050800B7D73C /* ASTextNodeCoreTextAdditions.h */,
 				058D09EB195D050800B7D73C /* ASTextNodeCoreTextAdditions.m */,
 				058D09EC195D050800B7D73C /* ASTextNodeRenderer.h */,
@@ -600,6 +611,7 @@
 				058D0A4F195D05CB00B7D73C /* ASImageNode.h in Headers */,
 				058D0A50195D05CB00B7D73C /* ASImageNode.mm in Headers */,
 				058D0A51195D05CB00B7D73C /* ASTextNode.h in Headers */,
+				296A0A2E1A9516B2005ACEAA /* ASBatchFetching.h in Headers */,
 				058D0A52195D05CB00B7D73C /* ASTextNode.mm in Headers */,
 				055F1A3819ABD413004DAFF1 /* ASRangeController.h in Headers */,
 				292C59A31A956527007E5DD6 /* ASRangeHandlerRender.h in Headers */,
@@ -832,6 +844,7 @@
 				058D0A29195D050800B7D73C /* ASDisplayNode+DebugTiming.mm in Sources */,
 				058D0A22195D050800B7D73C /* _ASAsyncTransaction.m in Sources */,
 				055F1A3919ABD413004DAFF1 /* ASRangeController.mm in Sources */,
+				296A0A2F1A9516B2005ACEAA /* ASBatchFetching.m in Sources */,
 				D785F6631A74327E00291744 /* ASScrollNode.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -841,6 +854,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */,
+				296A0A351A951ABF005ACEAA /* ASBatchFetchingTests.m in Sources */,
 				058D0A3E195D057000B7D73C /* ASTextNodeRendererTests.m in Sources */,
 				058D0A3D195D057000B7D73C /* ASTextNodeCoreTextAdditionsTests.m in Sources */,
 				058D0A3C195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m in Sources */,
