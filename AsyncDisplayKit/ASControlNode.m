@@ -50,9 +50,6 @@
 @property (nonatomic, readwrite, assign, getter=isTracking) BOOL tracking;
 @property (nonatomic, readwrite, assign, getter=isTouchInside) BOOL touchInside;
 
-//! @abstract Indicates whether the receiver is interested in receiving touches.
-- (BOOL)_isInterestedInTouches;
-
 /**
   @abstract Returns a key to be used in _controlEventDispatchTable that identifies the control event.
   @param controlEvent A control event.
@@ -91,7 +88,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (![self _isInterestedInTouches])
+  if (!self.enabled)
     return;
 
   ASControlNodeEvent controlEventMask = 0;
@@ -127,7 +124,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (![self _isInterestedInTouches])
+  if (!self.enabled)
     return;
 
   NSParameterAssert([touches count] == 1);
@@ -153,7 +150,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (![self _isInterestedInTouches])
+  if (!self.enabled)
     return;
 
   // We're no longer tracking and there is no touch to be inside.
@@ -172,7 +169,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (![self _isInterestedInTouches])
+  if (!self.enabled)
     return;
 
   NSParameterAssert([touches count] == 1);
@@ -197,7 +194,12 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
-  // similar to UIControl, gestures always win
+  // If we're interested in touches, this is a tap (the only gesture we care about) and passed -hitTest for us, then no, you may not begin. Sir.
+  if (self.enabled && [gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]] && gestureRecognizer.view != self.view) {
+    return NO;
+  }
+
+  // Otherwise, go ahead. :]
   return YES;
 }
 
@@ -361,12 +363,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 }
 
 #pragma mark - Convenience
-
-- (BOOL)_isInterestedInTouches
-{
-  // We're only interested in touches if we're enabled
-  return self.enabled;
-}
 
 id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEvent)
 {
