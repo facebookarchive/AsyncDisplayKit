@@ -71,8 +71,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 
   _ASPendingState *_pendingViewState;
 
-  NSTimeInterval _fadeAnimationDuration;
-
   struct {
     // public properties
     unsigned synchronous:1;

@@ -28,7 +28,7 @@ static CGFloat const kASDKLogoAspectRatio = 2.79;
 {
   if (self = [super init]) {
     self.placeholderEnabled = YES;
-    self.placeholderFadesOut = YES;
+    self.placeholderFadeDuration = 0.1;
   }
   return self;
 }
