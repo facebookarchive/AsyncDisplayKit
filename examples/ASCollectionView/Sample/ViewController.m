@@ -34,7 +34,7 @@
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
   
-  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:YES];
   _collectionView.asyncDataSource = self;
   _collectionView.asyncDelegate = self;
   _collectionView.backgroundColor = [UIColor whiteColor];
@@ -76,6 +76,15 @@
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
   return 300;
+}
+
+- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView {
+  // lock the data source
+  // The data source should not be change until it is unlocked.
+}
+
+- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView {
+  // unlock the data source to enable data source updating.
 }
 
 @end

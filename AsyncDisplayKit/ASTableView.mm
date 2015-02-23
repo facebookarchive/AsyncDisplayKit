@@ -110,7 +110,11 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASFlowLayoutController *_layoutController;
 
   ASRangeController *_rangeController;
+
+  BOOL _asyncDataFetchingEnabled;
 }
+
+@property (atomic, assign) BOOL asyncDataSourceLocked;
 
 @end
 
@@ -121,6 +125,12 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
 {
+  return [self initWithFrame:frame style:style asyncDataFetching:NO];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
+{
+
   if (!(self = [super initWithFrame:frame style:style]))
     return nil;
 
@@ -130,12 +140,15 @@ static BOOL _isInterceptedSelector(SEL sel)
   _rangeController.layoutController = _layoutController;
   _rangeController.delegate = self;
 
-  _dataController = [[ASDataController alloc] init];
+  _dataController = [[ASDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
   _dataController.dataSource = self;
   _dataController.delegate = _rangeController;
 
   _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+
+  _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
+  _asyncDataSourceLocked = NO;
 
   return self;
 }
@@ -423,6 +436,28 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   return CGSizeMake(self.bounds.size.width, FLT_MAX);
+}
+
+- (void)dataControllerLockDataSource
+{
+  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has already been locked !");
+
+  self.asyncDataSourceLocked = YES;
+
+  if ([_asyncDataSource respondsToSelector:@selector(tableViewLockDataSource:)]) {
+    [_asyncDataSource tableViewLockDataSource:self];
+  }
+}
+
+- (void)dataControllerUnlockDataSource
+{
+  ASDisplayNodeAssert(self.asyncDataSourceLocked, @"The data source has already been unlocked !");
+
+  self.asyncDataSourceLocked = NO;
+
+  if ([_asyncDataSource respondsToSelector:@selector(tableViewUnlockDataSource:)]) {
+    [_asyncDataSource tableViewUnlockDataSource:self];
+  }
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataControllre rowsInSection:(NSUInteger)section

@@ -101,7 +101,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   BOOL _performingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
+
+  BOOL _asyncDataFetchingEnabled;
 }
+
+@property (atomic, assign) BOOL asyncDataSourceLocked;
 
 @end
 
@@ -111,6 +115,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark Lifecycle.
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
+{
+  return [self initWithFrame:frame collectionViewLayout:layout asyncDataFetching:NO];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
@@ -124,12 +133,15 @@ static BOOL _isInterceptedSelector(SEL sel)
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
 
-  _dataController = [[ASDataController alloc] init];
+  _dataController = [[ASDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
   _dataController.delegate = _rangeController;
   _dataController.dataSource = self;
 
   _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+
+  _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
+  _asyncDataSourceLocked = NO;
 
   _performingBatchUpdates = NO;
   _batchUpdateBlocks = [NSMutableArray array];
@@ -372,6 +384,26 @@ static BOOL _isInterceptedSelector(SEL sel)
     return [_asyncDataSource numberOfSectionsInCollectionView:self];
   } else {
     return 1;
+  }
+}
+
+- (void)dataControllerLockDataSource
+{
+  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has already been locked");
+
+  self.asyncDataSourceLocked = YES;
+  if ([_asyncDataSource respondsToSelector:@selector(collectionViewLockDataSource:)]) {
+    [_asyncDataSource collectionViewLockDataSource:self];
+  }
+}
+
+- (void)dataControllerUnlockDataSource
+{
+  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has alredy been unlocked !");
+
+  self.asyncDataSourceLocked = NO;
+  if ([_asyncDataSource respondsToSelector:@selector(collectionViewUnlockDataSource:)]) {
+    [_asyncDataSource collectionViewUnlockDataSource:self];
   }
 }
 

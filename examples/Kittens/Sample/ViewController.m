@@ -12,6 +12,7 @@
 #import "ViewController.h"
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASAssert.h>
 
 #import "BlurbNode.h"
 #import "KittenNode.h"
@@ -25,7 +26,12 @@ static const NSInteger kLitterSize = 20;
 
   // array of boxed CGSizes corresponding to placekitten kittens
   NSArray *_kittenDataSource;
+
+  BOOL _dataSourceLocked;
 }
+
+@property (nonatomic, strong) NSArray *kittenDataSource;
+@property (atomic, assign) BOOL dataSourceLocked;
 
 @end
 
@@ -40,7 +46,7 @@ static const NSInteger kLitterSize = 20;
   if (!(self = [super init]))
     return nil;
 
-  _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
+  _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain asyncDataFetching:YES];
   _tableView.separatorStyle = UITableViewCellSeparatorStyleNone; // KittenNode has its own separator
   _tableView.asyncDataSource = self;
   _tableView.asyncDelegate = self;
@@ -57,6 +63,12 @@ static const NSInteger kLitterSize = 20;
   _kittenDataSource = kittenDataSource;
 
   return self;
+}
+
+- (void)setKittenDataSource:(NSArray *)kittenDataSource {
+  ASDisplayNodeAssert(!self.dataSourceLocked, @"Could not update data source when it is locked !");
+
+  _kittenDataSource = kittenDataSource;
 }
 
 - (void)viewDidLoad
@@ -103,6 +115,14 @@ static const NSInteger kLitterSize = 20;
 {
   // disable row selection
   return NO;
+}
+
+- (void)tableViewLockDataSource:(ASTableView *)tableView {
+  self.dataSourceLocked = YES;
+}
+
+- (void)tableViewUnlockDataSource:(ASTableView *)tableView {
+  self.dataSourceLocked = NO;
 }
 
 @end
