@@ -9,6 +9,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
 
+
 @protocol ASImageCacheProtocol <NSObject>
 
 @required

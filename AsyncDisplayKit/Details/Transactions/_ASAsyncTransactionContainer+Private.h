@@ -6,7 +6,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "_ASAsyncTransactionContainer.h"
+#import <AsyncDisplayKit/_ASAsyncTransactionContainer.h>
+
 
 @interface CALayer (ASAsyncTransactionContainerTransactions)
 @property (nonatomic, retain, setter=asyncdisplaykit_setAsyncLayerTransactions:) NSHashTable *asyncdisplaykit_asyncLayerTransactions;

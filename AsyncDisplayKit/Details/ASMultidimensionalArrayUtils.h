@@ -2,7 +2,8 @@
 
 #import <Foundation/Foundation.h>
 
-#import "ASBaseDefines.h"
+#import <AsyncDisplayKit/ASBaseDefines.h>
+
 
 /**
  * Helper class for operation on multidimensional array, where the object of array may be an object or an array.
