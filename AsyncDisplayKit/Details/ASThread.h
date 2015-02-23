@@ -13,10 +13,11 @@
 #import <stdbool.h>
 #import <stdlib.h>
 
+#import <libkern/OSAtomic.h>
+
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
-#import <libkern/OSAtomic.h>
 
 static inline BOOL ASDisplayNodeThreadIsMain()
 {

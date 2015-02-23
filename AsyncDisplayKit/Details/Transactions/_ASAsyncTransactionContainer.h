@@ -6,8 +6,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <QuartzCore/QuartzCore.h>
+#import <CoreGraphics/CoreGraphics.h>
 #import <UIKit/UIKit.h>
+
 
 @class _ASAsyncTransaction;
 
