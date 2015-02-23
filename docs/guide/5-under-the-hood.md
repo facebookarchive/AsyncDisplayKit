@@ -77,6 +77,7 @@ layer-backed:
   if (!self.layerBacked) {
     _gestureRecogniser = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                          action:@selector(_tap:)];
+    [self.view addGestureRecognizer:_gestureRecogniser];
   }
 }
 ```
