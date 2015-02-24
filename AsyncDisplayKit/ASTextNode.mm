@@ -234,6 +234,18 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   }
 }
 
+- (void)setBounds:(CGRect)bounds
+{
+  [super setBounds:bounds];
+  if (!CGSizeEqualToSize(bounds.size, _constrainedSize)) {
+    // Our bounds have changed to a size that is not identical to our constraining size,
+    // so our previous layout information is invalid, and TextKit may draw at the
+    // incorrect origin.
+    _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
+    [self _invalidateRenderer];
+  }
+}
+
 #pragma mark - Renderer Management
 
 - (ASTextNodeRenderer *)_renderer
