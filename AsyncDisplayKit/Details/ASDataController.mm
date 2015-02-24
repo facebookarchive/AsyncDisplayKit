@@ -471,7 +471,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
-  return ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, indexPaths);
+  return ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
 }
 
 @end
