@@ -139,11 +139,11 @@
 		1950C4491A3BB5C1005C8279 /* ASEqualityHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 1950C4481A3BB5C1005C8279 /* ASEqualityHelpers.h */; };
 		2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2911485B1A77147A005D0878 /* ASControlNodeTests.m */; };
 		292C599F1A956527007E5DD6 /* ASLayoutRangeType.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C59991A956527007E5DD6 /* ASLayoutRangeType.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		292C59A01A956527007E5DD6 /* ASPreloadRangeDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599A1A956527007E5DD6 /* ASPreloadRangeDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		292C59A11A956527007E5DD6 /* ASPreloadRangeDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 292C599B1A956527007E5DD6 /* ASPreloadRangeDelegate.mm */; };
-		292C59A21A956527007E5DD6 /* ASRangeDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599C1A956527007E5DD6 /* ASRangeDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		292C59A31A956527007E5DD6 /* ASRenderRangeDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599D1A956527007E5DD6 /* ASRenderRangeDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		292C59A41A956527007E5DD6 /* ASRenderRangeDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 292C599E1A956527007E5DD6 /* ASRenderRangeDelegate.mm */; };
+		292C59A01A956527007E5DD6 /* ASRangeHandlerPreload.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599A1A956527007E5DD6 /* ASRangeHandlerPreload.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		292C59A11A956527007E5DD6 /* ASRangeHandlerPreload.mm in Sources */ = {isa = PBXBuildFile; fileRef = 292C599B1A956527007E5DD6 /* ASRangeHandlerPreload.mm */; };
+		292C59A21A956527007E5DD6 /* ASRangeHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599C1A956527007E5DD6 /* ASRangeHandler.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		292C59A31A956527007E5DD6 /* ASRangeHandlerRender.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		292C59A41A956527007E5DD6 /* ASRangeHandlerRender.mm in Sources */ = {isa = PBXBuildFile; fileRef = 292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */; };
 		3C9C128519E616EF00E942A0 /* ASTableViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C9C128419E616EF00E942A0 /* ASTableViewTests.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		464052201A3F83C40061C0BA /* ASDataController.h in Headers */ = {isa = PBXBuildFile; fileRef = 464052191A3F83C40061C0BA /* ASDataController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		464052211A3F83C40061C0BA /* ASDataController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4640521A1A3F83C40061C0BA /* ASDataController.mm */; };
@@ -291,11 +291,11 @@
 		1950C4481A3BB5C1005C8279 /* ASEqualityHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASEqualityHelpers.h; sourceTree = "<group>"; };
 		2911485B1A77147A005D0878 /* ASControlNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASControlNodeTests.m; sourceTree = "<group>"; };
 		292C59991A956527007E5DD6 /* ASLayoutRangeType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLayoutRangeType.h; sourceTree = "<group>"; };
-		292C599A1A956527007E5DD6 /* ASPreloadRangeDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPreloadRangeDelegate.h; sourceTree = "<group>"; };
-		292C599B1A956527007E5DD6 /* ASPreloadRangeDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASPreloadRangeDelegate.mm; sourceTree = "<group>"; };
-		292C599C1A956527007E5DD6 /* ASRangeDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeDelegate.h; sourceTree = "<group>"; };
-		292C599D1A956527007E5DD6 /* ASRenderRangeDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRenderRangeDelegate.h; sourceTree = "<group>"; };
-		292C599E1A956527007E5DD6 /* ASRenderRangeDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRenderRangeDelegate.mm; sourceTree = "<group>"; };
+		292C599A1A956527007E5DD6 /* ASRangeHandlerPreload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeHandlerPreload.h; sourceTree = "<group>"; };
+		292C599B1A956527007E5DD6 /* ASRangeHandlerPreload.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRangeHandlerPreload.mm; sourceTree = "<group>"; };
+		292C599C1A956527007E5DD6 /* ASRangeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeHandler.h; sourceTree = "<group>"; };
+		292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeHandlerRender.h; sourceTree = "<group>"; };
+		292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRangeHandlerRender.mm; sourceTree = "<group>"; };
 		3C9C128419E616EF00E942A0 /* ASTableViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableViewTests.m; sourceTree = "<group>"; };
 		464052191A3F83C40061C0BA /* ASDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDataController.h; sourceTree = "<group>"; };
 		4640521A1A3F83C40061C0BA /* ASDataController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASDataController.mm; sourceTree = "<group>"; };
@@ -483,13 +483,13 @@
 				058D09E9195D050800B7D73C /* ASMutableAttributedStringBuilder.m */,
 				055F1A3619ABD413004DAFF1 /* ASRangeController.h */,
 				055F1A3719ABD413004DAFF1 /* ASRangeController.mm */,
-				292C599A1A956527007E5DD6 /* ASPreloadRangeDelegate.h */,
-				292C599B1A956527007E5DD6 /* ASPreloadRangeDelegate.mm */,
+				292C599A1A956527007E5DD6 /* ASRangeHandlerPreload.h */,
+				292C599B1A956527007E5DD6 /* ASRangeHandlerPreload.mm */,
 				055F1A3619ABD413004DAFF1 /* ASRangeController.h */,
 				055F1A3719ABD413004DAFF1 /* ASRangeController.mm */,
-				292C599C1A956527007E5DD6 /* ASRangeDelegate.h */,
-				292C599D1A956527007E5DD6 /* ASRenderRangeDelegate.h */,
-				292C599E1A956527007E5DD6 /* ASRenderRangeDelegate.mm */,
+				292C599C1A956527007E5DD6 /* ASRangeHandler.h */,
+				292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */,
+				292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */,
 				058D09EA195D050800B7D73C /* ASTextNodeCoreTextAdditions.h */,
 				058D09EB195D050800B7D73C /* ASTextNodeCoreTextAdditions.m */,
 				058D09EC195D050800B7D73C /* ASTextNodeRenderer.h */,
@@ -595,7 +595,7 @@
 				058D0A51195D05CB00B7D73C /* ASTextNode.h in Headers */,
 				058D0A52195D05CB00B7D73C /* ASTextNode.mm in Headers */,
 				055F1A3819ABD413004DAFF1 /* ASRangeController.h in Headers */,
-				292C59A31A956527007E5DD6 /* ASRenderRangeDelegate.h in Headers */,
+				292C59A31A956527007E5DD6 /* ASRangeHandlerRender.h in Headers */,
 				055F1A3419ABD3E3004DAFF1 /* ASTableView.h in Headers */,
 				0574D5E219C110940097DC25 /* ASTableViewProtocols.h in Headers */,
 				055F1A3C19ABD43F004DAFF1 /* ASCellNode.h in Headers */,
@@ -638,7 +638,7 @@
 				058D0A83195D060300B7D73C /* ASBaseDefines.h in Headers */,
 				058D0A84195D060300B7D73C /* ASDisplayNodeExtraIvars.h in Headers */,
 				AC3C4A511A1139C100143C57 /* ASCollectionView.h in Headers */,
-				292C59A01A956527007E5DD6 /* ASPreloadRangeDelegate.h in Headers */,
+				292C59A01A956527007E5DD6 /* ASRangeHandlerPreload.h in Headers */,
 				055B9FA81A1C154B00035D6D /* ASNetworkImageNode.h in Headers */,
 				054963491A1EA066000F8E56 /* ASBasicImageDownloader.h in Headers */,
 				AC3C4A541A113EEC00143C57 /* ASCollectionViewProtocols.h in Headers */,
@@ -658,7 +658,7 @@
 				058D0A7B195D05F900B7D73C /* ASDisplayNodeInternal.h in Headers */,
 				058D0A7C195D05F900B7D73C /* ASImageNode+CGExtras.h in Headers */,
 				058D0A7D195D05F900B7D73C /* ASImageNode+CGExtras.m in Headers */,
-				292C59A21A956527007E5DD6 /* ASRangeDelegate.h in Headers */,
+				292C59A21A956527007E5DD6 /* ASRangeHandler.h in Headers */,
 				058D0A7F195D05F900B7D73C /* ASSentinel.h in Headers */,
 				058D0A80195D05F900B7D73C /* ASSentinel.m in Headers */,
 				058D0A81195D05F900B7D73C /* ASThread.h in Headers */,
@@ -795,10 +795,10 @@
 				464052261A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm in Sources */,
 				055B9FA91A1C154B00035D6D /* ASNetworkImageNode.mm in Sources */,
 				058D0A1D195D050800B7D73C /* ASTextNodeRenderer.mm in Sources */,
-				292C59A41A956527007E5DD6 /* ASRenderRangeDelegate.mm in Sources */,
+				292C59A41A956527007E5DD6 /* ASRangeHandlerRender.mm in Sources */,
 				058D0A2A195D050800B7D73C /* ASDisplayNode+UIViewBridge.mm in Sources */,
 				AC3C4A521A1139C100143C57 /* ASCollectionView.mm in Sources */,
-				292C59A11A956527007E5DD6 /* ASPreloadRangeDelegate.mm in Sources */,
+				292C59A11A956527007E5DD6 /* ASRangeHandlerPreload.mm in Sources */,
 				058D0A20195D050800B7D73C /* ASTextNodeWordKerner.m in Sources */,
 				058D0A1A195D050800B7D73C /* ASHighlightOverlayLayer.mm in Sources */,
 				464052231A3F83C40061C0BA /* ASFlowLayoutController.mm in Sources */,

@@ -6,20 +6,20 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASRenderRangeDelegate.h"
+#import "ASRangeHandlerRender.h"
 
 #import "ASDisplayNode.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
 
-@interface ASDisplayNode (ASRenderRangeDelegate)
+@interface ASDisplayNode (ASRangeHandlerRender)
 
 - (void)display;
 - (void)recursivelyDisplay;
 
 @end
 
-@implementation ASDisplayNode (ASRenderRangeDelegate)
+@implementation ASDisplayNode (ASRangeHandlerRender)
 
 - (void)display
 {
@@ -59,12 +59,12 @@
 
 @end
 
-@implementation ASRenderRangeDelegate
+@implementation ASRangeHandlerRender
 
-- (void)node:(ASDisplayNode *)node enteredRangeType:(ASLayoutRangeType)rangeType
+- (void)node:(ASDisplayNode *)node enteredRangeOfType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(node, @"invalid argument");
+  ASDisplayNodeAssert(rangeType == ASLayoutRangeTypeRender, @"Render delegate should not handle other ranges");
 
   // if node is in the working range it should not actively be in view
   [node.view removeFromSuperview];
@@ -72,16 +72,14 @@
   [node recursivelyDisplay];
 }
 
-- (void)node:(ASDisplayNode *)node exitedRangeType:(ASLayoutRangeType)rangeType
+- (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(node, @"invalid argument");
+  ASDisplayNodeAssert(rangeType == ASLayoutRangeTypeRender, @"Render delegate should not handle other ranges");
 
   [node recursivelySetDisplaySuspended:YES];
   [node.view removeFromSuperview];
 
-  // since this class usually manages large or infinite data sets, the working range
-  // directly bounds memory usage by requiring redrawing any content that falls outside the range.
   [node recursivelyClearRendering];
 }
 

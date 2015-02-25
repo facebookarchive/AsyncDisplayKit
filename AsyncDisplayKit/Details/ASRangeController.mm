@@ -12,15 +12,15 @@
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASMultiDimensionalArrayUtils.h"
-#import "ASRenderRangeDelegate.h"
-#import "ASPreloadRangeDelegate.h"
+#import "ASRangeHandlerRender.h"
+#import "ASRangeHandlerPreload.h"
 
 @interface ASRangeController () {
   BOOL _rangeIsValid;
 
   // keys should be ASLayoutRangeTypes and values NSSets containing NSIndexPaths
   NSMutableDictionary *_rangeTypeIndexPaths;
-  NSDictionary *_rangeTypeDelegates;
+  NSDictionary *_rangeTypeHandlers;
   BOOL _queuedRangeUpdate;
 
   ASScrollDirection _scrollDirection;
@@ -36,9 +36,9 @@
     _rangeIsValid = YES;
     _rangeTypeIndexPaths = [[NSMutableDictionary alloc] init];
 
-    _rangeTypeDelegates = @{
-                            @(ASLayoutRangeTypeRender): [[ASRenderRangeDelegate alloc] init],
-                            @(ASLayoutRangeTypePreload): [[ASPreloadRangeDelegate alloc] init],
+    _rangeTypeHandlers = @{
+                            @(ASLayoutRangeTypeRender): [[ASRangeHandlerRender alloc] init],
+                            @(ASLayoutRangeTypePreload): [[ASRangeHandlerPreload alloc] init],
                             };
   }
 
@@ -94,7 +94,7 @@
     id rangeKey = @(rangeType);
 
     // this delegate decide what happens when a node is added or removed from a range
-    id<ASRangeDelegate> rangeDelegate = _rangeTypeDelegates[rangeKey];
+    id<ASRangeHandler> rangeDelegate = _rangeTypeHandlers[rangeKey];
 
     if ([_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths viewportSize:viewportSize rangeType:rangeType]) {
       NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize rangeType:rangeType];
@@ -106,7 +106,9 @@
       if (removedIndexPaths.count) {
         NSArray *removedNodes = [_delegate rangeController:self nodesAtIndexPaths:[removedIndexPaths allObjects]];
         [removedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-          [rangeDelegate node:node exitedRangeType:rangeType];
+          // since this class usually manages large or infinite data sets, the working range
+          // directly bounds memory usage by requiring redrawing any content that falls outside the range.
+          [rangeDelegate node:node exitedRangeOfType:rangeType];
         }];
       }
 
@@ -115,14 +117,15 @@
       [addedIndexPaths minusSet:[_rangeTypeIndexPaths objectForKey:rangeKey]];
 
       // The preload range (for example) should include nodes that are visible
-      if ([self shouldRemoveVisibleNodesFromRangeType:rangeType]) {
+      // TODO: remove this once we have removed the dependency on Core Animation's -display
+      if ([self shouldSkipVisibleNodesForRangeType:rangeType]) {
         [addedIndexPaths minusSet:visibleNodePathsSet];
       }
 
       if (addedIndexPaths.count) {
         NSArray *addedNodes = [_delegate rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
         [addedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-          [rangeDelegate node:node enteredRangeType:rangeType];
+          [rangeDelegate node:node enteredRangeOfType:rangeType];
         }];
       }
 
@@ -135,9 +138,9 @@
   _queuedRangeUpdate = NO;
 }
 
-- (BOOL)shouldRemoveVisibleNodesFromRangeType:(ASLayoutRangeType)rangeType
+- (BOOL)shouldSkipVisibleNodesForRangeType:(ASLayoutRangeType)rangeType
 {
-  return rangeType != ASLayoutRangeTypePreload;
+  return rangeType == ASLayoutRangeTypeRender;
 }
 
 - (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)cellNode

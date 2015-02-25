@@ -12,11 +12,11 @@
 
 @class ASDisplayNode;
 
-@protocol ASRangeDelegate <NSObject>
+@protocol ASRangeHandler <NSObject>
 
 @required
 
-- (void)node:(ASDisplayNode *)node enteredRangeType:(ASLayoutRangeType)rangeType;
-- (void)node:(ASDisplayNode *)node exitedRangeType:(ASLayoutRangeType)rangeType;
+- (void)node:(ASDisplayNode *)node enteredRangeOfType:(ASLayoutRangeType)rangeType;
+- (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType;
 
 @end

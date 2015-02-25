@@ -320,7 +320,8 @@
 - (void)didExitHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers.
+ * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
+ * on the current node.
  *
  * @discussion Called by -recursivelyClearRendering. Base class implements self.contents = nil, clearing any backing
  * store, for asynchronous regeneration when needed.
@@ -328,7 +329,7 @@
 - (void)clearRendering ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * Provides an opportunity to clear any remote data for only the current node.
+ * Provides an opportunity to clear any remote data on the current node.
  *
  * @discussion This will not clear data recursively for all subnodes. Either call -recursivelyClearRemoteData or
  * selectively clear remote data.

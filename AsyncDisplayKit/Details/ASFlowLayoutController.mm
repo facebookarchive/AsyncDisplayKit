@@ -25,7 +25,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   std::vector<std::pair<int, int>> _rangeStartPos;
   std::vector<std::pair<int, int>> _rangeEndPos;
 
-  std::vector<ASRangeTuningParameters> _tuningParameterMap;
+  std::vector<ASRangeTuningParameters> _tuningParameters;
 }
 
 @end
@@ -39,12 +39,12 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
   _layoutDirection = layoutDirection;
 
-  _tuningParameterMap = std::vector<ASRangeTuningParameters>(2);
-  _tuningParameterMap[ASLayoutRangeTypePreload] = {
+  _tuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
+  _tuningParameters[ASLayoutRangeTypePreload] = {
     .leadingBufferScreenfuls = 2,
     .trailingBufferScreenfuls = 1
   };
-  _tuningParameterMap[ASLayoutRangeTypeRender] = {
+  _tuningParameters[ASLayoutRangeTypeRender] = {
     .leadingBufferScreenfuls = 3,
     .trailingBufferScreenfuls = 2
   };
@@ -56,14 +56,14 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType < _tuningParameterMap.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  return _tuningParameterMap[rangeType];
+  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  return _tuningParameters[rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType < _tuningParameterMap.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  _tuningParameterMap[rangeType] = tuningParameters;
+  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  _tuningParameters[rangeType] = tuningParameters;
 }
 
 // Support for the deprecated tuningParameters property
