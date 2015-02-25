@@ -108,6 +108,8 @@
  */
 @protocol ASCollectionViewDataSource <ASCommonCollectionViewDataSource, NSObject>
 
+@required
+
 /**
  * Similar to -collectionView:cellForItemAtIndexPath:.
  *
@@ -120,6 +122,8 @@
  * is not called when the row is about to display.
  */
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
+
+@optional
 
 /**
  * Indicator to lock the data source for data fetching in asyn mode.
