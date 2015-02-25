@@ -110,6 +110,8 @@
  */
 @protocol ASTableViewDataSource <ASCommonTableViewDataSource, NSObject>
 
+@required
+
 /**
  * Similar to -tableView:cellForRowAtIndexPath:.
  *
@@ -122,6 +124,8 @@
  * is not called when the row is about to display.
  */
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath;
+
+@optional
 
 /**
  * Indicator to lock the data source for data fetching in asyn mode.
