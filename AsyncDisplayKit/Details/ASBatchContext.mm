@@ -8,6 +8,8 @@
 
 #import "ASBatchContext.h"
 
+#import "ASThread.h"
+
 typedef NS_ENUM(NSInteger, ASBatchContextState) {
   ASBatchContextStateFetching,
   ASBatchContextStateCancelled,
@@ -17,6 +19,7 @@ typedef NS_ENUM(NSInteger, ASBatchContextState) {
 @interface ASBatchContext ()
 {
   ASBatchContextState _state;
+  ASDN::RecursiveMutex _propertyLock;
 }
 @end
 
@@ -32,28 +35,33 @@ typedef NS_ENUM(NSInteger, ASBatchContextState) {
 
 - (BOOL)isFetching
 {
+  ASDN::MutexLocker l(_propertyLock);
   return _state == ASBatchContextStateFetching;
 }
 
 - (BOOL)batchFetchingWasCancelled
 {
+  ASDN::MutexLocker l(_propertyLock);
   return _state == ASBatchContextStateCancelled;
 }
 
 - (void)completeBatchFetching:(BOOL)didComplete
 {
   if (didComplete) {
+    ASDN::MutexLocker l(_propertyLock);
     _state = ASBatchContextStateCompleted;
   }
 }
 
 - (void)beginBatchFetching
 {
+  ASDN::MutexLocker l(_propertyLock);
   _state = ASBatchContextStateFetching;
 }
 
 - (void)cancelBatchFetching
 {
+  ASDN::MutexLocker l(_propertyLock);
   _state = ASBatchContextStateCancelled;
 }
 

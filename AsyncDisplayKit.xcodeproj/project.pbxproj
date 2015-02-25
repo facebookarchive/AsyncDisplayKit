@@ -144,12 +144,11 @@
 		292C59A21A956527007E5DD6 /* ASRangeHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599C1A956527007E5DD6 /* ASRangeHandler.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		292C59A31A956527007E5DD6 /* ASRangeHandlerRender.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		292C59A41A956527007E5DD6 /* ASRangeHandlerRender.mm in Sources */ = {isa = PBXBuildFile; fileRef = 292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */; };
-		299DA1A91A828D2900162D41 /* ASBatchContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 299DA1A71A828D2900162D41 /* ASBatchContext.h */; };
-		296A0A2E1A9516B2005ACEAA /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		296A0A2E1A9516B2005ACEAA /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		296A0A2F1A9516B2005ACEAA /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */; };
 		296A0A351A951ABF005ACEAA /* ASBatchFetchingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 296A0A341A951ABF005ACEAA /* ASBatchFetchingTests.m */; };
 		299DA1A91A828D2900162D41 /* ASBatchContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 299DA1A71A828D2900162D41 /* ASBatchContext.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		299DA1AA1A828D2900162D41 /* ASBatchContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 299DA1A81A828D2900162D41 /* ASBatchContext.m */; };
+		299DA1AA1A828D2900162D41 /* ASBatchContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 299DA1A81A828D2900162D41 /* ASBatchContext.mm */; };
 		3C9C128519E616EF00E942A0 /* ASTableViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C9C128419E616EF00E942A0 /* ASTableViewTests.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		464052201A3F83C40061C0BA /* ASDataController.h in Headers */ = {isa = PBXBuildFile; fileRef = 464052191A3F83C40061C0BA /* ASDataController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		464052211A3F83C40061C0BA /* ASDataController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4640521A1A3F83C40061C0BA /* ASDataController.mm */; };
@@ -302,12 +301,12 @@
 		292C599C1A956527007E5DD6 /* ASRangeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeHandler.h; sourceTree = "<group>"; };
 		292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeHandlerRender.h; sourceTree = "<group>"; };
 		292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRangeHandlerRender.mm; sourceTree = "<group>"; };
-		296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBatchFetching.h; sourceTree = "<group>"; };
-		296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBatchFetching.m; sourceTree = "<group>"; };
+		296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASBatchFetching.h; path = ../Details/ASBatchFetching.h; sourceTree = "<group>"; };
+		296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASBatchFetching.m; path = ../Details/ASBatchFetching.m; sourceTree = "<group>"; };
 		296A0A311A951715005ACEAA /* ASScrollDirection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASScrollDirection.h; path = AsyncDisplayKit/Details/ASScrollDirection.h; sourceTree = SOURCE_ROOT; };
 		296A0A341A951ABF005ACEAA /* ASBatchFetchingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBatchFetchingTests.m; sourceTree = "<group>"; };
 		299DA1A71A828D2900162D41 /* ASBatchContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBatchContext.h; sourceTree = "<group>"; };
-		299DA1A81A828D2900162D41 /* ASBatchContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBatchContext.m; sourceTree = "<group>"; };
+		299DA1A81A828D2900162D41 /* ASBatchContext.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASBatchContext.mm; sourceTree = "<group>"; };
 		3C9C128419E616EF00E942A0 /* ASTableViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableViewTests.m; sourceTree = "<group>"; };
 		464052191A3F83C40061C0BA /* ASDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDataController.h; sourceTree = "<group>"; };
 		4640521A1A3F83C40061C0BA /* ASDataController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASDataController.mm; sourceTree = "<group>"; };
@@ -479,9 +478,7 @@
 				054963471A1EA066000F8E56 /* ASBasicImageDownloader.h */,
 				054963481A1EA066000F8E56 /* ASBasicImageDownloader.mm */,
 				299DA1A71A828D2900162D41 /* ASBatchContext.h */,
-				299DA1A81A828D2900162D41 /* ASBatchContext.m */,
-				296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */,
-				296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */,
+				299DA1A81A828D2900162D41 /* ASBatchContext.mm */,
 				464052191A3F83C40061C0BA /* ASDataController.h */,
 				4640521A1A3F83C40061C0BA /* ASDataController.mm */,
 				05A6D05819D0EB64002DD95E /* ASDealloc2MainObject.h */,
@@ -546,6 +543,8 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */,
+				296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */,
 				058D0A02195D050800B7D73C /* _AS-objc-internal.h */,
 				058D0A03195D050800B7D73C /* _ASCoreAnimationExtras.h */,
 				058D0A04195D050800B7D73C /* _ASCoreAnimationExtras.mm */,
@@ -809,7 +808,7 @@
 				058D0A18195D050800B7D73C /* _ASDisplayLayer.mm in Sources */,
 				058D0A2C195D050800B7D73C /* ASSentinel.m in Sources */,
 				464052211A3F83C40061C0BA /* ASDataController.mm in Sources */,
-				299DA1AA1A828D2900162D41 /* ASBatchContext.m in Sources */,
+				299DA1AA1A828D2900162D41 /* ASBatchContext.mm in Sources */,
 				058D0A15195D050800B7D73C /* ASDisplayNodeExtras.mm in Sources */,
 				058D0A1F195D050800B7D73C /* ASTextNodeTextKitHelpers.mm in Sources */,
 				055F1A3519ABD3E3004DAFF1 /* ASTableView.mm in Sources */,
@@ -862,6 +861,7 @@
 				058D0A3B195D057000B7D73C /* ASDisplayNodeTestsHelper.m in Sources */,
 				058D0A3A195D057000B7D73C /* ASDisplayNodeTests.m in Sources */,
 				052EE0661A159FEF002C6279 /* ASMultiplexImageNodeTests.m in Sources */,
+				291D92411A9D537B008286B8 /* ASBatchFetching.m in Sources */,
 				058D0A39195D057000B7D73C /* ASDisplayNodeAppearanceTests.m in Sources */,
 				058D0A41195D057000B7D73C /* ASTextNodeWordKernerTests.mm in Sources */,
 				058D0A40195D057000B7D73C /* ASTextNodeTests.m in Sources */,

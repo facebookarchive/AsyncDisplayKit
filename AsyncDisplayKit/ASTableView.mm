@@ -390,13 +390,13 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-- (BOOL)shouldFetchBatch
+- (BOOL)shouldBatchFetch
 {
-  if ([self.asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)]) {
-    return [self.asyncDelegate shouldBatchFetchForTableView:self];
+  if ([_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)]) {
+    return [_asyncDelegate shouldBatchFetchForTableView:self];
   } else {
     // if the delegate does not respond to this method, there is no point in starting to fetch
-    return [self.asyncDelegate respondsToSelector:@selector(tableView:beginBatchFetchingWithContext:)];
+    return [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
   }
 }
 
@@ -404,13 +404,15 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
 
-  if (![self shouldFetchBatch]) {
+  if (![self shouldBatchFetch]) {
     return;
   }
 
   if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
     [_batchContext beginBatchFetching];
-    [self.asyncDelegate tableView:self beginBatchFetchingWithContext:_batchContext];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      [_asyncDelegate tableView:self willBeginBatchFetchWithContext:_batchContext];
+    });
   }
 }
 

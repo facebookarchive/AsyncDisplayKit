@@ -175,6 +175,21 @@
 - (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNodeForItemAtIndexPath:(NSIndexPath*)indexPath;
 
 /**
+ * Receive a message that the collectionView is near the end of its data set and more data should be fetched if 
+ * necessary.
+ *
+ * @param tableView The sender.
+ * @param context A context object that must be notified when the batch fetch is completed.
+ *
+ * @discussion You must eventually call -completeBatchFetching: with an argument of YES in order to receive future
+ * notifications to do batch fetches. This method is called on a background queue.
+ *
+ * UICollectionView currently only supports batch events for tail loads. If you require a head load, consider
+ * implementing a UIRefreshControl.
+ */
+- (void)collectionView:(ASCollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context;
+
+/**
  * Tell the collectionView if batch fetching should begin.
  *
  * @param collectionView The sender.
@@ -186,21 +201,6 @@
  * should occur.
  */
 - (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView;
-
-/**
- * Receive a message that the collectionView is near the end of its data set and more data should be fetched if 
- * necessary.
- *
- * @param tableView The sender.
- * @param context A context object that must be notified when the batch fetch is completed.
- *
- * @discussion You must eventually call -completeBatchFetching: with an argument of YES in order to receive future
- * notifications to do batch fetches.
- *
- * UICollectionView currently only supports batch events for tail loads. If you require a head load, consider
- * implementing a UIRefreshControl.
- */
-- (void)collectionView:(ASCollectionView *)collectionView beginBatchFetchingWithContext:(ASBatchContext *)context;
 
 @end
 
