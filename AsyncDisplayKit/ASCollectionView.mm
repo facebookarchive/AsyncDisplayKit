@@ -399,7 +399,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)dataControllerUnlockDataSource
 {
-  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has alredy been unlocked !");
+  ASDisplayNodeAssert(self.asyncDataSourceLocked, @"The data source has alredy been unlocked !");
 
   self.asyncDataSourceLocked = NO;
   if ([_asyncDataSource respondsToSelector:@selector(collectionViewUnlockDataSource:)]) {
