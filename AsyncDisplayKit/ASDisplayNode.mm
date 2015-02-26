@@ -124,8 +124,6 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _flags.implementsImageDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
   _flags.implementsDrawParameters = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
 
-  _fadeAnimationDuration = 0.1;
-
   ASDisplayNodeMethodOverrides overrides = ASDisplayNodeMethodOverrideNone;
   if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesBegan:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesBegan;
@@ -1235,10 +1233,10 @@ static NSInteger incrementIfFound(NSInteger i) {
         [self _tearDownPlaceholderLayer];
       };
 
-      if (self.placeholderFadesOut) {
+      if (_placeholderFadeDuration > 0.0) {
         [CATransaction begin];
         [CATransaction setCompletionBlock:cleanupBlock];
-        [CATransaction setAnimationDuration:_fadeAnimationDuration];
+        [CATransaction setAnimationDuration:_placeholderFadeDuration];
         _placeholderLayer.opacity = 0.0;
         [CATransaction commit];
       } else {
@@ -1771,6 +1769,21 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 - (void)addSubnode:(ASDisplayNode *)node
 {
   [self addSublayer:node.layer];
+}
+
+@end
+
+
+@implementation ASDisplayNode (Deprecated)
+
+- (void)setPlaceholderFadesOut:(BOOL)placeholderFadesOut
+{
+  self.placeholderFadeDuration = placeholderFadesOut ? 0.1 : 0.0;
+}
+
+- (BOOL)placeholderFadesOut
+{
+  return self.placeholderFadeDuration > 0.0;
 }
 
 @end

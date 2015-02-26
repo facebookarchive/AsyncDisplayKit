@@ -333,11 +333,11 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 @property (nonatomic, assign) BOOL placeholderEnabled;
 
 /**
- * @abstract Toggle to fade-out the placeholder when a node's contents are finished displaying.
+ * @abstract Set the time it takes to fade out the placeholder when a node's contents are finished displaying.
  *
- * @discussion Defaults to NO.
+ * @discussion Defaults to 0 seconds.
  */
-@property (nonatomic, assign) BOOL placeholderFadesOut;
+@property (nonatomic, assign) NSTimeInterval placeholderFadeDuration;
 
 
 /** @name Hit Testing */
@@ -536,4 +536,8 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * Convenience method, equivalent to [layer addSublayer:node.layer].
  */
 - (void)addSubnode:(ASDisplayNode *)node;
+@end
+
+@interface ASDisplayNode (Deprecated)
+@property (nonatomic, assign) BOOL placeholderFadesOut ASDISPLAYNODE_DEPRECATED;
 @end
