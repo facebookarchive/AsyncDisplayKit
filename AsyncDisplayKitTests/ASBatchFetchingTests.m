@@ -99,4 +99,20 @@
   XCTAssert(shouldFetch == YES, @"Fetch should begin when vertically scrolling past the content size");
 }
 
+- (void)testVerticalScrollingSmallContentSize {
+  CGFloat screen = 1.0;
+  ASBatchContext *context = [[ASBatchContext alloc] init];
+  // when the content size is < screen size, the target offset will always be 0
+  BOOL shouldFetch = ASDisplayShouldFetchBatchForContext(context, ASScrollDirectionUp, VERTICAL_RECT(screen), VERTICAL_SIZE(screen * 0.5), VERTICAL_OFFSET(0.0), 1.0);
+  XCTAssert(shouldFetch == YES, @"Fetch should begin when the target is 0 and the content size is smaller than the scree");
+}
+
+- (void)testHorizontalScrollingSmallContentSize {
+  CGFloat screen = 1.0;
+  ASBatchContext *context = [[ASBatchContext alloc] init];
+  // when the content size is < screen size, the target offset will always be 0
+  BOOL shouldFetch = ASDisplayShouldFetchBatchForContext(context, ASScrollDirectionLeft, HORIZONTAL_RECT(screen), HORIZONTAL_SIZE(screen * 0.5), HORIZONTAL_OFFSET(0.0), 1.0);
+  XCTAssert(shouldFetch == YES, @"Fetch should begin when the target is 0 and the content size is smaller than the scree");
+}
+
 @end

@@ -55,7 +55,7 @@ static const NSInteger kMaxLitterSize = 100;
 
   // populate our "data source" with some random kittens
 
-  _kittenDataSource = [self createLitterWithSize:kLitterSize];;
+  _kittenDataSource = [self createLitterWithSize:kLitterSize];
 
   return self;
 }
@@ -63,7 +63,7 @@ static const NSInteger kMaxLitterSize = 100;
 - (NSArray *)createLitterWithSize:(NSInteger)litterSize
 {
   NSMutableArray *kittens = [NSMutableArray arrayWithCapacity:litterSize];
-  for (NSInteger i = 0; i < kLitterSize; i++) {
+  for (NSInteger i = 0; i < litterSize; i++) {
     u_int32_t deltaX = arc4random_uniform(10) - 5;
     u_int32_t deltaY = arc4random_uniform(10) - 5;
     CGSize size = CGSizeMake(350 + 2 * deltaX, 350 + 4 * deltaY);
@@ -140,7 +140,7 @@ static const NSInteger kMaxLitterSize = 100;
   return _kittenDataSource.count < kMaxLitterSize;
 }
 
-- (void)tableView:(UITableView *)tableView beginBatchFetchingWithContext:(ASBatchContext *)context
+- (void)tableView:(UITableView *)tableView willBeginBatchFetchWithContext:(ASBatchContext *)context
 {
   NSLog(@"adding kitties");
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{

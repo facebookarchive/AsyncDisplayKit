@@ -392,11 +392,12 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (BOOL)shouldBatchFetch
 {
-  if ([_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)]) {
+  // if the delegate does not respond to this method, there is no point in starting to fetch
+  BOOL canFetch = [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
+  if (canFetch && [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)]) {
     return [_asyncDelegate shouldBatchFetchForTableView:self];
   } else {
-    // if the delegate does not respond to this method, there is no point in starting to fetch
-    return [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
+    return canFetch;
   }
 }
 

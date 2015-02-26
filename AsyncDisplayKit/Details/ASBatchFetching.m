@@ -19,16 +19,14 @@ BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
     return NO;
   }
 
-  // no fetching for null states
-  if (leadingScreens <= 0.0 ||
-      CGPointEqualToPoint(targetOffset, CGPointZero) ||
-      CGSizeEqualToSize(contentSize, CGSizeZero) ||
-      CGRectEqualToRect(bounds, CGRectZero)) {
+  // only Up and Left scrolls are currently supported (tail loading)
+  if (scrollDirection != ASScrollDirectionUp && scrollDirection != ASScrollDirectionLeft) {
     return NO;
   }
 
-  // only Up and Left scrolls are currently supported (tail loading)
-  if (scrollDirection != ASScrollDirectionUp && scrollDirection != ASScrollDirectionLeft) {
+  // no fetching for null states
+  if (leadingScreens <= 0.0 ||
+      CGRectEqualToRect(bounds, CGRectZero)) {
     return NO;
   }
 
@@ -44,8 +42,11 @@ BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
     contentLength = contentSize.width;
   }
 
+  // target offset will always be 0 if the content size is smaller than the viewport
+  BOOL hasSmallContent = offset == 0.0 && contentLength < viewLength;
+
   CGFloat triggerDistance = viewLength * leadingScreens;
   CGFloat remainingDistance = contentLength - viewLength - offset;
 
-  return remainingDistance <= triggerDistance;
+  return hasSmallContent || remainingDistance <= triggerDistance;
 }

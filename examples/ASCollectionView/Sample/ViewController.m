@@ -89,7 +89,7 @@
   // unlock the data source to enable data source updating.
 }
 
-- (void)collectionView:(UICollectionView *)collectionView beginBatchFetchingWithContext:(ASBatchContext *)context
+- (void)collectionView:(UICollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context
 {
   NSLog(@"fetch additional content");
   [context completeBatchFetching:YES];
