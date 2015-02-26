@@ -139,7 +139,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [_dataSource dataControllerUnlockDataSource];
     });
   } else {
+    [_dataSource dataControllerLockDataSource];
     block();
+    [_dataSource dataControllerUnlockDataSource];
   }
 }
 
