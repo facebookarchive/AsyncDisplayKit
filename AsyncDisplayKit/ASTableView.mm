@@ -14,7 +14,7 @@
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
 #import "ASDisplayNodeInternal.h"
-
+#import "ASBatchFetching.h"
 
 
 #pragma mark -
@@ -38,7 +38,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 
           // used for ASRangeController visibility updates
           sel == @selector(tableView:willDisplayCell:forRowAtIndexPath:) ||
-          sel == @selector(tableView:didEndDisplayingCell:forRowAtIndexPath:)
+          sel == @selector(tableView:didEndDisplayingCell:forRowAtIndexPath:) ||
+
+          // used for batch fetching API
+          sel == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
           );
 }
 
@@ -112,6 +115,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASRangeController *_rangeController;
 
   BOOL _asyncDataFetchingEnabled;
+
+  ASBatchContext *_batchContext;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -149,6 +154,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
   _asyncDataSourceLocked = NO;
+
+  _leadingScreensForBatching = 1.0;
+  _batchContext = [[ASBatchContext alloc] init];
 
   return self;
 }
@@ -366,6 +374,46 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNodeForRowAtIndexPath:)]) {
     [_asyncDelegate tableView:self didEndDisplayingNodeForRowAtIndexPath:indexPath];
+  }
+}
+
+
+#pragma mark - 
+#pragma mark Batch Fetching
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+{
+  [self handleBatchFetchScrollingToOffset:*targetContentOffset];
+
+  if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
+    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
+  }
+}
+
+- (BOOL)shouldBatchFetch
+{
+  // if the delegate does not respond to this method, there is no point in starting to fetch
+  BOOL canFetch = [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
+  if (canFetch && [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)]) {
+    return [_asyncDelegate shouldBatchFetchForTableView:self];
+  } else {
+    return canFetch;
+  }
+}
+
+- (void)handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
+{
+  ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
+
+  if (![self shouldBatchFetch]) {
+    return;
+  }
+
+  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
+    [_batchContext beginBatchFetching];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      [_asyncDelegate tableView:self willBeginBatchFetchWithContext:_batchContext];
+    });
   }
 }
 

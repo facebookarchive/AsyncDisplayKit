@@ -13,6 +13,7 @@
 #import "ASRangeController.h"
 #import "ASDataController.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASBatchFetching.h"
 
 const static NSUInteger kASCollectionViewAnimationNone = 0;
 
@@ -38,7 +39,10 @@ static BOOL _isInterceptedSelector(SEL sel)
           
           // used for ASRangeController visibility updates
           sel == @selector(collectionView:willDisplayCell:forItemAtIndexPath:) ||
-          sel == @selector(collectionView:didEndDisplayingCell:forItemAtIndexPath:)
+          sel == @selector(collectionView:didEndDisplayingCell:forItemAtIndexPath:) ||
+
+          // used for batch fetching API
+          sel == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
           );
 }
 
@@ -103,6 +107,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   NSMutableArray *_batchUpdateBlocks;
 
   BOOL _asyncDataFetchingEnabled;
+
+  ASBatchContext *_batchContext;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -136,6 +142,10 @@ static BOOL _isInterceptedSelector(SEL sel)
   _dataController = [[ASDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
   _dataController.delegate = _rangeController;
   _dataController.dataSource = self;
+
+  _batchContext = [[ASBatchContext alloc] init];
+
+  _leadingScreensForBatching = 1.0;
 
   _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
@@ -358,6 +368,46 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
     [_asyncDelegate collectionView:self didEndDisplayingNodeForItemAtIndexPath:indexPath];
+  }
+}
+
+
+#pragma mark -
+#pragma mark Batch Fetching
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+{
+  [self handleBatchFetchScrollingToOffset:*targetContentOffset];
+
+  if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
+    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
+  }
+}
+
+- (BOOL)shouldBatchFetch
+{
+  // if the delegate does not respond to this method, there is no point in starting to fetch
+  BOOL canFetch = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)];
+  if (canFetch && [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)]) {
+    return [_asyncDelegate shouldBatchFetchForCollectionView:self];
+  } else {
+    return canFetch;
+  }
+}
+
+- (void)handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
+{
+  ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
+
+  if (![self shouldBatchFetch]) {
+    return;
+  }
+
+  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
+    [_batchContext beginBatchFetching];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      [_asyncDelegate collectionView:self willBeginBatchFetchWithContext:_batchContext];
+    });
   }
 }
 
