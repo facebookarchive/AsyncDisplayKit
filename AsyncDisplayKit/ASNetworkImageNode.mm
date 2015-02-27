@@ -123,9 +123,16 @@
   return _delegate;
 }
 
-- (void)reclaimMemory
+- (void)displayWillStart
 {
-  [super reclaimMemory];
+  [super displayWillStart];
+
+  [self fetchRemoteData];
+}
+
+- (void)clearRemoteData
+{
+  [super clearRemoteData];
 
   {
     ASDN::MutexLocker l(_lock);
@@ -136,10 +143,10 @@
   }
 }
 
-- (void)displayWillStart
+- (void)fetchRemoteData
 {
-  [super displayWillStart];
-
+  [super fetchRemoteData];
+  
   {
     ASDN::MutexLocker l(_lock);
     [self _lazilyLoadImageIfNecessary];

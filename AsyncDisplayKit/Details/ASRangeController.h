@@ -16,7 +16,6 @@
 
 @protocol ASRangeControllerDelegate;
 
-
 /**
  * Working range controller.
  *

@@ -1,4 +1,10 @@
-//  Copyright 2004-present Facebook. All Rights Reserved.
+/* Copyright (c) 2014-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
 
 #import "ASFlowLayoutController.h"
 
@@ -16,8 +22,10 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   std::pair<int, int> _visibleRangeStartPos;
   std::pair<int, int> _visibleRangeEndPos;
 
-  std::pair<int, int> _workingRangeStartPos;
-  std::pair<int, int> _workingRangeEndPos;
+  std::vector<std::pair<int, int>> _rangeStartPos;
+  std::vector<std::pair<int, int>> _rangeEndPos;
+
+  std::vector<ASRangeTuningParameters> _tuningParameters;
 }
 
 @end
@@ -31,13 +39,49 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
   _layoutDirection = layoutDirection;
 
-  _tuningParameters.leadingBufferScreenfuls = 2;
-  _tuningParameters.trailingBufferScreenfuls = 1;
+  _tuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
+  _tuningParameters[ASLayoutRangeTypePreload] = {
+    .leadingBufferScreenfuls = 2,
+    .trailingBufferScreenfuls = 1
+  };
+  _tuningParameters[ASLayoutRangeTypeRender] = {
+    .leadingBufferScreenfuls = 3,
+    .trailingBufferScreenfuls = 2
+  };
 
   return self;
 }
 
-- (void)insertNodesAtIndexPaths:(NSArray *)indexPaths withSizes:(NSArray *)nodeSizes {
+#pragma mark - Tuning Parameters
+
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
+{
+  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  return _tuningParameters[rangeType];
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
+{
+  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  _tuningParameters[rangeType] = tuningParameters;
+}
+
+// Support for the deprecated tuningParameters property
+- (ASRangeTuningParameters)tuningParameters
+{
+  return [self tuningParametersForRangeType:ASLayoutRangeTypeRender];
+}
+
+// Support for the deprecated tuningParameters property
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters
+{
+  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
+}
+
+#pragma mark - Editing
+
+- (void)insertNodesAtIndexPaths:(NSArray *)indexPaths withSizes:(NSArray *)nodeSizes
+{
   ASDisplayNodeAssert(indexPaths.count == nodeSizes.count, @"Inconsistent index paths and node size");
 
   [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
@@ -46,14 +90,16 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   }];
 }
 
-- (void)deleteNodesAtIndexPaths:(NSArray *)indexPaths {
+- (void)deleteNodesAtIndexPaths:(NSArray *)indexPaths
+{
   [indexPaths enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
     std::vector<CGSize> &v = _nodeSizes[indexPath.section];
     v.erase(v.begin() + indexPath.row);
   }];
 }
 
-- (void)insertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet {
+- (void)insertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet
+{
   __block int cnt = 0;
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
     NSArray *nodes = sections[cnt++];
@@ -69,56 +115,76 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 }
 
 - (void)deleteSectionsAtIndexSet:(NSIndexSet *)indexSet {
-  [indexSet enumerateIndexesWithOptions:NSEnumerationReverse usingBlock:^(NSUInteger idx, BOOL *stop) {
+  [indexSet enumerateIndexesWithOptions:NSEnumerationReverse usingBlock:^(NSUInteger idx, BOOL *stop)
+  {
     _nodeSizes.erase(_nodeSizes.begin() +idx);
   }];
 }
 
-- (BOOL)shouldUpdateWorkingRangesForVisibleIndexPath:(NSArray *)indexPaths
-                                        viewportSize:(CGSize)viewportSize {
+#pragma mark - Visible Indices
+
+- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
+{
   if (!indexPaths.count) {
     return NO;
+  }
+
+  std::pair<int, int> rangeStartPos, rangeEndPos;
+
+  if (rangeType < _rangeStartPos.size() && rangeType < _rangeEndPos.size()) {
+    rangeStartPos = _rangeStartPos[rangeType];
+    rangeEndPos = _rangeEndPos[rangeType];
   }
 
   std::pair<int, int> startPos, endPos;
   ASFindIndexPathRange(indexPaths, startPos, endPos);
 
-  if (_workingRangeStartPos >= startPos || _workingRangeEndPos <= endPos) {
+  if (rangeStartPos >= startPos || rangeEndPos <= endPos) {
     return YES;
   }
 
-  return ASFlowLayoutDistance(startPos, _visibleRangeStartPos, _nodeSizes) > ASFlowLayoutDistance(_visibleRangeStartPos, _workingRangeStartPos, _nodeSizes) * kASFlowLayoutControllerRefreshingThreshold ||
-         ASFlowLayoutDistance(endPos, _visibleRangeEndPos, _nodeSizes) > ASFlowLayoutDistance(_visibleRangeEndPos, _workingRangeEndPos, _nodeSizes) * kASFlowLayoutControllerRefreshingThreshold;
+  return ASFlowLayoutDistance(startPos, _visibleRangeStartPos, _nodeSizes) > ASFlowLayoutDistance(_visibleRangeStartPos, rangeStartPos, _nodeSizes) * kASFlowLayoutControllerRefreshingThreshold ||
+  ASFlowLayoutDistance(endPos, _visibleRangeEndPos, _nodeSizes) > ASFlowLayoutDistance(_visibleRangeEndPos, rangeEndPos, _nodeSizes) * kASFlowLayoutControllerRefreshingThreshold;
 }
 
-- (void)setVisibleNodeIndexPaths:(NSArray *)indexPaths {
+- (BOOL)shouldUpdateForVisibleIndexPath:(NSArray *)indexPaths
+                                        viewportSize:(CGSize)viewportSize
+{
+  return [self shouldUpdateForVisibleIndexPaths:indexPaths viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
+}
+
+- (void)setVisibleNodeIndexPaths:(NSArray *)indexPaths
+{
   ASFindIndexPathRange(indexPaths, _visibleRangeStartPos, _visibleRangeEndPos);
 }
 
 /**
  * IndexPath array for the element in the working range.
  */
-- (NSSet *)workingRangeIndexPathsForScrolling:(enum ASScrollDirection)scrollDirection
-                                 viewportSize:(CGSize)viewportSize {
-  std::pair<int, int> startIter, endIter;
+
+- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
+{
+  CGFloat viewportScreenMetric;
+  ASScrollDirection leadingDirection;
 
   if (_layoutDirection == ASFlowLayoutDirectionHorizontal) {
     ASDisplayNodeAssert(scrollDirection == ASScrollDirectionNone || scrollDirection == ASScrollDirectionLeft || scrollDirection == ASScrollDirectionRight, @"Invalid scroll direction");
 
-    CGFloat backScreens = scrollDirection == ASScrollDirectionLeft ? self.tuningParameters.leadingBufferScreenfuls : self.tuningParameters.trailingBufferScreenfuls;
-    CGFloat frontScreens = scrollDirection == ASScrollDirectionLeft ? self.tuningParameters.trailingBufferScreenfuls : self.tuningParameters.leadingBufferScreenfuls;
-
-    startIter = ASFindIndexForRange(_nodeSizes, _visibleRangeStartPos, - backScreens * viewportSize.width, _layoutDirection);
-    endIter = ASFindIndexForRange(_nodeSizes, _visibleRangeEndPos, frontScreens * viewportSize.width, _layoutDirection);
+    viewportScreenMetric = viewportSize.width;
+    leadingDirection = ASScrollDirectionLeft;
   } else {
     ASDisplayNodeAssert(scrollDirection == ASScrollDirectionNone || scrollDirection == ASScrollDirectionUp || scrollDirection == ASScrollDirectionDown, @"Invalid scroll direction");
 
-    CGFloat backScreens = scrollDirection == ASScrollDirectionUp ? self.tuningParameters.leadingBufferScreenfuls : self.tuningParameters.trailingBufferScreenfuls;
-    CGFloat frontScreens = scrollDirection == ASScrollDirectionUp ? self.tuningParameters.trailingBufferScreenfuls : self.tuningParameters.leadingBufferScreenfuls;
-
-    startIter = ASFindIndexForRange(_nodeSizes, _visibleRangeStartPos, - backScreens * viewportSize.height, _layoutDirection);
-    endIter = ASFindIndexForRange(_nodeSizes, _visibleRangeEndPos, frontScreens * viewportSize.height, _layoutDirection);
+    viewportScreenMetric = viewportSize.height;
+    leadingDirection = ASScrollDirectionUp;
   }
+
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType];
+  CGFloat backScreens = scrollDirection == leadingDirection ? tuningParameters.leadingBufferScreenfuls : tuningParameters.trailingBufferScreenfuls;
+  CGFloat frontScreens = scrollDirection == leadingDirection ? tuningParameters.trailingBufferScreenfuls : tuningParameters.leadingBufferScreenfuls;
+
+  std::pair<int, int> startIter = ASFindIndexForRange(_nodeSizes, _visibleRangeStartPos, - backScreens * viewportScreenMetric, _layoutDirection);
+  std::pair<int, int> endIter = ASFindIndexForRange(_nodeSizes, _visibleRangeEndPos, frontScreens * viewportScreenMetric, _layoutDirection);
 
   NSMutableSet *indexPathSet = [[NSMutableSet alloc] init];
 
@@ -133,11 +199,21 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   }
 
   [indexPathSet addObject:[NSIndexPath indexPathForRow:endIter.second inSection:endIter.first]];
-
+  
   return indexPathSet;
 }
 
-static void ASFindIndexPathRange(NSArray *indexPaths, std::pair<int, int> &startPos, std::pair<int, int> &endPos) {
+- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection
+                                 viewportSize:(CGSize)viewportSize
+{
+  return [self indexPathsForScrolling:scrollDirection viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
+}
+
+#pragma mark - Utility
+
+static void ASFindIndexPathRange(NSArray *indexPaths, std::pair<int, int> &startPos, std::pair<int, int> &endPos)
+
+{
   NSIndexPath *initialIndexPath = [indexPaths firstObject];
   startPos = endPos = {initialIndexPath.section, initialIndexPath.row};
   [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
@@ -150,7 +226,8 @@ static void ASFindIndexPathRange(NSArray *indexPaths, std::pair<int, int> &start
 static const std::pair<int, int> ASFindIndexForRange(const std::vector<std::vector<CGSize>> &nodes,
                                                      const std::pair<int, int> &pos,
                                                      CGFloat range,
-                                                     ASFlowLayoutDirection layoutDirection) {
+                                                     ASFlowLayoutDirection layoutDirection)
+{
   std::pair<int, int> cur = pos, pre = pos;
 
   if (range < 0.0 && cur.first >= 0 && cur.first < nodes.size() && cur.second >= 0 && cur.second < nodes[cur.first].size()) {
@@ -190,7 +267,8 @@ static const std::pair<int, int> ASFindIndexForRange(const std::vector<std::vect
   return cur;
 }
 
-static int ASFlowLayoutDistance(const std::pair<int, int> &start, const std::pair<int, int> &end, const std::vector<std::vector<CGSize>> &nodes) {
+static int ASFlowLayoutDistance(const std::pair<int, int> &start, const std::pair<int, int> &end, const std::vector<std::vector<CGSize>> &nodes)
+{
   if (start == end) {
     return 0;
   } else if (start > end) {

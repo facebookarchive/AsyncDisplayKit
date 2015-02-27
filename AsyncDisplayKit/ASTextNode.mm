@@ -212,12 +212,12 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   [self _invalidateRenderer];
 }
 
-- (void)reclaimMemory
+- (void)clearRendering
 {
   // We discard the backing store and renderer to prevent the very large
   // memory overhead of maintaining these for all text nodes.  They can be
   // regenerated when layout is necessary.
-  [super reclaimMemory];      // ASDisplayNode will set layer.contents = nil
+  [super clearRendering];      // ASDisplayNode will set layer.contents = nil
   [self _invalidateRenderer];
 }
 
