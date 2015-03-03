@@ -140,6 +140,7 @@
 		2079963A1AA0F60400E398CA /* ASCollectionViewLayoutController.m in Sources */ = {isa = PBXBuildFile; fileRef = 207996381AA0F60400E398CA /* ASCollectionViewLayoutController.m */; };
 		2079963B1AA0F60400E398CA /* ASCollectionViewLayoutController.h in Headers */ = {isa = PBXBuildFile; fileRef = 207996391AA0F60400E398CA /* ASCollectionViewLayoutController.h */; };
 		2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2911485B1A77147A005D0878 /* ASControlNodeTests.m */; };
+		291B63FB1AA53A7A000A71B3 /* ASScrollDirection.h in Headers */ = {isa = PBXBuildFile; fileRef = 296A0A311A951715005ACEAA /* ASScrollDirection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		292C599F1A956527007E5DD6 /* ASLayoutRangeType.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C59991A956527007E5DD6 /* ASLayoutRangeType.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		292C59A01A956527007E5DD6 /* ASRangeHandlerPreload.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599A1A956527007E5DD6 /* ASRangeHandlerPreload.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		292C59A11A956527007E5DD6 /* ASRangeHandlerPreload.mm in Sources */ = {isa = PBXBuildFile; fileRef = 292C599B1A956527007E5DD6 /* ASRangeHandlerPreload.mm */; };
@@ -596,6 +597,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				291B63FB1AA53A7A000A71B3 /* ASScrollDirection.h in Headers */,
 				464052221A3F83C40061C0BA /* ASFlowLayoutController.h in Headers */,
 				464052241A3F83C40061C0BA /* ASLayoutController.h in Headers */,
 				464052201A3F83C40061C0BA /* ASDataController.h in Headers */,

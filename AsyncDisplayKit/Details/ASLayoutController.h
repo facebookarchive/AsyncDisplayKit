@@ -10,7 +10,7 @@
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
-#import "ASScrollDirection.h"
+#import <AsyncDisplayKit/ASScrollDirection.h>
 
 
 typedef struct {
