@@ -9,7 +9,7 @@
 #import "ASCollectionView.h"
 
 #import "ASAssert.h"
-#import "ASFlowLayoutController.h"
+#import "ASCollectionViewLayoutController.h"
 #import "ASRangeController.h"
 #import "ASDataController.h"
 #import "ASDisplayNodeInternal.h"
@@ -101,7 +101,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   ASDataController *_dataController;
   ASRangeController *_rangeController;
-  ASFlowLayoutController *_layoutController;
+  ASCollectionViewLayoutController *_layoutController;
 
   BOOL _performingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
@@ -130,10 +130,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
 
-  ASDisplayNodeAssert([layout isKindOfClass:UICollectionViewFlowLayout.class], @"only flow layouts are currently supported");
-
   ASFlowLayoutDirection direction = (((UICollectionViewFlowLayout *)layout).scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASFlowLayoutDirectionHorizontal : ASFlowLayoutDirectionVertical;
-  _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:direction];
+  _layoutController = [[ASCollectionViewLayoutController alloc] initWithScrollOption:direction layout:self.collectionViewLayout];
 
   _rangeController = [[ASRangeController alloc] init];
   _rangeController.delegate = self;
@@ -335,10 +333,19 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (ASScrollDirection)scrollDirection
 {
   CGPoint scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
+  if ([self isFlowLayoutBacked]) {
+    return [self flowLayoutScrollDirectionForVelocity:scrollVelocity];
+  } else {
+    return [self customLayoutScrollDirectionForVelocity:scrollVelocity];
+  }
+}
+
+- (ASScrollDirection)flowLayoutScrollDirectionForVelocity:(CGPoint)scrollVelocity
+{
   ASScrollDirection direction = ASScrollDirectionNone;
   if (_layoutController.layoutDirection == ASFlowLayoutDirectionHorizontal) {
     if (scrollVelocity.x > 0) {
-      direction = ASScrollDirectionRight;
+      direction = ASScrollDirectionRight; // TODO: !This is reversed!
     } else if (scrollVelocity.x < 0) {
       direction = ASScrollDirectionLeft;
     }
@@ -351,6 +358,62 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 
   return direction;
+}
+
+- (ASScrollDirection)customLayoutScrollDirectionForVelocity:(CGPoint)scrollVelocity
+{
+  ASScrollDirection direction = ASScrollDirectionNone;
+  if (scrollVelocity.x > 0) {
+    direction = ASScrollDirectionRight;
+  } else if (scrollVelocity.x < 0) {
+    direction = ASScrollDirectionLeft;
+  }
+  if (scrollVelocity.y > 0) {
+    direction |= ASScrollDirectionDown;
+  } else {
+    direction |= ASScrollDirectionUp;
+  }
+
+  return direction;
+}
+
+- (ASScrollDirection)scrollableDirections
+{
+  if ([self isFlowLayoutBacked]) {
+    return [self flowLayoutScrollableDirections];
+  } else {
+    return [self customLayoutScrollableDirections];
+  }
+}
+
+- (ASScrollDirection)flowLayoutScrollableDirections
+{
+  if ([self flowLayoutDirection:(UICollectionViewFlowLayout *)self.collectionViewLayout] == ASFlowLayoutDirectionHorizontal) {
+    return ASScrollDirectionUp | ASScrollDirectionDown;
+  } else {
+    return ASScrollDirectionLeft | ASScrollDirectionRight;
+  }
+}
+
+- (ASScrollDirection)customLayoutScrollableDirections
+{
+  ASScrollDirection scrollableDirection = ASScrollDirectionNone;
+  if (self.contentSize.width > self.bounds.size.width) { // Can scroll horizontally.
+    scrollableDirection |= ASScrollDirectionLeft | ASScrollDirectionRight;
+  }
+  if (self.contentSize.height > self.bounds.size.height) { // Can scroll vertically.
+    scrollableDirection |= ASScrollDirectionUp | ASScrollDirectionDown;
+  }
+  return scrollableDirection;
+}
+
+- (BOOL)isFlowLayoutBacked
+{
+  return [_layoutController isKindOfClass:[UICollectionViewFlowLayout class]];
+}
+
+- (ASFlowLayoutDirection)flowLayoutDirection:(UICollectionViewFlowLayout *)flowLayout {
+  return (flowLayout.scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASFlowLayoutDirectionHorizontal : ASFlowLayoutDirectionVertical;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath

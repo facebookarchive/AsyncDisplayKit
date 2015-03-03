@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSInteger, ASScrollDirection) {
-  ASScrollDirectionNone,
-  ASScrollDirectionRight,
-  ASScrollDirectionLeft,
-  ASScrollDirectionUp,
-  ASScrollDirectionDown,
+typedef NS_OPTIONS(NSUInteger, ASScrollDirection) {
+  ASScrollDirectionNone  = 0,
+  ASScrollDirectionRight = 1 << 0,
+  ASScrollDirectionLeft  = 1 << 1,
+  ASScrollDirectionUp    = 1 << 2,
+  ASScrollDirectionDown  = 1 << 3,
 };
