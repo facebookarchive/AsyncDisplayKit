@@ -435,7 +435,7 @@ static BOOL _isInterceptedSelector(SEL sel)
     restrainedSize.height -= (sectionInsets.top + sectionInsets.bottom);
   } else {
     restrainedSize.height = FLT_MAX;
-    restrainedSize.height -= (sectionInsets.left + sectionInsets.right);
+    restrainedSize.width -= (sectionInsets.left + sectionInsets.right);
   }
 
   return restrainedSize;
