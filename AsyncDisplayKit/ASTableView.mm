@@ -498,7 +498,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)dataControllerLockDataSource
 {
-  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has already been locked !");
+  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has already been locked");
 
   self.asyncDataSourceLocked = YES;
 
@@ -509,7 +509,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)dataControllerUnlockDataSource
 {
-  ASDisplayNodeAssert(self.asyncDataSourceLocked, @"The data source has already been unlocked !");
+  ASDisplayNodeAssert(self.asyncDataSourceLocked, @"The data source has already been unlocked");
 
   self.asyncDataSourceLocked = NO;
 
