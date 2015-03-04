@@ -16,15 +16,15 @@
 
 @implementation ASBatchFetchingTests
 
-#define PASSING_RECT (CGRect){0,0,1,1}
-#define PASSING_SIZE (CGSize){1,1}
-#define PASSING_POINT (CGPoint){1,1}
-#define VERTICAL_RECT(h) (CGRect){0,0,0,h}
-#define VERTICAL_SIZE(h) (CGSize){0,h}
-#define VERTICAL_OFFSET(y) (CGPoint){0,y}
-#define HORIZONTAL_RECT(w) (CGRect){0,0,w,0}
-#define HORIZONTAL_SIZE(w) (CGSize){w,0}
-#define HORIZONTAL_OFFSET(x) (CGPoint){x,0}
+#define PASSING_RECT CGRectMake(0,0,1,1)
+#define PASSING_SIZE CGSizeMake(1,1)
+#define PASSING_POINT CGPointMake(1,1)
+#define VERTICAL_RECT(h) CGRectMake(0,0,0,h)
+#define VERTICAL_SIZE(h) CGSizeMake(0,h)
+#define VERTICAL_OFFSET(y) CGPointMake(0,y)
+#define HORIZONTAL_RECT(w) CGRectMake(0,0,w,0)
+#define HORIZONTAL_SIZE(w) CGSizeMake(w,0)
+#define HORIZONTAL_OFFSET(x) CGPointMake(x,0)
 
 - (void)testBatchNullState {
   ASBatchContext *context = [[ASBatchContext alloc] init];
