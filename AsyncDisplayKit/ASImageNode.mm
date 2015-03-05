@@ -246,7 +246,7 @@
   }
 
   if (stretchable) {
-    return [image resizableImageWithCapInsets:image.capInsets resizingMode:image.resizingMode];
+    return [result resizableImageWithCapInsets:image.capInsets resizingMode:image.resizingMode];
   }
 
   return result;
