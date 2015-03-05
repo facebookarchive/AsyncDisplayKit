@@ -38,8 +38,8 @@ typedef struct TwoDimensionalBufferScreenfuls TwoDimensionalBufferScreenfuls;
 @implementation ASCollectionViewLayoutController
 
 
-- (instancetype)initWithScrollOption:(ASFlowLayoutDirection)layoutDirection layout:(UICollectionViewLayout *)layout {
-  if (!(self = [super initWithScrollOption:layoutDirection])) {
+- (instancetype)initWithLayout:(UICollectionViewLayout *)layout {
+  if (!(self = [super initWithScrollOption:ASFlowLayoutDirectionVertical])) {
     return nil;
   }
   _layout = layout;
@@ -74,7 +74,7 @@ typedef struct TwoDimensionalBufferScreenfuls TwoDimensionalBufferScreenfuls;
   BOOL canScrollVertically = ([asyncCollectionView scrollableDirections] & ASScrollDirectionUp) != 0;
   if (canScrollVertically) {
     // Calculate vertical buffer.
-    BOOL movingUp = (scrollDirection & ASScrollDirectionUp) != 0;
+    BOOL movingUp = (scrollDirection & ASScrollDirectionDown) != 0;
     buffer.vertical.positiveDirection = movingUp ? renderRangeTuningParameters.trailingBufferScreenfuls :
                                                    renderRangeTuningParameters.leadingBufferScreenfuls;
     buffer.vertical.negativeDirection = movingUp ? renderRangeTuningParameters.leadingBufferScreenfuls :
@@ -91,13 +91,29 @@ typedef struct TwoDimensionalBufferScreenfuls TwoDimensionalBufferScreenfuls;
   }
   
   // Calculate working rect.
+  CGRect collectionViewBounds = self.layout.collectionView.bounds;
   CGRect rangeRect = self.layout.collectionView.bounds;
+  
+  
   // Vertical expansion.
-  rangeRect = CGRectOffset(rangeRect, 0, -(buffer.vertical.negativeDirection * viewportSize.height));
-  rangeRect = CGRectMake(rangeRect.origin.x, MAX(rangeRect.origin.y, 0), rangeRect.size.width, ((buffer.vertical.negativeDirection + buffer.vertical.positiveDirection + 1) * viewportSize.height));
+  CGFloat negativeVerticalDirectionHeight = buffer.vertical.negativeDirection * viewportSize.height;
+  CGFloat rangeOriginY = rangeRect.origin.y - negativeVerticalDirectionHeight;
+  if (rangeOriginY <= 0) {
+    negativeVerticalDirectionHeight = collectionViewBounds.origin.y;
+  }
+  CGFloat positiveVerticalDirectionHeight = buffer.vertical.positiveDirection * viewportSize.height;
+  rangeRect = CGRectMake(rangeRect.origin.x, MAX(rangeOriginY, 0), rangeRect.size.width, negativeVerticalDirectionHeight + viewportSize.height + positiveVerticalDirectionHeight);
+  
+  
   // Horizontal expansion
-  rangeRect = CGRectOffset(rangeRect, -(buffer.horizontal.negativeDirection * viewportSize.width), 0);
-  rangeRect = CGRectMake(MAX(rangeRect.origin.x, 0), rangeRect.origin.y, ((buffer.horizontal.negativeDirection + buffer.horizontal.positiveDirection + 1) * viewportSize.width), rangeRect.size.height);
+  CGFloat negativeHorizontalDirectionWidth = buffer.horizontal.negativeDirection * viewportSize.width;
+  CGFloat rangeOriginX = rangeRect.origin.x - negativeHorizontalDirectionWidth;
+  if (rangeOriginX <= 0) {
+    negativeHorizontalDirectionWidth = collectionViewBounds.origin.x;
+  }
+  CGFloat positiveHorizontalDirectionWidth = buffer.horizontal.positiveDirection * viewportSize.width;
+  
+  rangeRect = CGRectMake(MAX(rangeOriginX, 0), rangeRect.origin.y, negativeHorizontalDirectionWidth + viewportSize.width + positiveHorizontalDirectionWidth, rangeRect.size.height);
   NSLog(@"Range Rect: %@", NSStringFromCGRect(rangeRect));
   
   return rangeRect;
@@ -127,14 +143,14 @@ typedef struct TwoDimensionalBufferScreenfuls TwoDimensionalBufferScreenfuls;
   BOOL canScrollVertically = ([asyncCollectionView scrollableDirections] & ASScrollDirectionUp) != 0;
   if (canScrollVertically) {
     CGFloat maxY = CGRectGetMaxY(bounds);
-    _currentPage = floorf(maxY / bounds.size.width); // Does this care which direction moving? if moving up is it minY?
+    _verticalCurrentPage = floorf(maxY / bounds.size.height);
     
     BOOL movingUp = ([asyncCollectionView scrollDirection] & ASScrollDirectionDown) != 0;
-    NSInteger wouldBeEnd = _currentPage + renderRangeTuningParameters.leadingBufferScreenfuls;
-    NSInteger wouldBeStart = _currentPage - renderRangeTuningParameters.trailingBufferScreenfuls;
+    NSInteger wouldBeEnd = _verticalCurrentPage + renderRangeTuningParameters.leadingBufferScreenfuls;
+    NSInteger wouldBeStart = _verticalCurrentPage - renderRangeTuningParameters.trailingBufferScreenfuls;
     if (movingUp) {
-      wouldBeEnd = _currentPage + renderRangeTuningParameters.trailingBufferScreenfuls;
-      wouldBeStart = _currentPage - renderRangeTuningParameters.leadingBufferScreenfuls;
+      wouldBeEnd = _verticalCurrentPage + renderRangeTuningParameters.trailingBufferScreenfuls;
+      wouldBeStart = _verticalCurrentPage - renderRangeTuningParameters.leadingBufferScreenfuls;
     }
     
     if (_verticalWorkingRangeEndPage == 0 && _verticalWorkingRangeStartPage == 0) {

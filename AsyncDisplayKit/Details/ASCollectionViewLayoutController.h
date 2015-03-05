@@ -6,6 +6,6 @@
 
 @property (nonatomic, readonly, assign) ASFlowLayoutDirection layoutDirection;
 
-- (instancetype)initWithScrollOption:(ASFlowLayoutDirection)layoutDirection layout:(UICollectionViewLayout *)layout;
+- (instancetype)initWithLayout:(UICollectionViewLayout *)layout;
 
 @end

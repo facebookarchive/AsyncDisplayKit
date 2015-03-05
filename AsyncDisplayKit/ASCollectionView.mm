@@ -130,8 +130,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
 
-  ASFlowLayoutDirection direction = (((UICollectionViewFlowLayout *)layout).scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASFlowLayoutDirectionHorizontal : ASFlowLayoutDirectionVertical;
-  _layoutController = [[ASCollectionViewLayoutController alloc] initWithScrollOption:direction layout:self.collectionViewLayout];
+//  ASFlowLayoutDirection direction = (((UICollectionViewFlowLayout *)layout).scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASFlowLayoutDirectionHorizontal : ASFlowLayoutDirectionVertical;
+  _layoutController = [[ASCollectionViewLayoutController alloc] initWithLayout:self.collectionViewLayout];
 
   _rangeController = [[ASRangeController alloc] init];
   _rangeController.delegate = self;
@@ -157,6 +157,10 @@ static BOOL _isInterceptedSelector(SEL sel)
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
   
   return self;
+}
+
+- (void)layoutSubviews {
+  [super layoutSubviews];
 }
 
 #pragma mark -
