@@ -139,9 +139,10 @@ nice if there were a more elegant way?
   // size all the things
   /* ... */
 
-  // make the tap target taller
+  // make the tap target larger
+  CGFloat extendX = roundf( (44.0f - size.width) / 2.0f );
   CGFloat extendY = roundf( (44.0f - size.height) / 2.0f );
-  _shuffleNode.hitTestSlop = UIEdgeInsetsMake(-extendY, 0.0f, -extendY, 0.0f);
+  _shuffleNode.hitTestSlop = UIEdgeInsetsMake(-extendY, -extendX, -extendY, -extendX);
 ```
 
 Et voilà!  *Hit-test slops* work on all nodes, and are a nice example of what
