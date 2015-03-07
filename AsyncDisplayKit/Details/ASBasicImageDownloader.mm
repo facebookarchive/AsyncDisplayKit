@@ -21,8 +21,8 @@
  */
 @interface ASBasicImageDownloaderMetadata : NSObject
 @property (nonatomic, strong) dispatch_queue_t callbackQueue;
-@property (nonatomic, strong) void (^downloadProgressBlock)(CGFloat);
-@property (nonatomic, strong) void (^completionBlock)(CGImageRef, NSError *);
+@property (nonatomic, copy) void (^downloadProgressBlock)(CGFloat);
+@property (nonatomic, copy) void (^completionBlock)(CGImageRef, NSError *);
 @end
 
 @implementation ASBasicImageDownloaderMetadata
