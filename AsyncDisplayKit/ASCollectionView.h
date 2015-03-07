@@ -80,7 +80,7 @@
 /**
  * Section updating.
  *
- * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI table
+ * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
  * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
  */
 - (void)insertSections:(NSIndexSet *)sections;
@@ -91,7 +91,7 @@
 /**
  * Items updating.
  *
- * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI table
+ * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
  * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
  */
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths;
@@ -180,7 +180,7 @@
  * Receive a message that the collectionView is near the end of its data set and more data should be fetched if 
  * necessary.
  *
- * @param tableView The sender.
+ * @param collectionView The sender.
  * @param context A context object that must be notified when the batch fetch is completed.
  *
  * @discussion You must eventually call -completeBatchFetching: with an argument of YES in order to receive future
