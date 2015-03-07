@@ -149,9 +149,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   _dataController.dataSource = self;
   _dataController.delegate = _rangeController;
 
-  _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
-  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
-
   _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
   _asyncDataSourceLocked = NO;
 
@@ -196,9 +193,15 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (_asyncDelegate == asyncDelegate)
     return;
 
-  _asyncDelegate = asyncDelegate;
-  _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:asyncDelegate interceptor:self];
-  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+  if (asyncDelegate == nil) {
+    _asyncDelegate = nil;
+    _proxyDelegate = nil;
+    super.delegate = nil;
+  } else {
+    _asyncDelegate = asyncDelegate;
+    _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
+    super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+  }
 }
 
 - (void)reloadData
