@@ -331,9 +331,18 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * This method is used to notify the node that it should purge any content that is both expensive to fetch and to
  * retain in memory.
  *
- * @see fetchRemoteData
+ * @see clearRemoteData and fetchRemoteData
  */
 - (void)recursivelyClearRemoteData;
+
+/**
+ * @abstract Calls -fetchRemoteData on the receiver and its subnode hierarchy.
+ *
+ * @discussion Fetches content from remote sources for the current node and all subnodes.
+ *
+ * @see fetchRemoteData and clearRemoteData
+ */
+- (void)recursivelyFetchRemoteData;
 
 /**
  * @abstract Toggle displaying a placeholder over the node that covers content until the node and all subnodes are

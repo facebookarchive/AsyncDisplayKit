@@ -1348,6 +1348,14 @@ static NSInteger incrementIfFound(NSInteger i) {
   // subclass override
 }
 
+- (void)recursivelyFetchRemoteData
+{
+  for (ASDisplayNode *subnode in self.subnodes) {
+    [subnode recursivelyFetchRemoteData];
+  }
+  [self fetchRemoteData];
+}
+
 - (void)clearRemoteData
 {
   // subclass override
