@@ -241,17 +241,11 @@
           }
         };
 
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-          [_cache fetchCachedImageWithURL:_URL
-                            callbackQueue:dispatch_get_main_queue()
-                               completion:cacheCompletion];
-        });
+        [_cache fetchCachedImageWithURL:_URL
+                          callbackQueue:dispatch_get_main_queue()
+                             completion:cacheCompletion];
       } else {
-          // NSURLSessionDownloadTask will do file I/O to create a temp directory. If called on the main thread this
-          // will cause significant performance issues.
-          dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-              [self _downloadImageWithCompletion:finished];
-          });
+        [self _downloadImageWithCompletion:finished];
       }
     }
   }
