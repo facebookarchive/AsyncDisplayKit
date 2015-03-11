@@ -236,4 +236,18 @@
     [_node tintColorDidChange];
 }
 
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender
+{
+  // We forward responder-chain actions to our node if we can't handle them ourselves. See -targetForAction:withSender:.
+  return ([super canPerformAction:action withSender:sender] || [_node respondsToSelector:action]);
+}
+
+- (id)forwardingTargetForSelector:(SEL)aSelector
+{
+  // Ideally, we would implement -targetForAction:withSender: and simply return the node where we don't respond personally.
+  // Unfortunately UIResponder's default implementation of -targetForAction:withSender: doesn't follow its own documentation. It doesn't call -targetForAction:withSender: up the responder chain when -canPerformAction:withSender: fails, but instead merely calls -canPerformAction:withSender: on itself and then up the chain. rdar://20111500.
+  // Consequently, to forward responder-chain actions to our node, we override -canPerformAction:withSender: (used by the chain) to indicate support for responder chain-driven actions that our node supports, and then provide the node as a forwarding target here.
+  return _node;
+}
+
 @end
