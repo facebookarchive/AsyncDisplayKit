@@ -5,7 +5,6 @@ before_install:
   - gem update cocoapods
   - xcrun simctl list
 env:
-  - TEST_OS=7.1
   - TEST_OS=8.1
 script: ./build.sh $TEST_OS
 
