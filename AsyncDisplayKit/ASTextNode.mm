@@ -711,7 +711,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   // fill each line with the placeholder color
   for (NSValue *rectValue in lineRects) {
     CGRect lineRect = [rectValue CGRectValue];
-    CGRect fillBounds = UIEdgeInsetsInsetRect(lineRect, self.placeholderInsets);
+    CGRect fillBounds = CGRectIntegral(UIEdgeInsetsInsetRect(lineRect, self.placeholderInsets));
 
     if (fillBounds.size.width > 0.0 && fillBounds.size.height > 0.0) {
       UIRectFill(fillBounds);
