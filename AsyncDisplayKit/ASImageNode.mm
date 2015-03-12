@@ -179,6 +179,7 @@
 
   CGFloat contentsScale = parameters.contentsScale;
   UIViewContentMode contentMode = parameters.contentMode;
+  UIColor *backgroundColor = parameters.backgroundColor;
   BOOL stretchable = !UIEdgeInsetsEqualToEdgeInsets(image.capInsets, UIEdgeInsetsZero);
   CGSize imageSize = image.size;
   CGSize imageSizeInPixels = CGSizeMake(imageSize.width * image.scale, imageSize.height * image.scale);
@@ -223,6 +224,13 @@
   UIGraphicsBeginImageContextWithOptions(backingSize, parameters.opaque, 1.0);
 
   CGContextRef context = UIGraphicsGetCurrentContext();
+
+  if (backgroundColor) {
+    CGContextSaveGState(context);
+    [backgroundColor setFill];
+    CGContextFillRect(context, imageDrawRect);
+    CGContextRestoreGState(context);
+  }
 
   [image drawInRect:imageDrawRect];
 
