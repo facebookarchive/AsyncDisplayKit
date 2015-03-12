@@ -145,8 +145,6 @@
 
 - (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)cellNode
 {
-  [cellNode recursivelySetDisplaySuspended:NO];
-
   if (cellNode.view.superview == contentView) {
     // this content view is already correctly configured
     return;

@@ -12,64 +12,34 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
 
-@interface ASDisplayNode (ASRangeHandlerRender)
-
-- (void)display;
-- (void)recursivelyDisplay;
-
-@end
-
-@implementation ASDisplayNode (ASRangeHandlerRender)
-
-- (void)display
-{
-  if (![self __shouldLoadViewOrLayer]) {
-    return;
-  }
-
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(self.nodeLoaded, @"backing store must be loaded before calling -display");
-
-  CALayer *layer = self.layer;
-
-  // rendering a backing store requires a node be laid out
-  [layer setNeedsLayout];
-  [layer layoutIfNeeded];
-
-  if (layer.contents) {
-    return;
-  }
-
-  [layer setNeedsDisplay];
-  [layer displayIfNeeded];
-}
-
-- (void)recursivelyDisplay
-{
-  if (![self __shouldLoadViewOrLayer]) {
-    return;
-  }
-
-  for (ASDisplayNode *node in self.subnodes) {
-    [node recursivelyDisplay];
-  }
-
-  [self display];
-}
-
-@end
-
 @implementation ASRangeHandlerRender
+
++ (UIWindow *)workingWindow
+{
+  ASDisplayNodeAssertMainThread();
+  
+  // we add nodes' views to this invisible window to start async rendering
+  static UIWindow *workingWindow = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    workingWindow = [[UIWindow alloc] initWithFrame:CGRectZero];
+    workingWindow.windowLevel = UIWindowLevelNormal - 1000;
+    workingWindow.userInteractionEnabled = NO;
+    workingWindow.clipsToBounds = YES;
+    workingWindow.hidden = YES;
+  });
+  return workingWindow;
+}
 
 - (void)node:(ASDisplayNode *)node enteredRangeOfType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(rangeType == ASLayoutRangeTypeRender, @"Render delegate should not handle other ranges");
 
-  // if node is in the working range it should not actively be in view
-  [node.view removeFromSuperview];
+  [node recursivelySetDisplaySuspended:NO];
 
-  [node recursivelyDisplay];
+  // add the node to an off-screen window to force display and preserve its contents
+  [[self.class workingWindow] addSubnode:node];
 }
 
 - (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType
