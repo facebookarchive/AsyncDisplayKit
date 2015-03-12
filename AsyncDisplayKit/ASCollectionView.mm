@@ -66,7 +66,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (!self) {
     return nil;
   }
-  
+
+  ASDisplayNodeAssert(target, @"target must not be nil");
   ASDisplayNodeAssert(interceptor, @"interceptor must not be nil");
   
   _target = target;
@@ -147,9 +148,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _leadingScreensForBatching = 1.0;
 
-  _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
-  super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
-
   _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
   _asyncDataSourceLocked = NO;
 
@@ -166,6 +164,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)reloadData
 {
+  ASDisplayNodeAssert(self.asyncDelegate, @"ASCollectionView's asyncDelegate property must be set.");
   ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
   });
@@ -204,9 +203,15 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (_asyncDelegate == asyncDelegate)
     return;
 
-  _asyncDelegate = asyncDelegate;
-  _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
-  super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+  if (asyncDelegate == nil) {
+    _asyncDelegate = nil;
+    _proxyDelegate = nil;
+    super.delegate = nil;
+  } else {
+    _asyncDelegate = asyncDelegate;
+    _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
+    super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+  }
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
