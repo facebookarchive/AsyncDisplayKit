@@ -28,7 +28,7 @@
 @interface ASCollectionView : UICollectionView
 
 @property (nonatomic, weak) id<ASCollectionViewDataSource> asyncDataSource;
-@property (nonatomic, weak) id<ASCollectionViewDelegate> asyncDelegate;
+@property (nonatomic, weak) id<ASCollectionViewDelegate> asyncDelegate;       // must not be nil
 
 /**
  * Tuning parameters for a range.

@@ -66,6 +66,7 @@ static BOOL _isInterceptedSelector(SEL sel)
     return nil;
   }
 
+  ASDisplayNodeAssert(target, @"target must not be nil");
   ASDisplayNodeAssert(interceptor, @"interceptor must not be nil");
 
   _target = target;
@@ -149,9 +150,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   _dataController.dataSource = self;
   _dataController.delegate = _rangeController;
 
-  _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
-  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
-
   _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
   _asyncDataSourceLocked = NO;
 
@@ -196,13 +194,20 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (_asyncDelegate == asyncDelegate)
     return;
 
-  _asyncDelegate = asyncDelegate;
-  _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:asyncDelegate interceptor:self];
-  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+  if (asyncDelegate == nil) {
+    _asyncDelegate = nil;
+    _proxyDelegate = nil;
+    super.delegate = nil;
+  } else {
+    _asyncDelegate = asyncDelegate;
+    _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:asyncDelegate interceptor:self];
+    super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+  }
 }
 
 - (void)reloadData
 {
+  ASDisplayNodeAssert(self.asyncDelegate, @"ASTableView's asyncDelegate property must be set.");
   ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
   });

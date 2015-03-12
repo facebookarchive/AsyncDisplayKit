@@ -28,7 +28,7 @@
 @interface ASTableView : UITableView
 
 @property (nonatomic, weak) id<ASTableViewDataSource> asyncDataSource;
-@property (nonatomic, weak) id<ASTableViewDelegate> asyncDelegate;
+@property (nonatomic, weak) id<ASTableViewDelegate> asyncDelegate;      // must not be nil
 
 /**
  * Tuning parameters for a range.
