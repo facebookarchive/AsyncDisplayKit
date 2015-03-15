@@ -175,11 +175,19 @@
 
   ASDisplayNodeAssert(parameters.contentsScale > 0, @"invalid contentsScale at display time");
 
+  // if the image is resizable, bail early since the image has likely already been configured
+  BOOL stretchable = !UIEdgeInsetsEqualToEdgeInsets(image.capInsets, UIEdgeInsetsZero);
+  if (stretchable) {
+    if (parameters.imageModificationBlock != NULL) {
+      image = parameters.imageModificationBlock(image);
+    }
+    return image;
+  }
+
   CGRect bounds = parameters.bounds;
 
   CGFloat contentsScale = parameters.contentsScale;
   UIViewContentMode contentMode = parameters.contentMode;
-  BOOL stretchable = !UIEdgeInsetsEqualToEdgeInsets(image.capInsets, UIEdgeInsetsZero);
   CGSize imageSize = image.size;
   CGSize imageSizeInPixels = CGSizeMake(imageSize.width * image.scale, imageSize.height * image.scale);
   CGSize boundsSizeInPixels = CGSizeMake(floorf(bounds.size.width * contentsScale), floorf(bounds.size.height * contentsScale));
@@ -243,10 +251,6 @@
 
   if (parameters.imageModificationBlock != NULL) {
     result = parameters.imageModificationBlock(result);
-  }
-
-  if (stretchable) {
-    return [result resizableImageWithCapInsets:image.capInsets resizingMode:image.resizingMode];
   }
 
   return result;
@@ -380,6 +384,12 @@ extern asimagenode_modification_block_t ASImageNodeTintColorModificationBlock(UI
     
     UIImage *modifiedImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
+
+    // if the original image was stretchy, keep it stretchy
+    if (!UIEdgeInsetsEqualToEdgeInsets(originalImage.capInsets, UIEdgeInsetsZero)) {
+      modifiedImage = [modifiedImage resizableImageWithCapInsets:originalImage.capInsets resizingMode:originalImage.resizingMode];
+    }
+
     return modifiedImage;
   };
 }
