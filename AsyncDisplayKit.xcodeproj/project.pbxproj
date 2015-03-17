@@ -443,6 +443,7 @@
 		058D09C5195D04C000B7D73C /* AsyncDisplayKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				29CDC2E11AAE70D000833CA4 /* ASBasicImageDownloaderContextTests.m */,
 				296A0A341A951ABF005ACEAA /* ASBatchFetchingTests.m */,
 				2911485B1A77147A005D0878 /* ASControlNodeTests.m */,
 				058D0A2D195D057000B7D73C /* ASDisplayLayerTests.m */,
@@ -450,7 +451,6 @@
 				058D0A2F195D057000B7D73C /* ASDisplayNodeTests.m */,
 				058D0A30195D057000B7D73C /* ASDisplayNodeTestsHelper.h */,
 				058D0A31195D057000B7D73C /* ASDisplayNodeTestsHelper.m */,
-				29CDC2E11AAE70D000833CA4 /* ASBasicImageDownloaderContextTests.m */,
 				052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */,
 				058D0A32195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m */,
 				3C9C128419E616EF00E942A0 /* ASTableViewTests.m */,
