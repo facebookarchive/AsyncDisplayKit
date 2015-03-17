@@ -54,7 +54,7 @@
   });
 
   [context cancel];
-  [self waitForExpectationsWithTimeout:0.1 handler:nil];
+  [self waitForExpectationsWithTimeout:30.0 handler:nil];
 }
 
 - (void)testContextSessionCanceled
