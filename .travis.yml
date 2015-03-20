@@ -8,6 +8,7 @@ install: echo "<3"
 env:
   - MODE=tests
   - MODE=examples
+  - MODE=life-without-cocoapods
 script: ./build.sh $MODE
 
 # whitelist
