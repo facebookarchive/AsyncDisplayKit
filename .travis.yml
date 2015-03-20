@@ -4,9 +4,11 @@ before_install:
   - brew reinstall xctool
   - gem update cocoapods
   - xcrun simctl list
+install: echo "<3"
 env:
-  - TEST_OS=8.1
-script: ./build.sh $TEST_OS
+  - MODE=tests
+  - MODE=examples
+script: ./build.sh $MODE
 
 # whitelist
 branches:
