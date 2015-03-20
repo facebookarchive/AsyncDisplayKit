@@ -24,7 +24,6 @@
 @property (nonatomic, retain) UIImage *image;
 @property (nonatomic, assign) CGRect bounds;
 @property (nonatomic, assign) CGFloat contentsScale;
-@property (nonatomic, assign) ASImageNodeTint tint;
 @property (nonatomic, retain) UIColor *backgroundColor;
 @property (nonatomic, assign) UIViewContentMode contentMode;
 @property (nonatomic, assign) CGRect cropRect;
@@ -35,7 +34,7 @@
 // TODO: eliminate explicit parameters with a set of keys copied from the node
 @implementation _ASImageNodeDrawParameters
 
-- (id)initWithCrop:(BOOL)cropEnabled opaque:(BOOL)opaque image:(UIImage *)image bounds:(CGRect)bounds contentsScale:(CGFloat)contentsScale backgroundColor:(UIColor *)backgroundColor tint:(ASImageNodeTint)tint contentMode:(UIViewContentMode)contentMode cropRect:(CGRect)cropRect imageModificationBlock:(asimagenode_modification_block_t)imageModificationBlock
+- (id)initWithCrop:(BOOL)cropEnabled opaque:(BOOL)opaque image:(UIImage *)image bounds:(CGRect)bounds contentsScale:(CGFloat)contentsScale backgroundColor:(UIColor *)backgroundColor contentMode:(UIViewContentMode)contentMode cropRect:(CGRect)cropRect imageModificationBlock:(asimagenode_modification_block_t)imageModificationBlock
 {
   self = [self init];
   if (!self) return nil;
@@ -46,7 +45,6 @@
   _bounds = bounds;
   _contentsScale = contentsScale;
   _backgroundColor = backgroundColor;
-  _tint = tint;
   _contentMode = contentMode;
   _cropRect = cropRect;
   _imageModificationBlock = [imageModificationBlock copy];
@@ -56,7 +54,7 @@
 
 - (NSString *)description
 {
-  return [NSString stringWithFormat:@"<%@ : %p image:%@ cropEnabled:%@ opaque:%@ bounds:%@ contentsScale:%.2f backgroundColor:%@ tint:%zd contentMode:%@ cropRect:%@>", [self class], self, self.image, @(self.cropEnabled), @(self.opaque), NSStringFromCGRect(self.bounds), self.contentsScale, self.backgroundColor, self.tint, ASDisplayNodeNSStringFromUIContentMode(self.contentMode), NSStringFromCGRect(self.cropRect)];
+  return [NSString stringWithFormat:@"<%@ : %p image:%@ cropEnabled:%@ opaque:%@ bounds:%@ contentsScale:%.2f backgroundColor:%@ contentMode:%@ cropRect:%@>", [self class], self, self.image, @(self.cropEnabled), @(self.opaque), NSStringFromCGRect(self.bounds), self.contentsScale, self.backgroundColor, ASDisplayNodeNSStringFromUIContentMode(self.contentMode), NSStringFromCGRect(self.cropRect)];
 }
 
 @end
@@ -72,7 +70,6 @@
 
   // Cropping.
   BOOL _cropEnabled; // Defaults to YES.
-  ASImageNodeTint _tint;
   CGRect _cropRect; // Defaults to CGRectMake(0.5, 0.5, 0, 0)
   CGRect _cropDisplayBounds;
 }
@@ -124,23 +121,6 @@
   return _image;
 }
 
-- (void)setTint:(ASImageNodeTint)tint
-{
-  ASDN::MutexLocker l(_imageLock);
-  if (_tint != tint) {
-    _tint = tint;
-    ASDisplayNodePerformBlockOnMainThread(^{
-      [self setNeedsDisplay];
-    });
-  }
-}
-
-- (ASImageNodeTint)tint
-{
-  ASDN::MutexLocker l(_imageLock);
-  return _tint;
-}
-
 - (void)setPlaceholderColor:(UIColor *)placeholderColor
 {
   _placeholderColor = placeholderColor;
@@ -159,7 +139,6 @@
                                                    bounds:(hasValidCropBounds ? _cropDisplayBounds : self.bounds)
                                             contentsScale:self.contentsScaleForDisplay
                                           backgroundColor:self.backgroundColor
-                                                     tint:self.tint
                                               contentMode:self.contentMode
                                                  cropRect:self.cropRect
                                    imageModificationBlock:self.imageModificationBlock];
@@ -230,15 +209,7 @@
   // will do its rounding on pixel instead of point boundaries
   UIGraphicsBeginImageContextWithOptions(backingSize, parameters.opaque, 1.0);
 
-  CGContextRef context = UIGraphicsGetCurrentContext();
-
   [image drawInRect:imageDrawRect];
-
-  if (parameters.tint == ASImageNodeTintGreyscale) {
-    [[UIColor grayColor] setFill];
-    CGContextSetBlendMode(context, kCGBlendModeColor);
-    CGContextFillRect(context, (CGRect){.size = backingSize});
-  }
 
   if (isCancelled()) {
     UIGraphicsEndImageContext();
