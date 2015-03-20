@@ -4,6 +4,7 @@ before_install:
   - brew reinstall xctool
   - gem update cocoapods
   - xcrun simctl list
+install: echo "<3"
 env:
   - MODE=tests
   - MODE=examples
