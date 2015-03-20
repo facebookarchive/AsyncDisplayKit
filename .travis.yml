@@ -5,8 +5,9 @@ before_install:
   - gem update cocoapods
   - xcrun simctl list
 env:
-  - TEST_OS=8.1
-script: ./build.sh $TEST_OS
+  - MODE=tests
+  - MODE=examples
+script: ./build.sh $MODE
 
 # whitelist
 branches:
