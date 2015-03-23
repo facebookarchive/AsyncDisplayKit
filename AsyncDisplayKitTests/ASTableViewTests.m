@@ -57,7 +57,7 @@
 
 @implementation ASTableViewTests
 
-- (void)testTableViewDoesNotRetainItselfAndDelegate
+- (void)DISABLED_testTableViewDoesNotRetainItselfAndDelegate
 {
   ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
 
