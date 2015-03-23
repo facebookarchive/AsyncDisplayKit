@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "FBSnapshotTestCase.h"
+#import <FBSnapshotTestCase/FBSnapshotTestCase.h>
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
