@@ -73,6 +73,14 @@
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
+ * @param completion Block to run on completion or nil.
+ * @warning This method is substantially more expensive than UICollectionView's version.
+ */
+- (void)reloadDataWithCompletion:(void (^)())completion;
+
+/**
+ * Reload everything from scratch, destroying the working range and all cached nodes.
+ *
  * @warning This method is substantially more expensive than UICollectionView's version.
  */
 - (void)reloadData;
