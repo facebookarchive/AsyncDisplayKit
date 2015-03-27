@@ -146,6 +146,18 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   return self;
 }
 
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
 - (void)dealloc
 {
   if (_shadowColor != NULL) {

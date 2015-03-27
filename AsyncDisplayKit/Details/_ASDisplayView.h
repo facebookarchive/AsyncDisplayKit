@@ -14,4 +14,11 @@
 
 @interface _ASDisplayView : UIView
 
+// These methods expose a way for ASDisplayNode touch events to let the view call super touch events
+// Some UIKit mechanisms, like UITableView and UICollectionView selection handling, require this to work
+- (void)__forwardTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void)__forwardTouchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void)__forwardTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void)__forwardTouchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event;
+
 @end

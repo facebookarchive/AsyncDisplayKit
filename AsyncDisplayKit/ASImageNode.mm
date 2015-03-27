@@ -94,6 +94,18 @@
   return self;
 }
 
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(_imageLock);
