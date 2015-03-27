@@ -8,8 +8,9 @@
 
 #import "ASCellNode.h"
 
-#import "ASDisplayNode+Subclasses.h"
-#import "ASTextNode.h"
+#import <AsyncDisplayKit/_ASDisplayView.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASTextNode.h>
 
 
 #pragma mark -
@@ -28,10 +29,50 @@
   return self;
 }
 
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
 - (void)setLayerBacked:(BOOL)layerBacked
 {
   // ASRangeController expects ASCellNodes to be view-backed.  (Layer-backing is supported on ASCellNode subnodes.)
   ASDisplayNodeAssert(!layerBacked, @"ASCellNode does not support layer-backing.");
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
+  [(_ASDisplayView *)self.view __forwardTouchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
+  [(_ASDisplayView *)self.view __forwardTouchesMoved:touches withEvent:event];
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
+  [(_ASDisplayView *)self.view __forwardTouchesEnded:touches withEvent:event];
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
+  [(_ASDisplayView *)self.view __forwardTouchesCancelled:touches withEvent:event];
 }
 
 @end
