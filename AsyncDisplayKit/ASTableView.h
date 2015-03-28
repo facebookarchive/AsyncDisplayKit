@@ -73,7 +73,8 @@
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
- * @param completion Block to run on completion or nil.
+ * @param completion block to run on completion of asynchronous loading or nil. If supplied, the block is run on 
+ * the main thread.
  * @warning This method is substantially more expensive than UITableView's version.
  */
 -(void)reloadDataWithCompletion:(void (^)())completion;
