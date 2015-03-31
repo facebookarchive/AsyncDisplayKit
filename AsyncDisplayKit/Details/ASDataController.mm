@@ -508,4 +508,23 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   return ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
 }
 
+
+#pragma mark - Dealloc
+
+- (void)dealloc {
+  [self _cleanupNodes];
+}
+
+#pragma mark - Node Cleanup
+
+- (void)_cleanupNodes {
+  if (nil != _nodes && [_nodes count] > 0) {
+    for (id nodeObj in [_nodes objectAtIndex:0]) {
+      if ([nodeObj isKindOfClass:[ASDisplayNode class]]) {
+        [((ASDisplayNode *) nodeObj).view removeFromSuperview];
+      }
+    }
+  }
+}
+
 @end
