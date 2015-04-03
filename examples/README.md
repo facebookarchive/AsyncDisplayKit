@@ -2,7 +2,8 @@
 
 ## Building
 
-Run `pod install` in each sample project directory to set up their
+Install CocoaPods with `sudo gem install cocoapods`, then
+run `pod install` in each sample project directory to set up their
 dependencies.
 
 ## License
