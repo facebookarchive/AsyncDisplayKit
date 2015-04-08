@@ -128,7 +128,7 @@
   [self setUpRenderer];
   CGSize calculatedSizeWithTruncation = [_renderer size];
   // Floating point equality
-  XCTAssertTrue(fabsf(calculatedSizeWithTruncation.height - calculatedSize.height) < .001, @"The height after truncation (%f) doesn't match the normal calculated height (%f)", calculatedSizeWithTruncation.height, calculatedSize.height);
+  XCTAssertTrue(fabs(calculatedSizeWithTruncation.height - calculatedSize.height) < .001, @"The height after truncation (%f) doesn't match the normal calculated height (%f)", calculatedSizeWithTruncation.height, calculatedSize.height);
 }
 
 - (void)testNoCrashOnTappingEmptyTextNode
