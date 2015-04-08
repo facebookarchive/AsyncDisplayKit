@@ -834,9 +834,9 @@ static void _addTonsOfSubnodes(ASDisplayNode *parent, NSUInteger fanout, NSUInte
 }
 
 static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point2, CGFloat epsilon) {
-  CGFloat absEpsilon =  fabsf(epsilon);
-  BOOL xOK = fabsf(point1.x - point2.x) < absEpsilon;
-  BOOL yOK = fabsf(point1.y - point2.y) < absEpsilon;
+  CGFloat absEpsilon =  fabs(epsilon);
+  BOOL xOK = fabs(point1.x - point2.x) < absEpsilon;
+  BOOL yOK = fabs(point1.y - point2.y) < absEpsilon;
   return xOK && yOK;
 }
 

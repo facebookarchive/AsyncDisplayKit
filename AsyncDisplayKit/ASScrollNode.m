@@ -9,6 +9,7 @@
 #import "ASScrollNode.h"
 
 @implementation ASScrollNode
+@dynamic view;
 
 - (instancetype)init
 {
