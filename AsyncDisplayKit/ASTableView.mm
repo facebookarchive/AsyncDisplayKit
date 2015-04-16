@@ -16,6 +16,7 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 
+#define DEBUG_VISIBLE_INDEX_PATHS
 
 #pragma mark -
 #pragma mark Proxying.
@@ -118,6 +119,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   BOOL _asyncDataFetchingEnabled;
 
   ASBatchContext *_batchContext;
+
+  NSMutableSet *_visibleIndexPaths;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -155,6 +158,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _leadingScreensForBatching = 1.0;
   _batchContext = [[ASBatchContext alloc] init];
+
+  _visibleIndexPaths = [[NSMutableSet alloc] init];
 
   return self;
 }
@@ -366,6 +371,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
+  [_visibleIndexPaths addObject:indexPath];
+
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)]) {
@@ -375,6 +382,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath
 {
+  [_visibleIndexPaths removeObject:indexPath];
+
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNodeForRowAtIndexPath:)]) {
@@ -445,7 +454,29 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
-  return [self indexPathsForVisibleRows];
+
+#ifdef DEBUG_VISIBLE_INDEX_PATHS
+
+  // Attempt to detect issues with our list of visible index paths.
+  // Generally our list should match the TV's list or have one more item in it.
+
+  NSMutableSet *missingFromOurs = [[NSMutableSet alloc] initWithArray:self.indexPathsForVisibleRows];
+  [missingFromOurs minusSet:_visibleIndexPaths];
+
+  NSMutableSet *addedToOurs = [_visibleIndexPaths mutableCopy];
+  [addedToOurs minusSet:[NSSet setWithArray:self.indexPathsForVisibleRows]];
+
+  if ( missingFromOurs.count > 0 ) {
+    NSLog(@"WARNING: Tableview thinks these should be visible, but we don't see them: %@", missingFromOurs);
+  }
+
+  if ( addedToOurs.count > 1 ) { // == 0 || 1 is fine
+    NSLog(@"WARNING: We think these should be visible, but TV doesn't see them: %@", addedToOurs);
+  }
+
+#endif
+
+  return [_visibleIndexPaths allObjects];
 }
 
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
