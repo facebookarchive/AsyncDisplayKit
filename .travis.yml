@@ -10,6 +10,8 @@ env:
   - MODE=examples
   - MODE=life-without-cocoapods
 script: ./build.sh $MODE
+after_success:
+  - after_success.sh
 
 # whitelist
 branches:
