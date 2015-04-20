@@ -11,7 +11,7 @@ env:
   - MODE=life-without-cocoapods
 script: ./build.sh $MODE
 after_success:
-  - after_success.sh
+  - ./after_success.sh
 
 # whitelist
 branches:
