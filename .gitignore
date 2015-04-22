@@ -24,3 +24,5 @@ docs/.sass-cache
 *.swp
 
 *.lock
+
+*.gcov
