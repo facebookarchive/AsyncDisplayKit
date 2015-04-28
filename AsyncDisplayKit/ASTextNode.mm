@@ -749,6 +749,33 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
 #pragma mark - Touch Handling
 
+-(BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
+{
+  if (!_passthroughNonlinkTouches) {
+    return [super pointInside:point withEvent:event];
+  }
+
+  NSRange range = NSMakeRange(0, 0);
+  NSString *linkAttributeName = nil;
+  BOOL inAdditionalTruncationMessage = NO;
+
+  id linkAttributeValue = [self _linkAttributeValueAtPoint:point
+                                             attributeName:&linkAttributeName
+                                                     range:&range
+                             inAdditionalTruncationMessage:&inAdditionalTruncationMessage];
+
+  NSUInteger lastCharIndex = NSIntegerMax;
+  BOOL linkCrossesVisibleRange = (lastCharIndex > range.location) && (lastCharIndex < NSMaxRange(range) - 1);
+
+  if (inAdditionalTruncationMessage) {
+    return YES;
+  } else if (range.length && !linkCrossesVisibleRange && linkAttributeValue != nil && linkAttributeName != nil) {
+    return YES;
+  } else {
+    return NO;
+  }
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
   [super touchesBegan:touches withEvent:event];
