@@ -129,17 +129,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark Lifecycle
 
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
-{
-  return [self initWithFrame:frame style:style asyncDataFetching:NO];
-}
-
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
-{
-
-  if (!(self = [super initWithFrame:frame style:style]))
-    return nil;
-
+- (void)configureWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled {
   _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
 
   _rangeController = [[ASRangeController alloc] init];
@@ -155,6 +145,28 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _leadingScreensForBatching = 1.0;
   _batchContext = [[ASBatchContext alloc] init];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
+{
+  return [self initWithFrame:frame style:style asyncDataFetching:NO];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
+{
+  if (!(self = [super initWithFrame:frame style:style]))
+    return nil;
+
+  [self configureWithAsyncDataFetching:asyncDataFetchingEnabled];
+
+  return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+  if (!(self = [super initWithCoder:aDecoder]))
+    return nil;
+
+  [self configureWithAsyncDataFetching:NO];
 
   return self;
 }
