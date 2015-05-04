@@ -514,8 +514,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   ASDisplayNodeAssertMainThread();
   [_nodes enumerateObjectsUsingBlock:^(NSMutableArray *section, NSUInteger sectionIndex, BOOL *stop) {
     [section enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger rowIndex, BOOL *stop) {
-      if (node.isNodeLoaded && node.view.superview) {
-        [node.view removeFromSuperview];
+      if (node.isNodeLoaded) {
+        if (node.layerBacked) {
+          [node.layer removeFromSuperlayer];
+        } else {
+          [node.view removeFromSuperview];
+        }
       }
     }];
   }];
