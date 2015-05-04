@@ -162,13 +162,18 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark Overrides.
 
-- (void)reloadData
+- (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssert(self.asyncDelegate, @"ASCollectionView's asyncDelegate property must be set.");
   ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
   });
-  [_dataController reloadDataWithAnimationOption:kASCollectionViewAnimationNone];
+  [_dataController reloadDataWithAnimationOption:kASCollectionViewAnimationNone completion:completion];
+}
+
+- (void)reloadData
+{
+  [self reloadDataWithCompletion:nil];
 }
 
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
