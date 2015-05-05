@@ -155,7 +155,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
 
-- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
+- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption completion:(void (^)())completion;
 
 /** @name Data Querying */
 

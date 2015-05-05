@@ -217,13 +217,18 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-- (void)reloadData
+- (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssert(self.asyncDelegate, @"ASTableView's asyncDelegate property must be set.");
   ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
   });
-  [_dataController reloadDataWithAnimationOption:UITableViewRowAnimationNone];
+  [_dataController reloadDataWithAnimationOption:UITableViewRowAnimationNone completion:completion];
+}
+
+- (void)reloadData
+{
+  [self reloadDataWithCompletion:nil];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType

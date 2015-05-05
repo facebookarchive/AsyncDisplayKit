@@ -437,7 +437,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   });
 }
 
-- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption
+- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption completion:(void (^)())completion
 {
   [self performDataFetchingWithBlock:^{
     // Fetching data in calling thread
@@ -478,6 +478,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }];
       
       [self _batchInsertNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOption];
+
+      if (completion) {
+        dispatch_async(dispatch_get_main_queue(), completion);
+      }
     });
   }];
 }
