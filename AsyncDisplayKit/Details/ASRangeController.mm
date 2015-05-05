@@ -22,6 +22,8 @@
   NSMutableDictionary *_rangeTypeIndexPaths;
   NSDictionary *_rangeTypeHandlers;
   BOOL _queuedRangeUpdate;
+  
+  BOOL _queuedSetNeedsUpdateRanges;
 
   ASScrollDirection _scrollDirection;
 }
@@ -101,47 +103,115 @@
     // this delegate decide what happens when a node is added or removed from a range
     id<ASRangeHandler> rangeDelegate = _rangeTypeHandlers[rangeKey];
 
+    // Hey, should I ask you again which index paths are in this range?
     if ([_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths viewportSize:viewportSize rangeType:rangeType]) {
-      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize rangeType:rangeType];
-
-      // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
-      NSMutableSet *removedIndexPaths = _rangeIsValid ? [[_rangeTypeIndexPaths objectForKey:rangeKey] mutableCopy] : [NSMutableSet set];
-      [removedIndexPaths minusSet:indexPaths];
-      [removedIndexPaths minusSet:visibleNodePathsSet];
-      if (removedIndexPaths.count) {
-        NSArray *removedNodes = [_delegate rangeController:self nodesAtIndexPaths:[removedIndexPaths allObjects]];
-        [removedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-          // since this class usually manages large or infinite data sets, the working range
-          // directly bounds memory usage by requiring redrawing any content that falls outside the range.
-          [rangeDelegate node:node exitedRangeOfType:rangeType];
-        }];
-      }
-
-      // Notify to add indexpaths that are not currently in _rangeTypeIndexPaths
-      NSMutableSet *addedIndexPaths = [indexPaths mutableCopy];
-      [addedIndexPaths minusSet:[_rangeTypeIndexPaths objectForKey:rangeKey]];
-
-      // The preload range (for example) should include nodes that are visible
-      // TODO: remove this once we have removed the dependency on Core Animation's -display
-      if ([self shouldSkipVisibleNodesForRangeType:rangeType]) {
-        [addedIndexPaths minusSet:visibleNodePathsSet];
-      }
-
-      if (addedIndexPaths.count) {
-        NSArray *addedNodes = [_delegate rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
-        [addedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-          [rangeDelegate node:node enteredRangeOfType:rangeType];
-        }];
-      }
-
-      // set the range indexpaths so that we can remove/add on the next update pass
-      [_rangeTypeIndexPaths setObject:indexPaths forKey:rangeKey];
+      [self updateRangeWithViewportSize:viewportSize
+                              rangeType:rangeType
+                               rangeKey:rangeKey
+                    visibleNodePathsSet:visibleNodePathsSet
+                          rangeDelegate:rangeDelegate];
     }
   }
 
   _rangeIsValid = YES;
   _queuedRangeUpdate = NO;
 }
+
+
+- (void)setNeedsUpdateRanges
+{
+//  _scrollDirection = ASScrollDirectionNone;
+  
+  if (_queuedSetNeedsUpdateRanges) {
+    return;
+  }
+  
+  // coalesce these events -- handling them multiple times per runloop is noisy and expensive
+  _queuedSetNeedsUpdateRanges = YES;
+  [self performSelector:@selector(updateRanges)
+             withObject:nil
+             afterDelay:0
+                inModes:@[ NSRunLoopCommonModes ]];
+}
+
+
+
+
+
+- (void)updateRanges
+{
+  if (!_queuedSetNeedsUpdateRanges) {
+    return;
+  }
+  
+  NSArray *visibleNodePaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
+  NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
+  CGSize viewportSize = [_delegate rangeControllerViewportSize:self];
+  
+  // the layout controller needs to know what the current visible indices are to calculate range offsets
+  [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
+  
+  for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
+    ASLayoutRangeType rangeType = (ASLayoutRangeType)i;
+    id rangeKey = @(rangeType);
+    
+    // this delegate decide what happens when a node is added or removed from a range
+    id<ASRangeHandler> rangeDelegate = _rangeTypeHandlers[rangeKey];
+    
+    [self updateRangeWithViewportSize:viewportSize
+                            rangeType:rangeType
+                             rangeKey:rangeKey
+                  visibleNodePathsSet:visibleNodePathsSet
+                        rangeDelegate:rangeDelegate];
+  }
+  
+  _rangeIsValid = YES;
+  _queuedSetNeedsUpdateRanges = NO;
+}
+
+
+- (void)updateRangeWithViewportSize:(CGSize)viewportSize
+                          rangeType:(ASLayoutRangeType)rangeType
+                           rangeKey:(id)rangeKey
+                visibleNodePathsSet:(NSSet *)visibleNodePathsSet
+                      rangeDelegate:(id<ASRangeHandler>)rangeDelegate {
+  // Hey, what are all the index paths in this range?
+  NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize rangeType:rangeType];
+  
+  // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
+  NSMutableSet *removedIndexPaths = _rangeIsValid ? [[_rangeTypeIndexPaths objectForKey:rangeKey] mutableCopy] : [NSMutableSet set];
+  [removedIndexPaths minusSet:indexPaths];
+  [removedIndexPaths minusSet:visibleNodePathsSet];
+  if (removedIndexPaths.count) {
+    NSArray *removedNodes = [_delegate rangeController:self nodesAtIndexPaths:[removedIndexPaths allObjects]];
+    [removedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+      // since this class usually manages large or infinite data sets, the working range
+      // directly bounds memory usage by requiring redrawing any content that falls outside the range.
+      [rangeDelegate node:node exitedRangeOfType:rangeType];
+    }];
+  }
+  
+  // Notify to add indexpaths that are not currently in _rangeTypeIndexPaths
+  NSMutableSet *addedIndexPaths = [indexPaths mutableCopy];
+  [addedIndexPaths minusSet:[_rangeTypeIndexPaths objectForKey:rangeKey]];
+  
+  // The preload range (for example) should include nodes that are visible
+  // TODO: remove this once we have removed the dependency on Core Animation's -display
+  if ([self shouldSkipVisibleNodesForRangeType:rangeType]) {
+    [addedIndexPaths minusSet:visibleNodePathsSet];
+  }
+  
+  if (addedIndexPaths.count) {
+    NSArray *addedNodes = [_delegate rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
+    [addedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+      [rangeDelegate node:node enteredRangeOfType:rangeType];
+    }];
+  }
+  
+  // set the range indexpaths so that we can remove/add on the next update pass
+  [_rangeTypeIndexPaths setObject:indexPaths forKey:rangeKey];
+}
+
 
 - (BOOL)shouldSkipVisibleNodesForRangeType:(ASLayoutRangeType)rangeType
 {
@@ -198,6 +268,7 @@
     [_layoutController insertNodesAtIndexPaths:indexPaths withSizes:nodeSizes];
     [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
     _rangeIsValid = NO;
+    [self setNeedsUpdateRanges];
   });
 }
 
