@@ -528,7 +528,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-- (NSUInteger)dataController:(ASDataController *)dataControllre rowsInSection:(NSUInteger)section
+- (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section
 {
   return [_asyncDataSource tableView:self numberOfRowsInSection:section];
 }
