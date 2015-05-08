@@ -126,6 +126,16 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 @implementation ASTableView
 
+void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
+  if (withoutAnimation) {
+    [UIView setAnimationsEnabled:NO];
+    block();
+    [UIView setAnimationsEnabled:YES];
+  } else {
+    block();
+  }
+}
+
 #pragma mark -
 #pragma mark Lifecycle
 
@@ -467,29 +477,36 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
-
-  [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
+  ASPerformBlockWithoutAnimation(animationOption == UITableViewRowAnimationNone, ^{
+    [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
+  });
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
 
-  [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
+  ASPerformBlockWithoutAnimation(animationOption == UITableViewRowAnimationNone, ^{
+    [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
+  });
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
 
-  [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
+  ASPerformBlockWithoutAnimation(animationOption == UITableViewRowAnimationNone, ^{
+    [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
+  });
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
 
-  [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
+  ASPerformBlockWithoutAnimation(animationOption == UITableViewRowAnimationNone, ^{
+    [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
+  });
 }
 
 #pragma mark - ASDataControllerDelegate

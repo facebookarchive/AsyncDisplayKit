@@ -15,7 +15,7 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 
-const static NSUInteger kASCollectionViewAnimationNone = 0;
+const static NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 
 
 #pragma mark -
