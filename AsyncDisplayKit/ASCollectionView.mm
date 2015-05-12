@@ -193,9 +193,9 @@ static BOOL _isInterceptedSelector(SEL sel)
     return;
 
   if (asyncDataSource == nil) {
+    super.dataSource = nil;
     _asyncDataSource = nil;
     _proxyDataSource = nil;
-    super.dataSource = nil;
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
@@ -209,9 +209,11 @@ static BOOL _isInterceptedSelector(SEL sel)
     return;
 
   if (asyncDelegate == nil) {
+    // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
+    // in UIScrollViewAccessibility.
+    super.delegate = nil;
     _asyncDelegate = nil;
     _proxyDelegate = nil;
-    super.delegate = nil;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
