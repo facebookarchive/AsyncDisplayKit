@@ -77,11 +77,17 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
+  ASDisplayNodeAssert(_target, @"target must not be nil"); // catch weak ref's being nilled early
+  ASDisplayNodeAssert(_interceptor, @"interceptor must not be nil");
+
   return (_isInterceptedSelector(aSelector) || [_target respondsToSelector:aSelector]);
 }
 
 - (id)forwardingTargetForSelector:(SEL)aSelector
 {
+  ASDisplayNodeAssert(_target, @"target must not be nil"); // catch weak ref's being nilled early
+  ASDisplayNodeAssert(_interceptor, @"interceptor must not be nil");
+
   if (_isInterceptedSelector(aSelector)) {
     return _interceptor;
   }
@@ -159,6 +165,12 @@ static BOOL _isInterceptedSelector(SEL sel)
   return self;
 }
 
+-(void)dealloc {
+  // a little defense move here.
+  super.delegate  = nil;
+  super.dataSource = nil;
+}
+
 #pragma mark -
 #pragma mark Overrides
 
@@ -175,8 +187,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)setAsyncDataSource:(id<ASTableViewDataSource>)asyncDataSource
 {
-  if (_asyncDataSource == asyncDataSource)
-    return;
+  // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
+  // the (common) case of nilling the asyncDataSource in the ViewController's dealloc. In this case our _asyncDataSource
+  // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to nil out
+  // super.dataSource in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
   if (asyncDataSource == nil) {
     super.dataSource = nil;
@@ -191,8 +205,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)setAsyncDelegate:(id<ASTableViewDelegate>)asyncDelegate
 {
-  if (_asyncDelegate == asyncDelegate)
-    return;
+  // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
+  // the (common) case of nilling the asyncDelegate in the ViewController's dealloc. In this case our _asyncDelegate
+  // will return as nil (ARC magic) even though the _proxyDelegate still exists. It's really important to nil out
+  // super.delegate in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
   if (asyncDelegate == nil) {
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
