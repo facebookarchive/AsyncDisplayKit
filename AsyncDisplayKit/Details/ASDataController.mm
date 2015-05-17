@@ -512,4 +512,21 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   return ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
 }
 
+#pragma mark - Dealloc
+
+- (void)dealloc {
+  ASDisplayNodeAssertMainThread();
+  [_nodes enumerateObjectsUsingBlock:^(NSMutableArray *section, NSUInteger sectionIndex, BOOL *stop) {
+    [section enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger rowIndex, BOOL *stop) {
+      if (node.isNodeLoaded) {
+        if (node.layerBacked) {
+          [node.layer removeFromSuperlayer];
+        } else {
+          [node.view removeFromSuperview];
+        }
+      }
+    }];
+  }];
+}
+
 @end
