@@ -29,7 +29,8 @@
 - (NSRange)_randomizedRangeForStringBuilder:(ASMutableAttributedStringBuilder *)builder
 {
   NSUInteger loc = arc4random() % (builder.length - 1);
-  NSUInteger len = MAX(arc4random() % (builder.length - loc), 1);
+  NSUInteger len = arc4random() % (builder.length - loc);
+  len = ((len > 0) ? len : 1);
   return NSMakeRange(loc, len);
 }
 
