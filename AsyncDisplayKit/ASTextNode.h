@@ -76,6 +76,8 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @property (nonatomic, readonly, assign) NSUInteger lineCount;
 
+@property (nonatomic, strong) NSArray *exclusionPaths;
+
 #pragma mark - Placeholders
 
 /**
