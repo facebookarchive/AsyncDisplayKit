@@ -347,7 +347,7 @@ extern asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(
     // Draw a border on top.
     if (borderWidth > 0.0) {
       [borderColor setStroke];
-      CGContextSetLineWidth(UIGraphicsGetCurrentContext(), borderWidth);
+      [roundOutline setLineWidth:borderWidth];
       [roundOutline stroke];
     }
 
