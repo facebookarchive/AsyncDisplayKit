@@ -18,7 +18,7 @@ class ViewController: UIViewController, ASTableViewDataSource, ASTableViewDelega
 
   // MARK: UIViewController.
 
-  required override init() {
+  required init() {
     self.tableView = ASTableView()
 
     super.init(nibName: nil, bundle: nil)
@@ -48,10 +48,9 @@ class ViewController: UIViewController, ASTableViewDataSource, ASTableViewDelega
   // MARK: ASTableView data source and delegate.
 
   func tableView(tableView: ASTableView!, nodeForRowAtIndexPath indexPath: NSIndexPath!) -> ASCellNode! {
-    let patter = NSString(format: "[%ld.%ld] says hello!", indexPath.section, indexPath.row)
+    let patter = "[\(indexPath.section).\(indexPath.row)] says hello!"
     let node = ASTextCellNode()
     node.text = patter
-
     return node
   }
 
