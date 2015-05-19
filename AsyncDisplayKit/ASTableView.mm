@@ -126,11 +126,21 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 @implementation ASTableView
 
+/**
+ @summary Conditionally performs UIView geometry changes in the given block without animation.
+ 
+ Used primarily to circumvent UITableView forcing insertion animations when explicitly told not to via
+ `UITableViewRowAnimationNone`. More info: https://github.com/facebook/AsyncDisplayKit/pull/445
+ 
+ @param withoutAnimation Set to `YES` to perform given block without animation
+ @param block Perform UIView geometry changes within the passed block
+ */
 void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   if (withoutAnimation) {
+    BOOL animationsEnabled = [UIView areAnimationsEnabled];
     [UIView setAnimationsEnabled:NO];
     block();
-    [UIView setAnimationsEnabled:YES];
+    [UIView setAnimationsEnabled:animationsEnabled];
   } else {
     block();
   }
@@ -477,7 +487,9 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
-  ASPerformBlockWithoutAnimation(animationOption == UITableViewRowAnimationNone, ^{
+
+  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
   });
 }
@@ -486,7 +498,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssertMainThread();
 
-  ASPerformBlockWithoutAnimation(animationOption == UITableViewRowAnimationNone, ^{
+  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
   });
 }
@@ -495,7 +508,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssertMainThread();
 
-  ASPerformBlockWithoutAnimation(animationOption == UITableViewRowAnimationNone, ^{
+  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
   });
 }
@@ -504,7 +518,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssertMainThread();
 
-  ASPerformBlockWithoutAnimation(animationOption == UITableViewRowAnimationNone, ^{
+  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
   });
 }
