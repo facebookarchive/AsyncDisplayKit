@@ -206,8 +206,8 @@
  * @abstract Indicates that the receiver is finished displaying its subnodes. This method is not called if there are
  * no subnodes present.
  *
- * @discussion Subclasses may override this method to be notified when subnode display (asynchronous or synchronous) is
- * about to begin.
+ * @discussion Subclasses may override this method to be notified when subnode display (asynchronous or synchronous) has
+ * completed.
  */
 - (void)subnodeDisplayDidFinish:(ASDisplayNode *)subnode ASDISPLAYNODE_REQUIRES_SUPER;
 
