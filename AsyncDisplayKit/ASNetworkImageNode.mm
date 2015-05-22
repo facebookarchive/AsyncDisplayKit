@@ -127,12 +127,12 @@
 {
   [super displayWillStart];
 
-  [self fetchRemoteData];
+  [self fetchData];
 }
 
-- (void)clearRemoteData
+- (void)clearFetchedData
 {
-  [super clearRemoteData];
+  [super clearFetchedData];
 
   {
     ASDN::MutexLocker l(_lock);
@@ -143,9 +143,9 @@
   }
 }
 
-- (void)fetchRemoteData
+- (void)fetchData
 {
-  [super fetchRemoteData];
+  [super fetchData];
   
   {
     ASDN::MutexLocker l(_lock);
