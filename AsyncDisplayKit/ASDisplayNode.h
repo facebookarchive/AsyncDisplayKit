@@ -312,7 +312,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 - (void)recursivelySetDisplaySuspended:(BOOL)flag;
 
 /**
- * @abstract Calls -clearRendering on the receiver and its subnode hierarchy.
+ * @abstract Calls -clearContents on the receiver and its subnode hierarchy.
  *
  * @discussion Clears backing stores and other memory-intensive intermediates.
  * If the node is removed from a visible hierarchy and then re-added, it will automatically trigger a new asynchronous display,
@@ -322,27 +322,27 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @see displaySuspended and setNeedsDisplay
  */
 
-- (void)recursivelyClearRendering;
+- (void)recursivelyClearContents;
 
 /**
- * @abstract Calls -clearRemoteData on the receiver and its subnode hierarchy.
+ * @abstract Calls -clearFetchedData on the receiver and its subnode hierarchy.
  *
  * @discussion Clears any memory-intensive fetched content.
  * This method is used to notify the node that it should purge any content that is both expensive to fetch and to
  * retain in memory.
  *
- * @see clearRemoteData and fetchRemoteData
+ * @see clearFetchedData and fetchData
  */
-- (void)recursivelyClearRemoteData;
+- (void)recursivelyClearFetchedData;
 
 /**
- * @abstract Calls -fetchRemoteData on the receiver and its subnode hierarchy.
+ * @abstract Calls -fetchData on the receiver and its subnode hierarchy.
  *
  * @discussion Fetches content from remote sources for the current node and all subnodes.
  *
- * @see fetchRemoteData and clearRemoteData
+ * @see fetchData and clearFetchedData
  */
-- (void)recursivelyFetchRemoteData;
+- (void)recursivelyFetchData;
 
 /**
  * @abstract Toggle displaying a placeholder over the node that covers content until the node and all subnodes are
