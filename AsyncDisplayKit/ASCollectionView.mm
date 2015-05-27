@@ -15,7 +15,7 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 
-const static NSUInteger kASCollectionViewAnimationNone = 0;
+const static NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 
 
 #pragma mark -
@@ -78,11 +78,17 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
+  ASDisplayNodeAssert(_target, @"target must not be nil"); // catch weak ref's being nilled early
+  ASDisplayNodeAssert(_interceptor, @"interceptor must not be nil");
+
   return (_isInterceptedSelector(aSelector) || [_target respondsToSelector:aSelector]);
 }
 
 - (id)forwardingTargetForSelector:(SEL)aSelector
 {
+  ASDisplayNodeAssert(_target, @"target must not be nil"); // catch weak ref's being nilled early
+  ASDisplayNodeAssert(_interceptor, @"interceptor must not be nil");
+
   if (_isInterceptedSelector(aSelector)) {
     return _interceptor;
   }
@@ -159,16 +165,27 @@ static BOOL _isInterceptedSelector(SEL sel)
   return self;
 }
 
+-(void)dealloc {
+  // a little defense move here.
+  super.delegate  = nil;
+  super.dataSource = nil;
+}
+
 #pragma mark -
 #pragma mark Overrides.
 
-- (void)reloadData
+- (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssert(self.asyncDelegate, @"ASCollectionView's asyncDelegate property must be set.");
   ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
   });
-  [_dataController reloadDataWithAnimationOption:kASCollectionViewAnimationNone];
+  [_dataController reloadDataWithAnimationOption:kASCollectionViewAnimationNone completion:completion];
+}
+
+- (void)reloadData
+{
+  [self reloadDataWithCompletion:nil];
 }
 
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
@@ -184,13 +201,15 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)setAsyncDataSource:(id<ASCollectionViewDataSource>)asyncDataSource
 {
-  if (_asyncDataSource == asyncDataSource)
-    return;
+  // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
+  // the (common) case of nilling the asyncDataSource in the ViewController's dealloc. In this case our _asyncDataSource
+  // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to nil out
+  // super.dataSource in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
   if (asyncDataSource == nil) {
+    super.dataSource = nil;
     _asyncDataSource = nil;
     _proxyDataSource = nil;
-    super.dataSource = nil;
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
@@ -200,13 +219,17 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)setAsyncDelegate:(id<ASCollectionViewDelegate>)asyncDelegate
 {
-  if (_asyncDelegate == asyncDelegate)
-    return;
+  // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
+  // the (common) case of nilling the asyncDelegate in the ViewController's dealloc. In this case our _asyncDelegate
+  // will return as nil (ARC magic) even though the _proxyDelegate still exists. It's really important to nil out
+  // super.delegate in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
   if (asyncDelegate == nil) {
+    // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
+    // in UIScrollViewAccessibility.
+    super.delegate = nil;
     _asyncDelegate = nil;
     _proxyDelegate = nil;
-    super.delegate = nil;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];

@@ -90,8 +90,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   // Subclasses should never override these
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearRendering)), @"Subclass %@ must not override recursivelyClearRendering method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearRemoteData)), @"Subclass %@ must not override recursivelyClearRemoteData method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
 }
 
 + (BOOL)layerBackedNodesEnabled
@@ -117,6 +117,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   
   _displaySentinel = [[ASSentinel alloc] init];
   
+  _pendingDisplayNodes = [[NSMutableSet alloc] init];
+
   _flags.isInHierarchy = NO;
   _flags.displaysAsynchronously = YES;
   
@@ -1329,44 +1331,44 @@ static NSInteger incrementIfFound(NSInteger i) {
   [self __exitedHierarchy];
 }
 
-- (void)clearRendering
+- (void)clearContents
 {
   self.layer.contents = nil;
   _placeholderLayer.contents = nil;
 }
 
-- (void)recursivelyClearRendering
+- (void)recursivelyClearContents
 {
   for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyClearRendering];
+    [subnode recursivelyClearContents];
   }
-  [self clearRendering];
+  [self clearContents];
 }
 
-- (void)fetchRemoteData
+- (void)fetchData
 {
   // subclass override
 }
 
-- (void)recursivelyFetchRemoteData
+- (void)recursivelyFetchData
 {
   for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyFetchRemoteData];
+    [subnode recursivelyFetchData];
   }
-  [self fetchRemoteData];
+  [self fetchData];
 }
 
-- (void)clearRemoteData
+- (void)clearFetchedData
 {
   // subclass override
 }
 
-- (void)recursivelyClearRemoteData
+- (void)recursivelyClearFetchedData
 {
   for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyClearRemoteData];
+    [subnode recursivelyClearFetchedData];
   }
-  [self clearRemoteData];
+  [self clearFetchedData];
 }
 
 - (void)layout
@@ -1382,7 +1384,11 @@ static NSInteger incrementIfFound(NSInteger i) {
   [_supernode subnodeDisplayWillStart:self];
 
   if (_placeholderImage && _placeholderLayer && self.layer.contents == nil) {
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
     _placeholderLayer.contents = (id)_placeholderImage.CGImage;
+    _placeholderLayer.opacity = 1.0;
+    [CATransaction commit];
     [self.layer addSublayer:_placeholderLayer];
   }
 }
@@ -1816,12 +1822,12 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (void)reclaimMemory
 {
-  [self clearRendering];
+  [self clearContents];
 }
 
 - (void)recursivelyReclaimMemory
 {
-  [self recursivelyClearRendering];
+  [self recursivelyClearContents];
 }
 
 @end

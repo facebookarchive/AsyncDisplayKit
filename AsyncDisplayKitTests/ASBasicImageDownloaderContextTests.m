@@ -42,6 +42,7 @@
   XCTAssert([context isCancelled], @"Context should be cancelled");
 }
 
+/* This test is currently unreliable.  See https://github.com/facebook/AsyncDisplayKit/issues/459
 - (void)testAsyncContextInvalidation
 {
   NSURL *url = [self randomURL];
@@ -56,6 +57,7 @@
   [context cancel];
   [self waitForExpectationsWithTimeout:30.0 handler:nil];
 }
+*/
 
 - (void)testContextSessionCanceled
 {

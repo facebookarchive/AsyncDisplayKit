@@ -45,6 +45,12 @@ typedef NS_ENUM(NSUInteger, ASTextNodeRendererMeasureOption) {
  */
 @interface ASTextNodeRenderer : NSObject
 
+- (instancetype)initWithAttributedString:(NSAttributedString *)attributedString
+                        truncationString:(NSAttributedString *)truncationString
+                          truncationMode:(NSLineBreakMode)truncationMode
+                        maximumLineCount:(NSUInteger)maximumLineCount
+                          exclusionPaths:(NSArray *)exclusionPaths
+                         constrainedSize:(CGSize)constrainedSize;
 /*
  * Designated Initializer
  *
