@@ -13,6 +13,10 @@
 
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 
+#import <AsyncDisplayKit/ASStackLayoutNode.h>
+#import <AsyncDisplayKit/ASInsetLayoutNode.h>
+#import <AsyncDisplayKit/ASCompositeNode.h>
+
 static const CGFloat kImageSize = 80.0f;
 static const CGFloat kOuterPadding = 16.0f;
 static const CGFloat kInnerPadding = 10.0f;
@@ -124,26 +128,41 @@ static const CGFloat kInnerPadding = 10.0f;
             NSParagraphStyleAttributeName: style };
 }
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (ASLayoutNode *)layoutNodeThatFits:(CGSize)constrainedSize
 {
-  CGSize imageSize = CGSizeMake(kImageSize, kImageSize);
-  CGSize textSize = [_textNode measure:CGSizeMake(constrainedSize.width - kImageSize - 2 * kOuterPadding - kInnerPadding,
-                                                  constrainedSize.height)];
-
-  // ensure there's room for the text
-  CGFloat requiredHeight = MAX(textSize.height, imageSize.height);
-  return CGSizeMake(constrainedSize.width, requiredHeight + 2 * kOuterPadding);
+  return
+  [ASInsetLayoutNode
+   newWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding)
+   node:
+   [ASStackLayoutNode
+    newWithSize:{
+      .maxWidth = ASRelativeDimensionMakeWithPoints(constrainedSize.width),
+      .maxHeight = ASRelativeDimensionMakeWithPoints(constrainedSize.height)
+    }
+    style:{
+      .direction = ASStackLayoutDirectionHorizontal,
+      .spacing = kInnerPadding
+    }
+    children:
+    @[
+      [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableCopy) {
+        mutableCopy.node = [ASCompositeNode
+                            newWithSize:ASLayoutNodeSizeMake(kImageSize, kImageSize)
+                            displayNode:_imageNode];
+      }],
+      [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableCopy) {
+        mutableCopy.node = [ASCompositeNode newWithDisplayNode:_textNode];
+        mutableCopy.flexShrink = true;
+      }]
+    ]]];
 }
 
 - (void)layout
 {
+  [super layout];
+  
   CGFloat pixelHeight = 1.0f / [[UIScreen mainScreen] scale];
   _divider.frame = CGRectMake(0.0f, 0.0f, self.calculatedSize.width, pixelHeight);
-
-  _imageNode.frame = CGRectMake(kOuterPadding, kOuterPadding, kImageSize, kImageSize);
-
-  CGSize textSize = _textNode.calculatedSize;
-  _textNode.frame = CGRectMake(kOuterPadding + kImageSize + kInnerPadding, kOuterPadding, textSize.width, textSize.height);
 }
 
 @end

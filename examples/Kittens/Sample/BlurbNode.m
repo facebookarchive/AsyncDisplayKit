@@ -14,6 +14,8 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 
+#import <AsyncDisplayKit/ASInsetLayoutNode.h>
+#import <AsyncDisplayKit/ASCompositeNode.h>
 
 static CGFloat kTextPadding = 10.0f;
 static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
@@ -70,22 +72,11 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
   [super didLoad];
 }
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (ASLayoutNode *)layoutNodeThatFits:(CGSize)constrainedSize
 {
   // called on a background thread.  custom nodes must call -measure: on their subnodes in -calculateSizeThatFits:
-  CGSize measuredSize = [_textNode measure:CGSizeMake(constrainedSize.width - 2 * kTextPadding,
-                                                      constrainedSize.height - 2 * kTextPadding)];
-  return CGSizeMake(constrainedSize.width, measuredSize.height + 2 * kTextPadding);
-}
-
-- (void)layout
-{
-  // called on the main thread.  we'll use the stashed size from above, instead of blocking on text sizing
-  CGSize textNodeSize = _textNode.calculatedSize;
-  _textNode.frame = CGRectMake(roundf((self.calculatedSize.width - textNodeSize.width) / 2.0f),
-                               kTextPadding,
-                               textNodeSize.width,
-                               textNodeSize.height);
+  UIEdgeInsets insets = UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding);
+  return [ASInsetLayoutNode newWithInsets:insets node:[ASCompositeNode newWithDisplayNode:_textNode]];
 }
 
 #pragma mark -
