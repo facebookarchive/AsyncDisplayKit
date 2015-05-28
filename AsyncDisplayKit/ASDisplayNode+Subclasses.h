@@ -13,6 +13,8 @@
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASThread.h>
 
+#import <AsyncDisplayKit/ASLayout.h>
+@class ASLayoutNode;
 
 /**
  * The subclass header _ASDisplayNode+Subclasses_ defines the following methods that either must or can be overriden by
@@ -65,6 +67,17 @@
  */
 @property (nonatomic, readonly, assign, getter=isInHierarchy) BOOL inHierarchy;
 
+/**
+ * @abstract Return the calculated layout.
+ *
+ * @discussion Ideal for use by subclasses in -layout, having already prompted their subnodes to calculate their size by
+ * calling -measure: on them in -calculateLayoutThatFits:.
+ *
+ * @return Layout already calculated by ASLayoutNode returned by layoutNodeThatFits:.
+ *
+ * @warning Subclasses must not override this; it returns the last cached layout and is never expensive.
+ */
+@property (nonatomic, readonly, assign) ASLayout *calculatedLayout;
 
 /** @name View Lifecycle */
 
@@ -95,31 +108,29 @@
  */
 - (void)layoutDidFinish;
 
-
-/** @name Sizing */
-
+- (ASLayoutNode *)layoutNodeThatFits:(CGSize)constrainedSize;
 
 /**
- * @abstract Return the calculated size.
+ * @abstract Return the calculated layout.
  *
  * @param constrainedSize The maximum size the receiver should fit in.
  *
- * @discussion Subclasses that override should expect this method to be called on a non-main thread. The returned size
+ * @discussion Subclasses that override should expect this method to be called on a non-main thread. The returned layout
  * is cached by ASDisplayNode for quick access during -layout, via -calculatedSize. Other expensive work that needs to
  * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
  * encouraged.
  *
- * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedSize instead.
+ * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
  */
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize;
+- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize;
 
 /**
- * @abstract Invalidate previously measured and cached size.
+ * @abstract Invalidate previously measured and cached layout.
  *
- * @discussion Subclasses should call this method to invalidate the previously measured and cached size for the display
+ * @discussion Subclasses should call this method to invalidate the previously measured and cached layout for the display
  * node, when the contents of the node change in such a way as to require measuring it again.
  */
-- (void)invalidateCalculatedSize;
+- (void)invalidateCalculatedLayout;
 
 
 /** @name Drawing */

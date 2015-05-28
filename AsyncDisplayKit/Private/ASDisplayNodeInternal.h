@@ -17,9 +17,8 @@
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
+#import "ASLayout.h"
 
-BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
-CGFloat ASDisplayNodeScreenScale();
 void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
@@ -51,7 +50,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
 
-  CGSize _size;
+  ASLayout *_layout;
   CGSize _constrainedSize;
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;

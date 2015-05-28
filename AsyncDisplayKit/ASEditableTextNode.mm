@@ -16,6 +16,8 @@
 #import "ASTextNodeWordKerner.h"
 #import "ASThread.h"
 
+#import "ASLayoutNode.h"
+
 //! @abstract This subclass exists solely to ensure the text view's panGestureRecognizer never begins, because it's sporadically enabled by UITextView. It will be removed pending rdar://14729288.
 @interface _ASDisabledPanUITextView : UITextView
 @end
@@ -143,16 +145,17 @@
   [self.view addSubview:_textKitComponents.textView];
 }
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
 {
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
   CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
-  return CGSizeMake(constrainedSize.width, fminf(textSize.height, constrainedSize.height));
+  CGSize finalSize = CGSizeMake(constrainedSize.width, fminf(textSize.height, constrainedSize.height));
+  return [ASLayout newWithNode:[ASLayoutNode new] size:finalSize];
 }
 
 - (void)layout
 {
-  [super layout];
+  ASDisplayNodeAssertMainThread();
 
   [self _layoutTextView];
 }
@@ -290,7 +293,7 @@
     [_textKitComponents.textStorage setAttributedString:attributedStringToDisplay];
 
   // Calculated size depends on the seeded text.
-  [self invalidateCalculatedSize];
+  [self invalidateCalculatedLayout];
 
   // Update if placeholder is shown.
   [self _updateDisplayingPlaceholder];
@@ -389,7 +392,7 @@
   [self _updateDisplayingPlaceholder];
 
   // Invalidate, as our calculated size depends on the textview's seeded text.
-  [self invalidateCalculatedSize];
+  [self invalidateCalculatedLayout];
 
   // Delegateify.
   [self _delegateDidUpdateText];

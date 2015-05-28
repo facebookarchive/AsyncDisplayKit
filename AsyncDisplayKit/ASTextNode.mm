@@ -19,6 +19,8 @@
 #import "ASTextNodeRenderer.h"
 #import "ASTextNodeShadower.h"
 
+#import "ASLayoutNode.h"
+
 static const NSTimeInterval ASTextNodeHighlightFadeOutDuration = 0.15;
 static const NSTimeInterval ASTextNodeHighlightFadeInDuration = 0.1;
 static const CGFloat ASTextNodeHighlightLightOpacity = 0.11;
@@ -184,7 +186,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
 #pragma mark - ASDisplayNode
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
 {
   ASDisplayNodeAssert(constrainedSize.width >= 0, @"Constrained width for text (%f) is too  narrow", constrainedSize.width);
   ASDisplayNodeAssert(constrainedSize.height >= 0, @"Constrained height for text (%f) is too short", constrainedSize.height);
@@ -210,8 +212,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   ASDisplayNodeAssert(renderSizePlusShadowPadding.width >= 0, @"Calculated width for text with shadow padding (%f) is too  narrow", constrainedSizeForText.width);
   ASDisplayNodeAssert(renderSizePlusShadowPadding.height >= 0, @"Calculated height for text with shadow padding (%f) is too short", constrainedSizeForText.height);
 
-  return CGSizeMake(MIN(ceilPixelValue(renderSizePlusShadowPadding.width), constrainedSize.width),
-                    MIN(ceilPixelValue(renderSizePlusShadowPadding.height), constrainedSize.height));
+  CGSize finalSize = CGSizeMake(MIN(ceilPixelValue(renderSizePlusShadowPadding.width), constrainedSize.width),
+                                MIN(ceilPixelValue(renderSizePlusShadowPadding.height), constrainedSize.height));
+  return [ASLayout newWithNode:[ASLayoutNode new] size:finalSize];
 }
 
 - (void)displayDidFinish
@@ -337,8 +340,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   // We need an entirely new renderer
   [self _invalidateRenderer];
 
-  // Tell the display node superclasses that the cached sizes are incorrect now
-  [self invalidateCalculatedSize];
+  // Tell the display node superclasses that the cached layout is incorrect now
+  [self invalidateCalculatedLayout];
 
   [self setNeedsDisplay];
 
@@ -359,7 +362,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   if ((_exclusionPaths == nil && exclusionPaths != nil) || (![_exclusionPaths  isEqualToArray:exclusionPaths])) {
     _exclusionPaths = exclusionPaths;
     [self _invalidateRenderer];
-    [self invalidateCalculatedSize];
+    [self invalidateCalculatedLayout];
     [self setNeedsDisplay];
   }
 }

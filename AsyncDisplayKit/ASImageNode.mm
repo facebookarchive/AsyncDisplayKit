@@ -17,6 +17,9 @@
 
 #import "ASImageNode+CGExtras.h"
 
+#import "ASInternalHelpers.h"
+#import "ASLayoutNode.h"
+
 @interface _ASImageNodeDrawParameters : NSObject
 
 @property (nonatomic, assign, readonly) BOOL cropEnabled;
@@ -82,7 +85,7 @@
     return nil;
 
   // TODO can this be removed?
-  self.contentsScale = ASDisplayNodeScreenScale();
+  self.contentsScale = ASScreenScale();
   self.contentMode = UIViewContentModeScaleAspectFill;
   self.opaque = NO;
 
@@ -106,13 +109,13 @@
   return nil;
 }
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(_imageLock);
+  CGSize size = CGSizeZero;
   if (_image)
-    return _image.size;
-  else
-    return CGSizeZero;
+    size = _image.size;
+  return [ASLayout newWithNode:[ASLayoutNode new] size:size];
 }
 
 - (void)setImage:(UIImage *)image
@@ -123,7 +126,7 @@
 
     ASDN::MutexUnlocker u(_imageLock);
     ASDisplayNodePerformBlockOnMainThread(^{
-      [self invalidateCalculatedSize];
+      [self invalidateCalculatedLayout];
       [self setNeedsDisplay];
     });
   }

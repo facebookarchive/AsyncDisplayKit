@@ -128,10 +128,10 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the 
  * constraint and the result.
  *
- * @warning Subclasses must not override this; it caches results from -calculateSizeThatFits:.  Calling this method may 
+ * @warning Subclasses must not override this; it caches results from -layoutNodeThatFits:.  Calling this method may
  * be expensive if result is not cached.
  *
- * @see [ASDisplayNode(Subclassing) calculateSizeThatFits:]
+ * @see [ASDisplayNode(Subclassing) layoutNodeThatFits:]
  */
 - (CGSize)measure:(CGSize)constrainedSize;
 
@@ -139,20 +139,20 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @abstract Return the calculated size.
  *
  * @discussion Ideal for use by subclasses in -layout, having already prompted their subnodes to calculate their size by
- * calling -measure: on them in -calculateSizeThatFits:.
+ * calling -measure: on them in -calculateLayoutThatFits.
  *
- * @return Size already calculated by calculateSizeThatFits:.
+ * @return Size already calculated by -calculateLayoutThatFits:.
  *
- * @warning Subclasses must not override this; it returns the last cached size calculated and is never expensive.
+ * @warning Subclasses must not override this; it returns the last cached measurement and is never expensive.
  */
 @property (nonatomic, readonly, assign) CGSize calculatedSize;
 
 /** 
- * @abstract Return the constrained size used for calculating size.
+ * @abstract Return the constrained size used for calculating layout.
  *
- * @return The constrained size used by calculateSizeThatFits:.
+ * @return The constrained size used by layoutNodeThatFits:.
  */
-@property (nonatomic, readonly, assign) CGSize constrainedSizeForCalculatedSize;
+@property (nonatomic, readonly, assign) CGSize constrainedSizeForCalculatedLayout;
 
 
 /** @name Managing the nodes hierarchy */

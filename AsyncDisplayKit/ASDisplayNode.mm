@@ -11,12 +11,18 @@
 #import "ASDisplayNodeInternal.h"
 
 #import <objc/runtime.h>
+#import <stack>
 
 #import "_ASAsyncTransaction.h"
 #import "_ASPendingState.h"
 #import "_ASDisplayView.h"
 #import "_ASScopeTimer.h"
 #import "ASDisplayNodeExtras.h"
+
+#import "ASInternalHelpers.h"
+#import "ASLayoutNodeSubclass.h"
+#import "ASCompositeNode.h"
+#import "ASLayoutNodeUtilities.h"
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
 
@@ -37,39 +43,6 @@
 
 @implementation ASDisplayNode
 
-BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
-{
-  Method superclassMethod = class_getInstanceMethod([ASDisplayNode class], selector);
-  Method subclassMethod = class_getInstanceMethod(subclass, selector);
-  IMP superclassIMP = superclassMethod ? method_getImplementation(superclassMethod) : NULL;
-  IMP subclassIMP = subclassMethod ? method_getImplementation(subclassMethod) : NULL;
-
-  return (superclassIMP != subclassIMP);
-}
-
-CGFloat ASDisplayNodeScreenScale()
-{
-  static CGFloat screenScale = 0.0;
-  static dispatch_once_t onceToken;
-  ASDispatchOnceOnMainThread(&onceToken, ^{
-    screenScale = [[UIScreen mainScreen] scale];
-  });
-  return screenScale;
-}
-
-static void ASDispatchOnceOnMainThread(dispatch_once_t *predicate, dispatch_block_t block)
-{
-  if ([NSThread isMainThread]) {
-    dispatch_once(predicate, block);
-  } else {
-    if (DISPATCH_EXPECT(*predicate == 0L, NO)) {
-      dispatch_sync(dispatch_get_main_queue(), ^{
-        dispatch_once(predicate, block);
-      });
-    }
-  }
-}
-
 void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 {
   if ([NSThread isMainThread]) {
@@ -88,10 +61,11 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   }
 
   // Subclasses should never override these
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
 }
 
 + (BOOL)layerBackedNodesEnabled
@@ -113,7 +87,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (void)_initializeInstance
 {
-  _contentsScaleForDisplay = ASDisplayNodeScreenScale();
+  _contentsScaleForDisplay = ASScreenScale();
   
   _displaySentinel = [[ASSentinel alloc] init];
 
@@ -126,16 +100,16 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _flags.implementsDrawParameters = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
 
   ASDisplayNodeMethodOverrides overrides = ASDisplayNodeMethodOverrideNone;
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesBegan:withEvent:))) {
+  if (ASSubclassOverridesSelector([ASDisplayNode class], [self class], @selector(touchesBegan:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesBegan;
   }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesMoved:withEvent:))) {
+  if (ASSubclassOverridesSelector([ASDisplayNode class], [self class], @selector(touchesMoved:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesMoved;
   }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesCancelled:withEvent:))) {
+  if (ASSubclassOverridesSelector([ASDisplayNode class], [self class], @selector(touchesCancelled:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesCancelled;
   }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesEnded:withEvent:))) {
+  if (ASSubclassOverridesSelector([ASDisplayNode class], [self class], @selector(touchesEnded:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
   }
   _methodOverrides = overrides;
@@ -453,17 +427,17 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   //  - the width is different from the last time
   //  - the height is different from the last time
   if (!_flags.isMeasured || !CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
-    _size = [self calculateSizeThatFits:constrainedSize];
+    _layout = [self calculateLayoutThatFits:constrainedSize];
     _constrainedSize = constrainedSize;
     _flags.isMeasured = YES;
   }
 
-  ASDisplayNodeAssertTrue(_size.width >= 0.0);
-  ASDisplayNodeAssertTrue(_size.height >= 0.0);
+  ASDisplayNodeAssertTrue(_layout.size.width >= 0.0);
+  ASDisplayNodeAssertTrue(_layout.size.height >= 0.0);
 
   // we generate placeholders at measure: time so that a node is guaranteed to have a placeholder ready to go
   // also if a node has no size, it should not have a placeholder
-  if (self.placeholderEnabled && [self _displaysAsynchronously] && _size.width > 0.0 && _size.height > 0.0) {
+  if (self.placeholderEnabled && [self _displaysAsynchronously] && _layout.size.width > 0.0 && _layout.size.height > 0.0) {
     if (!_placeholderImage) {
       _placeholderImage = [self placeholderImage];
     }
@@ -473,7 +447,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
     }
   }
 
-  return _size;
+  return _layout.size;
 }
 
 - (BOOL)displaysAsynchronously
@@ -1282,16 +1256,30 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 #pragma mark - For Subclasses
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (ASLayoutNode *)layoutNodeThatFits:(CGSize)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  return CGSizeZero;
+  return [ASLayoutNode new];
+}
+
+- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASLayoutNode *layoutNode = [self layoutNodeThatFits:constrainedSize];
+  ASLayout *layout = [layoutNode layoutThatFits:{CGSizeZero, constrainedSize} parentSize:constrainedSize];
+  return layout;
+}
+
+- (ASLayout *)calculatedLayout
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  return _layout;
 }
 
 - (CGSize)calculatedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  return _size;
+  return _layout.size;
 }
 
 - (CGSize)constrainedSizeForCalculatedSize
@@ -1305,7 +1293,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   return nil;
 }
 
-- (void)invalidateCalculatedSize
+- (void)invalidateCalculatedLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // This will cause -measure: to actually compute the size instead of returning the previously cached size
@@ -1376,6 +1364,43 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)layout
 {
   ASDisplayNodeAssertMainThread();
+  
+  if (!_flags.isMeasured) {
+    return;
+  }
+  
+  struct Context {
+    ASLayout *layout;
+    CGPoint absoultePosition;
+    BOOL visited;
+  };
+  
+  // Stack of Contexts, used to keep track of layout nodes while traversing the calculated layout in a DFS fashion.
+  std::stack<Context> stack;
+  stack.push({_layout, CGPointMake(0, 0), NO});
+  
+  while (!stack.empty()) {
+    Context &context = stack.top();
+    if (context.visited) {
+      stack.pop();
+    } else {
+      ASDisplayNodeAssertNotNil(context.layout.node, "node is required in calculated ASLayout.");
+      context.visited = YES;
+      
+      if ([context.layout.node isKindOfClass:[ASCompositeNode class]]) {
+        ASDisplayNode *subnode = ((ASCompositeNode *)context.layout.node).displayNode;
+        ASDisplayNodeAssertNotNil(subnode, "displayNode is required in ASCompositeNode.");
+        
+        CGPoint subnodePosition = context.absoultePosition;
+        CGSize subnodeSize = context.layout.size;
+        subnode.frame = CGRectMake(subnodePosition.x, subnodePosition.y, subnodeSize.width, subnodeSize.height);
+      }
+
+      for (ASLayoutChild *child in context.layout.children) {
+        stack.push({child.layout, context.absoultePosition + child.position, NO});
+      }
+    }
+  }
 }
 
 - (void)displayWillStart
