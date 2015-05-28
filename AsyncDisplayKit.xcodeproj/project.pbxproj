@@ -296,38 +296,38 @@
 		B350625E1B0111780018CF92 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
 		AC6456091B0A335000CF11B8 /* ASCellNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC6456071B0A335000CF11B8 /* ASCellNode.mm */; };
-		ACF6ED1A1B17843500DA7C62 /* ASBackgroundLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED011B17843500DA7C62 /* ASBackgroundLayoutNode.h */; };
+		ACF6ED1A1B17843500DA7C62 /* ASBackgroundLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED011B17843500DA7C62 /* ASBackgroundLayoutNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED1B1B17843500DA7C62 /* ASBackgroundLayoutNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED021B17843500DA7C62 /* ASBackgroundLayoutNode.mm */; };
-		ACF6ED1C1B17843500DA7C62 /* ASCenterLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED031B17843500DA7C62 /* ASCenterLayoutNode.h */; };
+		ACF6ED1C1B17843500DA7C62 /* ASCenterLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED031B17843500DA7C62 /* ASCenterLayoutNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED1D1B17843500DA7C62 /* ASCenterLayoutNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED041B17843500DA7C62 /* ASCenterLayoutNode.mm */; };
-		ACF6ED1E1B17843500DA7C62 /* ASCompositeNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED051B17843500DA7C62 /* ASCompositeNode.h */; };
+		ACF6ED1E1B17843500DA7C62 /* ASCompositeNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED051B17843500DA7C62 /* ASCompositeNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED1F1B17843500DA7C62 /* ASCompositeNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED061B17843500DA7C62 /* ASCompositeNode.mm */; };
-		ACF6ED201B17843500DA7C62 /* ASDimension.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED071B17843500DA7C62 /* ASDimension.h */; };
+		ACF6ED201B17843500DA7C62 /* ASDimension.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED071B17843500DA7C62 /* ASDimension.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED211B17843500DA7C62 /* ASDimension.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED081B17843500DA7C62 /* ASDimension.mm */; };
-		ACF6ED221B17843500DA7C62 /* ASInsetLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED091B17843500DA7C62 /* ASInsetLayoutNode.h */; };
+		ACF6ED221B17843500DA7C62 /* ASInsetLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED091B17843500DA7C62 /* ASInsetLayoutNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED231B17843500DA7C62 /* ASInsetLayoutNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED0A1B17843500DA7C62 /* ASInsetLayoutNode.mm */; };
-		ACF6ED241B17843500DA7C62 /* ASLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED0B1B17843500DA7C62 /* ASLayout.h */; };
+		ACF6ED241B17843500DA7C62 /* ASLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED0B1B17843500DA7C62 /* ASLayout.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED251B17843500DA7C62 /* ASLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED0C1B17843500DA7C62 /* ASLayout.mm */; };
-		ACF6ED261B17843500DA7C62 /* ASLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED0D1B17843500DA7C62 /* ASLayoutNode.h */; };
+		ACF6ED261B17843500DA7C62 /* ASLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED0D1B17843500DA7C62 /* ASLayoutNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED271B17843500DA7C62 /* ASLayoutNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED0E1B17843500DA7C62 /* ASLayoutNode.mm */; };
-		ACF6ED281B17843500DA7C62 /* ASLayoutNodeSize.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED0F1B17843500DA7C62 /* ASLayoutNodeSize.h */; };
+		ACF6ED281B17843500DA7C62 /* ASLayoutNodeSize.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED0F1B17843500DA7C62 /* ASLayoutNodeSize.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED291B17843500DA7C62 /* ASLayoutNodeSize.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED101B17843500DA7C62 /* ASLayoutNodeSize.mm */; };
-		ACF6ED2A1B17843500DA7C62 /* ASLayoutNodeSubclass.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED111B17843500DA7C62 /* ASLayoutNodeSubclass.h */; };
-		ACF6ED2B1B17843500DA7C62 /* ASOverlayLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED121B17843500DA7C62 /* ASOverlayLayoutNode.h */; };
+		ACF6ED2A1B17843500DA7C62 /* ASLayoutNodeSubclass.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED111B17843500DA7C62 /* ASLayoutNodeSubclass.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		ACF6ED2B1B17843500DA7C62 /* ASOverlayLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED121B17843500DA7C62 /* ASOverlayLayoutNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED2C1B17843500DA7C62 /* ASOverlayLayoutNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED131B17843500DA7C62 /* ASOverlayLayoutNode.mm */; };
-		ACF6ED2D1B17843500DA7C62 /* ASRatioLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED141B17843500DA7C62 /* ASRatioLayoutNode.h */; };
+		ACF6ED2D1B17843500DA7C62 /* ASRatioLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED141B17843500DA7C62 /* ASRatioLayoutNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED2E1B17843500DA7C62 /* ASRatioLayoutNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED151B17843500DA7C62 /* ASRatioLayoutNode.mm */; };
-		ACF6ED2F1B17843500DA7C62 /* ASStackLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED161B17843500DA7C62 /* ASStackLayoutNode.h */; };
+		ACF6ED2F1B17843500DA7C62 /* ASStackLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED161B17843500DA7C62 /* ASStackLayoutNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED301B17843500DA7C62 /* ASStackLayoutNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED171B17843500DA7C62 /* ASStackLayoutNode.mm */; };
-		ACF6ED311B17843500DA7C62 /* ASStaticLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED181B17843500DA7C62 /* ASStaticLayoutNode.h */; };
+		ACF6ED311B17843500DA7C62 /* ASStaticLayoutNode.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED181B17843500DA7C62 /* ASStaticLayoutNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED321B17843500DA7C62 /* ASStaticLayoutNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED191B17843500DA7C62 /* ASStaticLayoutNode.mm */; };
-		ACF6ED4B1B17847A00DA7C62 /* ASInternalHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED431B17847A00DA7C62 /* ASInternalHelpers.h */; };
+		ACF6ED4B1B17847A00DA7C62 /* ASInternalHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED431B17847A00DA7C62 /* ASInternalHelpers.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		ACF6ED4C1B17847A00DA7C62 /* ASInternalHelpers.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED441B17847A00DA7C62 /* ASInternalHelpers.mm */; };
-		ACF6ED4D1B17847A00DA7C62 /* ASLayoutNodeUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED451B17847A00DA7C62 /* ASLayoutNodeUtilities.h */; };
-		ACF6ED4E1B17847A00DA7C62 /* ASStackLayoutNodeUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED461B17847A00DA7C62 /* ASStackLayoutNodeUtilities.h */; };
-		ACF6ED4F1B17847A00DA7C62 /* ASStackPositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED471B17847A00DA7C62 /* ASStackPositionedLayout.h */; };
+		ACF6ED4D1B17847A00DA7C62 /* ASLayoutNodeUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED451B17847A00DA7C62 /* ASLayoutNodeUtilities.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		ACF6ED4E1B17847A00DA7C62 /* ASStackLayoutNodeUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED461B17847A00DA7C62 /* ASStackLayoutNodeUtilities.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		ACF6ED4F1B17847A00DA7C62 /* ASStackPositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED471B17847A00DA7C62 /* ASStackPositionedLayout.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		ACF6ED501B17847A00DA7C62 /* ASStackPositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED481B17847A00DA7C62 /* ASStackPositionedLayout.mm */; };
-		ACF6ED511B17847A00DA7C62 /* ASStackUnpositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED491B17847A00DA7C62 /* ASStackUnpositionedLayout.h */; };
+		ACF6ED511B17847A00DA7C62 /* ASStackUnpositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED491B17847A00DA7C62 /* ASStackUnpositionedLayout.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED521B17847A00DA7C62 /* ASStackUnpositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED4A1B17847A00DA7C62 /* ASStackUnpositionedLayout.mm */; };
 		ACF6ED5C1B178DC700DA7C62 /* ASCenterLayoutNodeSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED531B178DC700DA7C62 /* ASCenterLayoutNodeSnapshotTests.mm */; };
 		ACF6ED5D1B178DC700DA7C62 /* ASDimensionTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED541B178DC700DA7C62 /* ASDimensionTests.mm */; };
@@ -965,9 +965,22 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACF6ED511B17847A00DA7C62 /* ASStackUnpositionedLayout.h in Headers */,
+				ACF6ED2D1B17843500DA7C62 /* ASRatioLayoutNode.h in Headers */,
+				ACF6ED261B17843500DA7C62 /* ASLayoutNode.h in Headers */,
+				ACF6ED221B17843500DA7C62 /* ASInsetLayoutNode.h in Headers */,
+				ACF6ED201B17843500DA7C62 /* ASDimension.h in Headers */,
+				ACF6ED2B1B17843500DA7C62 /* ASOverlayLayoutNode.h in Headers */,
+				ACF6ED1C1B17843500DA7C62 /* ASCenterLayoutNode.h in Headers */,
+				ACF6ED2A1B17843500DA7C62 /* ASLayoutNodeSubclass.h in Headers */,
+				ACF6ED311B17843500DA7C62 /* ASStaticLayoutNode.h in Headers */,
+				ACF6ED241B17843500DA7C62 /* ASLayout.h in Headers */,
+				ACF6ED1E1B17843500DA7C62 /* ASCompositeNode.h in Headers */,
+				ACF6ED2F1B17843500DA7C62 /* ASStackLayoutNode.h in Headers */,
+				ACF6ED281B17843500DA7C62 /* ASLayoutNodeSize.h in Headers */,
+				ACF6ED1A1B17843500DA7C62 /* ASBackgroundLayoutNode.h in Headers */,
 				291B63FB1AA53A7A000A71B3 /* ASScrollDirection.h in Headers */,
 				464052221A3F83C40061C0BA /* ASFlowLayoutController.h in Headers */,
-				ACF6ED1A1B17843500DA7C62 /* ASBackgroundLayoutNode.h in Headers */,
 				464052241A3F83C40061C0BA /* ASLayoutController.h in Headers */,
 				464052201A3F83C40061C0BA /* ASDataController.h in Headers */,
 				05A6D05A19D0EB64002DD95E /* ASDealloc2MainObject.h in Headers */,
@@ -978,12 +991,9 @@
 				058D0A4A195D05CB00B7D73C /* ASDisplayNode.h in Headers */,
 				1950C4491A3BB5C1005C8279 /* ASEqualityHelpers.h in Headers */,
 				058D0A4B195D05CB00B7D73C /* ASDisplayNode.mm in Headers */,
-				ACF6ED4B1B17847A00DA7C62 /* ASInternalHelpers.h in Headers */,
-				ACF6ED281B17843500DA7C62 /* ASLayoutNodeSize.h in Headers */,
 				058D0A4C195D05CB00B7D73C /* ASDisplayNode+Subclasses.h in Headers */,
 				058D0A4D195D05CB00B7D73C /* ASDisplayNodeExtras.h in Headers */,
 				058D0A4E195D05CB00B7D73C /* ASDisplayNodeExtras.mm in Headers */,
-				ACF6ED511B17847A00DA7C62 /* ASStackUnpositionedLayout.h in Headers */,
 				058D0A4F195D05CB00B7D73C /* ASImageNode.h in Headers */,
 				058D0A50195D05CB00B7D73C /* ASImageNode.mm in Headers */,
 				058D0A51195D05CB00B7D73C /* ASTextNode.h in Headers */,
@@ -999,7 +1009,6 @@
 				058D0A55195D05DC00B7D73C /* _ASDisplayView.h in Headers */,
 				058D0A56195D05DC00B7D73C /* _ASDisplayView.mm in Headers */,
 				058D0A57195D05DC00B7D73C /* ASHighlightOverlayLayer.h in Headers */,
-				ACF6ED2D1B17843500DA7C62 /* ASRatioLayoutNode.h in Headers */,
 				058D0A58195D05DC00B7D73C /* ASHighlightOverlayLayer.mm in Headers */,
 				058D0A59195D05DC00B7D73C /* ASMutableAttributedStringBuilder.h in Headers */,
 				058D0A5A195D05DC00B7D73C /* ASMutableAttributedStringBuilder.m in Headers */,
@@ -1013,47 +1022,41 @@
 				058D0A61195D05DC00B7D73C /* ASTextNodeTextKitHelpers.h in Headers */,
 				058D0A62195D05DC00B7D73C /* ASTextNodeTextKitHelpers.mm in Headers */,
 				058D0A63195D05DC00B7D73C /* ASTextNodeTypes.h in Headers */,
-				ACF6ED261B17843500DA7C62 /* ASLayoutNode.h in Headers */,
 				292C599F1A956527007E5DD6 /* ASLayoutRangeType.h in Headers */,
 				464052251A3F83C40061C0BA /* ASMultidimensionalArrayUtils.h in Headers */,
-				ACF6ED221B17843500DA7C62 /* ASInsetLayoutNode.h in Headers */,
 				058D0A64195D05DC00B7D73C /* ASTextNodeWordKerner.h in Headers */,
 				299DA1A91A828D2900162D41 /* ASBatchContext.h in Headers */,
 				058D0A65195D05DC00B7D73C /* ASTextNodeWordKerner.m in Headers */,
 				058D0A66195D05DC00B7D73C /* NSMutableAttributedString+TextKitAdditions.h in Headers */,
-				ACF6ED201B17843500DA7C62 /* ASDimension.h in Headers */,
 				058D0A67195D05DC00B7D73C /* NSMutableAttributedString+TextKitAdditions.m in Headers */,
 				058D0A68195D05EC00B7D73C /* _ASAsyncTransaction.h in Headers */,
 				205F0E0F1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h in Headers */,
 				058D0A69195D05EC00B7D73C /* _ASAsyncTransaction.m in Headers */,
 				058D0A6A195D05EC00B7D73C /* _ASAsyncTransactionContainer+Private.h in Headers */,
-				ACF6ED2B1B17843500DA7C62 /* ASOverlayLayoutNode.h in Headers */,
 				058D0A6B195D05EC00B7D73C /* _ASAsyncTransactionContainer.h in Headers */,
 				058D0A6C195D05EC00B7D73C /* _ASAsyncTransactionContainer.m in Headers */,
-				ACF6ED1C1B17843500DA7C62 /* ASCenterLayoutNode.h in Headers */,
 				6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */,
 				058D0A6D195D05EC00B7D73C /* _ASAsyncTransactionGroup.h in Headers */,
 				058D0A6E195D05EC00B7D73C /* _ASAsyncTransactionGroup.m in Headers */,
 				205F0E1D1B373A2C007741D0 /* ASCollectionViewLayoutController.h in Headers */,
-				ACF6ED4E1B17847A00DA7C62 /* ASStackLayoutNodeUtilities.h in Headers */,
 				058D0A6F195D05EC00B7D73C /* UIView+ASConvenience.h in Headers */,
 				058D0A70195D05EC00B7D73C /* UIView+ASConvenience.m in Headers */,
-				ACF6ED2A1B17843500DA7C62 /* ASLayoutNodeSubclass.h in Headers */,
+				ACF6ED4B1B17847A00DA7C62 /* ASInternalHelpers.h in Headers */,
 				058D0A82195D060300B7D73C /* ASAssert.h in Headers */,
 				0516FA3C1A15563400B4EBED /* ASAvailability.h in Headers */,
 				0516FA3D1A15563400B4EBED /* ASLog.h in Headers */,
 				058D0A83195D060300B7D73C /* ASBaseDefines.h in Headers */,
 				058D0A84195D060300B7D73C /* ASDisplayNodeExtraIvars.h in Headers */,
 				AC3C4A511A1139C100143C57 /* ASCollectionView.h in Headers */,
-				ACF6ED4D1B17847A00DA7C62 /* ASLayoutNodeUtilities.h in Headers */,
 				292C59A01A956527007E5DD6 /* ASRangeHandlerPreload.h in Headers */,
 				055B9FA81A1C154B00035D6D /* ASNetworkImageNode.h in Headers */,
+				ACF6ED4E1B17847A00DA7C62 /* ASStackLayoutNodeUtilities.h in Headers */,
+				ACF6ED4D1B17847A00DA7C62 /* ASLayoutNodeUtilities.h in Headers */,
 				ACF6ED4F1B17847A00DA7C62 /* ASStackPositionedLayout.h in Headers */,
 				054963491A1EA066000F8E56 /* ASBasicImageDownloader.h in Headers */,
 				AC3C4A541A113EEC00143C57 /* ASCollectionViewProtocols.h in Headers */,
 				D785F6621A74327E00291744 /* ASScrollNode.h in Headers */,
 				0587F9BD1A7309ED00AFF0BA /* ASEditableTextNode.h in Headers */,
-				ACF6ED311B17843500DA7C62 /* ASStaticLayoutNode.h in Headers */,
 				05F20AA41A15733C00DCA68A /* ASImageProtocols.h in Headers */,
 				058D0A71195D05F800B7D73C /* _AS-objc-internal.h in Headers */,
 				058D0A72195D05F800B7D73C /* _ASCoreAnimationExtras.h in Headers */,
@@ -1061,7 +1064,6 @@
 				058D0A74195D05F800B7D73C /* _ASPendingState.h in Headers */,
 				058D0A75195D05F800B7D73C /* _ASPendingState.m in Headers */,
 				058D0A76195D05F900B7D73C /* _ASScopeTimer.h in Headers */,
-				ACF6ED241B17843500DA7C62 /* ASLayout.h in Headers */,
 				058D0A77195D05F900B7D73C /* ASDisplayNode+AsyncDisplay.mm in Headers */,
 				058D0A78195D05F900B7D73C /* ASDisplayNode+DebugTiming.h in Headers */,
 				058D0A79195D05F900B7D73C /* ASDisplayNode+DebugTiming.mm in Headers */,
@@ -1074,9 +1076,7 @@
 				292C59A21A956527007E5DD6 /* ASRangeHandler.h in Headers */,
 				058D0A7F195D05F900B7D73C /* ASSentinel.h in Headers */,
 				058D0A80195D05F900B7D73C /* ASSentinel.m in Headers */,
-				ACF6ED1E1B17843500DA7C62 /* ASCompositeNode.h in Headers */,
 				058D0A81195D05F900B7D73C /* ASThread.h in Headers */,
-				ACF6ED2F1B17843500DA7C62 /* ASStackLayoutNode.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
