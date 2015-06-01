@@ -1371,7 +1371,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   
   struct Context {
     ASLayout *layout;
-    CGPoint absoultePosition;
+    CGPoint absolutePosition;
     BOOL visited;
   };
   
@@ -1391,13 +1391,13 @@ static NSInteger incrementIfFound(NSInteger i) {
         ASDisplayNode *subnode = ((ASCompositeNode *)context.layout.node).displayNode;
         ASDisplayNodeAssertNotNil(subnode, "displayNode is required in ASCompositeNode.");
         
-        CGPoint subnodePosition = context.absoultePosition;
+        CGPoint subnodePosition = context.absolutePosition;
         CGSize subnodeSize = context.layout.size;
         subnode.frame = CGRectMake(subnodePosition.x, subnodePosition.y, subnodeSize.width, subnodeSize.height);
       }
 
       for (ASLayoutChild *child in context.layout.children) {
-        stack.push({child.layout, context.absoultePosition + child.position, NO});
+        stack.push({child.layout, context.absolutePosition + child.position, NO});
       }
     }
   }
