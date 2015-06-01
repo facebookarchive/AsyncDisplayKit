@@ -18,7 +18,7 @@ class ViewController: UIViewController, ASTableViewDataSource, ASTableViewDelega
 
   // MARK: UIViewController.
 
-  required init() {
+  override required init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
     self.tableView = ASTableView()
 
     super.init(nibName: nil, bundle: nil)
