@@ -43,6 +43,11 @@
 
 @implementation ASDisplayNode
 
+BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
+{
+    return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
+}
+
 void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 {
   if ([NSThread isMainThread]) {
@@ -61,11 +66,11 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   }
 
   // Subclasses should never override these
-  ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
 }
 
 + (BOOL)layerBackedNodesEnabled
@@ -100,16 +105,16 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _flags.implementsDrawParameters = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
 
   ASDisplayNodeMethodOverrides overrides = ASDisplayNodeMethodOverrideNone;
-  if (ASSubclassOverridesSelector([ASDisplayNode class], [self class], @selector(touchesBegan:withEvent:))) {
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesBegan:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesBegan;
   }
-  if (ASSubclassOverridesSelector([ASDisplayNode class], [self class], @selector(touchesMoved:withEvent:))) {
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesMoved:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesMoved;
   }
-  if (ASSubclassOverridesSelector([ASDisplayNode class], [self class], @selector(touchesCancelled:withEvent:))) {
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesCancelled:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesCancelled;
   }
-  if (ASSubclassOverridesSelector([ASDisplayNode class], [self class], @selector(touchesEnded:withEvent:))) {
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesEnded:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
   }
   _methodOverrides = overrides;

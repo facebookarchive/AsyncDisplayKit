@@ -19,6 +19,7 @@
 #import "ASThread.h"
 #import "ASLayout.h"
 
+BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
