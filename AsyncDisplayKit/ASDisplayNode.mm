@@ -116,8 +116,6 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _contentsScaleForDisplay = ASDisplayNodeScreenScale();
   
   _displaySentinel = [[ASSentinel alloc] init];
-  
-  _pendingDisplayNodes = [[NSMutableSet alloc] init];
 
   _flags.isInHierarchy = NO;
   _flags.displaysAsynchronously = YES;
@@ -1217,6 +1215,10 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)_pendingNodeWillDisplay:(ASDisplayNode *)node
 {
   ASDN::MutexLocker l(_propertyLock);
+
+  if (!_pendingDisplayNodes) {
+    _pendingDisplayNodes = [[NSMutableSet alloc] init];
+  }
 
   [_pendingDisplayNodes addObject:node];
 }
