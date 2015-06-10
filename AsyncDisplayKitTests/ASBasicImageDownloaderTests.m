@@ -45,9 +45,9 @@
                               dispatch_group_leave(group);
                           }];
     
-    XCTAssert(0 == dispatch_group_wait(group, dispatch_time(0, 10 * 1000000000)), @"URL loading takes to long");
+    XCTAssert(0 == dispatch_group_wait(group, dispatch_time(0, 10 * 1000000000)), @"URL loading takes too long");
     
-    XCTAssert(firstDone && secondDone, @"Not all handlers has been calles");
+    XCTAssert(firstDone && secondDone, @"Not all handlers has been called");
 }
 
 @end
