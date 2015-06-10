@@ -133,6 +133,34 @@ static ASDN::RecursiveMutex currentRequestsLock;
   [self.callbackDatas removeAllObjects];
 }
 
+- (NSURLSessionTask *)createSessionTaskIfNecessaryWithBlock:(NSURLSessionTask *(^)())creationBlock {
+  {
+    ASDN::MutexLocker l(_propertyLock);
+
+    if (self.isCancelled) {
+      return nil;
+    }
+
+    if (self.sessionTask && (self.sessionTask.state == NSURLSessionTaskStateRunning)) {
+      return nil;
+    }
+  }
+
+  NSURLSessionTask *newTask = creationBlock();
+
+  {
+    ASDN::MutexLocker l(_propertyLock);
+
+    if (self.isCancelled) {
+      return nil;
+    }
+    
+    self.sessionTask = newTask;
+    
+    return self.sessionTask;
+  }
+}
+
 @end
 
 
@@ -210,27 +238,14 @@ static const char *kContextKey = NSStringFromClass(ASBasicImageDownloaderContext
 
     [context addCallbackData:[NSDictionary dictionaryWithDictionary:callbackData]];
 
-    // Start new task only if previous one is not running
-    if (!context.sessionTask || (context.sessionTask.state != NSURLSessionTaskStateRunning)) {
-      // the downloader may have been invalidated in the time it takes to async dispatch this block
-      if ([context isCancelled]) {
-        return;
-      }
+    // Create new task if necessary
+    NSURLSessionDownloadTask *task = (NSURLSessionDownloadTask *)[context createSessionTaskIfNecessaryWithBlock:^(){return [_session downloadTaskWithURL:URL];}];
 
-      // create download task
-      NSURLSessionDownloadTask *task = [_session downloadTaskWithURL:URL];
-
-      // since creating the task does disk I/O, we should check if it has been invalidated
-      if ([context isCancelled]) {
-        return;
-      }
-
+    if (task) {
       task.originalRequest.asyncdisplaykit_context = context;
 
       // start downloading
       [task resume];
-
-      context.sessionTask = task;
     }
   });
 
