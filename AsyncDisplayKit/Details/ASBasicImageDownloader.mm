@@ -154,7 +154,11 @@ static ASDN::RecursiveMutex currentRequestsLock;
     if (self.isCancelled) {
       return nil;
     }
-    
+
+    if (self.sessionTask && (self.sessionTask.state == NSURLSessionTaskStateRunning)) {
+      return nil;
+    }
+
     self.sessionTask = newTask;
     
     return self.sessionTask;
