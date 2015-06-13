@@ -115,7 +115,7 @@ static ASDN::RecursiveMutex currentRequestsLock;
   }
 }
 
-- (void)completeWithImage:(CGImageRef)imageRef error:(NSError *)error
+- (void)completeWithImage:(UIImage *)image error:(NSError *)error
 {
   ASDN::MutexLocker l(_propertyLock);
   for (NSDictionary *callbackData in self.callbackDatas) {
@@ -124,7 +124,7 @@ static ASDN::RecursiveMutex currentRequestsLock;
 
     if (completionBlock) {
       dispatch_async(callbackQueue, ^{
-        completionBlock(imageRef, error);
+        completionBlock(image.CGImage, error);
       });
     }
   }
@@ -291,7 +291,7 @@ static const char *kContextKey = NSStringFromClass(ASBasicImageDownloaderContext
 
   if (context) {
     UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:location]];
-    [context completeWithImage:image.CGImage error:nil];
+    [context completeWithImage:image error:nil];
   }
 }
 
@@ -301,7 +301,7 @@ static const char *kContextKey = NSStringFromClass(ASBasicImageDownloaderContext
 {
   ASBasicImageDownloaderContext *context = task.originalRequest.asyncdisplaykit_context;
   if (context && error) {
-    [context completeWithImage:NULL error:error];
+    [context completeWithImage:nil error:error];
   }
 }
 
