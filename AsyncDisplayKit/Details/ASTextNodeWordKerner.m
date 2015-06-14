@@ -31,7 +31,7 @@
       continue;
 
     // If we've set the whitespace control character for this space already, we have nothing to do.
-    if (properties[arrayIndex] == NSGlyphPropertyControlCharacter) {
+    if (properties[arrayIndex] == NSGlyphPropertyElastic) {
       usesWordKerning = YES;
       continue;
     }
@@ -43,7 +43,7 @@
     }
 
     // It's a space. Make it a whitespace control character.
-    newGlyphProperties[arrayIndex] = NSGlyphPropertyControlCharacter;
+    newGlyphProperties[arrayIndex] = NSGlyphPropertyElastic;
   }
 
   // If we don't have any custom glyph properties, return 0 to indicate to the layout manager that it should use the standard glyphs+properties.
