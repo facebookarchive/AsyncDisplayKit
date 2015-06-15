@@ -173,7 +173,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     [self _recursivelyRasterizeSelfAndSublayersWithIsCancelledBlock:isCancelledBlock displayBlocks:displayBlocks];
 
     CGFloat contentsScaleForDisplay = self.contentsScaleForDisplay;
-    BOOL opaque = self.opaque;
+    BOOL opaque = self.opaque && CGColorGetAlpha(self.backgroundColor.CGColor) == 1.0f;
 
     ASDisplayNodeAssert(self.contentsScaleForDisplay != 0.0, @"Invalid contents scale");
 
@@ -185,7 +185,6 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       }
 
       ASDN_DELAY_FOR_DISPLAY();
-
       UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, contentsScaleForDisplay);
 
       for (dispatch_block_t block in displayBlocks) {
