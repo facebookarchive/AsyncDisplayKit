@@ -136,6 +136,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
+  
+  // FIXME: asyncDataFetching is currently unreliable for some use cases.
+  // https://github.com/facebook/AsyncDisplayKit/issues/385
+  asyncDataFetchingEnabled = NO;
 
   ASDisplayNodeAssert([layout isKindOfClass:UICollectionViewFlowLayout.class], @"only flow layouts are currently supported");
 
@@ -165,8 +169,10 @@ static BOOL _isInterceptedSelector(SEL sel)
   return self;
 }
 
--(void)dealloc {
-  // a little defense move here.
+- (void)dealloc
+{
+  // Sometimes the UIKit classes can call back to their delegate even during deallocation.
+  // This bug might be iOS 7-specific.
   super.delegate  = nil;
   super.dataSource = nil;
 }
