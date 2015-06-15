@@ -157,7 +157,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 #pragma mark -
 #pragma mark Lifecycle
 
-- (void)configureWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled {
+- (void)configureWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled
+{
   _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
 
   _rangeController = [[ASRangeController alloc] init];
@@ -185,12 +186,17 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   if (!(self = [super initWithFrame:frame style:style]))
     return nil;
 
+  // FIXME: asyncDataFetching is currently unreliable for some use cases.
+  // https://github.com/facebook/AsyncDisplayKit/issues/385
+  asyncDataFetchingEnabled = NO;
+  
   [self configureWithAsyncDataFetching:asyncDataFetchingEnabled];
 
   return self;
 }
 
-- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
+{
   if (!(self = [super initWithCoder:aDecoder]))
     return nil;
 
@@ -199,8 +205,10 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   return self;
 }
 
--(void)dealloc {
-  // a little defense move here.
+- (void)dealloc
+{
+  // Sometimes the UIKit classes can call back to their delegate even during deallocation.
+  // This bug might be iOS 7-specific.
   super.delegate  = nil;
   super.dataSource = nil;
 }
