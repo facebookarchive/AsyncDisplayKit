@@ -1680,5 +1680,16 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   [self checkNameInDescriptionIsLayerBacked:NO];
 }
 
+- (void)testBounds
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.bounds = CGRectMake(1, 2, 3, 4);
+  node.frame = CGRectMake(5, 6, 7, 8);
+
+  XCTAssert(node.bounds.origin.x == 1, @"Wrong ASDisplayNode.bounds.origin.x");
+  XCTAssert(node.bounds.origin.y == 2, @"Wrong ASDisplayNode.bounds.origin.y");
+  XCTAssert(node.bounds.size.width == 7, @"Wrong ASDisplayNode.bounds.size.width");
+  XCTAssert(node.bounds.size.height == 8, @"Wrong ASDisplayNode.bounds.size.height");
+}
 
 @end

@@ -144,13 +144,17 @@
 #endif
 
   if (_layer && ASDisplayNodeThreadIsMain()) {
+    CGRect oldBounds = _layer.bounds;
+    _layer.bounds = CGRectMake(oldBounds.origin.x, oldBounds.origin.y, rect.size.width, rect.size.height);
+    
     CGPoint anchorPoint = _layer.anchorPoint;
-    _layer.bounds = CGRectMake(0, 0, rect.size.width, rect.size.height);
     _layer.position = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
                                  rect.origin.y + rect.size.height * anchorPoint.y);
   } else {
+    CGRect oldBounds = self.bounds;
+    self.bounds = CGRectMake(oldBounds.origin.x, oldBounds.origin.y, rect.size.width, rect.size.height);
+
     CGPoint anchorPoint = self.anchorPoint;
-    self.bounds = CGRectMake(0, 0, rect.size.width, rect.size.height);
     self.position = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
                                 rect.origin.y + rect.size.height * anchorPoint.y);
   }
