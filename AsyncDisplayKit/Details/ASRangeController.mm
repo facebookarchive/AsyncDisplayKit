@@ -21,7 +21,6 @@
   // keys should be ASLayoutRangeTypes and values NSSets containing NSIndexPaths
   NSMutableDictionary *_rangeTypeIndexPaths;
   NSDictionary *_rangeTypeHandlers;
-  BOOL _queuedRangeUpdate;
 
   ASScrollDirection _scrollDirection;
 }
@@ -68,25 +67,11 @@
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
 {
   _scrollDirection = scrollDirection;
-
-  if (_queuedRangeUpdate) {
-    return;
-  }
-
-  // coalesce these events -- handling them multiple times per runloop is noisy and expensive
-  _queuedRangeUpdate = YES;
-  [self performSelector:@selector(updateVisibleNodeIndexPaths)
-             withObject:nil
-             afterDelay:0
-                inModes:@[ NSRunLoopCommonModes ]];
+  [self updateVisibleNodeIndexPaths];
 }
 
 - (void)updateVisibleNodeIndexPaths
 {
-  if (!_queuedRangeUpdate) {
-    return;
-  }
-
   NSArray *visibleNodePaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
   NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
   CGSize viewportSize = [_delegate rangeControllerViewportSize:self];
@@ -140,7 +125,6 @@
   }
 
   _rangeIsValid = YES;
-  _queuedRangeUpdate = NO;
 }
 
 - (BOOL)shouldSkipVisibleNodesForRangeType:(ASLayoutRangeType)rangeType
@@ -196,8 +180,8 @@
 
   ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController insertNodesAtIndexPaths:indexPaths withSizes:nodeSizes];
-    [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
     _rangeIsValid = NO;
+    [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
   });
 }
 
@@ -212,8 +196,8 @@
 - (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
   ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController deleteNodesAtIndexPaths:indexPaths];
-    [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
     _rangeIsValid = NO;
+    [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
   });
 }
 
@@ -240,8 +224,8 @@
 
   ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController insertSections:sectionNodeSizes atIndexSet:indexSet];
-    [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
     _rangeIsValid = NO;
+    [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
   });
 }
 
@@ -256,8 +240,8 @@
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption {
   ASDisplayNodePerformBlockOnMainThread(^{
     [_layoutController deleteSectionsAtIndexSet:indexSet];
-    [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
     _rangeIsValid = NO;
+    [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
   });
 }
 

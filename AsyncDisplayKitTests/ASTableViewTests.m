@@ -52,6 +52,27 @@
 
 @end
 
+@interface ASTableViewFilledDataSource : NSObject <ASTableViewDataSource, ASTableViewDelegate>
+
+@end
+
+@implementation ASTableViewFilledDataSource
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 100;
+}
+
+- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ASTextCellNode *textCellNode = [ASTextCellNode new];
+    textCellNode.text = indexPath.description;
+    
+    return textCellNode;
+}
+
+@end
+
 @interface ASTableViewTests : XCTestCase
 @end
 
@@ -81,6 +102,24 @@
 
   XCTAssertNoThrow([tableView release], @"unexpected exception when deallocating table view:%@", tableView);
   XCTAssertTrue(tableViewDidDealloc, @"unexpected table view lifetime:%@", tableView);
+}
+
+- (void)testReloadData
+{
+    ASTableView *tableView = [[ASTableView alloc] initWithFrame:CGRectMake(0, 0, 1000, 1000)
+                                                          style:UITableViewStylePlain
+                                              asyncDataFetching:YES];
+    
+    ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+    
+    tableView.asyncDelegate = dataSource;
+    tableView.asyncDataSource = dataSource;
+    
+    for (int i = 0; i < 100; ++i)
+    {
+        [tableView reloadData];
+        [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+    }
 }
 
 @end
