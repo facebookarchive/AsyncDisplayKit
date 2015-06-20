@@ -162,7 +162,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
  * IndexPath array for the element in the working range.
  */
 
-- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
 {
   CGFloat viewportScreenMetric;
   ASScrollDirection leadingDirection;
@@ -203,7 +203,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   return indexPathSet;
 }
 
-- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection
                                  viewportSize:(CGSize)viewportSize
 {
   return [self indexPathsForScrolling:scrollDirection viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
