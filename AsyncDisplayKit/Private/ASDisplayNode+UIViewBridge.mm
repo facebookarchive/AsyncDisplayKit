@@ -143,20 +143,21 @@
   ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"Must be an identity transform");
 #endif
 
-  if (_layer && ASDisplayNodeThreadIsMain()) {
-    CGPoint oldBoundsOrigin = _layer.bounds.origin;
-    _layer.bounds = CGRectMake(oldBoundsOrigin.x, oldBoundsOrigin.y, rect.size.width, rect.size.height);
-    
-    CGPoint anchorPoint = _layer.anchorPoint;
-    _layer.position = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
-                                 rect.origin.y + rect.size.height * anchorPoint.y);
+  BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
+  
+  CGPoint origin      = (useLayer ? _layer.bounds.origin : self.bounds.origin);
+  CGPoint anchorPoint = (useLayer ? _layer.anchorPoint   : self.anchorPoint);
+  
+  CGRect bounds       = (CGRect){ origin, rect.size };
+  CGPoint position    = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
+                                    rect.origin.y + rect.size.height * anchorPoint.y);
+  
+  if (useLayer) {
+    _layer.bounds = bounds;
+    _layer.position = position;
   } else {
-    CGPoint oldBoundsOrigin = self.bounds.origin;
-    self.bounds = CGRectMake(oldBoundsOrigin.x, oldBoundsOrigin.y, rect.size.width, rect.size.height);
-
-    CGPoint anchorPoint = self.anchorPoint;
-    self.position = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
-                                rect.origin.y + rect.size.height * anchorPoint.y);
+    self.bounds = bounds;
+    self.position = position;
   }
 }
 
