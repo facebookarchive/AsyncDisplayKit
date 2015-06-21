@@ -145,6 +145,8 @@
 		205F0E0F1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		205F0E101B371875007741D0 /* UICollectionViewLayout+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E0E1B371875007741D0 /* UICollectionViewLayout+ASConvenience.m */; };
 		205F0E121B371BD7007741D0 /* ASScrollDirection.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E111B371BD7007741D0 /* ASScrollDirection.m */; };
+		205F0E191B37339C007741D0 /* ASAbstractLayoutController.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E171B37339C007741D0 /* ASAbstractLayoutController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		205F0E1A1B37339C007741D0 /* ASAbstractLayoutController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E181B37339C007741D0 /* ASAbstractLayoutController.mm */; };
 		242995D31B29743C00090100 /* ASBasicImageDownloaderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 242995D21B29743C00090100 /* ASBasicImageDownloaderTests.m */; };
 		2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2911485B1A77147A005D0878 /* ASControlNodeTests.m */; };
 		291B63FB1AA53A7A000A71B3 /* ASScrollDirection.h in Headers */ = {isa = PBXBuildFile; fileRef = 296A0A311A951715005ACEAA /* ASScrollDirection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -325,6 +327,8 @@
 		205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UICollectionViewLayout+ASConvenience.h"; sourceTree = "<group>"; };
 		205F0E0E1B371875007741D0 /* UICollectionViewLayout+ASConvenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UICollectionViewLayout+ASConvenience.m"; sourceTree = "<group>"; };
 		205F0E111B371BD7007741D0 /* ASScrollDirection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASScrollDirection.m; sourceTree = "<group>"; };
+		205F0E171B37339C007741D0 /* ASAbstractLayoutController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASAbstractLayoutController.h; sourceTree = "<group>"; };
+		205F0E181B37339C007741D0 /* ASAbstractLayoutController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASAbstractLayoutController.mm; sourceTree = "<group>"; };
 		242995D21B29743C00090100 /* ASBasicImageDownloaderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBasicImageDownloaderTests.m; sourceTree = "<group>"; };
 		2911485B1A77147A005D0878 /* ASControlNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASControlNodeTests.m; sourceTree = "<group>"; };
 		292C59991A956527007E5DD6 /* ASLayoutRangeType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLayoutRangeType.h; sourceTree = "<group>"; };
@@ -544,6 +548,8 @@
 				058D09E3195D050800B7D73C /* _ASDisplayLayer.mm */,
 				058D09E4195D050800B7D73C /* _ASDisplayView.h */,
 				058D09E5195D050800B7D73C /* _ASDisplayView.mm */,
+				205F0E171B37339C007741D0 /* ASAbstractLayoutController.h */,
+				205F0E181B37339C007741D0 /* ASAbstractLayoutController.mm */,
 				054963471A1EA066000F8E56 /* ASBasicImageDownloader.h */,
 				054963481A1EA066000F8E56 /* ASBasicImageDownloader.mm */,
 				299DA1A71A828D2900162D41 /* ASBatchContext.h */,
@@ -698,6 +704,7 @@
 				058D0A5A195D05DC00B7D73C /* ASMutableAttributedStringBuilder.m in Headers */,
 				058D0A5B195D05DC00B7D73C /* ASTextNodeCoreTextAdditions.h in Headers */,
 				058D0A5C195D05DC00B7D73C /* ASTextNodeCoreTextAdditions.m in Headers */,
+				205F0E191B37339C007741D0 /* ASAbstractLayoutController.h in Headers */,
 				058D0A5D195D05DC00B7D73C /* ASTextNodeRenderer.h in Headers */,
 				058D0A5E195D05DC00B7D73C /* ASTextNodeRenderer.mm in Headers */,
 				058D0A5F195D05DC00B7D73C /* ASTextNodeShadower.h in Headers */,
@@ -925,6 +932,7 @@
 				058D0A1E195D050800B7D73C /* ASTextNodeShadower.m in Sources */,
 				058D0A18195D050800B7D73C /* _ASDisplayLayer.mm in Sources */,
 				058D0A2C195D050800B7D73C /* ASSentinel.m in Sources */,
+				205F0E1A1B37339C007741D0 /* ASAbstractLayoutController.mm in Sources */,
 				464052211A3F83C40061C0BA /* ASDataController.mm in Sources */,
 				299DA1AA1A828D2900162D41 /* ASBatchContext.mm in Sources */,
 				058D0A15195D050800B7D73C /* ASDisplayNodeExtras.mm in Sources */,

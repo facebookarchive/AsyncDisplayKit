@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/ASLayoutController.h>
+#import <AsyncDisplayKit/ASAbstractLayoutController.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
 
@@ -18,16 +18,10 @@ typedef NS_ENUM(NSUInteger, ASFlowLayoutDirection) {
 /**
  * The controller for flow layout.
  */
-@interface ASFlowLayoutController : NSObject <ASLayoutController>
-
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
-
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
+@interface ASFlowLayoutController : ASAbstractLayoutController
 
 @property (nonatomic, readonly, assign) ASFlowLayoutDirection layoutDirection;
 
 - (instancetype)initWithScrollOption:(ASFlowLayoutDirection)layoutDirection;
-
-@property (nonatomic, assign) ASRangeTuningParameters tuningParameters ASDISPLAYNODE_DEPRECATED;
 
 @end
