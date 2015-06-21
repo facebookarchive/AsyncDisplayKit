@@ -131,6 +131,20 @@
  */
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 
+/**
+ * Determines collection view's current scroll direction. Supports 2-axis collection views.
+ *
+ * @returns a bitmask of ASScrollDirection values.
+ */
+- (ASScrollDirection)scrollDirection;
+
+/**
+ * Determines collection view's scrollable directions.
+ *
+ * @returns a bitmask of ASScrollDirection values.
+ */
+- (ASScrollDirection)scrollableDirections;
+
 @end
 
 
