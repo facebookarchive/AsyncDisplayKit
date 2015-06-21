@@ -9,7 +9,7 @@
 #import "ASCollectionView.h"
 
 #import "ASAssert.h"
-#import "ASFlowLayoutController.h"
+#import "ASCollectionViewLayoutController.h"
 #import "ASRangeController.h"
 #import "ASDataController.h"
 #import "ASDisplayNodeInternal.h"
@@ -109,7 +109,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   ASDataController *_dataController;
   ASRangeController *_rangeController;
-  ASFlowLayoutController *_layoutController;
+  ASCollectionViewLayoutController *_layoutController;
 
   BOOL _performingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
@@ -143,9 +143,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   asyncDataFetchingEnabled = NO;
 
   ASDisplayNodeAssert([layout asdk_isFlowLayout], @"only flow layouts are currently supported");
-
-  ASFlowLayoutDirection direction = (((UICollectionViewFlowLayout *)layout).scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASFlowLayoutDirectionHorizontal : ASFlowLayoutDirectionVertical;
-  _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:direction];
+  _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];
 
   _rangeController = [[ASRangeController alloc] init];
   _rangeController.delegate = self;
@@ -379,14 +377,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASScrollDirection scrollableDirections = [self scrollableDirections];
   
   if (ASScrollDirectionContainsHorizontalDirection(scrollableDirections)) { // Can scroll horizontally.
-    if (scrollVelocity.x > 0) {
+    if (scrollVelocity.x >= 0) {
       direction |= ASScrollDirectionRight;
     } else {
       direction |= ASScrollDirectionLeft;
     }
   }
   if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) { // Can scroll vertically.
-    if (scrollVelocity.y > 0) {
+    if (scrollVelocity.y >= 0) {
       direction |= ASScrollDirectionDown;
     } else {
       direction |= ASScrollDirectionUp;
@@ -493,7 +491,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   CGSize restrainedSize = self.bounds.size;
 
-  if (_layoutController.layoutDirection == ASFlowLayoutDirectionHorizontal) {
+  if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
     restrainedSize.width = FLT_MAX;
   } else {
     restrainedSize.height = FLT_MAX;

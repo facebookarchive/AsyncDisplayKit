@@ -26,4 +26,9 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
 BOOL ASScrollDirectionContainsVerticalDirection(ASScrollDirection scrollDirection);
 BOOL ASScrollDirectionContainsHorizontalDirection(ASScrollDirection scrollDirection);
 
+BOOL ASScrollDirectionContainsRight(ASScrollDirection scrollDirection);
+BOOL ASScrollDirectionContainsLeft(ASScrollDirection scrollDirection);
+BOOL ASScrollDirectionContainsUp(ASScrollDirection scrollDirection);
+BOOL ASScrollDirectionContainsDown(ASScrollDirection scrollDirection);
+
 ASDISPLAYNODE_EXTERN_C_END
