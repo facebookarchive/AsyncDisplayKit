@@ -93,10 +93,13 @@
   [super layoutSublayers];
 
   ASDisplayNode *node = self.asyncdisplaykit_node;
-  // If our associated node is layer-backed, we cannot rely on the view's -layoutSubviews calling the node's -layout implementation, so do it ourselves.
-  if (node.isLayerBacked) {
-    ASDisplayNodeAssertMainThread();
+  if (ASDisplayNodeThreadIsMain()) {
     [node __layout];
+  } else {
+    ASDisplayNodeFailAssert(@"not reached assertion");
+    dispatch_async(dispatch_get_main_queue(), ^ {
+      [node __layout];
+    });
   }
 }
 
