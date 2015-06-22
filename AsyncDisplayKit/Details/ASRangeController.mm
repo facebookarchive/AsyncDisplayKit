@@ -75,6 +75,7 @@
 
   // coalesce these events -- handling them multiple times per runloop is noisy and expensive
   _queuedRangeUpdate = YES;
+
   [self performSelector:@selector(updateVisibleNodeIndexPaths)
              withObject:nil
              afterDelay:0
@@ -200,8 +201,8 @@
     if ([_layoutController respondsToSelector:@selector(insertNodesAtIndexPaths:withSizes:)]) {
       [_layoutController insertNodesAtIndexPaths:indexPaths withSizes:nodeSizes];
     }
-    [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
     _rangeIsValid = NO;
+    [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
   });
 }
 
@@ -218,8 +219,8 @@
     if ([_layoutController respondsToSelector:@selector(deleteNodesAtIndexPaths:)]) {
       [_layoutController deleteNodesAtIndexPaths:indexPaths];
     }
-    [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
     _rangeIsValid = NO;
+    [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths withAnimationOption:animationOption];
   });
 }
 
@@ -248,8 +249,8 @@
     if ([_layoutController respondsToSelector:@selector(insertSections:atIndexSet:)]) {
       [_layoutController insertSections:sectionNodeSizes atIndexSet:indexSet];
     }
-    [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
     _rangeIsValid = NO;
+    [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
   });
 }
 
@@ -266,8 +267,8 @@
     if ([_layoutController respondsToSelector:@selector(deleteSectionsAtIndexSet:)]) {
       [_layoutController deleteSectionsAtIndexSet:indexSet];
     }
-    [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
     _rangeIsValid = NO;
+    [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOption:animationOption];
   });
 }
 
