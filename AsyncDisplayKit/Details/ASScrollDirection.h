@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "ASBaseDefines.h"
+
 typedef NS_OPTIONS(NSInteger, ASScrollDirection) {
   ASScrollDirectionNone  = 0,
   ASScrollDirectionRight = 1 << 0,
@@ -15,3 +17,13 @@ typedef NS_OPTIONS(NSInteger, ASScrollDirection) {
   ASScrollDirectionUp    = 1 << 2,
   ASScrollDirectionDown  = 1 << 3
 };
+
+extern const ASScrollDirection ASScrollDirectionHorizontalDirections;
+extern const ASScrollDirection ASScrollDirectionVerticalDirections;
+
+ASDISPLAYNODE_EXTERN_C_BEGIN
+
+BOOL ASScrollDirectionContainsVerticalDirection(ASScrollDirection scrollDirection);
+BOOL ASScrollDirectionContainsHorizontalDirection(ASScrollDirection scrollDirection);
+
+ASDISPLAYNODE_EXTERN_C_END

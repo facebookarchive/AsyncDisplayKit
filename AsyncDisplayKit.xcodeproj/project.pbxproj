@@ -142,6 +142,9 @@
 		05F20AA41A15733C00DCA68A /* ASImageProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = 05F20AA31A15733C00DCA68A /* ASImageProtocols.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1950C4491A3BB5C1005C8279 /* ASEqualityHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 1950C4481A3BB5C1005C8279 /* ASEqualityHelpers.h */; };
 		204C979E1B362CB3002B1083 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 204C979D1B362CB3002B1083 /* Default-568h@2x.png */; };
+		205F0E0F1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		205F0E101B371875007741D0 /* UICollectionViewLayout+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E0E1B371875007741D0 /* UICollectionViewLayout+ASConvenience.m */; };
+		205F0E121B371BD7007741D0 /* ASScrollDirection.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E111B371BD7007741D0 /* ASScrollDirection.m */; };
 		242995D31B29743C00090100 /* ASBasicImageDownloaderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 242995D21B29743C00090100 /* ASBasicImageDownloaderTests.m */; };
 		2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2911485B1A77147A005D0878 /* ASControlNodeTests.m */; };
 		291B63FB1AA53A7A000A71B3 /* ASScrollDirection.h in Headers */ = {isa = PBXBuildFile; fileRef = 296A0A311A951715005ACEAA /* ASScrollDirection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -318,7 +321,10 @@
 		05EA6FE61AC0966E00E35788 /* ASSnapshotTestCase.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASSnapshotTestCase.mm; sourceTree = "<group>"; };
 		05F20AA31A15733C00DCA68A /* ASImageProtocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASImageProtocols.h; sourceTree = "<group>"; };
 		1950C4481A3BB5C1005C8279 /* ASEqualityHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASEqualityHelpers.h; sourceTree = "<group>"; };
-		204C979D1B362CB3002B1083 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		204C979D1B362CB3002B1083 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Default-568h@2x.png"; sourceTree = "<group>"; };
+		205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UICollectionViewLayout+ASConvenience.h"; sourceTree = "<group>"; };
+		205F0E0E1B371875007741D0 /* UICollectionViewLayout+ASConvenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UICollectionViewLayout+ASConvenience.m"; sourceTree = "<group>"; };
+		205F0E111B371BD7007741D0 /* ASScrollDirection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASScrollDirection.m; sourceTree = "<group>"; };
 		242995D21B29743C00090100 /* ASBasicImageDownloaderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBasicImageDownloaderTests.m; sourceTree = "<group>"; };
 		2911485B1A77147A005D0878 /* ASControlNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASControlNodeTests.m; sourceTree = "<group>"; };
 		292C59991A956527007E5DD6 /* ASLayoutRangeType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLayoutRangeType.h; sourceTree = "<group>"; };
@@ -392,6 +398,7 @@
 		057D02C01AC0A66700C7AC3C /* AsyncDisplayKitTestHost */ = {
 			isa = PBXGroup;
 			children = (
+				204C979D1B362CB3002B1083 /* Default-568h@2x.png */,
 				057D02C51AC0A66700C7AC3C /* AppDelegate.h */,
 				057D02C61AC0A66700C7AC3C /* AppDelegate.m */,
 				057D02C11AC0A66700C7AC3C /* Supporting Files */,
@@ -412,7 +419,6 @@
 		058D09A3195D04C000B7D73C = {
 			isa = PBXGroup;
 			children = (
-				204C979D1B362CB3002B1083 /* Default-568h@2x.png */,
 				058D09B1195D04C000B7D73C /* AsyncDisplayKit */,
 				058D09C5195D04C000B7D73C /* AsyncDisplayKitTests */,
 				058D09AE195D04C000B7D73C /* Frameworks */,
@@ -565,6 +571,7 @@
 				292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */,
 				292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */,
 				296A0A311A951715005ACEAA /* ASScrollDirection.h */,
+				205F0E111B371BD7007741D0 /* ASScrollDirection.m */,
 				058D09EA195D050800B7D73C /* ASTextNodeCoreTextAdditions.h */,
 				058D09EB195D050800B7D73C /* ASTextNodeCoreTextAdditions.m */,
 				058D09EC195D050800B7D73C /* ASTextNodeRenderer.h */,
@@ -580,6 +587,8 @@
 				058D09F5195D050800B7D73C /* NSMutableAttributedString+TextKitAdditions.h */,
 				058D09F6195D050800B7D73C /* NSMutableAttributedString+TextKitAdditions.m */,
 				058D09F7195D050800B7D73C /* Transactions */,
+				205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */,
+				205F0E0E1B371875007741D0 /* UICollectionViewLayout+ASConvenience.m */,
 				058D09FF195D050800B7D73C /* UIView+ASConvenience.h */,
 				058D0A00195D050800B7D73C /* UIView+ASConvenience.m */,
 			);
@@ -704,6 +713,7 @@
 				058D0A66195D05DC00B7D73C /* NSMutableAttributedString+TextKitAdditions.h in Headers */,
 				058D0A67195D05DC00B7D73C /* NSMutableAttributedString+TextKitAdditions.m in Headers */,
 				058D0A68195D05EC00B7D73C /* _ASAsyncTransaction.h in Headers */,
+				205F0E0F1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h in Headers */,
 				058D0A69195D05EC00B7D73C /* _ASAsyncTransaction.m in Headers */,
 				058D0A6A195D05EC00B7D73C /* _ASAsyncTransactionContainer+Private.h in Headers */,
 				058D0A6B195D05EC00B7D73C /* _ASAsyncTransactionContainer.h in Headers */,
@@ -920,6 +930,7 @@
 				058D0A15195D050800B7D73C /* ASDisplayNodeExtras.mm in Sources */,
 				058D0A1F195D050800B7D73C /* ASTextNodeTextKitHelpers.mm in Sources */,
 				055F1A3519ABD3E3004DAFF1 /* ASTableView.mm in Sources */,
+				205F0E121B371BD7007741D0 /* ASScrollDirection.m in Sources */,
 				464052261A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm in Sources */,
 				055B9FA91A1C154B00035D6D /* ASNetworkImageNode.mm in Sources */,
 				058D0A1D195D050800B7D73C /* ASTextNodeRenderer.mm in Sources */,
@@ -943,6 +954,7 @@
 				058D0A1C195D050800B7D73C /* ASTextNodeCoreTextAdditions.m in Sources */,
 				058D0A13195D050800B7D73C /* ASControlNode.m in Sources */,
 				058D0A19195D050800B7D73C /* _ASDisplayView.mm in Sources */,
+				205F0E101B371875007741D0 /* UICollectionViewLayout+ASConvenience.m in Sources */,
 				05A6D05B19D0EB64002DD95E /* ASDealloc2MainObject.m in Sources */,
 				058D0A17195D050800B7D73C /* ASTextNode.mm in Sources */,
 				058D0A27195D050800B7D73C /* _ASPendingState.m in Sources */,
