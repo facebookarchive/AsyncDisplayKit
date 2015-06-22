@@ -20,6 +20,15 @@
 //@property (atomic, retain) UIColor *backgroundColor;
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
+/*
+ * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
+ * these methods (e.g. for highlighting) requires the super method be called.
+ */
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+
 @end
 
 

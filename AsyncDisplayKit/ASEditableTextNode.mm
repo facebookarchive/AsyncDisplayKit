@@ -85,6 +85,18 @@
   return self;
 }
 
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
 - (void)dealloc
 {
   _textKitComponents.textView.delegate = nil;

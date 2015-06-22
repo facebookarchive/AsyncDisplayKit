@@ -187,6 +187,12 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @property (nonatomic, weak) id<ASTextNodeDelegate> delegate;
 
+/**
+ @abstract If YES and a long press is recognized, touches are cancelled. Default is NO
+ */
+@property (nonatomic, assign) BOOL longPressCancelsTouches;
+
+
 @end
 
 /**

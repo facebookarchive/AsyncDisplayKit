@@ -146,6 +146,18 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   return self;
 }
 
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
 - (void)dealloc
 {
   if (_shadowColor != NULL) {
@@ -228,9 +240,21 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   // If we are view-backed, support gesture interaction.
   if (!self.isLayerBacked) {
     _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(_handleLongPress:)];
-    _longPressGestureRecognizer.cancelsTouchesInView = NO;
+    _longPressGestureRecognizer.cancelsTouchesInView = self.longPressCancelsTouches;
     _longPressGestureRecognizer.delegate = self;
     [self.view addGestureRecognizer:_longPressGestureRecognizer];
+  }
+}
+
+- (void)setFrame:(CGRect)frame
+{
+  [super setFrame:frame];
+  if (!CGSizeEqualToSize(frame.size, _constrainedSize)) {
+    // Our bounds have changed to a size that is not identical to our constraining size,
+    // so our previous layout information is invalid, and TextKit may draw at the
+    // incorrect origin.
+    _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
+    [self _invalidateRenderer];
   }
 }
 
