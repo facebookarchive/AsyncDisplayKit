@@ -125,7 +125,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   ASBatchContext *_batchContext;
 
-  NSIndexPath *_pendingVisibleIndexPath;
+  NSMutableSet *_pendingVisibleIndexPaths;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -174,6 +174,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
   _leadingScreensForBatching = 1.0;
   _batchContext = [[ASBatchContext alloc] init];
+  
+  _pendingVisibleIndexPaths = [[NSMutableSet alloc] init];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -431,7 +433,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  _pendingVisibleIndexPath = indexPath;
+  [_pendingVisibleIndexPaths addObject:indexPath];
 
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
@@ -442,8 +444,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath
 {
-  if ([_pendingVisibleIndexPath isEqual:indexPath]) {
-    _pendingVisibleIndexPath = nil;
+  if ([_pendingVisibleIndexPaths containsObject:indexPath]) {
+    [_pendingVisibleIndexPaths removeObject:indexPath];
   }
 
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
@@ -517,20 +519,15 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssertMainThread();
 
-  NSArray *visibleIndexPaths = self.indexPathsForVisibleRows;
-
-  if ( _pendingVisibleIndexPath ) {
-    NSMutableSet *indexPaths = [NSMutableSet setWithArray:self.indexPathsForVisibleRows];
-
-    if ( [indexPaths containsObject:_pendingVisibleIndexPath]) {
-      _pendingVisibleIndexPath = nil; // once it has shown up in visibleIndexPaths, we can stop tracking it
-    } else {
-      [indexPaths addObject:_pendingVisibleIndexPath];
-      visibleIndexPaths = indexPaths.allObjects;
-    }
-  }
-
-  return visibleIndexPaths;
+  NSMutableSet *visibleIndexPaths = [NSMutableSet setWithArray:[self indexPathsForVisibleRows]];
+  
+  // First, remove any index paths we're tracking that UIKit has now proven it can remember :)
+  [_pendingVisibleIndexPaths minusSet:visibleIndexPaths];
+  
+  // Next, add all remaining index paths that we know should be visible (from willDisplayCell) but are not in the set.
+  [visibleIndexPaths unionSet:_pendingVisibleIndexPaths];
+  
+  return visibleIndexPaths.allObjects;
 }
 
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
@@ -547,7 +544,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
-
+  
   BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
