@@ -47,7 +47,9 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
                    sizingOptions:(ASCenterLayoutNodeSizingOptions)sizingOptions
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
-  ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+  ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+  foregroundNode.staticSize = {70, 100};
+
   
   ASLayoutNode *layoutNode =
   [ASBackgroundLayoutNode
@@ -55,8 +57,7 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
    [ASCenterLayoutNode
     newWithCenteringOptions:options
     sizingOptions:sizingOptions
-    child:[ASCompositeNode newWithSize:ASLayoutNodeSizeMake(70.0, 100.0) displayNode:foregroundNode]
-    size:{}]
+    child:[ASCompositeNode newWithDisplayNode:foregroundNode]]
    background:[ASCompositeNode newWithDisplayNode:backgroundNode]];
 
   [self testLayoutNode:layoutNode
@@ -92,7 +93,8 @@ static NSString *suffixForCenteringOptions(ASCenterLayoutNodeCenteringOptions ce
 - (void)testMinimumSizeRangeIsGivenToChildWhenNotCentering
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
-  ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
+  ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
+  foregroundNode.staticSize = {10, 10};
   
   ASCenterLayoutNode *layoutNode =
   [ASCenterLayoutNode
@@ -102,14 +104,12 @@ static NSString *suffixForCenteringOptions(ASCenterLayoutNodeCenteringOptions ce
    [ASBackgroundLayoutNode
     newWithNode:
     [ASStackLayoutNode
-     newWithSize:{}
-     style:{}
+     newWithStyle:{}
      children:@[[ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-      mutableChild.node = [ASCompositeNode newWithSize:ASLayoutNodeSizeMake(10, 10) displayNode:foregroundNode];
+      mutableChild.node = [ASCompositeNode newWithDisplayNode:foregroundNode];
       mutableChild.flexGrow = YES;
      }]]]
-    background: [ASCompositeNode newWithDisplayNode:backgroundNode]]
-   size:{}];
+    background: [ASCompositeNode newWithDisplayNode:backgroundNode]]];
 
   [self testLayoutNode:layoutNode sizeRange:kSize subnodes:@[backgroundNode, foregroundNode] identifier:nil];
 }

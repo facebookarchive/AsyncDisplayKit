@@ -27,10 +27,17 @@
             identifier:(NSString *)identifier;
 @end
 
-static inline ASDisplayNode *ASDisplayNodeWithBackgroundColor(UIColor *backgroundColor)
+@interface ASStaticSizeDisplayNode : ASDisplayNode
+
+@property (nonatomic) CGSize staticSize;
+
+@end
+
+static inline ASStaticSizeDisplayNode *ASDisplayNodeWithBackgroundColor(UIColor *backgroundColor)
 {
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASStaticSizeDisplayNode *node = [[ASStaticSizeDisplayNode alloc] init];
   node.layerBacked = YES;
   node.backgroundColor = backgroundColor;
+  node.staticSize = CGSizeZero;
   return node;
 }

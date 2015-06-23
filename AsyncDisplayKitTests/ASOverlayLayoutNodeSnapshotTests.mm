@@ -29,7 +29,8 @@ static const ASSizeRange kSize = {{320, 320}, {320, 320}};
 - (void)testOverlay
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
-  ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor blackColor]);
+  ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor blackColor]);
+  foregroundNode.staticSize = {20, 20};
   
   ASLayoutNode *layoutNode =
   [ASOverlayLayoutNode
@@ -38,8 +39,7 @@ static const ASSizeRange kSize = {{320, 320}, {320, 320}};
    [ASCenterLayoutNode
     newWithCenteringOptions:ASCenterLayoutNodeCenteringXY
     sizingOptions:{}
-    child:[ASCompositeNode newWithSize:ASLayoutNodeSizeMake(20, 20) displayNode:foregroundNode]
-    size:{}]];
+    child:[ASCompositeNode newWithDisplayNode:foregroundNode]]];
   
   [self testLayoutNode:layoutNode sizeRange:kSize subnodes:@[backgroundNode, foregroundNode] identifier: nil];
 }

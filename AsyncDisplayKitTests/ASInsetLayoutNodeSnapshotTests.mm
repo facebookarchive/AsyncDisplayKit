@@ -58,14 +58,15 @@ static NSString *nameForInsets(UIEdgeInsets insets)
   for (NSUInteger combination = 0; combination < 16; combination++) {
     UIEdgeInsets insets = insetsForCombination(combination, 10);
     ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor grayColor]);
-    ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+    ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+    foregroundNode.staticSize = {10, 10};
     
     ASLayoutNode *layoutNode =
     [ASBackgroundLayoutNode
      newWithNode:
      [ASInsetLayoutNode
       newWithInsets:insets
-      node:[ASCompositeNode newWithSize:ASLayoutNodeSizeMake(10, 10) displayNode:foregroundNode]]
+      node:[ASCompositeNode newWithDisplayNode:foregroundNode]]
      background:[ASCompositeNode newWithDisplayNode:backgroundNode]];
     
     static ASSizeRange kVariableSize = {{0, 0}, {300, 300}};
@@ -81,14 +82,15 @@ static NSString *nameForInsets(UIEdgeInsets insets)
   for (NSUInteger combination = 0; combination < 16; combination++) {
     UIEdgeInsets insets = insetsForCombination(combination, 10);
     ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor grayColor]);
-    ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+    ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+    foregroundNode.staticSize = {10, 10};
     
     ASLayoutNode *layoutNode =
     [ASBackgroundLayoutNode
      newWithNode:
      [ASInsetLayoutNode
       newWithInsets:insets
-      node:[ASCompositeNode newWithSize:ASLayoutNodeSizeMake(10, 10) displayNode:foregroundNode]]
+      node:[ASCompositeNode newWithDisplayNode:foregroundNode]]
      background:[ASCompositeNode newWithDisplayNode:backgroundNode]];
 
     static ASSizeRange kFixedSize = {{300, 300}, {300, 300}};
@@ -105,14 +107,15 @@ static NSString *nameForInsets(UIEdgeInsets insets)
   for (NSUInteger combination = 0; combination < 16; combination++) {
     UIEdgeInsets insets = insetsForCombination(combination, 0);
     ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor grayColor]);
-    ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+    ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+    foregroundNode.staticSize = {10, 10};
 
     ASLayoutNode *layoutNode =
     [ASBackgroundLayoutNode
      newWithNode:
      [ASInsetLayoutNode
       newWithInsets:insets
-      node:[ASCompositeNode newWithSize:ASLayoutNodeSizeMake(10, 10) displayNode:foregroundNode]]
+      node:[ASCompositeNode newWithDisplayNode:foregroundNode]]
      background:[ASCompositeNode newWithDisplayNode:backgroundNode]];
 
     static ASSizeRange kFixedSize = {{300, 300}, {300, 300}};

@@ -50,7 +50,7 @@
 
 - (void)setLayoutNodeUnderTest:(ASLayoutNode *)layoutNodeUnderTest sizeRange:(ASSizeRange)sizeRange
 {
-  _layoutUnderTest = [layoutNodeUnderTest calculateLayoutThatFits:sizeRange];
+  _layoutUnderTest = [layoutNodeUnderTest computeLayoutThatFits:sizeRange];
   self.frame = CGRectMake(0, 0, _layoutUnderTest.size.width, _layoutUnderTest.size.height);
   [self measure:_layoutUnderTest.size];
 }
@@ -58,6 +58,17 @@
 - (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
 {
   return _layoutUnderTest;
+}
+
+@end
+
+@implementation ASStaticSizeDisplayNode
+
+- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
+{
+  return CGSizeEqualToSize(_staticSize, CGSizeZero)
+    ? [super calculateLayoutThatFits:constrainedSize]
+    : [ASLayout newWithNode:[ASLayoutNode new] size:_staticSize];
 }
 
 @end

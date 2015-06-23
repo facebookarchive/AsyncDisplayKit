@@ -27,12 +27,12 @@ static const ASSizeRange kFixedSize = {{0, 0}, {100, 100}};
 
 - (void)testRatioLayoutNodeWithRatio:(CGFloat)ratio childNodeSize:(CGSize)childNodeSize identifier:(NSString *)identifier
 {
-  ASDisplayNode *subnode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+  ASStaticSizeDisplayNode *subnode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+  subnode.staticSize = childNodeSize;
   
   ASLayoutNode *layoutNode = [ASRatioLayoutNode
                               newWithRatio:ratio
-                              size:{}
-                              node:[ASCompositeNode newWithSize:ASLayoutNodeSizeMakeWithCGSize(childNodeSize) displayNode:subnode]];
+                              node:[ASCompositeNode newWithDisplayNode:subnode]];
   
   [self testLayoutNode:layoutNode sizeRange:kFixedSize subnodes:@[subnode] identifier:identifier];
 }

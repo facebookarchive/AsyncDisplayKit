@@ -330,7 +330,6 @@
 		ACF6ED5C1B178DC700DA7C62 /* ASCenterLayoutNodeSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED531B178DC700DA7C62 /* ASCenterLayoutNodeSnapshotTests.mm */; };
 		ACF6ED5D1B178DC700DA7C62 /* ASDimensionTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED541B178DC700DA7C62 /* ASDimensionTests.mm */; };
 		ACF6ED5E1B178DC700DA7C62 /* ASInsetLayoutNodeSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED551B178DC700DA7C62 /* ASInsetLayoutNodeSnapshotTests.mm */; };
-		ACF6ED5F1B178DC700DA7C62 /* ASLayoutNodeSizeTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED561B178DC700DA7C62 /* ASLayoutNodeSizeTests.mm */; };
 		ACF6ED601B178DC700DA7C62 /* ASLayoutNodeSnapshotTestsHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED581B178DC700DA7C62 /* ASLayoutNodeSnapshotTestsHelper.m */; };
 		ACF6ED611B178DC700DA7C62 /* ASOverlayLayoutNodeSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED591B178DC700DA7C62 /* ASOverlayLayoutNodeSnapshotTests.mm */; };
 		ACF6ED621B178DC700DA7C62 /* ASRatioLayoutNodeSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED5A1B178DC700DA7C62 /* ASRatioLayoutNodeSnapshotTests.mm */; };
@@ -558,7 +557,6 @@
 		ACF6ED531B178DC700DA7C62 /* ASCenterLayoutNodeSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASCenterLayoutNodeSnapshotTests.mm; sourceTree = "<group>"; };
 		ACF6ED541B178DC700DA7C62 /* ASDimensionTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASDimensionTests.mm; sourceTree = "<group>"; };
 		ACF6ED551B178DC700DA7C62 /* ASInsetLayoutNodeSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASInsetLayoutNodeSnapshotTests.mm; sourceTree = "<group>"; };
-		ACF6ED561B178DC700DA7C62 /* ASLayoutNodeSizeTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASLayoutNodeSizeTests.mm; sourceTree = "<group>"; };
 		ACF6ED571B178DC700DA7C62 /* ASLayoutNodeSnapshotTestsHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLayoutNodeSnapshotTestsHelper.h; sourceTree = "<group>"; };
 		ACF6ED581B178DC700DA7C62 /* ASLayoutNodeSnapshotTestsHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = ASLayoutNodeSnapshotTestsHelper.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		ACF6ED591B178DC700DA7C62 /* ASOverlayLayoutNodeSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASOverlayLayoutNodeSnapshotTests.mm; sourceTree = "<group>"; };
@@ -746,7 +744,6 @@
 				058D0A2F195D057000B7D73C /* ASDisplayNodeTests.m */,
 				058D0A30195D057000B7D73C /* ASDisplayNodeTestsHelper.h */,
 				058D0A31195D057000B7D73C /* ASDisplayNodeTestsHelper.m */,
-				ACF6ED561B178DC700DA7C62 /* ASLayoutNodeSizeTests.mm */,
 				052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */,
 				058D0A32195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m */,
 				3C9C128419E616EF00E942A0 /* ASTableViewTests.m */,
@@ -1420,7 +1417,6 @@
 				058D0A3F195D057000B7D73C /* ASTextNodeShadowerTests.m in Sources */,
 				ACF6ED631B178DC700DA7C62 /* ASStackLayoutNodeSnapshotTests.mm in Sources */,
 				29CDC2E21AAE70D000833CA4 /* ASBasicImageDownloaderContextTests.m in Sources */,
-				ACF6ED5F1B178DC700DA7C62 /* ASLayoutNodeSizeTests.mm in Sources */,
 				056D21551ABCEF50001107EF /* ASImageNodeSnapshotTests.m in Sources */,
 				05EA6FE71AC0966E00E35788 /* ASSnapshotTestCase.mm in Sources */,
 				ACF6ED5E1B178DC700DA7C62 /* ASInsetLayoutNodeSnapshotTests.mm in Sources */,
