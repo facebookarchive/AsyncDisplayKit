@@ -142,7 +142,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   // https://github.com/facebook/AsyncDisplayKit/issues/385
   asyncDataFetchingEnabled = NO;
 
-  ASDisplayNodeAssert([layout asdk_isFlowLayout], @"only flow layouts are currently supported");
   _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];
 
   _rangeController = [[ASRangeController alloc] init];
