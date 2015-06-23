@@ -41,14 +41,6 @@
 /**
  @param children Children to be positioned at fixed positions, each is of type ASStaticLayoutNodeChild.
  */
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size
-                   children:(NSArray *)children;
-
-/**
- Convenience that does not have a size.
-
- @param children Children to be positioned at fixed positions, each is of type ASStaticLayoutNodeChild.
- */
 + (instancetype)newWithChildren:(NSArray *)children;
 
 @end

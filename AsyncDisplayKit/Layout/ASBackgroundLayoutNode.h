@@ -20,7 +20,6 @@
         returns nil.
  @param background A child that is laid out behind it. May be nil, in which case the background is omitted.
  */
-+ (instancetype)newWithNode:(ASLayoutNode *)node
-                      background:(ASLayoutNode *)background;
++ (instancetype)newWithNode:(ASLayoutNode *)node background:(ASLayoutNode *)background;
 
 @end

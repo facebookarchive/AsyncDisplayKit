@@ -136,12 +136,9 @@ typedef struct {
 @interface ASStackLayoutNode : ASLayoutNode
 
 /**
- @param size A size, or {} for the default size.
  @param style Specifies how children are laid out.
  @param children Children to be positioned, each is of type ASStackLayoutNodeChild.
  */
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size
-                      style:(ASStackLayoutNodeStyle)style
-                   children:(NSArray *)children;
++ (instancetype)newWithStyle:(ASStackLayoutNodeStyle)style children:(NSArray *)children;
 
 @end

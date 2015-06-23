@@ -16,7 +16,6 @@
 
 @property (nonatomic, readonly) ASDisplayNode *displayNode;
 
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size displayNode:(ASDisplayNode *)displayNode;
 + (instancetype)newWithDisplayNode:(ASDisplayNode *)displayNode;
 
 @end

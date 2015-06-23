@@ -19,22 +19,17 @@
 
 + (instancetype)newWithDisplayNode:(ASDisplayNode *)displayNode
 {
-  return [self newWithSize:ASLayoutNodeSizeZero displayNode:displayNode];
-}
-
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size displayNode:(ASDisplayNode *)displayNode
-{
   if (displayNode == nil) {
     return nil;
   }
-  ASCompositeNode *n = [super newWithSize:size];
+  ASCompositeNode *n = [super new];
   if (n) {
     n->_displayNode = displayNode;
   }
   return n;
 }
 
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size
++ (instancetype)new
 {
   ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
 }

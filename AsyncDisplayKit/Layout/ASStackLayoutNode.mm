@@ -99,9 +99,9 @@
   std::vector<ASStackLayoutNodeChild *> _children;
 }
 
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size style:(ASStackLayoutNodeStyle)style children:(NSArray *)children
++ (instancetype)newWithStyle:(ASStackLayoutNodeStyle)style children:(NSArray *)children
 {
-  ASStackLayoutNode *n = [super newWithSize:size];
+  ASStackLayoutNode *n = [super new];
   if (n) {
     n->_style = style;
     n->_children = std::vector<ASStackLayoutNodeChild *>();
@@ -114,7 +114,7 @@
   return n;
 }
 
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size
++ (instancetype)new
 {
   ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
 }

@@ -23,9 +23,8 @@
 + (instancetype)newWithCenteringOptions:(ASCenterLayoutNodeCenteringOptions)centeringOptions
                           sizingOptions:(ASCenterLayoutNodeSizingOptions)sizingOptions
                                   child:(ASLayoutNode *)child
-                                   size:(ASLayoutNodeSize)size
 {
-  ASCenterLayoutNode *n = [super newWithSize:size];
+  ASCenterLayoutNode *n = [super new];
   if (n) {
     n->_centeringOptions = centeringOptions;
     n->_sizingOptions = sizingOptions;
@@ -34,14 +33,16 @@
   return n;
 }
 
++ (instancetype)new
+{
+  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+}
+
 - (ASLayout *)computeLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  // If we have a finite size in any direction, pass this so that the child can
-  // resolve percentages agains it. Otherwise pass kASLayoutNodeParentDimensionUndefined
-  // as the size will depend on the content
   CGSize size = {
-    isinf(constrainedSize.max.width) ? kASLayoutNodeParentDimensionUndefined : constrainedSize.max.width,
-    isinf(constrainedSize.max.height) ? kASLayoutNodeParentDimensionUndefined : constrainedSize.max.height
+    constrainedSize.max.width,
+    constrainedSize.max.height
   };
 
   // Layout the child
@@ -49,7 +50,7 @@
     (_centeringOptions & ASCenterLayoutNodeCenteringX) != 0 ? 0 : constrainedSize.min.width,
     (_centeringOptions & ASCenterLayoutNodeCenteringY) != 0 ? 0 : constrainedSize.min.height,
   };
-  ASLayout *childLayout = [_child layoutThatFits:ASSizeRangeMake(minChildSize, constrainedSize.max) parentSize:size];
+  ASLayout *childLayout = [_child computeLayoutThatFits:ASSizeRangeMake(minChildSize, constrainedSize.max)];
 
   // If we have an undetermined height or width, use the child size to define the layout
   // size

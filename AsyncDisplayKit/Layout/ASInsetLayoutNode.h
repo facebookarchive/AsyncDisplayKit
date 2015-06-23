@@ -33,7 +33,6 @@
  @param insets The amount of space to inset on each side.
  @param node The wrapped child layout node to inset. If nil, this method returns nil.
  */
-+ (instancetype)newWithInsets:(UIEdgeInsets)insets
-                         node:(ASLayoutNode *)node;
++ (instancetype)newWithInsets:(UIEdgeInsets)insets node:(ASLayoutNode *)node;
 
 @end

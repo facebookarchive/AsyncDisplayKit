@@ -21,10 +21,9 @@
   ASLayoutNode *_node;
 }
 
-+ (instancetype)newWithNode:(ASLayoutNode *)node
-                         overlay:(ASLayoutNode *)overlay
++ (instancetype)newWithNode:(ASLayoutNode *)node overlay:(ASLayoutNode *)overlay
 {
-  ASOverlayLayoutNode *n = [super newWithSize:{}];
+  ASOverlayLayoutNode *n = [super new];
   if (n) {
     ASDisplayNodeAssertNotNil(node, @"Node that will be overlayed on shouldn't be nil");
     n->_overlay = overlay;
@@ -33,7 +32,7 @@
   return n;
 }
 
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size
++ (instancetype)new
 {
   ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
 }
@@ -42,17 +41,11 @@
  First layout the contents, then fit the overlay on top of it.
  */
 - (ASLayout *)computeLayoutThatFits:(ASSizeRange)constrainedSize
-                          restrictedToSize:(ASLayoutNodeSize)size
-                      relativeToParentSize:(CGSize)parentSize
 {
-  ASDisplayNodeAssert(ASLayoutNodeSizeEqualToNodeSize(size, ASLayoutNodeSizeZero),
-           @"ASOverlayLayoutNode only passes size {} to the super class initializer, but received size %@ "
-           "(node=%@, overlay=%@)", NSStringFromASLayoutNodeSize(size), _node, _overlay);
-
-  ASLayout *contentsLayout = [_node layoutThatFits:constrainedSize parentSize:parentSize];
+  ASLayout *contentsLayout = [_node computeLayoutThatFits:constrainedSize];
   NSMutableArray *layoutChildren = [NSMutableArray arrayWithObject:[ASLayoutChild newWithPosition:{0, 0} layout:contentsLayout]];
   if (_overlay) {
-    ASLayout *overlayLayout = [_overlay layoutThatFits:{contentsLayout.size, contentsLayout.size} parentSize:contentsLayout.size];
+    ASLayout *overlayLayout = [_overlay computeLayoutThatFits:{contentsLayout.size, contentsLayout.size}];
     [layoutChildren addObject:[ASLayoutChild newWithPosition:{0, 0} layout:overlayLayout]];
   }
   

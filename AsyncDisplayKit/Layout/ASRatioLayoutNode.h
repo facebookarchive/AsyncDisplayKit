@@ -30,8 +30,6 @@
  **/
 @interface ASRatioLayoutNode : ASLayoutNode
 
-+ (instancetype)newWithRatio:(CGFloat)ratio
-                        size:(ASLayoutNodeSize)size
-                        node:(ASLayoutNode *)node;
++ (instancetype)newWithRatio:(CGFloat)ratio node:(ASLayoutNode *)node;
 
 @end

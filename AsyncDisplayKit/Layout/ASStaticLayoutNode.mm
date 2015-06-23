@@ -39,26 +39,25 @@
   NSArray *_children;
 }
 
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size
-                   children:(NSArray *)children
++ (instancetype)newWithChildren:(NSArray *)children
 {
-  ASStaticLayoutNode *n = [super newWithSize:size];
+  ASStaticLayoutNode *n = [super new];
   if (n) {
     n->_children = children;
   }
   return n;
 }
 
-+ (instancetype)newWithChildren:(NSArray *)children
++ (instancetype)new
 {
-  return [self newWithSize:{} children:children];
+  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
 }
 
 - (ASLayout *)computeLayoutThatFits:(ASSizeRange)constrainedSize
 {
   CGSize size = {
-    isinf(constrainedSize.max.width) ? kASLayoutNodeParentDimensionUndefined : constrainedSize.max.width,
-    isinf(constrainedSize.max.height) ? kASLayoutNodeParentDimensionUndefined : constrainedSize.max.height
+    constrainedSize.max.width,
+    constrainedSize.max.height
   };
 
   NSMutableArray *layoutChildren = [NSMutableArray arrayWithCapacity:_children.count];
@@ -69,7 +68,7 @@
     };
     ASSizeRange childConstraint = ASRelativeSizeRangeResolveSizeRange(child.size, size, {{0,0}, autoMaxSize});
     ASLayoutChild *layoutChild = [ASLayoutChild newWithPosition:child.position
-                                                         layout:[child.node layoutThatFits:childConstraint parentSize: size]];
+                                                         layout:[child.node computeLayoutThatFits:childConstraint]];
     [layoutChildren addObject:layoutChild];
   }
   

@@ -43,13 +43,12 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
 
 @implementation ASInsetLayoutNode
 
-+ (instancetype)newWithInsets:(UIEdgeInsets)insets
-                         node:(ASLayoutNode *)node
++ (instancetype)newWithInsets:(UIEdgeInsets)insets node:(ASLayoutNode *)node
 {
   if (node == nil) {
     return nil;
   }
-  ASInsetLayoutNode *n = [super newWithSize:{}];
+  ASInsetLayoutNode *n = [super new];
   if (n) {
     n->_insets = insets;
     n->_node = node;
@@ -57,7 +56,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   return n;
 }
 
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size
++ (instancetype)new
 {
   ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
 }
@@ -67,13 +66,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
  the child to respect the inset.
  */
 - (ASLayout *)computeLayoutThatFits:(ASSizeRange)constrainedSize
-                          restrictedToSize:(ASLayoutNodeSize)size
-                      relativeToParentSize:(CGSize)parentSize
 {
-  ASDisplayNodeAssert(ASLayoutNodeSizeEqualToNodeSize(size, ASLayoutNodeSizeZero),
-           @"ASInsetLayoutNode only passes size {} to the super class initializer, but received size %@ "
-           "(node=%@)", NSStringFromASLayoutNodeSize(size), _node);
-
   const CGFloat insetsX = (finiteOrZero(_insets.left) + finiteOrZero(_insets.right));
   const CGFloat insetsY = (finiteOrZero(_insets.top) + finiteOrZero(_insets.bottom));
 
@@ -92,20 +85,12 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
       MAX(0, constrainedSize.max.height - insetsY),
     }
   };
-  const CGSize insetParentSize = {
-    MAX(0, parentSize.width - insetsX),
-    MAX(0, parentSize.height - insetsY)
-  };
-  ASLayout *childLayout = [_node layoutThatFits:insetConstrainedSize parentSize:insetParentSize];
+  ASLayout *childLayout = [_node computeLayoutThatFits:insetConstrainedSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {
-    finite(childLayout.size.width + _insets.left + _insets.right, parentSize.width),
-    finite(childLayout.size.height + _insets.top + _insets.bottom, parentSize.height),
+    finite(childLayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),
+    finite(childLayout.size.height + _insets.top + _insets.bottom, constrainedSize.max.height),
   });
-
-  ASDisplayNodeAssert(!isnan(computedSize.width) && !isnan(computedSize.height),
-           @"Inset node computed size is NaN; you may not specify infinite insets against a NaN parent size\n"
-           "parentSize = %@, insets = %@", NSStringFromCGSize(parentSize), NSStringFromUIEdgeInsets(_insets));
 
   const CGFloat x = finite(_insets.left, constrainedSize.max.width -
                            (finite(_insets.right,

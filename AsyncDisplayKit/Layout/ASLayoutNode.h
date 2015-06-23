@@ -8,17 +8,9 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutNodeSize.h>
+#import <AsyncDisplayKit/ASDimension.h>
 
 /** A layout node is an immutable object that describes a layout, loosely inspired by React. */
 @interface ASLayoutNode : NSObject
-
-/**
- @param size A size constraint that should apply to this layout node. Pass {} to specify no size constraint.
-
- @example A layout node of a square:
- [ASLayoutNode newWithSize:{100, 100}]
- */
-+ (instancetype)newWithSize:(ASLayoutNodeSize)size;
 
 @end

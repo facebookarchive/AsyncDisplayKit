@@ -38,11 +38,9 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutNodeSizingOptions) {
 /**
  @param centeringOptions, see ASCenterLayoutNodeCenteringOptions.
  @param child The child to center.
- @param size The node size or {} for the default which is for the layout to take the maximum space available.
  */
 + (instancetype)newWithCenteringOptions:(ASCenterLayoutNodeCenteringOptions)centeringOptions
                           sizingOptions:(ASCenterLayoutNodeSizingOptions)sizingOptions
-                                  child:(ASLayoutNode *)child
-                                   size:(ASLayoutNodeSize)size;
+                                  child:(ASLayoutNode *)child;
 
 @end
