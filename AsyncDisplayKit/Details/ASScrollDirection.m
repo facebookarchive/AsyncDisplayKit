@@ -18,3 +18,19 @@ BOOL ASScrollDirectionContainsVerticalDirection(ASScrollDirection scrollDirectio
 BOOL ASScrollDirectionContainsHorizontalDirection(ASScrollDirection scrollDirection) {
   return (scrollDirection & ASScrollDirectionHorizontalDirections) != 0;
 }
+
+BOOL ASScrollDirectionContainsRight(ASScrollDirection scrollDirection) {
+  return (scrollDirection & ASScrollDirectionRight) != 0;
+}
+
+BOOL ASScrollDirectionContainsLeft(ASScrollDirection scrollDirection) {
+  return (scrollDirection & ASScrollDirectionLeft) != 0;
+}
+
+BOOL ASScrollDirectionContainsUp(ASScrollDirection scrollDirection) {
+  return (scrollDirection & ASScrollDirectionUp) != 0;
+}
+
+BOOL ASScrollDirectionContainsDown(ASScrollDirection scrollDirection) {
+  return (scrollDirection & ASScrollDirectionDown) != 0;
+}

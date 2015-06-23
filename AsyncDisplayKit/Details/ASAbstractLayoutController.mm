@@ -8,9 +8,7 @@
 
 #import "ASAbstractLayoutController.h"
 
-#include <map>
 #include <vector>
-#include <cassert>
 
 #import "ASAssert.h"
 
@@ -29,12 +27,12 @@
   
   _tuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
   _tuningParameters[ASLayoutRangeTypePreload] = {
-    .leadingBufferScreenfuls = 2,
-    .trailingBufferScreenfuls = 1
-  };
-  _tuningParameters[ASLayoutRangeTypeRender] = {
     .leadingBufferScreenfuls = 3,
     .trailingBufferScreenfuls = 2
+  };
+  _tuningParameters[ASLayoutRangeTypeRender] = {
+    .leadingBufferScreenfuls = 2,
+    .trailingBufferScreenfuls = 1
   };
   
   return self;
