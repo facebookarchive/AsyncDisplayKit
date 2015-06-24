@@ -124,6 +124,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   BOOL _asyncDataFetchingEnabled;
 
   ASBatchContext *_batchContext;
+
+  NSMutableSet *_pendingVisibleIndexPaths;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -132,10 +134,31 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 @implementation ASTableView
 
+/**
+ @summary Conditionally performs UIView geometry changes in the given block without animation.
+ 
+ Used primarily to circumvent UITableView forcing insertion animations when explicitly told not to via
+ `UITableViewRowAnimationNone`. More info: https://github.com/facebook/AsyncDisplayKit/pull/445
+ 
+ @param withoutAnimation Set to `YES` to perform given block without animation
+ @param block Perform UIView geometry changes within the passed block
+ */
+void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
+  if (withoutAnimation) {
+    BOOL animationsEnabled = [UIView areAnimationsEnabled];
+    [UIView setAnimationsEnabled:NO];
+    block();
+    [UIView setAnimationsEnabled:animationsEnabled];
+  } else {
+    block();
+  }
+}
+
 #pragma mark -
 #pragma mark Lifecycle
 
-- (void)configureWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled {
+- (void)configureWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled
+{
   _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
 
   _rangeController = [[ASRangeController alloc] init];
@@ -151,6 +174,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _leadingScreensForBatching = 1.0;
   _batchContext = [[ASBatchContext alloc] init];
+  
+  _pendingVisibleIndexPaths = [[NSMutableSet alloc] init];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -163,12 +188,17 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (!(self = [super initWithFrame:frame style:style]))
     return nil;
 
+  // FIXME: asyncDataFetching is currently unreliable for some use cases.
+  // https://github.com/facebook/AsyncDisplayKit/issues/385
+  asyncDataFetchingEnabled = NO;
+  
   [self configureWithAsyncDataFetching:asyncDataFetchingEnabled];
 
   return self;
 }
 
-- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
+{
   if (!(self = [super initWithCoder:aDecoder]))
     return nil;
 
@@ -177,8 +207,10 @@ static BOOL _isInterceptedSelector(SEL sel)
   return self;
 }
 
--(void)dealloc {
-  // a little defense move here.
+- (void)dealloc
+{
+  // Sometimes the UIKit classes can call back to their delegate even during deallocation.
+  // This bug might be iOS 7-specific.
   super.delegate  = nil;
   super.dataSource = nil;
 }
@@ -401,6 +433,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
+  [_pendingVisibleIndexPaths addObject:indexPath];
+
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)]) {
@@ -410,6 +444,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath
 {
+  if ([_pendingVisibleIndexPaths containsObject:indexPath]) {
+    [_pendingVisibleIndexPaths removeObject:indexPath];
+  }
+
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNodeForRowAtIndexPath:)]) {
@@ -480,7 +518,16 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
-  return [self indexPathsForVisibleRows];
+
+  NSMutableSet *visibleIndexPaths = [NSMutableSet setWithArray:[self indexPathsForVisibleRows]];
+  
+  // First, remove any index paths we're tracking that UIKit has now proven it can remember :)
+  [_pendingVisibleIndexPaths minusSet:visibleIndexPaths];
+  
+  // Next, add all remaining index paths that we know should be visible (from willDisplayCell) but are not in the set.
+  [visibleIndexPaths unionSet:_pendingVisibleIndexPaths];
+  
+  return visibleIndexPaths.allObjects;
 }
 
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
@@ -497,29 +544,41 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
-
-  [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
+  
+  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
+  });
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
 
-  [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
+  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
+  });
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
 
-  [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
+  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
+  });
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
   ASDisplayNodeAssertMainThread();
 
-  [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
+  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
+  });
 }
 
 #pragma mark - ASDataControllerDelegate

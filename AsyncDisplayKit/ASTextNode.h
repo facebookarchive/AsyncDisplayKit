@@ -194,6 +194,11 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @property (nonatomic, assign) BOOL longPressCancelsTouches;
 
+/**
+ @abstract if YES will not intercept touches for non-link areas of the text. Default is NO.
+ */
+@property (nonatomic, assign) BOOL passthroughNonlinkTouches;
+
 
 @end
 

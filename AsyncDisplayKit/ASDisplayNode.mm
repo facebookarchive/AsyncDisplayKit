@@ -116,7 +116,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _contentsScaleForDisplay = ASDisplayNodeScreenScale();
   
   _displaySentinel = [[ASSentinel alloc] init];
-  
+
   _flags.isInHierarchy = NO;
   _flags.displaysAsynchronously = YES;
   
@@ -1216,6 +1216,10 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDN::MutexLocker l(_propertyLock);
 
+  if (!_pendingDisplayNodes) {
+    _pendingDisplayNodes = [[NSMutableSet alloc] init];
+  }
+
   [_pendingDisplayNodes addObject:node];
 }
 
@@ -1382,7 +1386,11 @@ static NSInteger incrementIfFound(NSInteger i) {
   [_supernode subnodeDisplayWillStart:self];
 
   if (_placeholderImage && _placeholderLayer && self.layer.contents == nil) {
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
     _placeholderLayer.contents = (id)_placeholderImage.CGImage;
+    _placeholderLayer.opacity = 1.0;
+    [CATransaction commit];
     [self.layer addSublayer:_placeholderLayer];
   }
 }

@@ -87,15 +87,23 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   // Capture these outside the display block so they are retained.
   UIColor *backgroundColor = self.backgroundColor;
   CGRect bounds = self.bounds;
-  CGPoint position = self.position;
-  CGPoint anchorPoint = self.anchorPoint;
 
-  // Pretty hacky since full 3D transforms aren't actually supported, but attempt to compute the transformed frame of this node so that we can composite it into approximately the right spot.
-  CGAffineTransform transform = CATransform3DGetAffineTransform(self.transform);
-  CGSize scaledBoundsSize = CGSizeApplyAffineTransform(bounds.size, transform);
-  CGPoint origin = CGPointMake(position.x - scaledBoundsSize.width * anchorPoint.x,
-                               position.y - scaledBoundsSize.height * anchorPoint.y);
-  CGRect frame = CGRectMake(origin.x, origin.y, bounds.size.width, bounds.size.height);
+  CGRect frame;
+  
+  // If this is the root container node, use a frame with a zero origin to draw into. If not, calculate the correct frame using the node's position, transform and anchorPoint.
+  if (self.shouldRasterizeDescendants) {
+    frame = CGRectMake(0.0f, 0.0f, bounds.size.width, bounds.size.height);
+  } else {
+    CGPoint position = self.position;
+    CGPoint anchorPoint = self.anchorPoint;
+    
+    // Pretty hacky since full 3D transforms aren't actually supported, but attempt to compute the transformed frame of this node so that we can composite it into approximately the right spot.
+    CGAffineTransform transform = CATransform3DGetAffineTransform(self.transform);
+    CGSize scaledBoundsSize = CGSizeApplyAffineTransform(bounds.size, transform);
+    CGPoint origin = CGPointMake(position.x - scaledBoundsSize.width * anchorPoint.x,
+                                 position.y - scaledBoundsSize.height * anchorPoint.y);
+    frame = CGRectMake(origin.x, origin.y, bounds.size.width, bounds.size.height);
+  }
 
   // Get the display block for this node.
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = [self _displayBlockWithAsynchronous:NO isCancelledBlock:isCancelledBlock rasterizing:YES];
@@ -165,7 +173,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     [self _recursivelyRasterizeSelfAndSublayersWithIsCancelledBlock:isCancelledBlock displayBlocks:displayBlocks];
 
     CGFloat contentsScaleForDisplay = self.contentsScaleForDisplay;
-    BOOL opaque = self.opaque;
+    BOOL opaque = self.opaque && CGColorGetAlpha(self.backgroundColor.CGColor) == 1.0f;
 
     ASDisplayNodeAssert(self.contentsScaleForDisplay != 0.0, @"Invalid contents scale");
 
@@ -177,7 +185,6 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       }
 
       ASDN_DELAY_FOR_DISPLAY();
-
       UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, contentsScaleForDisplay);
 
       for (dispatch_block_t block in displayBlocks) {

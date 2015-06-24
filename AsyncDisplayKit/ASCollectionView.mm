@@ -9,13 +9,14 @@
 #import "ASCollectionView.h"
 
 #import "ASAssert.h"
-#import "ASFlowLayoutController.h"
+#import "ASCollectionViewLayoutController.h"
 #import "ASRangeController.h"
 #import "ASDataController.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
+#import "UICollectionViewLayout+ASConvenience.h"
 
-const static NSUInteger kASCollectionViewAnimationNone = 0;
+const static NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 
 
 #pragma mark -
@@ -108,7 +109,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   ASDataController *_dataController;
   ASRangeController *_rangeController;
-  ASFlowLayoutController *_layoutController;
+  ASCollectionViewLayoutController *_layoutController;
 
   BOOL _performingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
@@ -136,11 +137,12 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
+  
+  // FIXME: asyncDataFetching is currently unreliable for some use cases.
+  // https://github.com/facebook/AsyncDisplayKit/issues/385
+  asyncDataFetchingEnabled = NO;
 
-  ASDisplayNodeAssert([layout isKindOfClass:UICollectionViewFlowLayout.class], @"only flow layouts are currently supported");
-
-  ASFlowLayoutDirection direction = (((UICollectionViewFlowLayout *)layout).scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASFlowLayoutDirectionHorizontal : ASFlowLayoutDirectionVertical;
-  _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:direction];
+  _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];
 
   _rangeController = [[ASRangeController alloc] init];
   _rangeController.delegate = self;
@@ -165,8 +167,10 @@ static BOOL _isInterceptedSelector(SEL sel)
   return self;
 }
 
--(void)dealloc {
-  // a little defense move here.
+- (void)dealloc
+{
+  // Sometimes the UIKit classes can call back to their delegate even during deallocation.
+  // This bug might be iOS 7-specific.
   super.delegate  = nil;
   super.dataSource = nil;
 }
@@ -363,22 +367,55 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (ASScrollDirection)scrollDirection
 {
   CGPoint scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
+  return [self scrollDirectionForVelocity:scrollVelocity];
+}
+  
+- (ASScrollDirection)scrollDirectionForVelocity:(CGPoint)scrollVelocity
+{
   ASScrollDirection direction = ASScrollDirectionNone;
-  if (_layoutController.layoutDirection == ASFlowLayoutDirectionHorizontal) {
-    if (scrollVelocity.x > 0) {
-      direction = ASScrollDirectionRight;
-    } else if (scrollVelocity.x < 0) {
-      direction = ASScrollDirectionLeft;
-    }
-  } else {
-    if (scrollVelocity.y > 0) {
-      direction = ASScrollDirectionDown;
+  ASScrollDirection scrollableDirections = [self scrollableDirections];
+  
+  if (ASScrollDirectionContainsHorizontalDirection(scrollableDirections)) { // Can scroll horizontally.
+    if (scrollVelocity.x >= 0) {
+      direction |= ASScrollDirectionRight;
     } else {
-      direction = ASScrollDirectionUp;
+      direction |= ASScrollDirectionLeft;
+    }
+  }
+  if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) { // Can scroll vertically.
+    if (scrollVelocity.y >= 0) {
+      direction |= ASScrollDirectionDown;
+    } else {
+      direction |= ASScrollDirectionUp;
     }
   }
 
   return direction;
+}
+
+- (ASScrollDirection)scrollableDirections
+{
+  if ([self.collectionViewLayout asdk_isFlowLayout]) {
+    return [self flowLayoutScrollableDirections:(UICollectionViewFlowLayout *)self.collectionViewLayout];
+  } else {
+    return [self nonFlowLayoutScrollableDirections];
+  }
+}
+
+- (ASScrollDirection)flowLayoutScrollableDirections:(UICollectionViewFlowLayout *)flowLayout {
+  return (flowLayout.scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASScrollDirectionHorizontalDirections : ASScrollDirectionVerticalDirections;
+}
+
+- (ASScrollDirection)nonFlowLayoutScrollableDirections
+{
+  ASScrollDirection scrollableDirection = ASScrollDirectionNone;
+  if (self.contentSize.width > self.bounds.size.width) { // Can scroll horizontally.
+    scrollableDirection |= ASScrollDirectionHorizontalDirections;
+  }
+  if (self.contentSize.height > self.bounds.size.height) { // Can scroll vertically.
+    scrollableDirection |= ASScrollDirectionVerticalDirections;
+  }
+  return scrollableDirection;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
@@ -453,7 +490,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   CGSize restrainedSize = self.bounds.size;
 
-  if (_layoutController.layoutDirection == ASFlowLayoutDirectionHorizontal) {
+  if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
     restrainedSize.width = FLT_MAX;
   } else {
     restrainedSize.height = FLT_MAX;
