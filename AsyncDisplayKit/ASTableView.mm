@@ -522,11 +522,29 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   if ( _pendingVisibleIndexPath ) {
     NSMutableSet *indexPaths = [NSMutableSet setWithArray:self.indexPathsForVisibleRows];
 
+    BOOL (^isNextTo)(NSIndexPath *, NSIndexPath *, int) = ^(NSIndexPath *indexPath, NSIndexPath *anchor, int dir) {
+      if (!anchor) {
+        return NO;
+      }
+      if (indexPath.section == anchor.section) {
+        return (indexPath.row == anchor.row+dir);
+      } else if (indexPath.section == anchor.section+dir && anchor.row == 0) {
+        NSIndexPath *toCompare = (dir==1) ? indexPath : anchor;
+        NSInteger lastRow = [_dataController numberOfRowsInSection:toCompare.section] - 1;
+        return (toCompare.row == lastRow);
+      } else {
+        return NO;
+      }
+    };
+
     if ( [indexPaths containsObject:_pendingVisibleIndexPath]) {
       _pendingVisibleIndexPath = nil; // once it has shown up in visibleIndexPaths, we can stop tracking it
+    } else if (!isNextTo(_pendingVisibleIndexPath, visibleIndexPaths.firstObject, -1) &&
+               !isNextTo(_pendingVisibleIndexPath, visibleIndexPaths.lastObject, +1)) {
+      _pendingVisibleIndexPath = nil; // not contiguous, ignore.
     } else {
       [indexPaths addObject:_pendingVisibleIndexPath];
-      visibleIndexPaths = indexPaths.allObjects;
+      visibleIndexPaths = [indexPaths.allObjects sortedArrayUsingSelector:@selector(compare:)];
     }
   }
 
