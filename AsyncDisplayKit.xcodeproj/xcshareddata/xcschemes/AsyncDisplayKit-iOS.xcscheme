@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "B35061D91B010EDF0018CF92"
+               BlueprintIdentifier = "2C5B669C1B3A796F005926A7"
                BuildableName = "AsyncDisplayKit.framework"
                BlueprintName = "AsyncDisplayKit-iOS"
                ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
@@ -42,7 +42,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B35061D91B010EDF0018CF92"
+            BlueprintIdentifier = "2C5B669C1B3A796F005926A7"
             BuildableName = "AsyncDisplayKit.framework"
             BlueprintName = "AsyncDisplayKit-iOS"
             ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
@@ -60,7 +60,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B35061D91B010EDF0018CF92"
+            BlueprintIdentifier = "2C5B669C1B3A796F005926A7"
             BuildableName = "AsyncDisplayKit.framework"
             BlueprintName = "AsyncDisplayKit-iOS"
             ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
