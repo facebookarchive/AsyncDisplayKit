@@ -75,6 +75,9 @@
  @property (atomic, assign)           BOOL shouldGroupAccessibilityChildren;
  */
 
+// Accessibility identification support
+@property (nonatomic, copy)          NSString *accessibilityIdentifier;
+
 @end
 
 @interface CALayer (ASDisplayNodeLayer)
