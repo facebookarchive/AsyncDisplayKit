@@ -175,6 +175,13 @@
 		464052241A3F83C40061C0BA /* ASLayoutController.h in Headers */ = {isa = PBXBuildFile; fileRef = 4640521D1A3F83C40061C0BA /* ASLayoutController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		464052251A3F83C40061C0BA /* ASMultidimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 4640521E1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.h */; };
 		464052261A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4640521F1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm */; };
+		509E68601B3AED8E009B9150 /* ASScrollDirection.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E111B371BD7007741D0 /* ASScrollDirection.m */; };
+		509E68611B3AEDA0009B9150 /* ASAbstractLayoutController.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E171B37339C007741D0 /* ASAbstractLayoutController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		509E68621B3AEDA5009B9150 /* ASAbstractLayoutController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E181B37339C007741D0 /* ASAbstractLayoutController.mm */; };
+		509E68631B3AEDB4009B9150 /* ASCollectionViewLayoutController.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E1B1B373A2C007741D0 /* ASCollectionViewLayoutController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		509E68641B3AEDB7009B9150 /* ASCollectionViewLayoutController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E1C1B373A2C007741D0 /* ASCollectionViewLayoutController.mm */; };
+		509E68651B3AEDC5009B9150 /* CGRect+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E1F1B376416007741D0 /* CGRect+ASConvenience.h */; };
+		509E68661B3AEDD7009B9150 /* CGRect+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E201B376416007741D0 /* CGRect+ASConvenience.m */; };
 		6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC3C4A511A1139C100143C57 /* ASCollectionView.h in Headers */ = {isa = PBXBuildFile; fileRef = AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC3C4A521A1139C100143C57 /* ASCollectionView.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC3C4A501A1139C100143C57 /* ASCollectionView.mm */; };
@@ -954,6 +961,7 @@
 				B35062221B010EFD0018CF92 /* ASMultidimensionalArrayUtils.h in Headers */,
 				B350625B1B010F070018CF92 /* ASEqualityHelpers.h in Headers */,
 				B35061F71B010EFD0018CF92 /* ASCollectionViewProtocols.h in Headers */,
+				509E68631B3AEDB4009B9150 /* ASCollectionViewLayoutController.h in Headers */,
 				B35062241B010EFD0018CF92 /* ASMutableAttributedStringBuilder.h in Headers */,
 				B350621D1B010EFD0018CF92 /* ASHighlightOverlayLayer.h in Headers */,
 				B35062171B010EFD0018CF92 /* ASDataController.h in Headers */,
@@ -973,6 +981,7 @@
 				B350622E1B010EFD0018CF92 /* ASTextNodeCoreTextAdditions.h in Headers */,
 				B35062061B010EFD0018CF92 /* ASNetworkImageNode.h in Headers */,
 				B350624D1B010EFD0018CF92 /* _ASScopeTimer.h in Headers */,
+				509E68651B3AEDC5009B9150 /* CGRect+ASConvenience.h in Headers */,
 				B350624F1B010EFD0018CF92 /* ASDisplayNode+DebugTiming.h in Headers */,
 				B35062211B010EFD0018CF92 /* ASLayoutRangeType.h in Headers */,
 				B35062521B010EFD0018CF92 /* ASDisplayNodeInternal.h in Headers */,
@@ -980,6 +989,7 @@
 				B35062041B010EFD0018CF92 /* ASMultiplexImageNode.h in Headers */,
 				B35062021B010EFD0018CF92 /* ASImageNode.h in Headers */,
 				B35062301B010EFD0018CF92 /* ASTextNodeRenderer.h in Headers */,
+				509E68611B3AEDA0009B9150 /* ASAbstractLayoutController.h in Headers */,
 				B350620D1B010EFD0018CF92 /* ASTextNode.h in Headers */,
 				B35062151B010EFD0018CF92 /* ASBatchContext.h in Headers */,
 				B350621B1B010EFD0018CF92 /* ASFlowLayoutController.h in Headers */,
@@ -1276,6 +1286,7 @@
 				B35062471B010EFD0018CF92 /* ASBatchFetching.m in Sources */,
 				B350624E1B010EFD0018CF92 /* ASDisplayNode+AsyncDisplay.mm in Sources */,
 				B35061F61B010EFD0018CF92 /* ASCollectionView.mm in Sources */,
+				509E68621B3AEDA5009B9150 /* ASAbstractLayoutController.mm in Sources */,
 				B350620B1B010EFD0018CF92 /* ASTableView.mm in Sources */,
 				B350623D1B010EFD0018CF92 /* _ASAsyncTransaction.m in Sources */,
 				B35062161B010EFD0018CF92 /* ASBatchContext.mm in Sources */,
@@ -1283,10 +1294,12 @@
 				B35062141B010EFD0018CF92 /* ASBasicImageDownloader.mm in Sources */,
 				B350621C1B010EFD0018CF92 /* ASFlowLayoutController.mm in Sources */,
 				B35062231B010EFD0018CF92 /* ASMultidimensionalArrayUtils.mm in Sources */,
+				509E68641B3AEDB7009B9150 /* ASCollectionViewLayoutController.mm in Sources */,
 				B350621E1B010EFD0018CF92 /* ASHighlightOverlayLayer.mm in Sources */,
 				B35062271B010EFD0018CF92 /* ASRangeController.mm in Sources */,
 				B35061F91B010EFD0018CF92 /* ASControlNode.m in Sources */,
 				B35061F41B010EFD0018CF92 /* ASCellNode.m in Sources */,
+				509E68661B3AEDD7009B9150 /* CGRect+ASConvenience.m in Sources */,
 				B35062561B010EFD0018CF92 /* ASSentinel.m in Sources */,
 				B350624A1B010EFD0018CF92 /* _ASCoreAnimationExtras.mm in Sources */,
 				B35062071B010EFD0018CF92 /* ASNetworkImageNode.mm in Sources */,
@@ -1304,6 +1317,7 @@
 				B35062121B010EFD0018CF92 /* _ASDisplayView.mm in Sources */,
 				B350624C1B010EFD0018CF92 /* _ASPendingState.m in Sources */,
 				B35062541B010EFD0018CF92 /* ASImageNode+CGExtras.m in Sources */,
+				509E68601B3AED8E009B9150 /* ASScrollDirection.m in Sources */,
 				B350622C1B010EFD0018CF92 /* ASRangeHandlerRender.mm in Sources */,
 				B350622A1B010EFD0018CF92 /* ASRangeHandlerPreload.mm in Sources */,
 				B35062511B010EFD0018CF92 /* ASDisplayNode+UIViewBridge.mm in Sources */,
