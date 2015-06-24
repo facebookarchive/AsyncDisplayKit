@@ -34,7 +34,7 @@
   ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
 }
 
-- (ASLayout *)computeLayoutThatFits:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   CGSize measuredSize = ASSizeRangeClamp(constrainedSize, [_displayNode measure:constrainedSize.max]);
   return [ASLayout newWithNode:self size:measuredSize];

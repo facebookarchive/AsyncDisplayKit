@@ -119,7 +119,7 @@
   ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
 }
 
-- (ASLayout *)computeLayoutThatFits:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_children, _style, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, _style, constrainedSize);

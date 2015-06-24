@@ -14,12 +14,12 @@
 @interface ASLayoutNode ()
 
 /**
- Override this method to compute your node's layout.
+ Override this method to calculate your node's layout.
 
- @param constrainedSize  @param constrainedSize The maximum size the receiver should fit in.
+ @param constrainedSize The maximum size the receiver should fit in.
 
  @return An ASLayout instance defining the layout of the receiver and its children.
  */
-- (ASLayout *)computeLayoutThatFits:(ASSizeRange)constrainedSize;
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize;
 
 @end

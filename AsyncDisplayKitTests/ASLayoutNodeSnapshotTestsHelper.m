@@ -50,7 +50,7 @@
 
 - (void)setLayoutNodeUnderTest:(ASLayoutNode *)layoutNodeUnderTest sizeRange:(ASSizeRange)sizeRange
 {
-  _layoutUnderTest = [layoutNodeUnderTest computeLayoutThatFits:sizeRange];
+  _layoutUnderTest = [layoutNodeUnderTest calculateLayoutThatFits:sizeRange];
   self.frame = CGRectMake(0, 0, _layoutUnderTest.size.width, _layoutUnderTest.size.height);
   [self measure:_layoutUnderTest.size];
 }

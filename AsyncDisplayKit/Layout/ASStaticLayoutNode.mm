@@ -53,7 +53,7 @@
   ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
 }
 
-- (ASLayout *)computeLayoutThatFits:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   CGSize size = {
     constrainedSize.max.width,
@@ -68,7 +68,7 @@
     };
     ASSizeRange childConstraint = ASRelativeSizeRangeResolveSizeRange(child.size, size, {{0,0}, autoMaxSize});
     ASLayoutChild *layoutChild = [ASLayoutChild newWithPosition:child.position
-                                                         layout:[child.node computeLayoutThatFits:childConstraint]];
+                                                         layout:[child.node calculateLayoutThatFits:childConstraint]];
     [layoutChildren addObject:layoutChild];
   }
   

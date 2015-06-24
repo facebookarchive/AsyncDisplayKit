@@ -21,7 +21,7 @@
 
 #pragma mark - Layout
 
-- (ASLayout *)computeLayoutThatFits:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   return [ASLayout newWithNode:self size:constrainedSize.min];
 }

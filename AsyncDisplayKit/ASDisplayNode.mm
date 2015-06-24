@@ -1271,7 +1271,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASLayoutNode *layoutNode = [self layoutNodeThatFits:constrainedSize];
-  ASLayout *layout = [layoutNode computeLayoutThatFits:{CGSizeZero, constrainedSize}];
+  ASLayout *layout = [layoutNode calculateLayoutThatFits:{CGSizeZero, constrainedSize}];
   return layout;
 }
 

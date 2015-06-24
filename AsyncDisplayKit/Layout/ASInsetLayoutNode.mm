@@ -65,7 +65,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
  Inset will compute a new constrained size for it's child after applying insets and re-positioning
  the child to respect the inset.
  */
-- (ASLayout *)computeLayoutThatFits:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   const CGFloat insetsX = (finiteOrZero(_insets.left) + finiteOrZero(_insets.right));
   const CGFloat insetsY = (finiteOrZero(_insets.top) + finiteOrZero(_insets.bottom));
@@ -85,7 +85,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
       MAX(0, constrainedSize.max.height - insetsY),
     }
   };
-  ASLayout *childLayout = [_node computeLayoutThatFits:insetConstrainedSize];
+  ASLayout *childLayout = [_node calculateLayoutThatFits:insetConstrainedSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {
     finite(childLayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),
