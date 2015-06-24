@@ -51,6 +51,6 @@
 #define ASDisplayNodeConditionalAssert(shouldTestCondition, condition, description, ...) ASDisplayNodeAssert((!(shouldTestCondition) || (condition)), nil, (description), ##__VA_ARGS__)
 #define ASDisplayNodeConditionalCAssert(shouldTestCondition, condition, description, ...) ASDisplayNodeCAssert((!(shouldTestCondition) || (condition)), nil, (description), ##__VA_ARGS__)
 
-#define ASDisplayNodeCAssertPositiveReal(description, num) ASDisplayNodeCAssert(num >= 0 && num < CGFLOAT_MAX, @"%@ must be a real positive integer.", description)
-#define ASDisplayNodeCAssertInfOrPositiveReal(description, num) ASDisplayNodeCAssert(isinf(num) || (num >= 0 && num < CGFLOAT_MAX), @"%@ must be infinite or a real positive integer.", description)
+#define ASDisplayNodeCAssertPositiveReal(description, num) ASDisplayNodeCAssert(num >= 0 && num <= CGFLOAT_MAX, @"%@ must be a real positive integer.", description)
+#define ASDisplayNodeCAssertInfOrPositiveReal(description, num) ASDisplayNodeCAssert(isinf(num) || (num >= 0 && num <= CGFLOAT_MAX), @"%@ must be infinite or a real positive integer.", description)
 
