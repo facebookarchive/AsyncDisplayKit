@@ -29,7 +29,7 @@
 
 + (instancetype)newWithPosition:(CGPoint)position node:(ASLayoutNode *)node
 {
-  return [self newWithPosition:position node:node size:{}];
+  return [self newWithPosition:position node:node size:ASRelativeSizeRangeUnconstrained];
 }
 
 @end
@@ -66,7 +66,9 @@
       constrainedSize.max.width - child.position.x,
       constrainedSize.max.height - child.position.y
     };
-    ASSizeRange childConstraint = ASRelativeSizeRangeResolveSizeRange(child.size, size, {{0,0}, autoMaxSize});
+    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.size)
+      ? ASSizeRangeMake({0, 0}, autoMaxSize)
+      : ASRelativeSizeRangeResolveSizeRange(child.size, size);
     ASLayoutChild *layoutChild = [ASLayoutChild newWithPosition:child.position
                                                          layout:[child.node calculateLayoutThatFits:childConstraint]];
     [layoutChildren addObject:layoutChild];

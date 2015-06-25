@@ -12,17 +12,15 @@
 
 #import "ASAssert.h"
 
-ASRelativeDimension const ASRelativeDimensionAuto = {ASRelativeDimensionTypeAuto, 0};
-ASSizeRange const ASSizeRangeUnconstrained = {{0,0}, {INFINITY, INFINITY}};
-ASRelativeSize const ASRelativeSizeAuto = {ASRelativeDimensionAuto, ASRelativeDimensionAuto};
-ASRelativeSizeRange const ASRelativeSizeRangeAuto = {ASRelativeSizeAuto, ASRelativeSizeAuto};
+ASRelativeDimension const ASRelativeDimensionUnconstrained = {};
+
+ASRelativeSizeRange const ASRelativeSizeRangeUnconstrained = {};
 
 #pragma mark ASRelativeDimension
 
 ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value)
 {
   if (type == ASRelativeDimensionTypePoints) { ASDisplayNodeCAssertPositiveReal(@"Points", value); }
-  if (type == ASRelativeDimensionTypeAuto) { ASDisplayNodeCAssertTrue(value == 0); }
   ASRelativeDimension dimension; dimension.type = type; dimension.value = value; return dimension;
 }
 
@@ -43,24 +41,12 @@ ASRelativeDimension ASRelativeDimensionCopy(ASRelativeDimension aDimension)
 
 BOOL ASRelativeDimensionEqualToDimension(ASRelativeDimension lhs, ASRelativeDimension rhs)
 {
-  // Implementation assumes that "auto" assigns '0' to value.
-  if (lhs.type != rhs.type) {
-    return false;
-  }
-  switch (lhs.type) {
-    case ASRelativeDimensionTypeAuto:
-      return true;
-    case ASRelativeDimensionTypePoints:
-    case ASRelativeDimensionTypePercent:
-      return lhs.value == rhs.value;
-  }
+  return lhs.type == rhs.type && lhs.value == rhs.value;
 }
 
 NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension)
 {
   switch (dimension.type) {
-    case ASRelativeDimensionTypeAuto:
-      return @"Auto";
     case ASRelativeDimensionTypePoints:
       return [NSString stringWithFormat:@"%.0fpt", dimension.value];
     case ASRelativeDimensionTypePercent:
@@ -68,11 +54,9 @@ NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension)
   }
 }
 
-CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSize, CGFloat parent)
+CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat parent)
 {
   switch (dimension.type) {
-    case ASRelativeDimensionTypeAuto:
-      return autoSize;
     case ASRelativeDimensionTypePoints:
       return dimension.value;
     case ASRelativeDimensionTypePercent:
@@ -160,16 +144,16 @@ ASRelativeSize ASRelativeSizeMakeWithCGSize(CGSize size)
                             ASRelativeDimensionMakeWithPoints(size.height));
 }
 
-CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize)
+CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize)
 {
-  return CGSizeMake(ASRelativeDimensionResolve(relativeSize.width, autoSize.width, parentSize.width),
-                    ASRelativeDimensionResolve(relativeSize.height, autoSize.height, parentSize.height));
+  return CGSizeMake(ASRelativeDimensionResolve(relativeSize.width, parentSize.width),
+                    ASRelativeDimensionResolve(relativeSize.height, parentSize.height));
 }
 
 BOOL ASRelativeSizeEqualToSize(ASRelativeSize lhs, ASRelativeSize rhs)
 {
   return ASRelativeDimensionEqualToDimension(lhs.width, rhs.width)
-  && ASRelativeDimensionEqualToDimension(lhs.height, rhs.height);
+    && ASRelativeDimensionEqualToDimension(lhs.height, rhs.height);
 }
 
 NSString *NSStringFromASRelativeSize(ASRelativeSize size)
@@ -203,16 +187,14 @@ ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeDimensions(ASRelativ
   return ASRelativeSizeRangeMakeWithExactRelativeSize(ASRelativeSizeMake(exactWidth, exactHeight));
 }
 
-ASSizeRange ASRelativeSizeRangeResolveSizeRange(ASRelativeSizeRange relativeSizeRange,
-                                                CGSize parentSize,
-                                                ASSizeRange autoSizeRange)
+BOOL ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRange lhs, ASRelativeSizeRange rhs)
 {
-  return ASSizeRangeMake(ASRelativeSizeResolveSize(relativeSizeRange.min, parentSize, autoSizeRange.min),
-                         ASRelativeSizeResolveSize(relativeSizeRange.max, parentSize, autoSizeRange.max));
+  return ASRelativeSizeEqualToSize(lhs.min, rhs.min) && ASRelativeSizeEqualToSize(lhs.max, rhs.max);
 }
 
-ASSizeRange ASRelativeSizeRangeResolveSizeRangeWithDefaultAutoSizeRange(ASRelativeSizeRange relativeSizeRange,
-                                                                        CGSize parentSize)
+ASSizeRange ASRelativeSizeRangeResolveSizeRange(ASRelativeSizeRange relativeSizeRange,
+                                                CGSize parentSize)
 {
-  return ASRelativeSizeRangeResolveSizeRange(relativeSizeRange, parentSize, ASSizeRangeUnconstrained);
+  return ASSizeRangeMake(ASRelativeSizeResolveSize(relativeSizeRange.min, parentSize),
+                         ASRelativeSizeResolveSize(relativeSizeRange.max, parentSize));
 }

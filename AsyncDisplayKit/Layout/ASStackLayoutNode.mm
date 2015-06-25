@@ -84,6 +84,7 @@
   ASStackLayoutNodeChild *c = [super new];
   if (c && initializer) {
     ASMutableStackLayoutNodeChild *mutableChild = [[ASMutableStackLayoutNodeChild alloc] init];
+    mutableChild.flexBasis = ASRelativeDimensionUnconstrained;
     initializer(mutableChild);
     c = [mutableChild copy];
   }

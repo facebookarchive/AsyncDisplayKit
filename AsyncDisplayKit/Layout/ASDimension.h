@@ -13,20 +13,17 @@
 
 /**
  A dimension relative to constraints to be provided in the future.
- A RelativeDimension can be one of three types:
+ A RelativeDimension can be one of two types:
  
- "Auto" - This indicated "I have no opinion" and may be resolved in whatever way makes most sense given
- the circumstances. This is the default type.
- 
- "Points" - Just a number. It will always resolve to exactly this amount.
- 
+ "Points" - Just a number. It will always resolve to exactly this amount. This is the default type.
+
  "Percent" - Multiplied to a provided parent amount to resolve a final amount.
  */
 typedef NS_ENUM(NSInteger, ASRelativeDimensionType) {
-  ASRelativeDimensionTypeAuto,
   ASRelativeDimensionTypePoints,
   ASRelativeDimensionTypePercent,
 };
+
 typedef struct {
   ASRelativeDimensionType type;
   CGFloat value;
@@ -52,17 +49,9 @@ typedef struct {
   ASRelativeSize max;
 } ASRelativeSizeRange;
 
-/** type = Auto; value = 0 */
-extern ASRelativeDimension const ASRelativeDimensionAuto;
+extern ASRelativeDimension const ASRelativeDimensionUnconstrained;
 
-/** min = {0,0}; max = {INFINITY, INFINITY} */
-extern ASSizeRange const ASSizeRangeUnconstrained;
-
-/** width = Auto; height = Auto */
-extern ASRelativeSize const ASRelativeSizeAuto;
-
-/** min = {Auto, Auto}; max = {Auto, Auto} */
-extern ASRelativeSizeRange const ASRelativeSizeRangeAuto;
+extern ASRelativeSizeRange const ASRelativeSizeRangeUnconstrained;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
@@ -80,7 +69,7 @@ extern BOOL ASRelativeDimensionEqualToDimension(ASRelativeDimension lhs, ASRelat
 
 extern NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension);
 
-extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSize, CGFloat parent);
+extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat parent);
 
 #pragma mark -
 #pragma mark ASSizeRange
@@ -108,8 +97,8 @@ extern ASRelativeSize ASRelativeSizeMake(ASRelativeDimension width, ASRelativeDi
 /** Convenience constructor to provide size in Points. */
 extern ASRelativeSize ASRelativeSizeMakeWithCGSize(CGSize size);
 
-/** Resolve this relative size relative to a parent size and an auto size. */
-extern CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize);
+/** Resolve this relative size relative to a parent size. */
+extern CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize);
 
 extern BOOL ASRelativeSizeEqualToSize(ASRelativeSize lhs, ASRelativeSize rhs);
 
@@ -128,25 +117,12 @@ extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactCGSize(CGSize exact);
 extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeDimensions(ASRelativeDimension exactWidth,
                                                                               ASRelativeDimension exactHeight);
 
-/**
- Provided a parent size and values to use in place of Auto, compute final dimensions for this RelativeSizeRange
- to arrive at a SizeRange.
- */
-extern ASSizeRange ASRelativeSizeRangeResolveSizeRange(ASRelativeSizeRange relativeSizeRange,
-                                                       CGSize parentSize,
-                                                       ASSizeRange autoSizeRange);
+extern BOOL ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRange lhs, ASRelativeSizeRange rhs);
 
 /**
- Provided a parent size and a default autoSizeRange, compute final dimensions for this RelativeSizeRange
- to arrive at a SizeRange. As an example:
- 
- CGSize parent = {200, 120};
- RelativeSizeRange rel = {Percent(0.5), Percent(2/3)}
- ASRelativeSizeRangeResolve(rel, parent); // {{100, 60}, {100, 60}}
- 
- The default autoSizeRange is *everything*, meaning ASSizeRangeUnconstrained.
+ Provided a parent size, compute final dimensions for this RelativeSizeRange to arrive at a SizeRange.
  */
-extern ASSizeRange ASRelativeSizeRangeResolveSizeRangeWithDefaultAutoSizeRange(ASRelativeSizeRange relativeSizeRange,
-                                                                               CGSize parentSize);
+extern ASSizeRange ASRelativeSizeRangeResolveSizeRange(ASRelativeSizeRange relativeSizeRange,
+                                                       CGSize parentSize);
 
 ASDISPLAYNODE_EXTERN_C_END

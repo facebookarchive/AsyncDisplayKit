@@ -82,7 +82,7 @@ typedef struct {
 @property (nonatomic, readonly) BOOL flexGrow;
 /** If the sum of childrens' stack dimensions is greater than the maximum size, should this node shrink? */
 @property (nonatomic, readonly) BOOL flexShrink;
-/** Specifies the initial size in the stack dimension for the child. */
+/** Specifies the initial size in the stack dimension for the child. Default to ASRelativeDimensionUnconstrained. */
 @property (nonatomic, readonly) ASRelativeDimension flexBasis;
 /** Orientation of the child along cross axis, overriding alignItems */
 @property (nonatomic, readonly) ASStackLayoutAlignSelf alignSelf;

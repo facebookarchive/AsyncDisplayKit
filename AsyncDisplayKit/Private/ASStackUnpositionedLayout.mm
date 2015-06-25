@@ -292,7 +292,11 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
 {
   const CGFloat minCrossDimension = crossDimension(style.direction, sizeRange.min);
   const CGFloat maxCrossDimension = crossDimension(style.direction, sizeRange.max);
+  
   return AS::map(children, [&](ASStackLayoutNodeChild *child) -> ASStackUnpositionedItem {
+    const BOOL isUnconstrainedFlexBasis = ASRelativeDimensionEqualToDimension(ASRelativeDimensionUnconstrained, child.flexBasis);
+    const CGFloat exactStackDimension = ASRelativeDimensionResolve(child.flexBasis, stackDimension(style.direction, size));
+
     if (useOptimizedFlexing && isFlexibleInBothDirections(child)) {
       return { child, [ASLayout newWithNode:child.node size:{0, 0}] };
     } else {
@@ -300,8 +304,8 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
         child,
         crossChildLayout(child,
                          style,
-                         ASRelativeDimensionResolve(child.flexBasis, 0, stackDimension(style.direction, size)),
-                         ASRelativeDimensionResolve(child.flexBasis, INFINITY, stackDimension(style.direction, size)),
+                         isUnconstrainedFlexBasis ? 0 : exactStackDimension,
+                         isUnconstrainedFlexBasis ? INFINITY : exactStackDimension,
                          minCrossDimension,
                          maxCrossDimension)
       };

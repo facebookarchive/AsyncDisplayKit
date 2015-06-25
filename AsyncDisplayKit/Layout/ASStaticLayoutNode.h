@@ -24,7 +24,7 @@
 + (instancetype)newWithPosition:(CGPoint)position node:(ASLayoutNode *)node size:(ASRelativeSizeRange)size;
 
 /**
- Convenience with default size is Auto in both dimensions, which sets the child's min size to zero 
+ Convenience with default size is Unconstrained in both dimensions, which sets the child's min size to zero 
  and max size to the maximum available space it can consume without overflowing the node's bounds.
  */
 + (instancetype)newWithPosition:(CGPoint)position node:(ASLayoutNode *)node;
