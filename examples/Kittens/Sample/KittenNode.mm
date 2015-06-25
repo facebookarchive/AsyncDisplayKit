@@ -135,20 +135,15 @@ static const CGFloat kInnerPadding = 10.0f;
    newWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding)
    node:
    [ASStackLayoutNode
-    newWithSize:{
-      .maxWidth = ASRelativeDimensionMakeWithPoints(constrainedSize.width),
-      .maxHeight = ASRelativeDimensionMakeWithPoints(constrainedSize.height)
-    }
-    style:{
+    newWithStyle:{
       .direction = ASStackLayoutDirectionHorizontal,
       .spacing = kInnerPadding
     }
     children:
     @[
       [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableCopy) {
-        mutableCopy.node = [ASCompositeNode
-                            newWithSize:ASLayoutNodeSizeMake(kImageSize, kImageSize)
-                            displayNode:_imageNode];
+        mutableCopy.node = [ASRatioLayoutNode newWithRatio:1.0 node:[ASCompositeNode newWithDisplayNode:_imageNode]];
+        mutableCopy.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);
       }],
       [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableCopy) {
         mutableCopy.node = [ASCompositeNode newWithDisplayNode:_textNode];
