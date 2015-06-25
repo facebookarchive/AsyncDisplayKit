@@ -642,6 +642,18 @@
   _setToViewOnly(shouldGroupAccessibilityChildren, shouldGroupAccessibilityChildren);
 }
 
+- (NSString *)accessibilityIdentifier
+{
+  _bridge_prologue;
+  return _getFromViewOnly(accessibilityIdentifier);
+}
+
+- (void)setAccessibilityIdentifier:(NSString *)accessibilityIdentifier
+{
+  _bridge_prologue;
+  _setToViewOnly(accessibilityIdentifier, accessibilityIdentifier);
+}
+
 @end
 
 

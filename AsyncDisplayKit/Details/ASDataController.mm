@@ -113,7 +113,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   return sizingQueue;
 }
 
-+ (BOOL)isSizingQueue {
++ (BOOL)executingOnSizingQueue
+{
   return kASSizingQueueContext == dispatch_get_specific(kASSizingQueueContext);
 }
 
@@ -281,6 +282,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }
     }];
 
+    // Dispatch to sizing queue in order to guarantee that any in-progress sizing operations from prior edits have completed.
+    // For example, if an initial -reloadData call is quickly followed by -reloadSections, sizing the initial set may not be done
+    // at this time.  Thus _nodes could be empty and crash in ASIndexPathsForMultidimensional[...]
     dispatch_async([ASDataController sizingQueue], ^{
       [self syncUpdateDataWithBlock:^{
         // remove elements
@@ -329,6 +333,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   for (NSUInteger j = 0; j < nodes.count && j < indexPaths.count; j += kASDataControllerSizingCountPerProcessor) {
     NSArray *subIndexPaths = [indexPaths subarrayWithRange:NSMakeRange(j, MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j))];
 
+    // TODO: The current implementation does not make use of different constrained sizes per node.
+    // There should be a fast-path that avoids all of this object creation.
     NSMutableArray *nodeBoundSizes = [[NSMutableArray alloc] initWithCapacity:kASDataControllerSizingCountPerProcessor];
     [subIndexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
       [nodeBoundSizes addObject:[NSValue valueWithCGSize:[_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath]]];
@@ -347,12 +353,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     dispatch_group_wait(layoutGroup, DISPATCH_TIME_FOREVER);
 
     [self asyncUpdateDataWithBlock:^{
-      // updating the cells
+      // Insert finished nodes into data storage
       INSERT_NODES(_nodes, indexPaths, nodes, animationOption);
     }];
   };
 
-  if ([ASDataController isSizingQueue]) {
+  if ([ASDataController executingOnSizingQueue]) {
     block();
   } else {
     dispatch_async([ASDataController sizingQueue], block);
@@ -403,9 +409,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
 {
+  // Reloading requires re-fetching the data.  Load it on the current calling thread, locking the data source.
   [self performDataFetchingWithBlock:^{
-    // The reloading operation required reloading the data
-    // Loading data in the calling thread
     NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
     [indexPaths sortedArrayUsingSelector:@selector(compare:)];
     [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
@@ -458,16 +463,14 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
     dispatch_async([ASDataController sizingQueue], ^{
       [self syncUpdateDataWithBlock:^{
-
+        // Remove everything that existed before the reload, now that we're ready to insert replacements
         NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_nodes);
         DELETE_NODES(_nodes, indexPaths, animationOption);
 
         NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, _nodes.count)];
         DELETE_SECTIONS(_nodes, indexSet, animationOption);
 
-
-        // Insert section
-
+        // Insert each section
         NSMutableArray *sections = [[NSMutableArray alloc] initWithCapacity:sectionNum];
         for (int i = 0; i < sectionNum; i++) {
           [sections addObject:[[NSMutableArray alloc] init]];
@@ -509,6 +512,15 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+
+  // Make sure that any asynchronous layout operations have finished so that those nodes are present.
+  // Otherwise a failure case could be:
+  // - Reload section 2, deleting all current nodes in that section.
+  // - New nodes are created and sizing is triggered, but they are not yet added to _nodes.
+  // - This method is called and includes an indexPath in section 2.
+  // - Unless we wait for the layout group to finish, we will crash with array out of bounds looking for the index in _nodes.
+  // FIXME: Seralization is required here.  Diff in progress to resolve.
+  
   return ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
 }
 

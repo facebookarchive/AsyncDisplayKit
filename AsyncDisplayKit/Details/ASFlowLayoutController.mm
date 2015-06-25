@@ -24,8 +24,6 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
   std::vector<std::pair<int, int>> _rangeStartPos;
   std::vector<std::pair<int, int>> _rangeEndPos;
-
-  std::vector<ASRangeTuningParameters> _tuningParameters;
 }
 
 @end
@@ -39,43 +37,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
   _layoutDirection = layoutDirection;
 
-  _tuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
-  _tuningParameters[ASLayoutRangeTypePreload] = {
-    .leadingBufferScreenfuls = 2,
-    .trailingBufferScreenfuls = 1
-  };
-  _tuningParameters[ASLayoutRangeTypeRender] = {
-    .leadingBufferScreenfuls = 3,
-    .trailingBufferScreenfuls = 2
-  };
-
   return self;
-}
-
-#pragma mark - Tuning Parameters
-
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
-{
-  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  return _tuningParameters[rangeType];
-}
-
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
-{
-  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  _tuningParameters[rangeType] = tuningParameters;
-}
-
-// Support for the deprecated tuningParameters property
-- (ASRangeTuningParameters)tuningParameters
-{
-  return [self tuningParametersForRangeType:ASLayoutRangeTypeRender];
-}
-
-// Support for the deprecated tuningParameters property
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters
-{
-  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
 }
 
 #pragma mark - Editing
@@ -147,12 +109,6 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   ASFlowLayoutDistance(endPos, _visibleRangeEndPos, _nodeSizes) > ASFlowLayoutDistance(_visibleRangeEndPos, rangeEndPos, _nodeSizes) * kASFlowLayoutControllerRefreshingThreshold;
 }
 
-- (BOOL)shouldUpdateForVisibleIndexPath:(NSArray *)indexPaths
-                                        viewportSize:(CGSize)viewportSize
-{
-  return [self shouldUpdateForVisibleIndexPaths:indexPaths viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
-}
-
 - (void)setVisibleNodeIndexPaths:(NSArray *)indexPaths
 {
   ASFindIndexPathRange(indexPaths, _visibleRangeStartPos, _visibleRangeEndPos);
@@ -162,7 +118,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
  * IndexPath array for the element in the working range.
  */
 
-- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
 {
   CGFloat viewportScreenMetric;
   ASScrollDirection leadingDirection;
@@ -201,12 +157,6 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   [indexPathSet addObject:[NSIndexPath indexPathForRow:endIter.second inSection:endIter.first]];
   
   return indexPathSet;
-}
-
-- (NSSet *)indexPathsForScrolling:(enum ASScrollDirection)scrollDirection
-                                 viewportSize:(CGSize)viewportSize
-{
-  return [self indexPathsForScrolling:scrollDirection viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
 }
 
 #pragma mark - Utility

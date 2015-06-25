@@ -533,6 +533,9 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 @property (atomic, assign)           BOOL accessibilityViewIsModal;
 @property (atomic, assign)           BOOL shouldGroupAccessibilityChildren;
 
+// Accessibility identification support
+@property (nonatomic, copy)          NSString *accessibilityIdentifier;
+
 @end
 
 /*
