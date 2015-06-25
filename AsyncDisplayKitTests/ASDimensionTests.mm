@@ -28,7 +28,7 @@
   ASSizeRange other = {{7,7}, {15,15}};
   ASSizeRange result = ASSizeRangeIntersect(range, other);
   ASSizeRange expected = {{7,7}, {10,10}};
-  XCTAssertTrue(ASSizeRangeEqualToRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
+  XCTAssertTrue(ASSizeRangeEqualToSizeRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
 }
 
 - (void)testIntersectingSizeRangeWithRangeThatContainsItReturnsSameRange
@@ -41,7 +41,7 @@
   ASSizeRange other = {{0,0}, {10,10}};
   ASSizeRange result = ASSizeRangeIntersect(range, other);
   ASSizeRange expected = {{2,2}, {8,8}};
-  XCTAssertTrue(ASSizeRangeEqualToRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
+  XCTAssertTrue(ASSizeRangeEqualToSizeRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
 }
 
 - (void)testIntersectingSizeRangeWithRangeContainedWithinItReturnsContainedRange
@@ -54,7 +54,7 @@
   ASSizeRange other = {{2,2}, {8,8}};
   ASSizeRange result = ASSizeRangeIntersect(range, other);
   ASSizeRange expected = {{2,2}, {8,8}};
-  XCTAssertTrue(ASSizeRangeEqualToRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
+  XCTAssertTrue(ASSizeRangeEqualToSizeRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
 }
 
 - (void)testIntersectingSizeRangeWithNonOverlappingRangeToRightReturnsSinglePointNearestOtherRange
@@ -67,7 +67,7 @@
   ASSizeRange other = {{10,10}, {15,15}};
   ASSizeRange result = ASSizeRangeIntersect(range, other);
   ASSizeRange expected = {{5,5}, {5,5}};
-  XCTAssertTrue(ASSizeRangeEqualToRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
+  XCTAssertTrue(ASSizeRangeEqualToSizeRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
 }
 
 - (void)testIntersectingSizeRangeWithNonOverlappingRangeToLeftReturnsSinglePointNearestOtherRange
@@ -80,7 +80,7 @@
   ASSizeRange other = {{0,0}, {5,5}};
   ASSizeRange result = ASSizeRangeIntersect(range, other);
   ASSizeRange expected = {{10,10}, {10,10}};
-  XCTAssertTrue(ASSizeRangeEqualToRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
+  XCTAssertTrue(ASSizeRangeEqualToSizeRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
 }
 
 @end

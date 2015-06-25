@@ -68,7 +68,7 @@
     };
     ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.size)
       ? ASSizeRangeMake({0, 0}, autoMaxSize)
-      : ASRelativeSizeRangeResolveSizeRange(child.size, size);
+      : ASRelativeSizeRangeResolve(child.size, size);
     ASLayoutChild *layoutChild = [ASLayoutChild newWithPosition:child.position
                                                          layout:[child.node calculateLayoutThatFits:childConstraint]];
     [layoutChildren addObject:layoutChild];

@@ -65,7 +65,7 @@ extern ASRelativeDimension ASRelativeDimensionMakeWithPercent(CGFloat percent);
 
 extern ASRelativeDimension ASRelativeDimensionCopy(ASRelativeDimension aDimension);
 
-extern BOOL ASRelativeDimensionEqualToDimension(ASRelativeDimension lhs, ASRelativeDimension rhs);
+extern BOOL ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimension lhs, ASRelativeDimension rhs);
 
 extern NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension);
 
@@ -85,7 +85,7 @@ extern CGSize ASSizeRangeClamp(ASSizeRange sizeRange, CGSize size);
  */
 extern ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange otherSizeRange);
 
-extern BOOL ASSizeRangeEqualToRange(ASSizeRange lhs, ASSizeRange rhs);
+extern BOOL ASSizeRangeEqualToSizeRange(ASSizeRange lhs, ASSizeRange rhs);
 
 extern NSString * NSStringFromASSizeRange(ASSizeRange sizeRange);
 
@@ -98,9 +98,9 @@ extern ASRelativeSize ASRelativeSizeMake(ASRelativeDimension width, ASRelativeDi
 extern ASRelativeSize ASRelativeSizeMakeWithCGSize(CGSize size);
 
 /** Resolve this relative size relative to a parent size. */
-extern CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize);
+extern CGSize ASRelativeSizeResolve(ASRelativeSize relativeSize, CGSize parentSize);
 
-extern BOOL ASRelativeSizeEqualToSize(ASRelativeSize lhs, ASRelativeSize rhs);
+extern BOOL ASRelativeSizeEqualToRelativeSize(ASRelativeSize lhs, ASRelativeSize rhs);
 
 extern NSString *NSStringFromASRelativeSize(ASRelativeSize size);
 
@@ -122,7 +122,7 @@ extern BOOL ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRange lhs,
 /**
  Provided a parent size, compute final dimensions for this RelativeSizeRange to arrive at a SizeRange.
  */
-extern ASSizeRange ASRelativeSizeRangeResolveSizeRange(ASRelativeSizeRange relativeSizeRange,
+extern ASSizeRange ASRelativeSizeRangeResolve(ASRelativeSizeRange relativeSizeRange,
                                                        CGSize parentSize);
 
 ASDISPLAYNODE_EXTERN_C_END

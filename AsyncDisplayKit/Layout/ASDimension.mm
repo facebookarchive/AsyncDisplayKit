@@ -39,7 +39,7 @@ ASRelativeDimension ASRelativeDimensionCopy(ASRelativeDimension aDimension)
   return ASRelativeDimensionMake(aDimension.type, aDimension.value);
 }
 
-BOOL ASRelativeDimensionEqualToDimension(ASRelativeDimension lhs, ASRelativeDimension rhs)
+BOOL ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimension lhs, ASRelativeDimension rhs)
 {
   return lhs.type == rhs.type && lhs.value == rhs.value;
 }
@@ -118,7 +118,7 @@ ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange otherSizeRan
   return {{w.min, h.min}, {w.max, h.max}};
 }
 
-BOOL ASSizeRangeEqualToRange(ASSizeRange lhs, ASSizeRange rhs)
+BOOL ASSizeRangeEqualToSizeRange(ASSizeRange lhs, ASSizeRange rhs)
 {
   return CGSizeEqualToSize(lhs.min, rhs.min) && CGSizeEqualToSize(lhs.max, rhs.max);
 }
@@ -150,10 +150,10 @@ CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize)
                     ASRelativeDimensionResolve(relativeSize.height, parentSize.height));
 }
 
-BOOL ASRelativeSizeEqualToSize(ASRelativeSize lhs, ASRelativeSize rhs)
+BOOL ASRelativeSizeEqualToRelativeSize(ASRelativeSize lhs, ASRelativeSize rhs)
 {
-  return ASRelativeDimensionEqualToDimension(lhs.width, rhs.width)
-    && ASRelativeDimensionEqualToDimension(lhs.height, rhs.height);
+  return ASRelativeDimensionEqualToRelativeDimension(lhs.width, rhs.width)
+    && ASRelativeDimensionEqualToRelativeDimension(lhs.height, rhs.height);
 }
 
 NSString *NSStringFromASRelativeSize(ASRelativeSize size)
@@ -189,10 +189,10 @@ ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeDimensions(ASRelativ
 
 BOOL ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRange lhs, ASRelativeSizeRange rhs)
 {
-  return ASRelativeSizeEqualToSize(lhs.min, rhs.min) && ASRelativeSizeEqualToSize(lhs.max, rhs.max);
+  return ASRelativeSizeEqualToRelativeSize(lhs.min, rhs.min) && ASRelativeSizeEqualToRelativeSize(lhs.max, rhs.max);
 }
 
-ASSizeRange ASRelativeSizeRangeResolveSizeRange(ASRelativeSizeRange relativeSizeRange,
+ASSizeRange ASRelativeSizeRangeResolve(ASRelativeSizeRange relativeSizeRange,
                                                 CGSize parentSize)
 {
   return ASSizeRangeMake(ASRelativeSizeResolveSize(relativeSizeRange.min, parentSize),
