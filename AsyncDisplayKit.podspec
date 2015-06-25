@@ -25,7 +25,10 @@ Pod::Spec.new do |spec|
 
   # ASDealloc2MainObject must be compiled with MRR
   spec.requires_arc = true
-  spec.exclude_files = ['AsyncDisplayKit/Details/ASDealloc2MainObject.m']
+  spec.exclude_files = [
+    'AsyncDisplayKit/Details/ASDealloc2MainObject.h',
+    'AsyncDisplayKit/Details/ASDealloc2MainObject.m',
+  ]
   spec.subspec 'ASDealloc2MainObject' do |mrr|
     mrr.requires_arc = false
     mrr.source_files = [
