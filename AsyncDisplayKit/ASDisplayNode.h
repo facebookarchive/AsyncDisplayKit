@@ -468,6 +468,15 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 - (void)setNeedsDisplay;    // Marks the view as needing display. Convenience for use whether view is created or not, or from a background thread.
 - (void)setNeedsLayout;     // Marks the view as needing layout.  Convenience for use whether view is created or not, or from a background thread.
 
+// UIResponder methods
+// By default these fall through to the underlying view, but can be overridden.
+- (BOOL)canBecomeFirstResponder;                                            // default==NO
+- (BOOL)becomeFirstResponder;                                               // default==NO (no-op)
+- (BOOL)canResignFirstResponder;                                            // default==YES
+- (BOOL)resignFirstResponder;                                               // default==YES (no-op)
+- (BOOL)isFirstResponder;
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender;
+
 @property (atomic, retain)           id contents;                           // default=nil
 @property (atomic, assign)           BOOL clipsToBounds;                    // default==NO
 @property (atomic, getter=isOpaque)  BOOL opaque;                           // default==YES

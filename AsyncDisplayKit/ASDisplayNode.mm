@@ -1697,6 +1697,30 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 
 }
 
+- (BOOL)canBecomeFirstResponder {
+    return NO;
+}
+
+- (BOOL)becomeFirstResponder {
+    return [self.view becomeFirstResponder];
+}
+
+- (BOOL)canResignFirstResponder {
+    return YES;
+}
+
+- (BOOL)resignFirstResponder {
+    return [self.view resignFirstResponder];
+}
+
+- (BOOL)isFirstResponder {
+    return [self.view isFirstResponder];
+}
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+    return [self.view canPerformAction:action withSender:sender];
+}
+
 @end
 
 @implementation ASDisplayNode (Debugging)
