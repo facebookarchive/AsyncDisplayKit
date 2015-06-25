@@ -35,23 +35,7 @@ typedef struct {
   CGSize max;
 } ASSizeRange;
 
-/** Expresses a size with relative dimensions. */
-typedef struct {
-  ASRelativeDimension width;
-  ASRelativeDimension height;
-} ASRelativeSize;
-
-/**
- Expresses an inclusive range of relative sizes. Used to provide additional constraint to layout.
- */
-typedef struct {
-  ASRelativeSize min;
-  ASRelativeSize max;
-} ASRelativeSizeRange;
-
 extern ASRelativeDimension const ASRelativeDimensionUnconstrained;
-
-extern ASRelativeSizeRange const ASRelativeSizeRangeUnconstrained;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
@@ -88,41 +72,5 @@ extern ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange other
 extern BOOL ASSizeRangeEqualToSizeRange(ASSizeRange lhs, ASSizeRange rhs);
 
 extern NSString * NSStringFromASSizeRange(ASSizeRange sizeRange);
-
-#pragma mark -
-#pragma mark ASRelativeSize
-
-extern ASRelativeSize ASRelativeSizeMake(ASRelativeDimension width, ASRelativeDimension height);
-
-/** Convenience constructor to provide size in Points. */
-extern ASRelativeSize ASRelativeSizeMakeWithCGSize(CGSize size);
-
-/** Resolve this relative size relative to a parent size. */
-extern CGSize ASRelativeSizeResolve(ASRelativeSize relativeSize, CGSize parentSize);
-
-extern BOOL ASRelativeSizeEqualToRelativeSize(ASRelativeSize lhs, ASRelativeSize rhs);
-
-extern NSString *NSStringFromASRelativeSize(ASRelativeSize size);
-
-#pragma mark -
-#pragma mark ASRelativeSizeRange
-
-extern ASRelativeSizeRange ASRelativeSizeRangeMake(ASRelativeSize min, ASRelativeSize max);
-
-#pragma mark Convenience constructors to provide an exact size (min == max).
-extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeSize(ASRelativeSize exact);
-
-extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactCGSize(CGSize exact);
-
-extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeDimensions(ASRelativeDimension exactWidth,
-                                                                              ASRelativeDimension exactHeight);
-
-extern BOOL ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRange lhs, ASRelativeSizeRange rhs);
-
-/**
- Provided a parent size, compute final dimensions for this RelativeSizeRange to arrive at a SizeRange.
- */
-extern ASSizeRange ASRelativeSizeRangeResolve(ASRelativeSizeRange relativeSizeRange,
-                                                       CGSize parentSize);
 
 ASDISPLAYNODE_EXTERN_C_END

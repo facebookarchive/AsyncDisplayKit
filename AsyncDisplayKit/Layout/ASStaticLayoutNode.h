@@ -9,6 +9,7 @@
  */
 
 #import <AsyncDisplayKit/ASLayoutNode.h>
+#import <AsyncDisplayKit/ASStaticLayoutNodeDimension.h>
 
 @interface ASStaticLayoutNodeChild : NSObject
 
