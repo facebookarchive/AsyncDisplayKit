@@ -522,25 +522,37 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   if ( _pendingVisibleIndexPath ) {
     NSMutableSet *indexPaths = [NSMutableSet setWithArray:self.indexPathsForVisibleRows];
 
-    BOOL (^isNextTo)(NSIndexPath *, NSIndexPath *, int) = ^(NSIndexPath *indexPath, NSIndexPath *anchor, int dir) {
-      if (!anchor) {
+    BOOL (^isAfter)(NSIndexPath *, NSIndexPath *) = ^BOOL(NSIndexPath *indexPath, NSIndexPath *anchor) {
+      if (!anchor || !indexPath) {
         return NO;
       }
       if (indexPath.section == anchor.section) {
-        return (indexPath.row == anchor.row+dir);
-      } else if (indexPath.section == anchor.section+dir && anchor.row == 0) {
-        NSIndexPath *toCompare = (dir==1) ? indexPath : anchor;
-        NSInteger lastRow = [_dataController numberOfRowsInSection:toCompare.section] - 1;
-        return (toCompare.row == lastRow);
-      } else {
-        return NO;
+        return (indexPath.row == anchor.row+1); // assumes that indexes are valid
+
+      } else if (indexPath.section > anchor.section && indexPath.row == 0) {
+        if (anchor.row != [_dataController numberOfRowsInSection:anchor.section] -1) {
+          return NO;  // anchor is not at the end of the section
+        }
+
+        NSInteger nextSection = anchor.section+1;
+        while([_dataController numberOfRowsInSection:nextSection] == 0) {
+          ++nextSection;
+        }
+
+        return indexPath.section == nextSection;
       }
+
+      return NO;
+    };
+
+    BOOL (^isBefore)(NSIndexPath *, NSIndexPath *) = ^BOOL(NSIndexPath *indexPath, NSIndexPath *anchor) {
+      return isAfter(anchor, indexPath);
     };
 
     if ( [indexPaths containsObject:_pendingVisibleIndexPath]) {
       _pendingVisibleIndexPath = nil; // once it has shown up in visibleIndexPaths, we can stop tracking it
-    } else if (!isNextTo(_pendingVisibleIndexPath, visibleIndexPaths.firstObject, -1) &&
-               !isNextTo(_pendingVisibleIndexPath, visibleIndexPaths.lastObject, +1)) {
+    } else if (!isBefore(_pendingVisibleIndexPath, visibleIndexPaths.firstObject) &&
+               !isAfter(_pendingVisibleIndexPath, visibleIndexPaths.lastObject)) {
       _pendingVisibleIndexPath = nil; // not contiguous, ignore.
     } else {
       [indexPaths addObject:_pendingVisibleIndexPath];
