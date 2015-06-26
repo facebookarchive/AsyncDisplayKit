@@ -45,19 +45,6 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignItems) {
   ASStackLayoutAlignItemsStretch,
 };
 
-/**
- Each child may override their parent stack's cross axis alignment.
- @see ASStackLayoutNodeAlignItems
- */
-typedef NS_ENUM(NSUInteger, ASStackLayoutAlignSelf) {
-  /** Inherit alignment value from containing stack. */
-  ASStackLayoutAlignSelfAuto,
-  ASStackLayoutAlignSelfStart,
-  ASStackLayoutAlignSelfEnd,
-  ASStackLayoutAlignSelfCenter,
-  ASStackLayoutAlignSelfStretch,
-};
-
 typedef struct {
   /** Specifies the direction children are stacked in. */
   ASStackLayoutDirection direction;
@@ -68,50 +55,6 @@ typedef struct {
   /** Orientation of children along cross axis */
   ASStackLayoutAlignItems alignItems;
 } ASStackLayoutNodeStyle;
-
-@class ASMutableStackLayoutNodeChild;
-
-@interface ASStackLayoutNodeChild : NSObject <NSCopying, NSMutableCopying>
-
-@property (nonatomic, readwrite) id<ASLayoutable> node;
-/** Additional space to place before the node in the stacking direction. */
-@property (nonatomic, readonly) CGFloat spacingBefore;
-/** Additional space to place after the node in the stacking direction. */
-@property (nonatomic, readonly) CGFloat spacingAfter;
-/** If the sum of childrens' stack dimensions is less than the minimum size, should this node grow? */
-@property (nonatomic, readonly) BOOL flexGrow;
-/** If the sum of childrens' stack dimensions is greater than the maximum size, should this node shrink? */
-@property (nonatomic, readonly) BOOL flexShrink;
-/** Specifies the initial size in the stack dimension for the child. Default to ASRelativeDimensionUnconstrained. */
-@property (nonatomic, readonly) ASRelativeDimension flexBasis;
-/** Orientation of the child along cross axis, overriding alignItems */
-@property (nonatomic, readonly) ASStackLayoutAlignSelf alignSelf;
-
-+(instancetype)newWithInitializer:(void(^)(ASMutableStackLayoutNodeChild *mutableChild))initializer;
-
-@end
-
-
-/** A mutable stack layout node child intended for configuration. */
-@interface ASMutableStackLayoutNodeChild : ASStackLayoutNodeChild
-
-/** A read-write version of ASStackLayoutNodeChild node property */
-@property (nonatomic, readwrite) id<ASLayoutable> node;
-/** A read-write version of ASStackLayoutNodeChild spacingBefore property */
-@property (nonatomic, readwrite) CGFloat spacingBefore;
-/** A read-write version of ASStackLayoutNodeChild spacingAfter property */
-@property (nonatomic, readwrite) CGFloat spacingAfter;
-/** A read-write version of ASStackLayoutNodeChild flexGrow property */
-@property (nonatomic, readwrite) BOOL flexGrow;
-/** A read-write version of ASStackLayoutNodeChild flexShrink property */
-@property (nonatomic, readwrite) BOOL flexShrink;
-/** A read-write version of ASStackLayoutNodeChild flexBasis property */
-@property (nonatomic, readwrite) ASRelativeDimension flexBasis;
-/** A read-write version of ASStackLayoutNodeChild alignSelf property */
-@property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
-
-@end
-
 
 /**
  A simple layout node that stacks a list of children vertically or horizontally.
@@ -137,7 +80,7 @@ typedef struct {
 
 /**
  @param style Specifies how children are laid out.
- @param children Children to be positioned, each is of type ASStackLayoutNodeChild.
+ @param children Children to be positioned, each is an object conforms to ASLayoutable protocol.
  */
 + (instancetype)newWithStyle:(ASStackLayoutNodeStyle)style children:(NSArray *)children;
 

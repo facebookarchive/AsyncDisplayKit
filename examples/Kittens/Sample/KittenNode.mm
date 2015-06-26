@@ -129,6 +129,11 @@ static const CGFloat kInnerPadding = 10.0f;
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
+  ASRatioLayoutNode *imagePlaceholder = [ASRatioLayoutNode newWithRatio:1.0 child:_imageNode];
+  imagePlaceholder.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);
+  
+  _textNode.flexShrink = YES;
+  
   id<ASLayoutable> layoutSpec =
   [ASInsetLayoutNode
    newWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding)
@@ -138,17 +143,8 @@ static const CGFloat kInnerPadding = 10.0f;
       .direction = ASStackLayoutDirectionHorizontal,
       .spacing = kInnerPadding
     }
-    children:
-    @[
-      [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableCopy) {
-        mutableCopy.node = [ASRatioLayoutNode newWithRatio:1.0 child:_imageNode];
-        mutableCopy.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);
-      }],
-      [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableCopy) {
-        mutableCopy.node = _textNode;
-        mutableCopy.flexShrink = true;
-      }]
-    ]]];
+    children:@[imagePlaceholder, _textNode]]];
+  
   return [layoutSpec calculateLayoutThatFits:constrainedSize];
 }
 

@@ -41,6 +41,13 @@
 
 @implementation ASDisplayNode
 
+@synthesize spacingBefore = _spacingBefore;
+@synthesize spacingAfter = _spacingAfter;
+@synthesize flexGrow = _flexGrow;
+@synthesize flexShrink = _flexShrink;
+@synthesize flexBasis = _flexBasis;
+@synthesize alignSelf = _alignSelf;
+
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
     return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
@@ -116,6 +123,8 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
     overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
   }
   _methodOverrides = overrides;
+  
+  _flexBasis = ASRelativeDimensionUnconstrained;
 }
 
 - (id)init

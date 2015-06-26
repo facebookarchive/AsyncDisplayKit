@@ -13,6 +13,7 @@
 #import "ASInternalHelpers.h"
 #import "ASLayoutNodeUtilities.h"
 #import "ASStackLayoutNodeUtilities.h"
+#import "ASLayoutable.h"
 
 static CGFloat crossOffset(const ASStackLayoutNodeStyle &style,
                            const ASStackUnpositionedItem &l,

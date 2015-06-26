@@ -18,6 +18,22 @@
 
 @implementation ASLayoutNode
 
+@synthesize spacingBefore = _spacingBefore;
+@synthesize spacingAfter = _spacingAfter;
+@synthesize flexGrow = _flexGrow;
+@synthesize flexShrink = _flexShrink;
+@synthesize flexBasis = _flexBasis;
+@synthesize alignSelf = _alignSelf;
+
++ (instancetype)new
+{
+  ASLayoutNode *n = [super new];
+  if (n) {
+    n->_flexBasis = ASRelativeDimensionUnconstrained;
+  }
+  return n;
+}
+
 #pragma mark - Layout
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize

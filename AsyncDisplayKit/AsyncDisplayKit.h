@@ -35,4 +35,5 @@
 #import <AsyncDisplayKit/ASOverlayLayoutNode.h>
 #import <AsyncDisplayKit/ASRatioLayoutNode.h>
 #import <AsyncDisplayKit/ASStaticLayoutNode.h>
+#import <AsyncDisplayKit/ASStackLayoutChild.h>
 #import <AsyncDisplayKit/ASStackLayoutNode.h>

@@ -95,6 +95,7 @@ static NSString *suffixForCenteringOptions(ASCenterLayoutNodeCenteringOptions ce
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
   ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
   foregroundNode.staticSize = {10, 10};
+  foregroundNode.flexGrow = YES;
   
   ASCenterLayoutNode *layoutNode =
   [ASCenterLayoutNode
@@ -102,13 +103,7 @@ static NSString *suffixForCenteringOptions(ASCenterLayoutNodeCenteringOptions ce
    sizingOptions:{}
    child:
    [ASBackgroundLayoutNode
-    newWithChild:
-    [ASStackLayoutNode
-     newWithStyle:{}
-     children:@[[ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-      mutableChild.node = foregroundNode;
-      mutableChild.flexGrow = YES;
-     }]]]
+    newWithChild:[ASStackLayoutNode newWithStyle:{} children:@[foregroundNode]]
     background:backgroundNode]];
 
   [self testLayoutNode:layoutNode sizeRange:kSize subnodes:@[backgroundNode, foregroundNode] identifier:nil];

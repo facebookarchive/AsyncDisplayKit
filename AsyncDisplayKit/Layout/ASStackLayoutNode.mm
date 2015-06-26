@@ -21,82 +21,10 @@
 #import "ASStackPositionedLayout.h"
 #import "ASStackUnpositionedLayout.h"
 
-@implementation ASMutableStackLayoutNodeChild
-@synthesize node, spacingBefore, spacingAfter, flexGrow, flexShrink, flexBasis, alignSelf;
-@end
-
-@implementation ASStackLayoutNodeChild
-
-- (instancetype)initWithNode:(ASLayoutNode *)node
-               spacingBefore:(CGFloat)spacingBefore
-                spacingAfter:(CGFloat)spacingAfter
-                    flexGrow:(BOOL)flexGrow
-                  flexShrink:(BOOL)flexShrink
-                   flexBasis:(ASRelativeDimension)flexBasis
-                   alignSelf:(ASStackLayoutAlignSelf)alignSelf
-{
-  if (node == nil)
-    return nil;
-  
-  if (self = [super init]) {
-    _node = node;
-    _spacingBefore = spacingBefore;
-    _spacingAfter = spacingAfter;
-    _flexGrow = flexGrow;
-    _flexShrink = flexShrink;
-    _flexBasis = flexBasis;
-    _alignSelf = alignSelf;
-  }
-  return self;
-}
-
-- (id)copyWithZone:(NSZone *)zone
-{
-  if ([self isKindOfClass:[ASMutableStackLayoutNodeChild class]]) {
-    return [[ASStackLayoutNodeChild alloc] initWithNode:self.node
-                                          spacingBefore:self.spacingBefore
-                                           spacingAfter:self.spacingAfter
-                                               flexGrow:self.flexGrow
-                                             flexShrink:self.flexShrink
-                                              flexBasis:self.flexBasis
-                                              alignSelf:self.alignSelf];
-  } else {
-    return self;
-  }
-}
-
-- (id)mutableCopyWithZone:(NSZone *)zone
-{
-  ASMutableStackLayoutNodeChild *mutableChild = [[ASMutableStackLayoutNodeChild alloc] init];
-  mutableChild.node = self.node;
-  mutableChild.spacingBefore = self.spacingBefore;
-  mutableChild.spacingAfter = self.spacingAfter;
-  mutableChild.flexGrow = self.flexGrow;
-  mutableChild.flexShrink = self.flexShrink;
-  mutableChild.flexBasis = self.flexBasis;
-  mutableChild.alignSelf = self.alignSelf;
-  return mutableChild;
-}
-
-+ (instancetype)newWithInitializer:(void (^)(ASMutableStackLayoutNodeChild *))initializer
-{
-  ASStackLayoutNodeChild *c = [super new];
-  if (c && initializer) {
-    ASMutableStackLayoutNodeChild *mutableChild = [[ASMutableStackLayoutNodeChild alloc] init];
-    mutableChild.flexBasis = ASRelativeDimensionUnconstrained;
-    initializer(mutableChild);
-    c = [mutableChild copy];
-  }
-  return c;
-}
-
-@end
-
-
 @implementation ASStackLayoutNode
 {
   ASStackLayoutNodeStyle _style;
-  std::vector<ASStackLayoutNodeChild *> _children;
+  std::vector<id<ASLayoutable>> _children;
 }
 
 + (instancetype)newWithStyle:(ASStackLayoutNodeStyle)style children:(NSArray *)children
@@ -104,11 +32,9 @@
   ASStackLayoutNode *n = [super new];
   if (n) {
     n->_style = style;
-    n->_children = std::vector<ASStackLayoutNodeChild *>();
-    for (ASStackLayoutNodeChild *child in children) {
-      if (child.node != nil) {
-        n->_children.push_back(child);
-      }
+    n->_children = std::vector<id<ASLayoutable>>();
+    for (id<ASLayoutable> child in children) {
+      n->_children.push_back(child);
     }
   }
   return n;
