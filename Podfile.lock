@@ -1,5 +1,5 @@
 PODS:
-  - FBSnapshotTestCase (1.5)
+  - FBSnapshotTestCase (1.8.1)
   - OCMock (2.2.4)
 
 DEPENDENCIES:
@@ -7,7 +7,7 @@ DEPENDENCIES:
   - OCMock (~> 2.2)
 
 SPEC CHECKSUMS:
-  FBSnapshotTestCase: e2914fbaabccea1dcc773d6a16b1c24540642488
-  OCMock: 6db79185520e24f9f299548f2b8b07e41d881bd5
+  FBSnapshotTestCase: 3dc3899168747a0319c5278f5b3445c13a6532dd
+  OCMock: a6a7dc0e3997fb9f35d99f72528698ebf60d64f2
 
-COCOAPODS: 0.35.0
+COCOAPODS: 0.37.1

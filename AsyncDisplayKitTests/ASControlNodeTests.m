@@ -22,7 +22,6 @@
 @end
 
 @interface ASActionController : ReceiverController
-@property (nonatomic) NSInteger hits;
 @end
 @implementation ASActionController
 - (void)action { self.hits++; }

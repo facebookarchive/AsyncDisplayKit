@@ -50,7 +50,7 @@
   [node recursivelySetDisplaySuspended:YES];
   [node.view removeFromSuperview];
 
-  [node recursivelyClearRendering];
+  [node recursivelyClearContents];
 }
 
 @end

@@ -87,6 +87,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   CGFloat _shadowOpacity;
   CGFloat _shadowRadius;
 
+  NSArray *_exclusionPaths;
+
   NSAttributedString *_composedTruncationString;
 
   NSString *_highlightedLinkAttributeName;
@@ -224,12 +226,12 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   [self _invalidateRenderer];
 }
 
-- (void)clearRendering
+- (void)clearContents
 {
   // We discard the backing store and renderer to prevent the very large
   // memory overhead of maintaining these for all text nodes.  They can be
   // regenerated when layout is necessary.
-  [super clearRendering];      // ASDisplayNode will set layer.contents = nil
+  [super clearContents];      // ASDisplayNode will set layer.contents = nil
   [self _invalidateRenderer];
 }
 
@@ -281,6 +283,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
                                                         truncationString:_composedTruncationString
                                                           truncationMode:_truncationMode
                                                         maximumLineCount:_maximumLineCount
+                                                          exclusionPaths:_exclusionPaths
                                                          constrainedSize:constrainedSize];
   }
   return _renderer;
@@ -347,6 +350,23 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   } else {
     self.isAccessibilityElement = YES;
   }
+}
+
+#pragma mark - Text Layout
+
+- (void)setExclusionPaths:(NSArray *)exclusionPaths
+{
+  if ((_exclusionPaths == nil && exclusionPaths != nil) || (![_exclusionPaths  isEqualToArray:exclusionPaths])) {
+    _exclusionPaths = exclusionPaths;
+    [self _invalidateRenderer];
+    [self invalidateCalculatedSize];
+    [self setNeedsDisplay];
+  }
+}
+
+- (NSArray *)exclusionPaths
+{
+  return _exclusionPaths;
 }
 
 #pragma mark - Drawing

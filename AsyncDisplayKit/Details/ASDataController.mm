@@ -437,7 +437,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   });
 }
 
-- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption
+- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption completion:(void (^)())completion
 {
   [self performDataFetchingWithBlock:^{
     // Fetching data in calling thread
@@ -478,6 +478,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }];
       
       [self _batchInsertNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOption];
+
+      if (completion) {
+        dispatch_async(dispatch_get_main_queue(), completion);
+      }
     });
   }];
 }
@@ -506,6 +510,23 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   ASDisplayNodeAssertMainThread();
   return ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodes, [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
+}
+
+#pragma mark - Dealloc
+
+- (void)dealloc {
+  ASDisplayNodeAssertMainThread();
+  [_nodes enumerateObjectsUsingBlock:^(NSMutableArray *section, NSUInteger sectionIndex, BOOL *stop) {
+    [section enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger rowIndex, BOOL *stop) {
+      if (node.isNodeLoaded) {
+        if (node.layerBacked) {
+          [node.layer removeFromSuperlayer];
+        } else {
+          [node.view removeFromSuperview];
+        }
+      }
+    }];
+  }];
 }
 
 @end

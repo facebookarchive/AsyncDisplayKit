@@ -149,9 +149,9 @@ static const NSInteger kMaxLitterSize = 100;
       NSArray *moarKittens = [self createLitterWithSize:kLitterBatchSize];
 
       NSMutableArray *indexPaths = [[NSMutableArray alloc] init];
-      NSInteger existingKittens = _kittenDataSource.count;
+      NSInteger existingRows = _kittenDataSource.count + 1;
       for (NSInteger i = 0; i < moarKittens.count; i++) {
-        [indexPaths addObject:[NSIndexPath indexPathForRow:existingKittens + i inSection:0]];
+        [indexPaths addObject:[NSIndexPath indexPathForRow:existingRows + i inSection:0]];
       }
 
       _kittenDataSource = [_kittenDataSource arrayByAddingObjectsFromArray:moarKittens];
