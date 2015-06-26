@@ -48,6 +48,7 @@
   BOOL accessibilityElementsHidden;
   BOOL accessibilityViewIsModal;
   BOOL shouldGroupAccessibilityChildren;
+  NSString *accessibilityIdentifier;
 
   struct {
     // Properties
@@ -97,6 +98,7 @@
     int setAccessibilityElementsHidden:1;
     int setAccessibilityViewIsModal:1;
     int setShouldGroupAccessibilityChildren:1;
+    int setAccessibilityIdentifier:1;
   } _flags;
 }
 
@@ -187,6 +189,7 @@
   accessibilityElementsHidden = NO;
   accessibilityViewIsModal = NO;
   shouldGroupAccessibilityChildren = NO;
+  accessibilityIdentifier = nil;
   edgeAntialiasingMask = (kCALayerLeftEdge | kCALayerRightEdge | kCALayerTopEdge | kCALayerBottomEdge);
 
   return self;
@@ -542,6 +545,19 @@
   _flags.setShouldGroupAccessibilityChildren = YES;
 }
 
+- (NSString *)accessibilityIdentifier
+{
+  return accessibilityIdentifier;
+}
+
+- (void)setAccessibilityIdentifier:(NSString *)newAccessibilityIdentifier
+{
+  _flags.setAccessibilityIdentifier = YES;
+  if (accessibilityIdentifier != newAccessibilityIdentifier) {
+    accessibilityIdentifier = [newAccessibilityIdentifier copy];
+  }
+}
+
 - (void)applyToLayer:(CALayer *)layer
 {
   if (_flags.setAnchorPoint)
@@ -775,6 +791,9 @@
 
   if (_flags.setShouldGroupAccessibilityChildren)
     view.shouldGroupAccessibilityChildren = shouldGroupAccessibilityChildren;
+
+  if (_flags.setAccessibilityIdentifier)
+    view.accessibilityIdentifier = accessibilityIdentifier;
 }
 
 @end
