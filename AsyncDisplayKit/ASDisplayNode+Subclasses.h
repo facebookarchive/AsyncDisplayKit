@@ -14,7 +14,6 @@
 #import <AsyncDisplayKit/ASThread.h>
 
 #import <AsyncDisplayKit/ASLayout.h>
-@class ASLayoutNode;
 
 /**
  * The subclass header _ASDisplayNode+Subclasses_ defines the following methods that either must or can be overriden by
@@ -107,22 +106,6 @@
  * out.
  */
 - (void)layoutDidFinish;
-
-- (ASLayoutNode *)layoutNodeThatFits:(CGSize)constrainedSize;
-
-/**
- * @abstract Return the calculated layout.
- *
- * @param constrainedSize The maximum size the receiver should fit in.
- *
- * @discussion Subclasses that override should expect this method to be called on a non-main thread. The returned layout
- * is cached by ASDisplayNode for quick access during -layout, via -calculatedSize. Other expensive work that needs to
- * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
- * encouraged.
- *
- * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
- */
-- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize;
 
 /**
  * @abstract Invalidate previously measured and cached layout.

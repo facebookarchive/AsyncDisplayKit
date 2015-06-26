@@ -13,24 +13,22 @@
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
 
-#import "ASLayoutNodeSubclass.h"
-
 @interface ASBackgroundLayoutNode ()
 {
-  ASLayoutNode *_node;
-  ASLayoutNode *_background;
+  id<ASLayoutable> _child;
+  id<ASLayoutable> _background;
 }
 @end
 
 @implementation ASBackgroundLayoutNode
 
-+ (instancetype)newWithNode:(ASLayoutNode *)node background:(ASLayoutNode *)background
++ (instancetype)newWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
 {
-  if (node == nil) {
+  if (child == nil) {
     return nil;
   }
   ASBackgroundLayoutNode *n = [super new];
-  n->_node = node;
+  n->_child = child;
   n->_background = background;
   return n;
 }
@@ -45,7 +43,7 @@
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  ASLayout *contentsLayout = [_node calculateLayoutThatFits:constrainedSize];
+  ASLayout *contentsLayout = [_child calculateLayoutThatFits:constrainedSize];
 
   NSMutableArray *children = [NSMutableArray arrayWithCapacity:2];
   if (_background) {
@@ -55,7 +53,7 @@
   }
   [children addObject:[ASLayoutChild newWithPosition:{0,0} layout:contentsLayout]];
 
-  return [ASLayout newWithNode:self size:contentsLayout.size children:children];
+  return [ASLayout newWithLayoutableObject:self size:contentsLayout.size children:children];
 }
 
 @end

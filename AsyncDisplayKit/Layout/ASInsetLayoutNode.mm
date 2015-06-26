@@ -14,12 +14,11 @@
 #import "ASBaseDefines.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayoutNodeSubclass.h"
 
 @interface ASInsetLayoutNode ()
 {
   UIEdgeInsets _insets;
-  ASLayoutNode *_node;
+  id<ASLayoutable> _child;
 }
 @end
 
@@ -43,15 +42,15 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
 
 @implementation ASInsetLayoutNode
 
-+ (instancetype)newWithInsets:(UIEdgeInsets)insets node:(ASLayoutNode *)node
++ (instancetype)newWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child
 {
-  if (node == nil) {
+  if (child == nil) {
     return nil;
   }
   ASInsetLayoutNode *n = [super new];
   if (n) {
     n->_insets = insets;
-    n->_node = node;
+    n->_child = child;
   }
   return n;
 }
@@ -85,7 +84,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
       MAX(0, constrainedSize.max.height - insetsY),
     }
   };
-  ASLayout *childLayout = [_node calculateLayoutThatFits:insetConstrainedSize];
+  ASLayout *childLayout = [_child calculateLayoutThatFits:insetConstrainedSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {
     finite(childLayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),
@@ -100,9 +99,9 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
                            constrainedSize.max.height -
                            (finite(_insets.bottom,
                                    centerInset(constrainedSize.max.height, childLayout.size.height)) + childLayout.size.height));
-  return [ASLayout newWithNode:self
-                          size:computedSize
-                      children:@[[ASLayoutChild newWithPosition:{x,y} layout:childLayout]]];
+  return [ASLayout newWithLayoutableObject:self
+                                      size:computedSize
+                                  children:@[[ASLayoutChild newWithPosition:{x,y} layout:childLayout]]];
 }
 
 @end

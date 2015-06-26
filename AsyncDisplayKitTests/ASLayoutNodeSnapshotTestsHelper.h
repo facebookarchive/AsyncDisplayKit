@@ -7,7 +7,8 @@
 //
 
 #import "ASSnapshotTestCase.h"
-#import "ASCompositeNode.h"
+
+@class ASLayoutNode;
 
 @interface ASLayoutNodeSnapshotTestCase: ASSnapshotTestCase
 /**
@@ -18,7 +19,7 @@
  @param identifier An optional identifier, used to identify this snapshot test.
  
  @discussion In order to make the layout node visible, it is embeded to a ASDisplayNode host.
- Any display nodes used within the layout (via ASCompositeNode) must be provided.
+ Any display nodes used within the layout must be provided.
  They will be added to the host in the same order as the subnodes array.
  */
 - (void)testLayoutNode:(ASLayoutNode *)layoutNode

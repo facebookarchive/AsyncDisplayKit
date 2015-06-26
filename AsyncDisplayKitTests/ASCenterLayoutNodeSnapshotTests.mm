@@ -53,12 +53,12 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
   
   ASLayoutNode *layoutNode =
   [ASBackgroundLayoutNode
-   newWithNode:
+   newWithChild:
    [ASCenterLayoutNode
     newWithCenteringOptions:options
     sizingOptions:sizingOptions
-    child:[ASCompositeNode newWithDisplayNode:foregroundNode]]
-   background:[ASCompositeNode newWithDisplayNode:backgroundNode]];
+    child:foregroundNode]
+   background:backgroundNode];
 
   [self testLayoutNode:layoutNode
              sizeRange:kSize
@@ -102,14 +102,14 @@ static NSString *suffixForCenteringOptions(ASCenterLayoutNodeCenteringOptions ce
    sizingOptions:{}
    child:
    [ASBackgroundLayoutNode
-    newWithNode:
+    newWithChild:
     [ASStackLayoutNode
      newWithStyle:{}
      children:@[[ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-      mutableChild.node = [ASCompositeNode newWithDisplayNode:foregroundNode];
+      mutableChild.node = foregroundNode;
       mutableChild.flexGrow = YES;
      }]]]
-    background: [ASCompositeNode newWithDisplayNode:backgroundNode]]];
+    background:backgroundNode]];
 
   [self testLayoutNode:layoutNode sizeRange:kSize subnodes:@[backgroundNode, foregroundNode] identifier:nil];
 }

@@ -18,7 +18,6 @@
 #import "ASImageNode+CGExtras.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayoutNode.h"
 
 @interface _ASImageNodeDrawParameters : NSObject
 
@@ -109,13 +108,13 @@
   return nil;
 }
 
-- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   ASDN::MutexLocker l(_imageLock);
   CGSize size = CGSizeZero;
   if (_image)
     size = _image.size;
-  return [ASLayout newWithNode:[ASLayoutNode new] size:size];
+  return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
 }
 
 - (void)setImage:(UIImage *)image

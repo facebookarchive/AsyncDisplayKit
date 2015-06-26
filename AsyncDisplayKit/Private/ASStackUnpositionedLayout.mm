@@ -13,7 +13,6 @@
 #import <numeric>
 
 #import "ASLayoutNodeUtilities.h"
-#import "ASLayoutNodeSubclass.h"
 #import "ASStackLayoutNodeUtilities.h"
 
 /**
@@ -298,7 +297,7 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
     const CGFloat exactStackDimension = ASRelativeDimensionResolve(child.flexBasis, stackDimension(style.direction, size));
 
     if (useOptimizedFlexing && isFlexibleInBothDirections(child)) {
-      return { child, [ASLayout newWithNode:child.node size:{0, 0}] };
+      return { child, [ASLayout newWithLayoutableObject:child.node size:{0, 0}] };
     } else {
       return {
         child,

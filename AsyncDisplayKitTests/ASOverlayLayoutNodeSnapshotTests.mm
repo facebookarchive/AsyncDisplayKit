@@ -34,12 +34,12 @@ static const ASSizeRange kSize = {{320, 320}, {320, 320}};
   
   ASLayoutNode *layoutNode =
   [ASOverlayLayoutNode
-   newWithNode:[ASCompositeNode newWithDisplayNode:backgroundNode]
+   newWithChild:backgroundNode
    overlay:
    [ASCenterLayoutNode
     newWithCenteringOptions:ASCenterLayoutNodeCenteringXY
     sizingOptions:{}
-    child:[ASCompositeNode newWithDisplayNode:foregroundNode]]];
+    child:foregroundNode]];
   
   [self testLayoutNode:layoutNode sizeRange:kSize subnodes:@[backgroundNode, foregroundNode] identifier: nil];
 }

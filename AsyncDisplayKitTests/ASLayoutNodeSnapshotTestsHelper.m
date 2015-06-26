@@ -8,8 +8,8 @@
 
 #import "ASLayoutNodeSnapshotTestsHelper.h"
 
-#import "ASDisplayNode+Subclasses.h"
-#import "ASLayoutNodeSubclass.h"
+#import "ASDisplayNode.h"
+#import "ASLayoutNode.h"
 
 @interface ASTestNode : ASDisplayNode
 - (void)setLayoutNodeUnderTest:(ASLayoutNode *)layoutNodeUnderTest sizeRange:(ASSizeRange)sizeRange;
@@ -55,7 +55,7 @@
   [self measure:_layoutUnderTest.size];
 }
 
-- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   return _layoutUnderTest;
 }
@@ -64,11 +64,11 @@
 
 @implementation ASStaticSizeDisplayNode
 
-- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   return CGSizeEqualToSize(_staticSize, CGSizeZero)
     ? [super calculateLayoutThatFits:constrainedSize]
-    : [ASLayout newWithNode:[ASLayoutNode new] size:_staticSize];
+    : [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, _staticSize)];
 }
 
 @end

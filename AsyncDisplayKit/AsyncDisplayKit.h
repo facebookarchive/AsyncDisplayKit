@@ -27,7 +27,7 @@
 
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASDimension.h>
-#import <AsyncDisplayKit/ASCompositeNode.h>
+#import <AsyncDisplayKit/ASLayoutable.h>
 #import <AsyncDisplayKit/ASLayoutNode.h>
 #import <AsyncDisplayKit/ASBackgroundLayoutNode.h>
 #import <AsyncDisplayKit/ASCenterLayoutNode.h>

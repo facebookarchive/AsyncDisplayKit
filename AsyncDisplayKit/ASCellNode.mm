@@ -13,7 +13,6 @@
 #import <AsyncDisplayKit/ASTextNode.h>
 
 #import "ASInsetLayoutNode.h"
-#import "ASCompositeNode.h"
 
 #pragma mark -
 #pragma mark ASCellNode
@@ -106,12 +105,12 @@ static const CGFloat kFontSize = 18.0f;
   return self;
 }
 
-- (ASLayoutNode *)layoutNodeThatFits:(CGSize)constrainedSize
-{
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize{
   static const CGFloat kHorizontalPadding = 15.0f;
   static const CGFloat kVerticalPadding = 11.0f;
   UIEdgeInsets insets = UIEdgeInsetsMake(kVerticalPadding, kHorizontalPadding, kVerticalPadding, kHorizontalPadding);
-  return [ASInsetLayoutNode newWithInsets:insets node:[ASCompositeNode newWithDisplayNode:_textNode]];
+  id<ASLayoutable> layout = [ASInsetLayoutNode newWithInsets:insets child:_textNode];
+  return [layout calculateLayoutThatFits:constrainedSize];
 }
 
 - (void)setText:(NSString *)text

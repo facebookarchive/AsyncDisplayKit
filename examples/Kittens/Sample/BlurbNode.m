@@ -15,7 +15,6 @@
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 
 #import <AsyncDisplayKit/ASInsetLayoutNode.h>
-#import <AsyncDisplayKit/ASCompositeNode.h>
 
 static CGFloat kTextPadding = 10.0f;
 static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
@@ -72,11 +71,12 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
   [super didLoad];
 }
 
-- (ASLayoutNode *)layoutNodeThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   // called on a background thread.  custom nodes must call -measure: on their subnodes in -calculateSizeThatFits:
   UIEdgeInsets insets = UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding);
-  return [ASInsetLayoutNode newWithInsets:insets node:[ASCompositeNode newWithDisplayNode:_textNode]];
+  id<ASLayoutable> layoutSpec = [ASInsetLayoutNode newWithInsets:insets child:_textNode];
+  return [layoutSpec calculateLayoutThatFits:constrainedSize];
 }
 
 #pragma mark -

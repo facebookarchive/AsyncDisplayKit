@@ -16,27 +16,25 @@
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
 
-#import "ASLayoutNodeSubclass.h"
-
 #import "ASInternalHelpers.h"
 
 @implementation ASRatioLayoutNode
 {
   CGFloat _ratio;
-  ASLayoutNode *_node;
+  id<ASLayoutable> _child;
 }
 
-+ (instancetype)newWithRatio:(CGFloat)ratio node:(ASLayoutNode *)node
++ (instancetype)newWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child
 {
   ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
-  if (ratio <= 0) {
+  if (child == nil) {
     return nil;
   }
 
   ASRatioLayoutNode *n = [super new];
   if (n) {
     n->_ratio = ratio;
-    n->_node = node;
+    n->_child = child;
   }
   return n;
 }
@@ -69,10 +67,10 @@
 
   // If there is no max size in *either* dimension, we can't apply the ratio, so just pass our size range through.
   const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
-  ASLayout *childLayout = [_node calculateLayoutThatFits:childRange];
-  return [ASLayout newWithNode:self
-                          size:childLayout.size
-                      children:@[[ASLayoutChild newWithPosition:{0, 0} layout:childLayout]]];
+  ASLayout *childLayout = [_child calculateLayoutThatFits:childRange];
+  return [ASLayout newWithLayoutableObject:self
+                                      size:childLayout.size
+                                  children:@[[ASLayoutChild newWithPosition:{0, 0} layout:childLayout]]];
 }
 
 @end

@@ -16,10 +16,10 @@
 @interface ASBackgroundLayoutNode : ASLayoutNode
 
 /**
- @param node A child that is laid out to determine the size of this node. If this is nil, then this method
+ @param child A child that is laid out to determine the size of this node. If this is nil, then this method
         returns nil.
- @param background A child that is laid out behind it. May be nil, in which case the background is omitted.
+ @param background A layoutable object that is laid out behind the child. May be nil, in which case the background is omitted.
  */
-+ (instancetype)newWithNode:(ASLayoutNode *)node background:(ASLayoutNode *)background;
++ (instancetype)newWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
 
 @end

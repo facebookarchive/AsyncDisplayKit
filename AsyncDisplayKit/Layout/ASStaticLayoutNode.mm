@@ -11,7 +11,6 @@
 #import "ASStaticLayoutNode.h"
 
 #import "ASLayoutNodeUtilities.h"
-#import "ASLayoutNodeSubclass.h"
 #import "ASInternalHelpers.h"
 
 @implementation ASStaticLayoutNodeChild
@@ -88,7 +87,9 @@
     }
   }
 
-  return [ASLayout newWithNode:self size:ASSizeRangeClamp(constrainedSize, size) children:layoutChildren];
+  return [ASLayout newWithLayoutableObject:self
+                                      size:ASSizeRangeClamp(constrainedSize, size)
+                                  children:layoutChildren];
 }
 
 @end

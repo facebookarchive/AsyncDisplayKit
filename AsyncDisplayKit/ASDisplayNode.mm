@@ -20,8 +20,6 @@
 #import "ASDisplayNodeExtras.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayoutNodeSubclass.h"
-#import "ASCompositeNode.h"
 #import "ASLayoutNodeUtilities.h"
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
@@ -432,7 +430,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   //  - the width is different from the last time
   //  - the height is different from the last time
   if (!_flags.isMeasured || !CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
-    _layout = [self calculateLayoutThatFits:constrainedSize];
+    _layout = [self calculateLayoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)];
     _constrainedSize = constrainedSize;
     _flags.isMeasured = YES;
   }
@@ -1261,18 +1259,10 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 #pragma mark - For Subclasses
 
-- (ASLayoutNode *)layoutNodeThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  return [ASLayoutNode new];
-}
-
-- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
-{
-  ASDisplayNodeAssertThreadAffinity(self);
-  ASLayoutNode *layoutNode = [self layoutNodeThatFits:constrainedSize];
-  ASLayout *layout = [layoutNode calculateLayoutThatFits:{CGSizeZero, constrainedSize}];
-  return layout;
+  return [ASLayout newWithLayoutableObject:self size:constrainedSize.min];
 }
 
 - (ASLayout *)calculatedLayout
@@ -1389,16 +1379,15 @@ static NSInteger incrementIfFound(NSInteger i) {
     if (context.visited) {
       stack.pop();
     } else {
-      ASDisplayNodeAssertNotNil(context.layout.node, "node is required in calculated ASLayout.");
+      ASDisplayNodeAssertNotNil(context.layout.layoutableObject, "layoutableObject is required in calculated ASLayout.");
       context.visited = YES;
       
-      if ([context.layout.node isKindOfClass:[ASCompositeNode class]]) {
-        ASDisplayNode *subnode = ((ASCompositeNode *)context.layout.node).displayNode;
-        ASDisplayNodeAssertNotNil(subnode, "displayNode is required in ASCompositeNode.");
-        
+      id<ASLayoutable> layoutableObject = context.layout.layoutableObject;
+      if ([layoutableObject isKindOfClass:[ASDisplayNode class]] && layoutableObject != self) {
         CGPoint subnodePosition = context.absolutePosition;
         CGSize subnodeSize = context.layout.size;
-        subnode.frame = CGRectMake(subnodePosition.x, subnodePosition.y, subnodeSize.width, subnodeSize.height);
+        ((ASDisplayNode *)layoutableObject).frame = CGRectMake(subnodePosition.x, subnodePosition.y,
+                                                               subnodeSize.width, subnodeSize.height);
       }
 
       for (ASLayoutChild *child in context.layout.children) {

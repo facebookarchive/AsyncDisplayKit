@@ -10,25 +10,26 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASAssert.h>
-
-@class ASLayoutNode;
+#import <AsyncDisplayKit/ASLayoutable.h>
 
 /** Represents the computed size of a layout node, as well as the computed sizes and positions of its children. */
 @interface ASLayout : NSObject
 
-@property (nonatomic, readonly) ASLayoutNode *node;
+@property (nonatomic, readonly) id<ASLayoutable> layoutableObject;
 @property (nonatomic, readonly) CGSize size;
 /** 
  * Each item is of type ASLayoutChild. 
  */
 @property (nonatomic, readonly) NSArray *children;
 
-+ (instancetype)newWithNode:(ASLayoutNode *)node size:(CGSize)size children:(NSArray *)children;
++ (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                                   size:(CGSize)size
+                               children:(NSArray *)children;
 
 /**
  * Convenience that does not have any children.
  */
-+ (instancetype)newWithNode:(ASLayoutNode *)node size:(CGSize)size;
++ (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
 
 @end
 

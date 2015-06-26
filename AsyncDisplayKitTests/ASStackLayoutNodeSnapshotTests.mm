@@ -26,10 +26,10 @@
   self.recordMode = NO;
 }
 
-static ASStackLayoutNodeChild *flexChild(ASLayoutNode *n, BOOL flex)
+static ASStackLayoutNodeChild *flexChild(id<ASLayoutable> child, BOOL flex)
 {
   return [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-    mutableChild.node = n;
+    mutableChild.node = child;
     mutableChild.flexGrow = flex;
     mutableChild.flexShrink = flex;
   }];
@@ -64,9 +64,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   };
   NSArray *subnodes = defaultSubnodesWithSameSize({50, 50});
   NSArray *children = @[
-                        flexChild([ASCompositeNode newWithDisplayNode:subnodes[0]], flex),
-                        flexChild([ASCompositeNode newWithDisplayNode:subnodes[1]], flex),
-                        flexChild([ASCompositeNode newWithDisplayNode:subnodes[2]], flex)
+                        flexChild(subnodes[0], flex),
+                        flexChild(subnodes[1], flex),
+                        flexChild(subnodes[2], flex)
                         ];
   
   [self testStackLayoutNodeWithStyle:style children:children sizeRange:sizeRange subnodes:subnodes identifier:identifier];
@@ -82,8 +82,8 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   
   ASLayoutNode *layoutNode =
   [ASBackgroundLayoutNode
-   newWithNode:[ASStackLayoutNode newWithStyle:style children:children]
-   background:[ASCompositeNode newWithDisplayNode:backgroundNode]];
+   newWithChild:[ASStackLayoutNode newWithStyle:style children:children]
+   background:backgroundNode];
   
   NSMutableArray *newSubnodes = [NSMutableArray arrayWithObject:backgroundNode];
   [newSubnodes addObjectsFromArray:subnodes];
@@ -118,15 +118,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   NSArray *children = @[
                         // After flexShrink-able children are all clamped to zero, the sum of their widths is 100px.
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node = subnodes[0];
                           mutableChild.flexShrink = NO;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node = subnodes[1];
                           mutableChild.flexShrink = YES;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node = subnodes[2];
                           mutableChild.flexShrink = NO;
                         }]
                         ];
@@ -145,9 +145,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {50, 50};
 
   NSArray *children = @[
-                        flexChild([ASCompositeNode newWithDisplayNode:subnodes[0]], YES),
-                        flexChild([ASCompositeNode newWithDisplayNode:subnodes[1]], YES),
-                        flexChild([ASCompositeNode newWithDisplayNode:subnodes[2]], YES)
+                        flexChild(subnodes[0], YES),
+                        flexChild(subnodes[1], YES),
+                        flexChild(subnodes[2], YES)
                         ];
 
   // width 300px; height 0-150px.
@@ -170,13 +170,13 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node = subnodes[0];
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node = subnodes[1];
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node = subnodes[2];
                         }]
                         ];
   
@@ -203,13 +203,13 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node = subnodes[0];
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node = subnodes[1];
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node = subnodes[2];
                         }]
                         ];
   // width 0-300px; height 300px
@@ -226,9 +226,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   ASLayoutNode *layoutNode =
   [ASInsetLayoutNode
    newWithInsets:{10, 10, 10 ,10}
-   node:
+   child:
    [ASBackgroundLayoutNode
-    newWithNode:
+    newWithChild:
     [ASStackLayoutNode
      newWithStyle:{
        .direction = ASStackLayoutDirectionVertical,
@@ -239,7 +239,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
                 [ASStackLayoutNodeChild new],
                 [ASStackLayoutNodeChild new]
                 ]]
-    background:[ASCompositeNode newWithDisplayNode:backgroundNode]]];
+    background:backgroundNode]];
   
   // width 300px; height 0-300px
   static ASSizeRange kVariableHeight = {{300, 0}, {300, 300}};
@@ -259,14 +259,14 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.spacingBefore = 10;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.spacingBefore = 20;
                         }]
                         ];
@@ -274,14 +274,14 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   children = @[
                [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                 mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                 mutableChild.node =  subnodes[0];
                }],
                [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                 mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                 mutableChild.node =  subnodes[1];
                  mutableChild.spacingAfter = 10;
                }],
                [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                 mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                 mutableChild.node =  subnodes[2];
                  mutableChild.spacingAfter = 20;
                }]
                ];
@@ -290,15 +290,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   style.spacing = 10;
   children = @[
                [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                 mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                 mutableChild.node =  subnodes[0];
                }],
                [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                 mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                 mutableChild.node =  subnodes[1];
                  mutableChild.spacingBefore = -10;
                  mutableChild.spacingAfter = -10;
                }],
                [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                 mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                 mutableChild.node =  subnodes[2];
                }]
                ];
   [self testStackLayoutNodeWithStyle:style children:children sizeRange:kAnySize subnodes:subnodes identifier:@"spacingBalancedOut"];
@@ -318,15 +318,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.spacingBefore = 0;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.spacingBefore = 20;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.spacingBefore = 30;
                         }]
                         ];
@@ -348,15 +348,13 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   
   NSArray *children = @[
                       [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                        mutableChild.node = [ASRatioLayoutNode
-                                             newWithRatio:1.5
-                                             node:[ASCompositeNode newWithDisplayNode:subnodes[0]]];
+                        mutableChild.node = [ASRatioLayoutNode newWithRatio:1.5 child:subnodes[0]];
                         mutableChild.flexBasis = ASRelativeDimensionMakeWithPercent(1);
                         mutableChild.flexGrow = YES;
                         mutableChild.flexShrink = YES;
                       }],
                       [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                        mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                        mutableChild.node =  subnodes[1];
                       }]
                       ];
   static ASSizeRange kFixedWidth = {{150, 0}, {150, INFINITY}};
@@ -379,11 +377,11 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.flexShrink = YES;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.flexShrink = YES;
                         }],
                         ];
@@ -404,10 +402,10 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.alignSelf = ASStackLayoutAlignSelfCenter;
                         }],
                         ];
@@ -430,15 +428,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.spacingBefore = 0;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.spacingBefore = 20;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.spacingBefore = 30;
                         }]
                         ];
@@ -461,15 +459,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.spacingBefore = 0;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.spacingBefore = 20;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.spacingBefore = 30;
                         }]
                         ];
@@ -492,15 +490,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.spacingBefore = 0;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.spacingBefore = 20;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.spacingBefore = 30;
                         }]
                         ];
@@ -523,15 +521,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.spacingBefore = 0;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.spacingBefore = 20;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.spacingBefore = 30;
                         }]
                         ];
@@ -555,15 +553,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.spacingBefore = 0;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.spacingBefore = 20;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.spacingBefore = 30;
                         }]
                         ];
@@ -589,17 +587,17 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.flexGrow = YES;
                           mutableChild.flexBasis = ASRelativeDimensionMakeWithPoints(10);
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.flexGrow = YES;
                           mutableChild.flexBasis = ASRelativeDimensionMakeWithPoints(10);
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.flexGrow = YES;
                           mutableChild.flexBasis = ASRelativeDimensionMakeWithPoints(10);
                         }]
@@ -619,18 +617,18 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   NSArray *subnodes = defaultSubnodesWithSameSize({50, 50});
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.flexGrow = YES;
                           // This should override the intrinsic size of 50pts and instead compute to 50% = 100pts.
                           // The result should be that the red box is twice as wide as the blue and gree boxes after flexing.
                           mutableChild.flexBasis = ASRelativeDimensionMakeWithPercent(0.5);
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.flexGrow = YES;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.flexGrow = YES;
                         }]
                         ];
@@ -649,15 +647,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.flexBasis = ASRelativeDimensionMakeWithPoints(20);
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.flexBasis = ASRelativeDimensionMakeWithPoints(20);
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.flexBasis = ASRelativeDimensionMakeWithPoints(20);
                         }]
                         ];
@@ -679,26 +677,23 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
   // Instead it should be stretched to 300 points tall, matching the red child and not overlapping the green inset.
   ASLayoutNode *layoutNode =
   [ASBackgroundLayoutNode
-   newWithNode:
+   newWithChild:
    [ASInsetLayoutNode
     newWithInsets:UIEdgeInsetsMake(10, 10, 10, 10)
-    node:
-   [ASStackLayoutNode
-    newWithStyle:{
+    child:
+    [ASStackLayoutNode
+     newWithStyle:{
       .direction = ASStackLayoutDirectionHorizontal,
       .alignItems = ASStackLayoutAlignItemsStretch,
-    }
-    children:
-    @[
-      [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-        mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
-      }],
-      flexChild([ASRatioLayoutNode
-                 newWithRatio:1.0
-                 node:[ASCompositeNode newWithDisplayNode:subnodes[2]]],
-                YES),
-    ]]]
-   background:[ASCompositeNode newWithDisplayNode:subnodes[0]]];
+     }
+     children:
+     @[
+       [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
+          mutableChild.node = subnodes[1];
+       }],
+       flexChild([ASRatioLayoutNode newWithRatio:1.0 child:subnodes[2]], YES),
+      ]]]
+   background:subnodes[0]];
 
   static ASSizeRange kSize = {{300, 0}, {300, INFINITY}};
   [self testLayoutNode:layoutNode sizeRange:kSize subnodes:subnodes identifier:nil];
@@ -715,15 +710,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize)
 
   NSArray *children = @[
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[0]];
+                          mutableChild.node =  subnodes[0];
                           mutableChild.flexShrink = YES;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[1]];
+                          mutableChild.node =  subnodes[1];
                           mutableChild.flexShrink = NO;
                         }],
                         [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableChild) {
-                          mutableChild.node = [ASCompositeNode newWithDisplayNode:subnodes[2]];
+                          mutableChild.node =  subnodes[2];
                           mutableChild.flexShrink = YES;
                         }]
                         ];

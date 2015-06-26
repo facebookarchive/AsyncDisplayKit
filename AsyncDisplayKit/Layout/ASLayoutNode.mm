@@ -9,7 +9,6 @@
  */
 
 #import "ASLayoutNode.h"
-#import "ASLayoutNodeSubclass.h"
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
@@ -23,7 +22,7 @@
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  return [ASLayout newWithNode:self size:constrainedSize.min];
+  return [ASLayout newWithLayoutableObject:self size:constrainedSize.min];
 }
 
 @end

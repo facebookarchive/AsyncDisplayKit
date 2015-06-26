@@ -11,18 +11,17 @@
 #import "ASCenterLayoutNode.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayoutNodeSubclass.h"
 
 @implementation ASCenterLayoutNode
 {
   ASCenterLayoutNodeCenteringOptions _centeringOptions;
   ASCenterLayoutNodeSizingOptions _sizingOptions;
-  ASLayoutNode *_child;
+  id<ASLayoutable> _child;
 }
 
 + (instancetype)newWithCenteringOptions:(ASCenterLayoutNodeCenteringOptions)centeringOptions
                           sizingOptions:(ASCenterLayoutNodeSizingOptions)sizingOptions
-                                  child:(ASLayoutNode *)child
+                                  child:(id<ASLayoutable>)child
 {
   ASCenterLayoutNode *n = [super new];
   if (n) {
@@ -73,9 +72,9 @@
     ASRoundPixelValue(shouldCenterAlongY ? (size.height - childLayout.size.height) * 0.5f : 0)
   };
 
-  return [ASLayout newWithNode:self
-                          size:size
-                      children:@[[ASLayoutChild newWithPosition:childPosition layout:childLayout]]];
+  return [ASLayout newWithLayoutableObject:self
+                                      size:size
+                                  children:@[[ASLayoutChild newWithPosition:childPosition layout:childLayout]]];
 }
 
 @end

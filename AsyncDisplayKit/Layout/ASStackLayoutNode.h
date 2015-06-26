@@ -73,7 +73,7 @@ typedef struct {
 
 @interface ASStackLayoutNodeChild : NSObject <NSCopying, NSMutableCopying>
 
-@property (nonatomic, readonly) ASLayoutNode *node;
+@property (nonatomic, readwrite) id<ASLayoutable> node;
 /** Additional space to place before the node in the stacking direction. */
 @property (nonatomic, readonly) CGFloat spacingBefore;
 /** Additional space to place after the node in the stacking direction. */
@@ -96,7 +96,7 @@ typedef struct {
 @interface ASMutableStackLayoutNodeChild : ASStackLayoutNodeChild
 
 /** A read-write version of ASStackLayoutNodeChild node property */
-@property (nonatomic, readwrite) ASLayoutNode *node;
+@property (nonatomic, readwrite) id<ASLayoutable> node;
 /** A read-write version of ASStackLayoutNodeChild spacingBefore property */
 @property (nonatomic, readwrite) CGFloat spacingBefore;
 /** A read-write version of ASStackLayoutNodeChild spacingAfter property */

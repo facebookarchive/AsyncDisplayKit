@@ -15,7 +15,6 @@
 
 #import <AsyncDisplayKit/ASStackLayoutNode.h>
 #import <AsyncDisplayKit/ASInsetLayoutNode.h>
-#import <AsyncDisplayKit/ASCompositeNode.h>
 
 static const CGFloat kImageSize = 80.0f;
 static const CGFloat kOuterPadding = 16.0f;
@@ -128,12 +127,12 @@ static const CGFloat kInnerPadding = 10.0f;
             NSParagraphStyleAttributeName: style };
 }
 
-- (ASLayoutNode *)layoutNodeThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  return
+  id<ASLayoutable> layoutSpec =
   [ASInsetLayoutNode
    newWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding)
-   node:
+   child:
    [ASStackLayoutNode
     newWithStyle:{
       .direction = ASStackLayoutDirectionHorizontal,
@@ -142,14 +141,15 @@ static const CGFloat kInnerPadding = 10.0f;
     children:
     @[
       [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableCopy) {
-        mutableCopy.node = [ASRatioLayoutNode newWithRatio:1.0 node:[ASCompositeNode newWithDisplayNode:_imageNode]];
+        mutableCopy.node = [ASRatioLayoutNode newWithRatio:1.0 child:_imageNode];
         mutableCopy.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);
       }],
       [ASStackLayoutNodeChild newWithInitializer:^(ASMutableStackLayoutNodeChild *mutableCopy) {
-        mutableCopy.node = [ASCompositeNode newWithDisplayNode:_textNode];
+        mutableCopy.node = _textNode;
         mutableCopy.flexShrink = true;
       }]
     ]]];
+  return [layoutSpec calculateLayoutThatFits:constrainedSize];
 }
 
 - (void)layout

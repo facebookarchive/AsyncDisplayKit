@@ -145,12 +145,12 @@
   [self.view addSubview:_textKitComponents.textView];
 }
 
-- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
-  CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
-  CGSize finalSize = CGSizeMake(constrainedSize.width, fminf(textSize.height, constrainedSize.height));
-  return [ASLayout newWithNode:[ASLayoutNode new] size:finalSize];
+  CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.max.width];
+  CGSize finalSize = CGSizeMake(constrainedSize.max.width, fminf(textSize.height, constrainedSize.max.height));
+  return [ASLayout newWithLayoutableObject:self size:finalSize];
 }
 
 - (void)layout

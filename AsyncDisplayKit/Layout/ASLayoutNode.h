@@ -8,9 +8,10 @@
  *
  */
 
-#import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASLayout.h>
 
 /** A layout node is an immutable object that describes a layout, loosely inspired by React. */
-@interface ASLayoutNode : NSObject
+@interface ASLayoutNode : NSObject <ASLayoutable>
 
 @end

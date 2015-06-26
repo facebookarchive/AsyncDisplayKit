@@ -17,7 +17,6 @@
 #import "ASInternalHelpers.h"
 
 #import "ASLayoutNodeUtilities.h"
-#import "ASLayoutNodeSubclass.h"
 #import "ASStackLayoutNodeUtilities.h"
 #import "ASStackPositionedLayout.h"
 #import "ASStackUnpositionedLayout.h"
@@ -126,9 +125,9 @@
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, _style, constrainedSize);
   const CGSize finalSize = directionSize(_style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
   NSArray *children = [NSArray arrayWithObjects:&positionedLayout.children[0] count:positionedLayout.children.size()];
-  return [ASLayout newWithNode:self
-                          size:ASSizeRangeClamp(constrainedSize, finalSize)
-                      children:children];
+  return [ASLayout newWithLayoutableObject:self
+                                      size:ASSizeRangeClamp(constrainedSize, finalSize)
+                                  children:children];
 }
 
 @end

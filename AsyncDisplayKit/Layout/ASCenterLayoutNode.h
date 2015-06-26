@@ -41,6 +41,6 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutNodeSizingOptions) {
  */
 + (instancetype)newWithCenteringOptions:(ASCenterLayoutNodeCenteringOptions)centeringOptions
                           sizingOptions:(ASCenterLayoutNodeSizingOptions)sizingOptions
-                                  child:(ASLayoutNode *)child;
+                                  child:(id<ASLayoutable>)child;
 
 @end

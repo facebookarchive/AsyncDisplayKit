@@ -12,20 +12,22 @@
 
 @implementation ASLayout
 
-+ (instancetype)newWithNode:(ASLayoutNode *)node size:(CGSize)size children:(NSArray *)children
++ (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                                   size:(CGSize)size
+                               children:(NSArray *)children
 {
   ASLayout *l = [super new];
   if (l) {
-    l->_node = node;
+    l->_layoutableObject = layoutableObject;
     l->_size = size;
     l->_children = [children copy];
   }
   return l;
 }
 
-+ (instancetype)newWithNode:(ASLayoutNode *)node size:(CGSize)size
++ (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size
 {
-  return [self newWithNode:node size:size children:nil];
+  return [self newWithLayoutableObject:layoutableObject size:size children:nil];
 }
 
 @end

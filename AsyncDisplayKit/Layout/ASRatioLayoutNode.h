@@ -9,6 +9,7 @@
  */
 
 #import <AsyncDisplayKit/ASLayoutNode.h>
+#import <AsyncDisplayKit/ASLayoutable.h>
 
 /**
  Ratio layout node
@@ -30,6 +31,6 @@
  **/
 @interface ASRatioLayoutNode : ASLayoutNode
 
-+ (instancetype)newWithRatio:(CGFloat)ratio node:(ASLayoutNode *)node;
++ (instancetype)newWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;
 
 @end

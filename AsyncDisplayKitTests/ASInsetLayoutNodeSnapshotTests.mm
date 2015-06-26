@@ -63,11 +63,8 @@ static NSString *nameForInsets(UIEdgeInsets insets)
     
     ASLayoutNode *layoutNode =
     [ASBackgroundLayoutNode
-     newWithNode:
-     [ASInsetLayoutNode
-      newWithInsets:insets
-      node:[ASCompositeNode newWithDisplayNode:foregroundNode]]
-     background:[ASCompositeNode newWithDisplayNode:backgroundNode]];
+     newWithChild:[ASInsetLayoutNode newWithInsets:insets child:foregroundNode]
+     background:backgroundNode];
     
     static ASSizeRange kVariableSize = {{0, 0}, {300, 300}};
     [self testLayoutNode:layoutNode
@@ -87,11 +84,8 @@ static NSString *nameForInsets(UIEdgeInsets insets)
     
     ASLayoutNode *layoutNode =
     [ASBackgroundLayoutNode
-     newWithNode:
-     [ASInsetLayoutNode
-      newWithInsets:insets
-      node:[ASCompositeNode newWithDisplayNode:foregroundNode]]
-     background:[ASCompositeNode newWithDisplayNode:backgroundNode]];
+     newWithChild:[ASInsetLayoutNode newWithInsets:insets child:foregroundNode]
+     background:backgroundNode];
 
     static ASSizeRange kFixedSize = {{300, 300}, {300, 300}};
     [self testLayoutNode:layoutNode
@@ -112,11 +106,8 @@ static NSString *nameForInsets(UIEdgeInsets insets)
 
     ASLayoutNode *layoutNode =
     [ASBackgroundLayoutNode
-     newWithNode:
-     [ASInsetLayoutNode
-      newWithInsets:insets
-      node:[ASCompositeNode newWithDisplayNode:foregroundNode]]
-     background:[ASCompositeNode newWithDisplayNode:backgroundNode]];
+     newWithChild:[ASInsetLayoutNode newWithInsets:insets child:foregroundNode]
+     background:backgroundNode];
 
     static ASSizeRange kFixedSize = {{300, 300}, {300, 300}};
     [self testLayoutNode:layoutNode

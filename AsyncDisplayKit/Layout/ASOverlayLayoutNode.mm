@@ -13,21 +13,19 @@
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
 
-#import "ASLayoutNodeSubclass.h"
-
 @implementation ASOverlayLayoutNode
 {
-  ASLayoutNode *_overlay;
-  ASLayoutNode *_node;
+  id<ASLayoutable> _overlay;
+  id<ASLayoutable> _child;
 }
 
-+ (instancetype)newWithNode:(ASLayoutNode *)node overlay:(ASLayoutNode *)overlay
++ (instancetype)newWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
   ASOverlayLayoutNode *n = [super new];
   if (n) {
-    ASDisplayNodeAssertNotNil(node, @"Node that will be overlayed on shouldn't be nil");
+    ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
     n->_overlay = overlay;
-    n->_node = node;
+    n->_child = child;
   }
   return n;
 }
@@ -42,14 +40,14 @@
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  ASLayout *contentsLayout = [_node calculateLayoutThatFits:constrainedSize];
+  ASLayout *contentsLayout = [_child calculateLayoutThatFits:constrainedSize];
   NSMutableArray *layoutChildren = [NSMutableArray arrayWithObject:[ASLayoutChild newWithPosition:{0, 0} layout:contentsLayout]];
   if (_overlay) {
     ASLayout *overlayLayout = [_overlay calculateLayoutThatFits:{contentsLayout.size, contentsLayout.size}];
     [layoutChildren addObject:[ASLayoutChild newWithPosition:{0, 0} layout:overlayLayout]];
   }
   
-  return [ASLayout newWithNode:self size:contentsLayout.size children:layoutChildren];
+  return [ASLayout newWithLayoutableObject:self size:contentsLayout.size children:layoutChildren];
 }
 
 @end

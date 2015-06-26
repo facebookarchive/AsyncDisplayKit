@@ -186,10 +186,10 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
 #pragma mark - ASDisplayNode
 
-- (ASLayout *)calculateLayoutThatFits:(CGSize)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  ASDisplayNodeAssert(constrainedSize.width >= 0, @"Constrained width for text (%f) is too  narrow", constrainedSize.width);
-  ASDisplayNodeAssert(constrainedSize.height >= 0, @"Constrained height for text (%f) is too short", constrainedSize.height);
+  ASDisplayNodeAssert(constrainedSize.max.width >= 0, @"Constrained width for text (%f) is too  narrow", constrainedSize.max.width);
+  ASDisplayNodeAssert(constrainedSize.max.height >= 0, @"Constrained height for text (%f) is too short", constrainedSize.max.height);
   // The supplied constrainedSize should include room for shadowPadding.
   // Inset the constrainedSize by the shadow padding to get the size available for text.
   UIEdgeInsets shadowPadding = [[self _shadower] shadowPadding];
@@ -197,7 +197,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   UIEdgeInsets shadowPaddingOutset = ASDNEdgeInsetsInvert(shadowPadding);
 
   // Inset the padded constrainedSize to get the remaining size available for text
-  CGRect constrainedRect = CGRect{CGPointZero, constrainedSize};
+  CGRect constrainedRect = CGRect{CGPointZero, constrainedSize.max};
   CGSize constrainedSizeForText = UIEdgeInsetsInsetRect(constrainedRect, shadowPaddingOutset).size;
   ASDisplayNodeAssert(constrainedSizeForText.width >= 0, @"Constrained width for text (%f) after subtracting shadow padding (%@) is too narrow", constrainedSizeForText.width, NSStringFromUIEdgeInsets(shadowPadding));
   ASDisplayNodeAssert(constrainedSizeForText.height >= 0, @"Constrained height for text (%f) after subtracting shadow padding (%@) is too short", constrainedSizeForText.height, NSStringFromUIEdgeInsets(shadowPadding));
@@ -212,9 +212,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   ASDisplayNodeAssert(renderSizePlusShadowPadding.width >= 0, @"Calculated width for text with shadow padding (%f) is too  narrow", constrainedSizeForText.width);
   ASDisplayNodeAssert(renderSizePlusShadowPadding.height >= 0, @"Calculated height for text with shadow padding (%f) is too short", constrainedSizeForText.height);
 
-  CGSize finalSize = CGSizeMake(MIN(ceilPixelValue(renderSizePlusShadowPadding.width), constrainedSize.width),
-                                MIN(ceilPixelValue(renderSizePlusShadowPadding.height), constrainedSize.height));
-  return [ASLayout newWithNode:[ASLayoutNode new] size:finalSize];
+  CGSize finalSize = CGSizeMake(MIN(ceilPixelValue(renderSizePlusShadowPadding.width), constrainedSize.max.width),
+                                MIN(ceilPixelValue(renderSizePlusShadowPadding.height), constrainedSize.max.height));
+  return [ASLayout newWithLayoutableObject:self size:finalSize];
 }
 
 - (void)displayDidFinish
