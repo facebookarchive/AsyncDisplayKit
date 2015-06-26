@@ -28,6 +28,9 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
 
 @implementation BlurbNode
 
+#pragma mark -
+#pragma mark ASCellNode.
+
 - (instancetype)init
 {
   if (!(self = [super init]))
@@ -84,6 +87,9 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
                                textNodeSize.width,
                                textNodeSize.height);
 }
+
+#pragma mark -
+#pragma mark ASTextNodeDelegate methods.
 
 - (BOOL)textNode:(ASTextNode *)richTextNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point
 {

@@ -122,19 +122,6 @@
   }
 }
 
-- (void)layoutSubviews
-{
-  if (ASDisplayNodeThreadIsMain()) {
-    [_node __layout];
-  } else {
-    // FIXME: CRASH This should not be happening because of the way we gate -setNeedsLayout, but it has been seen.
-    ASDisplayNodeFailAssert(@"not reached assertion");
-    dispatch_async(dispatch_get_main_queue(), ^ {
-      [_node __layout];
-    });
-  }
-}
-
 - (UIViewContentMode)contentMode
 {
   return ASDisplayNodeUIContentModeFromCAContentsGravity(self.layer.contentsGravity);

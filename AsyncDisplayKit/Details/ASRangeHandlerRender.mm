@@ -19,14 +19,15 @@
   ASDisplayNodeAssertMainThread();
   
   // we add nodes' views to this invisible window to start async rendering
+  // TODO: Replace this with directly triggering display https://github.com/facebook/AsyncDisplayKit/issues/315
   static UIWindow *workingWindow = nil;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     workingWindow = [[UIWindow alloc] initWithFrame:CGRectZero];
     workingWindow.windowLevel = UIWindowLevelNormal - 1000;
     workingWindow.userInteractionEnabled = NO;
-    workingWindow.clipsToBounds = YES;
     workingWindow.hidden = YES;
+    workingWindow.alpha = 0.0;
   });
   return workingWindow;
 }
