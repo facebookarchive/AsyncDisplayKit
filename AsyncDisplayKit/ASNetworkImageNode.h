@@ -15,7 +15,7 @@
 
 /**
  * ASNetworkImageNode is a simple image node that can download and display an image from the network, with support for a
- * placeholder image (<defaultImage>).  The currently-displayed image is always available in the inherited ASImageNode
+ * placeholder image (<placeholderImage>).  The currently-displayed image is always available in the inherited ASImageNode
  * <image> property.
  *
  * @see ASMultiplexImageNode for a more powerful counterpart to this class.
@@ -49,21 +49,21 @@
 /**
  * A placeholder image to display while the URL is loading.
  */
-@property (atomic, strong, readwrite) UIImage *defaultImage;
+@property (atomic, strong, readwrite) UIImage *placeholderImage;
 
 /**
  * The URL of a new image to download and display.
  *
- * @discussion Changing this property will reset the displayed image to a placeholder (<defaultImage>) while loading.
+ * @discussion Changing this property will reset the displayed image to a placeholder (<placeholderImage>) while loading.
  */
 @property (atomic, strong, readwrite) NSURL *URL;
 
 /**
  * Download and display a new image.
  *
- * @param reset Whether to display a placeholder (<defaultImage>) while loading the new image.
+ * @param reset Whether to display a placeholder (<placeholderImage>) while loading the new image.
  */
-- (void)setURL:(NSURL *)URL resetToDefault:(BOOL)reset;
+- (void)setURL:(NSURL *)URL resetToPlaceholder:(BOOL)reset;
 
 /**
  * If <URL> is a local file, set this property to YES to take advantage of UIKit's image cacheing.  Defaults to YES.
