@@ -23,7 +23,7 @@
   __weak id<ASNetworkImageNodeDelegate> _delegate;
 
   NSURL *_URL;
-  UIImage *_defaultImage;
+  UIImage *_placeholderImage;
 
   NSUUID *_cacheUUID;
   id _imageDownload;
@@ -62,10 +62,10 @@
 
 - (void)setURL:(NSURL *)URL
 {
-  [self setURL:URL resetToDefault:YES];
+  [self setURL:URL resetToPlaceholder:YES];
 }
 
-- (void)setURL:(NSURL *)URL resetToDefault:(BOOL)reset
+- (void)setURL:(NSURL *)URL resetToPlaceholder:(BOOL)reset
 {
   ASDN::MutexLocker l(_lock);
 
@@ -79,7 +79,7 @@
   _URL = URL;
 
   if (reset || _URL == nil)
-    self.image = _defaultImage;
+    self.image = _placeholderImage;
 
   if (self.nodeLoaded && self.layer.superlayer)
     [self _lazilyLoadImageIfNecessary];
@@ -91,24 +91,24 @@
   return _URL;
 }
 
-- (void)setDefaultImage:(UIImage *)defaultImage
+- (void)setPlaceholderImage:(UIImage *)placeholderImage
 {
   ASDN::MutexLocker l(_lock);
 
-  if (defaultImage == _defaultImage || [defaultImage isEqual:_defaultImage]) {
+  if (placeholderImage == _placeholderImage || [placeholderImage isEqual:_placeholderImage]) {
     return;
   }
-  _defaultImage = defaultImage;
+  _placeholderImage = placeholderImage;
 
   if (!_imageLoaded) {
-    self.image = _defaultImage;
+    self.image = _placeholderImage;
   }
 }
 
-- (UIImage *)defaultImage
+- (UIImage *)placeholderImage
 {
   ASDN::MutexLocker l(_lock);
-  return _defaultImage;
+  return _placeholderImage;
 }
 
 - (void)setDelegate:(id<ASNetworkImageNodeDelegate>)delegate
@@ -138,7 +138,7 @@
     ASDN::MutexLocker l(_lock);
 
     [self _cancelImageDownload];
-    self.image = _defaultImage;
+    self.image = _placeholderImage;
     _imageLoaded = NO;
   }
 }

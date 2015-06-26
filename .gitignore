@@ -24,3 +24,4 @@ docs/.sass-cache
 *.swp
 
 *.lock
+.DS_Store

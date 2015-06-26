@@ -186,6 +186,7 @@
 		AC3C4A511A1139C100143C57 /* ASCollectionView.h in Headers */ = {isa = PBXBuildFile; fileRef = AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC3C4A521A1139C100143C57 /* ASCollectionView.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC3C4A501A1139C100143C57 /* ASCollectionView.mm */; };
 		AC3C4A541A113EEC00143C57 /* ASCollectionViewProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = AC3C4A531A113EEC00143C57 /* ASCollectionViewProtocols.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		AED80D6E1B39D19200A35224 /* ASNetworkImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AED80D6D1B39D19200A35224 /* ASNetworkImageNodeTests.m */; };
 		B31A241E1B0114FD0016AE7A /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B35061DF1B010EDF0018CF92 /* AsyncDisplayKit-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = B35061DE1B010EDF0018CF92 /* AsyncDisplayKit-iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B35061F31B010EFD0018CF92 /* ASCellNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 055F1A3A19ABD43F004DAFF1 /* ASCellNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -297,6 +298,7 @@
 		B350625D1B0111740018CF92 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943141A1575670030A7D0 /* Photos.framework */; };
 		B350625E1B0111780018CF92 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
+>>>>>>> master
 		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
@@ -483,6 +485,7 @@
 		AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionView.h; sourceTree = "<group>"; };
 		AC3C4A501A1139C100143C57 /* ASCollectionView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASCollectionView.mm; sourceTree = "<group>"; };
 		AC3C4A531A113EEC00143C57 /* ASCollectionViewProtocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionViewProtocols.h; sourceTree = "<group>"; };
+		AED80D6D1B39D19200A35224 /* ASNetworkImageNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASNetworkImageNodeTests.m; sourceTree = "<group>"; };
 		B35061DA1B010EDF0018CF92 /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncDisplayKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B35061DD1B010EDF0018CF92 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B35061DE1B010EDF0018CF92 /* AsyncDisplayKit-iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AsyncDisplayKit-iOS.h"; sourceTree = "<group>"; };
@@ -661,6 +664,7 @@
 				058D0A31195D057000B7D73C /* ASDisplayNodeTestsHelper.m */,
 				052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */,
 				058D0A32195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m */,
+				AED80D6D1B39D19200A35224 /* ASNetworkImageNodeTests.m */,
 				3C9C128419E616EF00E942A0 /* ASTableViewTests.m */,
 				058D0A33195D057000B7D73C /* ASTextNodeCoreTextAdditionsTests.m */,
 				058D0A34195D057000B7D73C /* ASTextNodeRendererTests.m */,
@@ -1252,6 +1256,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */,
+				AED80D6E1B39D19200A35224 /* ASNetworkImageNodeTests.m in Sources */,
 				296A0A351A951ABF005ACEAA /* ASBatchFetchingTests.m in Sources */,
 				058D0A3E195D057000B7D73C /* ASTextNodeRendererTests.m in Sources */,
 				058D0A3D195D057000B7D73C /* ASTextNodeCoreTextAdditionsTests.m in Sources */,
