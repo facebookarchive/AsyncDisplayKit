@@ -90,7 +90,7 @@
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     spaceSizes = [[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory capacity:1];
-    mapQueue = dispatch_queue_create("com.facebook.AsyncDisplayKit.wordKerningQueue", DISPATCH_QUEUE_SERIAL);
+    mapQueue = dispatch_queue_create("org.AsyncDisplayKit.wordKerningQueue", DISPATCH_QUEUE_SERIAL);
   });
   CGFloat ordinarySpaceWidth;
   UIFont *font = [layoutManager.textStorage attribute:NSFontAttributeName atIndex:characterIndex effectiveRange:NULL];

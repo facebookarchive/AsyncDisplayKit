@@ -129,7 +129,7 @@
   static dispatch_queue_t displayQueue = NULL;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    displayQueue = dispatch_queue_create("com.facebook.AsyncDisplayKit.ASDisplayLayer.displayQueue", DISPATCH_QUEUE_CONCURRENT);
+    displayQueue = dispatch_queue_create("org.AsyncDisplayKit.ASDisplayLayer.displayQueue", DISPATCH_QUEUE_CONCURRENT);
     // we use the highpri queue to prioritize UI rendering over other async operations
     dispatch_set_target_queue(displayQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
   });
