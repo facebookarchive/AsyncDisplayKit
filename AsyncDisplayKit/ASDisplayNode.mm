@@ -1701,24 +1701,29 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
     return NO;
 }
 
-- (BOOL)becomeFirstResponder {
-    return [self.view becomeFirstResponder];
-}
-
 - (BOOL)canResignFirstResponder {
     return YES;
 }
 
-- (BOOL)resignFirstResponder {
-    return [self.view resignFirstResponder];
+- (BOOL)isFirstResponder {
+    ASDisplayNodeAssertMainThread();
+    return _view != nil && [_view isFirstResponder];
 }
 
-- (BOOL)isFirstResponder {
-    return [self.view isFirstResponder];
+// Note: this implicitly loads the view if it hasn't been loaded yet.
+- (BOOL)becomeFirstResponder {
+    ASDisplayNodeAssertMainThread();
+    return !self.layerBacked && [self canBecomeFirstResponder] && [self.view becomeFirstResponder];
+}
+
+- (BOOL)resignFirstResponder {
+    ASDisplayNodeAssertMainThread();
+    return !self.layerBacked && [self canResignFirstResponder] && [_view resignFirstResponder];
 }
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
-    return [self.view canPerformAction:action withSender:sender];
+    ASDisplayNodeAssertMainThread();
+    return !self.layerBacked && [self.view canPerformAction:action withSender:sender];
 }
 
 @end
