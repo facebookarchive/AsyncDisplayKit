@@ -271,7 +271,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
   });
-  [_dataController reloadDataWithAnimationOption:UITableViewRowAnimationNone completion:completion];
+  [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
 }
 
 - (void)reloadData
@@ -333,42 +333,42 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController insertSections:sections withAnimationOption:animation];
+  [_dataController insertSections:sections withAnimationOptions:animation];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController deleteSections:sections withAnimationOption:animation];
+  [_dataController deleteSections:sections withAnimationOptions:animation];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController reloadSections:sections withAnimationOption:animation];
+  [_dataController reloadSections:sections withAnimationOptions:animation];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
-  [_dataController moveSection:section toSection:newSection withAnimationOption:UITableViewRowAnimationNone];
+  [_dataController moveSection:section toSection:newSection withAnimationOptions:UITableViewRowAnimationNone];
 }
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOption:animation];
+  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOption:animation];
+  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOption:animation];
+  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
-  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOption:UITableViewRowAnimationNone];
+  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:UITableViewRowAnimationNone];
 }
 
 #pragma mark -
@@ -574,43 +574,43 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   return self.bounds.size;
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
 
-  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
-    [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
+    [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
 
-  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
-    [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOption];
+    [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
 
-  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
-    [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
+    [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
 
-  BOOL preventAnimation = animationOption == UITableViewRowAnimationNone;
+  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
-    [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOption];
+    [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
 }
 
