@@ -94,7 +94,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   static dispatch_queue_t sizingQueue = NULL;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    sizingQueue = dispatch_queue_create("com.facebook.AsyncDisplayKit.ASDataController.sizingQueue", DISPATCH_QUEUE_SERIAL);
+    sizingQueue = dispatch_queue_create("org.AsyncDisplayKit.ASDataController.sizingQueue", DISPATCH_QUEUE_SERIAL);
     dispatch_queue_set_specific(sizingQueue, kASSizingQueueContext, kASSizingQueueContext, NULL);
     dispatch_set_target_queue(sizingQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
   });
@@ -332,7 +332,8 @@ withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
   });
 }
 
-- (void)endUpdates {
+- (void)endUpdates
+{
   [self endUpdatesWithCompletion:NULL];
 }
 
