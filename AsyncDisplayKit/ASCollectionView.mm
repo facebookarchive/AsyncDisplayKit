@@ -184,7 +184,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASDisplayNodePerformBlockOnMainThread(^{
     [super reloadData];
   });
-  [_dataController reloadDataWithAnimationOption:kASCollectionViewAnimationNone completion:completion];
+  [_dataController reloadDataWithAnimationOptions:kASCollectionViewAnimationNone completion:completion];
 }
 
 - (void)reloadData
@@ -290,42 +290,42 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)insertSections:(NSIndexSet *)sections
 {
-  [_dataController insertSections:sections withAnimationOption:kASCollectionViewAnimationNone];
+  [_dataController insertSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
-  [_dataController deleteSections:sections withAnimationOption:kASCollectionViewAnimationNone];
+  [_dataController deleteSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
 {
-  [_dataController reloadSections:sections withAnimationOption:kASCollectionViewAnimationNone];
+  [_dataController reloadSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
-  [_dataController moveSection:section toSection:newSection withAnimationOption:kASCollectionViewAnimationNone];
+  [_dataController moveSection:section toSection:newSection withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
 {
-  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOption:kASCollectionViewAnimationNone];
+  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
 {
-  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOption:kASCollectionViewAnimationNone];
+  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
-  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOption:kASCollectionViewAnimationNone];
+  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
-  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOption:kASCollectionViewAnimationNone];
+  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -574,7 +574,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   return [_dataController nodesAtIndexPaths:indexPaths];
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
   if (_performingBatchUpdates) {
@@ -588,7 +588,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
 
@@ -603,7 +603,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
 
@@ -618,7 +618,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption
+- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
 
