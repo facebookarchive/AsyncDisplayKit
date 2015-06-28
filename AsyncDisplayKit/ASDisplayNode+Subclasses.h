@@ -14,6 +14,7 @@
 #import <AsyncDisplayKit/ASThread.h>
 
 #import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASLayoutable.h>
 
 /**
  * The subclass header _ASDisplayNode+Subclasses_ defines the following methods that either must or can be overriden by
@@ -35,7 +36,7 @@
  * variables.
  */
 
-@interface ASDisplayNode (Subclassing)
+@interface ASDisplayNode (Subclassing) <ASLayoutable>
 
 
 /** @name View Configuration */
@@ -106,6 +107,55 @@
  * out.
  */
 - (void)layoutDidFinish;
+
+
+/** @name Layout calculation */
+
+
+/**
+ * @abstract Calculate a layout based on given size range.
+ *
+ * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
+ *
+ * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
+ *
+ * @discussion This method is called on a non-main thread. The default implementation calls either -layoutSpecThatFits: 
+ * or -calculateSizeThatFits:, whichever method is available. Thus, subclasses rarely need to override this method, 
+ * override -layoutSpecThatFits: or -calculateSizeThatFits: instead.
+ *
+ * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
+ */
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize;
+
+/**
+ * @abstract Return the calculated size.
+ *
+ * @param constrainedSize The maximum size the receiver should fit in.
+ *
+ * @discussion Subclasses that override should expect this method to be called on a non-main thread. The returned size
+ * is wrapped in an ASLayout and cached by ASDisplayNode for quick access during -layout. Other expensive work that needs to
+ * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
+ * encouraged.
+ *
+ * @note Subclasses that override are committed to manual layout. Therefore, -layout: must be overriden to layout all subnodes or subviews.
+ *
+ * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
+ */
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize;
+
+/**
+ * @abstract Return a layout spec that describes the layout of the receiver and its children.
+ *
+ * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
+ *
+ * @discussion Subclasses that override should expect this method to be called on a non-main thread. The returned layout spec
+ * is used to calculate an ASLayout and cached by ASDisplayNode for quick access during -layout. Other expensive work that needs to
+ * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
+ * encouraged.
+ *
+ * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
+ */
+- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize;
 
 /**
  * @abstract Invalidate previously measured and cached layout.

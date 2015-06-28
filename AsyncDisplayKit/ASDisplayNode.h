@@ -11,8 +11,6 @@
 #import <AsyncDisplayKit/_ASAsyncTransactionContainer.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
-#import <AsyncDisplayKit/ASLayoutable.h>
-
 
 typedef UIView *(^ASDisplayNodeViewBlock)();
 typedef CALayer *(^ASDisplayNodeLayerBlock)();
@@ -33,7 +31,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  *
  */
 
-@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
+@interface ASDisplayNode : ASDealloc2MainObject
 
 
 /** @name Initializing a node object */
@@ -154,22 +152,6 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @return The maximum constrained size used by calculateLayoutThatFits:.
  */
 @property (nonatomic, readonly, assign) CGSize constrainedSizeForCalculatedLayout;
-
-/**
- * @abstract Calculate a layout based on given size range.
- *
- * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
- *
- * @return An ASLayout instance defining the layout of the receiver and its children.
- *
- * @discussion Subclasses that override should expect this method to be called on a non-main thread. The returned layout
- * is cached by ASDisplayNode for quick access during -layout, via -calculatedSize. Other expensive work that needs to
- * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
- * encouraged.
- *
- * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
- */
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize;
 
 /** @name Managing the nodes hierarchy */
 

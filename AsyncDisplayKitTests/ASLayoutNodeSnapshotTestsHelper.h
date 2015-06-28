@@ -7,6 +7,7 @@
 //
 
 #import "ASSnapshotTestCase.h"
+#import "ASDisplayNode+Subclasses.h"
 
 @class ASLayoutNode;
 

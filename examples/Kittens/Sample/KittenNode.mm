@@ -127,14 +127,14 @@ static const CGFloat kInnerPadding = 10.0f;
             NSParagraphStyleAttributeName: style };
 }
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASRatioLayoutNode *imagePlaceholder = [ASRatioLayoutNode newWithRatio:1.0 child:_imageNode];
   imagePlaceholder.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);
   
   _textNode.flexShrink = YES;
   
-  id<ASLayoutable> layoutSpec =
+  return
   [ASInsetLayoutNode
    newWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding)
    child:
@@ -144,8 +144,6 @@ static const CGFloat kInnerPadding = 10.0f;
       .spacing = kInnerPadding
     }
     children:@[imagePlaceholder, _textNode]]];
-  
-  return [layoutSpec calculateLayoutThatFits:constrainedSize];
 }
 
 - (void)layout

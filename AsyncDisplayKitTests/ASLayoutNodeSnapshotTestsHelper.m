@@ -64,11 +64,9 @@
 
 @implementation ASStaticSizeDisplayNode
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  return CGSizeEqualToSize(_staticSize, CGSizeZero)
-    ? [super calculateLayoutThatFits:constrainedSize]
-    : [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, _staticSize)];
+  return _staticSize;
 }
 
 @end

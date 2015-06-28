@@ -105,12 +105,12 @@ static const CGFloat kFontSize = 18.0f;
   return self;
 }
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize{
+- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
   static const CGFloat kHorizontalPadding = 15.0f;
   static const CGFloat kVerticalPadding = 11.0f;
   UIEdgeInsets insets = UIEdgeInsetsMake(kVerticalPadding, kHorizontalPadding, kVerticalPadding, kHorizontalPadding);
-  id<ASLayoutable> layout = [ASInsetLayoutNode newWithInsets:insets child:_textNode];
-  return [layout calculateLayoutThatFits:constrainedSize];
+  return [ASInsetLayoutNode newWithInsets:insets child:_textNode];
 }
 
 - (void)setText:(NSString *)text

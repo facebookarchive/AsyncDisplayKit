@@ -108,13 +108,13 @@
   return nil;
 }
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(_imageLock);
-  CGSize size = CGSizeZero;
   if (_image)
-    size = _image.size;
-  return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
+    return _image.size;
+  else
+    return CGSizeZero;
 }
 
 - (void)setImage:(UIImage *)image

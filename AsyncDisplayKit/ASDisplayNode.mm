@@ -76,6 +76,12 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
+
+  // At most one of the three layout methods is overridden
+  ASDisplayNodeAssert((ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateSizeThatFits:)) ? 1 : 0)
+                      + (ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutSpecThatFits:)) ? 1 : 0)
+                      + (ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateLayoutThatFits:)) ? 1 : 0) <= 1,
+                      @"Subclass %@ must override at most one of the three layout methods: calculateLayoutThatFits, layoutSpecThatFits or calculateSizeThatFits", NSStringFromClass(self));
 }
 
 + (BOOL)layerBackedNodesEnabled
@@ -121,6 +127,9 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   }
   if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesEnded:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(calculateSizeThatFits:))) {
+    overrides |= ASDisplayNodeMethodOverrideCalculateSizeThatFits;
   }
   _methodOverrides = overrides;
   
@@ -1271,7 +1280,25 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  return [ASLayout newWithLayoutableObject:self size:constrainedSize.min];
+  if (_methodOverrides & ASDisplayNodeMethodOverrideCalculateSizeThatFits) {
+    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
+    return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
+  } else {
+    id<ASLayoutable> layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    return [layoutSpec calculateLayoutThatFits:constrainedSize];
+  }
+}
+
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  return CGSizeZero;
+}
+
+- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  return nil;
 }
 
 - (ASLayout *)calculatedLayout

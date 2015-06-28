@@ -71,12 +71,10 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
   [super didLoad];
 }
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  // called on a background thread.  custom nodes must call -measure: on their subnodes in -calculateSizeThatFits:
   UIEdgeInsets insets = UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding);
-  id<ASLayoutable> layoutSpec = [ASInsetLayoutNode newWithInsets:insets child:_textNode];
-  return [layoutSpec calculateLayoutThatFits:constrainedSize];
+  return [ASInsetLayoutNode newWithInsets:insets child:_textNode];
 }
 
 #pragma mark -

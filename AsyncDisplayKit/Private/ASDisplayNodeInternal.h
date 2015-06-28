@@ -24,10 +24,11 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
   ASDisplayNodeMethodOverrideNone = 0,
-  ASDisplayNodeMethodOverrideTouchesBegan     = 1 << 0,
-  ASDisplayNodeMethodOverrideTouchesCancelled = 1 << 1,
-  ASDisplayNodeMethodOverrideTouchesEnded     = 1 << 2,
-  ASDisplayNodeMethodOverrideTouchesMoved     = 1 << 3
+  ASDisplayNodeMethodOverrideTouchesBegan          = 1 << 0,
+  ASDisplayNodeMethodOverrideTouchesCancelled      = 1 << 1,
+  ASDisplayNodeMethodOverrideTouchesEnded          = 1 << 2,
+  ASDisplayNodeMethodOverrideTouchesMoved          = 1 << 3,
+  ASDisplayNodeMethodOverrideCalculateSizeThatFits = 1 << 4
 };
 
 @class _ASPendingState;
