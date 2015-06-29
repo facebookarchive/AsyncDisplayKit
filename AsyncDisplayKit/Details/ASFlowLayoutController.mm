@@ -77,8 +77,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 }
 
 - (void)deleteSectionsAtIndexSet:(NSIndexSet *)indexSet {
-  [indexSet enumerateIndexesWithOptions:NSEnumerationReverse usingBlock:^(NSUInteger idx, BOOL *stop)
-  {
+  [indexSet enumerateIndexesWithOptions:NSEnumerationReverse usingBlock:^(NSUInteger idx, BOOL *stop) {
     _nodeSizes.erase(_nodeSizes.begin() +idx);
   }];
 }
@@ -148,6 +147,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
     [indexPathSet addObject:[NSIndexPath indexPathForRow:startIter.second inSection:startIter.first]];
     startIter.second++;
 
+    // Once we reach the end of the section, advance to the next one.  Keep advancing if the next section is zero-sized.
     while (startIter.second == _nodeSizes[startIter.first].size() && startIter.first < _nodeSizes.size()) {
       startIter.second = 0;
       startIter.first++;

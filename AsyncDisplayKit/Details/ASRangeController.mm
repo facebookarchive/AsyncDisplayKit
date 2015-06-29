@@ -111,6 +111,7 @@
       NSMutableSet *removedIndexPaths = _rangeIsValid ? [[_rangeTypeIndexPaths objectForKey:rangeKey] mutableCopy] : [NSMutableSet set];
       [removedIndexPaths minusSet:indexPaths];
       [removedIndexPaths minusSet:visibleNodePathsSet];
+
       if (removedIndexPaths.count) {
         NSArray *removedNodes = [_delegate rangeController:self nodesAtIndexPaths:[removedIndexPaths allObjects]];
         [removedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
@@ -129,7 +130,7 @@
       if ([self shouldSkipVisibleNodesForRangeType:rangeType]) {
         [addedIndexPaths minusSet:visibleNodePathsSet];
       }
-
+      
       if (addedIndexPaths.count) {
         NSArray *addedNodes = [_delegate rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
         [addedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
@@ -181,14 +182,6 @@
   });
 }
 
-- (void)dataController:(ASDataController *)dataController willInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
-  ASDisplayNodePerformBlockOnMainThread(^{
-    if ([_delegate respondsToSelector:@selector(rangeController:willInsertNodesAtIndexPaths:withAnimationOptions:)]) {
-      [_delegate rangeController:self willInsertNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-    }
-  });
-}
-
 - (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
   ASDisplayNodeAssert(nodes.count == indexPaths.count, @"Invalid index path");
 
@@ -206,14 +199,6 @@
   });
 }
 
-- (void)dataController:(ASDataController *)dataController willDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
-  ASDisplayNodePerformBlockOnMainThread(^{
-    if ([_delegate respondsToSelector:@selector(rangeController:willDeleteNodesAtIndexPaths:withAnimationOptions:)]) {
-      [_delegate rangeController:self willDeleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-    }
-  });
-}
-
 - (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
   ASDisplayNodePerformBlockOnMainThread(^{
     if ([_layoutController respondsToSelector:@selector(deleteNodesAtIndexPaths:)]) {
@@ -221,14 +206,6 @@
     }
     _rangeIsValid = NO;
     [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-  });
-}
-
-- (void)dataController:(ASDataController *)dataController willInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
-  ASDisplayNodePerformBlockOnMainThread(^{
-    if ([_delegate respondsToSelector:@selector(rangeController:willInsertSectionsAtIndexSet:withAnimationOptions:)]) {
-      [_delegate rangeController:self willInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-    }
   });
 }
 
@@ -251,14 +228,6 @@
     }
     _rangeIsValid = NO;
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-  });
-}
-
-- (void)dataController:(ASDataController *)dataController willDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
-  ASDisplayNodePerformBlockOnMainThread(^{
-    if ([_delegate respondsToSelector:@selector(rangeController:willDeleteSectionsAtIndexSet:withAnimationOptions:)]) {
-      [_delegate rangeController:self willDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-    }
   });
 }
 

@@ -107,26 +107,4 @@
  */
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-@optional
-
-/**
- * Called before nodes insertion.
- */
-- (void)rangeController:(ASRangeController *)rangeController willInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- * Called before nodes deletion.
- */
-- (void)rangeController:(ASRangeController *)rangeController willDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- * Called before section insertion.
- */
-- (void)rangeController:(ASRangeController *)rangeController willInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- * Called before section deletion.
- */
-- (void)rangeController:(ASRangeController *)rangeController willDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
 @end

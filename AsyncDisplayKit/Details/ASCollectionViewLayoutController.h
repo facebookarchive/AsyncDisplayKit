@@ -14,5 +14,6 @@
 @interface ASCollectionViewLayoutController : ASAbstractLayoutController
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView;
+- (instancetype)initWithScrollView:(UIScrollView *)scrollView collectionViewLayout:(UICollectionViewLayout *)layout;
 
 @end

@@ -10,7 +10,7 @@
 
 #import "ASAssert.h"
 #import "ASDataController.h"
-#import "ASFlowLayoutController.h"
+#import "ASCollectionViewLayoutController.h"
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
 #import "ASDisplayNodeInternal.h"
@@ -117,7 +117,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   _ASTableViewProxy *_proxyDelegate;
 
   ASDataController *_dataController;
-  ASFlowLayoutController *_layoutController;
+  ASCollectionViewLayoutController *_layoutController;
 
   ASRangeController *_rangeController;
 
@@ -159,7 +159,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)configureWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
-  _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
+  UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+  _layoutController = [[ASCollectionViewLayoutController alloc] initWithScrollView:self collectionViewLayout:flowLayout];
 
   _rangeController = [[ASRangeController alloc] init];
   _rangeController.layoutController = _layoutController;
@@ -412,20 +413,12 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   CGPoint scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
   ASScrollDirection direction = ASScrollDirectionNone;
-  if (_layoutController.layoutDirection == ASFlowLayoutDirectionHorizontal) {
-    if (scrollVelocity.x > 0) {
-      direction = ASScrollDirectionRight;
-    } else if (scrollVelocity.x < 0) {
-      direction = ASScrollDirectionLeft;
-    }
+  if (scrollVelocity.y > 0) {
+    direction = ASScrollDirectionDown;
   } else {
-    if (scrollVelocity.y > 0) {
-      direction = ASScrollDirectionDown;
-    } else {
-      direction = ASScrollDirectionUp;
-    }
+    direction = ASScrollDirectionUp;
   }
-
+  
   return direction;
 }
 

@@ -21,7 +21,8 @@ struct ASDirectionalScreenfulBuffer {
 typedef struct ASDirectionalScreenfulBuffer ASDirectionalScreenfulBuffer;
 
 ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferHorizontal(ASScrollDirection scrollDirection,
-                                                                    ASRangeTuningParameters rangeTuningParameters) {
+                                                                    ASRangeTuningParameters rangeTuningParameters)
+{
   ASDirectionalScreenfulBuffer horizontalBuffer = {0, 0};
   BOOL movingRight = ASScrollDirectionContainsRight(scrollDirection);
   horizontalBuffer.positiveDirection = movingRight ? rangeTuningParameters.leadingBufferScreenfuls :
@@ -32,7 +33,8 @@ ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferHorizontal(ASScrollDire
 }
 
 ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferVertical(ASScrollDirection scrollDirection,
-                                                                  ASRangeTuningParameters rangeTuningParameters) {
+                                                                  ASRangeTuningParameters rangeTuningParameters)
+{
   ASDirectionalScreenfulBuffer verticalBuffer = {0, 0};
   BOOL movingDown = ASScrollDirectionContainsDown(scrollDirection);
   verticalBuffer.positiveDirection = movingDown ? rangeTuningParameters.leadingBufferScreenfuls :
@@ -52,44 +54,64 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 #pragma mark -
 #pragma mark ASCollectionViewLayoutController
 
-@interface ASCollectionViewLayoutController () {
-  ASCollectionView * __weak _collectionView;
+@interface ASCollectionViewLayoutController ()
+{
+  UIScrollView * __weak _scrollView;
+  UICollectionViewLayout * __strong _collectionViewLayout;
   std::vector<CGRect> _updateRangeBoundsIndexedByRangeType;
+  ASScrollDirection _scrollableDirections;
 }
 @end
 
 @implementation ASCollectionViewLayoutController
 
-- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView {
+- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView
+{
   if (!(self = [super init])) {
     return nil;
   }
-  _collectionView = collectionView;
+  
+  _scrollableDirections = [collectionView scrollableDirections];
+  _scrollView = collectionView;
+  _collectionViewLayout = [collectionView collectionViewLayout];
   _updateRangeBoundsIndexedByRangeType = std::vector<CGRect>(ASLayoutRangeTypeCount);
   return self;
 }
+
+- (instancetype)initWithScrollView:(UIScrollView *)scrollView collectionViewLayout:(UICollectionViewLayout *)layout
+{
+  if (!(self = [super init])) {
+    return nil;
+  }
+  
+  _scrollableDirections = ASScrollDirectionVerticalDirections;
+  _scrollView = scrollView;
+  _collectionViewLayout = layout;
+  _updateRangeBoundsIndexedByRangeType = std::vector<CGRect>(ASLayoutRangeTypeCount);
+  return self;
+}
+
 
 #pragma mark -
 #pragma mark Index Paths in Range
 
 - (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection
                      viewportSize:(CGSize)viewportSize
-                        rangeType:(ASLayoutRangeType)rangeType {
+                        rangeType:(ASLayoutRangeType)rangeType
+{
   ASRangeGeometry rangeGeometry = [self rangeGeometryWithScrollDirection:scrollDirection
-                                                          collectionView:_collectionView
                                                    rangeTuningParameters:[self tuningParametersForRangeType:rangeType]];
   _updateRangeBoundsIndexedByRangeType[rangeType] = rangeGeometry.updateBounds;
-  return [self indexPathsForItemsWithinRangeBounds:rangeGeometry.rangeBounds collectionView:_collectionView];
+  return [self indexPathsForItemsWithinRangeBounds:rangeGeometry.rangeBounds];
 }
 
 - (ASRangeGeometry)rangeGeometryWithScrollDirection:(ASScrollDirection)scrollDirection
-                                     collectionView:(ASCollectionView *)collectionView
-                              rangeTuningParameters:(ASRangeTuningParameters)rangeTuningParameters {
-  CGRect rangeBounds = collectionView.bounds;
-  CGRect updateBounds = collectionView.bounds;
-  ASScrollDirection scrollableDirections = [collectionView scrollableDirections];
+                              rangeTuningParameters:(ASRangeTuningParameters)rangeTuningParameters
+{
+  CGRect rangeBounds = _scrollView.bounds;
+  CGRect updateBounds = _scrollView.bounds;
   
-  BOOL canScrollHorizontally = ASScrollDirectionContainsHorizontalDirection(scrollableDirections);
+  BOOL canScrollHorizontally = ASScrollDirectionContainsHorizontalDirection(_scrollableDirections);
   if (canScrollHorizontally) {
     ASDirectionalScreenfulBuffer horizontalBuffer = ASDirectionalScreenfulBufferHorizontal(scrollDirection,
                                                                                            rangeTuningParameters);
@@ -102,7 +124,7 @@ typedef struct ASRangeGeometry ASRangeGeometry;
                                                  MIN(horizontalBuffer.positiveDirection * 0.5, 0.95));
   }
   
-  BOOL canScrollVertically = ASScrollDirectionContainsVerticalDirection(scrollableDirections);
+  BOOL canScrollVertically = ASScrollDirectionContainsVerticalDirection(_scrollableDirections);
   if (canScrollVertically) {
     ASDirectionalScreenfulBuffer verticalBuffer = ASDirectionalScreenfulBufferVertical(scrollDirection,
                                                                                        rangeTuningParameters);
@@ -118,9 +140,10 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return {rangeBounds, updateBounds};
 }
 
-- (NSSet *)indexPathsForItemsWithinRangeBounds:(CGRect)rangeBounds collectionView:(ASCollectionView *)collectionView {
+- (NSSet *)indexPathsForItemsWithinRangeBounds:(CGRect)rangeBounds
+{
   NSMutableSet *indexPathSet = [[NSMutableSet alloc] init];
-  NSArray *layoutAttributes = [collectionView.collectionViewLayout layoutAttributesForElementsInRect:rangeBounds];
+  NSArray *layoutAttributes = [_collectionViewLayout layoutAttributesForElementsInRect:rangeBounds];
   for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
     [indexPathSet addObject:la.indexPath];
   }
@@ -132,13 +155,14 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 
 - (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths
                             viewportSize:(CGSize)viewportSize
-                               rangeType:(ASLayoutRangeType)rangeType {
+                               rangeType:(ASLayoutRangeType)rangeType
+{
   CGRect updateRangeBounds = _updateRangeBoundsIndexedByRangeType[rangeType];
   if (CGRectIsEmpty(updateRangeBounds)) {
     return YES;
   }
   
-  CGRect currentBounds = _collectionView.bounds;
+  CGRect currentBounds = _scrollView.bounds;
   if (CGRectIsEmpty(currentBounds)) {
     currentBounds = CGRectMake(0, 0, viewportSize.width, viewportSize.height);
   }

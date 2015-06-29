@@ -70,25 +70,21 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 /**
  Called for insertion of elements.
  */
-- (void)dataController:(ASDataController *)dataController willInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 - (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for deletion of elements.
  */
-- (void)dataController:(ASDataController *)dataController willDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 - (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for insertion of sections.
  */
-- (void)dataController:(ASDataController *)dataController willInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 - (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for deletion of sections.
  */
-- (void)dataController:(ASDataController *)dataController willDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 @end
@@ -117,7 +113,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
  *  Designated iniailizer.
  *
  * @param asyncDataFetchingEnabled Enable the data fetching in async mode.
- 
+ *
  * @discussion If enabled, we will fetch data through `dataController:nodeAtIndexPath:` and `dataController:rowsInSection:` in background thread.
  * Otherwise, the methods will be invoked synchronically in calling thread. Enabling data fetching in async mode could avoid blocking main thread
  * while allocating cell on main thread, which is frequently reported issue for handling large scale data. On another hand, the application code
@@ -127,7 +123,11 @@ typedef NSUInteger ASDataControllerAnimationOptions;
  */
 - (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled;
 
-/** @name Initial loading */
+/** @name Initial loading
+ *
+ * @discussion This method allows choosing an animation style for the first load of content.  It is typically used just once,
+ * for example in viewWillAppear:, to specify an animation option for the information already present in the asyncDataSource.
+ */
 
 - (void)initialDataLoadingWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
