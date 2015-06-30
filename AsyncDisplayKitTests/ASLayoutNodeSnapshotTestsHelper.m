@@ -50,7 +50,9 @@
 
 - (void)setLayoutNodeUnderTest:(ASLayoutNode *)layoutNodeUnderTest sizeRange:(ASSizeRange)sizeRange
 {
-  _layoutUnderTest = [layoutNodeUnderTest calculateLayoutThatFits:sizeRange];
+  _layoutUnderTest = [[layoutNodeUnderTest calculateLayoutThatFits:sizeRange] flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
+    return [self.subnodes containsObject:evaluatedLayout.layoutableObject];
+  }];
   self.frame = CGRectMake(0, 0, _layoutUnderTest.size.width, _layoutUnderTest.size.height);
   [self measure:_layoutUnderTest.size];
 }

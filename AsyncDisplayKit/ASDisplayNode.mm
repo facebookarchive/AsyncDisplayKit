@@ -20,7 +20,6 @@
 #import "ASDisplayNodeExtras.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayoutNodeUtilities.h"
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
 
@@ -1285,7 +1284,9 @@ static NSInteger incrementIfFound(NSInteger i) {
     return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
   } else {
     id<ASLayoutable> layoutSpec = [self layoutSpecThatFits:constrainedSize];
-    return [layoutSpec calculateLayoutThatFits:constrainedSize];
+    return [[layoutSpec calculateLayoutThatFits:constrainedSize] flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
+      return [_subnodes containsObject:evaluatedLayout.layoutableObject];
+    }];
   }
 }
 
@@ -1400,36 +1401,13 @@ static NSInteger incrementIfFound(NSInteger i) {
     return;
   }
   
-  struct Context {
-    ASLayout *layout;
-    CGPoint absolutePosition;
-    BOOL visited;
-  };
-  
-  // Stack of Contexts, used to keep track of layout nodes while traversing the calculated layout in a DFS fashion.
-  std::stack<Context> stack;
-  stack.push({_layout, CGPointMake(0, 0), NO});
-  
-  while (!stack.empty()) {
-    Context &context = stack.top();
-    if (context.visited) {
-      stack.pop();
-    } else {
-      ASDisplayNodeAssertNotNil(context.layout.layoutableObject, "layoutableObject is required in calculated ASLayout.");
-      context.visited = YES;
-      
-      id<ASLayoutable> layoutableObject = context.layout.layoutableObject;
-      if ([layoutableObject isKindOfClass:[ASDisplayNode class]] && layoutableObject != self) {
-        CGPoint subnodePosition = context.absolutePosition;
-        CGSize subnodeSize = context.layout.size;
-        ((ASDisplayNode *)layoutableObject).frame = CGRectMake(subnodePosition.x, subnodePosition.y,
-                                                               subnodeSize.width, subnodeSize.height);
-      }
-
-      for (ASLayout *child in context.layout.children) {
-        stack.push({child, context.absolutePosition + child.position, NO});
-      }
-    }
+  // Assume that _layout was flattened and is 1-level deep.
+  for (ASLayout *subnodeLayout in _layout.children) {
+    ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached layout's children must only contain layout of subnodes.");
+    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = CGRectMake(subnodeLayout.position.x,
+                                                                         subnodeLayout.position.y,
+                                                                         subnodeLayout.size.width,
+                                                                         subnodeLayout.size.height);
   }
 }
 

@@ -53,4 +53,17 @@ extern BOOL CGPointIsNull(CGPoint point);
  */
 + (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
 
+
+/**
+ * @abstract Evaluates a given predicate block against each object in the receiving layout tree
+ * and returns a new, 1-level deep layout containing the objects for which the predicate block returns true.
+ *
+ * @param predicateBlock The block is applied to a layout to be evaluated. 
+ * The block takes 1 argument: evaluatedLayout - the layout to be evaluated.
+ * The block returns YES if evaluatedLayout evaluates  to true, otherwise NO.
+ *
+ * @return A new, 1-level deep layout containing the layout children for which the predicate block returns true.
+ */
+- (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *evaluatedLayout))predicateBlock;
+
 @end

@@ -10,6 +10,8 @@
 
 #import "ASLayout.h"
 #import "ASAssert.h"
+#import "ASLayoutNodeUtilities.h"
+#import <stack>
 
 CGPoint const CGPointNull = {NAN, NAN};
 
@@ -25,6 +27,7 @@ extern BOOL CGPointIsNull(CGPoint point)
                                position:(CGPoint)position
                                children:(NSArray *)children
 {
+  ASDisplayNodeAssert(layoutableObject, @"layoutableObject is required.");
   for (ASLayout *child in children) {
     ASDisplayNodeAssert(!CGPointIsNull(child.position), @"Invalid position is not allowed in children.");
   }
@@ -56,6 +59,43 @@ extern BOOL CGPointIsNull(CGPoint point)
   ASDisplayNodeAssert(CGPointIsNull(_position), @"Position can be set once and only once.");
   ASDisplayNodeAssert(!CGPointIsNull(position), @"Position must not be set to null.");
   _position = position;
+}
+
+- (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *))predicateBlock
+{
+  NSMutableArray *flattenedChildren = [NSMutableArray array];
+  
+  struct Context {
+    ASLayout *layout;
+    CGPoint absolutePosition;
+    BOOL visited;
+  };
+  
+  // Stack of Contexts, used to keep track of sub layouts while traversing the calculated layout in a DFS fashion.
+  std::stack<Context> stack;
+  stack.push({self, CGPointMake(0, 0), NO});
+  
+  while (!stack.empty()) {
+    Context &context = stack.top();
+    if (context.visited) {
+      stack.pop();
+    } else {
+      context.visited = YES;
+      
+      if (predicateBlock(context.layout)) {
+        [flattenedChildren addObject:[ASLayout newWithLayoutableObject:context.layout.layoutableObject
+                                                                  size:context.layout.size
+                                                              position:context.absolutePosition
+                                                              children:nil]];
+      }
+      
+      for (ASLayout *child in context.layout.children) {
+        stack.push({child, context.absolutePosition + child.position, NO});
+      }
+    }
+  }
+  
+  return [ASLayout newWithLayoutableObject:_layoutableObject size:_size children:flattenedChildren];
 }
 
 @end
