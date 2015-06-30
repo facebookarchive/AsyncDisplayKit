@@ -68,22 +68,22 @@
     ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.size)
       ? ASSizeRangeMake({0, 0}, autoMaxSize)
       : ASRelativeSizeRangeResolve(child.size, size);
-    ASLayoutChild *layoutChild = [ASLayoutChild newWithPosition:child.position
-                                                         layout:[child.node calculateLayoutThatFits:childConstraint]];
-    [layoutChildren addObject:layoutChild];
+    ASLayout *childLayout = [child.node calculateLayoutThatFits:childConstraint];
+    childLayout.position = child.position;
+    [layoutChildren addObject:childLayout];
   }
   
   if (isnan(size.width)) {
     size.width = constrainedSize.min.width;
-    for (ASLayoutChild *child in layoutChildren) {
-      size.width = MAX(size.width, child.position.x + child.layout.size.width);
+    for (ASLayout *child in layoutChildren) {
+      size.width = MAX(size.width, child.position.x + child.size.width);
     }
   }
 
   if (isnan(size.height)) {
     size.height = constrainedSize.min.height;
-    for (ASLayoutChild *child in layoutChildren) {
-      size.height = MAX(size.height, child.position.y + child.layout.size.height);
+    for (ASLayout *child in layoutChildren) {
+      size.height = MAX(size.height, child.position.y + child.size.height);
     }
   }
 

@@ -1426,8 +1426,8 @@ static NSInteger incrementIfFound(NSInteger i) {
                                                                subnodeSize.width, subnodeSize.height);
       }
 
-      for (ASLayoutChild *child in context.layout.children) {
-        stack.push({child.layout, context.absolutePosition + child.position, NO});
+      for (ASLayout *child in context.layout.children) {
+        stack.push({child, context.absolutePosition + child.position, NO});
       }
     }
   }

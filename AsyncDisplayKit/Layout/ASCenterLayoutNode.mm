@@ -67,14 +67,12 @@
   // Compute the centered postion for the child
   BOOL shouldCenterAlongX = (_centeringOptions & ASCenterLayoutNodeCenteringX);
   BOOL shouldCenterAlongY = (_centeringOptions & ASCenterLayoutNodeCenteringY);
-  const CGPoint childPosition = {
+  childLayout.position = {
     ASRoundPixelValue(shouldCenterAlongX ? (size.width - childLayout.size.width) * 0.5f : 0),
     ASRoundPixelValue(shouldCenterAlongY ? (size.height - childLayout.size.height) * 0.5f : 0)
   };
 
-  return [ASLayout newWithLayoutableObject:self
-                                      size:size
-                                  children:@[[ASLayoutChild newWithPosition:childPosition layout:childLayout]]];
+  return [ASLayout newWithLayoutableObject:self size:size children:@[childLayout]];
 }
 
 @end

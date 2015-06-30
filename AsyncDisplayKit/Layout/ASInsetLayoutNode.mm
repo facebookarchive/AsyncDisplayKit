@@ -99,9 +99,10 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
                            constrainedSize.max.height -
                            (finite(_insets.bottom,
                                    centerInset(constrainedSize.max.height, childLayout.size.height)) + childLayout.size.height));
-  return [ASLayout newWithLayoutableObject:self
-                                      size:computedSize
-                                  children:@[[ASLayoutChild newWithPosition:{x,y} layout:childLayout]]];
+  
+  childLayout.position = CGPointMake(x, y);
+  
+  return [ASLayout newWithLayoutableObject:self size:computedSize children:@[childLayout]];
 }
 
 @end

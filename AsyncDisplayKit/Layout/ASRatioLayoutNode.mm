@@ -68,9 +68,8 @@
   // If there is no max size in *either* dimension, we can't apply the ratio, so just pass our size range through.
   const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
   ASLayout *childLayout = [_child calculateLayoutThatFits:childRange];
-  return [ASLayout newWithLayoutableObject:self
-                                      size:childLayout.size
-                                  children:@[[ASLayoutChild newWithPosition:{0, 0} layout:childLayout]]];
+  childLayout.position = CGPointZero;
+  return [ASLayout newWithLayoutableObject:self size:childLayout.size children:@[childLayout]];
 }
 
 @end

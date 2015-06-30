@@ -47,16 +47,15 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutNodeStyle &style
 
   CGPoint p = directionPoint(style.direction, offset, 0);
   BOOL first = YES;
-  auto stackedChildren = AS::map(unpositionedLayout.items, [&](const ASStackUnpositionedItem &l) -> ASLayoutChild *{
+  auto stackedChildren = AS::map(unpositionedLayout.items, [&](const ASStackUnpositionedItem &l) -> ASLayout *{
     p = p + directionPoint(style.direction, l.child.spacingBefore, 0);
     if (!first) {
       p = p + directionPoint(style.direction, style.spacing, 0);
     }
     first = NO;
-    ASLayoutChild *c = [ASLayoutChild newWithPosition:p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize))
-                                               layout:l.layout];
+    l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize));
     p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.spacingAfter, 0);
-    return c;
+    return l.layout;
   });
   return {stackedChildren, crossSize};
 }

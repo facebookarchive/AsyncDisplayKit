@@ -41,10 +41,12 @@
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   ASLayout *contentsLayout = [_child calculateLayoutThatFits:constrainedSize];
-  NSMutableArray *layoutChildren = [NSMutableArray arrayWithObject:[ASLayoutChild newWithPosition:{0, 0} layout:contentsLayout]];
+  contentsLayout.position = CGPointZero;
+  NSMutableArray *layoutChildren = [NSMutableArray arrayWithObject:contentsLayout];
   if (_overlay) {
     ASLayout *overlayLayout = [_overlay calculateLayoutThatFits:{contentsLayout.size, contentsLayout.size}];
-    [layoutChildren addObject:[ASLayoutChild newWithPosition:{0, 0} layout:overlayLayout]];
+    overlayLayout.position = CGPointZero;
+    [layoutChildren addObject:overlayLayout];
   }
   
   return [ASLayout newWithLayoutableObject:self size:contentsLayout.size children:layoutChildren];
