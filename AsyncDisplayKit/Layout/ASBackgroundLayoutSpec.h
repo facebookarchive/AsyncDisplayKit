@@ -8,15 +8,15 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutNode.h>
+#import <AsyncDisplayKit/ASLayoutSpec.h>
 
 /**
- Lays out a single child node, then lays out a background node behind it stretched to its size.
+ Lays out a single layoutable child, then lays out a background layoutable instance behind it stretched to its size.
  */
-@interface ASBackgroundLayoutNode : ASLayoutNode
+@interface ASBackgroundLayoutSpec : ASLayoutSpec
 
 /**
- @param child A child that is laid out to determine the size of this node. If this is nil, then this method
+ @param child A child that is laid out to determine the size of this spec. If this is nil, then this method
         returns nil.
  @param background A layoutable object that is laid out behind the child. May be nil, in which case the background is omitted.
  */

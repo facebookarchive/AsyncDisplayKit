@@ -13,8 +13,8 @@
 
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 
-#import <AsyncDisplayKit/ASStackLayoutNode.h>
-#import <AsyncDisplayKit/ASInsetLayoutNode.h>
+#import <AsyncDisplayKit/ASStackLayoutSpec.h>
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 
 static const CGFloat kImageSize = 80.0f;
 static const CGFloat kOuterPadding = 16.0f;
@@ -129,16 +129,16 @@ static const CGFloat kInnerPadding = 10.0f;
 
 - (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASRatioLayoutNode *imagePlaceholder = [ASRatioLayoutNode newWithRatio:1.0 child:_imageNode];
+  ASRatioLayoutSpec *imagePlaceholder = [ASRatioLayoutSpec newWithRatio:1.0 child:_imageNode];
   imagePlaceholder.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);
   
   _textNode.flexShrink = YES;
   
   return
-  [ASInsetLayoutNode
+  [ASInsetLayoutSpec
    newWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding)
    child:
-   [ASStackLayoutNode
+   [ASStackLayoutSpec
     newWithStyle:{
       .direction = ASStackLayoutDirectionHorizontal,
       .spacing = kInnerPadding

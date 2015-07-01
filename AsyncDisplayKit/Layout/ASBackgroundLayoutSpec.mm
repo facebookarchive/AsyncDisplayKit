@@ -8,29 +8,29 @@
  *
  */
 
-#import "ASBackgroundLayoutNode.h"
+#import "ASBackgroundLayoutSpec.h"
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
 
-@interface ASBackgroundLayoutNode ()
+@interface ASBackgroundLayoutSpec ()
 {
   id<ASLayoutable> _child;
   id<ASLayoutable> _background;
 }
 @end
 
-@implementation ASBackgroundLayoutNode
+@implementation ASBackgroundLayoutSpec
 
 + (instancetype)newWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
 {
   if (child == nil) {
     return nil;
   }
-  ASBackgroundLayoutNode *n = [super new];
-  n->_child = child;
-  n->_background = background;
-  return n;
+  ASBackgroundLayoutSpec *spec = [super new];
+  spec->_child = child;
+  spec->_background = background;
+  return spec;
 }
 
 + (instancetype)new

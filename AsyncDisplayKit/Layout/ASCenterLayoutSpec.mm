@@ -8,28 +8,28 @@
  *
  */
 
-#import "ASCenterLayoutNode.h"
+#import "ASCenterLayoutSpec.h"
 
 #import "ASInternalHelpers.h"
 
-@implementation ASCenterLayoutNode
+@implementation ASCenterLayoutSpec
 {
-  ASCenterLayoutNodeCenteringOptions _centeringOptions;
-  ASCenterLayoutNodeSizingOptions _sizingOptions;
+  ASCenterLayoutSpecCenteringOptions _centeringOptions;
+  ASCenterLayoutSpecSizingOptions _sizingOptions;
   id<ASLayoutable> _child;
 }
 
-+ (instancetype)newWithCenteringOptions:(ASCenterLayoutNodeCenteringOptions)centeringOptions
-                          sizingOptions:(ASCenterLayoutNodeSizingOptions)sizingOptions
++ (instancetype)newWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+                          sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
                                   child:(id<ASLayoutable>)child
 {
-  ASCenterLayoutNode *n = [super new];
-  if (n) {
-    n->_centeringOptions = centeringOptions;
-    n->_sizingOptions = sizingOptions;
-    n->_child = child;
+  ASCenterLayoutSpec *spec = [super new];
+  if (spec) {
+    spec->_centeringOptions = centeringOptions;
+    spec->_sizingOptions = sizingOptions;
+    spec->_child = child;
   }
-  return n;
+  return spec;
 }
 
 + (instancetype)new
@@ -46,8 +46,8 @@
 
   // Layout the child
   const CGSize minChildSize = {
-    (_centeringOptions & ASCenterLayoutNodeCenteringX) != 0 ? 0 : constrainedSize.min.width,
-    (_centeringOptions & ASCenterLayoutNodeCenteringY) != 0 ? 0 : constrainedSize.min.height,
+    (_centeringOptions & ASCenterLayoutSpecCenteringX) != 0 ? 0 : constrainedSize.min.width,
+    (_centeringOptions & ASCenterLayoutSpecCenteringY) != 0 ? 0 : constrainedSize.min.height,
   };
   ASLayout *childLayout = [_child calculateLayoutThatFits:ASSizeRangeMake(minChildSize, constrainedSize.max)];
 
@@ -60,13 +60,13 @@
 
   // If minimum size options are set, attempt to shrink the size to the size of the child
   size = ASSizeRangeClamp(constrainedSize, {
-    MIN(size.width, (_sizingOptions & ASCenterLayoutNodeSizingOptionMinimumX) != 0 ? childLayout.size.width : size.width),
-    MIN(size.height, (_sizingOptions & ASCenterLayoutNodeSizingOptionMinimumY) != 0 ? childLayout.size.height : size.height)
+    MIN(size.width, (_sizingOptions & ASCenterLayoutSpecSizingOptionMinimumX) != 0 ? childLayout.size.width : size.width),
+    MIN(size.height, (_sizingOptions & ASCenterLayoutSpecSizingOptionMinimumY) != 0 ? childLayout.size.height : size.height)
   });
 
   // Compute the centered postion for the child
-  BOOL shouldCenterAlongX = (_centeringOptions & ASCenterLayoutNodeCenteringX);
-  BOOL shouldCenterAlongY = (_centeringOptions & ASCenterLayoutNodeCenteringY);
+  BOOL shouldCenterAlongX = (_centeringOptions & ASCenterLayoutSpecCenteringX);
+  BOOL shouldCenterAlongY = (_centeringOptions & ASCenterLayoutSpecCenteringY);
   childLayout.position = {
     ASRoundPixelValue(shouldCenterAlongX ? (size.width - childLayout.size.width) * 0.5f : 0),
     ASRoundPixelValue(shouldCenterAlongY ? (size.height - childLayout.size.height) * 0.5f : 0)

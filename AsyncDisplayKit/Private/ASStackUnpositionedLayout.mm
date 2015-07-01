@@ -12,14 +12,14 @@
 
 #import <numeric>
 
-#import "ASLayoutNodeUtilities.h"
-#import "ASStackLayoutNodeUtilities.h"
+#import "ASLayoutSpecUtilities.h"
+#import "ASStackLayoutSpecUtilities.h"
 
 /**
  Sizes the child given the parameters specified, and returns the computed layout.
  */
 static ASLayout *crossChildLayout(const id<ASLayoutable> child,
-                                  const ASStackLayoutNodeStyle style,
+                                  const ASStackLayoutSpecStyle style,
                                   const CGFloat stackMin,
                                   const CGFloat stackMax,
                                   const CGFloat crossMin,
@@ -65,7 +65,7 @@ static ASLayout *crossChildLayout(const id<ASLayoutable> child,
  @param style the layout style of the overall stack layout
  */
 static void stretchChildrenAlongCrossDimension(std::vector<ASStackUnpositionedItem> &layouts,
-                                               const ASStackLayoutNodeStyle &style)
+                                               const ASStackLayoutSpecStyle &style)
 {
   // Find the maximum cross dimension size among child layouts
   const auto it = std::max_element(layouts.begin(), layouts.end(),
@@ -82,7 +82,7 @@ static void stretchChildrenAlongCrossDimension(std::vector<ASStackUnpositionedIt
 
     // restretch all stretchable children along the cross axis using the new min. set their max size to childCrossMax,
     // not crossMax, so that if any of them would choose a larger size just because the min size increased (weird!)
-    // they are forced to choose the same width as all the other nodes.
+    // they are forced to choose the same width as all the other children.
     if (alignItems == ASStackLayoutAlignItemsStretch && fabs(cross - childCrossMax) > 0.01) {
       l.layout = crossChildLayout(l.child, style, stack, stack, childCrossMax, childCrossMax);
     }
@@ -100,11 +100,11 @@ static void stretchChildrenAlongCrossDimension(std::vector<ASStackUnpositionedIt
           +-----+  |       |  +---+
                    +-------+
 
- @param children unpositioned layouts for the child nodes of the stack node
+ @param children unpositioned layouts for the children of the stack spec
  @param style the layout style of the overall stack layout
  */
 static CGFloat computeStackDimensionSum(const std::vector<ASStackUnpositionedItem> &children,
-                                        const ASStackLayoutNodeStyle &style)
+                                        const ASStackLayoutSpecStyle &style)
 {
   // Sum up the childrens' spacing
   const CGFloat childSpacingSum = std::accumulate(children.begin(), children.end(),
@@ -125,7 +125,7 @@ static CGFloat computeStackDimensionSum(const std::vector<ASStackUnpositionedIte
 /**
  Computes the violation by comparing a stack dimension sum with the overall allowable size range for the stack.
 
- Violation is the distance you would have to add to the unbounded stack-direction length of the stack node's
+ Violation is the distance you would have to add to the unbounded stack-direction length of the stack spec's
  children in order to bring the stack within its allowed sizeRange.  The diagram below shows 3 horizontal stacks with
  the different types of violation.
 
@@ -151,10 +151,10 @@ static CGFloat computeStackDimensionSum(const std::vector<ASStackUnpositionedIte
 
  @param stackDimensionSum the consumed length of the children in the stack along the stack dimension
  @param style layout style to be applied to all children
- @param sizeRange the range of allowable sizes for the stack layout node
+ @param sizeRange the range of allowable sizes for the stack layout spec
  */
 static CGFloat computeViolation(const CGFloat stackDimensionSum,
-                                const ASStackLayoutNodeStyle &style,
+                                const ASStackLayoutSpecStyle &style,
                                 const ASSizeRange &sizeRange)
 {
   const CGFloat minStackDimension = stackDimension(style.direction, sizeRange.min);
@@ -196,7 +196,7 @@ ASDISPLAYNODE_INLINE BOOL isFlexibleInBothDirections(id<ASLayoutable> child)
  number then we may avoid the first "intrinsic" size calculation.
  */
 ASDISPLAYNODE_INLINE BOOL useOptimizedFlexing(const std::vector<id<ASLayoutable>> &children,
-                                              const ASStackLayoutNodeStyle &style,
+                                              const ASStackLayoutSpecStyle &style,
                                               const ASSizeRange &sizeRange)
 {
   const NSUInteger flexibleChildren = std::count_if(children.begin(), children.end(), isFlexibleInBothDirections);
@@ -210,7 +210,7 @@ ASDISPLAYNODE_INLINE BOOL useOptimizedFlexing(const std::vector<id<ASLayoutable>
  these children at zero size so that the children layouts are at least present.
  */
 static void layoutFlexibleChildrenAtZeroSize(std::vector<ASStackUnpositionedItem> &items,
-                                             const ASStackLayoutNodeStyle &style,
+                                             const ASStackLayoutSpecStyle &style,
                                              const ASSizeRange &sizeRange)
 {
   for (ASStackUnpositionedItem &item : items) {
@@ -235,10 +235,10 @@ static void layoutFlexibleChildrenAtZeroSize(std::vector<ASStackUnpositionedItem
 
  @param items Reference to unpositioned items from the original, unconstrained layout pass; modified in-place
  @param style layout style to be applied to all children
- @param sizeRange the range of allowable sizes for the stack layout node
+ @param sizeRange the range of allowable sizes for the stack layout spec
  */
 static void flexChildrenAlongStackDimension(std::vector<ASStackUnpositionedItem> &items,
-                                            const ASStackLayoutNodeStyle &style,
+                                            const ASStackLayoutSpecStyle &style,
                                             const ASSizeRange &sizeRange,
                                             const BOOL useOptimizedFlexing)
 {
@@ -284,7 +284,7 @@ static void flexChildrenAlongStackDimension(std::vector<ASStackUnpositionedItem>
  stretched.
  */
 static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStackDimension(const std::vector<id<ASLayoutable>> &children,
-                                                                                           const ASStackLayoutNodeStyle &style,
+                                                                                           const ASStackLayoutSpecStyle &style,
                                                                                            const ASSizeRange &sizeRange,
                                                                                            const CGSize size,
                                                                                            const BOOL useOptimizedFlexing)
@@ -313,7 +313,7 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
 }
 
 ASStackUnpositionedLayout ASStackUnpositionedLayout::compute(const std::vector<id<ASLayoutable>> &children,
-                                                             const ASStackLayoutNodeStyle &style,
+                                                             const ASStackLayoutSpecStyle &style,
                                                              const ASSizeRange &sizeRange)
 {
   const CGSize size = {

@@ -22,7 +22,7 @@ extern BOOL CGPointIsNull(CGPoint point);
 @property (nonatomic, readonly) id<ASLayoutable> layoutableObject;
 @property (nonatomic, readonly) CGSize size;
 /**
- * Position parent (if any). Default to CGPointNull.
+ * Position in parent. Default to CGPointNull.
  * 
  * @discussion Before being used as a child layout, this property must be set and no longer equal CGPointNull.
  *

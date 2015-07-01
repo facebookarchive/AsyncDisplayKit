@@ -8,7 +8,7 @@
  *
  */
 
-#import "ASStackLayoutNode.h"
+#import "ASStackLayoutSpec.h"
 
 #import <numeric>
 #import <vector>
@@ -16,28 +16,28 @@
 #import "ASBaseDefines.h"
 #import "ASInternalHelpers.h"
 
-#import "ASLayoutNodeUtilities.h"
-#import "ASStackLayoutNodeUtilities.h"
+#import "ASLayoutSpecUtilities.h"
+#import "ASStackLayoutSpecUtilities.h"
 #import "ASStackPositionedLayout.h"
 #import "ASStackUnpositionedLayout.h"
 
-@implementation ASStackLayoutNode
+@implementation ASStackLayoutSpec
 {
-  ASStackLayoutNodeStyle _style;
+  ASStackLayoutSpecStyle _style;
   std::vector<id<ASLayoutable>> _children;
 }
 
-+ (instancetype)newWithStyle:(ASStackLayoutNodeStyle)style children:(NSArray *)children
++ (instancetype)newWithStyle:(ASStackLayoutSpecStyle)style children:(NSArray *)children
 {
-  ASStackLayoutNode *n = [super new];
-  if (n) {
-    n->_style = style;
-    n->_children = std::vector<id<ASLayoutable>>();
+  ASStackLayoutSpec *spec = [super new];
+  if (spec) {
+    spec->_style = style;
+    spec->_children = std::vector<id<ASLayoutable>>();
     for (id<ASLayoutable> child in children) {
-      n->_children.push_back(child);
+      spec->_children.push_back(child);
     }
   }
-  return n;
+  return spec;
 }
 
 + (instancetype)new

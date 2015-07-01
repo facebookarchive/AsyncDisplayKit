@@ -19,7 +19,7 @@
 #import "ASTextNodeRenderer.h"
 #import "ASTextNodeShadower.h"
 
-#import "ASLayoutNode.h"
+#import "ASLayoutSpec.h"
 
 static const NSTimeInterval ASTextNodeHighlightFadeOutDuration = 0.15;
 static const NSTimeInterval ASTextNodeHighlightFadeInDuration = 0.1;

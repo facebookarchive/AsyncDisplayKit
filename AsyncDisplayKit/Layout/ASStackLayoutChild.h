@@ -10,7 +10,7 @@
 
 /**
  Each child may override their parent stack's cross axis alignment.
- @see ASStackLayoutNodeAlignItems
+ @see ASStackLayoutAlignItems
  */
 typedef NS_ENUM(NSUInteger, ASStackLayoutAlignSelf) {
   /** Inherit alignment value from containing stack. */

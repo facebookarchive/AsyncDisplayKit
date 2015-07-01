@@ -10,7 +10,7 @@
 
 #import "ASLayout.h"
 #import "ASAssert.h"
-#import "ASLayoutNodeUtilities.h"
+#import "ASLayoutSpecUtilities.h"
 #import <stack>
 
 CGPoint const CGPointNull = {NAN, NAN};
@@ -71,7 +71,7 @@ extern BOOL CGPointIsNull(CGPoint point)
     BOOL visited;
   };
   
-  // Stack of Contexts, used to keep track of sub layouts while traversing the calculated layout in a DFS fashion.
+  // Stack of Contexts, used to keep track of sublayouts while traversing this layout in a DFS fashion.
   std::stack<Context> stack;
   stack.push({self, CGPointMake(0, 0), NO});
   

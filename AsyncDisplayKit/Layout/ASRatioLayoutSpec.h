@@ -8,20 +8,20 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutNode.h>
+#import <AsyncDisplayKit/ASLayoutSpec.h>
 #import <AsyncDisplayKit/ASLayoutable.h>
 
 /**
- Ratio layout node
+ Ratio layout spec
  For when the content should respect a certain inherent ratio but can be scaled (think photos or videos)
  The ratio passed is the ratio of height / width you expect
 
- For a ratio 0.5, the node will have a flat rectangle shape
+ For a ratio 0.5, the spec will have a flat rectangle shape
   _ _ _ _
  |       |
  |_ _ _ _|
 
- For a ratio 2.0, the node will be twice as tall as it is wide
+ For a ratio 2.0, the spec will be twice as tall as it is wide
   _ _
  |   |
  |   |
@@ -29,7 +29,7 @@
  |_ _|
 
  **/
-@interface ASRatioLayoutNode : ASLayoutNode
+@interface ASRatioLayoutSpec : ASLayoutSpec
 
 + (instancetype)newWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;
 

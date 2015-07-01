@@ -12,7 +12,7 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 
-#import "ASInsetLayoutNode.h"
+#import "ASInsetLayoutSpec.h"
 
 #pragma mark -
 #pragma mark ASCellNode
@@ -110,7 +110,7 @@ static const CGFloat kFontSize = 18.0f;
   static const CGFloat kHorizontalPadding = 15.0f;
   static const CGFloat kVerticalPadding = 11.0f;
   UIEdgeInsets insets = UIEdgeInsetsMake(kVerticalPadding, kHorizontalPadding, kVerticalPadding, kHorizontalPadding);
-  return [ASInsetLayoutNode newWithInsets:insets child:_textNode];
+  return [ASInsetLayoutSpec newWithInsets:insets child:_textNode];
 }
 
 - (void)setText:(NSString *)text

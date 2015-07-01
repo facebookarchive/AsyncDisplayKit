@@ -11,11 +11,11 @@
 #import "ASStackPositionedLayout.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayoutNodeUtilities.h"
-#import "ASStackLayoutNodeUtilities.h"
+#import "ASLayoutSpecUtilities.h"
+#import "ASStackLayoutSpecUtilities.h"
 #import "ASLayoutable.h"
 
-static CGFloat crossOffset(const ASStackLayoutNodeStyle &style,
+static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
                            const ASStackUnpositionedItem &l,
                            const CGFloat crossSize)
 {
@@ -30,7 +30,7 @@ static CGFloat crossOffset(const ASStackLayoutNodeStyle &style,
   }
 }
 
-static ASStackPositionedLayout stackedLayout(const ASStackLayoutNodeStyle &style,
+static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style,
                                              const CGFloat offset,
                                              const ASStackUnpositionedLayout &unpositionedLayout,
                                              const ASSizeRange &constrainedSize)
@@ -61,7 +61,7 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutNodeStyle &style
 }
 
 ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnpositionedLayout &unpositionedLayout,
-                                                         const ASStackLayoutNodeStyle &style,
+                                                         const ASStackLayoutSpecStyle &style,
                                                          const ASSizeRange &constrainedSize)
 {
   switch (style.justifyContent) {

@@ -8,14 +8,14 @@
  *
  */
 
-#import "ASInsetLayoutNode.h"
+#import "ASInsetLayoutSpec.h"
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
 
 #import "ASInternalHelpers.h"
 
-@interface ASInsetLayoutNode ()
+@interface ASInsetLayoutSpec ()
 {
   UIEdgeInsets _insets;
   id<ASLayoutable> _child;
@@ -40,19 +40,19 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   return ASRoundPixelValue((outer - inner) / 2);
 }
 
-@implementation ASInsetLayoutNode
+@implementation ASInsetLayoutSpec
 
 + (instancetype)newWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child
 {
   if (child == nil) {
     return nil;
   }
-  ASInsetLayoutNode *n = [super new];
-  if (n) {
-    n->_insets = insets;
-    n->_child = child;
+  ASInsetLayoutSpec *spec = [super new];
+  if (spec) {
+    spec->_insets = insets;
+    spec->_child = child;
   }
-  return n;
+  return spec;
 }
 
 + (instancetype)new

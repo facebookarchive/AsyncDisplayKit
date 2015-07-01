@@ -8,12 +8,12 @@
  *
  */
 
-#import "ASOverlayLayoutNode.h"
+#import "ASOverlayLayoutSpec.h"
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
 
-@implementation ASOverlayLayoutNode
+@implementation ASOverlayLayoutSpec
 {
   id<ASLayoutable> _overlay;
   id<ASLayoutable> _child;
@@ -21,13 +21,13 @@
 
 + (instancetype)newWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
-  ASOverlayLayoutNode *n = [super new];
-  if (n) {
+  ASOverlayLayoutSpec *spec = [super new];
+  if (spec) {
     ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
-    n->_overlay = overlay;
-    n->_child = child;
+    spec->_overlay = overlay;
+    spec->_child = child;
   }
-  return n;
+  return spec;
 }
 
 + (instancetype)new

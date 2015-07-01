@@ -8,7 +8,7 @@
  *
  */
 
-#import "ASLayoutNode.h"
+#import "ASLayoutSpec.h"
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
@@ -16,7 +16,7 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
-@implementation ASLayoutNode
+@implementation ASLayoutSpec
 
 @synthesize spacingBefore = _spacingBefore;
 @synthesize spacingAfter = _spacingAfter;
@@ -27,11 +27,11 @@
 
 + (instancetype)new
 {
-  ASLayoutNode *n = [super new];
-  if (n) {
-    n->_flexBasis = ASRelativeDimensionUnconstrained;
+  ASLayoutSpec *spec = [super new];
+  if (spec) {
+    spec->_flexBasis = ASRelativeDimensionUnconstrained;
   }
-  return n;
+  return spec;
 }
 
 #pragma mark - Layout

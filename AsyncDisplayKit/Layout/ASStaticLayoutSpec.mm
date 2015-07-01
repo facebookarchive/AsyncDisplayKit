@@ -8,43 +8,43 @@
  *
  */
 
-#import "ASStaticLayoutNode.h"
+#import "ASStaticLayoutSpec.h"
 
-#import "ASLayoutNodeUtilities.h"
+#import "ASLayoutSpecUtilities.h"
 #import "ASInternalHelpers.h"
 
-@implementation ASStaticLayoutNodeChild
+@implementation ASStaticLayoutSpecChild
 
-+ (instancetype)newWithPosition:(CGPoint)position node:(ASLayoutNode *)node size:(ASRelativeSizeRange)size
++ (instancetype)newWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject size:(ASRelativeSizeRange)size
 {
-  ASStaticLayoutNodeChild *c = [super new];
+  ASStaticLayoutSpecChild *c = [super new];
   if (c) {
     c->_position = position;
-    c->_node = node;
+    c->_layoutableObject = layoutableObject;
     c->_size = size;
   }
   return c;
 }
 
-+ (instancetype)newWithPosition:(CGPoint)position node:(ASLayoutNode *)node
++ (instancetype)newWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject
 {
-  return [self newWithPosition:position node:node size:ASRelativeSizeRangeUnconstrained];
+  return [self newWithPosition:position layoutableObject:layoutableObject size:ASRelativeSizeRangeUnconstrained];
 }
 
 @end
 
-@implementation ASStaticLayoutNode
+@implementation ASStaticLayoutSpec
 {
   NSArray *_children;
 }
 
 + (instancetype)newWithChildren:(NSArray *)children
 {
-  ASStaticLayoutNode *n = [super new];
-  if (n) {
-    n->_children = children;
+  ASStaticLayoutSpec *spec = [super new];
+  if (spec) {
+    spec->_children = children;
   }
-  return n;
+  return spec;
 }
 
 + (instancetype)new
@@ -60,7 +60,7 @@
   };
 
   NSMutableArray *layoutChildren = [NSMutableArray arrayWithCapacity:_children.count];
-  for (ASStaticLayoutNodeChild *child in _children) {
+  for (ASStaticLayoutSpecChild *child in _children) {
     CGSize autoMaxSize = {
       constrainedSize.max.width - child.position.x,
       constrainedSize.max.height - child.position.y
@@ -68,7 +68,7 @@
     ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.size)
       ? ASSizeRangeMake({0, 0}, autoMaxSize)
       : ASRelativeSizeRangeResolve(child.size, size);
-    ASLayout *childLayout = [child.node calculateLayoutThatFits:childConstraint];
+    ASLayout *childLayout = [child.layoutableObject calculateLayoutThatFits:childConstraint];
     childLayout.position = child.position;
     [layoutChildren addObject:childLayout];
   }

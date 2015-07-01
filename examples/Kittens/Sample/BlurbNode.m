@@ -14,7 +14,7 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 
-#import <AsyncDisplayKit/ASInsetLayoutNode.h>
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 
 static CGFloat kTextPadding = 10.0f;
 static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
@@ -74,7 +74,7 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
 - (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   UIEdgeInsets insets = UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding);
-  return [ASInsetLayoutNode newWithInsets:insets child:_textNode];
+  return [ASInsetLayoutSpec newWithInsets:insets child:_textNode];
 }
 
 #pragma mark -

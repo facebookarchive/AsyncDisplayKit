@@ -71,6 +71,6 @@ extern ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange other
 
 extern BOOL ASSizeRangeEqualToSizeRange(ASSizeRange lhs, ASSizeRange rhs);
 
-extern NSString * NSStringFromASSizeRange(ASSizeRange sizeRange);
+extern NSString *NSStringFromASSizeRange(ASSizeRange sizeRange);
 
 ASDISPLAYNODE_EXTERN_C_END

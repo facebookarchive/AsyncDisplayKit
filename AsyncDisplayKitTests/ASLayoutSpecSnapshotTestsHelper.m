@@ -1,23 +1,25 @@
-//
-//  ASLayoutNodeTestsHelper.m
-//  AsyncDisplayKit
-//
-//  Created by Huy Nguyen on 28/05/15.
-//  Copyright (c) 2015 Facebook. All rights reserved.
-//
+/*
+ *  Copyright (c) 2015-present, Facebook, Inc.
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree. An additional grant
+ *  of patent rights can be found in the PATENTS file in the same directory.
+ *
+ */
 
-#import "ASLayoutNodeSnapshotTestsHelper.h"
+#import "ASLayoutSpecSnapshotTestsHelper.h"
 
 #import "ASDisplayNode.h"
-#import "ASLayoutNode.h"
+#import "ASLayoutSpec.h"
 
 @interface ASTestNode : ASDisplayNode
-- (void)setLayoutNodeUnderTest:(ASLayoutNode *)layoutNodeUnderTest sizeRange:(ASSizeRange)sizeRange;
+- (void)setLayoutSpecUnderTest:(ASLayoutSpec *)layoutSpecUnderTest sizeRange:(ASSizeRange)sizeRange;
 @end
 
-@implementation ASLayoutNodeSnapshotTestCase
+@implementation ASLayoutSpecSnapshotTestCase
 
-- (void)testLayoutNode:(ASLayoutNode *)layoutNode
+- (void)testLayoutSpec:(ASLayoutSpec *)layoutSpec
              sizeRange:(ASSizeRange)sizeRange
               subnodes:(NSArray *)subnodes
             identifier:(NSString *)identifier
@@ -28,7 +30,7 @@
     [node addSubnode:subnode];
   }
   
-  [node setLayoutNodeUnderTest:layoutNode sizeRange:sizeRange];
+  [node setLayoutSpecUnderTest:layoutSpec sizeRange:sizeRange];
   
   ASSnapshotVerifyNode(node, identifier);
 }
@@ -48,9 +50,9 @@
   return self;
 }
 
-- (void)setLayoutNodeUnderTest:(ASLayoutNode *)layoutNodeUnderTest sizeRange:(ASSizeRange)sizeRange
+- (void)setLayoutSpecUnderTest:(ASLayoutSpec *)layoutSpecUnderTest sizeRange:(ASSizeRange)sizeRange
 {
-  _layoutUnderTest = [[layoutNodeUnderTest calculateLayoutThatFits:sizeRange] flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
+  _layoutUnderTest = [[layoutSpecUnderTest calculateLayoutThatFits:sizeRange] flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
     return [self.subnodes containsObject:evaluatedLayout.layoutableObject];
   }];
   self.frame = CGRectMake(0, 0, _layoutUnderTest.size.width, _layoutUnderTest.size.height);

@@ -8,7 +8,7 @@
  *
  */
 
-#import "ASStackLayoutNode.h"
+#import "ASStackLayoutSpec.h"
 
 inline CGFloat stackDimension(const ASStackLayoutDirection direction, const CGSize size)
 {

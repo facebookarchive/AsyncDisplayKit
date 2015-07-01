@@ -8,12 +8,12 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutNode.h>
+#import <AsyncDisplayKit/ASLayoutSpec.h>
 
 /**
- This node lays out a single layoutable child and then overlays a layoutable object on top of it streched to its size
+ This layout spec lays out a single layoutable child and then overlays a layoutable object on top of it streched to its size
  */
-@interface ASOverlayLayoutNode : ASLayoutNode
+@interface ASOverlayLayoutSpec : ASLayoutSpec
 
 + (instancetype)newWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay;
 

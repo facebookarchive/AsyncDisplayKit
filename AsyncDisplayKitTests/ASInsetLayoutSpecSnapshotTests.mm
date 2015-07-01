@@ -8,21 +8,21 @@
  *
  */
 
-#import "ASLayoutNodeSnapshotTestsHelper.h"
+#import "ASLayoutSpecSnapshotTestsHelper.h"
 
-#import "ASBackgroundLayoutNode.h"
-#import "ASInsetLayoutNode.h"
-#import "ASStaticLayoutNode.h"
+#import "ASBackgroundLayoutSpec.h"
+#import "ASInsetLayoutSpec.h"
+#import "ASStaticLayoutSpec.h"
 
 
-typedef NS_OPTIONS(NSUInteger, ASInsetLayoutNodeTestEdge) {
-  ASInsetLayoutNodeTestEdgeTop    = 1 << 0,
-  ASInsetLayoutNodeTestEdgeLeft   = 1 << 1,
-  ASInsetLayoutNodeTestEdgeBottom = 1 << 2,
-  ASInsetLayoutNodeTestEdgeRight  = 1 << 3,
+typedef NS_OPTIONS(NSUInteger, ASInsetLayoutSpecTestEdge) {
+  ASInsetLayoutSpecTestEdgeTop    = 1 << 0,
+  ASInsetLayoutSpecTestEdgeLeft   = 1 << 1,
+  ASInsetLayoutSpecTestEdgeBottom = 1 << 2,
+  ASInsetLayoutSpecTestEdgeRight  = 1 << 3,
 };
 
-static CGFloat insetForEdge(NSUInteger combination, ASInsetLayoutNodeTestEdge edge, CGFloat insetValue)
+static CGFloat insetForEdge(NSUInteger combination, ASInsetLayoutSpecTestEdge edge, CGFloat insetValue)
 {
   return combination & edge ? INFINITY : insetValue;
 }
@@ -30,10 +30,10 @@ static CGFloat insetForEdge(NSUInteger combination, ASInsetLayoutNodeTestEdge ed
 static UIEdgeInsets insetsForCombination(NSUInteger combination, CGFloat insetValue)
 {
   return {
-    .top = insetForEdge(combination, ASInsetLayoutNodeTestEdgeTop, insetValue),
-    .left = insetForEdge(combination, ASInsetLayoutNodeTestEdgeLeft, insetValue),
-    .bottom = insetForEdge(combination, ASInsetLayoutNodeTestEdgeBottom, insetValue),
-    .right = insetForEdge(combination, ASInsetLayoutNodeTestEdgeRight, insetValue),
+    .top = insetForEdge(combination, ASInsetLayoutSpecTestEdgeTop, insetValue),
+    .left = insetForEdge(combination, ASInsetLayoutSpecTestEdgeLeft, insetValue),
+    .bottom = insetForEdge(combination, ASInsetLayoutSpecTestEdgeBottom, insetValue),
+    .right = insetForEdge(combination, ASInsetLayoutSpecTestEdgeRight, insetValue),
   };
 }
 
@@ -42,10 +42,10 @@ static NSString *nameForInsets(UIEdgeInsets insets)
   return [NSString stringWithFormat:@"%.f-%.f-%.f-%.f", insets.top, insets.left, insets.bottom, insets.right];
 }
 
-@interface ASInsetLayoutNodeSnapshotTests : ASLayoutNodeSnapshotTestCase
+@interface ASInsetLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end
 
-@implementation ASInsetLayoutNodeSnapshotTests
+@implementation ASInsetLayoutSpecSnapshotTests
 
 - (void)setUp
 {
@@ -61,13 +61,13 @@ static NSString *nameForInsets(UIEdgeInsets insets)
     ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
     foregroundNode.staticSize = {10, 10};
     
-    ASLayoutNode *layoutNode =
-    [ASBackgroundLayoutNode
-     newWithChild:[ASInsetLayoutNode newWithInsets:insets child:foregroundNode]
+    ASLayoutSpec *layoutSpec =
+    [ASBackgroundLayoutSpec
+     newWithChild:[ASInsetLayoutSpec newWithInsets:insets child:foregroundNode]
      background:backgroundNode];
     
     static ASSizeRange kVariableSize = {{0, 0}, {300, 300}};
-    [self testLayoutNode:layoutNode
+    [self testLayoutSpec:layoutSpec
                sizeRange:kVariableSize
                 subnodes:@[backgroundNode, foregroundNode]
               identifier:nameForInsets(insets)];
@@ -82,13 +82,13 @@ static NSString *nameForInsets(UIEdgeInsets insets)
     ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
     foregroundNode.staticSize = {10, 10};
     
-    ASLayoutNode *layoutNode =
-    [ASBackgroundLayoutNode
-     newWithChild:[ASInsetLayoutNode newWithInsets:insets child:foregroundNode]
+    ASLayoutSpec *layoutSpec =
+    [ASBackgroundLayoutSpec
+     newWithChild:[ASInsetLayoutSpec newWithInsets:insets child:foregroundNode]
      background:backgroundNode];
 
     static ASSizeRange kFixedSize = {{300, 300}, {300, 300}};
-    [self testLayoutNode:layoutNode
+    [self testLayoutSpec:layoutSpec
                sizeRange:kFixedSize
                 subnodes:@[backgroundNode, foregroundNode]
               identifier:nameForInsets(insets)];
@@ -104,13 +104,13 @@ static NSString *nameForInsets(UIEdgeInsets insets)
     ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
     foregroundNode.staticSize = {10, 10};
 
-    ASLayoutNode *layoutNode =
-    [ASBackgroundLayoutNode
-     newWithChild:[ASInsetLayoutNode newWithInsets:insets child:foregroundNode]
+    ASLayoutSpec *layoutSpec =
+    [ASBackgroundLayoutSpec
+     newWithChild:[ASInsetLayoutSpec newWithInsets:insets child:foregroundNode]
      background:backgroundNode];
 
     static ASSizeRange kFixedSize = {{300, 300}, {300, 300}};
-    [self testLayoutNode:layoutNode
+    [self testLayoutSpec:layoutSpec
                sizeRange:kFixedSize
                 subnodes:@[backgroundNode, foregroundNode]
               identifier:nameForInsets(insets)];

@@ -8,17 +8,17 @@
  *
  */
 
-#import "ASLayoutNodeSnapshotTestsHelper.h"
+#import "ASLayoutSpecSnapshotTestsHelper.h"
 
-#import "ASOverlayLayoutNode.h"
-#import "ASCenterLayoutNode.h"
+#import "ASOverlayLayoutSpec.h"
+#import "ASCenterLayoutSpec.h"
 
 static const ASSizeRange kSize = {{320, 320}, {320, 320}};
 
-@interface ASOverlayLayoutNodeSnapshotTests : ASLayoutNodeSnapshotTestCase
+@interface ASOverlayLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end
 
-@implementation ASOverlayLayoutNodeSnapshotTests
+@implementation ASOverlayLayoutSpecSnapshotTests
 
 - (void)setUp
 {
@@ -32,16 +32,16 @@ static const ASSizeRange kSize = {{320, 320}, {320, 320}};
   ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor blackColor]);
   foregroundNode.staticSize = {20, 20};
   
-  ASLayoutNode *layoutNode =
-  [ASOverlayLayoutNode
+  ASLayoutSpec *layoutSpec =
+  [ASOverlayLayoutSpec
    newWithChild:backgroundNode
    overlay:
-   [ASCenterLayoutNode
-    newWithCenteringOptions:ASCenterLayoutNodeCenteringXY
+   [ASCenterLayoutSpec
+    newWithCenteringOptions:ASCenterLayoutSpecCenteringXY
     sizingOptions:{}
     child:foregroundNode]];
   
-  [self testLayoutNode:layoutNode sizeRange:kSize subnodes:@[backgroundNode, foregroundNode] identifier: nil];
+  [self testLayoutSpec:layoutSpec sizeRange:kSize subnodes:@[backgroundNode, foregroundNode] identifier: nil];
 }
 
 @end

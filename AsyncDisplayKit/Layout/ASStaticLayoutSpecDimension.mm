@@ -8,7 +8,7 @@
  *
  */
 
-#import "ASStaticLayoutNodeDimension.h"
+#import "ASStaticLayoutSpecDimension.h"
 #import "ASAssert.h"
 
 ASRelativeSizeRange const ASRelativeSizeRangeUnconstrained = {};

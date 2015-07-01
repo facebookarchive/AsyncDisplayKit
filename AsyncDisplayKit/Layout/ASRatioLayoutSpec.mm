@@ -8,7 +8,7 @@
  *
  */
 
-#import "ASRatioLayoutNode.h"
+#import "ASRatioLayoutSpec.h"
 
 #import <algorithm>
 #import <vector>
@@ -18,7 +18,7 @@
 
 #import "ASInternalHelpers.h"
 
-@implementation ASRatioLayoutNode
+@implementation ASRatioLayoutSpec
 {
   CGFloat _ratio;
   id<ASLayoutable> _child;
@@ -31,12 +31,12 @@
     return nil;
   }
 
-  ASRatioLayoutNode *n = [super new];
-  if (n) {
-    n->_ratio = ratio;
-    n->_child = child;
+  ASRatioLayoutSpec *spec = [super new];
+  if (spec) {
+    spec->_ratio = ratio;
+    spec->_child = child;
   }
-  return n;
+  return spec;
 }
 
 + (instancetype)new

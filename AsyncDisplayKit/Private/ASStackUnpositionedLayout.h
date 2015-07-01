@@ -11,7 +11,7 @@
 #import <vector>
 
 #import "ASLayout.h"
-#import "ASStackLayoutNode.h"
+#import "ASStackLayoutSpec.h"
 
 struct ASStackUnpositionedItem {
   /** The original source child. */
@@ -31,6 +31,6 @@ struct ASStackUnpositionedLayout {
 
   /** Given a set of children, computes the unpositioned layouts for those children. */
   static ASStackUnpositionedLayout compute(const std::vector<id<ASLayoutable>> &children,
-                                           const ASStackLayoutNodeStyle &style,
+                                           const ASStackLayoutSpecStyle &style,
                                            const ASSizeRange &sizeRange);
 };

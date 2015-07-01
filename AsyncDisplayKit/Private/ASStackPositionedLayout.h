@@ -10,7 +10,7 @@
 
 #import "ASLayout.h"
 #import "ASDimension.h"
-#import "ASStackLayoutNode.h"
+#import "ASStackLayoutSpec.h"
 #import "ASStackUnpositionedLayout.h"
 
 /** Represents a set of laid out and positioned stack layout children. */
@@ -20,6 +20,6 @@ struct ASStackPositionedLayout {
 
   /** Given an unpositioned layout, computes the positions each child should be placed at. */
   static ASStackPositionedLayout compute(const ASStackUnpositionedLayout &unpositionedLayout,
-                                         const ASStackLayoutNodeStyle &style,
+                                         const ASStackLayoutSpecStyle &style,
                                          const ASSizeRange &constrainedSize);
 };

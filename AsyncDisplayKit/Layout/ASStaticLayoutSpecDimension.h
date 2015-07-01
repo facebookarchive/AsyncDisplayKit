@@ -14,7 +14,7 @@
 
 /** 
  Expresses a size with relative dimensions.
- Used by ASStaticLayoutNode.
+ Used by ASStaticLayoutSpec.
  */
 typedef struct {
   ASRelativeDimension width;
@@ -23,7 +23,7 @@ typedef struct {
 
 /**
  Expresses an inclusive range of relative sizes. Used to provide additional constraint to layout. 
- Used by ASStaticLayoutNode.
+ Used by ASStaticLayoutSpec.
  */
 typedef struct {
   ASRelativeSize min;
