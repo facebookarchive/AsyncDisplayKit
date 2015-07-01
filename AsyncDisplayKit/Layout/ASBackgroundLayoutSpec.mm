@@ -44,18 +44,18 @@
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   ASLayout *contentsLayout = [_child calculateLayoutThatFits:constrainedSize];
-  contentsLayout.position = CGPointZero;
 
-  NSMutableArray *children = [NSMutableArray arrayWithCapacity:2];
+  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
   if (_background) {
     // Size background to exactly the same size.
     ASLayout *backgroundLayout = [_background calculateLayoutThatFits:{contentsLayout.size, contentsLayout.size}];
     backgroundLayout.position = CGPointZero;
-    [children addObject:backgroundLayout];
+    [sublayouts addObject:backgroundLayout];
   }
-  [children addObject:contentsLayout];
+  contentsLayout.position = CGPointZero;
+  [sublayouts addObject:contentsLayout];
 
-  return [ASLayout newWithLayoutableObject:self size:contentsLayout.size children:children];
+  return [ASLayout newWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
 @end

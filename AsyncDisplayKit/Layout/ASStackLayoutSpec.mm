@@ -50,10 +50,10 @@
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_children, _style, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, _style, constrainedSize);
   const CGSize finalSize = directionSize(_style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
-  NSArray *children = [NSArray arrayWithObjects:&positionedLayout.children[0] count:positionedLayout.children.size()];
+  NSArray *sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
   return [ASLayout newWithLayoutableObject:self
                                       size:ASSizeRangeClamp(constrainedSize, finalSize)
-                                  children:children];
+                                sublayouts:sublayouts];
 }
 
 @end

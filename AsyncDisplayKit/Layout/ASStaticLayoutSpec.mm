@@ -59,7 +59,7 @@
     constrainedSize.max.height
   };
 
-  NSMutableArray *layoutChildren = [NSMutableArray arrayWithCapacity:_children.count];
+  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:_children.count];
   for (ASStaticLayoutSpecChild *child in _children) {
     CGSize autoMaxSize = {
       constrainedSize.max.width - child.position.x,
@@ -68,28 +68,28 @@
     ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.size)
       ? ASSizeRangeMake({0, 0}, autoMaxSize)
       : ASRelativeSizeRangeResolve(child.size, size);
-    ASLayout *childLayout = [child.layoutableObject calculateLayoutThatFits:childConstraint];
-    childLayout.position = child.position;
-    [layoutChildren addObject:childLayout];
+    ASLayout *sublayout = [child.layoutableObject calculateLayoutThatFits:childConstraint];
+    sublayout.position = child.position;
+    [sublayouts addObject:sublayout];
   }
   
   if (isnan(size.width)) {
     size.width = constrainedSize.min.width;
-    for (ASLayout *child in layoutChildren) {
-      size.width = MAX(size.width, child.position.x + child.size.width);
+    for (ASLayout *sublayout in sublayouts) {
+      size.width = MAX(size.width, sublayout.position.x + sublayout.size.width);
     }
   }
 
   if (isnan(size.height)) {
     size.height = constrainedSize.min.height;
-    for (ASLayout *child in layoutChildren) {
-      size.height = MAX(size.height, child.position.y + child.size.height);
+    for (ASLayout *sublayout in sublayouts) {
+      size.height = MAX(size.height, sublayout.position.y + sublayout.size.height);
     }
   }
 
   return [ASLayout newWithLayoutableObject:self
                                       size:ASSizeRangeClamp(constrainedSize, size)
-                                  children:layoutChildren];
+                                sublayouts:sublayouts];
 }
 
 @end

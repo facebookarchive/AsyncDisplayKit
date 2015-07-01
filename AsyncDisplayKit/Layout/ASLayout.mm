@@ -25,11 +25,11 @@ extern BOOL CGPointIsNull(CGPoint point)
 + (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                                    size:(CGSize)size
                                position:(CGPoint)position
-                               children:(NSArray *)children
+                             sublayouts:(NSArray *)sublayouts
 {
   ASDisplayNodeAssert(layoutableObject, @"layoutableObject is required.");
-  for (ASLayout *child in children) {
-    ASDisplayNodeAssert(!CGPointIsNull(child.position), @"Invalid position is not allowed in children.");
+  for (ASLayout *sublayout in sublayouts) {
+    ASDisplayNodeAssert(!CGPointIsNull(sublayout.position), @"Invalid position is not allowed in sublayout.");
   }
   
   ASLayout *l = [super new];
@@ -37,21 +37,21 @@ extern BOOL CGPointIsNull(CGPoint point)
     l->_layoutableObject = layoutableObject;
     l->_size = size;
     l->_position = position;
-    l->_children = [children copy];
+    l->_sublayouts = [sublayouts copy];
   }
   return l;
 }
 
 + (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                                    size:(CGSize)size
-                               children:(NSArray *)children
+                             sublayouts:(NSArray *)sublayouts
 {
-  return [self newWithLayoutableObject:layoutableObject size:size position:CGPointNull children:children];
+  return [self newWithLayoutableObject:layoutableObject size:size position:CGPointNull sublayouts:sublayouts];
 }
 
 + (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size
 {
-  return [self newWithLayoutableObject:layoutableObject size:size children:nil];
+  return [self newWithLayoutableObject:layoutableObject size:size sublayouts:nil];
 }
 
 - (void)setPosition:(CGPoint)position
@@ -63,7 +63,7 @@ extern BOOL CGPointIsNull(CGPoint point)
 
 - (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *))predicateBlock
 {
-  NSMutableArray *flattenedChildren = [NSMutableArray array];
+  NSMutableArray *flattenedSublayouts = [NSMutableArray array];
   
   struct Context {
     ASLayout *layout;
@@ -83,19 +83,19 @@ extern BOOL CGPointIsNull(CGPoint point)
       context.visited = YES;
       
       if (predicateBlock(context.layout)) {
-        [flattenedChildren addObject:[ASLayout newWithLayoutableObject:context.layout.layoutableObject
+        [flattenedSublayouts addObject:[ASLayout newWithLayoutableObject:context.layout.layoutableObject
                                                                   size:context.layout.size
                                                               position:context.absolutePosition
-                                                              children:nil]];
+                                                            sublayouts:nil]];
       }
       
-      for (ASLayout *child in context.layout.children) {
-        stack.push({child, context.absolutePosition + child.position, NO});
+      for (ASLayout *sublayout in context.layout.sublayouts) {
+        stack.push({sublayout, context.absolutePosition + sublayout.position, NO});
       }
     }
   }
   
-  return [ASLayout newWithLayoutableObject:_layoutableObject size:_size children:flattenedChildren];
+  return [ASLayout newWithLayoutableObject:_layoutableObject size:_size sublayouts:flattenedSublayouts];
 }
 
 @end

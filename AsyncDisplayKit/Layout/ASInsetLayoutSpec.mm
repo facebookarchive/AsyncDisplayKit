@@ -84,25 +84,25 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
       MAX(0, constrainedSize.max.height - insetsY),
     }
   };
-  ASLayout *childLayout = [_child calculateLayoutThatFits:insetConstrainedSize];
+  ASLayout *sublayout = [_child calculateLayoutThatFits:insetConstrainedSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {
-    finite(childLayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),
-    finite(childLayout.size.height + _insets.top + _insets.bottom, constrainedSize.max.height),
+    finite(sublayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),
+    finite(sublayout.size.height + _insets.top + _insets.bottom, constrainedSize.max.height),
   });
 
   const CGFloat x = finite(_insets.left, constrainedSize.max.width -
                            (finite(_insets.right,
-                                   centerInset(constrainedSize.max.width, childLayout.size.width)) + childLayout.size.width));
+                                   centerInset(constrainedSize.max.width, sublayout.size.width)) + sublayout.size.width));
 
   const CGFloat y = finite(_insets.top,
                            constrainedSize.max.height -
                            (finite(_insets.bottom,
-                                   centerInset(constrainedSize.max.height, childLayout.size.height)) + childLayout.size.height));
+                                   centerInset(constrainedSize.max.height, sublayout.size.height)) + sublayout.size.height));
   
-  childLayout.position = CGPointMake(x, y);
+  sublayout.position = CGPointMake(x, y);
   
-  return [ASLayout newWithLayoutableObject:self size:computedSize children:@[childLayout]];
+  return [ASLayout newWithLayoutableObject:self size:computedSize sublayouts:@[sublayout]];
 }
 
 @end

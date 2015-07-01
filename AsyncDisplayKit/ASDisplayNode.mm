@@ -1402,7 +1402,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
   
   // Assume that _layout was flattened and is 1-level deep.
-  for (ASLayout *subnodeLayout in _layout.children) {
+  for (ASLayout *subnodeLayout in _layout.sublayouts) {
     ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached layout's children must only contain layout of subnodes.");
     ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = CGRectMake(subnodeLayout.position.x,
                                                                          subnodeLayout.position.y,

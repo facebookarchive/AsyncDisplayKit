@@ -42,14 +42,14 @@
 {
   ASLayout *contentsLayout = [_child calculateLayoutThatFits:constrainedSize];
   contentsLayout.position = CGPointZero;
-  NSMutableArray *layoutChildren = [NSMutableArray arrayWithObject:contentsLayout];
+  NSMutableArray *sublayouts = [NSMutableArray arrayWithObject:contentsLayout];
   if (_overlay) {
     ASLayout *overlayLayout = [_overlay calculateLayoutThatFits:{contentsLayout.size, contentsLayout.size}];
     overlayLayout.position = CGPointZero;
-    [layoutChildren addObject:overlayLayout];
+    [sublayouts addObject:overlayLayout];
   }
   
-  return [ASLayout newWithLayoutableObject:self size:contentsLayout.size children:layoutChildren];
+  return [ASLayout newWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
 @end

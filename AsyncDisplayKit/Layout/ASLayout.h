@@ -24,7 +24,7 @@ extern BOOL CGPointIsNull(CGPoint point);
 /**
  * Position in parent. Default to CGPointNull.
  * 
- * @discussion Before being used as a child layout, this property must be set and no longer equal CGPointNull.
+ * @discussion Before being used as a sublayout, this property must be set and no longer equal CGPointNull.
  *
  * @discussion Unlike all other properties, this property is read-write because often by initializaion time, it has yet been determined.
  * To enforce immutability, this property can be set once and only once.
@@ -32,24 +32,24 @@ extern BOOL CGPointIsNull(CGPoint point);
  */
 @property (nonatomic, readwrite) CGPoint position;
 /** 
- * Array of ASLayout children. Each child must have a valid non-null position.
+ * Array of ASLayouts. Each must have a valid non-null position.
  */
-@property (nonatomic, readonly) NSArray *children;
+@property (nonatomic, readonly) NSArray *sublayouts;
 
 + (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                                    size:(CGSize)size
                                position:(CGPoint)position
-                               children:(NSArray *)children;
+                             sublayouts:(NSArray *)sublayouts;
 
 /**
  * Convenience that has CGPointNull position.
  */
 + (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                                    size:(CGSize)size
-                               children:(NSArray *)children;
+                             sublayouts:(NSArray *)sublayouts;
 
 /**
- * Convenience that has CGPointNull position and no children.
+ * Convenience that has CGPointNull position and no sublayouts.
  */
 + (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
 
@@ -62,7 +62,7 @@ extern BOOL CGPointIsNull(CGPoint point);
  * The block takes 1 argument: evaluatedLayout - the layout to be evaluated.
  * The block returns YES if evaluatedLayout evaluates  to true, otherwise NO.
  *
- * @return A new, 1-level deep layout containing the layout children for which the predicate block returns true.
+ * @return A new, 1-level deep layout containing the layouts for which the predicate block returns true.
  */
 - (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *evaluatedLayout))predicateBlock;
 

@@ -49,30 +49,30 @@
     (_centeringOptions & ASCenterLayoutSpecCenteringX) != 0 ? 0 : constrainedSize.min.width,
     (_centeringOptions & ASCenterLayoutSpecCenteringY) != 0 ? 0 : constrainedSize.min.height,
   };
-  ASLayout *childLayout = [_child calculateLayoutThatFits:ASSizeRangeMake(minChildSize, constrainedSize.max)];
+  ASLayout *sublayout = [_child calculateLayoutThatFits:ASSizeRangeMake(minChildSize, constrainedSize.max)];
 
   // If we have an undetermined height or width, use the child size to define the layout
   // size
   size = ASSizeRangeClamp(constrainedSize, {
-    isnan(size.width) ? childLayout.size.width : size.width,
-    isnan(size.height) ? childLayout.size.height : size.height
+    isnan(size.width) ? sublayout.size.width : size.width,
+    isnan(size.height) ? sublayout.size.height : size.height
   });
 
   // If minimum size options are set, attempt to shrink the size to the size of the child
   size = ASSizeRangeClamp(constrainedSize, {
-    MIN(size.width, (_sizingOptions & ASCenterLayoutSpecSizingOptionMinimumX) != 0 ? childLayout.size.width : size.width),
-    MIN(size.height, (_sizingOptions & ASCenterLayoutSpecSizingOptionMinimumY) != 0 ? childLayout.size.height : size.height)
+    MIN(size.width, (_sizingOptions & ASCenterLayoutSpecSizingOptionMinimumX) != 0 ? sublayout.size.width : size.width),
+    MIN(size.height, (_sizingOptions & ASCenterLayoutSpecSizingOptionMinimumY) != 0 ? sublayout.size.height : size.height)
   });
 
   // Compute the centered postion for the child
   BOOL shouldCenterAlongX = (_centeringOptions & ASCenterLayoutSpecCenteringX);
   BOOL shouldCenterAlongY = (_centeringOptions & ASCenterLayoutSpecCenteringY);
-  childLayout.position = {
-    ASRoundPixelValue(shouldCenterAlongX ? (size.width - childLayout.size.width) * 0.5f : 0),
-    ASRoundPixelValue(shouldCenterAlongY ? (size.height - childLayout.size.height) * 0.5f : 0)
+  sublayout.position = {
+    ASRoundPixelValue(shouldCenterAlongX ? (size.width - sublayout.size.width) * 0.5f : 0),
+    ASRoundPixelValue(shouldCenterAlongY ? (size.height - sublayout.size.height) * 0.5f : 0)
   };
 
-  return [ASLayout newWithLayoutableObject:self size:size children:@[childLayout]];
+  return [ASLayout newWithLayoutableObject:self size:size sublayouts:@[sublayout]];
 }
 
 @end
