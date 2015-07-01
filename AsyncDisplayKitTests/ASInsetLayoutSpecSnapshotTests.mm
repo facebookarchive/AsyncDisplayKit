@@ -12,8 +12,6 @@
 
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
-#import "ASStaticLayoutSpec.h"
-
 
 typedef NS_OPTIONS(NSUInteger, ASInsetLayoutSpecTestEdge) {
   ASInsetLayoutSpecTestEdgeTop    = 1 << 0,

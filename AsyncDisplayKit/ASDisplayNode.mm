@@ -11,7 +11,6 @@
 #import "ASDisplayNodeInternal.h"
 
 #import <objc/runtime.h>
-#import <stack>
 
 #import "_ASAsyncTransaction.h"
 #import "_ASPendingState.h"

@@ -16,8 +16,6 @@
 #import "ASTextNodeWordKerner.h"
 #import "ASThread.h"
 
-#import "ASLayoutSpec.h"
-
 //! @abstract This subclass exists solely to ensure the text view's panGestureRecognizer never begins, because it's sporadically enabled by UITextView. It will be removed pending rdar://14729288.
 @interface _ASDisabledPanUITextView : UITextView
 @end
