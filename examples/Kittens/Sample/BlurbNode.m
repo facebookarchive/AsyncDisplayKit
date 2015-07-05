@@ -15,6 +15,7 @@
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASCenterLayoutSpec.h>
 
 static CGFloat kTextPadding = 10.0f;
 static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
@@ -73,8 +74,13 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
 
 - (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  UIEdgeInsets insets = UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding);
-  return [ASInsetLayoutSpec newWithInsets:insets child:_textNode];
+  return [ASInsetLayoutSpec
+          newWithInsets:UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding)
+          child:
+          [ASCenterLayoutSpec
+           newWithCenteringOptions:ASCenterLayoutSpecCenteringX // Center the text horizontally
+           sizingOptions:ASCenterLayoutSpecSizingOptionMinimumY // Takes up minimum height
+           child:_textNode]];
 }
 
 #pragma mark -
