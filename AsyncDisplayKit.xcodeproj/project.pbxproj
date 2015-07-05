@@ -302,6 +302,8 @@
 		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
+		FA9EAC861ADFAF50005FC4D5 /* ASWaterfallLayoutController.h in Headers */ = {isa = PBXBuildFile; fileRef = FA9EAC841ADFAF50005FC4D5 /* ASWaterfallLayoutController.h */; };
+		FA9EAC871ADFAF50005FC4D5 /* ASWaterfallLayoutController.mm in Sources */ = {isa = PBXBuildFile; fileRef = FA9EAC851ADFAF50005FC4D5 /* ASWaterfallLayoutController.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -492,6 +494,8 @@
 		D785F6601A74327E00291744 /* ASScrollNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASScrollNode.h; sourceTree = "<group>"; };
 		D785F6611A74327E00291744 /* ASScrollNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASScrollNode.m; sourceTree = "<group>"; };
 		EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AsyncDisplayKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA9EAC841ADFAF50005FC4D5 /* ASWaterfallLayoutController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASWaterfallLayoutController.h; sourceTree = "<group>"; };
+		FA9EAC851ADFAF50005FC4D5 /* ASWaterfallLayoutController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASWaterfallLayoutController.mm; sourceTree = "<group>"; };
 		FB07EABBCF28656C6297BC2D /* Pods-AsyncDisplayKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -687,6 +691,8 @@
 		058D09E1195D050800B7D73C /* Details */ = {
 			isa = PBXGroup;
 			children = (
+				FA9EAC841ADFAF50005FC4D5 /* ASWaterfallLayoutController.h */,
+				FA9EAC851ADFAF50005FC4D5 /* ASWaterfallLayoutController.mm */,
 				058D09E2195D050800B7D73C /* _ASDisplayLayer.h */,
 				058D09E3195D050800B7D73C /* _ASDisplayLayer.mm */,
 				058D09E4195D050800B7D73C /* _ASDisplayView.h */,
@@ -903,6 +909,7 @@
 				AC3C4A511A1139C100143C57 /* ASCollectionView.h in Headers */,
 				292C59A01A956527007E5DD6 /* ASRangeHandlerPreload.h in Headers */,
 				055B9FA81A1C154B00035D6D /* ASNetworkImageNode.h in Headers */,
+				FA9EAC861ADFAF50005FC4D5 /* ASWaterfallLayoutController.h in Headers */,
 				054963491A1EA066000F8E56 /* ASBasicImageDownloader.h in Headers */,
 				AC3C4A541A113EEC00143C57 /* ASCollectionViewProtocols.h in Headers */,
 				D785F6621A74327E00291744 /* ASScrollNode.h in Headers */,
@@ -1240,6 +1247,7 @@
 				058D0A27195D050800B7D73C /* _ASPendingState.m in Sources */,
 				0516FA411A1563D200B4EBED /* ASMultiplexImageNode.mm in Sources */,
 				058D0A16195D050800B7D73C /* ASImageNode.mm in Sources */,
+				FA9EAC871ADFAF50005FC4D5 /* ASWaterfallLayoutController.mm in Sources */,
 				058D0A29195D050800B7D73C /* ASDisplayNode+DebugTiming.mm in Sources */,
 				205F0E1E1B373A2C007741D0 /* ASCollectionViewLayoutController.mm in Sources */,
 				058D0A22195D050800B7D73C /* _ASAsyncTransaction.m in Sources */,
