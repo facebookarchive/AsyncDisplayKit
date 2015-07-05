@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
-
+#import "ASFlowLayoutController.h"
 
 @class ASCellNode;
 @class ASDataController;
@@ -97,7 +97,8 @@ typedef NSUInteger ASDataControllerAnimationOptions;
  * will be updated asynchronously. The dataSource must be updated to reflect the changes before these methods has been called.
  * For each data updatin, the corresponding methods in delegate will be called.
  */
-@interface ASDataController : ASDealloc2MainObject
+@protocol ASFlowLayoutControllerDataSource;
+@interface ASDataController : ASDealloc2MainObject <ASFlowLayoutControllerDataSource>
 
 /**
  Data source for fetching data info.
@@ -166,5 +167,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 - (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath;
 
 - (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths;
+
+- (NSArray *)completedNodes;  // This provides efficient access to the entire _completedNodes multidimensional array.
 
 @end

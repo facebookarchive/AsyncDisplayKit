@@ -78,20 +78,6 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return self;
 }
 
-- (instancetype)initWithScrollView:(UIScrollView *)scrollView collectionViewLayout:(UICollectionViewLayout *)layout
-{
-  if (!(self = [super init])) {
-    return nil;
-  }
-  
-  _scrollableDirections = ASScrollDirectionVerticalDirections;
-  _scrollView = scrollView;
-  _collectionViewLayout = layout;
-  _updateRangeBoundsIndexedByRangeType = std::vector<CGRect>(ASLayoutRangeTypeCount);
-  return self;
-}
-
-
 #pragma mark -
 #pragma mark Index Paths in Range
 

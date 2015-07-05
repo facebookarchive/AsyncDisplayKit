@@ -15,12 +15,20 @@ typedef NS_ENUM(NSUInteger, ASFlowLayoutDirection) {
   ASFlowLayoutDirectionHorizontal,
 };
 
+@protocol ASFlowLayoutControllerDataSource
+
+- (NSArray *)completedNodes;  // This provides access to ASDataController's _completedNodes multidimensional array.
+
+@end
+
 /**
- * The controller for flow layout.
+ *  An optimized flow layout controller that supports only vertical or horizontal scrolling, not simultaneously two-dimensional scrolling.
+ *  It is used for all ASTableViews, and may be used with ASCollectionView.
  */
 @interface ASFlowLayoutController : ASAbstractLayoutController
 
 @property (nonatomic, readonly, assign) ASFlowLayoutDirection layoutDirection;
+@property (nonatomic) id <ASFlowLayoutControllerDataSource> dataSource;
 
 - (instancetype)initWithScrollOption:(ASFlowLayoutDirection)layoutDirection;
 

@@ -191,9 +191,6 @@
   }];
 
   ASDisplayNodePerformBlockOnMainThread(^{
-    if ([_layoutController respondsToSelector:@selector(insertNodesAtIndexPaths:withSizes:)]) {
-      [_layoutController insertNodesAtIndexPaths:indexPaths withSizes:nodeSizes];
-    }
     _rangeIsValid = NO;
     [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
@@ -201,9 +198,6 @@
 
 - (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
   ASDisplayNodePerformBlockOnMainThread(^{
-    if ([_layoutController respondsToSelector:@selector(deleteNodesAtIndexPaths:)]) {
-      [_layoutController deleteNodesAtIndexPaths:indexPaths];
-    }
     _rangeIsValid = NO;
     [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
@@ -223,9 +217,6 @@
   }];
 
   ASDisplayNodePerformBlockOnMainThread(^{
-    if ([_layoutController respondsToSelector:@selector(insertSections:atIndexSet:)]) {
-      [_layoutController insertSections:sectionNodeSizes atIndexSet:indexSet];
-    }
     _rangeIsValid = NO;
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   });
@@ -233,9 +224,6 @@
 
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
   ASDisplayNodePerformBlockOnMainThread(^{
-    if ([_layoutController respondsToSelector:@selector(deleteSectionsAtIndexSet:)]) {
-      [_layoutController deleteSectionsAtIndexSet:indexSet];
-    }
     _rangeIsValid = NO;
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   });

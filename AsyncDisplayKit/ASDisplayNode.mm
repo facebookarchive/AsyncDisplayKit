@@ -1337,6 +1337,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   self.layer.contents = nil;
   _placeholderLayer.contents = nil;
+  _placeholderImage = nil;
 }
 
 - (void)recursivelyClearContents

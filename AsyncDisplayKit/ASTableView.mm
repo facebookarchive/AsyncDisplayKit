@@ -117,7 +117,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   _ASTableViewProxy *_proxyDelegate;
 
   ASDataController *_dataController;
-  ASCollectionViewLayoutController *_layoutController;
+  ASFlowLayoutController *_layoutController;
 
   ASRangeController *_rangeController;
 
@@ -159,9 +159,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)configureWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
-  UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
-  _layoutController = [[ASCollectionViewLayoutController alloc] initWithScrollView:self collectionViewLayout:flowLayout];
-
+  _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
+  
   _rangeController = [[ASRangeController alloc] init];
   _rangeController.layoutController = _layoutController;
   _rangeController.delegate = self;
@@ -169,6 +168,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   _dataController = [[ASDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
   _dataController.dataSource = self;
   _dataController.delegate = _rangeController;
+  
+  _layoutController.dataSource = _dataController;
 
   _asyncDataFetchingEnabled = asyncDataFetchingEnabled;
   _asyncDataSourceLocked = NO;

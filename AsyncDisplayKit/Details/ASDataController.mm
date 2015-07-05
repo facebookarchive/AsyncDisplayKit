@@ -54,7 +54,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   _pendingEditCommandBlocks = [NSMutableArray array];
   
   _editingTransactionQueue = [[NSOperationQueue alloc] init];
-  _editingTransactionQueue.qualityOfService = NSQualityOfServiceUserInitiated;
   _editingTransactionQueue.maxConcurrentOperationCount = 1; // Serial queue
   _editingTransactionQueue.name = @"org.AsyncDisplayKit.ASDataController.editingTransactionQueue";
   
@@ -553,15 +552,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
-  
-  // Make sure that any asynchronous layout operations have finished so that those nodes are present.
-  // Otherwise a failure case could be:
-  // - Reload section 2, deleting all current nodes in that section.
-  // - New nodes are created and sizing is triggered, but they are not yet added to _completedNodes.
-  // - This method is called and includes an indexPath in section 2.
-  // - Unless we wait for the layout group to finish, we will crash with array out of bounds looking for the index in _completedNodes.
-
   return ASFindElementsInMultidimensionalArrayAtIndexPaths(_completedNodes, [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
+}
+
+- (NSArray *)completedNodes
+{
+  ASDisplayNodeAssertMainThread();
+  return _completedNodes;
 }
 
 #pragma mark - Dealloc
