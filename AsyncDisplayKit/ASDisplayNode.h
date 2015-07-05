@@ -432,6 +432,16 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  */
 - (CGRect)convertRect:(CGRect)rect fromNode:(ASDisplayNode *)node;
 
+/** @name UIResponder methods */
+
+// By default these fall through to the underlying view, but can be overridden.
+- (BOOL)canBecomeFirstResponder;                                            // default==NO
+- (BOOL)becomeFirstResponder;                                               // default==NO (no-op)
+- (BOOL)canResignFirstResponder;                                            // default==YES
+- (BOOL)resignFirstResponder;                                               // default==NO (no-op)
+- (BOOL)isFirstResponder;
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender;
+
 @end
 
 
