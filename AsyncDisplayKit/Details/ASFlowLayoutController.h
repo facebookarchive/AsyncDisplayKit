@@ -28,7 +28,7 @@ typedef NS_ENUM(NSUInteger, ASFlowLayoutDirection) {
 @interface ASFlowLayoutController : ASAbstractLayoutController
 
 @property (nonatomic, readonly, assign) ASFlowLayoutDirection layoutDirection;
-@property (nonatomic) id <ASFlowLayoutControllerDataSource> dataSource;
+@property (nonatomic, readwrite, weak) id <ASFlowLayoutControllerDataSource> dataSource;
 
 - (instancetype)initWithScrollOption:(ASFlowLayoutDirection)layoutDirection;
 
