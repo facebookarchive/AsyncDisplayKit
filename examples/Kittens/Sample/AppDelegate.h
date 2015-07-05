@@ -11,6 +11,8 @@
 
 #import <UIKit/UIKit.h>
 
+#define UseAutomaticLayout 1
+
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
