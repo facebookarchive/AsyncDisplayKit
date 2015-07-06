@@ -44,7 +44,7 @@
     ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
 }
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   std::vector<CGSize> sizeOptions;
   if (!isinf(constrainedSize.max.width)) {
@@ -67,7 +67,7 @@
 
   // If there is no max size in *either* dimension, we can't apply the ratio, so just pass our size range through.
   const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
-  ASLayout *sublayout = [_child calculateLayoutThatFits:childRange];
+  ASLayout *sublayout = [_child measureWithSizeRange:childRange];
   sublayout.position = CGPointZero;
   return [ASLayout newWithLayoutableObject:self size:sublayout.size sublayouts:@[sublayout]];
 }

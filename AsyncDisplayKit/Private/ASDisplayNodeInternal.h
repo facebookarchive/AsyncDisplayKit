@@ -53,7 +53,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
   CGFloat _contentsScaleForDisplay;
 
   ASLayout *_layout;
-  CGSize _constrainedSize;
+  ASSizeRange _constrainedSize;
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
 
@@ -119,8 +119,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 - (BOOL)__shouldSize;
 - (void)__exitedHierarchy;
 
-// Core implementation of -measure:. Must be called with _propertyLock held.
-- (CGSize)__measure:(CGSize)constrainedSize;
+// Core implementation of -measureWithSizeRange:. Must be called with _propertyLock held.
+- (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize;
 
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;

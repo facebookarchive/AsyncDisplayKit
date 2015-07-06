@@ -58,11 +58,7 @@
  * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
  *
  * @return An ASLayout instance defining the layout of the receiver and its children.
- *
- * @discussion This method is called on a non-main thread. Other expensive work that needs to
- * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
- * encouraged.
  */
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize;
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
 
 @end

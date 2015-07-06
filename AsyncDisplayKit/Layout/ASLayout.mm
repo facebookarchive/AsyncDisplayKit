@@ -54,13 +54,6 @@ extern BOOL CGPointIsNull(CGPoint point)
   return [self newWithLayoutableObject:layoutableObject size:size sublayouts:nil];
 }
 
-- (void)setPosition:(CGPoint)position
-{
-  ASDisplayNodeAssert(CGPointIsNull(_position), @"Position can be set once and only once.");
-  ASDisplayNodeAssert(!CGPointIsNull(position), @"Position must not be set to null.");
-  _position = position;
-}
-
 - (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *))predicateBlock
 {
   NSMutableArray *flattenedSublayouts = [NSMutableArray array];

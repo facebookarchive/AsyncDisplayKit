@@ -24,11 +24,7 @@ extern BOOL CGPointIsNull(CGPoint point);
 /**
  * Position in parent. Default to CGPointNull.
  * 
- * @discussion Before being used as a sublayout, this property must be set and no longer equal CGPointNull.
- *
- * @discussion Unlike all other properties, this property is read-write because often by initializaion time, it has yet been determined.
- * To enforce immutability, this property can be set once and only once.
- *
+ * @discussion When being used as a sublayout, this property must not equal CGPointNull.
  */
 @property (nonatomic, readwrite) CGPoint position;
 /** 

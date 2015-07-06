@@ -70,10 +70,19 @@
 /**
  * @abstract Return the calculated layout.
  *
- * @discussion Ideal for use by subclasses in -layout, having already prompted their subnodes to calculate their size by
- * calling -measure: on them in -calculateLayoutThatFits:.
+ * @discussion For node subclasses that implement manual layout (e.g., they have a custom -layout method), 
+ * calculatedLayout may be accessed on subnodes to retrieved cached information about their size.  
+ * This allows -layout to be very fast, saving time on the main thread.  
+ * Note: .calculatedLayout will only be set for nodes that have had -measure: called on them.  
+ * For manual layout, make sure you call -measure: in your implementation of -calculateSizeThatFits:.
  *
- * @return Layout already calculated by ASLayoutNode returned by layoutNodeThatFits:.
+ * For node subclasses that use automatic layout (e.g., they implement -layoutSpecThatFits:), 
+ * it is typically not necessary to use .calculatedLayout at any point.  For these nodes, 
+ * the ASLayoutSpec implementation will automatically call -measureWithSizeRange: on all of the subnodes,
+ * and the ASDisplayNode base class implementation of -layout will automatically make use of .calculatedLayout on the subnodes.
+ *
+ * @return Layout that wraps calculated size returned by -calculateSizeThatFits: (in manual layout mode),
+ * or layout already calculated from layout spec returned by -layoutSpecThatFits: (in automatic layout mode).
  *
  * @warning Subclasses must not override this; it returns the last cached layout and is never expensive.
  */
@@ -111,6 +120,22 @@
 
 /** @name Layout calculation */
 
+/**
+ * @abstract Asks the node to measure a layout based on given size range.
+ *
+ * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
+ *
+ * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
+ *
+ * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
+ * constraint and the result.
+ *
+ * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
+ * be expensive if result is not cached.
+ *
+ * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
+ */
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
 
 /**
  * @abstract Calculate a layout based on given size range.
@@ -120,7 +145,7 @@
  * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
  *
  * @discussion This method is called on a non-main thread. The default implementation calls either -layoutSpecThatFits: 
- * or -calculateSizeThatFits:, whichever method is available. Thus, subclasses rarely need to override this method, 
+ * or -calculateSizeThatFits:, whichever method is overriden. Subclasses rarely need to override this method,
  * override -layoutSpecThatFits: or -calculateSizeThatFits: instead.
  *
  * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
@@ -133,7 +158,7 @@
  * @param constrainedSize The maximum size the receiver should fit in.
  *
  * @discussion Subclasses that override should expect this method to be called on a non-main thread. The returned size
- * is wrapped in an ASLayout and cached by ASDisplayNode for quick access during -layout. Other expensive work that needs to
+ * is wrapped in an ASLayout and cached for quick access during -layout. Other expensive work that needs to
  * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
  * encouraged.
  *

@@ -29,7 +29,7 @@ static ASLayout *crossChildLayout(const id<ASLayoutable> child,
   // stretched children will have a cross dimension of at least crossMin
   const CGFloat childCrossMin = alignItems == ASStackLayoutAlignItemsStretch ? crossMin : 0;
   const ASSizeRange childSizeRange = directionSizeRange(style.direction, stackMin, stackMax, childCrossMin, crossMax);
-  return [child calculateLayoutThatFits:childSizeRange];
+  return [child measureWithSizeRange:childSizeRange];
 }
 
 /**

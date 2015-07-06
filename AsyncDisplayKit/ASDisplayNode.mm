@@ -72,6 +72,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", NSStringFromClass(self));
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange method", NSStringFromClass(self));
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
 
@@ -430,31 +431,36 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (CGSize)measure:(CGSize)constrainedSize
 {
-  ASDN::MutexLocker l(_propertyLock);
-  return [self __measure:constrainedSize];
+  return [self measureWithSizeRange:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
 }
 
-- (CGSize)__measure:(CGSize)constrainedSize
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return [self __measureWithSizeRange:constrainedSize];
+}
+
+- (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
 
   if (![self __shouldSize])
-    return CGSizeZero;
+    return nil;
 
   // only calculate the size if
   //  - we haven't already
-  //  - the width is different from the last time
-  //  - the height is different from the last time
-  if (!_flags.isMeasured || !CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
-    _layout = [self calculateLayoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)];
+  //  - the constrained size range is different
+  if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
+    _layout = [self calculateLayoutThatFits:constrainedSize];
     _constrainedSize = constrainedSize;
     _flags.isMeasured = YES;
   }
 
+  ASDisplayNodeAssertTrue(_layout.layoutableObject == self);
   ASDisplayNodeAssertTrue(_layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(_layout.size.height >= 0.0);
 
-  // we generate placeholders at measure: time so that a node is guaranteed to have a placeholder ready to go
+  // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed to have a placeholder ready to go
   // also if a node has no size, it should not have a placeholder
   if (self.placeholderEnabled && [self _displaysAsynchronously] && _layout.size.width > 0.0 && _layout.size.height > 0.0) {
     if (!_placeholderImage) {
@@ -466,7 +472,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
     }
   }
 
-  return _layout.size;
+  return _layout;
 }
 
 - (BOOL)displaysAsynchronously
@@ -559,7 +565,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
   if (CGRectEqualToRect(_layer.bounds, CGRectZero)) {
-    return;     // Performing layout on a zero-bounds view often results in frame calculations with negative sizes after applying margins, which will cause measure: on subnodes to assert.
+    return;     // Performing layout on a zero-bounds view often results in frame calculations with negative sizes after applying margins, which will cause measureWithSizeRange: on subnodes to assert.
   }
   _placeholderLayer.frame = _layer.bounds;
   [self layout];
@@ -1283,7 +1289,13 @@ static NSInteger incrementIfFound(NSInteger i) {
     return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
   } else {
     id<ASLayoutable> layoutSpec = [self layoutSpecThatFits:constrainedSize];
-    return [[layoutSpec calculateLayoutThatFits:constrainedSize] flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
+    ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
+    // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
+    if (layout.layoutableObject != self) {
+      layout.position = CGPointZero;
+      layout = [ASLayout newWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
+    }
+    return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
       return [_subnodes containsObject:evaluatedLayout.layoutableObject];
     }];
   }
@@ -1313,7 +1325,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   return _layout.size;
 }
 
-- (CGSize)constrainedSizeForCalculatedSize
+- (ASSizeRange)constrainedSizeForCalculatedLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
   return _constrainedSize;
@@ -1327,7 +1339,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)invalidateCalculatedLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  // This will cause -measure: to actually compute the size instead of returning the previously cached size
+  // This will cause -measureWithSizeRange: to actually compute the size instead of returning the previously cached size
   _flags.isMeasured = NO;
 }
 
@@ -1402,7 +1414,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   
   // Assume that _layout was flattened and is 1-level deep.
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
-    ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached layout's children must only contain layout of subnodes.");
+    ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.");
     ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = CGRectMake(subnodeLayout.position.x,
                                                                          subnodeLayout.position.y,
                                                                          subnodeLayout.size.width,

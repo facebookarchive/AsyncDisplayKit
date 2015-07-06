@@ -37,7 +37,7 @@
   ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
 }
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   CGSize size = {
     constrainedSize.max.width,
@@ -49,7 +49,7 @@
     (_centeringOptions & ASCenterLayoutSpecCenteringX) != 0 ? 0 : constrainedSize.min.width,
     (_centeringOptions & ASCenterLayoutSpecCenteringY) != 0 ? 0 : constrainedSize.min.height,
   };
-  ASLayout *sublayout = [_child calculateLayoutThatFits:ASSizeRangeMake(minChildSize, constrainedSize.max)];
+  ASLayout *sublayout = [_child measureWithSizeRange:ASSizeRangeMake(minChildSize, constrainedSize.max)];
 
   // If we have an undetermined height or width, use the child size to define the layout
   // size

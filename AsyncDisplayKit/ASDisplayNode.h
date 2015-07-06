@@ -11,6 +11,7 @@
 #import <AsyncDisplayKit/_ASAsyncTransactionContainer.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
+#import <AsyncDisplayKit/ASDimension.h>
 
 typedef UIView *(^ASDisplayNodeViewBlock)();
 typedef CALayer *(^ASDisplayNodeLayerBlock)();
@@ -117,8 +118,8 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 /** @name Managing dimensions */
 
 
-/** 
- * @abstract Asks the node to calculate and return the size that best fits its subnodes.
+/**
+ * @abstract Asks the node to measure and return the size that best fits its subnodes.
  *
  * @param constrainedSize The maximum size the receiver should fit in.
  *
@@ -127,9 +128,11 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the 
  * constraint and the result.
  *
- * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
+ * @warning Subclasses must not override this; it calls -measureWithSizeRange: with zero min size. 
+ * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may 
  * be expensive if result is not cached.
  *
+ * @see [ASDisplayNode(Subclassing) measureWithSizeRange:]
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
 - (CGSize)measure:(CGSize)constrainedSize;
@@ -147,11 +150,11 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 @property (nonatomic, readonly, assign) CGSize calculatedSize;
 
 /** 
- * @abstract Return the constrained size used for calculating layout.
+ * @abstract Return the constrained size range used for calculating layout.
  *
- * @return The maximum constrained size used by calculateLayoutThatFits:.
+ * @return The minimum and maximum constrained sizes used by calculateLayoutThatFits:.
  */
-@property (nonatomic, readonly, assign) CGSize constrainedSizeForCalculatedLayout;
+@property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
 
 /** @name Managing the nodes hierarchy */
 

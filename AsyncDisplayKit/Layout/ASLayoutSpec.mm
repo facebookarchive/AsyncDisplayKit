@@ -36,7 +36,7 @@
 
 #pragma mark - Layout
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   return [ASLayout newWithLayoutableObject:self size:constrainedSize.min];
 }

@@ -38,13 +38,13 @@
 /**
  First layout the contents, then fit the overlay on top of it.
  */
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASLayout *contentsLayout = [_child calculateLayoutThatFits:constrainedSize];
+  ASLayout *contentsLayout = [_child measureWithSizeRange:constrainedSize];
   contentsLayout.position = CGPointZero;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithObject:contentsLayout];
   if (_overlay) {
-    ASLayout *overlayLayout = [_overlay calculateLayoutThatFits:{contentsLayout.size, contentsLayout.size}];
+    ASLayout *overlayLayout = [_overlay measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
     overlayLayout.position = CGPointZero;
     [sublayouts addObject:overlayLayout];
   }

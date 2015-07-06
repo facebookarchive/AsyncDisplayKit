@@ -41,14 +41,14 @@
 /**
  First layout the contents, then fit the background image.
  */
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASLayout *contentsLayout = [_child calculateLayoutThatFits:constrainedSize];
+  ASLayout *contentsLayout = [_child measureWithSizeRange:constrainedSize];
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
   if (_background) {
     // Size background to exactly the same size.
-    ASLayout *backgroundLayout = [_background calculateLayoutThatFits:{contentsLayout.size, contentsLayout.size}];
+    ASLayout *backgroundLayout = [_background measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
     backgroundLayout.position = CGPointZero;
     [sublayouts addObject:backgroundLayout];
   }
