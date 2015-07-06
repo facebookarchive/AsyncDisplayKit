@@ -243,6 +243,14 @@
     [_node tintColorDidChange];
 }
 
+- (BOOL)canBecomeFirstResponder {
+    return [_node canBecomeFirstResponder];
+}
+
+- (BOOL)canResignFirstResponder {
+    return [_node canResignFirstResponder];
+}
+
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender
 {
   // We forward responder-chain actions to our node if we can't handle them ourselves. See -targetForAction:withSender:.
