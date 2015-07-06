@@ -12,7 +12,7 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 
-#import "ASInsetLayoutSpec.h"
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 
 #pragma mark -
 #pragma mark ASCellNode
