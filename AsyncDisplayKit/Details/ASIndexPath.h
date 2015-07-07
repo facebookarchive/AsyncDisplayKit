@@ -1,13 +1,12 @@
-//
-//  ASIndexPath.h
-//  Pods
-//
-//  Created by Scott Goodson on 7/4/15.
-//
-//  A much more efficient way to handle index paths than NSIndexPath.
-//  For best results, use C++ vectors; NSValue wrapping with Cocoa collections
-//  would make NSIndexPath a much better choice.
-//
+/* Copyright (c) 2014-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 typedef struct {
   NSInteger section;
@@ -19,66 +18,25 @@ typedef struct {
   ASIndexPath end;
 } ASIndexPathRange;
 
-ASIndexPath ASIndexPathMake(NSInteger section, NSInteger row)
-{
-  ASIndexPath indexPath;
-  indexPath.section = section;
-  indexPath.row = row;
-  return indexPath;
-}
+ASDISPLAYNODE_EXTERN_C_BEGIN
 
-BOOL ASIndexPathEqualToIndexPath(ASIndexPath first, ASIndexPath second)
-{
-  return (first.section == second.section && first.row == second.row);
-}
+extern ASIndexPath ASIndexPathMake(NSInteger section, NSInteger row);
 
-ASIndexPath ASIndexPathMinimum(ASIndexPath first, ASIndexPath second)
-{
-  if (first.section < second.section) {
-    return first;
-  } else if (first.section > second.section) {
-    return second;
-  } else {
-    return (first.row < second.row ? first : second);
-  }
-}
+extern BOOL ASIndexPathEqualToIndexPath(ASIndexPath first, ASIndexPath second);
 
-ASIndexPath ASIndexPathMaximum(ASIndexPath first, ASIndexPath second)
-{
-  if (first.section > second.section) {
-    return first;
-  } else if (first.section < second.section) {
-    return second;
-  } else {
-    return (first.row > second.row ? first : second);
-  }
-}
+extern ASIndexPath ASIndexPathMinimum(ASIndexPath first, ASIndexPath second);
 
-ASIndexPathRange ASIndexPathRangeMake(ASIndexPath first, ASIndexPath second)
-{
-  ASIndexPathRange range;
-  range.start = ASIndexPathMinimum(first, second);
-  range.end = ASIndexPathMaximum(first, second);
-  return range;
-}
+extern ASIndexPath ASIndexPathMaximum(ASIndexPath first, ASIndexPath second);
 
-BOOL ASIndexPathRangeEqualToIndexPathRange(ASIndexPathRange first, ASIndexPathRange second)
-{
-  return ASIndexPathEqualToIndexPath(first.start, second.start) && ASIndexPathEqualToIndexPath(first.end, second.end);
-}
+extern ASIndexPathRange ASIndexPathRangeMake(ASIndexPath first, ASIndexPath second);
+
+extern BOOL ASIndexPathRangeEqualToIndexPathRange(ASIndexPathRange first, ASIndexPathRange second);
+
+ASDISPLAYNODE_EXTERN_C_END
 
 @interface NSIndexPath (ASIndexPathAdditions)
+
 + (NSIndexPath *)indexPathWithASIndexPath:(ASIndexPath)indexPath;
 - (ASIndexPath)ASIndexPathValue;
-@end
 
-@implementation NSIndexPath (ASIndexPathAdditions)
-+ (NSIndexPath *)indexPathWithASIndexPath:(ASIndexPath)indexPath
-{
-  return [NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section];;
-}
-- (ASIndexPath)ASIndexPathValue
-{
-  return ASIndexPathMake(self.section, self.row);
-}
 @end
