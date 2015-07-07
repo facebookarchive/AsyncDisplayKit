@@ -12,6 +12,7 @@ Pod::Spec.new do |spec|
   spec.public_header_files = [
       'AsyncDisplayKit/*.h',
       'AsyncDisplayKit/Details/**/*.h',
+      'AsyncDisplayKit/Layout/*.h',
       'Base/*.h'
   ]
 

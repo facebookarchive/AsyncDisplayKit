@@ -152,7 +152,7 @@
 
 - (void)layout
 {
-  [super layout];
+  ASDisplayNodeAssertMainThread();
 
   [self _layoutTextView];
 }
@@ -290,7 +290,7 @@
     [_textKitComponents.textStorage setAttributedString:attributedStringToDisplay];
 
   // Calculated size depends on the seeded text.
-  [self invalidateCalculatedSize];
+  [self invalidateCalculatedLayout];
 
   // Update if placeholder is shown.
   [self _updateDisplayingPlaceholder];
@@ -399,7 +399,7 @@
   [self _updateDisplayingPlaceholder];
 
   // Invalidate, as our calculated size depends on the textview's seeded text.
-  [self invalidateCalculatedSize];
+  [self invalidateCalculatedLayout];
 
   // Delegateify.
   [self _delegateDidUpdateText];

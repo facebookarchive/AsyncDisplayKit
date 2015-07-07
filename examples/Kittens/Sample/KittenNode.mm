@@ -10,8 +10,12 @@
  */
 
 #import "KittenNode.h"
+#import "AppDelegate.h"
 
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+
+#import <AsyncDisplayKit/ASStackLayoutSpec.h>
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 
 static const CGFloat kImageSize = 80.0f;
 static const CGFloat kOuterPadding = 16.0f;
@@ -124,6 +128,36 @@ static const CGFloat kInnerPadding = 10.0f;
             NSParagraphStyleAttributeName: style };
 }
 
+#if UseAutomaticLayout
+- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  ASRatioLayoutSpec *imagePlaceholder = [ASRatioLayoutSpec newWithRatio:1.0 child:_imageNode];
+  imagePlaceholder.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);
+  
+  _textNode.flexShrink = YES;
+  
+  return
+  [ASInsetLayoutSpec
+   newWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding)
+   child:
+   [ASStackLayoutSpec
+    newWithStyle:{
+      .direction = ASStackLayoutDirectionHorizontal,
+      .spacing = kInnerPadding
+    }
+    children:@[imagePlaceholder, _textNode]]];
+}
+
+// With box model, you don't need to override this method, unless you want to add custom logic.
+- (void)layout
+{
+  [super layout];
+  
+  // Manually layout the divider.
+  CGFloat pixelHeight = 1.0f / [[UIScreen mainScreen] scale];
+  _divider.frame = CGRectMake(0.0f, 0.0f, self.calculatedSize.width, pixelHeight);
+}
+#else
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   CGSize imageSize = CGSizeMake(kImageSize, kImageSize);
@@ -145,5 +179,6 @@ static const CGFloat kInnerPadding = 10.0f;
   CGSize textSize = _textNode.calculatedSize;
   _textNode.frame = CGRectMake(kOuterPadding + kImageSize + kInnerPadding, kOuterPadding, textSize.width, textSize.height);
 }
+#endif
 
 @end

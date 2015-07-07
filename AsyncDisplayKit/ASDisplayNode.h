@@ -11,7 +11,7 @@
 #import <AsyncDisplayKit/_ASAsyncTransactionContainer.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
-
+#import <AsyncDisplayKit/ASDimension.h>
 
 typedef UIView *(^ASDisplayNodeViewBlock)();
 typedef CALayer *(^ASDisplayNodeLayerBlock)();
@@ -118,8 +118,8 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 /** @name Managing dimensions */
 
 
-/** 
- * @abstract Asks the node to calculate and return the size that best fits its subnodes.
+/**
+ * @abstract Asks the node to measure and return the size that best fits its subnodes.
  *
  * @param constrainedSize The maximum size the receiver should fit in.
  *
@@ -128,10 +128,12 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the 
  * constraint and the result.
  *
- * @warning Subclasses must not override this; it caches results from -calculateSizeThatFits:.  Calling this method may 
+ * @warning Subclasses must not override this; it calls -measureWithSizeRange: with zero min size. 
+ * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may 
  * be expensive if result is not cached.
  *
- * @see [ASDisplayNode(Subclassing) calculateSizeThatFits:]
+ * @see [ASDisplayNode(Subclassing) measureWithSizeRange:]
+ * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
 - (CGSize)measure:(CGSize)constrainedSize;
 
@@ -139,21 +141,20 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @abstract Return the calculated size.
  *
  * @discussion Ideal for use by subclasses in -layout, having already prompted their subnodes to calculate their size by
- * calling -measure: on them in -calculateSizeThatFits:.
+ * calling -measure: on them in -calculateLayoutThatFits.
  *
- * @return Size already calculated by calculateSizeThatFits:.
+ * @return Size already calculated by -calculateLayoutThatFits:.
  *
- * @warning Subclasses must not override this; it returns the last cached size calculated and is never expensive.
+ * @warning Subclasses must not override this; it returns the last cached measurement and is never expensive.
  */
 @property (nonatomic, readonly, assign) CGSize calculatedSize;
 
 /** 
- * @abstract Return the constrained size used for calculating size.
+ * @abstract Return the constrained size range used for calculating layout.
  *
- * @return The constrained size used by calculateSizeThatFits:.
+ * @return The minimum and maximum constrained sizes used by calculateLayoutThatFits:.
  */
-@property (nonatomic, readonly, assign) CGSize constrainedSizeForCalculatedSize;
-
+@property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
 
 /** @name Managing the nodes hierarchy */
 
