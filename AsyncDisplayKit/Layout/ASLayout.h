@@ -19,7 +19,7 @@ extern BOOL CGPointIsNull(CGPoint point);
 /** Represents a computed immutable layout tree. */
 @interface ASLayout : NSObject
 
-@property (nonatomic, readonly) id<ASLayoutable> layoutableObject;
+@property (nonatomic, weak, readonly) id<ASLayoutable> layoutableObject;
 @property (nonatomic, readonly) CGSize size;
 /**
  * Position in parent. Default to CGPointNull.
