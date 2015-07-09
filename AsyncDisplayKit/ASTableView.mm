@@ -329,6 +329,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   [_dataController endUpdates];
 }
 
+- (void)endUpdatesWithCompletion:(void (^)(BOOL))completion
+{
+  [_dataController endUpdatesWithCompletion:completion];
+}
+
 
 #pragma mark -
 #pragma mark Editing
