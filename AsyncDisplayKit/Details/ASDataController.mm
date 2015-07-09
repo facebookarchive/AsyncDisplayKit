@@ -73,7 +73,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   
   // Interrogate our delegate to understand its capabilities, optimizing away expensive respondsToSelector: calls later.
   _delegateDidInsertNodes     = [_delegate respondsToSelector:@selector(dataController:didInsertNodes:atIndexPaths:withAnimationOptions:)];
-  _delegateDidDeleteNodes     = [_delegate respondsToSelector:@selector(dataController:didDeleteNodesAtIndexPaths:withAnimationOptions:)];
+  _delegateDidDeleteNodes     = [_delegate respondsToSelector:@selector(dataController:didDeleteNodes:atIndexPaths:withAnimationOptions:)];
   _delegateDidInsertSections  = [_delegate respondsToSelector:@selector(dataController:didInsertSections:atIndexSet:withAnimationOptions:)];
   _delegateDidDeleteSections  = [_delegate respondsToSelector:@selector(dataController:didDeleteSectionsAtIndexSet:withAnimationOptions:)];
 }
@@ -167,9 +167,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_editingNodes, indexPaths);
 
   ASDisplayNodePerformBlockOnMainThread(^{
+    NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_completedNodes, indexPaths);
     ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_completedNodes, indexPaths);
     if (_delegateDidDeleteNodes)
-      [_delegate dataController:self didDeleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+      [_delegate dataController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
 

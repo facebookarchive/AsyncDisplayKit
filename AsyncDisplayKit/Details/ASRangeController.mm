@@ -192,14 +192,14 @@
 
   ASDisplayNodePerformBlockOnMainThread(^{
     _rangeIsValid = NO;
-    [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [_delegate rangeController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
+- (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
   ASDisplayNodePerformBlockOnMainThread(^{
     _rangeIsValid = NO;
-    [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [_delegate rangeController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
 
