@@ -336,7 +336,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   _batchUpdateCounter--;
 
   if (_batchUpdateCounter == 0) {
-    [_delegate dataControllerBeginUpdates:self];
+    [_editingTransactionQueue addOperationWithBlock:^{
+      [_delegate dataControllerBeginUpdates:self];
+    }];
     // Running these commands may result in blocking on an _editingTransactionQueue operation that started even before -beginUpdates.
     // Each subsequent command in the queue will also wait on the full asynchronous completion of the prior command's edit transaction.
     [_pendingEditCommandBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
@@ -344,7 +346,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     }];
     [_pendingEditCommandBlocks removeAllObjects];
 
-    [_delegate dataControllerEndUpdates:self completion:completion];
+    // Queue the endUpdates call in our editing queue so it is guaranteed to happen after our edits.
+
+    [_editingTransactionQueue addOperationWithBlock:^{
+        [_delegate dataControllerEndUpdates:self completion:completion];
+    }];
   }
 }
 
