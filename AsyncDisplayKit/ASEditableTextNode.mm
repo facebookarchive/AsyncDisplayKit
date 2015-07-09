@@ -77,6 +77,7 @@
   _textKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
   _textKitComponents.layoutManager.delegate = self;
   _wordKerner = [[ASTextNodeWordKerner alloc] init];
+  _textView = [[_ASDisabledPanUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
 
   // Create the placeholder scaffolding.
   _placeholderTextKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
@@ -133,7 +134,7 @@
   [self.view addSubview:_placeholderTextKitComponents.textView];
 
   // Create and configure our text view.
-  _textKitComponents.textView = [[_ASDisabledPanUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
+    _textKitComponents.textView = _textView;
   //_textKitComponents.textView = NO; // Unfortunately there's a bug here with iOS 7 DP5 that causes the text-view to only be one line high when scrollEnabled is NO. rdar://14729288
   _textKitComponents.textView.delegate = self;
   _textKitComponents.textView.editable = YES;

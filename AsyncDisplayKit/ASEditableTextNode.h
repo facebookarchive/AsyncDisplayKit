@@ -19,6 +19,9 @@
 
 #pragma mark - Configuration
 
+//! @abstract Access to underlying UITextView for more configuration options.
+@property (nonatomic, readwrite, strong) UITextView *textView;
+
 //! @abstract The attributes to apply to new text being entered by the user.
 @property (nonatomic, readwrite, strong) NSDictionary *typingAttributes;
 
