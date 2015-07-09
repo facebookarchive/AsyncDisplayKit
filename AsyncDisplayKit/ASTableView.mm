@@ -126,6 +126,9 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASBatchContext *_batchContext;
 
   NSIndexPath *_pendingVisibleIndexPath;
+
+  NSIndexPath *_contentOffsetAdjustmentTop;
+  CGFloat _contentOffsetAdjustment;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -176,6 +179,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
   _leadingScreensForBatching = 1.0;
   _batchContext = [[ASBatchContext alloc] init];
+
+  _automaticallyAdjustsContentOffset = NO;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -379,6 +384,52 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 }
 
 #pragma mark -
+#pragma mark adjust content offset
+
+- (void)beginAdjustingContentOffset
+{
+  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
+  _contentOffsetAdjustment = 0;
+  _contentOffsetAdjustmentTop = self.indexPathsForVisibleRows.firstObject;
+}
+
+- (void)endAdjustingContentOffset
+{
+  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
+  if (_contentOffsetAdjustment != 0) {
+    self.contentOffset = CGPointMake(0, self.contentOffset.y+_contentOffsetAdjustment);
+  }
+
+  _contentOffsetAdjustment = 0;
+  _contentOffsetAdjustmentTop = nil;
+}
+
+- (void)adjustContentOffsetWithNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths dir:(int)dir {
+  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
+
+  CGFloat adjustment = 0;
+  NSIndexPath *top = _contentOffsetAdjustmentTop ?: self.indexPathsForVisibleRows.firstObject;
+
+  for(int index=0; index<indexPaths.count; index++) {
+    NSIndexPath *indexPath = indexPaths[index];
+    if ([indexPath compare:top] <= 0) {
+      ASCellNode *cellNode = nodes[index];
+      adjustment += cellNode.calculatedSize.height * dir;
+      if(indexPath.section == top.section) {
+        top = [NSIndexPath indexPathForRow:top.row+dir inSection:top.section];
+      }
+    }
+  }
+
+  if (_contentOffsetAdjustmentTop) {
+    _contentOffsetAdjustmentTop = top;
+    _contentOffsetAdjustment += adjustment;
+  } else if (adjustment != 0) {
+    self.contentOffset = CGPointMake(0, self.contentOffset.y+adjustment);
+  }
+}
+
+#pragma mark -
 #pragma mark Intercepted selectors
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -505,11 +556,19 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssertMainThread();
   [super beginUpdates];
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self beginAdjustingContentOffset];
+  }
 }
 
 - (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
+  if (_automaticallyAdjustsContentOffset) {
+    [self endAdjustingContentOffset];
+  }
+
   [super endUpdates];
 
   if (completion) {
@@ -586,6 +645,10 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths dir:+1];
+  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
@@ -596,6 +659,10 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths dir:-1];
+  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions

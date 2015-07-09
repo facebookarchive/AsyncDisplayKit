@@ -94,7 +94,7 @@
  */
 - (void)beginUpdates;
 - (void)endUpdates;
-- (void)endUpdatesWithCompletion:(void (^)(BOOL))completion;
+- (void)endUpdatesWithCompletion:(void (^)(BOOL completed))completion;
 
 /**
  * Section updating.
@@ -133,6 +133,14 @@
  * @returns an array containing the nodes being displayed on screen.
  */
 - (NSArray *)visibleNodes;
+
+/**
+ * YES to automatically adjust the contentOffset when cells are inserted or deleted "before"
+ * visible cells, maintaining the users' visible scroll position. Very useful when supporting virtualization.
+ *
+ * default is NO.
+ */
+@property (nonatomic) BOOL automaticallyAdjustsContentOffset;
 
 @end
 
