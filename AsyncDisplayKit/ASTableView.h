@@ -94,7 +94,7 @@
  */
 - (void)beginUpdates;
 - (void)endUpdates;
-- (void)endUpdatesWithCompletion:(void (^)(BOOL completed))completion;
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion;
 
 /**
  * Section updating.

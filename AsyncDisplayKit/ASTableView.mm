@@ -334,11 +334,23 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   [_dataController endUpdates];
 }
 
-- (void)endUpdatesWithCompletion:(void (^)(BOOL))completion
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion;
 {
+  if (!animated && [UIView areAnimationsEnabled]) {
+    [UIView setAnimationsEnabled:NO];
+
+    void (^block)(BOOL completed) = [completion copy];
+
+    completion = ^(BOOL completed) {
+      [UIView setAnimationsEnabled:YES];
+      if (block) {
+        block(completed);
+      }
+    };
+  }
+
   [_dataController endUpdatesWithCompletion:completion];
 }
-
 
 #pragma mark -
 #pragma mark Editing
