@@ -177,4 +177,23 @@
   XCTAssertFalse(delegate.tappedLinkValue, @"Expected the delegate to be told that the value %@ was tapped, instead it thinks the tapped attribute value is %@", linkAttributeValue, delegate.tappedLinkValue);
 }
 
+#pragma mark exclusion Paths
+
+- (void)testSettingExclusionPaths
+{
+  NSArray *exclusionPaths = @[[UIBezierPath bezierPathWithRect:CGRectMake(10, 20, 30, 40)]];
+  _textNode.exclusionPaths = exclusionPaths;
+  XCTAssertTrue([_textNode.exclusionPaths isEqualToArray:exclusionPaths], @"Failed to set exclusion paths");
+}
+
+- (void)testAddingExclusionPathsShouldInvalidateAndIncreaseTheSize
+{
+  CGSize constrainedSize = CGSizeMake(100, CGFLOAT_MAX);
+  CGSize sizeWithoutExclusionPaths = [_textNode measure:constrainedSize];
+  _textNode.exclusionPaths = @[[UIBezierPath bezierPathWithRect:CGRectMake(50, 20, 30, 40)]];
+  CGSize sizeWithExclusionPaths = [_textNode measure:constrainedSize];
+
+  XCTAssertGreaterThan(sizeWithExclusionPaths.height, sizeWithoutExclusionPaths.height, @"Setting exclusions paths should invalidate the calculated size and return a greater size");
+}
+
 @end

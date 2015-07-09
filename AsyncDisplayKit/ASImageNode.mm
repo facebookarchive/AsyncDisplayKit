@@ -17,6 +17,8 @@
 
 #import "ASImageNode+CGExtras.h"
 
+#import "ASInternalHelpers.h"
+
 @interface _ASImageNodeDrawParameters : NSObject
 
 @property (nonatomic, assign, readonly) BOOL cropEnabled;
@@ -82,7 +84,7 @@
     return nil;
 
   // TODO can this be removed?
-  self.contentsScale = ASDisplayNodeScreenScale();
+  self.contentsScale = ASScreenScale();
   self.contentMode = UIViewContentModeScaleAspectFill;
   self.opaque = NO;
 
@@ -123,7 +125,7 @@
 
     ASDN::MutexUnlocker u(_imageLock);
     ASDisplayNodePerformBlockOnMainThread(^{
-      [self invalidateCalculatedSize];
+      [self invalidateCalculatedLayout];
       [self setNeedsDisplay];
     });
   }
@@ -347,7 +349,7 @@ extern asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(
     // Draw a border on top.
     if (borderWidth > 0.0) {
       [borderColor setStroke];
-      CGContextSetLineWidth(UIGraphicsGetCurrentContext(), borderWidth);
+      [roundOutline setLineWidth:borderWidth];
       [roundOutline stroke];
     }
 

@@ -73,6 +73,15 @@
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
+ * @param completion block to run on completion of asynchronous loading or nil. If supplied, the block is run on
+ * the main thread.
+ * @warning This method is substantially more expensive than UICollectionView's version.
+ */
+- (void)reloadDataWithCompletion:(void (^)())completion;
+
+/**
+ * Reload everything from scratch, destroying the working range and all cached nodes.
+ *
  * @warning This method is substantially more expensive than UICollectionView's version.
  */
 - (void)reloadData;
@@ -121,6 +130,20 @@
  * @param indexPath The index path for the node of interest.
  */
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Determines collection view's current scroll direction. Supports 2-axis collection views.
+ *
+ * @returns a bitmask of ASScrollDirection values.
+ */
+- (ASScrollDirection)scrollDirection;
+
+/**
+ * Determines collection view's scrollable directions.
+ *
+ * @returns a bitmask of ASScrollDirection values.
+ */
+- (ASScrollDirection)scrollableDirections;
 
 @end
 

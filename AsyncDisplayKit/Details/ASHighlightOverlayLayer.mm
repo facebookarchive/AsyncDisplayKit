@@ -10,7 +10,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
+#import "ASInternalHelpers.h"
 
 static const CGFloat kCornerRadius = 2.5;
 static const UIEdgeInsets padding = {2, 4, 1.5, 4};
@@ -23,7 +23,7 @@ static const UIEdgeInsets padding = {2, 4, 1.5, 4};
 + (id)defaultValueForKey:(NSString *)key
 {
   if ([key isEqualToString:@"contentsScale"]) {
-    return @(ASDisplayNodeScreenScale());
+    return @(ASScreenScale());
   } else if ([key isEqualToString:@"highlightColor"]) {
     CGFloat components[] = {0, 0, 0, 0.25};
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();

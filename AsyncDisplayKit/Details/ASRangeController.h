@@ -19,18 +19,20 @@
 /**
  * Working range controller.
  *
- * Used internally by ASTableView and potentially by a future ASCollectionView.  Observes the visible range, maintains
- * a working range, and is responsible for handling AsyncDisplayKit machinery (sizing cell nodes, enqueueing and
- * cancelling their asynchronous layout and display, and so on).
+ * Used internally by ASTableView and ASCollectionView.  It is paired with ASDataController.
+ * It is designed to support custom scrolling containers as well.  Observes the visible range, maintains
+ * "working ranges" to trigger network calls and rendering, and is responsible for driving asynchronous layout of cells.
+ * This includes cancelling those asynchronous operations as cells fall outside of the working ranges.
  */
 @interface ASRangeController : ASDealloc2MainObject <ASDataControllerDelegate>
 
 /**
- * Notify the receiver that the visible range has been updated.
+ * Notify the range controller that the visible range has been updated.
+ * This is the primary input call that drives updating the working ranges, and triggering their actions.
  *
  * @see [ASRangeControllerDelegate rangeControllerVisibleNodeIndexPaths:]
  */
-- (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(enum ASScrollDirection)scrollDirection;
+- (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection;
 
 /**
  * Add the sized node for `indexPath` as a subview of `contentView`.
@@ -88,43 +90,21 @@
 /**
  * Called for nodes insertion.
  */
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  * Called for nodes deletion.
  */
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  * Called for section insertion.
  */
-- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  * Called for section deletion.
  */
-- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
-
-@optional
-
-/**
- * Called before nodes insertion.
- */
-- (void)rangeController:(ASRangeController *)rangeController willInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
-
-/**
- * Called before nodes deletion.
- */
-- (void)rangeController:(ASRangeController *)rangeController willDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
-
-/**
- * Called before section insertion.
- */
-- (void)rangeController:(ASRangeController *)rangeController willInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
-
-/**
- * Called before section deletion.
- */
-- (void)rangeController:(ASRangeController *)rangeController willDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 @end

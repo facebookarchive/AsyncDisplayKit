@@ -152,7 +152,7 @@
 
 - (void)layout
 {
-  [super layout];
+  ASDisplayNodeAssertMainThread();
 
   [self _layoutTextView];
 }
@@ -290,7 +290,7 @@
     [_textKitComponents.textStorage setAttributedString:attributedStringToDisplay];
 
   // Calculated size depends on the seeded text.
-  [self invalidateCalculatedSize];
+  [self invalidateCalculatedLayout];
 
   // Update if placeholder is shown.
   [self _updateDisplayingPlaceholder];
@@ -352,16 +352,26 @@
   return [_textKitComponents.textView isFirstResponder];
 }
 
-- (void)becomeFirstResponder
-{
-  ASDN::MutexLocker l(_textKitLock);
-  [_textKitComponents.textView becomeFirstResponder];
+- (BOOL)canBecomeFirstResponder {
+    ASDN::MutexLocker l(_textKitLock);
+    return [_textKitComponents.textView canBecomeFirstResponder];
 }
 
-- (void)resignFirstResponder
+- (BOOL)becomeFirstResponder
 {
   ASDN::MutexLocker l(_textKitLock);
-  [_textKitComponents.textView resignFirstResponder];
+  return [_textKitComponents.textView becomeFirstResponder];
+}
+
+- (BOOL)canResignFirstResponder {
+    ASDN::MutexLocker l(_textKitLock);
+    return [_textKitComponents.textView canResignFirstResponder];
+}
+
+- (BOOL)resignFirstResponder
+{
+  ASDN::MutexLocker l(_textKitLock);
+  return [_textKitComponents.textView resignFirstResponder];
 }
 
 #pragma mark - UITextView Delegate
@@ -389,7 +399,7 @@
   [self _updateDisplayingPlaceholder];
 
   // Invalidate, as our calculated size depends on the textview's seeded text.
-  [self invalidateCalculatedSize];
+  [self invalidateCalculatedLayout];
 
   // Delegateify.
   [self _delegateDidUpdateText];

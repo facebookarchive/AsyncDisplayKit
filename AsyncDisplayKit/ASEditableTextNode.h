@@ -57,10 +57,10 @@
 - (BOOL)isFirstResponder;
 
 //! @abstract Makes the receiver's text view the first responder.
-- (void)becomeFirstResponder;
+- (BOOL)becomeFirstResponder;
 
 //! @abstract Resigns the receiver's text view from first-responder status, if it has it.
-- (void)resignFirstResponder;
+- (BOOL)resignFirstResponder;
 
 #pragma mark - Geometry
 /**

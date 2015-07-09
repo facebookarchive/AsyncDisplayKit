@@ -18,15 +18,15 @@
 #import "KittenNode.h"
 
 
-static const NSInteger kLitterSize = 20;
-static const NSInteger kLitterBatchSize = 10;
-static const NSInteger kMaxLitterSize = 100;
+static const NSInteger kLitterSize = 20;            // intial number of kitten cells in ASTableView
+static const NSInteger kLitterBatchSize = 10;       // number of kitten cells to add to ASTableView
+static const NSInteger kMaxLitterSize = 100;        // max number of kitten cells allowed in ASTableView
 
 @interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
 {
   ASTableView *_tableView;
 
-  // array of boxed CGSizes corresponding to placekitten kittens
+  // array of boxed CGSizes corresponding to placekitten.com kittens
   NSArray *_kittenDataSource;
 
   BOOL _dataSourceLocked;
@@ -54,7 +54,6 @@ static const NSInteger kMaxLitterSize = 100;
   _tableView.asyncDelegate = self;
 
   // populate our "data source" with some random kittens
-
   _kittenDataSource = [self createLitterWithSize:kLitterSize];
 
   return self;
@@ -64,10 +63,13 @@ static const NSInteger kMaxLitterSize = 100;
 {
   NSMutableArray *kittens = [NSMutableArray arrayWithCapacity:litterSize];
   for (NSInteger i = 0; i < litterSize; i++) {
+      
+    // placekitten.com will return the same kitten picture if the same pixel height & width are requested,
+    // so generate kittens with different width & height values.
     u_int32_t deltaX = arc4random_uniform(10) - 5;
     u_int32_t deltaY = arc4random_uniform(10) - 5;
     CGSize size = CGSizeMake(350 + 2 * deltaX, 350 + 4 * deltaY);
-
+      
     [kittens addObject:[NSValue valueWithCGSize:size]];
   }
   return kittens;
@@ -98,7 +100,7 @@ static const NSInteger kMaxLitterSize = 100;
 
 
 #pragma mark -
-#pragma mark Kittens.
+#pragma mark ASTableView.
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -143,17 +145,24 @@ static const NSInteger kMaxLitterSize = 100;
 - (void)tableView:(UITableView *)tableView willBeginBatchFetchWithContext:(ASBatchContext *)context
 {
   NSLog(@"adding kitties");
+    
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     sleep(1);
     dispatch_async(dispatch_get_main_queue(), ^{
+        
+      // populate a new array of random-sized kittens
       NSArray *moarKittens = [self createLitterWithSize:kLitterBatchSize];
 
       NSMutableArray *indexPaths = [[NSMutableArray alloc] init];
+        
+      // find number of kittens in the data source and create their indexPaths
       NSInteger existingRows = _kittenDataSource.count + 1;
+        
       for (NSInteger i = 0; i < moarKittens.count; i++) {
         [indexPaths addObject:[NSIndexPath indexPathForRow:existingRows + i inSection:0]];
       }
 
+      // add new kittens to the data source & notify table of new indexpaths
       _kittenDataSource = [_kittenDataSource arrayByAddingObjectsFromArray:moarKittens];
       [tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
 

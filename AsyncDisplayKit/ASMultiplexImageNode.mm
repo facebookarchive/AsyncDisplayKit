@@ -162,9 +162,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 }
 
 #pragma mark - ASDisplayNode Overrides
-- (void)clearRendering
+- (void)clearContents
 {
-  [super clearRendering]; // This actually clears the contents, so we need to do this first for our displayedImageIdentifier to be meaningful.
+  [super clearContents]; // This actually clears the contents, so we need to do this first for our displayedImageIdentifier to be meaningful.
   [self _setDisplayedImageIdentifier:nil withImage:nil];
 
   if (_downloadIdentifier) {
@@ -177,12 +177,12 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
   [super displayWillStart];
 
-  [self fetchRemoteData];
+  [self fetchData];
 }
 
-- (void)fetchRemoteData
+- (void)fetchData
 {
-  [super fetchRemoteData];
+  [super fetchData];
 
   [self _loadImageIdentifiers];
 }

@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
-
+#import "ASFlowLayoutController.h"
 
 @class ASCellNode;
 @class ASDataController;
@@ -70,26 +70,22 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 /**
  Called for insertion of elements.
  */
-- (void)dataController:(ASDataController *)dataController willInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
-- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for deletion of elements.
  */
-- (void)dataController:(ASDataController *)dataController willDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
-- (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for insertion of sections.
  */
-- (void)dataController:(ASDataController *)dataController willInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for deletion of sections.
  */
-- (void)dataController:(ASDataController *)dataController willDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
-- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 @end
 
@@ -101,7 +97,8 @@ typedef NSUInteger ASDataControllerAnimationOptions;
  * will be updated asynchronously. The dataSource must be updated to reflect the changes before these methods has been called.
  * For each data updatin, the corresponding methods in delegate will be called.
  */
-@interface ASDataController : ASDealloc2MainObject
+@protocol ASFlowLayoutControllerDataSource;
+@interface ASDataController : ASDealloc2MainObject <ASFlowLayoutControllerDataSource>
 
 /**
  Data source for fetching data info.
@@ -117,19 +114,23 @@ typedef NSUInteger ASDataControllerAnimationOptions;
  *  Designated iniailizer.
  *
  * @param asyncDataFetchingEnabled Enable the data fetching in async mode.
- 
+ *
  * @discussion If enabled, we will fetch data through `dataController:nodeAtIndexPath:` and `dataController:rowsInSection:` in background thread.
  * Otherwise, the methods will be invoked synchronically in calling thread. Enabling data fetching in async mode could avoid blocking main thread
- * while allocating cell on main thread, which is frequently reported issue for handing large scale data. On another hand, the application code
+ * while allocating cell on main thread, which is frequently reported issue for handling large scale data. On another hand, the application code
  * will take the responsibility to avoid data inconsistence. Specifically, we will lock the data source through `dataControllerLockDataSource`,
  * and unlock it by `dataControllerUnlockDataSource` after the data fetching. The application should not update the data source while
  * the data source is locked.
  */
 - (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled;
 
-/** @name Initial loading */
+/** @name Initial loading
+ *
+ * @discussion This method allows choosing an animation style for the first load of content.  It is typically used just once,
+ * for example in viewWillAppear:, to specify an animation option for the information already present in the asyncDataSource.
+ */
 
-- (void)initialDataLoadingWithAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)initialDataLoadingWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /** @name Data Updating */
 
@@ -139,23 +140,23 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)endUpdatesWithCompletion:(void (^)(BOOL))completion;
 
-- (void)insertSections:(NSIndexSet *)sections withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)insertSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)deleteSections:(NSIndexSet *)sections withAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
+- (void)deleteSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)reloadSections:(NSIndexSet *)sections withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)reloadSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOption:(ASDataControllerAnimationOptions)animationOption;
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)reloadDataWithAnimationOption:(ASDataControllerAnimationOptions)animationOption;;
+- (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^)())completion;
 
 /** @name Data Querying */
 
@@ -166,5 +167,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 - (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath;
 
 - (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths;
+
+- (NSArray *)completedNodes;  // This provides efficient access to the entire _completedNodes multidimensional array.
 
 @end

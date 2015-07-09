@@ -87,6 +87,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   CGFloat _shadowOpacity;
   CGFloat _shadowRadius;
 
+  NSArray *_exclusionPaths;
+
   NSAttributedString *_composedTruncationString;
 
   NSString *_highlightedLinkAttributeName;
@@ -224,12 +226,12 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   [self _invalidateRenderer];
 }
 
-- (void)clearRendering
+- (void)clearContents
 {
   // We discard the backing store and renderer to prevent the very large
   // memory overhead of maintaining these for all text nodes.  They can be
   // regenerated when layout is necessary.
-  [super clearRendering];      // ASDisplayNode will set layer.contents = nil
+  [super clearContents];      // ASDisplayNode will set layer.contents = nil
   [self _invalidateRenderer];
 }
 
@@ -281,6 +283,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
                                                         truncationString:_composedTruncationString
                                                           truncationMode:_truncationMode
                                                         maximumLineCount:_maximumLineCount
+                                                          exclusionPaths:_exclusionPaths
                                                          constrainedSize:constrainedSize];
   }
   return _renderer;
@@ -334,8 +337,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   // We need an entirely new renderer
   [self _invalidateRenderer];
 
-  // Tell the display node superclasses that the cached sizes are incorrect now
-  [self invalidateCalculatedSize];
+  // Tell the display node superclasses that the cached layout is incorrect now
+  [self invalidateCalculatedLayout];
 
   [self setNeedsDisplay];
 
@@ -347,6 +350,23 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   } else {
     self.isAccessibilityElement = YES;
   }
+}
+
+#pragma mark - Text Layout
+
+- (void)setExclusionPaths:(NSArray *)exclusionPaths
+{
+  if ((_exclusionPaths == nil && exclusionPaths != nil) || (![_exclusionPaths  isEqualToArray:exclusionPaths])) {
+    _exclusionPaths = exclusionPaths;
+    [self _invalidateRenderer];
+    [self invalidateCalculatedLayout];
+    [self setNeedsDisplay];
+  }
+}
+
+- (NSArray *)exclusionPaths
+{
+  return _exclusionPaths;
 }
 
 #pragma mark - Drawing
@@ -748,6 +768,33 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 }
 
 #pragma mark - Touch Handling
+
+-(BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
+{
+  if (!_passthroughNonlinkTouches) {
+    return [super pointInside:point withEvent:event];
+  }
+
+  NSRange range = NSMakeRange(0, 0);
+  NSString *linkAttributeName = nil;
+  BOOL inAdditionalTruncationMessage = NO;
+
+  id linkAttributeValue = [self _linkAttributeValueAtPoint:point
+                                             attributeName:&linkAttributeName
+                                                     range:&range
+                             inAdditionalTruncationMessage:&inAdditionalTruncationMessage];
+
+  NSUInteger lastCharIndex = NSIntegerMax;
+  BOOL linkCrossesVisibleRange = (lastCharIndex > range.location) && (lastCharIndex < NSMaxRange(range) - 1);
+
+  if (inAdditionalTruncationMessage) {
+    return YES;
+  } else if (range.length && !linkCrossesVisibleRange && linkAttributeValue != nil && linkAttributeName != nil) {
+    return YES;
+  } else {
+    return NO;
+  }
+}
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {

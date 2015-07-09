@@ -10,10 +10,13 @@
  */
 
 #import "BlurbNode.h"
+#import "AppDelegate.h"
 
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASCenterLayoutSpec.h>
 
 static CGFloat kTextPadding = 10.0f;
 static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
@@ -27,6 +30,9 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
 
 
 @implementation BlurbNode
+
+#pragma mark -
+#pragma mark ASCellNode.
 
 - (instancetype)init
 {
@@ -67,6 +73,19 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
   [super didLoad];
 }
 
+#if UseAutomaticLayout
+- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  return
+  [ASInsetLayoutSpec
+   newWithInsets:UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding)
+   child:
+   [ASCenterLayoutSpec
+    newWithCenteringOptions:ASCenterLayoutSpecCenteringX // Center the text horizontally
+    sizingOptions:ASCenterLayoutSpecSizingOptionMinimumY // Takes up minimum height
+    child:_textNode]];
+}
+#else
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   // called on a background thread.  custom nodes must call -measure: on their subnodes in -calculateSizeThatFits:
@@ -84,6 +103,10 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
                                textNodeSize.width,
                                textNodeSize.height);
 }
+#endif
+
+#pragma mark -
+#pragma mark ASTextNodeDelegate methods.
 
 - (BOOL)textNode:(ASTextNode *)richTextNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point
 {

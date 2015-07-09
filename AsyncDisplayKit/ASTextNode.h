@@ -76,6 +76,8 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @property (nonatomic, readonly, assign) NSUInteger lineCount;
 
+@property (nonatomic, strong) NSArray *exclusionPaths;
+
 #pragma mark - Placeholders
 
 /**
@@ -191,6 +193,11 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @abstract If YES and a long press is recognized, touches are cancelled. Default is NO
  */
 @property (nonatomic, assign) BOOL longPressCancelsTouches;
+
+/**
+ @abstract if YES will not intercept touches for non-link areas of the text. Default is NO.
+ */
+@property (nonatomic, assign) BOOL passthroughNonlinkTouches;
 
 
 @end

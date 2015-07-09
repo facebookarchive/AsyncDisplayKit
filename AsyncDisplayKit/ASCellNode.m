@@ -12,6 +12,7 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 
 #pragma mark -
 #pragma mark ASCellNode
@@ -25,6 +26,7 @@
 
   // use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
+  self.clipsToBounds = YES;
 
   return self;
 }
@@ -91,8 +93,6 @@
 
 @implementation ASTextCellNode
 
-static const CGFloat kHorizontalPadding = 15.0f;
-static const CGFloat kVerticalPadding = 11.0f;
 static const CGFloat kFontSize = 18.0f;
 
 - (instancetype)init
@@ -106,19 +106,12 @@ static const CGFloat kFontSize = 18.0f;
   return self;
 }
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  CGSize availableSize = CGSizeMake(constrainedSize.width - 2 * kHorizontalPadding,
-                                    constrainedSize.height - 2 * kVerticalPadding);
-  CGSize textNodeSize = [_textNode measure:availableSize];
-
-  return CGSizeMake(ceilf(2 * kHorizontalPadding + textNodeSize.width),
-                    ceilf(2 * kVerticalPadding + textNodeSize.height));
-}
-
-- (void)layout
-{
-  _textNode.frame = CGRectInset(self.bounds, kHorizontalPadding, kVerticalPadding);
+  static const CGFloat kHorizontalPadding = 15.0f;
+  static const CGFloat kVerticalPadding = 11.0f;
+  UIEdgeInsets insets = UIEdgeInsetsMake(kVerticalPadding, kHorizontalPadding, kVerticalPadding, kHorizontalPadding);
+  return [ASInsetLayoutSpec newWithInsets:insets child:_textNode];
 }
 
 - (void)setText:(NSString *)text
@@ -130,7 +123,7 @@ static const CGFloat kFontSize = 18.0f;
   _textNode.attributedString = [[NSAttributedString alloc] initWithString:_text
                                                                attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:kFontSize]}];
 
-  [self invalidateCalculatedSize];
+  [self invalidateCalculatedLayout];
 }
 
 @end

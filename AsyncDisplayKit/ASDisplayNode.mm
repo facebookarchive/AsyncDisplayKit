@@ -18,6 +18,8 @@
 #import "_ASScopeTimer.h"
 #import "ASDisplayNodeExtras.h"
 
+#import "ASInternalHelpers.h"
+
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
 
 /**
@@ -37,37 +39,16 @@
 
 @implementation ASDisplayNode
 
+@synthesize spacingBefore = _spacingBefore;
+@synthesize spacingAfter = _spacingAfter;
+@synthesize flexGrow = _flexGrow;
+@synthesize flexShrink = _flexShrink;
+@synthesize flexBasis = _flexBasis;
+@synthesize alignSelf = _alignSelf;
+
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
-  Method superclassMethod = class_getInstanceMethod([ASDisplayNode class], selector);
-  Method subclassMethod = class_getInstanceMethod(subclass, selector);
-  IMP superclassIMP = superclassMethod ? method_getImplementation(superclassMethod) : NULL;
-  IMP subclassIMP = subclassMethod ? method_getImplementation(subclassMethod) : NULL;
-
-  return (superclassIMP != subclassIMP);
-}
-
-CGFloat ASDisplayNodeScreenScale()
-{
-  static CGFloat screenScale = 0.0;
-  static dispatch_once_t onceToken;
-  ASDispatchOnceOnMainThread(&onceToken, ^{
-    screenScale = [[UIScreen mainScreen] scale];
-  });
-  return screenScale;
-}
-
-static void ASDispatchOnceOnMainThread(dispatch_once_t *predicate, dispatch_block_t block)
-{
-  if ([NSThread isMainThread]) {
-    dispatch_once(predicate, block);
-  } else {
-    if (DISPATCH_EXPECT(*predicate == 0L, NO)) {
-      dispatch_sync(dispatch_get_main_queue(), ^{
-        dispatch_once(predicate, block);
-      });
-    }
-  }
+    return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
 }
 
 void ASDisplayNodePerformBlockOnMainThread(void (^block)())
@@ -89,9 +70,17 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
   // Subclasses should never override these
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", NSStringFromClass(self));
   ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearRendering)), @"Subclass %@ must not override recursivelyClearRendering method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearRemoteData)), @"Subclass %@ must not override recursivelyClearRemoteData method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
+  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
+
+  // At most one of the three layout methods is overridden
+  ASDisplayNodeAssert((ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateSizeThatFits:)) ? 1 : 0)
+                      + (ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutSpecThatFits:)) ? 1 : 0)
+                      + (ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateLayoutThatFits:)) ? 1 : 0) <= 1,
+                      @"Subclass %@ must override at most one of the three layout methods: calculateLayoutThatFits, layoutSpecThatFits or calculateSizeThatFits", NSStringFromClass(self));
 }
 
 + (BOOL)layerBackedNodesEnabled
@@ -113,10 +102,10 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (void)_initializeInstance
 {
-  _contentsScaleForDisplay = ASDisplayNodeScreenScale();
+  _contentsScaleForDisplay = ASScreenScale();
   
   _displaySentinel = [[ASSentinel alloc] init];
-  
+
   _flags.isInHierarchy = NO;
   _flags.displaysAsynchronously = YES;
   
@@ -138,7 +127,12 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesEnded:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
   }
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(calculateSizeThatFits:))) {
+    overrides |= ASDisplayNodeMethodOverrideCalculateSizeThatFits;
+  }
   _methodOverrides = overrides;
+  
+  _flexBasis = ASRelativeDimensionUnconstrained;
 }
 
 - (id)init
@@ -437,33 +431,38 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (CGSize)measure:(CGSize)constrainedSize
 {
-  ASDN::MutexLocker l(_propertyLock);
-  return [self __measure:constrainedSize];
+  return [self measureWithSizeRange:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
 }
 
-- (CGSize)__measure:(CGSize)constrainedSize
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return [self __measureWithSizeRange:constrainedSize];
+}
+
+- (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
 
   if (![self __shouldSize])
-    return CGSizeZero;
+    return nil;
 
   // only calculate the size if
   //  - we haven't already
-  //  - the width is different from the last time
-  //  - the height is different from the last time
-  if (!_flags.isMeasured || !CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
-    _size = [self calculateSizeThatFits:constrainedSize];
+  //  - the constrained size range is different
+  if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
+    _layout = [self calculateLayoutThatFits:constrainedSize];
     _constrainedSize = constrainedSize;
     _flags.isMeasured = YES;
   }
 
-  ASDisplayNodeAssertTrue(_size.width >= 0.0);
-  ASDisplayNodeAssertTrue(_size.height >= 0.0);
+  ASDisplayNodeAssertTrue(_layout.layoutableObject == self);
+  ASDisplayNodeAssertTrue(_layout.size.width >= 0.0);
+  ASDisplayNodeAssertTrue(_layout.size.height >= 0.0);
 
-  // we generate placeholders at measure: time so that a node is guaranteed to have a placeholder ready to go
+  // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed to have a placeholder ready to go
   // also if a node has no size, it should not have a placeholder
-  if (self.placeholderEnabled && [self _displaysAsynchronously] && _size.width > 0.0 && _size.height > 0.0) {
+  if (self.placeholderEnabled && [self _displaysAsynchronously] && _layout.size.width > 0.0 && _layout.size.height > 0.0) {
     if (!_placeholderImage) {
       _placeholderImage = [self placeholderImage];
     }
@@ -473,7 +472,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
     }
   }
 
-  return _size;
+  return _layout;
 }
 
 - (BOOL)displaysAsynchronously
@@ -566,7 +565,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
   if (CGRectEqualToRect(_layer.bounds, CGRectZero)) {
-    return;     // Performing layout on a zero-bounds view often results in frame calculations with negative sizes after applying margins, which will cause measure: on subnodes to assert.
+    return;     // Performing layout on a zero-bounds view often results in frame calculations with negative sizes after applying margins, which will cause measureWithSizeRange: on subnodes to assert.
   }
   _placeholderLayer.frame = _layer.bounds;
   [self layout];
@@ -1216,6 +1215,10 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDN::MutexLocker l(_propertyLock);
 
+  if (!_pendingDisplayNodes) {
+    _pendingDisplayNodes = [[NSMutableSet alloc] init];
+  }
+
   [_pendingDisplayNodes addObject:node];
 }
 
@@ -1278,19 +1281,51 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 #pragma mark - For Subclasses
 
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  if (_methodOverrides & ASDisplayNodeMethodOverrideCalculateSizeThatFits) {
+    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
+    return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
+  } else {
+    id<ASLayoutable> layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
+    // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
+    if (layout.layoutableObject != self) {
+      layout.position = CGPointZero;
+      layout = [ASLayout newWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
+    }
+    return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
+      return [_subnodes containsObject:evaluatedLayout.layoutableObject];
+    }];
+  }
+}
+
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
   return CGSizeZero;
 }
 
+- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  return nil;
+}
+
+- (ASLayout *)calculatedLayout
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  return _layout;
+}
+
 - (CGSize)calculatedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  return _size;
+  return _layout.size;
 }
 
-- (CGSize)constrainedSizeForCalculatedSize
+- (ASSizeRange)constrainedSizeForCalculatedLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
   return _constrainedSize;
@@ -1301,10 +1336,10 @@ static NSInteger incrementIfFound(NSInteger i) {
   return nil;
 }
 
-- (void)invalidateCalculatedSize
+- (void)invalidateCalculatedLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  // This will cause -measure: to actually compute the size instead of returning the previously cached size
+  // This will cause -measureWithSizeRange: to actually compute the size instead of returning the previously cached size
   _flags.isMeasured = NO;
 }
 
@@ -1329,49 +1364,63 @@ static NSInteger incrementIfFound(NSInteger i) {
   [self __exitedHierarchy];
 }
 
-- (void)clearRendering
+- (void)clearContents
 {
   self.layer.contents = nil;
   _placeholderLayer.contents = nil;
+  _placeholderImage = nil;
 }
 
-- (void)recursivelyClearRendering
+- (void)recursivelyClearContents
 {
   for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyClearRendering];
+    [subnode recursivelyClearContents];
   }
-  [self clearRendering];
+  [self clearContents];
 }
 
-- (void)fetchRemoteData
+- (void)fetchData
 {
   // subclass override
 }
 
-- (void)recursivelyFetchRemoteData
+- (void)recursivelyFetchData
 {
   for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyFetchRemoteData];
+    [subnode recursivelyFetchData];
   }
-  [self fetchRemoteData];
+  [self fetchData];
 }
 
-- (void)clearRemoteData
+- (void)clearFetchedData
 {
   // subclass override
 }
 
-- (void)recursivelyClearRemoteData
+- (void)recursivelyClearFetchedData
 {
   for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyClearRemoteData];
+    [subnode recursivelyClearFetchedData];
   }
-  [self clearRemoteData];
+  [self clearFetchedData];
 }
 
 - (void)layout
 {
   ASDisplayNodeAssertMainThread();
+  
+  if (!_flags.isMeasured) {
+    return;
+  }
+  
+  // Assume that _layout was flattened and is 1-level deep.
+  for (ASLayout *subnodeLayout in _layout.sublayouts) {
+    ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.");
+    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = CGRectMake(subnodeLayout.position.x,
+                                                                         subnodeLayout.position.y,
+                                                                         subnodeLayout.size.width,
+                                                                         subnodeLayout.size.height);
+  }
 }
 
 - (void)displayWillStart
@@ -1382,7 +1431,11 @@ static NSInteger incrementIfFound(NSInteger i) {
   [_supernode subnodeDisplayWillStart:self];
 
   if (_placeholderImage && _placeholderLayer && self.layer.contents == nil) {
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
     _placeholderLayer.contents = (id)_placeholderImage.CGImage;
+    _placeholderLayer.opacity = 1.0;
+    [CATransaction commit];
     [self.layer addSublayer:_placeholderLayer];
   }
 }
@@ -1637,7 +1690,7 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   static dispatch_queue_t asyncSizingQueue = NULL;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    asyncSizingQueue = dispatch_queue_create("com.facebook.AsyncDisplayKit.ASDisplayNode.asyncSizingQueue", DISPATCH_QUEUE_CONCURRENT);
+    asyncSizingQueue = dispatch_queue_create("org.AsyncDisplayKit.ASDisplayNode.asyncSizingQueue", DISPATCH_QUEUE_CONCURRENT);
     // we use the highpri queue to prioritize UI rendering over other async operations
     dispatch_set_target_queue(asyncSizingQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
   });
@@ -1687,6 +1740,35 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
     });
   });
 
+}
+
+- (BOOL)canBecomeFirstResponder {
+    return NO;
+}
+
+- (BOOL)canResignFirstResponder {
+    return YES;
+}
+
+- (BOOL)isFirstResponder {
+    ASDisplayNodeAssertMainThread();
+    return _view != nil && [_view isFirstResponder];
+}
+
+// Note: this implicitly loads the view if it hasn't been loaded yet.
+- (BOOL)becomeFirstResponder {
+    ASDisplayNodeAssertMainThread();
+    return !self.layerBacked && [self canBecomeFirstResponder] && [self.view becomeFirstResponder];
+}
+
+- (BOOL)resignFirstResponder {
+    ASDisplayNodeAssertMainThread();
+    return !self.layerBacked && [self canResignFirstResponder] && [_view resignFirstResponder];
+}
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+    ASDisplayNodeAssertMainThread();
+    return !self.layerBacked && [self.view canPerformAction:action withSender:sender];
 }
 
 @end
@@ -1816,12 +1898,12 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (void)reclaimMemory
 {
-  [self clearRendering];
+  [self clearContents];
 }
 
 - (void)recursivelyReclaimMemory
 {
-  [self recursivelyClearRendering];
+  [self recursivelyClearContents];
 }
 
 @end

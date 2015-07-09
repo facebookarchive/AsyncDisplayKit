@@ -11,7 +11,7 @@
 #import <AsyncDisplayKit/_ASAsyncTransactionContainer.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
-
+#import <AsyncDisplayKit/ASDimension.h>
 
 typedef UIView *(^ASDisplayNodeViewBlock)();
 typedef CALayer *(^ASDisplayNodeLayerBlock)();
@@ -118,8 +118,8 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 /** @name Managing dimensions */
 
 
-/** 
- * @abstract Asks the node to calculate and return the size that best fits its subnodes.
+/**
+ * @abstract Asks the node to measure and return the size that best fits its subnodes.
  *
  * @param constrainedSize The maximum size the receiver should fit in.
  *
@@ -128,10 +128,12 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the 
  * constraint and the result.
  *
- * @warning Subclasses must not override this; it caches results from -calculateSizeThatFits:.  Calling this method may 
+ * @warning Subclasses must not override this; it calls -measureWithSizeRange: with zero min size. 
+ * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may 
  * be expensive if result is not cached.
  *
- * @see [ASDisplayNode(Subclassing) calculateSizeThatFits:]
+ * @see [ASDisplayNode(Subclassing) measureWithSizeRange:]
+ * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
 - (CGSize)measure:(CGSize)constrainedSize;
 
@@ -139,21 +141,20 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @abstract Return the calculated size.
  *
  * @discussion Ideal for use by subclasses in -layout, having already prompted their subnodes to calculate their size by
- * calling -measure: on them in -calculateSizeThatFits:.
+ * calling -measure: on them in -calculateLayoutThatFits.
  *
- * @return Size already calculated by calculateSizeThatFits:.
+ * @return Size already calculated by -calculateLayoutThatFits:.
  *
- * @warning Subclasses must not override this; it returns the last cached size calculated and is never expensive.
+ * @warning Subclasses must not override this; it returns the last cached measurement and is never expensive.
  */
 @property (nonatomic, readonly, assign) CGSize calculatedSize;
 
 /** 
- * @abstract Return the constrained size used for calculating size.
+ * @abstract Return the constrained size range used for calculating layout.
  *
- * @return The constrained size used by calculateSizeThatFits:.
+ * @return The minimum and maximum constrained sizes used by calculateLayoutThatFits:.
  */
-@property (nonatomic, readonly, assign) CGSize constrainedSizeForCalculatedSize;
-
+@property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
 
 /** @name Managing the nodes hierarchy */
 
@@ -312,7 +313,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 - (void)recursivelySetDisplaySuspended:(BOOL)flag;
 
 /**
- * @abstract Calls -clearRendering on the receiver and its subnode hierarchy.
+ * @abstract Calls -clearContents on the receiver and its subnode hierarchy.
  *
  * @discussion Clears backing stores and other memory-intensive intermediates.
  * If the node is removed from a visible hierarchy and then re-added, it will automatically trigger a new asynchronous display,
@@ -322,27 +323,27 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @see displaySuspended and setNeedsDisplay
  */
 
-- (void)recursivelyClearRendering;
+- (void)recursivelyClearContents;
 
 /**
- * @abstract Calls -clearRemoteData on the receiver and its subnode hierarchy.
+ * @abstract Calls -clearFetchedData on the receiver and its subnode hierarchy.
  *
  * @discussion Clears any memory-intensive fetched content.
  * This method is used to notify the node that it should purge any content that is both expensive to fetch and to
  * retain in memory.
  *
- * @see clearRemoteData and fetchRemoteData
+ * @see clearFetchedData and fetchData
  */
-- (void)recursivelyClearRemoteData;
+- (void)recursivelyClearFetchedData;
 
 /**
- * @abstract Calls -fetchRemoteData on the receiver and its subnode hierarchy.
+ * @abstract Calls -fetchData on the receiver and its subnode hierarchy.
  *
  * @discussion Fetches content from remote sources for the current node and all subnodes.
  *
- * @see fetchRemoteData and clearRemoteData
+ * @see fetchData and clearFetchedData
  */
-- (void)recursivelyFetchRemoteData;
+- (void)recursivelyFetchData;
 
 /**
  * @abstract Toggle displaying a placeholder over the node that covers content until the node and all subnodes are
@@ -431,6 +432,16 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @return The converted rectangle.
  */
 - (CGRect)convertRect:(CGRect)rect fromNode:(ASDisplayNode *)node;
+
+/** @name UIResponder methods */
+
+// By default these fall through to the underlying view, but can be overridden.
+- (BOOL)canBecomeFirstResponder;                                            // default==NO
+- (BOOL)becomeFirstResponder;                                               // default==NO (no-op)
+- (BOOL)canResignFirstResponder;                                            // default==YES
+- (BOOL)resignFirstResponder;                                               // default==NO (no-op)
+- (BOOL)isFirstResponder;
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender;
 
 @end
 
@@ -532,6 +543,9 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 @property (atomic, assign)           BOOL accessibilityElementsHidden;
 @property (atomic, assign)           BOOL accessibilityViewIsModal;
 @property (atomic, assign)           BOOL shouldGroupAccessibilityChildren;
+
+// Accessibility identification support
+@property (nonatomic, copy)          NSString *accessibilityIdentifier;
 
 @end
 

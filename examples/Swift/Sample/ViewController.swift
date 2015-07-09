@@ -18,7 +18,7 @@ class ViewController: UIViewController, ASTableViewDataSource, ASTableViewDelega
 
   // MARK: UIViewController.
 
-  required override init() {
+  override required init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
     self.tableView = ASTableView()
 
     super.init(nibName: nil, bundle: nil)
@@ -28,7 +28,7 @@ class ViewController: UIViewController, ASTableViewDataSource, ASTableViewDelega
   }
 
   required init(coder aDecoder: NSCoder) {
-      fatalError("storyboards are incompatible with truth and beauty")
+    fatalError("storyboards are incompatible with truth and beauty")
   }
 
   override func viewDidLoad() {
@@ -50,7 +50,7 @@ class ViewController: UIViewController, ASTableViewDataSource, ASTableViewDelega
   func tableView(tableView: ASTableView!, nodeForRowAtIndexPath indexPath: NSIndexPath!) -> ASCellNode! {
     let patter = NSString(format: "[%ld.%ld] says hello!", indexPath.section, indexPath.row)
     let node = ASTextCellNode()
-    node.text = patter
+    node.text = patter as String
 
     return node
   }

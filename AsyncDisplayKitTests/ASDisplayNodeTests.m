@@ -71,6 +71,9 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @property (atomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
 @end
 
+@interface ASTestResponderNode : ASTestDisplayNode
+@end
+
 @implementation ASTestDisplayNode
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
@@ -91,7 +94,55 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @interface UIDisplayNodeTestView : UIView
 @end
 
+@interface UIResponderNodeTestView : _ASDisplayView
+@property(nonatomic) BOOL isFirstResponder;
+@end
+
 @implementation UIDisplayNodeTestView
+@end
+
+@interface ASTestWindow : UIWindow
+@end
+
+@implementation ASTestWindow
+
+- (id)firstResponder {
+  return self.subviews.firstObject;
+}
+
+@end
+
+@implementation ASTestResponderNode
+
++ (Class)viewClass {
+  return [UIResponderNodeTestView class];
+}
+
+- (BOOL)canBecomeFirstResponder {
+  return YES;
+}
+
+@end
+
+@implementation UIResponderNodeTestView
+
+- (BOOL)becomeFirstResponder {
+  self.isFirstResponder = YES;
+  return YES;
+}
+
+- (BOOL)canResignFirstResponder {
+  return YES;
+}
+
+- (BOOL)resignFirstResponder {
+  if (self.isFirstResponder) {
+    self.isFirstResponder = NO;
+    return YES;
+  }
+  return NO;
+}
+
 @end
 
 @interface ASDisplayNodeTests : XCTestCase
@@ -100,6 +151,25 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @implementation ASDisplayNodeTests
 {
   dispatch_queue_t queue;
+}
+
+- (void)testOverriddenFirstResponderBehavior {
+  ASTestDisplayNode *node = [[ASTestResponderNode alloc] init];
+  XCTAssertTrue([node canBecomeFirstResponder]);
+  XCTAssertTrue([node becomeFirstResponder]);
+}
+
+- (void)testDefaultFirstResponderBehavior {
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  XCTAssertFalse([node canBecomeFirstResponder]);
+  XCTAssertFalse([node becomeFirstResponder]);
+}
+
+- (void)testLayerBackedFirstResponderBehavior {
+  ASTestDisplayNode *node = [[ASTestResponderNode alloc] init];
+  node.layerBacked = YES;
+  XCTAssertTrue([node canBecomeFirstResponder]);
+  XCTAssertFalse([node becomeFirstResponder]);
 }
 
 - (void)setUp
@@ -1680,5 +1750,16 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   [self checkNameInDescriptionIsLayerBacked:NO];
 }
 
+- (void)testBounds
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.bounds = CGRectMake(1, 2, 3, 4);
+  node.frame = CGRectMake(5, 6, 7, 8);
+
+  XCTAssert(node.bounds.origin.x == 1, @"Wrong ASDisplayNode.bounds.origin.x");
+  XCTAssert(node.bounds.origin.y == 2, @"Wrong ASDisplayNode.bounds.origin.y");
+  XCTAssert(node.bounds.size.width == 7, @"Wrong ASDisplayNode.bounds.size.width");
+  XCTAssert(node.bounds.size.height == 8, @"Wrong ASDisplayNode.bounds.size.height");
+}
 
 @end

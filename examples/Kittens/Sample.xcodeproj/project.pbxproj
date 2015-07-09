@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		05561CFA19D4E77700CBA93C /* BlurbNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 05561CF919D4E77700CBA93C /* BlurbNode.m */; };
-		05561CFD19D4F94A00CBA93C /* KittenNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 05561CFC19D4F94A00CBA93C /* KittenNode.m */; };
+		05561CFD19D4F94A00CBA93C /* KittenNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 05561CFC19D4F94A00CBA93C /* KittenNode.mm */; };
 		0585428019D4DBE100606EA6 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0585427F19D4DBE100606EA6 /* Default-568h@2x.png */; };
 		05E2128719D4DB510098F589 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 05E2128619D4DB510098F589 /* main.m */; };
 		05E2128A19D4DB510098F589 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 05E2128919D4DB510098F589 /* AppDelegate.m */; };
@@ -22,7 +22,7 @@
 		05561CF819D4E77700CBA93C /* BlurbNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlurbNode.h; sourceTree = "<group>"; };
 		05561CF919D4E77700CBA93C /* BlurbNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlurbNode.m; sourceTree = "<group>"; };
 		05561CFB19D4F94A00CBA93C /* KittenNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KittenNode.h; sourceTree = "<group>"; };
-		05561CFC19D4F94A00CBA93C /* KittenNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KittenNode.m; sourceTree = "<group>"; };
+		05561CFC19D4F94A00CBA93C /* KittenNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = KittenNode.mm; sourceTree = "<group>"; };
 		0585427F19D4DBE100606EA6 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Default-568h@2x.png"; sourceTree = "<group>"; };
 		05E2128119D4DB510098F589 /* Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		05E2128519D4DB510098F589 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -76,7 +76,7 @@
 				05E2128B19D4DB510098F589 /* ViewController.h */,
 				05E2128C19D4DB510098F589 /* ViewController.m */,
 				05561CFB19D4F94A00CBA93C /* KittenNode.h */,
-				05561CFC19D4F94A00CBA93C /* KittenNode.m */,
+				05561CFC19D4F94A00CBA93C /* KittenNode.mm */,
 				05561CF819D4E77700CBA93C /* BlurbNode.h */,
 				05561CF919D4E77700CBA93C /* BlurbNode.m */,
 				05E2128419D4DB510098F589 /* Supporting Files */,
@@ -218,7 +218,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				05561CFD19D4F94A00CBA93C /* KittenNode.m in Sources */,
+				05561CFD19D4F94A00CBA93C /* KittenNode.mm in Sources */,
 				05E2128D19D4DB510098F589 /* ViewController.m in Sources */,
 				05E2128A19D4DB510098F589 /* AppDelegate.m in Sources */,
 				05561CFA19D4E77700CBA93C /* BlurbNode.m in Sources */,
