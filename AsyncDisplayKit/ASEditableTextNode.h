@@ -11,10 +11,10 @@
 
 @protocol ASEditableTextNodeDelegate;
 
-//! @abstract ASEditableTextNode implements a node that supports text editing.
+/// @abstract ASEditableTextNode implements a node that supports text editing.
 @interface ASEditableTextNode : ASDisplayNode
 
-//! @abstract The text node's delegate, which must conform to the <ASEditableTextNodeDelegate> protocol.
+// @abstract The text node's delegate, which must conform to the <ASEditableTextNodeDelegate> protocol.
 @property (nonatomic, readwrite, weak) id <ASEditableTextNodeDelegate> delegate;
 
 #pragma mark - Configuration
@@ -74,6 +74,11 @@
 @end
 
 #pragma mark -
+/**
+ * The methods declared by the ASEditableTextNodeDelegate protocol allow the adopting delegate to 
+ * respond to notifications such as began and finished editing, selection changed and text updated;
+ * and manage whether a specified text should be replaced.
+ */
 @protocol ASEditableTextNodeDelegate <NSObject>
 
 @optional

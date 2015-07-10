@@ -198,6 +198,8 @@
  * @abstract Indicates that the receiver is about to display its subnodes. This method is not called if there are no
  * subnodes present.
  *
+ * @param subnode The subnode of which display is about to begin.
+ *
  * @discussion Subclasses may override this method to be notified when subnode display (asynchronous or synchronous) is
  * about to begin.
  */
@@ -206,6 +208,8 @@
 /**
  * @abstract Indicates that the receiver is finished displaying its subnodes. This method is not called if there are
  * no subnodes present.
+ *
+ * @param subnode The subnode of which display is about to completed.
  *
  * @discussion Subclasses may override this method to be notified when subnode display (asynchronous or synchronous) has
  * completed.
