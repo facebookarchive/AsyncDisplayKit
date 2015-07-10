@@ -8,10 +8,8 @@
  *
  */
 
-#import <UIKit/UIKit.h>
+#include <CoreGraphics/CGBase.h>
 #import "ASBaseDefines.h"
-
-@class ASLayoutChild;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
