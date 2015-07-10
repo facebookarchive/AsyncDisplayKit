@@ -74,7 +74,7 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
 }
 
 #if UseAutomaticLayout
-- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   return
   [ASInsetLayoutSpec
