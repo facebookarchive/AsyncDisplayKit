@@ -9,7 +9,7 @@
  */
 
 #import <AsyncDisplayKit/ASDimension.h>
-#import <AsyncDisplayKit/ASStackLayoutChild.h>
+#import <AsyncDisplayKit/ASStackLayoutDefines.h>
 
 @class ASLayout;
 
