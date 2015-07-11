@@ -111,7 +111,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 @property (nonatomic, weak) id<ASDataControllerDelegate> delegate;
 
 /**
- *  Designated iniailizer.
+ *  Designated initializer.
  *
  * @param asyncDataFetchingEnabled Enable the data fetching in async mode.
  *
