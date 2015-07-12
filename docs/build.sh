@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-HEADERS=`ls ../AsyncDisplayKit/*.h ../AsyncDisplayKit/Details/ASRangeController.h`
+HEADERS=`ls ../AsyncDisplayKit/*.h ../AsyncDisplayKit/Details/ASRangeController.h ../AsyncDisplayKit/Layout/*.h`
 
 rm -rf htdocs appledoc
 
