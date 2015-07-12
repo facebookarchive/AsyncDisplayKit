@@ -10,8 +10,11 @@
 
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 
+/** The direction children are stacked in */
 typedef NS_ENUM(NSUInteger, ASStackLayoutDirection) {
+  /** Children are stacked vertically */
   ASStackLayoutDirectionVertical,
+  /** Children are stacked horizontally */
   ASStackLayoutDirectionHorizontal,
 };
 
@@ -34,6 +37,7 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutJustifyContent) {
   ASStackLayoutJustifyContentEnd,
 };
 
+/** Orientation of children along cross axis */
 typedef NS_ENUM(NSUInteger, ASStackLayoutAlignItems) {
   /** Align children to start of cross axis */
   ASStackLayoutAlignItemsStart,
@@ -68,6 +72,7 @@ typedef struct {
      justifyContent determines how children are laid out.
 
  For example:
+ 
  - Suppose stacking direction is Vertical, min-width=100, max-width=300, min-height=200, max-height=500.
  - All children are laid out with min-width=100, max-width=300, min-height=0, max-height=INFINITY.
  - If the sum of the childrens' heights is less than 200, children with flexGrow are flexed larger.

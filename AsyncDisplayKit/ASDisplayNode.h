@@ -144,7 +144,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may 
  * be expensive if result is not cached.
  *
- * @see [ASDisplayNode(Subclassing) measureWithSizeRange:]
+ * @see measureWithSizeRange:
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
 - (CGSize)measure:(CGSize)constrainedSize;
@@ -361,7 +361,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * This method is used to notify the node that it should purge any content that is both expensive to fetch and to
  * retain in memory.
  *
- * @see ASDisplayNode(Subclassing):clearFetchedData and fetchData
+ * @see [ASDisplayNode(Subclassing) clearFetchedData] and [ASDisplayNode(Subclassing) fetchData]
  */
 - (void)recursivelyClearFetchedData;
 
@@ -370,7 +370,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  *
  * @discussion Fetches content from remote sources for the current node and all subnodes.
  *
- * @see ASDisplayNode(Subclassing):fetchData and clearFetchedData
+ * @see [ASDisplayNode(Subclassing) fetchData] and [ASDisplayNode(Subclassing) clearFetchedData]
  */
 - (void)recursivelyFetchData;
 
