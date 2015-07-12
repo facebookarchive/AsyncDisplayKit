@@ -31,11 +31,11 @@
 @property (nonatomic, weak) id<ASCollectionViewDelegate> asyncDelegate;       // must not be nil
 
 /**
- * Tuning parameters for a range.
+ * Tuning parameters for a range type.
  *
- * @param range The range to get the tuning parameters for.
+ * @param rangeType The range type to get the tuning parameters for.
  *
- * @returns A tuning parameter value for the given range.
+ * @returns A tuning parameter value for the given range type.
  *
  * Defaults to the render range having one sceenful both leading and trailing and the preload range having two
  * screenfuls in both directions.
@@ -43,15 +43,23 @@
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
 
 /**
- * Set the tuning parameters for a range.
+ * Set the tuning parameters for a range type.
  *
- * @param tuningParameters The tuning parameters to store for a range.
- * @param range The range to set the tuning parameters for.
+ * @param tuningParameters The tuning parameters to store for a range type.
+ * @param rangeType The range type to set the tuning parameters for.
  */
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
 
 /**
  * Initializer.
+ *
+ * @param frame The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview 
+ * in which you plan to add it. This frame is passed to the superclass during initialization.
+ * 
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. 
+ * Must not be nil.
+ *
+ * @param asyncDataFetchingEnabled Enable the data fetching in async mode.
  *
  * @discussion If asyncDataFetching is enabled, the `AScollectionView` will fetch data through `collectionView:numberOfRowsInSection:` and
  * `collectionView:nodeForRowAtIndexPath:` in async mode from background thread. Otherwise, the methods will be invoked synchronically
@@ -156,7 +164,7 @@
 /**
  * Similar to -collectionView:cellForItemAtIndexPath:.
  *
- * @param collection The sender.
+ * @param collectionView The sender.
  *
  * @param indexPath The index path of the requested node.
  *

@@ -102,6 +102,10 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
 
 
 #pragma mark -
+/**
+ * The methods declared by the ASMultiplexImageNodeDelegate protocol allow the adopting delegate to respond to
+ * notifications such as began, progressed and finished downloading, updated and displayed an image.
+ */
 @protocol ASMultiplexImageNodeDelegate <NSObject>
 
 @optional
@@ -170,6 +174,10 @@ didFinishDownloadingImageWithIdentifier:(id)imageIdentifier
 
 
 #pragma mark -
+/**
+ * The ASMultiplexImageNodeDataSource protocol is adopted by an object that provides the multiplex image node,
+ * for each image identifier, an image or a URL the image node should load.
+ */
 @protocol ASMultiplexImageNodeDataSource <NSObject>
 
 @optional
