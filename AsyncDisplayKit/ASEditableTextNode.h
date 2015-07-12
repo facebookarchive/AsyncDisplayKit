@@ -19,7 +19,10 @@
 
 #pragma mark - Configuration
 
-//! @abstract Access to underlying UITextView for more configuration options.
+/**
+  @abstract Access to underlying UITextView for more configuration options.
+  @warning This property should only be used on the main thread and should not be accessed before the editable text node's view is created.
+ */
 @property (nonatomic, readwrite, strong) UITextView *textView;
 
 //! @abstract The attributes to apply to new text being entered by the user.
