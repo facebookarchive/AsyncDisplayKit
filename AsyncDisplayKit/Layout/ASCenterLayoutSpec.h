@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 
+/** How the child is centered within the spec. */
 typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecCenteringOptions) {
   /** The child is positioned in {0,0} relatively to the layout bounds */
   ASCenterLayoutSpecCenteringNone = 0,
@@ -21,6 +22,7 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecCenteringOptions) {
   ASCenterLayoutSpecCenteringXY = ASCenterLayoutSpecCenteringX | ASCenterLayoutSpecCenteringY
 };
 
+/** How much space the spec will take up. */
 typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
   /** The spec will take up the maximum size possible */
   ASCenterLayoutSpecSizingOptionDefault,
@@ -36,8 +38,13 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
 @interface ASCenterLayoutSpec : ASLayoutSpec
 
 /**
- @param centeringOptions, see ASCenterLayoutSpecCenteringOptions.
- @param child The child to center.
+ * Initializer.
+ *
+ * @param centeringOptions How the child is centered.
+ *
+ * @param sizingOptions How much space will be taken up.
+ *
+ * @param child The child to center.
  */
 + (instancetype)newWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
                           sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions

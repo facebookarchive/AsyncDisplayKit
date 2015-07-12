@@ -13,6 +13,11 @@
 
 @class ASLayout;
 
+/** 
+ * The ASLayoutable protocol declares a method for measuring the layout of an object. A class must implement the method
+ * so that instances of that class can be used to build layout trees. The protocol also provides information 
+ * about how an object should be laid out within an ASStackLayoutSpec.
+ */
 @protocol ASLayoutable <NSObject>
 
 /** 
