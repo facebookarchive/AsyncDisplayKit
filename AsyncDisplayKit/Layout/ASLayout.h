@@ -38,14 +38,19 @@ extern BOOL CGPointIsNull(CGPoint point);
                              sublayouts:(NSArray *)sublayouts;
 
 /**
- * Convenience that has CGPointNull position.
+ * Convenience that has CGPointNull position. 
+ * Best used by ASDisplayNode subclasses that are manually creating a layout for -calculateLayoutThatFits:,
+ * or for ASLayoutSpec subclasses that are referencing the "self" level in the layout tree,
+ * or for creating a sublayout of which the position is yet to be determined.
  */
 + (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                                    size:(CGSize)size
                              sublayouts:(NSArray *)sublayouts;
 
 /**
- * Convenience that has CGPointNull position and no sublayouts.
+ * Convenience that has CGPointNull position and no sublayouts. 
+ * Best used for creating a layout that has no sublayouts, and is either a root one
+ * or a sublayout of which the position is yet to be determined.
  */
 + (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
 

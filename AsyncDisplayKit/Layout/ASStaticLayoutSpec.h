@@ -9,7 +9,7 @@
  */
 
 #import <AsyncDisplayKit/ASLayoutSpec.h>
-#import <AsyncDisplayKit/ASStaticLayoutSpecDimension.h>
+#import <AsyncDisplayKit/ASRelativeSize.h>
 
 @interface ASStaticLayoutSpecChild : NSObject
 

@@ -13,6 +13,8 @@
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
 
+#import <AsyncDisplayKit/ASLayoutable.h>
+
 /**
  * UIView creation block. Used to create the backing view of a new display node.
  */
@@ -38,7 +40,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  *
  */
 
-@interface ASDisplayNode : ASDealloc2MainObject
+@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
 
 
 /** @name Initializing a node object */
@@ -146,6 +148,23 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
 - (CGSize)measure:(CGSize)constrainedSize;
+
+/**
+ * @abstract Asks the node to measure a layout based on given size range.
+ *
+ * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
+ *
+ * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
+ *
+ * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
+ * constraint and the result.
+ *
+ * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
+ * be expensive if result is not cached.
+ *
+ * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
+ */
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
 
 /** 
  * @abstract Return the calculated size.
