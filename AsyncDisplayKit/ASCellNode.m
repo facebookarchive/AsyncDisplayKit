@@ -106,7 +106,7 @@ static const CGFloat kFontSize = 18.0f;
   return self;
 }
 
-- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   static const CGFloat kHorizontalPadding = 15.0f;
   static const CGFloat kVerticalPadding = 11.0f;

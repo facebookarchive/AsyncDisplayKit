@@ -12,6 +12,7 @@
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
+#import "ASLayout.h"
 
 @interface ASBackgroundLayoutSpec ()
 {

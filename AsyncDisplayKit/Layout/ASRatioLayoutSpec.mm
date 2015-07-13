@@ -17,6 +17,7 @@
 #import "ASBaseDefines.h"
 
 #import "ASInternalHelpers.h"
+#import "ASLayout.h"
 
 @implementation ASRatioLayoutSpec
 {
