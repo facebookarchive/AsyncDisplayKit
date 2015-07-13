@@ -15,8 +15,12 @@
 typedef NS_ENUM(NSUInteger, ASStackLayoutAlignSelf) {
   /** Inherit alignment value from containing stack. */
   ASStackLayoutAlignSelfAuto,
+  /** Align to start of cross axis */
   ASStackLayoutAlignSelfStart,
+  /** Align with end of cross axis */
   ASStackLayoutAlignSelfEnd,
+  /** Center on cross axis */
   ASStackLayoutAlignSelfCenter,
+  /** Expand to fill cross axis */
   ASStackLayoutAlignSelfStretch,
 };

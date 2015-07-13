@@ -19,6 +19,8 @@
 #import "ASDisplayNodeExtras.h"
 
 #import "ASInternalHelpers.h"
+#import "ASLayout.h"
+#import "ASLayoutSpec.h"
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
 
@@ -1307,10 +1309,10 @@ static NSInteger incrementIfFound(NSInteger i) {
   return CGSizeZero;
 }
 
-- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  return nil;
+  return [ASLayoutSpec new];
 }
 
 - (ASLayout *)calculatedLayout

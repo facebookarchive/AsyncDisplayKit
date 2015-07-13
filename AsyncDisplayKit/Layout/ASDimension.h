@@ -13,14 +13,11 @@
 
 /**
  A dimension relative to constraints to be provided in the future.
- A RelativeDimension can be one of two types:
- 
- "Points" - Just a number. It will always resolve to exactly this amount. This is the default type.
-
- "Percent" - Multiplied to a provided parent amount to resolve a final amount.
  */
 typedef NS_ENUM(NSInteger, ASRelativeDimensionType) {
+  /** Just a number. It will always resolve to exactly this amount. This is the default type. */
   ASRelativeDimensionTypePoints,
+  /** Multiplied to a provided parent amount to resolve a final amount. */
   ASRelativeDimensionTypePercent,
 };
 

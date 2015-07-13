@@ -129,7 +129,7 @@ static const CGFloat kInnerPadding = 10.0f;
 }
 
 #if UseAutomaticLayout
-- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASRatioLayoutSpec *imagePlaceholder = [ASRatioLayoutSpec newWithRatio:1.0 child:_imageNode];
   imagePlaceholder.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);

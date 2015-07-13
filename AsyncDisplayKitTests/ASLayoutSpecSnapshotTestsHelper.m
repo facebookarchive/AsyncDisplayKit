@@ -12,6 +12,7 @@
 
 #import "ASDisplayNode.h"
 #import "ASLayoutSpec.h"
+#import "ASLayout.h"
 
 @interface ASTestNode : ASDisplayNode
 - (void)setLayoutSpecUnderTest:(ASLayoutSpec *)layoutSpecUnderTest sizeRange:(ASSizeRange)sizeRange;
