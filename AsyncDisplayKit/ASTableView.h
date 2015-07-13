@@ -136,7 +136,7 @@
 
 /**
  * YES to automatically adjust the contentOffset when cells are inserted or deleted "before"
- * visible cells, maintaining the users' visible scroll position. Very useful when supporting virtualization.
+ * visible cells, maintaining the users' visible scroll position.
  *
  * default is NO.
  */

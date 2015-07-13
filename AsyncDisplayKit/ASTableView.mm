@@ -416,26 +416,31 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   _contentOffsetAdjustmentTop = nil;
 }
 
-- (void)adjustContentOffsetWithNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths dir:(int)dir {
+- (void)adjustContentOffsetWithNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths inserting:(BOOL)inserting {
+  // Maintain the users visible window when inserting or deleteing cells by adjusting the content offset for nodes
+  // before the visible area. If in a begin/end updates block this will update _contentOffsetAdjustment, otherwise it will
+  // update self.contentOffset directly.
+
   ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
 
+  CGFloat dir = (inserting) ? +1 : -1;
   CGFloat adjustment = 0;
   NSIndexPath *top = _contentOffsetAdjustmentTop ?: self.indexPathsForVisibleRows.firstObject;
 
-  for(int index=0; index<indexPaths.count; index++) {
+  for (int index=0; index<indexPaths.count; index++) {
     NSIndexPath *indexPath = indexPaths[index];
-    if ([indexPath compare:top] <= 0) {
+    if ([indexPath compare:top] <= 0) { // if this row is before or equal to the topmost visible row, make adjustments...
       ASCellNode *cellNode = nodes[index];
       adjustment += cellNode.calculatedSize.height * dir;
-      if(indexPath.section == top.section) {
+      if (indexPath.section == top.section) {
         top = [NSIndexPath indexPathForRow:top.row+dir inSection:top.section];
       }
     }
   }
 
-  if (_contentOffsetAdjustmentTop) {
+  if (_contentOffsetAdjustmentTop) { // true of we are in a begin/end update block (see beginAdjustingContentOffset)
     _contentOffsetAdjustmentTop = top;
-    _contentOffsetAdjustment += adjustment;
+     _contentOffsetAdjustment += adjustment;
   } else if (adjustment != 0) {
     self.contentOffset = CGPointMake(0, self.contentOffset.y+adjustment);
   }
@@ -659,7 +664,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   });
 
   if (_automaticallyAdjustsContentOffset) {
-    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths dir:+1];
+    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
   }
 }
 
@@ -673,7 +678,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   });
 
   if (_automaticallyAdjustsContentOffset) {
-    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths dir:-1];
+    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:NO];
   }
 }
 
