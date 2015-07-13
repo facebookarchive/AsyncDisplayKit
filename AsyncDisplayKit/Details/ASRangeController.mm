@@ -76,6 +76,8 @@
   // coalesce these events -- handling them multiple times per runloop is noisy and expensive
   _queuedRangeUpdate = YES;
 
+  [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateVisibleNodeIndexPaths) object:nil];
+
   [self performSelector:@selector(updateVisibleNodeIndexPaths)
              withObject:nil
              afterDelay:0
