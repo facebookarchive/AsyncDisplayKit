@@ -337,7 +337,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
   if (_batchUpdateCounter == 0) {
     [_editingTransactionQueue addOperationWithBlock:^{
-      [_delegate dataControllerBeginUpdates:self];
+      ASDisplayNodePerformBlockOnMainThread(^{
+        [_delegate dataControllerBeginUpdates:self];
+      });
     }];
     // Running these commands may result in blocking on an _editingTransactionQueue operation that started even before -beginUpdates.
     // Each subsequent command in the queue will also wait on the full asynchronous completion of the prior command's edit transaction.
@@ -349,7 +351,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // Queue the endUpdates call in our editing queue so it is guaranteed to happen after our edits.
 
     [_editingTransactionQueue addOperationWithBlock:^{
+      ASDisplayNodePerformBlockOnMainThread(^{
         [_delegate dataControllerEndUpdates:self completion:completion];
+      });
     }];
   }
 }
