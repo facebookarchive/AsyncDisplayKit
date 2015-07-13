@@ -138,6 +138,7 @@ layer-backed:</p>
   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">self</span><span class="p">.</span><span class="n">layerBacked</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">_gestureRecogniser</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">UITapGestureRecognizer</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithTarget</span><span class="p">:</span><span class="nb">self</span>
                                                          <span class="nl">action</span><span class="p">:</span><span class="k">@selector</span><span class="p">(</span><span class="nl">_tap</span><span class="p">:)];</span>
+    <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">view</span> <span class="nl">addGestureRecognizer</span><span class="p">:</span><span class="n">_gestureRecogniser</span><span class="p">];</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>

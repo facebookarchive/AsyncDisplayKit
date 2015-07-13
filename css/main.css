@@ -15,7 +15,7 @@ body {
   font-size: 16px;
   line-height: 1.5;
   font-weight: 300;
-  color: #111111;
+  color: #111;
   background-color: #f8f8f8;
   -webkit-text-size-adjust: 100%; }
 
@@ -67,9 +67,9 @@ a {
   color: #21b6ff;
   text-decoration: none; }
   a:visited {
-    color: #008ed3; }
+    color: #008ed4; }
   a:hover {
-    color: #111111;
+    color: #111;
     text-decoration: underline; }
 
 /**
@@ -175,9 +175,9 @@ pre {
     .site-nav .page-link:not(:first-child) {
       margin-left: 20px; }
     .site-nav .page-link:hover {
-      color: #111111; }
+      color: #111; }
   .site-nav .page-link-active {
-    color: #111111; }
+    color: #111; }
   @media screen and (max-width: 600px) {
     .site-nav {
       position: absolute;
@@ -353,32 +353,32 @@ pre {
     font-style: italic; }
   .highlight .gd {
     color: #000;
-    background-color: #ffdddd; }
+    background-color: #fdd; }
   .highlight .gd .x {
     color: #000;
-    background-color: #ffaaaa; }
+    background-color: #faa; }
   .highlight .ge {
     font-style: italic; }
   .highlight .gr {
-    color: #aa0000; }
+    color: #a00; }
   .highlight .gh {
-    color: #999999; }
+    color: #999; }
   .highlight .gi {
     color: #000;
-    background-color: #ddffdd; }
+    background-color: #dfd; }
   .highlight .gi .x {
     color: #000;
-    background-color: #aaffaa; }
+    background-color: #afa; }
   .highlight .go {
-    color: #888888; }
+    color: #888; }
   .highlight .gp {
-    color: #555555; }
+    color: #555; }
   .highlight .gs {
     font-weight: bold; }
   .highlight .gu {
-    color: #aaaaaa; }
+    color: #aaa; }
   .highlight .gt {
-    color: #aa0000; }
+    color: #a00; }
   .highlight .kc {
     color: orange; }
   .highlight .kd {
@@ -410,7 +410,7 @@ pre {
   .highlight .nt {
     color: orange; }
   .highlight .w {
-    color: #bbbbbb; }
+    color: #bbb; }
   .highlight .mh {
     color: black; }
   .highlight .mi {
@@ -420,21 +420,21 @@ pre {
   .highlight .il {
     color: black; }
   .highlight .sb {
-    color: #dd1144; }
+    color: #d14; }
   .highlight .sc {
-    color: #dd1144; }
+    color: #d14; }
   .highlight .sd {
-    color: #dd1144; }
+    color: #d14; }
   .highlight .s2 {
-    color: #dd1144; }
+    color: #d14; }
   .highlight .se {
-    color: #dd1144; }
+    color: #d14; }
   .highlight .sh {
-    color: #dd1144; }
+    color: #d14; }
   .highlight .si {
-    color: #dd1144; }
+    color: #d14; }
   .highlight .sx {
-    color: #dd1144; }
+    color: #d14; }
   .highlight .sr {
     color: orange; }
   .highlight .s1 {
