@@ -151,8 +151,19 @@
   
   tableView.asyncDelegate = dataSource;
   tableView.asyncDataSource = dataSource;
+
+  XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
   
-  [tableView reloadData];
+  [tableView reloadDataWithCompletion:^{
+    NSLog(@"*** Reload Complete ***");
+    [reloadDataExpectation fulfill];
+  }];
+
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
   
   for (int i = 0; i < NumberOfReloadIterations; ++i) {
     UITableViewRowAnimation rowAnimation = (arc4random_uniform(2) == 0 ? UITableViewRowAnimationMiddle : UITableViewRowAnimationNone);
