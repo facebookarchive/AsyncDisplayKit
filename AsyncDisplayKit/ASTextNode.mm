@@ -119,6 +119,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     }
     _shadowOpacity = [super shadowOpacity];
     _shadowRadius = [super shadowRadius];
+      
+    _verticalAlignment = ASTextNodeVerticalAlignmentDefault;
 
     // Disable user interaction for text node by default.
     self.userInteractionEnabled = NO;
@@ -406,10 +408,22 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   // Offset the text origin by any shadow padding
   UIEdgeInsets shadowPadding = [self shadowPadding];
   CGPoint textOrigin = CGPointMake(self.bounds.origin.x - shadowPadding.left, self.bounds.origin.y - shadowPadding.top);
-  return [[ASTextNodeDrawParameters alloc] initWithRenderer:[self _renderer]
-                                                       shadower:[self _shadower]
-                                                     textOrigin:textOrigin
-                                                backgroundColor:self.backgroundColor.CGColor];
+
+  switch (_verticalAlignment)
+  {
+    case ASTextNodeVerticalAlignmentDefault:
+      break;
+    case ASTextNodeVerticalAlignmentCenter:
+      textOrigin.y += (self.bounds.size.height - [self _renderer].size.height) / 2.0f;
+      break;
+    default:
+      break;
+  }
+
+    return [[ASTextNodeDrawParameters alloc] initWithRenderer:[self _renderer]
+                                                     shadower:[self _shadower]
+                                                   textOrigin:textOrigin
+                                              backgroundColor:self.backgroundColor.CGColor];
 }
 
 #pragma mark - Attributes
