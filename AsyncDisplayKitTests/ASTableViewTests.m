@@ -12,7 +12,7 @@
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
-#define NumberOfReloadIterations 250
+#define NumberOfReloadIterations 50
 
 @interface ASTestTableView : ASTableView
 @property (atomic, copy) void (^willDeallocBlock)(ASTableView *tableView);
@@ -162,7 +162,7 @@
     BOOL useBeginEndUpdates           = (arc4random_uniform(3) == 0 ? YES : NO);
 
     // instrument our instrumentation ;)
-    NSLog(@"Iteration %03d: %@|%@|%@|%@|%g", i, (rowAnimation == UITableViewRowAnimationNone) ? @"NONE  " : @"MIDDLE", animatedScroll ? @"ASCR" : @"    ", reloadRowsInsteadOfSections ? @"ROWS" : @"SECS", useBeginEndUpdates ? @"BEGEND" : @"      ", runLoopDelay);
+    //NSLog(@"Iteration %03d: %@|%@|%@|%@|%g", i, (rowAnimation == UITableViewRowAnimationNone) ? @"NONE  " : @"MIDDLE", animatedScroll ? @"ASCR" : @"    ", reloadRowsInsteadOfSections ? @"ROWS" : @"SECS", useBeginEndUpdates ? @"BEGEND" : @"      ", runLoopDelay);
 
     if (useBeginEndUpdates) {
       [tableView beginUpdates];
