@@ -129,6 +129,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   NSIndexPath *_contentOffsetAdjustmentTop;
   CGFloat _contentOffsetAdjustment;
+
+  BOOL _endUpdatesAnimationsEnabled;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -331,24 +333,12 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)endUpdates
 {
-  [_dataController endUpdates];
+  [self endUpdatesAnimated:YES completion:nil];
 }
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion;
 {
-  if (!animated && [UIView areAnimationsEnabled]) {
-    [UIView setAnimationsEnabled:NO];
-
-    void (^block)(BOOL completed) = [completion copy];
-
-    completion = ^(BOOL completed) {
-      [UIView setAnimationsEnabled:YES];
-      if (block) {
-        block(completed);
-      }
-    };
-  }
-
+  _endUpdatesAnimationsEnabled = animated;
   [_dataController endUpdatesWithCompletion:completion];
 }
 
@@ -586,7 +576,9 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     [self endAdjustingContentOffset];
   }
 
-  [super endUpdates];
+  ASPerformBlockWithoutAnimation(!_endUpdatesAnimationsEnabled, ^{
+    [super endUpdates];
+  });
 
   if (completion) {
     completion(YES);
