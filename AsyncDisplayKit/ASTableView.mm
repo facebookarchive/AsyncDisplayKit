@@ -499,12 +499,25 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
   [super beginUpdates];
 }
 
 - (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    if (completion) {
+      completion(NO);
+    }
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
   [super endUpdates];
 
   if (completion) {
@@ -577,6 +590,10 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssertMainThread();
 
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
@@ -586,6 +603,10 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
@@ -597,6 +618,10 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssertMainThread();
 
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
@@ -606,6 +631,10 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
