@@ -196,7 +196,9 @@
 - (UITextView *)textView
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(_textView != nil, @"ASEditableTextNode's text view has not been allocated yet — access it in -didLoad or after accessing the .view property instead");
+  if (!_textView) {
+    _textView = [[_ASDisabledPanUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
+  }
   return _textView;
 }
 
