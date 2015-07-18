@@ -71,6 +71,30 @@
 @property (nonatomic, assign) CGFloat leadingScreensForBatching;
 
 /**
+ *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. You can call it from background 
+ *  thread (it is recommendated) and the UI collection view will be updated asynchronously. The asyncDataSource must be updated 
+ *  to reflect the changes before this method is called.
+ *
+ *  @param animated   NO to disable animations for this batch
+ *  @param updates    The block that performs the relevant insert, delete, reload, or move operations.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single 
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or 
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ */
+- (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion;
+
+/**
+ *  Perform a batch of updates asynchronously. You can call it from background thread (it is recommendated) and the UI collection 
+ *  view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before this method is called.
+ *
+ *  @param updates    The block that performs the relevant insert, delete, reload, or move operations.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ */
+- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion;
+
+/**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
  * @param completion block to run on completion of asynchronous loading or nil. If supplied, the block is run on

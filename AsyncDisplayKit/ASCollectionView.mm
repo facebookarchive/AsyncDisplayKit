@@ -281,11 +281,16 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark Assertions.
 
-- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
+- (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
   [_dataController beginUpdates];
   updates();
-  [_dataController endUpdatesAnimated:YES completion:completion];
+  [_dataController endUpdatesAnimated:animated completion:completion];
+}
+
+- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  [self performBatchAnimated:YES updates:updates completion:completion];
 }
 
 - (void)insertSections:(NSIndexSet *)sections
@@ -543,11 +548,21 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
   ASDisplayNodeAssertMainThread();
 
+  BOOL animationsEnabled = NO;
+
+  if (!animated) {
+    animationsEnabled = [UIView areAnimationsEnabled];
+    [UIView setAnimationsEnabled:NO];
+  }
+
   [super performBatchUpdates:^{
     [_batchUpdateBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
       block();
     }];
   } completion:^(BOOL finished) {
+    if (!animated) {
+      [UIView setAnimationsEnabled:animationsEnabled];
+    }
     if (completion) {
       completion(finished);
     }
