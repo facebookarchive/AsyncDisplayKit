@@ -543,6 +543,13 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion {
   ASDisplayNodeAssertMainThread();
 
+  if (!self.asyncDataSource) {
+    if (completion) {
+      completion(NO);
+    }
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
   [super performBatchUpdates:^{
     [_batchUpdateBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
       block();
@@ -577,6 +584,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
   if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
       [super insertItemsAtIndexPaths:indexPaths];
@@ -591,6 +603,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
 
   if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
@@ -607,6 +623,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
 
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
   if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
       [super insertSections:indexSet];
@@ -621,6 +641,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
 
   if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
