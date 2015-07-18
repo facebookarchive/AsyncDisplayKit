@@ -193,7 +193,8 @@
 #pragma mark -
 @dynamic textView;
 
-- (UITextView *)textView{
+- (UITextView *)textView
+{
   ASDisplayNodeAssertMainThread();
   return _textView;
 }
