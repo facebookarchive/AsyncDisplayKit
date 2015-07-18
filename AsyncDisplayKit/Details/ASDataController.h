@@ -65,7 +65,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
  Called for batch update.
  */
 - (void)dataControllerBeginUpdates:(ASDataController *)dataController;
-- (void)dataControllerEndUpdates:(ASDataController *)dataController completion:(void (^)(BOOL))completion;
+- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
 
 /**
  Called for insertion of elements.
@@ -138,7 +138,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)endUpdates;
 
-- (void)endUpdatesWithCompletion:(void (^)(BOOL))completion;
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
 
 - (void)insertSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 

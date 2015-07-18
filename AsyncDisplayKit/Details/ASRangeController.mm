@@ -182,9 +182,9 @@
   });
 }
 
-- (void)dataControllerEndUpdates:(ASDataController *)dataController completion:(void (^)(BOOL))completion {
+- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
   ASDisplayNodePerformBlockOnMainThread(^{
-    [_delegate rangeControllerEndUpdates:self completion:completion];
+    [_delegate rangeController:self endUpdatesAnimated:animated completion:completion];
   });
 }
 

@@ -328,10 +328,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)endUpdates
 {
-  [self endUpdatesWithCompletion:NULL];
+  [self endUpdatesAnimated:YES completion:NULL];
 }
 
-- (void)endUpdatesWithCompletion:(void (^)(BOOL))completion
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   _batchUpdateCounter--;
 
@@ -352,7 +352,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
     [_editingTransactionQueue addOperationWithBlock:^{
       ASDisplayNodePerformBlockOnMainThread(^{
-        [_delegate dataControllerEndUpdates:self completion:completion];
+        [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
       });
     }];
   }

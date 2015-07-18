@@ -285,7 +285,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   [_dataController beginUpdates];
   updates();
-  [_dataController endUpdatesWithCompletion:completion];
+  [_dataController endUpdatesAnimated:YES completion:completion];
 }
 
 - (void)insertSections:(NSIndexSet *)sections
@@ -540,7 +540,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   _performingBatchUpdates = YES;
 }
 
-- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion {
+- (void)rangeController:(ASRangeController *)rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
   ASDisplayNodeAssertMainThread();
 
   [super performBatchUpdates:^{

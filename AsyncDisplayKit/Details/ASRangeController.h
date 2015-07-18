@@ -80,7 +80,7 @@
 /**
  * End updates.
  */
-- (void)rangeControllerEndUpdates:(ASRangeController * )rangeController completion:(void (^)(BOOL))completion ;
+- (void)rangeController:(ASRangeController * )rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
 
 /**
  * Fetch nodes at specific index paths.
