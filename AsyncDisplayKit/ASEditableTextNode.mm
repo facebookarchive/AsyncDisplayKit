@@ -196,6 +196,7 @@
 - (UITextView *)textView
 {
   ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(_textView != nil, @"ASEditableTextNode's text view has not been allocated yet — access it in -didLoad or after accessing the .view property instead");
   return _textView;
 }
 
