@@ -86,20 +86,39 @@
  */
 - (void)reloadData;
 
-
 /**
- * We don't support the these methods for animation yet.
- *
- * TODO: support animations.
+ *  begins a batch of insert, delete reload and move operations. Batches are asynchronous an thread safe.
  */
 - (void)beginUpdates;
+
+/**
+ *
+ *  @param animated   NO to disable all animations.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ */
 - (void)endUpdates;
+
+/**
+ *  Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view.
+ *  You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations 
+ *  to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
+ *  the operations simultaneously. This method is asynchronous and thread safe. It's important to remeber that the ASTableView will
+ *  be processing the updates asynchronously after this call and are not guaranteed to be reflected in the ASTableView until
+ *  the completion block is executed.
+ *
+ *  @param animated   NO to disable all animations.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ */
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion;
 
 /**
  * Section updating.
  *
- * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
+ * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI table
  * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
  */
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
@@ -110,7 +129,7 @@
 /**
  * Row updating.
  *
- * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
+ * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI table
  * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
  */
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
