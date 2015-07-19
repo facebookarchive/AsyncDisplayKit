@@ -187,13 +187,13 @@
 		509E68661B3AEDD7009B9150 /* CGRect+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E201B376416007741D0 /* CGRect+ASConvenience.m */; };
 		6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.m */; };
-		AC21EC101B3D0BF600C8B19A /* ASStackLayoutChild.h in Headers */ = {isa = PBXBuildFile; fileRef = AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutChild.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		AC21EC101B3D0BF600C8B19A /* ASStackLayoutDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC3C4A511A1139C100143C57 /* ASCollectionView.h in Headers */ = {isa = PBXBuildFile; fileRef = AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC3C4A521A1139C100143C57 /* ASCollectionView.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC3C4A501A1139C100143C57 /* ASCollectionView.mm */; };
 		AC3C4A541A113EEC00143C57 /* ASCollectionViewProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = AC3C4A531A113EEC00143C57 /* ASCollectionViewProtocols.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC47D9421B3B891B00AAEE9D /* ASCellNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AC6456071B0A335000CF11B8 /* ASCellNode.m */; };
-		AC47D9451B3BB41900AAEE9D /* ASStaticLayoutSpecDimension.h in Headers */ = {isa = PBXBuildFile; fileRef = AC47D9431B3BB41900AAEE9D /* ASStaticLayoutSpecDimension.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		AC47D9461B3BB41900AAEE9D /* ASStaticLayoutSpecDimension.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC47D9441B3BB41900AAEE9D /* ASStaticLayoutSpecDimension.mm */; };
+		AC47D9451B3BB41900AAEE9D /* ASRelativeSize.h in Headers */ = {isa = PBXBuildFile; fileRef = AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		AC47D9461B3BB41900AAEE9D /* ASRelativeSize.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */; };
 		AC6456091B0A335000CF11B8 /* ASCellNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AC6456071B0A335000CF11B8 /* ASCellNode.m */; };
 		ACF6ED1A1B17843500DA7C62 /* ASBackgroundLayoutSpec.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED011B17843500DA7C62 /* ASBackgroundLayoutSpec.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED1B1B17843500DA7C62 /* ASBackgroundLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED021B17843500DA7C62 /* ASBackgroundLayoutSpec.mm */; };
@@ -526,12 +526,12 @@
 		4640521F1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMultidimensionalArrayUtils.mm; sourceTree = "<group>"; };
 		6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AsyncDisplayKit.h; sourceTree = "<group>"; };
 		9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionViewTests.m; sourceTree = "<group>"; };
-		AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutChild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutChild.h; path = AsyncDisplayKit/Layout/ASStackLayoutChild.h; sourceTree = "<group>"; };
+		AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutDefines.h; path = AsyncDisplayKit/Layout/ASStackLayoutDefines.h; sourceTree = "<group>"; };
 		AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionView.h; sourceTree = "<group>"; };
 		AC3C4A501A1139C100143C57 /* ASCollectionView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASCollectionView.mm; sourceTree = "<group>"; };
 		AC3C4A531A113EEC00143C57 /* ASCollectionViewProtocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionViewProtocols.h; sourceTree = "<group>"; };
-		AC47D9431B3BB41900AAEE9D /* ASStaticLayoutSpecDimension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStaticLayoutSpecDimension.h; path = AsyncDisplayKit/Layout/ASStaticLayoutSpecDimension.h; sourceTree = "<group>"; };
-		AC47D9441B3BB41900AAEE9D /* ASStaticLayoutSpecDimension.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASStaticLayoutSpecDimension.mm; path = AsyncDisplayKit/Layout/ASStaticLayoutSpecDimension.mm; sourceTree = "<group>"; };
+		AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASRelativeSize.h; path = AsyncDisplayKit/Layout/ASRelativeSize.h; sourceTree = "<group>"; };
+		AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASRelativeSize.mm; path = AsyncDisplayKit/Layout/ASRelativeSize.mm; sourceTree = "<group>"; };
 		AC6456071B0A335000CF11B8 /* ASCellNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCellNode.m; sourceTree = "<group>"; };
 		ACF6ED011B17843500DA7C62 /* ASBackgroundLayoutSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASBackgroundLayoutSpec.h; path = AsyncDisplayKit/Layout/ASBackgroundLayoutSpec.h; sourceTree = "<group>"; };
 		ACF6ED021B17843500DA7C62 /* ASBackgroundLayoutSpec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; name = ASBackgroundLayoutSpec.mm; path = AsyncDisplayKit/Layout/ASBackgroundLayoutSpec.mm; sourceTree = "<group>"; };
@@ -914,6 +914,8 @@
 				ACF6ED041B17843500DA7C62 /* ASCenterLayoutSpec.mm */,
 				ACF6ED071B17843500DA7C62 /* ASDimension.h */,
 				ACF6ED081B17843500DA7C62 /* ASDimension.mm */,
+				AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */,
+				AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */,
 				ACF6ED091B17843500DA7C62 /* ASInsetLayoutSpec.h */,
 				ACF6ED0A1B17843500DA7C62 /* ASInsetLayoutSpec.mm */,
 				ACF6ED0B1B17843500DA7C62 /* ASLayout.h */,
@@ -925,13 +927,11 @@
 				ACF6ED131B17843500DA7C62 /* ASOverlayLayoutSpec.mm */,
 				ACF6ED141B17843500DA7C62 /* ASRatioLayoutSpec.h */,
 				ACF6ED151B17843500DA7C62 /* ASRatioLayoutSpec.mm */,
-				AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutChild.h */,
+				AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */,
 				ACF6ED161B17843500DA7C62 /* ASStackLayoutSpec.h */,
 				ACF6ED171B17843500DA7C62 /* ASStackLayoutSpec.mm */,
 				ACF6ED181B17843500DA7C62 /* ASStaticLayoutSpec.h */,
 				ACF6ED191B17843500DA7C62 /* ASStaticLayoutSpec.mm */,
-				AC47D9431B3BB41900AAEE9D /* ASStaticLayoutSpecDimension.h */,
-				AC47D9441B3BB41900AAEE9D /* ASStaticLayoutSpecDimension.mm */,
 			);
 			name = Layout;
 			path = ..;
@@ -971,8 +971,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC21EC101B3D0BF600C8B19A /* ASStackLayoutChild.h in Headers */,
-				AC47D9451B3BB41900AAEE9D /* ASStaticLayoutSpecDimension.h in Headers */,
+				AC21EC101B3D0BF600C8B19A /* ASStackLayoutDefines.h in Headers */,
+				AC47D9451B3BB41900AAEE9D /* ASRelativeSize.h in Headers */,
 				ACF6ED511B17847A00DA7C62 /* ASStackUnpositionedLayout.h in Headers */,
 				ACF6ED2D1B17843500DA7C62 /* ASRatioLayoutSpec.h in Headers */,
 				ACF6ED261B17843500DA7C62 /* ASLayoutSpec.h in Headers */,
@@ -1374,7 +1374,7 @@
 				ACF6ED1B1B17843500DA7C62 /* ASBackgroundLayoutSpec.mm in Sources */,
 				055F1A3519ABD3E3004DAFF1 /* ASTableView.mm in Sources */,
 				205F0E121B371BD7007741D0 /* ASScrollDirection.m in Sources */,
-				AC47D9461B3BB41900AAEE9D /* ASStaticLayoutSpecDimension.mm in Sources */,
+				AC47D9461B3BB41900AAEE9D /* ASRelativeSize.mm in Sources */,
 				ACF6ED271B17843500DA7C62 /* ASLayoutSpec.mm in Sources */,
 				ACF6ED211B17843500DA7C62 /* ASDimension.mm in Sources */,
 				464052261A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm in Sources */,

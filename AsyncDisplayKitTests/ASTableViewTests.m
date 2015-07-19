@@ -151,32 +151,49 @@
   
   tableView.asyncDelegate = dataSource;
   tableView.asyncDataSource = dataSource;
+
+  XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
   
-  [tableView reloadData];
+  [tableView reloadDataWithCompletion:^{
+    NSLog(@"*** Reload Complete ***");
+    [reloadDataExpectation fulfill];
+  }];
+
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
   
   for (int i = 0; i < NumberOfReloadIterations; ++i) {
-    UITableViewRowAnimation rowAnimation = (arc4random_uniform(1) == 0 ? UITableViewRowAnimationMiddle : UITableViewRowAnimationNone);
-    
-    BOOL animatedScroll               = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL reloadRowsInsteadOfSections  = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL letRunloopProceed            = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL useBeginEndUpdates           = (arc4random_uniform(2) == 0 ? YES : NO);
+    UITableViewRowAnimation rowAnimation = (arc4random_uniform(2) == 0 ? UITableViewRowAnimationMiddle : UITableViewRowAnimationNone);
+    BOOL animatedScroll               = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL reloadRowsInsteadOfSections  = (arc4random_uniform(2) == 0 ? YES : NO);
+    NSTimeInterval runLoopDelay       = ((arc4random_uniform(2) == 0) ? (1.0 / (1 + arc4random_uniform(500))) : 0);
+    BOOL useBeginEndUpdates           = (arc4random_uniform(3) == 0 ? YES : NO);
+
+    // instrument our instrumentation ;)
+    //NSLog(@"Iteration %03d: %@|%@|%@|%@|%g", i, (rowAnimation == UITableViewRowAnimationNone) ? @"NONE  " : @"MIDDLE", animatedScroll ? @"ASCR" : @"    ", reloadRowsInsteadOfSections ? @"ROWS" : @"SECS", useBeginEndUpdates ? @"BEGEND" : @"      ", runLoopDelay);
 
     if (useBeginEndUpdates) {
       [tableView beginUpdates];
     }
     
     if (reloadRowsInsteadOfSections) {
-      [tableView reloadRowsAtIndexPaths:[self randomIndexPathsExisting:YES] withRowAnimation:rowAnimation];
+      NSArray *indexPaths = [self randomIndexPathsExisting:YES];
+      //NSLog(@"reloading rows: %@", indexPaths);
+      [tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:rowAnimation];
     } else {
-      [tableView reloadSections:[self randomIndexSet] withRowAnimation:rowAnimation];
+      NSIndexSet *sections = [self randomIndexSet];
+      //NSLog(@"reloading sections: %@", sections);
+      [tableView reloadSections:sections withRowAnimation:rowAnimation];
     }
     
     [tableView setContentOffset:CGPointMake(0, arc4random_uniform(tableView.contentSize.height - tableView.bounds.size.height)) animated:animatedScroll];
     
-    if (letRunloopProceed) {
+    if (runLoopDelay > 0) {
       // Run other stuff on the main queue for between 2ms and 1000ms.
-      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:(1 / (1 + arc4random_uniform(500)))]];
+      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:runLoopDelay]];
     }
     
     if (useBeginEndUpdates) {
