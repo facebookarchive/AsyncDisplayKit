@@ -559,6 +559,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
+  NSLog(@"UITableView beginUpdates");
   [super beginUpdates];
 
   if (_automaticallyAdjustsContentOffset) {
@@ -569,6 +570,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
+  NSLog(@"UITableView endUpdates");
   if (_automaticallyAdjustsContentOffset) {
     [self endAdjustingContentOffset];
   }
@@ -646,6 +648,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  NSLog(@"UITableView insertRows");
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
@@ -660,6 +663,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  NSLog(@"UITableView deleteRows");
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
@@ -674,6 +678,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  NSLog(@"UITableView insertSections");
+
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
@@ -684,6 +690,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  NSLog(@"UITableView deleteSections");
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
