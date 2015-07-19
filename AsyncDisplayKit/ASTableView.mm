@@ -127,7 +127,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   NSIndexPath *_pendingVisibleIndexPath;
 
-  NSIndexPath *_contentOffsetAdjustmentTop;
+  NSIndexPath *_contentOffsetAdjustmentTopVisibleRow;
   CGFloat _contentOffsetAdjustment;
 }
 
@@ -389,7 +389,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
   _contentOffsetAdjustment = 0;
-  _contentOffsetAdjustmentTop = self.indexPathsForVisibleRows.firstObject;
+  _contentOffsetAdjustmentTopVisibleRow = self.indexPathsForVisibleRows.firstObject;
 }
 
 - (void)endAdjustingContentOffset
@@ -400,7 +400,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   }
 
   _contentOffsetAdjustment = 0;
-  _contentOffsetAdjustmentTop = nil;
+  _contentOffsetAdjustmentTopVisibleRow = nil;
 }
 
 - (void)adjustContentOffsetWithNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths inserting:(BOOL)inserting {
@@ -412,7 +412,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
   CGFloat dir = (inserting) ? +1 : -1;
   CGFloat adjustment = 0;
-  NSIndexPath *top = _contentOffsetAdjustmentTop ?: self.indexPathsForVisibleRows.firstObject;
+  NSIndexPath *top = _contentOffsetAdjustmentTopVisibleRow ?: self.indexPathsForVisibleRows.firstObject;
 
   for (int index=0; index<indexPaths.count; index++) {
     NSIndexPath *indexPath = indexPaths[index];
@@ -425,8 +425,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     }
   }
 
-  if (_contentOffsetAdjustmentTop) { // true of we are in a begin/end update block (see beginAdjustingContentOffset)
-    _contentOffsetAdjustmentTop = top;
+  if (_contentOffsetAdjustmentTopVisibleRow) { // true of we are in a begin/end update block (see beginAdjustingContentOffset)
+    _contentOffsetAdjustmentTopVisibleRow = top;
      _contentOffsetAdjustment += adjustment;
   } else if (adjustment != 0) {
     self.contentOffset = CGPointMake(0, self.contentOffset.y+adjustment);
