@@ -14,11 +14,14 @@
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import <AsyncDisplayKit/ASAssert.h>
 
-#define NumberOfSections 10
-#define NumberOfRowsPerSection 20
+#define NumberOfSections 5
+#define NumberOfRowsPerSection 5
 #define NumberOfReloadIterations 500
 
-@interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
+// Allows testing UIKit to ensure the test case itself is not incorrect client code.  Anything that works with UIKit shoudl work with ASDK.
+#define UseUITableView 1
+
+@interface ViewController () <ASTableViewDataSource, ASTableViewDelegate, UITableViewDataSource, UITableViewDelegate>
 {
   ASTableView *_tableView;
   NSMutableArray *_sections; // Contains arrays of indexPaths representing rows
@@ -34,9 +37,17 @@
   if (!(self = [super init]))
     return nil;
 
-  _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain asyncDataFetching:YES];
-  _tableView.asyncDataSource = self;
-  _tableView.asyncDelegate = self;
+  if (UseUITableView) {
+    _tableView = (ASTableView *)[[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
+    _tableView.rowHeight = 44.0f;
+    _tableView.dataSource = self;
+    _tableView.delegate = self;
+  } else {
+    _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain asyncDataFetching:YES];
+    _tableView.asyncDataSource = self;
+    _tableView.asyncDelegate = self;
+  }
+  
   _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
   
   _sections = [NSMutableArray arrayWithCapacity:NumberOfSections];
@@ -87,7 +98,7 @@
     NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
     for (NSUInteger i = (existing ? 0 : rowNum); i < (existing ? rowNum : rowNum * 2); i++) {
       // Maximize evility by sporadically skipping indicies 1/3rd of the time, but only if reloading existing rows
-      if (existing && arc4random_uniform(2) == 0) {
+      if (existing && arc4random_uniform(3) == 0) {
         continue;
       }
       
@@ -99,31 +110,36 @@
 }
 
 - (void)thrashTableView
-{
-  _tableView.asyncDelegate = self;
-  _tableView.asyncDataSource = self;
-  
+{  
   [_tableView reloadData];
   
   NSArray *indexPathsAddedAndRemoved = nil;
 
   for (int i = 0; i < NumberOfReloadIterations; ++i) {
-    UITableViewRowAnimation rowAnimation = (arc4random_uniform(1) == 0 ? UITableViewRowAnimationMiddle : UITableViewRowAnimationNone);
+    UITableViewRowAnimation rowAnimation = (arc4random_uniform(2) == 0 ? UITableViewRowAnimationMiddle : UITableViewRowAnimationNone);
 
-    BOOL animatedScroll               = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL reloadRowsInsteadOfSections  = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL letRunloopProceed            = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL addIndexPaths                = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL useBeginEndUpdates           = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL animatedScroll               = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL reloadRowsInsteadOfSections  = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL letRunloopProceed            = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL addIndexPaths                = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL useBeginEndUpdates           = YES;//(arc4random_uniform(2) == 0 ? YES : NO);
     
     if (useBeginEndUpdates) {
       [_tableView beginUpdates];
     }
     
     if (reloadRowsInsteadOfSections) {
-      [_tableView reloadRowsAtIndexPaths:[self randomIndexPathsExisting:YES] withRowAnimation:rowAnimation];
+      if (!UseUITableView || (!addIndexPaths && !indexPathsAddedAndRemoved)) {
+        // It is not a valid use case for UIKit to do a reload row in the same batch as deleting that row.
+        // ASTableView does actually support this, so thrash away.
+        [_tableView reloadRowsAtIndexPaths:[self randomIndexPathsExisting:YES] withRowAnimation:rowAnimation];
+      }
     } else {
-      [_tableView reloadSections:[self randomIndexSet] withRowAnimation:rowAnimation];
+      if (!addIndexPaths && !indexPathsAddedAndRemoved) {
+        // It is not a valid use case for UIKit to do a reload section in the same batch as adding or deleting rows from that section.
+        // Only do the section reload if we aren't currently thrashing the insert / delete.
+        [_tableView reloadSections:[self randomIndexSet] withRowAnimation:rowAnimation];
+      }
     }
     
     if (addIndexPaths && !indexPathsAddedAndRemoved) {
@@ -163,6 +179,13 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
   return [(NSArray *)[_sections objectAtIndex:section] count];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
+  cell.textLabel.text = @"UITableView Testing Mode";
+  return cell;
 }
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
