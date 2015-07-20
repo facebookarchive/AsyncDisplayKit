@@ -354,8 +354,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     }];
     [_pendingEditCommandBlocks removeAllObjects];
 
-    NSLog(@"endUpdatesWithCompletion - calling delegate end");
-    [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
+    
+    [_editingTransactionQueue addOperationWithBlock:^{
+      ASDisplayNodePerformBlockOnMainThread(^{
+        NSLog(@"endUpdatesWithCompletion - calling delegate end");
+        [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
+      });
+    }];
   }
 }
 
