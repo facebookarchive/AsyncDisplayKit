@@ -16,6 +16,9 @@
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASDisplayNodeInternal.h"
 
+//#define LOG(...) NSLog(__VA_ARGS__)
+#define LOG(...)
+
 const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
 
 static void *kASSizingQueueContext = &kASSizingQueueContext;
@@ -164,7 +167,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   if (indexPaths.count == 0)
     return;
-  NSLog(@"_deleteNodesAtIndexPaths:%@, full index paths in _editingNodes = %@", indexPaths, ASIndexPathsForMultidimensionalArray(_editingNodes));
+  LOG(@"_deleteNodesAtIndexPaths:%@, full index paths in _editingNodes = %@", indexPaths, ASIndexPathsForMultidimensionalArray(_editingNodes));
   ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_editingNodes, indexPaths);
 
   ASDisplayNodePerformBlockOnMainThread(^{
@@ -244,7 +247,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [self _populateFromEntireDataSourceWithMutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
-        NSLog(@"Edit Transaction - reloadData");
+        LOG(@"Edit Transaction - reloadData");
         
         // Remove everything that existed before the reload, now that we're ready to insert replacements
         NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_editingNodes);
@@ -340,12 +343,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   _batchUpdateCounter--;
 
   if (_batchUpdateCounter == 0) {
-    NSLog(@"endUpdatesWithCompletion - beginning");
+    LOG(@"endUpdatesWithCompletion - beginning");
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
     [_editingTransactionQueue addOperationWithBlock:^{
       ASDisplayNodePerformBlockOnMainThread(^{
-        NSLog(@"endUpdatesWithCompletion - begin updates call to delegate");
+        LOG(@"endUpdatesWithCompletion - begin updates call to delegate");
         [_delegate dataControllerBeginUpdates:self];
       });
     }];
@@ -354,9 +357,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
     // Running these commands may result in blocking on an _editingTransactionQueue operation that started even before -beginUpdates.
     // Each subsequent command in the queue will also wait on the full asynchronous completion of the prior command's edit transaction.
-    NSLog(@"endUpdatesWithCompletion - %zd blocks to run", _pendingEditCommandBlocks.count);
+    LOG(@"endUpdatesWithCompletion - %zd blocks to run", _pendingEditCommandBlocks.count);
     [_pendingEditCommandBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
-      NSLog(@"endUpdatesWithCompletion - running block #%zd", idx);
+      LOG(@"endUpdatesWithCompletion - running block #%zd", idx);
       block();
       [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     }];
@@ -365,7 +368,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     [_editingTransactionQueue addOperationWithBlock:^{
       ASDisplayNodePerformBlockOnMainThread(^{
-        NSLog(@"endUpdatesWithCompletion - calling delegate end");
+        LOG(@"endUpdatesWithCompletion - calling delegate end");
         [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
       });
     }];
@@ -389,7 +392,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
-    NSLog(@"Edit Command - insertSections: %@", indexSet);
+    LOG(@"Edit Command - insertSections: %@", indexSet);
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     [self accessDataSourceWithBlock:^{
@@ -398,7 +401,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [self _populateFromDataSourceWithSectionIndexSet:indexSet mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
-        NSLog(@"Edit Transaction - insertSections: %@", indexSet);
+        LOG(@"Edit Transaction - insertSections: %@", indexSet);
         NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:indexSet.count];
         for (NSUInteger i = 0; i < indexSet.count; i++) {
           [sectionArray addObject:[NSMutableArray array]];
@@ -415,12 +418,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
-    NSLog(@"Edit Command - deleteSections: %@", indexSet);
+    LOG(@"Edit Command - deleteSections: %@", indexSet);
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
     [_editingTransactionQueue addOperationWithBlock:^{
       // remove elements
-      NSLog(@"Edit Transaction - deleteSections: %@", indexSet);
+      LOG(@"Edit Transaction - deleteSections: %@", indexSet);
       NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes, indexSet);
       
       [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
@@ -433,7 +436,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
-    NSLog(@"Edit Command - reloadSections: %@", sections);
+    LOG(@"Edit Command - reloadSections: %@", sections);
     
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
@@ -449,7 +452,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [_editingTransactionQueue addOperationWithBlock:^{
         NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes, sections);
         
-        NSLog(@"Edit Transaction - reloadSections: updatedIndexPaths: %@, indexPaths: %@, _editingNodes: %@", updatedIndexPaths, indexPaths, ASIndexPathsForMultidimensionalArray(_editingNodes));
+        LOG(@"Edit Transaction - reloadSections: updatedIndexPaths: %@, indexPaths: %@, _editingNodes: %@", updatedIndexPaths, indexPaths, ASIndexPathsForMultidimensionalArray(_editingNodes));
         
         [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
         
@@ -464,14 +467,14 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
-    NSLog(@"Edit Command - moveSection");
+    LOG(@"Edit Command - moveSection");
 
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     [_editingTransactionQueue addOperationWithBlock:^{
       // remove elements
       
-      NSLog(@"Edit Transaction - moveSection");
+      LOG(@"Edit Transaction - moveSection");
       
       NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes, [NSIndexSet indexSetWithIndex:section]);
       NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes, indexPaths);
@@ -496,7 +499,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
-    NSLog(@"Edit Command - insertRows: %@", indexPaths);
+    LOG(@"Edit Command - insertRows: %@", indexPaths);
     
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
@@ -509,7 +512,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }
       
       [_editingTransactionQueue addOperationWithBlock:^{
-        NSLog(@"Edit Transaction - insertRows: %@", indexPaths);
+        LOG(@"Edit Transaction - insertRows: %@", indexPaths);
         [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
       }];
     }];
@@ -520,7 +523,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
-    NSLog(@"Edit Command - deleteRows: %@", indexPaths);
+    LOG(@"Edit Command - deleteRows: %@", indexPaths);
 
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
@@ -528,7 +531,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
 
     [_editingTransactionQueue addOperationWithBlock:^{
-      NSLog(@"Edit Transaction - deleteRows: %@", indexPaths);
+      LOG(@"Edit Transaction - deleteRows: %@", indexPaths);
       [self _deleteNodesAtIndexPaths:sortedIndexPaths withAnimationOptions:animationOptions];
     }];
   }];
@@ -538,7 +541,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
-    NSLog(@"Edit Command - reloadRows: %@", indexPaths);
+    LOG(@"Edit Command - reloadRows: %@", indexPaths);
 
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
@@ -551,7 +554,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }];
       
       [_editingTransactionQueue addOperationWithBlock:^{
-        NSLog(@"Edit Transaction - reloadRows: %@", indexPaths);
+        LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
         [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
         [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
       }];
@@ -563,11 +566,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
-    NSLog(@"Edit Command - moveRow: %@ > %@", indexPath, newIndexPath);
+    LOG(@"Edit Command - moveRow: %@ > %@", indexPath, newIndexPath);
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     [_editingTransactionQueue addOperationWithBlock:^{
-      NSLog(@"Edit Transaction - moveRow: %@ > %@", indexPath, newIndexPath);
+      LOG(@"Edit Transaction - moveRow: %@ > %@", indexPath, newIndexPath);
       NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes, [NSArray arrayWithObject:indexPath]);
       NSArray *indexPaths = [NSArray arrayWithObject:indexPath];
       [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
