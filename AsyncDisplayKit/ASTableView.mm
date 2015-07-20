@@ -16,6 +16,8 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 
+//#define LOG(...) NSLog(__VA_ARGS__)
+#define LOG(...)
 
 #pragma mark -
 #pragma mark Proxying.
@@ -126,6 +128,9 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASBatchContext *_batchContext;
 
   NSIndexPath *_pendingVisibleIndexPath;
+
+  NSIndexPath *_contentOffsetAdjustmentTopVisibleRow;
+  CGFloat _contentOffsetAdjustment;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -176,6 +181,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
   _leadingScreensForBatching = 1.0;
   _batchContext = [[ASBatchContext alloc] init];
+
+  _automaticallyAdjustsContentOffset = NO;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -326,9 +333,13 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)endUpdates
 {
-  [_dataController endUpdates];
+  [self endUpdatesAnimated:YES completion:nil];
 }
 
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion;
+{
+  [_dataController endUpdatesAnimated:animated completion:completion];
+}
 
 #pragma mark -
 #pragma mark Editing
@@ -371,6 +382,57 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:UITableViewRowAnimationNone];
+}
+
+#pragma mark -
+#pragma mark adjust content offset
+
+- (void)beginAdjustingContentOffset
+{
+  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
+  _contentOffsetAdjustment = 0;
+  _contentOffsetAdjustmentTopVisibleRow = self.indexPathsForVisibleRows.firstObject;
+}
+
+- (void)endAdjustingContentOffset
+{
+  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
+  if (_contentOffsetAdjustment != 0) {
+    self.contentOffset = CGPointMake(0, self.contentOffset.y+_contentOffsetAdjustment);
+  }
+
+  _contentOffsetAdjustment = 0;
+  _contentOffsetAdjustmentTopVisibleRow = nil;
+}
+
+- (void)adjustContentOffsetWithNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths inserting:(BOOL)inserting {
+  // Maintain the users visible window when inserting or deleteing cells by adjusting the content offset for nodes
+  // before the visible area. If in a begin/end updates block this will update _contentOffsetAdjustment, otherwise it will
+  // update self.contentOffset directly.
+
+  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
+
+  CGFloat dir = (inserting) ? +1 : -1;
+  CGFloat adjustment = 0;
+  NSIndexPath *top = _contentOffsetAdjustmentTopVisibleRow ?: self.indexPathsForVisibleRows.firstObject;
+
+  for (int index=0; index<indexPaths.count; index++) {
+    NSIndexPath *indexPath = indexPaths[index];
+    if ([indexPath compare:top] <= 0) { // if this row is before or equal to the topmost visible row, make adjustments...
+      ASCellNode *cellNode = nodes[index];
+      adjustment += cellNode.calculatedSize.height * dir;
+      if (indexPath.section == top.section) {
+        top = [NSIndexPath indexPathForRow:top.row+dir inSection:top.section];
+      }
+    }
+  }
+
+  if (_contentOffsetAdjustmentTopVisibleRow) { // true of we are in a begin/end update block (see beginAdjustingContentOffset)
+    _contentOffsetAdjustmentTopVisibleRow = top;
+     _contentOffsetAdjustment += adjustment;
+  } else if (adjustment != 0) {
+    self.contentOffset = CGPointMake(0, self.contentOffset.y+adjustment);
+  }
 }
 
 #pragma mark -
@@ -499,17 +561,23 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"--- UITableView beginUpdates");
 
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
 
   [super beginUpdates];
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self beginAdjustingContentOffset];
+  }
 }
 
-- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion
+- (void)rangeController:(ASRangeController *)rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"--- UITableView endUpdates");
 
   if (!self.asyncDataSource) {
     if (completion) {
@@ -518,7 +586,13 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
 
-  [super endUpdates];
+  if (_automaticallyAdjustsContentOffset) {
+    [self endAdjustingContentOffset];
+  }
+
+  ASPerformBlockWithoutAnimation(!animated, ^{
+    [super endUpdates];
+  });
 
   if (completion) {
     completion(YES);
@@ -586,9 +660,10 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   return self.bounds.size;
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView insertRows:%ld rows", indexPaths.count);
 
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
@@ -598,11 +673,16 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
+  }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView deleteRows:%ld rows", indexPaths.count);
 
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
@@ -612,11 +692,17 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:NO];
+  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView insertSections:%@", indexSet);
+
 
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
@@ -631,6 +717,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView deleteSections:%@", indexSet);
 
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
