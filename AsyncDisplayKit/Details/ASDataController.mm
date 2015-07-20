@@ -342,8 +342,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   if (_batchUpdateCounter == 0) {
     NSLog(@"endUpdatesWithCompletion - beginning");
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    NSLog(@"endUpdatesWithCompletion - begin updates call to delegate");
-    [_delegate dataControllerBeginUpdates:self];
+
+    [_editingTransactionQueue addOperationWithBlock:^{
+      ASDisplayNodePerformBlockOnMainThread(^{
+        NSLog(@"endUpdatesWithCompletion - begin updates call to delegate");
+        [_delegate dataControllerBeginUpdates:self];
+      });
+    }];
+
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+
     // Running these commands may result in blocking on an _editingTransactionQueue operation that started even before -beginUpdates.
     // Each subsequent command in the queue will also wait on the full asynchronous completion of the prior command's edit transaction.
     NSLog(@"endUpdatesWithCompletion - %zd blocks to run", _pendingEditCommandBlocks.count);
