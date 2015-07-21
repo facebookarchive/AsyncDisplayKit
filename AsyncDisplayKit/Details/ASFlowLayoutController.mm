@@ -103,16 +103,18 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
   NSMutableSet *indexPathSet = [[NSMutableSet alloc] init];
 
   NSArray *completedNodes = [_dataSource completedNodes];
+
+  ASIndexPath currPath = startPath;
   
-  while (!ASIndexPathEqualToIndexPath(startPath, endPath)) {
-    [indexPathSet addObject:[NSIndexPath indexPathWithASIndexPath:startPath]];
-    startPath.row++;
+  while (!ASIndexPathEqualToIndexPath(currPath, endPath)) {
+    [indexPathSet addObject:[NSIndexPath indexPathWithASIndexPath:currPath]];
+    currPath.row++;
 
     // Once we reach the end of the section, advance to the next one.  Keep advancing if the next section is zero-sized.
-    while (startPath.row >= [(NSArray *)completedNodes[startPath.section] count] && startPath.section < completedNodes.count - 1) {
-      startPath.row = 0;
-      startPath.section++;
-      ASDisplayNodeAssert(startPath.section <= endPath.section, @"startPath should never reach a further section than endPath");
+    while (currPath.row >= [(NSArray *)completedNodes[currPath.section] count] && currPath.section < completedNodes.count - 1) {
+      currPath.row = 0;
+      currPath.section++;
+      ASDisplayNodeAssert(currPath.section <= endPath.section, @"currPath should never reach a further section than endPath");
     }
   }
 

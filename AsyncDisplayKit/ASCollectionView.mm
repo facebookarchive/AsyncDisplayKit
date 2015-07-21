@@ -281,50 +281,65 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark Assertions.
 
-- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
+- (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
+  ASDisplayNodeAssertMainThread();
+
   [_dataController beginUpdates];
   updates();
-  [_dataController endUpdatesWithCompletion:completion];
+  [_dataController endUpdatesAnimated:animated completion:completion];
+}
+
+- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  [self performBatchAnimated:YES updates:updates completion:completion];
 }
 
 - (void)insertSections:(NSIndexSet *)sections
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController insertSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController deleteSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController reloadSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController moveSection:section toSection:newSection withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
@@ -540,7 +555,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   _performingBatchUpdates = YES;
 }
 
-- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion {
+- (void)rangeController:(ASRangeController *)rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
   ASDisplayNodeAssertMainThread();
 
   if (!self.asyncDataSource) {
@@ -550,11 +565,21 @@ static BOOL _isInterceptedSelector(SEL sel)
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
 
+  BOOL animationsEnabled = NO;
+
+  if (!animated) {
+    animationsEnabled = [UIView areAnimationsEnabled];
+    [UIView setAnimationsEnabled:NO];
+  }
+
   [super performBatchUpdates:^{
     [_batchUpdateBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
       block();
     }];
   } completion:^(BOOL finished) {
+    if (!animated) {
+      [UIView setAnimationsEnabled:animationsEnabled];
+    }
     if (completion) {
       completion(finished);
     }
@@ -581,7 +606,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   return [_dataController nodesAtIndexPaths:indexPaths];
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
 
@@ -600,7 +625,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
 
