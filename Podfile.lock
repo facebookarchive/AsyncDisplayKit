@@ -3,7 +3,7 @@ PODS:
   - OCMock (2.2.4)
 
 DEPENDENCIES:
-  - FBSnapshotTestCase
+  - FBSnapshotTestCase (~> 1.8.1)
   - OCMock (~> 2.2)
 
 SPEC CHECKSUMS:
