@@ -79,9 +79,8 @@
 @property (nonatomic, assign) CGFloat leadingScreensForBatching;
 
 /**
- *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. You can call it from background 
- *  thread (it is recommendated) and the UI collection view will be updated asynchronously. The asyncDataSource must be updated 
- *  to reflect the changes before this method is called.
+ *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread. 
+ *  The asyncDataSource must be updated to reflect the changes before the update block completes.
  *
  *  @param animated   NO to disable animations for this batch
  *  @param updates    The block that performs the relevant insert, delete, reload, or move operations.
@@ -92,8 +91,8 @@
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion;
 
 /**
- *  Perform a batch of updates asynchronously. You can call it from background thread (it is recommendated) and the UI collection 
- *  view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before this method is called.
+ *  Perform a batch of updates asynchronously.  This method must be called from the main thread.
+ *  The asyncDataSource must be updated to reflect the changes before update block completes.
  *
  *  @param updates    The block that performs the relevant insert, delete, reload, or move operations.
  *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
@@ -121,23 +120,85 @@
 /**
  * Section updating.
  *
- * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
- * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
+ * @param sections An index set that specifies the sections to insert.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
  */
 - (void)insertSections:(NSIndexSet *)sections;
+
+/**
+ * Deletes one or more sections.
+ *
+ * @param sections An index set that specifies the sections to delete.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
 - (void)deleteSections:(NSIndexSet *)sections;
+
+/**
+ * Reloads the specified sections.
+ *
+ * @param sections An index set that specifies the sections to reload.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
 - (void)reloadSections:(NSIndexSet *)sections;
+
+/**
+ * Moves a section to a new location.
+ *
+ * @param section The index of the section to move.
+ *
+ * @param newSection The index that is the destination of the move for the section.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 /**
  * Items updating.
  *
- * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the UI collection
- * view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes before these methods are called.
+ * @param indexPaths An array of NSIndexPath objects, each representing an item index and section index that together identify an item.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
  */
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths;
+
+/**
+ * Deletes the items specified by an array of index paths.
+ *
+ * @param indexPaths An array of NSIndexPath objects identifying the items to delete.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths;
+
+/**
+ * Reloads the specified items.
+ *
+ * @param indexPaths An array of NSIndexPath objects identifying the items to reload.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths;
+
+/**
+ * Moves the item at a specified location to a destination location.
+ *
+ * @param indexPath The index path identifying the item to move.
+ *
+ * @param newIndexPath The index path that is the destination of the move for the item.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 /**
