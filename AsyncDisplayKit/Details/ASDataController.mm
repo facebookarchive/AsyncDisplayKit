@@ -328,8 +328,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   [_editingTransactionQueue waitUntilAllOperationsAreFinished];
   // Begin queuing up edit calls that happen on the main thread.
   // This will prevent further operations from being scheduled on _editingTransactionQueue.
-  // It's fine if there is an in-flight operation on _editingTransactionQueue,
-  // as once the command queue is unpaused, each edit command will wait for the _editingTransactionQueue to be flushed.
   _batchUpdateCounter++;
 }
 

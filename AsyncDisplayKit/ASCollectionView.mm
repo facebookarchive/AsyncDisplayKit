@@ -283,6 +283,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
+  ASDisplayNodeAssertMainThread();
+
   [_dataController beginUpdates];
   updates();
   [_dataController endUpdatesAnimated:animated completion:completion];
@@ -295,41 +297,49 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)insertSections:(NSIndexSet *)sections
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController insertSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController deleteSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController reloadSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController moveSection:section toSection:newSection withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
