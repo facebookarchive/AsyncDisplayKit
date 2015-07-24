@@ -164,6 +164,24 @@
  *
  * @param indexPaths An array of NSIndexPath objects, each representing an item index and section index that together identify an item.
  *
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)insertItemsAtIndexPaths:(NSArray *)indexPaths withCompletion:(void(^)())completion;
+
+/**
+ * Inserts items at the locations identified by an array of index paths.
+ *
+ * @param indexPaths An array of NSIndexPath objects, each representing an item index and section index that together identify an item.
+ *
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ *
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
@@ -173,6 +191,24 @@
  * Deletes the items specified by an array of index paths.
  *
  * @param indexPaths An array of NSIndexPath objects identifying the items to delete.
+ *
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths withCompletion:(void(^)())completion;
+
+/**
+ * Deletes the items specified by an array of index paths.
+ *
+ * @param indexPaths An array of NSIndexPath objects identifying the items to delete.
+ *
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  *
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
@@ -187,7 +223,29 @@
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
+- (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths withCompletion:(void(^)())completion;
+
+/**
+ * Reloads the specified items.
+ *
+ * @param indexPaths An array of NSIndexPath objects identifying the items to reload.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths;
+
+/**
+ * Moves the item at a specified location to a destination location.
+ *
+ * @param indexPath The index path identifying the item to move.
+ *
+ * @param newIndexPath The index path that is the destination of the move for the item.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withCompletion:(void(^)())completion;
 
 /**
  * Moves the item at a specified location to a destination location.

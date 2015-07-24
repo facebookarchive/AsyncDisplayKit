@@ -229,7 +229,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }
 
       // insert elements
-      [self insertRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+      [self insertRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions withCompletion:nil];
     }];
   }];
 }
@@ -488,7 +488,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Row Editing (External API)
 
-- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions withCompletion:(void(^)())completion;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
@@ -508,11 +508,15 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         LOG(@"Edit Transaction - insertRows: %@", indexPaths);
         [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
       }];
+      
+      if (completion) {
+        dispatch_async(dispatch_get_main_queue(), completion);
+      }
     }];
   }];
 }
 
-- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions withCompletion:(void(^)())completion;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
@@ -526,11 +530,15 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue addOperationWithBlock:^{
       LOG(@"Edit Transaction - deleteRows: %@", indexPaths);
       [self _deleteNodesAtIndexPaths:sortedIndexPaths withAnimationOptions:animationOptions];
+      
+      if (completion) {
+        dispatch_async(dispatch_get_main_queue(), completion);
+      }
     }];
   }];
 }
 
-- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions withCompletion:(void(^)())completion;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
@@ -550,12 +558,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
         [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
         [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+        
+        if (completion) {
+          dispatch_async(dispatch_get_main_queue(), completion);
+        }
       }];
     }];
   }];
 }
 
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions withCompletion:(void(^)())completion;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
@@ -571,6 +583,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       // Don't re-calculate size for moving
       NSArray *newIndexPaths = [NSArray arrayWithObject:newIndexPath];
       [self _insertNodes:nodes atIndexPaths:newIndexPaths withAnimationOptions:animationOptions];
+      
+      if (completion) {
+        dispatch_async(dispatch_get_main_queue(), completion);
+      }
     }];
   }];
 }

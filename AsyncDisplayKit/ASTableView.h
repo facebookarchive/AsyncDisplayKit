@@ -176,50 +176,118 @@
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 /**
- * Inserts rows at the locations identified by an array of index paths, with an option to animate the insertion.
+ *  Inserts rows at the locations identified by an array of index paths, with an option to animate the insertion.
  *
- * @param indexPaths An array of NSIndexPath objects, each representing a row index and section index that together identify a row.
+ *  @param indexPaths An array of NSIndexPath objects, each representing a row index and section index that together identify a row.
  *
- * @param animation A constant that indicates how the insertion is to be animated. See UITableViewRowAnimation.
+ *  @param animation  A constant that indicates how the insertion is to be animated. See UITableViewRowAnimation.
  *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ *
+ *  @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ *  before this method is called.
+ */
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation withCompletion:(void(^)())completion;
+
+/**
+ *  Inserts rows at the locations identified by an array of index paths, with an option to animate the insertion.
+ *
+ *  @param indexPaths An array of NSIndexPath objects, each representing a row index and section index that together identify a row.
+ *
+ *  @param animation  A constant that indicates how the insertion is to be animated. See UITableViewRowAnimation.
+ *
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ *
+ *  @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ *  before this method is called.
  */
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
- * Deletes the rows specified by an array of index paths, with an option to animate the deletion.
+ *  Deletes the rows specified by an array of index paths, with an option to animate the deletion.
  *
- * @param indexPaths An array of NSIndexPath objects identifying the rows to delete.
+ *  @param indexPaths An array of NSIndexPath objects identifying the rows to delete.
  *
- * @param animation A constant that indicates how the deletion is to be animated. See UITableViewRowAnimation.
+ *  @param animation  A constant that indicates how the deletion is to be animated. See UITableViewRowAnimation.
  *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ *
+ *  @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ *  before this method is called.
+ */
+- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation withCompletion:(void(^)())completion;
+
+/**
+ *  Deletes the rows specified by an array of index paths, with an option to animate the deletion.
+ *
+ *  @param indexPaths An array of NSIndexPath objects identifying the rows to delete.
+ *
+ *  @param animation  A constant that indicates how the deletion is to be animated. See UITableViewRowAnimation.
+ *
+ *  @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ *  before this method is called.
  */
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
- * Reloads the specified rows using a given animation effect.
+ *  Reloads the specified rows using a given animation effect.
  *
- * @param indexPaths An array of NSIndexPath objects identifying the rows to reload.
+ *  @param indexPaths An array of NSIndexPath objects identifying the rows to reload.
  *
- * @param animation A constant that indicates how the reloading is to be animated. See UITableViewRowAnimation.
+ *  @param animation  A constant that indicates how the reloading is to be animated. See UITableViewRowAnimation.
  *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ *
+ *  @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ *  before this method is called.
+ */
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation withCompletion:(void(^)())completion;
+
+/**
+ *  Reloads the specified rows using a given animation effect.
+ *
+ *  @param indexPaths An array of NSIndexPath objects identifying the rows to reload.
+ *
+ *  @param animation A constant that indicates how the reloading is to be animated. See UITableViewRowAnimation.
+ *
+ *  @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ *  before this method is called.
  */
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
- * Moves the row at a specified location to a destination location.
+ *  Moves the row at a specified location to a destination location.
  *
- * @param indexPath The index path identifying the row to move.
+ *  @param indexPath    The index path identifying the row to move.
  *
- * @param newIndexPath The index path that is the destination of the move for the row.
+ *  @param newIndexPath The index path that is the destination of the move for the row.
  *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
+ *  @param completion   A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                      Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                      NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ *
+ *  @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ *  before this method is called.
+ */
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withCompletion:(void(^)())completion;
+
+/**
+ *  Moves the row at a specified location to a destination location.
+ *
+ *  @param indexPath The index path identifying the row to move.
+ *
+ *  @param newIndexPath The index path that is the destination of the move for the row.
+ *
+ *  @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ *  before this method is called.
  */
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
