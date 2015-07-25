@@ -2,7 +2,7 @@ language: objective-c
 before_install:
   - brew update
   - brew reinstall xctool
-  - gem update cocoapods
+  - gem install cocoapods -v 0.37.2
   - xcrun simctl list
 install: echo "<3"
 env:
