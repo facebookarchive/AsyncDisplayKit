@@ -319,28 +319,48 @@ static BOOL _isInterceptedSelector(SEL sel)
   [_dataController moveSection:section toSection:newSection withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
-- (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
+- (void)insertItemsAtIndexPaths:(NSArray *)indexPaths withCompletion:(void(^)())completion
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
+  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone withCompletion:completion];
+}
+
+- (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
+{
+  [self insertItemsAtIndexPaths:indexPaths withCompletion:nil];
+}
+
+- (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths withCompletion:(void(^)())completion
+{
+  ASDisplayNodeAssertMainThread();
+  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone withCompletion:completion];
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  [self deleteItemsAtIndexPaths:indexPaths withCompletion:nil];
+}
+
+- (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths withCompletion:(void(^)())completion
+{
   ASDisplayNodeAssertMainThread();
-  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
+  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone withCompletion:completion];
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  [self reloadItemsAtIndexPaths:indexPaths withCompletion:nil];
+}
+
+- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withCompletion:(void(^)())completion
+{
   ASDisplayNodeAssertMainThread();
-  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
+  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone withCompletion:completion];
 }
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
-  ASDisplayNodeAssertMainThread();
-  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
+  [self moveItemAtIndexPath:indexPath toIndexPath:newIndexPath withCompletion:nil];
 }
 
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath

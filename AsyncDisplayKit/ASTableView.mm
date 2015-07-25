@@ -370,28 +370,48 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   [_dataController moveSection:section toSection:newSection withAnimationOptions:UITableViewRowAnimationNone];
 }
 
-- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation withCompletion:(void(^)())completion
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
+  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:animation withCompletion:completion];
+}
+
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self insertRowsAtIndexPaths:indexPaths withRowAnimation:animation withCompletion:nil];
+}
+
+- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation withCompletion:(void(^)())completion
+{
+  ASDisplayNodeAssertMainThread();
+  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animation withCompletion:completion];
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
+  [self deleteRowsAtIndexPaths:indexPaths withRowAnimation:animation withCompletion:nil];
+}
+
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation withCompletion:(void(^)())completion
+{
   ASDisplayNodeAssertMainThread();
-  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
+  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation withCompletion:completion];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
-  ASDisplayNodeAssertMainThread();
-  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
+  [self reloadRowsAtIndexPaths:indexPaths withRowAnimation:animation withCompletion:nil];
+}
+
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withCompletion:(void(^)())completion
+{
+  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:UITableViewRowAnimationNone withCompletion:completion];
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:UITableViewRowAnimationNone];
+  [self moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withCompletion:nil];
 }
 
 #pragma mark -
