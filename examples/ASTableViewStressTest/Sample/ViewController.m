@@ -110,11 +110,14 @@
   for (int i = 0; i < NumberOfReloadIterations; ++i) {
     UITableViewRowAnimation rowAnimation = (arc4random_uniform(1) == 0 ? UITableViewRowAnimationMiddle : UITableViewRowAnimationNone);
 
-    BOOL animatedScroll               = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL reloadRowsInsteadOfSections  = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL letRunloopProceed            = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL addIndexPaths                = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL useBeginEndUpdates           = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL animatedScroll               = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL reloadRowsInsteadOfSections  = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL letRunloopProceed            = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL useBeginEndUpdates           = (arc4random_uniform(3) == 0 ? YES : NO);
+    
+    // FIXME: Need to revise the logic to support mutating the data source rather than just reload thrashing.
+    // UITableView itself does not support deleting a row in the same edit transaction as reloading it, for example.
+    BOOL addIndexPaths                = NO; //(arc4random_uniform(2) == 0 ? YES : NO);
     
     if (useBeginEndUpdates) {
       [_tableView beginUpdates];
