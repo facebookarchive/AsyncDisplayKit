@@ -50,6 +50,11 @@
 //! @abstract The text input mode used by the receiver's keyboard, if it is visible. This value is undefined if the receiver is not the first responder.
 @property (nonatomic, readonly) UITextInputMode *textInputMode;
 
+/*
+ @abstract The returnKeyType of the keyboard. This value defaults to UIReturnKeyDefault.
+ */
+@property (nonatomic, readwrite) UIReturnKeyType returnKeyType;
+
 /**
   @abstract Indicates whether the receiver's text view is the first responder, and thus has the keyboard visible and is prepared for editing by the user.
   @result YES if the receiver's text view is the first-responder; NO otherwise.
