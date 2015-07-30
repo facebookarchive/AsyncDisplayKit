@@ -24,6 +24,7 @@
 
   NSURL *_URL;
   UIImage *_defaultImage;
+  CGSize _expectedImageSize;
 
   NSUUID *_cacheUUID;
   id _imageDownload;
@@ -44,6 +45,7 @@
   _cache = cache;
   _downloader = downloader;
   _shouldCacheImage = YES;
+  _expectedImageSize = CGSizeZero;
 
   return self;
 }
@@ -111,6 +113,18 @@
   return _defaultImage;
 }
 
+-(void)setExpectedImageSize:(CGSize)expectedImageSize
+{
+    ASDN::MutexLocker l(_lock);
+    _expectedImageSize = expectedImageSize;
+}
+
+- (CGSize)expectedImageSize
+{
+    ASDN::MutexLocker l(_lock);
+    return _expectedImageSize;
+}
+
 - (void)setDelegate:(id<ASNetworkImageNodeDelegate>)delegate
 {
   ASDN::MutexLocker l(_lock);
@@ -151,6 +165,15 @@
     ASDN::MutexLocker l(_lock);
     [self _lazilyLoadImageIfNecessary];
   }
+}
+
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+{
+    ASDN::MutexLocker l(_lock);
+    if (CGSizeEqualToSize(CGSizeZero, _expectedImageSize))
+        return [super calculateSizeThatFits:constrainedSize];
+    else
+        return _expectedImageSize;
 }
 
 #pragma mark - Private methods -- only call with lock.

@@ -83,6 +83,7 @@ static const CGFloat kInnerPadding = 10.0f;
   _imageNode.URL = [NSURL URLWithString:[NSString stringWithFormat:@"http://placekitten.com/%zd/%zd",
                                                                    (NSInteger)roundl(_kittenSize.width),
                                                                    (NSInteger)roundl(_kittenSize.height)]];
+  _imageNode.expectedImageSize = CGSizeMake(kImageSize, kImageSize);
 //  _imageNode.contentMode = UIViewContentModeCenter;
   [self addSubnode:_imageNode];
 
@@ -131,8 +132,6 @@ static const CGFloat kInnerPadding = 10.0f;
 #if UseAutomaticLayout
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASRatioLayoutSpec *imagePlaceholder = [ASRatioLayoutSpec newWithRatio:1.0 child:_imageNode];
-  imagePlaceholder.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);
   
   _textNode.flexShrink = YES;
   
@@ -145,7 +144,7 @@ static const CGFloat kInnerPadding = 10.0f;
       .direction = ASStackLayoutDirectionHorizontal,
       .spacing = kInnerPadding
     }
-    children:@[imagePlaceholder, _textNode]]];
+    children:@[_imageNode, _textNode]]];
 }
 
 // With box model, you don't need to override this method, unless you want to add custom logic.

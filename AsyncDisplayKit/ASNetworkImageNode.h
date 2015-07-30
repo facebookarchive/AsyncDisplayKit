@@ -52,6 +52,11 @@
 @property (atomic, strong, readwrite) UIImage *defaultImage;
 
 /**
+ * The expected size of the image that will download
+ */
+@property (atomic, assign, readwrite) CGSize expectedImageSize;
+
+/**
  * The URL of a new image to download and display.
  *
  * @discussion Changing this property will reset the displayed image to a placeholder (<defaultImage>) while loading.
