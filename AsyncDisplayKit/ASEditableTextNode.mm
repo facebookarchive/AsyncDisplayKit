@@ -77,6 +77,7 @@
   _textKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
   _textKitComponents.layoutManager.delegate = self;
   _wordKerner = [[ASTextNodeWordKerner alloc] init];
+  _returnKeyType = UIReturnKeyDefault;
 
   // Create the placeholder scaffolding.
   _placeholderTextKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
@@ -138,6 +139,7 @@
   _textKitComponents.textView.delegate = self;
   _textKitComponents.textView.editable = YES;
   _textKitComponents.textView.typingAttributes = _typingAttributes;
+  _textKitComponents.textView.returnKeyType = _returnKeyType;
   _textKitComponents.textView.accessibilityHint = _placeholderTextKitComponents.textStorage.string;
   configureTextView(_textKitComponents.textView);
   [self.view addSubview:_textKitComponents.textView];
@@ -344,6 +346,13 @@
 {
   ASDN::MutexLocker l(_textKitLock);
   return [_textKitComponents.textView textInputMode];
+}
+
+- (void)setReturnKeyType:(UIReturnKeyType)returnKeyType
+{
+  ASDN::MutexLocker l(_textKitLock);
+  _returnKeyType = returnKeyType;
+  [_textKitComponents.textView setReturnKeyType:_returnKeyType];
 }
 
 - (BOOL)isFirstResponder
