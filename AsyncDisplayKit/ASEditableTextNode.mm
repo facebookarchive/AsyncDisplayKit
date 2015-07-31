@@ -134,7 +134,7 @@
   [self.view addSubview:_placeholderTextKitComponents.textView];
 
   // Create and configure our text view.
-  _textKitComponents.textView = [[_ASDisabledPanUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
+  _textKitComponents.textView = self.textView;
   //_textKitComponents.textView = NO; // Unfortunately there's a bug here with iOS 7 DP5 that causes the text-view to only be one line high when scrollEnabled is NO. rdar://14729288
   _textKitComponents.textView.delegate = self;
   _textKitComponents.textView.editable = YES;
@@ -189,6 +189,15 @@
 
 #pragma mark - Configuration
 @synthesize delegate = _delegate;
+
+- (UITextView *)textView
+{
+  ASDisplayNodeAssertMainThread();
+  if (!_textKitComponents.textView) {
+    _textKitComponents.textView = [[_ASDisabledPanUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
+  }
+  return _textKitComponents.textView;
+}
 
 #pragma mark -
 @dynamic typingAttributes;
