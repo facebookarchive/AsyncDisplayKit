@@ -20,6 +20,7 @@
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 void ASDisplayNodePerformBlockOnMainThread(void (^block)());
+void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)());
 
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
   ASDisplayNodeMethodOverrideNone = 0,
