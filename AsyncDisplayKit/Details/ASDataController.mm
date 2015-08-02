@@ -555,6 +555,26 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
+- (void)relayoutAllRows
+{
+  [self performEditCommandWithBlock:^{
+    ASDisplayNodeAssertMainThread();
+    LOG(@"Edit Command - relayoutRows");
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+    
+    NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_completedNodes);
+    NSArray *loadedNodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_completedNodes, indexPaths);
+    
+    for (NSUInteger i = 0; i < loadedNodes.count && i < indexPaths.count; i++) {
+      // TODO: The current implementation does not make use of different constrained sizes per node.
+      CGSize constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[i]];
+      ASCellNode *node = loadedNodes[i];
+      [node measure:constrainedSize];
+      node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+    }
+  }];
+}
+
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   [self performEditCommandWithBlock:^{

@@ -15,6 +15,7 @@
 #import "ASRangeController.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
+#import "ASInternalHelpers.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -131,6 +132,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   NSIndexPath *_contentOffsetAdjustmentTopVisibleRow;
   CGFloat _contentOffsetAdjustment;
+
+  BOOL _pendingRelayoutForAllRows;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -183,6 +186,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   _batchContext = [[ASBatchContext alloc] init];
 
   _automaticallyAdjustsContentOffset = NO;
+  
+  if (ASSystemVersionLessThan8()) {
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
+  }
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -220,6 +228,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   // This bug might be iOS 7-specific.
   super.delegate  = nil;
   super.dataSource = nil;
+  
+  if (ASSystemVersionLessThan8()) {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+  }
 }
 
 #pragma mark -
@@ -341,6 +354,31 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssertMainThread();
   [_dataController endUpdatesAnimated:animated completion:completion];
+}
+
+#pragma mark -
+#pragma mark Orientation Change Handling
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+  _pendingRelayoutForAllRows = YES;
+}
+
+- (void)deviceOrientationDidChange
+{
+  _pendingRelayoutForAllRows = YES;
+}
+
+- (void)layoutSubviews
+{
+  [super layoutSubviews];
+  
+  if (_pendingRelayoutForAllRows) {
+    _pendingRelayoutForAllRows = NO;
+    [self beginUpdates];
+    [_dataController relayoutAllRows];
+    [self endUpdates];
+  }
 }
 
 #pragma mark -

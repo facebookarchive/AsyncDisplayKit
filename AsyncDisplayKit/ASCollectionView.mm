@@ -15,6 +15,7 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 #import "UICollectionViewLayout+ASConvenience.h"
+#import "ASInternalHelpers.h"
 
 const static NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 
@@ -121,6 +122,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   BOOL _implementsInsetSection;
 
   ASBatchContext *_batchContext;
+  
+  BOOL _pendingRelayoutForAllRows;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -168,6 +171,11 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
   
+  if (ASSystemVersionLessThan8()) {
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
+  }
+  
   return self;
 }
 
@@ -177,6 +185,11 @@ static BOOL _isInterceptedSelector(SEL sel)
   // This bug might be iOS 7-specific.
   super.delegate  = nil;
   super.dataSource = nil;
+  
+  if (ASSystemVersionLessThan8()) {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+  }
 }
 
 #pragma mark -
@@ -458,6 +471,32 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
     [_asyncDelegate collectionView:self didEndDisplayingNodeForItemAtIndexPath:indexPath];
+  }
+}
+
+
+#pragma mark -
+#pragma mark Orientation Change Handling
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+  _pendingRelayoutForAllRows = YES;
+}
+
+- (void)deviceOrientationDidChange
+{
+  _pendingRelayoutForAllRows = YES;
+}
+
+- (void)layoutSubviews
+{
+  [super layoutSubviews];
+  
+  if (_pendingRelayoutForAllRows) {
+    _pendingRelayoutForAllRows = NO;
+    [self performBatchAnimated:NO updates:^{
+      [_dataController relayoutAllRows];
+    } completion:nil];
   }
 }
 
