@@ -560,6 +560,28 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   [[self asyncLayer] displayImmediately];
 }
 
+- (void)__setNeedsLayout
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
+  
+  if (!_flags.isMeasured) {
+    return;
+  }
+  
+  ASSizeRange oldConstrainedSize = _constrainedSize;
+  [self invalidateCalculatedLayout];
+  
+  if (_supernode) {
+    // Cause supernode's layout to be invalidated
+    [_supernode setNeedsLayout];
+  } else {
+    // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
+    [self measureWithSizeRange:oldConstrainedSize];
+    self.frame = CGRectMake(0.0f, 0.0f, _layout.size.width, _layout.size.height);
+  }
+}
+
 // These private methods ensure that subclasses are not required to call super in order for _renderingSubnodes to be properly managed.
 
 - (void)__layout
