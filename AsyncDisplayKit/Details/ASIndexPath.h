@@ -7,6 +7,7 @@
  */
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
+#import <Foundation/Foundation.h>
 
 typedef struct {
   NSInteger section;
