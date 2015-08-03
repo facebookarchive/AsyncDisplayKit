@@ -578,7 +578,9 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   } else {
     // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
     [self measureWithSizeRange:oldConstrainedSize];
-    self.frame = CGRectMake(0.0f, 0.0f, _layout.size.width, _layout.size.height);
+    CGRect bounds = self.bounds;
+    bounds.size = CGSizeMake(_layout.size.width, _layout.size.height);
+    self.bounds = bounds;
   }
 }
 

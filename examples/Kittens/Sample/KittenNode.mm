@@ -30,7 +30,7 @@ static const CGFloat kInnerPadding = 10.0f;
   ASTextNode *_textNode;
   ASDisplayNode *_divider;
   BOOL _isImageEnlarged;
-  BOOL _isNodesSwapped;
+  BOOL _swappedTextAndImage;
 }
 
 @end
@@ -148,7 +148,7 @@ static const CGFloat kInnerPadding = 10.0f;
       .direction = ASStackLayoutDirectionHorizontal,
       .spacing = kInnerPadding
     }
-    children:!_isNodesSwapped ? @[imagePlaceholder, _textNode] : @[_textNode, imagePlaceholder]]];
+    children:!_swappedTextAndImage ? @[imagePlaceholder, _textNode] : @[_textNode, imagePlaceholder]]];
 }
 
 // With box model, you don't need to override this method, unless you want to add custom logic.
@@ -192,7 +192,7 @@ static const CGFloat kInnerPadding = 10.0f;
 
 - (void)toggleNodesSwap
 {
-  _isNodesSwapped = !_isNodesSwapped;
+  _swappedTextAndImage = !_swappedTextAndImage;
   [self setNeedsLayout];
 }
 
