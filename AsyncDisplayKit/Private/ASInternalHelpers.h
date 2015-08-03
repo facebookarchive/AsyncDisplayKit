@@ -9,6 +9,7 @@
  */
 
 #include <CoreGraphics/CGBase.h>
+#import <Foundation/Foundation.h>
 #import "ASBaseDefines.h"
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
