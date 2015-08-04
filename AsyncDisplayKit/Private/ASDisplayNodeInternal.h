@@ -121,6 +121,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 // Core implementation of -measureWithSizeRange:. Must be called with _propertyLock held.
 - (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize;
 
+- (void)__setNeedsLayout;
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 

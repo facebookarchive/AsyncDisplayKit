@@ -29,6 +29,8 @@ static const CGFloat kInnerPadding = 10.0f;
   ASNetworkImageNode *_imageNode;
   ASTextNode *_textNode;
   ASDisplayNode *_divider;
+  BOOL _isImageEnlarged;
+  BOOL _swappedTextAndImage;
 }
 
 @end
@@ -84,6 +86,7 @@ static const CGFloat kInnerPadding = 10.0f;
                                                                    (NSInteger)roundl(_kittenSize.width),
                                                                    (NSInteger)roundl(_kittenSize.height)]];
 //  _imageNode.contentMode = UIViewContentModeCenter;
+  [_imageNode addTarget:self action:@selector(toggleNodesSwap) forControlEvents:ASControlNodeEventTouchUpInside];
   [self addSubnode:_imageNode];
 
   // lorem ipsum text, plus some nice styling
@@ -132,7 +135,7 @@ static const CGFloat kInnerPadding = 10.0f;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASRatioLayoutSpec *imagePlaceholder = [ASRatioLayoutSpec newWithRatio:1.0 child:_imageNode];
-  imagePlaceholder.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);
+  imagePlaceholder.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize * (!_isImageEnlarged ? 1 : 2));
   
   _textNode.flexShrink = YES;
   
@@ -145,7 +148,7 @@ static const CGFloat kInnerPadding = 10.0f;
       .direction = ASStackLayoutDirectionHorizontal,
       .spacing = kInnerPadding
     }
-    children:@[imagePlaceholder, _textNode]]];
+    children:!_swappedTextAndImage ? @[imagePlaceholder, _textNode] : @[_textNode, imagePlaceholder]]];
 }
 
 // With box model, you don't need to override this method, unless you want to add custom logic.
@@ -180,5 +183,17 @@ static const CGFloat kInnerPadding = 10.0f;
   _textNode.frame = CGRectMake(kOuterPadding + kImageSize + kInnerPadding, kOuterPadding, textSize.width, textSize.height);
 }
 #endif
+
+- (void)toggleImageEnlargement
+{
+  _isImageEnlarged = !_isImageEnlarged;
+  [self setNeedsLayout];
+}
+
+- (void)toggleNodesSwap
+{
+  _swappedTextAndImage = !_swappedTextAndImage;
+  [self setNeedsLayout];
+}
 
 @end

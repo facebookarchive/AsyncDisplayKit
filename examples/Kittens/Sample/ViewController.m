@@ -102,6 +102,16 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 #pragma mark -
 #pragma mark ASTableView.
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  [_tableView deselectRowAtIndexPath:indexPath animated:YES];
+  [_tableView beginUpdates];
+  // Assume only kitten nodes are selectable (see -tableView:shouldHighlightRowAtIndexPath:).
+  KittenNode *node = (KittenNode *)[_tableView nodeForRowAtIndexPath:indexPath];
+  [node toggleImageEnlargement];
+  [_tableView endUpdates];
+}
+
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   // special-case the first row
@@ -123,8 +133,8 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 
 - (BOOL)tableView:(UITableView *)tableView shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  // disable row selection
-  return NO;
+  // Enable selection for kitten nodes
+  return indexPath.section != 0 || indexPath.row != 0;
 }
 
 - (void)tableViewLockDataSource:(ASTableView *)tableView

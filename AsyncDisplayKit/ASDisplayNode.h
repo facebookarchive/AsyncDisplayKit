@@ -505,8 +505,22 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  */
 @interface ASDisplayNode (UIViewBridge)
 
-- (void)setNeedsDisplay;    // Marks the view as needing display. Convenience for use whether view is created or not, or from a background thread.
-- (void)setNeedsLayout;     // Marks the view as needing layout.  Convenience for use whether view is created or not, or from a background thread.
+/**
+ * Marks the view as needing display. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ */
+- (void)setNeedsDisplay;
+
+/**
+ * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ * 
+ * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
+ * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
+ * 
+ * Note: If the relayout causes a change in size of the root node that is attached to a container view
+ * (table or collection view, for example), the container view must be notified to relayout.
+ * For ASTableView and ASCollectionView, an empty batch editing transaction must be triggered to animate to new row / item sizes.
+ */
+- (void)setNeedsLayout;
 
 @property (atomic, retain)           id contents;                           // default=nil
 @property (atomic, assign)           BOOL clipsToBounds;                    // default==NO
