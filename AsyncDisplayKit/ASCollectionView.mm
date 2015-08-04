@@ -118,6 +118,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   NSMutableArray *_batchUpdateBlocks;
 
   BOOL _asyncDataFetchingEnabled;
+  BOOL _implementsInsetSection;
 
   ASBatchContext *_batchContext;
 }
@@ -164,6 +165,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _performingBatchUpdates = NO;
   _batchUpdateBlocks = [NSMutableArray array];
+  
+  _implementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
 
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
   
@@ -511,11 +514,16 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   CGSize restrainedSize = self.bounds.size;
+  UIEdgeInsets sectionInset = [(UICollectionViewFlowLayout *)self.collectionViewLayout sectionInset];
+  
+  if (_implementsInsetSection) {
+    sectionInset = [_asyncDelegate collectionView:self layout:self.collectionViewLayout insetForSectionAtIndex:indexPath.section];
+  }
 
   if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
-    restrainedSize.width = FLT_MAX;
+    restrainedSize.width = MAX(0, FLT_MAX - sectionInset.left - sectionInset.right);
   } else {
-    restrainedSize.height = FLT_MAX;
+    restrainedSize.height = MAX(0, FLT_MAX - sectionInset.top - sectionInset.bottom);
   }
 
   return restrainedSize;
