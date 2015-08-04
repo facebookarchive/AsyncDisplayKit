@@ -1308,7 +1308,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  return CGSizeZero;
+  return CGSizeMake(MIN(self.requestedLayoutSize.width, constrainedSize.width), MIN(self.requestedLayoutSize.height, constrainedSize.height));
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
