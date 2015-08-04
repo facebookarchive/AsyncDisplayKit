@@ -511,11 +511,18 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   CGSize restrainedSize = self.bounds.size;
+    
+  UIEdgeInsets sectionInsets = UIEdgeInsetsZero;
+    
+  if ([_asyncDelegate respondsToSelector: @selector(collectionView:layout:insetForSectionAtIndex:)])
+    sectionInsets = [_asyncDelegate collectionView: self layout: self.collectionViewLayout insetForSectionAtIndex: indexPath.section];
 
   if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
     restrainedSize.width = FLT_MAX;
+    restrainedSize.height -= (sectionInsets.top + sectionInsets.bottom);
   } else {
     restrainedSize.height = FLT_MAX;
+    restrainedSize.width -= (sectionInsets.left + sectionInsets.right);
   }
 
   return restrainedSize;
