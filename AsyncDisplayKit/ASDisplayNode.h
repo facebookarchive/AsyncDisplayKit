@@ -185,6 +185,15 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  */
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
 
+/**
+ * @abstract Used by some implementations of measureWithSizeRange: to provide an intrisic content size
+ * to a node when one cannot be computed from its subnodes
+ *
+ * @return The requested size of this node
+ */
+@property (atomic, assign, readwrite) CGSize requestedLayoutSize;
+
+
 /** @name Managing the nodes hierarchy */
 
 

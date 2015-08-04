@@ -111,7 +111,9 @@
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(_imageLock);
-  if (_image)
+  if (CGSizeEqualToSize(self.requestedLayoutSize, CGSizeZero) == NO)
+    return CGSizeMake(MIN(constrainedSize.width, self.requestedLayoutSize.width), MIN(constrainedSize.height, self.requestedLayoutSize.height));
+  else if (_image)
     return _image.size;
   else
     return CGSizeZero;

@@ -83,7 +83,7 @@ static const CGFloat kInnerPadding = 10.0f;
   _imageNode.URL = [NSURL URLWithString:[NSString stringWithFormat:@"http://placekitten.com/%zd/%zd",
                                                                    (NSInteger)roundl(_kittenSize.width),
                                                                    (NSInteger)roundl(_kittenSize.height)]];
-  _imageNode.expectedImageSize = CGSizeMake(kImageSize, kImageSize);
+  _imageNode.requestedLayoutSize = CGSizeMake(kImageSize, kImageSize);
 //  _imageNode.contentMode = UIViewContentModeCenter;
   [self addSubnode:_imageNode];
 

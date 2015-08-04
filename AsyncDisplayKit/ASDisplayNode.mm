@@ -47,6 +47,7 @@
 @synthesize flexShrink = _flexShrink;
 @synthesize flexBasis = _flexBasis;
 @synthesize alignSelf = _alignSelf;
+@synthesize requestedLayoutSize = _requestedLayoutSize;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
@@ -135,6 +136,7 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   _methodOverrides = overrides;
   
   _flexBasis = ASRelativeDimensionUnconstrained;
+  _requestedLayoutSize = CGSizeZero;
 }
 
 - (id)init
@@ -1331,6 +1333,18 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertThreadAffinity(self);
   return _constrainedSize;
+}
+
+-(void)setRequestedLayoutSize:(CGSize)requestedLayoutSize
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _requestedLayoutSize = requestedLayoutSize;
+}
+
+- (CGSize)requestedLayoutSize
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _requestedLayoutSize;
 }
 
 - (UIImage *)placeholderImage
