@@ -147,6 +147,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   CGFloat _contentOffsetAdjustment;
 
   BOOL _pendingRelayoutForAllRows;
+  
+  BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -273,10 +275,12 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     super.dataSource = nil;
     _asyncDataSource = nil;
     _proxyDataSource = nil;
+    _asyncDataSourceImplementsConstrainedSizeForNode = NO;
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
+    _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(tableView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
   }
 }
 
@@ -801,9 +805,14 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   return node;
 }
 
-- (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return CGSizeMake(self.bounds.size.width, FLT_MAX);
+  if (_asyncDataSourceImplementsConstrainedSizeForNode) {
+    return [_asyncDataSource tableView:self constrainedSizeForNodeAtIndexPath:indexPath];
+  }
+  
+  // Default size range
+  return ASSizeRangeMake(CGSizeZero, CGSizeMake(self.bounds.size.width, FLT_MAX));
 }
 
 - (void)dataControllerLockDataSource
@@ -849,14 +858,15 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   [self beginUpdates];
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
   
-  CGSize constrainedSize = [self dataController:_dataController constrainedSizeForNodeAtIndexPath:indexPath];
+  ASSizeRange constrainedSize = [self dataController:_dataController constrainedSizeForNodeAtIndexPath:indexPath];
   if (state != UITableViewCellStateDefaultMask) {
     // Edit control or delete confirmation was shown and size of content view was changed.
     // The new size should be taken into consideration.
-    constrainedSize.width = MIN(cell.contentView.frame.size.width, constrainedSize.width);
+    constrainedSize.min.width = MIN(cell.contentView.frame.size.width, constrainedSize.min.width);
+    constrainedSize.max.width = MIN(cell.contentView.frame.size.width, constrainedSize.max.width);
   }
   
-  [node measure:constrainedSize];
+  [node measureWithSizeRange:constrainedSize];
   node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
   [self endUpdates];
 }

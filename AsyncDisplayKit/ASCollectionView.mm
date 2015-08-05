@@ -121,6 +121,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   BOOL _asyncDataFetchingEnabled;
   BOOL _asyncDelegateImplementsInsetSection;
   BOOL _collectionViewLayoutImplementsInsetSection;
+  BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
 
   ASBatchContext *_batchContext;
   
@@ -234,6 +235,7 @@ static BOOL _isInterceptedSelector(SEL sel)
     super.dataSource = nil;
     _asyncDataSource = nil;
     _proxyDataSource = nil;
+    _asyncDataSourceImplementsConstrainedSizeForNode = NO;
   } else {
     _asyncDataSource = asyncDataSource;
     // TODO: Support supplementary views with ASCollectionView.
@@ -242,6 +244,7 @@ static BOOL _isInterceptedSelector(SEL sel)
     }
     _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
+    _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
   }
 }
 
@@ -553,9 +556,21 @@ static BOOL _isInterceptedSelector(SEL sel)
   return node;
 }
 
-- (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  CGSize restrainedSize = self.bounds.size;
+  ASSizeRange constrainedSize;
+  if (_asyncDataSourceImplementsConstrainedSizeForNode) {
+    constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
+  } else {
+    CGSize maxSize = self.bounds.size;
+    if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
+      maxSize.width = FLT_MAX;
+    } else {
+      maxSize.height = FLT_MAX;
+    }
+    constrainedSize = ASSizeRangeMake(CGSizeZero, maxSize);
+  }
+
   UIEdgeInsets sectionInset = UIEdgeInsetsZero;
   if (_collectionViewLayoutImplementsInsetSection) {
     sectionInset = [(UICollectionViewFlowLayout *)self.collectionViewLayout sectionInset];
@@ -566,12 +581,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 
   if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
-    restrainedSize.width = MAX(0, FLT_MAX - sectionInset.left - sectionInset.right);
+    constrainedSize.min.width = MAX(0, constrainedSize.min.width - sectionInset.left - sectionInset.right);
+    constrainedSize.max.width = MAX(0, constrainedSize.max.width - sectionInset.left - sectionInset.right);
   } else {
-    restrainedSize.height = MAX(0, FLT_MAX - sectionInset.top - sectionInset.bottom);
+    constrainedSize.min.height = MAX(0, constrainedSize.min.height - sectionInset.top - sectionInset.bottom);
+    constrainedSize.max.height = MAX(0, constrainedSize.max.height - sectionInset.top - sectionInset.bottom);
   }
 
-  return restrainedSize;
+  return constrainedSize;
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section

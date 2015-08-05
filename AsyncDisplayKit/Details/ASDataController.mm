@@ -108,17 +108,19 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   for (NSUInteger j = 0; j < nodes.count && j < indexPaths.count; j += kASDataControllerSizingCountPerProcessor) {
     NSArray *subIndexPaths = [indexPaths subarrayWithRange:NSMakeRange(j, MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j))];
     
-    // TODO: The current implementation does not make use of different constrained sizes per node.
-    // There should be a fast-path that avoids all of this object creation.
+    //TODO: There should be a fast-path that avoids all of this object creation.
     NSMutableArray *nodeBoundSizes = [[NSMutableArray alloc] initWithCapacity:kASDataControllerSizingCountPerProcessor];
     [subIndexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-      [nodeBoundSizes addObject:[NSValue valueWithCGSize:[_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath]]];
+      ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
+      [nodeBoundSizes addObject:[NSValue valueWithBytes:&constrainedSize objCType:@encode(ASSizeRange)]];
     }];
     
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       [subIndexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
         ASCellNode *node = nodes[j + idx];
-        [node measure:[nodeBoundSizes[idx] CGSizeValue]];
+        ASSizeRange constrainedSize;
+        [nodeBoundSizes[idx] getValue:&constrainedSize];
+        [node measureWithSizeRange:constrainedSize];
         node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
       }];
     });
@@ -566,10 +568,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     NSArray *loadedNodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_completedNodes, indexPaths);
     
     for (NSUInteger i = 0; i < loadedNodes.count && i < indexPaths.count; i++) {
-      // TODO: The current implementation does not make use of different constrained sizes per node.
-      CGSize constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[i]];
+      ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[i]];
       ASCellNode *node = loadedNodes[i];
-      [node measure:constrainedSize];
+      [node measureWithSizeRange:constrainedSize];
       node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
     }
   }];

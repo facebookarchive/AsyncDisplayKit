@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
+#import <AsyncDisplayKit/ASDimension.h>
 #import "ASFlowLayoutController.h"
 
 @class ASCellNode;
@@ -27,9 +28,9 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 - (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
- The constrained size for layout.
+ The constrained size range for layout.
  */
-- (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  Fetch the number of rows in specific section.
