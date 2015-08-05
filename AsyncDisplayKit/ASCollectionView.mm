@@ -166,8 +166,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   _performingBatchUpdates = NO;
   _batchUpdateBlocks = [NSMutableArray array];
   
-  _implementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
-
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
   
   return self;
@@ -244,10 +242,12 @@ static BOOL _isInterceptedSelector(SEL sel)
     super.delegate = nil;
     _asyncDelegate = nil;
     _proxyDelegate = nil;
+    _implementsInsetSection = NO;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+    _implementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
 }
 
