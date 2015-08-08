@@ -27,12 +27,13 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
   ASTableView *_tableView;
 
   // array of boxed CGSizes corresponding to placekitten.com kittens
-  NSArray *_kittenDataSource;
+  NSMutableArray *_kittenDataSource;
 
   BOOL _dataSourceLocked;
+  NSIndexPath *_blurbNodeIndexPath;
 }
 
-@property (nonatomic, strong) NSArray *kittenDataSource;
+@property (nonatomic, strong) NSMutableArray *kittenDataSource;
 @property (atomic, assign) BOOL dataSourceLocked;
 
 @end
@@ -56,10 +57,16 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
   // populate our "data source" with some random kittens
   _kittenDataSource = [self createLitterWithSize:kLitterSize];
 
+  _blurbNodeIndexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  
+  self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit
+                                                                                         target:self
+                                                                                         action:@selector(toggleEditingMode)];
+
   return self;
 }
 
-- (NSArray *)createLitterWithSize:(NSInteger)litterSize
+- (NSMutableArray *)createLitterWithSize:(NSInteger)litterSize
 {
   NSMutableArray *kittens = [NSMutableArray arrayWithCapacity:litterSize];
   for (NSInteger i = 0; i < litterSize; i++) {
@@ -75,7 +82,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
   return kittens;
 }
 
-- (void)setKittenDataSource:(NSArray *)kittenDataSource {
+- (void)setKittenDataSource:(NSMutableArray *)kittenDataSource {
   ASDisplayNodeAssert(!self.dataSourceLocked, @"Could not update data source when it is locked !");
 
   _kittenDataSource = kittenDataSource;
@@ -98,6 +105,11 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
   return YES;
 }
 
+- (void)toggleEditingMode
+{
+  [_tableView setEditing:!_tableView.editing animated:YES];
+}
+
 
 #pragma mark -
 #pragma mark ASTableView.
@@ -115,7 +127,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   // special-case the first row
-  if (indexPath.section == 0 && indexPath.row == 0) {
+  if ([_blurbNodeIndexPath compare:indexPath] == NSOrderedSame) {
     BlurbNode *node = [[BlurbNode alloc] init];
     return node;
   }
@@ -134,7 +146,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 - (BOOL)tableView:(UITableView *)tableView shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath
 {
   // Enable selection for kitten nodes
-  return indexPath.section != 0 || indexPath.row != 0;
+  return [_blurbNodeIndexPath compare:indexPath] != NSOrderedSame;
 }
 
 - (void)tableViewLockDataSource:(ASTableView *)tableView
@@ -173,7 +185,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
       }
 
       // add new kittens to the data source & notify table of new indexpaths
-      _kittenDataSource = [_kittenDataSource arrayByAddingObjectsFromArray:moarKittens];
+      [_kittenDataSource addObjectsFromArray:moarKittens];
       [tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
 
       [context completeBatchFetching:YES];
@@ -181,6 +193,21 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
       NSLog(@"kittens added");
     });
   });
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  // Enable editing for Kitten nodes
+  return [_blurbNodeIndexPath compare:indexPath] != NSOrderedSame;
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  if (editingStyle == UITableViewCellEditingStyleDelete) {
+    // Assume only kitten nodes are editable (see -tableView:canEditRowAtIndexPath:).
+    [_kittenDataSource removeObjectAtIndex:indexPath.row - 1];
+    [_tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+  }
 }
 
 @end

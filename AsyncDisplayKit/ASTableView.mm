@@ -104,18 +104,31 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASCellNode<->UITableViewCell bridging.
 
+@protocol _ASTableViewCellDelegate <NSObject>
+- (void)tableViewCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath didTransitionToState:(UITableViewCellStateMask)state;
+@end
+
 @interface _ASTableViewCell : UITableViewCell
+@property (nonatomic, weak) id<_ASTableViewCellDelegate> delegate;
+@property (nonatomic) NSIndexPath *indexPath;
 @end
 
 @implementation _ASTableViewCell
 // TODO add assertions to prevent use of view-backed UITableViewCell properties (eg .textLabel)
+
+- (void)didTransitionToState:(UITableViewCellStateMask)state
+{
+  [super didTransitionToState:state];
+  [_delegate tableViewCell:self atIndexPath:_indexPath didTransitionToState:state];
+}
+
 @end
 
 
 #pragma mark -
 #pragma mark ASTableView
 
-@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource> {
+@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate> {
   _ASTableViewProxy *_proxyDataSource;
   _ASTableViewProxy *_proxyDelegate;
 
@@ -493,11 +506,13 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   _ASTableViewCell *cell = [self dequeueReusableCellWithIdentifier:reuseIdentifier];
   if (!cell) {
     cell = [[_ASTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+    cell.delegate = self;
   }
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
   [_rangeController configureContentView:cell.contentView forCellNode:node];
 
+  cell.indexPath = indexPath;
   cell.backgroundColor = node.backgroundColor;
   cell.selectionStyle = node.selectionStyle;
 
@@ -825,6 +840,25 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   } else {
     return 1; // default section number
   }
+}
+
+#pragma mark - _ASTableViewCellDelegate
+
+- (void)tableViewCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath didTransitionToState:(UITableViewCellStateMask)state
+{
+  [self beginUpdates];
+  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+  
+  CGSize constrainedSize = [self dataController:_dataController constrainedSizeForNodeAtIndexPath:indexPath];
+  if (state != UITableViewCellStateDefaultMask) {
+    // Edit control or delete confirmation was shown and size of content view was changed.
+    // The new size should be taken into consideration.
+    constrainedSize.width = MIN(cell.contentView.frame.size.width, constrainedSize.width);
+  }
+  
+  [node measure:constrainedSize];
+  node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
+  [self endUpdates];
 }
 
 @end
