@@ -64,6 +64,22 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
   }
 }
 
+void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)())
+{
+  ASDisplayNodeCAssertNotNil(block, @"block is required");
+  if (!block) {
+    return;
+  }
+
+  if (node.nodeLoaded) {
+    ASDisplayNodePerformBlockOnMainThread(^{
+      block();
+    });
+  } else {
+    block();
+  }
+}
+
 + (void)initialize
 {
   if (self == [ASDisplayNode class]) {
