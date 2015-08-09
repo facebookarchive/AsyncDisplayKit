@@ -146,7 +146,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   NSIndexPath *_contentOffsetAdjustmentTopVisibleRow;
   CGFloat _contentOffsetAdjustment;
 
-  BOOL _pendingRelayoutForAllRows;
+  BOOL _needsRowRelayout;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -200,7 +200,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
   _automaticallyAdjustsContentOffset = NO;
   
-  if (ASSystemVersionLessThan8()) {
+  if (ASSystemVersionIsBefore8()) {
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
   }
@@ -242,7 +242,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   super.delegate  = nil;
   super.dataSource = nil;
   
-  if (ASSystemVersionLessThan8()) {
+  if (ASSystemVersionIsBefore8()) {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
   }
@@ -374,20 +374,27 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
 {
-  _pendingRelayoutForAllRows = YES;
+  [super traitCollectionDidChange:previousTraitCollection];
+  
+  if (self.traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass
+      || self.traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass) {
+    // -layoutSubviews should be called shortly afterwards.
+    _needsRowRelayout = YES;
+  }
 }
 
 - (void)deviceOrientationDidChange
 {
-  _pendingRelayoutForAllRows = YES;
+  // -layoutSubviews will be called shortly afterwards.
+  _needsRowRelayout = YES;
 }
 
 - (void)layoutSubviews
 {
   [super layoutSubviews];
   
-  if (_pendingRelayoutForAllRows) {
-    _pendingRelayoutForAllRows = NO;
+  if (_needsRowRelayout) {
+    _needsRowRelayout = NO;
     [self beginUpdates];
     [_dataController relayoutAllRows];
     [self endUpdates];
