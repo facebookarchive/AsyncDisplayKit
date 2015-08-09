@@ -125,7 +125,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   ASBatchContext *_batchContext;
   
-  BOOL _pendingRelayoutForAllRows;
+  CGSize _maxSizeForNodesConstrainedSize;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -170,15 +170,12 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   _performingBatchUpdates = NO;
   _batchUpdateBlocks = [NSMutableArray array];
+
+  _collectionViewLayoutImplementsInsetSection = [layout respondsToSelector:@selector(sectionInset)];
+
+  _maxSizeForNodesConstrainedSize = self.bounds.size;
   
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
-  
-  if (ASSystemVersionLessThan8()) {
-    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
-  }
-    
-  _collectionViewLayoutImplementsInsetSection = [layout respondsToSelector:@selector(sectionInset)];
   
   return self;
 }
@@ -189,11 +186,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   // This bug might be iOS 7-specific.
   super.delegate  = nil;
   super.dataSource = nil;
-  
-  if (ASSystemVersionLessThan8()) {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
-  }
 }
 
 #pragma mark -
@@ -480,26 +472,12 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-
-#pragma mark -
-#pragma mark Orientation Change Handling
-
-- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
-{
-  _pendingRelayoutForAllRows = YES;
-}
-
-- (void)deviceOrientationDidChange
-{
-  _pendingRelayoutForAllRows = YES;
-}
-
 - (void)layoutSubviews
 {
   [super layoutSubviews];
   
-  if (_pendingRelayoutForAllRows) {
-    _pendingRelayoutForAllRows = NO;
+  if (! CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, self.bounds.size)) {
+    _maxSizeForNodesConstrainedSize = self.bounds.size;
     [self performBatchAnimated:NO updates:^{
       [_dataController relayoutAllRows];
     } completion:nil];
@@ -562,7 +540,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   if (_asyncDataSourceImplementsConstrainedSizeForNode) {
     constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
   } else {
-    CGSize maxSize = self.bounds.size;
+    CGSize maxSize = _maxSizeForNodesConstrainedSize;
     if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
       maxSize.width = FLT_MAX;
     } else {
