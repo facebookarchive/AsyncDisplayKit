@@ -154,6 +154,12 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
+/**
+ * Re-measures all loaded nodes. Used for external relayout (relayout that is caused by a change in constrained size of each and every cell node,
+ * for example, after an orientation change).
+ */
+- (void)relayoutAllRows;
+
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 - (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^)())completion;

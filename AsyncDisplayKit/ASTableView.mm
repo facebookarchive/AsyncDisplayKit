@@ -15,6 +15,7 @@
 #import "ASRangeController.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
+#import "ASInternalHelpers.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -103,18 +104,31 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASCellNode<->UITableViewCell bridging.
 
+@protocol _ASTableViewCellDelegate <NSObject>
+- (void)tableViewCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath didTransitionToState:(UITableViewCellStateMask)state;
+@end
+
 @interface _ASTableViewCell : UITableViewCell
+@property (nonatomic, weak) id<_ASTableViewCellDelegate> delegate;
+@property (nonatomic) NSIndexPath *indexPath;
 @end
 
 @implementation _ASTableViewCell
 // TODO add assertions to prevent use of view-backed UITableViewCell properties (eg .textLabel)
+
+- (void)didTransitionToState:(UITableViewCellStateMask)state
+{
+  [super didTransitionToState:state];
+  [_delegate tableViewCell:self atIndexPath:_indexPath didTransitionToState:state];
+}
+
 @end
 
 
 #pragma mark -
 #pragma mark ASTableView
 
-@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource> {
+@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate> {
   _ASTableViewProxy *_proxyDataSource;
   _ASTableViewProxy *_proxyDelegate;
 
@@ -131,6 +145,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   NSIndexPath *_contentOffsetAdjustmentTopVisibleRow;
   CGFloat _contentOffsetAdjustment;
+
+  BOOL _pendingRelayoutForAllRows;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -183,6 +199,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   _batchContext = [[ASBatchContext alloc] init];
 
   _automaticallyAdjustsContentOffset = NO;
+  
+  if (ASSystemVersionLessThan8()) {
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
+  }
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -220,6 +241,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   // This bug might be iOS 7-specific.
   super.delegate  = nil;
   super.dataSource = nil;
+  
+  if (ASSystemVersionLessThan8()) {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+  }
 }
 
 #pragma mark -
@@ -344,6 +370,31 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 }
 
 #pragma mark -
+#pragma mark Orientation Change Handling
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+  _pendingRelayoutForAllRows = YES;
+}
+
+- (void)deviceOrientationDidChange
+{
+  _pendingRelayoutForAllRows = YES;
+}
+
+- (void)layoutSubviews
+{
+  [super layoutSubviews];
+  
+  if (_pendingRelayoutForAllRows) {
+    _pendingRelayoutForAllRows = NO;
+    [self beginUpdates];
+    [_dataController relayoutAllRows];
+    [self endUpdates];
+  }
+}
+
+#pragma mark -
 #pragma mark Editing
 
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
@@ -455,11 +506,13 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   _ASTableViewCell *cell = [self dequeueReusableCellWithIdentifier:reuseIdentifier];
   if (!cell) {
     cell = [[_ASTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+    cell.delegate = self;
   }
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
   [_rangeController configureContentView:cell.contentView forCellNode:node];
 
+  cell.indexPath = indexPath;
   cell.backgroundColor = node.backgroundColor;
   cell.selectionStyle = node.selectionStyle;
 
@@ -787,6 +840,25 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   } else {
     return 1; // default section number
   }
+}
+
+#pragma mark - _ASTableViewCellDelegate
+
+- (void)tableViewCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath didTransitionToState:(UITableViewCellStateMask)state
+{
+  [self beginUpdates];
+  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+  
+  CGSize constrainedSize = [self dataController:_dataController constrainedSizeForNodeAtIndexPath:indexPath];
+  if (state != UITableViewCellStateDefaultMask) {
+    // Edit control or delete confirmation was shown and size of content view was changed.
+    // The new size should be taken into consideration.
+    constrainedSize.width = MIN(cell.contentView.frame.size.width, constrainedSize.width);
+  }
+  
+  [node measure:constrainedSize];
+  node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
+  [self endUpdates];
 }
 
 @end

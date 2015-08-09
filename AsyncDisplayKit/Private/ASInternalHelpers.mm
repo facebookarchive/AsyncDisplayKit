@@ -61,3 +61,18 @@ CGFloat ASRoundPixelValue(CGFloat f)
 {
   return roundf(f * ASScreenScale()) / ASScreenScale();
 }
+
+BOOL ASSystemVersionLessThan8()
+{
+  static BOOL lessThan8;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    lessThan8 = ASSystemVersionLessThanVersion(@"8");
+  });
+  return lessThan8;
+}
+
+BOOL ASSystemVersionLessThanVersion(NSString *version)
+{
+  return [[[UIDevice currentDevice] systemVersion] compare:version options:NSNumericSearch] == NSOrderedAscending;
+}
