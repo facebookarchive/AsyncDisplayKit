@@ -562,16 +562,15 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     LOG(@"Edit Command - relayoutRows");
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
-    NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_completedNodes);
-    NSArray *loadedNodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_completedNodes, indexPaths);
-    
-    for (NSUInteger i = 0; i < loadedNodes.count && i < indexPaths.count; i++) {
-      // TODO: The current implementation does not make use of different constrained sizes per node.
-      CGSize constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[i]];
-      ASCellNode *node = loadedNodes[i];
-      [node measure:constrainedSize];
-      node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
-    }
+    [_completedNodes enumerateObjectsUsingBlock:^(NSMutableArray *section, NSUInteger sectionIndex, BOOL *stop) {
+      [section enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger rowIndex, BOOL *stop) {
+        // TODO: The current implementation does not make use of different constrained sizes per node.
+        CGSize constrainedSize = [_dataSource dataController:self
+                           constrainedSizeForNodeAtIndexPath:[NSIndexPath indexPathForRow:rowIndex inSection:sectionIndex]];
+        [node measure:constrainedSize];
+        node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+      }];
+    }];
   }];
 }
 
