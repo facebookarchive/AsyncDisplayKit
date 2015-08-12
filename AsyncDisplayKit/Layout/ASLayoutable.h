@@ -58,6 +58,16 @@
 @property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
 
 /**
+ *  @abstract Used for baseline alignment. The distance from the top of the object to its baseline.
+ */
+@property (nonatomic, readwrite) CGFloat ascender;
+
+/**
+ *  @abstract Used for baseline alignment. The distance from the baseline of the object to its bottom.
+ */
+@property (nonatomic, readwrite) CGFloat descender;
+
+/**
  * @abstract Calculate a layout based on given size range.
  *
  * @param constrainedSize The minimum and maximum sizes the receiver should fit in.

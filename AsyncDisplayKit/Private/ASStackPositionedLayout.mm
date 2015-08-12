@@ -15,9 +15,21 @@
 #import "ASStackLayoutSpecUtilities.h"
 #import "ASLayoutable.h"
 
+static CGFloat baselineForItem(const ASStackLayoutSpecStyle &style,
+                               const ASStackUnpositionedItem &item) {
+  const ASStackLayoutAlignItems alignItems = alignment(item.child.alignSelf, style.alignItems);
+  if (alignItems == ASStackLayoutAlignItemsBaselineFirst) {
+    return item.child.ascender;
+  } else if (alignItems == ASStackLayoutAlignItemsBaselineLast) {
+    return  item.layout.size.height + item.child.descender;
+  }
+  return 0;
+}
+
 static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
                            const ASStackUnpositionedItem &l,
-                           const CGFloat crossSize)
+                           const CGFloat crossSize,
+                           const CGFloat maxBaseline)
 {
   switch (alignment(l.child.alignSelf, style.alignItems)) {
     case ASStackLayoutAlignItemsEnd:
@@ -27,8 +39,13 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
     case ASStackLayoutAlignItemsStart:
     case ASStackLayoutAlignItemsStretch:
       return 0;
+    case ASStackLayoutAlignItemsBaselineFirst:
+      return maxBaseline - l.child.ascender;
+    case ASStackLayoutAlignItemsBaselineLast:
+      return maxBaseline - baselineForItem(style, l);
   }
 }
+
 
 static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style,
                                              const CGFloat offset,
@@ -44,6 +61,12 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
   const auto minCrossSize = crossDimension(style.direction, constrainedSize.min);
   const auto maxCrossSize = crossDimension(style.direction, constrainedSize.max);
   const CGFloat crossSize = MIN(MAX(minCrossSize, largestChildCrossSize), maxCrossSize);
+  
+  // Find the maximum height for the baseline
+  const auto baselineIt = std::max_element(unpositionedLayout.items.begin(), unpositionedLayout.items.end(), [&](const ASStackUnpositionedItem &a, const ASStackUnpositionedItem &b){
+    return baselineForItem(style, a) < baselineForItem(style, b);
+  });
+  const CGFloat maxBaseLine = baselineIt == unpositionedLayout.items.end() ? 0 : baselineForItem(style, *baselineIt);
 
   CGPoint p = directionPoint(style.direction, offset, 0);
   BOOL first = YES;
@@ -53,7 +76,7 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
       p = p + directionPoint(style.direction, style.spacing, 0);
     }
     first = NO;
-    l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize));
+    l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize, maxBaseLine));
     p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.spacingAfter, 0);
     return l.layout;
   });
