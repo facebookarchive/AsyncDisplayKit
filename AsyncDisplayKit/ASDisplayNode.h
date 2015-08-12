@@ -185,6 +185,16 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  */
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
 
+/**
+ * @abstract Provides a default intrinsic content size for calculateSizeThatFits:. This is useful when laying out
+ * a node that either has no intrinsic content size or should be laid out at a different size than its intrinsic content
+ * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
+ * image size.
+ *
+ * @return The preferred frame size of this node
+ */
+@property (atomic, assign, readwrite) CGSize preferredFrameSize;
+
 /** @name Managing the nodes hierarchy */
 
 

@@ -47,6 +47,7 @@
 @synthesize flexShrink = _flexShrink;
 @synthesize flexBasis = _flexBasis;
 @synthesize alignSelf = _alignSelf;
+@synthesize preferredFrameSize = _preferredFrameSize;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
@@ -155,6 +156,7 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
   _methodOverrides = overrides;
 
   _flexBasis = ASRelativeDimensionUnconstrained;
+  _preferredFrameSize = CGSizeZero;
 }
 
 - (id)init
@@ -1350,7 +1352,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  return CGSizeZero;
+  return _preferredFrameSize;
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
@@ -1377,6 +1379,17 @@ static NSInteger incrementIfFound(NSInteger i) {
   return _constrainedSize;
 }
 
+- (void)setPreferredFrameSize:(CGSize)preferredFrameSize
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _preferredFrameSize = preferredFrameSize;
+}
+
+- (CGSize)preferredFrameSize
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _preferredFrameSize;
+}
 - (UIImage *)placeholderImage
 {
   return nil;

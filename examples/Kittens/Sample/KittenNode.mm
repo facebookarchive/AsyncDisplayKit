@@ -134,9 +134,7 @@ static const CGFloat kInnerPadding = 10.0f;
 #if UseAutomaticLayout
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASRatioLayoutSpec *imagePlaceholder = [ASRatioLayoutSpec newWithRatio:1.0 child:_imageNode];
-  imagePlaceholder.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize * (!_isImageEnlarged ? 1 : 2));
-  
+  _imageNode.preferredFrameSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
   _textNode.flexShrink = YES;
   
   return
@@ -148,7 +146,7 @@ static const CGFloat kInnerPadding = 10.0f;
       .direction = ASStackLayoutDirectionHorizontal,
       .spacing = kInnerPadding
     }
-    children:!_swappedTextAndImage ? @[imagePlaceholder, _textNode] : @[_textNode, imagePlaceholder]]];
+    children:!_swappedTextAndImage ? @[_imageNode, _textNode] : @[_textNode, _imageNode]]];
 }
 
 // With box model, you don't need to override this method, unless you want to add custom logic.
