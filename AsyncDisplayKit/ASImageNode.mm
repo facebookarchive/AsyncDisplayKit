@@ -112,7 +112,7 @@
 {
   ASDN::MutexLocker l(_imageLock);
   if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO)
-    return CGSizeMake(MIN(constrainedSize.width, self.preferredFrameSize.width), MIN(constrainedSize.height, self.preferredFrameSize.height));
+    return [super calculateSizeThatFits:constrainedSize];
   else if (_image)
     return _image.size;
   else
