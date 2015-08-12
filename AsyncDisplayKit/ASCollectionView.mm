@@ -119,7 +119,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   NSMutableArray *_batchUpdateBlocks;
 
   BOOL _asyncDataFetchingEnabled;
-  BOOL _implementsInsetSection;
+  BOOL _asyncDelegateImplementsInsetSection;
+  BOOL _collectionViewLayoutImplementsInsetSection;
 
   ASBatchContext *_batchContext;
   
@@ -175,6 +176,8 @@ static BOOL _isInterceptedSelector(SEL sel)
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
   }
+    
+  _collectionViewLayoutImplementsInsetSection = [layout respondsToSelector:@selector(sectionInset)];
   
   return self;
 }
@@ -255,12 +258,12 @@ static BOOL _isInterceptedSelector(SEL sel)
     super.delegate = nil;
     _asyncDelegate = nil;
     _proxyDelegate = nil;
-    _implementsInsetSection = NO;
+    _asyncDelegateImplementsInsetSection = NO;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
-    _implementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
+    _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
 }
 
@@ -554,11 +557,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   CGSize restrainedSize = self.bounds.size;
   UIEdgeInsets sectionInset = UIEdgeInsetsZero;
-  if ([self.collectionViewLayout respondsToSelector:@selector(sectionInset)]) {
+  if (_collectionViewLayoutImplementsInsetSection) {
     sectionInset = [(UICollectionViewFlowLayout *)self.collectionViewLayout sectionInset];
   }
   
-  if (_implementsInsetSection) {
+  if (_asyncDelegateImplementsInsetSection) {
     sectionInset = [_asyncDelegate collectionView:self layout:self.collectionViewLayout insetForSectionAtIndex:indexPath.section];
   }
 
