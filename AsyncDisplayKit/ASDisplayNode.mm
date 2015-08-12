@@ -71,12 +71,16 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
     return;
   }
 
-  if (node.nodeLoaded) {
-    ASDisplayNodePerformBlockOnMainThread(^{
+  {
+    // Hold the lock to avoid a race where the node gets loaded while the block is in-flight.
+    ASDN::MutexLocker l(node->_propertyLock);
+    if (node.nodeLoaded) {
+      ASDisplayNodePerformBlockOnMainThread(^{
+        block();
+      });
+    } else {
       block();
-    });
-  } else {
-    block();
+    }
   }
 }
 
@@ -121,12 +125,12 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 - (void)_initializeInstance
 {
   _contentsScaleForDisplay = ASScreenScale();
-  
+
   _displaySentinel = [[ASSentinel alloc] init];
 
   _flags.isInHierarchy = NO;
   _flags.displaysAsynchronously = YES;
-  
+
   // As an optimization, it may be worth a caching system that performs these checks once per class in +initialize (see above).
   _flags.implementsDrawRect = ([[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
   _flags.implementsImageDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
@@ -149,7 +153,7 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
     overrides |= ASDisplayNodeMethodOverrideCalculateSizeThatFits;
   }
   _methodOverrides = overrides;
-  
+
   _flexBasis = ASRelativeDimensionUnconstrained;
 }
 
@@ -157,9 +161,9 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 {
   if (!(self = [super init]))
     return nil;
-  
+
   [self _initializeInstance];
-  
+
   return self;
 }
 
@@ -169,7 +173,7 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
     return nil;
 
   ASDisplayNodeAssert([viewClass isSubclassOfClass:[UIView class]], @"should initialize with a subclass of UIView");
-  
+
   [self _initializeInstance];
   _viewClass = viewClass;
   _flags.synchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
@@ -181,7 +185,7 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 {
   if (!(self = [super init]))
     return nil;
-  
+
   ASDisplayNodeAssert([layerClass isSubclassOfClass:[CALayer class]], @"should initialize with a subclass of CALayer");
 
   [self _initializeInstance];
@@ -500,7 +504,7 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 }
 
 /**
- * Core implementation of -displaysAsynchronously. 
+ * Core implementation of -displaysAsynchronously.
  * Must be called with _propertyLock held.
  */
 - (BOOL)_displaysAsynchronously
@@ -1166,7 +1170,7 @@ static NSInteger incrementIfFound(NSInteger i) {
       [self willEnterHierarchy];
     }
     _flags.isEnteringHierarchy = NO;
-    
+
     CALayer *layer = self.layer;
     if (!self.layer.contents) {
       [layer setNeedsDisplay];
@@ -1450,11 +1454,11 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)layout
 {
   ASDisplayNodeAssertMainThread();
-  
+
   if (!_flags.isMeasured) {
     return;
   }
-  
+
   // Assume that _layout was flattened and is 1-level deep.
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
     ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.");
