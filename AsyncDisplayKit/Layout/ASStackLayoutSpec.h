@@ -47,6 +47,10 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignItems) {
   ASStackLayoutAlignItemsCenter,
   /** Expand children to fill cross axis */
   ASStackLayoutAlignItemsStretch,
+  /** Children align to their first baseline. Only available for horizontal stack nodes */
+  ASStackLayoutAlignItemsBaselineFirst,
+  /** Children align to their last baseline. Only available for horizontal stack nodes */
+  ASStackLayoutAlignItemsBaselineLast,
 };
 
 typedef struct {

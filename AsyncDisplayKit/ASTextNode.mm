@@ -355,6 +355,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
       self.isAccessibilityElement = YES;
     }
   });
+  
+  self.ascender = [[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender];
+  self.descender = [[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender];
 }
 
 #pragma mark - Text Layout
