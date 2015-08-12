@@ -553,7 +553,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   CGSize restrainedSize = self.bounds.size;
-  UIEdgeInsets sectionInset = [(UICollectionViewFlowLayout *)self.collectionViewLayout sectionInset];
+  UIEdgeInsets sectionInset = UIEdgeInsetsZero;
+  if ([self.collectionViewLayout respondsToSelector:@selector(sectionInset)]) {
+    sectionInset = [(UICollectionViewFlowLayout *)self.collectionViewLayout sectionInset];
+  }
   
   if (_implementsInsetSection) {
     sectionInset = [_asyncDelegate collectionView:self layout:self.collectionViewLayout insetForSectionAtIndex:indexPath.section];
