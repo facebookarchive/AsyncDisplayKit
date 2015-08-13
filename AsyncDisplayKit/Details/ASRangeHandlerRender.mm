@@ -39,8 +39,12 @@
 
   [node recursivelySetDisplaySuspended:NO];
 
-  // add the node to an off-screen window to force display and preserve its contents
-  [[self.class workingWindow] addSubnode:node];
+  // Add the node's layer to an off-screen window to trigger display and mark its contents as non-volatile.
+  // Use the layer directly to avoid the substantial overhead of UIView heirarchy manipulations.
+  // Any view-backed nodes will still create their views in order to assemble the layer heirarchy, and they will
+  // also assemble a view subtree for the node, but we avoid the much more significant expense triggered by a view
+  // being added or removed from an onscreen window (responder chain setup, will/DidMoveToWindow: recursive calls, etc)
+  [[[self.class workingWindow] layer] addSublayer:node.layer];
 }
 
 - (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType
@@ -49,7 +53,7 @@
   ASDisplayNodeAssert(rangeType == ASLayoutRangeTypeRender, @"Render delegate should not handle other ranges");
 
   [node recursivelySetDisplaySuspended:YES];
-  [node.view removeFromSuperview];
+  [node.layer removeFromSuperlayer];
 
   [node recursivelyClearContents];
 }
