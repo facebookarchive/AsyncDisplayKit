@@ -1382,7 +1382,10 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)setPreferredFrameSize:(CGSize)preferredFrameSize
 {
   ASDN::MutexLocker l(_propertyLock);
-  _preferredFrameSize = preferredFrameSize;
+  if (! CGSizeEqualToSize(_preferredFrameSize, preferredFrameSize)) {
+    _preferredFrameSize = preferredFrameSize;
+    [self invalidateCalculatedLayout];
+  }
 }
 
 - (CGSize)preferredFrameSize
