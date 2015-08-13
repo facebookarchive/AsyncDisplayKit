@@ -150,8 +150,8 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
   if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesEnded:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
   }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(calculateSizeThatFits:))) {
-    overrides |= ASDisplayNodeMethodOverrideCalculateSizeThatFits;
+  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(layoutSpecThatFits:))) {
+    overrides |= ASDisplayNodeMethodOverrideLayoutSpecThatFits;
   }
   _methodOverrides = overrides;
 
@@ -1332,10 +1332,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  if (_methodOverrides & ASDisplayNodeMethodOverrideCalculateSizeThatFits) {
-    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
-    return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
-  } else {
+  if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
     id<ASLayoutable> layoutSpec = [self layoutSpecThatFits:constrainedSize];
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
@@ -1346,6 +1343,11 @@ static NSInteger incrementIfFound(NSInteger i) {
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
       return [_subnodes containsObject:evaluatedLayout.layoutableObject];
     }];
+  } else {
+    // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
+    // assume that the default implementation of -calculateSizeThatFits: returns it.
+    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
+    return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
   }
 }
 
