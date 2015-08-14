@@ -72,7 +72,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 
   _ASPendingState *_pendingViewState;
 
-  struct {
+  struct ASDisplayNodeFlags {
     // public properties
     unsigned synchronous:1;
     unsigned layerBacked:1;

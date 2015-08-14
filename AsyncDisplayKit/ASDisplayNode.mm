@@ -30,6 +30,8 @@
  *
  */
 
+- (void)_staticInitialize;
+
 @end
 
 // Conditionally time these scopes to our debug ivars (only exist in debug/profile builds)
@@ -85,25 +87,93 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
   }
 }
 
-+ (void)initialize
-{
-  if (self == [ASDisplayNode class]) {
-    return;
+/**
+ *  Returns ASDisplayNodeFlags for the givern class/instance. instance MAY BE NIL.
+ *
+ *  @param c        the class, required
+ *  @param instance the instance, which may be nil. (If so, the class is inspected instead)
+ *
+ *  @return ASDisplayNode flags.
+ */
+static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *instance) {
+  struct ASDisplayNodeFlags flags = {0};
+
+  flags.isInHierarchy = NO;
+  flags.displaysAsynchronously = YES;
+  flags.implementsDrawRect = ([c respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
+  flags.implementsImageDisplay = ([c respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
+  if (instance) {
+    flags.implementsDrawParameters = ([instance respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
+  } else {
+    flags.implementsDrawParameters = ([c instancesRespondToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
+  }
+  return flags;
+}
+
+/**
+ *  Returns ASDisplayNodeMethodOverrides for the given class
+ *
+ *  @param c the class, requireed.
+ *
+ *  @return ASDisplayNodeMethodOverrides.
+ */
+static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c) {
+  ASDisplayNodeMethodOverrides overrides = ASDisplayNodeMethodOverrideNone;
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(touchesBegan:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesBegan;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(touchesMoved:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesMoved;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(touchesCancelled:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesCancelled;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(touchesEnded:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(calculateSizeThatFits:))) {
+    overrides |= ASDisplayNodeMethodOverrideCalculateSizeThatFits;
   }
 
-  // Subclasses should never override these
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
+  return overrides;
+}
 
-  // At most one of the three layout methods is overridden
-  ASDisplayNodeAssert((ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateSizeThatFits:)) ? 1 : 0)
-                      + (ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutSpecThatFits:)) ? 1 : 0)
-                      + (ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateLayoutThatFits:)) ? 1 : 0) <= 1,
-                      @"Subclass %@ must override at most one of the three layout methods: calculateLayoutThatFits, layoutSpecThatFits or calculateSizeThatFits", NSStringFromClass(self));
++ (void)initialize
+{
+  if (self != [ASDisplayNode class]) {
+    
+    // Subclasses should never override these
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange method", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
+
+    // At most one of the three layout methods is overridden
+    ASDisplayNodeAssert((ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateSizeThatFits:)) ? 1 : 0)
+                        + (ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutSpecThatFits:)) ? 1 : 0)
+                        + (ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateLayoutThatFits:)) ? 1 : 0) <= 1,
+                        @"Subclass %@ must override at most one of the three layout methods: calculateLayoutThatFits, layoutSpecThatFits or calculateSizeThatFits", NSStringFromClass(self));
+  }
+
+  // Below we are pre-calculating values per-class and dynamically adding a method (_staticInitialize) to populate these values
+  // when each instance is constructed. These values don't change for each class, so there is significant performance benefit
+  // in doing it here. +initialize is guaranteed to be called before any instance method so it is safe to add this method here.
+  // Note that we take care to detect if the class overrides +respondsToSelector: or -respondsToSelector and take the slow path
+  // (recalculating for each instance) to make sure we are always correct.
+
+  BOOL classOverridesRespondsToSelector = ASSubclassOverridesClassSelector([NSObject class], self, @selector(respondsToSelector:));
+  BOOL instancesOverrideRespondsToSelector = ASSubclassOverridesSelector([NSObject class], self, @selector(respondsToSelector:));
+  struct ASDisplayNodeFlags flags = GetASDisplayNodeFlags(self, nil);
+  ASDisplayNodeMethodOverrides methodOverrides = GetASDisplayNodeMethodOverrides(self);
+
+  IMP staticInitialize = imp_implementationWithBlock(^(ASDisplayNode *node) {
+    node->_flags = (classOverridesRespondsToSelector || instancesOverrideRespondsToSelector) ? GetASDisplayNodeFlags(node.class, node) : flags;
+    node->_methodOverrides = (classOverridesRespondsToSelector) ? GetASDisplayNodeMethodOverrides(node.class) : methodOverrides;
+  });
+
+  class_replaceMethod(self, @selector(_staticInitialize), staticInitialize, "v:@");
 }
 
 + (BOOL)layerBackedNodesEnabled
@@ -123,38 +193,15 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 
 #pragma mark - Lifecycle
 
+- (void)_staticInitialize {
+  ASDisplayNodeAssert(NO, @"_staticInitialize must be overridden");
+}
+
 - (void)_initializeInstance
 {
+  [self _staticInitialize];
   _contentsScaleForDisplay = ASScreenScale();
-
   _displaySentinel = [[ASSentinel alloc] init];
-
-  _flags.isInHierarchy = NO;
-  _flags.displaysAsynchronously = YES;
-
-  // As an optimization, it may be worth a caching system that performs these checks once per class in +initialize (see above).
-  _flags.implementsDrawRect = ([[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
-  _flags.implementsImageDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
-  _flags.implementsDrawParameters = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
-
-  ASDisplayNodeMethodOverrides overrides = ASDisplayNodeMethodOverrideNone;
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesBegan:withEvent:))) {
-    overrides |= ASDisplayNodeMethodOverrideTouchesBegan;
-  }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesMoved:withEvent:))) {
-    overrides |= ASDisplayNodeMethodOverrideTouchesMoved;
-  }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesCancelled:withEvent:))) {
-    overrides |= ASDisplayNodeMethodOverrideTouchesCancelled;
-  }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesEnded:withEvent:))) {
-    overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
-  }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(calculateSizeThatFits:))) {
-    overrides |= ASDisplayNodeMethodOverrideCalculateSizeThatFits;
-  }
-  _methodOverrides = overrides;
-
   _flexBasis = ASRelativeDimensionUnconstrained;
   _preferredFrameSize = CGSizeZero;
 }
