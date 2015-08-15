@@ -66,7 +66,7 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
   const auto baselineIt = std::max_element(unpositionedLayout.items.begin(), unpositionedLayout.items.end(), [&](const ASStackUnpositionedItem &a, const ASStackUnpositionedItem &b){
     return baselineForItem(style, a) < baselineForItem(style, b);
   });
-  const CGFloat maxBaseLine = baselineIt == unpositionedLayout.items.end() ? 0 : baselineForItem(style, *baselineIt);
+  const CGFloat maxBaseline = baselineIt == unpositionedLayout.items.end() ? 0 : baselineForItem(style, *baselineIt);
 
   CGPoint p = directionPoint(style.direction, offset, 0);
   BOOL first = YES;
@@ -76,13 +76,13 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
       p = p + directionPoint(style.direction, style.spacing, 0);
     }
     first = NO;
-    l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize, maxBaseLine));
+    l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize, maxBaseline));
     
-    CGFloat spacingAfterBaseline = (style.direction == ASStackLayoutDirectionVertical && style.baselineRelativeArrangement) ? l.child.descender : 0;;
+    CGFloat spacingAfterBaseline = (style.direction == ASStackLayoutDirectionVertical && style.baselineRelativeArrangement) ? l.child.descender : 0;
     p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.spacingAfter + spacingAfterBaseline, 0);
     return l.layout;
   });
-  return {stackedChildren, crossSize, maxBaseLine, maxBaseLine == 0 ? 0 : crossSize - maxBaseLine};
+  return {stackedChildren, crossSize, maxBaseline, maxBaseline == 0 ? 0 : maxBaseline - crossSize};
 }
 
 ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnpositionedLayout &unpositionedLayout,

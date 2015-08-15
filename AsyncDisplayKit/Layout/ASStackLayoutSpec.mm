@@ -56,7 +56,7 @@
   
   ASDN::MutexLocker l(_propertyLock);
   self.ascender = positionedLayout.ascender;
-  self.descender = positionedLayout.desender;
+  self.descender = positionedLayout.descender;
   
   return [ASLayout newWithLayoutableObject:self
                                       size:ASSizeRangeClamp(constrainedSize, finalSize)
