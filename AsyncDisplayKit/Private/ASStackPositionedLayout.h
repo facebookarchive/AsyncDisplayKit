@@ -17,6 +17,8 @@
 struct ASStackPositionedLayout {
   const std::vector<ASLayout *> sublayouts;
   const CGFloat crossSize;
+  const CGFloat ascender;
+  const CGFloat desender;
 
   /** Given an unpositioned layout, computes the positions each child should be placed at. */
   static ASStackPositionedLayout compute(const ASStackUnpositionedLayout &unpositionedLayout,
