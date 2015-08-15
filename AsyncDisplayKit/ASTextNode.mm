@@ -356,8 +356,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     }
   });
   
-  self.ascender = [[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender];
-  self.descender = [[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender];
+  self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * [UIScreen mainScreen].scale)/[UIScreen mainScreen].scale;
+  self.descender = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * [UIScreen mainScreen].scale)/[UIScreen mainScreen].scale;
 }
 
 #pragma mark - Text Layout

@@ -77,10 +77,12 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
     }
     first = NO;
     l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize, maxBaseLine));
-    p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.spacingAfter, 0);
+    
+    CGFloat spacingAfterBaseline = (style.direction == ASStackLayoutDirectionVertical && style.baselineRelativeArrangement) ? l.child.descender : 0;;
+    p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.spacingAfter + spacingAfterBaseline, 0);
     return l.layout;
   });
-  return {stackedChildren, crossSize};
+  return {stackedChildren, crossSize, maxBaseLine, maxBaseLine == 0 ? 0 : crossSize - maxBaseLine};
 }
 
 ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnpositionedLayout &unpositionedLayout,

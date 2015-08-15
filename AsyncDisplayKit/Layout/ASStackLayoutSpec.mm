@@ -20,11 +20,13 @@
 #import "ASStackLayoutSpecUtilities.h"
 #import "ASStackPositionedLayout.h"
 #import "ASStackUnpositionedLayout.h"
+#import "ASThread.h"
 
 @implementation ASStackLayoutSpec
 {
   ASStackLayoutSpecStyle _style;
   std::vector<id<ASLayoutable>> _children;
+  ASDN::RecursiveMutex _propertyLock;
 }
 
 + (instancetype)newWithStyle:(ASStackLayoutSpecStyle)style children:(NSArray *)children
@@ -51,6 +53,11 @@
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, _style, constrainedSize);
   const CGSize finalSize = directionSize(_style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
   NSArray *sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
+  
+  ASDN::MutexLocker l(_propertyLock);
+  self.ascender = positionedLayout.ascender;
+  self.descender = positionedLayout.desender;
+  
   return [ASLayout newWithLayoutableObject:self
                                       size:ASSizeRangeClamp(constrainedSize, finalSize)
                                 sublayouts:sublayouts];
