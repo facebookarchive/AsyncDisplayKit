@@ -173,7 +173,7 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
 {
   ASDN::MutexLocker l(_textKitLock);
 
-  if (_attributedString.string.length == 0) {
+  if (_attributedString.length == 0) {
     _calculatedSize = CGSizeZero;
     return;
   }
