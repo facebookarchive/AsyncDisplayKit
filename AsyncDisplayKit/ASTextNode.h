@@ -12,6 +12,14 @@
 @protocol ASTextNodeDelegate;
 
 /**
+ * Alignment
+ */
+typedef NS_ENUM(NSUInteger, ASTextNodeVerticalAlignment) {
+    ASTextNodeVerticalAlignmentDefault = 0,
+    ASTextNodeVerticalAlignmentCenter
+};
+
+/**
  * Highlight styles.
  */
 typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
@@ -164,6 +172,11 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @result YES if an entity exists at `point`; NO otherwise.
  */
 - (id)linkAttributeValueAtPoint:(CGPoint)point attributeName:(out NSString **)attributeNameOut range:(out NSRange *)rangeOut;
+
+/**
+ @abstract The mode to use when aligning text vertically.
+ */
+@property (nonatomic, assign) ASTextNodeVerticalAlignment verticalAlignment;
 
 /**
  @abstract The style to use when highlighting text.
