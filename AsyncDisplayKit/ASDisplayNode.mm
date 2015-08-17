@@ -131,9 +131,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c) {
   if (ASDisplayNodeSubclassOverridesSelector(c, @selector(touchesEnded:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
   }
-  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(calculateSizeThatFits:))) {
-    overrides |= ASDisplayNodeMethodOverrideCalculateSizeThatFits;
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(layoutSpecThatFits:))) {
+    overrides |= ASDisplayNodeMethodOverrideLayoutSpecThatFits;
   }
+
 
   return overrides;
 }
@@ -1379,10 +1380,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  if (_methodOverrides & ASDisplayNodeMethodOverrideCalculateSizeThatFits) {
-    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
-    return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
-  } else {
+  if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
     id<ASLayoutable> layoutSpec = [self layoutSpecThatFits:constrainedSize];
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
@@ -1393,6 +1391,11 @@ static NSInteger incrementIfFound(NSInteger i) {
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
       return [_subnodes containsObject:evaluatedLayout.layoutableObject];
     }];
+  } else {
+    // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
+    // assume that the default implementation of -calculateSizeThatFits: returns it.
+    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
+    return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
   }
 }
 
@@ -1429,7 +1432,10 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)setPreferredFrameSize:(CGSize)preferredFrameSize
 {
   ASDN::MutexLocker l(_propertyLock);
-  _preferredFrameSize = preferredFrameSize;
+  if (! CGSizeEqualToSize(_preferredFrameSize, preferredFrameSize)) {
+    _preferredFrameSize = preferredFrameSize;
+    [self invalidateCalculatedLayout];
+  }
 }
 
 - (CGSize)preferredFrameSize

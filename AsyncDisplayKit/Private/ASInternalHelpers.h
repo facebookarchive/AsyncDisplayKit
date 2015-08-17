@@ -25,8 +25,4 @@ CGFloat ASCeilPixelValue(CGFloat f);
 
 CGFloat ASRoundPixelValue(CGFloat f);
 
-BOOL ASSystemVersionLessThan8();
-
-BOOL ASSystemVersionLessThanVersion(NSString *version);
-
 ASDISPLAYNODE_EXTERN_C_END

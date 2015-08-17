@@ -59,6 +59,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 
   _blurbNodeIndexPath = [NSIndexPath indexPathForItem:0 inSection:0];
   
+  self.title = @"Kittens";
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit
                                                                                          target:self
                                                                                          action:@selector(toggleEditingMode)];
