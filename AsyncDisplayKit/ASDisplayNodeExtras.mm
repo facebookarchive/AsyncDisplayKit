@@ -126,7 +126,24 @@ extern id ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c)
 
 UIColor *ASDisplayNodeDefaultPlaceholderColor()
 {
-  return [UIColor colorWithWhite:0.95 alpha:1.0];
+  static UIColor *defaultPlaceholderColor;
+
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    defaultPlaceholderColor = [UIColor colorWithWhite:0.95 alpha:1.0];
+  });
+  return defaultPlaceholderColor;
+}
+
+UIColor *ASDisplayNodeDefaultTintColor()
+{
+  static UIColor *defaultTintColor;
+
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    defaultTintColor = [UIColor colorWithRed:0.0 green:0.478 blue:1.0 alpha:1.0];
+  });
+  return defaultTintColor;
 }
 
 #pragma mark - Hierarchy Notifications

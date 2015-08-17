@@ -130,7 +130,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     self.needsDisplayOnBoundsChange = YES;
 
     _truncationMode = NSLineBreakByWordWrapping;
-    _truncationAttributedString = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"\u2026", @"Default truncation string")];
+    _truncationAttributedString = DefaultTruncationAttributedString();
 
     // The common case is for a text node to be non-opaque and blended over some background.
     self.opaque = NO;
@@ -971,6 +971,16 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 }
 
 #pragma mark - Truncation Message
+
+static NSAttributedString *DefaultTruncationAttributedString()
+{
+  static NSAttributedString *defaultTruncationAttributedString;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    defaultTruncationAttributedString = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"\u2026", @"Default truncation string")];
+  });
+  return defaultTruncationAttributedString;
+}
 
 - (void)setTruncationAttributedString:(NSAttributedString *)truncationAttributedString
 {
