@@ -60,6 +60,7 @@ extern id ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDi
 extern id ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c);
 
 extern UIColor *ASDisplayNodeDefaultPlaceholderColor();
+extern UIColor *ASDisplayNodeDefaultTintColor();
 
 /**
  Disable willAppear / didAppear / didDisappear notifications for a sub-hierarchy, then re-enable when done. Nested calls are supported.
