@@ -48,8 +48,6 @@
 @synthesize flexBasis = _flexBasis;
 @synthesize alignSelf = _alignSelf;
 @synthesize preferredFrameSize = _preferredFrameSize;
-@synthesize ascender = _ascender;
-@synthesize descender = _descender;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
@@ -159,8 +157,6 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 
   _flexBasis = ASRelativeDimensionUnconstrained;
   _preferredFrameSize = CGSizeZero;
-  _ascender = 0;
-  _descender = 0;
 }
 
 - (id)init
@@ -456,6 +452,11 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 }
 
 #pragma mark -
+
+- (CGFloat)distanceToBaseline:(ASStackLayoutAlignItems)baselineAlignmentType
+{
+  return 0;
+}
 
 - (CGSize)measure:(CGSize)constrainedSize
 {
