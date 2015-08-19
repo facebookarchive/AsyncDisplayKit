@@ -18,10 +18,8 @@
 static CGFloat baselineForItem(const ASStackLayoutSpecStyle &style,
                                const ASStackUnpositionedItem &item) {
   const ASStackLayoutAlignItems alignItems = alignment(item.child.alignSelf, style.alignItems);
-  if (alignItems == ASStackLayoutAlignItemsBaselineFirst) {
-    return item.child.ascender;
-  } else if (alignItems == ASStackLayoutAlignItemsBaselineLast) {
-    return  item.layout.size.height + item.child.descender;
+  if (alignItems == ASStackLayoutAlignItemsFirstBaseline || alignItems == ASStackLayoutAlignItemsLastBaseline) {
+    return [item.child distanceToBaseline:alignItems];
   }
   return 0;
 }
@@ -39,9 +37,8 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
     case ASStackLayoutAlignItemsStart:
     case ASStackLayoutAlignItemsStretch:
       return 0;
-    case ASStackLayoutAlignItemsBaselineFirst:
-      return maxBaseline - l.child.ascender;
-    case ASStackLayoutAlignItemsBaselineLast:
+    case ASStackLayoutAlignItemsLastBaseline:
+    case ASStackLayoutAlignItemsFirstBaseline:
       return maxBaseline - baselineForItem(style, l);
   }
 }
@@ -78,11 +75,11 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
     first = NO;
     l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize, maxBaseline));
     
-    CGFloat spacingAfterBaseline = (style.direction == ASStackLayoutDirectionVertical && style.baselineRelativeArrangement) ? l.child.descender : 0;
+    CGFloat spacingAfterBaseline = (style.direction == ASStackLayoutDirectionVertical && style.baselineRelativeArrangement) ? l.layout.size.height - [l.child distanceToBaseline:style.alignItems] : 0;
     p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.spacingAfter + spacingAfterBaseline, 0);
     return l.layout;
   });
-  return {stackedChildren, crossSize, maxBaseline, maxBaseline == 0 ? 0 : maxBaseline - crossSize};
+  return {stackedChildren, crossSize, maxBaseline};
 }
 
 ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnpositionedLayout &unpositionedLayout,

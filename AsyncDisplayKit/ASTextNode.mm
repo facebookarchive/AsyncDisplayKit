@@ -17,6 +17,7 @@
 #import <AsyncDisplayKit/ASTextNodeTextKitHelpers.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
+#import "ASInternalHelpers.h"
 #import "ASTextNodeRenderer.h"
 #import "ASTextNodeShadower.h"
 
@@ -105,6 +106,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   ASTextNodeShadower *_shadower;
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
+  
+  CGFloat _topBaseline;
+  CGFloat _bottomBaseline;
 }
 
 #pragma mark - NSObject
@@ -356,8 +360,24 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     }
   });
   
-  self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * [UIScreen mainScreen].scale)/[UIScreen mainScreen].scale;
-  self.descender = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * [UIScreen mainScreen].scale)/[UIScreen mainScreen].scale;
+  _topBaseline = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * ASScreenScale())/ASScreenScale();
+  _bottomBaseline = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * ASScreenScale())/ASScreenScale();
+}
+
+#pragma mark - Baseline computation
+
+- (CGFloat)distanceToBaseline:(ASStackLayoutAlignItems)baselineAlignmentType
+{
+  switch (baselineAlignmentType) {
+    case ASStackLayoutAlignItemsLastBaseline:
+      return self.calculatedSize.height + _bottomBaseline;
+      
+    case ASStackLayoutAlignItemsFirstBaseline:
+      return _topBaseline;
+      
+    default:
+      return 0;
+  }
 }
 
 #pragma mark - Text Layout

@@ -8,9 +8,9 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASStackLayoutable.h>
 
 /** A layout spec is an immutable object that describes a layout, loosely inspired by React. */
-@interface ASLayoutSpec : NSObject <ASLayoutable>
+@interface ASLayoutSpec : NSObject <ASStackLayoutable>
 
 @end

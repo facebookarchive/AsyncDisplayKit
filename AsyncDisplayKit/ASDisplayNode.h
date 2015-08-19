@@ -13,7 +13,7 @@
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
 
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASStackLayoutable.h>
 
 /**
  * UIView creation block. Used to create the backing view of a new display node.
@@ -40,7 +40,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  *
  */
 
-@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
+@interface ASDisplayNode : ASDealloc2MainObject <ASStackLayoutable>
 
 
 /** @name Initializing a node object */

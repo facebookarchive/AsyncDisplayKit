@@ -24,8 +24,6 @@
 @synthesize flexShrink = _flexShrink;
 @synthesize flexBasis = _flexBasis;
 @synthesize alignSelf = _alignSelf;
-@synthesize ascender = _ascender;
-@synthesize descender = _descender;
 
 + (instancetype)new
 {
@@ -34,6 +32,11 @@
     spec->_flexBasis = ASRelativeDimensionUnconstrained;
   }
   return spec;
+}
+
+- (CGFloat)distanceToBaseline:(ASStackLayoutAlignItems)baselineAlignmentType
+{
+    return 0;
 }
 
 #pragma mark - Layout
