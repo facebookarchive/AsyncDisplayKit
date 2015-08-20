@@ -34,11 +34,6 @@
   return spec;
 }
 
-- (CGFloat)distanceToBaseline:(ASStackLayoutAlignItems)baselineAlignmentType
-{
-    return 0;
-}
-
 #pragma mark - Layout
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize

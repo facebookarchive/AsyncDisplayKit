@@ -30,7 +30,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @abstract Draws interactive rich text.
  @discussion Backed by TextKit.
  */
-@interface ASTextNode : ASControlNode
+@interface ASTextNode : ASControlNode <ASStackTextLayoutable>
 
 /**
  @abstract The attributed string to show.

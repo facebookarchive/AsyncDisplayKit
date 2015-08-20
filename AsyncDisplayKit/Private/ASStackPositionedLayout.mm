@@ -18,8 +18,10 @@
 static CGFloat baselineForItem(const ASStackLayoutSpecStyle &style,
                                const ASStackUnpositionedItem &item) {
   const ASStackLayoutAlignItems alignItems = alignment(item.child.alignSelf, style.alignItems);
-  if (alignItems == ASStackLayoutAlignItemsFirstBaseline || alignItems == ASStackLayoutAlignItemsLastBaseline) {
-    return [item.child distanceToBaseline:alignItems];
+  if (alignItems == ASStackLayoutAlignItemsFirstBaseline) {
+      return item.child.layoutInsets.top;
+  } else if (alignItems == ASStackLayoutAlignItemsLastBaseline) {
+      return item.child.layoutInsets.bottom;
   }
   return 0;
 }
@@ -75,11 +77,11 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
     first = NO;
     l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize, maxBaseline));
     
-    CGFloat spacingAfterBaseline = (style.direction == ASStackLayoutDirectionVertical && style.baselineRelativeArrangement) ? l.layout.size.height - [l.child distanceToBaseline:style.alignItems] : 0;
+    CGFloat spacingAfterBaseline = (style.direction == ASStackLayoutDirectionVertical && style.baselineRelativeArrangement) ? l.child.layoutInsets.bottom : 0;
     p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.spacingAfter + spacingAfterBaseline, 0);
     return l.layout;
   });
-  return {stackedChildren, crossSize, maxBaseline};
+  return {stackedChildren, crossSize};
 }
 
 ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnpositionedLayout &unpositionedLayout,

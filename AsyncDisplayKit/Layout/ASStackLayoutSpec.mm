@@ -26,8 +26,6 @@
 {
   ASStackLayoutSpecStyle _style;
   std::vector<id<ASStackLayoutable>> _children;
-  ASDN::RecursiveMutex _propertyLock;
-  CGFloat _distanceToBaseline;
 }
 
 + (instancetype)newWithStyle:(ASStackLayoutSpecStyle)style children:(NSArray *)children
@@ -57,17 +55,9 @@
   const CGSize finalSize = directionSize(_style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
   NSArray *sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
   
-  ASDN::MutexLocker l(_propertyLock);
-  _distanceToBaseline = positionedLayout.distanceToBaseline;
-  
   return [ASLayout newWithLayoutableObject:self
                                       size:ASSizeRangeClamp(constrainedSize, finalSize)
                                 sublayouts:sublayouts];
-}
-
-- (CGFloat)distanceToBaseline:(ASStackLayoutAlignItems)baselineAlignmentType
-{
-  return _distanceToBaseline;
 }
 
 @end
