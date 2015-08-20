@@ -96,6 +96,8 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
  *  @return ASDisplayNode flags.
  */
 static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *instance) {
+  ASDisplayNodeCAssertNotNil(c, @"class is required");
+
   struct ASDisplayNodeFlags flags = {0};
 
   flags.isInHierarchy = NO;
@@ -118,6 +120,8 @@ static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *i
  *  @return ASDisplayNodeMethodOverrides.
  */
 static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c) {
+  ASDisplayNodeCAssertNotNil(c, @"class is required");
+  
   ASDisplayNodeMethodOverrides overrides = ASDisplayNodeMethodOverrideNone;
   if (ASDisplayNodeSubclassOverridesSelector(c, @selector(touchesBegan:withEvent:))) {
     overrides |= ASDisplayNodeMethodOverrideTouchesBegan;
