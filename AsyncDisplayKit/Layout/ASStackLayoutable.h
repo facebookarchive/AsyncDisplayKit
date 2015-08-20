@@ -49,9 +49,11 @@
  */
 @property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
 
-/**
- *  @abstract Used for baseline alignment in stack spec. The distance from the top of the object to its baseline.
- */
-- (CGFloat)distanceToBaseline:(ASStackLayoutAlignItems)baselineAlignmentType;
+@end
+
+@protocol ASStackTextLayoutable <ASStackLayoutable>
+
+@property (nonatomic, readwrite) CGFloat ascender;
+@property (nonatomic, readwrite) CGFloat descender;
 
 @end

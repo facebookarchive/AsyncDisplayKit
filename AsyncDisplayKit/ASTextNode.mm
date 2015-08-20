@@ -106,10 +106,10 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   ASTextNodeShadower *_shadower;
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
-  
-  CGFloat _topBaseline;
-  CGFloat _bottomBaseline;
 }
+
+@synthesize ascender = _ascender;
+@synthesize descender = _descender;
 
 #pragma mark - NSObject
 
@@ -360,24 +360,8 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     }
   });
   
-  _topBaseline = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * ASScreenScale())/ASScreenScale();
-  _bottomBaseline = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * ASScreenScale())/ASScreenScale();
-}
-
-#pragma mark - Baseline computation
-
-- (CGFloat)distanceToBaseline:(ASStackLayoutAlignItems)baselineAlignmentType
-{
-  switch (baselineAlignmentType) {
-    case ASStackLayoutAlignItemsLastBaseline:
-      return self.calculatedSize.height + _bottomBaseline;
-      
-    case ASStackLayoutAlignItemsFirstBaseline:
-      return _topBaseline;
-      
-    default:
-      return 0;
-  }
+  _ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * ASScreenScale())/ASScreenScale();
+  _descender = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * ASScreenScale())/ASScreenScale();
 }
 
 #pragma mark - Text Layout
