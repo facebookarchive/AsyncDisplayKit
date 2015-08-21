@@ -25,24 +25,33 @@
   id<ASLayoutable> _child;
 }
 
-+ (instancetype)newWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child
++ (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child
 {
-  ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
-  if (child == nil) {
-    return nil;
-  }
-
-  ASRatioLayoutSpec *spec = [super new];
-  if (spec) {
-    spec->_ratio = ratio;
-    spec->_child = child;
-  }
-  return spec;
+  return [[self alloc] initWithRatio:ratio child:child];
 }
 
-+ (instancetype)new
+- (instancetype)initWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;
 {
-    ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  self = [super init];
+  if (self) {
+    ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+    ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
+    _ratio = ratio;
+    _child = child;
+  }
+  return self;
+}
+
+- (void)setChild:(id<ASLayoutable>)child
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _child = child;
+}
+
+- (void)setRatio:(CGFloat)ratio
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _ratio = ratio;
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
@@ -70,7 +79,7 @@
   const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
   ASLayout *sublayout = [_child measureWithSizeRange:childRange];
   sublayout.position = CGPointZero;
-  return [ASLayout newWithLayoutableObject:self size:sublayout.size sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutableObject:self size:sublayout.size sublayouts:@[sublayout]];
 }
 
 @end

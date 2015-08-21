@@ -25,20 +25,21 @@
 @synthesize flexBasis = _flexBasis;
 @synthesize alignSelf = _alignSelf;
 
-+ (instancetype)new
+- (instancetype)init
 {
-  ASLayoutSpec *spec = [super new];
-  if (spec) {
-    spec->_flexBasis = ASRelativeDimensionUnconstrained;
+  self = [super init];
+  if (self) {
+    _flexBasis = ASRelativeDimensionUnconstrained;
+    _isMutable = YES;
   }
-  return spec;
+  return self;
 }
 
 #pragma mark - Layout
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  return [ASLayout newWithLayoutableObject:self size:constrainedSize.min];
+  return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
 }
 
 @end

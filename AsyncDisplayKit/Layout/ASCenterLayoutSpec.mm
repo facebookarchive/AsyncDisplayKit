@@ -20,22 +20,43 @@
   id<ASLayoutable> _child;
 }
 
-+ (instancetype)newWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
-                          sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
-                                  child:(id<ASLayoutable>)child
+- (instancetype)initWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+                           sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
+                                   child:(id<ASLayoutable>)child;
 {
-  ASCenterLayoutSpec *spec = [super new];
-  if (spec) {
-    spec->_centeringOptions = centeringOptions;
-    spec->_sizingOptions = sizingOptions;
-    spec->_child = child;
+  self = [super init];
+  if (self) {
+    ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+    _centeringOptions = centeringOptions;
+    _sizingOptions = sizingOptions;
+    _child = child;
   }
-  return spec;
+  return self;
 }
 
-+ (instancetype)new
++ (instancetype)centerLayoutSpecWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+                                       sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
+                                               child:(id<ASLayoutable>)child
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [[self alloc] initWithCenteringOptions:centeringOptions sizingOptions:sizingOptions child:child];
+}
+
+- (void)setChild:(id<ASLayoutable>)child
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _child = child;
+}
+
+- (void)setCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _centeringOptions = centeringOptions;
+}
+
+- (void)setSizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _sizingOptions = sizingOptions;
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
@@ -73,7 +94,7 @@
     ASRoundPixelValue(shouldCenterAlongY ? (size.height - sublayout.size.height) * 0.5f : 0)
   };
 
-  return [ASLayout newWithLayoutableObject:self size:size sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutableObject:self size:size sublayouts:@[sublayout]];
 }
 
 @end

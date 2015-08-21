@@ -10,7 +10,16 @@
 
 #import <AsyncDisplayKit/ASLayoutable.h>
 
-/** A layout spec is an immutable object that describes a layout, loosely inspired by React. */
+/** A layout spec is an temporarly mutable object that describes a layout, loosely inspired by React. */
 @interface ASLayoutSpec : NSObject <ASLayoutable>
+
+/** 
+ Creation of a layout spec should only happen by a user in layoutSpecThatFits:. During that method, a
+ layout spec can be created and mutated. Once it is passed back to ASDK, the isMutable flag will be 
+ set to NO and any further mutations will cause an assert.
+ */
+@property (nonatomic, assign) BOOL isMutable;
+
+- (instancetype)init;
 
 @end

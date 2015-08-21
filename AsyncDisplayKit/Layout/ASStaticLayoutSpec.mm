@@ -16,9 +16,9 @@
 
 @implementation ASStaticLayoutSpecChild
 
-+ (instancetype)newWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject size:(ASRelativeSizeRange)size
++ (instancetype)staticLayoutChildWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject size:(ASRelativeSizeRange)size;
 {
-  ASStaticLayoutSpecChild *c = [super new];
+  ASStaticLayoutSpecChild *c = [[super alloc] init];
   if (c) {
     c->_position = position;
     c->_layoutableObject = layoutableObject;
@@ -27,9 +27,9 @@
   return c;
 }
 
-+ (instancetype)newWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject
++ (instancetype)staticLayoutChildWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject
 {
-  return [self newWithPosition:position layoutableObject:layoutableObject size:ASRelativeSizeRangeUnconstrained];
+  return [self staticLayoutChildWithPosition:position layoutableObject:layoutableObject size:ASRelativeSizeRangeUnconstrained];
 }
 
 @end
@@ -39,18 +39,24 @@
   NSArray *_children;
 }
 
-+ (instancetype)newWithChildren:(NSArray *)children
++ (instancetype)staticLayoutSpecWithChildren:(NSArray *)children
 {
-  ASStaticLayoutSpec *spec = [super new];
-  if (spec) {
-    spec->_children = children;
-  }
-  return spec;
+  return [[self alloc] initWithChildren:children];
 }
 
-+ (instancetype)new
+- (instancetype)initWithChildren:(NSArray *)children
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  self = [super init];
+  if (self) {
+    _children = children;
+  }
+  return self;
+}
+
+- (void)addChild:(ASStaticLayoutSpecChild *)child
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _children = [_children arrayByAddingObject:child];
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
@@ -88,9 +94,9 @@
     }
   }
 
-  return [ASLayout newWithLayoutableObject:self
-                                      size:ASSizeRangeClamp(constrainedSize, size)
-                                sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self
+                                         size:ASSizeRangeClamp(constrainedSize, size)
+                                   sublayouts:sublayouts];
 }
 
 @end

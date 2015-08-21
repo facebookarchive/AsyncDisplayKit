@@ -23,20 +23,21 @@
 
 @implementation ASBackgroundLayoutSpec
 
-+ (instancetype)newWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
+- (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
 {
-  if (child == nil) {
-    return nil;
+  self = [super init];
+  if (self) {
+    ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+    _child = child;
+    _background = background;
   }
-  ASBackgroundLayoutSpec *spec = [super new];
-  spec->_child = child;
-  spec->_background = background;
-  return spec;
+  return self;
 }
 
-+ (instancetype)new
+
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [[self alloc] initWithChild:child background:background];
 }
 
 /**
@@ -56,7 +57,19 @@
   contentsLayout.position = CGPointZero;
   [sublayouts addObject:contentsLayout];
 
-  return [ASLayout newWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+}
+
+- (void)setBackground:(id<ASLayoutable>)background
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _background = background;
+}
+
+- (void)setChild:(id<ASLayoutable>)child
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _child = child;
 }
 
 @end

@@ -20,20 +20,32 @@
   id<ASLayoutable> _child;
 }
 
-+ (instancetype)newWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
+- (instancetype)initWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
-  ASOverlayLayoutSpec *spec = [super new];
-  if (spec) {
+  self = [super init];
+  if (self) {
     ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
-    spec->_overlay = overlay;
-    spec->_child = child;
+    _overlay = overlay;
+    _child = child;
   }
-  return spec;
+  return self;
 }
 
-+ (instancetype)new
++ (instancetype)overlayLayoutWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [[self alloc] initWithChild:child overlay:overlay];
+}
+
+- (void)setChild:(id<ASLayoutable>)child
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _child = child;
+}
+
+- (void)setOverlay:(id<ASLayoutable>)overlay
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _overlay = overlay;
 }
 
 /**
@@ -50,7 +62,7 @@
     [sublayouts addObject:overlayLayout];
   }
   
-  return [ASLayout newWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
 @end
