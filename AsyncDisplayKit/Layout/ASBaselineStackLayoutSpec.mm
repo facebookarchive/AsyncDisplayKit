@@ -8,7 +8,7 @@
  *
  */
 
-#import "ASStackTextLayoutSpec.h"
+#import "ASBaselineStackLayoutSpec.h"
 #import "ASStackLayoutable.h"
 
 #import <numeric>
@@ -21,13 +21,13 @@
 #import "ASStackLayoutSpecUtilities.h"
 #import "ASStackPositionedLayout.h"
 #import "ASStackUnpositionedLayout.h"
-#import "ASStackTextPositionedLayout.h"
+#import "ASBaselineStackPositionedLayout.h"
 #import "ASThread.h"
 
 
-@implementation ASStackTextLayoutSpec
+@implementation ASBaselineStackLayoutSpec
 {
-  ASStackTextLayoutSpecStyle _textStyle;
+  ASBaselineStackLayoutSpecStyle _textStyle;
   std::vector<id<ASStackLayoutable>> _stackChildren;
   ASDN::RecursiveMutex _propertyLock;
 }
@@ -35,16 +35,16 @@
 @synthesize ascender = _ascender;
 @synthesize descender = _descender;
 
-+ (instancetype)newWithStyle:(ASStackTextLayoutSpecStyle)style children:(NSArray *)children
++ (instancetype)newWithStyle:(ASBaselineStackLayoutSpecStyle)style children:(NSArray *)children
 {
-  ASDisplayNodeAssert((style.stackLayoutStyle.direction == ASStackLayoutDirectionHorizontal && style.baselineAlignment != ASStackTextLayoutBaselineAlignmentNone) || style.stackLayoutStyle.direction == ASStackLayoutDirectionVertical, @"baselineAlignment is set to none. If you don't need baseline alignment please use ASStackLayoutSpec");
+  ASDisplayNodeAssert((style.stackLayoutStyle.direction == ASStackLayoutDirectionHorizontal && style.baselineAlignment != ASBaselineStackLayoutBaselineAlignmentNone) || style.stackLayoutStyle.direction == ASStackLayoutDirectionVertical, @"baselineAlignment is set to none. If you don't need baseline alignment please use ASStackLayoutSpec");
   
-  ASStackTextLayoutSpec *spec = [super new];
+  ASBaselineStackLayoutSpec *spec = [super new];
   if (spec) {
     spec->_textStyle = style;
     spec->_stackChildren = std::vector<id<ASStackLayoutable>>();
-    for (id<ASStackTextLayoutable> child in children) {
-      ASDisplayNodeAssert([child conformsToProtocol:@protocol(ASStackTextLayoutable)], @"child must conform to ASStackLayoutable");
+    for (id<ASBaselineStackLayoutable> child in children) {
+      ASDisplayNodeAssert([child conformsToProtocol:@protocol(ASBaselineStackLayoutable)], @"child must conform to ASStackLayoutable");
       
       spec->_stackChildren.push_back(child);
     }
@@ -63,7 +63,7 @@
   
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_stackChildren, stackStyle, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, stackStyle, constrainedSize);
-  const auto baselinePositionedLayout = ASStackTextPositionedLayout::compute(positionedLayout, _textStyle, constrainedSize);
+  const auto baselinePositionedLayout = ASBaselineStackPositionedLayout::compute(positionedLayout, _textStyle, constrainedSize);
   
   const CGSize finalSize = directionSize(stackStyle.direction, unpositionedLayout.stackDimensionSum, baselinePositionedLayout.crossSize);
   

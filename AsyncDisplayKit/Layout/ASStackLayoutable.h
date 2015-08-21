@@ -50,10 +50,3 @@
 @property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
 
 @end
-
-@protocol ASStackTextLayoutable <ASStackLayoutable>
-
-@property (nonatomic, readwrite) CGFloat ascender;
-@property (nonatomic, readwrite) CGFloat descender;
-
-@end

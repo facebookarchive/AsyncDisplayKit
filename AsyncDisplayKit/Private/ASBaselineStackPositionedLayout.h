@@ -10,17 +10,17 @@
 
 #import "ASLayout.h"
 #import "ASDimension.h"
-#import "ASStackTextLayoutSpec.h"
+#import "ASBaselineStackLayoutSpec.h"
 #import "ASStackPositionedLayout.h"
 
-struct ASStackTextPositionedLayout {
+struct ASBaselineStackPositionedLayout {
     const std::vector<ASLayout *> sublayouts;
     const CGFloat crossSize;
     const CGFloat ascender;
     const CGFloat descender;
     
     /** Given a positioned layout, computes each child position using baseline alignment. */
-    static ASStackTextPositionedLayout compute(const ASStackPositionedLayout &positionedLayout,
-                                               const ASStackTextLayoutSpecStyle &textStyle,
+    static ASBaselineStackPositionedLayout compute(const ASStackPositionedLayout &positionedLayout,
+                                               const ASBaselineStackLayoutSpecStyle &textStyle,
                                                const ASSizeRange &constrainedSize);
 };
