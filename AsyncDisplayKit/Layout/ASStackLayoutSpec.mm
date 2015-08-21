@@ -20,11 +20,12 @@
 #import "ASStackLayoutSpecUtilities.h"
 #import "ASStackPositionedLayout.h"
 #import "ASStackUnpositionedLayout.h"
+#import "ASThread.h"
 
 @implementation ASStackLayoutSpec
 {
   ASStackLayoutSpecStyle _style;
-  std::vector<id<ASLayoutable>> _children;
+  std::vector<id<ASStackLayoutable>> _children;
 }
 
 + (instancetype)newWithStyle:(ASStackLayoutSpecStyle)style children:(NSArray *)children
@@ -32,8 +33,10 @@
   ASStackLayoutSpec *spec = [super new];
   if (spec) {
     spec->_style = style;
-    spec->_children = std::vector<id<ASLayoutable>>();
-    for (id<ASLayoutable> child in children) {
+    spec->_children = std::vector<id<ASStackLayoutable>>();
+    for (id<ASStackLayoutable> child in children) {
+      ASDisplayNodeAssert([child conformsToProtocol:@protocol(ASStackLayoutable)], @"child must conform to ASStackLayoutable");
+
       spec->_children.push_back(child);
     }
   }
@@ -51,6 +54,7 @@
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, _style, constrainedSize);
   const CGSize finalSize = directionSize(_style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
   NSArray *sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
+  
   return [ASLayout newWithLayoutableObject:self
                                       size:ASSizeRangeClamp(constrainedSize, finalSize)
                                 sublayouts:sublayouts];

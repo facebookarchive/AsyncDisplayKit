@@ -15,7 +15,7 @@
 
 struct ASStackUnpositionedItem {
   /** The original source child. */
-  id<ASLayoutable> child;
+  id<ASStackLayoutable> child;
   /** The proposed layout. */
   ASLayout *layout;
 };
@@ -30,7 +30,7 @@ struct ASStackUnpositionedLayout {
   const CGFloat violation;
 
   /** Given a set of children, computes the unpositioned layouts for those children. */
-  static ASStackUnpositionedLayout compute(const std::vector<id<ASLayoutable>> &children,
+  static ASStackUnpositionedLayout compute(const std::vector<id<ASStackLayoutable>> &children,
                                            const ASStackLayoutSpecStyle &style,
                                            const ASSizeRange &sizeRange);
 };

@@ -27,8 +27,11 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
     case ASStackLayoutAlignItemsStart:
     case ASStackLayoutAlignItemsStretch:
       return 0;
+    default:
+      return 0;
   }
 }
+
 
 static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style,
                                              const CGFloat offset,
@@ -44,7 +47,7 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
   const auto minCrossSize = crossDimension(style.direction, constrainedSize.min);
   const auto maxCrossSize = crossDimension(style.direction, constrainedSize.max);
   const CGFloat crossSize = MIN(MAX(minCrossSize, largestChildCrossSize), maxCrossSize);
-
+  
   CGPoint p = directionPoint(style.direction, offset, 0);
   BOOL first = YES;
   auto stackedChildren = AS::map(unpositionedLayout.items, [&](const ASStackUnpositionedItem &l) -> ASLayout *{
@@ -54,6 +57,7 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
     }
     first = NO;
     l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize));
+    
     p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.spacingAfter, 0);
     return l.layout;
   });

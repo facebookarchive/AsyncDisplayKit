@@ -453,6 +453,11 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 
 #pragma mark -
 
+- (CGFloat)distanceToBaseline:(ASStackLayoutAlignItems)baselineAlignmentType
+{
+  return 0;
+}
+
 - (CGSize)measure:(CGSize)constrainedSize
 {
   return [self measureWithSizeRange:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
