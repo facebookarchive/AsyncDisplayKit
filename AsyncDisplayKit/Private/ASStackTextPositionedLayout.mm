@@ -39,7 +39,7 @@ static CGFloat baselineOffset(const ASStackTextLayoutSpecStyle &style,
       case ASStackTextLayoutBaselineAlignmentFirst:
         return maxAscender - textChild.ascender;
       case ASStackTextLayoutBaselineAlignmentLast:
-        return maxBaseline + textChild.descender - textChild.ascender;
+        return maxBaseline - baselineForItem(style, l);
       case ASStackTextLayoutBaselineAlignmentNone:
         return 0;
     }
@@ -91,7 +91,7 @@ ASStackTextPositionedLayout ASStackTextPositionedLayout::compute(const ASStackPo
     // add the baseline offset. baselineOffset is only valid in the horizontal direction, so we always add to y
     l.position = p + CGPointMake(0, baselineOffset(textStyle, l, maxAscender, maxBaseline));
     
-    // If we are a vertical stack, add the minDescender (it is negative) to the spacing after. This will alter the stack spacing to be on baselines instead of bounding boxes
+    // If we are a vertical stack, add the item's descender (it is negative) to the spacing after. This will alter the stack spacing to be on baselines instead of bounding boxes
     CGFloat spacingAfterBaseline = (stackStyle.direction == ASStackLayoutDirectionVertical) ? textChild.descender : 0;
     p = p + directionPoint(stackStyle.direction, stackDimension(stackStyle.direction, l.size) + textChild.spacingAfter + spacingAfterBaseline, 0);
     
