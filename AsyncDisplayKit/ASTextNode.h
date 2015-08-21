@@ -7,6 +7,7 @@
  */
 
 #import <AsyncDisplayKit/ASControlNode.h>
+#import <AsyncDisplayKit/ASBaselineStackLayoutable.h>
 
 
 @protocol ASTextNodeDelegate;
@@ -30,7 +31,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @abstract Draws interactive rich text.
  @discussion Backed by TextKit.
  */
-@interface ASTextNode : ASControlNode <ASStackTextLayoutable>
+@interface ASTextNode : ASControlNode <ASBaselineStackLayoutable>
 
 /**
  @abstract The attributed string to show.
