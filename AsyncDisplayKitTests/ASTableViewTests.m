@@ -202,4 +202,44 @@
   }
 }
 
+- (void)testRelayoutAllRows
+{
+  // Initial width of the table view is 0 and all nodes are measured with this size.
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, 0, 500)
+                                                                style:UITableViewStylePlain
+                                                    asyncDataFetching:YES];
+  CGSize tableViewFinalSize = CGSizeMake(100, 500);
+  
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  [tableView reloadData];
+  
+  [tableView beginUpdates];
+  
+  tableView.frame = CGRectMake(0, 0, tableViewFinalSize.width, tableViewFinalSize.height);
+  [tableView layoutIfNeeded];
+  
+  XCTestExpectation *nodesMeasuredUsingNewConstrainedSizeExpectation = [self expectationWithDescription:@"nodesMeasuredUsingNewConstrainedSize"];
+
+  [tableView endUpdatesAnimated:NO completion:^(BOOL completed) {
+    for (int section = 0; section < NumberOfSections; section++) {
+      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        ASCellNode *node = [tableView nodeForRowAtIndexPath:indexPath];
+        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableViewFinalSize.width);
+      }
+    }
+    [nodesMeasuredUsingNewConstrainedSizeExpectation fulfill];
+  }];
+  
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
+}
+
 @end
