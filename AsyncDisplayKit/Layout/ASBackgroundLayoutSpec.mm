@@ -25,12 +25,13 @@
 
 - (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
 {
-  self = [super init];
-  if (self) {
-    ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-    _child = child;
-    _background = background;
+  if (!(self = [super init])) {
+    return nil;
   }
+  
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  _child = child;
+  _background = background;
   return self;
 }
 

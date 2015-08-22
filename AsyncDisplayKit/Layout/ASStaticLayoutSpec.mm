@@ -46,10 +46,10 @@
 
 - (instancetype)initWithChildren:(NSArray *)children
 {
-  self = [super init];
-  if (self) {
-    _children = children;
+  if (!(self = [super init])) {
+    return nil;
   }
+  _children = children;
   return self;
 }
 

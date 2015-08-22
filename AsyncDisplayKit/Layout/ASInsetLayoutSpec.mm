@@ -45,12 +45,12 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
 
 - (instancetype)initWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
 {
-  self = [super init];
-  if (self) {
-    ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-    _insets = insets;
-    _child = child;
+  if (!(self = [super init])) {
+    return nil;
   }
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  _insets = insets;
+  _child = child;
   return self;
 }
 

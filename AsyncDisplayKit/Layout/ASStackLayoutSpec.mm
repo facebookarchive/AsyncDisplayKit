@@ -28,43 +28,27 @@
 
 - (instancetype)init
 {
-  return [self initWithDirection:ASStackLayoutDirectionHorizontal
-                         spacing:0.0
-            contentJustification:ASStackLayoutJustifyContentStart
-                   itemAlignment:ASStackLayoutAlignItemsStart
-                        children:nil];
+  return [self initWithDirection:ASStackLayoutDirectionHorizontal spacing:0.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:nil];
 }
 
-+ (instancetype)satckLayoutSpecWithDirection:(ASStackLayoutDirection)direction
-                                     spacing:(CGFloat)spacing
-                        contentJustification:(ASStackLayoutJustifyContent)justifyContent
-                               itemAlignment:(ASStackLayoutAlignItems)alignItems
-                                    children:(NSArray *)children
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
 {
-  return [[self alloc] initWithDirection:direction
-                                 spacing:spacing
-                    contentJustification:justifyContent
-                           itemAlignment:alignItems
-                                children:children];
+  return [[self alloc] initWithDirection:direction spacing:spacing justifyContent:justifyContent alignItems:alignItems children:children];
 }
 
-- (instancetype)initWithDirection:(ASStackLayoutDirection)direction
-                          spacing:(CGFloat)spacing
-             contentJustification:(ASStackLayoutJustifyContent)justifyContent
-                    itemAlignment:(ASStackLayoutAlignItems)alignItems
-                         children:(NSArray *)children;
+- (instancetype)initWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
 {
-  self = [super init];
-  if (self) {
-    _direction = direction;
-    _alignItems = alignItems;
-    _spacing = spacing;
-    _justifyContent = justifyContent;
-    
-    _children = std::vector<id<ASLayoutable>>();
-    for (id<ASLayoutable> child in children) {
-      _children.push_back(child);
-    }
+  if (!(self = [super init])) {
+    return nil;
+  }
+  _direction = direction;
+  _alignItems = alignItems;
+  _spacing = spacing;
+  _justifyContent = justifyContent;
+  
+  _children = std::vector<id<ASLayoutable>>();
+  for (id<ASLayoutable> child in children) {
+    _children.push_back(child);
   }
   return self;
 }
@@ -81,7 +65,6 @@
     [self addChild:child];
   }
 }
-
 
 - (void)setDirection:(ASStackLayoutDirection)direction
 {
@@ -109,11 +92,7 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASStackLayoutSpecStyle style = {.direction = _direction,
-    .spacing = _spacing,
-    .justifyContent = _justifyContent,
-    .alignItems = _alignItems
-  };
+  ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems};
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_children, style, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
   const CGSize finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);

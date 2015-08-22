@@ -27,11 +27,11 @@
 
 - (instancetype)init
 {
-  self = [super init];
-  if (self) {
-    _flexBasis = ASRelativeDimensionUnconstrained;
-    _isMutable = YES;
+  if (!(self = [super init])) {
+    return nil;
   }
+  _flexBasis = ASRelativeDimensionUnconstrained;
+  _isMutable = YES;
   return self;
 }
 

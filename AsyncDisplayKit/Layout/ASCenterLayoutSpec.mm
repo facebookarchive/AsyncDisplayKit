@@ -24,13 +24,13 @@
                            sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
                                    child:(id<ASLayoutable>)child;
 {
-  self = [super init];
-  if (self) {
-    ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-    _centeringOptions = centeringOptions;
-    _sizingOptions = sizingOptions;
-    _child = child;
+  if (!(self = [super init])) {
+    return nil;
   }
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  _centeringOptions = centeringOptions;
+  _sizingOptions = sizingOptions;
+  _child = child;
   return self;
 }
 

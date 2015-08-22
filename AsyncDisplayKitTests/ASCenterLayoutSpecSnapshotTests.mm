@@ -52,9 +52,9 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
 
   ASLayoutSpec *layoutSpec =
   [ASBackgroundLayoutSpec
-   newWithChild:
+   backgroundLayoutSpecWithChild:
    [ASCenterLayoutSpec
-    newWithCenteringOptions:options
+    centerLayoutSpecWithCenteringOptions:options
     sizingOptions:sizingOptions
     child:foregroundNode]
    background:backgroundNode];
@@ -98,11 +98,11 @@ static NSString *suffixForCenteringOptions(ASCenterLayoutSpecCenteringOptions ce
   
   ASCenterLayoutSpec *layoutSpec =
   [ASCenterLayoutSpec
-   newWithCenteringOptions:ASCenterLayoutSpecCenteringNone
+   centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringNone
    sizingOptions:{}
    child:
    [ASBackgroundLayoutSpec
-    newWithChild:[ASStackLayoutSpec newWithStyle:{} children:@[foregroundNode]]
+    backgroundLayoutSpecWithChild:[ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:@[foregroundNode]]
     background:backgroundNode]];
 
   [self testLayoutSpec:layoutSpec sizeRange:kSize subnodes:@[backgroundNode, foregroundNode] identifier:nil];

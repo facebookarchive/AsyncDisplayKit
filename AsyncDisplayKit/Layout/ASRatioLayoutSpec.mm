@@ -32,13 +32,13 @@
 
 - (instancetype)initWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;
 {
-  self = [super init];
-  if (self) {
-    ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-    ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
-    _ratio = ratio;
-    _child = child;
+  if (!(self = [super init])) {
+    return nil;
   }
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
+  _ratio = ratio;
+  _child = child;
   return self;
 }
 

@@ -85,15 +85,13 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignItems) {
 - (instancetype)init;
 
 /**
- @param style Specifies how children are laid out.
+ @param direction The direction of the stack view (horizontal or vertical)
+ @param spacing The spacing between the children
+ @param justifyContent If no children are flexible, this describes how to fill any extra space
+ @param alignItems Orientation of the children along the cross axis
  @param children ASLayoutable children to be positioned.
  */
-+ (instancetype)satckLayoutSpecWithDirection:(ASStackLayoutDirection)direction
-                                     spacing:(CGFloat)spacing
-                        contentJustification:(ASStackLayoutJustifyContent)justifyContent
-                               itemAlignment:(ASStackLayoutAlignItems)alignItems
-                                    children:(NSArray *)children;
-
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children;
 
 - (void)addChild:(id<ASLayoutable>)child;
 - (void)addChildren:(NSArray *)children;

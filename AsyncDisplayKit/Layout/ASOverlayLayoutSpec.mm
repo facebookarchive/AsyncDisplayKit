@@ -22,16 +22,16 @@
 
 - (instancetype)initWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
-  self = [super init];
-  if (self) {
-    ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
-    _overlay = overlay;
-    _child = child;
+  if (!(self = [super init])) {
+    return nil;
   }
+  ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
+  _overlay = overlay;
+  _child = child;
   return self;
 }
 
-+ (instancetype)overlayLayoutWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
++ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
   return [[self alloc] initWithChild:child overlay:overlay];
 }
