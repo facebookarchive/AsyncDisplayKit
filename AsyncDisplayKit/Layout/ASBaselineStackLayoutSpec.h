@@ -30,7 +30,6 @@ typedef struct {
   ASBaselineStackLayoutBaselineAlignment baselineAlignment;
 } ASBaselineStackLayoutSpecStyle;
 
-
 /**
  A specialized version of a stack layout that aligns its children on a baseline. This spec only works with
  ASBaselineStackLayoutable children. 

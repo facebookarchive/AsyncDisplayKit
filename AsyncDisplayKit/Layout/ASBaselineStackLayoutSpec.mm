@@ -27,7 +27,7 @@
 
 @implementation ASBaselineStackLayoutSpec
 {
-  ASBaselineStackLayoutSpecStyle _textStyle;
+  ASBaselineStackLayoutSpecStyle _style;
   std::vector<id<ASStackLayoutable>> _stackChildren;
   ASDN::RecursiveMutex _propertyLock;
 }
@@ -41,7 +41,7 @@
   
   ASBaselineStackLayoutSpec *spec = [super new];
   if (spec) {
-    spec->_textStyle = style;
+    spec->_style = style;
     spec->_stackChildren = std::vector<id<ASStackLayoutable>>();
     for (id<ASBaselineStackLayoutable> child in children) {
       ASDisplayNodeAssert([child conformsToProtocol:@protocol(ASBaselineStackLayoutable)], @"child must conform to ASStackLayoutable");
@@ -59,11 +59,11 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASStackLayoutSpecStyle stackStyle = _textStyle.stackLayoutStyle;
+  ASStackLayoutSpecStyle stackStyle = _style.stackLayoutStyle;
   
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_stackChildren, stackStyle, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, stackStyle, constrainedSize);
-  const auto baselinePositionedLayout = ASBaselineStackPositionedLayout::compute(positionedLayout, _textStyle, constrainedSize);
+  const auto baselinePositionedLayout = ASBaselineStackPositionedLayout::compute(positionedLayout, _style, constrainedSize);
   
   const CGSize finalSize = directionSize(stackStyle.direction, unpositionedLayout.stackDimensionSum, baselinePositionedLayout.crossSize);
   
@@ -72,7 +72,6 @@
   ASDN::MutexLocker l(_propertyLock);
   _ascender = baselinePositionedLayout.ascender;
   _descender = baselinePositionedLayout.descender;
-  
   
   return [ASLayout newWithLayoutableObject:self
                                       size:ASSizeRangeClamp(constrainedSize, finalSize)
