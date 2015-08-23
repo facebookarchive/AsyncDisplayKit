@@ -34,7 +34,7 @@
  *
  * @param size The size range that this child's size is trstricted according to.
  */
-+ (instancetype)newWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject size:(ASRelativeSizeRange)size;
++ (instancetype)staticLayoutChildWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject size:(ASRelativeSizeRange)size;
 
 /**
  * Convenience initializer with default size is Unconstrained in both dimensions, which sets the child's min size to zero
@@ -44,7 +44,7 @@
  *
  * @param layoutableObject The backing ASLayoutable object of this child.
  */
-+ (instancetype)newWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject;
++ (instancetype)staticLayoutChildWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject;
 
 @end
 
@@ -58,6 +58,8 @@
 /**
  @param children Children to be positioned at fixed positions, each is of type ASStaticLayoutSpecChild.
  */
-+ (instancetype)newWithChildren:(NSArray *)children;
++ (instancetype)staticLayoutSpecWithChildren:(NSArray *)children;
+
+- (void)addChild:(ASStaticLayoutSpecChild *)child;
 
 @end

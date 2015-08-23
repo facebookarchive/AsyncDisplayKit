@@ -43,22 +43,32 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
 
 @implementation ASInsetLayoutSpec
 
-+ (instancetype)newWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child
+- (instancetype)initWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
 {
-  if (child == nil) {
+  if (!(self = [super init])) {
     return nil;
   }
-  ASInsetLayoutSpec *spec = [super new];
-  if (spec) {
-    spec->_insets = insets;
-    spec->_child = child;
-  }
-  return spec;
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  _insets = insets;
+  _child = child;
+  return self;
 }
 
-+ (instancetype)new
++ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [[self alloc] initWithInsets:insets child:child];
+}
+
+- (void)setChild:(id<ASLayoutable>)child
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _child = child;
+}
+
+- (void)setInsets:(UIEdgeInsets)insets
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _insets = insets;
 }
 
 /**
@@ -103,7 +113,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   
   sublayout.position = CGPointMake(x, y);
   
-  return [ASLayout newWithLayoutableObject:self size:computedSize sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutableObject:self size:computedSize sublayouts:@[sublayout]];
 }
 
 @end

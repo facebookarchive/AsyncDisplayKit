@@ -10,6 +10,13 @@
 
 #import "ASStackLayoutSpec.h"
 
+typedef struct {
+  ASStackLayoutDirection direction;
+  CGFloat spacing;
+  ASStackLayoutJustifyContent justifyContent;
+  ASStackLayoutAlignItems alignItems;
+} ASStackLayoutSpecStyle;
+
 inline CGFloat stackDimension(const ASStackLayoutDirection direction, const CGSize size)
 {
   return (direction == ASStackLayoutDirectionVertical) ? size.height : size.width;

@@ -30,7 +30,7 @@ static const ASSizeRange kFixedSize = {{0, 0}, {100, 100}};
   ASStaticSizeDisplayNode *subnode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
   subnode.staticSize = childSize;
   
-  ASLayoutSpec *layoutSpec = [ASRatioLayoutSpec newWithRatio:ratio child:subnode];
+  ASLayoutSpec *layoutSpec = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:ratio child:subnode];
   
   [self testLayoutSpec:layoutSpec sizeRange:kFixedSize subnodes:@[subnode] identifier:identifier];
 }

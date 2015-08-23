@@ -34,10 +34,10 @@ static const ASSizeRange kSize = {{320, 320}, {320, 320}};
   
   ASLayoutSpec *layoutSpec =
   [ASOverlayLayoutSpec
-   newWithChild:backgroundNode
+   overlayLayoutSpecWithChild:backgroundNode
    overlay:
    [ASCenterLayoutSpec
-    newWithCenteringOptions:ASCenterLayoutSpecCenteringXY
+    centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY
     sizingOptions:{}
     child:foregroundNode]];
   
