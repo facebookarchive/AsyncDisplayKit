@@ -21,6 +21,6 @@ struct ASBaselineStackPositionedLayout {
     
     /** Given a positioned layout, computes each child position using baseline alignment. */
     static ASBaselineStackPositionedLayout compute(const ASStackPositionedLayout &positionedLayout,
-                                               const ASBaselineStackLayoutSpecStyle &textStyle,
+                                               const ASBaselineStackLayoutSpecStyle &style,
                                                const ASSizeRange &constrainedSize);
 };

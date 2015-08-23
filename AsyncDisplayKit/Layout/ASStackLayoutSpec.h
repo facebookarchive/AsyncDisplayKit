@@ -20,10 +20,6 @@ typedef struct {
   ASStackLayoutJustifyContent justifyContent;
   /** Orientation of children along cross axis */
   ASStackLayoutAlignItems alignItems;
-  /** 
-   If YES the vertical spacing between two views is measured from the last baseline of the
-   top view to the top of the bottom view*/
-  BOOL baselineRelativeArrangement;
 } ASStackLayoutSpecStyle;
 
 /**

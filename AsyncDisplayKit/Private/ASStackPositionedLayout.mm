@@ -27,11 +27,8 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
     case ASStackLayoutAlignItemsStart:
     case ASStackLayoutAlignItemsStretch:
       return 0;
-    default:
-      return 0;
   }
 }
-
 
 static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style,
                                              const CGFloat offset,
