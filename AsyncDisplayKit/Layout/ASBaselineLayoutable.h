@@ -8,7 +8,7 @@
 
 #import "ASStackLayoutable.h"
 
-@protocol ASBaselineStackLayoutable <ASStackLayoutable>
+@protocol ASBaselineLayoutable <ASStackLayoutable>
 
 /**
  * @abstract The distance from the top of the layoutable object to its baseline
