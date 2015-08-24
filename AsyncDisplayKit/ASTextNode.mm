@@ -17,6 +17,7 @@
 #import <AsyncDisplayKit/ASTextNodeTextKitHelpers.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
+#import "ASInternalHelpers.h"
 #import "ASTextNodeRenderer.h"
 #import "ASTextNodeShadower.h"
 
@@ -106,6 +107,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
 }
+
+@synthesize ascender = _ascender;
+@synthesize descender = _descender;
 
 #pragma mark - NSObject
 
@@ -355,6 +359,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
       self.isAccessibilityElement = YES;
     }
   });
+  
+  _ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * ASScreenScale())/ASScreenScale();
+  _descender = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * ASScreenScale())/ASScreenScale();
 }
 
 #pragma mark - Text Layout

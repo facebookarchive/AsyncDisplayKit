@@ -20,10 +20,11 @@
 #import "ASStackLayoutSpecUtilities.h"
 #import "ASStackPositionedLayout.h"
 #import "ASStackUnpositionedLayout.h"
+#import "ASThread.h"
 
 @implementation ASStackLayoutSpec
 {
-  std::vector<id<ASLayoutable>> _children;
+  std::vector<id<ASStackLayoutable>> _children;
 }
 
 - (instancetype)init
@@ -46,14 +47,14 @@
   _spacing = spacing;
   _justifyContent = justifyContent;
   
-  _children = std::vector<id<ASLayoutable>>();
-  for (id<ASLayoutable> child in children) {
+  _children = std::vector<id<ASStackLayoutable>>();
+  for (id<ASStackLayoutable> child in children) {
     _children.push_back(child);
   }
   return self;
 }
 
-- (void)addChild:(id<ASLayoutable>)child
+- (void)addChild:(id<ASStackLayoutable>)child
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   _children.push_back(child);
@@ -61,7 +62,7 @@
 
 - (void)addChildren:(NSArray *)children
 {
-  for (id<ASLayoutable> child in children) {
+  for (id<ASStackLayoutable> child in children) {
     [self addChild:child];
   }
 }

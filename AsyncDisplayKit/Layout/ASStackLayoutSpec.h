@@ -9,45 +9,7 @@
  */
 
 #import <AsyncDisplayKit/ASLayoutSpec.h>
-
-/** The direction children are stacked in */
-typedef NS_ENUM(NSUInteger, ASStackLayoutDirection) {
-  /** Children are stacked vertically */
-  ASStackLayoutDirectionVertical,
-  /** Children are stacked horizontally */
-  ASStackLayoutDirectionHorizontal,
-};
-
-/** If no children are flexible, how should this spec justify its children in the available space? */
-typedef NS_ENUM(NSUInteger, ASStackLayoutJustifyContent) {
-  /**
-   On overflow, children overflow out of this spec's bounds on the right/bottom side.
-   On underflow, children are left/top-aligned within this spec's bounds.
-   */
-  ASStackLayoutJustifyContentStart,
-  /**
-   On overflow, children are centered and overflow on both sides.
-   On underflow, children are centered within this spec's bounds in the stacking direction.
-   */
-  ASStackLayoutJustifyContentCenter,
-  /**
-   On overflow, children overflow out of this spec's bounds on the left/top side.
-   On underflow, children are right/bottom-aligned within this spec's bounds.
-   */
-  ASStackLayoutJustifyContentEnd,
-};
-
-/** Orientation of children along cross axis */
-typedef NS_ENUM(NSUInteger, ASStackLayoutAlignItems) {
-  /** Align children to start of cross axis */
-  ASStackLayoutAlignItemsStart,
-  /** Align children with end of cross axis */
-  ASStackLayoutAlignItemsEnd,
-  /** Center children on cross axis */
-  ASStackLayoutAlignItemsCenter,
-  /** Expand children to fill cross axis */
-  ASStackLayoutAlignItemsStretch,
-};
+#import <AsyncDisplayKit/ASStackLayoutDefines.h>
 
 
 /**
@@ -93,7 +55,7 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignItems) {
  */
 + (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children;
 
-- (void)addChild:(id<ASLayoutable>)child;
+- (void)addChild:(id<ASStackLayoutable>)child;
 - (void)addChildren:(NSArray *)children;
 
 @end
