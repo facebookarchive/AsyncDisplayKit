@@ -21,15 +21,6 @@ typedef NS_ENUM(NSUInteger, ASBaselineLayoutBaselineAlignment) {
   ASBaselineLayoutBaselineAlignmentLast,
 };
 
-
-typedef struct {
-  /** Describes how the stack will be laid out */
-  ASStackLayoutSpecStyle stackLayoutStyle;
-  
-  /** The type of baseline alignment */
-  ASBaselineLayoutBaselineAlignment baselineAlignment;
-} ASBaselineLayoutSpecStyle;
-
 /**
  A specialized version of a stack layout that aligns its children on a baseline. This spec only works with
  ASBaselineLayoutable children. 
@@ -40,10 +31,33 @@ typedef struct {
 */
 @interface ASBaselineLayoutSpec : ASLayoutSpec <ASBaselineLayoutable>
 
+/** Specifies the direction children are stacked in. */
+@property (nonatomic, assign) ASStackLayoutDirection direction;
+/** The amount of space between each child. */
+@property (nonatomic, assign) CGFloat spacing;
+/** The amount of space between each child. */
+@property (nonatomic, assign) ASStackLayoutJustifyContent justifyContent;
+/** Orientation of children along cross axis */
+@property (nonatomic, assign) ASStackLayoutAlignItems alignItems;
+/** The type of baseline alignment */
+@property (nonatomic, assign) ASBaselineLayoutBaselineAlignment baselineAlignment;
+
+- (void)addChild:(id<ASBaselineLayoutable>)child;
+- (void)addChildren:(NSArray *)children;
+
 /**
- @param style Specifies how children are laid out.
- @param children ASTextLayoutable children to be positioned.
+ @param direction The direction of the stack view (horizontal or vertical)
+ @param spacing The spacing between the children
+ @param baselineAlignment The baseline to align to
+ @param justifyContent If no children are flexible, this describes how to fill any extra space
+ @param alignItems Orientation of the children along the cross axis
+ @param children ASLayoutable children to be positioned.
  */
-+ (instancetype)newWithStyle:(ASBaselineLayoutSpecStyle)style children:(NSArray *)children;
++ (instancetype)baselineLayoutSpecWithDirection:(ASStackLayoutDirection)direction
+                                        spacing:(CGFloat)spacing
+                              baselineAlignment:(ASBaselineLayoutBaselineAlignment)baselineAlignment
+                                 justifyContent:(ASStackLayoutJustifyContent)justifyContent
+                                     alignItems:(ASStackLayoutAlignItems)alignItems
+                                       children:(NSArray *)children;
 
 @end

@@ -27,43 +27,47 @@
 
 @implementation ASBaselineLayoutSpec
 {
-  ASBaselineLayoutSpecStyle _style;
-  std::vector<id<ASStackLayoutable>> _stackChildren;
+  std::vector<id<ASStackLayoutable>> _children;
   ASDN::RecursiveMutex _propertyLock;
 }
 
 @synthesize ascender = _ascender;
 @synthesize descender = _descender;
 
-+ (instancetype)newWithStyle:(ASBaselineLayoutSpecStyle)style children:(NSArray *)children
+- (instancetype)initWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing baselineAlignment:(ASBaselineLayoutBaselineAlignment)baselineAlignment justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
 {
-  ASDisplayNodeAssert((style.stackLayoutStyle.direction == ASStackLayoutDirectionHorizontal && style.baselineAlignment != ASBaselineLayoutBaselineAlignmentNone) || style.stackLayoutStyle.direction == ASStackLayoutDirectionVertical, @"baselineAlignment is set to none. If you don't need baseline alignment please use ASStackLayoutSpec");
-  
-  ASBaselineLayoutSpec *spec = [super new];
-  if (spec) {
-    spec->_style = style;
-    spec->_stackChildren = std::vector<id<ASStackLayoutable>>();
-    for (id<ASBaselineLayoutable> child in children) {
-      ASDisplayNodeAssert([child conformsToProtocol:@protocol(ASBaselineLayoutable)], @"child must conform to ASStackLayoutable");
-      
-      spec->_stackChildren.push_back(child);
-    }
+  if (!(self = [super init])) {
+    return nil;
   }
-  return spec;
+  
+  ASDisplayNodeAssert((direction == ASStackLayoutDirectionHorizontal && baselineAlignment != ASBaselineLayoutBaselineAlignmentNone) || direction == ASStackLayoutDirectionVertical, @"baselineAlignment is set to none. If you don't need baseline alignment please use ASStackLayoutSpec");
+  _direction = direction;
+  _alignItems = alignItems;
+  _spacing = spacing;
+  _justifyContent = justifyContent;
+  _baselineAlignment = baselineAlignment;
+  
+  _children = std::vector<id<ASStackLayoutable>>();
+  for (id<ASStackLayoutable> child in children) {
+    _children.push_back(child);
+  }
+  return self;
 }
 
-+ (instancetype)new
+
++ (instancetype)baselineLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing baselineAlignment:(ASBaselineLayoutBaselineAlignment)baselineAlignment justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [[ASBaselineLayoutSpec alloc] initWithDirection:direction spacing:spacing baselineAlignment:baselineAlignment justifyContent:justifyContent alignItems:alignItems children:children];
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASStackLayoutSpecStyle stackStyle = _style.stackLayoutStyle;
+  ASStackLayoutSpecStyle stackStyle = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems};
+  ASBaselineLayoutSpecStyle style = { .baselineAlignment = _baselineAlignment, .stackLayoutStyle = stackStyle };
   
-  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_stackChildren, stackStyle, constrainedSize);
+  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_children, stackStyle, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, stackStyle, constrainedSize);
-  const auto baselinePositionedLayout = ASBaselinePositionedLayout::compute(positionedLayout, _style, constrainedSize);
+  const auto baselinePositionedLayout = ASBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
   
   const CGSize finalSize = directionSize(stackStyle.direction, unpositionedLayout.stackDimensionSum, baselinePositionedLayout.crossSize);
   
@@ -73,8 +77,21 @@
   _ascender = baselinePositionedLayout.ascender;
   _descender = baselinePositionedLayout.descender;
   
-  return [ASLayout newWithLayoutableObject:self
-                                      size:ASSizeRangeClamp(constrainedSize, finalSize)
-                                sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self
+                                         size:ASSizeRangeClamp(constrainedSize, finalSize)
+                                   sublayouts:sublayouts];
 }
+
+- (void)addChild:(id<ASBaselineLayoutable>)child
+{
+  _children.push_back(child);
+}
+
+- (void)addChildren:(NSArray *)children
+{
+  for (id<ASBaselineLayoutable> child in children) {
+    [self addChild:child];
+  }
+}
+
 @end

@@ -13,6 +13,14 @@
 #import "ASBaselineLayoutSpec.h"
 #import "ASStackPositionedLayout.h"
 
+typedef struct {
+  /** Describes how the stack will be laid out */
+  ASStackLayoutSpecStyle stackLayoutStyle;
+  
+  /** The type of baseline alignment */
+  ASBaselineLayoutBaselineAlignment baselineAlignment;
+} ASBaselineLayoutSpecStyle;
+
 struct ASBaselinePositionedLayout {
     const std::vector<ASLayout *> sublayouts;
     const CGFloat crossSize;

@@ -1333,12 +1333,13 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertThreadAffinity(self);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
-    id<ASLayoutable> layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
     if (layout.layoutableObject != self) {
       layout.position = CGPointZero;
-      layout = [ASLayout newWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
+      layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
       return [_subnodes containsObject:evaluatedLayout.layoutableObject];
@@ -1347,7 +1348,7 @@ static NSInteger incrementIfFound(NSInteger i) {
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
     // assume that the default implementation of -calculateSizeThatFits: returns it.
     CGSize size = [self calculateSizeThatFits:constrainedSize.max];
-    return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
+    return [ASLayout layoutWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
   }
 }
 

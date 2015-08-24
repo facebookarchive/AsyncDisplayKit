@@ -297,7 +297,7 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
     const CGFloat exactStackDimension = ASRelativeDimensionResolve(child.flexBasis, stackDimension(style.direction, size));
 
     if (useOptimizedFlexing && isFlexibleInBothDirections(child)) {
-      return { child, [ASLayout newWithLayoutableObject:child size:{0, 0}] };
+      return { child, [ASLayout layoutWithLayoutableObject:child size:{0, 0}] };
     } else {
       return {
         child,
