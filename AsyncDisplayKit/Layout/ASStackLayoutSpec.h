@@ -55,7 +55,4 @@
  */
 + (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children;
 
-- (void)addChild:(id<ASStackLayoutable>)child;
-- (void)addChildren:(NSArray *)children;
-
 @end

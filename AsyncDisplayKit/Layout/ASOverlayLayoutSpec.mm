@@ -14,11 +14,9 @@
 #import "ASBaseDefines.h"
 #import "ASLayout.h"
 
+static NSString * const kOverlayChildKey = @"kOverlayChildKey";
+
 @implementation ASOverlayLayoutSpec
-{
-  id<ASLayoutable> _overlay;
-  id<ASLayoutable> _child;
-}
 
 - (instancetype)initWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
@@ -26,8 +24,8 @@
     return nil;
   }
   ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
-  _overlay = overlay;
-  _child = child;
+  self.overlay = overlay;
+  [self setChild:child];
   return self;
 }
 
@@ -36,16 +34,14 @@
   return [[self alloc] initWithChild:child overlay:overlay];
 }
 
-- (void)setChild:(id<ASLayoutable>)child
-{
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _child = child;
-}
-
 - (void)setOverlay:(id<ASLayoutable>)overlay
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _overlay = overlay;
+  [super setChild:overlay forIdentifier:kOverlayChildKey];
+}
+
+- (id<ASLayoutable>)overlay
+{
+  return [super childForIdentifier:kOverlayChildKey];
 }
 
 /**
@@ -56,8 +52,8 @@
   ASLayout *contentsLayout = [_child measureWithSizeRange:constrainedSize];
   contentsLayout.position = CGPointZero;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithObject:contentsLayout];
-  if (_overlay) {
-    ASLayout *overlayLayout = [_overlay measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
+  if (self.overlay) {
+    ASLayout *overlayLayout = [self.overlay measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
     overlayLayout.position = CGPointZero;
     [sublayouts addObject:overlayLayout];
   }
