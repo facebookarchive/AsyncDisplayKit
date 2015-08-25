@@ -42,9 +42,6 @@ typedef NS_ENUM(NSUInteger, ASBaselineLayoutBaselineAlignment) {
 /** The type of baseline alignment */
 @property (nonatomic, assign) ASBaselineLayoutBaselineAlignment baselineAlignment;
 
-- (void)addChild:(id<ASBaselineLayoutable>)child;
-- (void)addChildren:(NSArray *)children;
-
 /**
  @param direction The direction of the stack view (horizontal or vertical)
  @param spacing The spacing between the children

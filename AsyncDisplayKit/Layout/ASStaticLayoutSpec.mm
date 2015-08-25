@@ -13,31 +13,9 @@
 #import "ASLayoutSpecUtilities.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-
-@implementation ASStaticLayoutSpecChild
-
-+ (instancetype)staticLayoutChildWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject size:(ASRelativeSizeRange)size;
-{
-  ASStaticLayoutSpecChild *c = [[super alloc] init];
-  if (c) {
-    c->_position = position;
-    c->_layoutableObject = layoutableObject;
-    c->_size = size;
-  }
-  return c;
-}
-
-+ (instancetype)staticLayoutChildWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject
-{
-  return [self staticLayoutChildWithPosition:position layoutableObject:layoutableObject size:ASRelativeSizeRangeUnconstrained];
-}
-
-@end
+#import "ASStaticLayoutable.h"
 
 @implementation ASStaticLayoutSpec
-{
-  NSArray *_children;
-}
 
 + (instancetype)staticLayoutSpecWithChildren:(NSArray *)children
 {
@@ -49,14 +27,19 @@
   if (!(self = [super init])) {
     return nil;
   }
-  _children = children;
+  self.children = children;
   return self;
 }
 
-- (void)addChild:(ASStaticLayoutSpecChild *)child
+- (void)setChildren:(NSArray *)children
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _children = [_children arrayByAddingObject:child];
+  [super setChildren:children];
+  
+#if DEBUG
+  for (id<ASStaticLayoutable> child in children) {
+    ASDisplayNodeAssert(([child finalLayoutable] == child && [child conformsToProtocol:@protocol(ASStaticLayoutable)]) || ([child finalLayoutable] != child && [[child finalLayoutable] conformsToProtocol:@protocol(ASStaticLayoutable)]), @"child must conform to ASStaticLayoutable");
+  }
+#endif
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
@@ -66,16 +49,16 @@
     constrainedSize.max.height
   };
 
-  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:_children.count];
-  for (ASStaticLayoutSpecChild *child in _children) {
+  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:self.children.count];
+  for (id<ASStaticLayoutable> child in self.children) {
     CGSize autoMaxSize = {
       constrainedSize.max.width - child.position.x,
       constrainedSize.max.height - child.position.y
     };
-    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.size)
+    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.sizeRange)
       ? ASSizeRangeMake({0, 0}, autoMaxSize)
-      : ASRelativeSizeRangeResolve(child.size, size);
-    ASLayout *sublayout = [child.layoutableObject measureWithSizeRange:childConstraint];
+      : ASRelativeSizeRangeResolve(child.sizeRange, size);
+    ASLayout *sublayout = [child measureWithSizeRange:childConstraint];
     sublayout.position = child.position;
     [sublayouts addObject:sublayout];
   }

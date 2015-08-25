@@ -22,4 +22,13 @@
 
 - (instancetype)init;
 
+- (void)setChild:(id<ASLayoutable>)child;
+- (id<ASLayoutable>)child;
+
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier;
+- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
+
+- (void)setChildren:(NSArray *)children;
+- (NSArray *)children;
+
 @end

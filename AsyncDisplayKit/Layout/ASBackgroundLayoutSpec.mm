@@ -14,11 +14,9 @@
 #import "ASBaseDefines.h"
 #import "ASLayout.h"
 
+static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
+
 @interface ASBackgroundLayoutSpec ()
-{
-  id<ASLayoutable> _child;
-  id<ASLayoutable> _background;
-}
 @end
 
 @implementation ASBackgroundLayoutSpec
@@ -30,11 +28,10 @@
   }
   
   ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-  _child = child;
-  _background = background;
+  [self setChild:child];
+  self.background = background;
   return self;
 }
-
 
 + (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
 {
@@ -46,12 +43,12 @@
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASLayout *contentsLayout = [_child measureWithSizeRange:constrainedSize];
+  ASLayout *contentsLayout = [[self child] measureWithSizeRange:constrainedSize];
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
-  if (_background) {
+  if (self.background) {
     // Size background to exactly the same size.
-    ASLayout *backgroundLayout = [_background measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
+    ASLayout *backgroundLayout = [self.background measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
     backgroundLayout.position = CGPointZero;
     [sublayouts addObject:backgroundLayout];
   }
@@ -63,14 +60,12 @@
 
 - (void)setBackground:(id<ASLayoutable>)background
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _background = background;
+  [super setChild:background forIdentifier:kBackgroundChildKey];
 }
 
-- (void)setChild:(id<ASLayoutable>)child
+- (id<ASLayoutable>)background
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _child = child;
+  return [super childForIdentifier:kBackgroundChildKey];
 }
 
 @end

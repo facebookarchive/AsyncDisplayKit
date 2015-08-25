@@ -27,7 +27,6 @@
 
 @implementation ASBaselineLayoutSpec
 {
-  std::vector<id<ASStackLayoutable>> _children;
   ASDN::RecursiveMutex _propertyLock;
 }
 
@@ -47,10 +46,7 @@
   _justifyContent = justifyContent;
   _baselineAlignment = baselineAlignment;
   
-  _children = std::vector<id<ASStackLayoutable>>();
-  for (id<ASStackLayoutable> child in children) {
-    _children.push_back(child);
-  }
+  [self setChildren:children];
   return self;
 }
 
@@ -65,7 +61,12 @@
   ASStackLayoutSpecStyle stackStyle = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems};
   ASBaselineLayoutSpecStyle style = { .baselineAlignment = _baselineAlignment, .stackLayoutStyle = stackStyle };
   
-  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_children, stackStyle, constrainedSize);
+  std::vector<id<ASStackLayoutable>> stackChildren = std::vector<id<ASStackLayoutable>>();
+  for (id<ASStackLayoutable> child in self.children) {
+    stackChildren.push_back(child);
+  }
+  
+  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, stackStyle, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, stackStyle, constrainedSize);
   const auto baselinePositionedLayout = ASBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
   
@@ -82,16 +83,19 @@
                                    sublayouts:sublayouts];
 }
 
-- (void)addChild:(id<ASBaselineLayoutable>)child
+- (void)setChildren:(NSArray *)children
 {
-  _children.push_back(child);
+  [super setChildren:children];
+#if DEBUG
+  for (id<ASBaselineLayoutable> child in children) {
+    NSAssert(([child finalLayoutable] == child && [child conformsToProtocol:@protocol(ASBaselineLayoutable)]) || ([child finalLayoutable] != child && [[child finalLayoutable] conformsToProtocol:@protocol(ASBaselineLayoutable)]), @"child must conform to ASBaselineLayoutable");
+  }
+#endif
 }
 
-- (void)addChildren:(NSArray *)children
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
-  for (id<ASBaselineLayoutable> child in children) {
-    [self addChild:child];
-  }
+  ASDisplayNodeAssert(NO, @"ASBaselineLayoutSpec only supports setChildren");
 }
 
 @end

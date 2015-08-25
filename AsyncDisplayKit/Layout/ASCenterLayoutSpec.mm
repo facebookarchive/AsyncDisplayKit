@@ -17,7 +17,6 @@
 {
   ASCenterLayoutSpecCenteringOptions _centeringOptions;
   ASCenterLayoutSpecSizingOptions _sizingOptions;
-  id<ASLayoutable> _child;
 }
 
 - (instancetype)initWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
@@ -30,7 +29,7 @@
   ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
   _centeringOptions = centeringOptions;
   _sizingOptions = sizingOptions;
-  _child = child;
+  [self setChild:child];
   return self;
 }
 
@@ -39,12 +38,6 @@
                                                child:(id<ASLayoutable>)child
 {
   return [[self alloc] initWithCenteringOptions:centeringOptions sizingOptions:sizingOptions child:child];
-}
-
-- (void)setChild:(id<ASLayoutable>)child
-{
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _child = child;
 }
 
 - (void)setCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
@@ -71,7 +64,7 @@
     (_centeringOptions & ASCenterLayoutSpecCenteringX) != 0 ? 0 : constrainedSize.min.width,
     (_centeringOptions & ASCenterLayoutSpecCenteringY) != 0 ? 0 : constrainedSize.min.height,
   };
-  ASLayout *sublayout = [_child measureWithSizeRange:ASSizeRangeMake(minChildSize, constrainedSize.max)];
+  ASLayout *sublayout = [self.child measureWithSizeRange:ASSizeRangeMake(minChildSize, constrainedSize.max)];
 
   // If we have an undetermined height or width, use the child size to define the layout
   // size
