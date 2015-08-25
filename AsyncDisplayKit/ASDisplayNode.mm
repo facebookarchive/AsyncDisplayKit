@@ -677,6 +677,11 @@ static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possible
   return NO;
 }
 
+- (id<ASLayoutable>)finalLayoutable
+{
+  return self;
+}
+
 /**
  * NOTE: It is an error to try to convert between nodes which do not share a common ancestor. This behavior is
  * disallowed in UIKit documentation and the behavior is left undefined. The output does not have a rigorously defined
