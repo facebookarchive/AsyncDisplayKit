@@ -44,6 +44,11 @@
   return [[self alloc] initWithChildren:children];
 }
 
+- (instancetype)init
+{
+    return [self initWithChildren:@[]];
+}
+
 - (instancetype)initWithChildren:(NSArray *)children
 {
   if (!(self = [super init])) {
