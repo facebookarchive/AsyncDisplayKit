@@ -16,6 +16,8 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
+#import <objc/runtime.h>
+
 static NSString * const kDefaultChildKey = @"kDefaultChildKey";
 static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
@@ -25,12 +27,6 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 @implementation ASLayoutSpec
 
-@synthesize spacingBefore = _spacingBefore;
-@synthesize spacingAfter = _spacingAfter;
-@synthesize flexGrow = _flexGrow;
-@synthesize flexShrink = _flexShrink;
-@synthesize flexBasis = _flexBasis;
-@synthesize alignSelf = _alignSelf;
 @synthesize layoutChildren = _layoutChildren;
 
 - (instancetype)init
@@ -39,7 +35,6 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
     return nil;
   }
   _layoutChildren = [NSMutableDictionary dictionary];
-  _flexBasis = ASRelativeDimensionUnconstrained;
   _isMutable = YES;
   return self;
 }
@@ -61,15 +56,34 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   [self setChild:child forIdentifier:kDefaultChildKey];
 }
 
-- (id<ASLayoutable>)child
-{
-  return self.layoutChildren[kDefaultChildKey];
-}
-
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  self.layoutChildren[identifier] = [child finalLayoutable];
+  ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
+  layoutOptions.isMutable = NO;
+  self.layoutChildren[identifier] = child;
+}
+
+- (void)setChildren:(NSArray *)children
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  
+  NSMutableArray *finalChildren = [NSMutableArray arrayWithCapacity:children.count];
+  for (id<ASLayoutable> child in children) {
+    ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
+    id<ASLayoutable> finalLayoutable = [child finalLayoutable];
+    layoutOptions.isMutable = NO;
+    
+    if (finalLayoutable != child) {
+      ASLayoutOptions *finalLayoutOptions = [layoutOptions copy];
+      finalLayoutOptions.isMutable = NO;
+      [ASLayoutSpec associateLayoutOptions:finalLayoutOptions withChild:finalLayoutable];
+    }
+    
+    [finalChildren addObject:finalLayoutable];
+  }
+  
+  self.layoutChildren[kDefaultChildrenKey] = [NSArray arrayWithArray:finalChildren];
 }
 
 - (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
@@ -77,14 +91,9 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   return self.layoutChildren[identifier];
 }
 
-- (void)setChildren:(NSArray *)children
+- (id<ASLayoutable>)child
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  NSMutableArray *finalChildren = [NSMutableArray arrayWithCapacity:children.count];
-  for (id<ASLayoutable> child in children) {
-    [finalChildren addObject:[child finalLayoutable]];
-  }
-  self.layoutChildren[kDefaultChildrenKey] = [NSArray arrayWithArray:finalChildren];
+  return self.layoutChildren[kDefaultChildKey];
 }
 
 - (NSArray *)children
@@ -92,4 +101,35 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   return self.layoutChildren[kDefaultChildrenKey];
 }
 
+static Class gLayoutOptionsClass = [ASLayoutOptions class];
++ (void)setLayoutOptionsClass:(Class)layoutOptionsClass
+{
+  gLayoutOptionsClass = layoutOptionsClass;
+}
+
++ (ASLayoutOptions *)optionsForChild:(id<ASLayoutable>)child
+{
+  ASLayoutOptions *layoutOptions = [[gLayoutOptionsClass alloc] init];;
+  [layoutOptions setValuesFromLayoutable:child];
+  layoutOptions.isMutable = NO;
+  return layoutOptions;
+}
+
++ (void)associateLayoutOptions:(ASLayoutOptions *)layoutOptions withChild:(id<ASLayoutable>)child
+{
+  objc_setAssociatedObject(child, @selector(setChild:), layoutOptions, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
++ (ASLayoutOptions *)layoutOptionsForChild:(id<ASLayoutable>)child
+{
+  ASLayoutOptions *layoutOptions = objc_getAssociatedObject(child, @selector(setChild:));
+  if (layoutOptions == nil) {
+    layoutOptions = [self optionsForChild:child];
+    [self associateLayoutOptions:layoutOptions withChild:child];
+  }
+  return objc_getAssociatedObject(child, @selector(setChild:));
+}
+
+                     
+                     
 @end

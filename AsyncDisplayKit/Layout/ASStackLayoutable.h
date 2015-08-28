@@ -8,9 +8,10 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASStackLayoutDefines.h>
 
-@protocol ASStackLayoutable <ASLayoutable>
+@protocol ASStackLayoutable <NSObject>
 
 /**
  * @abstract Additional space to place before this object in the stacking direction.

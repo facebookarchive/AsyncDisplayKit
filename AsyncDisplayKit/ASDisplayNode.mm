@@ -41,12 +41,6 @@
 
 @implementation ASDisplayNode
 
-@synthesize spacingBefore = _spacingBefore;
-@synthesize spacingAfter = _spacingAfter;
-@synthesize flexGrow = _flexGrow;
-@synthesize flexShrink = _flexShrink;
-@synthesize flexBasis = _flexBasis;
-@synthesize alignSelf = _alignSelf;
 @synthesize preferredFrameSize = _preferredFrameSize;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
@@ -155,7 +149,6 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
   }
   _methodOverrides = overrides;
 
-  _flexBasis = ASRelativeDimensionUnconstrained;
   _preferredFrameSize = CGSizeZero;
 }
 

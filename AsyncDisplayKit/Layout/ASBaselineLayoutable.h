@@ -6,9 +6,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASStackLayoutable.h"
+#import <UIKit/UIKit.h>
 
-@protocol ASBaselineLayoutable <ASStackLayoutable>
+@protocol ASBaselineLayoutable
 
 /**
  * @abstract The distance from the top of the layoutable object to its baseline

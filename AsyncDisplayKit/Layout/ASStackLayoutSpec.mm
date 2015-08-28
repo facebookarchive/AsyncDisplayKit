@@ -72,17 +72,6 @@
   _spacing = spacing;
 }
 
-- (void)setChildren:(NSArray *)children
-{
-  [super setChildren:children];
-  
-#if DEBUG
-  for (id<ASStackLayoutable> child in children) {
-    ASDisplayNodeAssert(([child finalLayoutable] == child && [child conformsToProtocol:@protocol(ASStackLayoutable)]) || ([child finalLayoutable] != child && [[child finalLayoutable] conformsToProtocol:@protocol(ASStackLayoutable)]), @"child must conform to ASBaselineLayoutable");
-  }
-#endif
-}
-
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
@@ -91,9 +80,8 @@
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems};
-  std::vector<id<ASStackLayoutable>> stackChildren = std::vector<id<ASStackLayoutable>>();
-  for (id<ASStackLayoutable> child in self.children) {
-    NSAssert([child conformsToProtocol:@protocol(ASStackLayoutable)], @"Child must implement ASStackLayoutable");
+  std::vector<id<ASLayoutable>> stackChildren = std::vector<id<ASLayoutable>>();
+  for (id<ASLayoutable> child in self.children) {
     stackChildren.push_back(child);
   }
   
