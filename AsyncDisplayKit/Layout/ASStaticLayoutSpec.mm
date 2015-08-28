@@ -36,17 +36,6 @@
   return self;
 }
 
-- (void)setChildren:(NSArray *)children
-{
-  [super setChildren:children];
-  
-#if DEBUG
-  for (id<ASStaticLayoutable> child in children) {
-    ASDisplayNodeAssert(([child finalLayoutable] == child && [child conformsToProtocol:@protocol(ASStaticLayoutable)]) || ([child finalLayoutable] != child && [[child finalLayoutable] conformsToProtocol:@protocol(ASStaticLayoutable)]), @"child must conform to ASStaticLayoutable");
-  }
-#endif
-}
-
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   CGSize size = {
@@ -55,16 +44,17 @@
   };
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:self.children.count];
-  for (id<ASStaticLayoutable> child in self.children) {
+  for (id<ASLayoutable> child in self.children) {
+    ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
     CGSize autoMaxSize = {
-      constrainedSize.max.width - child.position.x,
-      constrainedSize.max.height - child.position.y
+      constrainedSize.max.width - layoutOptions.position.x,
+      constrainedSize.max.height - layoutOptions.position.y
     };
-    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.sizeRange)
+    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, layoutOptions.sizeRange)
       ? ASSizeRangeMake({0, 0}, autoMaxSize)
-      : ASRelativeSizeRangeResolve(child.sizeRange, size);
+      : ASRelativeSizeRangeResolve(layoutOptions.sizeRange, size);
     ASLayout *sublayout = [child measureWithSizeRange:childConstraint];
-    sublayout.position = child.position;
+    sublayout.position = layoutOptions.position;
     [sublayouts addObject:sublayout];
   }
   

@@ -8,10 +8,10 @@
  *
  */
 
-#import <AsyncDisplayKit/ASStackLayoutable.h>
+#import <AsyncDisplayKit/ASLayoutable.h>
 
 /** A layout spec is an immutable object that describes a layout, loosely inspired by React. */
-@interface ASLayoutSpec : NSObject <ASStackLayoutable>
+@interface ASLayoutSpec : NSObject <ASLayoutable>
 
 /** 
  Creation of a layout spec should only happen by a user in layoutSpecThatFits:. During that method, a
@@ -23,12 +23,15 @@
 - (instancetype)init;
 
 - (void)setChild:(id<ASLayoutable>)child;
-- (id<ASLayoutable>)child;
-
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier;
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
-
 - (void)setChildren:(NSArray *)children;
+
+- (id<ASLayoutable>)child;
+- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
 - (NSArray *)children;
+
++ (ASLayoutOptions *)layoutOptionsForChild:(id<ASLayoutable>)child;
++ (void)associateLayoutOptions:(ASLayoutOptions *)layoutOptions withChild:(id<ASLayoutable>)child;
++ (void)setLayoutOptionsClass:(Class)layoutOptionsClass;
 
 @end

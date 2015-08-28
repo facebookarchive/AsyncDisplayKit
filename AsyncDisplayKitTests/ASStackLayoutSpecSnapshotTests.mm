@@ -41,8 +41,8 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
                         ];
   for (ASStaticSizeDisplayNode *subnode in subnodes) {
     subnode.staticSize = subnodeSize;
-    subnode.flexGrow = flex;
-    subnode.flexShrink = flex;
+    [ASLayoutSpec layoutOptionsForChild:subnode].flexGrow = flex;
+    [ASLayoutSpec layoutOptionsForChild:subnode].flexShrink = flex;
   }
   return subnodes;
 }
@@ -114,7 +114,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
 
   NSArray *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
-  ((ASDisplayNode *)subnodes[1]).flexShrink = YES;
+  [ASLayoutSpec layoutOptionsForChild:((ASDisplayNode *)subnodes[1])].flexShrink = YES;
   
   // Width is 75px--that's less than the sum of the widths of the children, which is 100px.
   static ASSizeRange kSize = {{75, 0}, {75, 150}};
@@ -204,23 +204,25 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {100, 70};
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {150, 90};
   
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 10;
-  ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 20;
+  ASLayoutOptions *layoutOptions1 = [ASLayoutSpec layoutOptionsForChild:subnodes[1]];
+  ASLayoutOptions *layoutOptions2 = [ASLayoutSpec layoutOptionsForChild:subnodes[2]];
+  layoutOptions1.spacingBefore = 10;
+  layoutOptions2.spacingBefore = 20;
   [self testStackLayoutSpecWithStyle:style sizeRange:kAnySize subnodes:subnodes identifier:@"spacingBefore"];
   // Reset above spacing values
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 0;
-  ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 0;
+  layoutOptions1.spacingBefore = 0;
+  layoutOptions2.spacingBefore = 0;
 
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingAfter = 10;
-  ((ASStaticSizeDisplayNode *)subnodes[2]).spacingAfter = 20;
+  layoutOptions1.spacingAfter = 10;
+  layoutOptions2.spacingAfter = 20;
   [self testStackLayoutSpecWithStyle:style sizeRange:kAnySize subnodes:subnodes identifier:@"spacingAfter"];
   // Reset above spacing values
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingAfter = 0;
-  ((ASStaticSizeDisplayNode *)subnodes[2]).spacingAfter = 0;
+  layoutOptions1.spacingAfter = 0;
+  layoutOptions2.spacingAfter = 0;
   
   style.spacing = 10;
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = -10;
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingAfter = -10;
+  layoutOptions1.spacingBefore = -10;
+  layoutOptions2.spacingAfter = -10;
   [self testStackLayoutSpecWithStyle:style sizeRange:kAnySize subnodes:subnodes identifier:@"spacingBalancedOut"];
 }
 
@@ -236,9 +238,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {100, 70};
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {150, 90};
 
-  ((ASStaticSizeDisplayNode *)subnodes[0]).spacingBefore = 0;
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
-  ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[0])].spacingBefore = 0;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[1])].spacingBefore = 20;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[2])].spacingBefore = 30;
 
   // width 0-300px; height 300px
   static ASSizeRange kVariableHeight = {{0, 300}, {300, 300}};
@@ -254,9 +256,10 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   subnode2.staticSize = {50, 50};
   
   ASRatioLayoutSpec *child1 = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.5 child:subnode1];
-  child1.flexBasis = ASRelativeDimensionMakeWithPercent(1);
-  child1.flexGrow = YES;
-  child1.flexShrink = YES;
+  ASLayoutOptions *layoutOptions1 = [ASLayoutSpec layoutOptionsForChild:child1];
+  layoutOptions1.flexBasis = ASRelativeDimensionMakeWithPercent(1);
+  layoutOptions1.flexGrow = YES;
+  layoutOptions1.flexShrink = YES;
   
   static ASSizeRange kFixedWidth = {{150, 0}, {150, INFINITY}};
   [self testStackLayoutSpecWithStyle:style children:@[child1, subnode2] sizeRange:kFixedWidth subnodes:@[subnode1, subnode2] identifier:nil];
@@ -271,11 +274,11 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
 
   ASStaticSizeDisplayNode *subnode1 = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
   subnode1.staticSize = {100, 100};
-  subnode1.flexShrink = YES;
+  [ASLayoutSpec layoutOptionsForChild:subnode1].flexShrink = YES;
 
   ASStaticSizeDisplayNode *subnode2 = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
   subnode2.staticSize = {50, 50};
-  subnode2.flexShrink = YES;
+  [ASLayoutSpec layoutOptionsForChild:subnode2].flexShrink = YES;
 
   NSArray *subnodes = @[subnode1, subnode2];
   static ASSizeRange kFixedWidth = {{150, 0}, {150, 100}};
@@ -291,7 +294,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   
   ASStaticSizeDisplayNode *subnode2 = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
   subnode2.staticSize = {50, 50};
-  subnode2.alignSelf = ASStackLayoutAlignSelfCenter;
+  [ASLayoutSpec layoutOptionsForChild:subnode2].alignSelf = ASStackLayoutAlignSelfCenter;
 
   NSArray *subnodes = @[subnode1, subnode2];
   static ASSizeRange kFixedWidth = {{150, 0}, {150, INFINITY}};
@@ -311,9 +314,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {100, 70};
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {150, 90};
   
-  ((ASStaticSizeDisplayNode *)subnodes[0]).spacingBefore = 0;
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
-  ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[0])].spacingBefore = 0;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[1])].spacingBefore = 20;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[2])].spacingBefore = 30;
 
   static ASSizeRange kExactSize = {{300, 300}, {300, 300}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kExactSize subnodes:subnodes identifier:nil];
@@ -332,9 +335,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {100, 70};
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {150, 90};
   
-  ((ASStaticSizeDisplayNode *)subnodes[0]).spacingBefore = 0;
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
-  ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[0])].spacingBefore = 0;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[1])].spacingBefore = 20;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[2])].spacingBefore = 30;
 
   static ASSizeRange kExactSize = {{300, 300}, {300, 300}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kExactSize subnodes:subnodes identifier:nil];
@@ -353,9 +356,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {100, 70};
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {150, 90};
   
-  ((ASStaticSizeDisplayNode *)subnodes[0]).spacingBefore = 0;
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
-  ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[0])].spacingBefore = 0;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[1])].spacingBefore = 20;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[2])].spacingBefore = 30;
 
   static ASSizeRange kExactSize = {{300, 300}, {300, 300}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kExactSize subnodes:subnodes identifier:nil];
@@ -374,9 +377,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {100, 70};
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {150, 90};
 
-  ((ASStaticSizeDisplayNode *)subnodes[0]).spacingBefore = 0;
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
-  ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[0])].spacingBefore = 0;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[1])].spacingBefore = 20;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[2])].spacingBefore = 30;
 
   static ASSizeRange kVariableSize = {{200, 200}, {300, 300}};
   // all children should be 200px wide
@@ -396,9 +399,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {100, 70};
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {150, 90};
   
-  ((ASStaticSizeDisplayNode *)subnodes[0]).spacingBefore = 0;
-  ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
-  ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[0])].spacingBefore = 0;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[1])].spacingBefore = 20;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[2])].spacingBefore = 30;
 
   static ASSizeRange kVariableSize = {{50, 50}, {300, 300}};
   // all children should be 150px wide
@@ -419,8 +422,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {150, 150};
 
   for (ASStaticSizeDisplayNode *subnode in subnodes) {
-    subnode.flexGrow = YES;
-    subnode.flexBasis = ASRelativeDimensionMakeWithPoints(10);
+    ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:subnode];
+    layoutOptions.flexGrow = YES;
+    layoutOptions.flexBasis = ASRelativeDimensionMakeWithPoints(10);
   }
 
   // width 300px; height 0-150px.
@@ -439,12 +443,12 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   NSArray *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
   
   for (ASStaticSizeDisplayNode *subnode in subnodes) {
-    subnode.flexGrow = YES;
+    [ASLayoutSpec layoutOptionsForChild:subnode].flexGrow = YES;
   }
 
   // This should override the intrinsic size of 50pts and instead compute to 50% = 100pts.
   // The result should be that the red box is twice as wide as the blue and gree boxes after flexing.
-  ((ASStaticSizeDisplayNode *)subnodes[0]).flexBasis = ASRelativeDimensionMakeWithPercent(0.5);
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[0])].flexBasis = ASRelativeDimensionMakeWithPercent(0.5);
 
   static ASSizeRange kSize = {{200, 0}, {200, INFINITY}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
@@ -460,7 +464,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {50, 50};
 
   for (ASStaticSizeDisplayNode *subnode in subnodes) {
-    subnode.flexBasis = ASRelativeDimensionMakeWithPoints(20);
+    [ASLayoutSpec layoutOptionsForChild:subnode].flexBasis = ASRelativeDimensionMakeWithPoints(20);
   }
   
   static ASSizeRange kSize = {{300, 0}, {300, 150}};
@@ -478,8 +482,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {3000, 3000};
   
   ASRatioLayoutSpec *child2 = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.0 child:subnodes[2]];
-  child2.flexGrow = YES;
-  child2.flexShrink = YES;
+  ASLayoutOptions *layoutOptions2 = [ASLayoutSpec layoutOptionsForChild:child2];
+  layoutOptions2.flexGrow = YES;
+  layoutOptions2.flexShrink = YES;
 
   // If cross axis stretching occurred *before* flexing, then the blue child would be stretched to 3000 points tall.
   // Instead it should be stretched to 300 points tall, matching the red child and not overlapping the green inset.
@@ -504,13 +509,13 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   NSArray *subnodes = defaultSubnodes();
   
   ((ASStaticSizeDisplayNode *)subnodes[0]).staticSize = {300, 50};
-  ((ASStaticSizeDisplayNode *)subnodes[0]).flexShrink = YES;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[0])].flexShrink = YES;
   
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {100, 50};
-  ((ASStaticSizeDisplayNode *)subnodes[1]).flexShrink = NO;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[1])].flexShrink = NO;
   
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {200, 50};
-  ((ASStaticSizeDisplayNode *)subnodes[2]).flexShrink = YES;
+  [ASLayoutSpec layoutOptionsForChild:((ASStaticSizeDisplayNode *)subnodes[2])].flexShrink = YES;
   
   // A width of 400px results in a violation of 200px. This is distributed equally among each flexible child,
   // causing both of them to be shrunk by 100px, resulting in widths of 300px, 100px, and 50px.

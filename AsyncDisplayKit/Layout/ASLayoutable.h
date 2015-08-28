@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
+#import <AsyncDisplayKit/ASLayoutOptions.h>
 
 @class ASLayout;
 @class ASLayoutSpec;

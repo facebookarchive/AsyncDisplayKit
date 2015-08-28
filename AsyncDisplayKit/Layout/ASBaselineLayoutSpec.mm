@@ -9,7 +9,6 @@
  */
 
 #import "ASBaselineLayoutSpec.h"
-#import "ASStackLayoutable.h"
 
 #import <numeric>
 #import <vector>
@@ -26,12 +25,6 @@
 
 
 @implementation ASBaselineLayoutSpec
-{
-  ASDN::RecursiveMutex _propertyLock;
-}
-
-@synthesize ascender = _ascender;
-@synthesize descender = _descender;
 
 - (instancetype)initWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing baselineAlignment:(ASBaselineLayoutBaselineAlignment)baselineAlignment justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
 {
@@ -61,8 +54,8 @@
   ASStackLayoutSpecStyle stackStyle = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems};
   ASBaselineLayoutSpecStyle style = { .baselineAlignment = _baselineAlignment, .stackLayoutStyle = stackStyle };
   
-  std::vector<id<ASStackLayoutable>> stackChildren = std::vector<id<ASStackLayoutable>>();
-  for (id<ASStackLayoutable> child in self.children) {
+  std::vector<id<ASLayoutable>> stackChildren = std::vector<id<ASLayoutable>>();
+  for (id<ASLayoutable> child in self.children) {
     stackChildren.push_back(child);
   }
   
@@ -74,23 +67,9 @@
   
   NSArray *sublayouts = [NSArray arrayWithObjects:&baselinePositionedLayout.sublayouts[0] count:baselinePositionedLayout.sublayouts.size()];
   
-  ASDN::MutexLocker l(_propertyLock);
-  _ascender = baselinePositionedLayout.ascender;
-  _descender = baselinePositionedLayout.descender;
-  
   return [ASLayout layoutWithLayoutableObject:self
                                          size:ASSizeRangeClamp(constrainedSize, finalSize)
                                    sublayouts:sublayouts];
-}
-
-- (void)setChildren:(NSArray *)children
-{
-  [super setChildren:children];
-#if DEBUG
-  for (id<ASBaselineLayoutable> child in children) {
-    NSAssert(([child finalLayoutable] == child && [child conformsToProtocol:@protocol(ASBaselineLayoutable)]) || ([child finalLayoutable] != child && [[child finalLayoutable] conformsToProtocol:@protocol(ASBaselineLayoutable)]), @"child must conform to ASBaselineLayoutable");
-  }
-#endif
 }
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier

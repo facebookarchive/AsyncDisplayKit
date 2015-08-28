@@ -8,10 +8,9 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutable.h>
 #import <AsyncDisplayKit/ASRelativeSize.h>
 
-@protocol ASStaticLayoutable<ASLayoutable>
+@protocol ASStaticLayoutable
 
 /**
  If specified, the child's size is restricted according to this size. Percentages are resolved relative to the static layout spec.
