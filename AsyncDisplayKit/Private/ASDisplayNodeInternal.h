@@ -17,6 +17,7 @@
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
+#import "ASLayoutOptions.h"
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 void ASDisplayNodePerformBlockOnMainThread(void (^block)());
@@ -71,7 +72,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
   NSMutableSet *_pendingDisplayNodes;
 
   _ASPendingState *_pendingViewState;
-
+  
   struct {
     // public properties
     unsigned synchronous:1;
@@ -152,6 +153,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 - (id)initWithLayerClass:(Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
+
+- (id<ASLayoutable>)finalLayoutable;
 
 @end
 

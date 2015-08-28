@@ -9,8 +9,10 @@
  */
 
 #import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASRelativeSize.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
-#import <AsyncDisplayKit/ASLayoutOptions.h>
+
+#import <AsyncDisplayKit/ASLayoutablePrivate.h>
 
 @class ASLayout;
 @class ASLayoutSpec;
@@ -20,7 +22,7 @@
  * so that instances of that class can be used to build layout trees. The protocol also provides information 
  * about how an object should be laid out within an ASStackLayoutSpec.
  */
-@protocol ASLayoutable <NSObject>
+@protocol ASLayoutable <ASLayoutablePrivate>
 
 /**
  * @abstract Calculate a layout based on given size range.
@@ -31,16 +33,17 @@
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
 
-/**
- @abstract Give this object a last chance to add itself to a container ASLayoutable (most likely an ASLayoutSpec) before
- being added to a ASLayoutSpec.
- 
- For example, consider a node whose superclass is laid out via calculateLayoutThatFits:. The subclass cannot implement
- layoutSpecThatFits: since its ASLayout is already being created by calculateLayoutThatFits:. By implementing this method
- a subclass can wrap itself in an ASLayoutSpec right before it is added to a layout spec.
- 
- It is rare that a class will need to implement this method.
- */
-- (id<ASLayoutable>)finalLayoutable;
+@property (nonatomic, readwrite) CGFloat spacingBefore;
+@property (nonatomic, readwrite) CGFloat spacingAfter;
+@property (nonatomic, readwrite) BOOL flexGrow;
+@property (nonatomic, readwrite) BOOL flexShrink;
+@property (nonatomic, readwrite) ASRelativeDimension flexBasis;
+@property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
+
+@property (nonatomic, readwrite) CGFloat ascender;
+@property (nonatomic, readwrite) CGFloat descender;
+
+@property (nonatomic, readwrite) ASRelativeSizeRange sizeRange;
+@property (nonatomic, readwrite) CGPoint layoutPosition;
 
 @end

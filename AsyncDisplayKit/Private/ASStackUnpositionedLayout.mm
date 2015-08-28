@@ -14,6 +14,7 @@
 
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackLayoutSpecUtilities.h"
+#import "ASLayoutOptions.h"
 
 /**
  Sizes the child given the parameters specified, and returns the computed layout.
@@ -25,8 +26,7 @@ static ASLayout *crossChildLayout(const id<ASLayoutable> child,
                                   const CGFloat crossMin,
                                   const CGFloat crossMax)
 {
-  ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
-  const ASStackLayoutAlignItems alignItems = alignment(layoutOptions.alignSelf, style.alignItems);
+  const ASStackLayoutAlignItems alignItems = alignment(child.layoutOptions.alignSelf, style.alignItems);
   // stretched children will have a cross dimension of at least crossMin
   const CGFloat childCrossMin = alignItems == ASStackLayoutAlignItemsStretch ? crossMin : 0;
   const ASSizeRange childSizeRange = directionSizeRange(style.direction, stackMin, stackMax, childCrossMin, crossMax);
@@ -76,8 +76,7 @@ static void stretchChildrenAlongCrossDimension(std::vector<ASStackUnpositionedIt
 
   const CGFloat childCrossMax = it == layouts.end() ? 0 : crossDimension(style.direction, it->layout.size);
   for (auto &l : layouts) {
-    ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:l.child];
-    const ASStackLayoutAlignItems alignItems = alignment(layoutOptions.alignSelf, style.alignItems);
+    const ASStackLayoutAlignItems alignItems = alignment(l.child.layoutOptions.alignSelf, style.alignItems);
 
     const CGFloat cross = crossDimension(style.direction, l.layout.size);
     const CGFloat stack = stackDimension(style.direction, l.layout.size);
@@ -113,8 +112,7 @@ static CGFloat computeStackDimensionSum(const std::vector<ASStackUnpositionedIte
                                                   // Start from default spacing between each child:
                                                   children.empty() ? 0 : style.spacing * (children.size() - 1),
                                                   [&](CGFloat x, const ASStackUnpositionedItem &l) {
-                                                    ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:l.child];
-                                                    return x + layoutOptions.spacingBefore + layoutOptions.spacingAfter;
+                                                    return x + l.child.layoutOptions.spacingBefore + l.child.layoutOptions.spacingAfter;
                                                   });
 
   // Sum up the childrens' dimensions (including spacing) in the stack direction.
@@ -183,16 +181,15 @@ static std::function<BOOL(const ASStackUnpositionedItem &)> isFlexibleInViolatio
   if (fabs(violation) < kViolationEpsilon) {
     return [](const ASStackUnpositionedItem &l) { return NO; };
   } else if (violation > 0) {
-    return [](const ASStackUnpositionedItem &l) { return [ASLayoutSpec layoutOptionsForChild:l.child].flexGrow; };
+    return [](const ASStackUnpositionedItem &l) { return l.child.layoutOptions.flexGrow; };
   } else {
-    return [](const ASStackUnpositionedItem &l) { return [ASLayoutSpec layoutOptionsForChild:l.child].flexShrink; };
+    return [](const ASStackUnpositionedItem &l) { return l.child.layoutOptions.flexShrink; };
   }
 }
 
 ASDISPLAYNODE_INLINE BOOL isFlexibleInBothDirections(id<ASLayoutable> child)
 {
-  ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
-  return layoutOptions.flexGrow && layoutOptions.flexShrink;
+  return child.layoutOptions.flexGrow && child.layoutOptions.flexShrink;
 }
 
 /**
@@ -297,9 +294,8 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
   const CGFloat maxCrossDimension = crossDimension(style.direction, sizeRange.max);
   
   return AS::map(children, [&](id<ASLayoutable> child) -> ASStackUnpositionedItem {
-    ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
-    const BOOL isUnconstrainedFlexBasis = ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimensionUnconstrained, layoutOptions.flexBasis);
-    const CGFloat exactStackDimension = ASRelativeDimensionResolve(layoutOptions.flexBasis, stackDimension(style.direction, size));
+    const BOOL isUnconstrainedFlexBasis = ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimensionUnconstrained, child.layoutOptions.flexBasis);
+    const CGFloat exactStackDimension = ASRelativeDimensionResolve(child.layoutOptions.flexBasis, stackDimension(style.direction, size));
 
     if (useOptimizedFlexing && isFlexibleInBothDirections(child)) {
       return { child, [ASLayout layoutWithLayoutableObject:child size:{0, 0}] };

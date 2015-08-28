@@ -15,6 +15,8 @@
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
+#import "ASLayoutOptions.h"
+#import "ASLayoutOptionsPrivate.h"
 
 #import <objc/runtime.h>
 
@@ -27,6 +29,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 @implementation ASLayoutSpec
 
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
 @synthesize layoutChildren = _layoutChildren;
 
 - (instancetype)init
@@ -71,16 +74,20 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   NSMutableArray *finalChildren = [NSMutableArray arrayWithCapacity:children.count];
   for (id<ASLayoutable> child in children) {
     ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
-    id<ASLayoutable> finalLayoutable = [child finalLayoutable];
-    layoutOptions.isMutable = NO;
-    
-    if (finalLayoutable != child) {
-      ASLayoutOptions *finalLayoutOptions = [layoutOptions copy];
-      finalLayoutOptions.isMutable = NO;
-      [ASLayoutSpec associateLayoutOptions:finalLayoutOptions withChild:finalLayoutable];
+    if ([child respondsToSelector:@selector(finalLayoutable)]) {
+      id<ASLayoutable> finalLayoutable = [child performSelector:@selector(finalLayoutable)];
+      layoutOptions.isMutable = NO;
+      
+      if (finalLayoutable != child) {
+        ASLayoutOptions *finalLayoutOptions = [layoutOptions copy];
+        finalLayoutOptions.isMutable = NO;
+        [ASLayoutSpec associateLayoutOptions:finalLayoutOptions withChild:finalLayoutable];
+        [finalChildren addObject:finalLayoutable];
+      }
+    } else {
+      [finalChildren addObject:child];
     }
     
-    [finalChildren addObject:finalLayoutable];
   }
   
   self.layoutChildren[kDefaultChildrenKey] = [NSArray arrayWithArray:finalChildren];

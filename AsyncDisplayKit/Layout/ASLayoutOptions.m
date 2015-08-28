@@ -15,6 +15,18 @@
 
 @implementation ASLayoutOptions
 
+static Class gDefaultLayoutOptionsClass = nil;
++ (void)setDefaultLayoutOptionsClass:(Class)defaultLayoutOptionsClass
+{
+  gDefaultLayoutOptionsClass = defaultLayoutOptionsClass;
+}
+
++ (Class)defaultLayoutOptionsClass
+{
+  return gDefaultLayoutOptionsClass;
+}
+
+
 - (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable;
 {
   self = [super init];
@@ -79,7 +91,7 @@
   copy.descender = self.descender;
 
   copy.sizeRange = self.sizeRange;
-  copy.position = self.position;
+  copy.layoutPosition = self.layoutPosition;
 
   return copy;
 }
@@ -98,7 +110,7 @@
   _descender = 0;
   
   _sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero), ASRelativeSizeMakeWithCGSize(CGSizeZero));
-  _position = CGPointZero;
+  _layoutPosition = CGPointZero;
 }
 
 // Do this here instead of in Node/Spec subclasses so that custom specs can set default values
@@ -112,7 +124,7 @@
   if ([layoutable isKindOfClass:[ASDisplayNode class]]) {
     ASDisplayNode *displayNode = (ASDisplayNode *)layoutable;
     self.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(displayNode.preferredFrameSize), ASRelativeSizeMakeWithCGSize(displayNode.preferredFrameSize));
-    self.position = displayNode.frame.origin;
+    self.layoutPosition = displayNode.frame.origin;
   }
 }
 
