@@ -11,6 +11,9 @@
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASRelativeSize.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
+#import <AsyncDisplayKit/ASStackLayoutable.h>
+#import <AsyncDisplayKit/ASBaselineLayoutable.h>
+#import <AsyncDisplayKit/ASStaticLayoutable.h>
 
 #import <AsyncDisplayKit/ASLayoutablePrivate.h>
 
@@ -22,7 +25,7 @@
  * so that instances of that class can be used to build layout trees. The protocol also provides information 
  * about how an object should be laid out within an ASStackLayoutSpec.
  */
-@protocol ASLayoutable <ASLayoutablePrivate>
+@protocol ASLayoutable <ASLayoutablePrivate, ASStackLayoutable, ASBaselineLayoutable, ASStaticLayoutable>
 
 /**
  * @abstract Calculate a layout based on given size range.
@@ -32,18 +35,5 @@
  * @return An ASLayout instance defining the layout of the receiver and its children.
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
-
-@property (nonatomic, readwrite) CGFloat spacingBefore;
-@property (nonatomic, readwrite) CGFloat spacingAfter;
-@property (nonatomic, readwrite) BOOL flexGrow;
-@property (nonatomic, readwrite) BOOL flexShrink;
-@property (nonatomic, readwrite) ASRelativeDimension flexBasis;
-@property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
-
-@property (nonatomic, readwrite) CGFloat ascender;
-@property (nonatomic, readwrite) CGFloat descender;
-
-@property (nonatomic, readwrite) ASRelativeSizeRange sizeRange;
-@property (nonatomic, readwrite) CGPoint layoutPosition;
 
 @end

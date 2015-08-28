@@ -30,8 +30,4 @@
 - (id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
 - (NSArray *)children;
 
-//+ (ASLayoutOptions *)layoutOptionsForChild:(id<ASLayoutable>)child;
-//+ (void)associateLayoutOptions:(ASLayoutOptions *)layoutOptions withChild:(id<ASLayoutable>)child;
-//+ (void)setLayoutOptionsClass:(Class)layoutOptionsClass;
-
 @end

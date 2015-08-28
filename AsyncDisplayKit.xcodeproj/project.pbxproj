@@ -237,10 +237,10 @@
 		9C5FA35E1B90C9A500A62714 /* ASLayoutOptionsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5FA35B1B90C9A500A62714 /* ASLayoutOptionsPrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C5FA35F1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C5FA35C1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm */; };
 		9C5FA3601B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C5FA35C1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm */; };
-		9C5FA3631B91007100A62714 /* ASLayoutablePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5FA3611B91007100A62714 /* ASLayoutablePrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		9C5FA3641B91007100A62714 /* ASLayoutablePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5FA3611B91007100A62714 /* ASLayoutablePrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C6BB3B21B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C6BB3B31B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9CDC18CC1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9CDC18CD1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.m */; };
 		AC21EC101B3D0BF600C8B19A /* ASStackLayoutDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC3C4A511A1139C100143C57 /* ASCollectionView.h in Headers */ = {isa = PBXBuildFile; fileRef = AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -590,8 +590,8 @@
 		9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASLayoutOptions.m; path = AsyncDisplayKit/Layout/ASLayoutOptions.m; sourceTree = "<group>"; };
 		9C5FA35B1B90C9A500A62714 /* ASLayoutOptionsPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutOptionsPrivate.h; path = AsyncDisplayKit/Layout/ASLayoutOptionsPrivate.h; sourceTree = "<group>"; };
 		9C5FA35C1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASLayoutOptionsPrivate.mm; path = AsyncDisplayKit/Layout/ASLayoutOptionsPrivate.mm; sourceTree = "<group>"; };
-		9C5FA3611B91007100A62714 /* ASLayoutablePrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutablePrivate.h; path = AsyncDisplayKit/Private/ASLayoutablePrivate.h; sourceTree = "<group>"; };
 		9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStaticLayoutable.h; path = AsyncDisplayKit/Layout/ASStaticLayoutable.h; sourceTree = "<group>"; };
+		9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutablePrivate.h; path = AsyncDisplayKit/Layout/ASLayoutablePrivate.h; sourceTree = "<group>"; };
 		9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionViewTests.m; sourceTree = "<group>"; };
 		AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutDefines.h; path = AsyncDisplayKit/Layout/ASStackLayoutDefines.h; sourceTree = "<group>"; };
 		AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionView.h; sourceTree = "<group>"; };
@@ -993,7 +993,7 @@
 				ACF6ED0B1B17843500DA7C62 /* ASLayout.h */,
 				ACF6ED0C1B17843500DA7C62 /* ASLayout.mm */,
 				ACF6ED111B17843500DA7C62 /* ASLayoutable.h */,
-				9C5FA3611B91007100A62714 /* ASLayoutablePrivate.h */,
+				9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */,
 				ACF6ED0D1B17843500DA7C62 /* ASLayoutSpec.h */,
 				ACF6ED0E1B17843500DA7C62 /* ASLayoutSpec.mm */,
 				ACF6ED121B17843500DA7C62 /* ASOverlayLayoutSpec.h */,
@@ -1131,7 +1131,7 @@
 				058D0A6B195D05EC00B7D73C /* _ASAsyncTransactionContainer.h in Headers */,
 				058D0A6C195D05EC00B7D73C /* _ASAsyncTransactionContainer.m in Headers */,
 				6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */,
-				9C5FA3631B91007100A62714 /* ASLayoutablePrivate.h in Headers */,
+				9CDC18CC1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */,
 				058D0A6D195D05EC00B7D73C /* _ASAsyncTransactionGroup.h in Headers */,
 				058D0A6E195D05EC00B7D73C /* _ASAsyncTransactionGroup.m in Headers */,
 				205F0E1D1B373A2C007741D0 /* ASCollectionViewLayoutController.h in Headers */,
@@ -1272,7 +1272,7 @@
 				B35062591B010F070018CF92 /* ASBaseDefines.h in Headers */,
 				B35062191B010EFD0018CF92 /* ASDealloc2MainObject.h in Headers */,
 				B350620F1B010EFD0018CF92 /* _ASDisplayLayer.h in Headers */,
-				9C5FA3641B91007100A62714 /* ASLayoutablePrivate.h in Headers */,
+				9CDC18CD1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */,
 				B35062531B010EFD0018CF92 /* ASImageNode+CGExtras.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

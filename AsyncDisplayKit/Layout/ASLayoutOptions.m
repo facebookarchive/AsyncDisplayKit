@@ -1,10 +1,12 @@
-//
-//  ASLayoutOptions.m
-//  AsyncDisplayKit
-//
-//  Created by Ricky Cancro on 8/27/15.
-//  Copyright (c) 2015 Facebook. All rights reserved.
-//
+/*
+ *  Copyright (c) 2014-present, Facebook, Inc.
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree. An additional grant
+ *  of patent rights can be found in the PATENTS file in the same directory.
+ *
+ */
 
 #import "ASLayoutOptions.h"
 
@@ -23,6 +25,11 @@ static Class gDefaultLayoutOptionsClass = nil;
 
 + (Class)defaultLayoutOptionsClass
 {
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    // If someone is asking for this and it hasn't been customized yet, use the default.
+    gDefaultLayoutOptionsClass = [ASLayoutOptions class];
+  });
   return gDefaultLayoutOptionsClass;
 }
 

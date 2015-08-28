@@ -74,20 +74,17 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   NSMutableArray *finalChildren = [NSMutableArray arrayWithCapacity:children.count];
   for (id<ASLayoutable> child in children) {
     ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
-    if ([child respondsToSelector:@selector(finalLayoutable)]) {
-      id<ASLayoutable> finalLayoutable = [child performSelector:@selector(finalLayoutable)];
-      layoutOptions.isMutable = NO;
-      
-      if (finalLayoutable != child) {
-        ASLayoutOptions *finalLayoutOptions = [layoutOptions copy];
-        finalLayoutOptions.isMutable = NO;
-        [ASLayoutSpec associateLayoutOptions:finalLayoutOptions withChild:finalLayoutable];
-        [finalChildren addObject:finalLayoutable];
-      }
+    id<ASLayoutable> finalLayoutable = [child finalLayoutable];
+    layoutOptions.isMutable = NO;
+    
+    if (finalLayoutable != child) {
+      ASLayoutOptions *finalLayoutOptions = [layoutOptions copy];
+      finalLayoutOptions.isMutable = NO;
+      [ASLayoutSpec associateLayoutOptions:finalLayoutOptions withChild:finalLayoutable];
+      [finalChildren addObject:finalLayoutable];
     } else {
       [finalChildren addObject:child];
     }
-    
   }
   
   self.layoutChildren[kDefaultChildrenKey] = [NSArray arrayWithArray:finalChildren];
