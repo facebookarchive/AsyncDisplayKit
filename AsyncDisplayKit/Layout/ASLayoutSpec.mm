@@ -59,12 +59,25 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   [self setChild:child forIdentifier:kDefaultChildKey];
 }
 
+- (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
+{
+  ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
+  id<ASLayoutable> finalLayoutable = [child finalLayoutable];
+  layoutOptions.isMutable = NO;
+  
+  if (finalLayoutable != child) {
+    ASLayoutOptions *finalLayoutOptions = [layoutOptions copy];
+    finalLayoutOptions.isMutable = NO;
+    [ASLayoutSpec associateLayoutOptions:finalLayoutOptions withChild:finalLayoutable];
+    return finalLayoutable;
+  }
+  return child;
+}
+
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
-  layoutOptions.isMutable = NO;
-  self.layoutChildren[identifier] = child;
+  self.layoutChildren[identifier] = [self layoutableToAddFromLayoutable:child];;
 }
 
 - (void)setChildren:(NSArray *)children
@@ -73,18 +86,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   
   NSMutableArray *finalChildren = [NSMutableArray arrayWithCapacity:children.count];
   for (id<ASLayoutable> child in children) {
-    ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
-    id<ASLayoutable> finalLayoutable = [child finalLayoutable];
-    layoutOptions.isMutable = NO;
-    
-    if (finalLayoutable != child) {
-      ASLayoutOptions *finalLayoutOptions = [layoutOptions copy];
-      finalLayoutOptions.isMutable = NO;
-      [ASLayoutSpec associateLayoutOptions:finalLayoutOptions withChild:finalLayoutable];
-      [finalChildren addObject:finalLayoutable];
-    } else {
-      [finalChildren addObject:child];
-    }
+    [finalChildren addObject:[self layoutableToAddFromLayoutable:child]];
   }
   
   self.layoutChildren[kDefaultChildrenKey] = [NSArray arrayWithArray:finalChildren];
