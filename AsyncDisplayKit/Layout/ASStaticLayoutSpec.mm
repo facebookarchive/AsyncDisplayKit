@@ -11,6 +11,8 @@
 #import "ASStaticLayoutSpec.h"
 
 #import "ASLayoutSpecUtilities.h"
+#import "ASLayoutOptions.h"
+#import "ASLayoutOptionsPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASStaticLayoutable.h"
@@ -45,16 +47,16 @@
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:self.children.count];
   for (id<ASLayoutable> child in self.children) {
-    ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
+    ASLayoutOptions *layoutOptions = child.layoutOptions;
     CGSize autoMaxSize = {
-      constrainedSize.max.width - layoutOptions.position.x,
-      constrainedSize.max.height - layoutOptions.position.y
+      constrainedSize.max.width - layoutOptions.layoutPosition.x,
+      constrainedSize.max.height - layoutOptions.layoutPosition.y
     };
     ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, layoutOptions.sizeRange)
       ? ASSizeRangeMake({0, 0}, autoMaxSize)
       : ASRelativeSizeRangeResolve(layoutOptions.sizeRange, size);
     ASLayout *sublayout = [child measureWithSizeRange:childConstraint];
-    sublayout.position = layoutOptions.position;
+    sublayout.position = layoutOptions.layoutPosition;
     [sublayouts addObject:sublayout];
   }
   

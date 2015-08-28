@@ -12,17 +12,19 @@
 
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackLayoutSpecUtilities.h"
+#import "ASLayoutOptions.h"
 
 static CGFloat baselineForItem(const ASBaselineLayoutSpecStyle &style,
                                const ASLayout *layout) {
-  ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:layout.layoutableObject];
+  
+  __weak id<ASLayoutable> child = layout.layoutableObject;
   switch (style.baselineAlignment) {
     case ASBaselineLayoutBaselineAlignmentNone:
       return 0;
     case ASBaselineLayoutBaselineAlignmentFirst:
-      return layoutOptions.ascender;
+      return child.layoutOptions.ascender;
     case ASBaselineLayoutBaselineAlignmentLast:
-      return layout.size.height + layoutOptions.descender;
+      return layout.size.height + child.layoutOptions.descender;
   }
   
 }
@@ -33,10 +35,10 @@ static CGFloat baselineOffset(const ASBaselineLayoutSpecStyle &style,
                               const CGFloat maxBaseline)
 {
   if (style.stackLayoutStyle.direction == ASStackLayoutDirectionHorizontal) {
-    ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:l.layoutableObject];
+    __weak id<ASLayoutable> child = l.layoutableObject;
     switch (style.baselineAlignment) {
       case ASBaselineLayoutBaselineAlignmentFirst:
-        return maxAscender - layoutOptions.ascender;
+        return maxAscender - child.layoutOptions.ascender;
       case ASBaselineLayoutBaselineAlignmentLast:
         return maxBaseline - baselineForItem(style, l);
       case ASBaselineLayoutBaselineAlignmentNone:
@@ -90,11 +92,9 @@ ASBaselinePositionedLayout ASBaselinePositionedLayout::compute(const ASStackPosi
     our layoutSpec to have it so that it can be baseline aligned with another text node or baseline layout spec.
    */
   const auto ascenderIt = std::max_element(positionedLayout.sublayouts.begin(), positionedLayout.sublayouts.end(), [&](const ASLayout *a, const ASLayout *b){
-    ASLayoutOptions *layoutOptionsA = [ASLayoutSpec layoutOptionsForChild:a.layoutableObject];
-    ASLayoutOptions *layoutOptionsB = [ASLayoutSpec layoutOptionsForChild:b.layoutableObject];
-    return layoutOptionsA.ascender < layoutOptionsB.ascender;
+    return a.layoutableObject.layoutOptions.ascender < b.layoutableObject.layoutOptions.ascender;
   });
-  const CGFloat maxAscender = baselineIt == positionedLayout.sublayouts.end() ? 0 : [ASLayoutSpec layoutOptionsForChild:(*ascenderIt).layoutableObject].ascender;
+  const CGFloat maxAscender = baselineIt == positionedLayout.sublayouts.end() ? 0 : (*ascenderIt).layoutableObject.layoutOptions.ascender;
   
   /*
     Step 3: Take each child and update its layout position based on the baseline offset.
@@ -107,8 +107,8 @@ ASBaselinePositionedLayout ASBaselinePositionedLayout::compute(const ASStackPosi
   CGPoint p = CGPointZero;
   BOOL first = YES;
   auto stackedChildren = AS::map(positionedLayout.sublayouts, [&](ASLayout *l) -> ASLayout *{
-    ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:l.layoutableObject];
-    p = p + directionPoint(stackStyle.direction, layoutOptions.spacingBefore, 0);
+    __weak id<ASLayoutable> child = l.layoutableObject;
+    p = p + directionPoint(stackStyle.direction, child.layoutOptions.spacingBefore, 0);
     if (first) {
       // if this is the first item use the previously computed start point
       p = l.position;
@@ -125,9 +125,9 @@ ASBaselinePositionedLayout ASBaselinePositionedLayout::compute(const ASStackPosi
     // node from baselines and not bounding boxes.
     CGFloat spacingAfterBaseline = 0;
     if (stackStyle.direction == ASStackLayoutDirectionVertical) {
-      spacingAfterBaseline = layoutOptions.descender;
+      spacingAfterBaseline = child.layoutOptions.descender;
     }
-    p = p + directionPoint(stackStyle.direction, stackDimension(stackStyle.direction, l.size) + layoutOptions.spacingAfter + spacingAfterBaseline, 0);
+    p = p + directionPoint(stackStyle.direction, stackDimension(stackStyle.direction, l.size) + child.layoutOptions.spacingAfter + spacingAfterBaseline, 0);
     
     return l;
   });
@@ -157,7 +157,7 @@ ASBaselinePositionedLayout ASBaselinePositionedLayout::compute(const ASStackPosi
   const auto descenderIt = std::max_element(stackedChildren.begin(), stackedChildren.end(), [&](const ASLayout *a, const ASLayout *b){
     return  a.position.y + a.size.height <  b.position.y + b.size.height;
   });
-  const CGFloat minDescender = descenderIt == stackedChildren.end() ? 0 : [ASLayoutSpec layoutOptionsForChild:(*descenderIt).layoutableObject].descender;
+  const CGFloat minDescender = descenderIt == stackedChildren.end() ? 0 : (*descenderIt).layoutableObject.layoutOptions.descender;
 
   return {stackedChildren, crossSize, maxAscender, minDescender};
 }

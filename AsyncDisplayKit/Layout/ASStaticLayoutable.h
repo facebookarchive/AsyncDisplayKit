@@ -18,6 +18,6 @@
 @property (nonatomic, assign) ASRelativeSizeRange sizeRange;
 
 /** The position of this object within its parent spec. */
-@property (nonatomic, assign) CGPoint position;
+@property (nonatomic, assign) CGPoint layoutPosition;
 
 @end

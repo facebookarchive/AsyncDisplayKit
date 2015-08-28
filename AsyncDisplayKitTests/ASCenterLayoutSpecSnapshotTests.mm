@@ -13,6 +13,7 @@
 #import "ASBackgroundLayoutSpec.h"
 #import "ASCenterLayoutSpec.h"
 #import "ASStackLayoutSpec.h"
+#import "ASLayoutOptions.h"
 
 static const ASSizeRange kSize = {{100, 120}, {320, 160}};
 
@@ -94,7 +95,7 @@ static NSString *suffixForCenteringOptions(ASCenterLayoutSpecCenteringOptions ce
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
   ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
   foregroundNode.staticSize = {10, 10};
-  [ASLayoutSpec layoutOptionsForChild:foregroundNode].flexGrow = YES;
+  foregroundNode.layoutOptions.flexGrow = YES;
   
   ASCenterLayoutSpec *layoutSpec =
   [ASCenterLayoutSpec

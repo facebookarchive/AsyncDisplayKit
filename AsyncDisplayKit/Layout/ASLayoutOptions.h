@@ -16,6 +16,9 @@
 
 @interface ASLayoutOptions : NSObject <ASBaselineLayoutable, ASStackLayoutable, ASStaticLayoutable, NSCopying>
 
++ (void)setDefaultLayoutOptionsClass:(Class)defaultLayoutOptionsClass;
++ (Class)defaultLayoutOptionsClass;
+
 - (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable;
 - (void)setValuesFromLayoutable:(id<ASLayoutable>)layoutable;
 
@@ -42,7 +45,7 @@
 #pragma mark - ASStaticLayoutable
 
 @property (nonatomic, readwrite) ASRelativeSizeRange sizeRange;
-@property (nonatomic, readwrite) CGPoint position;
+@property (nonatomic, readwrite) CGPoint layoutPosition;
 
 - (void)setupDefaults;
 
