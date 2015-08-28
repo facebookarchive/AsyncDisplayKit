@@ -27,8 +27,10 @@ static Class gDefaultLayoutOptionsClass = nil;
 {
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    // If someone is asking for this and it hasn't been customized yet, use the default.
-    gDefaultLayoutOptionsClass = [ASLayoutOptions class];
+    if (gDefaultLayoutOptionsClass == nil) {
+      // If someone is asking for this and it hasn't been customized yet, use the default.
+      gDefaultLayoutOptionsClass = [ASLayoutOptions class];
+    }
   });
   return gDefaultLayoutOptionsClass;
 }
