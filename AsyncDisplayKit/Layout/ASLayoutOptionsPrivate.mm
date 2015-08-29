@@ -17,15 +17,10 @@
 {\
 dispatch_once(&_layoutOptionsInitializeToken, ^{\
 if (_layoutOptions == nil) {\
-_layoutOptions = [[[ASLayoutOptions defaultLayoutOptionsClass] alloc] init];\
+_layoutOptions = [[[ASLayoutOptions defaultLayoutOptionsClass] alloc] initWithLayoutable:self];\
 }\
 });\
 return _layoutOptions;\
-}\
-\
-- (void)setLayoutOptions:(ASLayoutOptions *)layoutOptions\
-{\
-  _layoutOptions = layoutOptions;\
 }\
 \
 - (CGFloat)spacingBefore\
