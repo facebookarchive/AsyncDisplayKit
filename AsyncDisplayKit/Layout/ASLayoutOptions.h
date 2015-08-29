@@ -24,6 +24,14 @@
 - (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable;
 - (void)setValuesFromLayoutable:(id<ASLayoutable>)layoutable;
 
+#pragma mark - Subclasses should implement these!
++ (NSSet *)keyPathsForValuesAffectingChangeMonitor;
+- (void)setupDefaults;
+- (instancetype)copyWithZone:(NSZone *)zone;
+- (void)copyIntoOptions:(ASLayoutOptions *)layoutOptions;
+
+#pragma mark - Mutability checks
+
 @property (nonatomic, assign) BOOL isMutable;
 
 #if DEBUG
@@ -49,6 +57,5 @@
 @property (nonatomic, readwrite) ASRelativeSizeRange sizeRange;
 @property (nonatomic, readwrite) CGPoint layoutPosition;
 
-- (void)setupDefaults;
 
 @end

@@ -15,5 +15,5 @@
 
 @protocol ASLayoutablePrivate <NSObject>
 - (ASLayoutSpec *)finalLayoutableWithParent:(ASLayoutSpec *)parentSpec;
-@property (nonatomic, strong) ASLayoutOptions *layoutOptions;
+@property (nonatomic, strong, readonly) ASLayoutOptions *layoutOptions;
 @end

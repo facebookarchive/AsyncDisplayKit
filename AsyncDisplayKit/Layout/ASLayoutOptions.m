@@ -13,7 +13,6 @@
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 #import "ASInternalHelpers.h"
-#import <objc/runtime.h>
 
 @implementation ASLayoutOptions
 
@@ -35,6 +34,10 @@ static Class gDefaultLayoutOptionsClass = nil;
   return gDefaultLayoutOptionsClass;
 }
 
+- (instancetype)init
+{
+  return [self initWithLayoutable:nil];
+}
 
 - (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable;
 {
@@ -42,30 +45,31 @@ static Class gDefaultLayoutOptionsClass = nil;
   if (self) {
     [self setupDefaults];
     [self setValuesFromLayoutable:layoutable];
+    _isMutable = YES;
 #if DEBUG
-    [self addObserver:self forKeyPath:@"changeMonitor"
-                     options:NSKeyValueObservingOptionNew
-                     context:nil];
+    [self addObserver:self
+           forKeyPath:@"changeMonitor"
+              options:NSKeyValueObservingOptionNew
+              context:nil];
 #endif
   }
   return self;
+}
+
+- (void)dealloc
+{
+#if DEBUG
+  [self removeObserver:self forKeyPath:@"changeMonitor"];
+#endif
 }
 
 #if DEBUG
 + (NSSet *)keyPathsForValuesAffectingChangeMonitor
 {
   NSMutableSet *keys = [NSMutableSet set];
-  unsigned int count;
-  
-  objc_property_t *properties = class_copyPropertyList([self class], &count);
-  for (size_t i = 0; i < count; ++i) {
-    NSString *property = [NSString stringWithCString:property_getName(properties[i]) encoding:NSASCIIStringEncoding];
-    
-    if ([property isEqualToString: @"observableSelf"] == NO) {
-      [keys addObject: property];
-    }
-  }
-  free(properties);
+  [keys addObjectsFromArray:@[@"spacingBefore", @"spacingAfter", @"flexGrow", @"flexShrink", @"flexBasis", @"alignSelf"]];
+  [keys addObjectsFromArray:@[@"ascender", @"descender"]];
+  [keys addObjectsFromArray:@[@"sizeRange", @"layoutPosition"]];
   
   return keys;
 }
@@ -89,7 +93,12 @@ static Class gDefaultLayoutOptionsClass = nil;
 - (id)copyWithZone:(NSZone *)zone
 {
   ASLayoutOptions *copy = [[[self class] alloc] init];
+  [self copyIntoOptions:copy];
+  return copy;
+}
 
+- (void)copyIntoOptions:(ASLayoutOptions *)copy
+{
   copy.flexBasis = self.flexBasis;
   copy.spacingAfter = self.spacingAfter;
   copy.spacingBefore = self.spacingBefore;
@@ -98,12 +107,11 @@ static Class gDefaultLayoutOptionsClass = nil;
   
   copy.ascender = self.ascender;
   copy.descender = self.descender;
-
+  
   copy.sizeRange = self.sizeRange;
   copy.layoutPosition = self.layoutPosition;
-
-  return copy;
 }
+
 
 #pragma mark - Defaults
 - (void)setupDefaults
