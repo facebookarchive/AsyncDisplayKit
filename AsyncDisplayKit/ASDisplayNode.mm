@@ -1849,8 +1849,9 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
     return !self.layerBacked && [self.view canPerformAction:action withSender:sender];
 }
 
-- (id<ASLayoutable>)finalLayoutable {
-  return self;
+- (ASLayoutSpec *)finalLayoutableWithParent:(ASLayoutSpec *)parentSpec
+{
+  return nil;
 }
 
 @end

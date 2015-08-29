@@ -15,7 +15,6 @@
  */
 @interface ASOverlayLayoutSpec : ASLayoutSpec
 
-@property (nonatomic, strong) id<ASLayoutable> child;
 @property (nonatomic, strong) id<ASLayoutable> overlay;
 
 + (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay;

@@ -154,8 +154,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
 
-- (id<ASLayoutable>)finalLayoutable;
-
 @end
 
 @interface UIView (ASDisplayNodeInternal)
