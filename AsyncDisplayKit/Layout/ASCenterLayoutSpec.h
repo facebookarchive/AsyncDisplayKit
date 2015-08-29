@@ -39,7 +39,6 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
 
 @property (nonatomic, assign) ASCenterLayoutSpecCenteringOptions centeringOptions;
 @property (nonatomic, assign) ASCenterLayoutSpecSizingOptions sizingOptions;
-@property (nonatomic, strong) id<ASLayoutable> child;
 
 /**
  * Initializer.

@@ -49,9 +49,9 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
 }
 
-- (id<ASLayoutable>)finalLayoutable
+- (ASLayoutSpec *)finalLayoutableWithParent:(ASLayoutSpec *)parentSpec;
 {
-  return self;
+  return nil;
 }
 
 - (void)setChild:(id<ASLayoutable>)child;
@@ -61,14 +61,14 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 - (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
 {
-  ASLayoutOptions *layoutOptions = [ASLayoutSpec layoutOptionsForChild:child];
-  id<ASLayoutable> finalLayoutable = [child finalLayoutable];
+  ASLayoutOptions *layoutOptions = [child layoutOptions];
   layoutOptions.isMutable = NO;
   
-  if (finalLayoutable != child) {
+  id<ASLayoutable> finalLayoutable = [child finalLayoutableWithParent:self];
+  if (finalLayoutable) {
     ASLayoutOptions *finalLayoutOptions = [layoutOptions copy];
     finalLayoutOptions.isMutable = NO;
-    [ASLayoutSpec associateLayoutOptions:finalLayoutOptions withChild:finalLayoutable];
+    finalLayoutable.layoutOptions = finalLayoutOptions;
     return finalLayoutable;
   }
   return child;
@@ -107,35 +107,5 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   return self.layoutChildren[kDefaultChildrenKey];
 }
 
-static Class gLayoutOptionsClass = [ASLayoutOptions class];
-+ (void)setLayoutOptionsClass:(Class)layoutOptionsClass
-{
-  gLayoutOptionsClass = layoutOptionsClass;
-}
-
-+ (ASLayoutOptions *)optionsForChild:(id<ASLayoutable>)child
-{
-  ASLayoutOptions *layoutOptions = [[gLayoutOptionsClass alloc] init];;
-  [layoutOptions setValuesFromLayoutable:child];
-  layoutOptions.isMutable = NO;
-  return layoutOptions;
-}
-
-+ (void)associateLayoutOptions:(ASLayoutOptions *)layoutOptions withChild:(id<ASLayoutable>)child
-{
-  objc_setAssociatedObject(child, @selector(setChild:), layoutOptions, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-+ (ASLayoutOptions *)layoutOptionsForChild:(id<ASLayoutable>)child
-{
-  ASLayoutOptions *layoutOptions = objc_getAssociatedObject(child, @selector(setChild:));
-  if (layoutOptions == nil) {
-    layoutOptions = [self optionsForChild:child];
-    [self associateLayoutOptions:layoutOptions withChild:child];
-  }
-  return objc_getAssociatedObject(child, @selector(setChild:));
-}
-
-                     
                      
 @end
