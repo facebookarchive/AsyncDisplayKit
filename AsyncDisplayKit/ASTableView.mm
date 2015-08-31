@@ -791,7 +791,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   }
   
   // Default size range
-  return ASSizeRangeMake(CGSizeZero, CGSizeMake(_maxWidthForNodesConstrainedSize, FLT_MAX));
+  return ASSizeRangeMake(CGSizeMake(_maxWidthForNodesConstrainedSize, 0),
+                         CGSizeMake(_maxWidthForNodesConstrainedSize, FLT_MAX));
 }
 
 - (void)dataControllerLockDataSource
