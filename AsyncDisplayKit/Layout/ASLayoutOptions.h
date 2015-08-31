@@ -25,18 +25,8 @@
 - (void)setValuesFromLayoutable:(id<ASLayoutable>)layoutable;
 
 #pragma mark - Subclasses should implement these!
-+ (NSSet *)keyPathsForValuesAffectingChangeMonitor;
 - (void)setupDefaults;
-- (instancetype)copyWithZone:(NSZone *)zone;
 - (void)copyIntoOptions:(ASLayoutOptions *)layoutOptions;
-
-#pragma mark - Mutability checks
-
-@property (nonatomic, assign) BOOL isMutable;
-
-#if DEBUG
-@property (nonatomic, assign) NSUInteger changeMonitor;
-#endif
 
 #pragma mark - ASStackLayoutable
 

@@ -62,12 +62,10 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 - (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
 {
   ASLayoutOptions *layoutOptions = [child layoutOptions];
-  layoutOptions.isMutable = NO;
   
   id<ASLayoutable> finalLayoutable = [child finalLayoutableWithParent:self];
   if (finalLayoutable) {
     [layoutOptions copyIntoOptions:finalLayoutable.layoutOptions];
-    finalLayoutable.layoutOptions.isMutable = NO;
     return finalLayoutable;
   }
   return child;
