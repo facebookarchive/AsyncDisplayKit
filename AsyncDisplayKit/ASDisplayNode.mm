@@ -612,10 +612,10 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 {
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
-  if (CGRectEqualToRect(_layer.bounds, CGRectZero)) {
+  if (CGRectEqualToRect(self.bounds, CGRectZero)) {
     return;     // Performing layout on a zero-bounds view often results in frame calculations with negative sizes after applying margins, which will cause measureWithSizeRange: on subnodes to assert.
   }
-  _placeholderLayer.frame = _layer.bounds;
+  _placeholderLayer.frame = self.bounds;
   [self layout];
   [self layoutDidFinish];
 }
