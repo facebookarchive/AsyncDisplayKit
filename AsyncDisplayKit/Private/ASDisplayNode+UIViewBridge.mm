@@ -143,22 +143,12 @@
   ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"Must be an identity transform");
 #endif
 
-  BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
+  CGPoint origin = self.bounds.origin;
+  CGPoint anchorPoint = self.anchorPoint;
   
-  CGPoint origin      = (useLayer ? _layer.bounds.origin : self.bounds.origin);
-  CGPoint anchorPoint = (useLayer ? _layer.anchorPoint   : self.anchorPoint);
-  
-  CGRect bounds       = (CGRect){ origin, rect.size };
-  CGPoint position    = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
-                                    rect.origin.y + rect.size.height * anchorPoint.y);
-  
-  if (useLayer) {
-    _layer.bounds = bounds;
-    _layer.position = position;
-  } else {
-    self.bounds = bounds;
-    self.position = position;
-  }
+  self.bounds = (CGRect){ origin, rect.size };
+  self.position = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
+                              rect.origin.y + rect.size.height * anchorPoint.y);
 }
 
 - (void)setNeedsDisplay
