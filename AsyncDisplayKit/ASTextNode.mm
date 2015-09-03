@@ -287,11 +287,11 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   if (_renderer == nil) {
     CGSize constrainedSize = _constrainedSize.width != -INFINITY ? _constrainedSize : self.bounds.size;
     _renderer = [[ASTextNodeRenderer alloc] initWithAttributedString:_attributedString
-                                                        truncationString:_composedTruncationString
-                                                          truncationMode:_truncationMode
-                                                        maximumLineCount:_maximumLineCount
-                                                          exclusionPaths:_exclusionPaths
-                                                         constrainedSize:constrainedSize];
+                                                    truncationString:_composedTruncationString
+                                                      truncationMode:_truncationMode
+                                                    maximumLineCount:_maximumLineCount
+                                                      exclusionPaths:_exclusionPaths
+                                                     constrainedSize:constrainedSize];
   }
   return _renderer;
 }
@@ -421,9 +421,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   UIEdgeInsets shadowPadding = [self shadowPadding];
   CGPoint textOrigin = CGPointMake(self.bounds.origin.x - shadowPadding.left, self.bounds.origin.y - shadowPadding.top);
   return [[ASTextNodeDrawParameters alloc] initWithRenderer:[self _renderer]
-                                                       shadower:[self _shadower]
-                                                     textOrigin:textOrigin
-                                                backgroundColor:self.backgroundColor.CGColor];
+                                                   shadower:[self _shadower]
+                                                 textOrigin:textOrigin
+                                            backgroundColor:self.backgroundColor.CGColor];
 }
 
 #pragma mark - Attributes
