@@ -14,6 +14,7 @@
 #import "ASTextNodeTextKitHelpers.h"
 #import "ASTextNodeWordKerner.h"
 #import "ASThread.h"
+#import "ASInternalHelpers.h"
 
 static const CGFloat ASTextNodeRendererGlyphTouchHitSlop = 5.0;
 static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
@@ -607,6 +608,10 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
 
 - (void)drawInRect:(CGRect)bounds inContext:(CGContextRef)context
 {
+  // NSLayoutManager often missed one pixel at the last line of the text.
+  // We need to offset this extra pixel to make 'g' or 'y' rendered perfectly at the last line within ASTextNode.
+  bounds.origin.y -= 1.0/ASScreenScale();
+
   ASDisplayNodeAssert(context, @"This is no good without a context.");
   UIGraphicsPushContext(context);
   CGContextSaveGState(context);
