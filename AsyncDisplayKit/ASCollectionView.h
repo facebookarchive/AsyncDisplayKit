@@ -27,6 +27,8 @@
  */
 @interface ASCollectionView : UICollectionView
 
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
+
 @property (nonatomic, weak) id<ASCollectionViewDataSource> asyncDataSource;
 @property (nonatomic, weak) id<ASCollectionViewDelegate> asyncDelegate;       // must not be nil
 

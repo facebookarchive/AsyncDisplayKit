@@ -137,6 +137,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark Lifecycle.
 
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
+{
+  return [self initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+}
+
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
   return [self initWithFrame:frame collectionViewLayout:layout asyncDataFetching:NO];
@@ -174,6 +179,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   _collectionViewLayoutImplementsInsetSection = [layout respondsToSelector:@selector(sectionInset)];
 
   _maxSizeForNodesConstrainedSize = self.bounds.size;
+  
+  self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
   
