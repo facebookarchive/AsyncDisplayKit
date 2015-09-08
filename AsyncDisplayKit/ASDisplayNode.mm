@@ -92,10 +92,15 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
  *
  *  @param c        the class, required
  *  @param instance the instance, which may be nil. (If so, the class is inspected instead)
+ *  @remarks        The instance value is used only if we suspect the class may be dynamic (because it overloads 
+ *                  +respondsToSelector: or -respondsToSelector.) In that case we use our "slow path", calling this 
+ *                  method on each -init and passing the instance value. While this may seem like an unlikely scenario,
+ *                  it turns our our own internal tests use a dynamic class, so it's worth capturing this edge case.
  *
  *  @return ASDisplayNode flags.
  */
-static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *instance) {
+static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *instance)
+{
   ASDisplayNodeCAssertNotNil(c, @"class is required");
 
   struct ASDisplayNodeFlags flags = {0};
@@ -119,7 +124,8 @@ static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *i
  *
  *  @return ASDisplayNodeMethodOverrides.
  */
-static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c) {
+static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
+{
   ASDisplayNodeCAssertNotNil(c, @"class is required");
   
   ASDisplayNodeMethodOverrides overrides = ASDisplayNodeMethodOverrideNone;
