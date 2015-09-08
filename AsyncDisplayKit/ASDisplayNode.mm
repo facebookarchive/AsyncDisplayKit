@@ -204,7 +204,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Lifecycle
 
-- (void)_staticInitialize {
+- (void)_staticInitialize
+{
   ASDisplayNodeAssert(NO, @"_staticInitialize must be overridden");
 }
 
