@@ -235,8 +235,8 @@
 		9C49C3701B853961000B0DD5 /* ASStackLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C5FA3511B8F6ADF00A62714 /* ASLayoutOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5FA34F1B8F6ADF00A62714 /* ASLayoutOptions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C5FA3521B8F6ADF00A62714 /* ASLayoutOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5FA34F1B8F6ADF00A62714 /* ASLayoutOptions.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		9C5FA3531B8F6ADF00A62714 /* ASLayoutOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.m */; };
-		9C5FA3541B8F6ADF00A62714 /* ASLayoutOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.m */; };
+		9C5FA3531B8F6ADF00A62714 /* ASLayoutOptions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.mm */; };
+		9C5FA3541B8F6ADF00A62714 /* ASLayoutOptions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.mm */; };
 		9C5FA35D1B90C9A500A62714 /* ASLayoutOptionsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5FA35B1B90C9A500A62714 /* ASLayoutOptionsPrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C5FA35E1B90C9A500A62714 /* ASLayoutOptionsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5FA35B1B90C9A500A62714 /* ASLayoutOptionsPrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C5FA35F1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C5FA35C1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm */; };
@@ -593,7 +593,7 @@
 		9C3061051B857EC400D0530B /* ASBaselineLayoutSpec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASBaselineLayoutSpec.mm; path = AsyncDisplayKit/Layout/ASBaselineLayoutSpec.mm; sourceTree = "<group>"; };
 		9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutable.h; path = AsyncDisplayKit/Layout/ASStackLayoutable.h; sourceTree = "<group>"; };
 		9C5FA34F1B8F6ADF00A62714 /* ASLayoutOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutOptions.h; path = AsyncDisplayKit/Layout/ASLayoutOptions.h; sourceTree = "<group>"; };
-		9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASLayoutOptions.m; path = AsyncDisplayKit/Layout/ASLayoutOptions.m; sourceTree = "<group>"; };
+		9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASLayoutOptions.mm; path = AsyncDisplayKit/Layout/ASLayoutOptions.mm; sourceTree = "<group>"; };
 		9C5FA35B1B90C9A500A62714 /* ASLayoutOptionsPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutOptionsPrivate.h; path = AsyncDisplayKit/Layout/ASLayoutOptionsPrivate.h; sourceTree = "<group>"; };
 		9C5FA35C1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASLayoutOptionsPrivate.mm; path = AsyncDisplayKit/Layout/ASLayoutOptionsPrivate.mm; sourceTree = "<group>"; };
 		9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStaticLayoutable.h; path = AsyncDisplayKit/Layout/ASStaticLayoutable.h; sourceTree = "<group>"; };
@@ -1018,7 +1018,7 @@
 				9C3061041B857EC400D0530B /* ASBaselineLayoutSpec.h */,
 				9C3061051B857EC400D0530B /* ASBaselineLayoutSpec.mm */,
 				9C5FA34F1B8F6ADF00A62714 /* ASLayoutOptions.h */,
-				9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.m */,
+				9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.mm */,
 				9C5FA35B1B90C9A500A62714 /* ASLayoutOptionsPrivate.h */,
 				9C5FA35C1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm */,
 			);
@@ -1487,7 +1487,7 @@
 				ACF6ED2E1B17843500DA7C62 /* ASRatioLayoutSpec.mm in Sources */,
 				058D0A18195D050800B7D73C /* _ASDisplayLayer.mm in Sources */,
 				ACF6ED321B17843500DA7C62 /* ASStaticLayoutSpec.mm in Sources */,
-				9C5FA3531B8F6ADF00A62714 /* ASLayoutOptions.m in Sources */,
+				9C5FA3531B8F6ADF00A62714 /* ASLayoutOptions.mm in Sources */,
 				9C5FA35F1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */,
 				ACF6ED2C1B17843500DA7C62 /* ASOverlayLayoutSpec.mm in Sources */,
 				058D0A2C195D050800B7D73C /* ASSentinel.m in Sources */,
@@ -1617,7 +1617,7 @@
 				B350621C1B010EFD0018CF92 /* ASFlowLayoutController.mm in Sources */,
 				B35062231B010EFD0018CF92 /* ASMultidimensionalArrayUtils.mm in Sources */,
 				509E68641B3AEDB7009B9150 /* ASCollectionViewLayoutController.mm in Sources */,
-				9C5FA3541B8F6ADF00A62714 /* ASLayoutOptions.m in Sources */,
+				9C5FA3541B8F6ADF00A62714 /* ASLayoutOptions.mm in Sources */,
 				B350621E1B010EFD0018CF92 /* ASHighlightOverlayLayer.mm in Sources */,
 				B35062271B010EFD0018CF92 /* ASRangeController.mm in Sources */,
 				18C2ED831B9B7DE800F627B3 /* ASCollectionNode.m in Sources */,

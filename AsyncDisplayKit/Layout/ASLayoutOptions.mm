@@ -117,8 +117,10 @@ static Class gDefaultLayoutOptionsClass = nil;
   ASDN::MutexLocker l(_propertyLock);
   if ([layoutable isKindOfClass:[ASTextNode class]]) {
     ASTextNode *textNode = (ASTextNode *)layoutable;
-    self.ascender = round([[textNode.attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * ASScreenScale())/ASScreenScale();
-    self.descender = round([[textNode.attributedString attribute:NSFontAttributeName atIndex:textNode.attributedString.length - 1 effectiveRange:NULL] descender] * ASScreenScale())/ASScreenScale();
+    if (textNode.attributedString.length > 0) {
+      self.ascender = round([[textNode.attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * ASScreenScale())/ASScreenScale();
+      self.descender = round([[textNode.attributedString attribute:NSFontAttributeName atIndex:textNode.attributedString.length - 1 effectiveRange:NULL] descender] * ASScreenScale())/ASScreenScale();
+    }
   }
   if ([layoutable isKindOfClass:[ASDisplayNode class]]) {
     ASDisplayNode *displayNode = (ASDisplayNode *)layoutable;
