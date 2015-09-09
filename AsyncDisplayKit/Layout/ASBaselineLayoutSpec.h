@@ -9,7 +9,7 @@
  */
 
 #import <AsyncDisplayKit/ASStackLayoutSpec.h>
-#import <AsyncDisplayKit/ASBaselineLayoutable.h>
+#import <AsyncDisplayKit/ASLayoutable.h>
 
 typedef NS_ENUM(NSUInteger, ASBaselineLayoutBaselineAlignment) {
   /** No baseline alignment. This is only valid for a vertical stack */
@@ -29,7 +29,7 @@ typedef NS_ENUM(NSUInteger, ASBaselineLayoutBaselineAlignment) {
  If the spec is created with a vertical direction, a child's vertical spacing will be measured from its
  baseline instead of from the child's bounding box.
 */
-@interface ASBaselineLayoutSpec : ASLayoutSpec <ASBaselineLayoutable>
+@interface ASBaselineLayoutSpec : ASLayoutSpec
 
 /** Specifies the direction children are stacked in. */
 @property (nonatomic, assign) ASStackLayoutDirection direction;
@@ -41,9 +41,6 @@ typedef NS_ENUM(NSUInteger, ASBaselineLayoutBaselineAlignment) {
 @property (nonatomic, assign) ASStackLayoutAlignItems alignItems;
 /** The type of baseline alignment */
 @property (nonatomic, assign) ASBaselineLayoutBaselineAlignment baselineAlignment;
-
-- (void)addChild:(id<ASBaselineLayoutable>)child;
-- (void)addChildren:(NSArray *)children;
 
 /**
  @param direction The direction of the stack view (horizontal or vertical)

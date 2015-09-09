@@ -31,8 +31,6 @@
  **/
 @interface ASRatioLayoutSpec : ASLayoutSpec
 
-
-@property (nonatomic, strong) id<ASLayoutable> child;
 @property (nonatomic, assign) CGFloat ratio;
 
 + (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;

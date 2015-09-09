@@ -23,9 +23,6 @@
 #import "ASThread.h"
 
 @implementation ASStackLayoutSpec
-{
-  std::vector<id<ASStackLayoutable>> _children;
-}
 
 - (instancetype)init
 {
@@ -47,24 +44,8 @@
   _spacing = spacing;
   _justifyContent = justifyContent;
   
-  _children = std::vector<id<ASStackLayoutable>>();
-  for (id<ASStackLayoutable> child in children) {
-    _children.push_back(child);
-  }
+  [self setChildren:children];
   return self;
-}
-
-- (void)addChild:(id<ASStackLayoutable>)child
-{
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _children.push_back(child);
-}
-
-- (void)addChildren:(NSArray *)children
-{
-  for (id<ASStackLayoutable> child in children) {
-    [self addChild:child];
-  }
 }
 
 - (void)setDirection:(ASStackLayoutDirection)direction
@@ -91,10 +72,20 @@
   _spacing = spacing;
 }
 
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+{
+  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
+}
+
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems};
-  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_children, style, constrainedSize);
+  std::vector<id<ASLayoutable>> stackChildren = std::vector<id<ASLayoutable>>();
+  for (id<ASLayoutable> child in self.children) {
+    stackChildren.push_back(child);
+  }
+  
+  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
   const CGSize finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
   NSArray *sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];

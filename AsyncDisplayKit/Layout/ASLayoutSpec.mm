@@ -15,22 +15,29 @@
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
+#import "ASLayoutOptions.h"
+#import "ASLayoutOptionsPrivate.h"
+
+#import <objc/runtime.h>
+
+static NSString * const kDefaultChildKey = @"kDefaultChildKey";
+static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
+
+@interface ASLayoutSpec()
+@property (nonatomic, strong) NSMutableDictionary *layoutChildren;
+@end
 
 @implementation ASLayoutSpec
 
-@synthesize spacingBefore = _spacingBefore;
-@synthesize spacingAfter = _spacingAfter;
-@synthesize flexGrow = _flexGrow;
-@synthesize flexShrink = _flexShrink;
-@synthesize flexBasis = _flexBasis;
-@synthesize alignSelf = _alignSelf;
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
+@synthesize layoutChildren = _layoutChildren;
 
 - (instancetype)init
 {
   if (!(self = [super init])) {
     return nil;
   }
-  _flexBasis = ASRelativeDimensionUnconstrained;
+  _layoutChildren = [NSMutableDictionary dictionary];
   _isMutable = YES;
   return self;
 }
@@ -42,4 +49,60 @@
   return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
 }
 
+- (ASLayoutSpec *)finalLayoutableWithParent:(ASLayoutSpec *)parentSpec;
+{
+  return nil;
+}
+
+- (void)setChild:(id<ASLayoutable>)child;
+{
+  [self setChild:child forIdentifier:kDefaultChildKey];
+}
+
+- (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
+{
+  ASLayoutOptions *layoutOptions = [child layoutOptions];
+  
+  id<ASLayoutable> finalLayoutable = [child finalLayoutableWithParent:self];
+  if (finalLayoutable) {
+    [layoutOptions copyIntoOptions:finalLayoutable.layoutOptions];
+    return finalLayoutable;
+  }
+  return child;
+}
+
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  self.layoutChildren[identifier] = [self layoutableToAddFromLayoutable:child];;
+}
+
+- (void)setChildren:(NSArray *)children
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  
+  NSMutableArray *finalChildren = [NSMutableArray arrayWithCapacity:children.count];
+  for (id<ASLayoutable> child in children) {
+    [finalChildren addObject:[self layoutableToAddFromLayoutable:child]];
+  }
+  
+  self.layoutChildren[kDefaultChildrenKey] = [NSArray arrayWithArray:finalChildren];
+}
+
+- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
+{
+  return self.layoutChildren[identifier];
+}
+
+- (id<ASLayoutable>)child
+{
+  return self.layoutChildren[kDefaultChildKey];
+}
+
+- (NSArray *)children
+{
+  return self.layoutChildren[kDefaultChildrenKey];
+}
+
+                     
 @end

@@ -9,6 +9,7 @@
 #import "ASDisplayNode.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASLayoutOptionsPrivate.h"
 
 #import <objc/runtime.h>
 
@@ -41,12 +42,7 @@
 
 @implementation ASDisplayNode
 
-@synthesize spacingBefore = _spacingBefore;
-@synthesize spacingAfter = _spacingAfter;
-@synthesize flexGrow = _flexGrow;
-@synthesize flexShrink = _flexShrink;
-@synthesize flexBasis = _flexBasis;
-@synthesize alignSelf = _alignSelf;
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
 @synthesize preferredFrameSize = _preferredFrameSize;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
@@ -155,7 +151,6 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
   }
   _methodOverrides = overrides;
 
-  _flexBasis = ASRelativeDimensionUnconstrained;
   _preferredFrameSize = CGSizeZero;
 }
 
@@ -1852,6 +1847,11 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
     ASDisplayNodeAssertMainThread();
     return !self.layerBacked && [self.view canPerformAction:action withSender:sender];
+}
+
+- (ASLayoutSpec *)finalLayoutableWithParent:(ASLayoutSpec *)parentSpec
+{
+  return nil;
 }
 
 @end

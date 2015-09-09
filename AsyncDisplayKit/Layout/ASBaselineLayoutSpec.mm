@@ -9,7 +9,6 @@
  */
 
 #import "ASBaselineLayoutSpec.h"
-#import "ASStackLayoutable.h"
 
 #import <numeric>
 #import <vector>
@@ -26,13 +25,6 @@
 
 
 @implementation ASBaselineLayoutSpec
-{
-  std::vector<id<ASStackLayoutable>> _children;
-  ASDN::RecursiveMutex _propertyLock;
-}
-
-@synthesize ascender = _ascender;
-@synthesize descender = _descender;
 
 - (instancetype)initWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing baselineAlignment:(ASBaselineLayoutBaselineAlignment)baselineAlignment justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
 {
@@ -47,10 +39,7 @@
   _justifyContent = justifyContent;
   _baselineAlignment = baselineAlignment;
   
-  _children = std::vector<id<ASStackLayoutable>>();
-  for (id<ASStackLayoutable> child in children) {
-    _children.push_back(child);
-  }
+  [self setChildren:children];
   return self;
 }
 
@@ -65,7 +54,12 @@
   ASStackLayoutSpecStyle stackStyle = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems};
   ASBaselineLayoutSpecStyle style = { .baselineAlignment = _baselineAlignment, .stackLayoutStyle = stackStyle };
   
-  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_children, stackStyle, constrainedSize);
+  std::vector<id<ASLayoutable>> stackChildren = std::vector<id<ASLayoutable>>();
+  for (id<ASLayoutable> child in self.children) {
+    stackChildren.push_back(child);
+  }
+  
+  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, stackStyle, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, stackStyle, constrainedSize);
   const auto baselinePositionedLayout = ASBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
   
@@ -73,25 +67,14 @@
   
   NSArray *sublayouts = [NSArray arrayWithObjects:&baselinePositionedLayout.sublayouts[0] count:baselinePositionedLayout.sublayouts.size()];
   
-  ASDN::MutexLocker l(_propertyLock);
-  _ascender = baselinePositionedLayout.ascender;
-  _descender = baselinePositionedLayout.descender;
-  
   return [ASLayout layoutWithLayoutableObject:self
                                          size:ASSizeRangeClamp(constrainedSize, finalSize)
                                    sublayouts:sublayouts];
 }
 
-- (void)addChild:(id<ASBaselineLayoutable>)child
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
-  _children.push_back(child);
-}
-
-- (void)addChildren:(NSArray *)children
-{
-  for (id<ASBaselineLayoutable> child in children) {
-    [self addChild:child];
-  }
+  ASDisplayNodeAssert(NO, @"ASBaselineLayoutSpec only supports setChildren");
 }
 
 @end
