@@ -63,6 +63,20 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 - (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
 {
   if (self.isFinalLayoutable == NO) {
+    
+    // If you are getting recursion crashes here after implementing finalLayoutable, make sure
+    // that you are setting isFinalLayoutable flag to YES BEFORE adding a child to the new ASLayoutable.
+    //
+    // For example:
+    //- (id<ASLayoutable>)finalLayoutable
+    //{
+    //  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
+    //  insetSpec.insets = UIEdgeInsetsMake(10,10,10,10);
+    //  insetSpec.isFinalLayoutable = YES;
+    //  [insetSpec setChild:self];
+    //  return insetSpec;
+    //}
+
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
     if (finalLayoutable != child) {
       ASLayoutOptions *layoutOptions = [child layoutOptions];
