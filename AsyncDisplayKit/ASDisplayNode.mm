@@ -44,6 +44,7 @@
 
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
 @synthesize preferredFrameSize = _preferredFrameSize;
+@synthesize isFinalLayoutable = _isFinalLayoutable;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
@@ -1849,9 +1850,9 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
     return !self.layerBacked && [self.view canPerformAction:action withSender:sender];
 }
 
-- (ASLayoutSpec *)finalLayoutableWithParent:(ASLayoutSpec *)parentSpec
+- (id<ASLayoutable>)finalLayoutable
 {
-  return nil;
+  return self;
 }
 
 @end

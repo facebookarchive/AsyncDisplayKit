@@ -31,6 +31,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
 @synthesize layoutChildren = _layoutChildren;
+@synthesize isFinalLayoutable = _isFinalLayoutable;
 
 - (instancetype)init
 {
@@ -49,9 +50,9 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
 }
 
-- (ASLayoutSpec *)finalLayoutableWithParent:(ASLayoutSpec *)parentSpec;
+- (id<ASLayoutable>)finalLayoutable
 {
-  return nil;
+  return self;
 }
 
 - (void)setChild:(id<ASLayoutable>)child;
@@ -61,12 +62,27 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 - (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
 {
-  ASLayoutOptions *layoutOptions = [child layoutOptions];
-  
-  id<ASLayoutable> finalLayoutable = [child finalLayoutableWithParent:self];
-  if (finalLayoutable) {
-    [layoutOptions copyIntoOptions:finalLayoutable.layoutOptions];
-    return finalLayoutable;
+  if (self.isFinalLayoutable == NO) {
+    
+    // If you are getting recursion crashes here after implementing finalLayoutable, make sure
+    // that you are setting isFinalLayoutable flag to YES BEFORE adding a child to the new ASLayoutable.
+    //
+    // For example:
+    //- (id<ASLayoutable>)finalLayoutable
+    //{
+    //  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
+    //  insetSpec.insets = UIEdgeInsetsMake(10,10,10,10);
+    //  insetSpec.isFinalLayoutable = YES;
+    //  [insetSpec setChild:self];
+    //  return insetSpec;
+    //}
+
+    id<ASLayoutable> finalLayoutable = [child finalLayoutable];
+    if (finalLayoutable != child) {
+      ASLayoutOptions *layoutOptions = [child layoutOptions];
+      [layoutOptions copyIntoOptions:finalLayoutable.layoutOptions];
+      return finalLayoutable;
+    }
   }
   return child;
 }
