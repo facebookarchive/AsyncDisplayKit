@@ -126,6 +126,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASBatchContext *_batchContext;
   
   CGSize _maxSizeForNodesConstrainedSize;
+  BOOL _ignoreMaxSizeChange;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -179,6 +180,9 @@ static BOOL _isInterceptedSelector(SEL sel)
   _collectionViewLayoutImplementsInsetSection = [layout respondsToSelector:@selector(sectionInset)];
 
   _maxSizeForNodesConstrainedSize = self.bounds.size;
+  // If the initial size is 0, expect a size change very soon which is part of the initial configuration
+  // and should not trigger a relayout.
+  _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
   
   self.backgroundColor = [UIColor whiteColor];
   
@@ -481,14 +485,22 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)layoutSubviews
 {
-  [super layoutSubviews];
-  
   if (! CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, self.bounds.size)) {
     _maxSizeForNodesConstrainedSize = self.bounds.size;
-    [self performBatchAnimated:NO updates:^{
-      [_dataController relayoutAllRows];
-    } completion:nil];
+    
+    // First size change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
+    // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
+    if (_ignoreMaxSizeChange) {
+      _ignoreMaxSizeChange = NO;
+    } else {
+      [self performBatchAnimated:NO updates:^{
+        [_dataController relayoutAllRows];
+      } completion:nil];
+    }
   }
+  
+  // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
+  [super layoutSubviews];
 }
 
 
