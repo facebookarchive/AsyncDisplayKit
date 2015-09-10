@@ -17,14 +17,13 @@
 @protocol ASLayoutablePrivate <NSObject>
 
 /**
- *  @abstract A display node cannot implement both calculateSizeThatFits: and layoutSpecThatFits:. This
- *  method exists to give the user a chance to wrap an ASLayoutable in an ASLayoutSpec just before it is
- *  added to a parent ASLayoutSpec. For example, if you wanted an ASTextNode that was always inside of an
- *  ASInsetLayoutSpec, you could subclass ASTextNode and implement finalLayoutable so that it wraps
- *  self in an inset spec.
+ *  @abstract This method can be used to give the user a chance to wrap an ASLayoutable in an ASLayoutSpec 
+ *  just before it is added to a parent ASLayoutSpec. For example, if you wanted an ASTextNode that was always 
+ *  inside of an ASInsetLayoutSpec, you could subclass ASTextNode and implement finalLayoutable so that it wraps
+ *  itself in an inset spec.
  *
- *  Note that any ASLayoutable other than self that is returned MUST set isFinalLayoutable to YES BEFORE
- *  adding a child.
+ *  Note that any ASLayoutable other than self that is returned MUST set isFinalLayoutable to YES. Make sure
+ *  to do this BEFORE adding a child to the ASLayoutable.
  *
  *  @return The layoutable that will be added to the parent layout spec. Defaults to self.
  */
