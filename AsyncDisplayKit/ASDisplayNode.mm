@@ -9,6 +9,7 @@
 #import "ASDisplayNode.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASLayoutOptionsPrivate.h"
 
 #import <objc/runtime.h>
 
@@ -43,13 +44,9 @@
 
 @implementation ASDisplayNode
 
-@synthesize spacingBefore = _spacingBefore;
-@synthesize spacingAfter = _spacingAfter;
-@synthesize flexGrow = _flexGrow;
-@synthesize flexShrink = _flexShrink;
-@synthesize flexBasis = _flexBasis;
-@synthesize alignSelf = _alignSelf;
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
 @synthesize preferredFrameSize = _preferredFrameSize;
+@synthesize isFinalLayoutable = _isFinalLayoutable;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
@@ -214,7 +211,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self _staticInitialize];
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
-  _flexBasis = ASRelativeDimensionUnconstrained;
   _preferredFrameSize = CGSizeZero;
 }
 
@@ -659,9 +655,27 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   } else {
     // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
     [self measureWithSizeRange:oldConstrainedSize];
-    CGRect bounds = self.bounds;
-    bounds.size = CGSizeMake(_layout.size.width, _layout.size.height);
-    self.bounds = bounds;
+
+    CGSize oldSize = self.bounds.size;
+    CGSize newSize = _layout.size;
+    
+    if (! CGSizeEqualToSize(oldSize, newSize)) {
+      CGRect bounds = self.bounds;
+      bounds.size = newSize;
+      self.bounds = bounds;
+      
+      // Frame's origin must be preserved. Since it is computed from bounds size, anchorPoint
+      // and position (see frame setter in ASDisplayNode+UIViewBridge), position needs to be adjusted.
+      BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
+      CGPoint anchorPoint = (useLayer ? _layer.anchorPoint : self.anchorPoint);
+      CGPoint oldPosition = (useLayer ? _layer.position : self.position);
+
+      CGFloat xDelta = (newSize.width - oldSize.width) * anchorPoint.x;
+      CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
+      CGPoint newPosition = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
+
+      useLayer ? _layer.position = newPosition : self.position = newPosition;
+    }
   }
 }
 
@@ -671,10 +685,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
-  if (CGRectEqualToRect(_layer.bounds, CGRectZero)) {
+  if (CGRectEqualToRect(self.bounds, CGRectZero)) {
     return;     // Performing layout on a zero-bounds view often results in frame calculations with negative sizes after applying margins, which will cause measureWithSizeRange: on subnodes to assert.
   }
-  _placeholderLayer.frame = _layer.bounds;
+  _placeholderLayer.frame = self.bounds;
   [self layout];
   [self layoutDidFinish];
 }
@@ -1392,12 +1406,13 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertThreadAffinity(self);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
-    id<ASLayoutable> layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
     if (layout.layoutableObject != self) {
       layout.position = CGPointZero;
-      layout = [ASLayout newWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
+      layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
       return [_subnodes containsObject:evaluatedLayout.layoutableObject];
@@ -1406,7 +1421,7 @@ static NSInteger incrementIfFound(NSInteger i) {
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
     // assume that the default implementation of -calculateSizeThatFits: returns it.
     CGSize size = [self calculateSizeThatFits:constrainedSize.max];
-    return [ASLayout newWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
+    return [ASLayout layoutWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
   }
 }
 
@@ -1892,6 +1907,11 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
     ASDisplayNodeAssertMainThread();
     return !self.layerBacked && [self.view canPerformAction:action withSender:sender];
+}
+
+- (id<ASLayoutable>)finalLayoutable
+{
+  return self;
 }
 
 @end

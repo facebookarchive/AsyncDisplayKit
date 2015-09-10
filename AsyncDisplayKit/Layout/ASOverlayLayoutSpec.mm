@@ -14,26 +14,34 @@
 #import "ASBaseDefines.h"
 #import "ASLayout.h"
 
+static NSString * const kOverlayChildKey = @"kOverlayChildKey";
+
 @implementation ASOverlayLayoutSpec
-{
-  id<ASLayoutable> _overlay;
-  id<ASLayoutable> _child;
-}
 
-+ (instancetype)newWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
+- (instancetype)initWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
-  ASOverlayLayoutSpec *spec = [super new];
-  if (spec) {
-    ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
-    spec->_overlay = overlay;
-    spec->_child = child;
+  if (!(self = [super init])) {
+    return nil;
   }
-  return spec;
+  ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
+  self.overlay = overlay;
+  [self setChild:child];
+  return self;
 }
 
-+ (instancetype)new
++ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [[self alloc] initWithChild:child overlay:overlay];
+}
+
+- (void)setOverlay:(id<ASLayoutable>)overlay
+{
+  [super setChild:overlay forIdentifier:kOverlayChildKey];
+}
+
+- (id<ASLayoutable>)overlay
+{
+  return [super childForIdentifier:kOverlayChildKey];
 }
 
 /**
@@ -41,16 +49,16 @@
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASLayout *contentsLayout = [_child measureWithSizeRange:constrainedSize];
+  ASLayout *contentsLayout = [self.child measureWithSizeRange:constrainedSize];
   contentsLayout.position = CGPointZero;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithObject:contentsLayout];
-  if (_overlay) {
-    ASLayout *overlayLayout = [_overlay measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
+  if (self.overlay) {
+    ASLayout *overlayLayout = [self.overlay measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
     overlayLayout.position = CGPointZero;
     [sublayouts addObject:overlayLayout];
   }
   
-  return [ASLayout newWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
 @end

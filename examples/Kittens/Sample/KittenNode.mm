@@ -137,16 +137,16 @@ static const CGFloat kInnerPadding = 10.0f;
   _imageNode.preferredFrameSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
   _textNode.flexShrink = YES;
   
-  return
-  [ASInsetLayoutSpec
-   newWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding)
-   child:
-   [ASStackLayoutSpec
-    newWithStyle:{
-      .direction = ASStackLayoutDirectionHorizontal,
-      .spacing = kInnerPadding
-    }
-    children:!_swappedTextAndImage ? @[_imageNode, _textNode] : @[_textNode, _imageNode]]];
+  ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
+  stackSpec.direction = ASStackLayoutDirectionHorizontal;
+  stackSpec.spacing = kInnerPadding;
+  [stackSpec setChildren:!_swappedTextAndImage ? @[_imageNode, _textNode] : @[_textNode, _imageNode]];
+  
+  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
+  insetSpec.insets = UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding);
+  insetSpec.child = stackSpec;
+  
+  return insetSpec;
 }
 
 // With box model, you don't need to override this method, unless you want to add custom logic.

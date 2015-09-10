@@ -19,7 +19,6 @@
 @interface ASInsetLayoutSpec ()
 {
   UIEdgeInsets _insets;
-  id<ASLayoutable> _child;
 }
 @end
 
@@ -43,22 +42,26 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
 
 @implementation ASInsetLayoutSpec
 
-+ (instancetype)newWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child
+- (instancetype)initWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
 {
-  if (child == nil) {
+  if (!(self = [super init])) {
     return nil;
   }
-  ASInsetLayoutSpec *spec = [super new];
-  if (spec) {
-    spec->_insets = insets;
-    spec->_child = child;
-  }
-  return spec;
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  _insets = insets;
+  [self setChild:child];
+  return self;
 }
 
-+ (instancetype)new
++ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [[self alloc] initWithInsets:insets child:child];
+}
+
+- (void)setInsets:(UIEdgeInsets)insets
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _insets = insets;
 }
 
 /**
@@ -85,7 +88,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
       MAX(0, constrainedSize.max.height - insetsY),
     }
   };
-  ASLayout *sublayout = [_child measureWithSizeRange:insetConstrainedSize];
+  ASLayout *sublayout = [self.child measureWithSizeRange:insetConstrainedSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {
     finite(sublayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),
@@ -103,7 +106,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   
   sublayout.position = CGPointMake(x, y);
   
-  return [ASLayout newWithLayoutableObject:self size:computedSize sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutableObject:self size:computedSize sublayouts:@[sublayout]];
 }
 
 @end

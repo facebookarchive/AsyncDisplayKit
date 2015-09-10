@@ -13,4 +13,21 @@
 /** A layout spec is an immutable object that describes a layout, loosely inspired by React. */
 @interface ASLayoutSpec : NSObject <ASLayoutable>
 
+/** 
+ Creation of a layout spec should only happen by a user in layoutSpecThatFits:. During that method, a
+ layout spec can be created and mutated. Once it is passed back to ASDK, the isMutable flag will be 
+ set to NO and any further mutations will cause an assert.
+ */
+@property (nonatomic, assign) BOOL isMutable;
+
+- (instancetype)init;
+
+- (void)setChild:(id<ASLayoutable>)child;
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier;
+- (void)setChildren:(NSArray *)children;
+
+- (id<ASLayoutable>)child;
+- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
+- (NSArray *)children;
+
 @end

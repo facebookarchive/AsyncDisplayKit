@@ -14,29 +14,28 @@
 #import "ASBaseDefines.h"
 #import "ASLayout.h"
 
+static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
+
 @interface ASBackgroundLayoutSpec ()
-{
-  id<ASLayoutable> _child;
-  id<ASLayoutable> _background;
-}
 @end
 
 @implementation ASBackgroundLayoutSpec
 
-+ (instancetype)newWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
+- (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
 {
-  if (child == nil) {
+  if (!(self = [super init])) {
     return nil;
   }
-  ASBackgroundLayoutSpec *spec = [super new];
-  spec->_child = child;
-  spec->_background = background;
-  return spec;
+  
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  [self setChild:child];
+  self.background = background;
+  return self;
 }
 
-+ (instancetype)new
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [[self alloc] initWithChild:child background:background];
 }
 
 /**
@@ -44,19 +43,29 @@
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASLayout *contentsLayout = [_child measureWithSizeRange:constrainedSize];
+  ASLayout *contentsLayout = [[self child] measureWithSizeRange:constrainedSize];
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
-  if (_background) {
+  if (self.background) {
     // Size background to exactly the same size.
-    ASLayout *backgroundLayout = [_background measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
+    ASLayout *backgroundLayout = [self.background measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
     backgroundLayout.position = CGPointZero;
     [sublayouts addObject:backgroundLayout];
   }
   contentsLayout.position = CGPointZero;
   [sublayouts addObject:contentsLayout];
 
-  return [ASLayout newWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+}
+
+- (void)setBackground:(id<ASLayoutable>)background
+{
+  [super setChild:background forIdentifier:kBackgroundChildKey];
+}
+
+- (id<ASLayoutable>)background
+{
+  return [super childForIdentifier:kBackgroundChildKey];
 }
 
 @end

@@ -37,6 +37,9 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
 /** Lays out a single layoutable child and position it so that it is centered into the layout bounds. */
 @interface ASCenterLayoutSpec : ASLayoutSpec
 
+@property (nonatomic, assign) ASCenterLayoutSpecCenteringOptions centeringOptions;
+@property (nonatomic, assign) ASCenterLayoutSpecSizingOptions sizingOptions;
+
 /**
  * Initializer.
  *
@@ -46,8 +49,8 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
  *
  * @param child The child to center.
  */
-+ (instancetype)newWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
-                          sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
-                                  child:(id<ASLayoutable>)child;
++ (instancetype)centerLayoutSpecWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+                                       sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
+                                               child:(id<ASLayoutable>)child;
 
 @end

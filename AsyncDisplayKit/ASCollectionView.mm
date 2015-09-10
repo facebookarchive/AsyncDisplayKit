@@ -126,6 +126,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASBatchContext *_batchContext;
   
   CGSize _maxSizeForNodesConstrainedSize;
+  BOOL _ignoreMaxSizeChange;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -136,6 +137,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark -
 #pragma mark Lifecycle.
+
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
+{
+  return [self initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+}
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
@@ -174,6 +180,11 @@ static BOOL _isInterceptedSelector(SEL sel)
   _collectionViewLayoutImplementsInsetSection = [layout respondsToSelector:@selector(sectionInset)];
 
   _maxSizeForNodesConstrainedSize = self.bounds.size;
+  // If the initial size is 0, expect a size change very soon which is part of the initial configuration
+  // and should not trigger a relayout.
+  _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
+  
+  self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
   
@@ -474,14 +485,22 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)layoutSubviews
 {
-  [super layoutSubviews];
-  
   if (! CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, self.bounds.size)) {
     _maxSizeForNodesConstrainedSize = self.bounds.size;
-    [self performBatchAnimated:NO updates:^{
-      [_dataController relayoutAllRows];
-    } completion:nil];
+    
+    // First size change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
+    // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
+    if (_ignoreMaxSizeChange) {
+      _ignoreMaxSizeChange = NO;
+    } else {
+      [self performBatchAnimated:NO updates:^{
+        [_dataController relayoutAllRows];
+      } completion:nil];
+    }
   }
+  
+  // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
+  [super layoutSubviews];
 }
 
 
@@ -560,10 +579,16 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
     constrainedSize.min.width = MAX(0, constrainedSize.min.width - sectionInset.left - sectionInset.right);
-    constrainedSize.max.width = MAX(0, constrainedSize.max.width - sectionInset.left - sectionInset.right);
+    //ignore insets for FLT_MAX so FLT_MAX can be compared against
+    if (constrainedSize.max.width - FLT_EPSILON < FLT_MAX) {
+      constrainedSize.max.width = MAX(0, constrainedSize.max.width - sectionInset.left - sectionInset.right);
+    }
   } else {
     constrainedSize.min.height = MAX(0, constrainedSize.min.height - sectionInset.top - sectionInset.bottom);
-    constrainedSize.max.height = MAX(0, constrainedSize.max.height - sectionInset.top - sectionInset.bottom);
+    //ignore insets for FLT_MAX so FLT_MAX can be compared against
+    if (constrainedSize.max.height - FLT_EPSILON < FLT_MAX) {
+      constrainedSize.max.height = MAX(0, constrainedSize.max.height - sectionInset.top - sectionInset.bottom);
+    }
   }
 
   return constrainedSize;

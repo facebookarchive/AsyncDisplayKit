@@ -9,53 +9,23 @@
  */
 
 #import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASRelativeSize.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
+#import <AsyncDisplayKit/ASStackLayoutable.h>
+#import <AsyncDisplayKit/ASBaselineLayoutable.h>
+#import <AsyncDisplayKit/ASStaticLayoutable.h>
+
+#import <AsyncDisplayKit/ASLayoutablePrivate.h>
 
 @class ASLayout;
+@class ASLayoutSpec;
 
 /** 
  * The ASLayoutable protocol declares a method for measuring the layout of an object. A class must implement the method
  * so that instances of that class can be used to build layout trees. The protocol also provides information 
  * about how an object should be laid out within an ASStackLayoutSpec.
  */
-@protocol ASLayoutable <NSObject>
-
-/** 
- * @abstract Additional space to place before this object in the stacking direction.
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) CGFloat spacingBefore;
-
-/**
- * @abstract Additional space to place after this object in the stacking direction.
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) CGFloat spacingAfter;
-
-/**
- * @abstract If the sum of childrens' stack dimensions is less than the minimum size, should this object grow?
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) BOOL flexGrow;
-
-/**
- * @abstract If the sum of childrens' stack dimensions is greater than the maximum size, should this object shrink?
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) BOOL flexShrink;
-
-/**
- * @abstract Specifies the initial size in the stack dimension for this object.
- * Default to ASRelativeDimensionUnconstrained.
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) ASRelativeDimension flexBasis;
-
-/**
- * @abstract Orientation of the object along cross axis, overriding alignItems
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
+@protocol ASLayoutable <ASLayoutablePrivate, ASStackLayoutable, ASBaselineLayoutable, ASStaticLayoutable>
 
 /**
  * @abstract Calculate a layout based on given size range.

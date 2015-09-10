@@ -11,46 +11,31 @@
 #import "ASStaticLayoutSpec.h"
 
 #import "ASLayoutSpecUtilities.h"
+#import "ASLayoutOptions.h"
+#import "ASLayoutOptionsPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-
-@implementation ASStaticLayoutSpecChild
-
-+ (instancetype)newWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject size:(ASRelativeSizeRange)size
-{
-  ASStaticLayoutSpecChild *c = [super new];
-  if (c) {
-    c->_position = position;
-    c->_layoutableObject = layoutableObject;
-    c->_size = size;
-  }
-  return c;
-}
-
-+ (instancetype)newWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject
-{
-  return [self newWithPosition:position layoutableObject:layoutableObject size:ASRelativeSizeRangeUnconstrained];
-}
-
-@end
+#import "ASStaticLayoutable.h"
 
 @implementation ASStaticLayoutSpec
+
++ (instancetype)staticLayoutSpecWithChildren:(NSArray *)children
 {
-  NSArray *_children;
+  return [[self alloc] initWithChildren:children];
 }
 
-+ (instancetype)newWithChildren:(NSArray *)children
+- (instancetype)init
 {
-  ASStaticLayoutSpec *spec = [super new];
-  if (spec) {
-    spec->_children = children;
+    return [self initWithChildren:@[]];
+}
+
+- (instancetype)initWithChildren:(NSArray *)children
+{
+  if (!(self = [super init])) {
+    return nil;
   }
-  return spec;
-}
-
-+ (instancetype)new
-{
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  self.children = children;
+  return self;
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
@@ -60,37 +45,38 @@
     constrainedSize.max.height
   };
 
-  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:_children.count];
-  for (ASStaticLayoutSpecChild *child in _children) {
+  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:self.children.count];
+  for (id<ASLayoutable> child in self.children) {
+    ASLayoutOptions *layoutOptions = child.layoutOptions;
     CGSize autoMaxSize = {
-      constrainedSize.max.width - child.position.x,
-      constrainedSize.max.height - child.position.y
+      constrainedSize.max.width - layoutOptions.layoutPosition.x,
+      constrainedSize.max.height - layoutOptions.layoutPosition.y
     };
-    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.size)
+    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, layoutOptions.sizeRange)
       ? ASSizeRangeMake({0, 0}, autoMaxSize)
-      : ASRelativeSizeRangeResolve(child.size, size);
-    ASLayout *sublayout = [child.layoutableObject measureWithSizeRange:childConstraint];
-    sublayout.position = child.position;
+      : ASRelativeSizeRangeResolve(layoutOptions.sizeRange, size);
+    ASLayout *sublayout = [child measureWithSizeRange:childConstraint];
+    sublayout.position = layoutOptions.layoutPosition;
     [sublayouts addObject:sublayout];
   }
   
-  if (isnan(size.width)) {
+  if (isnan(size.width) || size.width >= FLT_MAX - FLT_EPSILON) {
     size.width = constrainedSize.min.width;
     for (ASLayout *sublayout in sublayouts) {
       size.width = MAX(size.width, sublayout.position.x + sublayout.size.width);
     }
   }
 
-  if (isnan(size.height)) {
+  if (isnan(size.height) || size.height >= FLT_MAX - FLT_EPSILON) {
     size.height = constrainedSize.min.height;
     for (ASLayout *sublayout in sublayouts) {
       size.height = MAX(size.height, sublayout.position.y + sublayout.size.height);
     }
   }
 
-  return [ASLayout newWithLayoutableObject:self
-                                      size:ASSizeRangeClamp(constrainedSize, size)
-                                sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self
+                                         size:ASSizeRangeClamp(constrainedSize, size)
+                                   sublayouts:sublayouts];
 }
 
 @end

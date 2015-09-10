@@ -20,40 +20,78 @@
 #import "ASStackLayoutSpecUtilities.h"
 #import "ASStackPositionedLayout.h"
 #import "ASStackUnpositionedLayout.h"
+#import "ASThread.h"
 
 @implementation ASStackLayoutSpec
+
+- (instancetype)init
 {
-  ASStackLayoutSpecStyle _style;
-  std::vector<id<ASLayoutable>> _children;
+  return [self initWithDirection:ASStackLayoutDirectionHorizontal spacing:0.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:nil];
 }
 
-+ (instancetype)newWithStyle:(ASStackLayoutSpecStyle)style children:(NSArray *)children
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
 {
-  ASStackLayoutSpec *spec = [super new];
-  if (spec) {
-    spec->_style = style;
-    spec->_children = std::vector<id<ASLayoutable>>();
-    for (id<ASLayoutable> child in children) {
-      spec->_children.push_back(child);
-    }
+  return [[self alloc] initWithDirection:direction spacing:spacing justifyContent:justifyContent alignItems:alignItems children:children];
+}
+
+- (instancetype)initWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
+{
+  if (!(self = [super init])) {
+    return nil;
   }
-  return spec;
+  _direction = direction;
+  _alignItems = alignItems;
+  _spacing = spacing;
+  _justifyContent = justifyContent;
+  
+  [self setChildren:children];
+  return self;
 }
 
-+ (instancetype)new
+- (void)setDirection:(ASStackLayoutDirection)direction
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _direction = direction;
+}
+
+- (void)setAlignItems:(ASStackLayoutAlignItems)alignItems
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _alignItems = alignItems;
+}
+
+- (void)setJustifyContent:(ASStackLayoutJustifyContent)justifyContent
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _justifyContent = justifyContent;
+}
+
+- (void)setSpacing:(CGFloat)spacing
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _spacing = spacing;
+}
+
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+{
+  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(_children, _style, constrainedSize);
-  const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, _style, constrainedSize);
-  const CGSize finalSize = directionSize(_style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
+  ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems};
+  std::vector<id<ASLayoutable>> stackChildren = std::vector<id<ASLayoutable>>();
+  for (id<ASLayoutable> child in self.children) {
+    stackChildren.push_back(child);
+  }
+  
+  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
+  const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
+  const CGSize finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
   NSArray *sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
-  return [ASLayout newWithLayoutableObject:self
-                                      size:ASSizeRangeClamp(constrainedSize, finalSize)
-                                sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self
+                                         size:ASSizeRangeClamp(constrainedSize, finalSize)
+                                   sublayouts:sublayouts];
 }
 
 @end

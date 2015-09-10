@@ -57,7 +57,8 @@
 @end
 
 @interface ASTableViewFilledDataSource : NSObject <ASTableViewDataSource, ASTableViewDelegate>
-
+/** Calculated by counting how many times a constrained size is asked for the first node on main thread. */
+@property (atomic) int numberOfRelayouts;
 @end
 
 @implementation ASTableViewFilledDataSource
@@ -78,6 +79,16 @@
   textCellNode.text = indexPath.description;
   
   return textCellNode;
+}
+
+- (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  if ([NSThread isMainThread] && indexPath.section == 0 && indexPath.row == 0) {
+    _numberOfRelayouts++;
+  }
+  CGFloat maxWidth = tableView.bounds.size.width;
+  return ASSizeRangeMake(CGSizeMake(maxWidth, 0),
+                         CGSizeMake(maxWidth, FLT_MAX));
 }
 
 @end
@@ -200,6 +211,83 @@
       [tableView endUpdates];
     }
   }
+}
+
+- (void)testRelayoutAllRowsWithNonZeroSizeInitially
+{
+  // Initial width of the table view is non-zero and all nodes are measured with this size.
+  // Any subsequence size change must trigger a relayout.
+  CGSize tableViewFinalSize = CGSizeMake(100, 500);
+  // Width and height are swapped so that a later size change will simulate a rotation
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewFinalSize.height, tableViewFinalSize.width)
+                                                                style:UITableViewStylePlain
+                                                    asyncDataFetching:YES];
+  
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  // Trigger layout measurement on all nodes
+  [tableView reloadData];
+  
+  [self triggerSizeChangeAndAssertRelayoutAllRowsForTableView:tableView newSize:tableViewFinalSize];
+}
+
+- (void)testRelayoutAllRowsWithZeroSizeInitially
+{
+  // Initial width of the table view is 0. The first size change is part of the initial config.
+  // Any subsequence size change after that must trigger a relayout.
+  CGSize tableViewFinalSize = CGSizeMake(100, 500);
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectZero
+                                                                style:UITableViewStylePlain
+                                                    asyncDataFetching:YES];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  // Initial configuration
+  UIView *superview = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  [superview addSubview:tableView];
+  // Width and height are swapped so that a later size change will simulate a rotation
+  tableView.frame = CGRectMake(0, 0, tableViewFinalSize.height, tableViewFinalSize.width);
+  // Trigger layout measurement on all nodes
+  [tableView layoutIfNeeded];
+  
+  [self triggerSizeChangeAndAssertRelayoutAllRowsForTableView:tableView newSize:tableViewFinalSize];
+}
+
+- (void)triggerSizeChangeAndAssertRelayoutAllRowsForTableView:(ASTableView *)tableView newSize:(CGSize)newSize
+{
+  XCTestExpectation *nodesMeasuredUsingNewConstrainedSizeExpectation = [self expectationWithDescription:@"nodesMeasuredUsingNewConstrainedSizeExpectation"];
+  
+  [tableView beginUpdates];
+  
+  CGRect frame = tableView.frame;
+  frame.size = newSize;
+  tableView.frame = frame;
+  [tableView layoutIfNeeded];
+  
+  [tableView endUpdatesAnimated:NO completion:^(BOOL completed) {
+    int numberOfRelayouts = ((ASTableViewFilledDataSource *)(tableView.asyncDataSource)).numberOfRelayouts;
+    XCTAssertEqual(numberOfRelayouts, 1);
+    
+    for (int section = 0; section < NumberOfSections; section++) {
+      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        ASCellNode *node = [tableView nodeForRowAtIndexPath:indexPath];
+        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, newSize.width);
+      }
+    }
+    [nodesMeasuredUsingNewConstrainedSizeExpectation fulfill];
+  }];
+  
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
 }
 
 @end

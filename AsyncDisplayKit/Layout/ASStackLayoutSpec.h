@@ -9,56 +9,8 @@
  */
 
 #import <AsyncDisplayKit/ASLayoutSpec.h>
+#import <AsyncDisplayKit/ASStackLayoutDefines.h>
 
-/** The direction children are stacked in */
-typedef NS_ENUM(NSUInteger, ASStackLayoutDirection) {
-  /** Children are stacked vertically */
-  ASStackLayoutDirectionVertical,
-  /** Children are stacked horizontally */
-  ASStackLayoutDirectionHorizontal,
-};
-
-/** If no children are flexible, how should this spec justify its children in the available space? */
-typedef NS_ENUM(NSUInteger, ASStackLayoutJustifyContent) {
-  /**
-   On overflow, children overflow out of this spec's bounds on the right/bottom side.
-   On underflow, children are left/top-aligned within this spec's bounds.
-   */
-  ASStackLayoutJustifyContentStart,
-  /**
-   On overflow, children are centered and overflow on both sides.
-   On underflow, children are centered within this spec's bounds in the stacking direction.
-   */
-  ASStackLayoutJustifyContentCenter,
-  /**
-   On overflow, children overflow out of this spec's bounds on the left/top side.
-   On underflow, children are right/bottom-aligned within this spec's bounds.
-   */
-  ASStackLayoutJustifyContentEnd,
-};
-
-/** Orientation of children along cross axis */
-typedef NS_ENUM(NSUInteger, ASStackLayoutAlignItems) {
-  /** Align children to start of cross axis */
-  ASStackLayoutAlignItemsStart,
-  /** Align children with end of cross axis */
-  ASStackLayoutAlignItemsEnd,
-  /** Center children on cross axis */
-  ASStackLayoutAlignItemsCenter,
-  /** Expand children to fill cross axis */
-  ASStackLayoutAlignItemsStretch,
-};
-
-typedef struct {
-  /** Specifies the direction children are stacked in. */
-  ASStackLayoutDirection direction;
-  /** The amount of space between each child. */
-  CGFloat spacing;
-  /** How children are aligned if there are no flexible children. */
-  ASStackLayoutJustifyContent justifyContent;
-  /** Orientation of children along cross axis */
-  ASStackLayoutAlignItems alignItems;
-} ASStackLayoutSpecStyle;
 
 /**
  A simple layout spec that stacks a list of children vertically or horizontally.
@@ -83,10 +35,24 @@ typedef struct {
  */
 @interface ASStackLayoutSpec : ASLayoutSpec
 
+/** Specifies the direction children are stacked in. */
+@property (nonatomic, assign) ASStackLayoutDirection direction;
+/** The amount of space between each child. */
+@property (nonatomic, assign) CGFloat spacing;
+/** The amount of space between each child. */
+@property (nonatomic, assign) ASStackLayoutJustifyContent justifyContent;
+/** Orientation of children along cross axis */
+@property (nonatomic, assign) ASStackLayoutAlignItems alignItems;
+
+- (instancetype)init;
+
 /**
- @param style Specifies how children are laid out.
+ @param direction The direction of the stack view (horizontal or vertical)
+ @param spacing The spacing between the children
+ @param justifyContent If no children are flexible, this describes how to fill any extra space
+ @param alignItems Orientation of the children along the cross axis
  @param children ASLayoutable children to be positioned.
  */
-+ (instancetype)newWithStyle:(ASStackLayoutSpecStyle)style children:(NSArray *)children;
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children;
 
 @end

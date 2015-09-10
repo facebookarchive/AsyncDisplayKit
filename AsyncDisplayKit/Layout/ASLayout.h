@@ -43,10 +43,10 @@ extern BOOL CGPointIsNull(CGPoint point);
  *
  * @param sublayouts Sublayouts belong to the new layout.
  */
-+ (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                   size:(CGSize)size
-                               position:(CGPoint)position
-                             sublayouts:(NSArray *)sublayouts;
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                                      size:(CGSize)size
+                                  position:(CGPoint)position
+                                sublayouts:(NSArray *)sublayouts;
 
 /**
  * Convenience initializer that has CGPointNull position.
@@ -60,9 +60,9 @@ extern BOOL CGPointIsNull(CGPoint point);
  *
  * @param sublayouts Sublayouts belong to the new layout.
  */
-+ (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                   size:(CGSize)size
-                             sublayouts:(NSArray *)sublayouts;
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                                      size:(CGSize)size
+                                sublayouts:(NSArray *)sublayouts;
 
 /**
  * Convenience that has CGPointNull position and no sublayouts. 
@@ -73,7 +73,7 @@ extern BOOL CGPointIsNull(CGPoint point);
  *
  * @param size The size of this layout.
  */
-+ (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
 
 
 /**

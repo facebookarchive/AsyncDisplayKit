@@ -149,6 +149,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
 
   CGFloat _maxWidthForNodesConstrainedSize;
+  BOOL _ignoreMaxWidthChange;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -203,6 +204,9 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   _automaticallyAdjustsContentOffset = NO;
   
   _maxWidthForNodesConstrainedSize = self.bounds.size.width;
+  // If the initial size is 0, expect a size change very soon which is part of the initial configuration
+  // and should not trigger a relayout.
+  _ignoreMaxWidthChange = (_maxWidthForNodesConstrainedSize == 0);
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -367,14 +371,22 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)layoutSubviews
 {
-  [super layoutSubviews];
-  
   if (_maxWidthForNodesConstrainedSize != self.bounds.size.width) {
     _maxWidthForNodesConstrainedSize = self.bounds.size.width;
-    [self beginUpdates];
-    [_dataController relayoutAllRows];
-    [self endUpdates];
+
+    // First width change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
+    // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
+    if (_ignoreMaxWidthChange) {
+      _ignoreMaxWidthChange = NO;
+    } else {
+      [self beginUpdates];
+      [_dataController relayoutAllRows];
+      [self endUpdates];
+    }
   }
+  
+  // To ensure _maxWidthForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
+  [super layoutSubviews];
 }
 
 #pragma mark -
@@ -791,7 +803,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   }
   
   // Default size range
-  return ASSizeRangeMake(CGSizeZero, CGSizeMake(_maxWidthForNodesConstrainedSize, FLT_MAX));
+  return ASSizeRangeMake(CGSizeMake(_maxWidthForNodesConstrainedSize, 0),
+                         CGSizeMake(_maxWidthForNodesConstrainedSize, FLT_MAX));
 }
 
 - (void)dataControllerLockDataSource

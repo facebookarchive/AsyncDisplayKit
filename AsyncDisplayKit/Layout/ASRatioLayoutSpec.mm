@@ -22,27 +22,29 @@
 @implementation ASRatioLayoutSpec
 {
   CGFloat _ratio;
-  id<ASLayoutable> _child;
 }
 
-+ (instancetype)newWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child
++ (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child
 {
-  ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
-  if (child == nil) {
+  return [[self alloc] initWithRatio:ratio child:child];
+}
+
+- (instancetype)initWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;
+{
+  if (!(self = [super init])) {
     return nil;
   }
-
-  ASRatioLayoutSpec *spec = [super new];
-  if (spec) {
-    spec->_ratio = ratio;
-    spec->_child = child;
-  }
-  return spec;
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
+  _ratio = ratio;
+  [self setChild:child];
+  return self;
 }
 
-+ (instancetype)new
+- (void)setRatio:(CGFloat)ratio
 {
-    ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _ratio = ratio;
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
@@ -68,9 +70,9 @@
 
   // If there is no max size in *either* dimension, we can't apply the ratio, so just pass our size range through.
   const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
-  ASLayout *sublayout = [_child measureWithSizeRange:childRange];
+  ASLayout *sublayout = [self.child measureWithSizeRange:childRange];
   sublayout.position = CGPointZero;
-  return [ASLayout newWithLayoutableObject:self size:sublayout.size sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutableObject:self size:sublayout.size sublayouts:@[sublayout]];
 }
 
 @end
