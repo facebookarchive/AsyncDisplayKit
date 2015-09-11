@@ -10,25 +10,24 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASLayoutSpec.h>
-
-
-@interface ASDisplayNode()
-{
-  ASLayoutOptions *_layoutOptions;
-  dispatch_once_t _layoutOptionsInitializeToken;
-}
-@end
+#import <AsyncDisplayKit/ASThread.h>
 
 @interface ASDisplayNode(ASLayoutOptions)<ASLayoutable>
 @end
 
-@interface ASLayoutSpec()
+@interface ASDisplayNode()
 {
   ASLayoutOptions *_layoutOptions;
-  dispatch_once_t _layoutOptionsInitializeToken;
+  ASDN::RecursiveMutex _layoutOptionsLock;
 }
 @end
 
 @interface ASLayoutSpec(ASLayoutOptions)<ASLayoutable>
 @end
 
+@interface ASLayoutSpec()
+{
+  ASLayoutOptions *_layoutOptions;
+  ASDN::RecursiveMutex _layoutOptionsLock;
+}
+@end

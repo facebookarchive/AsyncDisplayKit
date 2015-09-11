@@ -12,8 +12,7 @@
 
 @protocol ASLayoutable;
 
-#import <AsyncDisplayKit/ASStackLayoutable.h>
-#import <AsyncDisplayKit/ASStaticLayoutable.h>
+#import <AsyncDisplayKit/ASLayoutSpec.h>
 
 @interface ASLayoutOptions : NSObject <ASStackLayoutable, ASStaticLayoutable, NSCopying>
 
@@ -24,8 +23,7 @@
 - (void)setValuesFromLayoutable:(id<ASLayoutable>)layoutable;
 
 #pragma mark - Subclasses should implement these!
-- (void)setupDefaults;
-- (void)copyIntoOptions:(ASLayoutOptions *)layoutOptions;
+- (void)propogateOptionsFromLayoutOptions:(ASLayoutOptions *)layoutOptions;
 
 #pragma mark - ASStackLayoutable
 
@@ -42,6 +40,5 @@
 
 @property (nonatomic, readwrite) ASRelativeSizeRange sizeRange;
 @property (nonatomic, readwrite) CGPoint layoutPosition;
-
 
 @end

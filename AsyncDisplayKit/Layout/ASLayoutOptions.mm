@@ -63,7 +63,20 @@ static Class gDefaultLayoutOptionsClass = nil;
 {
   self = [super init];
   if (self) {
-    [self setupDefaults];
+    
+    self.flexBasis = ASRelativeDimensionUnconstrained;
+    self.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero), ASRelativeSizeMakeWithCGSize(CGSizeZero));
+    self.layoutPosition = CGPointZero;
+    
+    // The following properties use a default value of 0 which we do not need to assign.
+    // self.spacingBefore = 0;
+    // self.spacingAfter = 0;
+    // self.flexGrow = NO;
+    // self.flexShrink = NO;
+    // self.alignSelf = ASStackLayoutAlignSelfAuto;
+    // self.ascender = 0;
+    // self.descender = 0;
+    
     [self setValuesFromLayoutable:layoutable];
   }
   return self;
@@ -73,59 +86,57 @@ static Class gDefaultLayoutOptionsClass = nil;
 - (id)copyWithZone:(NSZone *)zone
 {
   ASLayoutOptions *copy = [[[self class] alloc] init];
-  [self copyIntoOptions:copy];
+  [copy propogateOptionsFromLayoutOptions:self];
   return copy;
 }
 
-- (void)copyIntoOptions:(ASLayoutOptions *)copy
+- (void)propogateOptionsFromLayoutOptions:(ASLayoutOptions *)layoutOptions
 {
   ASDN::MutexLocker l(_propertyLock);
-  copy.flexBasis = self.flexBasis;
-  copy.spacingAfter = self.spacingAfter;
-  copy.spacingBefore = self.spacingBefore;
-  copy.flexGrow = self.flexGrow;
-  copy.flexShrink = self.flexShrink;
+  self.flexBasis = layoutOptions.flexBasis;
+  self.spacingAfter = layoutOptions.spacingAfter;
+  self.spacingBefore = layoutOptions.spacingBefore;
+  self.flexGrow = layoutOptions.flexGrow;
+  self.flexShrink = layoutOptions.flexShrink;
   
-  copy.ascender = self.ascender;
-  copy.descender = self.descender;
+  self.ascender = layoutOptions.ascender;
+  self.descender = layoutOptions.descender;
   
-  copy.sizeRange = self.sizeRange;
-  copy.layoutPosition = self.layoutPosition;
+  self.sizeRange = layoutOptions.sizeRange;
+  self.layoutPosition = layoutOptions.layoutPosition;
 }
 
-
-#pragma mark - Defaults
-- (void)setupDefaults
-{
-  self.flexBasis = ASRelativeDimensionUnconstrained;
-  self.spacingBefore = 0;
-  self.spacingAfter = 0;
-  self.flexGrow = NO;
-  self.flexShrink = NO;
-  self.alignSelf = ASStackLayoutAlignSelfAuto;
-
-  self.ascender = 0;
-  self.descender = 0;
-  
-  self.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero), ASRelativeSizeMakeWithCGSize(CGSizeZero));
-  self.layoutPosition = CGPointZero;
-}
-
-// Do this here instead of in Node/Spec subclasses so that custom specs can set default values
+/**
+ *  Given an id<ASLayoutable>, set up layout options that are intrinsically defined by the layoutable.
+ *
+ *  While this could be done in the layoutable object itself, moving the logic into the ASLayoutOptions class 
+ *  allows a custom spec to set up defaults without needing to alter the layoutable itself. For example,
+ *  image you were creating a custom baseline spec that needed ascender/descender. To assign values automatically
+ *  when a text node's attribute string is set, you would need to subclass ASTextNode and assign the values in the
+ *  override of setAttributeString. However, assigning the defaults in an ASLayoutOptions subclass's
+ *  setValuesFromLayoutable allows you to create a custom spec without the need to create a
+ *  subclass of ASTextNode.
+ *
+ *  @param layoutable The layoutable object to inspect for default intrinsic layout option values
+ */
 - (void)setValuesFromLayoutable:(id<ASLayoutable>)layoutable
 {
   ASDN::MutexLocker l(_propertyLock);
-  if ([layoutable isKindOfClass:[ASTextNode class]]) {
-    ASTextNode *textNode = (ASTextNode *)layoutable;
-    if (textNode.attributedString.length > 0) {
-      self.ascender = round([[textNode.attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * ASScreenScale())/ASScreenScale();
-      self.descender = round([[textNode.attributedString attribute:NSFontAttributeName atIndex:textNode.attributedString.length - 1 effectiveRange:NULL] descender] * ASScreenScale())/ASScreenScale();
-    }
-  }
   if ([layoutable isKindOfClass:[ASDisplayNode class]]) {
     ASDisplayNode *displayNode = (ASDisplayNode *)layoutable;
     self.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(displayNode.preferredFrameSize), ASRelativeSizeMakeWithCGSize(displayNode.preferredFrameSize));
     self.layoutPosition = displayNode.frame.origin;
+    
+    if ([layoutable isKindOfClass:[ASTextNode class]]) {
+      ASTextNode *textNode = (ASTextNode *)layoutable;
+      NSAttributedString *attributedString = textNode.attributedString;
+      if (attributedString.length > 0) {
+        CGFloat screenScale = ASScreenScale();
+        self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
+        self.descender = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+      }
+    }
+    
   }
 }
 

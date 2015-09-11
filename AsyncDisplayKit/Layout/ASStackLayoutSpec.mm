@@ -87,6 +87,12 @@
   ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
 }
 
+- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
+{
+  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports children");
+  return nil;
+}
+
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};

@@ -20,9 +20,9 @@ static CGFloat baselineForItem(const ASStackLayoutSpecStyle &style,
   __weak id<ASLayoutable> child = layout.layoutableObject;
   switch (style.alignItems) {
     case ASStackLayoutAlignItemsBaselineFirst:
-      return child.layoutOptions.ascender;
+      return child.ascender;
     case ASStackLayoutAlignItemsBaselineLast:
-      return layout.size.height + child.layoutOptions.descender;
+      return layout.size.height + child.descender;
     default:
       return 0;
   }
@@ -38,7 +38,7 @@ static CGFloat baselineOffset(const ASStackLayoutSpecStyle &style,
     __weak id<ASLayoutable> child = l.layoutableObject;
     switch (style.alignItems) {
       case ASStackLayoutAlignItemsBaselineFirst:
-        return maxAscender - child.layoutOptions.ascender;
+        return maxAscender - child.ascender;
       case ASStackLayoutAlignItemsBaselineLast:
         return maxBaseline - baselineForItem(style, l);
         
@@ -91,9 +91,9 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
     our layoutSpec to have it so that it can be baseline aligned with another text node or baseline layout spec.
    */
   const auto ascenderIt = std::max_element(positionedLayout.sublayouts.begin(), positionedLayout.sublayouts.end(), [&](const ASLayout *a, const ASLayout *b){
-    return a.layoutableObject.layoutOptions.ascender < b.layoutableObject.layoutOptions.ascender;
+    return a.layoutableObject.ascender < b.layoutableObject.ascender;
   });
-  const CGFloat maxAscender = baselineIt == positionedLayout.sublayouts.end() ? 0 : (*ascenderIt).layoutableObject.layoutOptions.ascender;
+  const CGFloat maxAscender = baselineIt == positionedLayout.sublayouts.end() ? 0 : (*ascenderIt).layoutableObject.ascender;
   
   /*
     Step 3: Take each child and update its layout position based on the baseline offset.
@@ -107,7 +107,7 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
   BOOL first = YES;
   auto stackedChildren = AS::map(positionedLayout.sublayouts, [&](ASLayout *l) -> ASLayout *{
     __weak id<ASLayoutable> child = l.layoutableObject;
-    p = p + directionPoint(style.direction, child.layoutOptions.spacingBefore, 0);
+    p = p + directionPoint(style.direction, child.spacingBefore, 0);
     if (first) {
       // if this is the first item use the previously computed start point
       p = l.position;
@@ -124,9 +124,9 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
     // node from baselines and not bounding boxes.
     CGFloat spacingAfterBaseline = 0;
     if (style.direction == ASStackLayoutDirectionVertical) {
-      spacingAfterBaseline = child.layoutOptions.descender;
+      spacingAfterBaseline = child.descender;
     }
-    p = p + directionPoint(style.direction, stackDimension(style.direction, l.size) + child.layoutOptions.spacingAfter + spacingAfterBaseline, 0);
+    p = p + directionPoint(style.direction, stackDimension(style.direction, l.size) + child.spacingAfter + spacingAfterBaseline, 0);
     
     return l;
   });
@@ -156,7 +156,7 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
   const auto descenderIt = std::max_element(stackedChildren.begin(), stackedChildren.end(), [&](const ASLayout *a, const ASLayout *b){
     return  a.position.y + a.size.height <  b.position.y + b.size.height;
   });
-  const CGFloat minDescender = descenderIt == stackedChildren.end() ? 0 : (*descenderIt).layoutableObject.layoutOptions.descender;
+  const CGFloat minDescender = descenderIt == stackedChildren.end() ? 0 : (*descenderIt).layoutableObject.descender;
 
   return {stackedChildren, crossSize, maxAscender, minDescender};
 }
