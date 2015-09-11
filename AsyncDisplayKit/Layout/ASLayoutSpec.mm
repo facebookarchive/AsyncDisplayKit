@@ -65,7 +65,8 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   if (self.isFinalLayoutable == NO) {
     
     // If you are getting recursion crashes here after implementing finalLayoutable, make sure
-    // that you are setting isFinalLayoutable flag to YES BEFORE adding a child to the new ASLayoutable.
+    // that you are setting isFinalLayoutable flag to YES. This must be one BEFORE adding a child
+    // to the new ASLayoutable.
     //
     // For example:
     //- (id<ASLayoutable>)finalLayoutable
