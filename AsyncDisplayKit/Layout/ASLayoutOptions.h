@@ -23,7 +23,7 @@
 - (void)setValuesFromLayoutable:(id<ASLayoutable>)layoutable;
 
 #pragma mark - Subclasses should implement these!
-- (void)propogateOptionsFromLayoutOptions:(ASLayoutOptions *)layoutOptions;
+- (void)propagateOptionsFromLayoutOptions:(ASLayoutOptions *)layoutOptions;
 
 #pragma mark - ASStackLayoutable
 
