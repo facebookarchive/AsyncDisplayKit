@@ -44,7 +44,11 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignItems) {
   /** Center children on cross axis */
   ASStackLayoutAlignItemsCenter,
   /** Expand children to fill cross axis */
-  ASStackLayoutAlignItemsStretch
+  ASStackLayoutAlignItemsStretch,
+  /** Children align to their first baseline. Only available for horizontal stack nodes */
+  ASStackLayoutAlignItemsBaselineFirst,
+  /** Children align to their last baseline. Only available for horizontal stack nodes */
+  ASStackLayoutAlignItemsBaselineLast,
 };
 
 /**
@@ -62,4 +66,8 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignSelf) {
   ASStackLayoutAlignSelfCenter,
   /** Expand to fill cross axis */
   ASStackLayoutAlignSelfStretch,
+  /** Children align to their first baseline. Only available for horizontal stack nodes */
+  ASStackLayoutAlignSelfBaselineFirst,
+  /** Children align to their last baseline. Only available for horizontal stack nodes */
+  ASStackLayoutAlignSelfBaselineLast,
 };

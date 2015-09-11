@@ -12,11 +12,10 @@
 
 @protocol ASLayoutable;
 
-#import <AsyncDisplayKit/ASBaselineLayoutable.h>
 #import <AsyncDisplayKit/ASStackLayoutable.h>
 #import <AsyncDisplayKit/ASStaticLayoutable.h>
 
-@interface ASLayoutOptions : NSObject <ASBaselineLayoutable, ASStackLayoutable, ASStaticLayoutable, NSCopying>
+@interface ASLayoutOptions : NSObject <ASStackLayoutable, ASStaticLayoutable, NSCopying>
 
 + (void)setDefaultLayoutOptionsClass:(Class)defaultLayoutOptionsClass;
 + (Class)defaultLayoutOptionsClass;
@@ -36,9 +35,6 @@
 @property (nonatomic, readwrite) BOOL flexShrink;
 @property (nonatomic, readwrite) ASRelativeDimension flexBasis;
 @property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
-
-#pragma mark - ASBaselineLayoutable
-
 @property (nonatomic, readwrite) CGFloat ascender;
 @property (nonatomic, readwrite) CGFloat descender;
 

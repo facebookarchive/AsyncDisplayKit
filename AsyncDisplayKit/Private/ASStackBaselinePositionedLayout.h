@@ -10,25 +10,16 @@
 
 #import "ASLayout.h"
 #import "ASDimension.h"
-#import "ASBaselineLayoutSpec.h"
 #import "ASStackPositionedLayout.h"
 
-typedef struct {
-  /** Describes how the stack will be laid out */
-  ASStackLayoutSpecStyle stackLayoutStyle;
-  
-  /** The type of baseline alignment */
-  ASBaselineLayoutBaselineAlignment baselineAlignment;
-} ASBaselineLayoutSpecStyle;
-
-struct ASBaselinePositionedLayout {
+struct ASStackBaselinePositionedLayout {
     const std::vector<ASLayout *> sublayouts;
     const CGFloat crossSize;
     const CGFloat ascender;
     const CGFloat descender;
     
     /** Given a positioned layout, computes each child position using baseline alignment. */
-    static ASBaselinePositionedLayout compute(const ASStackPositionedLayout &positionedLayout,
-                                               const ASBaselineLayoutSpecStyle &style,
-                                               const ASSizeRange &constrainedSize);
+  static ASStackBaselinePositionedLayout compute(const ASStackPositionedLayout &positionedLayout,
+                                                 const ASStackLayoutSpecStyle &style,
+                                                 const ASSizeRange &constrainedSize);
 };
