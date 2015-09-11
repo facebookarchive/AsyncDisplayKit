@@ -15,6 +15,7 @@ typedef struct {
   CGFloat spacing;
   ASStackLayoutJustifyContent justifyContent;
   ASStackLayoutAlignItems alignItems;
+  BOOL baselineRelativeArrangement;
 } ASStackLayoutSpecStyle;
 
 inline CGFloat stackDimension(const ASStackLayoutDirection direction, const CGSize size)
@@ -62,6 +63,10 @@ inline ASStackLayoutAlignItems alignment(ASStackLayoutAlignSelf childAlignment, 
       return ASStackLayoutAlignItemsStart;
     case ASStackLayoutAlignSelfStretch:
       return ASStackLayoutAlignItemsStretch;
+    case ASStackLayoutAlignSelfBaselineFirst:
+      return ASStackLayoutAlignItemsBaselineFirst;
+    case ASStackLayoutAlignSelfBaselineLast:
+      return ASStackLayoutAlignItemsBaselineLast;
     case ASStackLayoutAlignSelfAuto:
     default:
       return stackAlignment;
