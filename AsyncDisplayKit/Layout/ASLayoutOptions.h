@@ -9,10 +9,9 @@
  */
 
 #import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASLayoutSpec.h>
 
 @protocol ASLayoutable;
-
-#import <AsyncDisplayKit/ASLayoutSpec.h>
 
 @interface ASLayoutOptions : NSObject <ASStackLayoutable, ASStaticLayoutable, NSCopying>
 
