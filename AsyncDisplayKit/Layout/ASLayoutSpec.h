@@ -22,10 +22,37 @@
 
 - (instancetype)init;
 
+/**
+ *  Set child methods
+ *
+ *  Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
+ *  reponsibility of holding on to the spec children. For a layout spec like ASInsetLayoutSpec that
+ *  only requires a single child, the child can be added by calling setChild:.
+ *
+ *  For layout specs that require a known number of children (ASBackgroundLayoutSpec, for example)
+ *  a subclass should use the setChild to set the "primary" child. It can then use setChild:forIdentifier:
+ *  to set any other required children. Ideally a subclass would hide this from the user, and use the
+ *  setChildWithIdentifier: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
+ *  property that behind the scenes is calling setChild:forIdentifier:.
+ *
+ *  Finally, a layout spec like ASStackLayoutSpec can take an unknown number of children. In this case, 
+ *  the setChildren: method should be used. For good measure, in these layout specs it probably makes
+ *  sense to define setChild: to do something appropriate or to assert.
+ */
 - (void)setChild:(id<ASLayoutable>)child;
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier;
 - (void)setChildren:(NSArray *)children;
 
+/**
+ *  Get child methods
+ *
+ *  There is a corresponding "getChild" method for the above "setChild" methods.  If a subclass
+ *  has extra layoutable children, it is recommended to make a corresponding get method for that 
+ *  child. For example, the ASBackgroundLayoutSpec responds to backgroundChild.
+ *
+ *  If a get method is called on a spec that doesn't make sense, then the standard is to assert. 
+ *  For example, calling children on an ASInsetLayoutSpec will assert.
+ */
 - (id<ASLayoutable>)child;
 - (id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
 - (NSArray *)children;

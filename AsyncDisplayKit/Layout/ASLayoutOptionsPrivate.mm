@@ -10,16 +10,27 @@
 
 #import "ASLayoutOptionsPrivate.h"
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h>
+#import "ASThread.h"
 
 
+/**
+ *  Both an ASDisplayNode and an ASLayoutSpec conform to ASLayoutable. There are several properties
+ *  in ASLayoutable that are used as layoutOptions when a node or spec is used in a layout spec.
+ *  These properties are provided for convenience, as they are forwards to the node or spec's
+ *  ASLayoutOptions class. Instead of duplicating the property forwarding in both classes, we 
+ *  create a define that allows us to easily implement the forwards in one place.
+ *
+ *  If you create a custom layout spec, we recommend this stragety if you decide to extend
+ *  ASDisplayNode and ASLAyoutSpec to provide convenience properties for any options that your 
+ *  layoutSpec may require.
+ */
 #define ASLayoutOptionsForwarding \
 - (ASLayoutOptions *)layoutOptions\
 {\
-dispatch_once(&_layoutOptionsInitializeToken, ^{\
+ASDN::MutexLocker l(_layoutOptionsLock);\
 if (_layoutOptions == nil) {\
 _layoutOptions = [[[ASLayoutOptions defaultLayoutOptionsClass] alloc] initWithLayoutable:self];\
 }\
-});\
 return _layoutOptions;\
 }\
 \

@@ -47,16 +47,15 @@
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:self.children.count];
   for (id<ASLayoutable> child in self.children) {
-    ASLayoutOptions *layoutOptions = child.layoutOptions;
     CGSize autoMaxSize = {
-      constrainedSize.max.width - layoutOptions.layoutPosition.x,
-      constrainedSize.max.height - layoutOptions.layoutPosition.y
+      constrainedSize.max.width - child.layoutPosition.x,
+      constrainedSize.max.height - child.layoutPosition.y
     };
-    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, layoutOptions.sizeRange)
+    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.sizeRange)
       ? ASSizeRangeMake({0, 0}, autoMaxSize)
-      : ASRelativeSizeRangeResolve(layoutOptions.sizeRange, size);
+      : ASRelativeSizeRangeResolve(child.sizeRange, size);
     ASLayout *sublayout = [child measureWithSizeRange:childConstraint];
-    sublayout.position = layoutOptions.layoutPosition;
+    sublayout.position = child.layoutPosition;
     [sublayouts addObject:sublayout];
   }
   
@@ -77,6 +76,17 @@
   return [ASLayout layoutWithLayoutableObject:self
                                          size:ASSizeRangeClamp(constrainedSize, size)
                                    sublayouts:sublayouts];
+}
+
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+{
+  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
+}
+
+- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
+{
+  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports children");
+  return nil;
 }
 
 @end

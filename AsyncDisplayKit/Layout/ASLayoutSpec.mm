@@ -17,6 +17,7 @@
 #import "ASLayout.h"
 #import "ASLayoutOptions.h"
 #import "ASLayoutOptionsPrivate.h"
+#import "ASThread.h"
 
 #import <objc/runtime.h>
 
@@ -29,6 +30,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 @implementation ASLayoutSpec
 
+// these dynamic properties all defined in ASLayoutOptionsPrivate.m
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
 @synthesize layoutChildren = _layoutChildren;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
@@ -80,8 +82,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
     if (finalLayoutable != child) {
-      ASLayoutOptions *layoutOptions = [child layoutOptions];
-      [layoutOptions copyIntoOptions:finalLayoutable.layoutOptions];
+      [finalLayoutable.layoutOptions propagateOptionsFromLayoutOptions:child.layoutOptions];
       return finalLayoutable;
     }
   }
