@@ -256,32 +256,46 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
 {
-  if (!(self = [super init]))
-    return nil;
-
-  ASDisplayNodeAssertNotNil(viewBlock, @"should initialize with a valid block that returns a UIView");
-
-  [self _initializeInstance];
-  _viewBlock = viewBlock;
-  _flags.synchronous = YES;
-
-  return self;
+  return [self initWithViewBlock:viewBlock didLoadBlock:nil];
 }
 
-- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock
+- (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   if (!(self = [super init]))
     return nil;
-
-  ASDisplayNodeAssertNotNil(layerBlock, @"should initialize with a valid block that returns a CALayer");
-
+  
+  ASDisplayNodeAssertNotNil(viewBlock, @"should initialize with a valid block that returns a UIView");
+  
   [self _initializeInstance];
-  _layerBlock = layerBlock;
+  _viewBlock = viewBlock;
+  _nodeLoadedBlock = didLoadBlock;
   _flags.synchronous = YES;
-  _flags.layerBacked = YES;
-
+  
   return self;
 }
+
+
+- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock
+{
+  return [self initWithLayerBlock:layerBlock didLoadBlock:nil];
+}
+
+- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
+{
+  if (!(self = [super init]))
+    return nil;
+  
+  ASDisplayNodeAssertNotNil(layerBlock, @"should initialize with a valid block that returns a CALayer");
+  
+  [self _initializeInstance];
+  _layerBlock = layerBlock;
+  _nodeLoadedBlock = didLoadBlock;
+  _flags.synchronous = YES;
+  _flags.layerBacked = YES;
+  
+  return self;
+}
+
 
 - (void)dealloc
 {
@@ -424,7 +438,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   {
     TIME_SCOPED(_debugTimeForDidLoad);
-    [self didLoad];
+    [self __didLoad];
   }
 
   if (self.placeholderEnabled) {
@@ -1480,6 +1494,15 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDisplayNodeAssertThreadAffinity(self);
   // This will cause -measureWithSizeRange: to actually compute the size instead of returning the previously cached size
   _flags.isMeasured = NO;
+}
+
+- (void)__didLoad
+{
+  if (_nodeLoadedBlock) {
+    _nodeLoadedBlock(self);
+    _nodeLoadedBlock = nil;
+  }
+  [self didLoad];
 }
 
 - (void)didLoad
