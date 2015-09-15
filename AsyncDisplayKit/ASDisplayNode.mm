@@ -256,10 +256,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
 {
-  return [self initWithViewBlock:viewBlock viewDidLoadBlock:nil];
+  return [self initWithViewBlock:viewBlock didLoadBlock:nil];
 }
 
-- (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock viewDidLoadBlock:(ASDisplayNodeViewLoadedBlock)viewLoadedBlock
+- (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   if (!(self = [super init]))
     return nil;
@@ -268,7 +268,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   [self _initializeInstance];
   _viewBlock = viewBlock;
-  _viewLoadedBlock = viewLoadedBlock;
+  _nodeLoadedBlock = didLoadBlock;
   _flags.synchronous = YES;
   
   return self;
@@ -277,10 +277,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock
 {
-  return [self initWithLayerBlock:layerBlock layerDidLoadBlock:nil];
+  return [self initWithLayerBlock:layerBlock didLoadBlock:nil];
 }
 
-- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock layerDidLoadBlock:(ASDisplayNodeLayerLoadedBlock)layerLoadedBlock
+- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   if (!(self = [super init]))
     return nil;
@@ -289,7 +289,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   [self _initializeInstance];
   _layerBlock = layerBlock;
-  _layerLoadedBlock = layerLoadedBlock;
+  _nodeLoadedBlock = didLoadBlock;
   _flags.synchronous = YES;
   _flags.layerBacked = YES;
   
@@ -1498,11 +1498,9 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (void)__didLoad
 {
-  if (_viewLoadedBlock) {
-    _viewLoadedBlock(_view);
-  }
-  if (_layerLoadedBlock) {
-    _layerLoadedBlock(_layer);
+  if (_nodeLoadedBlock) {
+    _nodeLoadedBlock(self);
+    _nodeLoadedBlock = nil;
   }
   [self didLoad];
 }
