@@ -28,7 +28,7 @@ typedef UIView *(^ASDisplayNodeViewBlock)();
 typedef CALayer *(^ASDisplayNodeLayerBlock)();
 
 /**
- * ASDisplayNode loaded callback block. Used for any additional setup after node's layer/view has been loaded
+ * ASDisplayNode loaded callback block. This block is called BEFORE the -didLoad method and is always called on the main thread.
  */
 typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 
@@ -87,7 +87,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 /**
  * @abstract Alternative initializer with a block to create the backing layer.
  *
- * @param viewBlock The block that will be used to create the backing layer.
+ * @param layerBlock The block that will be used to create the backing layer.
  *
  * @return An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main
  * queue. The layer will render synchronously and -layout and touch handling methods on the node will not be called.
@@ -97,7 +97,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 /**
  * @abstract Alternative initializer with a block to create the backing layer.
  *
- * @param viewBlock The block that will be used to create the backing layer.
+ * @param layerBlock The block that will be used to create the backing layer.
  * @param didLoadBlock The block that will be called after the layer created by the layerBlock is loaded
  *
  * @return An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main

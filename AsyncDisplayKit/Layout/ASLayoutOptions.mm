@@ -86,11 +86,11 @@ static Class gDefaultLayoutOptionsClass = nil;
 - (id)copyWithZone:(NSZone *)zone
 {
   ASLayoutOptions *copy = [[[self class] alloc] init];
-  [copy propagateOptionsFromLayoutOptions:self];
+  [copy copyIntoOptions:self];
   return copy;
 }
 
-- (void)propagateOptionsFromLayoutOptions:(ASLayoutOptions *)layoutOptions
+- (void)copyIntoOptions:(ASLayoutOptions *)layoutOptions
 {
   ASDN::MutexLocker l(_propertyLock);
   self.flexBasis = layoutOptions.flexBasis;
@@ -125,7 +125,6 @@ static Class gDefaultLayoutOptionsClass = nil;
   if ([layoutable isKindOfClass:[ASDisplayNode class]]) {
     ASDisplayNode *displayNode = (ASDisplayNode *)layoutable;
     self.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(displayNode.preferredFrameSize), ASRelativeSizeMakeWithCGSize(displayNode.preferredFrameSize));
-    self.layoutPosition = displayNode.frame.origin;
     
     if ([layoutable isKindOfClass:[ASTextNode class]]) {
       ASTextNode *textNode = (ASTextNode *)layoutable;

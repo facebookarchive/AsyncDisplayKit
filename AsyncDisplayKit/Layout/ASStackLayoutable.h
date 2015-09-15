@@ -11,6 +11,9 @@
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
 
+/**
+ *  Layout options that can be defined for an ASLayoutable being added to a ASStackLayoutSpec.
+ */
 @protocol ASStackLayoutable <NSObject>
 
 /**
