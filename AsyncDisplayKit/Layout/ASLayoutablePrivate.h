@@ -14,6 +14,10 @@
 @class ASLayoutOptions;
 @protocol ASLayoutable;
 
+/**
+ *  The base protocol for ASLayoutable. Generally the methods/properties in this class do not need to be
+ *  called by the end user and are only called internally. However, there may be a case where the methods are useful.
+ */
 @protocol ASLayoutablePrivate <NSObject>
 
 /**
@@ -35,5 +39,9 @@
  */
 @property (nonatomic, assign) BOOL isFinalLayoutable;
 
+
+/**
+ *  The class that holds all of the layoutOptions set on an ASLayoutable.
+ */
 @property (nonatomic, strong, readonly) ASLayoutOptions *layoutOptions;
 @end
