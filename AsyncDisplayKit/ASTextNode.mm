@@ -149,13 +149,13 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   return self;
 }
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock layerDidLoadBlock:(ASDisplayNodeLayerLoadedBlock)layerLoadedBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
 }
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock viewDidLoadBlock:(ASDisplayNodeViewLoadedBlock)viewLoadedBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;

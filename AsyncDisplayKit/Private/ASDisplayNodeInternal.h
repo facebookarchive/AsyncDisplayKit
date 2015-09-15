@@ -59,7 +59,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
   NSMutableArray *_subnodes;
 
   ASDisplayNodeViewBlock _viewBlock;
+  ASDisplayNodeViewLoadedBlock _viewLoadedBlock;
   ASDisplayNodeLayerBlock _layerBlock;
+  ASDisplayNodeLayerLoadedBlock _layerLoadedBlock;
   Class _viewClass;
   Class _layerClass;
   UIView *_view;
