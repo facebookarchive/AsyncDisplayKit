@@ -64,7 +64,7 @@
  *
  *  @param layoutOptions The layoutOptions to copy from
  */
-- (void)copyIntoOptions:(ASLayoutOptions *)layoutOptions;
+- (void)copyFromOptions:(ASLayoutOptions *)layoutOptions;
 
 #pragma mark - ASStackLayoutable
 
