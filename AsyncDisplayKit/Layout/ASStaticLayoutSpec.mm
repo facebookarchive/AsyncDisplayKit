@@ -12,7 +12,6 @@
 
 #import "ASLayoutSpecUtilities.h"
 #import "ASLayoutOptions.h"
-#import "ASLayoutOptionsPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASStaticLayoutable.h"
