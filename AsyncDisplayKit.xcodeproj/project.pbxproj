@@ -230,6 +230,8 @@
 		AC47D9451B3BB41900AAEE9D /* ASRelativeSize.h in Headers */ = {isa = PBXBuildFile; fileRef = AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC47D9461B3BB41900AAEE9D /* ASRelativeSize.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */; };
 		AC6456091B0A335000CF11B8 /* ASCellNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AC6456071B0A335000CF11B8 /* ASCellNode.m */; };
+		ACC945A91BA9E7A0005E1FB8 /* ASViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */; };
+		ACC945AB1BA9E7C1005E1FB8 /* ASViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ACC945AA1BA9E7C1005E1FB8 /* ASViewController.m */; };
 		ACF6ED1A1B17843500DA7C62 /* ASBackgroundLayoutSpec.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED011B17843500DA7C62 /* ASBackgroundLayoutSpec.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ACF6ED1B1B17843500DA7C62 /* ASBackgroundLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED021B17843500DA7C62 /* ASBackgroundLayoutSpec.mm */; };
 		ACF6ED1C1B17843500DA7C62 /* ASCenterLayoutSpec.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED031B17843500DA7C62 /* ASCenterLayoutSpec.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -574,6 +576,8 @@
 		AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASRelativeSize.h; path = AsyncDisplayKit/Layout/ASRelativeSize.h; sourceTree = "<group>"; };
 		AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASRelativeSize.mm; path = AsyncDisplayKit/Layout/ASRelativeSize.mm; sourceTree = "<group>"; };
 		AC6456071B0A335000CF11B8 /* ASCellNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCellNode.m; sourceTree = "<group>"; };
+		ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASViewController.h; sourceTree = "<group>"; };
+		ACC945AA1BA9E7C1005E1FB8 /* ASViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASViewController.m; sourceTree = "<group>"; };
 		ACF6ED011B17843500DA7C62 /* ASBackgroundLayoutSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASBackgroundLayoutSpec.h; path = AsyncDisplayKit/Layout/ASBackgroundLayoutSpec.h; sourceTree = "<group>"; };
 		ACF6ED021B17843500DA7C62 /* ASBackgroundLayoutSpec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; name = ASBackgroundLayoutSpec.mm; path = AsyncDisplayKit/Layout/ASBackgroundLayoutSpec.mm; sourceTree = "<group>"; };
 		ACF6ED031B17843500DA7C62 /* ASCenterLayoutSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASCenterLayoutSpec.h; path = AsyncDisplayKit/Layout/ASCenterLayoutSpec.h; sourceTree = "<group>"; };
@@ -758,6 +762,8 @@
 				0574D5E119C110610097DC25 /* ASTableViewProtocols.h */,
 				058D09DF195D050800B7D73C /* ASTextNode.h */,
 				058D09E0195D050800B7D73C /* ASTextNode.mm */,
+				ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */,
+				ACC945AA1BA9E7C1005E1FB8 /* ASViewController.m */,
 				6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */,
 				058D09E1195D050800B7D73C /* Details */,
 				058D0A01195D050800B7D73C /* Private */,
@@ -1114,6 +1120,7 @@
 				058D0A63195D05DC00B7D73C /* ASTextNodeTypes.h in Headers */,
 				058D0A64195D05DC00B7D73C /* ASTextNodeWordKerner.h in Headers */,
 				058D0A81195D05F900B7D73C /* ASThread.h in Headers */,
+				ACC945A91BA9E7A0005E1FB8 /* ASViewController.h in Headers */,
 				6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */,
 				205F0E211B376416007741D0 /* CGRect+ASConvenience.h in Headers */,
 				058D0A66195D05DC00B7D73C /* NSMutableAttributedString+TextKitAdditions.h in Headers */,
@@ -1478,6 +1485,7 @@
 				058D0A1E195D050800B7D73C /* ASTextNodeShadower.m in Sources */,
 				058D0A1F195D050800B7D73C /* ASTextNodeTextKitHelpers.mm in Sources */,
 				058D0A20195D050800B7D73C /* ASTextNodeWordKerner.m in Sources */,
+				ACC945AB1BA9E7C1005E1FB8 /* ASViewController.m in Sources */,
 				205F0E221B376416007741D0 /* CGRect+ASConvenience.m in Sources */,
 				058D0A21195D050800B7D73C /* NSMutableAttributedString+TextKitAdditions.m in Sources */,
 				205F0E101B371875007741D0 /* UICollectionViewLayout+ASConvenience.m in Sources */,
