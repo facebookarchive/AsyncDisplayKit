@@ -585,7 +585,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 @property (atomic, assign)           CGFloat contentsScale;                 // default=1.0f. See @contentsScaleForDisplay for more info
 @property (atomic, assign)           CATransform3D transform;               // default=CATransform3DIdentity
 @property (atomic, assign)           CATransform3D subnodeTransform;        // default=CATransform3DIdentity
-@property (atomic, copy, nullable)             NSString *name;                        // default=nil. Use this to tag your layers in the server-recurse-description / pca or for your own purposes
+@property (atomic, copy, nullable)   NSString *name;              // default=nil. Use this to tag your layers in the server-recurse-description / pca or for your own purposes
 
 /**
  * @abstract The node view's background color.
@@ -593,9 +593,9 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @discussion In contrast to UIView, setting a transparent color will not set opaque = NO.
  * This only affects nodes that implement +drawRect like ASTextNode.
 */
-@property (atomic, retain, nullable)           UIColor *backgroundColor;              // default=nil
+@property (atomic, retain, nullable) UIColor *backgroundColor;              // default=nil
 
-@property (atomic, retain, null_resettable)           UIColor *tintColor;                    // default=Blue
+@property (atomic, retain, null_resettable)    UIColor *tintColor;          // default=Blue
 - (void)tintColorDidChange;     // Notifies the node when the tintColor has changed.
 
 /**
