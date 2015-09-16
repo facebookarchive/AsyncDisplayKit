@@ -37,8 +37,9 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-  [super viewWillAppear:animated];
+  // This should be done before calling super's viewWillAppear which triggers data fetching on the node.
   [_screenNode start];
+  [super viewWillAppear:animated];
 }
 
 - (void)reload:(id)sender {
