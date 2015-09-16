@@ -7,7 +7,6 @@
 //
 
 #import "ScreenNode.h"
-#import "AsyncDisplayKit/AsyncDisplayKit.h"
 
 @interface ScreenNode() <ASMultiplexImageNodeDataSource, ASMultiplexImageNodeDelegate, ASImageDownloaderProtocol>
 @end
