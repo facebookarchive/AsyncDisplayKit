@@ -1042,7 +1042,6 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 - (void)testSubnodes
 {
   ASDisplayNode *parent = [[ASDisplayNode alloc] init];
-  XCTAssertNoThrow([parent addSubnode:nil], @"Don't try to add nil, but we'll deal.");
   XCTAssertNoThrow([parent addSubnode:parent], @"Not good, test that we recover");
   XCTAssertEqual(0u, parent.subnodes.count, @"We shouldn't have any subnodes");
 }
@@ -1456,14 +1455,8 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertNodeSubnodeSubviewSublayerOrder(parent, loaded, isLayerBacked, @"c,a,b", @"Incorrect insertion below");
   XCTAssertNodesHaveParent(parent, a, b, c);
 
-  // Check insertSubnode with no below
-  XCTAssertThrows([parent insertSubnode:b belowSubnode:nil], @"Can't insert below a nil");
   // Check nothing was inserted
   XCTAssertNodeSubnodeSubviewSublayerOrder(parent, loaded, isLayerBacked, @"c,a,b", @"Incorrect insertion below");
-
-
-  XCTAssertThrows([parent insertSubnode:nil belowSubnode:nil], @"Can't insert a nil subnode");
-  XCTAssertThrows([parent insertSubnode:nil belowSubnode:a], @"Can't insert a nil subnode");
 
   // Check inserting below when you're already in the array
   // (c,a,b) => (a,c,b)
@@ -1534,17 +1527,6 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   // (a,b) => (a,c,b)
   [parent insertSubnode:c aboveSubnode:a];
   XCTAssertNodeSubnodeSubviewSublayerOrder(parent, loaded, isLayerBacked, @"a,c,b", @"After insert c above a");
-
-  // Check insertSubnode with invalid parameters throws and doesn't change anything
-  // (a,c,b) => (a,c,b)
-  XCTAssertThrows([parent insertSubnode:b aboveSubnode:nil], @"Can't insert below a nil");
-  XCTAssertNodeSubnodeSubviewSublayerOrder(parent, loaded, isLayerBacked, @"a,c,b", @"Check no monkey business");
-
-  XCTAssertThrows([parent insertSubnode:nil aboveSubnode:nil], @"Can't insert a nil subnode");
-  XCTAssertNodeSubnodeSubviewSublayerOrder(parent, loaded, isLayerBacked, @"a,c,b", @"Check no monkey business");
-
-  XCTAssertThrows([parent insertSubnode:nil aboveSubnode:a], @"Can't insert a nil subnode");
-  XCTAssertNodeSubnodeSubviewSublayerOrder(parent, loaded, isLayerBacked, @"a,c,b", @"Check no monkey business");
 
   // Check inserting above when you're already in the array
   // (a,c,b) => (c,b,a)
