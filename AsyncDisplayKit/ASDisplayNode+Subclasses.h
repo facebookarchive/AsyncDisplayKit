@@ -361,7 +361,7 @@ NS_ASSUME_NONNULL_BEGIN
  * 1) allows sending events to plain UIViews that don't have attached nodes,
  * 2) hitTest: is never called before the views are created.
  */
-- (UIView *)hitTest:(CGPoint)point withEvent:(nullable UIEvent *)event;
+- (nullable UIView *)hitTest:(CGPoint)point withEvent:(nullable UIEvent *)event;
 
 
 /** @name Observing node-related changes */
