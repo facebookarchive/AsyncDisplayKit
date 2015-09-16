@@ -229,8 +229,8 @@
 		9C5FA3541B8F6ADF00A62714 /* ASLayoutOptions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.mm */; };
 		9C5FA35F1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C5FA35C1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm */; };
 		9C5FA3601B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C5FA35C1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm */; };
-		9C65A72A1BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */; settings = {ASSET_TAGS = (); }; };
-		9C65A72B1BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */; settings = {ASSET_TAGS = (); }; };
+		9C65A72A1BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		9C65A72B1BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		9C6BB3B21B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C6BB3B31B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C8221951BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */; settings = {ASSET_TAGS = (); }; };
