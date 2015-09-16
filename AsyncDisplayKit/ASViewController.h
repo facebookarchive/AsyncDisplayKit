@@ -7,12 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
 
 @interface ASViewController : UIViewController
 
-@property (nonatomic, strong, readonly) ASDisplayNode *node;
+@property (nonatomic, strong, readonly, nonnull) ASDisplayNode *node;
 
-- (instancetype)initWithNode:(ASDisplayNode *)node;
+- (nullable instancetype)initWithNode:(nonnull ASDisplayNode *)node;
 
 @end
