@@ -128,6 +128,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)didTransitionToState:(UITableViewCellStateMask)state
 {
   [self setNeedsLayout];
+  [self layoutIfNeeded];
   [super didTransitionToState:state];
 }
 
