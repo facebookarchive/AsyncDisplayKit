@@ -64,16 +64,13 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  return
-  [ASInsetLayoutSpec
-   insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10)
-   child:
-   [ASStackLayoutSpec
-    stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-    spacing:10
-    justifyContent:ASStackLayoutJustifyContentCenter
-    alignItems:ASStackLayoutAlignItemsCenter
-    children:@[[ASRatioLayoutSpec ratioLayoutSpecWithRatio:1 child:_imageNode], _textNode]]];
+  ASRatioLayoutSpec *imagePlaceholder = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1 child:_imageNode];
+  ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+                                                                             spacing:10
+                                                                      justifyContent:ASStackLayoutJustifyContentCenter
+                                                                          alignItems:ASStackLayoutAlignItemsCenter
+                                                                            children:@[imagePlaceholder, _textNode]];
+  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10) child:verticalStack];
 }
 
 #pragma mark -

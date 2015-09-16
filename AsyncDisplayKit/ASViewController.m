@@ -33,7 +33,8 @@
 
 - (void)viewWillLayoutSubviews
 {
-  ASSizeRange constrainedSize = ASSizeRangeMake(self.view.bounds.size, self.view.bounds.size);
+  CGSize viewSize = self.view.bounds.size;
+  ASSizeRange constrainedSize = ASSizeRangeMake(viewSize, viewSize);
   [_node measureWithSizeRange:constrainedSize];
   [super viewWillLayoutSubviews];
 }
