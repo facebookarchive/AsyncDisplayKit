@@ -8,9 +8,13 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASStackLayoutDefines.h>
 
-@protocol ASStackLayoutable <ASLayoutable>
+/**
+ *  Layout options that can be defined for an ASLayoutable being added to a ASStackLayoutSpec.
+ */
+@protocol ASStackLayoutable <NSObject>
 
 /**
  * @abstract Additional space to place before this object in the stacking direction.
@@ -48,5 +52,15 @@
  * Used when attached to a stack layout.
  */
 @property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
+
+/**
+ *  @abstract Used for baseline alignment. The distance from the top of the object to its baseline.
+ */
+@property (nonatomic, readwrite) CGFloat ascender;
+
+/**
+ *  @abstract Used for baseline alignment. The distance from the baseline of the object to its bottom.
+ */
+@property (nonatomic, readwrite) CGFloat descender;
 
 @end

@@ -15,7 +15,6 @@
  */
 @interface ASBackgroundLayoutSpec : ASLayoutSpec
 
-@property (nonatomic, strong) id<ASLayoutable> child;
 @property (nonatomic, strong) id<ASLayoutable> background;
 
 /**

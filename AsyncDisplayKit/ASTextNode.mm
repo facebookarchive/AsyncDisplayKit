@@ -17,7 +17,6 @@
 #import <AsyncDisplayKit/ASTextNodeTextKitHelpers.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
-#import "ASInternalHelpers.h"
 #import "ASTextNodeRenderer.h"
 #import "ASTextNodeShadower.h"
 
@@ -108,9 +107,6 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
 }
 
-@synthesize ascender = _ascender;
-@synthesize descender = _descender;
-
 #pragma mark - NSObject
 
 - (instancetype)init
@@ -153,13 +149,13 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   return self;
 }
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
 }
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
@@ -359,9 +355,6 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
       self.isAccessibilityElement = YES;
     }
   });
-  
-  _ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * ASScreenScale())/ASScreenScale();
-  _descender = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * ASScreenScale())/ASScreenScale();
 }
 
 #pragma mark - Text Layout

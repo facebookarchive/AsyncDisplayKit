@@ -22,7 +22,6 @@
 @implementation ASRatioLayoutSpec
 {
   CGFloat _ratio;
-  id<ASLayoutable> _child;
 }
 
 + (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child
@@ -38,14 +37,8 @@
   ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
   ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
   _ratio = ratio;
-  _child = child;
+  [self setChild:child];
   return self;
-}
-
-- (void)setChild:(id<ASLayoutable>)child
-{
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _child = child;
 }
 
 - (void)setRatio:(CGFloat)ratio
@@ -77,9 +70,20 @@
 
   // If there is no max size in *either* dimension, we can't apply the ratio, so just pass our size range through.
   const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
-  ASLayout *sublayout = [_child measureWithSizeRange:childRange];
+  ASLayout *sublayout = [self.child measureWithSizeRange:childRange];
   sublayout.position = CGPointZero;
   return [ASLayout layoutWithLayoutableObject:self size:sublayout.size sublayouts:@[sublayout]];
+}
+
+- (void)setChildren:(NSArray *)children
+{
+  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
+}
+
+- (NSArray *)children
+{
+  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
+  return nil;
 }
 
 @end

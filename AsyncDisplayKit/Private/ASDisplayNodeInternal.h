@@ -17,6 +17,7 @@
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
+#import "ASLayoutOptions.h"
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 void ASDisplayNodePerformBlockOnMainThread(void (^block)());
@@ -59,6 +60,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
+  ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
   Class _viewClass;
   Class _layerClass;
   UIView *_view;
@@ -72,7 +74,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 
   _ASPendingState *_pendingViewState;
 
-  struct {
+  struct ASDisplayNodeFlags {
     // public properties
     unsigned synchronous:1;
     unsigned layerBacked:1;

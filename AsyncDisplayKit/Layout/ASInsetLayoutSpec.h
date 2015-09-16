@@ -29,7 +29,6 @@
  */
 @interface ASInsetLayoutSpec : ASLayoutSpec
 
-@property (nonatomic, strong) id<ASLayoutable> child;
 @property (nonatomic, assign) UIEdgeInsets insets;
 
 /**

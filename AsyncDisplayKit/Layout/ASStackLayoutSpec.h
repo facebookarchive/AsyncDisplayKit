@@ -43,6 +43,8 @@
 @property (nonatomic, assign) ASStackLayoutJustifyContent justifyContent;
 /** Orientation of children along cross axis */
 @property (nonatomic, assign) ASStackLayoutAlignItems alignItems;
+/** If YES the vertical spacing between two views is measured from the last baseline of the top view to the top of the bottom view */
+@property (nonatomic, assign) BOOL baselineRelativeArrangement;
 
 - (instancetype)init;
 
@@ -54,8 +56,5 @@
  @param children ASLayoutable children to be positioned.
  */
 + (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children;
-
-- (void)addChild:(id<ASStackLayoutable>)child;
-- (void)addChildren:(NSArray *)children;
 
 @end

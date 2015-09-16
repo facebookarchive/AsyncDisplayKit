@@ -9,6 +9,7 @@
 #import "ASDisplayNode.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASLayoutOptionsPrivate.h"
 
 #import <objc/runtime.h>
 
@@ -30,6 +31,8 @@
  *
  */
 
+- (void)_staticInitialize;
+
 @end
 
 // Conditionally time these scopes to our debug ivars (only exist in debug/profile builds)
@@ -41,13 +44,10 @@
 
 @implementation ASDisplayNode
 
-@synthesize spacingBefore = _spacingBefore;
-@synthesize spacingAfter = _spacingAfter;
-@synthesize flexGrow = _flexGrow;
-@synthesize flexShrink = _flexShrink;
-@synthesize flexBasis = _flexBasis;
-@synthesize alignSelf = _alignSelf;
+// these dynamic properties all defined in ASLayoutOptionsPrivate.m
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
 @synthesize preferredFrameSize = _preferredFrameSize;
+@synthesize isFinalLayoutable = _isFinalLayoutable;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
@@ -85,25 +85,104 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
   }
 }
 
-+ (void)initialize
+/**
+ *  Returns ASDisplayNodeFlags for the givern class/instance. instance MAY BE NIL.
+ *
+ *  @param c        the class, required
+ *  @param instance the instance, which may be nil. (If so, the class is inspected instead)
+ *  @remarks        The instance value is used only if we suspect the class may be dynamic (because it overloads 
+ *                  +respondsToSelector: or -respondsToSelector.) In that case we use our "slow path", calling this 
+ *                  method on each -init and passing the instance value. While this may seem like an unlikely scenario,
+ *                  it turns our our own internal tests use a dynamic class, so it's worth capturing this edge case.
+ *
+ *  @return ASDisplayNode flags.
+ */
+static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *instance)
 {
-  if (self == [ASDisplayNode class]) {
-    return;
+  ASDisplayNodeCAssertNotNil(c, @"class is required");
+
+  struct ASDisplayNodeFlags flags = {0};
+
+  flags.isInHierarchy = NO;
+  flags.displaysAsynchronously = YES;
+  flags.implementsDrawRect = ([c respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
+  flags.implementsImageDisplay = ([c respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
+  if (instance) {
+    flags.implementsDrawParameters = ([instance respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
+  } else {
+    flags.implementsDrawParameters = ([c instancesRespondToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
+  }
+  return flags;
+}
+
+/**
+ *  Returns ASDisplayNodeMethodOverrides for the given class
+ *
+ *  @param c the class, requireed.
+ *
+ *  @return ASDisplayNodeMethodOverrides.
+ */
+static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
+{
+  ASDisplayNodeCAssertNotNil(c, @"class is required");
+  
+  ASDisplayNodeMethodOverrides overrides = ASDisplayNodeMethodOverrideNone;
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(touchesBegan:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesBegan;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(touchesMoved:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesMoved;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(touchesCancelled:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesCancelled;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(touchesEnded:withEvent:))) {
+    overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(layoutSpecThatFits:))) {
+    overrides |= ASDisplayNodeMethodOverrideLayoutSpecThatFits;
   }
 
-  // Subclasses should never override these
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
-  ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
 
-  // At most one of the three layout methods is overridden
-  ASDisplayNodeAssert((ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateSizeThatFits:)) ? 1 : 0)
-                      + (ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutSpecThatFits:)) ? 1 : 0)
-                      + (ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateLayoutThatFits:)) ? 1 : 0) <= 1,
-                      @"Subclass %@ must override at most one of the three layout methods: calculateLayoutThatFits, layoutSpecThatFits or calculateSizeThatFits", NSStringFromClass(self));
+  return overrides;
+}
+
++ (void)initialize
+{
+  if (self != [ASDisplayNode class]) {
+    
+    // Subclasses should never override these
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure method", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange method", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
+
+    // At most one of the three layout methods is overridden
+    ASDisplayNodeAssert((ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateSizeThatFits:)) ? 1 : 0)
+                        + (ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutSpecThatFits:)) ? 1 : 0)
+                        + (ASDisplayNodeSubclassOverridesSelector(self, @selector(calculateLayoutThatFits:)) ? 1 : 0) <= 1,
+                        @"Subclass %@ must override at most one of the three layout methods: calculateLayoutThatFits, layoutSpecThatFits or calculateSizeThatFits", NSStringFromClass(self));
+  }
+
+  // Below we are pre-calculating values per-class and dynamically adding a method (_staticInitialize) to populate these values
+  // when each instance is constructed. These values don't change for each class, so there is significant performance benefit
+  // in doing it here. +initialize is guaranteed to be called before any instance method so it is safe to add this method here.
+  // Note that we take care to detect if the class overrides +respondsToSelector: or -respondsToSelector and take the slow path
+  // (recalculating for each instance) to make sure we are always correct.
+
+  BOOL classOverridesRespondsToSelector = ASSubclassOverridesClassSelector([NSObject class], self, @selector(respondsToSelector:));
+  BOOL instancesOverrideRespondsToSelector = ASSubclassOverridesSelector([NSObject class], self, @selector(respondsToSelector:));
+  struct ASDisplayNodeFlags flags = GetASDisplayNodeFlags(self, nil);
+  ASDisplayNodeMethodOverrides methodOverrides = GetASDisplayNodeMethodOverrides(self);
+
+  IMP staticInitialize = imp_implementationWithBlock(^(ASDisplayNode *node) {
+    node->_flags = (classOverridesRespondsToSelector || instancesOverrideRespondsToSelector) ? GetASDisplayNodeFlags(node.class, node) : flags;
+    node->_methodOverrides = (classOverridesRespondsToSelector) ? GetASDisplayNodeMethodOverrides(node.class) : methodOverrides;
+  });
+
+  class_replaceMethod(self, @selector(_staticInitialize), staticInitialize, "v:@");
 }
 
 + (BOOL)layerBackedNodesEnabled
@@ -123,39 +202,16 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 
 #pragma mark - Lifecycle
 
+- (void)_staticInitialize
+{
+  ASDisplayNodeAssert(NO, @"_staticInitialize must be overridden");
+}
+
 - (void)_initializeInstance
 {
+  [self _staticInitialize];
   _contentsScaleForDisplay = ASScreenScale();
-
   _displaySentinel = [[ASSentinel alloc] init];
-
-  _flags.isInHierarchy = NO;
-  _flags.displaysAsynchronously = YES;
-
-  // As an optimization, it may be worth a caching system that performs these checks once per class in +initialize (see above).
-  _flags.implementsDrawRect = ([[self class] respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
-  _flags.implementsImageDisplay = ([[self class] respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
-  _flags.implementsDrawParameters = ([self respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
-
-  ASDisplayNodeMethodOverrides overrides = ASDisplayNodeMethodOverrideNone;
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesBegan:withEvent:))) {
-    overrides |= ASDisplayNodeMethodOverrideTouchesBegan;
-  }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesMoved:withEvent:))) {
-    overrides |= ASDisplayNodeMethodOverrideTouchesMoved;
-  }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesCancelled:withEvent:))) {
-    overrides |= ASDisplayNodeMethodOverrideTouchesCancelled;
-  }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(touchesEnded:withEvent:))) {
-    overrides |= ASDisplayNodeMethodOverrideTouchesEnded;
-  }
-  if (ASDisplayNodeSubclassOverridesSelector([self class], @selector(layoutSpecThatFits:))) {
-    overrides |= ASDisplayNodeMethodOverrideLayoutSpecThatFits;
-  }
-  _methodOverrides = overrides;
-
-  _flexBasis = ASRelativeDimensionUnconstrained;
   _preferredFrameSize = CGSizeZero;
 }
 
@@ -200,32 +256,46 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 
 - (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
 {
-  if (!(self = [super init]))
-    return nil;
-
-  ASDisplayNodeAssertNotNil(viewBlock, @"should initialize with a valid block that returns a UIView");
-
-  [self _initializeInstance];
-  _viewBlock = viewBlock;
-  _flags.synchronous = YES;
-
-  return self;
+  return [self initWithViewBlock:viewBlock didLoadBlock:nil];
 }
 
-- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock
+- (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   if (!(self = [super init]))
     return nil;
-
-  ASDisplayNodeAssertNotNil(layerBlock, @"should initialize with a valid block that returns a CALayer");
-
+  
+  ASDisplayNodeAssertNotNil(viewBlock, @"should initialize with a valid block that returns a UIView");
+  
   [self _initializeInstance];
-  _layerBlock = layerBlock;
+  _viewBlock = viewBlock;
+  _nodeLoadedBlock = didLoadBlock;
   _flags.synchronous = YES;
-  _flags.layerBacked = YES;
-
+  
   return self;
 }
+
+
+- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock
+{
+  return [self initWithLayerBlock:layerBlock didLoadBlock:nil];
+}
+
+- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
+{
+  if (!(self = [super init]))
+    return nil;
+  
+  ASDisplayNodeAssertNotNil(layerBlock, @"should initialize with a valid block that returns a CALayer");
+  
+  [self _initializeInstance];
+  _layerBlock = layerBlock;
+  _nodeLoadedBlock = didLoadBlock;
+  _flags.synchronous = YES;
+  _flags.layerBacked = YES;
+  
+  return self;
+}
+
 
 - (void)dealloc
 {
@@ -368,7 +438,7 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
   }
   {
     TIME_SCOPED(_debugTimeForDidLoad);
-    [self didLoad];
+    [self __didLoad];
   }
 
   if (self.placeholderEnabled) {
@@ -600,9 +670,27 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
   } else {
     // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
     [self measureWithSizeRange:oldConstrainedSize];
-    CGRect bounds = self.bounds;
-    bounds.size = CGSizeMake(_layout.size.width, _layout.size.height);
-    self.bounds = bounds;
+
+    CGSize oldSize = self.bounds.size;
+    CGSize newSize = _layout.size;
+    
+    if (! CGSizeEqualToSize(oldSize, newSize)) {
+      CGRect bounds = self.bounds;
+      bounds.size = newSize;
+      self.bounds = bounds;
+      
+      // Frame's origin must be preserved. Since it is computed from bounds size, anchorPoint
+      // and position (see frame setter in ASDisplayNode+UIViewBridge), position needs to be adjusted.
+      BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
+      CGPoint anchorPoint = (useLayer ? _layer.anchorPoint : self.anchorPoint);
+      CGPoint oldPosition = (useLayer ? _layer.position : self.position);
+
+      CGFloat xDelta = (newSize.width - oldSize.width) * anchorPoint.x;
+      CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
+      CGPoint newPosition = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
+
+      useLayer ? _layer.position = newPosition : self.position = newPosition;
+    }
   }
 }
 
@@ -612,10 +700,10 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
 {
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
-  if (CGRectEqualToRect(_layer.bounds, CGRectZero)) {
+  if (CGRectEqualToRect(self.bounds, CGRectZero)) {
     return;     // Performing layout on a zero-bounds view often results in frame calculations with negative sizes after applying margins, which will cause measureWithSizeRange: on subnodes to assert.
   }
-  _placeholderLayer.frame = _layer.bounds;
+  _placeholderLayer.frame = self.bounds;
   [self layout];
   [self layoutDidFinish];
 }
@@ -1408,6 +1496,15 @@ static NSInteger incrementIfFound(NSInteger i) {
   _flags.isMeasured = NO;
 }
 
+- (void)__didLoad
+{
+  if (_nodeLoadedBlock) {
+    _nodeLoadedBlock(self);
+    _nodeLoadedBlock = nil;
+  }
+  [self didLoad];
+}
+
 - (void)didLoad
 {
   ASDisplayNodeAssertMainThread();
@@ -1834,6 +1931,11 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
     ASDisplayNodeAssertMainThread();
     return !self.layerBacked && [self.view canPerformAction:action withSender:sender];
+}
+
+- (id<ASLayoutable>)finalLayoutable
+{
+  return self;
 }
 
 @end

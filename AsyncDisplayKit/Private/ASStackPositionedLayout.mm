@@ -14,6 +14,7 @@
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackLayoutSpecUtilities.h"
 #import "ASLayoutable.h"
+#import "ASLayoutOptions.h"
 
 static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
                            const ASStackUnpositionedItem &l,
@@ -24,6 +25,8 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
       return crossSize - crossDimension(style.direction, l.layout.size);
     case ASStackLayoutAlignItemsCenter:
       return ASFloorPixelValue((crossSize - crossDimension(style.direction, l.layout.size)) / 2);
+    case ASStackLayoutAlignItemsBaselineFirst:
+    case ASStackLayoutAlignItemsBaselineLast:
     case ASStackLayoutAlignItemsStart:
     case ASStackLayoutAlignItemsStretch:
       return 0;

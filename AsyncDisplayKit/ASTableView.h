@@ -99,16 +99,11 @@
 - (void)beginUpdates;
 
 /**
- *  Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view.
+ *  Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
  *  You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations
  *  to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
  *  the operations simultaneously. This method is must be called from the main thread. It's important to remeber that the ASTableView will
  *  be processing the updates asynchronously after this call is completed.
- *
- *  @param animated   NO to disable all animations.
- *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
- *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
- *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
 - (void)endUpdates;
 
@@ -270,17 +265,6 @@
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 @optional
-
-/**
- * Provides the constrained size range for measuring the node at the index path.
- *
- * @param tableView The sender.
- *
- * @param indexPath The index path of the node.
- *
- * @returns A constrained size range for layout the node at this index path.
- */
-- (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Indicator to lock the data source for data fetching in async mode.

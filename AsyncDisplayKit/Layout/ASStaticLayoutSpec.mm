@@ -11,37 +11,21 @@
 #import "ASStaticLayoutSpec.h"
 
 #import "ASLayoutSpecUtilities.h"
+#import "ASLayoutOptions.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-
-@implementation ASStaticLayoutSpecChild
-
-+ (instancetype)staticLayoutChildWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject size:(ASRelativeSizeRange)size;
-{
-  ASStaticLayoutSpecChild *c = [[super alloc] init];
-  if (c) {
-    c->_position = position;
-    c->_layoutableObject = layoutableObject;
-    c->_size = size;
-  }
-  return c;
-}
-
-+ (instancetype)staticLayoutChildWithPosition:(CGPoint)position layoutableObject:(id<ASLayoutable>)layoutableObject
-{
-  return [self staticLayoutChildWithPosition:position layoutableObject:layoutableObject size:ASRelativeSizeRangeUnconstrained];
-}
-
-@end
+#import "ASStaticLayoutable.h"
 
 @implementation ASStaticLayoutSpec
-{
-  NSArray *_children;
-}
 
 + (instancetype)staticLayoutSpecWithChildren:(NSArray *)children
 {
   return [[self alloc] initWithChildren:children];
+}
+
+- (instancetype)init
+{
+    return [self initWithChildren:@[]];
 }
 
 - (instancetype)initWithChildren:(NSArray *)children
@@ -49,14 +33,8 @@
   if (!(self = [super init])) {
     return nil;
   }
-  _children = children;
+  self.children = children;
   return self;
-}
-
-- (void)addChild:(ASStaticLayoutSpecChild *)child
-{
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _children = [_children arrayByAddingObject:child];
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
@@ -66,17 +44,17 @@
     constrainedSize.max.height
   };
 
-  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:_children.count];
-  for (ASStaticLayoutSpecChild *child in _children) {
+  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:self.children.count];
+  for (id<ASLayoutable> child in self.children) {
     CGSize autoMaxSize = {
-      constrainedSize.max.width - child.position.x,
-      constrainedSize.max.height - child.position.y
+      constrainedSize.max.width - child.layoutPosition.x,
+      constrainedSize.max.height - child.layoutPosition.y
     };
-    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.size)
+    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.sizeRange)
       ? ASSizeRangeMake({0, 0}, autoMaxSize)
-      : ASRelativeSizeRangeResolve(child.size, size);
-    ASLayout *sublayout = [child.layoutableObject measureWithSizeRange:childConstraint];
-    sublayout.position = child.position;
+      : ASRelativeSizeRangeResolve(child.sizeRange, size);
+    ASLayout *sublayout = [child measureWithSizeRange:childConstraint];
+    sublayout.position = child.layoutPosition;
     [sublayouts addObject:sublayout];
   }
   
@@ -97,6 +75,17 @@
   return [ASLayout layoutWithLayoutableObject:self
                                          size:ASSizeRangeClamp(constrainedSize, size)
                                    sublayouts:sublayouts];
+}
+
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+{
+  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
+}
+
+- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
+{
+  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports children");
+  return nil;
 }
 
 @end
