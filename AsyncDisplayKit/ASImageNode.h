@@ -8,6 +8,7 @@
 
 #import <AsyncDisplayKit/ASControlNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Image modification block.  Use to transform an image before display.
@@ -32,12 +33,12 @@ typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
  * the layer's contentsCenter property.  Non-stretchable images work too, of
  * course.
  */
-@property (atomic, retain) UIImage *image;
+@property (nullable, atomic, retain) UIImage *image;
 
 /**
  @abstract The placeholder color.
  */
-@property (nonatomic, strong) UIColor *placeholderColor;
+@property (nullable, nonatomic, strong) UIColor *placeholderColor;
 
 /**
  * @abstract Indicates whether efficient cropping of the receiver is enabled.
@@ -99,7 +100,7 @@ typedef UIImage *(^asimagenode_modification_block_t)(UIImage *image);
  * `displaySuspended` is YES, `displayCompletionBlock` is will be
  * performed immediately and `YES` will be passed for `canceled`.
  */
-- (void)setNeedsDisplayWithCompletion:(void (^)(BOOL canceled))displayCompletionBlock;
+- (void)setNeedsDisplayWithCompletion:(void (^ _Nullable)(BOOL canceled))displayCompletionBlock;
 
 @end
 
@@ -131,3 +132,4 @@ asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat
 asimagenode_modification_block_t ASImageNodeTintColorModificationBlock(UIColor *color);
 
 ASDISPLAYNODE_EXTERN_C_END
+NS_ASSUME_NONNULL_END

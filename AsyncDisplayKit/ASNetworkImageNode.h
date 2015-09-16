@@ -9,6 +9,7 @@
 #import <AsyncDisplayKit/ASImageNode.h>
 #import <AsyncDisplayKit/ASImageProtocols.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASNetworkImageNodeDelegate;
 
@@ -32,7 +33,7 @@
  *
  * @returns An initialized ASNetworkImageNode.
  */
-- (instancetype)initWithCache:(id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader;
+- (instancetype)initWithCache:(nullable id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader NS_DESIGNATED_INITIALIZER;
 
 /**
  * Convenience initialiser.
@@ -49,14 +50,14 @@
 /**
  * A placeholder image to display while the URL is loading.
  */
-@property (atomic, strong, readwrite) UIImage *defaultImage;
+@property (nullable, atomic, strong, readwrite) UIImage *defaultImage;
 
 /**
  * The URL of a new image to download and display.
  *
  * @discussion Changing this property will reset the displayed image to a placeholder (<defaultImage>) while loading.
  */
-@property (atomic, strong, readwrite) NSURL *URL;
+@property (nullable, atomic, strong, readwrite) NSURL *URL;
 
 /**
  * Download and display a new image.
@@ -65,7 +66,7 @@
  *
  * @param reset Whether to display a placeholder (<defaultImage>) while loading the new image.
  */
-- (void)setURL:(NSURL *)URL resetToDefault:(BOOL)reset;
+- (void)setURL:(nullable NSURL *)URL resetToDefault:(BOOL)reset;
 
 /**
  * If <URL> is a local file, set this property to YES to take advantage of UIKit's image cacheing.  Defaults to YES.
@@ -102,3 +103,5 @@
 - (void)imageNodeDidFinishDecoding:(ASNetworkImageNode *)imageNode;
 
 @end
+
+NS_ASSUME_NONNULL_END

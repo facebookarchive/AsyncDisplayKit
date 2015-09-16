@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Simple node that wraps UIScrollView.
@@ -22,3 +23,5 @@
 @property (nonatomic, readonly, strong) UIScrollView *view;
 
 @end
+
+NS_ASSUME_NONNULL_END

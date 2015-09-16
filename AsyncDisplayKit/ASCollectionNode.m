@@ -13,7 +13,7 @@
 - (instancetype)init
 {
   ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
-  self = [self initWithCollectionViewLayout:nil]; // Will throw an exception for lacking a UICV Layout.
+  self = [self initWithCollectionViewLayout:[UICollectionViewFlowLayout new]];
   return nil;
 }
 

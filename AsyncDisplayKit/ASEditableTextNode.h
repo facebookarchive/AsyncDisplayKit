@@ -8,6 +8,7 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASEditableTextNodeDelegate;
 
@@ -26,7 +27,7 @@
 @property (nonatomic, readonly, strong) UITextView *textView;
 
 //! @abstract The attributes to apply to new text being entered by the user.
-@property (nonatomic, readwrite, strong) NSDictionary *typingAttributes;
+@property (nonatomic, readwrite, strong) NSDictionary<NSString *, id> *typingAttributes;
 
 //! @abstract The range of text currently selected. If length is zero, the range is the cursor location.
 @property (nonatomic, readwrite, assign) NSRange selectedRange;
@@ -136,3 +137,5 @@
 
 
 @end
+
+NS_ASSUME_NONNULL_END

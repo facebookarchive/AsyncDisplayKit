@@ -12,22 +12,24 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
 /**
  Given a layer, returns the associated display node, if any.
  */
-extern ASDisplayNode *ASLayerToDisplayNode(CALayer *layer);
+extern ASDisplayNode * _Nullable ASLayerToDisplayNode(CALayer * _Nullable layer);
 
 /**
  Given a view, returns the associated display node, if any.
  */
-extern ASDisplayNode *ASViewToDisplayNode(UIView *view);
+extern ASDisplayNode * _Nullable ASViewToDisplayNode(UIView * _Nullable view);
 
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.
  */
-extern id ASDisplayNodeFind(ASDisplayNode *node, BOOL (^block)(ASDisplayNode *node));
+extern id ASDisplayNodeFind(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node of kind class.
@@ -35,29 +37,29 @@ extern id ASDisplayNodeFind(ASDisplayNode *node, BOOL (^block)(ASDisplayNode *no
 extern id ASDisplayNodeFindClass(ASDisplayNode *start, Class c);
 
 /**
- Given a display node, collects all descendents. This is a specialization of ASCollectContainer() that walks the Core Animation layer tree as opposed to the display node tree, thus supporting non-continues display node hierarchies.
+ Given a display node, collects all descendents. This is a specialization of ASCollectContainer() that walks the Core Animation layer tree as opposed to the display node tree, thus supporting non-continuous display node hierarchies.
  */
-extern NSArray *ASCollectDisplayNodes(ASDisplayNode *node);
+extern NSArray<ASDisplayNode *> *ASCollectDisplayNodes(ASDisplayNode *node);
 
 /**
  Given a display node, traverses down the node hierarchy, returning all the display nodes that pass the block.
  */
-extern NSArray *ASDisplayNodeFindAllSubnodes(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodes(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses down the node hierarchy, returning all the display nodes of kind class.
  */
-extern NSArray *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c);
+extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c);
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node that pass the block.
  */
-extern id ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node of kind class.
  */
-extern id ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c);
+extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c);
 
 extern UIColor *ASDisplayNodeDefaultPlaceholderColor();
 extern UIColor *ASDisplayNodeDefaultTintColor();
@@ -69,3 +71,5 @@ extern void ASDisplayNodeDisableHierarchyNotifications(ASDisplayNode *node);
 extern void ASDisplayNodeEnableHierarchyNotifications(ASDisplayNode *node);
 
 ASDISPLAYNODE_EXTERN_C_END
+
+NS_ASSUME_NONNULL_END

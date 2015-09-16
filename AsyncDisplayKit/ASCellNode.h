@@ -8,6 +8,7 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Generic cell node.  Subclass ASCellNode instead of <ASDisplayNode> to use <ASTableView>.
@@ -43,3 +44,5 @@
 @property (nonatomic, copy) NSString *text;
 
 @end
+
+NS_ASSUME_NONNULL_END
