@@ -379,7 +379,7 @@
   }];
 }
 
-- (void)testRelayoutRowsAfterEditingModeIsChangedAndTheyBecomeVisible
+- (void)DISABLED_testRelayoutRowsAfterEditingModeIsChangedAndTheyBecomeVisible
 {
   CGSize tableViewSize = CGSizeMake(100, 500);
   ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
