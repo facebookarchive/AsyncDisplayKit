@@ -84,6 +84,10 @@
 		
 		<option value="//api/name/nodeForItemAtIndexPath:">- nodeForItemAtIndexPath:</option>
 		
+		<option value="//api/name/performBatchAnimated:updates:completion:">- performBatchAnimated:updates:completion:</option>
+		
+		<option value="//api/name/performBatchUpdates:completion:">- performBatchUpdates:completion:</option>
+		
 		<option value="//api/name/reloadData">- reloadData</option>
 		
 		<option value="//api/name/reloadDataWithCompletion:">- reloadDataWithCompletion:</option>
@@ -396,6 +400,133 @@ The application should not update the data source while the data source is locke
 		</div>
 	</div>
 </div><div class="section-method">
+	<a name="//api/name/performBatchAnimated:updates:completion:" title="performBatchAnimated:updates:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/performBatchAnimated:updates:completion:">&ndash;&nbsp;performBatchAnimated:updates:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread.
+The asyncDataSource must be updated to reflect the changes before the update block completes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)performBatchAnimated:(BOOL)<em>animated</em> updates:(void ( ^ ) ( ))<em>updates</em> completion:(void ( ^ ) ( BOOL ))<em>completion</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animated</code></th>
+						<td><p>NO to disable animations for this batch</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>updates</code></th>
+						<td><p>The block that performs the relevant insert, delete, reload, or move operations.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>completion</code></th>
+						<td><p>A completion handler block to execute when all of the operations are finished. This block takes a single
+Boolean parameter that contains the value YES if all of the related animations completed successfully or
+NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/performBatchUpdates:completion:" title="performBatchUpdates:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/performBatchUpdates:completion:">&ndash;&nbsp;performBatchUpdates:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Perform a batch of updates asynchronously.  This method must be called from the main thread.
+The asyncDataSource must be updated to reflect the changes before update block completes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)performBatchUpdates:(void ( ^ ) ( ))<em>updates</em> completion:(void ( ^ ) ( BOOL ))<em>completion</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>updates</code></th>
+						<td><p>The block that performs the relevant insert, delete, reload, or move operations.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>completion</code></th>
+						<td><p>A completion handler block to execute when all of the operations are finished. This block takes a single
+Boolean parameter that contains the value YES if all of the related animations completed successfully or
+NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/reloadDataWithCompletion:" title="reloadDataWithCompletion:"></a>
 	<h3 class="method-title"><code><a href="#//api/name/reloadDataWithCompletion:">&ndash;&nbsp;reloadDataWithCompletion:</a></code>
 </h3>
@@ -541,8 +672,7 @@ the main thread.</p></td>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI collection view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -601,8 +731,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI collection view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -661,8 +790,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI collection view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -726,8 +854,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI collection view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -786,8 +913,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI collection view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -846,8 +972,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI collection view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -906,8 +1031,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI collection view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -971,8 +1095,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI collection view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -1254,7 +1377,7 @@ before this method is called.</p>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-07-13</p>
+						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
 						
 						
 						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>

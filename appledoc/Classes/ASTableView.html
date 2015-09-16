@@ -56,6 +56,8 @@
 	
 	<optgroup label="Properties">
 		
+		<option value="//api/name/automaticallyAdjustsContentOffset">automaticallyAdjustsContentOffset</option>
+		
 		<option value="//api/name/leadingScreensForBatching">leadingScreensForBatching</option>
 		
 	</optgroup>
@@ -71,6 +73,10 @@
 		<option value="//api/name/deleteRowsAtIndexPaths:withRowAnimation:">- deleteRowsAtIndexPaths:withRowAnimation:</option>
 		
 		<option value="//api/name/deleteSections:withRowAnimation:">- deleteSections:withRowAnimation:</option>
+		
+		<option value="//api/name/endUpdates">- endUpdates</option>
+		
+		<option value="//api/name/endUpdatesAnimated:completion:">- endUpdatesAnimated:completion:</option>
 		
 		<option value="//api/name/initWithFrame:style:asyncDataFetching:">- initWithFrame:style:asyncDataFetching:</option>
 		
@@ -507,7 +513,7 @@ the main thread.</p></td>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>We don&rsquo;t support the these methods for animation yet.</p>
+				<p>begins a batch of insert, delete reload and move operations. This method must be called from the main thread.</p>
 			</div>
 			
 		    
@@ -522,10 +528,115 @@ the main thread.</p></td>
 			
 
 			
-			<div class="method-subsection discussion-section">
-				<h4 class="method-subtitle">Discussion</h4>
-				<p>TODO: support animations.</p>
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
 			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/endUpdates" title="endUpdates"></a>
+	<h3 class="method-title"><code><a href="#//api/name/endUpdates">&ndash;&nbsp;endUpdates</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
+You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations
+to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
+the operations simultaneously. This method is must be called from the main thread. It&rsquo;s important to remeber that the ASTableView will
+be processing the updates asynchronously after this call is completed.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)endUpdates</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/endUpdatesAnimated:completion:" title="endUpdatesAnimated:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/endUpdatesAnimated:completion:">&ndash;&nbsp;endUpdatesAnimated:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view.
+You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations
+to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
+the operations simultaneously. This method is must be called from the main thread. It&rsquo;s important to remeber that the ASTableView will
+be processing the updates asynchronously after this call and are not guaranteed to be reflected in the ASTableView until
+the completion block is executed.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)endUpdatesAnimated:(BOOL)<em>animated</em> completion:(void ( ^ ) ( BOOL completed ))<em>completion</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animated</code></th>
+						<td><p>NO to disable all animations.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>completion</code></th>
+						<td><p>A completion handler block to execute when all of the operations are finished. This block takes a single
+Boolean parameter that contains the value YES if all of the related animations completed successfully or
+NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
 			
 
 			
@@ -587,8 +698,7 @@ the main thread.</p></td>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI table view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -652,8 +762,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI table view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -717,8 +826,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI table view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -782,8 +890,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI table view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -847,8 +954,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI table view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -912,8 +1018,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI table view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -977,8 +1082,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI table view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -1042,8 +1146,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>This operation is asynchronous and thread safe. You can call it from background thread (it is recommendated)
-and the UI table view will be updated asynchronously. The asyncDataSource must be updated to reflect the changes
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
 before this method is called.</p>
 			</div>
 			
@@ -1165,6 +1268,54 @@ before this method is called.</p>
 			
 		</div>
 	</div>
+</div><div class="section-method">
+	<a name="//api/name/automaticallyAdjustsContentOffset" title="automaticallyAdjustsContentOffset"></a>
+	<h3 class="method-title"><code><a href="#//api/name/automaticallyAdjustsContentOffset">&nbsp;&nbsp;automaticallyAdjustsContentOffset</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>YES to automatically adjust the contentOffset when cells are inserted or deleted &ldquo;before&rdquo;
+visible cells, maintaining the users' visible scroll position. Currently this feature tracks insertions, moves and deletions of
+cells, but section edits are ignored.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic) BOOL automaticallyAdjustsContentOffset</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>default is NO.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
 </div>
 						</div>
 						
@@ -1180,7 +1331,7 @@ before this method is called.</p>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-07-13</p>
+						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
 						
 						
 						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>

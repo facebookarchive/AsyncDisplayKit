@@ -54,11 +54,25 @@
 
 	
 	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/alignItems">alignItems</option>
+		
+		<option value="//api/name/baselineRelativeArrangement">baselineRelativeArrangement</option>
+		
+		<option value="//api/name/direction">direction</option>
+		
+		<option value="//api/name/justifyContent">justifyContent</option>
+		
+		<option value="//api/name/spacing">spacing</option>
+		
+	</optgroup>
+	
 
 	
 	<optgroup label="Class Methods">
 		
-		<option value="//api/name/newWithStyle:children:">+ newWithStyle:children:</option>
+		<option value="//api/name/stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:">+ stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:</option>
 		
 	</optgroup>
 	
@@ -140,8 +154,8 @@ justifyContent determines how children are laid out.</li>
 
 						<div class="task-list">
 							<div class="section-method">
-	<a name="//api/name/newWithStyle:children:" title="newWithStyle:children:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/newWithStyle:children:">+&nbsp;newWithStyle:children:</a></code>
+	<a name="//api/name/direction" title="direction"></a>
+	<h3 class="method-title"><code><a href="#//api/name/direction">&nbsp;&nbsp;direction</a></code>
 </h3>
 
 	<div class="method-info">
@@ -151,12 +165,217 @@ justifyContent determines how children are laid out.</li>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Specifies how children are laid out.</p>
+				<p>Specifies the direction children are stacked in.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>+ (instancetype)newWithStyle:(ASStackLayoutSpecStyle)<em>style</em> children:(NSArray *)<em>children</em></code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASStackLayoutDirection direction</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/spacing" title="spacing"></a>
+	<h3 class="method-title"><code><a href="#//api/name/spacing">&nbsp;&nbsp;spacing</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The amount of space between each child.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) CGFloat spacing</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/justifyContent" title="justifyContent"></a>
+	<h3 class="method-title"><code><a href="#//api/name/justifyContent">&nbsp;&nbsp;justifyContent</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The amount of space between each child.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASStackLayoutJustifyContent justifyContent</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/alignItems" title="alignItems"></a>
+	<h3 class="method-title"><code><a href="#//api/name/alignItems">&nbsp;&nbsp;alignItems</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Orientation of children along cross axis</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASStackLayoutAlignItems alignItems</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/baselineRelativeArrangement" title="baselineRelativeArrangement"></a>
+	<h3 class="method-title"><code><a href="#//api/name/baselineRelativeArrangement">&nbsp;&nbsp;baselineRelativeArrangement</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>If YES the vertical spacing between two views is measured from the last baseline of the top view to the top of the bottom view</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL baselineRelativeArrangement</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:" title="stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:">+&nbsp;stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The direction of the stack view (horizontal or vertical)</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>+ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)<em>direction</em> spacing:(CGFloat)<em>spacing</em> justifyContent:(ASStackLayoutJustifyContent)<em>justifyContent</em> alignItems:(ASStackLayoutAlignItems)<em>alignItems</em> children:(NSArray *)<em>children</em></code></div>
 
 		    
 			
@@ -165,8 +384,23 @@ justifyContent determines how children are laid out.</li>
 				<table class="argument-def parameter-def">
 				
 					<tr>
-						<th scope="row" class="argument-name"><code>style</code></th>
-						<td><p>Specifies how children are laid out.</p></td>
+						<th scope="row" class="argument-name"><code>direction</code></th>
+						<td><p>The direction of the stack view (horizontal or vertical)</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>spacing</code></th>
+						<td><p>The spacing between the children</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>justifyContent</code></th>
+						<td><p>If no children are flexible, this describes how to fill any extra space</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>alignItems</code></th>
+						<td><p>Orientation of the children along the cross axis</p></td>
 					</tr>
 				
 					<tr>
@@ -212,7 +446,7 @@ justifyContent determines how children are laid out.</li>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-07-13</p>
+						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
 						
 						
 						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>

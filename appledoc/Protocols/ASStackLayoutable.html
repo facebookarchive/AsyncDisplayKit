@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 
-	<title>ASLayoutable Protocol Reference</title>
+	<title>ASStackLayoutable Protocol Reference</title>
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
@@ -68,10 +68,6 @@
 		
 		<option value="//api/name/flexShrink">flexShrink</option>
 		
-		<option value="//api/name/layoutPosition">layoutPosition</option>
-		
-		<option value="//api/name/sizeRange">sizeRange</option>
-		
 		<option value="//api/name/spacingAfter">spacingAfter</option>
 		
 		<option value="//api/name/spacingBefore">spacingBefore</option>
@@ -81,12 +77,6 @@
 
 	
 
-	
-	<optgroup label="Instance Methods">
-		
-		<option value="//api/name/measureWithSizeRange:">- measureWithSizeRange:</option>
-		
-	</optgroup>
 	
 	
 </select>
@@ -101,16 +91,16 @@
 		<div id="overview_contents" class="container">
 			<div id="content">
 				<main role="main">
-					<h1 class="title">ASLayoutable Protocol Reference</h1>
+					<h1 class="title">ASStackLayoutable Protocol Reference</h1>
 
 					
 					<div class="section section-specification"><table cellspacing="0"><tbody>
 						<tr>
 	<th>Conforms to</th>
-	<td><a href="../Protocols/ASLayoutablePrivate.html">ASLayoutablePrivate</a><br /><a href="../Protocols/ASStackLayoutable.html">ASStackLayoutable</a><br /><a href="../Protocols/ASStaticLayoutable.html">ASStaticLayoutable</a></td>
+	<td>NSObject</td>
 </tr><tr>
 	<th>Declared in</th>
-	<td>ASLayoutable.h</td>
+	<td>ASStackLayoutable.h</td>
 </tr>
 						</tbody></table></div>
 					
@@ -120,20 +110,7 @@
 					<div class="section section-overview">
 						<a title="Overview" name="overview"></a>
 						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p>The ASLayoutable protocol declares a method for measuring the layout of an object. A layout
-is defined by an ASLayout return value, and must specify 1) the size (but not position) of the
-layoutable object, and 2) the size and position of all of its immediate child objects. The tree
-recursion is driven by parents requesting layouts from their children in order to determine their
-size, followed by the parents setting the position of the children once the size is known</p>
-
-<p>The protocol also implements a &ldquo;family&rdquo; of Layoutable protocols. These protocols contain layout
-options that can be used for specific layout specs. For example, ASStackLayoutSpec has options
-defining how a layoutable should shrink or grow based upon available space.</p>
-
-<p>These layout options are all stored in an ASLayoutOptions class (that is defined in ASLayoutablePrivate).
-Generally you needn&rsquo;t worry about the layout options class, as the layoutable protocols allow all direct
-access to the options via convenience properties. If you are creating custom layout spec, then you can
-extend the backing layout options class to accomodate any new layout options.</p>
+						<p>Layout options that can be defined for an ASLayoutable being added to a ASStackLayoutSpec.</p>
 					</div>
 					
 					
@@ -149,64 +126,6 @@ extend the backing layout options class to accomodate any new layout options.</p
 
 						<div class="task-list">
 							<div class="section-method">
-	<a name="//api/name/measureWithSizeRange:" title="measureWithSizeRange:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/measureWithSizeRange:">&ndash;&nbsp;measureWithSizeRange:</a></code>
-<span class="task-item-suffix">required method</span></h3>
-
-	<div class="method-info">
-		<div class="pointy-thing"></div>
-
-		<div class="method-info-container">
-			
-			
-			<div class="method-subsection brief-description">
-				<p>Calculate a layout based on given size range.</p>
-			</div>
-			
-		    
-
-			<div class="method-subsection method-declaration"><code>- (ASLayout *)measureWithSizeRange:(ASSizeRange)<em>constrainedSize</em></code></div>
-
-		    
-			
-			<div class="method-subsection arguments-section parameters">
-				<h4 class="method-subtitle parameter-title">Parameters</h4>
-				<table class="argument-def parameter-def">
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>constrainedSize</code></th>
-						<td><p>The minimum and maximum sizes the receiver should fit in.</p></td>
-					</tr>
-				
-				</table>
-			</div>
-			
-
-			
-			<div class="method-subsection return">
-				<h4 class="method-subtitle parameter-title">Return Value</h4>
-				<p>An ASLayout instance defining the layout of the receiver and its children.</p>
-			</div>
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-			<div class="method-subsection declared-in-section">
-				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
-			</div>
-			
-			
-		</div>
-	</div>
-</div><div class="section-method">
 	<a name="//api/name/spacingBefore" title="spacingBefore"></a>
 	<h3 class="method-title"><code><a href="#//api/name/spacingBefore">&nbsp;&nbsp;spacingBefore</a></code>
 <span class="task-item-suffix">required method</span></h3>
@@ -242,7 +161,7 @@ Used when attached to a stack layout.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
+				<p><code class="declared-in-ref">ASStackLayoutable.h</code></p>
 			</div>
 			
 			
@@ -284,7 +203,7 @@ Used when attached to a stack layout.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
+				<p><code class="declared-in-ref">ASStackLayoutable.h</code></p>
 			</div>
 			
 			
@@ -326,7 +245,7 @@ Used when attached to a stack layout.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
+				<p><code class="declared-in-ref">ASStackLayoutable.h</code></p>
 			</div>
 			
 			
@@ -368,7 +287,7 @@ Used when attached to a stack layout.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
+				<p><code class="declared-in-ref">ASStackLayoutable.h</code></p>
 			</div>
 			
 			
@@ -411,7 +330,7 @@ Used when attached to a stack layout.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
+				<p><code class="declared-in-ref">ASStackLayoutable.h</code></p>
 			</div>
 			
 			
@@ -453,7 +372,7 @@ Used when attached to a stack layout.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
+				<p><code class="declared-in-ref">ASStackLayoutable.h</code></p>
 			</div>
 			
 			
@@ -494,7 +413,7 @@ Used when attached to a stack layout.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
+				<p><code class="declared-in-ref">ASStackLayoutable.h</code></p>
 			</div>
 			
 			
@@ -535,89 +454,7 @@ Used when attached to a stack layout.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
-			</div>
-			
-			
-		</div>
-	</div>
-</div><div class="section-method">
-	<a name="//api/name/sizeRange" title="sizeRange"></a>
-	<h3 class="method-title"><code><a href="#//api/name/sizeRange">&nbsp;&nbsp;sizeRange</a></code>
-<span class="task-item-suffix">required method</span></h3>
-
-	<div class="method-info">
-		<div class="pointy-thing"></div>
-
-		<div class="method-info-container">
-			
-			
-			<div class="method-subsection brief-description">
-				<p>If specified, the child&rsquo;s size is restricted according to this size. Percentages are resolved relative to the static layout spec.</p>
-			</div>
-			
-		    
-
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASRelativeSizeRange sizeRange</code></div>
-
-		    
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-			<div class="method-subsection declared-in-section">
-				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
-			</div>
-			
-			
-		</div>
-	</div>
-</div><div class="section-method">
-	<a name="//api/name/layoutPosition" title="layoutPosition"></a>
-	<h3 class="method-title"><code><a href="#//api/name/layoutPosition">&nbsp;&nbsp;layoutPosition</a></code>
-<span class="task-item-suffix">required method</span></h3>
-
-	<div class="method-info">
-		<div class="pointy-thing"></div>
-
-		<div class="method-info-container">
-			
-			
-			<div class="method-subsection brief-description">
-				<p>The position of this object within its parent spec.</p>
-			</div>
-			
-		    
-
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) CGPoint layoutPosition</code></div>
-
-		    
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-			<div class="method-subsection declared-in-section">
-				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASLayoutable.h</code></p>
+				<p><code class="declared-in-ref">ASStackLayoutable.h</code></p>
 			</div>
 			
 			
