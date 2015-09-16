@@ -89,6 +89,12 @@
   }
 
   NSArray *visibleNodePaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
+
+  if ( visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
+    _queuedRangeUpdate = NO;
+    return ; // don't do anything for this update, but leave _rangeIsValid to make sure we update it later
+  }
+
   NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
   CGSize viewportSize = [_delegate rangeControllerViewportSize:self];
 
@@ -104,7 +110,7 @@
     // this delegate decide what happens when a node is added or removed from a range
     id<ASRangeHandler> rangeDelegate = _rangeTypeHandlers[rangeKey];
 
-    if ([_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths viewportSize:viewportSize rangeType:rangeType]) {
+    if (!_rangeIsValid || [_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths viewportSize:viewportSize rangeType:rangeType]) {
       NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize rangeType:rangeType];
 
       // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
@@ -176,9 +182,9 @@
   });
 }
 
-- (void)dataControllerEndUpdates:(ASDataController *)dataController completion:(void (^)(BOOL))completion {
+- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
   ASDisplayNodePerformBlockOnMainThread(^{
-    [_delegate rangeControllerEndUpdates:self completion:completion];
+    [_delegate rangeController:self endUpdatesAnimated:animated completion:completion];
   });
 }
 
@@ -192,14 +198,14 @@
 
   ASDisplayNodePerformBlockOnMainThread(^{
     _rangeIsValid = NO;
-    [_delegate rangeController:self didInsertNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [_delegate rangeController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
+- (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
   ASDisplayNodePerformBlockOnMainThread(^{
     _rangeIsValid = NO;
-    [_delegate rangeController:self didDeleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [_delegate rangeController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
 

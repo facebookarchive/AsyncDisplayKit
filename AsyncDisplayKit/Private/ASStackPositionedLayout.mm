@@ -14,6 +14,7 @@
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackLayoutSpecUtilities.h"
 #import "ASLayoutable.h"
+#import "ASLayoutOptions.h"
 
 static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
                            const ASStackUnpositionedItem &l,
@@ -24,6 +25,8 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
       return crossSize - crossDimension(style.direction, l.layout.size);
     case ASStackLayoutAlignItemsCenter:
       return ASFloorPixelValue((crossSize - crossDimension(style.direction, l.layout.size)) / 2);
+    case ASStackLayoutAlignItemsBaselineFirst:
+    case ASStackLayoutAlignItemsBaselineLast:
     case ASStackLayoutAlignItemsStart:
     case ASStackLayoutAlignItemsStretch:
       return 0;
@@ -44,7 +47,7 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
   const auto minCrossSize = crossDimension(style.direction, constrainedSize.min);
   const auto maxCrossSize = crossDimension(style.direction, constrainedSize.max);
   const CGFloat crossSize = MIN(MAX(minCrossSize, largestChildCrossSize), maxCrossSize);
-
+  
   CGPoint p = directionPoint(style.direction, offset, 0);
   BOOL first = YES;
   auto stackedChildren = AS::map(unpositionedLayout.items, [&](const ASStackUnpositionedItem &l) -> ASLayout *{
@@ -54,6 +57,7 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
     }
     first = NO;
     l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize));
+    
     p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.spacingAfter, 0);
     return l.layout;
   });

@@ -77,6 +77,7 @@
   _textKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
   _textKitComponents.layoutManager.delegate = self;
   _wordKerner = [[ASTextNodeWordKerner alloc] init];
+  _returnKeyType = UIReturnKeyDefault;
 
   // Create the placeholder scaffolding.
   _placeholderTextKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
@@ -85,13 +86,13 @@
   return self;
 }
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
 }
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
@@ -133,11 +134,12 @@
   [self.view addSubview:_placeholderTextKitComponents.textView];
 
   // Create and configure our text view.
-  _textKitComponents.textView = [[_ASDisabledPanUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
+  _textKitComponents.textView = self.textView;
   //_textKitComponents.textView = NO; // Unfortunately there's a bug here with iOS 7 DP5 that causes the text-view to only be one line high when scrollEnabled is NO. rdar://14729288
   _textKitComponents.textView.delegate = self;
   _textKitComponents.textView.editable = YES;
   _textKitComponents.textView.typingAttributes = _typingAttributes;
+  _textKitComponents.textView.returnKeyType = _returnKeyType;
   _textKitComponents.textView.accessibilityHint = _placeholderTextKitComponents.textStorage.string;
   configureTextView(_textKitComponents.textView);
   [self.view addSubview:_textKitComponents.textView];
@@ -187,6 +189,15 @@
 
 #pragma mark - Configuration
 @synthesize delegate = _delegate;
+
+- (UITextView *)textView
+{
+  ASDisplayNodeAssertMainThread();
+  if (!_textKitComponents.textView) {
+    _textKitComponents.textView = [[_ASDisabledPanUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
+  }
+  return _textKitComponents.textView;
+}
 
 #pragma mark -
 @dynamic typingAttributes;
@@ -344,6 +355,13 @@
 {
   ASDN::MutexLocker l(_textKitLock);
   return [_textKitComponents.textView textInputMode];
+}
+
+- (void)setReturnKeyType:(UIReturnKeyType)returnKeyType
+{
+  ASDN::MutexLocker l(_textKitLock);
+  _returnKeyType = returnKeyType;
+  [_textKitComponents.textView setReturnKeyType:_returnKeyType];
 }
 
 - (BOOL)isFirstResponder

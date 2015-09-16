@@ -31,13 +31,13 @@
   return self;
 }
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
 }
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
@@ -106,12 +106,12 @@ static const CGFloat kFontSize = 18.0f;
   return self;
 }
 
-- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   static const CGFloat kHorizontalPadding = 15.0f;
   static const CGFloat kVerticalPadding = 11.0f;
   UIEdgeInsets insets = UIEdgeInsetsMake(kVerticalPadding, kHorizontalPadding, kVerticalPadding, kHorizontalPadding);
-  return [ASInsetLayoutSpec newWithInsets:insets child:_textNode];
+  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_textNode];
 }
 
 - (void)setText:(NSString *)text

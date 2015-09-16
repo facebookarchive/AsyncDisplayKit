@@ -15,6 +15,7 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 #import "UICollectionViewLayout+ASConvenience.h"
+#import "ASInternalHelpers.h"
 
 const static NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 
@@ -33,6 +34,9 @@ static BOOL _isInterceptedSelector(SEL sel)
           // handled by ASCollectionView node<->cell machinery
           sel == @selector(collectionView:cellForItemAtIndexPath:) ||
           sel == @selector(collectionView:layout:sizeForItemAtIndexPath:) ||
+
+          // TODO: Supplementary views are currently not supported.  An assertion is triggered if the _asyncDataSource implements this method.
+          // sel == @selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:) ||
           
           // handled by ASRangeController
           sel == @selector(numberOfSectionsInCollectionView:) ||
@@ -115,8 +119,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   NSMutableArray *_batchUpdateBlocks;
 
   BOOL _asyncDataFetchingEnabled;
+  BOOL _asyncDelegateImplementsInsetSection;
+  BOOL _collectionViewLayoutImplementsInsetSection;
+  BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
 
   ASBatchContext *_batchContext;
+  
+  CGSize _maxSizeForNodesConstrainedSize;
+  BOOL _ignoreMaxSizeChange;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -127,6 +137,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark -
 #pragma mark Lifecycle.
+
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
+{
+  return [self initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+}
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
@@ -162,6 +177,15 @@ static BOOL _isInterceptedSelector(SEL sel)
   _performingBatchUpdates = NO;
   _batchUpdateBlocks = [NSMutableArray array];
 
+  _collectionViewLayoutImplementsInsetSection = [layout respondsToSelector:@selector(sectionInset)];
+
+  _maxSizeForNodesConstrainedSize = self.bounds.size;
+  // If the initial size is 0, expect a size change very soon which is part of the initial configuration
+  // and should not trigger a relayout.
+  _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
+  
+  self.backgroundColor = [UIColor whiteColor];
+  
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
   
   return self;
@@ -214,10 +238,16 @@ static BOOL _isInterceptedSelector(SEL sel)
     super.dataSource = nil;
     _asyncDataSource = nil;
     _proxyDataSource = nil;
+    _asyncDataSourceImplementsConstrainedSizeForNode = NO;
   } else {
     _asyncDataSource = asyncDataSource;
+    // TODO: Support supplementary views with ASCollectionView.
+    if ([_asyncDataSource respondsToSelector:@selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:)]) {
+      ASDisplayNodeAssert(NO, @"ASCollectionView is planned to support supplementary views by September 2015.  You can work around this issue by using standard items.");
+    }
     _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
+    _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
   }
 }
 
@@ -234,10 +264,12 @@ static BOOL _isInterceptedSelector(SEL sel)
     super.delegate = nil;
     _asyncDelegate = nil;
     _proxyDelegate = nil;
+    _asyncDelegateImplementsInsetSection = NO;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+    _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
 }
 
@@ -281,50 +313,65 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark Assertions.
 
-- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
+- (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
+  ASDisplayNodeAssertMainThread();
+
   [_dataController beginUpdates];
   updates();
-  [_dataController endUpdatesWithCompletion:completion];
+  [_dataController endUpdatesAnimated:animated completion:completion];
+}
+
+- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  [self performBatchAnimated:YES updates:updates completion:completion];
 }
 
 - (void)insertSections:(NSIndexSet *)sections
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController insertSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController deleteSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController reloadSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController moveSection:section toSection:newSection withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
@@ -436,6 +483,26 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
+- (void)layoutSubviews
+{
+  if (! CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, self.bounds.size)) {
+    _maxSizeForNodesConstrainedSize = self.bounds.size;
+    
+    // First size change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
+    // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
+    if (_ignoreMaxSizeChange) {
+      _ignoreMaxSizeChange = NO;
+    } else {
+      [self performBatchAnimated:NO updates:^{
+        [_dataController relayoutAllRows];
+      } completion:nil];
+    }
+  }
+  
+  // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
+  [super layoutSubviews];
+}
+
 
 #pragma mark -
 #pragma mark Batch Fetching
@@ -486,17 +553,45 @@ static BOOL _isInterceptedSelector(SEL sel)
   return node;
 }
 
-- (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  CGSize restrainedSize = self.bounds.size;
-
-  if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
-    restrainedSize.width = FLT_MAX;
+  ASSizeRange constrainedSize;
+  if (_asyncDataSourceImplementsConstrainedSizeForNode) {
+    constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
   } else {
-    restrainedSize.height = FLT_MAX;
+    CGSize maxSize = _maxSizeForNodesConstrainedSize;
+    if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
+      maxSize.width = FLT_MAX;
+    } else {
+      maxSize.height = FLT_MAX;
+    }
+    constrainedSize = ASSizeRangeMake(CGSizeZero, maxSize);
   }
 
-  return restrainedSize;
+  UIEdgeInsets sectionInset = UIEdgeInsetsZero;
+  if (_collectionViewLayoutImplementsInsetSection) {
+    sectionInset = [(UICollectionViewFlowLayout *)self.collectionViewLayout sectionInset];
+  }
+  
+  if (_asyncDelegateImplementsInsetSection) {
+    sectionInset = [_asyncDelegate collectionView:self layout:self.collectionViewLayout insetForSectionAtIndex:indexPath.section];
+  }
+
+  if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
+    constrainedSize.min.width = MAX(0, constrainedSize.min.width - sectionInset.left - sectionInset.right);
+    //ignore insets for FLT_MAX so FLT_MAX can be compared against
+    if (constrainedSize.max.width - FLT_EPSILON < FLT_MAX) {
+      constrainedSize.max.width = MAX(0, constrainedSize.max.width - sectionInset.left - sectionInset.right);
+    }
+  } else {
+    constrainedSize.min.height = MAX(0, constrainedSize.min.height - sectionInset.top - sectionInset.bottom);
+    //ignore insets for FLT_MAX so FLT_MAX can be compared against
+    if (constrainedSize.max.height - FLT_EPSILON < FLT_MAX) {
+      constrainedSize.max.height = MAX(0, constrainedSize.max.height - sectionInset.top - sectionInset.bottom);
+    }
+  }
+
+  return constrainedSize;
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section
@@ -540,14 +635,31 @@ static BOOL _isInterceptedSelector(SEL sel)
   _performingBatchUpdates = YES;
 }
 
-- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion {
+- (void)rangeController:(ASRangeController *)rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    if (completion) {
+      completion(NO);
+    }
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
+  BOOL animationsEnabled = NO;
+
+  if (!animated) {
+    animationsEnabled = [UIView areAnimationsEnabled];
+    [UIView setAnimationsEnabled:NO];
+  }
 
   [super performBatchUpdates:^{
     [_batchUpdateBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
       block();
     }];
   } completion:^(BOOL finished) {
+    if (!animated) {
+      [UIView setAnimationsEnabled:animationsEnabled];
+    }
     if (completion) {
       completion(finished);
     }
@@ -574,9 +686,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   return [_dataController nodesAtIndexPaths:indexPaths];
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
   if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
       [super insertItemsAtIndexPaths:indexPaths];
@@ -588,9 +705,13 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
 
   if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
@@ -607,6 +728,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
 
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
   if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
       [super insertSections:indexSet];
@@ -621,6 +746,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
 
   if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{

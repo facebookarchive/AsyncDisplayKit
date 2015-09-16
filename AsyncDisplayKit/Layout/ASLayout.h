@@ -32,22 +32,48 @@ extern BOOL CGPointIsNull(CGPoint point);
  */
 @property (nonatomic, readonly) NSArray *sublayouts;
 
-+ (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                   size:(CGSize)size
-                               position:(CGPoint)position
-                             sublayouts:(NSArray *)sublayouts;
+/**
+ * Initializer.
+ *
+ * @param layoutableObject The backing ASLayoutable object.
+ *
+ * @param size The size of this layout.
+ *
+ * @param position The posiion of this layout within its parent (if available).
+ *
+ * @param sublayouts Sublayouts belong to the new layout.
+ */
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                                      size:(CGSize)size
+                                  position:(CGPoint)position
+                                sublayouts:(NSArray *)sublayouts;
 
 /**
- * Convenience that has CGPointNull position.
+ * Convenience initializer that has CGPointNull position.
+ * Best used by ASDisplayNode subclasses that are manually creating a layout for -calculateLayoutThatFits:,
+ * or for ASLayoutSpec subclasses that are referencing the "self" level in the layout tree,
+ * or for creating a sublayout of which the position is yet to be determined.
+ *
+ * @param layoutableObject The backing ASLayoutable object.
+ *
+ * @param size The size of this layout.
+ *
+ * @param sublayouts Sublayouts belong to the new layout.
  */
-+ (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                   size:(CGSize)size
-                             sublayouts:(NSArray *)sublayouts;
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                                      size:(CGSize)size
+                                sublayouts:(NSArray *)sublayouts;
 
 /**
- * Convenience that has CGPointNull position and no sublayouts.
+ * Convenience that has CGPointNull position and no sublayouts. 
+ * Best used for creating a layout that has no sublayouts, and is either a root one
+ * or a sublayout of which the position is yet to be determined.
+ *
+ * @param layoutableObject The backing ASLayoutable object.
+ *
+ * @param size The size of this layout.
  */
-+ (instancetype)newWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
 
 
 /**

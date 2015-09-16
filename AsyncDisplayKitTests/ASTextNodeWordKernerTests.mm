@@ -80,7 +80,7 @@
   CGFloat expectedWidth = [@" " sizeWithAttributes:@{ NSFontAttributeName : font }].width;
 
   CGRect boundingBox = [_layoutManagerDelegate layoutManager:_components.layoutManager boundingBoxForControlGlyphAtIndex:0 forTextContainer:_components.textContainer proposedLineFragment:CGRectZero glyphPosition:CGPointZero characterIndex:0];
-    
+
   XCTAssertEqualWithAccuracy(boundingBox.size.width, expectedWidth, FLT_EPSILON, @"Word kerning shouldn't alter the default width of %f. Encountered space width was %f", expectedWidth, boundingBox.size.width);
 }
 
@@ -111,7 +111,7 @@
   }
   NSGlyphProperty *glyphProperties = (NSGlyphProperty *)malloc(sizeof(NSGlyphProperty) * glyphCount);
   CGGlyph *glyphs = (CGGlyph *)malloc(sizeof(CGGlyph) * glyphCount);
-  NSInteger glyphsToChange = [_layoutManagerDelegate layoutManager:_components.layoutManager shouldGenerateGlyphs:glyphs properties:glyphProperties characterIndexes:characterIndexes font:NULL forGlyphRange:stringRange];
+  NSInteger glyphsToChange = [_layoutManagerDelegate layoutManager:_components.layoutManager shouldGenerateGlyphs:glyphs properties:glyphProperties characterIndexes:characterIndexes font:[UIFont systemFontOfSize:12.0] forGlyphRange:stringRange];
   free(characterIndexes);
   free(glyphProperties);
   free(glyphs);

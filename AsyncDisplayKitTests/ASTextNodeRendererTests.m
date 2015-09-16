@@ -69,6 +69,22 @@
   XCTAssertTrue(size.height > 0, @"Should have a nonzero height");
 }
 
+- (void)testCalculateSizeWithEmptyString
+{
+    _attributedString = [[NSAttributedString alloc] initWithString:@""];
+    [self setUpRenderer];
+    CGSize size = [_renderer size];
+    XCTAssertTrue(CGSizeEqualToSize(CGSizeZero, size), @"Empty NSAttributedString should result in CGSizeZero");
+}
+
+- (void)testCalculateSizeWithNilString
+{
+    _attributedString = nil;
+    [self setUpRenderer];
+    CGSize size = [_renderer size];
+    XCTAssertTrue(CGSizeEqualToSize(CGSizeZero, size), @"Nil NSAttributedString should result in CGSizeZero");
+}
+
 - (void)testNumberOfLines
 {
   [self setUpRenderer];

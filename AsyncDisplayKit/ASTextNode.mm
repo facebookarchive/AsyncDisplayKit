@@ -11,6 +11,7 @@
 #import <AsyncDisplayKit/_ASDisplayLayer.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 #import <AsyncDisplayKit/ASTextNodeCoreTextAdditions.h>
 #import <AsyncDisplayKit/ASTextNodeTextKitHelpers.h>
@@ -125,7 +126,7 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     self.needsDisplayOnBoundsChange = YES;
 
     _truncationMode = NSLineBreakByWordWrapping;
-    _truncationAttributedString = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"\u2026", @"Default truncation string")];
+    _truncationAttributedString = DefaultTruncationAttributedString();
 
     // The common case is for a text node to be non-opaque and blended over some background.
     self.opaque = NO;
@@ -148,13 +149,13 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   return self;
 }
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
 }
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
@@ -202,7 +203,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 
   _constrainedSize = constrainedSizeForText;
   [self _invalidateRenderer];
-  [self setNeedsDisplay];
+  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+    [self setNeedsDisplay];
+  });
   CGSize rendererSize = [[self _renderer] size];
 
   // Add shadow padding back
@@ -337,19 +340,21 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   // We need an entirely new renderer
   [self _invalidateRenderer];
 
-  // Tell the display node superclasses that the cached layout is incorrect now
-  [self invalidateCalculatedLayout];
+  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+    // Tell the display node superclasses that the cached layout is incorrect now
+    [self invalidateCalculatedLayout];
 
-  [self setNeedsDisplay];
+    [self setNeedsDisplay];
 
-  self.accessibilityLabel = _attributedString.string;
+    self.accessibilityLabel = _attributedString.string;
 
-  if (_attributedString.length == 0) {
-    // We're not an accessibility element by default if there is no string.
-    self.isAccessibilityElement = NO;
-  } else {
-    self.isAccessibilityElement = YES;
-  }
+    if (_attributedString.length == 0) {
+      // We're not an accessibility element by default if there is no string.
+      self.isAccessibilityElement = NO;
+    } else {
+      self.isAccessibilityElement = YES;
+    }
+  });
 }
 
 #pragma mark - Text Layout
@@ -360,7 +365,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     _exclusionPaths = exclusionPaths;
     [self _invalidateRenderer];
     [self invalidateCalculatedLayout];
-    [self setNeedsDisplay];
+    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+      [self setNeedsDisplay];
+    });
   }
 }
 
@@ -897,7 +904,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
     }
     _shadowColor = shadowColor;
     [self _invalidateShadower];
-    [self setNeedsDisplay];
+    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+      [self setNeedsDisplay];
+    });
   }
 }
 
@@ -911,7 +920,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   if (!CGSizeEqualToSize(_shadowOffset, shadowOffset)) {
     _shadowOffset = shadowOffset;
     [self _invalidateShadower];
-    [self setNeedsDisplay];
+    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+      [self setNeedsDisplay];
+    });
   }
 }
 
@@ -925,7 +936,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   if (_shadowOpacity != shadowOpacity) {
     _shadowOpacity = shadowOpacity;
     [self _invalidateShadower];
-    [self setNeedsDisplay];
+    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+      [self setNeedsDisplay];
+    });
   }
 }
 
@@ -939,7 +952,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   if (_shadowRadius != shadowRadius) {
     _shadowRadius = shadowRadius;
     [self _invalidateShadower];
-    [self setNeedsDisplay];
+    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+      [self setNeedsDisplay];
+    });
   }
 }
 
@@ -949,6 +964,16 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 }
 
 #pragma mark - Truncation Message
+
+static NSAttributedString *DefaultTruncationAttributedString()
+{
+  static NSAttributedString *defaultTruncationAttributedString;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    defaultTruncationAttributedString = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"\u2026", @"Default truncation string")];
+  });
+  return defaultTruncationAttributedString;
+}
 
 - (void)setTruncationAttributedString:(NSAttributedString *)truncationAttributedString
 {
@@ -981,7 +1006,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   if (_truncationMode != truncationMode) {
     _truncationMode = truncationMode;
     [self _invalidateRenderer];
-    [self setNeedsDisplay];
+    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+      [self setNeedsDisplay];
+    });
   }
 }
 
@@ -994,8 +1021,10 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 {
     if (_maximumLineCount != maximumLineCount) {
         _maximumLineCount = maximumLineCount;
-        [self _invalidateRenderer];
+      [self _invalidateRenderer];
+      ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
         [self setNeedsDisplay];
+      });
     }
 }
 
@@ -1010,7 +1039,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
 {
   _composedTruncationString = [self _prepareTruncationStringForDrawing:[self _composedTruncationString]];
   [self _invalidateRenderer];
-  [self setNeedsDisplay];
+  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+    [self setNeedsDisplay];
+  });
 }
 
 /**

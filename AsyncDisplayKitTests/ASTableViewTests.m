@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 
 #import "ASTableView.h"
+#import "ASDisplayNode+Subclasses.h"
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
@@ -56,8 +57,24 @@
 
 @end
 
-@interface ASTableViewFilledDataSource : NSObject <ASTableViewDataSource, ASTableViewDelegate>
+@interface ASTestTextCellNode : ASTextCellNode
+/** Calculated by counting how many times -layoutSpecThatFits: is called on the main thread. */
+@property (atomic) int numberOfLayoutsOnMainThread;
+@end
 
+@implementation ASTestTextCellNode
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  if ([NSThread isMainThread]) {
+    _numberOfLayoutsOnMainThread++;
+  }
+  return [super layoutSpecThatFits:constrainedSize];
+}
+
+@end
+
+@interface ASTableViewFilledDataSource : NSObject <ASTableViewDataSource, ASTableViewDelegate>
 @end
 
 @implementation ASTableViewFilledDataSource
@@ -74,7 +91,7 @@
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASTextCellNode *textCellNode = [ASTextCellNode new];
+  ASTestTextCellNode *textCellNode = [ASTestTextCellNode new];
   textCellNode.text = indexPath.description;
   
   return textCellNode;
@@ -151,38 +168,264 @@
   
   tableView.asyncDelegate = dataSource;
   tableView.asyncDataSource = dataSource;
+
+  XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
   
-  [tableView reloadData];
+  [tableView reloadDataWithCompletion:^{
+    NSLog(@"*** Reload Complete ***");
+    [reloadDataExpectation fulfill];
+  }];
+
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
   
   for (int i = 0; i < NumberOfReloadIterations; ++i) {
-    UITableViewRowAnimation rowAnimation = (arc4random_uniform(1) == 0 ? UITableViewRowAnimationMiddle : UITableViewRowAnimationNone);
-    
-    BOOL animatedScroll               = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL reloadRowsInsteadOfSections  = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL letRunloopProceed            = (arc4random_uniform(1) == 0 ? YES : NO);
-    BOOL useBeginEndUpdates           = (arc4random_uniform(2) == 0 ? YES : NO);
+    UITableViewRowAnimation rowAnimation = (arc4random_uniform(2) == 0 ? UITableViewRowAnimationMiddle : UITableViewRowAnimationNone);
+    BOOL animatedScroll               = (arc4random_uniform(2) == 0 ? YES : NO);
+    BOOL reloadRowsInsteadOfSections  = (arc4random_uniform(2) == 0 ? YES : NO);
+    NSTimeInterval runLoopDelay       = ((arc4random_uniform(2) == 0) ? (1.0 / (1 + arc4random_uniform(500))) : 0);
+    BOOL useBeginEndUpdates           = (arc4random_uniform(3) == 0 ? YES : NO);
+
+    // instrument our instrumentation ;)
+    //NSLog(@"Iteration %03d: %@|%@|%@|%@|%g", i, (rowAnimation == UITableViewRowAnimationNone) ? @"NONE  " : @"MIDDLE", animatedScroll ? @"ASCR" : @"    ", reloadRowsInsteadOfSections ? @"ROWS" : @"SECS", useBeginEndUpdates ? @"BEGEND" : @"      ", runLoopDelay);
 
     if (useBeginEndUpdates) {
       [tableView beginUpdates];
     }
     
     if (reloadRowsInsteadOfSections) {
-      [tableView reloadRowsAtIndexPaths:[self randomIndexPathsExisting:YES] withRowAnimation:rowAnimation];
+      NSArray *indexPaths = [self randomIndexPathsExisting:YES];
+      //NSLog(@"reloading rows: %@", indexPaths);
+      [tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:rowAnimation];
     } else {
-      [tableView reloadSections:[self randomIndexSet] withRowAnimation:rowAnimation];
+      NSIndexSet *sections = [self randomIndexSet];
+      //NSLog(@"reloading sections: %@", sections);
+      [tableView reloadSections:sections withRowAnimation:rowAnimation];
     }
     
     [tableView setContentOffset:CGPointMake(0, arc4random_uniform(tableView.contentSize.height - tableView.bounds.size.height)) animated:animatedScroll];
     
-    if (letRunloopProceed) {
+    if (runLoopDelay > 0) {
       // Run other stuff on the main queue for between 2ms and 1000ms.
-      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:(1 / (1 + arc4random_uniform(500)))]];
+      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:runLoopDelay]];
     }
     
     if (useBeginEndUpdates) {
       [tableView endUpdates];
     }
   }
+}
+
+- (void)testRelayoutAllRowsWithNonZeroSizeInitially
+{
+  // Initial width of the table view is non-zero and all nodes are measured with this size.
+  // Any subsequence size change must trigger a relayout.
+  CGSize tableViewFinalSize = CGSizeMake(100, 500);
+  // Width and height are swapped so that a later size change will simulate a rotation
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewFinalSize.height, tableViewFinalSize.width)
+                                                                style:UITableViewStylePlain
+                                                    asyncDataFetching:YES];
+  
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  // Trigger layout measurement on all nodes
+  [tableView reloadData];
+  
+  [self triggerSizeChangeAndAssertRelayoutAllRowsForTableView:tableView newSize:tableViewFinalSize];
+}
+
+- (void)testRelayoutAllRowsWithZeroSizeInitially
+{
+  // Initial width of the table view is 0. The first size change is part of the initial config.
+  // Any subsequence size change after that must trigger a relayout.
+  CGSize tableViewFinalSize = CGSizeMake(100, 500);
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectZero
+                                                                style:UITableViewStylePlain
+                                                    asyncDataFetching:YES];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  // Initial configuration
+  UIView *superview = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  [superview addSubview:tableView];
+  // Width and height are swapped so that a later size change will simulate a rotation
+  tableView.frame = CGRectMake(0, 0, tableViewFinalSize.height, tableViewFinalSize.width);
+  // Trigger layout measurement on all nodes
+  [tableView layoutIfNeeded];
+  
+  [self triggerSizeChangeAndAssertRelayoutAllRowsForTableView:tableView newSize:tableViewFinalSize];
+}
+
+- (void)triggerSizeChangeAndAssertRelayoutAllRowsForTableView:(ASTableView *)tableView newSize:(CGSize)newSize
+{
+  XCTestExpectation *nodesMeasuredUsingNewConstrainedSizeExpectation = [self expectationWithDescription:@"nodesMeasuredUsingNewConstrainedSize"];
+  
+  [tableView beginUpdates];
+  
+  CGRect frame = tableView.frame;
+  frame.size = newSize;
+  tableView.frame = frame;
+  [tableView layoutIfNeeded];
+  
+  [tableView endUpdatesAnimated:NO completion:^(BOOL completed) {
+    for (int section = 0; section < NumberOfSections; section++) {
+      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
+        XCTAssertEqual(node.numberOfLayoutsOnMainThread, 1);
+        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, newSize.width);
+      }
+    }
+    [nodesMeasuredUsingNewConstrainedSizeExpectation fulfill];
+  }];
+  
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
+}
+
+- (void)testRelayoutVisibleRowsWhenEditingModeIsChanged
+{
+  CGSize tableViewSize = CGSizeMake(100, 500);
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
+                                                                style:UITableViewStylePlain
+                                                    asyncDataFetching:YES];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
+  [tableView reloadDataWithCompletion:^{
+    for (int section = 0; section < NumberOfSections; section++) {
+      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
+        XCTAssertEqual(node.numberOfLayoutsOnMainThread, 0);
+        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
+      }
+    }
+    [reloadDataExpectation fulfill];
+  }];
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
+  
+  NSArray *visibleNodes = [tableView visibleNodes];
+  XCTAssertGreaterThan(visibleNodes.count, 0);
+  
+  // Cause table view to enter editing mode.
+  // Visibile nodes should be re-measured on main thread with the new (smaller) content view width.
+  // Other nodes are untouched.
+  XCTestExpectation *relayoutAfterEnablingEditingExpectation = [self expectationWithDescription:@"relayoutAfterEnablingEditing"];
+  [tableView beginUpdates];
+  [tableView setEditing:YES];
+  [tableView endUpdatesAnimated:YES completion:^(BOOL completed) {
+    for (int section = 0; section < NumberOfSections; section++) {
+      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
+        if ([visibleNodes containsObject:node]) {
+          XCTAssertEqual(node.numberOfLayoutsOnMainThread, 1);
+          XCTAssertLessThan(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
+        } else {
+          XCTAssertEqual(node.numberOfLayoutsOnMainThread, 0);
+          XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
+        }
+      }
+    }
+    [relayoutAfterEnablingEditingExpectation fulfill];
+  }];
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
+
+  // Cause table view to leave editing mode.
+  // Visibile nodes should be re-measured again.
+  // All nodes should have max constrained width equals to the table view width.
+  XCTestExpectation *relayoutAfterDisablingEditingExpectation = [self expectationWithDescription:@"relayoutAfterDisablingEditing"];
+  [tableView beginUpdates];
+  [tableView setEditing:NO];
+  [tableView endUpdatesAnimated:YES completion:^(BOOL completed) {
+    for (int section = 0; section < NumberOfSections; section++) {
+      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
+        BOOL visible = [visibleNodes containsObject:node];
+        XCTAssertEqual(node.numberOfLayoutsOnMainThread, visible ? 2: 0);
+        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
+      }
+    }
+    [relayoutAfterDisablingEditingExpectation fulfill];
+  }];
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
+}
+
+- (void)testRelayoutRowsAfterEditingModeIsChangedAndTheyBecomeVisible
+{
+  CGSize tableViewSize = CGSizeMake(100, 500);
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
+                                                                style:UITableViewStylePlain
+                                                    asyncDataFetching:YES];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
+  [tableView reloadDataWithCompletion:^{
+    for (int section = 0; section < NumberOfSections; section++) {
+      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
+        XCTAssertEqual(node.numberOfLayoutsOnMainThread, 0);
+        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
+      }
+    }
+    [reloadDataExpectation fulfill];
+  }];
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
+  
+  // Cause table view to enter editing mode and then scroll to the bottom.
+  // The last node should be re-measured on main thread with the new (smaller) content view width.
+  NSIndexPath *lastRowIndexPath = [NSIndexPath indexPathForRow:(NumberOfRowsPerSection - 1) inSection:(NumberOfSections - 1)];
+  XCTestExpectation *relayoutExpectation = [self expectationWithDescription:@"relayout"];
+  [tableView beginUpdates];
+  [tableView setEditing:YES];
+  [tableView setContentOffset:CGPointMake(0, CGFLOAT_MAX) animated:YES];
+  [tableView endUpdatesAnimated:YES completion:^(BOOL completed) {
+    ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:lastRowIndexPath];
+    XCTAssertEqual(node.numberOfLayoutsOnMainThread, 1);
+    XCTAssertLessThan(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
+    [relayoutExpectation fulfill];
+  }];
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
 }
 
 @end

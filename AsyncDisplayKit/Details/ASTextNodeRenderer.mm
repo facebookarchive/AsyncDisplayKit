@@ -173,8 +173,12 @@ static const CGFloat ASTextNodeRendererTextCapHeightPadding = 1.3;
 {
   ASDN::MutexLocker l(_textKitLock);
 
+  if (_attributedString.length == 0) {
+    _calculatedSize = CGSizeZero;
+    return;
+  }
+    
   [self _initializeTextKitComponentsIfNeeded];
-
 
   // Force glyph generation and layout, which may not have happened yet (and
   // isn't triggered by -usedRectForTextContainer:).

@@ -96,13 +96,13 @@
   return self;
 }
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
 }
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
@@ -111,7 +111,10 @@
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(_imageLock);
-  if (_image)
+  // if a preferredFrameSize is set, call the superclass to return that instead of using the image size.
+  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO)
+    return [super calculateSizeThatFits:constrainedSize];
+  else if (_image)
     return _image.size;
   else
     return CGSizeZero;

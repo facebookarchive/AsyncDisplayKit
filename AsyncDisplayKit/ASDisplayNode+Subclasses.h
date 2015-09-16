@@ -13,8 +13,7 @@
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASThread.h>
 
-#import <AsyncDisplayKit/ASLayout.h>
-#import <AsyncDisplayKit/ASLayoutable.h>
+@class ASLayoutSpec;
 
 /**
  * The subclass header _ASDisplayNode+Subclasses_ defines the following methods that either must or can be overriden by
@@ -36,7 +35,7 @@
  * variables.
  */
 
-@interface ASDisplayNode (Subclassing) <ASLayoutable>
+@interface ASDisplayNode (Subclassing)
 
 
 /** @name View Configuration */
@@ -121,23 +120,6 @@
 /** @name Layout calculation */
 
 /**
- * @abstract Asks the node to measure a layout based on given size range.
- *
- * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
- *
- * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
- *
- * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
- * constraint and the result.
- *
- * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
- * be expensive if result is not cached.
- *
- * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
- */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
-
-/**
  * @abstract Calculate a layout based on given size range.
  *
  * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
@@ -180,7 +162,7 @@
  *
  * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
  */
-- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize;
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize;
 
 /**
  * @abstract Invalidate previously measured and cached layout.
@@ -267,6 +249,8 @@
  * @abstract Indicates that the receiver is about to display its subnodes. This method is not called if there are no
  * subnodes present.
  *
+ * @param subnode The subnode of which display is about to begin.
+ *
  * @discussion Subclasses may override this method to be notified when subnode display (asynchronous or synchronous) is
  * about to begin.
  */
@@ -275,6 +259,8 @@
 /**
  * @abstract Indicates that the receiver is finished displaying its subnodes. This method is not called if there are
  * no subnodes present.
+ *
+ * @param subnode The subnode of which display is about to completed.
  *
  * @discussion Subclasses may override this method to be notified when subnode display (asynchronous or synchronous) has
  * completed.

@@ -15,7 +15,11 @@
 #import "ASRangeController.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
+#import "ASInternalHelpers.h"
+#import "ASLayout.h"
 
+//#define LOG(...) NSLog(__VA_ARGS__)
+#define LOG(...)
 
 #pragma mark -
 #pragma mark Proxying.
@@ -101,18 +105,40 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASCellNode<->UITableViewCell bridging.
 
+@class _ASTableViewCell;
+
+@protocol _ASTableViewCellDelegate <NSObject>
+- (void)willLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell;
+@end
+
 @interface _ASTableViewCell : UITableViewCell
+@property (nonatomic, weak) id<_ASTableViewCellDelegate> delegate;
+@property (nonatomic, weak) ASCellNode *node;
 @end
 
 @implementation _ASTableViewCell
 // TODO add assertions to prevent use of view-backed UITableViewCell properties (eg .textLabel)
+
+- (void)layoutSubviews
+{
+  [_delegate willLayoutSubviewsOfTableViewCell:self];
+  [super layoutSubviews];
+}
+
+- (void)didTransitionToState:(UITableViewCellStateMask)state
+{
+  [self setNeedsLayout];
+  [self layoutIfNeeded];
+  [super didTransitionToState:state];
+}
+
 @end
 
 
 #pragma mark -
 #pragma mark ASTableView
 
-@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource> {
+@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate> {
   _ASTableViewProxy *_proxyDataSource;
   _ASTableViewProxy *_proxyDelegate;
 
@@ -126,6 +152,12 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASBatchContext *_batchContext;
 
   NSIndexPath *_pendingVisibleIndexPath;
+
+  NSIndexPath *_contentOffsetAdjustmentTopVisibleRow;
+  CGFloat _contentOffsetAdjustment;
+
+  CGFloat _maxWidthForNodesConstrainedSize;
+  BOOL _ignoreMaxWidthChange;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -176,6 +208,13 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
   _leadingScreensForBatching = 1.0;
   _batchContext = [[ASBatchContext alloc] init];
+
+  _automaticallyAdjustsContentOffset = NO;
+  
+  _maxWidthForNodesConstrainedSize = self.bounds.size.width;
+  // If the initial size is 0, expect a size change very soon which is part of the initial configuration
+  // and should not trigger a relayout.
+  _ignoreMaxWidthChange = (_maxWidthForNodesConstrainedSize == 0);
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -321,56 +360,141 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)beginUpdates
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController beginUpdates];
 }
 
 - (void)endUpdates
 {
-  [_dataController endUpdates];
+  [self endUpdatesAnimated:YES completion:nil];
 }
 
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion;
+{
+  ASDisplayNodeAssertMainThread();
+  [_dataController endUpdatesAnimated:animated completion:completion];
+}
+
+- (void)layoutSubviews
+{
+  if (_maxWidthForNodesConstrainedSize != self.bounds.size.width) {
+    _maxWidthForNodesConstrainedSize = self.bounds.size.width;
+
+    // First width change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
+    // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
+    if (_ignoreMaxWidthChange) {
+      _ignoreMaxWidthChange = NO;
+    } else {
+      [self beginUpdates];
+      [_dataController relayoutAllRows];
+      [self endUpdates];
+    }
+  }
+  
+  // To ensure _maxWidthForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
+  [super layoutSubviews];
+}
 
 #pragma mark -
 #pragma mark Editing
 
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController insertSections:sections withAnimationOptions:animation];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController deleteSections:sections withAnimationOptions:animation];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController reloadSections:sections withAnimationOptions:animation];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController moveSection:section toSection:newSection withAnimationOptions:UITableViewRowAnimationNone];
 }
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
+  ASDisplayNodeAssertMainThread();
   [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:UITableViewRowAnimationNone];
+}
+
+#pragma mark -
+#pragma mark adjust content offset
+
+- (void)beginAdjustingContentOffset
+{
+  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
+  _contentOffsetAdjustment = 0;
+  _contentOffsetAdjustmentTopVisibleRow = self.indexPathsForVisibleRows.firstObject;
+}
+
+- (void)endAdjustingContentOffset
+{
+  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
+  if (_contentOffsetAdjustment != 0) {
+    self.contentOffset = CGPointMake(0, self.contentOffset.y+_contentOffsetAdjustment);
+  }
+
+  _contentOffsetAdjustment = 0;
+  _contentOffsetAdjustmentTopVisibleRow = nil;
+}
+
+- (void)adjustContentOffsetWithNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths inserting:(BOOL)inserting {
+  // Maintain the users visible window when inserting or deleteing cells by adjusting the content offset for nodes
+  // before the visible area. If in a begin/end updates block this will update _contentOffsetAdjustment, otherwise it will
+  // update self.contentOffset directly.
+
+  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
+
+  CGFloat dir = (inserting) ? +1 : -1;
+  CGFloat adjustment = 0;
+  NSIndexPath *top = _contentOffsetAdjustmentTopVisibleRow ?: self.indexPathsForVisibleRows.firstObject;
+
+  for (int index = 0; index < indexPaths.count; index++) {
+    NSIndexPath *indexPath = indexPaths[index];
+    if ([indexPath compare:top] <= 0) { // if this row is before or equal to the topmost visible row, make adjustments...
+      ASCellNode *cellNode = nodes[index];
+      adjustment += cellNode.calculatedSize.height * dir;
+      if (indexPath.section == top.section) {
+        top = [NSIndexPath indexPathForRow:top.row+dir inSection:top.section];
+      }
+    }
+  }
+
+  if (_contentOffsetAdjustmentTopVisibleRow) { // true of we are in a begin/end update block (see beginAdjustingContentOffset)
+    _contentOffsetAdjustmentTopVisibleRow = top;
+    _contentOffsetAdjustment += adjustment;
+  } else if (adjustment != 0) {
+    self.contentOffset = CGPointMake(0, self.contentOffset.y+adjustment);
+  }
 }
 
 #pragma mark -
@@ -383,11 +507,13 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   _ASTableViewCell *cell = [self dequeueReusableCellWithIdentifier:reuseIdentifier];
   if (!cell) {
     cell = [[_ASTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+    cell.delegate = self;
   }
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
   [_rangeController configureContentView:cell.contentView forCellNode:node];
 
+  cell.node = node;
   cell.backgroundColor = node.backgroundColor;
   cell.selectionStyle = node.selectionStyle;
 
@@ -499,13 +625,38 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"--- UITableView beginUpdates");
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
   [super beginUpdates];
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self beginAdjustingContentOffset];
+  }
 }
 
-- (void)rangeControllerEndUpdates:(ASRangeController *)rangeController completion:(void (^)(BOOL))completion
+- (void)rangeController:(ASRangeController *)rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
-  [super endUpdates];
+  LOG(@"--- UITableView endUpdates");
+
+  if (!self.asyncDataSource) {
+    if (completion) {
+      completion(NO);
+    }
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self endAdjustingContentOffset];
+  }
+
+  ASPerformBlockWithoutAnimation(!animated, ^{
+    [super endUpdates];
+  });
 
   if (completion) {
     completion(YES);
@@ -573,29 +724,53 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   return self.bounds.size;
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView insertRows:%ld rows", indexPaths.count);
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
+  }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView deleteRows:%ld rows", indexPaths.count);
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:NO];
+  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView insertSections:%@", indexSet);
+
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
@@ -606,6 +781,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView deleteSections:%@", indexSet);
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
@@ -622,9 +802,10 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   return node;
 }
 
-- (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return CGSizeMake(self.bounds.size.width, FLT_MAX);
+  return ASSizeRangeMake(CGSizeMake(_maxWidthForNodesConstrainedSize, 0),
+                         CGSizeMake(_maxWidthForNodesConstrainedSize, FLT_MAX));
 }
 
 - (void)dataControllerLockDataSource
@@ -660,6 +841,35 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     return [_asyncDataSource numberOfSectionsInTableView:self];
   } else {
     return 1; // default section number
+  }
+}
+
+#pragma mark - _ASTableViewCellDelegate
+
+- (void)willLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
+{
+  CGFloat contentViewWidth = tableViewCell.contentView.bounds.size.width;
+  ASCellNode *node = tableViewCell.node;
+  ASSizeRange constrainedSize = node.constrainedSizeForCalculatedLayout;
+  
+  // Table view cells should always fill its content view width.
+  // Normally the content view width equals to the constrained size width (which equals to the table view width).
+  // If there is a mismatch between these values, for example after the table view entered or left editing mode,
+  // content view width is preferred and used to re-measure the cell node.
+  if (contentViewWidth != constrainedSize.max.width) {
+    constrainedSize.min.width = contentViewWidth;
+    constrainedSize.max.width = contentViewWidth;
+
+    // Re-measurement is done on main to ensure thread affinity. In the worst case, this is as fast as UIKit's implementation.
+    //
+    // Unloaded nodes *could* be re-measured off the main thread, but only with the assumption that content view width
+    // is the same for all cells (because there is no easy way to get that individual value before the node being assigned to a _ASTableViewCell).
+    // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
+    // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
+    [self beginUpdates];
+    CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
+    node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
+    [self endUpdates];
   }
 }
 

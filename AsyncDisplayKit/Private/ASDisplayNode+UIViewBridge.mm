@@ -174,6 +174,7 @@
 - (void)setNeedsLayout
 {
   _bridge_prologue;
+  [self __setNeedsLayout];
   _messageToViewOrLayer(setNeedsLayout);
 }
 

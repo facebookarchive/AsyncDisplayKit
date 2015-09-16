@@ -11,9 +11,11 @@
 #import "ASLayoutSpecSnapshotTestsHelper.h"
 
 #import "ASStackLayoutSpec.h"
+#import "ASStackLayoutSpecUtilities.h"
 #import "ASBackgroundLayoutSpec.h"
 #import "ASRatioLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
+#import "ASLayoutOptions.h"
 
 @interface ASStackLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end
@@ -79,7 +81,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   
   ASLayoutSpec *layoutSpec =
   [ASBackgroundLayoutSpec
-   newWithChild:[ASStackLayoutSpec newWithStyle:style children:children]
+   backgroundLayoutSpecWithChild:[ASStackLayoutSpec stackLayoutSpecWithDirection:style.direction spacing:style.spacing justifyContent:style.justifyContent alignItems:style.alignItems children:children]
    background:backgroundNode];
   
   NSMutableArray *newSubnodes = [NSMutableArray arrayWithObject:backgroundNode];
@@ -179,17 +181,12 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
 
   ASLayoutSpec *layoutSpec =
   [ASInsetLayoutSpec
-   newWithInsets:{10, 10, 10 ,10}
+   insetLayoutSpecWithInsets:{10, 10, 10 ,10}
    child:
    [ASBackgroundLayoutSpec
-    newWithChild:
+    backgroundLayoutSpecWithChild:
     [ASStackLayoutSpec
-     newWithStyle:{
-       .direction = ASStackLayoutDirectionVertical,
-       .spacing = 10,
-       .alignItems = ASStackLayoutAlignItemsStretch
-     }
-     children:@[]]
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:10 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStretch children:@[]]
     background:backgroundNode]];
   
   // width 300px; height 0-300px
@@ -257,7 +254,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ASStaticSizeDisplayNode * subnode2 = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
   subnode2.staticSize = {50, 50};
   
-  ASRatioLayoutSpec *child1 = [ASRatioLayoutSpec newWithRatio:1.5 child:subnode1];
+  ASRatioLayoutSpec *child1 = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.5 child:subnode1];
   child1.flexBasis = ASRelativeDimensionMakeWithPercent(1);
   child1.flexGrow = YES;
   child1.flexShrink = YES;
@@ -481,7 +478,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {10, 0};
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {3000, 3000};
   
-  ASRatioLayoutSpec *child2 = [ASRatioLayoutSpec newWithRatio:1.0 child:subnodes[2]];
+  ASRatioLayoutSpec *child2 = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.0 child:subnodes[2]];
   child2.flexGrow = YES;
   child2.flexShrink = YES;
 
@@ -489,16 +486,12 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   // Instead it should be stretched to 300 points tall, matching the red child and not overlapping the green inset.
   ASLayoutSpec *layoutSpec =
   [ASBackgroundLayoutSpec
-   newWithChild:
+   backgroundLayoutSpecWithChild:
    [ASInsetLayoutSpec
-    newWithInsets:UIEdgeInsetsMake(10, 10, 10, 10)
+    insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10)
     child:
-    [ASStackLayoutSpec
-     newWithStyle:{
-      .direction = ASStackLayoutDirectionHorizontal,
-      .alignItems = ASStackLayoutAlignItemsStretch,
-     }
-     children:@[subnodes[1], child2,]]]
+    [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStretch children:@[subnodes[1], child2,]]
+    ]
    background:subnodes[0]];
 
   static ASSizeRange kSize = {{300, 0}, {300, INFINITY}};

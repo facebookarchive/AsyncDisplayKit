@@ -31,6 +31,7 @@
 
   // simple editable text node.  here we use it synchronously, but it fully supports async layout & display
   _textNode = [[ASEditableTextNode alloc] init];
+  _textNode.returnKeyType = UIReturnKeyDone;
   _textNode.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.1f];
 
   // with placeholder text (displayed if the user hasn't entered text)

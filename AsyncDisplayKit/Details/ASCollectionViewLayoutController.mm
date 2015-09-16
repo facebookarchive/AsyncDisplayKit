@@ -13,6 +13,7 @@
 #import "ASAssert.h"
 #import "ASCollectionView.h"
 #import "CGRect+ASConvenience.h"
+#import "UICollectionViewLayout+ASConvenience.h"
 
 struct ASDirectionalScreenfulBuffer {
   CGFloat positiveDirection; // Positive relative to iOS Core Animation layer coordinate space.
@@ -56,7 +57,7 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 
 @interface ASCollectionViewLayoutController ()
 {
-  UIScrollView * __weak _scrollView;
+  ASCollectionView * __weak _collectionView;
   UICollectionViewLayout * __strong _collectionViewLayout;
   std::vector<CGRect> _updateRangeBoundsIndexedByRangeType;
   ASScrollDirection _scrollableDirections;
@@ -72,7 +73,7 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   }
   
   _scrollableDirections = [collectionView scrollableDirections];
-  _scrollView = collectionView;
+  _collectionView = collectionView;
   _collectionViewLayout = [collectionView collectionViewLayout];
   _updateRangeBoundsIndexedByRangeType = std::vector<CGRect>(ASLayoutRangeTypeCount);
   return self;
@@ -94,8 +95,13 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 - (ASRangeGeometry)rangeGeometryWithScrollDirection:(ASScrollDirection)scrollDirection
                               rangeTuningParameters:(ASRangeTuningParameters)rangeTuningParameters
 {
-  CGRect rangeBounds = _scrollView.bounds;
-  CGRect updateBounds = _scrollView.bounds;
+  CGRect rangeBounds = _collectionView.bounds;
+  CGRect updateBounds = _collectionView.bounds;
+  
+  //scrollable directions can change for non-flow layouts
+  if ([_collectionViewLayout asdk_isFlowLayout] == NO) {
+    _scrollableDirections = [_collectionView scrollableDirections];
+  }
   
   BOOL canScrollHorizontally = ASScrollDirectionContainsHorizontalDirection(_scrollableDirections);
   if (canScrollHorizontally) {
@@ -148,7 +154,7 @@ typedef struct ASRangeGeometry ASRangeGeometry;
     return YES;
   }
   
-  CGRect currentBounds = _scrollView.bounds;
+  CGRect currentBounds = _collectionView.bounds;
   if (CGRectIsEmpty(currentBounds)) {
     currentBounds = CGRectMake(0, 0, viewportSize.width, viewportSize.height);
   }

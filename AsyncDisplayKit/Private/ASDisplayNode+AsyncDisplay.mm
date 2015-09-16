@@ -83,6 +83,13 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   if (self.isHidden || self.alpha <= 0.0) {
     return;
   }
+    
+  BOOL rasterizingFromAscendent = [self __rasterizedContainerNode] != nil;
+
+  // if super node is rasterizing descendents, subnodes will not have had layout calls becase they don't have layers
+  if (rasterizingFromAscendent) {
+    [self __layout];
+  }
 
   // Capture these outside the display block so they are retained.
   UIColor *backgroundColor = self.backgroundColor;
@@ -120,6 +127,11 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       CGContextSaveGState(context);
 
       CGContextTranslateCTM(context, frame.origin.x, frame.origin.y);
+
+      //support cornerRadius
+      if (rasterizingFromAscendent && self.cornerRadius && self.clipsToBounds) {
+        [[UIBezierPath bezierPathWithRoundedRect:bounds cornerRadius:self.cornerRadius] addClip];
+      }
 
       // Fill background if any.
       CGColorRef backgroundCGColor = backgroundColor.CGColor;

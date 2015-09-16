@@ -29,10 +29,12 @@
  */
 @interface ASInsetLayoutSpec : ASLayoutSpec
 
+@property (nonatomic, assign) UIEdgeInsets insets;
+
 /**
  @param insets The amount of space to inset on each side.
  @param child The wrapped child to inset. If nil, this method returns nil.
  */
-+ (instancetype)newWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
++ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
 
 @end

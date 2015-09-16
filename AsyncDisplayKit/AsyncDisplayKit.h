@@ -21,6 +21,7 @@
 
 #import <AsyncDisplayKit/ASTableView.h>
 #import <AsyncDisplayKit/ASCollectionView.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
 #import <AsyncDisplayKit/ASCellNode.h>
 
 #import <AsyncDisplayKit/ASScrollNode.h>
@@ -35,5 +36,5 @@
 #import <AsyncDisplayKit/ASOverlayLayoutSpec.h>
 #import <AsyncDisplayKit/ASRatioLayoutSpec.h>
 #import <AsyncDisplayKit/ASStaticLayoutSpec.h>
-#import <AsyncDisplayKit/ASStackLayoutChild.h>
+#import <AsyncDisplayKit/ASStackLayoutDefines.h>
 #import <AsyncDisplayKit/ASStackLayoutSpec.h>

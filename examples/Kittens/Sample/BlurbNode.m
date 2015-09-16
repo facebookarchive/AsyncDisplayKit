@@ -74,16 +74,15 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
 }
 
 #if UseAutomaticLayout
-- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  return
-  [ASInsetLayoutSpec
-   newWithInsets:UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding)
-   child:
-   [ASCenterLayoutSpec
-    newWithCenteringOptions:ASCenterLayoutSpecCenteringX // Center the text horizontally
-    sizingOptions:ASCenterLayoutSpecSizingOptionMinimumY // Takes up minimum height
-    child:_textNode]];
+  ASCenterLayoutSpec *centerSpec = [[ASCenterLayoutSpec alloc] init];
+  centerSpec.centeringOptions = ASCenterLayoutSpecCenteringX;
+  centerSpec.sizingOptions = ASCenterLayoutSpecSizingOptionMinimumY;
+  centerSpec.child = _textNode;
+  
+  UIEdgeInsets padding =UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding);
+  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:padding child:centerSpec];
 }
 #else
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize

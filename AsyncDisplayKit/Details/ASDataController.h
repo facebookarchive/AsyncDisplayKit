@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
+#import <AsyncDisplayKit/ASDimension.h>
 #import "ASFlowLayoutController.h"
 
 @class ASCellNode;
@@ -27,9 +28,9 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 - (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
- The constrained size for layout.
+ The constrained size range for layout.
  */
-- (CGSize)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  Fetch the number of rows in specific section.
@@ -65,7 +66,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
  Called for batch update.
  */
 - (void)dataControllerBeginUpdates:(ASDataController *)dataController;
-- (void)dataControllerEndUpdates:(ASDataController *)dataController completion:(void (^)(BOOL))completion;
+- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
 
 /**
  Called for insertion of elements.
@@ -75,7 +76,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 /**
  Called for deletion of elements.
  */
-- (void)dataController:(ASDataController *)dataController didDeleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for insertion of sections.
@@ -111,7 +112,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 @property (nonatomic, weak) id<ASDataControllerDelegate> delegate;
 
 /**
- *  Designated iniailizer.
+ *  Designated initializer.
  *
  * @param asyncDataFetchingEnabled Enable the data fetching in async mode.
  *
@@ -138,7 +139,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)endUpdates;
 
-- (void)endUpdatesWithCompletion:(void (^)(BOOL))completion;
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
 
 - (void)insertSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
@@ -153,6 +154,12 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+/**
+ * Re-measures all loaded nodes. Used to respond to a change in size of the containing view 
+ * (e.g. ASTableView or ASCollectionView after an orientation change).
+ */
+- (void)relayoutAllRows;
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 

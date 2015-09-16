@@ -10,6 +10,14 @@
 
 #import "ASStackLayoutSpec.h"
 
+typedef struct {
+  ASStackLayoutDirection direction;
+  CGFloat spacing;
+  ASStackLayoutJustifyContent justifyContent;
+  ASStackLayoutAlignItems alignItems;
+  BOOL baselineRelativeArrangement;
+} ASStackLayoutSpecStyle;
+
 inline CGFloat stackDimension(const ASStackLayoutDirection direction, const CGSize size)
 {
   return (direction == ASStackLayoutDirectionVertical) ? size.height : size.width;
@@ -55,6 +63,10 @@ inline ASStackLayoutAlignItems alignment(ASStackLayoutAlignSelf childAlignment, 
       return ASStackLayoutAlignItemsStart;
     case ASStackLayoutAlignSelfStretch:
       return ASStackLayoutAlignItemsStretch;
+    case ASStackLayoutAlignSelfBaselineFirst:
+      return ASStackLayoutAlignItemsBaselineFirst;
+    case ASStackLayoutAlignSelfBaselineLast:
+      return ASStackLayoutAlignItemsBaselineLast;
     case ASStackLayoutAlignSelfAuto:
     default:
       return stackAlignment;

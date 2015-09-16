@@ -29,6 +29,8 @@ static const CGFloat kInnerPadding = 10.0f;
   ASNetworkImageNode *_imageNode;
   ASTextNode *_textNode;
   ASDisplayNode *_divider;
+  BOOL _isImageEnlarged;
+  BOOL _swappedTextAndImage;
 }
 
 @end
@@ -84,6 +86,7 @@ static const CGFloat kInnerPadding = 10.0f;
                                                                    (NSInteger)roundl(_kittenSize.width),
                                                                    (NSInteger)roundl(_kittenSize.height)]];
 //  _imageNode.contentMode = UIViewContentModeCenter;
+  [_imageNode addTarget:self action:@selector(toggleNodesSwap) forControlEvents:ASControlNodeEventTouchUpInside];
   [self addSubnode:_imageNode];
 
   // lorem ipsum text, plus some nice styling
@@ -129,23 +132,21 @@ static const CGFloat kInnerPadding = 10.0f;
 }
 
 #if UseAutomaticLayout
-- (id<ASLayoutable>)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASRatioLayoutSpec *imagePlaceholder = [ASRatioLayoutSpec newWithRatio:1.0 child:_imageNode];
-  imagePlaceholder.flexBasis = ASRelativeDimensionMakeWithPoints(kImageSize);
-  
+  _imageNode.preferredFrameSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
   _textNode.flexShrink = YES;
   
-  return
-  [ASInsetLayoutSpec
-   newWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding)
-   child:
-   [ASStackLayoutSpec
-    newWithStyle:{
-      .direction = ASStackLayoutDirectionHorizontal,
-      .spacing = kInnerPadding
-    }
-    children:@[imagePlaceholder, _textNode]]];
+  ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
+  stackSpec.direction = ASStackLayoutDirectionHorizontal;
+  stackSpec.spacing = kInnerPadding;
+  [stackSpec setChildren:!_swappedTextAndImage ? @[_imageNode, _textNode] : @[_textNode, _imageNode]];
+  
+  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
+  insetSpec.insets = UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding);
+  insetSpec.child = stackSpec;
+  
+  return insetSpec;
 }
 
 // With box model, you don't need to override this method, unless you want to add custom logic.
@@ -180,5 +181,17 @@ static const CGFloat kInnerPadding = 10.0f;
   _textNode.frame = CGRectMake(kOuterPadding + kImageSize + kInnerPadding, kOuterPadding, textSize.width, textSize.height);
 }
 #endif
+
+- (void)toggleImageEnlargement
+{
+  _isImageEnlarged = !_isImageEnlarged;
+  [self setNeedsLayout];
+}
+
+- (void)toggleNodesSwap
+{
+  _swappedTextAndImage = !_swappedTextAndImage;
+  [self setNeedsLayout];
+}
 
 @end

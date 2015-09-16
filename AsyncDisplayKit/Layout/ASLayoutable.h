@@ -9,13 +9,48 @@
  */
 
 #import <AsyncDisplayKit/ASDimension.h>
-#import <AsyncDisplayKit/ASStackLayoutChild.h>
+#import <AsyncDisplayKit/ASRelativeSize.h>
+#import <AsyncDisplayKit/ASStackLayoutDefines.h>
+#import <AsyncDisplayKit/ASStackLayoutable.h>
+#import <AsyncDisplayKit/ASStaticLayoutable.h>
+
+#import <AsyncDisplayKit/ASLayoutablePrivate.h>
 
 @class ASLayout;
-
-@protocol ASLayoutable <NSObject>
+@class ASLayoutSpec;
 
 /** 
+ * The ASLayoutable protocol declares a method for measuring the layout of an object. A layout
+ * is defined by an ASLayout return value, and must specify 1) the size (but not position) of the
+ * layoutable object, and 2) the size and position of all of its immediate child objects. The tree 
+ * recursion is driven by parents requesting layouts from their children in order to determine their 
+ * size, followed by the parents setting the position of the children once the size is known
+ *
+ * The protocol also implements a "family" of Layoutable protocols. These protocols contain layout 
+ * options that can be used for specific layout specs. For example, ASStackLayoutSpec has options
+ * defining how a layoutable should shrink or grow based upon available space.
+ *
+ * These layout options are all stored in an ASLayoutOptions class (that is defined in ASLayoutablePrivate).
+ * Generally you needn't worry about the layout options class, as the layoutable protocols allow all direct
+ * access to the options via convenience properties. If you are creating custom layout spec, then you can
+ * extend the backing layout options class to accomodate any new layout options.
+ */
+@protocol ASLayoutable <ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate>
+
+/**
+ * @abstract Calculate a layout based on given size range.
+ *
+ * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
+ *
+ * @return An ASLayout instance defining the layout of the receiver and its children.
+ */
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
+
+
+#pragma mark - Layout options from the Layoutable Protocols
+
+#pragma mark - ASStackLayoutable
+/**
  * @abstract Additional space to place before this object in the stacking direction.
  * Used when attached to a stack layout.
  */
@@ -53,12 +88,22 @@
 @property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
 
 /**
- * @abstract Calculate a layout based on given size range.
- *
- * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
- *
- * @return An ASLayout instance defining the layout of the receiver and its children.
+ *  @abstract Used for baseline alignment. The distance from the top of the object to its baseline.
  */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
+@property (nonatomic, readwrite) CGFloat ascender;
+
+/**
+ *  @abstract Used for baseline alignment. The distance from the baseline of the object to its bottom.
+ */
+@property (nonatomic, readwrite) CGFloat descender;
+
+#pragma mark - ASStaticLayoutable
+/**
+ If specified, the child's size is restricted according to this size. Percentages are resolved relative to the static layout spec.
+ */
+@property (nonatomic, assign) ASRelativeSizeRange sizeRange;
+
+/** The position of this object within its parent spec. */
+@property (nonatomic, assign) CGPoint layoutPosition;
 
 @end

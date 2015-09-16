@@ -13,8 +13,24 @@
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
 
+#import <AsyncDisplayKit/ASLayoutable.h>
+
+@class ASDisplayNode;
+
+/**
+ * UIView creation block. Used to create the backing view of a new display node.
+ */
 typedef UIView *(^ASDisplayNodeViewBlock)();
+
+/**
+ * CALayer creation block. Used to create the backing layer of a new display node.
+ */
 typedef CALayer *(^ASDisplayNodeLayerBlock)();
+
+/**
+ * ASDisplayNode loaded callback block. This block is called BEFORE the -didLoad method and is always called on the main thread.
+ */
+typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 
 /**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
@@ -32,7 +48,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  *
  */
 
-@interface ASDisplayNode : ASDealloc2MainObject
+@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
 
 
 /** @name Initializing a node object */
@@ -50,18 +66,44 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 /**
  * @abstract Alternative initializer with a block to create the backing view.
  *
+ * @param viewBlock The block that will be used to create the backing view.
+ *
  * @return An ASDisplayNode instance that loads its view with the given block that is guaranteed to run on the main
  * queue. The view will render synchronously and -layout and touch handling methods on the node will not be called.
  */
 - (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock;
 
 /**
+ * @abstract Alternative initializer with a block to create the backing view.
+ *
+ * @param viewBlock The block that will be used to create the backing view.
+ * @param didLoadBlock The block that will be called after the view created by the viewBlock is loaded
+ *
+ * @return An ASDisplayNode instance that loads its view with the given block that is guaranteed to run on the main
+ * queue. The view will render synchronously and -layout and touch handling methods on the node will not be called.
+ */
+- (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
+
+/**
  * @abstract Alternative initializer with a block to create the backing layer.
+ *
+ * @param layerBlock The block that will be used to create the backing layer.
  *
  * @return An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main
  * queue. The layer will render synchronously and -layout and touch handling methods on the node will not be called.
  */
-- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock;
+- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock;
+
+/**
+ * @abstract Alternative initializer with a block to create the backing layer.
+ *
+ * @param layerBlock The block that will be used to create the backing layer.
+ * @param didLoadBlock The block that will be called after the layer created by the layerBlock is loaded
+ *
+ * @return An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main
+ * queue. The layer will render synchronously and -layout and touch handling methods on the node will not be called.
+ */
+- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
 
 
 /** @name Properties */
@@ -132,10 +174,27 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may 
  * be expensive if result is not cached.
  *
- * @see [ASDisplayNode(Subclassing) measureWithSizeRange:]
+ * @see measureWithSizeRange:
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
 - (CGSize)measure:(CGSize)constrainedSize;
+
+/**
+ * @abstract Asks the node to measure a layout based on given size range.
+ *
+ * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
+ *
+ * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
+ *
+ * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
+ * constraint and the result.
+ *
+ * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
+ * be expensive if result is not cached.
+ *
+ * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
+ */
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
 
 /** 
  * @abstract Return the calculated size.
@@ -155,6 +214,16 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * @return The minimum and maximum constrained sizes used by calculateLayoutThatFits:.
  */
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
+
+/**
+ * @abstract Provides a default intrinsic content size for calculateSizeThatFits:. This is useful when laying out
+ * a node that either has no intrinsic content size or should be laid out at a different size than its intrinsic content
+ * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
+ * image size.
+ *
+ * @return The preferred frame size of this node
+ */
+@property (atomic, assign, readwrite) CGSize preferredFrameSize;
 
 /** @name Managing the nodes hierarchy */
 
@@ -332,7 +401,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  * This method is used to notify the node that it should purge any content that is both expensive to fetch and to
  * retain in memory.
  *
- * @see clearFetchedData and fetchData
+ * @see [ASDisplayNode(Subclassing) clearFetchedData] and [ASDisplayNode(Subclassing) fetchData]
  */
 - (void)recursivelyClearFetchedData;
 
@@ -341,7 +410,7 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  *
  * @discussion Fetches content from remote sources for the current node and all subnodes.
  *
- * @see fetchData and clearFetchedData
+ * @see [ASDisplayNode(Subclassing) fetchData] and [ASDisplayNode(Subclassing) clearFetchedData]
  */
 - (void)recursivelyFetchData;
 
@@ -476,8 +545,22 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
  */
 @interface ASDisplayNode (UIViewBridge)
 
-- (void)setNeedsDisplay;    // Marks the view as needing display. Convenience for use whether view is created or not, or from a background thread.
-- (void)setNeedsLayout;     // Marks the view as needing layout.  Convenience for use whether view is created or not, or from a background thread.
+/**
+ * Marks the view as needing display. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ */
+- (void)setNeedsDisplay;
+
+/**
+ * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ * 
+ * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
+ * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
+ * 
+ * Note: If the relayout causes a change in size of the root node that is attached to a container view
+ * (table or collection view, for example), the container view must be notified to relayout.
+ * For ASTableView and ASCollectionView, an empty batch editing transaction must be triggered to animate to new row / item sizes.
+ */
+- (void)setNeedsLayout;
 
 @property (atomic, retain)           id contents;                           // default=nil
 @property (atomic, assign)           BOOL clipsToBounds;                    // default==NO
@@ -556,18 +639,22 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 @interface ASDisplayNode (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>
 @end
 
-
+/** UIVIew(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to an UIView. */
 @interface UIView (AsyncDisplayKit)
 /**
  * Convenience method, equivalent to [view addSubview:node.view] or [view.layer addSublayer:node.layer] if layer-backed.
+ *
+ * @param node The node to be added.
  */
 - (void)addSubnode:(ASDisplayNode *)node;
 @end
 
-
+/** CALayer(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to a CALayer. */
 @interface CALayer (AsyncDisplayKit)
 /**
  * Convenience method, equivalent to [layer addSublayer:node.layer].
+ *
+ * @param node The node to be added.
  */
 - (void)addSubnode:(ASDisplayNode *)node;
 @end

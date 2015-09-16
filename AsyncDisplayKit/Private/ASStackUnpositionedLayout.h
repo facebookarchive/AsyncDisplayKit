@@ -11,6 +11,7 @@
 #import <vector>
 
 #import "ASLayout.h"
+#import "ASStackLayoutSpecUtilities.h"
 #import "ASStackLayoutSpec.h"
 
 struct ASStackUnpositionedItem {
