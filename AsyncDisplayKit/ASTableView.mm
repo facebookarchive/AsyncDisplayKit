@@ -16,6 +16,7 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 #import "ASInternalHelpers.h"
+#import "ASLayout.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -104,22 +105,31 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASCellNode<->UITableViewCell bridging.
 
+@class _ASTableViewCell;
+
 @protocol _ASTableViewCellDelegate <NSObject>
-- (void)tableViewCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath didTransitionToState:(UITableViewCellStateMask)state;
+- (void)willLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell;
 @end
 
 @interface _ASTableViewCell : UITableViewCell
 @property (nonatomic, weak) id<_ASTableViewCellDelegate> delegate;
-@property (nonatomic) NSIndexPath *indexPath;
+@property (nonatomic, weak) ASCellNode *node;
 @end
 
 @implementation _ASTableViewCell
 // TODO add assertions to prevent use of view-backed UITableViewCell properties (eg .textLabel)
 
+- (void)layoutSubviews
+{
+  [_delegate willLayoutSubviewsOfTableViewCell:self];
+  [super layoutSubviews];
+}
+
 - (void)didTransitionToState:(UITableViewCellStateMask)state
 {
+  [self setNeedsLayout];
+  [self layoutIfNeeded];
   [super didTransitionToState:state];
-  [_delegate tableViewCell:self atIndexPath:_indexPath didTransitionToState:state];
 }
 
 @end
@@ -145,8 +155,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   NSIndexPath *_contentOffsetAdjustmentTopVisibleRow;
   CGFloat _contentOffsetAdjustment;
-
-  BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
 
   CGFloat _maxWidthForNodesConstrainedSize;
   BOOL _ignoreMaxWidthChange;
@@ -271,12 +279,10 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     super.dataSource = nil;
     _asyncDataSource = nil;
     _proxyDataSource = nil;
-    _asyncDataSourceImplementsConstrainedSizeForNode = NO;
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
-    _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(tableView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
   }
 }
 
@@ -507,7 +513,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
   [_rangeController configureContentView:cell.contentView forCellNode:node];
 
-  cell.indexPath = indexPath;
+  cell.node = node;
   cell.backgroundColor = node.backgroundColor;
   cell.selectionStyle = node.selectionStyle;
 
@@ -798,11 +804,6 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  if (_asyncDataSourceImplementsConstrainedSizeForNode) {
-    return [_asyncDataSource tableView:self constrainedSizeForNodeAtIndexPath:indexPath];
-  }
-  
-  // Default size range
   return ASSizeRangeMake(CGSizeMake(_maxWidthForNodesConstrainedSize, 0),
                          CGSizeMake(_maxWidthForNodesConstrainedSize, FLT_MAX));
 }
@@ -845,22 +846,31 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 #pragma mark - _ASTableViewCellDelegate
 
-- (void)tableViewCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath didTransitionToState:(UITableViewCellStateMask)state
+- (void)willLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
 {
-  [self beginUpdates];
-  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+  CGFloat contentViewWidth = tableViewCell.contentView.bounds.size.width;
+  ASCellNode *node = tableViewCell.node;
+  ASSizeRange constrainedSize = node.constrainedSizeForCalculatedLayout;
   
-  ASSizeRange constrainedSize = [self dataController:_dataController constrainedSizeForNodeAtIndexPath:indexPath];
-  if (state != UITableViewCellStateDefaultMask) {
-    // Edit control or delete confirmation was shown and size of content view was changed.
-    // The new size should be taken into consideration.
-    constrainedSize.min.width = MIN(cell.contentView.frame.size.width, constrainedSize.min.width);
-    constrainedSize.max.width = MIN(cell.contentView.frame.size.width, constrainedSize.max.width);
+  // Table view cells should always fill its content view width.
+  // Normally the content view width equals to the constrained size width (which equals to the table view width).
+  // If there is a mismatch between these values, for example after the table view entered or left editing mode,
+  // content view width is preferred and used to re-measure the cell node.
+  if (contentViewWidth != constrainedSize.max.width) {
+    constrainedSize.min.width = contentViewWidth;
+    constrainedSize.max.width = contentViewWidth;
+
+    // Re-measurement is done on main to ensure thread affinity. In the worst case, this is as fast as UIKit's implementation.
+    //
+    // Unloaded nodes *could* be re-measured off the main thread, but only with the assumption that content view width
+    // is the same for all cells (because there is no easy way to get that individual value before the node being assigned to a _ASTableViewCell).
+    // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
+    // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
+    [self beginUpdates];
+    CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
+    node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
+    [self endUpdates];
   }
-  
-  [node measureWithSizeRange:constrainedSize];
-  node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
-  [self endUpdates];
 }
 
 @end
