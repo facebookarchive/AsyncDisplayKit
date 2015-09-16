@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 
-	<title>ASNetworkImageNodeDelegate Protocol Reference</title>
+	<title>ASLayoutablePrivate Protocol Reference</title>
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
@@ -54,15 +54,21 @@
 
 	
 	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/isFinalLayoutable">isFinalLayoutable</option>
+		
+		<option value="//api/name/layoutOptions">layoutOptions</option>
+		
+	</optgroup>
+	
 
 	
 
 	
 	<optgroup label="Instance Methods">
 		
-		<option value="//api/name/imageNode:didLoadImage:">- imageNode:didLoadImage:</option>
-		
-		<option value="//api/name/imageNodeDidFinishDecoding:">- imageNodeDidFinishDecoding:</option>
+		<option value="//api/name/finalLayoutable">- finalLayoutable</option>
 		
 	</optgroup>
 	
@@ -79,7 +85,7 @@
 		<div id="overview_contents" class="container">
 			<div id="content">
 				<main role="main">
-					<h1 class="title">ASNetworkImageNodeDelegate Protocol Reference</h1>
+					<h1 class="title">ASLayoutablePrivate Protocol Reference</h1>
 
 					
 					<div class="section section-specification"><table cellspacing="0"><tbody>
@@ -88,7 +94,7 @@
 	<td>NSObject</td>
 </tr><tr>
 	<th>Declared in</th>
-	<td>ASNetworkImageNode.h</td>
+	<td>ASLayoutablePrivate.h</td>
 </tr>
 						</tbody></table></div>
 					
@@ -98,8 +104,8 @@
 					<div class="section section-overview">
 						<a title="Overview" name="overview"></a>
 						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p>The methods declared by the ASNetworkImageNodeDelegate protocol allow the adopting delegate to respond to
-notifications such as fininished decoding and downloading an image.</p>
+						<p>The base protocol for ASLayoutable. Generally the methods/properties in this class do not need to be
+called by the end user and are only called internally. However, there may be a case where the methods are useful.</p>
 					</div>
 					
 					
@@ -115,8 +121,8 @@ notifications such as fininished decoding and downloading an image.</p>
 
 						<div class="task-list">
 							<div class="section-method">
-	<a name="//api/name/imageNode:didLoadImage:" title="imageNode:didLoadImage:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/imageNode:didLoadImage:">&ndash;&nbsp;imageNode:didLoadImage:</a></code>
+	<a name="//api/name/finalLayoutable" title="finalLayoutable"></a>
+	<h3 class="method-title"><code><a href="#//api/name/finalLayoutable">&ndash;&nbsp;finalLayoutable</a></code>
 <span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
@@ -126,42 +132,31 @@ notifications such as fininished decoding and downloading an image.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Notification that the image node finished downloading an image.</p>
+				<p>This method can be used to give the user a chance to wrap an ASLayoutable in an ASLayoutSpec
+just before it is added to a parent ASLayoutSpec. For example, if you wanted an ASTextNode that was always
+inside of an ASInsetLayoutSpec, you could subclass ASTextNode and implement finalLayoutable so that it wraps
+itself in an inset spec.</p>
+
+<p>Note that any ASLayoutable other than self that is returned MUST set isFinalLayoutable to YES. Make sure
+to do this BEFORE adding a child to the ASLayoutable.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)imageNode:(ASNetworkImageNode *)<em>imageNode</em> didLoadImage:(UIImage *)<em>image</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (id&lt;ASLayoutable&gt;)finalLayoutable</code></div>
 
 		    
 			
-			<div class="method-subsection arguments-section parameters">
-				<h4 class="method-subtitle parameter-title">Parameters</h4>
-				<table class="argument-def parameter-def">
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>imageNode</code></th>
-						<td><p>The sender.</p></td>
-					</tr>
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>image</code></th>
-						<td><p>The newly-loaded image.</p></td>
-					</tr>
-				
-				</table>
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>The layoutable that will be added to the parent layout spec. Defaults to self.</p>
 			</div>
 			
 
 			
 
-			
-
-			
-			<div class="method-subsection discussion-section">
-				<h4 class="method-subtitle">Discussion</h4>
-				<p>Called on a background queue.</p>
-			</div>
 			
 
 			
@@ -171,16 +166,16 @@ notifications such as fininished decoding and downloading an image.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASNetworkImageNode.h</code></p>
+				<p><code class="declared-in-ref">ASLayoutablePrivate.h</code></p>
 			</div>
 			
 			
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/imageNodeDidFinishDecoding:" title="imageNodeDidFinishDecoding:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/imageNodeDidFinishDecoding:">&ndash;&nbsp;imageNodeDidFinishDecoding:</a></code>
-</h3>
+	<a name="//api/name/isFinalLayoutable" title="isFinalLayoutable"></a>
+	<h3 class="method-title"><code><a href="#//api/name/isFinalLayoutable">&nbsp;&nbsp;isFinalLayoutable</a></code>
+<span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
 		<div class="pointy-thing"></div>
@@ -189,26 +184,15 @@ notifications such as fininished decoding and downloading an image.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Notification that the image node finished decoding an image.</p>
+				<p>A flag to indicate that this ASLayoutable was created in finalLayoutable. This MUST be set to YES
+before adding a child to this layoutable.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)imageNodeDidFinishDecoding:(ASNetworkImageNode *)<em>imageNode</em></code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL isFinalLayoutable</code></div>
 
 		    
-			
-			<div class="method-subsection arguments-section parameters">
-				<h4 class="method-subtitle parameter-title">Parameters</h4>
-				<table class="argument-def parameter-def">
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>imageNode</code></th>
-						<td><p>The sender.</p></td>
-					</tr>
-				
-				</table>
-			</div>
 			
 
 			
@@ -224,7 +208,48 @@ notifications such as fininished decoding and downloading an image.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASNetworkImageNode.h</code></p>
+				<p><code class="declared-in-ref">ASLayoutablePrivate.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutOptions" title="layoutOptions"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutOptions">&nbsp;&nbsp;layoutOptions</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The class that holds all of the layoutOptions set on an ASLayoutable.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, strong, readonly) ASLayoutOptions *layoutOptions</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutablePrivate.h</code></p>
 			</div>
 			
 			

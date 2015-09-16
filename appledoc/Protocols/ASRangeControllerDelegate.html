@@ -60,19 +60,19 @@
 	
 	<optgroup label="Instance Methods">
 		
-		<option value="//api/name/rangeController:didDeleteNodesAtIndexPaths:withAnimationOptions:">- rangeController:didDeleteNodesAtIndexPaths:withAnimationOptions:</option>
+		<option value="//api/name/rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:">- rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:</option>
 		
 		<option value="//api/name/rangeController:didDeleteSectionsAtIndexSet:withAnimationOptions:">- rangeController:didDeleteSectionsAtIndexSet:withAnimationOptions:</option>
 		
-		<option value="//api/name/rangeController:didInsertNodesAtIndexPaths:withAnimationOptions:">- rangeController:didInsertNodesAtIndexPaths:withAnimationOptions:</option>
+		<option value="//api/name/rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:">- rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:</option>
 		
 		<option value="//api/name/rangeController:didInsertSectionsAtIndexSet:withAnimationOptions:">- rangeController:didInsertSectionsAtIndexSet:withAnimationOptions:</option>
+		
+		<option value="//api/name/rangeController:endUpdatesAnimated:completion:">- rangeController:endUpdatesAnimated:completion:</option>
 		
 		<option value="//api/name/rangeController:nodesAtIndexPaths:">- rangeController:nodesAtIndexPaths:</option>
 		
 		<option value="//api/name/rangeControllerBeginUpdates:">- rangeControllerBeginUpdates:</option>
-		
-		<option value="//api/name/rangeControllerEndUpdates:completion:">- rangeControllerEndUpdates:completion:</option>
 		
 		<option value="//api/name/rangeControllerViewportSize:">- rangeControllerViewportSize:</option>
 		
@@ -297,8 +297,8 @@
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/rangeControllerEndUpdates:completion:" title="rangeControllerEndUpdates:completion:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/rangeControllerEndUpdates:completion:">&ndash;&nbsp;rangeControllerEndUpdates:completion:</a></code>
+	<a name="//api/name/rangeController:endUpdatesAnimated:completion:" title="rangeController:endUpdatesAnimated:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/rangeController:endUpdatesAnimated:completion:">&ndash;&nbsp;rangeController:endUpdatesAnimated:completion:</a></code>
 <span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
@@ -313,7 +313,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)rangeControllerEndUpdates:(ASRangeController *)<em>rangeController</em> completion:(void ( ^ ) ( BOOL ))<em>completion</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> endUpdatesAnimated:(BOOL)<em>animated</em> completion:(void ( ^ ) ( BOOL ))<em>completion</em></code></div>
 
 		    
 			
@@ -324,6 +324,11 @@
 					<tr>
 						<th scope="row" class="argument-name"><code>rangeController</code></th>
 						<td><p>Sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animated</code></th>
+						<td><p>NO if all animations are disabled. YES otherwise.</p></td>
 					</tr>
 				
 					<tr>
@@ -413,8 +418,8 @@
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/rangeController:didInsertNodesAtIndexPaths:withAnimationOptions:" title="rangeController:didInsertNodesAtIndexPaths:withAnimationOptions:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/rangeController:didInsertNodesAtIndexPaths:withAnimationOptions:">&ndash;&nbsp;rangeController:didInsertNodesAtIndexPaths:withAnimationOptions:</a></code>
+	<a name="//api/name/rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:" title="rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:">&ndash;&nbsp;rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:</a></code>
 <span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
@@ -429,7 +434,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didInsertNodesAtIndexPaths:(NSArray *)<em>indexPaths</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didInsertNodes:(NSArray *)<em>nodes</em> atIndexPaths:(NSArray *)<em>indexPaths</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
 
 		    
 			
@@ -440,6 +445,11 @@
 					<tr>
 						<th scope="row" class="argument-name"><code>rangeController</code></th>
 						<td><p>Sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>nodes</code></th>
+						<td><p>Inserted nodes.</p></td>
 					</tr>
 				
 					<tr>
@@ -476,8 +486,8 @@
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/rangeController:didDeleteNodesAtIndexPaths:withAnimationOptions:" title="rangeController:didDeleteNodesAtIndexPaths:withAnimationOptions:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/rangeController:didDeleteNodesAtIndexPaths:withAnimationOptions:">&ndash;&nbsp;rangeController:didDeleteNodesAtIndexPaths:withAnimationOptions:</a></code>
+	<a name="//api/name/rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:" title="rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:">&ndash;&nbsp;rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:</a></code>
 <span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
@@ -492,7 +502,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didDeleteNodesAtIndexPaths:(NSArray *)<em>indexPaths</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didDeleteNodes:(NSArray *)<em>nodes</em> atIndexPaths:(NSArray *)<em>indexPaths</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
 
 		    
 			
@@ -503,6 +513,11 @@
 					<tr>
 						<th scope="row" class="argument-name"><code>rangeController</code></th>
 						<td><p>Sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>nodes</code></th>
+						<td><p>Deleted nodes.</p></td>
 					</tr>
 				
 					<tr>
@@ -679,7 +694,7 @@
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-07-13</p>
+						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
 						
 						
 						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>

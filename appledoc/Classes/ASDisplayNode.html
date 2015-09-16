@@ -76,6 +76,8 @@
 		
 		<option value="//api/name/placeholderFadeDuration">placeholderFadeDuration</option>
 		
+		<option value="//api/name/preferredFrameSize">preferredFrameSize</option>
+		
 		<option value="//api/name/shouldRasterizeDescendants">shouldRasterizeDescendants</option>
 		
 		<option value="//api/name/subnodes">subnodes</option>
@@ -108,7 +110,11 @@
 		
 		<option value="//api/name/initWithLayerBlock:">- initWithLayerBlock:</option>
 		
+		<option value="//api/name/initWithLayerBlock:didLoadBlock:">- initWithLayerBlock:didLoadBlock:</option>
+		
 		<option value="//api/name/initWithViewBlock:">- initWithViewBlock:</option>
+		
+		<option value="//api/name/initWithViewBlock:didLoadBlock:">- initWithViewBlock:didLoadBlock:</option>
 		
 		<option value="//api/name/insertSubnode:aboveSubnode:">- insertSubnode:aboveSubnode:</option>
 		
@@ -304,6 +310,70 @@ queue. The view will render synchronously and -layout and touch handling methods
 		</div>
 	</div>
 </div><div class="section-method">
+	<a name="//api/name/initWithViewBlock:didLoadBlock:" title="initWithViewBlock:didLoadBlock:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithViewBlock:didLoadBlock:">&ndash;&nbsp;initWithViewBlock:didLoadBlock:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Alternative initializer with a block to create the backing view.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (id)initWithViewBlock:(ASDisplayNodeViewBlock)<em>viewBlock</em> didLoadBlock:(ASDisplayNodeDidLoadBlock)<em>didLoadBlock</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>viewBlock</code></th>
+						<td><p>The block that will be used to create the backing view.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>didLoadBlock</code></th>
+						<td><p>The block that will be called after the view created by the viewBlock is loaded</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>An ASDisplayNode instance that loads its view with the given block that is guaranteed to run on the main
+queue. The view will render synchronously and -layout and touch handling methods on the node will not be called.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/initWithLayerBlock:" title="initWithLayerBlock:"></a>
 	<h3 class="method-title"><code><a href="#//api/name/initWithLayerBlock:">&ndash;&nbsp;initWithLayerBlock:</a></code>
 </h3>
@@ -320,7 +390,7 @@ queue. The view will render synchronously and -layout and touch handling methods
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)<em>viewBlock</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)<em>layerBlock</em></code></div>
 
 		    
 			
@@ -329,8 +399,72 @@ queue. The view will render synchronously and -layout and touch handling methods
 				<table class="argument-def parameter-def">
 				
 					<tr>
-						<th scope="row" class="argument-name"><code>viewBlock</code></th>
+						<th scope="row" class="argument-name"><code>layerBlock</code></th>
 						<td><p>The block that will be used to create the backing layer.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main
+queue. The layer will render synchronously and -layout and touch handling methods on the node will not be called.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/initWithLayerBlock:didLoadBlock:" title="initWithLayerBlock:didLoadBlock:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithLayerBlock:didLoadBlock:">&ndash;&nbsp;initWithLayerBlock:didLoadBlock:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Alternative initializer with a block to create the backing layer.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)<em>layerBlock</em> didLoadBlock:(ASDisplayNodeDidLoadBlock)<em>didLoadBlock</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>layerBlock</code></th>
+						<td><p>The block that will be used to create the backing layer.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>didLoadBlock</code></th>
+						<td><p>The block that will be called after the layer created by the layerBlock is loaded</p></td>
 					</tr>
 				
 				</table>
@@ -849,6 +983,55 @@ calling -measure: on them in -calculateLayoutThatFits.</p><div class="warning"><
 			<div class="method-subsection return">
 				<h4 class="method-subtitle parameter-title">Return Value</h4>
 				<p>The minimum and maximum constrained sizes used by calculateLayoutThatFits:.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/preferredFrameSize" title="preferredFrameSize"></a>
+	<h3 class="method-title"><code><a href="#//api/name/preferredFrameSize">&nbsp;&nbsp;preferredFrameSize</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Provides a default intrinsic content size for calculateSizeThatFits:. This is useful when laying out
+a node that either has no intrinsic content size or should be laid out at a different size than its intrinsic content
+size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
+image size.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (atomic, assign, readwrite) CGSize preferredFrameSize</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>The preferred frame size of this node</p>
 			</div>
 			
 
@@ -2223,7 +2406,7 @@ it and want hitTestSlop applied.</p>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-07-13</p>
+						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
 						
 						
 						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>

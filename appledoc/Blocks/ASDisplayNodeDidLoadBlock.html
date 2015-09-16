@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 
-	<title>ASDisplayNodeViewBlock Block Reference</title>
+	<title>ASDisplayNodeDidLoadBlock Block Reference</title>
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
@@ -59,7 +59,7 @@
 		<div id="overview_contents" class="container">
 			<div id="content">
 				<main role="main">
-					<h1 class="title">ASDisplayNodeViewBlock Block Reference</h1>
+					<h1 class="title">ASDisplayNodeDidLoadBlock Block Reference</h1>
 
 					
 					<div class="section section-specification"><table cellspacing="0"><tbody>
@@ -79,16 +79,16 @@
           
           <a title="Block Definition" name="instance_methods"></a>
           <h4 class="method-subtitle parameter-title">Block Definition</h4>
-          <h3 class="subsubtitle method-title">ASDisplayNodeViewBlock</h3>
+          <h3 class="subsubtitle method-title">ASDisplayNodeDidLoadBlock</h3>
 
 
 <div class="method-subsection brief-description">
-  <p>UIView creation block. Used to create the backing view of a new display node.</p>
+  <p>ASDisplayNode loaded callback block. This block is called BEFORE the -didLoad method and is always called on the main thread.</p>
 </div>
 
 
 
-<code>typedef UIView* (^ASDisplayNodeViewBlock) ()</code>
+<code>typedef void (^ASDisplayNodeDidLoadBlock) (ASDisplayNode *node)</code>
   
   
   

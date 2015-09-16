@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 
-	<title>ASNetworkImageNodeDelegate Protocol Reference</title>
+	<title>ASStaticLayoutable Protocol Reference</title>
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
@@ -54,17 +54,17 @@
 
 	
 	
-
-	
-
-	
-	<optgroup label="Instance Methods">
+	<optgroup label="Properties">
 		
-		<option value="//api/name/imageNode:didLoadImage:">- imageNode:didLoadImage:</option>
+		<option value="//api/name/layoutPosition">layoutPosition</option>
 		
-		<option value="//api/name/imageNodeDidFinishDecoding:">- imageNodeDidFinishDecoding:</option>
+		<option value="//api/name/sizeRange">sizeRange</option>
 		
 	</optgroup>
+	
+
+	
+
 	
 	
 </select>
@@ -79,16 +79,13 @@
 		<div id="overview_contents" class="container">
 			<div id="content">
 				<main role="main">
-					<h1 class="title">ASNetworkImageNodeDelegate Protocol Reference</h1>
+					<h1 class="title">ASStaticLayoutable Protocol Reference</h1>
 
 					
 					<div class="section section-specification"><table cellspacing="0"><tbody>
 						<tr>
-	<th>Conforms to</th>
-	<td>NSObject</td>
-</tr><tr>
 	<th>Declared in</th>
-	<td>ASNetworkImageNode.h</td>
+	<td>ASStaticLayoutable.h</td>
 </tr>
 						</tbody></table></div>
 					
@@ -98,8 +95,7 @@
 					<div class="section section-overview">
 						<a title="Overview" name="overview"></a>
 						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p>The methods declared by the ASNetworkImageNodeDelegate protocol allow the adopting delegate to respond to
-notifications such as fininished decoding and downloading an image.</p>
+						<p>Layout options that can be defined for an ASLayoutable being added to a ASStaticLayoutSpec.</p>
 					</div>
 					
 					
@@ -115,8 +111,8 @@ notifications such as fininished decoding and downloading an image.</p>
 
 						<div class="task-list">
 							<div class="section-method">
-	<a name="//api/name/imageNode:didLoadImage:" title="imageNode:didLoadImage:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/imageNode:didLoadImage:">&ndash;&nbsp;imageNode:didLoadImage:</a></code>
+	<a name="//api/name/sizeRange" title="sizeRange"></a>
+	<h3 class="method-title"><code><a href="#//api/name/sizeRange">&nbsp;&nbsp;sizeRange</a></code>
 <span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
@@ -126,42 +122,20 @@ notifications such as fininished decoding and downloading an image.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Notification that the image node finished downloading an image.</p>
+				<p>If specified, the child&rsquo;s size is restricted according to this size. Percentages are resolved relative to the static layout spec.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)imageNode:(ASNetworkImageNode *)<em>imageNode</em> didLoadImage:(UIImage *)<em>image</em></code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASRelativeSizeRange sizeRange</code></div>
 
 		    
 			
-			<div class="method-subsection arguments-section parameters">
-				<h4 class="method-subtitle parameter-title">Parameters</h4>
-				<table class="argument-def parameter-def">
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>imageNode</code></th>
-						<td><p>The sender.</p></td>
-					</tr>
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>image</code></th>
-						<td><p>The newly-loaded image.</p></td>
-					</tr>
-				
-				</table>
-			</div>
-			
 
 			
 
 			
 
-			
-			<div class="method-subsection discussion-section">
-				<h4 class="method-subtitle">Discussion</h4>
-				<p>Called on a background queue.</p>
-			</div>
 			
 
 			
@@ -171,16 +145,16 @@ notifications such as fininished decoding and downloading an image.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASNetworkImageNode.h</code></p>
+				<p><code class="declared-in-ref">ASStaticLayoutable.h</code></p>
 			</div>
 			
 			
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/imageNodeDidFinishDecoding:" title="imageNodeDidFinishDecoding:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/imageNodeDidFinishDecoding:">&ndash;&nbsp;imageNodeDidFinishDecoding:</a></code>
-</h3>
+	<a name="//api/name/layoutPosition" title="layoutPosition"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutPosition">&nbsp;&nbsp;layoutPosition</a></code>
+<span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
 		<div class="pointy-thing"></div>
@@ -189,26 +163,14 @@ notifications such as fininished decoding and downloading an image.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Notification that the image node finished decoding an image.</p>
+				<p>The position of this object within its parent spec.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)imageNodeDidFinishDecoding:(ASNetworkImageNode *)<em>imageNode</em></code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) CGPoint layoutPosition</code></div>
 
 		    
-			
-			<div class="method-subsection arguments-section parameters">
-				<h4 class="method-subtitle parameter-title">Parameters</h4>
-				<table class="argument-def parameter-def">
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>imageNode</code></th>
-						<td><p>The sender.</p></td>
-					</tr>
-				
-				</table>
-			</div>
 			
 
 			
@@ -224,7 +186,7 @@ notifications such as fininished decoding and downloading an image.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASNetworkImageNode.h</code></p>
+				<p><code class="declared-in-ref">ASStaticLayoutable.h</code></p>
 			</div>
 			
 			

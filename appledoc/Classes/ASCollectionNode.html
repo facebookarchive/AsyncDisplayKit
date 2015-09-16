@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 
-	<title>ASTextCellNode Class Reference</title>
+	<title>ASCollectionNode Class Reference</title>
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
@@ -56,7 +56,7 @@
 	
 	<optgroup label="Properties">
 		
-		<option value="//api/name/text">text</option>
+		<option value="//api/name/view">view</option>
 		
 	</optgroup>
 	
@@ -77,16 +77,16 @@
 		<div id="overview_contents" class="container">
 			<div id="content">
 				<main role="main">
-					<h1 class="title">ASTextCellNode Class Reference</h1>
+					<h1 class="title">ASCollectionNode Class Reference</h1>
 
 					
 					<div class="section section-specification"><table cellspacing="0"><tbody>
 						<tr>
 	<th>Inherits from</th>
-	<td><a href="../Classes/ASCellNode.html">ASCellNode</a> : <a href="../Classes/ASDisplayNode.html">ASDisplayNode</a> : ASDealloc2MainObject</td>
+	<td><a href="../Classes/ASDisplayNode.html">ASDisplayNode</a> : ASDealloc2MainObject</td>
 </tr><tr>
 	<th>Declared in</th>
-	<td>ASCellNode.h</td>
+	<td>ASCollectionNode.h</td>
 </tr>
 						</tbody></table></div>
 					
@@ -96,7 +96,8 @@
 					<div class="section section-overview">
 						<a title="Overview" name="overview"></a>
 						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p>Simple label-style cell node.  Read its source for an example of custom <a href="../Classes/ASCellNode.html">ASCellNode</a>s.</p>
+						<p>ASCollectionNode is a node based class that wraps an ASCollectionView. It can be used
+as a subnode of another node, and provide room for many (great) features and improvements later on.</p>
 					</div>
 					
 					
@@ -112,8 +113,8 @@
 
 						<div class="task-list">
 							<div class="section-method">
-	<a name="//api/name/text" title="text"></a>
-	<h3 class="method-title"><code><a href="#//api/name/text">&nbsp;&nbsp;text</a></code>
+	<a name="//api/name/view" title="view"></a>
+	<h3 class="method-title"><code><a href="#//api/name/view">&nbsp;&nbsp;view</a></code>
 </h3>
 
 	<div class="method-info">
@@ -123,12 +124,12 @@
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Text to display.</p>
+				<p>Returns a view.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, copy) NSString *text</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly) ASCollectionView *view</code></div>
 
 		    
 			
@@ -137,6 +138,13 @@
 
 			
 
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The view property is lazily initialized, similar to UIViewController.
+To go the other direction, use ASViewToDisplayNode() in ASDisplayNodeExtras.h.</p><div class="warning"><p><strong>Warning:</strong> The first access to it must be on the main thread, and should only be used on the main thread thereafter as
+well.</p></div>
+			</div>
 			
 
 			
@@ -146,7 +154,7 @@
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASCellNode.h</code></p>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
 			</div>
 			
 			
