@@ -57,7 +57,10 @@
 				058968F11ABCE06E0059CE2A /* Life Without CocoaPods */,
 				058968F01ABCE06E0059CE2A /* Products */,
 			);
+			indentWidth = 2;
 			sourceTree = "<group>";
+			tabWidth = 2;
+			usesTabs = 0;
 		};
 		058968F01ABCE06E0059CE2A /* Products */ = {
 			isa = PBXGroup;

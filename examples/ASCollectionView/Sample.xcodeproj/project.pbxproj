@@ -77,8 +77,11 @@
 				AC3C4A8D1A11F80C00143C57 /* Images.xcassets */,
 				AC3C4A611A11F47200143C57 /* Supporting Files */,
 			);
+			indentWidth = 2;
 			path = Sample;
 			sourceTree = "<group>";
+			tabWidth = 2;
+			usesTabs = 0;
 		};
 		AC3C4A611A11F47200143C57 /* Supporting Files */ = {
 			isa = PBXGroup;
