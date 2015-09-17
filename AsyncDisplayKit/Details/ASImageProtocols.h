@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
   @result An opaque identifier to be used in canceling the download, via `cancelImageDownloadForIdentifier:`. You must 
       retain the identifier if you wish to use it later.
  */
-- (id)downloadImageWithURL:(NSURL *)URL
+- (nullable id)downloadImageWithURL:(NSURL *)URL
              callbackQueue:(nullable dispatch_queue_t)callbackQueue
      downloadProgressBlock:(void (^ _Nullable)(CGFloat progress))downloadProgressBlock
                 completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion;
