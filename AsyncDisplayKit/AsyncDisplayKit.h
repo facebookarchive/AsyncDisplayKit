@@ -49,6 +49,7 @@
 #import <AsyncDisplayKit/ASControlNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtraIvars.h>
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 #import <AsyncDisplayKit/ASIndexPath.h>
 #import <AsyncDisplayKit/ASLayoutOptions.h>
@@ -57,7 +58,6 @@
 #import <AsyncDisplayKit/ASRangeHandler.h>
 #import <AsyncDisplayKit/ASRangeHandlerPreload.h>
 #import <AsyncDisplayKit/ASRangeHandlerRender.h>
-//#import <AsyncDisplayKit/ASStackUnpositionedLayout.h>
 #import <AsyncDisplayKit/ASTextNodeCoreTextAdditions.h>
 #import <AsyncDisplayKit/ASTextNodeRenderer.h>
 #import <AsyncDisplayKit/ASTextNodeShadower.h>
@@ -65,5 +65,7 @@
 #import <AsyncDisplayKit/ASTextNodeTypes.h>
 #import <AsyncDisplayKit/ASTextNodeWordKerner.h>
 #import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/CGRect+ASConvenience.h>
 #import <AsyncDisplayKit/NSMutableAttributedString+TextKitAdditions.h>
+#import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 #import <AsyncDisplayKit/UIView+ASConvenience.h>
