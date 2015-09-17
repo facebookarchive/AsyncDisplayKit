@@ -41,7 +41,7 @@ Pod::Spec.new do |spec|
 
   spec.social_media_url = 'https://twitter.com/fbOpenSource'
   spec.library = 'c++'
-  spec.xcconfig = {
+  spec.pod_target_xcconfig = {
        'CLANG_CXX_LANGUAGE_STANDARD' => 'c++11',
        'CLANG_CXX_LIBRARY' => 'libc++'
   }
