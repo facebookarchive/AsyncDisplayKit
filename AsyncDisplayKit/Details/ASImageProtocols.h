@@ -52,7 +52,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (id)downloadImageWithURL:(nullable NSURL *)URL
              callbackQueue:(nullable dispatch_queue_t)callbackQueue
      downloadProgressBlock:(void (^ _Nullable)(CGFloat progress))downloadProgressBlock
-                completion:(void (^ _Nullable)(CGImageRef image, NSError *error))completion;
+                completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion;
 
 /**
   @abstract Cancels an image download.
