@@ -26,6 +26,8 @@
 
 #import <AsyncDisplayKit/ASScrollNode.h>
 
+#import <AsyncDisplayKit/ASViewController.h>
+
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASLayoutable.h>

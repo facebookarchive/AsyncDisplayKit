@@ -14,6 +14,7 @@
 		3EC0CDCBA10D483D9F386E5E /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D24B17D1E4A4E7A9566C5E9 /* libPods.a */; };
 		6C2C82AC19EE274300767484 /* Default-667h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C2C82AA19EE274300767484 /* Default-667h@2x.png */; };
 		6C2C82AD19EE274300767484 /* Default-736h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C2C82AB19EE274300767484 /* Default-736h@3x.png */; };
+		ACC945AE1BA9EFBA005E1FB8 /* ScreenNode.m in Sources */ = {isa = PBXBuildFile; fileRef = ACC945AD1BA9EFBA005E1FB8 /* ScreenNode.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,8 @@
 		3D24B17D1E4A4E7A9566C5E9 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C2C82AA19EE274300767484 /* Default-667h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-667h@2x.png"; sourceTree = SOURCE_ROOT; };
 		6C2C82AB19EE274300767484 /* Default-736h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-736h@3x.png"; sourceTree = SOURCE_ROOT; };
+		ACC945AC1BA9EFB3005E1FB8 /* ScreenNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScreenNode.h; sourceTree = "<group>"; };
+		ACC945AD1BA9EFBA005E1FB8 /* ScreenNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScreenNode.m; sourceTree = "<group>"; };
 		C068F1D3F0CC317E895FCDAB /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -72,6 +75,8 @@
 				05E2128919D4DB510098F589 /* AppDelegate.m */,
 				05E2128B19D4DB510098F589 /* ViewController.h */,
 				05E2128C19D4DB510098F589 /* ViewController.m */,
+				ACC945AC1BA9EFB3005E1FB8 /* ScreenNode.h */,
+				ACC945AD1BA9EFBA005E1FB8 /* ScreenNode.m */,
 				05E2128419D4DB510098F589 /* Supporting Files */,
 			);
 			path = Sample;
@@ -214,6 +219,7 @@
 				05E2128D19D4DB510098F589 /* ViewController.m in Sources */,
 				05E2128A19D4DB510098F589 /* AppDelegate.m in Sources */,
 				05E2128719D4DB510098F589 /* main.m in Sources */,
+				ACC945AE1BA9EFBA005E1FB8 /* ScreenNode.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
