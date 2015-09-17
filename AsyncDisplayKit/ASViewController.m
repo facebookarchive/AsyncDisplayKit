@@ -18,6 +18,7 @@
     return nil;
   }
   
+  ASDisplayNodeAssertNotNil(node, @"Node must not be nil");
   ASDisplayNodeAssertTrue(!node.layerBacked);
   _node = node;
   

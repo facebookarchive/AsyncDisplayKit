@@ -11,8 +11,9 @@
 
 @interface ASViewController : UIViewController
 
-@property (nonatomic, strong, readonly, nonnull) ASDisplayNode *node;
+@property (nonatomic, strong, readonly) ASDisplayNode *node;
 
-- (nullable instancetype)initWithNode:(nonnull ASDisplayNode *)node;
+//TODO Use nonnull annotation late on. Travis doesn't recognize it (yet).
+- (instancetype)initWithNode:(ASDisplayNode *)node;
 
 @end
