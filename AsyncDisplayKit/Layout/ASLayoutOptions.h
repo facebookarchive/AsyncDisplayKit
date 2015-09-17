@@ -54,7 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @return a new instance of ASLayoutOptions
  */
-- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithLayoutable:(nullable id<ASLayoutable>)layoutable NS_DESIGNATED_INITIALIZER;
 
 /**
  *  Copies the values of layoutOptions into self. This is useful when placing a layoutable inside of another. Consider
