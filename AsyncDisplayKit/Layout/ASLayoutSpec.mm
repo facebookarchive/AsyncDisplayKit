@@ -82,7 +82,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
     if (finalLayoutable != child) {
-      [finalLayoutable.layoutOptions copyIntoOptions:child.layoutOptions];
+      [finalLayoutable.layoutOptions copyFromOptions:child.layoutOptions];
       return finalLayoutable;
     }
   }

@@ -86,11 +86,11 @@ static Class gDefaultLayoutOptionsClass = nil;
 - (id)copyWithZone:(NSZone *)zone
 {
   ASLayoutOptions *copy = [[[self class] alloc] init];
-  [copy copyIntoOptions:self];
+  [copy copyFromOptions:self];
   return copy;
 }
 
-- (void)copyIntoOptions:(ASLayoutOptions *)layoutOptions
+- (void)copyFromOptions:(ASLayoutOptions *)layoutOptions
 {
   ASDN::MutexLocker l(_propertyLock);
   self.flexBasis = layoutOptions.flexBasis;
