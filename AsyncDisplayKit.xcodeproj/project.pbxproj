@@ -10,6 +10,14 @@
 		044284FD1BAA365100D16268 /* UICollectionViewLayout+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E0E1B371875007741D0 /* UICollectionViewLayout+ASConvenience.m */; };
 		044284FE1BAA387800D16268 /* ASStackLayoutSpecUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED461B17847A00DA7C62 /* ASStackLayoutSpecUtilities.h */; };
 		044284FF1BAA3BD600D16268 /* UICollectionViewLayout+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		044285071BAA63FE00D16268 /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 044285051BAA63FE00D16268 /* ASBatchFetching.h */; settings = {ASSET_TAGS = (); }; };
+		044285081BAA63FE00D16268 /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 044285051BAA63FE00D16268 /* ASBatchFetching.h */; settings = {ASSET_TAGS = (); }; };
+		044285091BAA63FE00D16268 /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 044285061BAA63FE00D16268 /* ASBatchFetching.m */; settings = {ASSET_TAGS = (); }; };
+		0442850A1BAA63FE00D16268 /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 044285061BAA63FE00D16268 /* ASBatchFetching.m */; settings = {ASSET_TAGS = (); }; };
+		0442850D1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */; settings = {ASSET_TAGS = (); }; };
+		0442850E1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */; settings = {ASSET_TAGS = (); }; };
+		0442850F1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */; settings = {ASSET_TAGS = (); }; };
+		044285101BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */; settings = {ASSET_TAGS = (); }; };
 		0515EA211A15769900BA8B9A /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943141A1575670030A7D0 /* Photos.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		0515EA221A1576A100BA8B9A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		0516FA3C1A15563400B4EBED /* ASAvailability.h in Headers */ = {isa = PBXBuildFile; fileRef = 0516FA3A1A15563400B4EBED /* ASAvailability.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -141,8 +149,6 @@
 		292C59A31A956527007E5DD6 /* ASRangeHandlerRender.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		292C59A41A956527007E5DD6 /* ASRangeHandlerRender.mm in Sources */ = {isa = PBXBuildFile; fileRef = 292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */; };
 		2967F9E21AB0A5190072E4AB /* ASBasicImageDownloaderInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 2967F9E11AB0A4CF0072E4AB /* ASBasicImageDownloaderInternal.h */; };
-		296A0A2E1A9516B2005ACEAA /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		296A0A2F1A9516B2005ACEAA /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */; };
 		296A0A351A951ABF005ACEAA /* ASBatchFetchingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 296A0A341A951ABF005ACEAA /* ASBatchFetchingTests.m */; };
 		299DA1A91A828D2900162D41 /* ASBatchContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 299DA1A71A828D2900162D41 /* ASBatchContext.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		299DA1AA1A828D2900162D41 /* ASBatchContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 299DA1A81A828D2900162D41 /* ASBatchContext.mm */; };
@@ -189,8 +195,6 @@
 		464052221A3F83C40061C0BA /* ASFlowLayoutController.h in Headers */ = {isa = PBXBuildFile; fileRef = 4640521B1A3F83C40061C0BA /* ASFlowLayoutController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		464052231A3F83C40061C0BA /* ASFlowLayoutController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4640521C1A3F83C40061C0BA /* ASFlowLayoutController.mm */; };
 		464052241A3F83C40061C0BA /* ASLayoutController.h in Headers */ = {isa = PBXBuildFile; fileRef = 4640521D1A3F83C40061C0BA /* ASLayoutController.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		464052251A3F83C40061C0BA /* ASMultidimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 4640521E1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		464052261A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4640521F1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm */; };
 		509E68601B3AED8E009B9150 /* ASScrollDirection.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E111B371BD7007741D0 /* ASScrollDirection.m */; };
 		509E68611B3AEDA0009B9150 /* ASAbstractLayoutController.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E171B37339C007741D0 /* ASAbstractLayoutController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		509E68621B3AEDA5009B9150 /* ASAbstractLayoutController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E181B37339C007741D0 /* ASAbstractLayoutController.mm */; };
@@ -308,8 +312,6 @@
 		B350621F1B010EFD0018CF92 /* ASImageProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = 05F20AA31A15733C00DCA68A /* ASImageProtocols.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B35062201B010EFD0018CF92 /* ASLayoutController.h in Headers */ = {isa = PBXBuildFile; fileRef = 4640521D1A3F83C40061C0BA /* ASLayoutController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B35062211B010EFD0018CF92 /* ASLayoutRangeType.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C59991A956527007E5DD6 /* ASLayoutRangeType.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		B35062221B010EFD0018CF92 /* ASMultidimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 4640521E1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		B35062231B010EFD0018CF92 /* ASMultidimensionalArrayUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4640521F1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm */; };
 		B35062241B010EFD0018CF92 /* ASMutableAttributedStringBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D09E8195D050800B7D73C /* ASMutableAttributedStringBuilder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B35062251B010EFD0018CF92 /* ASMutableAttributedStringBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D09E9195D050800B7D73C /* ASMutableAttributedStringBuilder.m */; };
 		B35062261B010EFD0018CF92 /* ASRangeController.h in Headers */ = {isa = PBXBuildFile; fileRef = 055F1A3619ABD413004DAFF1 /* ASRangeController.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -343,9 +345,7 @@
 		B35062421B010EFD0018CF92 /* _ASAsyncTransactionGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D09FE195D050800B7D73C /* _ASAsyncTransactionGroup.m */; };
 		B35062431B010EFD0018CF92 /* UIView+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D09FF195D050800B7D73C /* UIView+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B35062441B010EFD0018CF92 /* UIView+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A00195D050800B7D73C /* UIView+ASConvenience.m */; };
-		B35062451B010EFD0018CF92 /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B35062461B010EFD0018CF92 /* ASBasicImageDownloaderInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 2967F9E11AB0A4CF0072E4AB /* ASBasicImageDownloaderInternal.h */; };
-		B35062471B010EFD0018CF92 /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */; };
 		B35062481B010EFD0018CF92 /* _AS-objc-internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D0A02195D050800B7D73C /* _AS-objc-internal.h */; };
 		B35062491B010EFD0018CF92 /* _ASCoreAnimationExtras.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D0A03195D050800B7D73C /* _ASCoreAnimationExtras.h */; };
 		B350624A1B010EFD0018CF92 /* _ASCoreAnimationExtras.mm in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A04195D050800B7D73C /* _ASCoreAnimationExtras.mm */; };
@@ -406,6 +406,10 @@
 
 /* Begin PBXFileReference section */
 		044285011BAA3CC700D16268 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
+		044285051BAA63FE00D16268 /* ASBatchFetching.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBatchFetching.h; sourceTree = "<group>"; };
+		044285061BAA63FE00D16268 /* ASBatchFetching.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBatchFetching.m; sourceTree = "<group>"; };
+		0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMultidimensionalArrayUtils.h; sourceTree = "<group>"; };
+		0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMultidimensionalArrayUtils.mm; sourceTree = "<group>"; };
 		0516FA3A1A15563400B4EBED /* ASAvailability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASAvailability.h; sourceTree = "<group>"; };
 		0516FA3B1A15563400B4EBED /* ASLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLog.h; sourceTree = "<group>"; };
 		0516FA3E1A1563D200B4EBED /* ASMultiplexImageNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMultiplexImageNode.h; sourceTree = "<group>"; };
@@ -539,8 +543,6 @@
 		292C599D1A956527007E5DD6 /* ASRangeHandlerRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeHandlerRender.h; sourceTree = "<group>"; };
 		292C599E1A956527007E5DD6 /* ASRangeHandlerRender.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRangeHandlerRender.mm; sourceTree = "<group>"; };
 		2967F9E11AB0A4CF0072E4AB /* ASBasicImageDownloaderInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ASBasicImageDownloaderInternal.h; sourceTree = "<group>"; };
-		296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASBatchFetching.h; path = ../Details/ASBatchFetching.h; sourceTree = "<group>"; };
-		296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASBatchFetching.m; path = ../Details/ASBatchFetching.m; sourceTree = "<group>"; };
 		296A0A311A951715005ACEAA /* ASScrollDirection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASScrollDirection.h; path = AsyncDisplayKit/Details/ASScrollDirection.h; sourceTree = SOURCE_ROOT; };
 		296A0A341A951ABF005ACEAA /* ASBatchFetchingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBatchFetchingTests.m; sourceTree = "<group>"; };
 		299DA1A71A828D2900162D41 /* ASBatchContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBatchContext.h; sourceTree = "<group>"; };
@@ -554,8 +556,6 @@
 		4640521B1A3F83C40061C0BA /* ASFlowLayoutController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASFlowLayoutController.h; sourceTree = "<group>"; };
 		4640521C1A3F83C40061C0BA /* ASFlowLayoutController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASFlowLayoutController.mm; sourceTree = "<group>"; };
 		4640521D1A3F83C40061C0BA /* ASLayoutController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLayoutController.h; sourceTree = "<group>"; };
-		4640521E1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMultidimensionalArrayUtils.h; sourceTree = "<group>"; };
-		4640521F1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMultidimensionalArrayUtils.mm; sourceTree = "<group>"; };
 		6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AsyncDisplayKit.h; sourceTree = "<group>"; };
 		9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutable.h; path = AsyncDisplayKit/Layout/ASStackLayoutable.h; sourceTree = "<group>"; };
 		9C5FA34F1B8F6ADF00A62714 /* ASLayoutOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutOptions.h; path = AsyncDisplayKit/Layout/ASLayoutOptions.h; sourceTree = "<group>"; };
@@ -852,8 +852,6 @@
 				05F20AA31A15733C00DCA68A /* ASImageProtocols.h */,
 				4640521D1A3F83C40061C0BA /* ASLayoutController.h */,
 				292C59991A956527007E5DD6 /* ASLayoutRangeType.h */,
-				4640521E1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.h */,
-				4640521F1A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm */,
 				058D09E8195D050800B7D73C /* ASMutableAttributedStringBuilder.h */,
 				058D09E9195D050800B7D73C /* ASMutableAttributedStringBuilder.m */,
 				055F1A3619ABD413004DAFF1 /* ASRangeController.h */,
@@ -910,9 +908,7 @@
 				9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */,
 				9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */,
 				9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */,
-				296A0A2C1A9516B2005ACEAA /* ASBatchFetching.h */,
 				2967F9E11AB0A4CF0072E4AB /* ASBasicImageDownloaderInternal.h */,
-				296A0A2D1A9516B2005ACEAA /* ASBatchFetching.m */,
 				058D0A02195D050800B7D73C /* _AS-objc-internal.h */,
 				058D0A03195D050800B7D73C /* _ASCoreAnimationExtras.h */,
 				058D0A04195D050800B7D73C /* _ASCoreAnimationExtras.mm */,
@@ -920,6 +916,8 @@
 				058D0A06195D050800B7D73C /* _ASPendingState.m */,
 				058D0A07195D050800B7D73C /* _ASScopeTimer.h */,
 				058D0A08195D050800B7D73C /* ASDisplayNode+AsyncDisplay.mm */,
+				044285051BAA63FE00D16268 /* ASBatchFetching.h */,
+				044285061BAA63FE00D16268 /* ASBatchFetching.m */,
 				058D0A09195D050800B7D73C /* ASDisplayNode+DebugTiming.h */,
 				058D0A0A195D050800B7D73C /* ASDisplayNode+DebugTiming.mm */,
 				058D0A0B195D050800B7D73C /* ASDisplayNode+UIViewBridge.mm */,
@@ -936,6 +934,8 @@
 				ACF6ED481B17847A00DA7C62 /* ASStackPositionedLayout.mm */,
 				ACF6ED491B17847A00DA7C62 /* ASStackUnpositionedLayout.h */,
 				ACF6ED4A1B17847A00DA7C62 /* ASStackUnpositionedLayout.mm */,
+				0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */,
+				0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */,
 			);
 			path = Private;
 			sourceTree = "<group>";
@@ -1042,7 +1042,7 @@
 				054963491A1EA066000F8E56 /* ASBasicImageDownloader.h in Headers */,
 				2967F9E21AB0A5190072E4AB /* ASBasicImageDownloaderInternal.h in Headers */,
 				299DA1A91A828D2900162D41 /* ASBatchContext.h in Headers */,
-				296A0A2E1A9516B2005ACEAA /* ASBatchFetching.h in Headers */,
+				044285071BAA63FE00D16268 /* ASBatchFetching.h in Headers */,
 				055F1A3C19ABD43F004DAFF1 /* ASCellNode.h in Headers */,
 				ACF6ED1C1B17843500DA7C62 /* ASCenterLayoutSpec.h in Headers */,
 				18C2ED7E1B9B7DE800F627B3 /* ASCollectionNode.h in Headers */,
@@ -1080,7 +1080,7 @@
 				ACF6ED261B17843500DA7C62 /* ASLayoutSpec.h in Headers */,
 				ACF6ED4D1B17847A00DA7C62 /* ASLayoutSpecUtilities.h in Headers */,
 				0516FA3D1A15563400B4EBED /* ASLog.h in Headers */,
-				464052251A3F83C40061C0BA /* ASMultidimensionalArrayUtils.h in Headers */,
+				0442850D1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */,
 				0516FA401A1563D200B4EBED /* ASMultiplexImageNode.h in Headers */,
 				058D0A59195D05DC00B7D73C /* ASMutableAttributedStringBuilder.h in Headers */,
 				055B9FA81A1C154B00035D6D /* ASNetworkImageNode.h in Headers */,
@@ -1143,7 +1143,7 @@
 				B35062131B010EFD0018CF92 /* ASBasicImageDownloader.h in Headers */,
 				B35062461B010EFD0018CF92 /* ASBasicImageDownloaderInternal.h in Headers */,
 				B35062151B010EFD0018CF92 /* ASBatchContext.h in Headers */,
-				B35062451B010EFD0018CF92 /* ASBatchFetching.h in Headers */,
+				044285081BAA63FE00D16268 /* ASBatchFetching.h in Headers */,
 				B35061F31B010EFD0018CF92 /* ASCellNode.h in Headers */,
 				34EFC7631B701CBF00AD841F /* ASCenterLayoutSpec.h in Headers */,
 				18C2ED7F1B9B7DE800F627B3 /* ASCollectionNode.h in Headers */,
@@ -1181,7 +1181,7 @@
 				34EFC76A1B701CE600AD841F /* ASLayoutSpec.h in Headers */,
 				34EFC7791B701D3600AD841F /* ASLayoutSpecUtilities.h in Headers */,
 				B350625C1B010F070018CF92 /* ASLog.h in Headers */,
-				B35062221B010EFD0018CF92 /* ASMultidimensionalArrayUtils.h in Headers */,
+				0442850E1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */,
 				B35062041B010EFD0018CF92 /* ASMultiplexImageNode.h in Headers */,
 				B35062241B010EFD0018CF92 /* ASMutableAttributedStringBuilder.h in Headers */,
 				B35062061B010EFD0018CF92 /* ASNetworkImageNode.h in Headers */,
@@ -1425,7 +1425,6 @@
 				ACF6ED1B1B17843500DA7C62 /* ASBackgroundLayoutSpec.mm in Sources */,
 				0549634A1A1EA066000F8E56 /* ASBasicImageDownloader.mm in Sources */,
 				299DA1AA1A828D2900162D41 /* ASBatchContext.mm in Sources */,
-				296A0A2F1A9516B2005ACEAA /* ASBatchFetching.m in Sources */,
 				AC6456091B0A335000CF11B8 /* ASCellNode.m in Sources */,
 				ACF6ED1D1B17843500DA7C62 /* ASCenterLayoutSpec.mm in Sources */,
 				18C2ED801B9B7DE800F627B3 /* ASCollectionNode.m in Sources */,
@@ -1452,12 +1451,13 @@
 				9C5FA3531B8F6ADF00A62714 /* ASLayoutOptions.mm in Sources */,
 				9C5FA35F1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */,
 				ACF6ED271B17843500DA7C62 /* ASLayoutSpec.mm in Sources */,
-				464052261A3F83C40061C0BA /* ASMultidimensionalArrayUtils.mm in Sources */,
 				0516FA411A1563D200B4EBED /* ASMultiplexImageNode.mm in Sources */,
 				058D0A1B195D050800B7D73C /* ASMutableAttributedStringBuilder.m in Sources */,
 				055B9FA91A1C154B00035D6D /* ASNetworkImageNode.mm in Sources */,
 				ACF6ED2C1B17843500DA7C62 /* ASOverlayLayoutSpec.mm in Sources */,
+				0442850F1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */,
 				055F1A3919ABD413004DAFF1 /* ASRangeController.mm in Sources */,
+				044285091BAA63FE00D16268 /* ASBatchFetching.m in Sources */,
 				292C59A11A956527007E5DD6 /* ASRangeHandlerPreload.mm in Sources */,
 				292C59A41A956527007E5DD6 /* ASRangeHandlerRender.mm in Sources */,
 				ACF6ED2E1B17843500DA7C62 /* ASRatioLayoutSpec.mm in Sources */,
@@ -1532,7 +1532,6 @@
 				34EFC7621B701CA400AD841F /* ASBackgroundLayoutSpec.mm in Sources */,
 				B35062141B010EFD0018CF92 /* ASBasicImageDownloader.mm in Sources */,
 				B35062161B010EFD0018CF92 /* ASBatchContext.mm in Sources */,
-				B35062471B010EFD0018CF92 /* ASBatchFetching.m in Sources */,
 				AC47D9421B3B891B00AAEE9D /* ASCellNode.m in Sources */,
 				34EFC7641B701CC600AD841F /* ASCenterLayoutSpec.mm in Sources */,
 				18C2ED831B9B7DE800F627B3 /* ASCollectionNode.m in Sources */,
@@ -1559,12 +1558,13 @@
 				9C5FA3541B8F6ADF00A62714 /* ASLayoutOptions.mm in Sources */,
 				9C5FA3601B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */,
 				34EFC76B1B701CEB00AD841F /* ASLayoutSpec.mm in Sources */,
-				B35062231B010EFD0018CF92 /* ASMultidimensionalArrayUtils.mm in Sources */,
 				B35062051B010EFD0018CF92 /* ASMultiplexImageNode.mm in Sources */,
 				B35062251B010EFD0018CF92 /* ASMutableAttributedStringBuilder.m in Sources */,
 				B35062071B010EFD0018CF92 /* ASNetworkImageNode.mm in Sources */,
 				34EFC76D1B701CF100AD841F /* ASOverlayLayoutSpec.mm in Sources */,
+				044285101BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */,
 				B35062271B010EFD0018CF92 /* ASRangeController.mm in Sources */,
+				0442850A1BAA63FE00D16268 /* ASBatchFetching.m in Sources */,
 				B350622A1B010EFD0018CF92 /* ASRangeHandlerPreload.mm in Sources */,
 				B350622C1B010EFD0018CF92 /* ASRangeHandlerRender.mm in Sources */,
 				34EFC76F1B701CF700AD841F /* ASRatioLayoutSpec.mm in Sources */,
