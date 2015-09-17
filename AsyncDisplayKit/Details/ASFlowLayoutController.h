@@ -9,6 +9,9 @@
 #import <AsyncDisplayKit/ASAbstractLayoutController.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+@class ASCellNode;
 
 typedef NS_ENUM(NSUInteger, ASFlowLayoutDirection) {
   ASFlowLayoutDirectionVertical,
@@ -17,7 +20,7 @@ typedef NS_ENUM(NSUInteger, ASFlowLayoutDirection) {
 
 @protocol ASFlowLayoutControllerDataSource
 
-- (NSArray *)completedNodes;  // This provides access to ASDataController's _completedNodes multidimensional array.
+- (NSArray<NSArray <ASCellNode *> *> *)completedNodes;  // This provides access to ASDataController's _completedNodes multidimensional array.
 
 @end
 
@@ -33,3 +36,5 @@ typedef NS_ENUM(NSUInteger, ASFlowLayoutDirection) {
 - (instancetype)initWithScrollOption:(ASFlowLayoutDirection)layoutDirection;
 
 @end
+
+NS_ASSUME_NONNULL_END

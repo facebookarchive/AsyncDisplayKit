@@ -9,6 +9,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASImageCacheProtocol <NSObject>
 
@@ -23,9 +24,9 @@
   @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image. This method should not block
       the calling thread as it is likely to be called from the main thread.
  */
-- (void)fetchCachedImageWithURL:(NSURL *)URL
-                  callbackQueue:(dispatch_queue_t)callbackQueue
-                     completion:(void (^)(CGImageRef imageFromCache))completion;
+- (void)fetchCachedImageWithURL:(nullable NSURL *)URL
+                  callbackQueue:(nullable dispatch_queue_t)callbackQueue
+                     completion:(void (^)(CGImageRef _Nullable imageFromCache))completion;
 
 @end
 
@@ -48,10 +49,10 @@
   @result An opaque identifier to be used in canceling the download, via `cancelImageDownloadForIdentifier:`. You must 
       retain the identifier if you wish to use it later.
  */
-- (id)downloadImageWithURL:(NSURL *)URL
-             callbackQueue:(dispatch_queue_t)callbackQueue
-     downloadProgressBlock:(void (^)(CGFloat progress))downloadProgressBlock
-                completion:(void (^)(CGImageRef image, NSError *error))completion;
+- (id)downloadImageWithURL:(nullable NSURL *)URL
+             callbackQueue:(nullable dispatch_queue_t)callbackQueue
+     downloadProgressBlock:(void (^ _Nullable)(CGFloat progress))downloadProgressBlock
+                completion:(void (^ _Nullable)(CGImageRef image, NSError *error))completion;
 
 /**
   @abstract Cancels an image download.
@@ -59,6 +60,8 @@
       `downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:`.
   @discussion This method has no effect if `downloadIdentifier` is nil.
  */
-- (void)cancelImageDownloadForIdentifier:(id)downloadIdentifier;
+- (void)cancelImageDownloadForIdentifier:(nullable id)downloadIdentifier;
 
 @end
+
+NS_ASSUME_NONNULL_END

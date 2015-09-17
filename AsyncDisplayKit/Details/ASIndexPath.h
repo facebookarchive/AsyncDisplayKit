@@ -19,7 +19,10 @@ typedef struct {
   ASIndexPath end;
 } ASIndexPathRange;
 
+NS_ASSUME_NONNULL_BEGIN
+
 ASDISPLAYNODE_EXTERN_C_BEGIN
+
 
 extern ASIndexPath ASIndexPathMake(NSInteger section, NSInteger row);
 
@@ -41,3 +44,5 @@ ASDISPLAYNODE_EXTERN_C_END
 - (ASIndexPath)ASIndexPathValue;
 
 @end
+
+NS_ASSUME_NONNULL_END

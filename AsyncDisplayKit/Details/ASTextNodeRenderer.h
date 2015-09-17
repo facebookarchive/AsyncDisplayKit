@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^as_renderer_index_block_t)(NSUInteger characterIndex,
                                           CGRect glyphBoundingRect,
@@ -46,10 +47,10 @@ typedef NS_ENUM(NSUInteger, ASTextNodeRendererMeasureOption) {
 @interface ASTextNodeRenderer : NSObject
 
 - (instancetype)initWithAttributedString:(NSAttributedString *)attributedString
-                        truncationString:(NSAttributedString *)truncationString
+                        truncationString:(nullable NSAttributedString *)truncationString
                           truncationMode:(NSLineBreakMode)truncationMode
                         maximumLineCount:(NSUInteger)maximumLineCount
-                          exclusionPaths:(NSArray *)exclusionPaths
+                          exclusionPaths:(nullable NSArray<UIBezierPath *> *)exclusionPaths
                          constrainedSize:(CGSize)constrainedSize;
 /*
  * Designated Initializer
@@ -59,7 +60,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeRendererMeasureOption) {
  * so feel free
  */
 - (instancetype)initWithAttributedString:(NSAttributedString *)attributedString
-                        truncationString:(NSAttributedString *)truncationString
+                        truncationString:(nullable NSAttributedString *)truncationString
                           truncationMode:(NSLineBreakMode)truncationMode
                         maximumLineCount:(NSUInteger)maximumLineCount
                          constrainedSize:(CGSize)constrainedSize;
@@ -129,7 +130,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeRendererMeasureOption) {
  *
  * Triggers initialization of textkit components, truncation, and sizing.
  */
-- (NSArray *)rectsForTextRange:(NSRange)textRange
+- (NSArray<NSValue *> *)rectsForTextRange:(NSRange)textRange
                  measureOption:(ASTextNodeRendererMeasureOption)measureOption;
 
 /*
@@ -186,3 +187,5 @@ typedef NS_ENUM(NSUInteger, ASTextNodeRendererMeasureOption) {
 - (NSUInteger)lineCount;
 
 @end
+
+NS_ASSUME_NONNULL_END

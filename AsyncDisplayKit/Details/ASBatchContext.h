@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * @abstract A context object to notify when batch fetches are finished or cancelled.
  */
@@ -58,3 +60,5 @@
 - (void)beginBatchFetching;
 
 @end
+
+NS_ASSUME_NONNULL_END

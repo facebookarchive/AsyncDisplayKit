@@ -10,6 +10,8 @@
 
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class ASDisplayNode;
 
 @protocol ASRangeHandler <NSObject>
@@ -20,3 +22,5 @@
 - (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType;
 
 @end
+
+NS_ASSUME_NONNULL_END

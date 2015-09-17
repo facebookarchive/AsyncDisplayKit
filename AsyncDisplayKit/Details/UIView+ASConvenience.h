@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 
 /**
  These are the properties we support from CALayer (implemented in the pending state)
@@ -18,7 +20,7 @@
 @property (nonatomic, assign) CGPoint position;
 @property (nonatomic, assign) CGFloat zPosition;
 @property (nonatomic, assign) CGPoint anchorPoint;
-@property (nonatomic, retain) id contents;
+@property (nullable, nonatomic, retain) id contents;
 @property (nonatomic, assign) CGFloat cornerRadius;
 @property (nonatomic, assign) CGFloat contentsScale;
 @property (nonatomic, assign) CATransform3D transform;
@@ -30,9 +32,9 @@
 @property (nonatomic, assign) CGFloat shadowRadius;
 @property (nonatomic, assign) CGFloat borderWidth;
 @property (nonatomic, assign, getter = isOpaque) BOOL opaque;
-@property (nonatomic, retain) __attribute__((NSObject)) CGColorRef borderColor;
-@property (nonatomic, copy) NSString *asyncdisplaykit_name;
-@property (nonatomic, retain) __attribute__((NSObject)) CGColorRef backgroundColor;
+@property (nullable, nonatomic, retain) __attribute__((NSObject)) CGColorRef borderColor;
+@property (nullable, nonatomic, copy) NSString *asyncdisplaykit_name;
+@property (nullable, nonatomic, retain) __attribute__((NSObject)) CGColorRef backgroundColor;
 @property (nonatomic, assign) BOOL allowsEdgeAntialiasing;
 @property (nonatomic, assign) unsigned int edgeAntialiasingMask;
 
@@ -50,7 +52,7 @@
 @property (nonatomic, getter=isHidden)                  BOOL hidden;
 @property (nonatomic, assign)                           BOOL autoresizesSubviews;
 @property (nonatomic, assign)                           UIViewAutoresizing autoresizingMask;
-@property (nonatomic, retain)                           UIColor *tintColor;
+@property (nonatomic, retain, null_resettable)          UIColor *tintColor;
 @property (nonatomic, assign)                           CGFloat alpha;
 @property (nonatomic, assign)                           CGRect bounds;
 @property (nonatomic, assign)                           UIViewContentMode contentMode;
@@ -76,10 +78,12 @@
  */
 
 // Accessibility identification support
-@property (nonatomic, copy)          NSString *accessibilityIdentifier;
+@property (nullable, nonatomic, copy)          NSString *accessibilityIdentifier;
 
 @end
 
 @interface CALayer (ASDisplayNodeLayer)
-@property (atomic, copy) NSString *asyncdisplaykit_name;
+@property (nullable, atomic, copy) NSString *asyncdisplaykit_name;
 @end
+
+NS_ASSUME_NONNULL_END

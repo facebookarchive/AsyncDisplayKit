@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 /*
  * Use this class to compose new attributed strings.  You may use the normal
@@ -38,14 +39,14 @@
  */
 @interface ASMutableAttributedStringBuilder : NSMutableAttributedString
 
-- (instancetype)initWithString:(NSString *)str attributes:(NSDictionary *)attrs;
+- (instancetype)initWithString:(NSString *)str attributes:(nullable NSDictionary<NSString *, id> *)attrs;
 - (instancetype)initWithAttributedString:(NSAttributedString *)attrStr;
 
 - (void)replaceCharactersInRange:(NSRange)range withString:(NSString *)str;
-- (void)setAttributes:(NSDictionary *)attrs range:(NSRange)range;
+- (void)setAttributes:(nullable NSDictionary<NSString *, id> *)attrs range:(NSRange)range;
 
 - (void)addAttribute:(NSString *)name value:(id)value range:(NSRange)range;
-- (void)addAttributes:(NSDictionary *)attrs range:(NSRange)range;
+- (void)addAttributes:(NSDictionary<NSString *, id> *)attrs range:(NSRange)range;
 - (void)removeAttribute:(NSString *)name range:(NSRange)range;
 
 - (void)replaceCharactersInRange:(NSRange)range withAttributedString:(NSAttributedString *)attrString;
@@ -57,3 +58,5 @@
 - (NSMutableAttributedString *)composedAttributedString;
 
 @end
+
+NS_ASSUME_NONNULL_END
