@@ -19,6 +19,8 @@
 @class ASLayout;
 @class ASLayoutSpec;
 
+NS_ASSUME_NONNULL_BEGIN
+
 /** 
  * The ASLayoutable protocol declares a method for measuring the layout of an object. A layout
  * is defined by an ASLayout return value, and must specify 1) the size (but not position) of the
@@ -107,3 +109,5 @@
 @property (nonatomic, assign) CGPoint layoutPosition;
 
 @end
+
+NS_ASSUME_NONNULL_END

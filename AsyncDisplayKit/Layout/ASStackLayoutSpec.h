@@ -11,6 +11,7 @@
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  A simple layout spec that stacks a list of children vertically or horizontally.
@@ -55,6 +56,8 @@
  @param alignItems Orientation of the children along the cross axis
  @param children ASLayoutable children to be positioned.
  */
-+ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children;
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray<id<ASLayoutable>> *)children;
 
 @end
+
+NS_ASSUME_NONNULL_END
