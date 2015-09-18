@@ -1,0 +1,5 @@
+ci_service: travis_ci
+coverage_service: coveralls
+xcodeproj: AsyncDisplayKit.xcodeproj
+source_directory: AsyncDisplayKit
+

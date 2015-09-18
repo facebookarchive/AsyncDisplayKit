@@ -1,6 +1,7 @@
 ![AsyncDisplayKit](https://github.com/facebook/AsyncDisplayKit/blob/master/docs/assets/logo.png)
 
 [![Build Status](https://travis-ci.org/facebook/AsyncDisplayKit.svg)](https://travis-ci.org/facebook/AsyncDisplayKit)
+[![Coverage Status](https://coveralls.io/repos/facebook/AsyncDisplayKit/badge.svg?branch=master)](https://coveralls.io/r/facebook/AsyncDisplayKit?branch=master)
  [![Version](http://img.shields.io/cocoapods/v/AsyncDisplayKit.svg)](http://cocoapods.org/?q=AsyncDisplayKit)
  [![Platform](http://img.shields.io/cocoapods/p/AsyncDisplayKit.svg)]()
  [![License](http://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
