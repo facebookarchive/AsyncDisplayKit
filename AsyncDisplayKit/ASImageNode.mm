@@ -227,6 +227,12 @@
   // Use contentsScale of 1.0 and do the contentsScale handling in boundsSizeInPixels so ASCroppedImageBackingSizeAndDrawRectInBounds
   // will do its rounding on pixel instead of point boundaries
   UIGraphicsBeginImageContextWithOptions(backingSize, parameters.opaque, 1.0);
+  
+  // if view is opaque, fill the context with background color
+  if (parameters.opaque && parameters.backgroundColor) {
+    [parameters.backgroundColor setFill];
+    [[UIBezierPath bezierPathWithRect:{ .size = backingSize }] fill];
+  }
 
   [image drawInRect:imageDrawRect];
 
