@@ -46,14 +46,14 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @abstract The attributedString to use when the text must be truncated.
  @discussion Defaults to a localized ellipsis character.
  */
-@property (nonatomic, copy) NSAttributedString *truncationAttributedString;
+@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedString;
 
 /**
  @summary The second attributed string appended for truncation.
  @discussion This string will be highlighted on touches.
  @default nil
  */
-@property (nonatomic, copy) NSAttributedString *additionalTruncationMessage;
+@property (nullable, nonatomic, copy) NSAttributedString *additionalTruncationMessage;
 
 /**
  @abstract Determines how the text is truncated to fit within the receiver's maximum size.
@@ -77,7 +77,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @property (nonatomic, readonly, assign) NSUInteger lineCount;
 
-@property (nonatomic, strong) NSArray<UIBezierPath *> *exclusionPaths;
+@property (nullable, nonatomic, strong) NSArray<UIBezierPath *> *exclusionPaths;
 
 #pragma mark - Placeholders
 
