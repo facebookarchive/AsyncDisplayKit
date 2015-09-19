@@ -129,8 +129,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   BOOL _ignoreMaxSizeChange;
   
   /**
-   If YES, the `UICollectionView` will reload its data on next `layoutSubviews` so we should
-   not forward any updates to it.
+   If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
    
    Rationale:
    In `reloadData`, a collection view invalidates its data and marks itself as needing reload, and waits until `layoutSubviews` to requery its data source. This can lead to data inconsistency problems. Say you have an empty collection view. You call `reloadData`, then immediately insert an item into your data source and call `insertItemsAtIndexPaths:[0,0]`. You will get an assertion failure saying "Invalid number of items in section 0. The number of items after the update (1) must be equal to the number of items before the update (1) plus or minus the items added and removed (1 added, 0 removed)." The collection view never queried your data source before the update to see that it actually had 0 items.
