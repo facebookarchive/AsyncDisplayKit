@@ -231,7 +231,7 @@
   // if view is opaque, fill the context with background color
   if (parameters.opaque && parameters.backgroundColor) {
     [parameters.backgroundColor setFill];
-    [[UIBezierPath bezierPathWithRect:{ .size = backingSize }] fill];
+    UIRectFill({ .size = backingSize });
   }
 
   [image drawInRect:imageDrawRect];
