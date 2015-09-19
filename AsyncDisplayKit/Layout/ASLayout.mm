@@ -28,9 +28,11 @@ extern BOOL CGPointIsNull(CGPoint point)
                                 sublayouts:(NSArray *)sublayouts
 {
   ASDisplayNodeAssert(layoutableObject, @"layoutableObject is required.");
+#if DEBUG
   for (ASLayout *sublayout in sublayouts) {
     ASDisplayNodeAssert(!CGPointIsNull(sublayout.position), @"Invalid position is not allowed in sublayout.");
   }
+#endif
   
   ASLayout *l = [super new];
   if (l) {
