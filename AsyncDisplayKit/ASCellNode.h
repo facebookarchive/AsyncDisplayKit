@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * Generic cell node.  Subclass ASCellNode instead of <ASDisplayNode> to use <ASTableView>.
+ * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
  */
 @interface ASCellNode : ASDisplayNode
 
