@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASMultiplexImageNodeDelegate;
 @protocol ASMultiplexImageNodeDataSource;
 
-typedef __kindof NSObject<NSCopying> * ImageIdentifier;
+typedef __kindof NSObject<NSCopying> * ASImageIdentifier;
 
 extern NSString *const ASMultiplexImageNodeErrorDomain;
 
@@ -38,8 +38,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  * @abstract ASMultiplexImageNode is an image node that can load and display multiple versions of an image.  For
  * example, it can display a low-resolution version of an image while the high-resolution version is loading.
  *
- * @discussion ASMultiplexImageNode begins loading images when its <imageIdentifiers> property  is set.  For each image
- * identifier, the data source can either return a UIImage directly, or a URL the image node should load.
+ * @discussion ASMultiplexImageNode begins loading images when its <esource can either return a UIImage directly, or a URL the image node should load.
  */
 @interface ASMultiplexImageNode : ASImageNode
 
@@ -80,10 +79,10 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  *
  * @see <downloadsIntermediateImages> for more information on the image loading process.
  */
-@property (nonatomic, readwrite, copy) NSArray<ImageIdentifier> *imageIdentifiers;
+@property (nonatomic, readwrite, copy) NSArray<ASImageIdentifier> *imageIdentifiers;
 
 /**
- * @abstract Notify the receiver that its data source has new UIImages or NSURLs available for <imageIdentifiers>.
+ * @abstract Notify the receiver SSAAthat its data source has new UIImages or NSURLs available for <imageIdentifiers>.
  *
  * @discussion If a higher-quality image than is currently displayed is now available, it will be loaded.
  */
@@ -94,12 +93,12 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  *
  * @discussion This value may differ from <displayedImageIdentifier> if the image hasn't yet been displayed.
  */
-@property (nullable, nonatomic, readonly) ImageIdentifier loadedImageIdentifier;
+@property (nullable, nonatomic, readonly) ASImageIdentifier loadedImageIdentifier;
 
 /**
  * @abstract The identifier for the image that the receiver is currently displaying, or nil.
  */
-@property (nullable, nonatomic, readonly) ImageIdentifier displayedImageIdentifier;
+@property (nullable, nonatomic, readonly) ASImageIdentifier displayedImageIdentifier;
 
 @end
 
@@ -127,7 +126,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  */
 - (void)multiplexImageNode:(ASMultiplexImageNode *)imageNode
  didUpdateDownloadProgress:(CGFloat)downloadProgress
-    forImageWithIdentifier:(ImageIdentifier)imageIdentifier;
+    forImageWithIdentifier:(ASImageIdentifier)imageIdentifier;
 
 /**
  * @abstract Notification that the image node's download has finished.
@@ -136,7 +135,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  * @param error The error that occurred while downloading, if one occurred; nil otherwise.
  */
 - (void)multiplexImageNode:(ASMultiplexImageNode *)imageNode
-didFinishDownloadingImageWithIdentifier:(ImageIdentifier)imageIdentifier
+didFinishDownloadingImageWithIdentifier:(ASImageIdentifier)imageIdentifier
                      error:(nullable NSError *)error;
 
 /**
@@ -151,9 +150,9 @@ didFinishDownloadingImageWithIdentifier:(ImageIdentifier)imageIdentifier
  */
 - (void)multiplexImageNode:(ASMultiplexImageNode *)imageNode
             didUpdateImage:(nullable UIImage *)image
-            withIdentifier:(nullable ImageIdentifier)imageIdentifier
+            withIdentifier:(nullable ASImageIdentifier)imageIdentifier
                  fromImage:(nullable UIImage *)previousImage
-            withIdentifier:(nullable ImageIdentifier)previousImageIdentifier;
+            withIdentifier:(nullable ASImageIdentifier)previousImageIdentifier;
 
 /**
  * @abstract Notification that the image node displayed a new image.
@@ -164,7 +163,7 @@ didFinishDownloadingImageWithIdentifier:(ImageIdentifier)imageIdentifier
  */
 - (void)multiplexImageNode:(ASMultiplexImageNode *)imageNode
     didDisplayUpdatedImage:(nullable UIImage *)image
-            withIdentifier:(nullable ImageIdentifier)imageIdentifier;
+            withIdentifier:(nullable ASImageIdentifier)imageIdentifier;
 
 /**
  * @abstract Notification that the image node finished displaying an image.
@@ -192,7 +191,7 @@ didFinishDownloadingImageWithIdentifier:(ImageIdentifier)imageIdentifier
  * URL to the image via -multiplexImageNode:URLForImageIdentifier:.
  * @returns A UIImage corresponding to `imageIdentifier`, or nil if none is available.
  */
-- (nullable UIImage *)multiplexImageNode:(ASMultiplexImageNode *)imageNode imageForImageIdentifier:(ImageIdentifier)imageIdentifier;
+- (nullable UIImage *)multiplexImageNode:(ASMultiplexImageNode *)imageNode imageForImageIdentifier:(ASImageIdentifier)imageIdentifier;
 
 /**
  * @abstract An image URL for the specified identifier.
@@ -203,7 +202,7 @@ didFinishDownloadingImageWithIdentifier:(ImageIdentifier)imageIdentifier
  * multiplexImageNode:imageForImageIdentifier:]> instead.
  * @returns An NSURL for the image identified by `imageIdentifier`, or nil if none is available.
  */
-- (nullable NSURL *)multiplexImageNode:(ASMultiplexImageNode *)imageNode URLForImageIdentifier:(ImageIdentifier)imageIdentifier;
+- (nullable NSURL *)multiplexImageNode:(ASMultiplexImageNode *)imageNode URLForImageIdentifier:(ASImageIdentifier)imageIdentifier;
 
 @end
 
