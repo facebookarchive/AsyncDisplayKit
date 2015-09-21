@@ -189,7 +189,7 @@
 }
 
 - (void)setLayerBacked:(BOOL)layerBacked {
-  ASDisplayNodeAssert(!layerBacked, @"Cannot set isLayerBacked to YES on ASEditableTextNode – all instances are view-backed.");
+  ASDisplayNodeAssert(!layerBacked, @"Cannot set layerBacked to YES on ASEditableTextNode – all instances are view-backed.");
   [super setLayerBacked:layerBacked];
 }
 
