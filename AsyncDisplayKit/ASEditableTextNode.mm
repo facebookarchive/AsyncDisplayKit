@@ -188,6 +188,11 @@
   _placeholderTextKitComponents.textView.opaque = opaque;
 }
 
+- (void)setLayerBacked:(BOOL)layerBacked {
+  ASDisplayNodeAssert(!layerBacked, @"Cannot set isLayerBacked to YES on ASEditableTextNode – all instances are view-backed.");
+  [super setLayerBacked:layerBacked];
+}
+
 #pragma mark - Configuration
 @synthesize delegate = _delegate;
 
