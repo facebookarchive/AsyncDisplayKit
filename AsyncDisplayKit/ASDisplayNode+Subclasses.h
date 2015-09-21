@@ -193,7 +193,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
 + (void)drawRect:(CGRect)bounds
-  withParameters:(id<NSObject>)parameters
+  withParameters:(nullable id<NSObject>)parameters
      isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
    isRasterizing:(BOOL)isRasterizing;
 
@@ -210,7 +210,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
-+ (nullable UIImage *)displayWithParameters:(id<NSObject>)parameters
++ (nullable UIImage *)displayWithParameters:(nullable id<NSObject>)parameters
                        isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock;
 
 /**
@@ -220,7 +220,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @note Called on the main thread only
  */
-- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
+- (nullable id<NSObject>)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
 
 /**
  * @abstract Indicates that the receiver is about to display.
