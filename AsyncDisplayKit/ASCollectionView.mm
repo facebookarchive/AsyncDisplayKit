@@ -127,6 +127,19 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   CGSize _maxSizeForNodesConstrainedSize;
   BOOL _ignoreMaxSizeChange;
+  
+  /**
+   * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
+   
+   * Rationale:
+   * In `reloadData`, a collection view invalidates its data and marks itself as needing reload, and waits until `layoutSubviews` to requery its data source.
+   * This can lead to data inconsistency problems.
+   * Say you have an empty collection view. You call `reloadData`, then immediately insert an item into your data source and call `insertItemsAtIndexPaths:[0,0]`.
+   * You will get an assertion failure saying `Invalid number of items in section 0.
+   * The number of items after the update (1) must be equal to the number of items before the update (1) plus or minus the items added and removed (1 added, 0 removed).`
+   * The collection view never queried your data source before the update to see that it actually had 0 items.
+  */
+  BOOL _superIsPendingDataLoad;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -177,6 +190,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   _performingBatchUpdates = NO;
   _batchUpdateBlocks = [NSMutableArray array];
 
+  _superIsPendingDataLoad = YES;
+  
   _collectionViewLayoutImplementsInsetSection = [layout respondsToSelector:@selector(sectionInset)];
 
   _maxSizeForNodesConstrainedSize = self.bounds.size;
@@ -206,6 +221,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssert(self.asyncDelegate, @"ASCollectionView's asyncDelegate property must be set.");
   ASDisplayNodePerformBlockOnMainThread(^{
+    _superIsPendingDataLoad = YES;
     [super reloadData];
   });
   [_dataController reloadDataWithAnimationOptions:kASCollectionViewAnimationNone completion:completion];
@@ -403,6 +419,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
+  _superIsPendingDataLoad = NO;
   return [_dataController numberOfSections];
 }
 
@@ -638,7 +655,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)rangeController:(ASRangeController *)rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
   ASDisplayNodeAssertMainThread();
 
-  if (!self.asyncDataSource) {
+  if (!self.asyncDataSource || _superIsPendingDataLoad) {
     if (completion) {
       completion(NO);
     }
@@ -690,7 +707,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
 
-  if (!self.asyncDataSource) {
+  if (!self.asyncDataSource || _superIsPendingDataLoad) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
 
@@ -709,7 +726,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
 
-  if (!self.asyncDataSource) {
+  if (!self.asyncDataSource || _superIsPendingDataLoad) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
 
@@ -728,7 +745,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
 
-  if (!self.asyncDataSource) {
+  if (!self.asyncDataSource || _superIsPendingDataLoad) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
 
@@ -747,7 +764,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
 
-  if (!self.asyncDataSource) {
+  if (!self.asyncDataSource || _superIsPendingDataLoad) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
 
