@@ -66,18 +66,6 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 @end
 
-ASDISPLAYNODE_INLINE CGFloat ceilPixelValueForScale(CGFloat f, CGFloat scale)
-{
-  // Round up to device pixel (.5 on retina)
-  return ceilf(f * scale) / scale;
-}
-
-ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
-{
-  return ceilPixelValueForScale(f, [UIScreen mainScreen].scale);
-}
-
-
 @interface ASTextNode () <UIGestureRecognizerDelegate>
 
 @end
@@ -212,9 +200,9 @@ ASDISPLAYNODE_INLINE CGFloat ceilPixelValue(CGFloat f)
   CGSize renderSizePlusShadowPadding = UIEdgeInsetsInsetRect(CGRect{CGPointZero, rendererSize}, shadowPadding).size;
   ASDisplayNodeAssert(renderSizePlusShadowPadding.width >= 0, @"Calculated width for text with shadow padding (%f) is too  narrow", constrainedSizeForText.width);
   ASDisplayNodeAssert(renderSizePlusShadowPadding.height >= 0, @"Calculated height for text with shadow padding (%f) is too short", constrainedSizeForText.height);
-
-  return CGSizeMake(MIN(ceilPixelValue(renderSizePlusShadowPadding.width), constrainedSize.width),
-                    MIN(ceilPixelValue(renderSizePlusShadowPadding.height), constrainedSize.height));
+  renderSizePlusShadowPadding = ceilSizeValue(renderSizePlusShadowPadding);
+  return CGSizeMake(MIN(renderSizePlusShadowPadding.width, constrainedSize.width),
+                    MIN(renderSizePlusShadowPadding.height, constrainedSize.height));
 }
 
 - (void)displayDidFinish
