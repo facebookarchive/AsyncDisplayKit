@@ -10,7 +10,21 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "ASBaseDefines.h"
 
+ASDISPLAYNODE_INLINE CGFloat ceilPixelValueForScale(CGFloat f, CGFloat scale)
+{
+  // Round up to device pixel (.5 on retina)
+  return ceilf(f * scale) / scale;
+}
+
+ASDISPLAYNODE_INLINE CGSize ceilSizeValue(CGSize s)
+{
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  s.width = ceilPixelValueForScale(s.width, screenScale);
+  s.height = ceilPixelValueForScale(s.height, screenScale);
+  return s;
+}
 
 @interface ASTextKitComponents : NSObject
 
