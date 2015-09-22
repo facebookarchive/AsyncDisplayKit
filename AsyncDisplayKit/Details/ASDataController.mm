@@ -632,6 +632,22 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   return _completedNodes[indexPath.section][indexPath.row];
 }
 
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
+{
+  ASDisplayNodeAssertMainThread();
+
+  // Loop through each section to look for the cellNode
+  for (NSUInteger i = 0; i < [_completedNodes count]; i++) {
+    NSArray *sectionNodes = _completedNodes[i];
+    NSUInteger cellIndex = [sectionNodes indexOfObjectIdenticalTo:cellNode];
+    if (cellIndex != NSNotFound) {
+      return [NSIndexPath indexPathForRow:cellIndex inSection:i];
+    }
+  }
+  
+  return nil;
+}
+
 - (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
