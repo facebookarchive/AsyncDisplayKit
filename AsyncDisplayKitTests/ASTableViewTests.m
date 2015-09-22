@@ -428,4 +428,27 @@
   }];
 }
 
+- (void)testIndexPathForNode
+{
+  CGSize tableViewSize = CGSizeMake(100, 500);
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
+                                                                style:UITableViewStylePlain
+                                                    asyncDataFetching:YES];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  [tableView reloadDataWithCompletion:^{
+    for (NSUInteger i = 0; i < NumberOfSections; i++) {
+      for (NSUInteger j = 0; j < NumberOfRowsPerSection; j++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:j inSection:i];
+        ASCellNode *cellNode = [tableView nodeForRowAtIndexPath:indexPath];
+        NSIndexPath *reportedIndexPath = [tableView indexPathForNode:cellNode];
+        XCTAssertEqual(indexPath.row, reportedIndexPath.row);
+      }
+    }
+  }];
+}
+
 @end

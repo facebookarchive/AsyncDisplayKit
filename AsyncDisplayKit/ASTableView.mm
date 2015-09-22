@@ -345,6 +345,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   return [_dataController nodeAtIndexPath:indexPath];
 }
 
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
+{
+  return [_dataController indexPathForNode:cellNode];
+}
+
 - (NSArray *)visibleNodes
 {
   NSArray *indexPaths = [self indexPathsForVisibleRows];
