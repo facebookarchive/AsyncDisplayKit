@@ -188,6 +188,12 @@
   _placeholderTextKitComponents.textView.opaque = opaque;
 }
 
+- (void)setLayerBacked:(BOOL)layerBacked
+{
+  ASDisplayNodeAssert(!layerBacked, @"Cannot set layerBacked to YES on ASEditableTextNode – instances must be view-backed in order to ensure touch events can be passed to the internal UITextView during editing.");
+  [super setLayerBacked:layerBacked];
+}
+
 #pragma mark - Configuration
 @synthesize delegate = _delegate;
 

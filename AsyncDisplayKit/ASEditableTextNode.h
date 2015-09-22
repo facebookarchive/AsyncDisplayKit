@@ -11,7 +11,10 @@
 
 @protocol ASEditableTextNodeDelegate;
 
-/// @abstract ASEditableTextNode implements a node that supports text editing.
+/**
+ @abstract Implements a node that supports text editing.
+ @discussion Does not support layer backing.
+ */
 @interface ASEditableTextNode : ASDisplayNode
 
 // @abstract The text node's delegate, which must conform to the <ASEditableTextNodeDelegate> protocol.
