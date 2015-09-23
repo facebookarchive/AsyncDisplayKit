@@ -530,7 +530,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   }
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  [_rangeController configureContentView:cell.contentView forCellNode:node];
+  [_rangeController configureContentView:cell.contentView forNode:node];
 
   cell.node = node;
   cell.backgroundColor = node.backgroundColor;
@@ -859,7 +859,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   return [_asyncDataSource tableView:self numberOfRowsInSection:section];
 }
 
-- (NSUInteger)dataControllerNumberOfSections:(ASDataController *)dataController
+- (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController
 {
   if ([_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableView:)]) {
     return [_asyncDataSource numberOfSectionsInTableView:self];

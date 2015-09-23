@@ -41,9 +41,9 @@
  *
  * @param contentView UIView to add a (sized) node's view to.
  *
- * @param node The ASCellNode to be added.
+ * @param node The node to be added. Often an ASCellNode.
  */
-- (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node;
+- (void)configureContentView:(UIView *)contentView forNode:(ASDisplayNode *)node;
 
 /**
  * Delegate and ultimate data source.  Must not be nil.

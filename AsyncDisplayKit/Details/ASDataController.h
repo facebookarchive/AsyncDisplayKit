@@ -40,7 +40,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 /**
  Fetch the number of sections.
  */
-- (NSUInteger)dataControllerNumberOfSections:(ASDataController *)dataController;
+- (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController;
 
 /**
  Lock the data source for data fetching.

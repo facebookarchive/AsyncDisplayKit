@@ -239,7 +239,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     ASDisplayNodeAssertMainThread();
     [self accessDataSourceWithBlock:^{
       NSMutableArray *indexPaths = [NSMutableArray array];
-      NSUInteger sectionNum = [_dataSource dataControllerNumberOfSections:self];
+      NSUInteger sectionNum = [_dataSource numberOfSectionsInDataController:self];
 
       // insert sections
       [self insertSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionNum)] withAnimationOptions:0];
@@ -266,7 +266,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
     [self accessDataSourceWithBlock:^{
-      NSUInteger sectionCount = [_dataSource dataControllerNumberOfSections:self];
+      NSUInteger sectionCount = [_dataSource numberOfSectionsInDataController:self];
       NSMutableArray *updatedNodes = [NSMutableArray array];
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromEntireDataSourceWithMutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
@@ -335,7 +335,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)_populateFromEntireDataSourceWithMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
 {
-  NSUInteger sectionNum = [_dataSource dataControllerNumberOfSections:self];
+  NSUInteger sectionNum = [_dataSource numberOfSectionsInDataController:self];
   for (NSUInteger i = 0; i < sectionNum; i++) {
     NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:i];
     

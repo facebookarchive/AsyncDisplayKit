@@ -11,7 +11,7 @@
 #import "ASAssert.h"
 #import "ASCollectionViewLayoutController.h"
 #import "ASRangeController.h"
-#import "ASDataController.h"
+#import "ASCollectionDataController.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 #import "UICollectionViewLayout+ASConvenience.h"
@@ -37,9 +37,7 @@ static BOOL _isInterceptedSelector(SEL sel)
           // handled by ASCollectionView node<->cell machinery
           sel == @selector(collectionView:cellForItemAtIndexPath:) ||
           sel == @selector(collectionView:layout:sizeForItemAtIndexPath:) ||
-
-          // TODO: Supplementary views are currently not supported.  An assertion is triggered if the _asyncDataSource implements this method.
-          // sel == @selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:) ||
+          sel == @selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:) ||
           
           // handled by ASRangeController
           sel == @selector(numberOfSectionsInCollectionView:) ||
@@ -136,7 +134,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   _ASCollectionViewProxy *_proxyDataSource;
   _ASCollectionViewProxy *_proxyDelegate;
 
-  ASDataController *_dataController;
+  ASCollectionDataController *_dataController;
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
 
@@ -201,7 +199,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
 
-  _dataController = [[ASDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
+  _dataController = [[ASCollectionDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
   _dataController.delegate = _rangeController;
   _dataController.dataSource = self;
 
@@ -381,8 +379,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)registerSupplementaryViewOfKind:(NSString *)elementKind
 {
-  NSString *identifier = [NSString stringWithFormat:@"_ASCollectionSupplementaryView_%@", elementKind];
-  [self registerClass:[UIView class] forSupplementaryViewOfKind:elementKind withReuseIdentifier:identifier];
+  [self registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:elementKind
+                                            withReuseIdentifier:[self __reuseIdentifierForKind:elementKind]];
 }
 
 - (void)insertSections:(NSIndexSet *)sections
@@ -433,6 +431,16 @@ static BOOL _isInterceptedSelector(SEL sel)
   [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
+- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController nodeAtIndexPath:indexPath];
+}
+
+- (NSString *)__reuseIdentifierForKind:(NSString *)kind
+{
+  return [NSString stringWithFormat:@"_ASCollectionSupplementaryView_%@", kind];
+}
+
 #pragma mark -
 #pragma mark Intercepted selectors.
 
@@ -443,7 +451,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  [_rangeController configureContentView:cell.contentView forCellNode:node];
+  
+  [_rangeController configureContentView:cell.contentView forNode:node];
   
   cell.node = node;
   
@@ -453,6 +462,15 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   return [[_dataController nodeAtIndexPath:indexPath] calculatedSize];
+}
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  NSString *identifier = [self __reuseIdentifierForKind:kind];
+  UICollectionReusableView *view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:identifier forIndexPath:indexPath];
+  ASDisplayNode *node = [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
+  [_rangeController configureContentView:view forNode:node];
+  return view;
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
@@ -613,6 +631,11 @@ static BOOL _isInterceptedSelector(SEL sel)
   return node;
 }
 
+- (ASDisplayNode *)dataController:(ASDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  return [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+}
+
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASSizeRange constrainedSize;
@@ -659,7 +682,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   return [_asyncDataSource collectionView:self numberOfItemsInSection:section];
 }
 
-- (NSUInteger)dataControllerNumberOfSections:(ASDataController *)dataController {
+- (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController {
   if ([_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)]) {
     return [_asyncDataSource numberOfSectionsInCollectionView:self];
   } else {

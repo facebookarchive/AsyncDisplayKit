@@ -64,7 +64,7 @@
   //    This happens if the UITableViewCell is reused after scrolling offscreen.  Because the node has already been given the opportunity to display, we do not
   //    proactively re-host it within the workingWindow (improving efficiency).  Some time later, it may fall outside the working range, in which case calling
   //    -recursivelyClearContents is critical.  If the user scrolls back and it is re-hosted in a UITableViewCell, the content will still exist as it is not cleared
-  //    by simply being removed from the cell.  The code that usually triggers this condition is the -removeFromSuperview in -[ASRangeController configureContentView:forCellNode:].
+  //    by simply being removed from the cell.  The code that usually triggers this condition is the -removeFromSuperview in -[ASRangeController configureContentView:forNode:].
   // Condition #4 is suboptimal in some cases, as it is conceivable that memory warnings could trigger clearing content that is inside the working range.  However, enforcing the
   // preservation of this content could result in the app being killed, which is not likely preferable over briefly seeing placeholders in the event the user scrolls backwards.
   // Nonetheless, future changes to the implementation will likely eliminate this behavior to simplify debugging and extensibility of working range functionality.
