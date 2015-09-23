@@ -90,7 +90,6 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 @end
 
-
 /**
  * Controller to layout data in background, and managed data updating.
  *
@@ -177,6 +176,9 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths;
 
-- (NSArray *)completedNodes;  // This provides efficient access to the entire _completedNodes multidimensional array.
+/**
+ * Direct access to the nodes that have completed calculation and layout
+ */
+- (NSArray *)completedNodes;
 
 @end
