@@ -76,6 +76,17 @@
   return node;
 }
 
+- (ASDisplayNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+    node.backgroundColor = [UIColor blueColor];
+  } else {
+    node.backgroundColor = [UIColor redColor];
+  }
+  return node;
+}
+
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
   return 300;
