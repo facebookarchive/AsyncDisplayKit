@@ -119,6 +119,8 @@
  */
 - (void)reloadData;
 
+- (void)registerSupplementaryViewOfKind:(NSString *)elementKind;
+
 /**
  * Inserts one or more sections.
  *

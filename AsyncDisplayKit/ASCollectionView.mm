@@ -379,6 +379,12 @@ static BOOL _isInterceptedSelector(SEL sel)
   [self performBatchAnimated:YES updates:updates completion:completion];
 }
 
+- (void)registerSupplementaryViewOfKind:(NSString *)elementKind
+{
+  NSString *identifier = [NSString stringWithFormat:@"_ASCollectionSupplementaryView_%@", elementKind];
+  [self registerClass:[UIView class] forSupplementaryViewOfKind:elementKind withReuseIdentifier:identifier];
+}
+
 - (void)insertSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
