@@ -628,7 +628,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
   
   if (_asyncDelegateImplementsInsetSection) {
-    sectionInset = [_asyncDelegate collectionView:self layout:self.collectionViewLayout insetForSectionAtIndex:indexPath.section];
+    sectionInset = [(id<ASCollectionViewDelegateFlowLayout>)_asyncDelegate collectionView:self layout:self.collectionViewLayout insetForSectionAtIndex:indexPath.section];
   }
 
   if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {

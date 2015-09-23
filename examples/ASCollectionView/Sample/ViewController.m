@@ -13,7 +13,7 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegate>
+@interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
 {
   ASCollectionView *_collectionView;
 }
@@ -95,7 +95,7 @@
   [context completeBatchFetching:YES];
 }
 
-- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
   return UIEdgeInsetsMake(20.0, 20.0, 20.0, 20.0);
 }
 

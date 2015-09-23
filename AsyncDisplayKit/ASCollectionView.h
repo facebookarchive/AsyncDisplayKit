@@ -342,18 +342,34 @@
  */
 - (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView;
 
+@end
+
+@protocol ASCollectionViewDelegateFlowLayout <ASCollectionViewDelegate>
+
+@optional
+
 /**
  * Passthrough support to UICollectionViewDelegateFlowLayout sectionInset behavior.
  *
  * @param collectionView The sender.
  * @param collectionViewLayout The layout object requesting the information.
- * #param section The index number of the section whose insets are needed.
+ * @param section The index number of the section whose insets are needed.
  *
  * @discussion The same rules apply as the UICollectionView implementation, but this can also be used without a UICollectionViewFlowLayout.
  * https://developer.apple.com/library/ios/documentation/UIKit/Reference/UICollectionViewDelegateFlowLayout_protocol/index.html#//apple_ref/occ/intfm/UICollectionViewDelegateFlowLayout/collectionView:layout:insetForSectionAtIndex:
  *
  */
-- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section;
+- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section;
+
+/**
+ * Asks the delegate for the size of the header in the specified section.
+ */
+- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section;
+
+/**
+ * Asks the delegate for the size of the footer in the specified section.
+ */
+- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section;
 
 @end
 
