@@ -143,6 +143,7 @@
   _textKitComponents.textView.accessibilityHint = _placeholderTextKitComponents.textStorage.string;
   configureTextView(_textKitComponents.textView);
   [self.view addSubview:_textKitComponents.textView];
+  [self _updateDisplayingPlaceholder];
 }
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
