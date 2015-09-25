@@ -527,11 +527,13 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // Get the best image we can.
   PHAsset *imageAsset = [assetFetchResult firstObject];
+  PHImageRequestOptions *options = [request.options copy];
+  options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
 
   [[PHImageManager defaultManager] requestImageForAsset:imageAsset
                                              targetSize:request.targetSize
                                             contentMode:request.contentMode
-                                                options:request.options
+                                                options:options
                                           resultHandler:^(UIImage *image, NSDictionary *info) {
                                             completionBlock(image, info[PHImageErrorKey]);
                                           }];
