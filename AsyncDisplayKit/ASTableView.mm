@@ -259,7 +259,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)setDataSource:(id<UITableViewDataSource>)dataSource
 {
-  ASDisplayNodeAssert(NO, @"ASTableView uses asyncDataSource, not UITableView's dataSource property.");
+  // UIKit can internally generate a call to this method upon changing the asyncDataSource; only assert for non-nil.
+  ASDisplayNodeAssert(dataSource == nil, @"ASTableView uses asyncDataSource, not UITableView's dataSource property.");
 }
 
 - (void)setDelegate:(id<UITableViewDelegate>)delegate

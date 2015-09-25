@@ -234,7 +234,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
 {
-  ASDisplayNodeAssert(NO, @"ASCollectionView uses asyncDataSource, not UICollectionView's dataSource property.");
+  // UIKit can internally generate a call to this method upon changing the asyncDataSource; only assert for non-nil.
+  ASDisplayNodeAssert(dataSource == nil, @"ASCollectionView uses asyncDataSource, not UICollectionView's dataSource property.");
 }
 
 - (void)setDelegate:(id<UICollectionViewDelegate>)delegate

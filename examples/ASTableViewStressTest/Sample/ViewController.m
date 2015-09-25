@@ -100,9 +100,6 @@
 
 - (void)thrashTableView
 {
-  _tableView.asyncDelegate = self;
-  _tableView.asyncDataSource = self;
-  
   [_tableView reloadData];
   
   NSArray *indexPathsAddedAndRemoved = nil;
