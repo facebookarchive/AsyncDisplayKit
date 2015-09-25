@@ -96,11 +96,12 @@ static NSString *const _ASPhotosURLQueryKeyCropHeight = @"crop_h";
 
 + (ASPhotosImageRequest *)requestWithURL:(NSURL *)url
 {
-  NSURLComponents *comp = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
   // not a photos URL
-  if (![comp.scheme isEqualToString:ASPhotosURLScheme]) {
+  if (![url.scheme isEqualToString:ASPhotosURLScheme]) {
     return nil;
   }
+  
+  NSURLComponents *comp = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
   
   ASPhotosImageRequest *request = [[ASPhotosImageRequest alloc] initWithAssetIdentifier:url.host];
   
