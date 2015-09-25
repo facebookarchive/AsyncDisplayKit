@@ -195,7 +195,7 @@ didFinishDownloadingImageWithIdentifier:(id)imageIdentifier
  * @abstract An image URL for the specified identifier.
  * @param imageNode The sender.
  * @param imageIdentifier The identifier for the image that will be downloaded.
- * @discussion Supported URLs include assets-library, Photo framework URLs (ph://), HTTP, HTTPS, and FTP URLs.  If the
+ * @discussion Supported URLs include assets-library, URLs converted from ASPhotosImageRequest, HTTP, HTTPS, and FTP URLs.  If the
  * image is already available to the data source, it should be provided via <[ASMultiplexImageNodeDataSource
  * multiplexImageNode:imageForImageIdentifier:]> instead.
  * @returns An NSURL for the image identified by `imageIdentifier`, or nil if none is available.

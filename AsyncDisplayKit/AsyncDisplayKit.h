@@ -18,6 +18,7 @@
 #import <AsyncDisplayKit/ASBasicImageDownloader.h>
 #import <AsyncDisplayKit/ASMultiplexImageNode.h>
 #import <AsyncDisplayKit/ASNetworkImageNode.h>
+#import <AsyncDisplayKit/ASPhotosImageRequest.h>
 
 #import <AsyncDisplayKit/ASTableView.h>
 #import <AsyncDisplayKit/ASCollectionView.h>

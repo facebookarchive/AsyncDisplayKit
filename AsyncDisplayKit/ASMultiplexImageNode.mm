@@ -18,6 +18,7 @@
 #import "ASBaseDefines.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASLog.h"
+#import "ASPhotosImageRequest.h"
 
 #if !AS_IOS8_SDK_OR_LATER
 #error ASMultiplexImageNode can be used on iOS 7, but must be linked against the iOS 8 SDK.
@@ -26,8 +27,6 @@
 NSString *const ASMultiplexImageNodeErrorDomain = @"ASMultiplexImageNodeErrorDomain";
 
 static NSString *const kAssetsLibraryURLScheme = @"assets-library";
-static NSString *const kPHAssetURLScheme = @"ph";
-static NSString *const kPHAssetURLPrefix = @"ph://";
 
 /**
   @abstract Signature for the block to be performed after an image has loaded.
@@ -120,14 +119,14 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 - (void)_loadALAssetWithIdentifier:(id)imageIdentifier URL:(NSURL *)assetURL completion:(void (^)(UIImage *image, NSError *error))completionBlock;
 
 /**
-  @abstract Loads the image corresponding to the given assetURL from the Photos framework.
+  @abstract Loads the image corresponding to the given image request from the Photos framework.
   @param imageIdentifier The identifier for the image to be loaded. May not be nil.
-  @param assetURL The photos framework URL (e.g., "ph://identifier") of the image to load, from PHAsset. May not be nil.
+  @param request The photos image request to load. May not be nil.
   @param completionBlock The block to be performed when the image has been loaded, if possible. May not be nil.
     @param image The image that was loaded. May be nil if no image could be downloaded.
     @param error An error describing why the load failed, if it failed; nil otherwise.
  */
-- (void)_loadPHAssetWithIdentifier:(id)imageIdentifier URL:(NSURL *)assetURL completion:(void (^)(UIImage *image, NSError *error))completionBlock;
+- (void)_loadPHAssetWithRequest:(ASPhotosImageRequest *)request identifier:(id)imageIdentifier completion:(void (^)(UIImage *image, NSError *error))completionBlock;
 
 /**
  @abstract Downloads the image corresponding to the given imageIdentifier from the given URL.
@@ -456,8 +455,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     }];
   }
   // Likewise, if it's a iOS 8 Photo asset, we need to fetch it accordingly.
-  else if (AS_AT_LEAST_IOS8 && [[nextImageURL scheme] isEqualToString:kPHAssetURLScheme]) {
-    [self _loadPHAssetWithIdentifier:nextImageIdentifier URL:nextImageURL completion:^(UIImage *image, NSError *error) {
+  else if (ASPhotosImageRequest *request = nextImageURL.asyncdisplaykit_photosRequest) {
+    [self _loadPHAssetWithRequest:request identifier:nextImageIdentifier completion:^(UIImage *image, NSError *error) {
       ASMultiplexImageNodeCLogDebug(@"[%p] Acquired next image (%@) from Photos Framework", weakSelf, nextImageIdentifier);
       finishedLoadingBlock(image, nextImageIdentifier, error);
     }];
@@ -511,17 +510,15 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   }];
 }
 
-- (void)_loadPHAssetWithIdentifier:(id)imageIdentifier URL:(NSURL *)assetURL completion:(void (^)(UIImage *image, NSError *error))completionBlock
+- (void)_loadPHAssetWithRequest:(ASPhotosImageRequest *)request identifier:(id)imageIdentifier completion:(void (^)(UIImage *image, NSError *error))completionBlock
 {
   ASDisplayNodeAssert(AS_AT_LEAST_IOS8, @"PhotosKit is unavailable on iOS 7.");
   ASDisplayNodeAssertNotNil(imageIdentifier, @"imageIdentifier is required");
-  ASDisplayNodeAssertNotNil(assetURL, @"assetURL is required");
+  ASDisplayNodeAssertNotNil(request, @"request is required");
   ASDisplayNodeAssertNotNil(completionBlock, @"completionBlock is required");
 
   // Get the PHAsset itself.
-  ASDisplayNodeAssertTrue([[assetURL absoluteString] hasPrefix:kPHAssetURLPrefix]);
-  NSString *assetIdentifier = [[assetURL absoluteString] substringFromIndex:[kPHAssetURLPrefix length]];
-  PHFetchResult *assetFetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:@[assetIdentifier] options:nil];
+  PHFetchResult *assetFetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:@[request.assetIdentifier] options:nil];
   if ([assetFetchResult count] == 0) {
     // Error.
     completionBlock(nil, nil);
@@ -531,15 +528,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   // Get the best image we can.
   PHAsset *imageAsset = [assetFetchResult firstObject];
 
-  PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
-  requestOptions.version = PHImageRequestOptionsVersionCurrent;
-  requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-  requestOptions.resizeMode = PHImageRequestOptionsResizeModeNone;
-
   [[PHImageManager defaultManager] requestImageForAsset:imageAsset
-                                             targetSize:CGSizeMake(2048.0, 2048.0) // Ideally we would use PHImageManagerMaximumSize and kill the options, but we get back nil when requesting images of video assets. rdar://18447788
-                                            contentMode:PHImageContentModeDefault
-                                                options:requestOptions
+                                             targetSize:request.targetSize
+                                            contentMode:request.contentMode
+                                                options:request.options
                                           resultHandler:^(UIImage *image, NSDictionary *info) {
                                             completionBlock(image, info[PHImageErrorKey]);
                                           }];

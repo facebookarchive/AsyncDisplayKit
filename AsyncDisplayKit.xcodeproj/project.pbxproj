@@ -374,9 +374,10 @@
 		B350625D1B0111740018CF92 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943141A1575670030A7D0 /* Photos.framework */; };
 		B350625E1B0111780018CF92 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
-		CC7FD9DE1BB5E962005CCB2B /* ASPhotosImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosImageRequest.h */; settings = {ASSET_TAGS = (); }; };
+		CC7FD9DE1BB5E962005CCB2B /* ASPhotosImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC7FD9DF1BB5E962005CCB2B /* ASPhotosImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosImageRequest.m */; settings = {ASSET_TAGS = (); }; };
 		CC7FD9E11BB5F750005CCB2B /* ASPhotosImageRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9E01BB5F750005CCB2B /* ASPhotosImageRequestTests.m */; settings = {ASSET_TAGS = (); }; };
+		CC7FD9E21BB603FF005CCB2B /* ASPhotosImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
@@ -1218,6 +1219,7 @@
 				9C8221961BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */,
 				9C49C3701B853961000B0DD5 /* ASStackLayoutable.h in Headers */,
 				34EFC7701B701CFA00AD841F /* ASStackLayoutDefines.h in Headers */,
+				CC7FD9E21BB603FF005CCB2B /* ASPhotosImageRequest.h in Headers */,
 				34EFC7711B701CFF00AD841F /* ASStackLayoutSpec.h in Headers */,
 				2767E9411BB19BD600EA9B77 /* ASViewController.h in Headers */,
 				044284FE1BAA387800D16268 /* ASStackLayoutSpecUtilities.h in Headers */,
