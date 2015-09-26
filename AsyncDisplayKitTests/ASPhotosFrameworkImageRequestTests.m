@@ -1,5 +1,5 @@
 //
-//  ASPhotosImageRequestTests.m
+//  ASPhotosFrameworkImageRequestTests.m
 //  AsyncDisplayKit
 //
 //  Created by Adlai Holler on 9/25/15.
@@ -7,21 +7,21 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ASPhotosImageRequest.h"
+#import "ASPhotosFrameworkImageRequest.h"
 
 static NSString *const kTestAssetID = @"testAssetID";
 
-@interface ASPhotosImageRequestTests : XCTestCase
+@interface ASPhotosFrameworkImageRequestTests : XCTestCase
 
 @end
 
-@implementation ASPhotosImageRequestTests
+@implementation ASPhotosFrameworkImageRequestTests
 
 #pragma mark Example Data
 
-+ (ASPhotosImageRequest *)exampleImageRequest
++ (ASPhotosFrameworkImageRequest *)exampleImageRequest
 {
-  ASPhotosImageRequest *req = [[ASPhotosImageRequest alloc] initWithAssetIdentifier:kTestAssetID];
+  ASPhotosFrameworkImageRequest *req = [[ASPhotosFrameworkImageRequest alloc] initWithAssetIdentifier:kTestAssetID];
   req.options.networkAccessAllowed = YES;
   req.options.normalizedCropRect = CGRectMake(0.2, 0.1, 0.6, 0.8);
   req.targetSize = CGSizeMake(1024, 1536);
@@ -51,8 +51,8 @@ static NSString *const kTestAssetID = @"testAssetID";
 
 - (void)testThatCopyingWorks
 {
-  ASPhotosImageRequest *example = [self.class exampleImageRequest];
-  ASPhotosImageRequest *copy = [[self.class exampleImageRequest] copy];
+  ASPhotosFrameworkImageRequest *example = [self.class exampleImageRequest];
+  ASPhotosFrameworkImageRequest *copy = [[self.class exampleImageRequest] copy];
   XCTAssertEqualObjects(example, copy);
 }
 

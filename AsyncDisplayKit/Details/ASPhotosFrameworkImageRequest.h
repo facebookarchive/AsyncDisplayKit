@@ -1,5 +1,5 @@
 //
-//  ASPhotosImageRequest.h
+//  ASPhotosFrameworkImageRequest.h
 //  AsyncDisplayKit
 //
 //  Created by Adlai Holler on 9/25/15.
@@ -14,17 +14,17 @@
 extern NSString *const ASPhotosURLScheme;
 
 /**
- @abstract Use ASPhotosImageRequest to encapsulate all the information needed to request an image from
+ @abstract Use ASPhotosFrameworkImageRequest to encapsulate all the information needed to request an image from
  the Photos framework and store it in a URL.
  */
-@interface ASPhotosImageRequest : NSObject <NSCopying>
+@interface ASPhotosFrameworkImageRequest : NSObject <NSCopying>
 
 - (instancetype)initWithAssetIdentifier:(NSString *)assetIdentifier NS_DESIGNATED_INITIALIZER;
 
 /**
  @return A new image request deserialized from `url`, or nil if `url` is not a valid photos URL.
  */
-+ (/*nullable*/ ASPhotosImageRequest *)requestWithURL:(NSURL *)url;
++ (/*nullable*/ ASPhotosFrameworkImageRequest *)requestWithURL:(NSURL *)url;
 
 /**
  @abstract The asset identifier for this image request provided during initialization.
@@ -47,7 +47,9 @@ extern NSString *const ASPhotosURLScheme;
  @abstract The options specified for this request. Default value is the result of `[PHImageRequestOptions new]`.
  
  @discussion Some properties of this object are ignored when converting this request into a URL.
- As of iOS SDK 9.0, these properties are `progressHandler`, `synchronous`, and `deliveryMode`.
+ As of iOS SDK 9.0, these properties are `progressHandler` and `synchronous`.
+ Note that PHImageRequestOptionsDeliveryModeOpportunistic is not recommended when using ASMultiplexImageNode, 
+ because it sends multiple images and only the first will be accepted.
  */
 @property (nonatomic, strong) PHImageRequestOptions *options;
 
@@ -66,9 +68,9 @@ extern NSString *const ASPhotosURLScheme;
 @interface NSURL (ASPhotosRequestConverting)
 
 /**
- @abstract A convenience function that calls `[ASPhotosImageRequest requestWithURL:self]`.
+ @abstract A convenience function that calls `[ASPhotosFrameworkImageRequest requestWithURL:self]`.
  */
-- (/*nullable*/ ASPhotosImageRequest *)asyncdisplaykit_photosRequest;
+- (/*nullable*/ ASPhotosFrameworkImageRequest *)asyncdisplaykit_photosRequest;
 
 @end
 

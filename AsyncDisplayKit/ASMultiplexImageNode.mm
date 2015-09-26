@@ -18,7 +18,7 @@
 #import "ASBaseDefines.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASLog.h"
-#import "ASPhotosImageRequest.h"
+#import "ASPhotosFrameworkImageRequest.h"
 
 #if !AS_IOS8_SDK_OR_LATER
 #error ASMultiplexImageNode can be used on iOS 7, but must be linked against the iOS 8 SDK.
@@ -126,7 +126,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     @param image The image that was loaded. May be nil if no image could be downloaded.
     @param error An error describing why the load failed, if it failed; nil otherwise.
  */
-- (void)_loadPHAssetWithRequest:(ASPhotosImageRequest *)request identifier:(id)imageIdentifier completion:(void (^)(UIImage *image, NSError *error))completionBlock;
+- (void)_loadPHAssetWithRequest:(ASPhotosFrameworkImageRequest *)request identifier:(id)imageIdentifier completion:(void (^)(UIImage *image, NSError *error))completionBlock;
 
 /**
  @abstract Downloads the image corresponding to the given imageIdentifier from the given URL.
@@ -455,7 +455,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     }];
   }
   // Likewise, if it's a iOS 8 Photo asset, we need to fetch it accordingly.
-  else if (ASPhotosImageRequest *request = nextImageURL.asyncdisplaykit_photosRequest) {
+  else if (ASPhotosFrameworkImageRequest *request = nextImageURL.asyncdisplaykit_photosRequest) {
     [self _loadPHAssetWithRequest:request identifier:nextImageIdentifier completion:^(UIImage *image, NSError *error) {
       ASMultiplexImageNodeCLogDebug(@"[%p] Acquired next image (%@) from Photos Framework", weakSelf, nextImageIdentifier);
       finishedLoadingBlock(image, nextImageIdentifier, error);
@@ -510,7 +510,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   }];
 }
 
-- (void)_loadPHAssetWithRequest:(ASPhotosImageRequest *)request identifier:(id)imageIdentifier completion:(void (^)(UIImage *image, NSError *error))completionBlock
+- (void)_loadPHAssetWithRequest:(ASPhotosFrameworkImageRequest *)request identifier:(id)imageIdentifier completion:(void (^)(UIImage *image, NSError *error))completionBlock
 {
   ASDisplayNodeAssert(AS_AT_LEAST_IOS8, @"PhotosKit is unavailable on iOS 7.");
   ASDisplayNodeAssertNotNil(imageIdentifier, @"imageIdentifier is required");
