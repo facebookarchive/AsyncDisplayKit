@@ -40,9 +40,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 @property (atomic, assign) NSUInteger batchUpdateCounter;
 
-/// Returns nodes that can be queried externally. _externalCompletedNodes is used if available, _completedNodes otherwise.
-- (NSMutableArray *)externalCompletedNodes;
-
 @end
 
 @implementation ASDataController
@@ -628,26 +625,26 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSUInteger)numberOfSections
 {
   ASDisplayNodeAssertMainThread();
-  return [[self externalCompletedNodes] count];
+  return [[self completedNodes] count];
 }
 
 - (NSUInteger)numberOfRowsInSection:(NSUInteger)section
 {
   ASDisplayNodeAssertMainThread();
-  return [[self externalCompletedNodes][section] count];
+  return [[self completedNodes][section] count];
 }
 
 - (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
-  return [self externalCompletedNodes][indexPath.section][indexPath.row];
+  return [self completedNodes][indexPath.section][indexPath.row];
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
 {
   ASDisplayNodeAssertMainThread();
 
-  NSArray *nodes = [self externalCompletedNodes];
+  NSArray *nodes = [self completedNodes];
   NSUInteger numberOfNodes = nodes.count;
   
   // Loop through each section to look for the cellNode
@@ -665,17 +662,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
-  return ASFindElementsInMultidimensionalArrayAtIndexPaths([self externalCompletedNodes], [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
+  return ASFindElementsInMultidimensionalArrayAtIndexPaths((NSMutableArray *)[self completedNodes], [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
 }
 
+/// Returns nodes that can be queried externally. _externalCompletedNodes is used if available, _completedNodes otherwise.
 - (NSArray *)completedNodes
 {
   ASDisplayNodeAssertMainThread();
-  return [self externalCompletedNodes];
-}
-
-- (NSMutableArray *)externalCompletedNodes
-{
   return _externalCompletedNodes != nil ? _externalCompletedNodes : _completedNodes;
 }
 
