@@ -540,7 +540,13 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
                                               contentMode:request.contentMode
                                                   options:options
                                             resultHandler:^(UIImage *image, NSDictionary *info) {
-                                              completionBlock(image, info[PHImageErrorKey]);
+                                              if (NSThread.isMainThread) {
+                                                dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+                                                  completionBlock(image, info[PHImageErrorKey]);
+                                                });
+                                              } else {
+                                                completionBlock(image, info[PHImageErrorKey]);
+                                              }
                                             }];
   });
 }
