@@ -528,7 +528,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   // Get the best image we can.
   PHAsset *imageAsset = [assetFetchResult firstObject];
   PHImageRequestOptions *options = [request.options copy];
-  options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+  if (options.deliveryMode == PHImageRequestOptionsDeliveryModeOpportunistic) {
+    options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+  }
 
   [[PHImageManager defaultManager] requestImageForAsset:imageAsset
                                              targetSize:request.targetSize

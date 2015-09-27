@@ -48,8 +48,8 @@ extern NSString *const ASPhotosURLScheme;
  
  @discussion Some properties of this object are ignored when converting this request into a URL.
  As of iOS SDK 9.0, these properties are `progressHandler` and `synchronous`.
- Note that PHImageRequestOptionsDeliveryModeOpportunistic is not recommended when using ASMultiplexImageNode, 
- because it sends multiple images and only the first will be accepted.
+ Note that ASMultiplexImageNode does not support PHImageRequestOptionsDeliveryModeOpportunistic
+ because it sends multiple images, and that mode will be replaced by PHImageRequestOptionsDeliveryModeHighQualityFormat
  */
 @property (nonatomic, strong) PHImageRequestOptions *options;
 
