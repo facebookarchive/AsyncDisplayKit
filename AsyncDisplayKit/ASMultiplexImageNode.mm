@@ -516,29 +516,33 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   ASDisplayNodeAssertNotNil(imageIdentifier, @"imageIdentifier is required");
   ASDisplayNodeAssertNotNil(request, @"request is required");
   ASDisplayNodeAssertNotNil(completionBlock, @"completionBlock is required");
-
-  // Get the PHAsset itself.
-  PHFetchResult *assetFetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:@[request.assetIdentifier] options:nil];
-  if ([assetFetchResult count] == 0) {
-    // Error.
-    completionBlock(nil, nil);
-    return;
-  }
-
-  // Get the best image we can.
-  PHAsset *imageAsset = [assetFetchResult firstObject];
-  PHImageRequestOptions *options = [request.options copy];
-  if (options.deliveryMode == PHImageRequestOptionsDeliveryModeOpportunistic) {
-    options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-  }
-
-  [[PHImageManager defaultManager] requestImageForAsset:imageAsset
-                                             targetSize:request.targetSize
-                                            contentMode:request.contentMode
-                                                options:options
-                                          resultHandler:^(UIImage *image, NSDictionary *info) {
-                                            completionBlock(image, info[PHImageErrorKey]);
-                                          }];
+  
+  // This is sometimes called on main but there's no reason to stay there
+  dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+    // Get the PHAsset itself.
+    PHFetchResult *assetFetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:@[request.assetIdentifier] options:nil];
+    if ([assetFetchResult count] == 0) {
+      // Error.
+      completionBlock(nil, nil);
+      return;
+    }
+    
+    PHAsset *imageAsset = [assetFetchResult firstObject];
+    PHImageRequestOptions *options = [request.options copy];
+    if (options.deliveryMode == PHImageRequestOptionsDeliveryModeHighQualityFormat) {
+      // Without this flag the result will be delivered on the main queue, which is pointless
+      // But synchronous -> HighQualityFormat so we only use it if high quality format is specified
+      options.synchronous = YES;
+    }
+    
+    [[PHImageManager defaultManager] requestImageForAsset:imageAsset
+                                               targetSize:request.targetSize
+                                              contentMode:request.contentMode
+                                                  options:options
+                                            resultHandler:^(UIImage *image, NSDictionary *info) {
+                                              completionBlock(image, info[PHImageErrorKey]);
+                                            }];
+  });
 }
 
 - (void)_fetchImageWithIdentifierFromCache:(id)imageIdentifier URL:(NSURL *)imageURL completion:(void (^)(UIImage *image))completionBlock
