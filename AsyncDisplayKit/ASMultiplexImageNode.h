@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASMultiplexImageNodeDelegate;
 @protocol ASMultiplexImageNodeDataSource;
 
-typedef __kindof NSObject<NSCopying> * ASImageIdentifier;
+typedef id<NSCopying> ASImageIdentifier;
 
 extern NSString *const ASMultiplexImageNodeErrorDomain;
 
