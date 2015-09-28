@@ -18,6 +18,9 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
+// FIXME: Temporary nonsense import until method names are finalized and exposed
+#import "ASDisplayNode+Subclasses.h"
+
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
@@ -568,6 +571,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)]) {
     [_asyncDelegate tableView:self willDisplayNodeForRowAtIndexPath:indexPath];
+  }
+
+  ASCellNode *cellNode = [self nodeForRowAtIndexPath:indexPath];
+  if (cellNode.neverShowPlaceholders) {
+    [cellNode recursivelyEnsureDisplay];
   }
 }
 

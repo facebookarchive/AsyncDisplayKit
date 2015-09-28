@@ -17,6 +17,9 @@
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "ASInternalHelpers.h"
 
+// FIXME: Temporary nonsense import until method names are finalized and exposed
+#import "ASDisplayNode+Subclasses.h"
+
 const static NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 
 
@@ -315,6 +318,16 @@ static BOOL _isInterceptedSelector(SEL sel)
   return [[_dataController nodeAtIndexPath:indexPath] calculatedSize];
 }
 
+- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController nodeAtIndexPath:indexPath];
+}
+
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
+{
+  return [_dataController indexPathForNode:cellNode];
+}
+
 - (NSArray *)visibleNodes
 {
   NSArray *indexPaths = [self indexPathsForVisibleItems];
@@ -390,11 +403,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
   [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
-}
-
-- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  return [_dataController nodeAtIndexPath:indexPath];
 }
 
 #pragma mark -
@@ -489,6 +497,11 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)]) {
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
+  }
+  
+  ASCellNode *cellNode = [self nodeForItemAtIndexPath:indexPath];
+  if (cellNode.neverShowPlaceholders) {
+    [cellNode recursivelyEnsureDisplay];
   }
 }
 

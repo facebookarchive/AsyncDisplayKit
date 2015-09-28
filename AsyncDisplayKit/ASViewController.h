@@ -13,7 +13,11 @@
 
 @property (nonatomic, strong, readonly) ASDisplayNode *node;
 
-//TODO Use nonnull annotation late on. Travis doesn't recognize it (yet).
+// AsyncDisplayKit 2.0 BETA: This property is still being tested, but it allows
+// blocking as a view controller becomes visible to ensure no placeholders flash onscreen.
+// Refer to examples/SynchronousConcurrency, AsyncViewController.m
+@property (nonatomic, assign) BOOL neverShowPlaceholders;
+
 - (instancetype)initWithNode:(ASDisplayNode *)node;
 
 @end

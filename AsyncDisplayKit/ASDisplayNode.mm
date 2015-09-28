@@ -14,6 +14,7 @@
 #import <objc/runtime.h>
 
 #import "_ASAsyncTransaction.h"
+#import "_ASAsyncTransactionContainer+Private.h"
 #import "_ASPendingState.h"
 #import "_ASDisplayView.h"
 #import "_ASScopeTimer.h"
@@ -1415,6 +1416,68 @@ static NSInteger incrementIfFound(NSInteger i) {
   [_placeholderLayer removeFromSuperlayer];
 }
 
+void recursivelyEnsureDisplayForLayer(CALayer *layer)
+{
+  // This recursion must handle layers in various states:
+  // 1. Just added to hierarchy, CA hasn't yet called -display
+  // 2. Previously in a hierarchy (such as a working window owned by an Intelligent Preloading class, like ASTableView / ASCollectionView / ASViewController)
+  // 3. Has no content to display at all
+  // Specifically for case 1), we need to explicitly trigger a -display call now.
+  // Otherwise, there is no opportunity to block the main thread after CoreAnimation's transaction commit
+  // (even a runloop observer at a late call order will not stop the next frame from compositing, showing placeholders).
+  
+  ASDisplayNode *node = [layer asyncdisplaykit_node];
+  if (!layer.contents && [node _implementsDisplay]) {
+    // For layers that do get displayed here, this immediately kicks off the work on the concurrent -[_ASDisplayLayer displayQueue].
+    // At the same time, it creates an associated _ASAsyncTransaction, which we can use to block on display completion.  See ASDisplayNode+AsyncDisplay.mm.
+    [layer displayIfNeeded];
+  }
+  
+  // Kick off the recursion first, so that all necessary display calls are sent and the displayQueue is full of parallelizable work.
+  for (CALayer *sublayer in layer.sublayers) {
+    recursivelyEnsureDisplayForLayer(sublayer);
+  }
+  
+  // As the recursion unwinds, verify each transaction is complete and block if it is not.
+  // While blocking on one transaction, others may be completing concurrently, so it doesn't matter which blocks first.
+  BOOL waitUntilComplete = (!node.shouldBypassEnsureDisplay);
+  if (waitUntilComplete) {
+    for (_ASAsyncTransaction *transaction in [layer.asyncdisplaykit_asyncLayerTransactions copy]) {
+      // Even if none of the layers have had a chance to start display earlier, they will still be allowed to saturate a multicore CPU while blocking main.
+      // This significantly reduces time on the main thread relative to UIKit.
+      [transaction waitUntilComplete];
+    }
+  }
+}
+
+- (void)recursivelyEnsureDisplay
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(self.isNodeLoaded, @"Node must have layer or view loaded to use -recursivelyEnsureDisplay");
+  ASDisplayNodeAssert(self.inHierarchy && (self.isLayerBacked || self.view.window != nil), @"Node must be in a hierarchy to use -recursivelyEnsureDisplay");
+  
+  CALayer *layer = self.layer;
+  // -layoutIfNeeded is recursive, and even walks up to superlayers to check if they need layout,
+  // so we should call it outside of starting the recursion below.  If our own layer is not marked
+  // as dirty, we can assume layout has run on this subtree before.
+  if ([layer needsLayout]) {
+    [layer layoutIfNeeded];
+  }
+  recursivelyEnsureDisplayForLayer(layer);
+}
+
+- (void)setShouldBypassEnsureDisplay:(BOOL)shouldBypassEnsureDisplay
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _flags.shouldBypassEnsureDisplay = shouldBypassEnsureDisplay;
+}
+
+- (BOOL)shouldBypassEnsureDisplay
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _flags.shouldBypassEnsureDisplay;
+}
+
 #pragma mark - For Subclasses
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
@@ -1484,6 +1547,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDN::MutexLocker l(_propertyLock);
   return _preferredFrameSize;
 }
+
 - (UIImage *)placeholderImage
 {
   return nil;
