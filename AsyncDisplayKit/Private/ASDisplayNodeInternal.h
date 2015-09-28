@@ -80,6 +80,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
     unsigned layerBacked:1;
     unsigned displaysAsynchronously:1;
     unsigned shouldRasterizeDescendants:1;
+    unsigned shouldBypassEnsureDisplay:1;
     unsigned displaySuspended:1;
 
     // whether custom drawing is enabled
