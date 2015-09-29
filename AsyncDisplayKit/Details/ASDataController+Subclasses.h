@@ -25,6 +25,9 @@
  */
 - (void)accessDataSourceWithBlock:(dispatch_block_t)block;
 
-- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))block;
+/**
+ * Measure and layout the given nodes in optimized batches, constraining each to a given size.
+ */
+- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
 
 @end

@@ -17,7 +17,7 @@
 @class ASCellNode;
 @protocol ASCollectionViewDataSource;
 @protocol ASCollectionViewDelegate;
-
+@protocol ASCollectionViewLayoutInspecting;
 
 /**
  * Node-based collection view.
@@ -81,6 +81,13 @@
 @property (nonatomic, assign) CGFloat leadingScreensForBatching;
 
 /**
+ * Optional introspection object for the collection view's layout.
+ *
+ * TODO: Discuss more about this delegate
+ */
+@property (nonatomic, weak) id<ASCollectionViewLayoutInspecting> layoutDelegate;
+
+/**
  *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread. 
  *  The asyncDataSource must be updated to reflect the changes before the update block completes.
  *
@@ -119,7 +126,7 @@
  */
 - (void)reloadData;
 
-- (void)registerSupplementaryViewOfKind:(NSString *)elementKind;
+- (void)registerSupplementaryNodeOfKind:(NSString *)elementKind;
 
 /**
  * Inserts one or more sections.

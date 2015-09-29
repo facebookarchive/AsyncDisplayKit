@@ -16,6 +16,7 @@
 #import "ASBatchFetching.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "ASInternalHelpers.h"
+#import "ASCollectionViewFlowLayoutInspector.h"
 
 // FIXME: Temporary nonsense import until method names are finalized and exposed
 #import "ASDisplayNode+Subclasses.h"
@@ -137,6 +138,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASCollectionDataController *_dataController;
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
+  ASCollectionViewFlowLayoutInspector *_flowLayoutInspector;
 
   BOOL _performingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
@@ -202,7 +204,11 @@ static BOOL _isInterceptedSelector(SEL sel)
   _dataController = [[ASCollectionDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
   _dataController.delegate = _rangeController;
   _dataController.dataSource = self;
-
+  
+  _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] init];
+  // TODO: Implement a better path of falling-back to a flow layout
+  _flowLayoutInspector.layout = (UICollectionViewFlowLayout *)layout;
+  
   _batchContext = [[ASBatchContext alloc] init];
 
   _leadingScreensForBatching = 1.0;
@@ -377,7 +383,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   [self performBatchAnimated:YES updates:updates completion:completion];
 }
 
-- (void)registerSupplementaryViewOfKind:(NSString *)elementKind
+- (void)registerSupplementaryNodeOfKind:(NSString *)elementKind
 {
   [self registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:elementKind
                                             withReuseIdentifier:[self __reuseIdentifierForKind:elementKind]];
@@ -675,6 +681,11 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 
   return constrainedSize;
+}
+
+- (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  return [self.layoutDelegate collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section

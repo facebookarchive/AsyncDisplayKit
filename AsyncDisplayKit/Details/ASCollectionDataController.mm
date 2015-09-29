@@ -14,6 +14,12 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASDataController+Subclasses.h"
 
+@interface ASCollectionDataController ()
+
+- (id<ASCollectionDataControllerSource>)collectionDataSource;
+
+@end
+
 @implementation ASCollectionDataController {
   NSMutableDictionary *_completedSupplementaryNodes;
   NSMutableDictionary *_editingSupplementaryNodes;
@@ -24,21 +30,23 @@
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
     [self accessDataSourceWithBlock:^{
-      NSArray *elementKinds = [self.collectionDataSource supplementaryKindsInDataController:self];
+      NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
       [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL * _Nonnull stop) {
         _completedSupplementaryNodes[kind] = [NSMutableArray array];
         _editingSupplementaryNodes[kind] = [NSMutableArray array];
         
         NSMutableArray *indexPaths = [NSMutableArray array];
         NSMutableArray *nodes = [NSMutableArray array];
-        [self _populateAllNodesOfKind:kind withMutableNodes:nodes mutableIndexPaths:indexPaths];
-        [self batchLayoutNodes:nodes atIndexPaths:indexPaths completion:nil];
+        [self _populateSupplementaryNodesOfKind:kind withMutableNodes:nodes mutableIndexPaths:indexPaths];
+        [self batchLayoutNodes:nodes atIndexPaths:indexPaths constrainedSize:^ASSizeRange(NSIndexPath *indexPath) {
+          return [self.collectionDataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+        } completion:nil];
       }];
     }];
   }];
 }
        
-- (void)_populateAllNodesOfKind:(NSString *)kind withMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
+- (void)_populateSupplementaryNodesOfKind:(NSString *)kind withMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
 {
   NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryKind:kind];
   for (NSUInteger i = 0; i < sectionCount; i++) {
@@ -65,6 +73,7 @@
 
 #pragma mark - Internal Data Querying
 
+// TODO: Reduce code duplication by exposing generic insert/delete helpers from ASDataController
 - (void)_insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths
 {
   if (indexPaths.count == 0)
@@ -78,6 +87,7 @@
   });
 }
 
+// TODO: Reduce code duplication by exposing generic insert/delete helpers from ASDataController
 - (void)_deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths
 {
   if (indexPaths.count == 0)

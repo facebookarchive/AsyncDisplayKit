@@ -39,8 +39,8 @@
   _collectionView.asyncDelegate = self;
   _collectionView.backgroundColor = [UIColor whiteColor];
   
-  [_collectionView registerSupplementaryViewOfKind:UICollectionElementKindSectionHeader];
-  [_collectionView registerSupplementaryViewOfKind:UICollectionElementKindSectionFooter];
+  [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+  [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
   
   return self;
 }

@@ -113,7 +113,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
-- (void)_layoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *, NSArray *))block
+- (void)_layoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
 {
   ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"Cell node layout must be initiated from edit transaction queue");
   
@@ -129,7 +129,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     for (NSUInteger k = j; k < j + batchCount; k++) {
       ASCellNode *node = nodes[k];
       if (!node.isNodeLoaded) {
-        nodeBoundSizes[k] = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[k]];
+        nodeBoundSizes[k] = constraintedSizeBlock(indexPaths[k]);
       }
     }
     
@@ -151,10 +151,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   dispatch_group_wait(layoutGroup, DISPATCH_TIME_FOREVER);
   free(nodeBoundSizes);
 
-  block(nodes, indexPaths);
+  completionBlock(nodes, indexPaths);
 }
 
-- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))block
+- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
 {
   NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
   
@@ -164,14 +164,15 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     NSArray *batchedIndexPaths = [indexPaths subarrayWithRange:batchedRange];
     NSArray *batchedNodes = [nodes subarrayWithRange:batchedRange];
     
-    [self _layoutNodes:batchedNodes atIndexPaths:batchedIndexPaths completion:block];
+    [self _layoutNodes:batchedNodes atIndexPaths:batchedIndexPaths constrainedSize:constraintedSizeBlock completion:completionBlock];
   }
 }
 
 - (void)_batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  
-  [self batchLayoutNodes:nodes atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
+  [self batchLayoutNodes:nodes atIndexPaths:indexPaths constrainedSize:^ASSizeRange(NSIndexPath *indexPath) {
+    return [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
+  } completion:^(NSArray *nodes, NSArray *indexPaths) {
     // Insert finished nodes into data storage
     [self _insertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   }];
