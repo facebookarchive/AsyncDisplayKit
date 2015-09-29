@@ -437,11 +437,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
-- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  return [_dataController nodeAtIndexPath:indexPath];
-}
-
 - (NSString *)__reuseIdentifierForKind:(NSString *)kind
 {
   return [NSString stringWithFormat:@"_ASCollectionSupplementaryView_%@", kind];
@@ -700,7 +695,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryKind:(NSString *)kind;
 {
-  return [self.layoutDelegate collectionView:self numerOfSectionsForSupplementaryKind:kind];
+  return [self.layoutDelegate collectionView:self numberOfSectionsForSupplementaryKind:kind];
 }
 
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController {
