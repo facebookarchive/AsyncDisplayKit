@@ -70,3 +70,12 @@ CGFloat ASRoundPixelValue(CGFloat f)
 {
   return roundf(f * ASScreenScale()) / ASScreenScale();
 }
+
+@implementation NSIndexPath (ASInverseComparison)
+
+- (NSComparisonResult)as_inverseCompare:(NSIndexPath *)otherIndexPath
+{
+  return [otherIndexPath compare:self];
+}
+
+@end
