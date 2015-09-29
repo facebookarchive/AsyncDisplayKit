@@ -18,6 +18,10 @@
   return ASSizeRangeMake(CGSizeZero, CGSizeMake(FLT_MAX, FLT_MAX));
 }
 
+- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryKind:(NSString *)kind {
+  return self.collectionView.numberOfSections;
+}
+
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
   NSUInteger count = 0;

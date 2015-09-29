@@ -683,14 +683,24 @@ static BOOL _isInterceptedSelector(SEL sel)
   return constrainedSize;
 }
 
+- (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section
+{
+  return [_asyncDataSource collectionView:self numberOfItemsInSection:section];
+}
+
 - (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   return [self.layoutDelegate collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
 }
 
-- (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section
+- (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
-  return [_asyncDataSource collectionView:self numberOfItemsInSection:section];
+  return [self.layoutDelegate collectionView:self supplementaryViewsOfKind:kind inSection:section];
+}
+
+- (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryKind:(NSString *)kind;
+{
+  return [self.layoutDelegate collectionView:self numerOfSectionsForSupplementaryKind:kind];
 }
 
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController {

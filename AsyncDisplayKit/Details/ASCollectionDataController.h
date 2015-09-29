@@ -28,7 +28,7 @@
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryKind:(NSString *)kind;
 
-- (NSUInteger)dataController:(ASCollectionDataController *)dataController rowsInSection:(NSUInteger)section supplementaryKind:(NSString *)kind;
+- (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section;
 
 @end
 

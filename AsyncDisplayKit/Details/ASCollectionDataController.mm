@@ -51,7 +51,7 @@
   NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryKind:kind];
   for (NSUInteger i = 0; i < sectionCount; i++) {
     NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:i];
-    NSUInteger rowCount = [self.collectionDataSource dataController:self rowsInSection:i supplementaryKind:kind];
+    NSUInteger rowCount = [self.collectionDataSource dataController:self supplementaryViewsOfKind:kind inSection:i];
     for (NSUInteger j = 0; j < rowCount; j++) {
       NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:j];
       [indexPaths addObject:indexPath];
