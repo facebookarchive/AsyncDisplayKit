@@ -205,10 +205,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   _dataController.delegate = _rangeController;
   _dataController.dataSource = self;
   
-  _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] init];
-  // TODO: Implement a better path of falling-back to a flow layout
-  _flowLayoutInspector.layout = (UICollectionViewFlowLayout *)layout;
-  
   _batchContext = [[ASBatchContext alloc] init];
 
   _leadingScreensForBatching = 1.0;
@@ -228,6 +224,15 @@ static BOOL _isInterceptedSelector(SEL sel)
   // and should not trigger a relayout.
   _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
   
+  // Register the default layout inspector delegate for flow layouts, custom layouts
+  // will need to roll their own ASCollectionViewLayoutInspecting implementation.
+  if ([layout asdk_isFlowLayout]) {
+    _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] init];
+    _flowLayoutInspector.layout = (UICollectionViewFlowLayout *)layout;
+    _flowLayoutInspector.collectionView = self;
+    _layoutDelegate = _flowLayoutInspector;
+  }
+
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
