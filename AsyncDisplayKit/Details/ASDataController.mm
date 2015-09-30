@@ -113,6 +113,33 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
+- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
+{
+  NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
+  
+  // Processing in batches
+  for (NSUInteger i = 0; i < indexPaths.count; i += blockSize) {
+    NSRange batchedRange = NSMakeRange(i, MIN(indexPaths.count - i, blockSize));
+    NSArray *batchedIndexPaths = [indexPaths subarrayWithRange:batchedRange];
+    NSArray *batchedNodes = [nodes subarrayWithRange:batchedRange];
+    
+    [self _layoutNodes:batchedNodes atIndexPaths:batchedIndexPaths constrainedSize:constraintedSizeBlock completion:completionBlock];
+  }
+}
+
+/**
+ * Measures and defines the layout for each node in optimized batches on an editing queue, inserting the results into the backing store.
+ */
+- (void)_batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  [self batchLayoutNodes:nodes atIndexPaths:indexPaths constrainedSize:^ASSizeRange(NSIndexPath *indexPath) {
+    return [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
+  } completion:^(NSArray *nodes, NSArray *indexPaths) {
+    // Insert finished nodes into data storage
+    [self _insertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+  }];
+}
+
 - (void)_layoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
 {
   ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"Cell node layout must be initiated from edit transaction queue");
@@ -154,32 +181,14 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   completionBlock(nodes, indexPaths);
 }
 
-- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
-{
-  NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
-  
-  // Processing in batches
-  for (NSUInteger i = 0; i < indexPaths.count; i += blockSize) {
-    NSRange batchedRange = NSMakeRange(i, MIN(indexPaths.count - i, blockSize));
-    NSArray *batchedIndexPaths = [indexPaths subarrayWithRange:batchedRange];
-    NSArray *batchedNodes = [nodes subarrayWithRange:batchedRange];
-    
-    [self _layoutNodes:batchedNodes atIndexPaths:batchedIndexPaths constrainedSize:constraintedSizeBlock completion:completionBlock];
-  }
-}
-
-- (void)_batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  [self batchLayoutNodes:nodes atIndexPaths:indexPaths constrainedSize:^ASSizeRange(NSIndexPath *indexPath) {
-    return [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
-  } completion:^(NSArray *nodes, NSArray *indexPaths) {
-    // Insert finished nodes into data storage
-    [self _insertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
-  }];
-}
-
 #pragma mark - Internal Data Querying + Editing
 
+/**
+ * Inserts the specified nodes into the given index paths and notifies the delegate of newly inserted nodes.
+ *
+ * @discussion Nodes are first inserted into the editing store, then the completed store is replaced by a deep copy
+ * of the editing nodes. The delegate is invoked on the main thread.
+ */
 - (void)_insertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   if (indexPaths.count == 0)
@@ -196,6 +205,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   });
 }
 
+/**
+ * Removes the specified nodes at the given index paths and notifies the delegate of the nodes removed.
+ *
+ * @discussion Nodes are first removed from the editing store then removed from the completed store on the main thread.
+ * Once the backing stores are consistent, the delegate is invoked on the main thread.
+ */
 - (void)_deleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   if (indexPaths.count == 0)
@@ -211,6 +226,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   });
 }
 
+/**
+ * Inserts sections, represented as arrays, into the backing store at the given indicies and notifies the delegate.
+ *
+ * @discussion The section arrays are inserted into the editing store, then a deep copy of the sections are inserted
+ * in the completed store on the main thread. The delegate is invoked on the main thread.
+ */
 - (void)_insertSections:(NSMutableArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   if (indexSet.count == 0)
@@ -227,6 +248,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   });
 }
 
+/**
+ * Removes sections at the given indicies from the backing store and notifies the delegate.
+ *
+ * @discussion Section array are first removed from the editing store, then the associated section in the completed
+ * store is removed on the main thread. The delegate is invoked on the main thread.
+ */
 - (void)_deleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   if (indexSet.count == 0)
