@@ -688,21 +688,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   return [_asyncDataSource collectionView:self numberOfItemsInSection:section];
 }
 
-- (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
-{
-  return [self.layoutDelegate collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
-}
-
-- (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section
-{
-  return [self.layoutDelegate collectionView:self supplementaryViewsOfKind:kind inSection:section];
-}
-
-- (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryKind:(NSString *)kind;
-{
-  return [self.layoutDelegate collectionView:self numberOfSectionsForSupplementaryKind:kind];
-}
-
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController {
   if ([_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)]) {
     return [_asyncDataSource numberOfSectionsInCollectionView:self];
@@ -731,8 +716,24 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-#pragma mark -
-#pragma mark ASRangeControllerDelegate.
+#pragma mark - ASCollectionViewDataControllerSource Supplementary view support
+
+- (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  return [_layoutDelegate collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+}
+
+- (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section
+{
+  return [_layoutDelegate collectionView:self supplementaryViewsOfKind:kind inSection:section];
+}
+
+- (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryKind:(NSString *)kind;
+{
+  return [_layoutDelegate collectionView:self numberOfSectionsForSupplementaryKind:kind];
+}
+
+#pragma mark - ASRangeControllerDelegate.
 
 - (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController {
   ASDisplayNodeAssertMainThread();

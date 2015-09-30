@@ -14,10 +14,19 @@
 
 @protocol ASCollectionViewLayoutInspecting <NSObject>
 
+/**
+ * Asks the inspector 
+ */
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
+/**
+ * Asks the inspector for the number of supplementary sections in the collection view for the given kind.
+ */
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryKind:(NSString *)kind;
 
+/**
+ * Asks the inspector for the number of supplementary views for the given kind in the specified section.
+ */
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section;
 
 @end
