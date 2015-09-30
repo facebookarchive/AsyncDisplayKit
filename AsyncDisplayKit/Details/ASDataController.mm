@@ -354,6 +354,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }
 }
 
+/**
+ * Fetches row nodes and their specified index paths for the provided sections from the data source.
+ *
+ * @discussion Results are stored in the passed mutable arrays.
+ */
 - (void)_populateFromDataSourceWithSectionIndexSet:(NSIndexSet *)indexSet mutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
 {
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
@@ -368,6 +373,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
+/**
+ * Fetches row nodes and their specified index paths for all sections from the data source.
+ *
+ * @discussion Results are stored in the passed mutable arrays.
+ */
 - (void)_populateFromEntireDataSourceWithMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
 {
   NSUInteger sectionNum = [_dataSource numberOfSectionsInDataController:self];
