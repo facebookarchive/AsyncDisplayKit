@@ -30,4 +30,14 @@
  */
 - (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
 
+/**
+ * An opportunity for a subclass to access the data source before entering into the editing queue
+ */
+- (void)prepareForReloadData;
+
+/**
+ * Subclasses can override this to reload data after the abstract data controller deletes its old data and before it reloads the new.
+ */
+- (void)willReloadData;
+
 @end

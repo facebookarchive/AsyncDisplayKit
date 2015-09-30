@@ -153,6 +153,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   CGSize _maxSizeForNodesConstrainedSize;
   BOOL _ignoreMaxSizeChange;
   
+  NSMutableArray *_registeredSupplementaryKinds;
+  
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
    
@@ -233,6 +235,8 @@ static BOOL _isInterceptedSelector(SEL sel)
     _layoutDelegate = _flowLayoutInspector;
   }
 
+  _registeredSupplementaryKinds = [NSMutableArray array];
+  
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
@@ -390,6 +394,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)registerSupplementaryNodeOfKind:(NSString *)elementKind
 {
+  [_registeredSupplementaryKinds addObject:elementKind];
   [self registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:elementKind
                                             withReuseIdentifier:[self __reuseIdentifierForKind:elementKind]];
 }
@@ -637,11 +642,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   return node;
 }
 
-- (ASDisplayNode *)dataController:(ASDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
-{
-  return [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
-}
-
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASSizeRange constrainedSize;
@@ -717,6 +717,16 @@ static BOOL _isInterceptedSelector(SEL sel)
 }
 
 #pragma mark - ASCollectionViewDataControllerSource Supplementary view support
+
+- (ASDisplayNode *)dataController:(ASCollectionDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  return [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+}
+
+- (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController
+{
+  return _registeredSupplementaryKinds;
+}
 
 - (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {

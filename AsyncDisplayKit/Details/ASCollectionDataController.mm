@@ -23,29 +23,32 @@
 @implementation ASCollectionDataController {
   NSMutableDictionary *_completedSupplementaryNodes;
   NSMutableDictionary *_editingSupplementaryNodes;
+  
+  NSMutableDictionary *_pendingNodes;
+  NSMutableDictionary *_pendingIndexPaths;
 }
 
-- (void)initialSupplementaryLoading
+- (void)prepareForReloadData
 {
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    [self accessDataSourceWithBlock:^{
-      NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
-      [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL * _Nonnull stop) {
-        _completedSupplementaryNodes[kind] = [NSMutableArray array];
-        _editingSupplementaryNodes[kind] = [NSMutableArray array];
-        
-        NSMutableArray *indexPaths = [NSMutableArray array];
-        NSMutableArray *nodes = [NSMutableArray array];
-        [self _populateSupplementaryNodesOfKind:kind withMutableNodes:nodes mutableIndexPaths:indexPaths];
-        [self batchLayoutNodes:nodes atIndexPaths:indexPaths constrainedSize:^ASSizeRange(NSIndexPath *indexPath) {
-          return [self.collectionDataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
-        } completion:nil];
-      }];
-    }];
+  NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
+  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL * _Nonnull stop) {
+    NSMutableArray *indexPaths = [NSMutableArray array];
+    NSMutableArray *nodes = [NSMutableArray array];
+    [self _populateSupplementaryNodesOfKind:kind withMutableNodes:nodes mutableIndexPaths:indexPaths];
+    _pendingNodes[kind] = nodes;
+    _pendingIndexPaths[kind] = indexPaths;
   }];
 }
-       
+
+- (void)willReloadData
+{
+  [_pendingNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
+    [self batchLayoutNodes:nodes atIndexPaths:_pendingIndexPaths[kind] constrainedSize:^ASSizeRange(NSIndexPath *indexPath) {
+      return [self.collectionDataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+    } completion:nil];
+  }];
+}
+
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
 {
   NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryKind:kind];

@@ -308,6 +308,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       
       // Measure nodes whose views are loaded before we leave the main thread
       [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
+
+      // Allow subclasses to perform setup before going into the edit transaction
+      [self prepareForReloadData];
       
       [_editingTransactionQueue addOperationWithBlock:^{
         ASLOG(@"Edit Transaction - reloadData");
@@ -318,6 +321,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         
         NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, _editingNodes.count)];
         [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
+        
+        [self willReloadData];
         
         // Insert each section
         NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
@@ -335,6 +340,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }];
     }];
   }];
+}
+
+- (void)prepareForReloadData
+{
+  // Implemented by subclasses
+}
+
+- (void)willReloadData
+{
+  // Implemented by subclasses
 }
 
 #pragma mark - Data Source Access (Calling _dataSource)
