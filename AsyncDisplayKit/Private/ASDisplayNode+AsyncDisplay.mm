@@ -94,6 +94,8 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   // Capture these outside the display block so they are retained.
   UIColor *backgroundColor = self.backgroundColor;
   CGRect bounds = self.bounds;
+  CGFloat cornerRadius = self.cornerRadius;
+  BOOL clipsToBounds = self.clipsToBounds;
 
   CGRect frame;
   
@@ -129,7 +131,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       CGContextTranslateCTM(context, frame.origin.x, frame.origin.y);
 
       //support cornerRadius
-      if (rasterizingFromAscendent && self.cornerRadius && self.clipsToBounds) {
+      if (rasterizingFromAscendent && cornerRadius && clipsToBounds) {
         [[UIBezierPath bezierPathWithRoundedRect:bounds cornerRadius:self.cornerRadius] addClip];
       }
 
