@@ -374,6 +374,10 @@
 		B350625D1B0111740018CF92 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943141A1575670030A7D0 /* Photos.framework */; };
 		B350625E1B0111780018CF92 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
+		CCE3AEC41BBB02DA00AFAB54 /* _ASHierarchyChangeSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CCE3AEC21BBB02DA00AFAB54 /* _ASHierarchyChangeSet.h */; settings = {ASSET_TAGS = (); }; };
+		CCE3AEC51BBB02DA00AFAB54 /* _ASHierarchyChangeSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CCE3AEC21BBB02DA00AFAB54 /* _ASHierarchyChangeSet.h */; settings = {ASSET_TAGS = (); }; };
+		CCE3AEC61BBB02DA00AFAB54 /* _ASHierarchyChangeSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CCE3AEC31BBB02DA00AFAB54 /* _ASHierarchyChangeSet.m */; settings = {ASSET_TAGS = (); }; };
+		CCE3AEC71BBB02DA00AFAB54 /* _ASHierarchyChangeSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CCE3AEC31BBB02DA00AFAB54 /* _ASHierarchyChangeSet.m */; settings = {ASSET_TAGS = (); }; };
 		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
@@ -619,6 +623,8 @@
 		ACF6ED5B1B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASStackLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		B35061DA1B010EDF0018CF92 /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncDisplayKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B35061DD1B010EDF0018CF92 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../AsyncDisplayKit-iOS/Info.plist"; sourceTree = "<group>"; };
+		CCE3AEC21BBB02DA00AFAB54 /* _ASHierarchyChangeSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _ASHierarchyChangeSet.h; sourceTree = "<group>"; };
+		CCE3AEC31BBB02DA00AFAB54 /* _ASHierarchyChangeSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _ASHierarchyChangeSet.m; sourceTree = "<group>"; };
 		D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.release.xcconfig"; sourceTree = "<group>"; };
 		D785F6601A74327E00291744 /* ASScrollNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASScrollNode.h; sourceTree = "<group>"; };
 		D785F6611A74327E00291744 /* ASScrollNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASScrollNode.m; sourceTree = "<group>"; };
@@ -914,6 +920,8 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				CCE3AEC21BBB02DA00AFAB54 /* _ASHierarchyChangeSet.h */,
+				CCE3AEC31BBB02DA00AFAB54 /* _ASHierarchyChangeSet.m */,
 				9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */,
 				9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */,
 				9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */,
@@ -1082,6 +1090,7 @@
 				ACF6ED241B17843500DA7C62 /* ASLayout.h in Headers */,
 				ACF6ED2A1B17843500DA7C62 /* ASLayoutable.h in Headers */,
 				9CDC18CC1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */,
+				CCE3AEC41BBB02DA00AFAB54 /* _ASHierarchyChangeSet.h in Headers */,
 				464052241A3F83C40061C0BA /* ASLayoutController.h in Headers */,
 				9C5FA3511B8F6ADF00A62714 /* ASLayoutOptions.h in Headers */,
 				9C65A72A1BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h in Headers */,
@@ -1184,6 +1193,7 @@
 				34EFC7671B701CD900AD841F /* ASLayout.h in Headers */,
 				34EFC7691B701CE100AD841F /* ASLayoutable.h in Headers */,
 				9CDC18CD1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */,
+				CCE3AEC51BBB02DA00AFAB54 /* _ASHierarchyChangeSet.h in Headers */,
 				B35062201B010EFD0018CF92 /* ASLayoutController.h in Headers */,
 				9C5FA3521B8F6ADF00A62714 /* ASLayoutOptions.h in Headers */,
 				9C65A72B1BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h in Headers */,
@@ -1453,6 +1463,7 @@
 				0587F9BE1A7309ED00AFF0BA /* ASEditableTextNode.mm in Sources */,
 				464052231A3F83C40061C0BA /* ASFlowLayoutController.mm in Sources */,
 				058D0A1A195D050800B7D73C /* ASHighlightOverlayLayer.mm in Sources */,
+				CCE3AEC61BBB02DA00AFAB54 /* _ASHierarchyChangeSet.m in Sources */,
 				058D0A2B195D050800B7D73C /* ASImageNode+CGExtras.m in Sources */,
 				058D0A16195D050800B7D73C /* ASImageNode.mm in Sources */,
 				430E7C911B4C23F100697A4C /* ASIndexPath.m in Sources */,
@@ -1561,6 +1572,7 @@
 				B35061FF1B010EFD0018CF92 /* ASDisplayNodeExtras.mm in Sources */,
 				B35062011B010EFD0018CF92 /* ASEditableTextNode.mm in Sources */,
 				B350621C1B010EFD0018CF92 /* ASFlowLayoutController.mm in Sources */,
+				CCE3AEC71BBB02DA00AFAB54 /* _ASHierarchyChangeSet.m in Sources */,
 				B350621E1B010EFD0018CF92 /* ASHighlightOverlayLayer.mm in Sources */,
 				B35062541B010EFD0018CF92 /* ASImageNode+CGExtras.m in Sources */,
 				B35062031B010EFD0018CF92 /* ASImageNode.mm in Sources */,

@@ -15,10 +15,13 @@
 #import "ASDisplayNode.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASInternalHelpers.h"
+#import "_ASHierarchyChangeSet.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
+typedef void (^EditCommandBlock)(_ASHierarchyChangeSet *changeSet);
 const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
 
 static void *kASSizingQueueContext = &kASSizingQueueContext;
@@ -213,27 +216,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)initialDataLoadingWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    [self accessDataSourceWithBlock:^{
-      NSMutableArray *indexPaths = [NSMutableArray array];
-      NSUInteger sectionNum = [_dataSource dataControllerNumberOfSections:self];
-
-      // insert sections
-      [self insertSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionNum)] withAnimationOptions:0];
-
-      for (NSUInteger i = 0; i < sectionNum; i++) {
-        NSIndexPath *indexPath = [[NSIndexPath alloc] initWithIndex:i];
-
-        NSUInteger rowNum = [_dataSource dataController:self rowsInSection:i];
-        for (NSUInteger j = 0; j < rowNum; j++) {
-          [indexPaths addObject:[indexPath indexPathByAddingIndex:j]];
-        }
-      }
-
-      // insert elements
-      [self insertRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-    }];
+  [self accessDataSourceWithBlock:^{
+    NSUInteger sectionNum = [_dataSource dataControllerNumberOfSections:self];
+    [self insertSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionNum)] withAnimationOptions:0];
   }];
 }
 
@@ -360,11 +345,17 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // Running these commands may result in blocking on an _editingTransactionQueue operation that started even before -beginUpdates.
     // Each subsequent command in the queue will also wait on the full asynchronous completion of the prior command's edit transaction.
     LOG(@"endUpdatesWithCompletion - %zd blocks to run", _pendingEditCommandBlocks.count);
-    [_pendingEditCommandBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
+    _ASHierarchyChangeSet *changeSet = [_ASHierarchyChangeSet new];
+    [_pendingEditCommandBlocks enumerateObjectsUsingBlock:^(EditCommandBlock block, NSUInteger idx, BOOL *stop) {
       LOG(@"endUpdatesWithCompletion - running block #%zd", idx);
-      block();
+      block(changeSet);
     }];
     [_pendingEditCommandBlocks removeAllObjects];
+    [changeSet markCompleted];
+    
+    [self accessDataSourceWithBlock:^{
+      [self _applySubmittedChangeSet:changeSet];
+    }];
     
     [_editingTransactionQueue addOperationWithBlock:^{
       ASDisplayNodePerformBlockOnMainThread(^{
@@ -375,6 +366,124 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
       });
     }];
+  }
+}
+
+/// Assumes called inside accessDataSourceWithBlock:
+- (void)_applySubmittedChangeSet:(_ASHierarchyChangeSet *)changeSet
+{
+  // Reloaded sections
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
+    LOG(@"Edit Command - reloadSections: %@", reloadedSections);
+    
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+    
+    NSMutableArray *updatedNodes = [NSMutableArray array];
+    NSMutableArray *updatedIndexPaths = [NSMutableArray array];
+    [self _populateFromDataSourceWithSectionIndexSet:change.indexSet mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
+    
+    // Dispatch to sizing queue in order to guarantee that any in-progress sizing operations from prior edits have completed.
+    // For example, if an initial -reloadData call is quickly followed by -reloadSections, sizing the initial set may not be done
+    // at this time.  Thus _editingNodes could be empty and crash in ASIndexPathsForMultidimensional[...]
+    
+    [_editingTransactionQueue addOperationWithBlock:^{
+      NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes, change.indexSet);
+      
+      LOG(@"Edit Transaction - reloadSections: updatedIndexPaths: %@, indexPaths: %@, _editingNodes: %@", updatedIndexPaths, indexPaths, ASIndexPathsForMultidimensionalArray(_editingNodes));
+      
+      [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:change.animationOptions];
+      
+      // reinsert the elements
+      [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:change.animationOptions];
+    }];
+  }
+  
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
+    LOG(@"Edit Command - reloadRows: %@", change.indexPaths);
+    NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:change.indexPaths.count];
+    for (NSIndexPath *indexPath in change.indexPaths) {
+      [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
+    }
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+    
+    [_editingTransactionQueue addOperationWithBlock:^{
+      LOG(@"Edit Transaction - reloadRows: %@", reloadedItems);
+      [self _deleteNodesAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+      [self _batchLayoutNodes:nodes atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+    }];
+  }
+  
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+    
+    [_editingTransactionQueue addOperationWithBlock:^{
+      LOG(@"Edit Transaction - deleteRows: %@", change.indexPaths);
+      [self _deleteNodesAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+    }];
+  }
+  
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
+    
+    LOG(@"Edit Command - deleteSections: %@", change.indexSet);
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+    
+    [_editingTransactionQueue addOperationWithBlock:^{
+      // remove elements
+      LOG(@"Edit Transaction - deleteSections: %@", deletedSections);
+      NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes, change.indexSet);
+      
+      [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:change.animationOptions];
+      [self _deleteSectionsAtIndexSet:change.indexSet withAnimationOptions:change.animationOptions];
+    }];
+  }
+  
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
+    LOG(@"Edit Command - insertSections: %@", change.indexSet);
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+    
+    NSMutableArray *updatedNodes = [NSMutableArray array];
+    NSMutableArray *updatedIndexPaths = [NSMutableArray array];
+    [self _populateFromDataSourceWithSectionIndexSet:change.indexSet mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
+    
+    [_editingTransactionQueue addOperationWithBlock:^{
+      LOG(@"Edit Transaction - insertSections: %@", change.indexSet);
+      NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:change.indexSet.count];
+      
+      for (NSUInteger i = 0; i < change.indexSet.count; i++) {
+        [sectionArray addObject:[NSMutableArray array]];
+      }
+      
+      [self _insertSections:sectionArray atIndexSet:change.indexSet withAnimationOptions:change.animationOptions];
+      [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:change.animationOptions];
+    }];
+  }
+
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
+    LOG(@"Edit Command - insertRows: %@", insertedItems);
+    
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+    
+    NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:change.indexPaths.count];
+    for (NSIndexPath *indexPath in change.indexPaths) {
+      [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
+    }
+    
+    [_editingTransactionQueue addOperationWithBlock:^{
+      LOG(@"Edit Transaction - insertRows: %@", insertedItems);
+      [self _batchLayoutNodes:nodes atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+    }];
+  }
+}
+
+// FIXME: Nonsense name while we port
+- (void)performEditCommandWithBlockNew:(EditCommandBlock)block
+{
+  if (_batchUpdateCounter == 0) {
+    [self beginUpdates];
+    [self performEditCommandWithBlockNew:block];
+    [self endUpdates];
+  } else {
+    [_pendingEditCommandBlocks addObject:block];
   }
 }
 
@@ -391,108 +500,32 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Section Editing (External API)
 
-- (void)insertSections:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)insertSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    LOG(@"Edit Command - insertSections: %@", indexSet);
-    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
-    [self accessDataSourceWithBlock:^{
-      NSMutableArray *updatedNodes = [NSMutableArray array];
-      NSMutableArray *updatedIndexPaths = [NSMutableArray array];
-      [self _populateFromDataSourceWithSectionIndexSet:indexSet mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
-      
-      [_editingTransactionQueue addOperationWithBlock:^{
-        LOG(@"Edit Transaction - insertSections: %@", indexSet);
-        NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:indexSet.count];
-        for (NSUInteger i = 0; i < indexSet.count; i++) {
-          [sectionArray addObject:[NSMutableArray array]];
-        }
-        
-        [self _insertSections:sectionArray atIndexSet:indexSet withAnimationOptions:animationOptions];
-        [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
-      }];
-    }];
+  [self performEditCommandWithBlockNew:^(_ASHierarchyChangeSet *changeSet) {
+    [changeSet insertSections:sections animationOptions:animationOptions];
   }];
 }
 
-- (void)deleteSections:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)deleteSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    LOG(@"Edit Command - deleteSections: %@", indexSet);
-    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-
-    [_editingTransactionQueue addOperationWithBlock:^{
-      // remove elements
-      LOG(@"Edit Transaction - deleteSections: %@", indexSet);
-      NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes, indexSet);
-      
-      [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-      [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-    }];
+  [self performEditCommandWithBlockNew:^(_ASHierarchyChangeSet *changeSet) {
+    [changeSet deleteSections:sections animationOptions:animationOptions];
   }];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    LOG(@"Edit Command - reloadSections: %@", sections);
-    
-    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-
-    [self accessDataSourceWithBlock:^{
-      NSMutableArray *updatedNodes = [NSMutableArray array];
-      NSMutableArray *updatedIndexPaths = [NSMutableArray array];
-      [self _populateFromDataSourceWithSectionIndexSet:sections mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
-
-      // Dispatch to sizing queue in order to guarantee that any in-progress sizing operations from prior edits have completed.
-      // For example, if an initial -reloadData call is quickly followed by -reloadSections, sizing the initial set may not be done
-      // at this time.  Thus _editingNodes could be empty and crash in ASIndexPathsForMultidimensional[...]
-      
-      [_editingTransactionQueue addOperationWithBlock:^{
-        NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes, sections);
-        
-        LOG(@"Edit Transaction - reloadSections: updatedIndexPaths: %@, indexPaths: %@, _editingNodes: %@", updatedIndexPaths, indexPaths, ASIndexPathsForMultidimensionalArray(_editingNodes));
-        
-        [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-        
-        // reinsert the elements
-        [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
-      }];
-    }];
+  [self performEditCommandWithBlockNew:^(_ASHierarchyChangeSet *changeSet) {
+    [changeSet reloadSections:sections animationOptions:animationOptions];
   }];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    LOG(@"Edit Command - moveSection");
-
-    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
-    [_editingTransactionQueue addOperationWithBlock:^{
-      // remove elements
-      
-      LOG(@"Edit Transaction - moveSection");
-      
-      NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes, [NSIndexSet indexSetWithIndex:section]);
-      NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes, indexPaths);
-      [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-
-      // update the section of indexpaths
-      NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:newSection];
-      NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-      [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-        [updatedIndexPaths addObject:[sectionIndexPath indexPathByAddingIndex:[indexPath indexAtPosition:indexPath.length - 1]]];
-      }];
-
-      // Don't re-calculate size for moving
-      [self _insertNodes:nodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
-    }];
+  [self performEditCommandWithBlockNew:^(_ASHierarchyChangeSet *changeSet) {
+    [changeSet deleteSections:[NSIndexSet indexSetWithIndex:section] animationOptions:animationOptions];
+    [changeSet insertSections:[NSIndexSet indexSetWithIndex:newSection] animationOptions:animationOptions];
   }];
 }
 
@@ -500,68 +533,22 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    LOG(@"Edit Command - insertRows: %@", indexPaths);
-    
-    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
-    [self accessDataSourceWithBlock:^{
-      // sort indexPath to avoid messing up the index when inserting in several batches
-      NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
-      NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-      for (NSUInteger i = 0; i < sortedIndexPaths.count; i++) {
-        [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:sortedIndexPaths[i]]];
-      }
-      
-      [_editingTransactionQueue addOperationWithBlock:^{
-        LOG(@"Edit Transaction - insertRows: %@", indexPaths);
-        [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
-      }];
-    }];
+  [self performEditCommandWithBlockNew:^(_ASHierarchyChangeSet *changeSet) {
+    [changeSet insertItems:indexPaths animationOptions:animationOptions];
   }];
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    LOG(@"Edit Command - deleteRows: %@", indexPaths);
-
-    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
-    // sort indexPath in order to avoid messing up the index when deleting
-    NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
-
-    [_editingTransactionQueue addOperationWithBlock:^{
-      LOG(@"Edit Transaction - deleteRows: %@", indexPaths);
-      [self _deleteNodesAtIndexPaths:sortedIndexPaths withAnimationOptions:animationOptions];
-    }];
+  [self performEditCommandWithBlockNew:^(_ASHierarchyChangeSet *changeSet) {
+    [changeSet deleteItems:indexPaths animationOptions:animationOptions];
   }];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    LOG(@"Edit Command - reloadRows: %@", indexPaths);
-
-    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
-    // Reloading requires re-fetching the data.  Load it on the current calling thread, locking the data source.
-    [self accessDataSourceWithBlock:^{
-      NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-      [indexPaths sortedArrayUsingSelector:@selector(compare:)];
-      [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-        [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
-      }];
-      
-      [_editingTransactionQueue addOperationWithBlock:^{
-        LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
-        [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-        [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
-      }];
-    }];
+  [self performEditCommandWithBlockNew:^(_ASHierarchyChangeSet *changeSet) {
+    [changeSet reloadItems:indexPaths animationOptions:animationOptions];
   }];
 }
 
@@ -602,21 +589,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    LOG(@"Edit Command - moveRow: %@ > %@", indexPath, newIndexPath);
-    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
-    [_editingTransactionQueue addOperationWithBlock:^{
-      LOG(@"Edit Transaction - moveRow: %@ > %@", indexPath, newIndexPath);
-      NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes, [NSArray arrayWithObject:indexPath]);
-      NSArray *indexPaths = [NSArray arrayWithObject:indexPath];
-      [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-
-      // Don't re-calculate size for moving
-      NSArray *newIndexPaths = [NSArray arrayWithObject:newIndexPath];
-      [self _insertNodes:nodes atIndexPaths:newIndexPaths withAnimationOptions:animationOptions];
-    }];
+  [self performEditCommandWithBlockNew:^(_ASHierarchyChangeSet *changeSet) {
+    [changeSet deleteItems:@[ indexPath ] animationOptions:animationOptions];
+    [changeSet insertItems:@[ newIndexPath ] animationOptions:animationOptions];
   }];
 }
 
