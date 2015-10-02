@@ -158,12 +158,3 @@ static NSString *const _ASPhotosURLQueryKeyCropHeight = @"crop_h";
 }
 
 @end
-
-@implementation NSURL (ASPhotosRequestConverting)
-
-- (ASPhotosFrameworkImageRequest *)asyncdisplaykit_photosRequest
-{
-  return [ASPhotosFrameworkImageRequest requestWithURL:self];
-}
-
-@end

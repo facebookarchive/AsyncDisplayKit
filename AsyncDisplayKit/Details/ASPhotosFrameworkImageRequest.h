@@ -48,8 +48,6 @@ extern NSString *const ASPhotosURLScheme;
  
  @discussion Some properties of this object are ignored when converting this request into a URL.
  As of iOS SDK 9.0, these properties are `progressHandler` and `synchronous`.
- Note that ASMultiplexImageNode does not support PHImageRequestOptionsDeliveryModeOpportunistic
- because it sends multiple images, and that mode will be replaced by PHImageRequestOptionsDeliveryModeHighQualityFormat
  */
 @property (nonatomic, strong) PHImageRequestOptions *options;
 
@@ -62,15 +60,6 @@ extern NSString *const ASPhotosURLScheme;
  @return `YES` if `object` is an equivalent image request, `NO` otherwise.
  */
 - (BOOL)isEqual:(id)object;
-
-@end
-
-@interface NSURL (ASPhotosRequestConverting)
-
-/**
- @abstract A convenience function that calls `[ASPhotosFrameworkImageRequest requestWithURL:self]`.
- */
-- (/*nullable*/ ASPhotosFrameworkImageRequest *)asyncdisplaykit_photosRequest;
 
 @end
 

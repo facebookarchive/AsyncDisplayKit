@@ -157,7 +157,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   _cache = cache;
   _downloader = downloader;
-
+  _imageManager = PHImageManager.defaultManager;
+  
   return self;
 }
 
@@ -455,7 +456,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     }];
   }
   // Likewise, if it's a iOS 8 Photo asset, we need to fetch it accordingly.
-  else if (ASPhotosFrameworkImageRequest *request = nextImageURL.asyncdisplaykit_photosRequest) {
+  else if (ASPhotosFrameworkImageRequest *request = [ASPhotosFrameworkImageRequest requestWithURL:nextImageURL]) {
     [self _loadPHAssetWithRequest:request identifier:nextImageIdentifier completion:^(UIImage *image, NSError *error) {
       ASMultiplexImageNodeCLogDebug(@"[%p] Acquired next image (%@) from Photos Framework", weakSelf, nextImageIdentifier);
       finishedLoadingBlock(image, nextImageIdentifier, error);
@@ -529,25 +530,27 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     
     PHAsset *imageAsset = [assetFetchResult firstObject];
     PHImageRequestOptions *options = [request.options copy];
+    
+    // We don't support opportunistic delivery – one request, one image.
+    if (options.deliveryMode == PHImageRequestOptionsDeliveryModeOpportunistic) {
+      options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+    }
+    
     if (options.deliveryMode == PHImageRequestOptionsDeliveryModeHighQualityFormat) {
       // Without this flag the result will be delivered on the main queue, which is pointless
       // But synchronous -> HighQualityFormat so we only use it if high quality format is specified
       options.synchronous = YES;
     }
     
-    [[PHImageManager defaultManager] requestImageForAsset:imageAsset
-                                               targetSize:request.targetSize
-                                              contentMode:request.contentMode
-                                                  options:options
-                                            resultHandler:^(UIImage *image, NSDictionary *info) {
-                                              if (NSThread.isMainThread) {
-                                                dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
-                                                  completionBlock(image, info[PHImageErrorKey]);
-                                                });
-                                              } else {
-                                                completionBlock(image, info[PHImageErrorKey]);
-                                              }
-                                            }];
+    [self.imageManager requestImageForAsset:imageAsset targetSize:request.targetSize contentMode:request.contentMode options:options resultHandler:^(UIImage *image, NSDictionary *info) {
+      if (NSThread.isMainThread) {
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+          completionBlock(image, info[PHImageErrorKey]);
+        });
+      } else {
+        completionBlock(image, info[PHImageErrorKey]);
+      }
+    }];
   });
 }
 
@@ -645,6 +648,19 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (BOOL)_shouldClearFetchedImageData {
   return _cache != nil;
+}
+
+@end
+
+@implementation NSURL (ASPhotosFrameworkURLs)
+
++ (NSURL *)URLWithAssetLocalIdentifier:(NSString *)assetLocalIdentifier targetSize:(CGSize)targetSize contentMode:(PHImageContentMode)contentMode options:(PHImageRequestOptions *)options
+{
+  ASPhotosFrameworkImageRequest *request = [[ASPhotosFrameworkImageRequest alloc] initWithAssetIdentifier:assetLocalIdentifier];
+  request.options = options;
+  request.contentMode = contentMode;
+  request.targetSize = targetSize;
+  return request.url;
 }
 
 @end

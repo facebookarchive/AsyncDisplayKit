@@ -46,7 +46,8 @@ static NSString *const kTestAssetID = @"testAssetID";
 
 - (void)testThatParsingFromURLWorks
 {
-  XCTAssertEqualObjects([self.class urlForExampleImageRequest].asyncdisplaykit_photosRequest, [self.class exampleImageRequest]);
+  NSURL *url = [self.class urlForExampleImageRequest];
+  XCTAssertEqualObjects([ASPhotosFrameworkImageRequest requestWithURL:url], [self.class exampleImageRequest]);
 }
 
 - (void)testThatCopyingWorks
