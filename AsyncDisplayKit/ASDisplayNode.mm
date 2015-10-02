@@ -672,25 +672,20 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
     [self measureWithSizeRange:oldConstrainedSize];
 
-    CGSize oldSize = self.bounds.size;
+    CGRect oldBounds = self.bounds;
+    CGSize oldSize = oldBounds.size;
     CGSize newSize = _layout.size;
     
     if (! CGSizeEqualToSize(oldSize, newSize)) {
-      CGRect bounds = self.bounds;
-      bounds.size = newSize;
-      self.bounds = bounds;
+      self.bounds = (CGRect){ oldBounds.origin, newSize };
       
       // Frame's origin must be preserved. Since it is computed from bounds size, anchorPoint
       // and position (see frame setter in ASDisplayNode+UIViewBridge), position needs to be adjusted.
-      BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
-      CGPoint anchorPoint = (useLayer ? _layer.anchorPoint : self.anchorPoint);
-      CGPoint oldPosition = (useLayer ? _layer.position : self.position);
-
+      CGPoint anchorPoint = self.anchorPoint;
+      CGPoint oldPosition = self.position;
       CGFloat xDelta = (newSize.width - oldSize.width) * anchorPoint.x;
       CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
-      CGPoint newPosition = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
-
-      useLayer ? _layer.position = newPosition : self.position = newPosition;
+      self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
     }
   }
 }
