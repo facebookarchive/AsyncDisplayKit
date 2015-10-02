@@ -58,18 +58,14 @@
     [sublayouts addObject:sublayout];
   }
   
-  if (isnan(size.width) || size.width >= FLT_MAX - FLT_EPSILON) {
-    size.width = constrainedSize.min.width;
-    for (ASLayout *sublayout in sublayouts) {
-      size.width = MAX(size.width, sublayout.position.x + sublayout.size.width);
-    }
+  size.width = constrainedSize.min.width;
+  for (ASLayout *sublayout in sublayouts) {
+    size.width = MAX(size.width, sublayout.position.x + sublayout.size.width);
   }
 
-  if (isnan(size.height) || size.height >= FLT_MAX - FLT_EPSILON) {
-    size.height = constrainedSize.min.height;
-    for (ASLayout *sublayout in sublayouts) {
-      size.height = MAX(size.height, sublayout.position.y + sublayout.size.height);
-    }
+  size.height = constrainedSize.min.height;
+  for (ASLayout *sublayout in sublayouts) {
+    size.height = MAX(size.height, sublayout.position.y + sublayout.size.height);
   }
 
   return [ASLayout layoutWithLayoutableObject:self
