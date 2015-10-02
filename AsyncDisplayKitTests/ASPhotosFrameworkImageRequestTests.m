@@ -33,7 +33,7 @@ static NSString *const kTestAssetID = @"testAssetID";
 
 + (NSURL *)urlForExampleImageRequest
 {
-  NSString *str = [NSString stringWithFormat:@"ph://%@?width=1024&height=1536&version=2&contentmode=1&network=1&resizemode=1&crop_x=0.2&crop_y=0.1&crop_w=0.6&crop_h=0.8", kTestAssetID];
+  NSString *str = [NSString stringWithFormat:@"ph://%@?width=1024&height=1536&version=2&contentmode=1&network=1&resizemode=1&deliverymode=0&crop_x=0.2&crop_y=0.1&crop_w=0.6&crop_h=0.8", kTestAssetID];
   return [NSURL URLWithString:str];
 }
 
