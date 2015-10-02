@@ -10,7 +10,13 @@
 #import "ASAssert.h"
 #import "ASDimension.h"
 
+// FIXME: Temporary nonsense import until method names are finalized and exposed
+#import "ASDisplayNode+Subclasses.h"
+
 @implementation ASViewController
+{
+  BOOL _ensureDisplayed;
+}
 
 - (instancetype)initWithNode:(ASDisplayNode *)node
 {
@@ -33,15 +39,25 @@
 
 - (void)viewWillLayoutSubviews
 {
+  [super viewWillLayoutSubviews];
   CGSize viewSize = self.view.bounds.size;
   ASSizeRange constrainedSize = ASSizeRangeMake(viewSize, viewSize);
   [_node measureWithSizeRange:constrainedSize];
-  [super viewWillLayoutSubviews];
+}
+
+- (void)viewDidLayoutSubviews
+{
+  if (_ensureDisplayed && self.neverShowPlaceholders) {
+    _ensureDisplayed = NO;
+    [self.node recursivelyEnsureDisplay];
+  }
+  [super viewDidLayoutSubviews];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
+  _ensureDisplayed = YES;
   [_node recursivelyFetchData];
 }
 

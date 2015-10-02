@@ -7,7 +7,7 @@
  */
 
 #import "_ASAsyncTransaction.h"
-
+#import "_ASAsyncTransactionGroup.h"
 #import "ASAssert.h"
 
 @interface ASDisplayNodeAsyncTransactionOperation : NSObject
@@ -38,6 +38,11 @@
     // Guarantee that _operationCompletionBlock is released on _callbackQueue:
     self.operationCompletionBlock = nil;
   }
+}
+
+- (NSString *)description
+{
+  return [NSString stringWithFormat:@"<ASDisplayNodeAsyncTransactionOperation: %p - value = %@", self, self.value];
 }
 
 @end
@@ -140,7 +145,7 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_state == ASAsyncTransactionStateOpen, @"You cannot double-commit a transaction");
   _state = ASAsyncTransactionStateCommitted;
-
+  
   if ([_operations count] == 0) {
     // Fast path: if a transaction was opened, but no operations were added, execute completion block synchronously.
     if (_completionBlock) {
@@ -148,15 +153,56 @@
     }
   } else {
     ASDisplayNodeAssert(_group != NULL, @"If there are operations, dispatch group should have been created");
+    
     dispatch_group_notify(_group, _callbackQueue, ^{
-      BOOL isCanceled = (_state == ASAsyncTransactionStateCanceled);
-      for (ASDisplayNodeAsyncTransactionOperation *operation in _operations) {
-        [operation callAndReleaseCompletionBlock:isCanceled];
-      }
-      if (_completionBlock) {
-        _completionBlock(self, isCanceled);
-      }
+      // _callbackQueue is the main queue in current practice (also asserted in -waitUntilComplete).
+      // This code should be reviewed before taking on significantly different use cases.
+      ASDisplayNodeAssertMainThread();
+      [self completeTransaction];
     });
+  }
+}
+
+- (void)completeTransaction
+{
+  if (_state != ASAsyncTransactionStateComplete) {
+    BOOL isCanceled = (_state == ASAsyncTransactionStateCanceled);
+    for (ASDisplayNodeAsyncTransactionOperation *operation in _operations) {
+      [operation callAndReleaseCompletionBlock:isCanceled];
+    }
+    
+    // Always set _state to Complete, even if we were cancelled, to block any extraneous
+    // calls to this method that may have been scheduled for the next runloop
+    // (e.g. if we needed to force one in this runloop with -waitUntilComplete, but another was already scheduled)
+    _state = ASAsyncTransactionStateComplete;
+
+    if (_completionBlock) {
+      _completionBlock(self, isCanceled);
+    }
+  }
+}
+
+- (void)waitUntilComplete
+{
+  ASDisplayNodeAssertMainThread();
+  if (_state != ASAsyncTransactionStateComplete) {
+    if (_group) {
+      ASDisplayNodeAssertTrue(_callbackQueue == dispatch_get_main_queue());
+      dispatch_group_wait(_group, DISPATCH_TIME_FOREVER);
+      
+      // At this point, the asynchronous operation may have completed, but the runloop
+      // observer has not committed the batch of transactions we belong to.  It's important to
+      // commit ourselves via the group to avoid double-committing the transaction.
+      // This is only necessary when forcing display work to complete before allowing the runloop
+      // to continue, e.g. in the implementation of -[ASDisplayNode recursivelyEnsureDisplay].
+      if (_state == ASAsyncTransactionStateOpen) {
+        [_ASAsyncTransactionGroup commit];
+        ASDisplayNodeAssert(_state != ASAsyncTransactionStateOpen, @"Transaction should not be open after committing group");
+      }
+      // If we needed to commit the group above, -completeTransaction may have already been run.
+      // It is designed to accomodate this by checking _state to ensure it is not complete.
+      [self completeTransaction];
+    }
   }
 }
 
@@ -172,6 +218,11 @@
   if (_operations == nil) {
     _operations = [[NSMutableArray alloc] init];
   }
+}
+
+- (NSString *)description
+{
+  return [NSString stringWithFormat:@"<_ASAsyncTransaction: %p - _state = %lu, _group = %@, _operations = %@>", self, (unsigned long)_state, _group, _operations];
 }
 
 @end

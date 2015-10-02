@@ -158,7 +158,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   _cache = cache;
   _downloader = downloader;
   _imageManager = PHImageManager.defaultManager;
-  
+  self.shouldBypassEnsureDisplay = YES;
+
   return self;
 }
 

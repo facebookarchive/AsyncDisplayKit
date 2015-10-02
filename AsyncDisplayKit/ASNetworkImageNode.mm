@@ -44,6 +44,7 @@
   _cache = cache;
   _downloader = downloader;
   _shouldCacheImage = YES;
+  self.shouldBypassEnsureDisplay = YES;
 
   return self;
 }
