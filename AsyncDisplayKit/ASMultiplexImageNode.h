@@ -100,7 +100,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
 @property (nonatomic, readonly) id displayedImageIdentifier;
 
 /**
- * @abstract The image manager that this image node should use when requesting images from the Photos framework. Defaults to `PHImageManager.defaultManager`.
+ * @abstract The image manager that this image node should use when requesting images from the Photos framework. If this is `nil` (the default), then `PHImageManager.defaultManager` is used.
  
  * @see `+[NSURL URLWithAssetLocalIdentifier:targetSize:contentMode:options:]` below.
  */

@@ -157,7 +157,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   _cache = cache;
   _downloader = downloader;
-  _imageManager = PHImageManager.defaultManager;
   self.shouldBypassEnsureDisplay = YES;
 
   return self;
@@ -543,7 +542,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       options.synchronous = YES;
     }
     
-    [self.imageManager requestImageForAsset:imageAsset targetSize:request.targetSize contentMode:request.contentMode options:options resultHandler:^(UIImage *image, NSDictionary *info) {
+    PHImageManager *imageManager = self.imageManager ?: PHImageManager.defaultManager;
+    [imageManager requestImageForAsset:imageAsset targetSize:request.targetSize contentMode:request.contentMode options:options resultHandler:^(UIImage *image, NSDictionary *info) {
       if (NSThread.isMainThread) {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
           completionBlock(image, info[PHImageErrorKey]);
