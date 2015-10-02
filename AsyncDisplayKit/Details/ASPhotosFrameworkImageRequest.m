@@ -8,6 +8,7 @@
 
 #import "ASPhotosFrameworkImageRequest.h"
 #import "ASBaseDefines.h"
+#import "ASAvailability.h"
 
 NSString *const ASPhotosURLScheme = @"ph";
 
@@ -100,8 +101,8 @@ static NSString *const _ASPhotosURLQueryKeyCropHeight = @"crop_h";
 
 + (ASPhotosFrameworkImageRequest *)requestWithURL:(NSURL *)url
 {
-  // not a photos URL
-  if (![url.scheme isEqualToString:ASPhotosURLScheme]) {
+  // not a photos URL or iOS < 8
+  if (![url.scheme isEqualToString:ASPhotosURLScheme] || !AS_AT_LEAST_IOS8) {
     return nil;
   }
   
