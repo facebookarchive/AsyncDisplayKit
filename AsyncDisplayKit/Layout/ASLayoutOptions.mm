@@ -98,6 +98,7 @@ static Class gDefaultLayoutOptionsClass = nil;
   self.spacingBefore = layoutOptions.spacingBefore;
   self.flexGrow = layoutOptions.flexGrow;
   self.flexShrink = layoutOptions.flexShrink;
+  self.alignSelf = layoutOptions.alignSelf;
   
   self.ascender = layoutOptions.ascender;
   self.descender = layoutOptions.descender;
