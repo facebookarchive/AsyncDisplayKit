@@ -158,9 +158,9 @@
   return rangeType == ASLayoutRangeTypeRender;
 }
 
-- (void)configureContentView:(UIView *)contentView forNode:(ASDisplayNode *)cellNode
+- (void)configureContentView:(UIView *)contentView forNode:(ASDisplayNode *)node
 {
-  if (cellNode.view.superview == contentView) {
+  if (node.view.superview == contentView) {
     // this content view is already correctly configured
     return;
   }
@@ -170,7 +170,7 @@
     [view removeFromSuperview];
   }
 
-  [self moveNode:cellNode toView:contentView];
+  [self moveNode:node toView:contentView];
 }
 
 

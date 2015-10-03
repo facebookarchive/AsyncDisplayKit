@@ -26,11 +26,6 @@
 - (void)accessDataSourceWithBlock:(dispatch_block_t)block;
 
 /**
- * Measure and layout the given nodes in optimized batches, constraining each to a given size.
- */
-- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
-
-/**
  * An opportunity for a subclass to access the data source before entering into the editing queue
  */
 - (void)prepareForReloadData;
@@ -39,5 +34,20 @@
  * Subclasses can override this to reload data after the abstract data controller deletes its old data and before it reloads the new.
  */
 - (void)willReloadData;
+
+- (NSMutableDictionary *)internalCompletedNodes;
+
+/**
+ * Measure and layout the given nodes in optimized batches, constraining each to a given size.
+ */
+- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
+
+- (void)insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
+
+- (void)deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
+
+- (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSArray *sections, NSIndexSet *indexSet))completionBlock;
+
+- (void)deleteSectionsOfKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSIndexSet *indexSet))completionBlock;
 
 @end

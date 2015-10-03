@@ -8,6 +8,7 @@
 
 #import "ASCollectionDataController.h"
 
+#import "ASLog.h"
 #import "ASAssert.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASDisplayNode.h"
@@ -21,17 +22,18 @@
 @end
 
 @implementation ASCollectionDataController {
-  NSMutableDictionary *_completedSupplementaryNodes;
-  NSMutableDictionary *_editingSupplementaryNodes;
-  
   NSMutableDictionary *_pendingNodes;
   NSMutableDictionary *_pendingIndexPaths;
 }
 
 - (void)prepareForReloadData
 {
+  _pendingNodes = [NSMutableDictionary dictionary];
+  _pendingIndexPaths = [NSMutableDictionary dictionary];
+
   NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
   [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL * _Nonnull stop) {
+    ASLOG(@"Populating elements of kind: %@", kind);
     NSMutableArray *indexPaths = [NSMutableArray array];
     NSMutableArray *nodes = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind withMutableNodes:nodes mutableIndexPaths:indexPaths];
@@ -43,9 +45,21 @@
 - (void)willReloadData
 {
   [_pendingNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
+    ASLOG(@"Batch layout nodes of kind: %@, (%@)", kind, nodes);
+
+    // Insert each section
+    NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryKind:kind];
+    NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
+    for (int i = 0; i < sectionCount; i++) {
+      [sections addObject:[[NSMutableArray alloc] init]];
+    }
+    [self insertSections:sections ofKind:kind atIndexSet:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)] completion:nil];
+    
     [self batchLayoutNodes:nodes atIndexPaths:_pendingIndexPaths[kind] constrainedSize:^ASSizeRange(NSIndexPath *indexPath) {
       return [self.collectionDataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
-    } completion:nil];
+    } completion:^(NSArray *nodes, NSArray *indexPaths) {
+      [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
+    }];
   }];
 }
 
@@ -66,45 +80,12 @@
 - (ASDisplayNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
-  return _completedSupplementaryNodes[kind][indexPath.section][indexPath.item];
+  return [self internalCompletedNodes][kind][indexPath.section][indexPath.item];
 }
 
 - (id<ASCollectionDataControllerSource>)collectionDataSource
 {
   return (id<ASCollectionDataControllerSource>)self.dataSource;
-}
-
-#pragma mark - Internal Data Querying
-
-// TODO: Reduce code duplication by exposing generic insert/delete helpers from ASDataController
-- (void)_insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths
-{
-  if (indexPaths.count == 0)
-    return;
-  NSMutableArray *editingNodes = [self _editingNodesOfKind:kind];
-  ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(editingNodes, indexPaths, nodes);
-  NSMutableArray *completedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(editingNodes);
-  ASDisplayNodePerformBlockOnMainThread(^{
-    _completedSupplementaryNodes[kind] = completedNodes;
-    // TODO: Notify change
-  });
-}
-
-// TODO: Reduce code duplication by exposing generic insert/delete helpers from ASDataController
-- (void)_deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths
-{
-  if (indexPaths.count == 0)
-    return;
-}
-
-- (NSMutableArray *)_completedNodesOfKind:(NSString *)kind
-{
-  return _completedSupplementaryNodes[kind];
-}
-
-- (NSMutableArray *)_editingNodesOfKind:(NSString *)kind
-{
-  return _editingSupplementaryNodes[kind];
 }
 
 @end

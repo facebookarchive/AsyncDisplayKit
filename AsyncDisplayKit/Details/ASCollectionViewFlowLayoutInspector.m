@@ -42,7 +42,11 @@
 
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryKind:(NSString *)kind
 {
-  return [collectionView.asyncDataSource numberOfSectionsInCollectionView:collectionView];
+  if ([collectionView.asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)]) {
+    return [collectionView.asyncDataSource numberOfSectionsInCollectionView:collectionView];
+  } else {
+    return 1;
+  }
 }
 
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section

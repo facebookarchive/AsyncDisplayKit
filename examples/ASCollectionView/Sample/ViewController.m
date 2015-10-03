@@ -33,6 +33,7 @@
   
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+  layout.headerReferenceSize = CGSizeMake(50.0, 50.0);
   
   _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:YES];
   _collectionView.asyncDataSource = self;
