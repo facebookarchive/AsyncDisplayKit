@@ -195,7 +195,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   if (indexPaths.count == 0)
     return;
-  
+
   NSMutableArray *editingNodes = _editingNodes[kind];
   ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(editingNodes, indexPaths, nodes);
   _editingNodes[kind] = editingNodes;
@@ -233,6 +233,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   if (indexSet.count == 0)
     return;
+
+  if (_editingNodes[kind] == nil) {
+    _editingNodes[kind] = [NSMutableArray array];
+  }
+  
   [_editingNodes[kind] insertObjects:sections atIndexes:indexSet];
   
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
