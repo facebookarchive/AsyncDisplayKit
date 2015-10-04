@@ -64,8 +64,8 @@ if [ "$MODE" = "framework" ]; then
     echo "Verifying that AsyncDisplayKit functions as a dynamic framework (for Swift/Carthage users)."
 
     xctool \
-        -workspace "smoke-tests/Life Without CocoaPods/Life Without CocoaPods.xcworkspace" \
-        -scheme "Life Without CocoaPods" \
+        -project "smoke-tests/Framework/Sample.xcodeproj" \
+        -scheme Sample \
         -sdk "$SDK" \
         -destination "$PLATFORM" \
         build
