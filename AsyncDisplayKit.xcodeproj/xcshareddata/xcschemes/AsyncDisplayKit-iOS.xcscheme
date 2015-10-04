@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0630"
+   LastUpgradeVersion = "0700"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2C5B669C1B3A796F005926A7"
+               BlueprintIdentifier = "B35061D91B010EDF0018CF92"
                BuildableName = "AsyncDisplayKit.framework"
                BlueprintName = "AsyncDisplayKit-iOS"
                ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
@@ -23,26 +23,29 @@
       </BuildActionEntries>
    </BuildAction>
    <TestAction
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      buildConfiguration = "Debug">
+      shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
+      <AdditionalOptions>
+      </AdditionalOptions>
    </TestAction>
    <LaunchAction
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
-      buildConfiguration = "Debug"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2C5B669C1B3A796F005926A7"
+            BlueprintIdentifier = "B35061D91B010EDF0018CF92"
             BuildableName = "AsyncDisplayKit.framework"
             BlueprintName = "AsyncDisplayKit-iOS"
             ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
@@ -52,15 +55,15 @@
       </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
+      buildConfiguration = "Release"
       shouldUseLaunchSchemeArgsEnv = "YES"
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
-      buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2C5B669C1B3A796F005926A7"
+            BlueprintIdentifier = "B35061D91B010EDF0018CF92"
             BuildableName = "AsyncDisplayKit.framework"
             BlueprintName = "AsyncDisplayKit-iOS"
             ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
