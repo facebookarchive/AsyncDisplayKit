@@ -60,4 +60,17 @@ if [ "$MODE" = "life-without-cocoapods" ]; then
     exit 0
 fi
 
+if [ "$MODE" = "framework" ]; then
+    echo "Verifying that AsyncDisplayKit functions as a dynamic framework (for Swift/Carthage users)."
+
+    xctool \
+        -project "smoke-tests/Framework/Sample.xcodeproj" \
+        -scheme Sample \
+        -sdk "$SDK" \
+        -destination "$PLATFORM" \
+        build
+    trap - EXIT
+    exit 0
+fi
+
 echo "Unrecognised mode '$MODE'."

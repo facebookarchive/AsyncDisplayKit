@@ -14,24 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "058D09AB195D04C000B7D73C"
-               BuildableName = "libAsyncDisplayKit.a"
-               BlueprintName = "AsyncDisplayKit"
-               ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "058D09BB195D04C000B7D73C"
-               BuildableName = "AsyncDisplayKitTests.xctest"
-               BlueprintName = "AsyncDisplayKitTests"
-               ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
+               BlueprintIdentifier = "050E7C6D19D22E19004363C2"
+               BuildableName = "Sample.app"
+               BlueprintName = "Sample"
+               ReferencedContainer = "container:Sample.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -42,24 +28,14 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "058D09BB195D04C000B7D73C"
-               BuildableName = "AsyncDisplayKitTests.xctest"
-               BlueprintName = "AsyncDisplayKitTests"
-               ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "058D09AB195D04C000B7D73C"
-            BuildableName = "libAsyncDisplayKit.a"
-            BlueprintName = "AsyncDisplayKit"
-            ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
+            BlueprintIdentifier = "050E7C6D19D22E19004363C2"
+            BuildableName = "Sample.app"
+            BlueprintName = "Sample"
+            ReferencedContainer = "container:Sample.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -75,15 +51,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "058D09AB195D04C000B7D73C"
-            BuildableName = "libAsyncDisplayKit.a"
-            BlueprintName = "AsyncDisplayKit"
-            ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
+            BlueprintIdentifier = "050E7C6D19D22E19004363C2"
+            BuildableName = "Sample.app"
+            BlueprintName = "Sample"
+            ReferencedContainer = "container:Sample.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -93,15 +70,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "058D09AB195D04C000B7D73C"
-            BuildableName = "libAsyncDisplayKit.a"
-            BlueprintName = "AsyncDisplayKit"
-            ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
+            BlueprintIdentifier = "050E7C6D19D22E19004363C2"
+            BuildableName = "Sample.app"
+            BlueprintName = "Sample"
+            ReferencedContainer = "container:Sample.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
