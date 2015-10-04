@@ -370,7 +370,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_editingNodes[ASRowNodeKind]);
         [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
         
-        NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, _editingNodes.count)];
+        NSMutableArray *editingNodes = _editingNodes[ASRowNodeKind];
+        NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodes.count)];
         [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
         
         [self willReloadData];
