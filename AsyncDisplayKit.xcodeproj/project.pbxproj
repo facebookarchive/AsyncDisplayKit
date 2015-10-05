@@ -211,6 +211,8 @@
 		509E68651B3AEDC5009B9150 /* CGRect+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E1F1B376416007741D0 /* CGRect+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		509E68661B3AEDD7009B9150 /* CGRect+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E201B376416007741D0 /* CGRect+ASConvenience.m */; };
 		6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9B92C8851BC2EB6E00EE46B2 /* ASCollectionDataController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */; };
+		9B92C8861BC2EB7600EE46B2 /* ASCollectionViewFlowLayoutInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF51BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m */; };
 		9C49C36F1B853957000B0DD5 /* ASStackLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C49C3701B853961000B0DD5 /* ASStackLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C5FA3511B8F6ADF00A62714 /* ASLayoutOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5FA34F1B8F6ADF00A62714 /* ASLayoutOptions.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1568,6 +1570,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B92C8861BC2EB7600EE46B2 /* ASCollectionViewFlowLayoutInspector.m in Sources */,
+				9B92C8851BC2EB6E00EE46B2 /* ASCollectionDataController.mm in Sources */,
 				B350623D1B010EFD0018CF92 /* _ASAsyncTransaction.m in Sources */,
 				B35062401B010EFD0018CF92 /* _ASAsyncTransactionContainer.m in Sources */,
 				B35062421B010EFD0018CF92 /* _ASAsyncTransactionGroup.m in Sources */,
