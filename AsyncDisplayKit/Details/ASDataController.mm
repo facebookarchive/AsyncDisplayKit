@@ -843,7 +843,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (void)dealloc
 {
   ASDisplayNodeAssertMainThread();
-  [_completedNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL * _Nonnull stop) {
+  [_completedNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
     [nodes enumerateObjectsUsingBlock:^(NSMutableArray *section, NSUInteger sectionIndex, BOOL *stop) {
       [section enumerateObjectsUsingBlock:^(ASDisplayNode *node, NSUInteger rowIndex, BOOL *stop) {
         if (node.isNodeLoaded) {

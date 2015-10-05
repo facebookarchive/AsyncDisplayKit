@@ -32,7 +32,7 @@
   _pendingIndexPaths = [NSMutableDictionary dictionary];
 
   NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
-  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL * _Nonnull stop) {
+  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
     ASLOG(@"Populating elements of kind: %@", kind);
     NSMutableArray *indexPaths = [NSMutableArray array];
     NSMutableArray *nodes = [NSMutableArray array];
