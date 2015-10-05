@@ -175,6 +175,8 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (nullable ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath;
 
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
+
 - (NSArray<ASCellNode *> *)nodesAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
 
 - (NSArray<NSArray <ASCellNode *> *> *)completedNodes;  // This provides efficient access to the entire _completedNodes multidimensional array.

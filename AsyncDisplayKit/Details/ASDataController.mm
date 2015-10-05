@@ -24,7 +24,8 @@ const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
 static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 @interface ASDataController () {
-  NSMutableArray *_completedNodes;            // Main thread only.  External data access can immediately query this.
+  NSMutableArray *_externalCompletedNodes;    // Main thread only.  External data access can immediately query this if available.
+  NSMutableArray *_completedNodes;            // Main thread only.  External data access can immediately query this if _externalCompletedNodes is unavailable.
   NSMutableArray *_editingNodes;              // Modified on _editingTransactionQueue only.  Updates propogated to _completedNodes.
   
   NSMutableArray *_pendingEditCommandBlocks;  // To be run on the main thread.  Handles begin/endUpdates tracking.
@@ -104,31 +105,27 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }
   
   dispatch_group_t layoutGroup = dispatch_group_create();
-  
+  ASSizeRange *nodeBoundSizes = (ASSizeRange *)malloc(sizeof(ASSizeRange) * nodes.count);
   for (NSUInteger j = 0; j < nodes.count && j < indexPaths.count; j += kASDataControllerSizingCountPerProcessor) {
-    NSArray *subIndexPaths = [indexPaths subarrayWithRange:NSMakeRange(j, MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j))];
+    NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j);
     
-    //TODO: There should be a fast-path that avoids all of this object creation.
-    NSMutableArray *nodeBoundSizes = [[NSMutableArray alloc] initWithCapacity:kASDataControllerSizingCountPerProcessor];
-    [subIndexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-      ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
-      [nodeBoundSizes addObject:[NSValue valueWithBytes:&constrainedSize objCType:@encode(ASSizeRange)]];
-    }];
+    for (NSUInteger k = j; k < j + batchCount; k++) {
+      nodeBoundSizes[k] = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[k]];
+    }
     
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      [subIndexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-        ASCellNode *node = nodes[j + idx];
-        ASSizeRange constrainedSize;
-        [nodeBoundSizes[idx] getValue:&constrainedSize];
+      for (NSUInteger k = j; k < j + batchCount; k++) {
+        ASCellNode *node = nodes[k];
+        ASSizeRange constrainedSize = nodeBoundSizes[k];
         [node measureWithSizeRange:constrainedSize];
-        node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
-      }];
+        node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
+      }
     });
   }
   
   // Block the _editingTransactionQueue from executing a new edit transaction until layout is done & _editingNodes array is updated.
   dispatch_group_wait(layoutGroup, DISPATCH_TIME_FOREVER);
-  
+  free(nodeBoundSizes);
   // Insert finished nodes into data storage
   [self _insertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
 }
@@ -347,6 +344,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
     [_editingTransactionQueue addOperationWithBlock:^{
       ASDisplayNodePerformBlockOnMainThread(^{
+        // Deep copy _completedNodes to _externalCompletedNodes.
+        // Any external queries from now on will be done on _externalCompletedNodes, to guarantee data consistency with the delegate.
+        _externalCompletedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(_completedNodes);
+
         LOG(@"endUpdatesWithCompletion - begin updates call to delegate");
         [_delegate dataControllerBeginUpdates:self];
       });
@@ -363,6 +364,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     [_editingTransactionQueue addOperationWithBlock:^{
       ASDisplayNodePerformBlockOnMainThread(^{
+        // Now that the transaction is done, _completedNodes can be accessed externally again.
+        _externalCompletedNodes = nil;
+        
         LOG(@"endUpdatesWithCompletion - calling delegate end");
         [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
       });
@@ -617,31 +621,51 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSUInteger)numberOfSections
 {
   ASDisplayNodeAssertMainThread();
-  return [_completedNodes count];
+  return [[self completedNodes] count];
 }
 
 - (NSUInteger)numberOfRowsInSection:(NSUInteger)section
 {
   ASDisplayNodeAssertMainThread();
-  return [_completedNodes[section] count];
+  return [[self completedNodes][section] count];
 }
 
 - (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
-  return _completedNodes[indexPath.section][indexPath.row];
+  return [self completedNodes][indexPath.section][indexPath.row];
+}
+
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
+{
+  ASDisplayNodeAssertMainThread();
+
+  NSArray *nodes = [self completedNodes];
+  NSUInteger numberOfNodes = nodes.count;
+  
+  // Loop through each section to look for the cellNode
+  for (NSUInteger i = 0; i < numberOfNodes; i++) {
+    NSArray *sectionNodes = nodes[i];
+    NSUInteger cellIndex = [sectionNodes indexOfObjectIdenticalTo:cellNode];
+    if (cellIndex != NSNotFound) {
+      return [NSIndexPath indexPathForRow:cellIndex inSection:i];
+    }
+  }
+  
+  return nil;
 }
 
 - (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
-  return ASFindElementsInMultidimensionalArrayAtIndexPaths(_completedNodes, [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
+  return ASFindElementsInMultidimensionalArrayAtIndexPaths((NSMutableArray *)[self completedNodes], [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
 }
 
+/// Returns nodes that can be queried externally. _externalCompletedNodes is used if available, _completedNodes otherwise.
 - (NSArray *)completedNodes
 {
   ASDisplayNodeAssertMainThread();
-  return _completedNodes;
+  return _externalCompletedNodes != nil ? _externalCompletedNodes : _completedNodes;
 }
 
 #pragma mark - Dealloc

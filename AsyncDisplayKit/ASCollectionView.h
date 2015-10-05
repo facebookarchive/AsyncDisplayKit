@@ -214,6 +214,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
+ * Similar to -indexPathForCell:.
+ *
+ * @param cellNode a cellNode part of the table view
+ *
+ * @returns an indexPath for this cellNode
+ */
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
+
+/**
  * Similar to -visibleCells.
  *
  * @returns an array containing the nodes being displayed on screen.

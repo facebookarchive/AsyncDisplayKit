@@ -143,6 +143,7 @@
   _textKitComponents.textView.accessibilityHint = _placeholderTextKitComponents.textStorage.string;
   configureTextView(_textKitComponents.textView);
   [self.view addSubview:_textKitComponents.textView];
+  [self _updateDisplayingPlaceholder];
 }
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
@@ -186,6 +187,12 @@
     _textKitComponents.textView.opaque = opaque;
   }
   _placeholderTextKitComponents.textView.opaque = opaque;
+}
+
+- (void)setLayerBacked:(BOOL)layerBacked
+{
+  ASDisplayNodeAssert(!layerBacked, @"Cannot set layerBacked to YES on ASEditableTextNode – instances must be view-backed in order to ensure touch events can be passed to the internal UITextView during editing.");
+  [super setLayerBacked:layerBacked];
 }
 
 #pragma mark - Configuration

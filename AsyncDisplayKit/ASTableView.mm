@@ -18,6 +18,9 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
+// FIXME: Temporary nonsense import until method names are finalized and exposed
+#import "ASDisplayNode+Subclasses.h"
+
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
@@ -259,7 +262,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
 - (void)setDataSource:(id<UITableViewDataSource>)dataSource
 {
-  ASDisplayNodeAssert(NO, @"ASTableView uses asyncDataSource, not UITableView's dataSource property.");
+  // UIKit can internally generate a call to this method upon changing the asyncDataSource; only assert for non-nil.
+  ASDisplayNodeAssert(dataSource == nil, @"ASTableView uses asyncDataSource, not UITableView's dataSource property.");
 }
 
 - (void)setDelegate:(id<UITableViewDelegate>)delegate
@@ -343,6 +347,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   return [_dataController nodeAtIndexPath:indexPath];
+}
+
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
+{
+  return [_dataController indexPathForNode:cellNode];
 }
 
 - (NSArray *)visibleNodes
@@ -562,6 +571,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)]) {
     [_asyncDelegate tableView:self willDisplayNodeForRowAtIndexPath:indexPath];
+  }
+
+  ASCellNode *cellNode = [self nodeForRowAtIndexPath:indexPath];
+  if (cellNode.neverShowPlaceholders) {
+    [cellNode recursivelyEnsureDisplay];
   }
 }
 

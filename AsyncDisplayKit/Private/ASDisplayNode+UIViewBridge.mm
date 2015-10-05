@@ -60,7 +60,7 @@
 #define _messageToLayer(layerSelector) __loaded ? [_layer layerSelector] : [self.pendingViewState layerSelector]
 
 /**
- * This category implements certainly frequently-used properties and methods of UIView and CALayer so that ASDisplayNode clients can just call the view/layer methods on the node,
+ * This category implements certain frequently-used properties and methods of UIView and CALayer so that ASDisplayNode clients can just call the view/layer methods on the node,
  * with minimal loss in performance.  Unlike UIView and CALayer methods, these can be called from a non-main thread until the view or layer is created.
  * This allows text sizing in -calculateSizeThatFits: (essentially a simplified layout) to happen off the main thread
  * without any CALayer or UIView actually existing while still being able to set and read properties from ASDisplayNode instances.
@@ -122,7 +122,7 @@
   // Frame is only defined when transform is identity.
 #if DEBUG
   // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
-  ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"Must be an identity transform");
+  ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode frame] - self.transform must be identity in order to use the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
 #endif
 
   CGPoint position = self.position;
@@ -140,7 +140,7 @@
   // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
 #if DEBUG
   // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
-  ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"Must be an identity transform");
+  ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
 #endif
 
   BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());

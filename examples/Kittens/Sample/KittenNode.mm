@@ -38,7 +38,7 @@ static const CGFloat kInnerPadding = 10.0f;
 
 @implementation KittenNode
 
-// lorem ipsum text courtesy http://kittyipsum.com/ <3
+// lorem ipsum text courtesy https://kittyipsum.com/ <3
 + (NSArray *)placeholders
 {
   static NSArray *placeholders = nil;
@@ -82,7 +82,7 @@ static const CGFloat kInnerPadding = 10.0f;
   // kitten image, with a solid background colour serving as placeholder
   _imageNode = [[ASNetworkImageNode alloc] init];
   _imageNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
-  _imageNode.URL = [NSURL URLWithString:[NSString stringWithFormat:@"http://placekitten.com/%zd/%zd",
+  _imageNode.URL = [NSURL URLWithString:[NSString stringWithFormat:@"https://placekitten.com/%zd/%zd",
                                                                    (NSInteger)roundl(_kittenSize.width),
                                                                    (NSInteger)roundl(_kittenSize.height)]];
 //  _imageNode.contentMode = UIViewContentModeCenter;

@@ -94,6 +94,8 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   // Capture these outside the display block so they are retained.
   UIColor *backgroundColor = self.backgroundColor;
   CGRect bounds = self.bounds;
+  CGFloat cornerRadius = self.cornerRadius;
+  BOOL clipsToBounds = self.clipsToBounds;
 
   CGRect frame;
   
@@ -129,7 +131,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       CGContextTranslateCTM(context, frame.origin.x, frame.origin.y);
 
       //support cornerRadius
-      if (rasterizingFromAscendent && self.cornerRadius && self.clipsToBounds) {
+      if (rasterizingFromAscendent && cornerRadius && clipsToBounds) {
         [[UIBezierPath bezierPathWithRoundedRect:bounds cornerRadius:self.cornerRadius] addClip];
       }
 
@@ -308,16 +310,14 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     return BOOL(displaySentinelValue != displaySentinel.value);
   };
 
-  // If we're participating in an ancestor's asyncTransaction, find it here
-  ASDisplayNodeAssert(_layer, @"Expect _layer to be not nil");
-  CALayer *containerLayer = _layer.asyncdisplaykit_parentTransactionContainer ?: _layer;
-  _ASAsyncTransaction *transaction = containerLayer.asyncdisplaykit_asyncTransaction;
-
   // Set up displayBlock to call either display or draw on the delegate and return a UIImage contents
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = [self _displayBlockWithAsynchronous:asynchronously isCancelledBlock:isCancelledBlock rasterizing:NO];
+  
   if (!displayBlock) {
     return;
   }
+  
+  ASDisplayNodeAssert(_layer, @"Expect _layer to be not nil");
 
   // This block is called back on the main thread after rendering at the completion of the current async transaction, or immediately if !asynchronously
   asyncdisplaykit_async_transaction_operation_completion_block_t completionBlock = ^(id<NSObject> value, BOOL canceled){
@@ -335,16 +335,27 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     }
   };
 
-  if (displayBlock != NULL) {
-    // Call willDisplay immediately in either case
-    [self willDisplayAsyncLayer:self.asyncLayer];
+  // Call willDisplay immediately in either case
+  [self willDisplayAsyncLayer:self.asyncLayer];
 
-    if (asynchronously) {
-      [transaction addOperationWithBlock:displayBlock queue:[_ASDisplayLayer displayQueue] completion:completionBlock];
-    } else {
-      UIImage *contents = (UIImage *)displayBlock();
-      completionBlock(contents, NO);
-    }
+  if (asynchronously) {
+    // Async rendering operations are contained by a transaction, which allows them to proceed and concurrently
+    // while synchronizing the final application of the results to the layer's contents property (completionBlock).
+    
+    // First, look to see if we are expected to join a parent's transaction container.
+    CALayer *containerLayer = _layer.asyncdisplaykit_parentTransactionContainer ?: _layer;
+    
+    // In the case that a transaction does not yet exist (such as for an individual node outside of a container),
+    // this call will allocate the transaction and add it to _ASAsyncTransactionGroup.
+    // It will automatically commit the transaction at the end of the runloop.
+    _ASAsyncTransaction *transaction = containerLayer.asyncdisplaykit_asyncTransaction;
+    
+    // Adding this displayBlock operation to the transaction will start it IMMEDIATELY.
+    // The only function of the transaction commit is to gate the calling of the completionBlock.
+    [transaction addOperationWithBlock:displayBlock queue:[_ASDisplayLayer displayQueue] completion:completionBlock];
+  } else {
+    UIImage *contents = (UIImage *)displayBlock();
+    completionBlock(contents, NO);
   }
 }
 

@@ -11,6 +11,7 @@ env:
   - MODE=tests
   - MODE=examples
   - MODE=life-without-cocoapods
+  - MODE=framework
 script: ./build.sh $MODE
 after_success:
   - slather
