@@ -105,31 +105,27 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }
   
   dispatch_group_t layoutGroup = dispatch_group_create();
-  
+  ASSizeRange *nodeBoundSizes = (ASSizeRange *)malloc(sizeof(ASSizeRange) * nodes.count);
   for (NSUInteger j = 0; j < nodes.count && j < indexPaths.count; j += kASDataControllerSizingCountPerProcessor) {
-    NSArray *subIndexPaths = [indexPaths subarrayWithRange:NSMakeRange(j, MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j))];
+    NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j);
     
-    //TODO: There should be a fast-path that avoids all of this object creation.
-    NSMutableArray *nodeBoundSizes = [[NSMutableArray alloc] initWithCapacity:kASDataControllerSizingCountPerProcessor];
-    [subIndexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-      ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
-      [nodeBoundSizes addObject:[NSValue valueWithBytes:&constrainedSize objCType:@encode(ASSizeRange)]];
-    }];
+    for (NSUInteger k = j; k < j + batchCount; k++) {
+      nodeBoundSizes[k] = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[k]];
+    }
     
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      [subIndexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-        ASCellNode *node = nodes[j + idx];
-        ASSizeRange constrainedSize;
-        [nodeBoundSizes[idx] getValue:&constrainedSize];
+      for (NSUInteger k = j; k < j + batchCount; k++) {
+        ASCellNode *node = nodes[k];
+        ASSizeRange constrainedSize = nodeBoundSizes[k];
         [node measureWithSizeRange:constrainedSize];
-        node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
-      }];
+        node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
+      }
     });
   }
   
   // Block the _editingTransactionQueue from executing a new edit transaction until layout is done & _editingNodes array is updated.
   dispatch_group_wait(layoutGroup, DISPATCH_TIME_FOREVER);
-  
+  free(nodeBoundSizes);
   // Insert finished nodes into data storage
   [self _insertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
 }
