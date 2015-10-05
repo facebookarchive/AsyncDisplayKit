@@ -131,9 +131,9 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       CGContextTranslateCTM(context, frame.origin.x, frame.origin.y);
 
       //support cornerRadius
-      if (clipsToBounds) {
+      if (rasterizingFromAscendent && clipsToBounds) {
         if (cornerRadius) {
-          [[UIBezierPath bezierPathWithRoundedRect:bounds cornerRadius:self.cornerRadius] addClip];
+          [[UIBezierPath bezierPathWithRoundedRect:bounds cornerRadius:cornerRadius] addClip];
         } else {
           [[UIBezierPath bezierPathWithRect:bounds] addClip];
         }
