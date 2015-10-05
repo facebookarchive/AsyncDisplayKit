@@ -450,7 +450,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (NSString *)__reuseIdentifierForKind:(NSString *)kind
 {
-  return [NSString stringWithFormat:@"_ASCollectionSupplementaryView_%@", kind];
+  return [@"_ASCollectionSupplementaryView_" stringByAppendingString:kind];
 }
 
 #pragma mark -
