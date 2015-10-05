@@ -12,6 +12,7 @@
 #import "ViewController.h"
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import "SupplementaryNode.h"
 
 @interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
 {
@@ -32,8 +33,8 @@
     return nil;
   
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
   layout.headerReferenceSize = CGSizeMake(50.0, 50.0);
+  layout.footerReferenceSize = CGSizeMake(50.0, 50.0);
   
   _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:YES];
   _collectionView.asyncDataSource = self;
@@ -79,7 +80,8 @@
 
 - (ASDisplayNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  NSString *text = [kind isEqualToString:UICollectionElementKindSectionHeader] ? @"Header" : @"Footer";
+  SupplementaryNode *node = [[SupplementaryNode alloc] initWithText:text];
   if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
     node.backgroundColor = [UIColor blueColor];
   } else {
