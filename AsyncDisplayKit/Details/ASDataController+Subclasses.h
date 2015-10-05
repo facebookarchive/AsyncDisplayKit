@@ -35,7 +35,7 @@
  */
 - (void)willReloadData;
 
-- (NSMutableDictionary *)internalCompletedNodes;
+- (NSArray *)completedNodesOfKind:(NSString *)kind;
 
 /**
  * Measure and layout the given nodes in optimized batches, constraining each to a given size.

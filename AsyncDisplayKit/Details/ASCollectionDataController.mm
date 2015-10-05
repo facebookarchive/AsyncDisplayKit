@@ -80,7 +80,7 @@
 - (ASDisplayNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
-  return [self internalCompletedNodes][kind][indexPath.section][indexPath.item];
+  return [self completedNodesOfKind:kind][indexPath.section][indexPath.item];
 }
 
 - (id<ASCollectionDataControllerSource>)collectionDataSource

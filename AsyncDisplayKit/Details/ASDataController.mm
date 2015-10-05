@@ -781,9 +781,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Data Querying (Subclass API)
 
-- (NSMutableDictionary *)internalCompletedNodes
+- (NSArray *)completedNodesOfKind:(NSString *)kind
 {
-  return _completedNodes;
+  return _completedNodes[kind];
 }
 
 #pragma mark - Data Querying (External API)
