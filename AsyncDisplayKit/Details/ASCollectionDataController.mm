@@ -8,12 +8,14 @@
 
 #import "ASCollectionDataController.h"
 
-#import "ASLog.h"
 #import "ASAssert.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDataController+Subclasses.h"
+
+//#define LOG(...) NSLog(__VA_ARGS__)
+#define LOG(...)
 
 @interface ASCollectionDataController ()
 
@@ -33,7 +35,7 @@
 
   NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
   [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
-    ASLOG(@"Populating elements of kind: %@", kind);
+    LOG(@"Populating elements of kind: %@", kind);
     NSMutableArray *indexPaths = [NSMutableArray array];
     NSMutableArray *nodes = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind withMutableNodes:nodes mutableIndexPaths:indexPaths];
@@ -45,7 +47,7 @@
 - (void)willReloadData
 {
   [_pendingNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
-    ASLOG(@"Batch layout nodes of kind: %@, (%@)", kind, nodes);
+    LOG(@"Batch layout nodes of kind: %@, (%@)", kind, nodes);
 
     // Insert each section
     NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryKind:kind];

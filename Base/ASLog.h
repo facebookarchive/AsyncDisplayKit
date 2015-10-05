@@ -8,9 +8,6 @@
 
 #pragma once
 
-//#define ASLOG(...) NSLog(__VA_ARGS__)
-#define ASLOG(...)
-
 #define ASMultiplexImageNodeLogDebug(...)
 #define ASMultiplexImageNodeCLogDebug(...)
 

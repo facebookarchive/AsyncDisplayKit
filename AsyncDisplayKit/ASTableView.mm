@@ -8,7 +8,6 @@
 
 #import "ASTableView.h"
 
-#import "ASLog.h"
 #import "ASAssert.h"
 #import "ASDataController.h"
 #import "ASCollectionViewLayoutController.h"
@@ -21,6 +20,9 @@
 
 // FIXME: Temporary nonsense import until method names are finalized and exposed
 #import "ASDisplayNode+Subclasses.h"
+
+//#define LOG(...) NSLog(__VA_ARGS__)
+#define LOG(...)
 
 #pragma mark -
 #pragma mark Proxying.
@@ -647,7 +649,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
-  ASLOG(@"--- UITableView beginUpdates");
+  LOG(@"--- UITableView beginUpdates");
 
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
@@ -663,7 +665,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
-  ASLOG(@"--- UITableView endUpdates");
+  LOG(@"--- UITableView endUpdates");
 
   if (!self.asyncDataSource) {
     if (completion) {
@@ -749,7 +751,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  ASLOG(@"UITableView insertRows:%ld rows", indexPaths.count);
+  LOG(@"UITableView insertRows:%ld rows", indexPaths.count);
 
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
@@ -768,7 +770,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  ASLOG(@"UITableView deleteRows:%ld rows", indexPaths.count);
+  LOG(@"UITableView deleteRows:%ld rows", indexPaths.count);
 
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
@@ -787,7 +789,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  ASLOG(@"UITableView insertSections:%@", indexSet);
+  LOG(@"UITableView insertSections:%@", indexSet);
 
 
   if (!self.asyncDataSource) {
@@ -803,7 +805,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  ASLOG(@"UITableView deleteSections:%@", indexSet);
+  LOG(@"UITableView deleteSections:%@", indexSet);
 
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
