@@ -118,7 +118,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         ASCellNode *node = nodes[k];
         ASSizeRange constrainedSize = nodeBoundSizes[k - j];
         [node measureWithSizeRange:constrainedSize];
-        node.frame.size = node.calculatedSize;
+        node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
       }
     });
   }
