@@ -796,4 +796,212 @@
     view.accessibilityIdentifier = accessibilityIdentifier;
 }
 
++ (_ASPendingState *)pendingViewStateFromLayer:(CALayer *)layer
+{
+  _ASPendingState *pendingState = [[_ASPendingState alloc] init];
+  
+  pendingState.anchorPoint = layer.anchorPoint;
+  (pendingState->_flags).setAnchorPoint = YES;
+  
+  pendingState.position = layer.position;
+  (pendingState->_flags).setPosition = YES;
+  
+  pendingState.zPosition = layer.zPosition;
+  (pendingState->_flags).setZPosition = YES;
+  
+  pendingState.bounds = layer.bounds;
+  (pendingState->_flags).setBounds = YES;
+  
+  pendingState.contentsScale = layer.contentsScale;
+  (pendingState->_flags).setContentsScale = YES;
+  
+  pendingState.transform = layer.transform;
+  (pendingState->_flags).setTransform = YES;
+  
+  pendingState.sublayerTransform = layer.sublayerTransform;
+  (pendingState->_flags).setSublayerTransform = YES;
+  
+  pendingState.contents = layer.contents;
+  (pendingState->_flags).setContents = YES;
+  
+  pendingState.clipsToBounds = layer.masksToBounds;
+  (pendingState->_flags).setClipsToBounds = YES;
+  
+  pendingState.backgroundColor = layer.backgroundColor;
+  (pendingState->_flags).setBackgroundColor = YES;
+  
+  pendingState.opaque = layer.opaque;
+  (pendingState->_flags).setOpaque = YES;
+  
+  pendingState.hidden = layer.hidden;
+  (pendingState->_flags).setHidden = YES;
+  
+  pendingState.alpha = layer.opacity;
+  (pendingState->_flags).setAlpha = YES;
+  
+  pendingState.cornerRadius = layer.cornerRadius;
+  (pendingState->_flags).setCornerRadius = YES;
+  
+  pendingState.contentMode = ASDisplayNodeUIContentModeFromCAContentsGravity(layer.contentsGravity);
+  (pendingState->_flags).setContentMode = YES;
+  
+  pendingState.shadowColor = layer.shadowColor;
+  (pendingState->_flags).setShadowColor = YES;
+  
+  pendingState.shadowOpacity = layer.shadowOpacity;
+  (pendingState->_flags).setShadowOpacity = YES;
+  
+  pendingState.shadowOffset = layer.shadowOffset;
+  (pendingState->_flags).setShadowOffset = YES;
+  
+  pendingState.shadowRadius = layer.shadowRadius;
+  (pendingState->_flags).setShadowRadius = YES;
+  
+  pendingState.borderWidth = layer.borderWidth;
+  (pendingState->_flags).setBorderWidth = YES;
+  
+  pendingState.borderColor = layer.borderColor;
+  (pendingState->_flags).setBorderColor = YES;
+  
+  pendingState.needsDisplayOnBoundsChange = layer.needsDisplayOnBoundsChange;
+  (pendingState->_flags).setNeedsDisplayOnBoundsChange = YES;
+  
+  pendingState.allowsEdgeAntialiasing = layer.allowsEdgeAntialiasing;
+  (pendingState->_flags).setAllowsEdgeAntialiasing = YES;
+  
+  pendingState.edgeAntialiasingMask = layer.edgeAntialiasingMask;
+  (pendingState->_flags).setEdgeAntialiasingMask = YES;
+  
+  return pendingState;
+}
+
++ (_ASPendingState *)pendingViewStateFromView:(UIView *)view
+{
+  _ASPendingState *pendingState = [[_ASPendingState alloc] init];
+  
+  CALayer *layer = view.layer;
+  
+  pendingState.anchorPoint = layer.anchorPoint;
+  (pendingState->_flags).setAnchorPoint = YES;
+  
+  pendingState.position = layer.position;
+  (pendingState->_flags).setPosition = YES;
+  
+  pendingState.zPosition = layer.zPosition;
+  (pendingState->_flags).setZPosition = YES;
+  
+  pendingState.bounds = view.bounds;
+  (pendingState->_flags).setBounds = YES;
+  
+  pendingState.contentsScale = layer.contentsScale;
+  (pendingState->_flags).setContentsScale = YES;
+  
+  pendingState.transform = layer.transform;
+  (pendingState->_flags).setTransform = YES;
+  
+  pendingState.sublayerTransform = layer.sublayerTransform;
+  (pendingState->_flags).setSublayerTransform = YES;
+  
+  pendingState.contents = layer.contents;
+  (pendingState->_flags).setContents = YES;
+  
+  pendingState.clipsToBounds = view.clipsToBounds;
+  (pendingState->_flags).setClipsToBounds = YES;
+  
+  pendingState.backgroundColor = layer.backgroundColor;
+  (pendingState->_flags).setBackgroundColor = YES;
+  
+  pendingState.tintColor = view.tintColor;
+  (pendingState->_flags).setTintColor = YES;
+  
+  pendingState.opaque = layer.opaque;
+  (pendingState->_flags).setOpaque = YES;
+  
+  pendingState.hidden = view.hidden;
+  (pendingState->_flags).setHidden = YES;
+  
+  pendingState.alpha = view.alpha;
+  (pendingState->_flags).setAlpha = YES;
+  
+  pendingState.cornerRadius = layer.cornerRadius;
+  (pendingState->_flags).setCornerRadius = YES;
+  
+  pendingState.contentMode = view.contentMode;
+  (pendingState->_flags).setContentMode = YES;
+  
+  pendingState.userInteractionEnabled = view.userInteractionEnabled;
+  (pendingState->_flags).setUserInteractionEnabled = YES;
+  
+  pendingState.exclusiveTouch = view.exclusiveTouch;
+  (pendingState->_flags).setExclusiveTouch = YES;
+  
+  pendingState.shadowColor = layer.shadowColor;
+  (pendingState->_flags).setShadowColor = YES;
+  
+  pendingState.shadowOpacity = layer.shadowOpacity;
+  (pendingState->_flags).setShadowOpacity = YES;
+  
+  pendingState.shadowOffset = layer.shadowOffset;
+  (pendingState->_flags).setShadowOffset = YES;
+  
+  pendingState.shadowRadius = layer.shadowRadius;
+  (pendingState->_flags).setShadowRadius = YES;
+  
+  pendingState.borderWidth = layer.borderWidth;
+  (pendingState->_flags).setBorderWidth = YES;
+  
+  pendingState.borderColor = layer.borderColor;
+  (pendingState->_flags).setBorderColor = YES;
+  
+  pendingState.autoresizingMask = view.autoresizingMask;
+  (pendingState->_flags).setAutoresizingMask = YES;
+  
+  pendingState.autoresizesSubviews = view.autoresizesSubviews;
+  (pendingState->_flags).setAutoresizesSubviews = YES;
+  
+  pendingState.needsDisplayOnBoundsChange = layer.needsDisplayOnBoundsChange;
+  (pendingState->_flags).setNeedsDisplayOnBoundsChange = YES;
+  
+  pendingState.allowsEdgeAntialiasing = layer.allowsEdgeAntialiasing;
+  (pendingState->_flags).setAllowsEdgeAntialiasing = YES;
+  
+  pendingState.edgeAntialiasingMask = layer.edgeAntialiasingMask;
+  (pendingState->_flags).setEdgeAntialiasingMask = YES;
+
+  pendingState.isAccessibilityElement = view.isAccessibilityElement;
+  (pendingState->_flags).setIsAccessibilityElement = YES;
+  
+  pendingState.accessibilityLabel = view.accessibilityLabel;
+  (pendingState->_flags).setAccessibilityLabel = YES;
+  
+  pendingState.accessibilityHint = view.accessibilityHint;
+  (pendingState->_flags).setAccessibilityHint = YES;
+  
+  pendingState.accessibilityValue = view.accessibilityValue;
+  (pendingState->_flags).setAccessibilityValue = YES;
+  
+  pendingState.accessibilityTraits = view.accessibilityTraits;
+  (pendingState->_flags).setAccessibilityTraits = YES;
+  
+  pendingState.accessibilityFrame = view.accessibilityFrame;
+  (pendingState->_flags).setAccessibilityFrame = YES;
+  
+  pendingState.accessibilityLanguage = view.accessibilityLanguage;
+  (pendingState->_flags).setAccessibilityLanguage = YES;
+  
+  pendingState.accessibilityElementsHidden = view.accessibilityElementsHidden;
+  (pendingState->_flags).setAccessibilityElementsHidden = YES;
+  
+  pendingState.accessibilityViewIsModal = view.accessibilityViewIsModal;
+  (pendingState->_flags).setAccessibilityViewIsModal = YES;
+  
+  pendingState.shouldGroupAccessibilityChildren = view.shouldGroupAccessibilityChildren;
+  (pendingState->_flags).setShouldGroupAccessibilityChildren = YES;
+  
+  pendingState.accessibilityIdentifier = view.accessibilityIdentifier;
+  (pendingState->_flags).setAccessibilityIdentifier = YES;
+  
+  return pendingState;
+}
+
 @end
