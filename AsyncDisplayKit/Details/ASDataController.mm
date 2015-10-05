@@ -116,7 +116,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       for (NSUInteger k = j; k < j + batchCount; k++) {
         ASCellNode *node = nodes[k];
-        ASSizeRange constrainedSize = nodeBoundSizes[k - j];
+        ASSizeRange constrainedSize = nodeBoundSizes[k];
         [node measureWithSizeRange:constrainedSize];
         node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
       }
