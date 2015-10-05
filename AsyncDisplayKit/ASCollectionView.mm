@@ -394,6 +394,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)registerSupplementaryNodeOfKind:(NSString *)elementKind
 {
+  ASDisplayNodeAssert(elementKind != nil, @"A kind is needed for supplementary node registration");
   [_registeredSupplementaryKinds addObject:elementKind];
   [self registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:elementKind
                                             withReuseIdentifier:[self __reuseIdentifierForKind:elementKind]];
