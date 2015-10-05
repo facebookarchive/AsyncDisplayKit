@@ -122,7 +122,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
-- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
+- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constrainedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
 {
   NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
   
@@ -132,7 +132,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     NSArray *batchedIndexPaths = [indexPaths subarrayWithRange:batchedRange];
     NSArray *batchedNodes = [nodes subarrayWithRange:batchedRange];
     
-    [self _layoutNodes:batchedNodes atIndexPaths:batchedIndexPaths constrainedSize:constraintedSizeBlock completion:completionBlock];
+    [self _layoutNodes:batchedNodes atIndexPaths:batchedIndexPaths constrainedSize:constrainedSizeBlock completion:completionBlock];
   }
 }
 
@@ -149,7 +149,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
-- (void)_layoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
+- (void)_layoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constrainedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
 {
   ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"Cell node layout must be initiated from edit transaction queue");
   
@@ -165,7 +165,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     for (NSUInteger k = j; k < j + batchCount; k++) {
       ASCellNode *node = nodes[k];
       if (!node.isNodeLoaded) {
-        nodeBoundSizes[k] = constraintedSizeBlock(indexPaths[k]);
+        nodeBoundSizes[k] = constrainedSizeBlock(indexPaths[k]);
       }
     }
     

@@ -40,7 +40,7 @@
 /**
  * Measure and layout the given nodes in optimized batches, constraining each to a given size.
  */
-- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constraintedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
+- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constrainedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
 
 - (void)insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
 
