@@ -14,6 +14,8 @@
 @class ASCellNode;
 @class ASDataController;
 
+FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
+
 typedef NSUInteger ASDataControllerAnimationOptions;
 
 /**

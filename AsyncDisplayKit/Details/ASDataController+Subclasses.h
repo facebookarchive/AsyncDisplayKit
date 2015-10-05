@@ -35,19 +35,39 @@
  */
 - (void)willReloadData;
 
+/**
+ * Read only access to the underlying completed nodes of the given kind
+ */
 - (NSArray *)completedNodesOfKind:(NSString *)kind;
 
 /**
- * Measure and layout the given nodes in optimized batches, constraining each to a given size.
+ * Measure and layout the given nodes in optimized batches, constraining each to a given size in `constrainedSizeForNodeOfKind:atIndexPath:`.
  */
-- (void)batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths constrainedSize:(ASSizeRange (^)(NSIndexPath *indexPath))constrainedSizeBlock completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
+- (void)batchLayoutNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
 
+/**
+ * Provides the size range for a specific node during the layout process.
+ */
+- (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Inserts the given nodes of the specified kind into the backing store, calling completion on the main thread when the write finishes.
+ */
 - (void)insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
 
+/**
+ * Deletes the given nodes of the specified kind in the backing store, calling completion on the main thread when the deletion finishes.
+ */
 - (void)deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
 
+/**
+ * Inserts the given sections of the specified kind in the backing store, calling completion on the main thread when finished.
+ */
 - (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSArray *sections, NSIndexSet *indexSet))completionBlock;
 
+/**
+ * Deletes the given sections of the specified kind in the backing store, calling completion on the main thread when finished.
+ */
 - (void)deleteSectionsOfKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSIndexSet *indexSet))completionBlock;
 
 @end

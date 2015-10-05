@@ -57,12 +57,19 @@
     }
     [self insertSections:sections ofKind:kind atIndexSet:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)] completion:nil];
     
-    [self batchLayoutNodes:nodes atIndexPaths:_pendingIndexPaths[kind] constrainedSize:^ASSizeRange(NSIndexPath *indexPath) {
-      return [self.collectionDataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
-    } completion:^(NSArray *nodes, NSArray *indexPaths) {
+    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:_pendingIndexPaths[kind] completion:^(NSArray *nodes, NSArray *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
   }];
+}
+
+- (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  if ([kind isEqualToString:ASDataControllerRowNodeKind]) {
+    return [super constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+  } else {
+    return [self.collectionDataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+  }
 }
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
