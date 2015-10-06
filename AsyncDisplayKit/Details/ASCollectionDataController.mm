@@ -104,6 +104,17 @@
 
 - (void)willDeleteSections:(NSIndexSet *)sections
 {
+  NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
+  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+    NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], sections);
+    
+    [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
+    [self deleteSectionsOfKind:kind atIndexSet:sections completion:nil];
+  }];
+}
+
+- (void)prepareForReloadSections:(NSIndexSet *)sections
+{
   // TODO: Implement
 }
 
