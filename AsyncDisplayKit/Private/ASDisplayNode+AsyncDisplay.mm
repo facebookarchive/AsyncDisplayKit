@@ -117,8 +117,8 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   // Get the display block for this node.
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = [self _displayBlockWithAsynchronous:NO isCancelledBlock:isCancelledBlock rasterizing:YES];
 
-  // We'll display something if there is a display block and/or a background color.
-  BOOL shouldDisplay = displayBlock || backgroundColor;
+  // We'll display something if there is a display block, clipping, translation and/or a background color.
+  BOOL shouldDisplay = displayBlock || backgroundColor || CGPointEqualToPoint(CGPointZero, frame.origin) == NO || clipsToBounds;
 
   // If we should display, then push a transform, draw the background color, and draw the contents.
   // The transform is popped in a block added after the recursion into subnodes.
@@ -131,8 +131,12 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       CGContextTranslateCTM(context, frame.origin.x, frame.origin.y);
 
       //support cornerRadius
-      if (rasterizingFromAscendent && cornerRadius && clipsToBounds) {
-        [[UIBezierPath bezierPathWithRoundedRect:bounds cornerRadius:self.cornerRadius] addClip];
+      if (rasterizingFromAscendent && clipsToBounds) {
+        if (cornerRadius) {
+          [[UIBezierPath bezierPathWithRoundedRect:bounds cornerRadius:cornerRadius] addClip];
+        } else {
+          [[UIBezierPath bezierPathWithRect:bounds] addClip];
+        }
       }
 
       // Fill background if any.
