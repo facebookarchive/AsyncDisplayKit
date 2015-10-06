@@ -518,17 +518,33 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   ASDisplayNodeAssertNotNil(request, @"request is required");
   ASDisplayNodeAssertNotNil(completionBlock, @"completionBlock is required");
   
+  /*
+   * Locking rationale:
+   * As of iOS 9, Photos.framework will eventually deadlock if you hit it with concurrent fetch requests. rdar://22984886
+   * Image requests are OK, but metadata requests aren't, so we limit ourselves to one at a time.
+   
+   * -[PHFetchResult dealloc] plays a role in this deadlock, so we help the fetch result die ASAP by never storing it.
+   */
+  static NSLock *phRequestLock;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    phRequestLock = [NSLock new];
+  });
+  
   // This is sometimes called on main but there's no reason to stay there
   dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+    
     // Get the PHAsset itself.
-    PHFetchResult *assetFetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:@[request.assetIdentifier] options:nil];
-    if ([assetFetchResult count] == 0) {
+    [phRequestLock lock];
+    PHAsset *imageAsset = [PHAsset fetchAssetsWithLocalIdentifiers:@[request.assetIdentifier] options:nil].firstObject;
+    [phRequestLock unlock];
+    
+    if (imageAsset == nil) {
       // Error.
       completionBlock(nil, nil);
       return;
     }
     
-    PHAsset *imageAsset = [assetFetchResult firstObject];
     PHImageRequestOptions *options = [request.options copy];
     
     // We don't support opportunistic delivery – one request, one image.
