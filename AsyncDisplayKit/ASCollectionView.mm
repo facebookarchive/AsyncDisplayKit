@@ -733,7 +733,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (ASDisplayNode *)dataController:(ASCollectionDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  return [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+  ASDisplayNode *node = [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+  ASDisplayNodeAssert(node != nil, @"A node must be returned for a supplementary node");
+  ASDisplayNodeAssert(!node.nodeLoaded, @"The supplementary node must not be loaded");
+  return node;
 }
 
 - (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController
