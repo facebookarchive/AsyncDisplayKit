@@ -66,7 +66,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   id _loadedImageIdentifier;
   id _loadingImageIdentifier;
   id _displayedImageIdentifier;
-  NSOperation *_phImageRequestOperation;
+  __weak NSOperation *_phImageRequestOperation;
   
   // Networking.
   id _downloadIdentifier;
@@ -547,7 +547,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   [_phImageRequestOperation cancel];
   
   __weak __typeof(self)weakSelf = self;
-  _phImageRequestOperation = [NSBlockOperation blockOperationWithBlock:^{
+  NSOperation *newImageRequestOp = [NSBlockOperation blockOperationWithBlock:^{
     __strong __typeof(weakSelf)strongSelf = weakSelf;
     if (strongSelf == nil) { return; }
     
@@ -590,7 +590,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       }
     }];
   }];
-  [phImageRequestQueue addOperation:_phImageRequestOperation];
+  _phImageRequestOperation = newImageRequestOp;
+  [phImageRequestQueue addOperation:newImageRequestOp];
 }
 
 - (void)_fetchImageWithIdentifierFromCache:(id)imageIdentifier URL:(NSURL *)imageURL completion:(void (^)(UIImage *image))completionBlock
