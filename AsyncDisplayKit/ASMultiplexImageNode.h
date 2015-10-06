@@ -212,6 +212,18 @@ didFinishDownloadingImageWithIdentifier:(id)imageIdentifier
  */
 - (NSURL *)multiplexImageNode:(ASMultiplexImageNode *)imageNode URLForImageIdentifier:(id)imageIdentifier;
 
+/**
+ * @abstract A PHAsset for the specific asset local identifier
+ * @param imageNode The sender.
+ * @param assetLocalIdentifier The local identifier for a PHAsset that this image node is loading.
+ *
+ * @discussion This optional method can improve image performance if your data source already has the PHAsset available.
+ * If this method is not implemented, or returns nil, the image node will request the asset from the Photos framework.
+ * @note This method may be called from any thread.
+ * @return A PHAsset corresponding to `assetLocalIdentifier`, or nil if none is available.
+ */
+- (PHAsset *)multiplexImageNode:(ASMultiplexImageNode *)imageNode assetForLocalIdentifier:(NSString *)assetLocalIdentifier;
+
 @end
 
 #pragma mark - 

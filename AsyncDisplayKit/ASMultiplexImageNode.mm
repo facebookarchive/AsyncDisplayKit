@@ -546,19 +546,23 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   // Each ASMultiplexImageNode can have max 1 inflight Photos image request operation
   [_phImageRequestOperation cancel];
   
-  __weak __typeof(self)weakSelf = self;
+  __weak __typeof(self) weakSelf = self;
   NSOperation *newImageRequestOp = [NSBlockOperation blockOperationWithBlock:^{
-    __strong __typeof(weakSelf)strongSelf = weakSelf;
+    __strong __typeof(weakSelf) strongSelf = weakSelf;
     if (strongSelf == nil) { return; }
     
-    // Get the PHAsset itself.
-    [phRequestLock lock];
-    PHAsset *imageAsset;
-    // -[PHFetchResult dealloc] plays a role in the deadlock mentioned above, so we make sure the PHFetchResult is deallocated inside the critical section
-    @autoreleasepool {
-      imageAsset = [PHAsset fetchAssetsWithLocalIdentifiers:@[request.assetIdentifier] options:nil].firstObject;
+    // Try to get the asset immediately from the data source.
+    PHAsset *imageAsset = [strongSelf.dataSource multiplexImageNode:strongSelf assetForLocalIdentifier:request.assetIdentifier];
+    
+    // Fall back to locking and getting the PHAsset.
+    if (imageAsset == nil) {
+      [phRequestLock lock];
+      // -[PHFetchResult dealloc] plays a role in the deadlock mentioned above, so we make sure the PHFetchResult is deallocated inside the critical section
+      @autoreleasepool {
+        imageAsset = [PHAsset fetchAssetsWithLocalIdentifiers:@[request.assetIdentifier] options:nil].firstObject;
+      }
+      [phRequestLock unlock];
     }
-    [phRequestLock unlock];
     
     if (imageAsset == nil) {
       // Error.
