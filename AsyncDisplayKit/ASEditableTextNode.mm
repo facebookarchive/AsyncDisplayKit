@@ -217,7 +217,7 @@
 
 - (void)setTypingAttributes:(NSDictionary *)typingAttributes
 {
-  if (_typingAttributes == typingAttributes)
+  if (ASObjectIsEqual(typingAttributes, _typingAttributes))
     return;
 
   _typingAttributes = [typingAttributes copy];

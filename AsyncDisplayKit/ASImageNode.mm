@@ -18,6 +18,7 @@
 #import "ASImageNode+CGExtras.h"
 
 #import "ASInternalHelpers.h"
+#import "ASEqualityHelpers.h"
 
 @interface _ASImageNodeDrawParameters : NSObject
 
@@ -123,7 +124,7 @@
 - (void)setImage:(UIImage *)image
 {
   ASDN::MutexLocker l(_imageLock);
-  if (_image != image) {
+  if (!ASObjectIsEqual(_image, image)) {
     _image = image;
 
     ASDN::MutexUnlocker u(_imageLock);

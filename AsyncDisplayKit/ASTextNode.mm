@@ -19,6 +19,7 @@
 
 #import "ASTextNodeRenderer.h"
 #import "ASTextNodeShadower.h"
+#import "ASEqualityHelpers.h"
 
 static const NSTimeInterval ASTextNodeHighlightFadeOutDuration = 0.15;
 static const NSTimeInterval ASTextNodeHighlightFadeInDuration = 0.1;
@@ -315,7 +316,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 #pragma mark - Modifying User Text
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {
-  if (attributedString == _attributedString) {
+  if (ASObjectIsEqual(attributedString, _attributedString)) {
     return;
   }
 
@@ -349,14 +350,16 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (void)setExclusionPaths:(NSArray *)exclusionPaths
 {
-  if ((_exclusionPaths == nil && exclusionPaths != nil) || (![_exclusionPaths  isEqualToArray:exclusionPaths])) {
-    _exclusionPaths = exclusionPaths;
-    [self _invalidateRenderer];
-    [self invalidateCalculatedLayout];
-    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-      [self setNeedsDisplay];
-    });
+  if (ASObjectIsEqual(exclusionPaths, _exclusionPaths)) {
+    return;
   }
+  
+  _exclusionPaths = [exclusionPaths copy];
+  [self _invalidateRenderer];
+  [self invalidateCalculatedLayout];
+  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+    [self setNeedsDisplay];
+  });
 }
 
 - (NSArray *)exclusionPaths
@@ -965,28 +968,22 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 - (void)setTruncationAttributedString:(NSAttributedString *)truncationAttributedString
 {
-  // No-op if they're exactly equal (avoid redrawing)
-  if (_truncationAttributedString == truncationAttributedString) {
+  if (ASObjectIsEqual(_truncationAttributedString, truncationAttributedString)) {
     return;
   }
 
-  if (![_truncationAttributedString isEqual:truncationAttributedString]) {
-    _truncationAttributedString = [truncationAttributedString copy];
-    [self _invalidateTruncationString];
-  }
+  _truncationAttributedString = [truncationAttributedString copy];
+  [self _invalidateTruncationString];
 }
 
 - (void)setAdditionalTruncationMessage:(NSAttributedString *)additionalTruncationMessage
 {
-  // Short circuit if we're setting to nil (prevent redrawing when we don't need to)
-  if (_additionalTruncationMessage == additionalTruncationMessage) {
+  if (ASObjectIsEqual(_additionalTruncationMessage, additionalTruncationMessage)) {
     return;
   }
 
-  if (![_additionalTruncationMessage isEqual:additionalTruncationMessage]) {
-    _additionalTruncationMessage = [additionalTruncationMessage copy];
-    [self _invalidateTruncationString];
-  }
+  _additionalTruncationMessage = [additionalTruncationMessage copy];
+  [self _invalidateTruncationString];
 }
 
 - (void)setTruncationMode:(NSLineBreakMode)truncationMode
