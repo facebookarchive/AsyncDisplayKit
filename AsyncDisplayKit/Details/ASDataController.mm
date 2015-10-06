@@ -623,6 +623,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
+        [self willReloadSections:sections];
+
         NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes[ASDataControllerRowNodeKind], sections);
         
         LOG(@"Edit Transaction - reloadSections: updatedIndexPaths: %@, indexPaths: %@, _editingNodes: %@", updatedIndexPaths, indexPaths, ASIndexPathsForMultidimensionalArray(_editingNodes[ASDataControllerRowNodeKind]));
