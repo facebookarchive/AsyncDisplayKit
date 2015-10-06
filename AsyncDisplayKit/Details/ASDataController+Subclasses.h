@@ -59,12 +59,12 @@
 /**
  * Read-only access to the underlying editing nodes of the given kind
  */
-- (NSArray *)editingNodesOfKind:(NSString *)kind;
+- (NSMutableArray *)editingNodesOfKind:(NSString *)kind;
 
 /**
  * Read only access to the underlying completed nodes of the given kind
  */
-- (NSArray *)completedNodesOfKind:(NSString *)kind;
+- (NSMutableArray *)completedNodesOfKind:(NSString *)kind;
 
 /**
  * Measure and layout the given nodes in optimized batches, constraining each to a given size in `constrainedSizeForNodeOfKind:atIndexPath:`.

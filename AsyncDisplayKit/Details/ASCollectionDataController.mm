@@ -141,7 +141,20 @@
 
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
-  // TODO: Implement
+  NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
+  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+    NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], [NSIndexSet indexSetWithIndex:section]);
+    NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths([self editingNodesOfKind:kind], indexPaths);
+    [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
+    
+    // update the section of indexpaths
+    NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:newSection];
+    NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+    [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
+      [updatedIndexPaths addObject:[sectionIndexPath indexPathByAddingIndex:[indexPath indexAtPosition:indexPath.length - 1]]];
+    }];
+    [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
+  }];
 }
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths

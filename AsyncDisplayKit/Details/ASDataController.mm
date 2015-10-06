@@ -849,12 +849,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   return _editingNodes[kind] != nil ? ASIndexPathsForMultidimensionalArray(_editingNodes[kind]) : [NSArray array];
 }
 
-- (NSArray *)editingNodesOfKind:(NSString *)kind
+- (NSMutableArray *)editingNodesOfKind:(NSString *)kind
 {
-  return _editingNodes[kind] != nil ? _editingNodes[kind] : [NSArray array];
+  return _editingNodes[kind] != nil ? _editingNodes[kind] : [NSMutableArray array];
 }
 
-- (NSArray *)completedNodesOfKind:(NSString *)kind
+- (NSMutableArray *)completedNodesOfKind:(NSString *)kind
 {
   return _completedNodes[kind];
 }
