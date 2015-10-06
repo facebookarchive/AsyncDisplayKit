@@ -331,6 +331,40 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Core
 
+- (void)__tearDown:(BOOL)tearDown subnodesOfNode:(ASDisplayNode *)node
+{
+  for (ASDisplayNode *subnode in node.subnodes) {
+    if (tearDown) {
+      [subnode __unloadNode];
+    } else {
+      [subnode __loadNode];
+    }
+  }
+}
+
+- (void)__unloadNode
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
+  
+  if (_flags.layerBacked)
+    _pendingViewState = [_ASPendingState pendingViewStateFromLayer:_layer];
+  else
+    _pendingViewState = [_ASPendingState pendingViewStateFromView:_view];
+    
+  [_view removeFromSuperview];
+  _view = nil;
+  if (_flags.layerBacked)
+    _layer.delegate = nil;
+  [_layer removeFromSuperlayer];
+  _layer = nil;
+}
+
+- (void)__loadNode
+{
+  [self layer];
+}
+
 - (ASDisplayNode *)__rasterizedContainerNode
 {
   ASDisplayNode *node = self.supernode;
@@ -340,7 +374,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
     node = node.supernode;
   }
-
+  
   return nil;
 }
 
@@ -619,11 +653,22 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
-
+  
   if (_flags.shouldRasterizeDescendants == flag)
     return;
-
+  
   _flags.shouldRasterizeDescendants = flag;
+  
+  if (self.isNodeLoaded) {
+    //recursively tear down or build up subnodes
+    [self recursivelyClearContents];
+    [self __tearDown:flag subnodesOfNode:self];
+    if (flag == NO) {
+      [self _addSubnodeViewsAndLayers];
+    }
+    
+    [self recursivelyDisplayImmediately];
+  }
 }
 
 - (CGFloat)contentsScaleForDisplay
@@ -651,6 +696,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssert(!_flags.synchronous, @"this method is designed for asynchronous mode only");
 
   [[self asyncLayer] displayImmediately];
+}
+
+- (void)recursivelyDisplayImmediately
+{
+  ASDN::MutexLocker l(_propertyLock);
+  for (ASDisplayNode *child in _subnodes) {
+    [child recursivelyDisplayImmediately];
+  }
+  [self displayImmediately];
 }
 
 - (void)__setNeedsLayout
