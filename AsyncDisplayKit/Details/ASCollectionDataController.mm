@@ -71,8 +71,8 @@
     [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:_pendingIndexPaths[kind] completion:^(NSArray *nodes, NSArray *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-    _pendingNodes[kind] = [NSArray array];
-    _pendingIndexPaths[kind] = [NSArray array];
+    _pendingNodes[kind] = nil;
+    _pendingIndexPaths[kind] = nil;
   }];
 }
 
