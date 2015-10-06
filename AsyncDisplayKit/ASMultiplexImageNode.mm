@@ -268,7 +268,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
   OSSpinLockLock(&_imageIdentifiersLock);
 
-  if (_imageIdentifiers == imageIdentifiers) {
+  if ([_imageIdentifiers isEqual:imageIdentifiers]) {
     OSSpinLockUnlock(&_imageIdentifiersLock);
     return;
   }
