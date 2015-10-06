@@ -268,7 +268,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
   OSSpinLockLock(&_imageIdentifiersLock);
 
-  if (_imageIdentifiers == imageIdentifiers) {
+  if ([_imageIdentifiers isEqual:imageIdentifiers]) {
     OSSpinLockUnlock(&_imageIdentifiersLock);
     return;
   }
@@ -372,7 +372,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   OSSpinLockLock(&_imageIdentifiersLock);
 
   // If we've already loaded the best identifier, we've got nothing else to do.
-  id bestImageIdentifier = ([_imageIdentifiers count] > 0) ? _imageIdentifiers[0] : nil;
+  id bestImageIdentifier = _imageIdentifiers.firstObject;
   if (!bestImageIdentifier || [_loadedImageIdentifier isEqual:bestImageIdentifier]) {
     OSSpinLockUnlock(&_imageIdentifiersLock);
     return nil;
