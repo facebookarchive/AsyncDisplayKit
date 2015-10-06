@@ -741,9 +741,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // (see _layoutNodes:atIndexPaths:withAnimationOptions:).
     [_editingTransactionQueue addOperationWithBlock:^{
       ASDisplayNodePerformBlockOnMainThread(^{
-        [_completedNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
+        for (NSString *kind in [_completedNodes keyEnumerator]) {
           [self _relayoutNodesOfKind:kind];
-        }];
+        }
       });
     }];
   }];
