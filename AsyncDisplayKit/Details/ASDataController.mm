@@ -729,37 +729,42 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
-- (void)relayoutAllRows
+- (void)relayoutAllNodes
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
     LOG(@"Edit Command - relayoutRows");
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
-    void (^relayoutNodesBlock)(NSMutableArray *) = ^void(NSMutableArray *nodes) {
-      if (!nodes.count) {
-        return;
-      }
-      
-      [self accessDataSourceWithBlock:^{
-        [nodes enumerateObjectsUsingBlock:^(NSMutableArray *section, NSUInteger sectionIndex, BOOL *stop) {
-          [section enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger rowIndex, BOOL *stop) {
-            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:rowIndex inSection:sectionIndex];
-            ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
-            [node measureWithSizeRange:constrainedSize];
-            node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
-          }];
-        }];
-      }];
-    };
 
     // Can't relayout right away because _completedNodes may not be up-to-date,
     // i.e there might be some nodes that were measured using the old constrained size but haven't been added to _completedNodes
     // (see _layoutNodes:atIndexPaths:withAnimationOptions:).
     [_editingTransactionQueue addOperationWithBlock:^{
       ASDisplayNodePerformBlockOnMainThread(^{
-        relayoutNodesBlock(_completedNodes[ASDataControllerRowNodeKind]);
+        [_completedNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
+          [self _relayoutNodesOfKind:kind];
+        }];
       });
+    }];
+  }];
+}
+
+- (void)_relayoutNodesOfKind:(NSString *)kind
+{
+  ASDisplayNodeAssertMainThread();
+  NSArray *nodes = [self completedNodesOfKind:kind];
+  if (!nodes.count) {
+    return;
+  }
+  
+  [self accessDataSourceWithBlock:^{
+    [nodes enumerateObjectsUsingBlock:^(NSMutableArray *section, NSUInteger sectionIndex, BOOL *stop) {
+      [section enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger rowIndex, BOOL *stop) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:rowIndex inSection:sectionIndex];
+        ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+        [node measureWithSizeRange:constrainedSize];
+        node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+      }];
     }];
   }];
 }

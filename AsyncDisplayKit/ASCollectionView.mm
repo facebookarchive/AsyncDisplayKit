@@ -596,7 +596,7 @@ static BOOL _isInterceptedSelector(SEL sel)
       _ignoreMaxSizeChange = NO;
     } else {
       [self performBatchAnimated:NO updates:^{
-        [_dataController relayoutAllRows];
+        [_dataController relayoutAllNodes];
       } completion:nil];
     }
   }

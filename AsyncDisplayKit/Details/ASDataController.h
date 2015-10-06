@@ -157,10 +157,12 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
- * Re-measures all loaded nodes. Used to respond to a change in size of the containing view 
+ * Re-measures all loaded nodes in the backing store.
+ * 
+ * @discussion Used to respond to a change in size of the containing view
  * (e.g. ASTableView or ASCollectionView after an orientation change).
  */
-- (void)relayoutAllRows;
+- (void)relayoutAllNodes;
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
