@@ -354,7 +354,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
     return;
   }
   
-  _exclusionPaths = exclusionPaths;
+  _exclusionPaths = [exclusionPaths copy];
   [self _invalidateRenderer];
   [self invalidateCalculatedLayout];
   ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
