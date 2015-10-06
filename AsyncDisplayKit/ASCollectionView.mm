@@ -228,13 +228,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   // Register the default layout inspector delegate for flow layouts, custom layouts
   // will need to roll their own ASCollectionViewLayoutInspecting implementation.
-  if ([layout asdk_isFlowLayout]) {
-    _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] init];
-    _flowLayoutInspector.layout = (UICollectionViewFlowLayout *)layout;
-    _flowLayoutInspector.collectionView = self;
-    _layoutDelegate = _flowLayoutInspector;
-  }
-
+  _layoutDelegate = [self flowLayoutInspector];
+  
   _registeredSupplementaryKinds = [NSMutableArray array];
   
   self.backgroundColor = [UIColor whiteColor];
@@ -250,6 +245,21 @@ static BOOL _isInterceptedSelector(SEL sel)
   // This bug might be iOS 7-specific.
   super.delegate  = nil;
   super.dataSource = nil;
+}
+
+/**
+ * A layout inspector implementation specific for the sizing behavior of UICollectionViewFlowLayouts
+ *
+ * @discussion Will return nil if the current layout is not a flow layout
+ */
+- (ASCollectionViewFlowLayoutInspector *)flowLayoutInspector
+{
+    if (_flowLayoutInspector == nil) {
+        UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
+        _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self
+                                                                                        flowLayout:layout];
+    }
+    return _flowLayoutInspector;
 }
 
 #pragma mark -
@@ -326,6 +336,8 @@ static BOOL _isInterceptedSelector(SEL sel)
     super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
     _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
+
+  _flowLayoutInspector.collectionView = self;
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType

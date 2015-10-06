@@ -19,11 +19,25 @@
 
 #pragma mark - Accessors
 
-- (void)setLayout:(UICollectionViewFlowLayout *)layout
+- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout
 {
-  _layout = layout;
-  _delegateImplementsReferenceSizeForHeader = [[self layoutDelegate] respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
-  _delegateImplementsReferenceSizeForFooter = [[self layoutDelegate] respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
+    if (flowLayout == nil) {
+        return nil;
+    }
+
+    self = [super init];
+    if (self != nil) {
+        self.collectionView = collectionView;
+        _layout = flowLayout;
+    }
+    return self;
+}
+
+- (void)setCollectionView:(ASCollectionView *)collectionView
+{
+    _collectionView = collectionView;
+    _delegateImplementsReferenceSizeForHeader = [[self layoutDelegate] respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
+    _delegateImplementsReferenceSizeForFooter = [[self layoutDelegate] respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
 }
 
 #pragma mark - ASCollectionViewLayoutInspecting
@@ -94,9 +108,9 @@
   }
 }
 
-- (id<UICollectionViewDelegateFlowLayout>)layoutDelegate
+- (id<ASCollectionViewDelegateFlowLayout>)layoutDelegate
 {
-  return (id<UICollectionViewDelegateFlowLayout>)self.collectionView.delegate;
+  return (id<ASCollectionViewDelegateFlowLayout>)_collectionView.asyncDelegate;
 }
 
 @end
