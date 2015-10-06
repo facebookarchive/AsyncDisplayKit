@@ -78,12 +78,28 @@
 
 - (void)prepareInsertSections:(NSIndexSet *)sections
 {
-  // TODO: Implement
+  NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
+  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+    LOG(@"Populating elements of kind: %@, for sections: %@", kind, sections);
+    NSMutableArray *nodes = [NSMutableArray array];
+    NSMutableArray *indexPaths = [NSMutableArray array];
+    [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableNodes:nodes mutableIndexPaths:indexPaths];
+    _pendingNodes[kind] = nodes;
+    _pendingIndexPaths[kind] = indexPaths;
+  }];
 }
 
 - (void)willInsertSections:(NSIndexSet *)sections
 {
-  // TODO: Implement
+  [_pendingNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
+    NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:sections.count];
+    for (NSUInteger i = 0; i < sections.count; i++) {
+      [sectionArray addObject:[NSMutableArray array]];
+    }
+    
+    [self insertSections:sectionArray ofKind:kind atIndexSet:sections completion:nil];
+    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:_pendingIndexPaths[kind] completion:nil];
+  }];
 }
 
 - (void)willDeleteSections:(NSIndexSet *)sections
