@@ -786,6 +786,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Data Querying (Subclass API)
 
+- (NSArray *)indexPathsForEditingNodesOfKind:(NSString *)kind
+{
+  return _editingNodes[kind] != nil ? ASIndexPathsForMultidimensionalArray(_editingNodes[kind]) : [NSArray array];
+}
+
+- (NSArray *)editingNodesOfKind:(NSString *)kind
+{
+  return _editingNodes[kind] != nil ? _editingNodes[kind] : [NSArray array];
+}
+
 - (NSArray *)completedNodesOfKind:(NSString *)kind
 {
   return _completedNodes[kind];

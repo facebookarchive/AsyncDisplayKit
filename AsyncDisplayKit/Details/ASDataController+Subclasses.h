@@ -32,8 +32,20 @@
 
 /**
  * Subclasses can override this to reload data after the abstract data controller deletes its old data and before it reloads the new.
+ *
+ * @discussion Invoked on the editing transaction queue.
  */
 - (void)willReloadData;
+
+/**
+ * Provides a collection of index paths for nodes of the given kind that are currently in the editing store
+ */
+- (NSArray *)indexPathsForEditingNodesOfKind:(NSString *)kind;
+
+/**
+ * Read-only access to the underlying editing nodes of the given kind
+ */
+- (NSArray *)editingNodesOfKind:(NSString *)kind;
 
 /**
  * Read only access to the underlying completed nodes of the given kind

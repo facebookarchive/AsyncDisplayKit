@@ -47,7 +47,13 @@
 - (void)willReloadData
 {
   [_pendingNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
-    LOG(@"Batch layout nodes of kind: %@, (%@)", kind, nodes);
+    // Remove everything that existed before the reload, now that we're ready to insert replacements
+    NSArray *indexPaths = [self indexPathsForEditingNodesOfKind:kind];
+    [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
+    
+    NSArray *editingNodes = [self editingNodesOfKind:kind];
+    NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodes.count)];
+    [self deleteSectionsOfKind:kind atIndexSet:indexSet completion:nil];
 
     // Insert each section
     NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryKind:kind];
@@ -60,6 +66,8 @@
     [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:_pendingIndexPaths[kind] completion:^(NSArray *nodes, NSArray *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
+    _pendingNodes[kind] = [NSArray array];
+    _pendingIndexPaths[kind] = [NSArray array];
   }];
 }
 
