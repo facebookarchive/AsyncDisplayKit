@@ -334,6 +334,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
     [self accessDataSourceWithBlock:^{
+      [self willPerformInitialDataLoading];
+
       NSMutableArray *indexPaths = [NSMutableArray array];
       NSUInteger sectionNum = [_dataSource numberOfSectionsInDataController:self];
 
@@ -402,6 +404,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }];
     }];
   }];
+}
+
+#pragma mark - Initial & Reload Data Hooks (Subclass API)
+
+- (void)willPerformInitialDataLoading
+{
+  // Implemented by subclasses
 }
 
 - (void)prepareForReloadData
@@ -538,7 +547,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Section Editing (External API)
 
-- (void)insertSections:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)insertSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
@@ -546,41 +555,47 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     [self accessDataSourceWithBlock:^{
+      [self prepareInsertSections:sections];
+      
       NSMutableArray *updatedNodes = [NSMutableArray array];
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
-      [self _populateFromDataSourceWithSectionIndexSet:indexSet mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
+      [self _populateFromDataSourceWithSectionIndexSet:sections mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
       
       // Measure nodes whose views are loaded before we leave the main thread
       [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
+        [self willInsertSections:sections];
+
         LOG(@"Edit Transaction - insertSections: %@", indexSet);
-        NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:indexSet.count];
-        for (NSUInteger i = 0; i < indexSet.count; i++) {
+        NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:sections.count];
+        for (NSUInteger i = 0; i < sections.count; i++) {
           [sectionArray addObject:[NSMutableArray array]];
         }
         
-        [self _insertSections:sectionArray atIndexSet:indexSet withAnimationOptions:animationOptions];
+        [self _insertSections:sectionArray atIndexSet:sections withAnimationOptions:animationOptions];
         [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
       }];
     }];
   }];
 }
 
-- (void)deleteSections:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)deleteSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
-    LOG(@"Edit Command - deleteSections: %@", indexSet);
+    LOG(@"Edit Command - deleteSections: %@", sections);
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
     [_editingTransactionQueue addOperationWithBlock:^{
+      [self willDeleteSections:sections];
+
       // remove elements
-      LOG(@"Edit Transaction - deleteSections: %@", indexSet);
-      NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes[ASDataControllerRowNodeKind], indexSet);
+      LOG(@"Edit Transaction - deleteSections: %@", sections);
+      NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes[ASDataControllerRowNodeKind], sections);
       
       [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-      [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
+      [self _deleteSectionsAtIndexSet:sections withAnimationOptions:animationOptions];
     }];
   }];
 }
@@ -594,6 +609,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
     [self accessDataSourceWithBlock:^{
+      [self prepareForReloadSections:sections];
+
       NSMutableArray *updatedNodes = [NSMutableArray array];
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromDataSourceWithSectionIndexSet:sections mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
@@ -628,6 +645,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     [_editingTransactionQueue addOperationWithBlock:^{
+      [self willMoveSection:section toSection:newSection];
+
       // remove elements
       
       LOG(@"Edit Transaction - moveSection");
@@ -647,6 +666,38 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [self _insertNodes:nodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
     }];
   }];
+}
+
+#pragma mark - Section Insertion Hooks (Subclass API)
+
+- (void)prepareInsertSections:(NSIndexSet *)sections
+{
+  // Implemented by subclass
+}
+
+- (void)willInsertSections:(NSIndexSet *)sections
+{
+  // Implemented by subclass
+}
+
+- (void)willDeleteSections:(NSIndexSet *)sections
+{
+  // Implemented by subclass
+}
+
+- (void)prepareForReloadSections:(NSIndexSet *)sections
+{
+  // Implemented by subclass
+}
+
+- (void)willReloadSections:(NSIndexSet *)sections
+{
+  // Implemented by subclass
+}
+
+- (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
+{
+  // Implemented by subclass
 }
 
 #pragma mark - Row Editing (External API)

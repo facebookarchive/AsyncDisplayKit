@@ -28,6 +28,11 @@
   NSMutableDictionary *_pendingIndexPaths;
 }
 
+- (void)willPerformInitialDataLoading
+{
+  // TODO: Implement
+}
+
 - (void)prepareForReloadData
 {
   _pendingNodes = [NSMutableDictionary dictionary];
@@ -71,13 +76,29 @@
   }];
 }
 
-- (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+- (void)prepareInsertSections:(NSIndexSet *)sections
 {
-  if ([kind isEqualToString:ASDataControllerRowNodeKind]) {
-    return [super constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
-  } else {
-    return [self.collectionDataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
-  }
+  // TODO: Implement
+}
+
+- (void)willInsertSections:(NSIndexSet *)sections
+{
+  // TODO: Implement
+}
+
+- (void)willDeleteSections:(NSIndexSet *)sections
+{
+  // TODO: Implement
+}
+
+- (void)willReloadSections:(NSIndexSet *)sections
+{
+  // TODO: Implement
+}
+
+- (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
+{
+  // TODO: Implement
 }
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
@@ -94,11 +115,26 @@
   }
 }
 
+#pragma mark - Sizing query
+
+- (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  if ([kind isEqualToString:ASDataControllerRowNodeKind]) {
+    return [super constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+  } else {
+    return [self.collectionDataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+  }
+}
+
+#pragma mark - External supplementary store querying
+
 - (ASDisplayNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
   return [self completedNodesOfKind:kind][indexPath.section][indexPath.item];
 }
+
+#pragma mark - Private Helpers
 
 - (id<ASCollectionDataControllerSource>)collectionDataSource
 {

@@ -25,6 +25,8 @@
  */
 - (void)accessDataSourceWithBlock:(dispatch_block_t)block;
 
+- (void)willPerformInitialDataLoading;
+
 /**
  * An opportunity for a subclass to access the data source before entering into the editing queue
  */
@@ -36,6 +38,18 @@
  * @discussion Invoked on the editing transaction queue.
  */
 - (void)willReloadData;
+
+- (void)prepareInsertSections:(NSIndexSet *)sections;
+
+- (void)willInsertSections:(NSIndexSet *)sections;
+
+- (void)willDeleteSections:(NSIndexSet *)sections;
+
+- (void)prepareForReloadSections:(NSIndexSet *)sections;
+
+- (void)willReloadSections:(NSIndexSet *)sections;
+
+- (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 /**
  * Provides a collection of index paths for nodes of the given kind that are currently in the editing store
