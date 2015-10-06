@@ -44,12 +44,12 @@
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  CGSize constrainedSize = CGSizeMake(FLT_MAX, FLT_MAX);
+  CGSize constrainedSize;
   CGSize supplementarySize = [self sizeForSupplementaryViewOfKind:kind inSection:indexPath.section];
   if (_layout.scrollDirection == UICollectionViewScrollDirectionVertical) {
-    constrainedSize.height = supplementarySize.height;
+    constrainedSize = CGSizeMake(_collectionView.bounds.size.width, supplementarySize.height);
   } else {
-    constrainedSize.width = supplementarySize.width;
+    constrainedSize = CGSizeMake(supplementarySize.height, _collectionView.bounds.size.height);
   }
   return ASSizeRangeMake(CGSizeZero, constrainedSize);
 }
