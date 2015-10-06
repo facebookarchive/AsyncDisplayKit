@@ -115,6 +115,19 @@
   }
 }
 
+- (void)_populateSupplementaryNodesOfKind:(NSString *)kind withSections:(NSIndexSet *)sections mutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
+{
+  [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+    NSUInteger rowNum = [self.collectionDataSource dataController:self supplementaryViewsOfKind:kind inSection:idx];
+    NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
+    for (NSUInteger i = 0; i < rowNum; i++) {
+      NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
+      [indexPaths addObject:indexPath];
+      [nodes addObject:[self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath]];
+    }
+  }];
+}
+
 #pragma mark - Sizing query
 
 - (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
