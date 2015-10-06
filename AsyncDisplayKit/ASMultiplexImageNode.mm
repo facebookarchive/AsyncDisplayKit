@@ -66,7 +66,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   id _loadedImageIdentifier;
   id _loadingImageIdentifier;
   id _displayedImageIdentifier;
-
+  NSOperation *_phImageRequestOperation;
+  
   // Networking.
   id _downloadIdentifier;
 }
@@ -168,12 +169,21 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   return [self initWithCache:nil downloader:nil]; // satisfy compiler
 }
 
+- (void)dealloc {
+  [_phImageRequestOperation cancel];
+}
+
 #pragma mark - ASDisplayNode Overrides
 - (void)clearContents
 {
   [super clearContents]; // This actually clears the contents, so we need to do this first for our displayedImageIdentifier to be meaningful.
   [self _setDisplayedImageIdentifier:nil withImage:nil];
 
+  if (_phImageRequestOperation) {
+    [_phImageRequestOperation cancel];
+    _phImageRequestOperation = nil;
+  }
+  
   if (_downloadIdentifier) {
     [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
     _downloadIdentifier = nil;
@@ -521,22 +531,33 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   /*
    * Locking rationale:
    * As of iOS 9, Photos.framework will eventually deadlock if you hit it with concurrent fetch requests. rdar://22984886
-   * Image requests are OK, but metadata requests aren't, so we limit ourselves to one at a time.
-   
-   * -[PHFetchResult dealloc] plays a role in this deadlock, so we help the fetch result die ASAP by never storing it.
+   * Concurrent image requests are OK, but metadata requests aren't, so we limit ourselves to one at a time.
    */
   static NSLock *phRequestLock;
+  static NSOperationQueue *phImageRequestQueue;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     phRequestLock = [NSLock new];
+    phImageRequestQueue = [NSOperationQueue new];
+    phImageRequestQueue.maxConcurrentOperationCount = 10;
+    phImageRequestQueue.name = @"org.AsyncDisplayKit.MultiplexImageNode.phImageRequestQueue";
   });
   
-  // This is sometimes called on main but there's no reason to stay there
-  dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+  // Each ASMultiplexImageNode can have max 1 inflight Photos image request operation
+  [_phImageRequestOperation cancel];
+  
+  __weak __typeof(self)weakSelf = self;
+  _phImageRequestOperation = [NSBlockOperation blockOperationWithBlock:^{
+    __strong __typeof(weakSelf)strongSelf = weakSelf;
+    if (strongSelf == nil) { return; }
     
     // Get the PHAsset itself.
     [phRequestLock lock];
-    PHAsset *imageAsset = [PHAsset fetchAssetsWithLocalIdentifiers:@[request.assetIdentifier] options:nil].firstObject;
+    PHAsset *imageAsset;
+    // -[PHFetchResult dealloc] plays a role in the deadlock mentioned above, so we make sure the PHFetchResult is deallocated inside the critical section
+    @autoreleasepool {
+      imageAsset = [PHAsset fetchAssetsWithLocalIdentifiers:@[request.assetIdentifier] options:nil].firstObject;
+    }
     [phRequestLock unlock];
     
     if (imageAsset == nil) {
@@ -558,7 +579,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       options.synchronous = YES;
     }
     
-    PHImageManager *imageManager = self.imageManager ?: PHImageManager.defaultManager;
+    PHImageManager *imageManager = strongSelf.imageManager ?: PHImageManager.defaultManager;
     [imageManager requestImageForAsset:imageAsset targetSize:request.targetSize contentMode:request.contentMode options:options resultHandler:^(UIImage *image, NSDictionary *info) {
       if (NSThread.isMainThread) {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
@@ -568,7 +589,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
         completionBlock(image, info[PHImageErrorKey]);
       }
     }];
-  });
+  }];
+  [phImageRequestQueue addOperation:_phImageRequestOperation];
 }
 
 - (void)_fetchImageWithIdentifierFromCache:(id)imageIdentifier URL:(NSURL *)imageURL completion:(void (^)(UIImage *image))completionBlock
