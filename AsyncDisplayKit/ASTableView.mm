@@ -59,14 +59,12 @@ static BOOL _isInterceptedSelector(SEL sel)
  */
 @interface _ASTableViewProxy : NSProxy
 - (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASTableView *)interceptor;
-@property (nonatomic, weak) id<NSObject> target;
 @end
 
 @implementation _ASTableViewProxy {
   id<NSObject> __weak _target;
   ASTableView * __weak _interceptor;
 }
-@synthesize target = _target;
 
 - (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASTableView *)interceptor
 {
@@ -220,14 +218,6 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   // If the initial size is 0, expect a size change very soon which is part of the initial configuration
   // and should not trigger a relayout.
   _ignoreMaxWidthChange = (_maxWidthForNodesConstrainedSize == 0);
-  
-  // Set up the delegate / dataSource proxy now, so we recieve key method calls from UITableView even if
-  // our owner never sets up asyncDelegate (technically the dataSource is required)
-  _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
-  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
-  
-  _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
-  super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -287,14 +277,16 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDataSource in the ViewController's dealloc. In this case our _asyncDataSource
   // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to nil out
-  // _proxyDataSource.target in this case because calls to _ASTableViewProxy will start failing and cause crashes.
+  // super.dataSource in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
   if (asyncDataSource == nil) {
-    _proxyDataSource.target = nil;
+    super.dataSource = nil;
     _asyncDataSource = nil;
+    _proxyDataSource = nil;
   } else {
-    _proxyDataSource.target = asyncDataSource;
     _asyncDataSource = asyncDataSource;
+    _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
+    super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
   }
 }
 
@@ -303,16 +295,18 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDelegate in the ViewController's dealloc. In this case our _asyncDelegate
   // will return as nil (ARC magic) even though the _proxyDelegate still exists. It's really important to nil out
-  // _proxyDelegate.target in this case because calls to _ASTableViewProxy will start failing and cause crashes.
+  // super.delegate in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
   if (asyncDelegate == nil) {
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
     // in UIScrollViewAccessibility.
-    _proxyDelegate.target = nil;
+    super.delegate = nil;
     _asyncDelegate = nil;
+    _proxyDelegate = nil; 
   } else {
-    _proxyDelegate.target = asyncDelegate;
     _asyncDelegate = asyncDelegate;
+    _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:asyncDelegate interceptor:self];
+    super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
   }
 }
 
