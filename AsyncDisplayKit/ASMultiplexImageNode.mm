@@ -57,6 +57,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   struct {
     unsigned int image:1;
     unsigned int URL:1;
+    unsigned int asset:1;
   } _dataSourceFlags;
 
   // Image flags.
@@ -260,6 +261,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   _dataSource = dataSource;
   _dataSourceFlags.image = [_dataSource respondsToSelector:@selector(multiplexImageNode:imageForImageIdentifier:)];
   _dataSourceFlags.URL = [_dataSource respondsToSelector:@selector(multiplexImageNode:URLForImageIdentifier:)];
+  _dataSourceFlags.asset = [_dataSource respondsToSelector:@selector(multiplexImageNode:assetForLocalIdentifier:)];
 }
 
 #pragma mark -
@@ -551,8 +553,12 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     __strong __typeof(weakSelf) strongSelf = weakSelf;
     if (strongSelf == nil) { return; }
     
+    PHAsset *imageAsset = nil;
+    
     // Try to get the asset immediately from the data source.
-    PHAsset *imageAsset = [strongSelf.dataSource multiplexImageNode:strongSelf assetForLocalIdentifier:request.assetIdentifier];
+    if (_dataSourceFlags.asset) {
+      imageAsset = [strongSelf.dataSource multiplexImageNode:strongSelf assetForLocalIdentifier:request.assetIdentifier];
+    }
     
     // Fall back to locking and getting the PHAsset.
     if (imageAsset == nil) {
