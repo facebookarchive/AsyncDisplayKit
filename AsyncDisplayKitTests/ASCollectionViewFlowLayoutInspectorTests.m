@@ -12,10 +12,13 @@
 #import "ASCollectionView.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
 
-@interface TestDataSource : NSObject <ASCollectionViewDataSource>
+/**
+ * Test Data Source
+ */
+@interface InspectorTestDataSource : NSObject <ASCollectionViewDataSource>
 @end
 
-@implementation TestDataSource
+@implementation InspectorTestDataSource
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -35,6 +38,22 @@
 @end
 
 @interface ASCollectionViewFlowLayoutInspectorTests : XCTestCase
+
+@end
+
+/**
+ * Test Delegate
+ */
+@interface ReferenceSizeTestDelegate : NSObject <ASCollectionViewDelegateFlowLayout>
+
+@end
+
+@implementation ReferenceSizeTestDelegate
+
+- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
+{
+  return CGSizeMake(125.0, 125.0);
+}
 
 @end
 
@@ -67,7 +86,7 @@
 
 - (void)testThatItProvidesTheNumberOfSectionsInTheDataSource
 {
-  TestDataSource *dataSource = [[TestDataSource alloc] init];
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
   collectionView.asyncDataSource = dataSource;
@@ -77,5 +96,45 @@
 }
 
 #pragma mark - #collectionView:supplementaryViewsOfKind:inSection:
+
+- (void)testThatItReturnsOneWhenAValidSizeIsImplementedOnTheDelegate
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  ReferenceSizeTestDelegate *delegate = [[ReferenceSizeTestDelegate alloc] init];
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  collectionView.asyncDelegate = delegate;
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  NSUInteger count = [inspector collectionView:collectionView supplementaryViewsOfKind:UICollectionElementKindSectionHeader inSection:0];
+  XCTAssert(count == 1, @"should have a header supplementary view");
+}
+
+- (void)testThatItReturnsOneWhenAValidSizeIsImplementedOnTheLayout
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  ReferenceSizeTestDelegate *delegate = [[ReferenceSizeTestDelegate alloc] init];
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  layout.footerReferenceSize = CGSizeMake(125.0, 125.0);
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  collectionView.asyncDelegate = delegate;
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  NSUInteger count = [inspector collectionView:collectionView supplementaryViewsOfKind:UICollectionElementKindSectionFooter inSection:0];
+  XCTAssert(count == 1, @"should have a footer supplementary view");
+}
+
+- (void)testThatItReturnsNoneWhenNoReferenceSizeIsImplemented
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  ReferenceSizeTestDelegate *delegate = [[ReferenceSizeTestDelegate alloc] init];
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  collectionView.asyncDelegate = delegate;
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  NSUInteger count = [inspector collectionView:collectionView supplementaryViewsOfKind:UICollectionElementKindSectionFooter inSection:0];
+  XCTAssert(count == 0, @"should not have a footer supplementary view");
+}
 
 @end
