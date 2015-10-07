@@ -746,6 +746,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)__setSafeFrame:(CGRect)rect
 {
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
+  
   BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
   
   CGPoint origin      = (useLayer ? _layer.bounds.origin : self.bounds.origin);
