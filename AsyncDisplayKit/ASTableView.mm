@@ -455,6 +455,14 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
+- (void)relayoutRowAtIndexPath:(NSIndexPath *)indexPath withRowAnimation:(UITableViewRowAnimation)animation
+{
+  ASDisplayNodeAssertMainThread();
+  ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
+  [node setNeedsLayout];
+  [super reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:animation];
+}
+
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   ASDisplayNodeAssertMainThread();

@@ -556,9 +556,13 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
  * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
  * 
- * Note: If the relayout causes a change in size of the root node that is attached to a container view
- * (table or collection view, for example), the container view must be notified to relayout.
- * For ASTableView and ASCollectionView, an empty batch editing transaction must be triggered to animate to new row / item sizes.
+ * Note: If the relayout causes a change in size of the root node that is attached to a container view, 
+ * the container view must be notified to relayout. 
+ * For ASTableView and ASCollectionView, instead of calling this method directly, 
+ * it is recommended to call -relayoutRowAtIndexPath:withRowAnimation and -relayoutItemAtIndexPath: respectively.
+ *
+ * @see [ASTableView relayoutRowAtIndexPath:withRowAnimation:]
+ * @see [ASCollectionView relayoutItemAtIndexPath:]
  */
 - (void)setNeedsLayout;
 

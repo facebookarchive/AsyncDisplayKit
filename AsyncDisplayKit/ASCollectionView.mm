@@ -406,6 +406,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
+- (void)relayoutItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertMainThread();
+  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
+  [node setNeedsLayout];
+  [super reloadItemsAtIndexPaths:@[indexPath]];
+}
+
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   ASDisplayNodeAssertMainThread();

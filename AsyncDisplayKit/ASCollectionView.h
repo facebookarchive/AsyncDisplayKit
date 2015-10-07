@@ -192,6 +192,16 @@
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths;
 
 /**
+ * Relayouts the specified item.
+ *
+ * @param indexPath The index path identifying the item to relayout.
+ *
+ * @discussion This method must be called from the main thread. The relayout is excuted on main thread.
+ * The node of the specified item must be updated to cause layout changes before this method is called.
+ */
+- (void)relayoutItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
  * Moves the item at a specified location to a destination location.
  *
  * @param indexPath The index path identifying the item to move.
