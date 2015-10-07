@@ -145,6 +145,7 @@
 		251B8EF91BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */; settings = {ASSET_TAGS = (); }; };
 		251B8EFA1BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF51BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m */; settings = {ASSET_TAGS = (); }; };
 		251B8EFB1BBB3D690087C538 /* ASDataController+Subclasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF61BBB3D690087C538 /* ASDataController+Subclasses.h */; settings = {ASSET_TAGS = (); }; };
+		2538B6F31BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2538B6F21BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m */; settings = {ASSET_TAGS = (); }; };
 		2767E9411BB19BD600EA9B77 /* ASViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2767E9421BB19BD600EA9B77 /* ASViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ACC945AA1BA9E7C1005E1FB8 /* ASViewController.m */; settings = {ASSET_TAGS = (); }; };
 		2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2911485B1A77147A005D0878 /* ASControlNodeTests.m */; };
@@ -556,6 +557,7 @@
 		251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionViewFlowLayoutInspector.h; sourceTree = "<group>"; };
 		251B8EF51BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionViewFlowLayoutInspector.m; sourceTree = "<group>"; };
 		251B8EF61BBB3D690087C538 /* ASDataController+Subclasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASDataController+Subclasses.h"; sourceTree = "<group>"; };
+		2538B6F21BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionViewFlowLayoutInspectorTests.m; sourceTree = "<group>"; };
 		2911485B1A77147A005D0878 /* ASControlNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASControlNodeTests.m; sourceTree = "<group>"; };
 		292C59991A956527007E5DD6 /* ASLayoutRangeType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLayoutRangeType.h; sourceTree = "<group>"; };
 		292C599A1A956527007E5DD6 /* ASRangeHandlerPreload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeHandlerPreload.h; sourceTree = "<group>"; };
@@ -841,6 +843,7 @@
 				058D0A37195D057000B7D73C /* ASTextNodeWordKernerTests.mm */,
 				058D09C6195D04C000B7D73C /* Supporting Files */,
 				052EE06A1A15A0D8002C6279 /* TestResources */,
+				2538B6F21BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m */,
 			);
 			path = AsyncDisplayKitTests;
 			sourceTree = "<group>";
@@ -1544,6 +1547,7 @@
 				2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */,
 				ACF6ED5D1B178DC700DA7C62 /* ASDimensionTests.mm in Sources */,
 				058D0A38195D057000B7D73C /* ASDisplayLayerTests.m in Sources */,
+				2538B6F31BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m in Sources */,
 				058D0A39195D057000B7D73C /* ASDisplayNodeAppearanceTests.m in Sources */,
 				058D0A3A195D057000B7D73C /* ASDisplayNodeTests.m in Sources */,
 				058D0A3B195D057000B7D73C /* ASDisplayNodeTestsHelper.m in Sources */,
