@@ -170,7 +170,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   return [self initWithCache:nil downloader:nil]; // satisfy compiler
 }
 
-- (void)dealloc {
+- (void)dealloc
+{
   [_phImageRequestOperation cancel];
 }
 
@@ -180,10 +181,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   [super clearContents]; // This actually clears the contents, so we need to do this first for our displayedImageIdentifier to be meaningful.
   [self _setDisplayedImageIdentifier:nil withImage:nil];
 
-  if (_phImageRequestOperation) {
-    [_phImageRequestOperation cancel];
-    _phImageRequestOperation = nil;
-  }
+  [_phImageRequestOperation cancel];
   
   if (_downloadIdentifier) {
     [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
@@ -196,6 +194,14 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   [super clearFetchedData];
     
   if ([self _shouldClearFetchedImageData]) {
+    
+    [_phImageRequestOperation cancel];
+    
+    if (_downloadIdentifier) {
+      [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
+      _downloadIdentifier = nil;
+    }
+    
     // setting this to nil makes the node fetch images the next time its display starts
     _loadedImageIdentifier = nil;
     self.image = nil;
