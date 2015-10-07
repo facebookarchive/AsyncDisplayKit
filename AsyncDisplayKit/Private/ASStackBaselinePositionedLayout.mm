@@ -93,7 +93,7 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
   const auto ascenderIt = std::max_element(positionedLayout.sublayouts.begin(), positionedLayout.sublayouts.end(), [&](const ASLayout *a, const ASLayout *b){
     return a.layoutableObject.ascender < b.layoutableObject.ascender;
   });
-  const CGFloat maxAscender = baselineIt == positionedLayout.sublayouts.end() ? 0 : (*ascenderIt).layoutableObject.ascender;
+  const CGFloat maxAscender = ascenderIt == positionedLayout.sublayouts.end() ? 0 : (*ascenderIt).layoutableObject.ascender;
   
   /*
     Step 3: Take each child and update its layout position based on the baseline offset.
@@ -103,33 +103,40 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
     spacing between the two nodes is from the baseline, not the bounding box.
    
   */
-  CGPoint p = CGPointZero;
-  BOOL first = YES;
-  auto stackedChildren = AS::map(positionedLayout.sublayouts, [&](ASLayout *l) -> ASLayout *{
-    __weak id<ASLayoutable> child = l.layoutableObject;
-    p = p + directionPoint(style.direction, child.spacingBefore, 0);
-    if (first) {
-      // if this is the first item use the previously computed start point
-      p = l.position;
-    } else {
-      // otherwise add the stack spacing
-      p = p + directionPoint(style.direction, style.spacing, 0);
-    }
-    first = NO;
-    
-    // Find the difference between this node's baseline and the max baseline of all the children. Add this difference to the child's y position.
-    l.position = p + CGPointMake(0, baselineOffset(style, l, maxAscender, maxBaseline));
-    
-    // If we are a vertical stack, add the item's descender (it is negative) to the offset for the next node. This will ensure we are spacing
-    // node from baselines and not bounding boxes.
-    CGFloat spacingAfterBaseline = 0;
-    if (style.direction == ASStackLayoutDirectionVertical) {
-      spacingAfterBaseline = child.descender;
-    }
-    p = p + directionPoint(style.direction, stackDimension(style.direction, l.size) + child.spacingAfter + spacingAfterBaseline, 0);
-    
-    return l;
-  });
+  std::vector<ASLayout *> stackedChildren;
+  // Only change positions of layouts this stackSpec is aligning to a baseline. Otherwise we are only here to
+  // compute the min/max descender/ascender for this stack spec.
+  if (style.baselineRelativeArrangement || style.alignItems == ASStackLayoutAlignItemsBaselineFirst || style.alignItems == ASStackLayoutAlignItemsBaselineLast) {
+    CGPoint p = CGPointZero;
+    BOOL first = YES;
+    stackedChildren = AS::map(positionedLayout.sublayouts, [&](ASLayout *l) -> ASLayout *{
+      __weak id<ASLayoutable> child = l.layoutableObject;
+      p = p + directionPoint(style.direction, child.spacingBefore, 0);
+      if (first) {
+        // if this is the first item use the previously computed start point
+        p = l.position;
+      } else {
+        // otherwise add the stack spacing
+        p = p + directionPoint(style.direction, style.spacing, 0);
+      }
+      first = NO;
+      
+      // Find the difference between this node's baseline and the max baseline of all the children. Add this difference to the child's y position.
+      l.position = p + CGPointMake(0, baselineOffset(style, l, maxAscender, maxBaseline));
+      
+      // If we are a vertical stack, add the item's descender (it is negative) to the offset for the next node. This will ensure we are spacing
+      // node from baselines and not bounding boxes.
+      CGFloat spacingAfterBaseline = 0;
+      if (style.direction == ASStackLayoutDirectionVertical) {
+        spacingAfterBaseline = child.descender;
+      }
+      p = p + directionPoint(style.direction, stackDimension(style.direction, l.size) + child.spacingAfter + spacingAfterBaseline, 0);
+      
+      return l;
+    });
+  } else {
+    stackedChildren = positionedLayout.sublayouts;
+  }
   
   /*
     Step 4: Since we have been mucking with positions, there is a chance that our cross size has changed. Imagine a node with a font size of 40

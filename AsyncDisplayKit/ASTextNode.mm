@@ -17,6 +17,7 @@
 #import <AsyncDisplayKit/ASTextNodeTextKitHelpers.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
+#import "ASInternalHelpers.h"
 #import "ASTextNodeRenderer.h"
 #import "ASTextNodeShadower.h"
 #import "ASEqualityHelpers.h"
@@ -344,6 +345,12 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
       self.isAccessibilityElement = YES;
     }
   });
+  
+  if (attributedString.length > 0) {
+    CGFloat screenScale = ASScreenScale();
+    self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
+    self.descender = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+  }
 }
 
 #pragma mark - Text Layout

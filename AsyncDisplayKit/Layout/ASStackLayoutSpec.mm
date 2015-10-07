@@ -101,7 +101,6 @@
   std::vector<id<ASLayoutable>> stackChildren = std::vector<id<ASLayoutable>>();
   for (id<ASLayoutable> child in self.children) {
     stackChildren.push_back(child);
-    needsBaselinePass |= child.alignSelf == ASStackLayoutAlignSelfBaselineFirst || child.alignSelf == ASStackLayoutAlignSelfBaselineLast;
   }
   
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
@@ -109,12 +108,21 @@
   
   CGSize finalSize = CGSizeZero;
   NSArray *sublayouts = nil;
-  if (needsBaselinePass) {
-    const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
+  
+  // regardless of whether or not this stack aligns to baseline, we should let ASStackBaselinePositionedLayout::compute find the max ascender
+  // and min descender in case this spec is a child in another spec that wants to align to a baseline.
+  const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
+  if (self.direction == ASStackLayoutDirectionVertical) {
+    ASDN::MutexLocker l(_propertyLock);
+    self.ascender = [[self.children firstObject] ascender];
+    self.descender = [[self.children lastObject] descender];
+  } else {
     ASDN::MutexLocker l(_propertyLock);
     self.ascender = baselinePositionedLayout.ascender;
     self.descender = baselinePositionedLayout.descender;
-    
+  }
+  
+  if (needsBaselinePass) {
     finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, baselinePositionedLayout.crossSize);
     sublayouts = [NSArray arrayWithObjects:&baselinePositionedLayout.sublayouts[0] count:baselinePositionedLayout.sublayouts.size()];
   } else {
