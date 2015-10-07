@@ -63,10 +63,6 @@ inline ASStackLayoutAlignItems alignment(ASStackLayoutAlignSelf childAlignment, 
       return ASStackLayoutAlignItemsStart;
     case ASStackLayoutAlignSelfStretch:
       return ASStackLayoutAlignItemsStretch;
-    case ASStackLayoutAlignSelfBaselineFirst:
-      return ASStackLayoutAlignItemsBaselineFirst;
-    case ASStackLayoutAlignSelfBaselineLast:
-      return ASStackLayoutAlignItemsBaselineLast;
     case ASStackLayoutAlignSelfAuto:
     default:
       return stackAlignment;
