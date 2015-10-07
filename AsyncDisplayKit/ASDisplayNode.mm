@@ -746,6 +746,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)__setSafeFrame:(CGRect)rect
 {
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
+  
   BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
   
   CGPoint origin      = (useLayer ? _layer.bounds.origin : self.bounds.origin);
@@ -1712,9 +1715,9 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
     ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.");
     [((ASDisplayNode *)subnodeLayout.layoutableObject) __setSafeFrame:CGRectMake(subnodeLayout.position.x,
-                                                                             subnodeLayout.position.y,
-                                                                             subnodeLayout.size.width,
-                                                                             subnodeLayout.size.height)];
+                                                                                 subnodeLayout.position.y,
+                                                                                 subnodeLayout.size.width,
+                                                                                 subnodeLayout.size.height)];
   }
 }
 
