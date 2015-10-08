@@ -42,15 +42,31 @@
 @end
 
 /**
- * Test Delegate
+ * Test Delegate for Header Reference Size Implementation
  */
-@interface ReferenceSizeTestDelegate : NSObject <ASCollectionViewDelegateFlowLayout>
+@interface HeaderReferenceSizeTestDelegate : NSObject <ASCollectionViewDelegateFlowLayout>
 
 @end
 
-@implementation ReferenceSizeTestDelegate
+@implementation HeaderReferenceSizeTestDelegate
 
 - (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
+{
+  return CGSizeMake(125.0, 125.0);
+}
+
+@end
+
+/**
+ * Test Delegate for Footer Reference Size Implementation
+ */
+@interface FooterReferenceSizeTestDelegate : NSObject <ASCollectionViewDelegateFlowLayout>
+
+@end
+
+@implementation FooterReferenceSizeTestDelegate
+
+- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section
 {
   return CGSizeMake(125.0, 125.0);
 }
@@ -71,7 +87,177 @@
 
 #pragma mark - #collectionView:constrainedSizeForSupplementaryNodeOfKind:atIndexPath:
 
+// Vertical
 
+// Delegate implementation
+
+- (void)testThatItReturnsAVerticalConstrainedSizeFromTheHeaderDelegateImplementation
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  HeaderReferenceSizeTestDelegate *delegate = [[HeaderReferenceSizeTestDelegate alloc] init];
+  
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  layout.scrollDirection = UICollectionViewScrollDirectionVertical;
+
+  CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  collectionView.asyncDelegate = delegate;
+  
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
+  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+}
+
+- (void)testThatItReturnsAVerticalConstrainedSizeFromTheFooterDelegateImplementation
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  FooterReferenceSizeTestDelegate *delegate = [[FooterReferenceSizeTestDelegate alloc] init];
+  
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  layout.scrollDirection = UICollectionViewScrollDirectionVertical;
+  
+  CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  collectionView.asyncDelegate = delegate;
+  
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
+  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+}
+
+// Size implementation
+
+- (void)testThatItReturnsAVerticalConstrainedSizeFromTheHeaderProperty
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  layout.scrollDirection = UICollectionViewScrollDirectionVertical;
+  layout.headerReferenceSize = CGSizeMake(125.0, 125.0);
+  
+  CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
+  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+}
+
+- (void)testThatItReturnsAVerticalConstrainedSizeFromTheFooterProperty
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  layout.scrollDirection = UICollectionViewScrollDirectionVertical;
+  layout.footerReferenceSize = CGSizeMake(125.0, 125.0);
+  
+  CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
+  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+}
+
+// Horizontal
+
+- (void)testThatItReturnsAHorizontalConstrainedSizeFromTheHeaderDelegateImplementation
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  HeaderReferenceSizeTestDelegate *delegate = [[HeaderReferenceSizeTestDelegate alloc] init];
+  
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+  
+  CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  collectionView.asyncDelegate = delegate;
+  
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.height));
+  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+}
+
+- (void)testThatItReturnsAHorizontalConstrainedSizeFromTheFooterDelegateImplementation
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  FooterReferenceSizeTestDelegate *delegate = [[FooterReferenceSizeTestDelegate alloc] init];
+  
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+  
+  CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  collectionView.asyncDelegate = delegate;
+  
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.height));
+  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+}
+
+// Size implementation
+
+- (void)testThatItReturnsAHorizontalConstrainedSizeFromTheHeaderProperty
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+  layout.headerReferenceSize = CGSizeMake(125.0, 125.0);
+  
+  CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.width));
+  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+}
+
+- (void)testThatItReturnsAHorizontalConstrainedSizeFromTheFooterProperty
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+  layout.footerReferenceSize = CGSizeMake(125.0, 125.0);
+  
+  CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.height));
+  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+}
+
+- (void)testThatItReturnsZeroSizeWhenNoReferenceSizeIsImplemented
+{
+  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
+  HeaderReferenceSizeTestDelegate *delegate = [[HeaderReferenceSizeTestDelegate alloc] init];
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+  collectionView.asyncDataSource = dataSource;
+  collectionView.asyncDelegate = delegate;
+  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
+  ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeZero);
+  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a zero size");
+}
 
 #pragma mark - #collectionView:numberOfSectionsForSupplementaryKind:
 
@@ -100,7 +286,7 @@
 - (void)testThatItReturnsOneWhenAValidSizeIsImplementedOnTheDelegate
 {
   InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
-  ReferenceSizeTestDelegate *delegate = [[ReferenceSizeTestDelegate alloc] init];
+  HeaderReferenceSizeTestDelegate *delegate = [[HeaderReferenceSizeTestDelegate alloc] init];
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
   collectionView.asyncDataSource = dataSource;
@@ -113,7 +299,7 @@
 - (void)testThatItReturnsOneWhenAValidSizeIsImplementedOnTheLayout
 {
   InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
-  ReferenceSizeTestDelegate *delegate = [[ReferenceSizeTestDelegate alloc] init];
+  HeaderReferenceSizeTestDelegate *delegate = [[HeaderReferenceSizeTestDelegate alloc] init];
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   layout.footerReferenceSize = CGSizeMake(125.0, 125.0);
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
@@ -127,7 +313,7 @@
 - (void)testThatItReturnsNoneWhenNoReferenceSizeIsImplemented
 {
   InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
-  ReferenceSizeTestDelegate *delegate = [[ReferenceSizeTestDelegate alloc] init];
+  HeaderReferenceSizeTestDelegate *delegate = [[HeaderReferenceSizeTestDelegate alloc] init];
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
   collectionView.asyncDataSource = dataSource;
