@@ -108,7 +108,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     if (node.isNodeLoaded && node.needsMeasure) {
       ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
       [node measureWithSizeRange:constrainedSize];
-      node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
       node.needsMeasure = NO;
     }
   }];
@@ -138,7 +137,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         // Nodes with main thread affinity should all have already been measured.
         if (node.needsMeasure) {
           [node measureWithSizeRange:constrainedSize];
-          node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
           node.needsMeasure = NO;
         }
       }
