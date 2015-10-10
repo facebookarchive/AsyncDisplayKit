@@ -881,7 +881,8 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
     // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
     [self beginUpdates];
-    [node measureWithSizeRange:constrainedSize];
+    CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
+    node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
     [self endUpdates];
   }
 }
