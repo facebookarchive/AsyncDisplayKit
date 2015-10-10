@@ -12,9 +12,7 @@
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
  */
-@interface ASCellNode : ASDisplayNode {
-  BOOL _needsMeasure;
-}
+@interface ASCellNode : ASDisplayNode
 
 /**
  * @abstract When enabled, ensures that the cell is completely displayed before allowed onscreen.

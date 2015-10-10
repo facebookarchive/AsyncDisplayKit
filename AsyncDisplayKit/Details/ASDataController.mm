@@ -15,7 +15,6 @@
 #import "ASDisplayNode.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASCellNodeInternal.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -106,11 +105,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   
   [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, __unused BOOL * stop) {
     ASCellNode *node = nodes[idx];
-    if (node.isNodeLoaded && node.needsMeasure) {
+    if (node.isNodeLoaded) {
       ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
       [node measureWithSizeRange:constrainedSize];
       node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
-      node.needsMeasure = NO;
     }
   }];
 }
@@ -130,7 +128,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     for (NSUInteger k = j; k < j + batchCount; k++) {
       ASCellNode *node = nodes[k];
-      if (node.needsMeasure) {
+      if (!node.isNodeLoaded) {
         nodeBoundSizes[k] = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[k]];
       }
     }
@@ -138,12 +136,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       for (NSUInteger k = j; k < j + batchCount; k++) {
         ASCellNode *node = nodes[k];
-        if (node.needsMeasure) {
+        if (!node.isNodeLoaded) {
           ASDisplayNodeAssert(!node.isNodeLoaded, @"Nodes that are loaded should already have been measured on the main thread.");
           ASSizeRange constrainedSize = nodeBoundSizes[k];
           [node measureWithSizeRange:constrainedSize];
           node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
-          node.needsMeasure = NO;
         }
       }
     });
@@ -616,7 +613,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
             ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
             [node measureWithSizeRange:constrainedSize];
             node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
-            node.needsMeasure = NO;
           }];
         }];
       }];
