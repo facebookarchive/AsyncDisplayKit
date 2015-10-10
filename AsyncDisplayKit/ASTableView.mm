@@ -537,12 +537,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  CGSize size = node.calculatedSize;
-  // Update node's frame to ensure it will fill its cell.
-  if (!CGSizeEqualToSize(node.frame.size, size)) {
-    node.frame = CGRectMake(0, 0, size.width, size.height);
-  }
-  return size.height;
+  return node.calculatedSize.height;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView

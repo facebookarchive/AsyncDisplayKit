@@ -423,12 +423,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  CGSize size = node.calculatedSize;
-  if (!CGSizeEqualToSize(size, node.frame.size)) {
-    node.frame = CGRectMake(0, 0, size.width, size.height);
-  }
-  return size;
+  return [[_dataController nodeAtIndexPath:indexPath] calculatedSize];
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView

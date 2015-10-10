@@ -98,7 +98,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 #pragma mark - Cell Layout
 
 /*
- * Once nodes have loaded their views, we can't measure in the background so this is a chance
+ * Once nodes have loaded their views, we can't layout in the background so this is a chance
  * to do so immediately on the main thread.
  */
 - (void)_layoutNodesWithMainThreadAffinity:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths {
@@ -109,12 +109,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     if (node.isNodeLoaded && node.needsMeasure) {
       ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
       [node measureWithSizeRange:constrainedSize];
+      node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
       node.needsMeasure = NO;
     }
   }];
 }
 
-// FIXME: Isn't this name sort of misleading? We don't lay the node out we just measure it. _measureNodes?
 - (void)_layoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"Cell node layout must be initiated from edit transaction queue");
@@ -142,6 +142,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
           ASDisplayNodeAssert(!node.isNodeLoaded, @"Nodes that are loaded should already have been measured on the main thread.");
           ASSizeRange constrainedSize = nodeBoundSizes[k];
           [node measureWithSizeRange:constrainedSize];
+          node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
           node.needsMeasure = NO;
         }
       }
@@ -614,6 +615,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
             NSIndexPath *indexPath = [NSIndexPath indexPathForRow:rowIndex inSection:sectionIndex];
             ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
             [node measureWithSizeRange:constrainedSize];
+            node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
             node.needsMeasure = NO;
           }];
         }];
