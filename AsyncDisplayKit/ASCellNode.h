@@ -12,7 +12,9 @@
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
  */
-@interface ASCellNode : ASDisplayNode
+@interface ASCellNode : ASDisplayNode {
+  BOOL _needsMeasure;
+}
 
 /**
  * @abstract When enabled, ensures that the cell is completely displayed before allowed onscreen.
@@ -51,6 +53,11 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+
+/*
+ * 
+ */
+@property (nonatomic) BOOL needsMeasure;
 
 @end
 

@@ -15,6 +15,7 @@
 #import "ASDisplayNode.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASCellNodeInternal.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -96,6 +97,23 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Cell Layout
 
+/*
+ * Once nodes have loaded their views, we can't layout in the background so this is a chance
+ * to do so immediately on the main thread.
+ */
+- (void)_layoutNodesWithMainThreadAffinity:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths {
+  NSAssert(NSThread.isMainThread, @"Main thread layout must be on the main thread.");
+  [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, __unused BOOL * stop) {
+    ASCellNode *node = nodes[idx];
+    if (node.isNodeLoaded && node.needsMeasure) {
+      ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
+      [node measureWithSizeRange:constrainedSize];
+      node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
+      node.needsMeasure = NO;
+    }
+  }];
+}
+
 - (void)_layoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"Cell node layout must be initiated from edit transaction queue");
@@ -117,8 +135,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       for (NSUInteger k = j; k < j + batchCount; k++) {
         ASCellNode *node = nodes[k];
         ASSizeRange constrainedSize = nodeBoundSizes[k];
-        [node measureWithSizeRange:constrainedSize];
-        node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
+        // Nodes with main thread affinity should all have already been measured.
+        if (node.needsMeasure) {
+          [node measureWithSizeRange:constrainedSize];
+          node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
+          node.needsMeasure = NO;
+        }
       }
     });
   }
@@ -244,6 +266,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       NSMutableArray *updatedNodes = [NSMutableArray array];
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromEntireDataSourceWithMutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
+      
+      [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadData");
@@ -399,6 +423,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromDataSourceWithSectionIndexSet:indexSet mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
       
+      [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
+      
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - insertSections: %@", indexSet);
         NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:indexSet.count];
@@ -447,6 +473,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       // Dispatch to sizing queue in order to guarantee that any in-progress sizing operations from prior edits have completed.
       // For example, if an initial -reloadData call is quickly followed by -reloadSections, sizing the initial set may not be done
       // at this time.  Thus _editingNodes could be empty and crash in ASIndexPathsForMultidimensional[...]
+      
+      [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
         NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes, sections);
@@ -510,6 +538,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:sortedIndexPaths[i]]];
       }
       
+      [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - insertRows: %@", indexPaths);
         [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
@@ -552,6 +581,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
       }];
       
+      // FIXME: Is there any reason I should split the edit transaction queue work into two phases, and do this layout in between rather than before?
+      [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
+
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
         [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
@@ -580,6 +612,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
             ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
             [node measureWithSizeRange:constrainedSize];
             node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+            node.needsMeasure = NO;
           }];
         }];
       }];

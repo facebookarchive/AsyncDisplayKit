@@ -379,6 +379,10 @@
 		CC7FD9DF1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; settings = {ASSET_TAGS = (); }; };
 		CC7FD9E11BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */; settings = {ASSET_TAGS = (); }; };
 		CC7FD9E21BB603FF005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CCBFF68F1BC8A8BA00EF0162 /* ASCellNodeInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = CCBFF68D1BC8A8BA00EF0162 /* ASCellNodeInternal.h */; settings = {ASSET_TAGS = (); }; };
+		CCBFF6901BC8A8BA00EF0162 /* ASCellNodeInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = CCBFF68D1BC8A8BA00EF0162 /* ASCellNodeInternal.h */; settings = {ASSET_TAGS = (); }; };
+		CCBFF6911BC8A8BA00EF0162 /* ASCellNodeInternal.m in Sources */ = {isa = PBXBuildFile; fileRef = CCBFF68E1BC8A8BA00EF0162 /* ASCellNodeInternal.m */; settings = {ASSET_TAGS = (); }; };
+		CCBFF6921BC8A8BA00EF0162 /* ASCellNodeInternal.m in Sources */ = {isa = PBXBuildFile; fileRef = CCBFF68E1BC8A8BA00EF0162 /* ASCellNodeInternal.m */; settings = {ASSET_TAGS = (); }; };
 		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
@@ -627,6 +631,8 @@
 		CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPhotosFrameworkImageRequest.h; sourceTree = "<group>"; };
 		CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequest.m; sourceTree = "<group>"; };
 		CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequestTests.m; sourceTree = "<group>"; };
+		CCBFF68D1BC8A8BA00EF0162 /* ASCellNodeInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCellNodeInternal.h; sourceTree = "<group>"; };
+		CCBFF68E1BC8A8BA00EF0162 /* ASCellNodeInternal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCellNodeInternal.m; sourceTree = "<group>"; };
 		D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.release.xcconfig"; sourceTree = "<group>"; };
 		D785F6601A74327E00291744 /* ASScrollNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASScrollNode.h; sourceTree = "<group>"; };
 		D785F6611A74327E00291744 /* ASScrollNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASScrollNode.m; sourceTree = "<group>"; };
@@ -925,6 +931,8 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				CCBFF68D1BC8A8BA00EF0162 /* ASCellNodeInternal.h */,
+				CCBFF68E1BC8A8BA00EF0162 /* ASCellNodeInternal.m */,
 				9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */,
 				9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */,
 				9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */,
@@ -1047,6 +1055,7 @@
 				058D0A71195D05F800B7D73C /* _AS-objc-internal.h in Headers */,
 				058D0A68195D05EC00B7D73C /* _ASAsyncTransaction.h in Headers */,
 				058D0A6A195D05EC00B7D73C /* _ASAsyncTransactionContainer+Private.h in Headers */,
+				CCBFF68F1BC8A8BA00EF0162 /* ASCellNodeInternal.h in Headers */,
 				058D0A6B195D05EC00B7D73C /* _ASAsyncTransactionContainer.h in Headers */,
 				058D0A6D195D05EC00B7D73C /* _ASAsyncTransactionGroup.h in Headers */,
 				058D0A72195D05F800B7D73C /* _ASCoreAnimationExtras.h in Headers */,
@@ -1150,6 +1159,7 @@
 				B35062481B010EFD0018CF92 /* _AS-objc-internal.h in Headers */,
 				B350623C1B010EFD0018CF92 /* _ASAsyncTransaction.h in Headers */,
 				B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */,
+				CCBFF6901BC8A8BA00EF0162 /* ASCellNodeInternal.h in Headers */,
 				B350623F1B010EFD0018CF92 /* _ASAsyncTransactionContainer.h in Headers */,
 				B35062411B010EFD0018CF92 /* _ASAsyncTransactionGroup.h in Headers */,
 				B35062491B010EFD0018CF92 /* _ASCoreAnimationExtras.h in Headers */,
@@ -1442,6 +1452,7 @@
 				058D0A23195D050800B7D73C /* _ASAsyncTransactionContainer.m in Sources */,
 				058D0A24195D050800B7D73C /* _ASAsyncTransactionGroup.m in Sources */,
 				058D0A26195D050800B7D73C /* _ASCoreAnimationExtras.mm in Sources */,
+				CCBFF6911BC8A8BA00EF0162 /* ASCellNodeInternal.m in Sources */,
 				058D0A18195D050800B7D73C /* _ASDisplayLayer.mm in Sources */,
 				058D0A19195D050800B7D73C /* _ASDisplayView.mm in Sources */,
 				058D0A27195D050800B7D73C /* _ASPendingState.m in Sources */,
@@ -1552,6 +1563,7 @@
 				B35062401B010EFD0018CF92 /* _ASAsyncTransactionContainer.m in Sources */,
 				B35062421B010EFD0018CF92 /* _ASAsyncTransactionGroup.m in Sources */,
 				B350624A1B010EFD0018CF92 /* _ASCoreAnimationExtras.mm in Sources */,
+				CCBFF6921BC8A8BA00EF0162 /* ASCellNodeInternal.m in Sources */,
 				2767E9421BB19BD600EA9B77 /* ASViewController.m in Sources */,
 				B35062101B010EFD0018CF92 /* _ASDisplayLayer.mm in Sources */,
 				B35062121B010EFD0018CF92 /* _ASDisplayView.mm in Sources */,
