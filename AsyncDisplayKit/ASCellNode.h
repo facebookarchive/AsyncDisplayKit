@@ -54,11 +54,6 @@
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
-/*
- * 
- */
-@property (nonatomic) BOOL needsMeasure;
-
 @end
 
 
