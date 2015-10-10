@@ -540,6 +540,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }
       
       [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
+      
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - insertRows: %@", indexPaths);
         [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
