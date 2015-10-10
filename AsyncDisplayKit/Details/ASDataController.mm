@@ -137,7 +137,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       for (NSUInteger k = j; k < j + batchCount; k++) {
         ASCellNode *node = nodes[k];
         if (!node.isNodeLoaded) {
-          ASDisplayNodeAssert(!node.isNodeLoaded, @"Nodes that are loaded should already have been measured on the main thread.");
           ASSizeRange constrainedSize = nodeBoundSizes[k];
           [node measureWithSizeRange:constrainedSize];
           node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
