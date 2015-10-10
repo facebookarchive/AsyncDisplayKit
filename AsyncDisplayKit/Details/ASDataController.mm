@@ -118,7 +118,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         ASCellNode *node = nodes[k];
         ASSizeRange constrainedSize = nodeBoundSizes[k];
         [node measureWithSizeRange:constrainedSize];
-        node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
       }
     });
   }
@@ -579,7 +578,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
             NSIndexPath *indexPath = [NSIndexPath indexPathForRow:rowIndex inSection:sectionIndex];
             ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
             [node measureWithSizeRange:constrainedSize];
-            node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
           }];
         }];
       }];
