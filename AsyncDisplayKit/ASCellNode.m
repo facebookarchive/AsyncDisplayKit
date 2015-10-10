@@ -27,7 +27,8 @@
   // use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
-
+  _needsMeasure = YES;
+  
   return self;
 }
 

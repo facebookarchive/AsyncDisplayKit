@@ -10,7 +10,7 @@
 
 @implementation ASCellNode (Internal)
 
-// FIXME: Lock this
+// FIXME: Is locking this worth the extra lock?
 
 - (BOOL)needsMeasure
 {

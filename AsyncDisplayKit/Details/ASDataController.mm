@@ -98,11 +98,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 #pragma mark - Cell Layout
 
 /*
- * Once nodes have loaded their views, we can't layout in the background so this is a chance
+ * Once nodes have loaded their views, we can't measure in the background so this is a chance
  * to do so immediately on the main thread.
  */
 - (void)_layoutNodesWithMainThreadAffinity:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths {
   NSAssert(NSThread.isMainThread, @"Main thread layout must be on the main thread.");
+  
   [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, __unused BOOL * stop) {
     ASCellNode *node = nodes[idx];
     if (node.isNodeLoaded && node.needsMeasure) {
@@ -113,6 +114,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
+// FIXME: Isn't this name sort of misleading? We don't lay the node out we just measure it. _measureNodes?
 - (void)_layoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"Cell node layout must be initiated from edit transaction queue");
@@ -127,15 +129,18 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j);
     
     for (NSUInteger k = j; k < j + batchCount; k++) {
-      nodeBoundSizes[k] = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[k]];
+      ASCellNode *node = nodes[k];
+      if (node.needsMeasure) {
+        nodeBoundSizes[k] = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[k]];
+      }
     }
     
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       for (NSUInteger k = j; k < j + batchCount; k++) {
         ASCellNode *node = nodes[k];
-        ASSizeRange constrainedSize = nodeBoundSizes[k];
-        // Nodes with main thread affinity should all have already been measured.
         if (node.needsMeasure) {
+          ASDisplayNodeAssert(!node.isNodeLoaded, @"Nodes that are loaded should already have been measured on the main thread.");
+          ASSizeRange constrainedSize = nodeBoundSizes[k];
           [node measureWithSizeRange:constrainedSize];
           node.needsMeasure = NO;
         }
