@@ -583,7 +583,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
       }];
       
-      // FIXME: Is there any reason I should split the edit transaction queue work into two phases, and do this layout in between rather than before?
       [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
 
       [_editingTransactionQueue addOperationWithBlock:^{
