@@ -537,7 +537,12 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  return node.calculatedSize.height;
+  CGSize size = node.calculatedSize;
+  // Update node's frame to ensure it will fill its cell.
+  if (!CGSizeEqualToSize(node.frame.size, size)) {
+    node.frame = CGRectMake(0, 0, size.width, size.height);
+  }
+  return size.height;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -881,8 +886,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
     // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
     [self beginUpdates];
-    CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
-    node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
+    [node measureWithSizeRange:constrainedSize];
     [self endUpdates];
   }
 }
