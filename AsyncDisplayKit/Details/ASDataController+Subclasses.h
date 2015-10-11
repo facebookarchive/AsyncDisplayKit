@@ -24,7 +24,7 @@
  */
 - (void)willReloadData;
 
-- (void)prepareInsertSections:(NSIndexSet *)sections;
+- (void)prepareForInsertSections:(NSIndexSet *)sections;
 
 - (void)willInsertSections:(NSIndexSet *)sections;
 

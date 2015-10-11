@@ -76,7 +76,7 @@
   }];
 }
 
-- (void)prepareInsertSections:(NSIndexSet *)sections
+- (void)prepareForInsertSections:(NSIndexSet *)sections
 {
   NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
   [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
