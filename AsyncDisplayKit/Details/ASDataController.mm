@@ -425,6 +425,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Data Source Access (Calling _dataSource)
 
+/**
+ * Safely locks access to the data source and executes the given block, unlocking once complete.
+ *
+ * @discussion When `asyncDataFetching` is enabled, the block is executed on a background thread.
+ */
 - (void)accessDataSourceWithBlock:(dispatch_block_t)block
 {
   if (_asyncDataFetchingEnabled) {
@@ -534,6 +539,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }
 }
 
+/**
+ * Queues the given operation until an `endUpdates` synchronize update is completed.
+ *
+ * If this method is called outside of a begin/endUpdates batch update, the block is
+ * executed immediately.
+ */
 - (void)performEditCommandWithBlock:(void (^)(void))block
 {
   // This method needs to block the thread and synchronously perform the operation if we are not

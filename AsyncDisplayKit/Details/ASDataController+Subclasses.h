@@ -10,21 +10,6 @@
 
 @interface ASDataController (Subclasses)
 
-/**
- * Queues the given operation until an `endUpdates` synchronize update is completed.
- *
- * If this method is called outside of a begin/endUpdates batch update, the block is
- * executed immediately.
- */
-- (void)performEditCommandWithBlock:(void (^)(void))block;
-
-/**
- * Safely locks access to the data source and executes the given block, unlocking once complete.
- *
- * When `asyncDataFetching` is enabled, the block is executed on a background thread.
- */
-- (void)accessDataSourceWithBlock:(dispatch_block_t)block;
-
 - (void)willPerformInitialDataLoading;
 
 /**
@@ -51,6 +36,8 @@
 
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
+#pragma mark - Internal editing & completed store querying
+
 /**
  * Provides a collection of index paths for nodes of the given kind that are currently in the editing store
  */
@@ -66,6 +53,8 @@
  */
 - (NSMutableArray *)completedNodesOfKind:(NSString *)kind;
 
+#pragma mark - Node sizing
+
 /**
  * Measure and layout the given nodes in optimized batches, constraining each to a given size in `constrainedSizeForNodeOfKind:atIndexPath:`.
  */
@@ -75,6 +64,8 @@
  * Provides the size range for a specific node during the layout process.
  */
 - (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+#pragma mark - Node & Section Insertion/Deletion API
 
 /**
  * Inserts the given nodes of the specified kind into the backing store, calling completion on the main thread when the write finishes.
