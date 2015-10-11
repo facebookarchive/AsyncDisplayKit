@@ -26,3 +26,5 @@ docs/.sass-cache
 *.lock
 
 *.gcov
+*.gcno
+*.gcda
