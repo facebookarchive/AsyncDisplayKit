@@ -97,6 +97,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 #pragma mark - Cell Layout
 
 /*
+ * FIXME: Shouldn't this method, as well as `_layoutNodes:atIndexPaths:withAnimationOptions:` use the word "measure" instead?
+ *
  * Once nodes have loaded their views, we can't layout in the background so this is a chance
  * to do so immediately on the main thread.
  */
@@ -136,6 +138,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       for (NSUInteger k = j; k < j + batchCount; k++) {
         ASCellNode *node = nodes[k];
+        // Only measure nodes whose views aren't loaded, since we're in the background.
+        // We should already have measured loaded nodes before we left the main thread, using _layoutNodesWithMainThreadAffinity:
         if (!node.isNodeLoaded) {
           ASSizeRange constrainedSize = nodeBoundSizes[k];
           [node measureWithSizeRange:constrainedSize];
@@ -267,6 +271,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromEntireDataSourceWithMutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
       
+      // Measure nodes with
       [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
@@ -510,9 +515,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       // update the section of indexpaths
       NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:newSection];
       NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-      [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
+      for (NSIndexPath *indexPath in indexPaths) {
         [updatedIndexPaths addObject:[sectionIndexPath indexPathByAddingIndex:[indexPath indexAtPosition:indexPath.length - 1]]];
-      }];
+      }
 
       // Don't re-calculate size for moving
       [self _insertNodes:nodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
@@ -538,6 +543,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:sortedIndexPaths[i]]];
       }
       
+      // Layout nodes whose views are loaded before we leave the main thread
       [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
@@ -557,6 +563,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     // sort indexPath in order to avoid messing up the index when deleting
+    // FIXME: Shouldn't deletes be sorted in descending order?
     NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
 
     [_editingTransactionQueue addOperationWithBlock:^{
@@ -577,11 +584,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // Reloading requires re-fetching the data.  Load it on the current calling thread, locking the data source.
     [self accessDataSourceWithBlock:^{
       NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-      [indexPaths sortedArrayUsingSelector:@selector(compare:)];
-      [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-        [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
-      }];
       
+      // FIXME: This doesn't currently do anything
+      // FIXME: Shouldn't deletes be sorted in descending order?
+      [indexPaths sortedArrayUsingSelector:@selector(compare:)];
+      
+      for (NSIndexPath *indexPath in indexPaths) {
+        [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
+      }
+      
+      // Layout nodes whose views are loaded before we leave the main thread
       [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
 
       [_editingTransactionQueue addOperationWithBlock:^{
