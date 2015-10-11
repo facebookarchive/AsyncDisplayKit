@@ -6,7 +6,8 @@
 //
 
 #import <XCTest/XCTest.h>
-#import <AsyncDisplayKit/ASCollectionView.h>
+#import "ASCollectionView.h"
+#import "ASCollectionViewFlowLayoutInspector.h"
 
 @interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate>
 
@@ -79,7 +80,23 @@
 
 @implementation ASCollectionViewTests
 
-- (void)DISABLED_testCollectionViewController {
+- (void)testThatItSetsALayoutInspectorForFlowLayouts
+{
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+  XCTAssert(collectionView.layoutDelegate != nil, @"should automatically set a layout delegate for flow layouts");
+  XCTAssert([collectionView.layoutDelegate isKindOfClass:[ASCollectionViewFlowLayoutInspector class]], @"should have a flow layout inspector by default");
+}
+
+- (void)testThatItDoesNotSetALayoutInspectorForCustomLayouts
+{
+  UICollectionViewLayout *layout = [[UICollectionViewLayout alloc] init];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+  XCTAssert(collectionView.layoutDelegate == nil, @"should not set a layout delegate for custom layouts");
+}
+
+- (void)DISABLED_testCollectionViewController
+{
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
 
   UIView *containerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];

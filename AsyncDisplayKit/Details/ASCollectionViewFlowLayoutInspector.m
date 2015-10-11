@@ -21,11 +21,12 @@
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout
 {
+    self = [super init];
+
     if (flowLayout == nil) {
         return nil;
     }
-
-    self = [super init];
+    
     if (self != nil) {
         self.collectionView = collectionView;
         _layout = flowLayout;

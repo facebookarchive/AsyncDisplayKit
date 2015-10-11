@@ -228,7 +228,9 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   // Register the default layout inspector delegate for flow layouts, custom layouts
   // will need to roll their own ASCollectionViewLayoutInspecting implementation.
-  _layoutDelegate = [self flowLayoutInspector];
+  if ([layout asdk_isFlowLayout]) {
+    _layoutDelegate = [self flowLayoutInspector];
+  }
   
   _registeredSupplementaryKinds = [NSMutableArray array];
   
@@ -249,8 +251,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 /**
  * A layout inspector implementation specific for the sizing behavior of UICollectionViewFlowLayouts
- *
- * @discussion Will return nil if the current layout is not a flow layout
  */
 - (ASCollectionViewFlowLayoutInspector *)flowLayoutInspector
 {
