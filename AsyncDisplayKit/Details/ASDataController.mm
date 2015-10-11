@@ -103,6 +103,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Cell Layout
 
+- (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
+{
+  [node measureWithSizeRange:constrainedSize];
+  node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+}
+
 /*
  * FIXME: Shouldn't this method, as well as `_layoutNodes:atIndexPaths:withAnimationOptions:` use the word "measure" instead?
  *
@@ -116,8 +122,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     ASCellNode *node = nodes[idx];
     if (node.isNodeLoaded) {
       ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-      [node measureWithSizeRange:constrainedSize];
-      node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+      [self _layoutNode:node withConstrainedSize:constrainedSize];
     }
   }];
 }
@@ -173,9 +178,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         // Only measure nodes whose views aren't loaded, since we're in the background.
         // We should already have measured loaded nodes before we left the main thread, using _layoutNodesWithMainThreadAffinity:
         if (!node.isNodeLoaded) {
-          ASSizeRange constrainedSize = nodeBoundSizes[k];
-          [node measureWithSizeRange:constrainedSize];
-          node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+          [self _layoutNode:node withConstrainedSize:nodeBoundSizes[k]];
         }
       }
     });
