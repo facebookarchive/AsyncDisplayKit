@@ -746,19 +746,19 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayNodeAssert(_layoutDelegate != nil, @"ASCollectionView must have a layoutDelegate for layout inspection");
+  ASDisplayNodeAssert(_layoutDelegate != nil, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
   return [_layoutDelegate collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
 }
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
-  ASDisplayNodeAssert(_layoutDelegate != nil, @"ASCollectionView must have a layoutDelegate for layout inspection");
+  ASDisplayNodeAssert(_layoutDelegate != nil, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
   return [_layoutDelegate collectionView:self supplementaryViewsOfKind:kind inSection:section];
 }
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryKind:(NSString *)kind;
 {
-  ASDisplayNodeAssert(_layoutDelegate != nil, @"ASCollectionView must have a layoutDelegate for layout inspection");
+  ASDisplayNodeAssert(_layoutDelegate != nil, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
   return [_layoutDelegate collectionView:self numberOfSectionsForSupplementaryKind:kind];
 }
 
