@@ -17,7 +17,7 @@
 
 @protocol ASCollectionDataControllerSource <ASDataControllerSource>
 
-- (ASDisplayNode *)dataController:(ASCollectionDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+- (ASCellNode *)dataController:(ASCollectionDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
 /**
  The constrained size range for layout.
@@ -34,6 +34,6 @@
 
 @interface ASCollectionDataController : ASDataController
 
-- (ASDisplayNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+- (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
 @end

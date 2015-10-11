@@ -476,7 +476,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
   
-  [_rangeController configureContentView:cell.contentView forNode:node];
+  [_rangeController configureContentView:cell.contentView forCellNode:node];
   
   cell.node = node;
   
@@ -492,8 +492,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   NSString *identifier = [self __reuseIdentifierForKind:kind];
   UICollectionReusableView *view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:identifier forIndexPath:indexPath];
-  ASDisplayNode *node = [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
-  [_rangeController configureContentView:view forNode:node];
+  ASCellNode *node = [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
+  [_rangeController configureContentView:view forCellNode:node];
   return view;
 }
 
@@ -731,9 +731,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark - ASCollectionViewDataControllerSource Supplementary view support
 
-- (ASDisplayNode *)dataController:(ASCollectionDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+- (ASCellNode *)dataController:(ASCollectionDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayNode *node = [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+  ASCellNode *node = [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
   ASDisplayNodeAssert(node != nil, @"A node must be returned for a supplementary node");
   ASDisplayNodeAssert(!node.nodeLoaded, @"The supplementary node must not be loaded");
   return node;

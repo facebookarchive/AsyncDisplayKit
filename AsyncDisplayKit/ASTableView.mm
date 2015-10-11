@@ -530,7 +530,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   }
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  [_rangeController configureContentView:cell.contentView forNode:node];
+  [_rangeController configureContentView:cell.contentView forCellNode:node];
 
   cell.node = node;
   cell.backgroundColor = node.backgroundColor;

@@ -197,7 +197,7 @@
 
 #pragma mark - External supplementary store querying
 
-- (ASDisplayNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+- (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
   return [self completedNodesOfKind:kind][indexPath.section][indexPath.item];

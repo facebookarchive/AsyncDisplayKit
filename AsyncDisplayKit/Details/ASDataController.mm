@@ -169,7 +169,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       for (NSUInteger k = j; k < j + batchCount; k++) {
-        ASDisplayNode *node = nodes[k];
+        ASCellNode *node = nodes[k];
         // Only measure nodes whose views aren't loaded, since we're in the background.
         // We should already have measured loaded nodes before we left the main thread, using _layoutNodesWithMainThreadAffinity:
         if (!node.isNodeLoaded) {
@@ -928,7 +928,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   ASDisplayNodeAssertMainThread();
   [_completedNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
     [nodes enumerateObjectsUsingBlock:^(NSMutableArray *section, NSUInteger sectionIndex, BOOL *stop) {
-      [section enumerateObjectsUsingBlock:^(ASDisplayNode *node, NSUInteger rowIndex, BOOL *stop) {
+      [section enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger rowIndex, BOOL *stop) {
         if (node.isNodeLoaded) {
           if (node.layerBacked) {
             [node.layer removeFromSuperlayer];
