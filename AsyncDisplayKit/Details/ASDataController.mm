@@ -406,23 +406,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
-#pragma mark - Initial & Reload Data Hooks (Subclass API)
-
-- (void)willPerformInitialDataLoading
-{
-  // Implemented by subclasses
-}
-
-- (void)prepareForReloadData
-{
-  // Implemented by subclasses
-}
-
-- (void)willReloadData
-{
-  // Implemented by subclasses
-}
-
 #pragma mark - Data Source Access (Calling _dataSource)
 
 /**
@@ -681,36 +664,52 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
-#pragma mark - Section Insertion Hooks (Subclass API)
+
+#pragma mark - Backing store manipulation optional hooks (Subclass API)
+
+- (void)willPerformInitialDataLoading
+{
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
+}
+
+- (void)prepareForReloadData
+{
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
+}
+
+- (void)willReloadData
+{
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
+}
 
 - (void)prepareInsertSections:(NSIndexSet *)sections
 {
-  // Implemented by subclass
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
 - (void)willInsertSections:(NSIndexSet *)sections
 {
-  // Implemented by subclass
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
 - (void)willDeleteSections:(NSIndexSet *)sections
 {
-  // Implemented by subclass
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
 - (void)prepareForReloadSections:(NSIndexSet *)sections
 {
-  // Implemented by subclass
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
 - (void)willReloadSections:(NSIndexSet *)sections
 {
-  // Implemented by subclass
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
-  // Implemented by subclass
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
 #pragma mark - Row Editing (External API)
