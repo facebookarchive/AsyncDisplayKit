@@ -11,7 +11,7 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface SupplementaryNode : ASDisplayNode
+@interface SupplementaryNode : ASCellNode
 
 - (instancetype)initWithText:(NSString *)text;
 

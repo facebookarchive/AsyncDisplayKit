@@ -36,6 +36,7 @@ static CGFloat kInsets = 15.0;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASCenterLayoutSpec *center = [[ASCenterLayoutSpec alloc] init];
+  center.centeringOptions = ASCenterLayoutSpecCenteringXY;
   center.child = _textNode;
   UIEdgeInsets insets = UIEdgeInsetsMake(kInsets, kInsets, kInsets, kInsets);
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:center];
