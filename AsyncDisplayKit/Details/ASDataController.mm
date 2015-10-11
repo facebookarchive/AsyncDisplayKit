@@ -271,7 +271,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromEntireDataSourceWithMutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
       
-      // Measure nodes with
+      // Measure nodes whose views are loaded before we leave the main thread
       [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
@@ -428,6 +428,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromDataSourceWithSectionIndexSet:indexSet mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
       
+      // Measure nodes whose views are loaded before we leave the main thread
       [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
@@ -479,6 +480,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       // For example, if an initial -reloadData call is quickly followed by -reloadSections, sizing the initial set may not be done
       // at this time.  Thus _editingNodes could be empty and crash in ASIndexPathsForMultidimensional[...]
       
+      // Measure nodes whose views are loaded before we leave the main thread
       [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
@@ -543,7 +545,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:sortedIndexPaths[i]]];
       }
       
-      // Layout nodes whose views are loaded before we leave the main thread
+      // Measure nodes whose views are loaded before we leave the main thread
       [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
@@ -593,7 +595,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
       }
       
-      // Layout nodes whose views are loaded before we leave the main thread
+      // Measure nodes whose views are loaded before we leave the main thread
       [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
 
       [_editingTransactionQueue addOperationWithBlock:^{
