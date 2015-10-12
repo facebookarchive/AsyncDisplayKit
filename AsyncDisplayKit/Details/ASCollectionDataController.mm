@@ -28,11 +28,6 @@
   NSMutableDictionary *_pendingIndexPaths;
 }
 
-- (void)willPerformInitialDataLoading
-{
-  // TODO: Implement
-}
-
 - (void)prepareForReloadData
 {
   _pendingNodes = [NSMutableDictionary dictionary];

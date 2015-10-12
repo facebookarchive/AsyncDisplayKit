@@ -10,8 +10,6 @@
 
 @interface ASDataController (Subclasses)
 
-- (void)willPerformInitialDataLoading;
-
 /**
  * An opportunity for a subclass to access the data source before entering into the editing queue
  */

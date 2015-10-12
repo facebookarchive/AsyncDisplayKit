@@ -110,9 +110,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 }
 
 /*
- * FIXME: Shouldn't this method, as well as `_layoutNodes:atIndexPaths:withAnimationOptions:` use the word "measure" instead?
+ * Perform measurement and layout of loaded nodes on the main thread, skipping unloaded nodes.
  *
- * Once nodes have loaded their views, we can't layout in the background so this is a chance
+ * @discussion Once nodes have loaded their views, we can't layout in the background so this is a chance
  * to do so immediately on the main thread.
  */
 - (void)_layoutNodesWithMainThreadAffinity:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths {
@@ -337,8 +337,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
     [self accessDataSourceWithBlock:^{
-      [self willPerformInitialDataLoading];
-
       NSMutableArray *indexPaths = [NSMutableArray array];
       NSUInteger sectionNum = [_dataSource numberOfSectionsInDataController:self];
 
@@ -669,11 +667,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 
 #pragma mark - Backing store manipulation optional hooks (Subclass API)
-
-- (void)willPerformInitialDataLoading
-{
-  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
-}
 
 - (void)prepareForReloadData
 {
