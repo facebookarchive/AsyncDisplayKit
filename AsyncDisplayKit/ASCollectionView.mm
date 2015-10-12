@@ -61,14 +61,12 @@ static BOOL _isInterceptedSelector(SEL sel)
  */
 @interface _ASCollectionViewProxy : NSProxy
 - (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASCollectionView *)interceptor;
-@property (nonatomic, weak) id<NSObject> target;
 @end
 
 @implementation _ASCollectionViewProxy {
   id<NSObject> __weak _target;
   ASCollectionView * __weak _interceptor;
 }
-@synthesize target = _target;
 
 - (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASCollectionView *)interceptor
 {
@@ -204,14 +202,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   // and should not trigger a relayout.
   _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
   
-  // Set up the delegate / dataSource proxy now, so we recieve key method calls from UITableView even if
-  // our owner never sets up asyncDelegate (technically the dataSource is required)
-  _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
-  super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
-  
-  _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
-  super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
-
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
@@ -262,21 +252,22 @@ static BOOL _isInterceptedSelector(SEL sel)
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDataSource in the ViewController's dealloc. In this case our _asyncDataSource
   // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to nil out
-  // _proxyDataSource.target in this case because calls to _ASCollectionViewProxy will start failing and cause crashes.
+  // super.dataSource in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
   if (asyncDataSource == nil) {
-    _proxyDataSource.target = nil;
+    super.dataSource = nil;
     _asyncDataSource = nil;
+    _proxyDataSource = nil;
     _asyncDataSourceImplementsConstrainedSizeForNode = NO;
   } else {
-    _proxyDataSource.target = asyncDataSource;
     _asyncDataSource = asyncDataSource;
-    _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
-    
     // TODO: Support supplementary views with ASCollectionView.
     if ([_asyncDataSource respondsToSelector:@selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:)]) {
       ASDisplayNodeAssert(NO, @"ASCollectionView is planned to support supplementary views by September 2015.  You can work around this issue by using standard items.");
     }
+    _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
+    super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
+    _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
   }
 }
 
@@ -285,17 +276,19 @@ static BOOL _isInterceptedSelector(SEL sel)
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDelegate in the ViewController's dealloc. In this case our _asyncDelegate
   // will return as nil (ARC magic) even though the _proxyDelegate still exists. It's really important to nil out
-  // _proxyDelegate.target in this case because calls to _ASCollectionViewProxy will start failing and cause crashes.
+  // super.delegate in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
   if (asyncDelegate == nil) {
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
     // in UIScrollViewAccessibility.
-    _proxyDelegate.target = nil;
+    super.delegate = nil;
     _asyncDelegate = nil;
+    _proxyDelegate = nil;
     _asyncDelegateImplementsInsetSection = NO;
   } else {
-    _proxyDelegate.target = asyncDelegate;
     _asyncDelegate = asyncDelegate;
+    _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
+    super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
     _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
 }
