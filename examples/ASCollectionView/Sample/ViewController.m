@@ -92,7 +92,12 @@
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-  return 300;
+  return 10;
+}
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
+  return 100;
 }
 
 - (void)collectionViewLockDataSource:(ASCollectionView *)collectionView

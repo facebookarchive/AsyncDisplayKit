@@ -58,6 +58,14 @@
  */
 - (void)batchLayoutNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
 
+/*
+ * Perform measurement and layout of loaded nodes on the main thread, skipping unloaded nodes.
+ *
+ * @discussion Once nodes have loaded their views, we can't layout in the background so this is a chance
+ * to do so immediately on the main thread.
+ */
+- (void)layoutLoadedNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths;
+
 /**
  * Provides the size range for a specific node during the layout process.
  */

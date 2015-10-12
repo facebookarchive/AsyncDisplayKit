@@ -735,7 +735,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASCellNode *node = [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
   ASDisplayNodeAssert(node != nil, @"A node must be returned for a supplementary node");
-  ASDisplayNodeAssert(!node.nodeLoaded, @"The supplementary node must not be loaded");
   return node;
 }
 

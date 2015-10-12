@@ -103,30 +103,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Cell Layout
 
-- (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
-{
-  [node measureWithSizeRange:constrainedSize];
-  node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
-}
-
-/*
- * Perform measurement and layout of loaded nodes on the main thread, skipping unloaded nodes.
- *
- * @discussion Once nodes have loaded their views, we can't layout in the background so this is a chance
- * to do so immediately on the main thread.
- */
-- (void)_layoutNodesWithMainThreadAffinity:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths {
-  NSAssert(NSThread.isMainThread, @"Main thread layout must be on the main thread.");
-  
-  [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, __unused BOOL * stop) {
-    ASCellNode *node = nodes[idx];
-    if (node.isNodeLoaded) {
-      ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-      [self _layoutNode:node withConstrainedSize:constrainedSize];
-    }
-  }];
-}
-
 - (void)batchLayoutNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
 {
   NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
@@ -139,6 +115,27 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     [self _layoutNodes:batchedNodes ofKind:kind atIndexPaths:batchedIndexPaths completion:completionBlock];
   }
+}
+
+- (void)layoutLoadedNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths {
+  NSAssert(NSThread.isMainThread, @"Main thread layout must be on the main thread.");
+  
+  [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, __unused BOOL * stop) {
+    ASCellNode *node = nodes[idx];
+    if (node.isNodeLoaded) {
+      ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+      [self _layoutNode:node withConstrainedSize:constrainedSize];
+    }
+  }];
+}
+
+/**
+ * Measure and layout the given node with the constrained size range.
+ */
+- (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
+{
+  [node measureWithSizeRange:constrainedSize];
+  node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
 }
 
 /**
@@ -176,7 +173,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       for (NSUInteger k = j; k < j + batchCount; k++) {
         ASCellNode *node = nodes[k];
         // Only measure nodes whose views aren't loaded, since we're in the background.
-        // We should already have measured loaded nodes before we left the main thread, using _layoutNodesWithMainThreadAffinity:
+        // We should already have measured loaded nodes before we left the main thread, using layoutLoadedNodes:ofKind:atIndexPaths:
         if (!node.isNodeLoaded) {
           [self _layoutNode:node withConstrainedSize:nodeBoundSizes[k]];
         }
@@ -371,7 +368,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [self _populateFromEntireDataSourceWithMutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
       
       // Measure nodes whose views are loaded before we leave the main thread
-      [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
+      [self layoutLoadedNodes:updatedNodes ofKind:ASDataControllerRowNodeKind atIndexPaths:updatedIndexPaths];
 
       // Allow subclasses to perform setup before going into the edit transaction
       [self prepareForReloadData];
@@ -550,14 +547,14 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     [self accessDataSourceWithBlock:^{
-      [self prepareForInsertSections:sections];
-      
       NSMutableArray *updatedNodes = [NSMutableArray array];
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromDataSourceWithSectionIndexSet:sections mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
       
       // Measure nodes whose views are loaded before we leave the main thread
-      [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
+      [self layoutLoadedNodes:updatedNodes ofKind:ASDataControllerRowNodeKind atIndexPaths:updatedIndexPaths];
+
+      [self prepareForInsertSections:sections];
       
       [_editingTransactionQueue addOperationWithBlock:^{
         [self willInsertSections:sections];
@@ -604,8 +601,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
     [self accessDataSourceWithBlock:^{
-      [self prepareForReloadSections:sections];
-
       NSMutableArray *updatedNodes = [NSMutableArray array];
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromDataSourceWithSectionIndexSet:sections mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
@@ -615,7 +610,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       // at this time.  Thus _editingNodes could be empty and crash in ASIndexPathsForMultidimensional[...]
       
       // Measure nodes whose views are loaded before we leave the main thread
-      [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
+      [self layoutLoadedNodes:updatedNodes ofKind:ASDataControllerRowNodeKind atIndexPaths:updatedIndexPaths];
+
+      [self prepareForReloadSections:sections];
       
       [_editingTransactionQueue addOperationWithBlock:^{
         [self willReloadSections:sections];
@@ -727,7 +724,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }
       
       // Measure nodes whose views are loaded before we leave the main thread
-      [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
+      [self layoutLoadedNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - insertRows: %@", indexPaths);
@@ -777,7 +774,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }
       
       // Measure nodes whose views are loaded before we leave the main thread
-      [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
+      [self layoutLoadedNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths];
 
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadRows: %@", indexPaths);

@@ -41,6 +41,9 @@
     [self _populateSupplementaryNodesOfKind:kind withMutableNodes:nodes mutableIndexPaths:indexPaths];
     _pendingNodes[kind] = nodes;
     _pendingIndexPaths[kind] = indexPaths;
+
+    // Measure loaded nodes before leaving the main thread
+    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
   }];
 }
 
@@ -66,8 +69,8 @@
     [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:_pendingIndexPaths[kind] completion:^(NSArray *nodes, NSArray *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-    _pendingNodes[kind] = nil;
-    _pendingIndexPaths[kind] = nil;
+    [_pendingNodes removeObjectForKey:kind];
+    [_pendingIndexPaths removeObjectForKey:kind];
   }];
 }
 
@@ -81,6 +84,9 @@
     [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableNodes:nodes mutableIndexPaths:indexPaths];
     _pendingNodes[kind] = nodes;
     _pendingIndexPaths[kind] = indexPaths;
+    
+    // Measure loaded nodes before leaving the main thread
+    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
   }];
 }
 
@@ -119,6 +125,9 @@
     [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableNodes:nodes mutableIndexPaths:indexPaths];
     _pendingNodes[kind] = nodes;
     _pendingIndexPaths[kind] = indexPaths;
+    
+    // Measure loaded nodes before leaving the main thread
+    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
   }];
 }
 
