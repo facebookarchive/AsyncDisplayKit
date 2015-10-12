@@ -123,7 +123,6 @@ static const CGFloat kFontSize = 18.0f;
   _textNode.attributedString = [[NSAttributedString alloc] initWithString:_text
                                                                attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:kFontSize]}];
 
-  [self invalidateCalculatedLayout];
 }
 
 @end
