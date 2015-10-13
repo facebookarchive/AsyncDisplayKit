@@ -226,8 +226,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   // and should not trigger a relayout.
   _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
   
-  // Register the default layout inspector delegate for flow layouts, custom layouts
-  // will need to roll their own ASCollectionViewLayoutInspecting implementation.
+  // Register the default layout inspector delegate for flow layouts only, custom layouts
+  // will need to roll their own ASCollectionViewLayoutInspecting implementation and set a layout delegate
   if ([layout asdk_isFlowLayout]) {
     _layoutDelegate = [self flowLayoutInspector];
   }
