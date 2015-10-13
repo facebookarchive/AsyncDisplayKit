@@ -59,7 +59,7 @@
     [self deleteSectionsOfKind:kind atIndexSet:indexSet completion:nil];
 
     // Insert each section
-    NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryKind:kind];
+    NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryNodeOfKind:kind];
     NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
     for (int i = 0; i < sectionCount; i++) {
       [sections addObject:[[NSMutableArray alloc] init]];
@@ -163,10 +163,10 @@
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
 {
-  NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryKind:kind];
+  NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryNodeOfKind:kind];
   for (NSUInteger i = 0; i < sectionCount; i++) {
     NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:i];
-    NSUInteger rowCount = [self.collectionDataSource dataController:self supplementaryViewsOfKind:kind inSection:i];
+    NSUInteger rowCount = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:i];
     for (NSUInteger j = 0; j < rowCount; j++) {
       NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:j];
       [indexPaths addObject:indexPath];
@@ -178,7 +178,7 @@
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withSections:(NSIndexSet *)sections mutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
 {
   [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    NSUInteger rowNum = [self.collectionDataSource dataController:self supplementaryViewsOfKind:kind inSection:idx];
+    NSUInteger rowNum = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:idx];
     NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
     for (NSUInteger i = 0; i < rowNum; i++) {
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];

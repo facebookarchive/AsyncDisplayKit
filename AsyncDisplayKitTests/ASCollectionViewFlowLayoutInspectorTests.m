@@ -259,14 +259,14 @@
   XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a zero size");
 }
 
-#pragma mark - #collectionView:numberOfSectionsForSupplementaryKind:
+#pragma mark - #collectionView:numberOfSectionsForSupplementaryNodeOfKind:
 
 - (void)testThatItRespondsWithTheDefaultNumberOfSections
 {
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
-  NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryKind:UICollectionElementKindSectionHeader];
+  NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   XCTAssert(sections == 1, @"should return 1 by default");
 }
 
@@ -277,11 +277,11 @@
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
   collectionView.asyncDataSource = dataSource;
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
-  NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryKind:UICollectionElementKindSectionHeader];
+  NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   XCTAssert(sections == 2, @"should return 2");
 }
 
-#pragma mark - #collectionView:supplementaryViewsOfKind:inSection:
+#pragma mark - #collectionView:supplementaryNodesOfKind:inSection:
 
 - (void)testThatItReturnsOneWhenAValidSizeIsImplementedOnTheDelegate
 {
@@ -292,7 +292,7 @@
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
-  NSUInteger count = [inspector collectionView:collectionView supplementaryViewsOfKind:UICollectionElementKindSectionHeader inSection:0];
+  NSUInteger count = [inspector collectionView:collectionView supplementaryNodesOfKind:UICollectionElementKindSectionHeader inSection:0];
   XCTAssert(count == 1, @"should have a header supplementary view");
 }
 
@@ -306,7 +306,7 @@
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
-  NSUInteger count = [inspector collectionView:collectionView supplementaryViewsOfKind:UICollectionElementKindSectionFooter inSection:0];
+  NSUInteger count = [inspector collectionView:collectionView supplementaryNodesOfKind:UICollectionElementKindSectionFooter inSection:0];
   XCTAssert(count == 1, @"should have a footer supplementary view");
 }
 
@@ -319,7 +319,7 @@
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
-  NSUInteger count = [inspector collectionView:collectionView supplementaryViewsOfKind:UICollectionElementKindSectionFooter inSection:0];
+  NSUInteger count = [inspector collectionView:collectionView supplementaryNodesOfKind:UICollectionElementKindSectionFooter inSection:0];
   XCTAssert(count == 0, @"should not have a footer supplementary view");
 }
 

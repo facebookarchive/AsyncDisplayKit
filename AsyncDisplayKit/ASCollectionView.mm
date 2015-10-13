@@ -754,16 +754,16 @@ static BOOL _isInterceptedSelector(SEL sel)
   return [_layoutDelegate collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
 }
 
-- (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section
+- (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
   ASDisplayNodeAssert(_layoutDelegate != nil, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
-  return [_layoutDelegate collectionView:self supplementaryViewsOfKind:kind inSection:section];
+  return [_layoutDelegate collectionView:self supplementaryNodesOfKind:kind inSection:section];
 }
 
-- (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryKind:(NSString *)kind;
+- (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind;
 {
   ASDisplayNodeAssert(_layoutDelegate != nil, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
-  return [_layoutDelegate collectionView:self numberOfSectionsForSupplementaryKind:kind];
+  return [_layoutDelegate collectionView:self numberOfSectionsForSupplementaryNodeOfKind:kind];
 }
 
 #pragma mark - ASRangeControllerDelegate.

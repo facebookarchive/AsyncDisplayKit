@@ -28,7 +28,7 @@
   }
 
   if (self != nil) {
-    [self cacheSelectorForCollectionView:collectionView];
+    [self cacheSelectorsForCollectionView:collectionView];
     _layout = flowLayout;
   }
   return self;
@@ -59,7 +59,7 @@
   return ASSizeRangeMake(CGSizeZero, constrainedSize);
 }
 
-- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryKind:(NSString *)kind
+- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind
 {
   if ([collectionView.asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)]) {
     return [collectionView.asyncDataSource numberOfSectionsInCollectionView:collectionView];
@@ -68,7 +68,7 @@
   }
 }
 
-- (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section
+- (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
   return [self layoutHasSupplementaryViewOfKind:kind inSection:section collectionView:collectionView] ? 1 : 0;
 }

@@ -26,9 +26,9 @@
 
 - (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController;
 
-- (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryKind:(NSString *)kind;
+- (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind;
 
-- (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryViewsOfKind:(NSString *)kind inSection:(NSUInteger)section;
+- (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
 
 @end
 
