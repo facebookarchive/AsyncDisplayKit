@@ -7,6 +7,7 @@
 
 #import <XCTest/XCTest.h>
 #import "ASCollectionView.h"
+#import "ASCollectionDataController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
 
 @interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate>
@@ -74,6 +75,12 @@
 
 @end
 
+@interface ASCollectionView (InternalTesting)
+
+- (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController;
+
+@end
+
 @interface ASCollectionViewTests : XCTestCase
 
 @end
@@ -93,6 +100,14 @@
   UICollectionViewLayout *layout = [[UICollectionViewLayout alloc] init];
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   XCTAssert(collectionView.layoutDelegate == nil, @"should not set a layout delegate for custom layouts");
+}
+
+- (void)testThatRegisteringASupplementaryNodeStoresItForIntrospection
+{
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+  [collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+  XCTAssertEqualObjects([collectionView supplementaryNodeKindsInDataController:nil], @[UICollectionElementKindSectionHeader]);
 }
 
 - (void)DISABLED_testCollectionViewController

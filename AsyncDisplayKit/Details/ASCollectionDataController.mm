@@ -33,8 +33,7 @@
   _pendingNodes = [NSMutableDictionary dictionary];
   _pendingIndexPaths = [NSMutableDictionary dictionary];
 
-  NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
-  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+  [[self supplementaryKinds] enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
     LOG(@"Populating elements of kind: %@", kind);
     NSMutableArray *indexPaths = [NSMutableArray array];
     NSMutableArray *nodes = [NSMutableArray array];
@@ -76,8 +75,7 @@
 
 - (void)prepareForInsertSections:(NSIndexSet *)sections
 {
-  NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
-  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+  [[self supplementaryKinds] enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
     LOG(@"Populating elements of kind: %@, for sections: %@", kind, sections);
     NSMutableArray *nodes = [NSMutableArray array];
     NSMutableArray *indexPaths = [NSMutableArray array];
@@ -107,8 +105,7 @@
 
 - (void)willDeleteSections:(NSIndexSet *)sections
 {
-  NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
-  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+  [[self supplementaryKinds] enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
     NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], sections);
     
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
@@ -118,8 +115,7 @@
 
 - (void)prepareForReloadSections:(NSIndexSet *)sections
 {
-  NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
-  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+  [[self supplementaryKinds] enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
     NSMutableArray *nodes = [NSMutableArray array];
     NSMutableArray *indexPaths = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableNodes:nodes mutableIndexPaths:indexPaths];
@@ -145,8 +141,7 @@
 
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
-  NSArray *elementKinds = [self.collectionDataSource supplementaryNodeKindsInDataController:self];
-  [elementKinds enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+  [[self supplementaryKinds] enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
     NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], [NSIndexSet indexSetWithIndex:section]);
     NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths([self editingNodesOfKind:kind], indexPaths);
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
@@ -208,6 +203,11 @@
 }
 
 #pragma mark - Private Helpers
+
+- (NSArray *)supplementaryKinds
+{
+  return [self.collectionDataSource supplementaryNodeKindsInDataController:self];
+}
 
 - (id<ASCollectionDataControllerSource>)collectionDataSource
 {
