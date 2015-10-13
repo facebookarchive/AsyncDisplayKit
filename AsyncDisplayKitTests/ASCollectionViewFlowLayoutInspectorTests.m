@@ -108,6 +108,9 @@
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
   XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 - (void)testThatItReturnsAVerticalConstrainedSizeFromTheFooterDelegateImplementation
@@ -127,6 +130,9 @@
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
   XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 // Size implementation
@@ -147,6 +153,9 @@
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
   XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 - (void)testThatItReturnsAVerticalConstrainedSizeFromTheFooterProperty
@@ -165,6 +174,9 @@
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
   XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 // Horizontal
@@ -186,6 +198,9 @@
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.height));
   XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 - (void)testThatItReturnsAHorizontalConstrainedSizeFromTheFooterDelegateImplementation
@@ -205,6 +220,9 @@
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.height));
   XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 // Size implementation
@@ -225,6 +243,9 @@
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.width));
   XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 - (void)testThatItReturnsAHorizontalConstrainedSizeFromTheFooterProperty
@@ -243,6 +264,9 @@
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.height));
   XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 - (void)testThatItReturnsZeroSizeWhenNoReferenceSizeIsImplemented
@@ -257,6 +281,9 @@
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeZero);
   XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a zero size");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 #pragma mark - #collectionView:numberOfSectionsForSupplementaryNodeOfKind:
@@ -268,6 +295,9 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   XCTAssert(sections == 1, @"should return 1 by default");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 - (void)testThatItProvidesTheNumberOfSectionsInTheDataSource
@@ -279,6 +309,9 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   XCTAssert(sections == 2, @"should return 2");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 #pragma mark - #collectionView:supplementaryNodesOfKind:inSection:
@@ -294,6 +327,9 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   NSUInteger count = [inspector collectionView:collectionView supplementaryNodesOfKind:UICollectionElementKindSectionHeader inSection:0];
   XCTAssert(count == 1, @"should have a header supplementary view");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 - (void)testThatItReturnsOneWhenAValidSizeIsImplementedOnTheLayout
@@ -308,6 +344,9 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   NSUInteger count = [inspector collectionView:collectionView supplementaryNodesOfKind:UICollectionElementKindSectionFooter inSection:0];
   XCTAssert(count == 1, @"should have a footer supplementary view");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 - (void)testThatItReturnsNoneWhenNoReferenceSizeIsImplemented
@@ -321,6 +360,9 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   NSUInteger count = [inspector collectionView:collectionView supplementaryNodesOfKind:UICollectionElementKindSectionFooter inSection:0];
   XCTAssert(count == 0, @"should not have a footer supplementary view");
+  
+  collectionView.asyncDataSource = nil;
+  collectionView.asyncDelegate = nil;
 }
 
 @end
