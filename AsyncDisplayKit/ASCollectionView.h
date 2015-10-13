@@ -126,6 +126,16 @@
  */
 - (void)reloadData;
 
+/**
+ * Registers the given kind of supplementary node for use in creating node-backed supplementary views.
+ *
+ * @param kind The kind of supplementary node that will be requested through the data source.
+ *
+ * @discussion Use this method to register support for the use of supplementary nodes in place of the default
+ * `registerClass:forSupplementaryViewOfKind:withReuseIdentifier:` and `registerNib:forSupplementaryViewOfKind:withReuseIdentifier:`
+ * methods. This method will register an internal backing view that will host the contents of the supplementary nodes
+ * returned from the data source.
+ */
 - (void)registerSupplementaryNodeOfKind:(NSString *)elementKind;
 
 /**
@@ -281,6 +291,13 @@
 
 @optional
 
+/**
+ * Asks the collection view to provide a supplementary node to display in the collection view.
+ *
+ * @param collectionView An object representing the collection view requesting this information.
+ * @param kind           The kind of supplementary node to provide.
+ * @param indexPath      The index path that specifies the location of the new supplementary node.
+ */
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
 /**
@@ -355,6 +372,9 @@
 
 @end
 
+/**
+ * Defines methods that let you coordinate with a `UICollectionViewFlowLayout` in combination with an `ASCollectionView`.
+ */
 @protocol ASCollectionViewDelegateFlowLayout <ASCollectionViewDelegate>
 
 @optional

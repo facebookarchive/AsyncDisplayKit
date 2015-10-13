@@ -10,30 +10,6 @@
 
 @interface ASDataController (Subclasses)
 
-/**
- * An opportunity for a subclass to access the data source before entering into the editing queue
- */
-- (void)prepareForReloadData;
-
-/**
- * Subclasses can override this to reload data after the abstract data controller deletes its old data and before it reloads the new.
- *
- * @discussion Invoked on the editing transaction queue.
- */
-- (void)willReloadData;
-
-- (void)prepareForInsertSections:(NSIndexSet *)sections;
-
-- (void)willInsertSections:(NSIndexSet *)sections;
-
-- (void)willDeleteSections:(NSIndexSet *)sections;
-
-- (void)prepareForReloadSections:(NSIndexSet *)sections;
-
-- (void)willReloadSections:(NSIndexSet *)sections;
-
-- (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection;
-
 #pragma mark - Internal editing & completed store querying
 
 /**
@@ -92,5 +68,92 @@
  * Deletes the given sections of the specified kind in the backing store, calling completion on the main thread when finished.
  */
 - (void)deleteSectionsOfKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSIndexSet *indexSet))completionBlock;
+
+#pragma mark - Data Manipulation Hooks
+
+/**
+ * Notifies the subclass to perform any work needed before the data controller is reloaded entirely
+ *
+ * @discussion This method will be performed before the data controller enters its editing queue, usually on the main
+ * thread. The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * data stores before entering into editing the backing store on a background thread.
+ */
+ - (void)prepareForReloadData;
+ 
+/**
+ * Notifies the subclass that the data controller is about to reload its data entirely
+ *
+ * @discussion This method will be performed on the data controller's editing background queue before the parent's
+ * concrete implementation. This is a great place to perform new node creation like supplementary views
+ * or header/footer nodes.
+ */
+- (void)willReloadData;
+
+/**
+ * Notifies the subclass to perform setup before sections are inserted in the data controller
+ *
+ * @discussion This method will be performed before the data controller enters its editing queue, usually on the main
+ * thread. The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * data stores before entering into editing the backing store on a background thread.
+ *
+ * @param sections Indices of sections to be inserted
+ */
+- (void)prepareForInsertSections:(NSIndexSet *)sections;
+
+/**
+ * Notifies the subclass that the data controller will insert new sections at the given position
+ *
+ * @discussion This method will be performed on the data controller's editing background queue before the parent's
+ * concrete implementation. This is a great place to perform any additional transformations like supplementary views
+ * or header/footer nodes.
+ *
+ * @param sections Indices of sections to be inserted
+ */
+- (void)willInsertSections:(NSIndexSet *)sections;
+
+/**
+ * Notifies the subclass that the data controller will delete sections at the given positions
+ *
+ * @discussion This method will be performed on the data controller's editing background queue before the parent's
+ * concrete implementation. This is a great place to perform any additional transformations like supplementary views
+ * or header/footer nodes.
+ *
+ * @param sections Indices of sections to be deleted
+ */
+- (void)willDeleteSections:(NSIndexSet *)sections;
+
+/**
+ * Notifies the subclass to perform any work needed before the given sections will be reloaded.
+ *
+ * @discussion This method will be performed before the data controller enters its editing queue, usually on the main
+ * thread. The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * data stores before entering into editing the backing store on a background thread.
+ *
+ * @param sections Indices of sections to be reloaded
+ */
+- (void)prepareForReloadSections:(NSIndexSet *)sections;
+
+/**
+ * Notifies the subclass that the data controller will reload the sections in the given index set
+ *
+ * @discussion This method will be performed on the data controller's editing background queue before the parent's
+ * concrete implementation. This is a great place to perform any additional transformations like supplementary views
+ * or header/footer nodes.
+ *
+ * @param sections Indices of sections to be reloaded
+ */
+- (void)willReloadSections:(NSIndexSet *)sections;
+
+/**
+ * Notifies the subclass that the data controller will move a section to a new position
+ *
+ * @discussion This method will be performed on the data controller's editing background queue before the parent's
+ * concrete implementation. This is a great place to perform any additional transformations like supplementary views
+ * or header/footer nodes.
+ *
+ * @param section    Index of current section position
+ * @param newSection Index of new section position
+ */
+- (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 @end
