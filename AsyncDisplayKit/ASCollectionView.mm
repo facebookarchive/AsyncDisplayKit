@@ -306,10 +306,6 @@ static BOOL _isInterceptedSelector(SEL sel)
     _asyncDataSourceImplementsConstrainedSizeForNode = NO;
   } else {
     _asyncDataSource = asyncDataSource;
-    // TODO: Support supplementary views with ASCollectionView.
-    if ([_asyncDataSource respondsToSelector:@selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:)]) {
-      ASDisplayNodeAssert(NO, @"ASCollectionView is planned to support supplementary views by September 2015.  You can work around this issue by using standard items.");
-    }
     _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
     _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
