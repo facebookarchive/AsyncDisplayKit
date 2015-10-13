@@ -34,9 +34,10 @@
 @interface ASCollectionViewFlowLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
 
 @property (nonatomic, weak) UICollectionViewFlowLayout *layout;
-@property (nonatomic, weak) ASCollectionView *collectionView;
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout;
+
+- (void)cacheSelectorsForCollectionView:(ASCollectionView *)collectionView;
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 

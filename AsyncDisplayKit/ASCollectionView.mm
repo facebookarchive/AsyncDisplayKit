@@ -337,7 +337,16 @@ static BOOL _isInterceptedSelector(SEL sel)
     _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
 
-  _flowLayoutInspector.collectionView = self;
+  [_flowLayoutInspector cacheSelectorsForCollectionView:self];
+}
+
+- (void)setCollectionViewLayout:(UICollectionViewLayout *)collectionViewLayout
+{
+  [super setCollectionViewLayout:collectionViewLayout];
+  if ([collectionViewLayout asdk_isFlowLayout]) {
+    _flowLayoutInspector = nil;
+    _layoutDelegate = [self flowLayoutInspector];
+  }
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
