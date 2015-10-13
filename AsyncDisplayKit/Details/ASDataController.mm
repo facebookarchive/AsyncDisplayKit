@@ -543,7 +543,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
-    LOG(@"Edit Command - insertSections: %@", indexSet);
+    LOG(@"Edit Command - insertSections: %@", sections);
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     [self accessDataSourceWithBlock:^{
@@ -559,7 +559,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [_editingTransactionQueue addOperationWithBlock:^{
         [self willInsertSections:sections];
 
-        LOG(@"Edit Transaction - insertSections: %@", indexSet);
+        LOG(@"Edit Transaction - insertSections: %@", sections);
         NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:sections.count];
         for (NSUInteger i = 0; i < sections.count; i++) {
           [sectionArray addObject:[NSMutableArray array]];
