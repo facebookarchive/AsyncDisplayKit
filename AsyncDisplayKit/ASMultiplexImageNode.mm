@@ -606,6 +606,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       }
     }];
   }];
+  if (AS_AT_LEAST_IOS8) {
+    // If you don't set this, iOS will sometimes infer NSQualityOfServiceUserInteractive and promote the entire queue to that level, damaging system responsiveness
+    newImageRequestOp.qualityOfService = NSQualityOfServiceUserInitiated;
+  }
   _phImageRequestOperation = newImageRequestOp;
   [phImageRequestQueue addOperation:newImageRequestOp];
 }
