@@ -14,6 +14,12 @@
 { \
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:node__]; \
   FBSnapshotVerifyLayer(node__.layer, identifier__); \
+  [node__ setShouldRasterizeDescendants:YES]; \
+  [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:node__]; \
+  FBSnapshotVerifyLayer(node__.layer, identifier__); \
+  [node__ setShouldRasterizeDescendants:NO]; \
+  [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:node__]; \
+  FBSnapshotVerifyLayer(node__.layer, identifier__); \
 }
 
 @interface ASSnapshotTestCase : FBSnapshotTestCase

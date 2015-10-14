@@ -96,6 +96,25 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Cell Layout
 
+/*
+ * FIXME: Shouldn't this method, as well as `_layoutNodes:atIndexPaths:withAnimationOptions:` use the word "measure" instead?
+ *
+ * Once nodes have loaded their views, we can't layout in the background so this is a chance
+ * to do so immediately on the main thread.
+ */
+- (void)_layoutNodesWithMainThreadAffinity:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths {
+  NSAssert(NSThread.isMainThread, @"Main thread layout must be on the main thread.");
+  
+  [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, __unused BOOL * stop) {
+    ASCellNode *node = nodes[idx];
+    if (node.isNodeLoaded) {
+      ASSizeRange constrainedSize = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
+      [node measureWithSizeRange:constrainedSize];
+      node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+    }
+  }];
+}
+
 - (void)_layoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"Cell node layout must be initiated from edit transaction queue");
@@ -110,15 +129,22 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j);
     
     for (NSUInteger k = j; k < j + batchCount; k++) {
-      nodeBoundSizes[k] = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[k]];
+      ASCellNode *node = nodes[k];
+      if (!node.isNodeLoaded) {
+        nodeBoundSizes[k] = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPaths[k]];
+      }
     }
     
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       for (NSUInteger k = j; k < j + batchCount; k++) {
         ASCellNode *node = nodes[k];
-        ASSizeRange constrainedSize = nodeBoundSizes[k];
-        [node measureWithSizeRange:constrainedSize];
-        node.frame = CGRectMake(0, 0, node.calculatedSize.width, node.calculatedSize.height);
+        // Only measure nodes whose views aren't loaded, since we're in the background.
+        // We should already have measured loaded nodes before we left the main thread, using _layoutNodesWithMainThreadAffinity:
+        if (!node.isNodeLoaded) {
+          ASSizeRange constrainedSize = nodeBoundSizes[k];
+          [node measureWithSizeRange:constrainedSize];
+          node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+        }
       }
     });
   }
@@ -244,6 +270,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       NSMutableArray *updatedNodes = [NSMutableArray array];
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromEntireDataSourceWithMutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
+      
+      // Measure nodes whose views are loaded before we leave the main thread
+      [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadData");
@@ -399,6 +428,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
       [self _populateFromDataSourceWithSectionIndexSet:indexSet mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
       
+      // Measure nodes whose views are loaded before we leave the main thread
+      [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
+      
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - insertSections: %@", indexSet);
         NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:indexSet.count];
@@ -448,6 +480,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       // For example, if an initial -reloadData call is quickly followed by -reloadSections, sizing the initial set may not be done
       // at this time.  Thus _editingNodes could be empty and crash in ASIndexPathsForMultidimensional[...]
       
+      // Measure nodes whose views are loaded before we leave the main thread
+      [self _layoutNodesWithMainThreadAffinity:updatedNodes atIndexPaths:updatedIndexPaths];
+      
       [_editingTransactionQueue addOperationWithBlock:^{
         NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes, sections);
         
@@ -482,9 +517,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       // update the section of indexpaths
       NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:newSection];
       NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-      [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
+      for (NSIndexPath *indexPath in indexPaths) {
         [updatedIndexPaths addObject:[sectionIndexPath indexPathByAddingIndex:[indexPath indexAtPosition:indexPath.length - 1]]];
-      }];
+      }
 
       // Don't re-calculate size for moving
       [self _insertNodes:nodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
@@ -510,6 +545,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:sortedIndexPaths[i]]];
       }
       
+      // Measure nodes whose views are loaded before we leave the main thread
+      [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
+      
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - insertRows: %@", indexPaths);
         [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
@@ -527,6 +565,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     // sort indexPath in order to avoid messing up the index when deleting
+    // FIXME: Shouldn't deletes be sorted in descending order?
     NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
 
     [_editingTransactionQueue addOperationWithBlock:^{
@@ -547,11 +586,18 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // Reloading requires re-fetching the data.  Load it on the current calling thread, locking the data source.
     [self accessDataSourceWithBlock:^{
       NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-      [indexPaths sortedArrayUsingSelector:@selector(compare:)];
-      [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-        [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
-      }];
       
+      // FIXME: This doesn't currently do anything
+      // FIXME: Shouldn't deletes be sorted in descending order?
+      [indexPaths sortedArrayUsingSelector:@selector(compare:)];
+      
+      for (NSIndexPath *indexPath in indexPaths) {
+        [nodes addObject:[_dataSource dataController:self nodeAtIndexPath:indexPath]];
+      }
+      
+      // Measure nodes whose views are loaded before we leave the main thread
+      [self _layoutNodesWithMainThreadAffinity:nodes atIndexPaths:indexPaths];
+
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
         [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];

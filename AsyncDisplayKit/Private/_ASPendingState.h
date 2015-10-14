@@ -27,4 +27,7 @@
 - (void)applyToView:(UIView *)view;
 - (void)applyToLayer:(CALayer *)layer;
 
++ (_ASPendingState *)pendingViewStateFromLayer:(CALayer *)layer;
++ (_ASPendingState *)pendingViewStateFromView:(UIView *)view;
+
 @end

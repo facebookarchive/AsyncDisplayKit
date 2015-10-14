@@ -143,22 +143,7 @@
   ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
 #endif
 
-  BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
-  
-  CGPoint origin      = (useLayer ? _layer.bounds.origin : self.bounds.origin);
-  CGPoint anchorPoint = (useLayer ? _layer.anchorPoint   : self.anchorPoint);
-  
-  CGRect bounds       = (CGRect){ origin, rect.size };
-  CGPoint position    = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
-                                    rect.origin.y + rect.size.height * anchorPoint.y);
-  
-  if (useLayer) {
-    _layer.bounds = bounds;
-    _layer.position = position;
-  } else {
-    self.bounds = bounds;
-    self.position = position;
-  }
+  [self __setSafeFrame:rect];
 }
 
 - (void)setNeedsDisplay

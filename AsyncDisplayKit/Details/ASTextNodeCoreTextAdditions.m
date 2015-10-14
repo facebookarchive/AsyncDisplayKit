@@ -149,7 +149,7 @@ NSAttributedString *ASCleanseAttributedStringOfCoreTextAttributes(NSAttributedSt
 
     return cleanAttributedString;
   } else {
-    return dirtyAttributedString;
+    return [dirtyAttributedString copy];
   }
 }
 

@@ -28,7 +28,7 @@
 {
   return [super initWithViewBlock:^UIView *{
     return [[ASScrollView alloc] init];
-  }];
+  } didLoadBlock:nil];
 }
 
 @end

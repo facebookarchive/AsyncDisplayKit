@@ -11,7 +11,7 @@
 #import "ASBasicImageDownloader.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASThread.h"
-
+#import "ASEqualityHelpers.h"
 
 @interface ASNetworkImageNode ()
 {
@@ -70,7 +70,7 @@
 {
   ASDN::MutexLocker l(_lock);
 
-  if (URL == _URL || [URL isEqual:_URL]) {
+  if (ASObjectIsEqual(URL, _URL)) {
     return;
   }
 
@@ -96,7 +96,7 @@
 {
   ASDN::MutexLocker l(_lock);
 
-  if (defaultImage == _defaultImage || [defaultImage isEqual:_defaultImage]) {
+  if (ASObjectIsEqual(defaultImage, _defaultImage)) {
     return;
   }
   _defaultImage = defaultImage;
