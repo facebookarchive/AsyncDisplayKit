@@ -137,7 +137,9 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   NSMutableSet *indexPathSet = [[NSMutableSet alloc] init];
   NSArray *layoutAttributes = [_collectionViewLayout layoutAttributesForElementsInRect:rangeBounds];
   for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
-    [indexPathSet addObject:la.indexPath];
+    if (la.representedElementCategory == UICollectionElementCategoryCell) {
+      [indexPathSet addObject:la.indexPath];
+    }
   }
   return indexPathSet;
 }
