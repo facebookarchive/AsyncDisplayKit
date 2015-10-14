@@ -577,8 +577,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     }
     
     if (imageAsset == nil) {
-      // Error.
-      completionBlock(nil, nil);
+      NSError *error = [NSError errorWithDomain:ASMultiplexImageNodeErrorDomain code:ASMultiplexImageNodeErrorCodePHAssetIsUnavailable userInfo:nil];
+      completionBlock(nil, error);
       return;
     }
     
@@ -597,12 +597,18 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     
     PHImageManager *imageManager = strongSelf.imageManager ?: PHImageManager.defaultManager;
     [imageManager requestImageForAsset:imageAsset targetSize:request.targetSize contentMode:request.contentMode options:options resultHandler:^(UIImage *image, NSDictionary *info) {
+      NSError *error = info[PHImageErrorKey];
+      
+      if (error == nil && image == nil) {
+        error = [NSError errorWithDomain:ASMultiplexImageNodeErrorDomain code:ASMultiplexImageNodeErrorCodePhotosImageManagerFailedWithoutError userInfo:nil];
+      }
+      
       if (NSThread.isMainThread) {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
-          completionBlock(image, info[PHImageErrorKey]);
+          completionBlock(image, error);
         });
       } else {
-        completionBlock(image, info[PHImageErrorKey]);
+        completionBlock(image, error);
       }
     }];
   }];
@@ -673,7 +679,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
   // If we failed to load, we stop the loading process.
   // Note that if we bailed before we began downloading because the best identifier changed, we don't bail, but rather just begin loading the best image identifier.
-  if (error && error.code != ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged)
+  if (error && !([error.domain isEqual:ASMultiplexImageNodeErrorDomain] && error.code == ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged))
     return;
 
   OSSpinLockLock(&_imageIdentifiersLock);
