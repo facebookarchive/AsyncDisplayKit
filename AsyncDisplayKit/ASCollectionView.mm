@@ -106,6 +106,28 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 @end
 
+#pragma mark -
+#pragma mark ASCellNode<->UICollectionViewCell bridging.
+
+@class _ASCollectionViewCell;
+
+@interface _ASCollectionViewCell : UICollectionViewCell
+@property (nonatomic, weak) ASCellNode *node;
+@end
+
+@implementation _ASCollectionViewCell
+
+- (void)setSelected:(BOOL)selected
+{
+  _node.selected = selected;
+}
+
+- (void)setHighlighted:(BOOL)highlighted
+{
+  _node.highlighted = highlighted;
+}
+
+@end
 
 #pragma mark -
 #pragma mark ASCollectionView.
@@ -204,7 +226,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   self.backgroundColor = [UIColor whiteColor];
   
-  [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
+  [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
   
   return self;
 }
@@ -412,11 +434,12 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   static NSString *reuseIdentifier = @"_ASCollectionViewCell";
   
-  UICollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  
   [_rangeController configureContentView:cell.contentView forCellNode:node];
+  
+  cell.node = node;
   
   return cell;
 }
