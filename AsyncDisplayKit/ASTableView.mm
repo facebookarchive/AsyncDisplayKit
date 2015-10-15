@@ -140,7 +140,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   _node.selected = selected;
 }
 
-- (void)setHighlighted:(BOOL)highlighted {
+- (void)setHighlighted:(BOOL)highlighted
+{
   _node.highlighted = highlighted;
 }
 
