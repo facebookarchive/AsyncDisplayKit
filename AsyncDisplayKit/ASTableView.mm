@@ -135,6 +135,15 @@ static BOOL _isInterceptedSelector(SEL sel)
   [super didTransitionToState:state];
 }
 
+- (void)setSelected:(BOOL)selected
+{
+  _node.selected = selected;
+}
+
+- (void)setHighlighted:(BOOL)highlighted {
+  _node.highlighted = highlighted;
+}
+
 @end
 
 
