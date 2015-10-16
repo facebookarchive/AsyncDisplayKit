@@ -12,7 +12,7 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
-
+#import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 #import <AsyncDisplayKit/ASLayoutable.h>
 
 @class ASDisplayNode;
@@ -48,7 +48,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  */
 
-@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
+@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable, ASLayoutableAsciiArtProtocol>
 
 
 /** @name Initializing a node object */

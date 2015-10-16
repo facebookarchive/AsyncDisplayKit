@@ -9,9 +9,10 @@
  */
 
 #import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 
 /** A layout spec is an immutable object that describes a layout, loosely inspired by React. */
-@interface ASLayoutSpec : NSObject <ASLayoutable>
+@interface ASLayoutSpec : NSObject <ASLayoutable, ASLayoutableAsciiArtProtocol>
 
 /** 
  * Creation of a layout spec should only happen by a user in layoutSpecThatFits:. During that method, a
@@ -94,5 +95,11 @@
 
 /** Returns all children added to this layout spec. */
 - (NSArray *)children;
+
+/**
+ *  Used by other layout specs to create ascii art debug strings
+ */
++ (NSString *)asciiArtStringForChildren:(NSArray<id<ASLayoutableAsciiArtProtocol>> *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction;
++ (NSString *)asciiArtStringForChildren:(NSArray<id<ASLayoutableAsciiArtProtocol>> *)children parentName:(NSString *)parentName;
 
 @end

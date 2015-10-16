@@ -135,4 +135,11 @@
                                    sublayouts:sublayouts];
 }
 
+#pragma mark - ASLayoutableAsciiArtProtocol
+
+- (NSString *)asciiArtString
+{
+  return [ASLayoutSpec asciiArtStringForChildren:self.children parentName:[self asciiArtName] direction:self.direction];
+}
+
 @end
