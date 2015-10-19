@@ -519,7 +519,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * Convenience methods for debugging.
  */
 
-@interface ASDisplayNode (Debugging)
+@interface ASDisplayNode (Debugging) <ASLayoutableAsciiArtProtocol>
 
 /**
  * @abstract Return a description of the node hierarchy.
@@ -657,9 +657,6 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @param node The node to be added.
  */
 - (void)addSubnode:(ASDisplayNode *)node;
-@end
-
-@interface ASDisplayNode (Debugging) <ASLayoutableAsciiArtProtocol>
 @end
 
 @interface ASDisplayNode (Deprecated)
