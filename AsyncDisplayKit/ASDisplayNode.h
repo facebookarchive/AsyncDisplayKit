@@ -48,7 +48,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  */
 
-@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable, ASLayoutableAsciiArtProtocol>
+@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
 
 
 /** @name Initializing a node object */
@@ -657,6 +657,9 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @param node The node to be added.
  */
 - (void)addSubnode:(ASDisplayNode *)node;
+@end
+
+@interface ASDisplayNode (Debugging) <ASLayoutableAsciiArtProtocol>
 @end
 
 @interface ASDisplayNode (Deprecated)

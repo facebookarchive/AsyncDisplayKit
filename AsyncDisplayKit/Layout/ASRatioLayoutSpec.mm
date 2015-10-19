@@ -86,6 +86,10 @@
   return nil;
 }
 
+@end
+
+@implementation ASRatioLayoutSpec (Debugging)
+
 #pragma mark - ASLayoutableAsciiArtProtocol
 
 - (NSString *)asciiArtName

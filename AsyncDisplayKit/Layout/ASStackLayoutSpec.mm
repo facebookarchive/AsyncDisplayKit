@@ -135,6 +135,10 @@
                                    sublayouts:sublayouts];
 }
 
+@end
+
+@implementation ASStackLayoutSpec (Debugging)
+
 #pragma mark - ASLayoutableAsciiArtProtocol
 
 - (NSString *)asciiArtString

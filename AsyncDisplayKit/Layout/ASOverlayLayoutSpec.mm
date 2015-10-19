@@ -72,6 +72,10 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
   return nil;
 }
 
+@end
+
+@implementation ASOverlayLayoutSpec (Debugging)
+
 #pragma mark - ASLayoutableAsciiArtProtocol
 
 - (NSString *)debugBoxString

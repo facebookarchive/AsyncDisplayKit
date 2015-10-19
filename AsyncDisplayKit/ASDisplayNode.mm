@@ -2074,19 +2074,6 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   return self;
 }
 
-
-#pragma mark - ASLayoutableAsciiArtProtocol
-
-- (NSString *)asciiArtString
-{
-  return [ASLayoutSpec asciiArtStringForChildren:@[] parentName:[self asciiArtName]];
-}
-
-- (NSString *)asciiArtName
-{
-  return NSStringFromClass([self class]);
-}
-
 @end
 
 @implementation ASDisplayNode (Debugging)
@@ -2148,6 +2135,18 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
     [subtree appendString:[n _recursiveDescriptionHelperWithIndent:[indent stringByAppendingString:@" | "]]];
   }
   return subtree;
+}
+
+#pragma mark - ASLayoutableAsciiArtProtocol
+
+- (NSString *)asciiArtString
+{
+    return [ASLayoutSpec asciiArtStringForChildren:@[] parentName:[self asciiArtName]];
+}
+
+- (NSString *)asciiArtName
+{
+    return NSStringFromClass([self class]);
 }
 
 @end

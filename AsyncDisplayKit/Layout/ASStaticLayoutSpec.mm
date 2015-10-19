@@ -84,6 +84,10 @@
   return nil;
 }
 
+@end
+
+@implementation ASStaticLayoutSpec (Debugging)
+
 #pragma mark - ASLayoutableAsciiArtProtocol
 
 - (NSString *)debugBoxString

@@ -122,6 +122,10 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   return self.layoutChildren[kDefaultChildrenKey];
 }
 
+@end
+
+@implementation ASLayoutSpec (Debugging)
+
 #pragma mark - ASLayoutableAsciiArtProtocol
 
 + (NSString *)asciiArtStringForChildren:(NSArray<id<ASLayoutableAsciiArtProtocol>> *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction
