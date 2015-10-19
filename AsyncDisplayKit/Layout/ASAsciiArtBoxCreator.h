@@ -41,7 +41,7 @@
  *  |  ASTextNode  ASTextNode  ASTextNode  |
  *  ----------------------------------------
  */
-+ (NSString *)horizontalBoxStringForChildren:(NSArray<NSString *> *)children parent:(NSString *)parent;
++ (NSString *)horizontalBoxStringForChildren:(NSArray *)children parent:(NSString *)parent;
 
 /**
  *  Renders an ascii art box with the children aligned vertically.
@@ -52,7 +52,7 @@
  *   |     ASTextNode    |
  *   ---------------------
  */
-+ (NSString *)verticalBoxStringForChildren:(NSArray<NSString *> *)children parent:(NSString *)parent;
++ (NSString *)verticalBoxStringForChildren:(NSArray *)children parent:(NSString *)parent;
 
 @end
 

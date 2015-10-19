@@ -101,7 +101,7 @@
 /**
  *  Used by other layout specs to create ascii art debug strings
  */
-+ (NSString *)asciiArtStringForChildren:(NSArray<id<ASLayoutableAsciiArtProtocol>> *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction;
-+ (NSString *)asciiArtStringForChildren:(NSArray<id<ASLayoutableAsciiArtProtocol>> *)children parentName:(NSString *)parentName;
++ (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction;
++ (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName;
 
 @end

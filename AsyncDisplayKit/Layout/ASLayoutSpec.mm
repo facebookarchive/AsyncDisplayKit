@@ -128,7 +128,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 #pragma mark - ASLayoutableAsciiArtProtocol
 
-+ (NSString *)asciiArtStringForChildren:(NSArray<id<ASLayoutableAsciiArtProtocol>> *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction
++ (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction
 {
   NSMutableArray *childStrings = [NSMutableArray array];
   for (id<ASLayoutableAsciiArtProtocol> layoutChild in children) {
@@ -143,7 +143,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   return [ASAsciiArtBoxCreator verticalBoxStringForChildren:childStrings parent:parentName];
 }
 
-+ (NSString *)asciiArtStringForChildren:(NSArray<id<ASLayoutableAsciiArtProtocol>> *)children parentName:(NSString *)parentName
++ (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName
 {
   return [self asciiArtStringForChildren:children parentName:parentName direction:ASStackLayoutDirectionHorizontal];
 }
