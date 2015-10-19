@@ -9,7 +9,7 @@
 #import "ASTableView.h"
 
 #import "ASAssert.h"
-#import "ASDataController.h"
+#import "ASChangeSetDataController.h"
 #import "ASCollectionViewLayoutController.h"
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
@@ -210,7 +210,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   _rangeController.layoutController = _layoutController;
   _rangeController.delegate = self;
 
-  _dataController = [[ASDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
+  _dataController = [[ASChangeSetDataController alloc] initWithAsyncDataFetching:asyncDataFetchingEnabled];
   _dataController.dataSource = self;
   _dataController.delegate = _rangeController;
   

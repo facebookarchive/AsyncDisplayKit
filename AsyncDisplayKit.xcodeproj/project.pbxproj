@@ -237,6 +237,14 @@
 		9CDC18CC1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9CDC18CD1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.m */; };
+		AC026B691BD57D6F00BBC17E /* ASChangeSetDataController.h in Headers */ = {isa = PBXBuildFile; fileRef = AC026B671BD57D6F00BBC17E /* ASChangeSetDataController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		AC026B6A1BD57D6F00BBC17E /* ASChangeSetDataController.h in Headers */ = {isa = PBXBuildFile; fileRef = AC026B671BD57D6F00BBC17E /* ASChangeSetDataController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		AC026B6B1BD57D6F00BBC17E /* ASChangeSetDataController.m in Sources */ = {isa = PBXBuildFile; fileRef = AC026B681BD57D6F00BBC17E /* ASChangeSetDataController.m */; };
+		AC026B6C1BD57D6F00BBC17E /* ASChangeSetDataController.m in Sources */ = {isa = PBXBuildFile; fileRef = AC026B681BD57D6F00BBC17E /* ASChangeSetDataController.m */; };
+		AC026B6F1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h in Headers */ = {isa = PBXBuildFile; fileRef = AC026B6D1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h */; };
+		AC026B701BD57DBF00BBC17E /* _ASHierarchyChangeSet.h in Headers */ = {isa = PBXBuildFile; fileRef = AC026B6D1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h */; };
+		AC026B711BD57DBF00BBC17E /* _ASHierarchyChangeSet.m in Sources */ = {isa = PBXBuildFile; fileRef = AC026B6E1BD57DBF00BBC17E /* _ASHierarchyChangeSet.m */; };
+		AC026B721BD57DBF00BBC17E /* _ASHierarchyChangeSet.m in Sources */ = {isa = PBXBuildFile; fileRef = AC026B6E1BD57DBF00BBC17E /* _ASHierarchyChangeSet.m */; };
 		AC026B581BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AC026B571BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m */; };
 		AC21EC101B3D0BF600C8B19A /* ASStackLayoutDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC3C4A511A1139C100143C57 /* ASCollectionView.h in Headers */ = {isa = PBXBuildFile; fileRef = AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -597,6 +605,10 @@
 		9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASStackBaselinePositionedLayout.mm; sourceTree = "<group>"; };
 		9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutablePrivate.h; path = AsyncDisplayKit/Layout/ASLayoutablePrivate.h; sourceTree = "<group>"; };
 		9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionViewTests.m; sourceTree = "<group>"; };
+		AC026B671BD57D6F00BBC17E /* ASChangeSetDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASChangeSetDataController.h; sourceTree = "<group>"; };
+		AC026B681BD57D6F00BBC17E /* ASChangeSetDataController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASChangeSetDataController.m; sourceTree = "<group>"; };
+		AC026B6D1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _ASHierarchyChangeSet.h; sourceTree = "<group>"; };
+		AC026B6E1BD57DBF00BBC17E /* _ASHierarchyChangeSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _ASHierarchyChangeSet.m; sourceTree = "<group>"; };
 		AC026B571BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASStaticLayoutSpecSnapshotTests.m; sourceTree = "<group>"; };
 		AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutDefines.h; path = AsyncDisplayKit/Layout/ASStackLayoutDefines.h; sourceTree = "<group>"; };
 		AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionView.h; sourceTree = "<group>"; };
@@ -890,6 +902,8 @@
 				205F0E1C1B373A2C007741D0 /* ASCollectionViewLayoutController.mm */,
 				464052191A3F83C40061C0BA /* ASDataController.h */,
 				4640521A1A3F83C40061C0BA /* ASDataController.mm */,
+				AC026B671BD57D6F00BBC17E /* ASChangeSetDataController.h */,
+				AC026B681BD57D6F00BBC17E /* ASChangeSetDataController.m */,
 				05A6D05819D0EB64002DD95E /* ASDealloc2MainObject.h */,
 				05A6D05919D0EB64002DD95E /* ASDealloc2MainObject.m */,
 				4640521B1A3F83C40061C0BA /* ASFlowLayoutController.h */,
@@ -954,6 +968,8 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				AC026B6D1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h */,
+				AC026B6E1BD57DBF00BBC17E /* _ASHierarchyChangeSet.m */,
 				9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */,
 				9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */,
 				9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */,
@@ -1075,6 +1091,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC026B691BD57D6F00BBC17E /* ASChangeSetDataController.h in Headers */,
 				058D0A71195D05F800B7D73C /* _AS-objc-internal.h in Headers */,
 				058D0A68195D05EC00B7D73C /* _ASAsyncTransaction.h in Headers */,
 				058D0A6A195D05EC00B7D73C /* _ASAsyncTransactionContainer+Private.h in Headers */,
@@ -1133,6 +1150,7 @@
 				292C599F1A956527007E5DD6 /* ASLayoutRangeType.h in Headers */,
 				ACF6ED261B17843500DA7C62 /* ASLayoutSpec.h in Headers */,
 				ACF6ED4D1B17847A00DA7C62 /* ASLayoutSpecUtilities.h in Headers */,
+				AC026B6F1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h in Headers */,
 				0516FA3D1A15563400B4EBED /* ASLog.h in Headers */,
 				0442850D1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */,
 				0516FA401A1563D200B4EBED /* ASMultiplexImageNode.h in Headers */,
@@ -1182,6 +1200,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC026B6A1BD57D6F00BBC17E /* ASChangeSetDataController.h in Headers */,
 				B35062481B010EFD0018CF92 /* _AS-objc-internal.h in Headers */,
 				B350623C1B010EFD0018CF92 /* _ASAsyncTransaction.h in Headers */,
 				B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */,
@@ -1202,6 +1221,7 @@
 				B35062461B010EFD0018CF92 /* ASBasicImageDownloaderInternal.h in Headers */,
 				B35062151B010EFD0018CF92 /* ASBatchContext.h in Headers */,
 				044285081BAA63FE00D16268 /* ASBatchFetching.h in Headers */,
+				AC026B701BD57DBF00BBC17E /* _ASHierarchyChangeSet.h in Headers */,
 				B35061F31B010EFD0018CF92 /* ASCellNode.h in Headers */,
 				34EFC7631B701CBF00AD841F /* ASCenterLayoutSpec.h in Headers */,
 				18C2ED7F1B9B7DE800F627B3 /* ASCollectionNode.h in Headers */,
@@ -1478,6 +1498,7 @@
 				058D0A23195D050800B7D73C /* _ASAsyncTransactionContainer.m in Sources */,
 				058D0A24195D050800B7D73C /* _ASAsyncTransactionGroup.m in Sources */,
 				058D0A26195D050800B7D73C /* _ASCoreAnimationExtras.mm in Sources */,
+				AC026B711BD57DBF00BBC17E /* _ASHierarchyChangeSet.m in Sources */,
 				058D0A18195D050800B7D73C /* _ASDisplayLayer.mm in Sources */,
 				058D0A19195D050800B7D73C /* _ASDisplayView.mm in Sources */,
 				9C55866A1BD549CB00B50E3A /* ASAsciiArtBoxCreator.m in Sources */,
@@ -1533,6 +1554,7 @@
 				ACF6ED501B17847A00DA7C62 /* ASStackPositionedLayout.mm in Sources */,
 				ACF6ED521B17847A00DA7C62 /* ASStackUnpositionedLayout.mm in Sources */,
 				ACF6ED321B17843500DA7C62 /* ASStaticLayoutSpec.mm in Sources */,
+				AC026B6B1BD57D6F00BBC17E /* ASChangeSetDataController.m in Sources */,
 				055F1A3519ABD3E3004DAFF1 /* ASTableView.mm in Sources */,
 				058D0A17195D050800B7D73C /* ASTextNode.mm in Sources */,
 				058D0A1C195D050800B7D73C /* ASTextNodeCoreTextAdditions.m in Sources */,
@@ -1593,6 +1615,7 @@
 				9B92C8851BC2EB6E00EE46B2 /* ASCollectionDataController.mm in Sources */,
 				B350623D1B010EFD0018CF92 /* _ASAsyncTransaction.m in Sources */,
 				B35062401B010EFD0018CF92 /* _ASAsyncTransactionContainer.m in Sources */,
+				AC026B721BD57DBF00BBC17E /* _ASHierarchyChangeSet.m in Sources */,
 				B35062421B010EFD0018CF92 /* _ASAsyncTransactionGroup.m in Sources */,
 				B350624A1B010EFD0018CF92 /* _ASCoreAnimationExtras.mm in Sources */,
 				2767E9421BB19BD600EA9B77 /* ASViewController.m in Sources */,
@@ -1648,6 +1671,7 @@
 				34EFC7721B701D0300AD841F /* ASStackLayoutSpec.mm in Sources */,
 				34EFC7761B701D2A00AD841F /* ASStackPositionedLayout.mm in Sources */,
 				34EFC7781B701D3100AD841F /* ASStackUnpositionedLayout.mm in Sources */,
+				AC026B6C1BD57D6F00BBC17E /* ASChangeSetDataController.m in Sources */,
 				34EFC7741B701D0A00AD841F /* ASStaticLayoutSpec.mm in Sources */,
 				B350620B1B010EFD0018CF92 /* ASTableView.mm in Sources */,
 				B350620E1B010EFD0018CF92 /* ASTextNode.mm in Sources */,

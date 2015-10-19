@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import <AsyncDisplayKit/ASDataController.h>
+#import <AsyncDisplayKit/ASChangeSetDataController.h>
 #import <AsyncDisplayKit/ASDimension.h>
 
 @class ASDisplayNode;
@@ -32,7 +32,7 @@
 
 @end
 
-@interface ASCollectionDataController : ASDataController
+@interface ASCollectionDataController : ASChangeSetDataController
 
 - (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 

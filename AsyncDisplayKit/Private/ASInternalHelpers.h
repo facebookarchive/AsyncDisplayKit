@@ -26,3 +26,7 @@ CGFloat ASCeilPixelValue(CGFloat f);
 CGFloat ASRoundPixelValue(CGFloat f);
 
 ASDISPLAYNODE_EXTERN_C_END
+
+@interface NSIndexPath (ASInverseComparison)
+- (NSComparisonResult)as_inverseCompare:(NSIndexPath *)otherIndexPath;
+@end
