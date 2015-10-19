@@ -12,8 +12,9 @@
 #import "ViewController.h"
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import "SupplementaryNode.h"
 
-@interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegate>
+@interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
 {
   ASCollectionView *_collectionView;
 }
@@ -32,12 +33,16 @@
     return nil;
   
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+  layout.headerReferenceSize = CGSizeMake(50.0, 50.0);
+  layout.footerReferenceSize = CGSizeMake(50.0, 50.0);
   
   _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:YES];
   _collectionView.asyncDataSource = self;
   _collectionView.asyncDelegate = self;
   _collectionView.backgroundColor = [UIColor whiteColor];
+  
+  [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+  [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
   
   return self;
 }
@@ -73,9 +78,26 @@
   return node;
 }
 
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  NSString *text = [kind isEqualToString:UICollectionElementKindSectionHeader] ? @"Header" : @"Footer";
+  SupplementaryNode *node = [[SupplementaryNode alloc] initWithText:text];
+  if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+    node.backgroundColor = [UIColor blueColor];
+  } else {
+    node.backgroundColor = [UIColor redColor];
+  }
+  return node;
+}
+
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-  return 300;
+  return 10;
+}
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
+  return 100;
 }
 
 - (void)collectionViewLockDataSource:(ASCollectionView *)collectionView
@@ -95,7 +117,7 @@
   [context completeBatchFetching:YES];
 }
 
-- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
   return UIEdgeInsetsMake(20.0, 20.0, 20.0, 20.0);
 }
 

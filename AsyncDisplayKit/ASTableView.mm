@@ -405,7 +405,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
       _ignoreMaxWidthChange = NO;
     } else {
       [self beginUpdates];
-      [_dataController relayoutAllRows];
+      [_dataController relayoutAllNodes];
       [self endUpdates];
     }
   }
@@ -859,7 +859,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   return [_asyncDataSource tableView:self numberOfRowsInSection:section];
 }
 
-- (NSUInteger)dataControllerNumberOfSections:(ASDataController *)dataController
+- (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController
 {
   if ([_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableView:)]) {
     return [_asyncDataSource numberOfSectionsInTableView:self];

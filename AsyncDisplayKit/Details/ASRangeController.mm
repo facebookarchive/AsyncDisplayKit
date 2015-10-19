@@ -48,7 +48,7 @@
 
 #pragma mark - View manipulation
 
-- (void)moveNode:(ASCellNode *)node toView:(UIView *)view
+- (void)moveCellNode:(ASCellNode *)node toView:(UIView *)view
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node, @"Cannot move a nil node to a view");
@@ -75,7 +75,7 @@
 
   // coalesce these events -- handling them multiple times per runloop is noisy and expensive
   _queuedRangeUpdate = YES;
-
+    
   [self performSelector:@selector(updateVisibleNodeIndexPaths)
              withObject:nil
              afterDelay:0
@@ -158,9 +158,9 @@
   return rangeType == ASLayoutRangeTypeRender;
 }
 
-- (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)cellNode
+- (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node
 {
-  if (cellNode.view.superview == contentView) {
+  if (node.view.superview == contentView) {
     // this content view is already correctly configured
     return;
   }
@@ -170,7 +170,7 @@
     [view removeFromSuperview];
   }
 
-  [self moveNode:cellNode toView:contentView];
+  [self moveCellNode:node toView:contentView];
 }
 
 

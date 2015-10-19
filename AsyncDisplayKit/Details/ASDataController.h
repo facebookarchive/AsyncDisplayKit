@@ -14,6 +14,8 @@
 @class ASCellNode;
 @class ASDataController;
 
+FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
+
 typedef NSUInteger ASDataControllerAnimationOptions;
 
 /**
@@ -40,7 +42,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 /**
  Fetch the number of sections.
  */
-- (NSUInteger)dataControllerNumberOfSections:(ASDataController *)dataController;
+- (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController;
 
 /**
  Lock the data source for data fetching.
@@ -89,7 +91,6 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 @end
-
 
 /**
  * Controller to layout data in background, and managed data updating.
@@ -156,10 +157,12 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
- * Re-measures all loaded nodes. Used to respond to a change in size of the containing view 
+ * Re-measures all loaded nodes in the backing store.
+ * 
+ * @discussion Used to respond to a change in size of the containing view
  * (e.g. ASTableView or ASCollectionView after an orientation change).
  */
-- (void)relayoutAllRows;
+- (void)relayoutAllNodes;
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
@@ -177,6 +180,9 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths;
 
-- (NSArray *)completedNodes;  // This provides efficient access to the entire _completedNodes multidimensional array.
+/**
+ * Direct access to the nodes that have completed calculation and layout
+ */
+- (NSArray *)completedNodes;
 
 @end

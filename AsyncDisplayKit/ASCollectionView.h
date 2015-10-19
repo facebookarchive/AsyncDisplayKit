@@ -17,7 +17,7 @@
 @class ASCellNode;
 @protocol ASCollectionViewDataSource;
 @protocol ASCollectionViewDelegate;
-
+@protocol ASCollectionViewLayoutInspecting;
 
 /**
  * Node-based collection view.
@@ -63,7 +63,7 @@
  *
  * @param asyncDataFetchingEnabled Enable the data fetching in async mode.
  *
- * @discussion If asyncDataFetching is enabled, the `AScollectionView` will fetch data through `collectionView:numberOfRowsInSection:` and
+ * @discussion If asyncDataFetching is enabled, the `ASCollectionView` will fetch data through `collectionView:numberOfRowsInSection:` and
  * `collectionView:nodeForRowAtIndexPath:` in async mode from background thread. Otherwise, the methods will be invoked synchronically
  * from calling thread.
  * Enabling asyncDataFetching could avoid blocking main thread for `ASCellNode` allocation, which is frequently reported issue for
@@ -79,6 +79,18 @@
  * Defaults to one screenful.
  */
 @property (nonatomic, assign) CGFloat leadingScreensForBatching;
+
+/**
+ * Optional introspection object for the collection view's layout.
+ *
+ * @discussion Since supplementary and decoration views are controlled by the collection view's layout, this object
+ * is used as a bridge to provide information to the internal data controller about the existence of these views and
+ * their associated index paths. For collection views using `UICollectionViewFlowLayout`, a default inspector
+ * implementation `ASCollectionViewFlowLayoutInspector` is created and set on this property by default. Custom
+ * collection view layout subclasses will need to provide their own implementation of an inspector object for their
+ * supplementary views to be compatible with `ASCollectionView`'s supplementary node support.
+ */
+@property (nonatomic, weak) id<ASCollectionViewLayoutInspecting> layoutDelegate;
 
 /**
  *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread. 
@@ -118,6 +130,18 @@
  * @warning This method is substantially more expensive than UICollectionView's version.
  */
 - (void)reloadData;
+
+/**
+ * Registers the given kind of supplementary node for use in creating node-backed supplementary views.
+ *
+ * @param kind The kind of supplementary node that will be requested through the data source.
+ *
+ * @discussion Use this method to register support for the use of supplementary nodes in place of the default
+ * `registerClass:forSupplementaryViewOfKind:withReuseIdentifier:` and `registerNib:forSupplementaryViewOfKind:withReuseIdentifier:`
+ * methods. This method will register an internal backing view that will host the contents of the supplementary nodes
+ * returned from the data source.
+ */
+- (void)registerSupplementaryNodeOfKind:(NSString *)elementKind;
 
 /**
  * Inserts one or more sections.
@@ -273,6 +297,15 @@
 @optional
 
 /**
+ * Asks the collection view to provide a supplementary node to display in the collection view.
+ *
+ * @param collectionView An object representing the collection view requesting this information.
+ * @param kind           The kind of supplementary node to provide.
+ * @param indexPath      The index path that specifies the location of the new supplementary node.
+ */
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+/**
  * Provides the constrained size range for measuring the node at the index path.
  *
  * @param collectionView The sender.
@@ -342,18 +375,37 @@
  */
 - (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView;
 
+@end
+
+/**
+ * Defines methods that let you coordinate with a `UICollectionViewFlowLayout` in combination with an `ASCollectionView`.
+ */
+@protocol ASCollectionViewDelegateFlowLayout <ASCollectionViewDelegate>
+
+@optional
+
 /**
  * Passthrough support to UICollectionViewDelegateFlowLayout sectionInset behavior.
  *
  * @param collectionView The sender.
  * @param collectionViewLayout The layout object requesting the information.
- * #param section The index number of the section whose insets are needed.
+ * @param section The index number of the section whose insets are needed.
  *
  * @discussion The same rules apply as the UICollectionView implementation, but this can also be used without a UICollectionViewFlowLayout.
  * https://developer.apple.com/library/ios/documentation/UIKit/Reference/UICollectionViewDelegateFlowLayout_protocol/index.html#//apple_ref/occ/intfm/UICollectionViewDelegateFlowLayout/collectionView:layout:insetForSectionAtIndex:
  *
  */
-- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section;
+- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section;
+
+/**
+ * Asks the delegate for the size of the header in the specified section.
+ */
+- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section;
+
+/**
+ * Asks the delegate for the size of the footer in the specified section.
+ */
+- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section;
 
 @end
 
