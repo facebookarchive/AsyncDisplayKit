@@ -15,6 +15,7 @@
 #import "ASDisplayNode.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASLayout.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -818,8 +819,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [section enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger rowIndex, BOOL *stop) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:rowIndex inSection:sectionIndex];
         ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
-        [node measureWithSizeRange:constrainedSize];
-        node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+        ASLayout *layout = [node measureWithSizeRange:constrainedSize];
+        node.frame = CGRectMake(0.0f, 0.0f, layout.size.width, layout.size.height);
       }];
     }];
   }];
