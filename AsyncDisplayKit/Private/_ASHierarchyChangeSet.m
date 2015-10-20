@@ -262,7 +262,7 @@
     if (presorted) {
       _indexPaths = indexPaths;
     } else {
-      SEL sorting = changeType == _ASHierarchyChangeTypeDelete ? @selector(as_inverseCompare:) : @selector(compare:);
+      SEL sorting = changeType == _ASHierarchyChangeTypeDelete ? @selector(asdk_inverseCompare:) : @selector(compare:);
       _indexPaths = [indexPaths sortedArrayUsingSelector:sorting];
     }
     _animationOptions = animationOptions;
@@ -296,7 +296,7 @@
     }
   }
   
-  SEL sorting = type == _ASHierarchyChangeTypeDelete ? @selector(as_inverseCompare:) : @selector(compare:);
+  SEL sorting = type == _ASHierarchyChangeTypeDelete ? @selector(asdk_inverseCompare:) : @selector(compare:);
   [allIndexPaths sortUsingSelector:sorting];
 
   // Create new changes by grouping sorted changes by animation option

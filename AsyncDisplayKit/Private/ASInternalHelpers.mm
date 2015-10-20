@@ -73,7 +73,7 @@ CGFloat ASRoundPixelValue(CGFloat f)
 
 @implementation NSIndexPath (ASInverseComparison)
 
-- (NSComparisonResult)as_inverseCompare:(NSIndexPath *)otherIndexPath
+- (NSComparisonResult)asdk_inverseCompare:(NSIndexPath *)otherIndexPath
 {
   return [otherIndexPath compare:self];
 }
