@@ -186,8 +186,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   dispatch_group_wait(layoutGroup, DISPATCH_TIME_FOREVER);
   free(nodeBoundSizes);
 
-  if (completionBlock)
+  if (completionBlock) {
     completionBlock(nodes, indexPaths);
+  }
 }
 
 - (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
