@@ -153,7 +153,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   CGSize _maxSizeForNodesConstrainedSize;
   BOOL _ignoreMaxSizeChange;
   
-  NSMutableArray *_registeredSupplementaryKinds;
+  NSMutableSet *_registeredSupplementaryKinds;
   
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
@@ -232,7 +232,7 @@ static BOOL _isInterceptedSelector(SEL sel)
     _layoutDelegate = [self flowLayoutInspector];
   }
   
-  _registeredSupplementaryKinds = [NSMutableArray array];
+  _registeredSupplementaryKinds = [NSMutableSet set];
   
   self.backgroundColor = [UIColor whiteColor];
   
@@ -745,7 +745,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController
 {
-  return _registeredSupplementaryKinds;
+  return [_registeredSupplementaryKinds allObjects];
 }
 
 - (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
