@@ -20,7 +20,7 @@
 
 - (instancetype)initWithNode:(ASDisplayNode *)node
 {
-  if (!(self = [super init])) {
+  if (!(self = [super initWithNibName:nil bundle:nil])) {
     return nil;
   }
   
