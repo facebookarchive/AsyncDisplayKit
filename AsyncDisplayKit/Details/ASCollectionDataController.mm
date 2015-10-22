@@ -61,7 +61,7 @@
     NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryNodeOfKind:kind];
     NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
     for (int i = 0; i < sectionCount; i++) {
-      [sections addObject:[[NSMutableArray alloc] init]];
+      [sections addObject:[NSMutableArray array]];
     }
     [self insertSections:sections ofKind:kind atIndexSet:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)] completion:nil];
     
