@@ -12,6 +12,7 @@
 
 #import "ASCollectionView.h"
 #import "ASAssert.h"
+#import "ASEqualityHelpers.h"
 
 @implementation ASCollectionViewFlowLayoutInspector {
   BOOL _delegateImplementsReferenceSizeForHeader;
@@ -79,13 +80,13 @@
 
 - (CGSize)sizeForSupplementaryViewOfKind:(NSString *)kind inSection:(NSUInteger)section collectionView:(ASCollectionView *)collectionView
 {
-  if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+  if (ASObjectIsEqual(kind, UICollectionElementKindSectionHeader)) {
     if (_delegateImplementsReferenceSizeForHeader) {
       return [[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForHeaderInSection:section];
     } else {
       return [self.layout headerReferenceSize];
     }
-  } else if ([kind isEqualToString:UICollectionElementKindSectionFooter]) {
+  } else if (ASObjectIsEqual(kind, UICollectionElementKindSectionFooter)) {
     if (_delegateImplementsReferenceSizeForFooter) {
       return [[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForFooterInSection:section];
     } else {
