@@ -74,8 +74,8 @@
 /**
  * Notifies the subclass to perform any work needed before the data controller is reloaded entirely
  *
- * @discussion This method will be performed before the data controller enters its editing queue, usually on the main
- * thread. The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * @discussion This method will be performed before the data controller enters its editing queue.
+ * The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
  * data stores before entering into editing the backing store on a background thread.
  */
  - (void)prepareForReloadData;
@@ -92,8 +92,8 @@
 /**
  * Notifies the subclass to perform setup before sections are inserted in the data controller
  *
- * @discussion This method will be performed before the data controller enters its editing queue, usually on the main
- * thread. The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * @discussion This method will be performed before the data controller enters its editing queue.
+ * The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
  * data stores before entering into editing the backing store on a background thread.
  *
  * @param sections Indices of sections to be inserted
