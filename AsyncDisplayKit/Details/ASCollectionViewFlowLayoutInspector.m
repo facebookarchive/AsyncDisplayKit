@@ -11,6 +11,7 @@
 #import "ASCollectionViewFlowLayoutInspector.h"
 
 #import "ASCollectionView.h"
+#import "ASAssert.h"
 
 @implementation ASCollectionViewFlowLayoutInspector {
   BOOL _delegateImplementsReferenceSizeForHeader;
@@ -24,7 +25,7 @@
   self = [super init];
 
   if (flowLayout == nil) {
-    return nil;
+    ASDisplayNodeAssert(NO, @"Should never create a layout inspector without a layout");
   }
 
   if (self != nil) {
