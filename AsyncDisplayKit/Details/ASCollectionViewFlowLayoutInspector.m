@@ -41,8 +41,9 @@
     _delegateImplementsReferenceSizeForHeader = NO;
     _delegateImplementsReferenceSizeForFooter = NO;
   } else {
-    _delegateImplementsReferenceSizeForHeader = [[self delegateForCollectionView:collectionView] respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
-    _delegateImplementsReferenceSizeForFooter = [[self delegateForCollectionView:collectionView] respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
+    id<ASCollectionViewDelegateFlowLayout> delegate = [self delegateForCollectionView:collectionView];
+    _delegateImplementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
+    _delegateImplementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
   }
 }
 
