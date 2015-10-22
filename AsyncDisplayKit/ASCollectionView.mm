@@ -337,15 +337,6 @@ static BOOL _isInterceptedSelector(SEL sel)
   [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
 }
 
-- (void)setCollectionViewLayout:(UICollectionViewLayout *)collectionViewLayout
-{
-  [super setCollectionViewLayout:collectionViewLayout];
-  if ([collectionViewLayout asdk_isFlowLayout]) {
-    _flowLayoutInspector = nil;
-    _layoutInspector = [self flowLayoutInspector];
-  }
-}
-
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
   [_layoutController setTuningParameters:tuningParameters forRangeType:rangeType];
