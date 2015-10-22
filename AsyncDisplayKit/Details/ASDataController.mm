@@ -404,6 +404,51 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
+- (void)reloadDataAndWait
+{
+  [self performEditCommandWithBlock:^{
+    ASDisplayNodeAssertMainThread();
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+    
+    [self accessDataSourceSynchronously:YES withBlock:^{
+      NSUInteger sectionCount = [_dataSource numberOfSectionsInDataController:self];
+      NSMutableArray *updatedNodes = [NSMutableArray array];
+      NSMutableArray *updatedIndexPaths = [NSMutableArray array];
+      [self _populateFromEntireDataSourceWithMutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
+      
+      // Measure nodes whose views are loaded before we leave the main thread
+      [self layoutLoadedNodes:updatedNodes ofKind:ASDataControllerRowNodeKind atIndexPaths:updatedIndexPaths];
+      
+      // Allow subclasses to perform setup before going into the edit transaction
+      [self prepareForReloadData];
+      
+      LOG(@"Edit Transaction - reloadData");
+      
+      ASDataControllerAnimationOptions animationOptions = UITableViewRowAnimationNone;
+      
+      // Remove everything that existed before the reload, now that we're ready to insert replacements
+      NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_editingNodes[ASDataControllerRowNodeKind]);
+      [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+      
+      NSMutableArray *editingNodes = _editingNodes[ASDataControllerRowNodeKind];
+      NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodes.count)];
+      [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
+      
+      [self willReloadData];
+      
+      // Insert each section
+      NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
+      for (int i = 0; i < sectionCount; i++) {
+        [sections addObject:[[NSMutableArray alloc] init]];
+      }
+      
+      [self _insertSections:sections atIndexSet:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)] withAnimationOptions:animationOptions];
+      
+      [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
+    }];
+  }];
+}
+
 #pragma mark - Data Source Access (Calling _dataSource)
 
 /**
@@ -413,7 +458,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)accessDataSourceWithBlock:(dispatch_block_t)block
 {
-  if (_asyncDataFetchingEnabled) {
+  [self accessDataSourceSynchronously:NO withBlock:block];
+}
+
+- (void)accessDataSourceSynchronously:(BOOL)synchronously withBlock:(dispatch_block_t)block
+{
+  if (!synchronously && _asyncDataFetchingEnabled) {
     [_dataSource dataControllerLockDataSource];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
       block();

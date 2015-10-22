@@ -131,6 +131,8 @@
  */
 - (void)reloadData;
 
+- (void)reloadDataAndWait;
+
 /**
  * Registers the given kind of supplementary node for use in creating node-backed supplementary views.
  *
