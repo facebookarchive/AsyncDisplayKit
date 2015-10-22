@@ -256,6 +256,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
     if (_flowLayoutInspector == nil) {
         UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
+        ASDisplayNodeAssertNotNil(layout, @"Collection view layout must be a flow layout to use the built-in inspector");
         _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self
                                                                                         flowLayout:layout];
     }
