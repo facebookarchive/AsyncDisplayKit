@@ -334,7 +334,7 @@ static BOOL _isInterceptedSelector(SEL sel)
     _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
 
-  [_flowLayoutInspector cacheSelectorsForCollectionView:self];
+  [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
 }
 
 - (void)setCollectionViewLayout:(UICollectionViewLayout *)collectionViewLayout

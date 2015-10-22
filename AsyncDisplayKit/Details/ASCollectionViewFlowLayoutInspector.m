@@ -30,19 +30,18 @@
   }
 
   if (self != nil) {
-    [self cacheSelectorsForCollectionView:collectionView];
+    [self didChangeCollectionViewDelegate:collectionView.asyncDelegate];
     _layout = flowLayout;
   }
   return self;
 }
 
-- (void)cacheSelectorsForCollectionView:(ASCollectionView *)collectionView
+- (void)didChangeCollectionViewDelegate:(id<ASCollectionViewDelegate>)delegate;
 {
-  if (collectionView == nil) {
+  if (delegate == nil) {
     _delegateImplementsReferenceSizeForHeader = NO;
     _delegateImplementsReferenceSizeForFooter = NO;
   } else {
-    id<ASCollectionViewDelegateFlowLayout> delegate = [self delegateForCollectionView:collectionView];
     _delegateImplementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
     _delegateImplementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
   }
