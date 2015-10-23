@@ -280,6 +280,13 @@ static BOOL _isInterceptedSelector(SEL sel)
   [self reloadDataWithCompletion:nil];
 }
 
+- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  ASDisplayNodeAssertMainThread();
+  [_dataController reloadDataImmediatelyWithAnimationOptions:animationOptions];
+  [super reloadData];
+}
+
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
 {
   // UIKit can internally generate a call to this method upon changing the asyncDataSource; only assert for non-nil.
