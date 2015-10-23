@@ -94,6 +94,8 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
   [super viewDidLoad];
 
   [self.view addSubview:_tableView];
+  
+  [_tableView reloadDataImmediately];
 }
 
 - (void)viewWillLayoutSubviews

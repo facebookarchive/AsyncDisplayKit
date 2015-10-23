@@ -94,6 +94,14 @@
 - (void)reloadData;
 
 /**
+ * Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.
+ *
+ * @warning This method is substantially more expensive than UITableView's version and will block the main thread while
+ * all the cells load.
+ */
+- (void)reloadDataImmediately;
+
+/**
  *  begins a batch of insert, delete reload and move operations. This method must be called from the main thread.
  */
 - (void)beginUpdates;

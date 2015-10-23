@@ -280,9 +280,10 @@ static BOOL _isInterceptedSelector(SEL sel)
   [self reloadDataWithCompletion:nil];
 }
 
-- (void)reloadDataAndWait
+- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [_dataController reloadDataAndWait];
+  ASDisplayNodeAssertMainThread();
+  [_dataController reloadDataImmediatelyWithAnimationOptions:animationOptions];
   [super reloadData];
 }
 
