@@ -39,8 +39,8 @@
 - (void)didChangeCollectionViewDelegate:(id<ASCollectionViewDelegate>)delegate;
 {
   if (delegate == nil) {
-    _delegateImplementsReferenceSizeForHeader = nil;
-    _delegateImplementsReferenceSizeForFooter = nil;
+    _delegateImplementsReferenceSizeForHeader = NO;
+    _delegateImplementsReferenceSizeForFooter = NO;
   } else {
     _delegateImplementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
     _delegateImplementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
