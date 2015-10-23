@@ -151,8 +151,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)_layoutNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
 {
-  ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"Cell node layout must be initiated from edit transaction queue");
-  
   if (!nodes.count) {
     return;
   }
@@ -357,11 +355,21 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^)())completion
 {
+  [self _reloadDataWithAnimationOptions:animationOptions synchronously:NO completion:completion];
+}
+
+- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  [self _reloadDataWithAnimationOptions:animationOptions synchronously:YES completion:nil];
+}
+
+- (void)_reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions synchronously:(BOOL)synchronously completion:(void (^)())completion
+{
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
-    [self accessDataSourceWithBlock:^{
+    [self accessDataSourceSynchronously:synchronously withBlock:^{
       NSUInteger sectionCount = [_dataSource numberOfSectionsInDataController:self];
       NSMutableArray *updatedNodes = [NSMutableArray array];
       NSMutableArray *updatedIndexPaths = [NSMutableArray array];
@@ -373,7 +381,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       // Allow subclasses to perform setup before going into the edit transaction
       [self prepareForReloadData];
       
-      [_editingTransactionQueue addOperationWithBlock:^{
+      void (^transactionBlock)() = ^{
         LOG(@"Edit Transaction - reloadData");
         
         // Remove everything that existed before the reload, now that we're ready to insert replacements
@@ -399,52 +407,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         if (completion) {
           dispatch_async(dispatch_get_main_queue(), completion);
         }
-      }];
-    }];
-  }];
-}
-
-- (void)reloadDataAndWait
-{
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
-    [self accessDataSourceSynchronously:YES withBlock:^{
-      NSUInteger sectionCount = [_dataSource numberOfSectionsInDataController:self];
-      NSMutableArray *updatedNodes = [NSMutableArray array];
-      NSMutableArray *updatedIndexPaths = [NSMutableArray array];
-      [self _populateFromEntireDataSourceWithMutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
+      };
       
-      // Measure nodes whose views are loaded before we leave the main thread
-      [self layoutLoadedNodes:updatedNodes ofKind:ASDataControllerRowNodeKind atIndexPaths:updatedIndexPaths];
-      
-      // Allow subclasses to perform setup before going into the edit transaction
-      [self prepareForReloadData];
-      
-      LOG(@"Edit Transaction - reloadData");
-      
-      ASDataControllerAnimationOptions animationOptions = UITableViewRowAnimationNone;
-      
-      // Remove everything that existed before the reload, now that we're ready to insert replacements
-      NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_editingNodes[ASDataControllerRowNodeKind]);
-      [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-      
-      NSMutableArray *editingNodes = _editingNodes[ASDataControllerRowNodeKind];
-      NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodes.count)];
-      [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-      
-      [self willReloadData];
-      
-      // Insert each section
-      NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
-      for (int i = 0; i < sectionCount; i++) {
-        [sections addObject:[[NSMutableArray alloc] init]];
+      if (synchronously) {
+        transactionBlock();
+      } else {
+        [_editingTransactionQueue addOperationWithBlock:transactionBlock];
       }
-      
-      [self _insertSections:sections atIndexSet:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)] withAnimationOptions:animationOptions];
-      
-      [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
     }];
   }];
 }

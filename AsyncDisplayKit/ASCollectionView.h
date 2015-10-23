@@ -131,7 +131,13 @@
  */
 - (void)reloadData;
 
-- (void)reloadDataAndWait;
+/**
+ * Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.
+ *
+ * @warning This method is substantially more expensive than UICollectionView's version and will block the main thread
+ * while all the cells load.
+ */
+- (void)reloadDataImmediately;
 
 /**
  * Registers the given kind of supplementary node for use in creating node-backed supplementary views.
