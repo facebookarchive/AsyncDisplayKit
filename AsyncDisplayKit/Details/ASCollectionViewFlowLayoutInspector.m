@@ -37,8 +37,8 @@
 - (void)cacheSelectorsForCollectionView:(ASCollectionView *)collectionView
 {
   if (collectionView == nil) {
-    _delegateImplementsReferenceSizeForHeader = nil;
-    _delegateImplementsReferenceSizeForFooter = nil;
+    _delegateImplementsReferenceSizeForHeader = NO;
+    _delegateImplementsReferenceSizeForFooter = NO;
   } else {
     _delegateImplementsReferenceSizeForHeader = [[self delegateForCollectionView:collectionView] respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
     _delegateImplementsReferenceSizeForFooter = [[self delegateForCollectionView:collectionView] respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
