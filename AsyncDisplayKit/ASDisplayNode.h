@@ -543,7 +543,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * Using them will not cause the actual view/layer to be created, and will be applied when it is created (when the view 
  * or layer property is accessed).
  *
- * After the view is created, the properties pass through to the view directly as if called on the main thread.
+ * - NOTE: After the view or layer is created, the properties pass through to the view or layer directly and must be called on the main thread.
  *
  * See UIView and CALayer for documentation on these common properties.
  */
