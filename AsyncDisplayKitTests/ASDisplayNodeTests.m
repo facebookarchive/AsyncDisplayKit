@@ -19,19 +19,22 @@
 // Conveniences for making nodes named a certain way
 
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
-#define DeclareViewNamed(v) UIView *v = [[UIView alloc] init]; v.layer.asyncdisplaykit_name = @#v
-#define DeclareLayerNamed(l) CALayer *l = [[CALayer alloc] init]; l.asyncdisplaykit_name = @#l
+
+// FIXME: It's goofy to use `setValue:forKey:` here but importing ASDisplayNodeInternal.h
+// in this file causes build to fail (compiler chokes at ASDN::RecursiveMutex)
+#define DeclareViewNamed(v) UIView *v = [[UIView alloc] init]; [v.layer setValue:@#v forKey:@"asyncdisplaykit_node.name"]
+#define DeclareLayerNamed(l) CALayer *l = [[CALayer alloc] init]; [l setValue:@#l forKey:@"asyncdisplaykit_node.name"]
 
 static NSString *orderStringFromSublayers(CALayer *l) {
-  return [[[l.sublayers valueForKey:@"asyncdisplaykit_name"] allObjects] componentsJoinedByString:@","];
+  return [[l.sublayers valueForKey:@"asyncdisplaykit_node.name"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubviews(UIView *v) {
-  return [[[v.subviews valueForKeyPath:@"layer.asyncdisplaykit_name"] allObjects] componentsJoinedByString:@","];
+  return [[v.subviews valueForKeyPath:@"layer.asyncdisplaykit_node.name"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubnodes(ASDisplayNode *n) {
-  return [[[n.subnodes valueForKey:@"name"] allObjects] componentsJoinedByString:@","];
+  return [[n.subnodes valueForKey:@"name"] componentsJoinedByString:@","];
 }
 
 // Asserts subnode, subview, sublayer order match what you provide here
