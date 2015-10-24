@@ -496,18 +496,6 @@
   _setToLayer(edgeAntialiasingMask, edgeAntialiasingMask);
 }
 
-- (NSString *)name
-{
-  _bridge_prologue;
-  return _getFromLayer(asyncdisplaykit_name);
-}
-
-- (void)setName:(NSString *)name
-{
-  _bridge_prologue;
-  _setToLayer(asyncdisplaykit_name, name);
-}
-
 - (BOOL)isAccessibilityElement
 {
   _bridge_prologue;

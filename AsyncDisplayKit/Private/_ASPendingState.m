@@ -37,7 +37,6 @@
   CGFloat borderWidth;
   CGColorRef borderColor;
   BOOL asyncTransactionContainer;
-  NSString *name;
   BOOL isAccessibilityElement;
   NSString *accessibilityLabel;
   NSString *accessibilityHint;
@@ -417,20 +416,6 @@
 {
   asyncTransactionContainer = flag;
   _flags.setAsyncTransactionContainer = YES;
-}
-
-// This is named this way, since I'm not sure we can change the setter for the CA version
-- (void)setAsyncdisplaykit_name:(NSString *)newName
-{
-  _flags.setName = YES;
-  if (name != newName) {
-    name = [newName copy];
-  }
-}
-
-- (NSString *)asyncdisplaykit_name
-{
-  return name;
 }
 
 - (BOOL)isAccessibilityElement
