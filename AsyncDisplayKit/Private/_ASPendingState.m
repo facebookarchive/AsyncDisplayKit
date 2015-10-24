@@ -84,7 +84,6 @@
     int setBorderWidth:1;
     int setBorderColor:1;
     int setAsyncTransactionContainer:1;
-    int setName:1;
     int setAllowsEdgeAntialiasing:1;
     int setEdgeAntialiasingMask:1;
     int setIsAccessibilityElement:1;
