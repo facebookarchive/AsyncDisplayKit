@@ -132,7 +132,6 @@
 @synthesize borderWidth=borderWidth;
 @synthesize borderColor=borderColor;
 @synthesize asyncdisplaykit_asyncTransactionContainer=asyncTransactionContainer;
-@synthesize asyncdisplaykit_name=name;
 
 - (id)init
 {
@@ -626,9 +625,6 @@
   if (_flags.setAsyncTransactionContainer)
     layer.asyncdisplaykit_asyncTransactionContainer = asyncTransactionContainer;
 
-  if (_flags.setName)
-    layer.asyncdisplaykit_name = name;
-
   if (_flags.setOpaque)
     ASDisplayNodeAssert(layer.opaque == opaque, @"Didn't set opaque as desired");
 }
@@ -740,9 +736,6 @@
 
   if (_flags.setAsyncTransactionContainer)
     view.asyncdisplaykit_asyncTransactionContainer = asyncTransactionContainer;
-
-  if (_flags.setName)
-    layer.asyncdisplaykit_name = name;
 
   if (_flags.setOpaque)
     ASDisplayNodeAssert(view.layer.opaque == opaque, @"Didn't set opaque as desired");
