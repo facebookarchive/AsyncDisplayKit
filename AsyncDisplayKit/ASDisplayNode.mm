@@ -535,8 +535,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)setName:(NSString *)name
 {
+  NSString *copy = [name copy];
+  
   ASDN::MutexLocker l(_propertyLock);
-  _name = [name copy];
+  _name = copy;
 }
 
 - (BOOL)isSynchronous
