@@ -19,6 +19,7 @@
 #import "_ASDisplayView.h"
 #import "_ASScopeTimer.h"
 #import "ASDisplayNodeExtras.h"
+#import "ASEqualityHelpers.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -535,10 +536,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)setName:(NSString *)name
 {
-  NSString *copy = [name copy];
-  
   ASDN::MutexLocker l(_propertyLock);
-  _name = copy;
+  if (!ASObjectIsEqual(_name, name)) {
+    _name = [name copy];
+  }
 }
 
 - (BOOL)isSynchronous
