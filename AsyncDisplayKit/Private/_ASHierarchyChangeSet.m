@@ -219,11 +219,13 @@
   
   __block ASDataControllerAnimationOptions currentOptions = 0;
   __block NSMutableIndexSet *currentIndexes = nil;
+  NSUInteger lastIndex = allIndexes.lastIndex;
   
   NSEnumerationOptions options = type == _ASHierarchyChangeTypeDelete ? NSEnumerationReverse : kNilOptions;
   [allIndexes enumerateIndexesWithOptions:options usingBlock:^(NSUInteger idx, __unused BOOL * stop) {
-    
     ASDataControllerAnimationOptions options = [animationOptions[@(idx)] integerValue];
+    BOOL endingCurrentGroup = NO;
+    
     if (currentIndexes == nil) {
       // Starting a new group
       currentIndexes = [NSMutableIndexSet indexSetWithIndex:idx];
@@ -232,7 +234,12 @@
       // Continuing the current group
       [currentIndexes addIndex:idx];
     } else {
-      // Ending the current group
+      endingCurrentGroup = YES;
+    }
+    
+    BOOL endingLastGroup = (currentIndexes != nil && lastIndex == idx);
+    
+    if (endingCurrentGroup || endingLastGroup) {
       _ASHierarchySectionChange *change = [[_ASHierarchySectionChange alloc] initWithChangeType:type indexSet:currentIndexes animationOptions:currentOptions];
       [result addObject:change];
       currentOptions = 0;
@@ -240,13 +247,6 @@
     }
   }];
   
-  if (currentIndexes != nil) {
-    // Ending the last group
-    _ASHierarchySectionChange *change = [[_ASHierarchySectionChange alloc] initWithChangeType:type indexSet:currentIndexes animationOptions:currentOptions];
-    [result addObject:change];
-    currentOptions = 0;
-    currentIndexes = nil;
-  }
   [changes setArray:result];
 }
 
@@ -304,9 +304,12 @@
   
   ASDataControllerAnimationOptions currentOptions = 0;
   NSMutableArray *currentIndexPaths = nil;
+  NSIndexPath *lastIndexPath = allIndexPaths.lastObject;
   
   for (NSIndexPath *indexPath in allIndexPaths) {
     ASDataControllerAnimationOptions options = [animationOptions[indexPath] integerValue];
+    BOOL endingCurrentGroup = NO;
+    
     if (currentIndexPaths == nil) {
       // Starting a new group
       currentIndexPaths = [NSMutableArray arrayWithObject:indexPath];
@@ -315,7 +318,12 @@
       // Continuing the current group
       [currentIndexPaths addObject:indexPath];
     } else {
-      // Ending the current group
+      endingCurrentGroup = YES;
+    }
+    
+    BOOL endingLastGroup = (currentIndexPaths != nil && (NSOrderedSame == [lastIndexPath compare:indexPath]));
+
+    if (endingCurrentGroup || endingLastGroup) {
       _ASHierarchyItemChange *change = [[_ASHierarchyItemChange alloc] initWithChangeType:type indexPaths:currentIndexPaths animationOptions:currentOptions presorted:YES];
       [result addObject:change];
       currentOptions = 0;
@@ -323,13 +331,6 @@
     }
   }
   
-  if (currentIndexPaths != nil) {
-    // Ending the last group
-    _ASHierarchyItemChange *change = [[_ASHierarchyItemChange alloc] initWithChangeType:type indexPaths:currentIndexPaths animationOptions:currentOptions presorted:YES];
-    [result addObject:change];
-    currentOptions = 0;
-    currentIndexPaths = nil;
-  }
   [changes setArray:result];
 }
 
