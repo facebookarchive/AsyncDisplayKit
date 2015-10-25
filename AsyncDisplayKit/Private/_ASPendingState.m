@@ -37,7 +37,6 @@
   CGFloat borderWidth;
   CGColorRef borderColor;
   BOOL asyncTransactionContainer;
-  NSString *name;
   BOOL isAccessibilityElement;
   NSString *accessibilityLabel;
   NSString *accessibilityHint;
@@ -85,7 +84,6 @@
     int setBorderWidth:1;
     int setBorderColor:1;
     int setAsyncTransactionContainer:1;
-    int setName:1;
     int setAllowsEdgeAntialiasing:1;
     int setEdgeAntialiasingMask:1;
     int setIsAccessibilityElement:1;
@@ -133,7 +131,6 @@
 @synthesize borderWidth=borderWidth;
 @synthesize borderColor=borderColor;
 @synthesize asyncdisplaykit_asyncTransactionContainer=asyncTransactionContainer;
-@synthesize asyncdisplaykit_name=name;
 
 - (id)init
 {
@@ -419,20 +416,6 @@
   _flags.setAsyncTransactionContainer = YES;
 }
 
-// This is named this way, since I'm not sure we can change the setter for the CA version
-- (void)setAsyncdisplaykit_name:(NSString *)newName
-{
-  _flags.setName = YES;
-  if (name != newName) {
-    name = [newName copy];
-  }
-}
-
-- (NSString *)asyncdisplaykit_name
-{
-  return name;
-}
-
 - (BOOL)isAccessibilityElement
 {
   return isAccessibilityElement;
@@ -641,9 +624,6 @@
   if (_flags.setAsyncTransactionContainer)
     layer.asyncdisplaykit_asyncTransactionContainer = asyncTransactionContainer;
 
-  if (_flags.setName)
-    layer.asyncdisplaykit_name = name;
-
   if (_flags.setOpaque)
     ASDisplayNodeAssert(layer.opaque == opaque, @"Didn't set opaque as desired");
 }
@@ -755,9 +735,6 @@
 
   if (_flags.setAsyncTransactionContainer)
     view.asyncdisplaykit_asyncTransactionContainer = asyncTransactionContainer;
-
-  if (_flags.setName)
-    layer.asyncdisplaykit_name = name;
 
   if (_flags.setOpaque)
     ASDisplayNodeAssert(view.layer.opaque == opaque, @"Didn't set opaque as desired");
