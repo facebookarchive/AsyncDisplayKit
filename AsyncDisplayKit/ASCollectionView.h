@@ -90,7 +90,7 @@
  * collection view layout subclasses will need to provide their own implementation of an inspector object for their
  * supplementary views to be compatible with `ASCollectionView`'s supplementary node support.
  */
-@property (nonatomic, weak) id<ASCollectionViewLayoutInspecting> layoutDelegate;
+@property (nonatomic, weak) id<ASCollectionViewLayoutInspecting> layoutInspector;
 
 /**
  *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread. 
