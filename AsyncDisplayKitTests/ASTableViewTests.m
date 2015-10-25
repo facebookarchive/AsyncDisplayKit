@@ -234,9 +234,7 @@
   tableView.asyncDelegate = dataSource;
   tableView.asyncDataSource = dataSource;
   
-  // Trigger layout measurement on all nodes
-  [tableView reloadData];
-  
+  [self triggerFirstLayoutMeasurementForTableView:tableView];
   [self triggerSizeChangeAndAssertRelayoutAllRowsForTableView:tableView newSize:tableViewFinalSize];
 }
 
@@ -264,36 +262,6 @@
   [self triggerSizeChangeAndAssertRelayoutAllRowsForTableView:tableView newSize:tableViewFinalSize];
 }
 
-- (void)triggerSizeChangeAndAssertRelayoutAllRowsForTableView:(ASTableView *)tableView newSize:(CGSize)newSize
-{
-  XCTestExpectation *nodesMeasuredUsingNewConstrainedSizeExpectation = [self expectationWithDescription:@"nodesMeasuredUsingNewConstrainedSize"];
-  
-  [tableView beginUpdates];
-  
-  CGRect frame = tableView.frame;
-  frame.size = newSize;
-  tableView.frame = frame;
-  [tableView layoutIfNeeded];
-  
-  [tableView endUpdatesAnimated:NO completion:^(BOOL completed) {
-    for (int section = 0; section < NumberOfSections; section++) {
-      for (int row = 0; row < NumberOfRowsPerSection; row++) {
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
-        ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
-        XCTAssertEqual(node.numberOfLayoutsOnMainThread, 1);
-        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, newSize.width);
-      }
-    }
-    [nodesMeasuredUsingNewConstrainedSizeExpectation fulfill];
-  }];
-  
-  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
-    if (error) {
-      XCTFail(@"Expectation failed: %@", error);
-    }
-  }];
-}
-
 - (void)testRelayoutVisibleRowsWhenEditingModeIsChanged
 {
   CGSize tableViewSize = CGSizeMake(100, 500);
@@ -304,24 +272,8 @@
   
   tableView.asyncDelegate = dataSource;
   tableView.asyncDataSource = dataSource;
-  
-  XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
-  [tableView reloadDataWithCompletion:^{
-    for (int section = 0; section < NumberOfSections; section++) {
-      for (int row = 0; row < NumberOfRowsPerSection; row++) {
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
-        ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
-        XCTAssertEqual(node.numberOfLayoutsOnMainThread, 0);
-        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
-      }
-    }
-    [reloadDataExpectation fulfill];
-  }];
-  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
-    if (error) {
-      XCTFail(@"Expectation failed: %@", error);
-    }
-  }];
+
+  [self triggerFirstLayoutMeasurementForTableView:tableView];
   
   NSArray *visibleNodes = [tableView visibleNodes];
   XCTAssertGreaterThan(visibleNodes.count, 0);
@@ -390,23 +342,7 @@
   tableView.asyncDelegate = dataSource;
   tableView.asyncDataSource = dataSource;
   
-  XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
-  [tableView reloadDataWithCompletion:^{
-    for (int section = 0; section < NumberOfSections; section++) {
-      for (int row = 0; row < NumberOfRowsPerSection; row++) {
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
-        ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
-        XCTAssertEqual(node.numberOfLayoutsOnMainThread, 0);
-        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
-      }
-    }
-    [reloadDataExpectation fulfill];
-  }];
-  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
-    if (error) {
-      XCTFail(@"Expectation failed: %@", error);
-    }
-  }];
+  [self triggerFirstLayoutMeasurementForTableView:tableView];
   
   // Cause table view to enter editing mode and then scroll to the bottom.
   // The last node should be re-measured on main thread with the new (smaller) content view width.
@@ -447,6 +383,55 @@
         NSIndexPath *reportedIndexPath = [tableView indexPathForNode:cellNode];
         XCTAssertEqual(indexPath.row, reportedIndexPath.row);
       }
+    }
+  }];
+}
+
+- (void)triggerFirstLayoutMeasurementForTableView:(ASTableView *)tableView{
+  XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
+  [tableView reloadDataWithCompletion:^{
+    for (int section = 0; section < NumberOfSections; section++) {
+      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
+        XCTAssertEqual(node.numberOfLayoutsOnMainThread, 0);
+        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableView.frame.size.width);
+      }
+    }
+    [reloadDataExpectation fulfill];
+  }];
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
+}
+
+- (void)triggerSizeChangeAndAssertRelayoutAllRowsForTableView:(ASTableView *)tableView newSize:(CGSize)newSize
+{
+  XCTestExpectation *nodesMeasuredUsingNewConstrainedSizeExpectation = [self expectationWithDescription:@"nodesMeasuredUsingNewConstrainedSize"];
+  
+  [tableView beginUpdates];
+  
+  CGRect frame = tableView.frame;
+  frame.size = newSize;
+  tableView.frame = frame;
+  [tableView layoutIfNeeded];
+  
+  [tableView endUpdatesAnimated:NO completion:^(BOOL completed) {
+    for (int section = 0; section < NumberOfSections; section++) {
+      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
+        XCTAssertEqual(node.numberOfLayoutsOnMainThread, 1);
+        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, newSize.width);
+      }
+    }
+    [nodesMeasuredUsingNewConstrainedSizeExpectation fulfill];
+  }];
+  [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
     }
   }];
 }
