@@ -898,7 +898,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   // Normally the content view width equals to the constrained size width (which equals to the table view width).
   // If there is a mismatch between these values, for example after the table view entered or left editing mode,
   // content view width is preferred and used to re-measure the cell node.
-  if (!_ignoreNodesConstrainedWidthChange && contentViewWidth != constrainedSize.max.width) {
+  if (contentViewWidth != constrainedSize.max.width) {
     constrainedSize.min.width = contentViewWidth;
     constrainedSize.max.width = contentViewWidth;
 
