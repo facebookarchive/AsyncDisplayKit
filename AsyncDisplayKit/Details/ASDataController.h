@@ -168,6 +168,8 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^)())completion;
 
+- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
 /** @name Data Querying */
 
 - (NSUInteger)numberOfSections;
