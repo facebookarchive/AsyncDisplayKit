@@ -417,7 +417,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     }
   }
   
-  // To ensure _maxWidthForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
+  // To ensure _nodesConstrainedWidth is up-to-date for every usage, this call to super must be done last
   [super layoutSubviews];
 }
 
