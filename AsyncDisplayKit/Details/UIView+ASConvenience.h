@@ -31,6 +31,7 @@
 @property (nonatomic, assign) CGFloat borderWidth;
 @property (nonatomic, assign, getter = isOpaque) BOOL opaque;
 @property (nonatomic, retain) __attribute__((NSObject)) CGColorRef borderColor;
+@property (nonatomic, copy) NSString *asyncdisplaykit_name;
 @property (nonatomic, retain) __attribute__((NSObject)) CGColorRef backgroundColor;
 @property (nonatomic, assign) BOOL allowsEdgeAntialiasing;
 @property (nonatomic, assign) unsigned int edgeAntialiasingMask;
@@ -77,4 +78,8 @@
 // Accessibility identification support
 @property (nonatomic, copy)          NSString *accessibilityIdentifier;
 
+@end
+
+@interface CALayer (ASDisplayNodeLayer)
+@property (atomic, copy) NSString *asyncdisplaykit_name;
 @end

@@ -19,7 +19,6 @@
 #import "_ASDisplayView.h"
 #import "_ASScopeTimer.h"
 #import "ASDisplayNodeExtras.h"
-#import "ASEqualityHelpers.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -48,7 +47,6 @@
 
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
-@synthesize name = _name;
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
@@ -526,20 +524,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(_propertyLock);
   return (_view != nil || (_flags.layerBacked && _layer != nil));
-}
-
-- (NSString *)name
-{
-  ASDN::MutexLocker l(_propertyLock);
-  return _name;
-}
-
-- (void)setName:(NSString *)name
-{
-  ASDN::MutexLocker l(_propertyLock);
-  if (!ASObjectIsEqual(_name, name)) {
-    _name = [name copy];
-  }
 }
 
 - (BOOL)isSynchronous
