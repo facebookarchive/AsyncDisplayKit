@@ -11,6 +11,8 @@
 #import "ASCollectionViewFlowLayoutInspector.h"
 
 #import "ASCollectionView.h"
+#import "ASAssert.h"
+#import "ASEqualityHelpers.h"
 
 @implementation ASCollectionViewFlowLayoutInspector {
   BOOL _delegateImplementsReferenceSizeForHeader;
@@ -24,24 +26,24 @@
   self = [super init];
 
   if (flowLayout == nil) {
-    return nil;
+    ASDisplayNodeAssert(NO, @"Should never create a layout inspector without a layout");
   }
 
   if (self != nil) {
-    [self cacheSelectorsForCollectionView:collectionView];
+    [self didChangeCollectionViewDelegate:collectionView.asyncDelegate];
     _layout = flowLayout;
   }
   return self;
 }
 
-- (void)cacheSelectorsForCollectionView:(ASCollectionView *)collectionView
+- (void)didChangeCollectionViewDelegate:(id<ASCollectionViewDelegate>)delegate;
 {
-  if (collectionView == nil) {
-    _delegateImplementsReferenceSizeForHeader = nil;
-    _delegateImplementsReferenceSizeForFooter = nil;
+  if (delegate == nil) {
+    _delegateImplementsReferenceSizeForHeader = NO;
+    _delegateImplementsReferenceSizeForFooter = NO;
   } else {
-    _delegateImplementsReferenceSizeForHeader = [[self delegateForCollectionView:collectionView] respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
-    _delegateImplementsReferenceSizeForFooter = [[self delegateForCollectionView:collectionView] respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
+    _delegateImplementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
+    _delegateImplementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
   }
 }
 
@@ -77,13 +79,13 @@
 
 - (CGSize)sizeForSupplementaryViewOfKind:(NSString *)kind inSection:(NSUInteger)section collectionView:(ASCollectionView *)collectionView
 {
-  if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+  if (ASObjectIsEqual(kind, UICollectionElementKindSectionHeader)) {
     if (_delegateImplementsReferenceSizeForHeader) {
       return [[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForHeaderInSection:section];
     } else {
       return [self.layout headerReferenceSize];
     }
-  } else if ([kind isEqualToString:UICollectionElementKindSectionFooter]) {
+  } else if (ASObjectIsEqual(kind, UICollectionElementKindSectionFooter)) {
     if (_delegateImplementsReferenceSizeForFooter) {
       return [[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForFooterInSection:section];
     } else {

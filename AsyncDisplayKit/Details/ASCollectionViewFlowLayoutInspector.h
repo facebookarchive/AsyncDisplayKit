@@ -11,6 +11,7 @@
 #import <AsyncDisplayKit/ASDimension.h>
 
 @class ASCollectionView;
+@protocol ASCollectionViewDelegate;
 
 @protocol ASCollectionViewLayoutInspecting <NSObject>
 
@@ -29,6 +30,13 @@
  */
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
 
+/**
+ * Allow the inspector to respond to delegate changes.
+ *
+ * @discussion A great time to update perform selector caches!
+ */
+- (void)didChangeCollectionViewDelegate:(id<ASCollectionViewDelegate>)delegate;
+
 @end
 
 @interface ASCollectionViewFlowLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
@@ -36,7 +44,5 @@
 @property (nonatomic, weak) UICollectionViewFlowLayout *layout;
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout;
-
-- (void)cacheSelectorsForCollectionView:(ASCollectionView *)collectionView;
 
 @end
