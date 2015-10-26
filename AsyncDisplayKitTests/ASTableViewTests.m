@@ -423,7 +423,7 @@
       for (int row = 0; row < NumberOfRowsPerSection; row++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
         ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
-        XCTAssertEqual(node.numberOfLayoutsOnMainThread, 1);
+        XCTAssertLessThanOrEqual(node.numberOfLayoutsOnMainThread, 1);
         XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, newSize.width);
       }
     }
