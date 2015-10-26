@@ -460,9 +460,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _layer = _view.layer;
   }
   _layer.asyncdisplaykit_node = self;
-#if DEBUG
-  _layer.name = self.description;
-#endif
+
   self.asyncLayer.asyncDelegate = self;
 
   {
