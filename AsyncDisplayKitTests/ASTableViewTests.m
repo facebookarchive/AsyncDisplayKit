@@ -9,17 +9,43 @@
 #import <XCTest/XCTest.h>
 
 #import "ASTableView.h"
+#import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASChangeSetDataController.h"
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
 #define NumberOfReloadIterations 50
+
+@interface ASTestDataController : ASChangeSetDataController
+@property (atomic) int numberOfAllNodesRelayouts;
+@end
+
+@implementation ASTestDataController
+
+- (void)relayoutAllNodes
+{
+  _numberOfAllNodesRelayouts++;
+  [super relayoutAllNodes];
+}
+
+@end
 
 @interface ASTestTableView : ASTableView
 @property (atomic, copy) void (^willDeallocBlock)(ASTableView *tableView);
 @end
 
 @implementation ASTestTableView
+
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
+{
+  return [super initWithFrame:frame style:style dataControllerClass:[ASTestDataController class] asyncDataFetching:asyncDataFetchingEnabled];
+}
+
+- (ASTestDataController *)testDataController
+{
+  return (ASTestDataController *)self.dataController;
+}
 
 - (void)dealloc
 {
@@ -219,7 +245,7 @@
   }
 }
 
-- (void)testRelayoutAllRowsWithNonZeroSizeInitially
+- (void)testRelayoutAllNodesWithNonZeroSizeInitially
 {
   // Initial width of the table view is non-zero and all nodes are measured with this size.
   // Any subsequence size change must trigger a relayout.
@@ -233,12 +259,14 @@
 
   tableView.asyncDelegate = dataSource;
   tableView.asyncDataSource = dataSource;
+
+  [tableView layoutIfNeeded];
   
-  [self triggerFirstLayoutMeasurementForTableView:tableView];
-  [self triggerSizeChangeAndAssertRelayoutAllRowsForTableView:tableView newSize:tableViewFinalSize];
+  XCTAssertEqual(tableView.testDataController.numberOfAllNodesRelayouts, 0);
+  [self triggerSizeChangeAndAssertRelayoutAllNodesForTableView:tableView newSize:tableViewFinalSize];
 }
 
-- (void)testRelayoutAllRowsWithZeroSizeInitially
+- (void)testRelayoutAllNodesWithZeroSizeInitially
 {
   // Initial width of the table view is 0. The first size change is part of the initial config.
   // Any subsequence size change after that must trigger a relayout.
@@ -256,10 +284,10 @@
   [superview addSubview:tableView];
   // Width and height are swapped so that a later size change will simulate a rotation
   tableView.frame = CGRectMake(0, 0, tableViewFinalSize.height, tableViewFinalSize.width);
-  // Trigger layout measurement on all nodes
   [tableView layoutIfNeeded];
   
-  [self triggerSizeChangeAndAssertRelayoutAllRowsForTableView:tableView newSize:tableViewFinalSize];
+  XCTAssertEqual(tableView.testDataController.numberOfAllNodesRelayouts, 0);
+  [self triggerSizeChangeAndAssertRelayoutAllNodesForTableView:tableView newSize:tableViewFinalSize];
 }
 
 - (void)testRelayoutVisibleRowsWhenEditingModeIsChanged
@@ -407,7 +435,7 @@
   }];
 }
 
-- (void)triggerSizeChangeAndAssertRelayoutAllRowsForTableView:(ASTableView *)tableView newSize:(CGSize)newSize
+- (void)triggerSizeChangeAndAssertRelayoutAllNodesForTableView:(ASTestTableView *)tableView newSize:(CGSize)newSize
 {
   XCTestExpectation *nodesMeasuredUsingNewConstrainedSizeExpectation = [self expectationWithDescription:@"nodesMeasuredUsingNewConstrainedSize"];
   
@@ -419,6 +447,8 @@
   [tableView layoutIfNeeded];
   
   [tableView endUpdatesAnimated:NO completion:^(BOOL completed) {
+    XCTAssertEqual(tableView.testDataController.numberOfAllNodesRelayouts, 1);
+
     for (int section = 0; section < NumberOfSections; section++) {
       for (int row = 0; row < NumberOfRowsPerSection; row++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
