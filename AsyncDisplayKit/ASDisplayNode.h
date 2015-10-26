@@ -12,7 +12,7 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
-
+#import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 #import <AsyncDisplayKit/ASLayoutable.h>
 
 @class ASDisplayNode;
@@ -519,7 +519,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * Convenience methods for debugging.
  */
 
-@interface ASDisplayNode (Debugging)
+@interface ASDisplayNode (Debugging) <ASLayoutableAsciiArtProtocol>
 
 /**
  * @abstract Return a description of the node hierarchy.

@@ -2137,6 +2137,18 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   return subtree;
 }
 
+#pragma mark - ASLayoutableAsciiArtProtocol
+
+- (NSString *)asciiArtString
+{
+    return [ASLayoutSpec asciiArtStringForChildren:@[] parentName:[self asciiArtName]];
+}
+
+- (NSString *)asciiArtName
+{
+    return NSStringFromClass([self class]);
+}
+
 @end
 
 // We use associated objects as a last resort if our view is not a _ASDisplayView ie it doesn't have the _node ivar to write to

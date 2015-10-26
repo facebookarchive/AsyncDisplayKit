@@ -85,3 +85,14 @@
 }
 
 @end
+
+@implementation ASStaticLayoutSpec (Debugging)
+
+#pragma mark - ASLayoutableAsciiArtProtocol
+
+- (NSString *)debugBoxString
+{
+  return [ASLayoutSpec asciiArtStringForChildren:self.children parentName:[self asciiArtName]];
+}
+
+@end

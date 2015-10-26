@@ -87,3 +87,14 @@
 }
 
 @end
+
+@implementation ASRatioLayoutSpec (Debugging)
+
+#pragma mark - ASLayoutableAsciiArtProtocol
+
+- (NSString *)asciiArtName
+{
+  return [NSString stringWithFormat:@"%@ (%.1f)", NSStringFromClass([self class]), self.ratio];
+}
+
+@end
