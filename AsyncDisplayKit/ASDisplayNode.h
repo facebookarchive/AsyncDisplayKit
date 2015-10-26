@@ -108,10 +108,6 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 
 /** @name Properties */
 
-/**
- * @abstract The name of this node, which will be displayed in `description`. The default value is nil.
- */
-@property (atomic, copy) NSString *name;
 
 /** 
  * @abstract Returns whether the node is synchronous.
@@ -543,7 +539,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * Using them will not cause the actual view/layer to be created, and will be applied when it is created (when the view 
  * or layer property is accessed).
  *
- * - NOTE: After the view or layer is created, the properties pass through to the view or layer directly and must be called on the main thread.
+ * After the view is created, the properties pass through to the view directly as if called on the main thread.
  *
  * See UIView and CALayer for documentation on these common properties.
  */
@@ -587,6 +583,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 @property (atomic, assign)           CGFloat contentsScale;                 // default=1.0f. See @contentsScaleForDisplay for more info
 @property (atomic, assign)           CATransform3D transform;               // default=CATransform3DIdentity
 @property (atomic, assign)           CATransform3D subnodeTransform;        // default=CATransform3DIdentity
+@property (atomic, copy)             NSString *name;                        // default=nil. Use this to tag your layers in the server-recurse-description / pca or for your own purposes
 
 /**
  * @abstract The node view's background color.
