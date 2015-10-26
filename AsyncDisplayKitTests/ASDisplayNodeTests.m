@@ -17,20 +17,29 @@
 #import "UIView+ASConvenience.h"
 
 // Conveniences for making nodes named a certain way
-
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
+#define DeclareViewNamed(v) UIView *v = viewWithName(@#v)
+#define DeclareLayerNamed(l) CALayer *l = layerWithName(@#l)
 
-// FIXME: It's goofy to use `setValue:forKey:` here but importing ASDisplayNodeInternal.h
-// in this file causes build to fail (compiler chokes at ASDN::RecursiveMutex)
-#define DeclareViewNamed(v) UIView *v = [[UIView alloc] init]; [v.layer setValue:@#v forKey:@"asyncdisplaykit_node.name"]
-#define DeclareLayerNamed(l) CALayer *l = [[CALayer alloc] init]; [l setValue:@#l forKey:@"asyncdisplaykit_node.name"]
+static UIView *viewWithName(NSString *name) {
+  ASDisplayNode *n = [[ASDisplayNode alloc] init];
+  n.name = name;
+  return n.view;
+}
+
+static CALayer *layerWithName(NSString *name) {
+  ASDisplayNode *n = [[ASDisplayNode alloc] init];
+  n.layerBacked = YES;
+  n.name = name;
+  return n.layer;
+}
 
 static NSString *orderStringFromSublayers(CALayer *l) {
-  return [[l.sublayers valueForKey:@"asyncdisplaykit_node.name"] componentsJoinedByString:@","];
+  return [[l.sublayers valueForKey:@"name"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubviews(UIView *v) {
-  return [[v.subviews valueForKeyPath:@"layer.asyncdisplaykit_node.name"] componentsJoinedByString:@","];
+  return [[v.subviews valueForKey:@"name"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubnodes(ASDisplayNode *n) {
@@ -1377,7 +1386,6 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   DeclareNodeNamed(b);
   DeclareNodeNamed(c);
   DeclareViewNamed(d);
-  DeclareLayerNamed(e);
 
   [parent layer];
 

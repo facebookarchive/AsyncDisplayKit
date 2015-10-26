@@ -56,12 +56,15 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 @interface ASDisplayNodeAppearanceTests : XCTestCase
 @end
 
+// Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
+#define DeclareViewNamed(v) UIView *v = viewWithName(@#v)
 
-// FIXME: It's goofy to use `setValue:forKey:` here but importing ASDisplayNodeInternal.h
-// in this file causes build to fail (compiler chokes at ASDN::RecursiveMutex)
-#define DeclareViewNamed(v) UIView *v = [[UIView alloc] init]; [v.layer setValue:@#v forKey:@"asyncdisplaykit_node.name"]
-#define DeclareLayerNamed(l) CALayer *l = [[CALayer alloc] init]; [l setValue:@#l forKey:@"asyncdisplaykit_node.name"]
+static UIView *viewWithName(NSString *name) {
+  ASDisplayNode *n = [[ASDisplayNode alloc] init];
+  n.name = name;
+  return n.view;
+}
 
 @implementation ASDisplayNodeAppearanceTests
 {
