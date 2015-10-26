@@ -36,11 +36,6 @@
     _displaySentinel = [[ASSentinel alloc] init];
 
     self.opaque = YES;
-
-#if DEBUG
-    // This is too expensive to do in production on all layers.
-    self.name = [NSString stringWithFormat:@"%@ (%p)", NSStringFromClass([self class]), self];
-#endif
   }
   return self;
 }

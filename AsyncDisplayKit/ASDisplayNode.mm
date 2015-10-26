@@ -19,6 +19,7 @@
 #import "_ASDisplayView.h"
 #import "_ASScopeTimer.h"
 #import "ASDisplayNodeExtras.h"
+#import "ASEqualityHelpers.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -47,6 +48,7 @@
 
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
+@synthesize name = _name;
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
@@ -458,9 +460,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _layer = _view.layer;
   }
   _layer.asyncdisplaykit_node = self;
-#if DEBUG
-  _layer.name = self.description;
-#endif
+
   self.asyncLayer.asyncDelegate = self;
 
   {
@@ -524,6 +524,20 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(_propertyLock);
   return (_view != nil || (_flags.layerBacked && _layer != nil));
+}
+
+- (NSString *)name
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _name;
+}
+
+- (void)setName:(NSString *)name
+{
+  ASDN::MutexLocker l(_propertyLock);
+  if (!ASObjectIsEqual(_name, name)) {
+    _name = [name copy];
+  }
 }
 
 - (BOOL)isSynchronous
@@ -2187,6 +2201,11 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   }
 }
 
+- (NSString *)name
+{
+  return self.asyncdisplaykit_node.name;
+}
+
 @end
 
 @implementation CALayer (AsyncDisplayKit)
@@ -2194,6 +2213,11 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 - (void)addSubnode:(ASDisplayNode *)node
 {
   [self addSublayer:node.layer];
+}
+
+- (NSString *)name
+{
+  return self.asyncdisplaykit_node.name;
 }
 
 @end

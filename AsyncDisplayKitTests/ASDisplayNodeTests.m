@@ -17,21 +17,33 @@
 #import "UIView+ASConvenience.h"
 
 // Conveniences for making nodes named a certain way
-
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
-#define DeclareViewNamed(v) UIView *v = [[UIView alloc] init]; v.layer.asyncdisplaykit_name = @#v
-#define DeclareLayerNamed(l) CALayer *l = [[CALayer alloc] init]; l.asyncdisplaykit_name = @#l
+#define DeclareViewNamed(v) UIView *v = viewWithName(@#v)
+#define DeclareLayerNamed(l) CALayer *l = layerWithName(@#l)
+
+static UIView *viewWithName(NSString *name) {
+  ASDisplayNode *n = [[ASDisplayNode alloc] init];
+  n.name = name;
+  return n.view;
+}
+
+static CALayer *layerWithName(NSString *name) {
+  ASDisplayNode *n = [[ASDisplayNode alloc] init];
+  n.layerBacked = YES;
+  n.name = name;
+  return n.layer;
+}
 
 static NSString *orderStringFromSublayers(CALayer *l) {
-  return [[[l.sublayers valueForKey:@"asyncdisplaykit_name"] allObjects] componentsJoinedByString:@","];
+  return [[l.sublayers valueForKey:@"name"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubviews(UIView *v) {
-  return [[[v.subviews valueForKeyPath:@"layer.asyncdisplaykit_name"] allObjects] componentsJoinedByString:@","];
+  return [[v.subviews valueForKey:@"name"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubnodes(ASDisplayNode *n) {
-  return [[[n.subnodes valueForKey:@"name"] allObjects] componentsJoinedByString:@","];
+  return [[n.subnodes valueForKey:@"name"] componentsJoinedByString:@","];
 }
 
 // Asserts subnode, subview, sublayer order match what you provide here
@@ -1374,7 +1386,6 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   DeclareNodeNamed(b);
   DeclareNodeNamed(c);
   DeclareViewNamed(d);
-  DeclareLayerNamed(e);
 
   [parent layer];
 
