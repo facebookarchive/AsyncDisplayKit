@@ -20,4 +20,13 @@
 
 - (instancetype)initWithNode:(ASDisplayNode *)node;
 
+/**
+ * The constrained size used to measure the backing node.
+ *
+ * @discussion Defaults to providing a size range that uses the view controller view's bounds as
+ * both the min and max definitions. Override this method to provide a custom size range to the
+ * backing node.
+ */
+- (ASSizeRange)nodeConstrainedSize;
+
 @end
