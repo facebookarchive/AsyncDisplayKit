@@ -981,4 +981,11 @@
   return pendingState;
 }
 
+- (void)dealloc
+{
+  CGColorRelease(backgroundColor);
+  CGColorRelease(shadowColor);
+  CGColorRelease(borderColor);
+}
+
 @end
