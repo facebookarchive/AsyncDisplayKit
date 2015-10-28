@@ -180,26 +180,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 @implementation ASTableView
 
-/**
- @summary Conditionally performs UIView geometry changes in the given block without animation.
- 
- Used primarily to circumvent UITableView forcing insertion animations when explicitly told not to via
- `UITableViewRowAnimationNone`. More info: https://github.com/facebook/AsyncDisplayKit/pull/445
- 
- @param withoutAnimation Set to `YES` to perform given block without animation
- @param block Perform UIView geometry changes within the passed block
- */
-void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
-  if (withoutAnimation) {
-    BOOL animationsEnabled = [UIView areAnimationsEnabled];
-    [UIView setAnimationsEnabled:NO];
-    block();
-    [UIView setAnimationsEnabled:animationsEnabled];
-  } else {
-    block();
-  }
-}
-
 + (Class)dataControllerClass
 {
   return [ASChangeSetDataController class];
