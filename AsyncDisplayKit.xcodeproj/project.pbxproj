@@ -10,14 +10,14 @@
 		044284FD1BAA365100D16268 /* UICollectionViewLayout+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E0E1B371875007741D0 /* UICollectionViewLayout+ASConvenience.m */; };
 		044284FE1BAA387800D16268 /* ASStackLayoutSpecUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED461B17847A00DA7C62 /* ASStackLayoutSpecUtilities.h */; };
 		044284FF1BAA3BD600D16268 /* UICollectionViewLayout+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		044285071BAA63FE00D16268 /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 044285051BAA63FE00D16268 /* ASBatchFetching.h */; settings = {ASSET_TAGS = (); }; };
-		044285081BAA63FE00D16268 /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 044285051BAA63FE00D16268 /* ASBatchFetching.h */; settings = {ASSET_TAGS = (); }; };
-		044285091BAA63FE00D16268 /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 044285061BAA63FE00D16268 /* ASBatchFetching.m */; settings = {ASSET_TAGS = (); }; };
-		0442850A1BAA63FE00D16268 /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 044285061BAA63FE00D16268 /* ASBatchFetching.m */; settings = {ASSET_TAGS = (); }; };
-		0442850D1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */; settings = {ASSET_TAGS = (); }; };
-		0442850E1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */; settings = {ASSET_TAGS = (); }; };
-		0442850F1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */; settings = {ASSET_TAGS = (); }; };
-		044285101BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */; settings = {ASSET_TAGS = (); }; };
+		044285071BAA63FE00D16268 /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 044285051BAA63FE00D16268 /* ASBatchFetching.h */; };
+		044285081BAA63FE00D16268 /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 044285051BAA63FE00D16268 /* ASBatchFetching.h */; };
+		044285091BAA63FE00D16268 /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 044285061BAA63FE00D16268 /* ASBatchFetching.m */; };
+		0442850A1BAA63FE00D16268 /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 044285061BAA63FE00D16268 /* ASBatchFetching.m */; };
+		0442850D1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */; };
+		0442850E1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */; };
+		0442850F1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */; };
+		044285101BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */; };
 		0515EA211A15769900BA8B9A /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943141A1575670030A7D0 /* Photos.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		0515EA221A1576A100BA8B9A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		0516FA3C1A15563400B4EBED /* ASAvailability.h in Headers */ = {isa = PBXBuildFile; fileRef = 0516FA3A1A15563400B4EBED /* ASAvailability.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -140,14 +140,14 @@
 		205F0E211B376416007741D0 /* CGRect+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E1F1B376416007741D0 /* CGRect+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		205F0E221B376416007741D0 /* CGRect+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E201B376416007741D0 /* CGRect+ASConvenience.m */; };
 		242995D31B29743C00090100 /* ASBasicImageDownloaderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 242995D21B29743C00090100 /* ASBasicImageDownloaderTests.m */; };
-		251B8EF71BBB3D690087C538 /* ASCollectionDataController.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */; settings = {ASSET_TAGS = (); }; };
-		251B8EF81BBB3D690087C538 /* ASCollectionDataController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */; settings = {ASSET_TAGS = (); }; };
-		251B8EF91BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */; settings = {ASSET_TAGS = (); }; };
-		251B8EFA1BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF51BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m */; settings = {ASSET_TAGS = (); }; };
-		251B8EFB1BBB3D690087C538 /* ASDataController+Subclasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF61BBB3D690087C538 /* ASDataController+Subclasses.h */; settings = {ASSET_TAGS = (); }; };
-		2538B6F31BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2538B6F21BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m */; settings = {ASSET_TAGS = (); }; };
+		251B8EF71BBB3D690087C538 /* ASCollectionDataController.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */; };
+		251B8EF81BBB3D690087C538 /* ASCollectionDataController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */; };
+		251B8EF91BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */; };
+		251B8EFA1BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF51BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m */; };
+		251B8EFB1BBB3D690087C538 /* ASDataController+Subclasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF61BBB3D690087C538 /* ASDataController+Subclasses.h */; };
+		2538B6F31BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2538B6F21BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m */; };
 		2767E9411BB19BD600EA9B77 /* ASViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2767E9421BB19BD600EA9B77 /* ASViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ACC945AA1BA9E7C1005E1FB8 /* ASViewController.m */; settings = {ASSET_TAGS = (); }; };
+		2767E9421BB19BD600EA9B77 /* ASViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ACC945AA1BA9E7C1005E1FB8 /* ASViewController.m */; };
 		2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2911485B1A77147A005D0878 /* ASControlNodeTests.m */; };
 		291B63FB1AA53A7A000A71B3 /* ASScrollDirection.h in Headers */ = {isa = PBXBuildFile; fileRef = 296A0A311A951715005ACEAA /* ASScrollDirection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		292C599F1A956527007E5DD6 /* ASLayoutRangeType.h in Headers */ = {isa = PBXBuildFile; fileRef = 292C59991A956527007E5DD6 /* ASLayoutRangeType.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -162,7 +162,7 @@
 		299DA1AA1A828D2900162D41 /* ASBatchContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 299DA1A81A828D2900162D41 /* ASBatchContext.mm */; };
 		29CDC2E21AAE70D000833CA4 /* ASBasicImageDownloaderContextTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 29CDC2E11AAE70D000833CA4 /* ASBasicImageDownloaderContextTests.m */; };
 		2C107F5B1BA9F54500F13DE5 /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		34566CB31BC1213700715E6B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; settings = {ASSET_TAGS = (); }; };
+		34566CB31BC1213700715E6B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; };
 		34EFC75B1B701BAF00AD841F /* ASDimension.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED071B17843500DA7C62 /* ASDimension.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		34EFC75C1B701BD200AD841F /* ASDimension.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED081B17843500DA7C62 /* ASDimension.mm */; };
 		34EFC75D1B701BE900AD841F /* ASInternalHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED431B17847A00DA7C62 /* ASInternalHelpers.h */; };
@@ -232,8 +232,8 @@
 		9C6BB3B31B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C8221951BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */; };
 		9C8221961BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */; };
-		9C8221971BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */; settings = {ASSET_TAGS = (); }; };
-		9C8221981BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */; settings = {ASSET_TAGS = (); }; };
+		9C8221971BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */; };
+		9C8221981BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */; };
 		9CDC18CC1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9CDC18CD1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.m */; };
@@ -399,8 +399,8 @@
 		B350625E1B0111780018CF92 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
 		CC7FD9DE1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		CC7FD9DF1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; settings = {ASSET_TAGS = (); }; };
-		CC7FD9E11BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */; settings = {ASSET_TAGS = (); }; };
+		CC7FD9DF1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; };
+		CC7FD9E11BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */; };
 		CC7FD9E21BB603FF005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
@@ -1916,6 +1916,7 @@
 		B35061EE1B010EDF0018CF92 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BITCODE_GENERATION_MODE = bitcode;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
@@ -1947,6 +1948,7 @@
 		B35061EF1B010EDF0018CF92 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BITCODE_GENERATION_MODE = bitcode;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
