@@ -80,7 +80,7 @@ to implement node hierarchies or custom drawing.
 * Read the [Getting Started guide](http://asyncdisplaykit.org/guide/)
 * Get the [sample projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples)
 * Browse the [API reference](http://asyncdisplaykit.org/appledoc/)
-* Watch the [NSLondon talk](http://vimeo.com/103589245)
+* Watch the [NSLondon talk](http://vimeo.com/103589245) or the [NSSpain talk](http://vimeo.com/140409084)
 
 ## Testing
 
