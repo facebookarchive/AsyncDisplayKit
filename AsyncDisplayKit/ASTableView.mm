@@ -330,13 +330,14 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   if (asyncDelegate == nil) {
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
     // in UIScrollViewAccessibility.
-    _asyncDelegate = nil;
-    _proxyDelegate = nil; 
+    _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+    
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:asyncDelegate interceptor:self];
-    super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
   }
+  
+  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
 }
 
 - (void)reloadDataWithCompletion:(void (^)())completion
