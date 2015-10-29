@@ -45,6 +45,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
 /*
+ * A Boolean value that indicates whether the node is selected.
+ */
+@property (nonatomic, assign) BOOL selected;
+
+/*
+ * A Boolean value that indicates whether the node is highlighted.
+ */
+@property (nonatomic, assign) BOOL highlighted;
+
+/*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.
  */

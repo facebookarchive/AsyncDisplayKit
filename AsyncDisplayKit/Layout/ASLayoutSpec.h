@@ -9,6 +9,7 @@
  */
 
 #import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -96,6 +97,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** Returns all children added to this layout spec. */
 - (NSArray<id<ASLayoutable>> *)children;
+
+@end
+
+@interface ASLayoutSpec (Debugging) <ASLayoutableAsciiArtProtocol>
+/**
+ *  Used by other layout specs to create ascii art debug strings
+ */
++ (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction;
++ (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName;
 
 @end
 

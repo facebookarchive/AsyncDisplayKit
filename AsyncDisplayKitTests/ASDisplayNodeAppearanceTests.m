@@ -56,9 +56,15 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 @interface ASDisplayNodeAppearanceTests : XCTestCase
 @end
 
+// Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
-#define DeclareViewNamed(v) UIView *v = [[UIView alloc] init]; v.layer.asyncdisplaykit_name = @#v
-#define DeclareLayerNamed(l) CALayer *l = [[CALayer alloc] init]; l.asyncdisplaykit_name = @#l
+#define DeclareViewNamed(v) UIView *v = viewWithName(@#v)
+
+static UIView *viewWithName(NSString *name) {
+  ASDisplayNode *n = [[ASDisplayNode alloc] init];
+  n.name = name;
+  return n.view;
+}
 
 @implementation ASDisplayNodeAppearanceTests
 {

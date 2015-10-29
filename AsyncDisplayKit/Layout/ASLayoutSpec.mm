@@ -122,5 +122,40 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   return self.layoutChildren[kDefaultChildrenKey];
 }
 
-                     
+@end
+
+@implementation ASLayoutSpec (Debugging)
+
+#pragma mark - ASLayoutableAsciiArtProtocol
+
++ (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction
+{
+  NSMutableArray *childStrings = [NSMutableArray array];
+  for (id<ASLayoutableAsciiArtProtocol> layoutChild in children) {
+    NSString *childString = [layoutChild asciiArtString];
+    if (childString) {
+      [childStrings addObject:childString];
+    }
+  }
+  if (direction == ASStackLayoutDirectionHorizontal) {
+    return [ASAsciiArtBoxCreator horizontalBoxStringForChildren:childStrings parent:parentName];
+  }
+  return [ASAsciiArtBoxCreator verticalBoxStringForChildren:childStrings parent:parentName];
+}
+
++ (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName
+{
+  return [self asciiArtStringForChildren:children parentName:parentName direction:ASStackLayoutDirectionHorizontal];
+}
+
+- (NSString *)asciiArtString
+{
+  return [ASLayoutSpec asciiArtStringForChildren:@[self.child] parentName:[self asciiArtName]];
+}
+
+- (NSString *)asciiArtName
+{
+  return NSStringFromClass([self class]);
+}
+
 @end

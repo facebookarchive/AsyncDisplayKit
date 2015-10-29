@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASCellNode;
 @class ASDataController;
 
+FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
+
 typedef NSUInteger ASDataControllerAnimationOptions;
 
 /**
@@ -42,7 +44,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 /**
  Fetch the number of sections.
  */
-- (NSUInteger)dataControllerNumberOfSections:(ASDataController *)dataController;
+- (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController;
 
 /**
  Lock the data source for data fetching.
@@ -92,13 +94,12 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 @end
 
-
 /**
  * Controller to layout data in background, and managed data updating.
  *
  * All operations are asynchronous and thread safe. You can call it from background thread (it is recommendated) and the data
  * will be updated asynchronously. The dataSource must be updated to reflect the changes before these methods has been called.
- * For each data updatin, the corresponding methods in delegate will be called.
+ * For each data updating, the corresponding methods in delegate will be called.
  */
 @protocol ASFlowLayoutControllerDataSource;
 @interface ASDataController : ASDealloc2MainObject <ASFlowLayoutControllerDataSource>
@@ -158,14 +159,18 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 - (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
- * Re-measures all loaded nodes. Used to respond to a change in size of the containing view 
+ * Re-measures all loaded nodes in the backing store.
+ * 
+ * @discussion Used to respond to a change in size of the containing view
  * (e.g. ASTableView or ASCollectionView after an orientation change).
  */
-- (void)relayoutAllRows;
+- (void)relayoutAllNodes;
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 - (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
+
+- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /** @name Data Querying */
 
@@ -179,7 +184,10 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (NSArray<ASCellNode *> *)nodesAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
 
-- (NSArray<NSArray <ASCellNode *> *> *)completedNodes;  // This provides efficient access to the entire _completedNodes multidimensional array.
+/**
+ * Direct access to the nodes that have completed calculation and layout
+ */
+- (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
 
 @end
 

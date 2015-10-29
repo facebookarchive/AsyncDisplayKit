@@ -95,6 +95,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reloadData;
 
 /**
+ * Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.
+ *
+ * @warning This method is substantially more expensive than UITableView's version and will block the main thread while
+ * all the cells load.
+ */
+- (void)reloadDataImmediately;
+
+/**
  *  begins a batch of insert, delete reload and move operations. This method must be called from the main thread.
  */
 - (void)beginUpdates;
@@ -206,6 +214,18 @@ NS_ASSUME_NONNULL_BEGIN
  * before this method is called.
  */
 - (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
+
+/**
+ * Relayouts the specified row using a given animation effect.
+ *
+ * @param indexPath The index path identifying the row to relayout.
+ *
+ * @param animation A constant that indicates how the relayout is to be animated. See UITableViewRowAnimation.
+ *
+ * @discussion This method must be called from the main thread. The relayout is excuted on main thread. 
+ * The node of the specified row must be updated to cause layout changes before this method is called.
+ */
+- (void)relayoutRowAtIndexPath:(NSIndexPath *)indexPath withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
  * Moves the row at a specified location to a destination location.

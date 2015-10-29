@@ -32,9 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGFloat shadowRadius;
 @property (nonatomic, assign) CGFloat borderWidth;
 @property (nonatomic, assign, getter = isOpaque) BOOL opaque;
-@property (nullable, nonatomic, retain) __attribute__((NSObject)) CGColorRef borderColor;
-@property (nullable, nonatomic, copy) NSString *asyncdisplaykit_name;
-@property (nullable, nonatomic, retain) __attribute__((NSObject)) CGColorRef backgroundColor;
+@property (nonatomic, retain) __attribute__((NSObject)) CGColorRef borderColor;
+@property (nonatomic, retain) __attribute__((NSObject)) CGColorRef backgroundColor;
 @property (nonatomic, assign) BOOL allowsEdgeAntialiasing;
 @property (nonatomic, assign) unsigned int edgeAntialiasingMask;
 
@@ -81,9 +80,3 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, copy)          NSString *accessibilityIdentifier;
 
 @end
-
-@interface CALayer (ASDisplayNodeLayer)
-@property (nullable, atomic, copy) NSString *asyncdisplaykit_name;
-@end
-
-NS_ASSUME_NONNULL_END

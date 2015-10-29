@@ -185,13 +185,22 @@ static const CGFloat kInnerPadding = 10.0f;
 - (void)toggleImageEnlargement
 {
   _isImageEnlarged = !_isImageEnlarged;
-  [self setNeedsLayout];
 }
 
 - (void)toggleNodesSwap
 {
   _swappedTextAndImage = !_swappedTextAndImage;
-  [self setNeedsLayout];
+  
+  [UIView animateWithDuration:0.15 animations:^{
+    self.alpha = 0;
+  } completion:^(BOOL finished) {
+    [self setNeedsLayout];
+    [self.view layoutIfNeeded];
+    
+    [UIView animateWithDuration:0.15 animations:^{
+      self.alpha = 1;
+    }];
+  }];
 }
 
 @end

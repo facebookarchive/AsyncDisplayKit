@@ -33,6 +33,20 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
    * Indicates that the best image identifier changed before a download for a worse identifier began.
    */
   ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged,
+
+  /**
+   * Indicates that the Photos framework returned no image and no error.
+   * This may happen if the image is in iCloud and the user did not specify `allowsNetworkAccess`
+   * in their image request.
+   */
+  ASMultiplexImageNodeErrorCodePhotosImageManagerFailedWithoutError,
+  
+  /**
+   * Indicates that the image node could not retrieve the PHAsset for a given asset identifier.
+   * This typically means that the user has not given Photos framework permissions yet or the asset 
+   * has been removed from the device.
+   */
+  ASMultiplexImageNodeErrorCodePHAssetIsUnavailable
 };
 
 
