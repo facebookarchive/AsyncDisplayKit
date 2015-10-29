@@ -113,7 +113,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 /**
  * @abstract The name of this node, which will be displayed in `description`. The default value is nil.
  */
-@property (atomic, copy) NSString *name;
+@property (nullable, atomic, copy) NSString *name;
 
 /** 
  * @abstract Returns whether the node is synchronous.
