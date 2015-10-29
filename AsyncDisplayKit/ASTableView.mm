@@ -234,6 +234,12 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   // If the initial size is 0, expect a size change very soon which is part of the initial configuration
   // and should not trigger a relayout.
   _ignoreNodesConstrainedWidthChange = (_nodesConstrainedWidth == 0);
+  
+  _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+  
+  _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+  super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -300,8 +306,9 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to nil out
   // super.dataSource in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
+  super.dataSource = nil;
+
   if (asyncDataSource == nil) {
-    super.dataSource = nil;
     _asyncDataSource = nil;
     _proxyDataSource = nil;
   } else {
@@ -318,10 +325,11 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   // will return as nil (ARC magic) even though the _proxyDelegate still exists. It's really important to nil out
   // super.delegate in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
+  super.delegate = nil;
+
   if (asyncDelegate == nil) {
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
     // in UIScrollViewAccessibility.
-    super.delegate = nil;
     _asyncDelegate = nil;
     _proxyDelegate = nil; 
   } else {
