@@ -60,6 +60,11 @@
 @property (nonatomic, readonly) UITextInputMode *textInputMode;
 
 /*
+ @abstract The textContainerInset of both the placeholder and typed textView. This value defaults to UIEdgeInsetsZero.
+ */
+@property (nonatomic, readwrite) UIEdgeInsets textContainerInset;
+
+/*
  @abstract The returnKeyType of the keyboard. This value defaults to UIReturnKeyDefault.
  */
 @property (nonatomic, readwrite) UIReturnKeyType returnKeyType;
