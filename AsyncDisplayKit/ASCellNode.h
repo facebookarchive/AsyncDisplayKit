@@ -98,7 +98,9 @@ typedef NSUInteger ASCellNodeAnimation;
  * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
  * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
  *
- * Note: If the relayout causes a change in size, the delegate will be notified (on main thread) to relayout.
+ * If the relayout causes a change in size, the delegate will be notified on main thread.
+ *
+ * This method can be called inside of an animation block (to animate all of the layout changes).
  */
 - (void)setNeedsLayout;
 
