@@ -278,7 +278,7 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
       return;
 
     // Bail if it's trying to load an identifier that's more than one step than what's loaded.
-    NSInteger nextImageIdentifier = [imageNode.loadedImageIdentifier integerValue] + 1;
+    NSInteger nextImageIdentifier = [(NSNumber *)imageNode.loadedImageIdentifier integerValue] + 1;
     if (requestedIdentifierValue != nextImageIdentifier)
       return;
 
@@ -344,7 +344,7 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
 
   // Wait until the image is loaded.
   ASRunRunLoopUntilBlockIsTrue(^BOOL{
-    return [imageNode.loadedImageIdentifier isEqual:imageIdentifier];
+    return [(id)imageNode.loadedImageIdentifier isEqual:imageIdentifier];
   });
 
   // Verify the delegation.
