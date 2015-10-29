@@ -15,16 +15,14 @@ typedef NSUInteger ASCellNodeAnimation;
 @protocol ASCellNodeDelegate <NSObject>
 
 /**
- * Notifies the delegate that the specified cell node has done a relayout that results in a new size. 
+ * Notifies the delegate that the specified cell node has done a relayout.
  * The notification is done on main thread.
  *
  * @param node A node informing the delegate about the relayout.
  *
- * @param newSize A new size that is resulted in the relayout.
- *
- * @param suggestedAnimation A constant that indicates how the delegate should animate. See UITableViewRowAnimation.
+ * @param suggestedAnimation A constant indicates how the delegate should animate. See UITableViewRowAnimation.
  */
-- (void)node:(ASCellNode *)node didRelayoutToNewSize:(CGSize)newSize suggestedAnimation:(ASCellNodeAnimation)animation;
+- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation;
 @end
 
 /**
@@ -72,7 +70,7 @@ typedef NSUInteger ASCellNodeAnimation;
 @property (nonatomic, assign) BOOL highlighted;
 
 /*
- * A delegate to be notified (on main thread) after a relayout that results in a new size.
+ * A delegate to be notified (on main thread) after a relayout.
  */
 @property (nonatomic, weak) id<ASCellNodeDelegate> delegate;
 
@@ -97,8 +95,7 @@ typedef NSUInteger ASCellNodeAnimation;
  *
  * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
  * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
- *
- * If the relayout causes a change in size, the delegate will be notified on main thread.
+ * The delegate will then be notified on main thread.
  *
  * This method can be called inside of an animation block (to animate all of the layout changes).
  */

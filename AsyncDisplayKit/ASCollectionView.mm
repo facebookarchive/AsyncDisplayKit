@@ -901,7 +901,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark - ASCellNodeDelegate
 
-- (void)node:(ASCellNode *)node didRelayoutToNewSize:(CGSize)newSize suggestedAnimation:(ASCellNodeAnimation)animation
+- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
   NSIndexPath *indexPath = [self indexPathForNode:node];

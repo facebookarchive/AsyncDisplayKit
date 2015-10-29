@@ -191,17 +191,7 @@ static const CGFloat kInnerPadding = 10.0f;
 - (void)toggleNodesSwap
 {
   _swappedTextAndImage = !_swappedTextAndImage;
-  
-  [UIView animateWithDuration:0.15 animations:^{
-    self.alpha = 0;
-  } completion:^(BOOL finished) {
-    [self setNeedsLayout];
-    [self.view layoutIfNeeded];
-    
-    [UIView animateWithDuration:0.15 animations:^{
-      self.alpha = 1;
-    }];
-  }];
+  [self setNeedsLayout];
 }
 
 @end
