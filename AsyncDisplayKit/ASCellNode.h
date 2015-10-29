@@ -8,6 +8,24 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+@class ASCellNode;
+
+typedef NSUInteger ASCellNodeAnimation;
+
+@protocol ASCellNodeDelegate <NSObject>
+
+/**
+ * Notifies the delegate that the specified cell node has done a relayout that results in a new size. 
+ * The notification is done on main thread.
+ *
+ * @param node A node informing the delegate about the relayout.
+ *
+ * @param newSize A new size that is resulted in the relayout.
+ *
+ * @param suggestedAnimation A constant that indicates how the delegate should animate. See UITableViewRowAnimation.
+ */
+- (void)node:(ASCellNode *)node didRelayoutToNewSize:(CGSize)newSize suggestedAnimation:(ASCellNodeAnimation)animation;
+@end
 
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
@@ -54,6 +72,18 @@
 @property (nonatomic, assign) BOOL highlighted;
 
 /*
+ * A delegate to be notified (on main thread) after a relayout that results in a new size.
+ */
+@property (nonatomic, weak) id<ASCellNodeDelegate> delegate;
+
+/*
+ * A constant that is passed to the delegate to indicate how a relayout is to be animated.
+ * 
+ * @see UITableViewRowAnimation
+ */
+@property (nonatomic, assign) ASCellNodeAnimation relayoutAnimation;
+
+/*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.
  */
@@ -61,6 +91,16 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ *
+ * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
+ * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
+ *
+ * Note: If the relayout causes a change in size, the delegate will be notified (on main thread) to relayout.
+ */
+- (void)setNeedsLayout;
 
 @end
 

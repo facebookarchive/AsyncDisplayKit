@@ -151,7 +151,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASTableView
 
-@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate> {
+@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeDelegate> {
   _ASTableViewProxy *_proxyDataSource;
   _ASTableViewProxy *_proxyDelegate;
 
@@ -474,14 +474,6 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssertMainThread();
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
-}
-
-- (void)relayoutRowAtIndexPath:(NSIndexPath *)indexPath withRowAnimation:(UITableViewRowAnimation)animation
-{
-  ASDisplayNodeAssertMainThread();
-  ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-  [node setNeedsLayout];
-  [super reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:animation];
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
@@ -848,6 +840,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+  node.delegate = self;
   return node;
 }
 
@@ -919,6 +912,17 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
     node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
     [self endUpdates];
+  }
+}
+
+#pragma mark - ASCellNodeDelegate
+
+- (void)node:(ASCellNode *)node didRelayoutToNewSize:(CGSize)newSize suggestedAnimation:(ASCellNodeAnimation)animation
+{
+  ASDisplayNodeAssertMainThread();
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath != nil) {
+    [super reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:(UITableViewRowAnimation)animation];
   }
 }
 

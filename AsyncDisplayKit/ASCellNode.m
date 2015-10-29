@@ -8,6 +8,7 @@
 
 #import "ASCellNode.h"
 
+#import "ASInternalHelpers.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASTextNode.h>
@@ -27,6 +28,7 @@
   // use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
+  _relayoutAnimation = UITableViewRowAnimationAutomatic;
 
   return self;
 }
@@ -47,6 +49,21 @@
 {
   // ASRangeController expects ASCellNodes to be view-backed.  (Layer-backing is supported on ASCellNode subnodes.)
   ASDisplayNodeAssert(!layerBacked, @"ASCellNode does not support layer-backing.");
+}
+
+- (void)setNeedsLayout
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  
+  CGSize oldSize = self.calculatedSize;
+  [super setNeedsLayout];
+  CGSize newSize = self.calculatedSize;
+  
+  if (_delegate != nil && !CGSizeEqualToSize(oldSize, newSize)) {
+    ASPerformBlockOnMainThread(^{
+      [_delegate node:self didRelayoutToNewSize:newSize suggestedAnimation:_relayoutAnimation];
+    });
+  }
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
