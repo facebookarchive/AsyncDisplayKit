@@ -310,12 +310,13 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 
   if (asyncDataSource == nil) {
     _asyncDataSource = nil;
-    _proxyDataSource = nil;
+    _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
-    super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
   }
+  
+  super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
 }
 
 - (void)setAsyncDelegate:(id<ASTableViewDelegate>)asyncDelegate
@@ -330,6 +331,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   if (asyncDelegate == nil) {
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
     // in UIScrollViewAccessibility.
+    _asyncDelegate = nil;
     _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
     
   } else {
