@@ -792,9 +792,9 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   ASPerformBlockWithoutAnimation(!animated, ^{
     [super performBatchUpdates:^{
-      [_batchUpdateBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
+      for (dispatch_block_t block in _batchUpdateBlocks) {
         block();
-      }];
+      }
     } completion:completion];
   });
 
