@@ -317,14 +317,15 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   if (asyncDataSource == nil) {
     _asyncDataSource = nil;
-    _proxyDataSource = nil;
+    _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
     _asyncDataSourceImplementsConstrainedSizeForNode = NO;
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
-    super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
     _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
   }
+  
+  super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
 }
 
 - (void)setAsyncDelegate:(id<ASCollectionViewDelegate>)asyncDelegate
@@ -340,14 +341,15 @@ static BOOL _isInterceptedSelector(SEL sel)
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
     // in UIScrollViewAccessibility.
     _asyncDelegate = nil;
-    _proxyDelegate = nil;
+    _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
     _asyncDelegateImplementsInsetSection = NO;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
-    super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
     _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
+  
+  super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
 
   [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
 }
