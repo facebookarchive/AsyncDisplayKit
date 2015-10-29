@@ -80,3 +80,5 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, copy)          NSString *accessibilityIdentifier;
 
 @end
+
+NS_ASSUME_NONNULL_END
