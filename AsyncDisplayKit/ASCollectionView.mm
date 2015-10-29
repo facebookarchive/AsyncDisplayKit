@@ -12,7 +12,6 @@
 #import "ASCollectionViewLayoutController.h"
 #import "ASRangeController.h"
 #import "ASCollectionDataController.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "ASInternalHelpers.h"
@@ -269,7 +268,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssert(self.asyncDelegate, @"ASCollectionView's asyncDelegate property must be set.");
-  ASDisplayNodePerformBlockOnMainThread(^{
+  ASPerformBlockOnMainThread(^{
     _superIsPendingDataLoad = YES;
     [super reloadData];
   });

@@ -85,7 +85,7 @@
   return _getFromLayer(cornerRadius);
 }
 
--(void)setCornerRadius:(CGFloat)newCornerRadius
+- (void)setCornerRadius:(CGFloat)newCornerRadius
 {
   _bridge_prologue;
   _setToLayer(cornerRadius, newCornerRadius);

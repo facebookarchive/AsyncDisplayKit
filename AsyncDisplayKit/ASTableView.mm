@@ -14,7 +14,6 @@
 #import "ASCollectionViewLayoutController.h"
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -334,7 +333,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssert(self.asyncDelegate, @"ASTableView's asyncDelegate property must be set.");
-  ASDisplayNodePerformBlockOnMainThread(^{
+  ASPerformBlockOnMainThread(^{
     [super reloadData];
   });
   [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
