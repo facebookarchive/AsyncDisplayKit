@@ -789,26 +789,14 @@ static BOOL _isInterceptedSelector(SEL sel)
     }
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
-
-  BOOL animationsEnabled = NO;
-
-  if (!animated) {
-    animationsEnabled = [UIView areAnimationsEnabled];
-    [UIView setAnimationsEnabled:NO];
-  }
-
-  [super performBatchUpdates:^{
-    [_batchUpdateBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
-      block();
-    }];
-  } completion:^(BOOL finished) {
-    if (!animated) {
-      [UIView setAnimationsEnabled:animationsEnabled];
-    }
-    if (completion) {
-      completion(finished);
-    }
-  }];
+  
+  ASPerformBlockWithoutAnimation(!animated, ^{
+    [super performBatchUpdates:^{
+      for (dispatch_block_t block in _batchUpdateBlocks) {
+        block();
+      }
+    } completion:completion];
+  });
 
   [_batchUpdateBlocks removeAllObjects];
   _performingBatchUpdates = NO;
