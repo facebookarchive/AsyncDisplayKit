@@ -38,6 +38,20 @@
   return [[self alloc] initWithDirection:direction spacing:spacing justifyContent:justifyContent alignItems:alignItems children:children];
 }
 
++ (instancetype)verticalStackLayoutSpec
+{
+  ASStackLayoutSpec *stackLayoutSpec = [[self alloc] init];
+  stackLayoutSpec.direction = ASStackLayoutDirectionVertical;
+  return stackLayoutSpec;
+}
+
++ (instancetype)horizontalStackLayoutSpec
+{
+  ASStackLayoutSpec *stackLayoutSpec = [[self alloc] init];
+  stackLayoutSpec.direction = ASStackLayoutDirectionHorizontal;
+  return stackLayoutSpec;
+}
+
 - (instancetype)initWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
 {
   if (!(self = [super init])) {
