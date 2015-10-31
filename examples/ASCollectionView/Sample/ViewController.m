@@ -44,6 +44,9 @@
   [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
   
+  self.navigationItem.leftItemsSupplementBackButton = YES;
+  self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(reloadTapped)];
+  
   return self;
 }
 
@@ -64,6 +67,10 @@
   return YES;
 }
 
+- (void)reloadTapped
+{
+  [_collectionView reloadData];
+}
 
 #pragma mark -
 #pragma mark ASCollectionView data source.
