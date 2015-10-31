@@ -16,8 +16,8 @@
 @interface ASNetworkImageNode ()
 {
   ASDN::RecursiveMutex _lock;
-  id<ASImageCacheProtocol> _cache;
-  id<ASImageDownloaderProtocol> _downloader;
+  __weak id<ASImageCacheProtocol> _cache;
+  __weak id<ASImageDownloaderProtocol> _downloader;
 
   // Only access any of these with _lock.
   __weak id<ASNetworkImageNodeDelegate> _delegate;
@@ -51,7 +51,7 @@
 
 - (instancetype)init
 {
-  return [self initWithCache:nil downloader:[[ASBasicImageDownloader alloc] init]];
+  return [self initWithCache:nil downloader:[ASBasicImageDownloader sharedImageDownloader]];
 }
 
 - (void)dealloc
