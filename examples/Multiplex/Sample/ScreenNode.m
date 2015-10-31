@@ -31,11 +31,13 @@
   // load low-quality images before high-quality images
   _imageNode.downloadsIntermediateImages = YES;
   
-  // simple status label
-  _textNode = [[ASTextNode alloc] init];
+  // simple status label.  Synchronous to avoid flicker / placeholder state when updating.
+  _buttonNode = [[ASButtonNode alloc] init];
+  [_buttonNode addTarget:self action:@selector(reload) forControlEvents:ASControlNodeEventTouchUpInside];
+  _buttonNode.titleNode.displaysAsynchronously = NO;
   
   [self addSubnode:_imageNode];
-  [self addSubnode:_textNode];
+  [self addSubnode:_buttonNode];
   
   return self;
 }
@@ -43,11 +45,12 @@
 - (void)start
 {
   [self setText:@"loading…"];
-  _textNode.userInteractionEnabled = NO;
+  _buttonNode.userInteractionEnabled = NO;
   _imageNode.imageIdentifiers = @[ @"best", @"medium", @"worst" ]; // go!
 }
 
-- (void)reload {
+- (void)reload
+{
   [self start];
   [_imageNode reloadImageIdentifierSources];
 }
@@ -57,18 +60,21 @@
   NSDictionary *attributes = @{NSFontAttributeName: [UIFont fontWithName:@"HelveticaNeue-Light" size:22.0f]};
   NSAttributedString *string = [[NSAttributedString alloc] initWithString:text
                                                                attributes:attributes];
-  _textNode.attributedString = string;
+  [_buttonNode setAttributedTitle:string forState:ASButtonStateNormal];
   [self setNeedsLayout];
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASRatioLayoutSpec *imagePlaceholder = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1 child:_imageNode];
-  ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-                                                                             spacing:10
-                                                                      justifyContent:ASStackLayoutJustifyContentCenter
-                                                                          alignItems:ASStackLayoutAlignItemsCenter
-                                                                            children:@[imagePlaceholder, _textNode]];
+  
+  ASStackLayoutSpec *verticalStack = [[ASStackLayoutSpec alloc] init];
+  verticalStack.direction = ASStackLayoutDirectionVertical;
+  verticalStack.spacing = 10;
+  verticalStack.justifyContent = ASStackLayoutJustifyContentCenter;
+  verticalStack.alignItems = ASStackLayoutAlignItemsCenter;
+  verticalStack.children = @[imagePlaceholder, _buttonNode];
+                                      
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10) child:verticalStack];
 }
 
@@ -98,8 +104,8 @@
   [self setText:[NSString stringWithFormat:@"loaded '%@'", imageIdentifier]];
   
   if ([imageIdentifier isEqualToString:@"best"]) {
-    [self setText:[_textNode.attributedString.string stringByAppendingString:@".  tap to reload"]];
-    _textNode.userInteractionEnabled = YES;
+    [self setText:[_buttonNode.titleNode.attributedString.string stringByAppendingString:@".  tap to reload"]];
+    _buttonNode.userInteractionEnabled = YES;
   }
 }
 

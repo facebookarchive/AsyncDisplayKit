@@ -11,7 +11,7 @@
 @interface ScreenNode : ASDisplayNode
 
 @property (nonatomic, strong) ASMultiplexImageNode *imageNode;
-@property (nonatomic, strong) ASTextNode *textNode;
+@property (nonatomic, strong) ASButtonNode *buttonNode;
 
 - (void)start;
 - (void)reload;

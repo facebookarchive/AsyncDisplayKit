@@ -96,6 +96,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
 }
+@dynamic placeholderEnabled;
 
 #pragma mark - NSObject
 
