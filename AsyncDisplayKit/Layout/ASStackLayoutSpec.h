@@ -57,4 +57,14 @@
  */
 + (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children;
 
+/**
+ * @return A stack layout spec with direction of ASStackLayoutDirectionVertical
+ **/
++ (instancetype)verticalStackLayoutSpec;
+
+/**
+ * @return A stack layout spec with direction of ASStackLayoutDirectionHorizontal
+ **/
++ (instancetype)horizontalStackLayoutSpec;
+
 @end
