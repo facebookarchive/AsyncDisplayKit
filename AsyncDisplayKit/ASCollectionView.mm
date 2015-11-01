@@ -130,7 +130,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeDelegate> {
+@interface ASCollectionView () <ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate> {
   _ASCollectionViewProxy *_proxyDataSource;
   _ASCollectionViewProxy *_proxyDelegate;
 
@@ -655,7 +655,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
-  node.delegate = self;
+  node.layoutDelegate = self;
   return node;
 }
 

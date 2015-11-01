@@ -12,7 +12,7 @@
 
 typedef NSUInteger ASCellNodeAnimation;
 
-@protocol ASCellNodeDelegate <NSObject>
+@protocol ASCellNodeLayoutDelegate <NSObject>
 
 /**
  * Notifies the delegate that the specified cell node has done a relayout.
@@ -72,7 +72,7 @@ typedef NSUInteger ASCellNodeAnimation;
 /*
  * A delegate to be notified (on main thread) after a relayout.
  */
-@property (nonatomic, weak) id<ASCellNodeDelegate> delegate;
+@property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
 
 /*
  * A constant that is passed to the delegate to indicate how a relayout is to be animated.
