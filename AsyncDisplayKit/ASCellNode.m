@@ -56,9 +56,9 @@
   ASDisplayNodeAssertThreadAffinity(self);  
   [super setNeedsLayout];
   
-  if (_delegate != nil) {
+  if (_layoutDelegate != nil) {
     ASPerformBlockOnMainThread(^{
-      [_delegate node:self didRelayoutWithSuggestedAnimation:_relayoutAnimation];
+      [_layoutDelegate node:self didRelayoutWithSuggestedAnimation:_relayoutAnimation];
     });
   }
 }
