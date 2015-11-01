@@ -14,7 +14,6 @@
 #import "ASCollectionViewLayoutController.h"
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -152,7 +151,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASTableView
 
-@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate> {
+@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeDelegate> {
   _ASTableViewProxy *_proxyDataSource;
   _ASTableViewProxy *_proxyDelegate;
 
@@ -314,7 +313,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssert(self.asyncDelegate, @"ASTableView's asyncDelegate property must be set.");
-  ASDisplayNodePerformBlockOnMainThread(^{
+  ASPerformBlockOnMainThread(^{
     [super reloadData];
   });
   [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
@@ -455,14 +454,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
-}
-
-- (void)relayoutRowAtIndexPath:(NSIndexPath *)indexPath withRowAnimation:(UITableViewRowAnimation)animation
-{
-  ASDisplayNodeAssertMainThread();
-  ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-  [node setNeedsLayout];
-  [super reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:animation];
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
@@ -829,6 +820,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+  node.delegate = self;
   return node;
 }
 
@@ -900,6 +892,17 @@ static BOOL _isInterceptedSelector(SEL sel)
     CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
     node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
     [self endUpdates];
+  }
+}
+
+#pragma mark - ASCellNodeDelegate
+
+- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation
+{
+  ASDisplayNodeAssertMainThread();
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath != nil) {
+    [super reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:(UITableViewRowAnimation)animation];
   }
 }
 

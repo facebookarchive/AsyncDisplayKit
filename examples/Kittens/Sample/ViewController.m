@@ -121,7 +121,6 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
   // Assume only kitten nodes are selectable (see -tableView:shouldHighlightRowAtIndexPath:).
   KittenNode *node = (KittenNode *)[_tableView nodeForRowAtIndexPath:indexPath];
   [node toggleImageEnlargement];
-  [_tableView relayoutRowAtIndexPath:indexPath withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath

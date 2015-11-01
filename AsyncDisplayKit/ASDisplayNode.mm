@@ -57,17 +57,6 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
     return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
 }
 
-void ASDisplayNodePerformBlockOnMainThread(void (^block)())
-{
-  if ([NSThread isMainThread]) {
-    block();
-  } else {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      block();
-    });
-  }
-}
-
 void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)())
 {
   ASDisplayNodeCAssertNotNil(block, @"block is required");
@@ -79,7 +68,7 @@ void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)
     // Hold the lock to avoid a race where the node gets loaded while the block is in-flight.
     ASDN::MutexLocker l(node->_propertyLock);
     if (node.nodeLoaded) {
-      ASDisplayNodePerformBlockOnMainThread(^{
+      ASPerformBlockOnMainThread(^{
         block();
       });
     } else {
