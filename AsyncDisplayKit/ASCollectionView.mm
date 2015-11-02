@@ -12,7 +12,6 @@
 #import "ASCollectionViewLayoutController.h"
 #import "ASRangeController.h"
 #import "ASCollectionDataController.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "ASInternalHelpers.h"
@@ -131,7 +130,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDelegate, ASDataControllerSource> {
+@interface ASCollectionView () <ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate> {
   _ASCollectionViewProxy *_proxyDataSource;
   _ASCollectionViewProxy *_proxyDelegate;
 
@@ -269,7 +268,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssert(self.asyncDelegate, @"ASCollectionView's asyncDelegate property must be set.");
-  ASDisplayNodePerformBlockOnMainThread(^{
+  ASPerformBlockOnMainThread(^{
     _superIsPendingDataLoad = YES;
     [super reloadData];
   });
@@ -456,14 +455,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssertMainThread();
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
-}
-
-- (void)relayoutItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssertMainThread();
-  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-  [node setNeedsLayout];
-  [super reloadItemsAtIndexPaths:@[indexPath]];
 }
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
@@ -664,6 +655,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+  node.layoutDelegate = self;
   return node;
 }
 
@@ -789,26 +781,14 @@ static BOOL _isInterceptedSelector(SEL sel)
     }
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
-
-  BOOL animationsEnabled = NO;
-
-  if (!animated) {
-    animationsEnabled = [UIView areAnimationsEnabled];
-    [UIView setAnimationsEnabled:NO];
-  }
-
-  [super performBatchUpdates:^{
-    [_batchUpdateBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
-      block();
-    }];
-  } completion:^(BOOL finished) {
-    if (!animated) {
-      [UIView setAnimationsEnabled:animationsEnabled];
-    }
-    if (completion) {
-      completion(finished);
-    }
-  }];
+  
+  ASPerformBlockWithoutAnimation(!animated, ^{
+    [super performBatchUpdates:^{
+      for (dispatch_block_t block in _batchUpdateBlocks) {
+        block();
+      }
+    } completion:completion];
+  });
 
   [_batchUpdateBlocks removeAllObjects];
   _performingBatchUpdates = NO;
@@ -904,6 +884,17 @@ static BOOL _isInterceptedSelector(SEL sel)
     [UIView performWithoutAnimation:^{
       [super deleteSections:indexSet];
     }];
+  }
+}
+
+#pragma mark - ASCellNodeDelegate
+
+- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation
+{
+  ASDisplayNodeAssertMainThread();
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath != nil) {
+    [super reloadItemsAtIndexPaths:@[indexPath]];
   }
 }
 

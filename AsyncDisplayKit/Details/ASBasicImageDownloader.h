@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASBasicImageDownloader : NSObject <ASImageDownloaderProtocol>
 
++ (instancetype)sharedImageDownloader;
+
 @end
 
 NS_ASSUME_NONNULL_END

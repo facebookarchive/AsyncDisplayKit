@@ -128,7 +128,7 @@
     _image = image;
 
     ASDN::MutexUnlocker u(_imageLock);
-    ASDisplayNodePerformBlockOnMainThread(^{
+    ASPerformBlockOnMainThread(^{
       [self invalidateCalculatedLayout];
       [self setNeedsDisplay];
     });
@@ -306,7 +306,7 @@
   // If we have an image to display, display it, respecting our recrop flag.
   if (self.image)
   {
-    ASDisplayNodePerformBlockOnMainThread(^{
+    ASPerformBlockOnMainThread(^{
       if (recropImmediately)
         [self displayImmediately];
       else
@@ -334,7 +334,7 @@
   BOOL isCroppingImage = ((boundsSize.width < imageSize.width) || (boundsSize.height < imageSize.height));
 
   // Re-display if we need to.
-  ASDisplayNodePerformBlockOnMainThread(^{
+  ASPerformBlockOnMainThread(^{
     if (self.nodeLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
       [self setNeedsDisplay];
   });

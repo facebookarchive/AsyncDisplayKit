@@ -121,7 +121,6 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
   // Assume only kitten nodes are selectable (see -tableView:shouldHighlightRowAtIndexPath:).
   KittenNode *node = (KittenNode *)[_tableView nodeForRowAtIndexPath:indexPath];
   [node toggleImageEnlargement];
-  [_tableView relayoutRowAtIndexPath:indexPath withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -166,8 +165,6 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 
 - (void)tableView:(UITableView *)tableView willBeginBatchFetchWithContext:(ASBatchContext *)context
 {
-  NSLog(@"adding kitties");
-    
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     sleep(1);
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -189,8 +186,6 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
       [tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
 
       [context completeBatchFetching:YES];
-
-      NSLog(@"kittens added");
     });
   });
 }

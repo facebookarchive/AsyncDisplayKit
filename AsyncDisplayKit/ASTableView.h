@@ -216,18 +216,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
- * Relayouts the specified row using a given animation effect.
- *
- * @param indexPath The index path identifying the row to relayout.
- *
- * @param animation A constant that indicates how the relayout is to be animated. See UITableViewRowAnimation.
- *
- * @discussion This method must be called from the main thread. The relayout is excuted on main thread. 
- * The node of the specified row must be updated to cause layout changes before this method is called.
- */
-- (void)relayoutRowAtIndexPath:(NSIndexPath *)indexPath withRowAnimation:(UITableViewRowAnimation)animation;
-
-/**
  * Moves the row at a specified location to a destination location.
  *
  * @param indexPath The index path identifying the row to move.
@@ -255,7 +243,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @returns an indexPath for this cellNode
  */
-- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
 
 /**
  * Similar to -visibleCells.

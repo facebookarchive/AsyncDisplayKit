@@ -10,6 +10,23 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class ASCellNode;
+
+typedef NSUInteger ASCellNodeAnimation;
+
+@protocol ASCellNodeLayoutDelegate <NSObject>
+
+/**
+ * Notifies the delegate that the specified cell node has done a relayout.
+ * The notification is done on main thread.
+ *
+ * @param node A node informing the delegate about the relayout.
+ *
+ * @param suggestedAnimation A constant indicates how the delegate should animate. See UITableViewRowAnimation.
+ */
+- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation;
+@end
+
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
  */
@@ -55,6 +72,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL highlighted;
 
 /*
+ * A delegate to be notified (on main thread) after a relayout.
+ */
+@property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
+
+/*
+ * A constant that is passed to the delegate to indicate how a relayout is to be animated.
+ * 
+ * @see UITableViewRowAnimation
+ */
+@property (nonatomic, assign) ASCellNodeAnimation relayoutAnimation;
+
+/*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.
  */
@@ -62,6 +91,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ *
+ * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
+ * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
+ * The delegate will then be notified on main thread.
+ *
+ * This method can be called inside of an animation block (to animate all of the layout changes).
+ */
+- (void)setNeedsLayout;
 
 @end
 

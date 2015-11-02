@@ -14,7 +14,6 @@
 #import "ASCollectionViewLayoutController.h"
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASBatchFetching.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -152,7 +151,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASTableView
 
-@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate> {
+@interface ASTableView () <ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeLayoutDelegate> {
   _ASTableViewProxy *_proxyDataSource;
   _ASTableViewProxy *_proxyDelegate;
 
@@ -179,26 +178,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 @end
 
 @implementation ASTableView
-
-/**
- @summary Conditionally performs UIView geometry changes in the given block without animation.
- 
- Used primarily to circumvent UITableView forcing insertion animations when explicitly told not to via
- `UITableViewRowAnimationNone`. More info: https://github.com/facebook/AsyncDisplayKit/pull/445
- 
- @param withoutAnimation Set to `YES` to perform given block without animation
- @param block Perform UIView geometry changes within the passed block
- */
-void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
-  if (withoutAnimation) {
-    BOOL animationsEnabled = [UIView areAnimationsEnabled];
-    [UIView setAnimationsEnabled:NO];
-    block();
-    [UIView setAnimationsEnabled:animationsEnabled];
-  } else {
-    block();
-  }
-}
 
 + (Class)dataControllerClass
 {
@@ -334,7 +313,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssert(self.asyncDelegate, @"ASTableView's asyncDelegate property must be set.");
-  ASDisplayNodePerformBlockOnMainThread(^{
+  ASPerformBlockOnMainThread(^{
     [super reloadData];
   });
   [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
@@ -475,14 +454,6 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASDisplayNodeAssertMainThread();
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
-}
-
-- (void)relayoutRowAtIndexPath:(NSIndexPath *)indexPath withRowAnimation:(UITableViewRowAnimation)animation
-{
-  ASDisplayNodeAssertMainThread();
-  ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-  [node setNeedsLayout];
-  [super reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:animation];
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
@@ -849,6 +820,7 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
 {
   ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+  node.layoutDelegate = self;
   return node;
 }
 
@@ -920,6 +892,17 @@ void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
     CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
     node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
     [self endUpdates];
+  }
+}
+
+#pragma mark - ASCellNodeDelegate
+
+- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation
+{
+  ASDisplayNodeAssertMainThread();
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath != nil) {
+    [super reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:(UITableViewRowAnimation)animation];
   }
 }
 

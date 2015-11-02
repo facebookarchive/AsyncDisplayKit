@@ -58,6 +58,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray<id<ASLayoutable>> *)children;
 
+/**
+ * @return A stack layout spec with direction of ASStackLayoutDirectionVertical
+ **/
++ (instancetype)verticalStackLayoutSpec;
+
+/**
+ * @return A stack layout spec with direction of ASStackLayoutDirectionHorizontal
+ **/
++ (instancetype)horizontalStackLayoutSpec;
+
 @end
 
 NS_ASSUME_NONNULL_END

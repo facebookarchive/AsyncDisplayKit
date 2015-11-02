@@ -96,6 +96,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
 }
+@dynamic placeholderEnabled;
 
 #pragma mark - NSObject
 
@@ -131,7 +132,8 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
     _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
 
     // Placeholders
-    self.placeholderEnabled = YES;
+    // Disabled by default in ASDisplayNode, but add a few options for those who toggle
+    // on the special placeholder behavior of ASTextNode.
     _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
     _placeholderInsets = UIEdgeInsetsMake(1.0, 0.0, 1.0, 0.0);
   }
@@ -747,6 +749,8 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (UIImage *)placeholderImage
 {
+  // FIXME: Replace this implementation with reusable CALayers that have .backgroundColor set.
+  // This would completely eliminate the memory and performance cost of the backing store.
   CGSize size = self.calculatedSize;
   UIGraphicsBeginImageContext(size);
   [self.placeholderColor setFill];

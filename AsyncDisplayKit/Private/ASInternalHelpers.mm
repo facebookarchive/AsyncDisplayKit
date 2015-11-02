@@ -46,6 +46,17 @@ static void ASDispatchOnceOnMainThread(dispatch_once_t *predicate, dispatch_bloc
   }
 }
 
+void ASPerformBlockOnMainThread(void (^block)())
+{
+  if ([NSThread isMainThread]) {
+    block();
+  } else {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      block();
+    });
+  }
+}
+
 CGFloat ASScreenScale()
 {
   static CGFloat _scale;
