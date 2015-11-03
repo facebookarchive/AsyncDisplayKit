@@ -82,7 +82,7 @@ typedef NSUInteger ASCellNodeAnimation;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not.
  *
  * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
  * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
