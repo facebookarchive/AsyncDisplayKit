@@ -889,13 +889,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark - ASCellNodeDelegate
 
-- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation
+- (void)nodeDidRelayout:(ASCellNode *)node
 {
   ASDisplayNodeAssertMainThread();
-  NSIndexPath *indexPath = [self indexPathForNode:node];
-  if (indexPath != nil) {
-    [super reloadItemsAtIndexPaths:@[indexPath]];
-  }
+  // Cause UICollectionView to requery for the new height of this node
+  [super performBatchUpdates:^{} completion:nil];
 }
 
 @end

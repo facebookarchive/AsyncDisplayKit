@@ -19,10 +19,8 @@ typedef NSUInteger ASCellNodeAnimation;
  * The notification is done on main thread.
  *
  * @param node A node informing the delegate about the relayout.
- *
- * @param suggestedAnimation A constant indicates how the delegate should animate. See UITableViewRowAnimation.
  */
-- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation;
+- (void)nodeDidRelayout:(ASCellNode *)node;
 @end
 
 /**
@@ -73,13 +71,6 @@ typedef NSUInteger ASCellNodeAnimation;
  * A delegate to be notified (on main thread) after a relayout.
  */
 @property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
-
-/*
- * A constant that is passed to the delegate to indicate how a relayout is to be animated.
- * 
- * @see UITableViewRowAnimation
- */
-@property (nonatomic, assign) ASCellNodeAnimation relayoutAnimation;
 
 /*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding

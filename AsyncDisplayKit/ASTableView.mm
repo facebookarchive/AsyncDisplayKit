@@ -895,15 +895,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-#pragma mark - ASCellNodeDelegate
+#pragma mark - ASCellNodeLayoutDelegate
 
-- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation
+- (void)nodeDidRelayout:(ASCellNode *)node
 {
   ASDisplayNodeAssertMainThread();
-  NSIndexPath *indexPath = [self indexPathForNode:node];
-  if (indexPath != nil) {
-    [super reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:(UITableViewRowAnimation)animation];
-  }
+  // Cause UITableView to requery for the new height of this node
+  [super beginUpdates];
+  [super endUpdates];
 }
 
 @end
