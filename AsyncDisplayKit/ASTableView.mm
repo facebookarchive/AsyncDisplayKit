@@ -820,7 +820,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
-  node.layoutDelegate = self;
+  if (node.layoutDelegate == nil) {
+    node.layoutDelegate = self;
+  }
   return node;
 }
 
