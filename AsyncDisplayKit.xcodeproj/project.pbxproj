@@ -293,6 +293,8 @@
 		ACF6ED611B178DC700DA7C62 /* ASOverlayLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED591B178DC700DA7C62 /* ASOverlayLayoutSpecSnapshotTests.mm */; };
 		ACF6ED621B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED5A1B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm */; };
 		ACF6ED631B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED5B1B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm */; };
+		B0F8805A1BEAEC7500D17647 /* ASTableNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B0F880581BEAEC7500D17647 /* ASTableNode.h */; };
+		B0F8805B1BEAEC7500D17647 /* ASTableNode.m in Sources */ = {isa = PBXBuildFile; fileRef = B0F880591BEAEC7500D17647 /* ASTableNode.m */; };
 		B35061F31B010EFD0018CF92 /* ASCellNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 055F1A3A19ABD43F004DAFF1 /* ASCellNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B35061F51B010EFD0018CF92 /* ASCollectionView.h in Headers */ = {isa = PBXBuildFile; fileRef = AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B35061F61B010EFD0018CF92 /* ASCollectionView.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC3C4A501A1139C100143C57 /* ASCollectionView.mm */; };
@@ -661,6 +663,8 @@
 		ACF6ED591B178DC700DA7C62 /* ASOverlayLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASOverlayLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		ACF6ED5A1B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRatioLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		ACF6ED5B1B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASStackLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
+		B0F880581BEAEC7500D17647 /* ASTableNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASTableNode.h; sourceTree = "<group>"; };
+		B0F880591BEAEC7500D17647 /* ASTableNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableNode.m; sourceTree = "<group>"; };
 		B35061DA1B010EDF0018CF92 /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncDisplayKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B35061DD1B010EDF0018CF92 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../AsyncDisplayKit-iOS/Info.plist"; sourceTree = "<group>"; };
 		CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPhotosFrameworkImageRequest.h; sourceTree = "<group>"; };
@@ -810,6 +814,8 @@
 				055B9FA71A1C154B00035D6D /* ASNetworkImageNode.mm */,
 				D785F6601A74327E00291744 /* ASScrollNode.h */,
 				D785F6611A74327E00291744 /* ASScrollNode.m */,
+				B0F880581BEAEC7500D17647 /* ASTableNode.h */,
+				B0F880591BEAEC7500D17647 /* ASTableNode.m */,
 				055F1A3219ABD3E3004DAFF1 /* ASTableView.h */,
 				055F1A3319ABD3E3004DAFF1 /* ASTableView.mm */,
 				AC7A2C161BDE11DF0093FE1A /* ASTableViewInternal.h */,
@@ -1156,6 +1162,7 @@
 				251B8EFB1BBB3D690087C538 /* ASDataController+Subclasses.h in Headers */,
 				ACF6ED2A1B17843500DA7C62 /* ASLayoutable.h in Headers */,
 				9CDC18CC1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */,
+				B0F8805A1BEAEC7500D17647 /* ASTableNode.h in Headers */,
 				464052241A3F83C40061C0BA /* ASLayoutController.h in Headers */,
 				9C5FA3511B8F6ADF00A62714 /* ASLayoutOptions.h in Headers */,
 				9C65A72A1BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h in Headers */,
@@ -1594,6 +1601,7 @@
 				058D0A1F195D050800B7D73C /* ASTextNodeTextKitHelpers.mm in Sources */,
 				058D0A20195D050800B7D73C /* ASTextNodeWordKerner.m in Sources */,
 				ACC945AB1BA9E7C1005E1FB8 /* ASViewController.m in Sources */,
+				B0F8805B1BEAEC7500D17647 /* ASTableNode.m in Sources */,
 				205F0E221B376416007741D0 /* CGRect+ASConvenience.m in Sources */,
 				058D0A21195D050800B7D73C /* NSMutableAttributedString+TextKitAdditions.m in Sources */,
 				205F0E101B371875007741D0 /* UICollectionViewLayout+ASConvenience.m in Sources */,
