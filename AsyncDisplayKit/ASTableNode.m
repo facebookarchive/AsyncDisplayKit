@@ -10,10 +10,10 @@
 
 @implementation ASTableNode
 
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
+- (instancetype)initWithStyle:(UITableViewStyle)style
 {
   if (self = [super initWithViewBlock:^UIView *{
-    return [[ASTableView alloc] initWithFrame:frame style:style asyncDataFetching:asyncDataFetchingEnabled];
+    return [[ASTableView alloc] initWithFrame:CGRectZero style:style];
   }]) {
     return self;
   }
