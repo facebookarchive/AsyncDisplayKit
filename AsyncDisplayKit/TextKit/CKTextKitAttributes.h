@@ -61,6 +61,10 @@ struct CKTextKitAttributes {
    */
   NSUInteger maximumNumberOfLines;
   /**
+   An array of UIBezierPath objects representing the exclusion paths inside the receiver's bounding rectangle. Default value: nil.
+   */
+  NSArray *exclusionPaths;
+  /**
    The shadow offset for any shadows applied to the text.  The coordinate space for this is the same as UIKit, so a
    positive width means towards the right, and a positive height means towards the bottom.
    */
@@ -94,6 +98,7 @@ struct CKTextKitAttributes {
       [avoidTailTruncationSet copy],
       lineBreakMode,
       maximumNumberOfLines,
+      [exclusionPaths copy],
       shadowOffset,
       [shadowColor copy],
       shadowOpacity,
@@ -111,6 +116,7 @@ struct CKTextKitAttributes {
     && shadowRadius == other.shadowRadius
     && layoutManagerFactory == other.layoutManagerFactory
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)
+    && _objectsEqual(exclusionPaths, other.exclusionPaths)
     && _objectsEqual(avoidTailTruncationSet, other.avoidTailTruncationSet)
     && _objectsEqual(shadowColor, other.shadowColor)
     && _objectsEqual(attributedString, other.attributedString)

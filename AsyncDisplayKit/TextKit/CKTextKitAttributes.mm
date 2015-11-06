@@ -26,6 +26,7 @@ size_t CKTextKitAttributes::hash() const
     std::hash<NSUInteger>()((NSUInteger) layoutManagerFactory),
     std::hash<NSInteger>()(lineBreakMode),
     std::hash<NSInteger>()(maximumNumberOfLines),
+    [exclusionPaths hash],
     std::hash<CGFloat>()(shadowOffset.width),
     std::hash<CGFloat>()(shadowOffset.height),
     [shadowColor hash],

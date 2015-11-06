@@ -54,6 +54,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     _context = [[CKTextKitContext alloc] initWithAttributedString:attributes.attributedString
                                                     lineBreakMode:attributes.lineBreakMode
                                              maximumNumberOfLines:attributes.maximumNumberOfLines
+                                                   exclusionPaths:attributes.exclusionPaths
                                                   constrainedSize:shadowConstrainedSize
                                              layoutManagerFactory:attributes.layoutManagerFactory];
 

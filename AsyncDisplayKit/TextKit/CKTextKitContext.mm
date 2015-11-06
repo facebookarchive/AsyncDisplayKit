@@ -25,6 +25,7 @@
 - (instancetype)initWithAttributedString:(NSAttributedString *)attributedString
                            lineBreakMode:(NSLineBreakMode)lineBreakMode
                     maximumNumberOfLines:(NSUInteger)maximumNumberOfLines
+                          exclusionPaths:(NSArray *)exclusionPaths
                          constrainedSize:(CGSize)constrainedSize
                     layoutManagerFactory:(NSLayoutManager*(*)(void))layoutManagerFactory
 {
@@ -42,6 +43,7 @@
     _textContainer.lineFragmentPadding = 0;
     _textContainer.lineBreakMode = lineBreakMode;
     _textContainer.maximumNumberOfLines = maximumNumberOfLines;
+    _textContainer.exclusionPaths = exclusionPaths;
     [_layoutManager addTextContainer:_textContainer];
   }
   return self;

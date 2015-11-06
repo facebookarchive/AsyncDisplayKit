@@ -26,6 +26,7 @@
 - (instancetype)initWithAttributedString:(NSAttributedString *)attributedString
                            lineBreakMode:(NSLineBreakMode)lineBreakMode
                     maximumNumberOfLines:(NSUInteger)maximumNumberOfLines
+                          exclusionPaths:(NSArray *)exclusionPaths
                          constrainedSize:(CGSize)constrainedSize
                     layoutManagerFactory:(NSLayoutManager*(*)(void))layoutManagerFactory;
 
