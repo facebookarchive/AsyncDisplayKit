@@ -797,7 +797,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   BOOL linkCrossesVisibleRange = (lastCharIndex > range.location) && (lastCharIndex < NSMaxRange(range) - 1);
 
   if (inAdditionalTruncationMessage) {
-    NSRange visibleRange = self._renderer.visibleRanges[0];
+    NSRange visibleRange = [self _renderer].visibleRanges[0];
     NSRange truncationMessageRange = [self _additionalTruncationMessageRangeWithVisibleRange:visibleRange];
     [self _setHighlightRange:truncationMessageRange forAttributeName:ASTextNodeTruncationTokenAttributeName value:nil animated:YES];
   } else if (range.length && !linkCrossesVisibleRange && linkAttributeValue != nil && linkAttributeName != nil) {
@@ -978,9 +978,8 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 - (BOOL)isTruncated
 {
-  return NO;
-// TODO: Temporarily disabling this to prove implemenation and identify ranges vector behavior
-//  return [[self _renderer] truncationStringCharacterRange].location != NSNotFound;
+  NSRange visibleRange = [self _renderer].visibleRanges[0];
+  return visibleRange.length < _attributedString.length;
 }
 
 - (void)setMaximumNumberOfLines:(NSUInteger)maximumNumberOfLines
