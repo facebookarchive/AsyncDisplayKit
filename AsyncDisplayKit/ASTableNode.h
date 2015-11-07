@@ -14,7 +14,7 @@
  */
 @interface ASTableNode : ASDisplayNode
 
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithStyle:(UITableViewStyle)style NS_DESIGNATED_INITIALIZER;
 
 @property (nonatomic, readonly) ASTableView *view;
 
