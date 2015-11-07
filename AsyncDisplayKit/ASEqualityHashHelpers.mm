@@ -8,7 +8,7 @@
  *
  */
 
-#import "CKEqualityHashHelpers.h"
+#import "ASEqualityHashHelpers.h"
 
 #import <functional>
 #import <objc/runtime.h>

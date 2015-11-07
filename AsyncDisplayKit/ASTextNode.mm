@@ -17,9 +17,9 @@
 #import <AsyncDisplayKit/ASTextNodeTextKitHelpers.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
-#import "CKTextKitRenderer.h"
-#import "CKTextKitRenderer+Positioning.h"
-#import "CKTextKitShadower.h"
+#import "ASTextKitRenderer.h"
+#import "ASTextKitRenderer+Positioning.h"
+#import "ASTextKitShadower.h"
 
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
@@ -32,11 +32,11 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 @interface ASTextNodeDrawParameters : NSObject
 
-- (instancetype)initWithRenderer:(CKTextKitRenderer *)renderer
+- (instancetype)initWithRenderer:(ASTextKitRenderer *)renderer
                       textOrigin:(CGPoint)textOrigin
                  backgroundColor:(CGColorRef)backgroundColor;
 
-@property (nonatomic, strong, readonly) CKTextKitRenderer *renderer;
+@property (nonatomic, strong, readonly) ASTextKitRenderer *renderer;
 
 @property (nonatomic, assign, readonly) CGPoint textOrigin;
 
@@ -46,7 +46,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 @implementation ASTextNodeDrawParameters
 
-- (instancetype)initWithRenderer:(CKTextKitRenderer *)renderer
+- (instancetype)initWithRenderer:(ASTextKitRenderer *)renderer
                       textOrigin:(CGPoint)textOrigin
                  backgroundColor:(CGColorRef)backgroundColor
 {
@@ -88,7 +88,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   CGSize _constrainedSize;
 
-  CKTextKitRenderer *_renderer;
+  ASTextKitRenderer *_renderer;
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
 }
@@ -246,18 +246,18 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 #pragma mark - Renderer Management
 
-- (CKTextKitRenderer *)_renderer
+- (ASTextKitRenderer *)_renderer
 {
   ASDN::MutexLocker l(_rendererLock);
   if (_renderer == nil) {
     CGSize constrainedSize = _constrainedSize.width != -INFINITY ? _constrainedSize : self.bounds.size;
-    _renderer = [[CKTextKitRenderer alloc] initWithTextKitAttributes:[self _rendererAttributes]
+    _renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:[self _rendererAttributes]
                                                      constrainedSize:constrainedSize];
   }
   return _renderer;
 }
 
-- (CKTextKitAttributes)_rendererAttributes
+- (ASTextKitAttributes)_rendererAttributes
 {
   return {
     .attributedString = _attributedString,
@@ -275,7 +275,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
     // Destruction of the layout managers/containers/text storage is quite
     // expensive, and can take some time, so we dispatch onto a bg queue to
     // actually dealloc.
-    __block CKTextKitRenderer *renderer = _renderer;
+    __block ASTextKitRenderer *renderer = _renderer;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       renderer = nil;
     });
@@ -402,7 +402,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
                            range:(out NSRange *)rangeOut
    inAdditionalTruncationMessage:(out BOOL *)inAdditionalTruncationMessageOut
 {
-  CKTextKitRenderer *renderer = [self _renderer];
+  ASTextKitRenderer *renderer = [self _renderer];
   NSRange visibleRange = renderer.visibleRanges[0];
   NSAttributedString *attributedString = _attributedString;
 
@@ -601,7 +601,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
       }
 
       if (highlightTargetLayer != nil) {
-        NSArray *highlightRects = [[self _renderer] rectsForTextRange:highlightRange measureOption:CKTextKitRendererMeasureOptionBlock];
+        NSArray *highlightRects = [[self _renderer] rectsForTextRange:highlightRange measureOption:ASTextKitRendererMeasureOptionBlock];
         NSMutableArray *converted = [NSMutableArray arrayWithCapacity:highlightRects.count];
         for (NSValue *rectValue in highlightRects) {
           UIEdgeInsets shadowPadding = _renderer.shadower.shadowPadding;
@@ -666,7 +666,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   return rendererRect;
 }
 
-- (NSArray *)_rectsForTextRange:(NSRange)textRange measureOption:(CKTextKitRendererMeasureOption)measureOption
+- (NSArray *)_rectsForTextRange:(NSRange)textRange measureOption:(ASTextKitRendererMeasureOption)measureOption
 {
   NSArray *rects = [[self _renderer] rectsForTextRange:textRange measureOption:measureOption];
   NSMutableArray *adjustedRects = [NSMutableArray array];
@@ -684,12 +684,12 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (NSArray *)rectsForTextRange:(NSRange)textRange
 {
-  return [self _rectsForTextRange:textRange measureOption:CKTextKitRendererMeasureOptionCapHeight];
+  return [self _rectsForTextRange:textRange measureOption:ASTextKitRendererMeasureOptionCapHeight];
 }
 
 - (NSArray *)highlightRectsForTextRange:(NSRange)textRange
 {
-  return [self _rectsForTextRange:textRange measureOption:CKTextKitRendererMeasureOptionBlock];
+  return [self _rectsForTextRange:textRange measureOption:ASTextKitRendererMeasureOptionBlock];
 }
 
 - (CGRect)trailingRect
@@ -722,11 +722,11 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   UIGraphicsBeginImageContext(size);
   [self.placeholderColor setFill];
 
-  CKTextKitRenderer *renderer = [self _renderer];
+  ASTextKitRenderer *renderer = [self _renderer];
   NSRange textRange = renderer.visibleRanges[0];
 
   // cap height is both faster and creates less subpixel blending
-  NSArray *lineRects = [self _rectsForTextRange:textRange measureOption:CKTextKitRendererMeasureOptionLineHeight];
+  NSArray *lineRects = [self _rectsForTextRange:textRange measureOption:ASTextKitRendererMeasureOptionLineHeight];
 
   // fill each line with the placeholder color
   for (NSValue *rectValue in lineRects) {

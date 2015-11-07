@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASTextNodeTextKitHelpers.h"
+#import "ASTextKitHelpers.h"
 
 @interface ASTextKitComponents ()
 

@@ -8,14 +8,14 @@
  *
  */
 
-#import "CKTextKitRenderer+TextChecking.h"
+#import "ASTextKitRenderer+TextChecking.h"
 
-#import "CKTextKitAttributes.h"
-#import "CKTextKitEntityAttribute.h"
-#import "CKTextKitRenderer+Positioning.h"
-#import "CKTextKitTailTruncater.h"
+#import "ASTextKitAttributes.h"
+#import "ASTextKitEntityAttribute.h"
+#import "ASTextKitRenderer+Positioning.h"
+#import "ASTextKitTailTruncater.h"
 
-@implementation CKTextKitTextCheckingResult
+@implementation ASTextKitTextCheckingResult
 
 {
   // Be explicit about the fact that we are overriding the super class' implementation of -range and -resultType
@@ -27,7 +27,7 @@
 }
 
 - (instancetype)initWithType:(NSTextCheckingType)type
-             entityAttribute:(CKTextKitEntityAttribute *)entityAttribute
+             entityAttribute:(ASTextKitEntityAttribute *)entityAttribute
                        range:(NSRange)range
 {
   if ((self = [super init])) {
@@ -50,7 +50,7 @@
 
 @end
 
-@implementation CKTextKitRenderer (TextChecking)
+@implementation ASTextKitRenderer (TextChecking)
 
 - (NSTextCheckingResult *)textCheckingResultAtPoint:(CGPoint)point
 {
@@ -62,7 +62,7 @@
   NSRange visibleRange = self.truncater.visibleRanges[0];
   __block NSRange truncationTokenRange = { NSNotFound, 0 };
 
-  [truncationAttributedString enumerateAttribute:CKTextKitTruncationAttributeName inRange:NSMakeRange(0, truncationAttributedString.length)
+  [truncationAttributedString enumerateAttribute:ASTextKitTruncationAttributeName inRange:NSMakeRange(0, truncationAttributedString.length)
                                          options:0
                                       usingBlock:^(id value, NSRange range, BOOL *stop) {
     if (value != nil && range.length > 0) {
@@ -79,15 +79,15 @@
 
   [self enumerateTextIndexesAtPosition:point usingBlock:^(NSUInteger index, CGRect glyphBoundingRect, BOOL *stop){
     if (index >= truncationTokenRange.location) {
-      result = [[CKTextKitTextCheckingResult alloc] initWithType:CKTextKitTextCheckingTypeTruncation
+      result = [[ASTextKitTextCheckingResult alloc] initWithType:ASTextKitTextCheckingTypeTruncation
                                                  entityAttribute:nil
                                                            range:truncationTokenRange];
     } else {
       NSRange range;
       NSDictionary *attributes = [attributedString attributesAtIndex:index effectiveRange:&range];
-      CKTextKitEntityAttribute *entityAttribute = attributes[CKTextKitEntityAttributeName];
+      ASTextKitEntityAttribute *entityAttribute = attributes[ASTextKitEntityAttributeName];
       if (entityAttribute) {
-        result = [[CKTextKitTextCheckingResult alloc] initWithType:CKTextKitTextCheckingTypeEntity
+        result = [[ASTextKitTextCheckingResult alloc] initWithType:ASTextKitTextCheckingTypeEntity
                                                    entityAttribute:entityAttribute
                                                              range:range];
       }

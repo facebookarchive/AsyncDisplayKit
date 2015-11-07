@@ -10,8 +10,8 @@
 
 #import <UIKit/UIKit.h>
 
-#import "CKTextKitTruncating.h"
+#import "ASTextKitTruncating.h"
 
-@interface CKTextKitTailTruncater : NSObject <CKTextKitTruncating>
+@interface ASTextKitTailTruncater : NSObject <ASTextKitTruncating>
 
 @end

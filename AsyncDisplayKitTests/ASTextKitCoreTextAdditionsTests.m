@@ -10,13 +10,13 @@
 
 #import <XCTest/XCTest.h>
 
-#import "ASTextNodeCoreTextAdditions.h"
+#import "ASTextKitCoreTextAdditions.h"
 
-@interface ASTextNodeCoreTextAdditionsTests : XCTestCase
+@interface ASTextKitCoreTextAdditionsTests : XCTestCase
 
 @end
 
-@implementation ASTextNodeCoreTextAdditionsTests
+@implementation ASTextKitCoreTextAdditionsTests
 
 - (void)testAttributeCleansing
 {

@@ -12,14 +12,14 @@
 
 #import <UIKit/UIKit.h>
 
-#import "CKTextKitAttributes.h"
+#import "ASTextKitAttributes.h"
 
-@class CKTextKitContext;
-@class CKTextKitShadower;
-@protocol CKTextKitTruncating;
+@class ASTextKitContext;
+@class ASTextKitShadower;
+@protocol ASTextKitTruncating;
 
 /**
- CKTextKitRenderer is a modular object that is responsible for laying out and drawing text.
+ ASTextKitRenderer is a modular object that is responsible for laying out and drawing text.
 
  A renderer will hold onto the TextKit layouts for the given attributes after initialization.  This may constitute a
  large amount of memory for large enough applications, so care must be taken when keeping many of these around in-memory
@@ -33,23 +33,23 @@
  coordinate space.  Padding will be added for you in order to ensure clipping does not occur, and additional information
  on this transform is available via the shadower should you need it.
  */
-@interface CKTextKitRenderer : NSObject
+@interface ASTextKitRenderer : NSObject
 
 /**
  Designated Initializer
 dvlkferufedgjnhjjfhldjedlunvtdtv
  @discussion Sizing will occur as a result of initialization, so be careful when/where you use this.
  */
-- (instancetype)initWithTextKitAttributes:(const CKTextKitAttributes &)textComponentAttributes
+- (instancetype)initWithTextKitAttributes:(const ASTextKitAttributes &)textComponentAttributes
                           constrainedSize:(const CGSize)constrainedSize;
 
-@property (nonatomic, strong, readonly) CKTextKitContext *context;
+@property (nonatomic, strong, readonly) ASTextKitContext *context;
 
-@property (nonatomic, strong, readonly) id<CKTextKitTruncating> truncater;
+@property (nonatomic, strong, readonly) id<ASTextKitTruncating> truncater;
 
-@property (nonatomic, strong, readonly) CKTextKitShadower *shadower;
+@property (nonatomic, strong, readonly) ASTextKitShadower *shadower;
 
-@property (nonatomic, assign, readonly) CKTextKitAttributes attributes;
+@property (nonatomic, assign, readonly) ASTextKitAttributes attributes;
 
 @property (nonatomic, assign, readonly) CGSize constrainedSize;
 

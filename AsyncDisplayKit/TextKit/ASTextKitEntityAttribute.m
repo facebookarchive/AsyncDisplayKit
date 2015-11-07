@@ -8,9 +8,9 @@
  *
  */
 
-#import "CKTextKitEntityAttribute.h"
+#import "ASTextKitEntityAttribute.h"
 
-@implementation CKTextKitEntityAttribute
+@implementation ASTextKitEntityAttribute
 
 - (instancetype)initWithEntity:(id<NSObject>)entity
 {
@@ -33,7 +33,7 @@
   if (![object isKindOfClass:[self class]]) {
     return NO;
   }
-  CKTextKitEntityAttribute *other = (CKTextKitEntityAttribute *)object;
+  ASTextKitEntityAttribute *other = (ASTextKitEntityAttribute *)object;
   return _entity == other.entity || [_entity isEqual:other.entity];
 }
 

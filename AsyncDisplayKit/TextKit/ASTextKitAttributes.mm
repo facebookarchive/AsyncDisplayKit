@@ -8,16 +8,16 @@
  *
  */
 
-#import "CKTextKitAttributes.h"
+#import "ASTextKitAttributes.h"
 
-#import "CKEqualityHashHelpers.h"
+#import "ASEqualityHashHelpers.h"
 
 #include <functional>
 
-NSString *const CKTextKitTruncationAttributeName = @"ck_truncation";
-NSString *const CKTextKitEntityAttributeName = @"ck_entity";
+NSString *const ASTextKitTruncationAttributeName = @"ck_truncation";
+NSString *const ASTextKitEntityAttributeName = @"ck_entity";
 
-size_t CKTextKitAttributes::hash() const
+size_t ASTextKitAttributes::hash() const
 {
   NSUInteger subhashes[] = {
     [attributedString hash],

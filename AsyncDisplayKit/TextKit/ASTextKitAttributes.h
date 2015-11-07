@@ -10,17 +10,17 @@
 
 #import <UIKit/UIKit.h>
 
-#ifndef ComponentKit_CKTextKitAttributes_h
-#define ComponentKit_CKTextKitAttributes_h
+#ifndef ComponentKit_ASTextKitAttributes_h
+#define ComponentKit_ASTextKitAttributes_h
 
-@protocol CKTextKitTruncating;
+@protocol ASTextKitTruncating;
 
-extern NSString *const CKTextKitTruncationAttributeName;
+extern NSString *const ASTextKitTruncationAttributeName;
 /**
- Use CKTextKitEntityAttribute as the value of this attribute to embed a link or other interactable content inside the
+ Use ASTextKitEntityAttribute as the value of this attribute to embed a link or other interactable content inside the
  text.
  */
-extern NSString *const CKTextKitEntityAttributeName;
+extern NSString *const ASTextKitEntityAttributeName;
 
 static inline BOOL _objectsEqual(id<NSObject> obj1, id<NSObject> obj2)
 {
@@ -30,19 +30,19 @@ static inline BOOL _objectsEqual(id<NSObject> obj1, id<NSObject> obj2)
 /**
  All NSObject values in this struct should be copied when passed into the TextComponent.
  */
-struct CKTextKitAttributes {
+struct ASTextKitAttributes {
   /**
-   The string to be drawn.  CKTextKit will not augment this string with default colors, etc. so this must be complete.
+   The string to be drawn.  ASTextKit will not augment this string with default colors, etc. so this must be complete.
    */
   NSAttributedString *attributedString;
   /**
    The string to use as the truncation string, usually just "...".  If you have a range of text you would like to
-   restrict highlighting to (for instance if you have "... Continue Reading", use the CKTextKitTruncationAttributeName
+   restrict highlighting to (for instance if you have "... Continue Reading", use the ASTextKitTruncationAttributeName
    to mark the specific range of the string that should be highlightable.
    */
   NSAttributedString *truncationAttributedString;
   /**
-   This is the character set that CKTextKit should attempt to avoid leaving as a trailing character before your
+   This is the character set that ASTextKit should attempt to avoid leaving as a trailing character before your
    truncation token.  By default this set includes "\s\t\n\r.,!?:;" so you don't end up with ugly looking truncation
    text like "Hey, this is some fancy Truncation!\n\n...".  Instead it would be truncated as "Hey, this is some fancy
    truncation...".  This is not always possible.
@@ -90,7 +90,7 @@ struct CKTextKitAttributes {
    We provide an explicit copy function so we can use aggregate initializer syntax while providing copy semantics for
    the NSObjects inside.
    */
-  const CKTextKitAttributes copy() const
+  const ASTextKitAttributes copy() const
   {
     return {
       [attributedString copy],
@@ -107,7 +107,7 @@ struct CKTextKitAttributes {
     };
   };
 
-  bool operator==(const CKTextKitAttributes &other) const
+  bool operator==(const ASTextKitAttributes &other) const
   {
     // These comparisons are in a specific order to reduce the overall cost of this function.
     return lineBreakMode == other.lineBreakMode

@@ -12,9 +12,9 @@
 
 #import <UIKit/UIKit.h>
 
-#import "CKTextKitRenderer.h"
+#import "ASTextKitRenderer.h"
 
-@protocol CKTextKitTruncating <NSObject>
+@protocol ASTextKitTruncating <NSObject>
 
 @property (nonatomic, assign, readonly) std::vector<NSRange> visibleRanges;
 @property (nonatomic, assign, readonly) CGRect truncationStringRect;
@@ -29,7 +29,7 @@
 
  The truncater should not store a strong reference to the context to prevent retain cycles.
  */
-- (instancetype)initWithContext:(CKTextKitContext *)context
+- (instancetype)initWithContext:(ASTextKitContext *)context
      truncationAttributedString:(NSAttributedString *)truncationAttributedString
          avoidTailTruncationSet:(NSCharacterSet *)avoidTailTruncationSet
                 constrainedSize:(CGSize)constrainedSize;

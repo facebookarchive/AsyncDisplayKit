@@ -11,7 +11,7 @@
 #import <Foundation/Foundation.h>
 
 /**
- The object that should be embedded with CKTextKitEntityAttributeName.  Please note that the entity you provide MUST
+ The object that should be embedded with ASTextKitEntityAttributeName.  Please note that the entity you provide MUST
  implement a proper hash and isEqual function or your application performance will grind to a halt due to
  NSMutableAttributedString's usage of a global hash table of all attributes.  This means the entity should NOT be a
  Foundation Collection (NSArray, NSDictionary, NSSet, etc.) since their hash function is a simple count of the values
@@ -19,7 +19,7 @@
 
  rdar://19352367
  */
-@interface CKTextKitEntityAttribute : NSObject
+@interface ASTextKitEntityAttribute : NSObject
 
 @property (nonatomic, strong, readonly) id<NSObject> entity;
 

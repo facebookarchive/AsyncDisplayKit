@@ -8,7 +8,7 @@
  *
  */
 
-#import "CKTextKitRenderer.h"
+#import "ASTextKitRenderer.h"
 
 typedef void (^ck_text_component_index_block_t)(NSUInteger characterIndex,
                                                 CGRect glyphBoundingRect,
@@ -25,13 +25,13 @@ typedef void (^ck_text_component_index_block_t)(NSUInteger characterIndex,
  ASTextNodeRendererMeasureOptionBlock uses the cap height option to generate each glyph index, but combines all but the
  first and last line rect into a single block.  Looks nice for multiline selection.
  */
-typedef NS_ENUM(NSUInteger, CKTextKitRendererMeasureOption) {
-  CKTextKitRendererMeasureOptionLineHeight,
-  CKTextKitRendererMeasureOptionCapHeight,
-  CKTextKitRendererMeasureOptionBlock
+typedef NS_ENUM(NSUInteger, ASTextKitRendererMeasureOption) {
+  ASTextKitRendererMeasureOptionLineHeight,
+  ASTextKitRendererMeasureOptionCapHeight,
+  ASTextKitRendererMeasureOptionBlock
 };
 
-@interface CKTextKitRenderer (Positioning)
+@interface ASTextKitRenderer (Positioning)
 
 /**
  Returns the bounding rect for the given character range.
@@ -48,7 +48,7 @@ typedef NS_ENUM(NSUInteger, CKTextKitRendererMeasureOption) {
 
  @param textRange The character range for which the rects will be computed. Should be within the range of the
  attributedString of this renderer.
- @param measureOption The measure option to use for construction of the rects. See CKTextKitRendererMeasureOption
+ @param measureOption The measure option to use for construction of the rects. See ASTextKitRendererMeasureOption
  docs for usage.
 
  @discussion This method is useful for providing highlighting text.  Returned rects are in the coordinate space of the
@@ -57,7 +57,7 @@ typedef NS_ENUM(NSUInteger, CKTextKitRendererMeasureOption) {
  Triggers initialization of textkit components, truncation, and sizing.
  */
 - (NSArray *)rectsForTextRange:(NSRange)textRange
-                 measureOption:(CKTextKitRendererMeasureOption)measureOption;
+                 measureOption:(ASTextKitRendererMeasureOption)measureOption;
 
 /**
  Enumerate the text character indexes at a position within the coordinate space of the renderer.

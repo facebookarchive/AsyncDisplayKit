@@ -8,7 +8,7 @@
  *
  */
 
-#import "CKTextKitShadower.h"
+#import "ASTextKitShadower.h"
 
 static inline CGSize _insetSize(CGSize size, UIEdgeInsets insets)
 {
@@ -25,7 +25,7 @@ static inline UIEdgeInsets _invertInsets(UIEdgeInsets insets)
   };
 }
 
-@implementation CKTextKitShadower {
+@implementation ASTextKitShadower {
   UIEdgeInsets _calculatedShadowPadding;
 }
 

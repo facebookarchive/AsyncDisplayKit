@@ -8,14 +8,14 @@
  *
  */
 
-#import "CKTextKitRenderer.h"
+#import "ASTextKitRenderer.h"
 
 #import "ASAssert.h"
 
-#import "CKTextKitContext.h"
-#import "CKTextKitShadower.h"
-#import "CKTextKitTailTruncater.h"
-#import "CKTextKitTruncating.h"
+#import "ASTextKitContext.h"
+#import "ASTextKitShadower.h"
+#import "ASTextKitTailTruncater.h"
+#import "ASTextKitTruncating.h"
 
 static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
@@ -30,20 +30,20 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   return truncationCharacterSet;
 }
 
-@implementation CKTextKitRenderer {
+@implementation ASTextKitRenderer {
   CGSize _calculatedSize;
 }
 
 #pragma mark - Initialization
 
-- (instancetype)initWithTextKitAttributes:(const CKTextKitAttributes &)attributes
+- (instancetype)initWithTextKitAttributes:(const ASTextKitAttributes &)attributes
                           constrainedSize:(const CGSize)constrainedSize
 {
   if (self = [super init]) {
     _constrainedSize = constrainedSize;
     _attributes = attributes;
 
-    _shadower = [[CKTextKitShadower alloc] initWithShadowOffset:attributes.shadowOffset
+    _shadower = [[ASTextKitShadower alloc] initWithShadowOffset:attributes.shadowOffset
                                                     shadowColor:attributes.shadowColor
                                                   shadowOpacity:attributes.shadowOpacity
                                                    shadowRadius:attributes.shadowRadius];
@@ -51,14 +51,14 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     // We must inset the constrained size by the size of the shadower.
     CGSize shadowConstrainedSize = [_shadower insetSizeWithConstrainedSize:_constrainedSize];
 
-    _context = [[CKTextKitContext alloc] initWithAttributedString:attributes.attributedString
+    _context = [[ASTextKitContext alloc] initWithAttributedString:attributes.attributedString
                                                     lineBreakMode:attributes.lineBreakMode
                                              maximumNumberOfLines:attributes.maximumNumberOfLines
                                                    exclusionPaths:attributes.exclusionPaths
                                                   constrainedSize:shadowConstrainedSize
                                              layoutManagerFactory:attributes.layoutManagerFactory];
 
-    _truncater = [[CKTextKitTailTruncater alloc] initWithContext:_context
+    _truncater = [[ASTextKitTailTruncater alloc] initWithContext:_context
                                       truncationAttributedString:attributes.truncationAttributedString
                                           avoidTailTruncationSet:attributes.avoidTailTruncationSet ?: _defaultAvoidTruncationCharacterSet()
                                                  constrainedSize:shadowConstrainedSize];

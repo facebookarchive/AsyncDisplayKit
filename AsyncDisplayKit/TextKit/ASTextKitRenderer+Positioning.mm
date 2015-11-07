@@ -8,22 +8,22 @@
  *
  */
 
-#import "CKTextKitRenderer+Positioning.h"
+#import "ASTextKitRenderer+Positioning.h"
 
 #import <CoreText/CoreText.h>
 
 #import "ASAssert.h"
 
-#import "CKTextKitContext.h"
-#import "CKTextKitShadower.h"
+#import "ASTextKitContext.h"
+#import "ASTextKitShadower.h"
 
-static const CGFloat CKTextKitRendererGlyphTouchHitSlop = 5.0;
-static const CGFloat CKTextKitRendererTextCapHeightPadding = 1.3;
+static const CGFloat ASTextKitRendererGlyphTouchHitSlop = 5.0;
+static const CGFloat ASTextKitRendererTextCapHeightPadding = 1.3;
 
-@implementation CKTextKitRenderer (Tracking)
+@implementation ASTextKitRenderer (Tracking)
 
 - (NSArray *)rectsForTextRange:(NSRange)textRange
-                 measureOption:(CKTextKitRendererMeasureOption)measureOption
+                 measureOption:(ASTextKitRendererMeasureOption)measureOption
 {
   __block NSArray *textRects = @[];
   [self.context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
@@ -75,7 +75,7 @@ static const CGFloat CKTextKitRendererTextCapHeightPadding = 1.3;
       }
 
       if (!CGRectIsNull(lineRect)) {
-        if (measureOption == CKTextKitRendererMeasureOptionBlock) {
+        if (measureOption == ASTextKitRendererMeasureOptionBlock) {
           // For the block measurement option we store the first & last rect as
           // special cases, then merge everything else into a single block rect
           if (CGRectIsNull(firstRect)) {
@@ -105,7 +105,7 @@ static const CGFloat CKTextKitRendererTextCapHeightPadding = 1.3;
       }
     }];
 
-    if (measureOption == CKTextKitRendererMeasureOptionBlock) {
+    if (measureOption == ASTextKitRendererMeasureOptionBlock) {
       // Block measure option is handled differently with just 3 vars for the entire range.
       if (!CGRectIsNull(firstRect)) {
         if (!CGRectIsNull(blockRect)) {
@@ -170,7 +170,7 @@ static const CGFloat CKTextKitRendererTextCapHeightPadding = 1.3;
  as an approximation to work around problems in TextKit's glyph sizing.
  */
 - (CGRect)_internalRectForGlyphAtIndex:(NSUInteger)glyphIndex
-                         measureOption:(CKTextKitRendererMeasureOption)measureOption
+                         measureOption:(ASTextKitRendererMeasureOption)measureOption
                          layoutManager:(NSLayoutManager *)layoutManager
                          textContainer:(NSTextContainer *)textContainer
                            textStorage:(NSTextStorage *)textStorage
@@ -226,8 +226,8 @@ static const CGFloat CKTextKitRendererTextCapHeightPadding = 1.3;
   CGPoint glyphCenter = CGPointMake(CGRectGetMidX(glyphRect), CGRectGetMidY(glyphRect));
 
   CGRect properGlyphRect;
-  if (measureOption == CKTextKitRendererMeasureOptionCapHeight
-      || measureOption == CKTextKitRendererMeasureOptionBlock) {
+  if (measureOption == ASTextKitRendererMeasureOptionCapHeight
+      || measureOption == ASTextKitRendererMeasureOptionBlock) {
     CGFloat ascent = CTFontGetAscent(font);
     CGFloat descent = CTFontGetDescent(font);
     CGFloat capHeight = CTFontGetCapHeight(font);
@@ -237,7 +237,7 @@ static const CGFloat CKTextKitRendererTextCapHeightPadding = 1.3;
     // For visual balance, we add the cap height padding above the cap, and
     // below the baseline, we scale by the descent so it grows with the size of
     // the text.
-    CGFloat topPadding = CKTextKitRendererTextCapHeightPadding * descent;
+    CGFloat topPadding = ASTextKitRendererTextCapHeightPadding * descent;
     CGFloat bottomPadding = topPadding;
 
     properGlyphRect = CGRectMake(glyphCenter.x - advance * 0.5,
@@ -263,7 +263,7 @@ static const CGFloat CKTextKitRendererTextCapHeightPadding = 1.3;
   // This method is a little complex because it has to call out to client code from inside an enumeration that needs
   // to achieve a lock on the textkit components.  It cannot call out to client code from within that lock so we just
   // perform the textkit-locked ops inside the locked context.
-  CKTextKitContext *lockingContext = self.context;
+  ASTextKitContext *lockingContext = self.context;
   CGPoint internalPosition = [self.shadower offsetPointWithExternalPoint:externalPosition];
   __block BOOL invalidPosition = NO;
   [lockingContext performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
@@ -314,7 +314,7 @@ static const CGFloat CKTextKitRendererTextCapHeightPadding = 1.3;
         characterIndex = [layoutManager characterIndexForGlyphAtIndex:glyphIndex];
 
         glyphRect = [self _internalRectForGlyphAtIndex:glyphIndex
-                                         measureOption:CKTextKitRendererMeasureOptionLineHeight
+                                         measureOption:ASTextKitRendererMeasureOptionLineHeight
                                          layoutManager:layoutManager
                                          textContainer:textContainer
                                            textStorage:textStorage];
@@ -322,7 +322,7 @@ static const CGFloat CKTextKitRendererTextCapHeightPadding = 1.3;
 
       // Sometimes TextKit plays jokes on us and returns glyphs that really aren't close to the point in question.
       // Silly TextKit...
-      if (!isValidGlyph || !CGRectContainsPoint(CGRectInset(glyphRect, -CKTextKitRendererGlyphTouchHitSlop, -CKTextKitRendererGlyphTouchHitSlop), currentPoint)) {
+      if (!isValidGlyph || !CGRectContainsPoint(CGRectInset(glyphRect, -ASTextKitRendererGlyphTouchHitSlop, -ASTextKitRendererGlyphTouchHitSlop), currentPoint)) {
         continue;
       }
 
@@ -343,7 +343,7 @@ static const CGFloat CKTextKitRendererTextCapHeightPadding = 1.3;
     }
 
     // Take everything after our final character as trailing space.
-    NSArray *finalRects = [self rectsForTextRange:NSMakeRange([textStorage length] - 1, 1) measureOption:CKTextKitRendererMeasureOptionLineHeight];
+    NSArray *finalRects = [self rectsForTextRange:NSMakeRange([textStorage length] - 1, 1) measureOption:ASTextKitRendererMeasureOptionLineHeight];
     CGRect finalGlyphRect = [[finalRects lastObject] CGRectValue];
     CGPoint origin = CGPointMake(CGRectGetMaxX(finalGlyphRect), CGRectGetMinY(finalGlyphRect));
     CGSize size = CGSizeMake(calculatedSize.width - origin.x, calculatedSize.height - origin.y);

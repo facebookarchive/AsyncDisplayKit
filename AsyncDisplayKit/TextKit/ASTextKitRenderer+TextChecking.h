@@ -8,21 +8,21 @@
  *
  */
 
-#import "CKTextKitRenderer.h"
+#import "ASTextKitRenderer.h"
 
 /**
  Application extensions to NSTextCheckingType. We're allowed to do this (see NSTextCheckingAllCustomTypes).
  */
-static uint64_t const CKTextKitTextCheckingTypeEntity =               1ULL << 33;
-static uint64_t const CKTextKitTextCheckingTypeTruncation =           1ULL << 34;
+static uint64_t const ASTextKitTextCheckingTypeEntity =               1ULL << 33;
+static uint64_t const ASTextKitTextCheckingTypeTruncation =           1ULL << 34;
 
-@class CKTextKitEntityAttribute;
+@class ASTextKitEntityAttribute;
 
-@interface CKTextKitTextCheckingResult : NSTextCheckingResult
-@property (nonatomic, strong, readonly) CKTextKitEntityAttribute *entityAttribute;
+@interface ASTextKitTextCheckingResult : NSTextCheckingResult
+@property (nonatomic, strong, readonly) ASTextKitEntityAttribute *entityAttribute;
 @end
 
-@interface CKTextKitRenderer (TextChecking)
+@interface ASTextKitRenderer (TextChecking)
 
 - (NSTextCheckingResult *)textCheckingResultAtPoint:(CGPoint)point;
 

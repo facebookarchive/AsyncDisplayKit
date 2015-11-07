@@ -11,12 +11,12 @@
 #import <UIKit/UIKit.h>
 
 /**
- A threadsafe container for the TextKit components that CKTextKit uses to lay out and truncate its text.
+ A threadsafe container for the TextKit components that ASTextKit uses to lay out and truncate its text.
 
  This container is the sole owner and manager of the TextKit classes.  This is an important model because of major
  thread safety issues inside vanilla TextKit.  It provides a central locking location for accessing TextKit methods.
  */
-@interface CKTextKitContext : NSObject
+@interface ASTextKitContext : NSObject
 
 /**
  Initializes a context and its associated TextKit components.

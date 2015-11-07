@@ -10,12 +10,12 @@
 
 #import "ASAssert.h"
 
-#import "CKTextKitContext.h"
-#import "CKTextKitTailTruncater.h"
+#import "ASTextKitContext.h"
+#import "ASTextKitTailTruncater.h"
 
-@implementation CKTextKitTailTruncater
+@implementation ASTextKitTailTruncater
 {
-  __weak CKTextKitContext *_context;
+  __weak ASTextKitContext *_context;
   NSAttributedString *_truncationAttributedString;
   NSCharacterSet *_avoidTailTruncationSet;
   CGSize _constrainedSize;
@@ -23,7 +23,7 @@
 @synthesize visibleRanges = _visibleRanges;
 @synthesize truncationStringRect = _truncationStringRect;
 
-- (instancetype)initWithContext:(CKTextKitContext *)context
+- (instancetype)initWithContext:(ASTextKitContext *)context
      truncationAttributedString:(NSAttributedString *)truncationAttributedString
          avoidTailTruncationSet:(NSCharacterSet *)avoidTailTruncationSet
                 constrainedSize:(CGSize)constrainedSize
@@ -69,7 +69,7 @@
   BOOL leftAligned = CGRectGetMinX(lastLineRect) == CGRectGetMinX(lastLineUsedRect) || !rtlWritingDirection;
 
   // Calculate the bounding rectangle for the truncation message
-  CKTextKitContext *truncationContext = [[CKTextKitContext alloc] initWithAttributedString:_truncationAttributedString
+  ASTextKitContext *truncationContext = [[ASTextKitContext alloc] initWithAttributedString:_truncationAttributedString
                                                                              lineBreakMode:NSLineBreakByWordWrapping
                                                                       maximumNumberOfLines:1
                                                                             exclusionPaths:nil

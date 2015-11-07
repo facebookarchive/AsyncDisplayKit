@@ -13,7 +13,7 @@
 /**
  * @abstract an immutable class for calculating shadow padding drawing a shadowed background for text
  */
-@interface CKTextKitShadower : NSObject
+@interface ASTextKitShadower : NSObject
 
 - (instancetype)initWithShadowOffset:(CGSize)shadowOffset
                          shadowColor:(UIColor *)shadowColor

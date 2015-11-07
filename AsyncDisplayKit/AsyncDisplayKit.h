@@ -65,10 +65,11 @@
 #import <AsyncDisplayKit/ASRangeHandler.h>
 #import <AsyncDisplayKit/ASRangeHandlerPreload.h>
 #import <AsyncDisplayKit/ASRangeHandlerRender.h>
-#import <AsyncDisplayKit/ASTextNodeCoreTextAdditions.h>
-#import <AsyncDisplayKit/ASTextNodeRenderer.h>
-#import <AsyncDisplayKit/ASTextNodeShadower.h>
-#import <AsyncDisplayKit/ASTextNodeTextKitHelpers.h>
+#import <AsyncDisplayKit/ASTextKitCoreTextAdditions.h>
+// FIXME: Including this forces the renderer to be compiled as a C header, failing to find c++ std lib.
+//#import <AsyncDisplayKit/ASTextKitRenderer.h>
+#import <AsyncDisplayKit/ASTextKitShadower.h>
+#import <AsyncDisplayKit/ASTextKitHelpers.h>
 #import <AsyncDisplayKit/ASTextNodeTypes.h>
 #import <AsyncDisplayKit/ASTextNodeWordKerner.h>
 #import <AsyncDisplayKit/ASThread.h>
