@@ -670,7 +670,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       [self _addSubnodeViewsAndLayers];
     }
     
-    [self recursivelyDisplayImmediately];
+    [self recursivelyEnsureDisplay];
   }
 }
 
@@ -2043,35 +2043,6 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 
 }
 
-- (BOOL)canBecomeFirstResponder {
-    return NO;
-}
-
-- (BOOL)canResignFirstResponder {
-    return YES;
-}
-
-- (BOOL)isFirstResponder {
-    ASDisplayNodeAssertMainThread();
-    return _view != nil && [_view isFirstResponder];
-}
-
-// Note: this implicitly loads the view if it hasn't been loaded yet.
-- (BOOL)becomeFirstResponder {
-    ASDisplayNodeAssertMainThread();
-    return !self.layerBacked && [self canBecomeFirstResponder] && [self.view becomeFirstResponder];
-}
-
-- (BOOL)resignFirstResponder {
-    ASDisplayNodeAssertMainThread();
-    return !self.layerBacked && [self canResignFirstResponder] && [_view resignFirstResponder];
-}
-
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
-    ASDisplayNodeAssertMainThread();
-    return !self.layerBacked && [self.view canPerformAction:action withSender:sender];
-}
-
 - (id<ASLayoutable>)finalLayoutable
 {
   return self;
@@ -2081,8 +2052,6 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 
 @implementation ASDisplayNode (Debugging)
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 - (NSString *)description
 {
   if (self.name) {
@@ -2091,7 +2060,6 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
     return [super description];
   }
 }
-#pragma clang diagnostic pop
 
 - (NSString *)debugDescription
 {
@@ -2190,6 +2158,11 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   }
 }
 
+- (NSString *)name
+{
+  return self.asyncdisplaykit_node.name;
+}
+
 @end
 
 @implementation CALayer (AsyncDisplayKit)
@@ -2197,6 +2170,11 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 - (void)addSubnode:(ASDisplayNode *)node
 {
   [self addSublayer:node.layer];
+}
+
+- (NSString *)name
+{
+  return self.asyncdisplaykit_node.name;
 }
 
 @end
