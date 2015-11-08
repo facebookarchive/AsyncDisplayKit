@@ -91,7 +91,7 @@
     case _ASHierarchyChangeTypeDelete:
       return _deleteSectionChanges;
     default:
-      NSAssert(NO, @"Request for section changes with invalid type: %lu", changeType);
+      NSAssert(NO, @"Request for section changes with invalid type: %lu", (long)changeType);
   }
 }
 
@@ -106,7 +106,7 @@
     case _ASHierarchyChangeTypeDelete:
       return _deleteItemChanges;
     default:
-      NSAssert(NO, @"Request for item changes with invalid type: %lu", changeType);
+      NSAssert(NO, @"Request for item changes with invalid type: %lu", (long)changeType);
   }
 }
 
