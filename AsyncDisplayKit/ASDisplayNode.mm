@@ -670,7 +670,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       [self _addSubnodeViewsAndLayers];
     }
     
-    [self recursivelyEnsureDisplay];
+    [self recursivelyDisplayImmediately];
   }
 }
 
