@@ -188,6 +188,14 @@
     [rasterizedContainerNode setNeedsDisplay];
   } else {
     [_layer setNeedsDisplay];
+
+    if (_layer && !self.isSynchronous && self.displaysAsynchronously) {
+      // It's essenital that any layout pass that is scheduled during the current
+      // runloop has a chance to be applied / scheduled.
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [self recursivelyEnsureDisplay];
+      });
+    }
   }
 }
 

@@ -63,6 +63,29 @@
   }
 }
 
+- (void)clearFetchedData
+{
+  [super clearFetchedData];
+  NSLog(@"%p - clearFetchedData", self);
+}
+
+- (void)fetchData
+{
+  [super fetchData];
+  NSLog(@"%p - fetchData", self);
+}
+
+- (void)clearContents
+{
+  [super clearContents];
+  NSLog(@"%p - clearContents", self);
+}
+
+- (void)dealloc
+{
+  NSLog(@"%p - dealloc", self);
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
   ASDisplayNodeAssertMainThread();

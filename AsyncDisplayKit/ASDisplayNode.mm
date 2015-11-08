@@ -670,7 +670,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       [self _addSubnodeViewsAndLayers];
     }
     
-    [self recursivelyDisplayImmediately];
+    [self recursivelyEnsureDisplay];
   }
 }
 
@@ -1528,8 +1528,8 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 - (void)recursivelyEnsureDisplay
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(self.isNodeLoaded, @"Node must have layer or view loaded to use -recursivelyEnsureDisplay");
-  ASDisplayNodeAssert(self.inHierarchy && (self.isLayerBacked || self.view.window != nil), @"Node must be in a hierarchy to use -recursivelyEnsureDisplay");
+//  ASDisplayNodeAssert(self.isNodeLoaded, @"Node must have layer or view loaded to use -recursivelyEnsureDisplay");
+//  ASDisplayNodeAssert(self.inHierarchy && (self.isLayerBacked || self.view.window != nil), @"Node must be in a hierarchy to use -recursivelyEnsureDisplay");
   
   CALayer *layer = self.layer;
   // -layoutIfNeeded is recursive, and even walks up to superlayers to check if they need layout,
