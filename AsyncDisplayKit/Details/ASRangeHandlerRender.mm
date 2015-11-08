@@ -65,7 +65,6 @@
   
   // The node un-suspends display.
   [node enterInterfaceState:ASInterfaceStateDisplay];
-
   
 #if USE_WORKING_WINDOW
   // Add the node's layer to an off-screen window to trigger display and mark its contents as non-volatile.
