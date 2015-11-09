@@ -40,7 +40,7 @@
 
 - (void)dealloc
 {
-  for(CALayer *layer in self.workingWindow.layer.sublayers) {
+  for(CALayer *layer in [self.workingWindow.layer.sublayers copy]) {
     ASDisplayNode *node = layer.asyncdisplaykit_node;
     [self node:node exitedRangeOfType:ASLayoutRangeTypeRender];
   }
