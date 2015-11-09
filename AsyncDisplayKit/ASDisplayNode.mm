@@ -739,8 +739,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (rasterizedContainerNode) {
     [rasterizedContainerNode setNeedsDisplay];
   } else {
-    [_layer setNeedsDisplay];
-    
     if (_layer && !self.isSynchronous && self.displaysAsynchronously) {
       [ASDisplayNode scheduleNodeForDisplay:self];
     }
