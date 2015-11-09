@@ -381,8 +381,8 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   UIEdgeInsets shadowPadding = [self shadowPadding];
   CGPoint textOrigin = CGPointMake(self.bounds.origin.x - shadowPadding.left, self.bounds.origin.y - shadowPadding.top);
   return [[ASTextNodeDrawParameters alloc] initWithRenderer:[self _renderer]
-                                                     textOrigin:textOrigin
-                                                backgroundColor:self.backgroundColor.CGColor];
+                                                 textOrigin:textOrigin
+                                            backgroundColor:self.backgroundColor.CGColor];
 }
 
 #pragma mark - Attributes
