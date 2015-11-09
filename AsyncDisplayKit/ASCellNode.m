@@ -113,7 +113,8 @@ static const CGFloat kFontSize = 18.0f;
 {
   if (!(self = [super init]))
     return nil;
-
+  
+  _text = @"";
   _textNode = [[ASTextNode alloc] init];
   [self addSubnode:_textNode];
 
