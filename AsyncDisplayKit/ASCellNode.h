@@ -19,10 +19,8 @@ typedef NSUInteger ASCellNodeAnimation;
  * The notification is done on main thread.
  *
  * @param node A node informing the delegate about the relayout.
- *
- * @param suggestedAnimation A constant indicates how the delegate should animate. See UITableViewRowAnimation.
  */
-- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation;
+- (void)nodeDidRelayout:(ASCellNode *)node;
 @end
 
 /**
@@ -75,13 +73,6 @@ typedef NSUInteger ASCellNodeAnimation;
 @property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
 
 /*
- * A constant that is passed to the delegate to indicate how a relayout is to be animated.
- * 
- * @see UITableViewRowAnimation
- */
-@property (nonatomic, assign) ASCellNodeAnimation relayoutAnimation;
-
-/*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.
  */
@@ -91,7 +82,7 @@ typedef NSUInteger ASCellNodeAnimation;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not.
  *
  * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
  * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
