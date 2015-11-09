@@ -303,10 +303,9 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   // for async display, capture the current displaySentinel value to bail early when the job is executed if another is
   // enqueued
   // for sync display, just use nil for the displaySentinel and go
-  //
-  // REVIEW: what about the degenerate case where we are calling setNeedsDisplay faster than the jobs are dequeuing
-  // from the displayQueue?  do we want to put in some kind of timer to not cancel early fails from displaySentinel
-  // changes?
+  
+  // FIXME: what about the degenerate case where we are calling setNeedsDisplay faster than the jobs are dequeuing
+  // from the displayQueue?  Need to not cancel early fails from displaySentinel changes.
   ASSentinel *displaySentinel = (asynchronously ? _displaySentinel : nil);
   int64_t displaySentinelValue = [displaySentinel increment];
 
