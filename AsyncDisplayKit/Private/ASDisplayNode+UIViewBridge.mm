@@ -184,10 +184,8 @@
 - (void)setNeedsDisplay
 {
   _bridge_prologue;
-  // Send the message to the layer first, as __setNeedsDisplay may call -displayIfNeeded.
-  // REVIEW: Audit if this is necessary or if it can be called after like __setNeedsLayout
-  // -> Likely possible because of the aggregation / trampoline to occur on a later runloop.
-  _messageToLayer(setNeedsDisplay);
+  // Send the message to the view/layer first, as __setNeedsDisplay may call -displayIfNeeded.
+  _messageToViewOrLayer(setNeedsDisplay);
   [self __setNeedsDisplay];
 }
 
