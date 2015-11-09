@@ -192,6 +192,29 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return [_ASDisplayLayer class];
 }
 
++ (void)scheduleNodeForDisplay:(ASDisplayNode *)node
+{
+  ASDisplayNodeAssertMainThread();
+  static NSMutableSet *nodesToDisplay = nil;
+  static BOOL displayScheduled = NO;
+  if (!nodesToDisplay) {
+    nodesToDisplay = [[NSMutableSet alloc] init];
+  }
+  [nodesToDisplay addObject:node];
+  if (!displayScheduled) {
+    displayScheduled = YES;
+    // It's essenital that any layout pass that is scheduled during the current
+    // runloop has a chance to be applied / scheduled, so always perform this after the current runloop.
+    dispatch_async(dispatch_get_main_queue(), ^{
+      displayScheduled = NO;
+      for (ASDisplayNode *node in nodesToDisplay) {
+        [node __recursivelyTriggerDisplayAndBlock:NO];
+      }
+      nodesToDisplay = nil;
+    });
+  }
+}
+
 #pragma mark - Lifecycle
 
 - (void)_staticInitialize
@@ -708,6 +731,20 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [child recursivelyDisplayImmediately];
   }
   [self displayImmediately];
+}
+
+- (void)__setNeedsDisplay
+{
+  ASDisplayNode *rasterizedContainerNode = [self __rasterizedContainerNode];
+  if (rasterizedContainerNode) {
+    [rasterizedContainerNode setNeedsDisplay];
+  } else {
+    [_layer setNeedsDisplay];
+    
+    if (_layer && !self.isSynchronous && self.displaysAsynchronously) {
+      [ASDisplayNode scheduleNodeForDisplay:self];
+    }
+  }
 }
 
 - (void)__setNeedsLayout
@@ -1491,7 +1528,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   [_placeholderLayer removeFromSuperlayer];
 }
 
-void recursivelyEnsureDisplayForLayer(CALayer *layer)
+void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   // This recursion must handle layers in various states:
   // 1. Just added to hierarchy, CA hasn't yet called -display
@@ -1510,22 +1547,24 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   
   // Kick off the recursion first, so that all necessary display calls are sent and the displayQueue is full of parallelizable work.
   for (CALayer *sublayer in layer.sublayers) {
-    recursivelyEnsureDisplayForLayer(sublayer);
+    recursivelyTriggerDisplayForLayer(sublayer, shouldBlock);
   }
   
-  // As the recursion unwinds, verify each transaction is complete and block if it is not.
-  // While blocking on one transaction, others may be completing concurrently, so it doesn't matter which blocks first.
-  BOOL waitUntilComplete = (!node.shouldBypassEnsureDisplay);
-  if (waitUntilComplete) {
-    for (_ASAsyncTransaction *transaction in [layer.asyncdisplaykit_asyncLayerTransactions copy]) {
-      // Even if none of the layers have had a chance to start display earlier, they will still be allowed to saturate a multicore CPU while blocking main.
-      // This significantly reduces time on the main thread relative to UIKit.
-      [transaction waitUntilComplete];
+  if (shouldBlock) {
+    // As the recursion unwinds, verify each transaction is complete and block if it is not.
+    // While blocking on one transaction, others may be completing concurrently, so it doesn't matter which blocks first.
+    BOOL waitUntilComplete = (!node.shouldBypassEnsureDisplay);
+    if (waitUntilComplete) {
+      for (_ASAsyncTransaction *transaction in [layer.asyncdisplaykit_asyncLayerTransactions copy]) {
+        // Even if none of the layers have had a chance to start display earlier, they will still be allowed to saturate a multicore CPU while blocking main.
+        // This significantly reduces time on the main thread relative to UIKit.
+        [transaction waitUntilComplete];
+      }
     }
   }
 }
 
-- (void)recursivelyEnsureDisplay
+- (void)__recursivelyTriggerDisplayAndBlock:(BOOL)shouldBlock
 {
   ASDisplayNodeAssertMainThread();
 //  ASDisplayNodeAssert(self.isNodeLoaded, @"Node must have layer or view loaded to use -recursivelyEnsureDisplay");
@@ -1538,7 +1577,12 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   if ([layer needsLayout]) {
     [layer layoutIfNeeded];
   }
-  recursivelyEnsureDisplayForLayer(layer);
+  recursivelyTriggerDisplayForLayer(layer, shouldBlock);
+}
+
+- (void)recursivelyEnsureDisplay
+{
+  [self __recursivelyTriggerDisplayAndBlock:YES];
 }
 
 - (void)setShouldBypassEnsureDisplay:(BOOL)shouldBypassEnsureDisplay
@@ -2006,6 +2050,7 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   return _replaceAsyncSentinel != nil;
 }
 
+// FIXME: This method doesn't appear to be called, and should be removed.
 - (ASSentinel *)_asyncReplaceSentinel
 {
   ASDN::MutexLocker l(_propertyLock);
