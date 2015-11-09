@@ -14,22 +14,15 @@
 
 #define USE_WORKING_WINDOW 0
 
-<<<<<<< HEAD
 @interface ASRangeHandlerRender ()
 @property (nonatomic,readonly) UIWindow *workingWindow;
 @end
 
-=======
->>>>>>> origin/NoWorkingWindow
 @implementation ASRangeHandlerRender
 @synthesize workingWindow = _workingWindow;
 
 #if USE_WORKING_WINDOW
-<<<<<<< HEAD
 - (UIWindow *)workingWindow
-=======
-+ (UIWindow *)workingWindow
->>>>>>> origin/NoWorkingWindow
 {
   ASDisplayNodeAssertMainThread();
 
@@ -69,10 +62,6 @@
   }
   
   [node recursivelySetDisplaySuspended:NO];
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/NoWorkingWindow
   
 #if USE_WORKING_WINDOW
   // Add the node's layer to an off-screen window to trigger display and mark its contents as non-volatile.
@@ -80,11 +69,7 @@
   // Any view-backed nodes will still create their views in order to assemble the layer heirarchy, and they will
   // also assemble a view subtree for the node, but we avoid the much more significant expense triggered by a view
   // being added or removed from an onscreen window (responder chain setup, will/DidMoveToWindow: recursive calls, etc)
-<<<<<<< HEAD
   [[[self workingWindow] layer] addSublayer:node.layer];
-=======
-  [[[[self class] workingWindow] layer] addSublayer:node.layer];
->>>>>>> origin/NoWorkingWindow
 #else
   [node recursivelyEnsureDisplay];  // Need to do this without waiting
 #endif
@@ -115,11 +100,7 @@
   [node recursivelySetDisplaySuspended:YES];
   
 #if USE_WORKING_WINDOW
-<<<<<<< HEAD
   if (node.layer.superlayer != [[self workingWindow] layer]) {
-=======
-  if (node.layer.superlayer != [[[self class] workingWindow] layer]) {
->>>>>>> origin/NoWorkingWindow
     // In this case, the node has previously passed through the working range (or it is zero), and it has now fallen outside the working range.
     if (![node isLayerBacked]) {
       // If the node is view-backed, we need to make sure to remove the view (which is now present in the containing cell contentsView).
