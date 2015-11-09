@@ -586,6 +586,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  NSLog(@"About to measure lock for %@", self);
   ASDN::MutexLocker l(_propertyLock);
   return [self __measureWithSizeRange:constrainedSize];
 }
@@ -666,6 +667,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (BOOL)shouldRasterizeDescendants
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  NSLog(@"About to descendants lock for %p, %@", self, [self class]);
   ASDN::MutexLocker l(_propertyLock);
   return _flags.shouldRasterizeDescendants;
 }
@@ -722,6 +724,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)recursivelyDisplayImmediately
 {
   ASDN::MutexLocker l(_propertyLock);
+  
   for (ASDisplayNode *child in _subnodes) {
     [child recursivelyDisplayImmediately];
   }
@@ -730,12 +733,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)__setNeedsDisplay
 {
+  ASDN::MutexLocker l(_propertyLock);
+  NSLog(@"About to find parent rasterize for %@", self);
   ASDisplayNode *rasterizedContainerNode = [self __rasterizedContainerNode];
   if (rasterizedContainerNode) {
     [rasterizedContainerNode setNeedsDisplay];
   } else {
-    [_layer setNeedsDisplay];
-    
     if (_layer && !self.isSynchronous && self.displaysAsynchronously) {
       [ASDisplayNode scheduleNodeForDisplay:self];
     }
