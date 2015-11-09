@@ -218,20 +218,12 @@
 
 - (void)setNeedsDisplay
 {
-  ASDisplayNode *rasterizedContainerNode = [self __rasterizedContainerNode];
-  if (rasterizedContainerNode) {
-    [rasterizedContainerNode setNeedsDisplay];
-  } else {
-    [_layer setNeedsDisplay];
-
-    if (_layer && !self.isSynchronous && self.displaysAsynchronously) {
-      // It's essenital that any layout pass that is scheduled during the current
-      // runloop has a chance to be applied / scheduled.
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [self recursivelyEnsureDisplay];
-      });
-    }
-  }
+  _bridge_prologue;
+  // Send the message to the layer first, as __setNeedsDisplay may call -displayIfNeeded.
+  // REVIEW: Audit if this is necessary or if it can be called after like __setNeedsLayout
+  // -> Likely possible because of the aggregation / trampoline to occur on a later runloop.
+  _messageToLayer(setNeedsDisplay);
+  [self __setNeedsDisplay];
 }
 
 - (void)setNeedsLayout
