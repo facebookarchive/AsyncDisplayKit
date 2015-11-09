@@ -37,6 +37,12 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(rangeType == ASLayoutRangeTypeRender, @"Render delegate should not handle other ranges");
 
+  // If a node had previously been onscreen but now is only in the working range,
+  // ensure its view is not orphaned in a UITableViewCell in the reuse pool.
+  if (![node isLayerBacked] && node.view.superview) {
+    [node.view removeFromSuperview];
+  }
+  
   [node recursivelySetDisplaySuspended:NO];
 
   // Add the node's layer to an off-screen window to trigger display and mark its contents as non-volatile.

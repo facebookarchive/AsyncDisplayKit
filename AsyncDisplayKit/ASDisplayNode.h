@@ -508,16 +508,6 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  */
 - (CGRect)convertRect:(CGRect)rect fromNode:(nullable ASDisplayNode *)node;
 
-/** @name UIResponder methods */
-
-// By default these fall through to the underlying view, but can be overridden.
-- (BOOL)canBecomeFirstResponder;                                            // default==NO
-- (BOOL)becomeFirstResponder;                                               // default==NO (no-op)
-- (BOOL)canResignFirstResponder;                                            // default==YES
-- (BOOL)resignFirstResponder;                                               // default==NO (no-op)
-- (BOOL)isFirstResponder;
-- (BOOL)canPerformAction:(SEL)action withSender:(nullable id)sender;
-
 @end
 
 
@@ -615,6 +605,15 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 @property (atomic, assign)           CGFloat shadowRadius;                  // default=3
 @property (atomic, assign)           CGFloat borderWidth;                   // default=0
 @property (atomic, assign)           CGColorRef borderColor;                // default=opaque rgb black
+
+// UIResponder methods
+// By default these fall through to the underlying view, but can be overridden.
+- (BOOL)canBecomeFirstResponder;                                            // default==NO
+- (BOOL)becomeFirstResponder;                                               // default==NO (no-op)
+- (BOOL)canResignFirstResponder;                                            // default==YES
+- (BOOL)resignFirstResponder;                                               // default==NO (no-op)
+- (BOOL)isFirstResponder;
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender;
 
 // Accessibility support
 @property (atomic, assign)           BOOL isAccessibilityElement;
