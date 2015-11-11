@@ -135,13 +135,22 @@ static BOOL _isInterceptedSelector(SEL sel)
   [super didTransitionToState:state];
 }
 
+- (void)setNode:(ASCellNode *)node
+{
+  _node = node;
+  node.selected = self.selected;
+  node.highlighted = self.highlighted;
+}
+
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
 {
+  [super setSelected:selected animated:animated];
   _node.selected = selected;
 }
 
 - (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated
 {
+  [super setHighlighted:highlighted];
   _node.highlighted = highlighted;
 }
 
