@@ -150,7 +150,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated
 {
-  [super setHighlighted:highlighted];
+  [super setHighlighted:highlighted animated:animated];
   _node.highlighted = highlighted;
 }
 
