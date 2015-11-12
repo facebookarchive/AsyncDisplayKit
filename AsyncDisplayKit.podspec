@@ -21,7 +21,7 @@ Pod::Spec.new do |spec|
       'Base/*.{h,m}'
   ]
 
-  spec.frameworks = 'AssetsLibrary'
+  spec.frameworks = 'AssetsLibrary','MapKit'
   spec.weak_frameworks = 'Photos'
 
   # ASDealloc2MainObject must be compiled with MRR
