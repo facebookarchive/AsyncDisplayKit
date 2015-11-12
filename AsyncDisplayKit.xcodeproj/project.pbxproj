@@ -213,6 +213,9 @@
 		6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		92DD2FE31BF4B97E0074C9DD /* ASMapNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 92DD2FE11BF4B97E0074C9DD /* ASMapNode.h */; };
 		92DD2FE41BF4B97E0074C9DD /* ASMapNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */; };
+		92DD2FE61BF4D05E0074C9DD /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92DD2FE51BF4D05E0074C9DD /* MapKit.framework */; };
+		92DD2FE71BF4D0850074C9DD /* ASMapNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */; };
+		92DD2FE81BF4D0A80074C9DD /* ASMapNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 92DD2FE11BF4B97E0074C9DD /* ASMapNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9B92C8851BC2EB6E00EE46B2 /* ASCollectionDataController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */; };
 		9B92C8861BC2EB7600EE46B2 /* ASCollectionViewFlowLayoutInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF51BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m */; };
 		9C49C36F1B853957000B0DD5 /* ASStackLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -603,6 +606,7 @@
 		6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AsyncDisplayKit.h; sourceTree = "<group>"; };
 		92DD2FE11BF4B97E0074C9DD /* ASMapNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMapNode.h; sourceTree = "<group>"; };
 		92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMapNode.mm; sourceTree = "<group>"; };
+		92DD2FE51BF4D05E0074C9DD /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutable.h; path = AsyncDisplayKit/Layout/ASStackLayoutable.h; sourceTree = "<group>"; };
 		9C5586671BD549CB00B50E3A /* ASAsciiArtBoxCreator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASAsciiArtBoxCreator.h; path = AsyncDisplayKit/Layout/ASAsciiArtBoxCreator.h; sourceTree = "<group>"; };
 		9C5586681BD549CB00B50E3A /* ASAsciiArtBoxCreator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASAsciiArtBoxCreator.m; path = AsyncDisplayKit/Layout/ASAsciiArtBoxCreator.m; sourceTree = "<group>"; };
@@ -719,6 +723,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92DD2FE61BF4D05E0074C9DD /* MapKit.framework in Frameworks */,
 				B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */,
 				B350625E1B0111780018CF92 /* AssetsLibrary.framework in Frameworks */,
 				B350625D1B0111740018CF92 /* Photos.framework in Frameworks */,
@@ -778,6 +783,7 @@
 		058D09AE195D04C000B7D73C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				92DD2FE51BF4D05E0074C9DD /* MapKit.framework */,
 				051943141A1575670030A7D0 /* Photos.framework */,
 				051943121A1575630030A7D0 /* AssetsLibrary.framework */,
 				058D09AF195D04C000B7D73C /* Foundation.framework */,
@@ -1307,6 +1313,7 @@
 				CC7FD9E21BB603FF005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */,
 				34EFC7711B701CFF00AD841F /* ASStackLayoutSpec.h in Headers */,
 				2767E9411BB19BD600EA9B77 /* ASViewController.h in Headers */,
+				92DD2FE81BF4D0A80074C9DD /* ASMapNode.h in Headers */,
 				044284FE1BAA387800D16268 /* ASStackLayoutSpecUtilities.h in Headers */,
 				34EFC7751B701D2400AD841F /* ASStackPositionedLayout.h in Headers */,
 				34EFC7771B701D2D00AD841F /* ASStackUnpositionedLayout.h in Headers */,
@@ -1657,6 +1664,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92DD2FE71BF4D0850074C9DD /* ASMapNode.mm in Sources */,
 				9B92C8861BC2EB7600EE46B2 /* ASCollectionViewFlowLayoutInspector.m in Sources */,
 				9B92C8851BC2EB6E00EE46B2 /* ASCollectionDataController.mm in Sources */,
 				B350623D1B010EFD0018CF92 /* _ASAsyncTransaction.m in Sources */,
