@@ -1,10 +1,12 @@
-//
-//  ASVisualEffectNode.m
-//  AsyncDisplayKit
-//
-//  Created by Samuel Hsiung on 11/11/15.
-//  Copyright © 2015 Facebook. All rights reserved.
-//
+/*
+ *  Copyright (c) 2014-present, Facebook, Inc.
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree. An additional grant
+ *  of patent rights can be found in the PATENTS file in the same directory.
+ *
+ */
 
 #import "ASVisualEffectNode.h"
 
@@ -12,14 +14,11 @@
 
 - (instancetype)initWithEffect:(UIVisualEffect*)visualEffect
 {
-  if (self = [super initWithViewBlock:^UIView *{
+  return [self initWithViewBlock:^UIView *{
     _visualEffectView = [[UIVisualEffectView alloc] initWithEffect:visualEffect];
     _visualEffectView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
     return _visualEffectView;
-  }]) {
-    self.userInteractionEnabled = NO;
-  }
-  return self;
+  }];
 }
 
 + (instancetype)blurNodeWithEffect:(UIBlurEffectStyle)effectStyle

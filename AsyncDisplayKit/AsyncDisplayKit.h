@@ -25,8 +25,8 @@
 #import <AsyncDisplayKit/ASCollectionView.h>
 #import <AsyncDisplayKit/ASCollectionNode.h>
 #import <AsyncDisplayKit/ASCellNode.h>
-
 #import <AsyncDisplayKit/ASScrollNode.h>
+#import <AsyncDisplayKit/ASVisualEffectNode.h>
 
 #import <AsyncDisplayKit/ASViewController.h>
 
