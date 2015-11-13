@@ -307,7 +307,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesBegan:(NSSet *)touches withEvent:(nullable UIEvent *)event;
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
 
 /**
  * @abstract Tells the node when touches moved in its view.
@@ -315,7 +315,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesMoved:(NSSet *)touches withEvent:(nullable UIEvent *)event;
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
 
 /**
  * @abstract Tells the node when touches ended in its view.
@@ -323,7 +323,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesEnded:(NSSet *)touches withEvent:(nullable UIEvent *)event;
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
 
 /**
  * @abstract Tells the node when touches was cancelled in its view.
@@ -331,7 +331,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesCancelled:(NSSet *)touches withEvent:(nullable UIEvent *)event;
+- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
 
 
 /** @name Managing Gesture Recognizers */
