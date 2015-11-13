@@ -331,7 +331,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
+- (void)touchesCancelled:(nullable NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
 
 
 /** @name Managing Gesture Recognizers */
