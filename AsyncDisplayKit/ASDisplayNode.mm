@@ -1215,7 +1215,6 @@ static NSInteger incrementIfFound(NSInteger i) {
   [self _insertSubnode:subnode atSubnodeIndex:idx sublayerIndex:sublayerIndex andRemoveSubnode:nil];
 }
 
-
 - (void)_addSubnodeSubviewOrSublayer:(ASDisplayNode *)subnode
 {
   ASDisplayNodeAssertMainThread();
@@ -1223,7 +1222,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 
   BOOL canUseViewAPI = !self.isLayerBacked && !subnode.isLayerBacked;
   if (canUseViewAPI) {
-    [_view addSubview:subnode.view];
+    [self.parentViewForSubnodeViews addSubview:subnode.view];
   } else {
     // Disallow subviews in a layer-backed node
     ASDisplayNodeAssert(subnode.isLayerBacked, @"Cannot add a subview to a layer-backed node; only sublayers permitted.");
@@ -2046,6 +2045,13 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 - (id<ASLayoutable>)finalLayoutable
 {
   return self;
+}
+
+- (UIView *)parentViewForSubnodeViews
+{
+  ASDisplayNodeAssert(!_flags.layerBacked, @"Call to -parentViewForSubnodeViews undefined on layer-backed nodes");
+  ASDN::MutexLocker l(_propertyLock);
+  return _view;
 }
 
 @end
