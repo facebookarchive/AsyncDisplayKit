@@ -28,7 +28,6 @@
   // use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
-  _relayoutAnimation = UITableViewRowAnimationAutomatic;
 
   return self;
 }
@@ -58,7 +57,7 @@
   
   if (_layoutDelegate != nil) {
     ASPerformBlockOnMainThread(^{
-      [_layoutDelegate node:self didRelayoutWithSuggestedAnimation:_relayoutAnimation];
+      [_layoutDelegate nodeDidRelayout:self];
     });
   }
 }

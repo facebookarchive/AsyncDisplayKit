@@ -655,7 +655,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
-  node.layoutDelegate = self;
+  if (node.layoutDelegate == nil) {
+    node.layoutDelegate = self;
+  }
   return node;
 }
 
@@ -889,13 +891,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark - ASCellNodeDelegate
 
-- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation
+- (void)nodeDidRelayout:(ASCellNode *)node
 {
   ASDisplayNodeAssertMainThread();
-  NSIndexPath *indexPath = [self indexPathForNode:node];
-  if (indexPath != nil) {
-    [super reloadItemsAtIndexPaths:@[indexPath]];
-  }
+  // Cause UICollectionView to requery for the new height of this node
+  [super performBatchUpdates:^{} completion:nil];
 }
 
 @end

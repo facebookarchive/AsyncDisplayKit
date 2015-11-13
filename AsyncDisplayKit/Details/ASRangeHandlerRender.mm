@@ -12,24 +12,38 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
 
-@implementation ASRangeHandlerRender
+@interface ASRangeHandlerRender ()
+@property (nonatomic,readonly) UIWindow *workingWindow;
+@end
 
-+ (UIWindow *)workingWindow
+@implementation ASRangeHandlerRender
+@synthesize workingWindow = _workingWindow;
+
+- (UIWindow *)workingWindow
 {
   ASDisplayNodeAssertMainThread();
-  
+
   // we add nodes' views to this invisible window to start async rendering
   // TODO: Replace this with directly triggering display https://github.com/facebook/AsyncDisplayKit/issues/315
-  static UIWindow *workingWindow = nil;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    workingWindow = [[UIWindow alloc] initWithFrame:CGRectZero];
-    workingWindow.windowLevel = UIWindowLevelNormal - 1000;
-    workingWindow.userInteractionEnabled = NO;
-    workingWindow.hidden = YES;
-    workingWindow.alpha = 0.0;
-  });
-  return workingWindow;
+  // Update: Latest attempt is at https://github.com/facebook/AsyncDisplayKit/pull/828
+
+  if (!_workingWindow) {
+    _workingWindow = [[UIWindow alloc] initWithFrame:CGRectZero];
+    _workingWindow.windowLevel = UIWindowLevelNormal - 1000;
+    _workingWindow.userInteractionEnabled = NO;
+    _workingWindow.hidden = YES;
+    _workingWindow.alpha = 0.0;
+  }
+
+  return _workingWindow;
+}
+
+- (void)dealloc
+{
+  for(CALayer *layer in [self.workingWindow.layer.sublayers copy]) {
+    ASDisplayNode *node = layer.asyncdisplaykit_node;
+    [self node:node exitedRangeOfType:ASLayoutRangeTypeRender];
+  }
 }
 
 - (void)node:(ASDisplayNode *)node enteredRangeOfType:(ASLayoutRangeType)rangeType
@@ -50,7 +64,7 @@
   // Any view-backed nodes will still create their views in order to assemble the layer heirarchy, and they will
   // also assemble a view subtree for the node, but we avoid the much more significant expense triggered by a view
   // being added or removed from an onscreen window (responder chain setup, will/DidMoveToWindow: recursive calls, etc)
-  [[[[self class] workingWindow] layer] addSublayer:node.layer];
+  [[[self workingWindow] layer] addSublayer:node.layer];
 }
 
 - (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType
@@ -77,7 +91,7 @@
   
   [node recursivelySetDisplaySuspended:YES];
   
-  if (node.layer.superlayer != [[[self class] workingWindow] layer]) {
+  if (node.layer.superlayer != [[self workingWindow] layer]) {
     // In this case, the node has previously passed through the working range (or it is zero), and it has now fallen outside the working range.
     if (![node isLayerBacked]) {
       // If the node is view-backed, we need to make sure to remove the view (which is now present in the containing cell contentsView).

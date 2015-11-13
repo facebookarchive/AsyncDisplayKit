@@ -135,12 +135,12 @@ static BOOL _isInterceptedSelector(SEL sel)
   [super didTransitionToState:state];
 }
 
-- (void)setSelected:(BOOL)selected
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated
 {
   _node.selected = selected;
 }
 
-- (void)setHighlighted:(BOOL)highlighted
+- (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated
 {
   _node.highlighted = highlighted;
 }
@@ -820,7 +820,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
-  node.layoutDelegate = self;
+  if (node.layoutDelegate == nil) {
+    node.layoutDelegate = self;
+  }
   return node;
 }
 
@@ -895,15 +897,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   }
 }
 
-#pragma mark - ASCellNodeDelegate
+#pragma mark - ASCellNodeLayoutDelegate
 
-- (void)node:(ASCellNode *)node didRelayoutWithSuggestedAnimation:(ASCellNodeAnimation)animation
+- (void)nodeDidRelayout:(ASCellNode *)node
 {
   ASDisplayNodeAssertMainThread();
-  NSIndexPath *indexPath = [self indexPathForNode:node];
-  if (indexPath != nil) {
-    [super reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:(UITableViewRowAnimation)animation];
-  }
+  // Cause UITableView to requery for the new height of this node
+  [super beginUpdates];
+  [super endUpdates];
 }
 
 @end
