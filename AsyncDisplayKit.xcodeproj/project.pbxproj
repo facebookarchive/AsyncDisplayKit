@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		044284FD1BAA365100D16268 /* UICollectionViewLayout+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E0E1B371875007741D0 /* UICollectionViewLayout+ASConvenience.m */; };
-		044284FE1BAA387800D16268 /* ASStackLayoutSpecUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED461B17847A00DA7C62 /* ASStackLayoutSpecUtilities.h */; };
+		044284FE1BAA387800D16268 /* ASStackLayoutSpecUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED461B17847A00DA7C62 /* ASStackLayoutSpecUtilities.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		044284FF1BAA3BD600D16268 /* UICollectionViewLayout+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		044285071BAA63FE00D16268 /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 044285051BAA63FE00D16268 /* ASBatchFetching.h */; };
 		044285081BAA63FE00D16268 /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 044285051BAA63FE00D16268 /* ASBatchFetching.h */; };
@@ -398,8 +398,10 @@
 		B350625D1B0111740018CF92 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943141A1575670030A7D0 /* Photos.framework */; };
 		B350625E1B0111780018CF92 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
-		B36D5B781BF38EF100AFFD83 /* ASVisualEffectNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B36D5B761BF38EF100AFFD83 /* ASVisualEffectNode.h */; };
-		B36D5B791BF38EF100AFFD83 /* ASVisualEffectNode.m in Sources */ = {isa = PBXBuildFile; fileRef = B36D5B771BF38EF100AFFD83 /* ASVisualEffectNode.m */; };
+		B36D5B781BF38EF100AFFD83 /* ASVisualEffectNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B36D5B761BF38EF100AFFD83 /* ASVisualEffectNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B36D5B791BF38EF100AFFD83 /* ASVisualEffectNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = B36D5B771BF38EF100AFFD83 /* ASVisualEffectNode.mm */; };
+		B37B23C91BF5A7F000CC59F6 /* ASVisualEffectNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = B36D5B771BF38EF100AFFD83 /* ASVisualEffectNode.mm */; };
+		B37B23CA1BF5B7B900CC59F6 /* ASVisualEffectNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B36D5B761BF38EF100AFFD83 /* ASVisualEffectNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC7FD9DE1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC7FD9DF1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; };
 		CC7FD9E11BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */; };
@@ -669,8 +671,8 @@
 		B0F880591BEAEC7500D17647 /* ASTableNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableNode.m; sourceTree = "<group>"; };
 		B35061DA1B010EDF0018CF92 /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncDisplayKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B35061DD1B010EDF0018CF92 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../AsyncDisplayKit-iOS/Info.plist"; sourceTree = "<group>"; };
-		B36D5B761BF38EF100AFFD83 /* ASVisualEffectNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASVisualEffectNode.h; path = AsyncDisplayKit/ASVisualEffectNode.h; sourceTree = "<group>"; };
-		B36D5B771BF38EF100AFFD83 /* ASVisualEffectNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASVisualEffectNode.m; path = AsyncDisplayKit/ASVisualEffectNode.m; sourceTree = "<group>"; };
+		B36D5B761BF38EF100AFFD83 /* ASVisualEffectNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASVisualEffectNode.h; sourceTree = "<group>"; };
+		B36D5B771BF38EF100AFFD83 /* ASVisualEffectNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASVisualEffectNode.mm; sourceTree = "<group>"; };
 		CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPhotosFrameworkImageRequest.h; sourceTree = "<group>"; };
 		CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequest.m; sourceTree = "<group>"; };
 		CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequestTests.m; sourceTree = "<group>"; };
@@ -828,6 +830,8 @@
 				058D09E0195D050800B7D73C /* ASTextNode.mm */,
 				ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */,
 				ACC945AA1BA9E7C1005E1FB8 /* ASViewController.m */,
+				B36D5B761BF38EF100AFFD83 /* ASVisualEffectNode.h */,
+				B36D5B771BF38EF100AFFD83 /* ASVisualEffectNode.mm */,
 				6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */,
 				058D09E1195D050800B7D73C /* Details */,
 				058D0A01195D050800B7D73C /* Private */,
@@ -1073,8 +1077,6 @@
 				9C5FA34F1B8F6ADF00A62714 /* ASLayoutOptions.h */,
 				9C5FA3501B8F6ADF00A62714 /* ASLayoutOptions.mm */,
 				9C5FA35C1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm */,
-				B36D5B761BF38EF100AFFD83 /* ASVisualEffectNode.h */,
-				B36D5B771BF38EF100AFFD83 /* ASVisualEffectNode.m */,
 			);
 			name = Layout;
 			path = ..;
@@ -1193,6 +1195,7 @@
 				058D0A7F195D05F900B7D73C /* ASSentinel.h in Headers */,
 				9C8221951BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */,
 				9C49C36F1B853957000B0DD5 /* ASStackLayoutable.h in Headers */,
+				B36D5B781BF38EF100AFFD83 /* ASVisualEffectNode.h in Headers */,
 				AC21EC101B3D0BF600C8B19A /* ASStackLayoutDefines.h in Headers */,
 				CC7FD9DE1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */,
 				ACF6ED2F1B17843500DA7C62 /* ASStackLayoutSpec.h in Headers */,
@@ -1204,7 +1207,6 @@
 				055F1A3419ABD3E3004DAFF1 /* ASTableView.h in Headers */,
 				251B8EF71BBB3D690087C538 /* ASCollectionDataController.h in Headers */,
 				0574D5E219C110940097DC25 /* ASTableViewProtocols.h in Headers */,
-				B36D5B781BF38EF100AFFD83 /* ASVisualEffectNode.h in Headers */,
 				058D0A51195D05CB00B7D73C /* ASTextNode.h in Headers */,
 				058D0A5B195D05DC00B7D73C /* ASTextNodeCoreTextAdditions.h in Headers */,
 				058D0A5D195D05DC00B7D73C /* ASTextNodeRenderer.h in Headers */,
@@ -1306,8 +1308,9 @@
 				34EFC7701B701CFA00AD841F /* ASStackLayoutDefines.h in Headers */,
 				CC7FD9E21BB603FF005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */,
 				34EFC7711B701CFF00AD841F /* ASStackLayoutSpec.h in Headers */,
-				2767E9411BB19BD600EA9B77 /* ASViewController.h in Headers */,
 				044284FE1BAA387800D16268 /* ASStackLayoutSpecUtilities.h in Headers */,
+				2767E9411BB19BD600EA9B77 /* ASViewController.h in Headers */,
+				B37B23CA1BF5B7B900CC59F6 /* ASVisualEffectNode.h in Headers */,
 				34EFC7751B701D2400AD841F /* ASStackPositionedLayout.h in Headers */,
 				34EFC7771B701D2D00AD841F /* ASStackUnpositionedLayout.h in Headers */,
 				9C6BB3B31B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */,
@@ -1414,6 +1417,9 @@
 		058D09A4195D04C000B7D73C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				KnownAssetTags = (
+					New,
+				);
 				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
@@ -1552,7 +1558,7 @@
 				0549634A1A1EA066000F8E56 /* ASBasicImageDownloader.mm in Sources */,
 				299DA1AA1A828D2900162D41 /* ASBatchContext.mm in Sources */,
 				AC6456091B0A335000CF11B8 /* ASCellNode.m in Sources */,
-				B36D5B791BF38EF100AFFD83 /* ASVisualEffectNode.m in Sources */,
+				B36D5B791BF38EF100AFFD83 /* ASVisualEffectNode.mm in Sources */,
 				ACF6ED1D1B17843500DA7C62 /* ASCenterLayoutSpec.mm in Sources */,
 				18C2ED801B9B7DE800F627B3 /* ASCollectionNode.m in Sources */,
 				AC3C4A521A1139C100143C57 /* ASCollectionView.mm in Sources */,
@@ -1727,6 +1733,7 @@
 				B35062331B010EFD0018CF92 /* ASTextNodeShadower.m in Sources */,
 				B35062351B010EFD0018CF92 /* ASTextNodeTextKitHelpers.mm in Sources */,
 				B35062381B010EFD0018CF92 /* ASTextNodeWordKerner.m in Sources */,
+				B37B23C91BF5A7F000CC59F6 /* ASVisualEffectNode.mm in Sources */,
 				509E68661B3AEDD7009B9150 /* CGRect+ASConvenience.m in Sources */,
 				34566CB31BC1213700715E6B /* ASPhotosFrameworkImageRequest.m in Sources */,
 				B350623B1B010EFD0018CF92 /* NSMutableAttributedString+TextKitAdditions.m in Sources */,

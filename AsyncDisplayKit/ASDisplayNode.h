@@ -506,6 +506,14 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  */
 - (CGRect)convertRect:(CGRect)rect fromNode:(ASDisplayNode *)node;
 
+/**
+ * @abstract Returns the view by which this node's subnode views get added to.
+ *
+ * @discussion This property can be overriden in a subclass for nodes whose
+ * backing views expect subviews to be added to a separate view.
+ **/
+@property (nonatomic, readonly) UIView *parentViewForSubnodeViews;
+
 @end
 
 
