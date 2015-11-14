@@ -22,6 +22,7 @@
 #import <AsyncDisplayKit/ASPhotosFrameworkImageRequest.h>
 
 #import <AsyncDisplayKit/ASTableView.h>
+#import <AsyncDisplayKit/ASTableNode.h>
 #import <AsyncDisplayKit/ASCollectionView.h>
 #import <AsyncDisplayKit/ASCollectionNode.h>
 #import <AsyncDisplayKit/ASCellNode.h>
@@ -29,6 +30,8 @@
 #import <AsyncDisplayKit/ASScrollNode.h>
 
 #import <AsyncDisplayKit/ASViewController.h>
+
+#import <AsyncDisplayKit/ASChangeSetDataController.h>
 
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASDimension.h>
