@@ -13,10 +13,10 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
-#import <AsyncDisplayKit/ASTextNodeCoreTextAdditions.h>
-#import <AsyncDisplayKit/ASTextNodeTextKitHelpers.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
+#import "ASTextKitCoreTextAdditions.h"
+#import "ASTextKitHelpers.h"
 #import "ASTextKitRenderer.h"
 #import "ASTextKitRenderer+Positioning.h"
 #import "ASTextKitShadower.h"
