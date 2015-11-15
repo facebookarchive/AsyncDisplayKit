@@ -134,6 +134,32 @@
 		2538B6F31BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2538B6F21BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m */; };
 		254C6B521BF8FE6D003EC431 /* ASTextKitTruncationTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 254C6B511BF8FE6D003EC431 /* ASTextKitTruncationTests.mm */; };
 		254C6B541BF8FF2A003EC431 /* ASTextKitTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 254C6B531BF8FF2A003EC431 /* ASTextKitTests.mm */; };
+		254C6B731BF94DF4003EC431 /* ASTextKitCoreTextAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754BB1BEE458E00737CA5 /* ASTextKitCoreTextAdditions.h */; };
+		254C6B741BF94DF4003EC431 /* ASTextNodeWordKerner.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754B91BEE458E00737CA5 /* ASTextNodeWordKerner.h */; };
+		254C6B751BF94DF4003EC431 /* ASTextKitHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754BA1BEE458E00737CA5 /* ASTextKitHelpers.h */; };
+		254C6B761BF94DF4003EC431 /* ASTextNodeTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754BC1BEE458E00737CA5 /* ASTextNodeTypes.h */; };
+		254C6B771BF94DF4003EC431 /* ASTextKitAttributes.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754951BEE44CD00737CA5 /* ASTextKitAttributes.h */; };
+		254C6B781BF94DF4003EC431 /* ASTextKitContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754961BEE44CD00737CA5 /* ASTextKitContext.h */; };
+		254C6B791BF94DF4003EC431 /* ASTextKitEntityAttribute.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754981BEE44CD00737CA5 /* ASTextKitEntityAttribute.h */; };
+		254C6B7A1BF94DF4003EC431 /* ASTextKitRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754931BEE44CD00737CA5 /* ASTextKitRenderer.h */; };
+		254C6B7B1BF94DF4003EC431 /* ASTextKitRenderer+Positioning.h in Headers */ = {isa = PBXBuildFile; fileRef = 2577549B1BEE44CD00737CA5 /* ASTextKitRenderer+Positioning.h */; };
+		254C6B7C1BF94DF4003EC431 /* ASTextKitRenderer+TextChecking.h in Headers */ = {isa = PBXBuildFile; fileRef = 2577549D1BEE44CD00737CA5 /* ASTextKitRenderer+TextChecking.h */; };
+		254C6B7D1BF94DF4003EC431 /* ASTextKitShadower.h in Headers */ = {isa = PBXBuildFile; fileRef = 2577549F1BEE44CD00737CA5 /* ASTextKitShadower.h */; };
+		254C6B7E1BF94DF4003EC431 /* ASTextKitTailTruncater.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754A11BEE44CD00737CA5 /* ASTextKitTailTruncater.h */; };
+		254C6B7F1BF94DF4003EC431 /* ASTextKitTruncating.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754A31BEE44CD00737CA5 /* ASTextKitTruncating.h */; };
+		254C6B801BF94DF4003EC431 /* ASEqualityHashHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754A41BEE44CD00737CA5 /* ASEqualityHashHelpers.h */; };
+		254C6B821BF94F8A003EC431 /* ASTextKitHelpers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 257754B71BEE458D00737CA5 /* ASTextKitHelpers.mm */; };
+		254C6B831BF94F8A003EC431 /* ASTextKitCoreTextAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 257754B81BEE458E00737CA5 /* ASTextKitCoreTextAdditions.m */; };
+		254C6B841BF94F8A003EC431 /* ASTextNodeWordKerner.m in Sources */ = {isa = PBXBuildFile; fileRef = 257754BD1BEE458E00737CA5 /* ASTextNodeWordKerner.m */; };
+		254C6B851BF94F8A003EC431 /* ASTextKitAttributes.mm in Sources */ = {isa = PBXBuildFile; fileRef = 257754941BEE44CD00737CA5 /* ASTextKitAttributes.mm */; };
+		254C6B861BF94F8A003EC431 /* ASTextKitContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 257754971BEE44CD00737CA5 /* ASTextKitContext.mm */; };
+		254C6B871BF94F8A003EC431 /* ASTextKitEntityAttribute.m in Sources */ = {isa = PBXBuildFile; fileRef = 257754991BEE44CD00737CA5 /* ASTextKitEntityAttribute.m */; };
+		254C6B881BF94F8A003EC431 /* ASTextKitRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2577549A1BEE44CD00737CA5 /* ASTextKitRenderer.mm */; };
+		254C6B891BF94F8A003EC431 /* ASTextKitRenderer+Positioning.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2577549C1BEE44CD00737CA5 /* ASTextKitRenderer+Positioning.mm */; };
+		254C6B8A1BF94F8A003EC431 /* ASTextKitRenderer+TextChecking.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2577549E1BEE44CD00737CA5 /* ASTextKitRenderer+TextChecking.mm */; };
+		254C6B8B1BF94F8A003EC431 /* ASTextKitShadower.mm in Sources */ = {isa = PBXBuildFile; fileRef = 257754A01BEE44CD00737CA5 /* ASTextKitShadower.mm */; };
+		254C6B8C1BF94F8A003EC431 /* ASTextKitTailTruncater.mm in Sources */ = {isa = PBXBuildFile; fileRef = 257754A21BEE44CD00737CA5 /* ASTextKitTailTruncater.mm */; };
+		254C6B8D1BF94F8A003EC431 /* ASEqualityHashHelpers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2577548F1BED289A00737CA5 /* ASEqualityHashHelpers.mm */; };
 		257754921BED28F300737CA5 /* ASEqualityHashHelpers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2577548F1BED289A00737CA5 /* ASEqualityHashHelpers.mm */; };
 		257754A51BEE44CD00737CA5 /* ASTextKitRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 257754931BEE44CD00737CA5 /* ASTextKitRenderer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		257754A61BEE44CD00737CA5 /* ASTextKitAttributes.mm in Sources */ = {isa = PBXBuildFile; fileRef = 257754941BEE44CD00737CA5 /* ASTextKitAttributes.mm */; };
@@ -1285,6 +1311,7 @@
 				B350623C1B010EFD0018CF92 /* _ASAsyncTransaction.h in Headers */,
 				B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */,
 				B350623F1B010EFD0018CF92 /* _ASAsyncTransactionContainer.h in Headers */,
+				254C6B7E1BF94DF4003EC431 /* ASTextKitTailTruncater.h in Headers */,
 				B35062411B010EFD0018CF92 /* _ASAsyncTransactionGroup.h in Headers */,
 				B35062491B010EFD0018CF92 /* _ASCoreAnimationExtras.h in Headers */,
 				B350620F1B010EFD0018CF92 /* _ASDisplayLayer.h in Headers */,
@@ -1292,9 +1319,14 @@
 				B350624B1B010EFD0018CF92 /* _ASPendingState.h in Headers */,
 				9C55866C1BD54A3000B50E3A /* ASAsciiArtBoxCreator.h in Headers */,
 				B350624D1B010EFD0018CF92 /* _ASScopeTimer.h in Headers */,
+				254C6B771BF94DF4003EC431 /* ASTextKitAttributes.h in Headers */,
 				509E68611B3AEDA0009B9150 /* ASAbstractLayoutController.h in Headers */,
 				B35062571B010F070018CF92 /* ASAssert.h in Headers */,
+				254C6B7D1BF94DF4003EC431 /* ASTextKitShadower.h in Headers */,
 				B35062581B010F070018CF92 /* ASAvailability.h in Headers */,
+				254C6B731BF94DF4003EC431 /* ASTextKitCoreTextAdditions.h in Headers */,
+				254C6B7A1BF94DF4003EC431 /* ASTextKitRenderer.h in Headers */,
+				254C6B7C1BF94DF4003EC431 /* ASTextKitRenderer+TextChecking.h in Headers */,
 				34EFC7611B701C9C00AD841F /* ASBackgroundLayoutSpec.h in Headers */,
 				B35062591B010F070018CF92 /* ASBaseDefines.h in Headers */,
 				B35062131B010EFD0018CF92 /* ASBasicImageDownloader.h in Headers */,
@@ -1306,6 +1338,7 @@
 				34EFC7631B701CBF00AD841F /* ASCenterLayoutSpec.h in Headers */,
 				18C2ED7F1B9B7DE800F627B3 /* ASCollectionNode.h in Headers */,
 				B35061F51B010EFD0018CF92 /* ASCollectionView.h in Headers */,
+				254C6B791BF94DF4003EC431 /* ASTextKitEntityAttribute.h in Headers */,
 				509E68631B3AEDB4009B9150 /* ASCollectionViewLayoutController.h in Headers */,
 				B35061F71B010EFD0018CF92 /* ASCollectionViewProtocols.h in Headers */,
 				B35061FA1B010EFD0018CF92 /* ASControlNode+Subclasses.h in Headers */,
@@ -1314,6 +1347,7 @@
 				B35062191B010EFD0018CF92 /* ASDealloc2MainObject.h in Headers */,
 				34EFC75B1B701BAF00AD841F /* ASDimension.h in Headers */,
 				DE6D9E331C0AD9ED001A1DD3 /* ASRangeHandlerVisible.h in Headers */,
+				254C6B801BF94DF4003EC431 /* ASEqualityHashHelpers.h in Headers */,
 				B350624F1B010EFD0018CF92 /* ASDisplayNode+DebugTiming.h in Headers */,
 				B35061FD1B010EFD0018CF92 /* ASDisplayNode+Subclasses.h in Headers */,
 				B35061FB1B010EFD0018CF92 /* ASDisplayNode.h in Headers */,
@@ -1327,6 +1361,7 @@
 				C78F7E2B1BF7809800CDEAFC /* ASTableNode.h in Headers */,
 				AC7A2C181BDE11DF0093FE1A /* ASTableViewInternal.h in Headers */,
 				B35062531B010EFD0018CF92 /* ASImageNode+CGExtras.h in Headers */,
+				254C6B7F1BF94DF4003EC431 /* ASTextKitTruncating.h in Headers */,
 				B35062021B010EFD0018CF92 /* ASImageNode.h in Headers */,
 				B350621F1B010EFD0018CF92 /* ASImageProtocols.h in Headers */,
 				430E7C901B4C23F100697A4C /* ASIndexPath.h in Headers */,
@@ -1354,13 +1389,17 @@
 				B350622B1B010EFD0018CF92 /* ASRangeHandlerRender.h in Headers */,
 				34EFC76E1B701CF400AD841F /* ASRatioLayoutSpec.h in Headers */,
 				34EFC7651B701CCC00AD841F /* ASRelativeSize.h in Headers */,
+				254C6B741BF94DF4003EC431 /* ASTextNodeWordKerner.h in Headers */,
 				B350622D1B010EFD0018CF92 /* ASScrollDirection.h in Headers */,
+				254C6B751BF94DF4003EC431 /* ASTextKitHelpers.h in Headers */,
 				B35062081B010EFD0018CF92 /* ASScrollNode.h in Headers */,
 				B35062551B010EFD0018CF92 /* ASSentinel.h in Headers */,
 				9C8221961BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */,
 				9C49C3701B853961000B0DD5 /* ASStackLayoutable.h in Headers */,
 				34EFC7701B701CFA00AD841F /* ASStackLayoutDefines.h in Headers */,
+				254C6B7B1BF94DF4003EC431 /* ASTextKitRenderer+Positioning.h in Headers */,
 				CC7FD9E21BB603FF005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */,
+				254C6B761BF94DF4003EC431 /* ASTextNodeTypes.h in Headers */,
 				34EFC7711B701CFF00AD841F /* ASStackLayoutSpec.h in Headers */,
 				2767E9411BB19BD600EA9B77 /* ASViewController.h in Headers */,
 				044284FE1BAA387800D16268 /* ASStackLayoutSpecUtilities.h in Headers */,
@@ -1368,6 +1407,7 @@
 				34EFC7771B701D2D00AD841F /* ASStackUnpositionedLayout.h in Headers */,
 				9C6BB3B31B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */,
 				34EFC7731B701D0700AD841F /* ASStaticLayoutSpec.h in Headers */,
+				254C6B781BF94DF4003EC431 /* ASTextKitContext.h in Headers */,
 				B350620A1B010EFD0018CF92 /* ASTableView.h in Headers */,
 				B350620C1B010EFD0018CF92 /* ASTableViewProtocols.h in Headers */,
 				B350620D1B010EFD0018CF92 /* ASTextNode.h in Headers */,
@@ -1710,6 +1750,7 @@
 				B35062121B010EFD0018CF92 /* _ASDisplayView.mm in Sources */,
 				B350624C1B010EFD0018CF92 /* _ASPendingState.m in Sources */,
 				509E68621B3AEDA5009B9150 /* ASAbstractLayoutController.mm in Sources */,
+				254C6B861BF94F8A003EC431 /* ASTextKitContext.mm in Sources */,
 				34EFC7621B701CA400AD841F /* ASBackgroundLayoutSpec.mm in Sources */,
 				B35062141B010EFD0018CF92 /* ASBasicImageDownloader.mm in Sources */,
 				B35062161B010EFD0018CF92 /* ASBatchContext.mm in Sources */,
@@ -1724,14 +1765,17 @@
 				34EFC75C1B701BD200AD841F /* ASDimension.mm in Sources */,
 				B350624E1B010EFD0018CF92 /* ASDisplayNode+AsyncDisplay.mm in Sources */,
 				B35062501B010EFD0018CF92 /* ASDisplayNode+DebugTiming.mm in Sources */,
+				254C6B891BF94F8A003EC431 /* ASTextKitRenderer+Positioning.mm in Sources */,
 				B35062511B010EFD0018CF92 /* ASDisplayNode+UIViewBridge.mm in Sources */,
 				B35061FC1B010EFD0018CF92 /* ASDisplayNode.mm in Sources */,
 				B35061FF1B010EFD0018CF92 /* ASDisplayNodeExtras.mm in Sources */,
 				B35062011B010EFD0018CF92 /* ASEditableTextNode.mm in Sources */,
+				254C6B881BF94F8A003EC431 /* ASTextKitRenderer.mm in Sources */,
 				B350621C1B010EFD0018CF92 /* ASFlowLayoutController.mm in Sources */,
 				B350621E1B010EFD0018CF92 /* ASHighlightOverlayLayer.mm in Sources */,
 				B35062541B010EFD0018CF92 /* ASImageNode+CGExtras.m in Sources */,
 				B35062031B010EFD0018CF92 /* ASImageNode.mm in Sources */,
+				254C6B821BF94F8A003EC431 /* ASTextKitHelpers.mm in Sources */,
 				430E7C921B4C23F100697A4C /* ASIndexPath.m in Sources */,
 				34EFC7601B701C8B00AD841F /* ASInsetLayoutSpec.mm in Sources */,
 				34EFC75E1B701BF000AD841F /* ASInternalHelpers.mm in Sources */,
@@ -1739,7 +1783,9 @@
 				9C5FA3541B8F6ADF00A62714 /* ASLayoutOptions.mm in Sources */,
 				9C5FA3601B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */,
 				DECBD6EA1BE56E1900CF4905 /* ASButtonNode.mm in Sources */,
+				254C6B841BF94F8A003EC431 /* ASTextNodeWordKerner.m in Sources */,
 				34EFC76B1B701CEB00AD841F /* ASLayoutSpec.mm in Sources */,
+				254C6B8C1BF94F8A003EC431 /* ASTextKitTailTruncater.mm in Sources */,
 				B35062051B010EFD0018CF92 /* ASMultiplexImageNode.mm in Sources */,
 				B35062251B010EFD0018CF92 /* ASMutableAttributedStringBuilder.m in Sources */,
 				B35062071B010EFD0018CF92 /* ASNetworkImageNode.mm in Sources */,
@@ -1750,7 +1796,9 @@
 				B350622A1B010EFD0018CF92 /* ASRangeHandlerPreload.mm in Sources */,
 				B350622C1B010EFD0018CF92 /* ASRangeHandlerRender.mm in Sources */,
 				34EFC76F1B701CF700AD841F /* ASRatioLayoutSpec.mm in Sources */,
+				254C6B8B1BF94F8A003EC431 /* ASTextKitShadower.mm in Sources */,
 				34EFC7661B701CD200AD841F /* ASRelativeSize.mm in Sources */,
+				254C6B851BF94F8A003EC431 /* ASTextKitAttributes.mm in Sources */,
 				509E68601B3AED8E009B9150 /* ASScrollDirection.m in Sources */,
 				B35062091B010EFD0018CF92 /* ASScrollNode.m in Sources */,
 				B35062561B010EFD0018CF92 /* ASSentinel.m in Sources */,
@@ -1764,9 +1812,13 @@
 				B350620E1B010EFD0018CF92 /* ASTextNode.mm in Sources */,
 				C78F7E2A1BF7808300CDEAFC /* ASTableNode.m in Sources */,
 				509E68661B3AEDD7009B9150 /* CGRect+ASConvenience.m in Sources */,
+				254C6B8D1BF94F8A003EC431 /* ASEqualityHashHelpers.mm in Sources */,
+				254C6B871BF94F8A003EC431 /* ASTextKitEntityAttribute.m in Sources */,
 				34566CB31BC1213700715E6B /* ASPhotosFrameworkImageRequest.m in Sources */,
+				254C6B831BF94F8A003EC431 /* ASTextKitCoreTextAdditions.m in Sources */,
 				B350623B1B010EFD0018CF92 /* NSMutableAttributedString+TextKitAdditions.m in Sources */,
 				044284FD1BAA365100D16268 /* UICollectionViewLayout+ASConvenience.m in Sources */,
+				254C6B8A1BF94F8A003EC431 /* ASTextKitRenderer+TextChecking.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
