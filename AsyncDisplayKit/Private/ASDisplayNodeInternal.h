@@ -125,11 +125,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 - (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize;
 
 - (void)__setNeedsLayout;
-/**
- * Sets a new frame to this node by changing its bounds and position. This method can be safely called even if the transform property 
- * contains a non-identity transform, because bounds and position can be changed in such case.
- */
-- (void)__setSafeFrame:(CGRect)rect;
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 

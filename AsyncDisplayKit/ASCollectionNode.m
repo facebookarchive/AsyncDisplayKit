@@ -30,4 +30,16 @@
   return (ASCollectionView *)[super view];
 }
 
+- (void)clearContents
+{
+  [super clearContents];
+  [self.view clearContents];
+}
+
+- (void)clearFetchedData
+{
+  [super clearFetchedData];
+  [self.view clearFetchedData];
+}
+
 @end

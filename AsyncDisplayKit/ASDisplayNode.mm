@@ -747,29 +747,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 }
 
-- (void)__setSafeFrame:(CGRect)rect
-{
-  ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(_propertyLock);
-  
-  BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
-  
-  CGPoint origin      = (useLayer ? _layer.bounds.origin : self.bounds.origin);
-  CGPoint anchorPoint = (useLayer ? _layer.anchorPoint   : self.anchorPoint);
-  
-  CGRect bounds       = (CGRect){ origin, rect.size };
-  CGPoint position    = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
-                                    rect.origin.y + rect.size.height * anchorPoint.y);
-  
-  if (useLayer) {
-    _layer.bounds = bounds;
-    _layer.position = position;
-  } else {
-    self.bounds = bounds;
-    self.position = position;
-  }
-}
-
 // These private methods ensure that subclasses are not required to call super in order for _renderingSubnodes to be properly managed.
 
 - (void)__layout
@@ -1715,12 +1692,14 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   }
 
   // Assume that _layout was flattened and is 1-level deep.
+  ASDisplayNode *subnode = nil;
+  CGRect subnodeFrame = CGRectZero;
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
     ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.");
-    [((ASDisplayNode *)subnodeLayout.layoutableObject) __setSafeFrame:CGRectMake(subnodeLayout.position.x,
-                                                                                 subnodeLayout.position.y,
-                                                                                 subnodeLayout.size.width,
-                                                                                 subnodeLayout.size.height)];
+    subnodeFrame.origin = subnodeLayout.position;
+    subnodeFrame.size = subnodeLayout.size;
+    subnode = ((ASDisplayNode *)subnodeLayout.layoutableObject);
+    [subnode setFrame:subnodeFrame];
   }
 }
 
