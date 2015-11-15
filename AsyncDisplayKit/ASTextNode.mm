@@ -77,7 +77,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   NSArray *_exclusionPaths;
 
-  NSAttributedString *_truncationAttributedString;
+  NSAttributedString *_composedTruncationString;
 
   NSString *_highlightedLinkAttributeName;
   id _highlightedLinkAttributeValue;
@@ -113,7 +113,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
     self.needsDisplayOnBoundsChange = YES;
 
     _truncationMode = NSLineBreakByWordWrapping;
-    _truncationAttributedString = DefaultTruncationAttributedString();
+    _composedTruncationString = DefaultTruncationAttributedString();
 
     // The common case is for a text node to be non-opaque and blended over some background.
     self.opaque = NO;
@@ -165,7 +165,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 - (NSString *)description
 {
   NSString *plainString = [[_attributedString string] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-  NSString *truncationString = [_truncationAttributedString string];
+  NSString *truncationString = [_composedTruncationString string];
   if (plainString.length > 50)
     plainString = [[plainString substringToIndex:50] stringByAppendingString:@"\u2026"];
   return [NSString stringWithFormat:@"<%@: %p; text = \"%@\"; truncation string = \"%@\"; frame = %@>", self.class, self, plainString, truncationString, self.nodeLoaded ? NSStringFromCGRect(self.layer.frame) : nil];
@@ -261,7 +261,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 {
   return {
     .attributedString = _attributedString,
-    .truncationAttributedString = _truncationAttributedString,
+    .truncationAttributedString = _composedTruncationString,
     .lineBreakMode = _truncationMode,
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
@@ -1002,7 +1002,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 - (void)_invalidateTruncationString
 {
-  _truncationAttributedString = [self _prepareTruncationStringForDrawing:[self _truncationAttributedString]];
+  _composedTruncationString = [self _prepareTruncationStringForDrawing:[self _composedTruncationString]];
   [self _invalidateRenderer];
   ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
     [self setNeedsDisplay];
@@ -1035,7 +1035,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
  * additional truncation message and a truncation attributed string, they will
  * be properly composed.
  */
-- (NSAttributedString *)_truncationAttributedString
+- (NSAttributedString *)_composedTruncationString
 {
   // Short circuit if we only have one or the other.
   if (!_additionalTruncationMessage) {
