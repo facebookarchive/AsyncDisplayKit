@@ -10,13 +10,18 @@
 #import <MapKit/MapKit.h>
 @interface ASMapNode : ASControlNode
 - (instancetype)initWithCoordinate:(CLLocationCoordinate2D)coordinate NS_DESIGNATED_INITIALIZER;
-
-@property (nonatomic, readonly) ASImageNode *mapImage;
-@property (nonatomic, readonly) ASDisplayNode *liveMap;
 /**
- Whether the map snapshot should turn into a MKMapView when tapped on. Defaults to YES.
+ This is the snapshot shot image node, this will be hidden (but not nil) when .liveMap = YES
  */
-@property (nonatomic, assign) BOOL hasLiveMap;
+@property (nonatomic, readonly) ASImageNode *mapImage;
+/**
+ This is the ASDisplayNode that backs the MKMapView. This will be nil if .liveMap = NO. To access the underlying MKMapView, in order to set a delegate for example, use (MKMapView *)mapView.view;
+ */
+@property (nonatomic, readonly) ASDisplayNode *mapView;
+/**
+ Set this to YES to turn the snapshot into an interactive MKMapView and vice versa. Defaults to NO.
+ */
+@property (nonatomic, assign, getter=isLiveMap) BOOL liveMap;
 /**
  @abstract Explicitly set the size of the map and therefore the size of ASMapNode. Defaults to CGSizeMake(constrainedSize.max.width, 256).
  @discussion If the mapSize width or height is greater than the available space, then ASMapNode will take the maximum space available.

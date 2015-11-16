@@ -24,7 +24,7 @@
 
 @implementation ASMapNode
 
-@synthesize hasLiveMap = _hasLiveMap;
+@synthesize liveMap = _liveMap;
 @synthesize mapSize = _mapSize;
 @synthesize automaticallyReloadsMapImageOnOrientationChange = _automaticallyReloadsMapImageOnOrientationChange;
 @synthesize mapDelegate = _mapDelegate;
@@ -35,15 +35,14 @@
     return nil;
   }
   self.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
-  _hasLiveMap = YES;
   _automaticallyReloadsMapImageOnOrientationChange = YES;
+  _liveMap = NO;
+
   _options = [[MKMapSnapshotOptions alloc] init];
   _options.region = MKCoordinateRegionMakeWithDistance(coordinate, 1000, 1000);;
-  
   _mapImage = [[ASImageNode alloc]init];
   _mapImage.clipsToBounds = YES;
   [self addSubnode:_mapImage];
-  [self updateGesture];
   _maxSize = self.bounds.size;
   return self;
 }
@@ -69,20 +68,18 @@
   }
 }
 
-- (BOOL)hasLiveMap
+- (BOOL)isLiveMap
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _hasLiveMap;
+  return _liveMap;
 }
 
-- (void)setHasLiveMap:(BOOL)hasLiveMap
+- (void)setLiveMap:(BOOL)liveMap
 {
   ASDN::MutexLocker l(_propertyLock);
-  if (hasLiveMap == _hasLiveMap)
-    return;
-  
-  _hasLiveMap = hasLiveMap;
-  [self updateGesture];
+  if (liveMap == _liveMap) return;
+  _liveMap = liveMap;
+  liveMap ? [self addLiveMap] : [self removeLiveMap];
 }
 
 - (CGSize)mapSize
@@ -119,11 +116,6 @@
   
 }
 
-- (void)updateGesture
-{
-  _hasLiveMap ? [self addTarget:self action:@selector(showLiveMap) forControlEvents:ASControlNodeEventTouchUpInside] :  [self removeTarget:self action:@selector(showLiveMap) forControlEvents:ASControlNodeEventTouchUpInside];
-}
-
 - (void)fetchData
 {
   [super fetchData];
@@ -134,9 +126,9 @@
 - (void)clearFetchedData
 {
   [super clearFetchedData];
-  if (_liveMap) {
-    [_liveMap removeFromSupernode];
-    _liveMap = nil;
+  if (_mapView) {
+    [_mapView removeFromSupernode];
+    _mapView = nil;
   }
   _mapImage.image = nil;
 }
@@ -186,18 +178,27 @@
 }
 
 #pragma mark - Action
-- (void)showLiveMap
+- (void)addLiveMap
 {
-  if (self.isNodeLoaded && !_liveMap) {
-    _liveMap = [[ASDisplayNode alloc]initWithViewBlock:^UIView *{
+  if (self.isNodeLoaded && !_mapView) {
+    _mapView = [[ASDisplayNode alloc]initWithViewBlock:^UIView *{
       MKMapView *mapView = [[MKMapView alloc]initWithFrame:CGRectMake(0.0f, 0.0f, self.calculatedSize.width, self.calculatedSize.height)];
       mapView.delegate = _mapDelegate;
       [mapView setRegion:_options.region];
       [mapView addAnnotations:_annotations];
       return mapView;
     }];
-    [self addSubnode:_liveMap];
-    _mapImage.image = nil;
+    [self addSubnode:_mapView];
+    _mapImage.hidden = YES;
+  }
+}
+
+- (void)removeLiveMap
+{
+  if (_mapView) {
+    [_mapView removeFromSupernode];
+    _mapView = nil;
+    _mapImage.hidden = NO;
   }
 }
 
@@ -215,8 +216,8 @@
 - (void)layout
 {
   [super layout];
-  if (_liveMap) {
-    MKMapView *mapView = (MKMapView *)_liveMap.view;
+  if (_mapView) {
+    MKMapView *mapView = (MKMapView *)_mapView.view;
     mapView.frame = CGRectMake(0.0f, 0.0f, self.calculatedSize.width, self.calculatedSize.height);
   }
   else {
