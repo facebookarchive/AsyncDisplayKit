@@ -26,6 +26,7 @@
         
         // name node
         _nameNode = [[ASTextNode alloc] init];
+        _nameNode.flexShrink = NO;  // Never truncate user's real name
         _nameNode.attributedString = [[NSAttributedString alloc] initWithString:_post.name
                                                                      attributes:[TextStyles nameStyle]];
         _nameNode.maximumLineCount = 1;
@@ -33,9 +34,9 @@
         
         // username node
         _usernameNode = [[ASTextNode alloc] init];
+        _usernameNode.flexShrink = YES; // If real name and username don't fit to cell width, allow username shrink
         _usernameNode.attributedString = [[NSAttributedString alloc] initWithString:_post.username
                                                                      attributes:[TextStyles usernameStyle]];
-        _usernameNode.flexShrink = YES; //if name and username don't fit to cell width, allow username shrink
         _usernameNode.truncationMode = NSLineBreakByTruncatingTail;
         _usernameNode.maximumLineCount = 1;
         
@@ -43,6 +44,7 @@
         
         // time node
         _timeNode = [[ASTextNode alloc] init];
+        _timeNode.flexShrink = NO;  // Never truncate the time, as it is quite short.
         _timeNode.attributedString = [[NSAttributedString alloc] initWithString:_post.time
                                                                      attributes:[TextStyles timeStyle]];
         [self addSubnode:_timeNode];

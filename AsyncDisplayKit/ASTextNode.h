@@ -71,6 +71,13 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 @property (nonatomic, assign) NSUInteger maximumLineCount;
 
 /**
+ * @abstract flexShrink is YES by default for ASTextNode, allowing it to wrap to
+ * multple lines when contained in stacks.
+ * @default YES
+ */
+@property (nonatomic, assign) BOOL flexShrink;
+
+/**
  @abstract The number of lines in the text. Text must have been sized first.
  */
 @property (nonatomic, readonly, assign) NSUInteger lineCount;
