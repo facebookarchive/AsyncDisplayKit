@@ -1683,6 +1683,18 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   [self clearFetchedData];
 }
 
+- (ASInterfaceState)interfaceState
+{
+  return _interfaceState;
+}
+
+- (void)setInterfaceState:(ASInterfaceState)interfaceState
+{
+  if (interfaceState != _interfaceState) {
+    _interfaceState = interfaceState;
+  }
+}
+
 - (void)layout
 {
   ASDisplayNodeAssertMainThread();

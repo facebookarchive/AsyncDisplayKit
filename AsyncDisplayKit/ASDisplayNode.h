@@ -33,6 +33,27 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 
 /**
+ Interface state is available on ASDisplayNode and ASViewController, and
+ allows checking whether a node is in an interface situation where it is prudent to trigger certain
+ actions: measurement, data fetching, display, and visibility (the latter for animations or other onscreen-only effects).
+ */
+
+typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
+{
+  /** The element is not predicted to be onscreen soon and preloading should not be performed */
+  ASInterfaceStateNone          = 1 << 0,
+  /** The element may be added to a view soon that could become visible.  Measure the layout, including size calculation. */
+  ASInterfaceStateMeasureLayout = 1 << 1,
+  /** The element is likely enough to come onscreen that disk and/or network data required for display should be fetched. */
+  ASInterfaceStateFetchData     = 1 << 2,
+  /** The elemant is very likely to become visible, and concurrent rendering should be executed for any -setNeedsDisplay. */
+  ASInterfaceStateDisplay       = 1 << 3,
+  /** The element is physically onscreen by at least 1 pixel.
+   In practice, all other bit fields should also be set when this flag is set. */
+  ASInterfaceStateVisible       = 1 << 4,
+};
+
+/**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
  * hierarchy off the main thread, and could do rendering off the main thread as well.
  *
@@ -160,6 +181,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  */
 @property (nonatomic, readonly, retain) CALayer *layer;
 
+@property (nonatomic, readwrite) ASInterfaceState interfaceState;
 
 /** @name Managing dimensions */
 
