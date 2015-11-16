@@ -72,6 +72,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
   NSMutableSet *_pendingDisplayNodes;
 
   _ASPendingState *_pendingViewState;
+  
+  ASInterfaceState _interfaceState;
 
   struct ASDisplayNodeFlags {
     // public properties
