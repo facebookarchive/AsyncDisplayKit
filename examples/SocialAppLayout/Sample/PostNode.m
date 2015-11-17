@@ -14,6 +14,9 @@
 #import "LikesNode.h"
 #import "CommentsNode.h"
 
+@interface PostNode() <ASNetworkImageNodeDelegate>
+@end
+
 @implementation PostNode
 
 - (instancetype)initWithPost:(Post *)post {
@@ -90,6 +93,7 @@
             _mediaNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
             _mediaNode.cornerRadius = 4.0;
             _mediaNode.URL = [NSURL URLWithString:_post.media];
+            _mediaNode.delegate = self;
             _mediaNode.imageModificationBlock = ^UIImage *(UIImage *image) {
                 
                 UIImage *modifiedImage;
@@ -256,6 +260,14 @@
 {
     // the node tapped a link, open it
     [[UIApplication sharedApplication] openURL:URL];
+}
+
+#pragma mark -
+#pragma mark ASNetworkImageNodeDelegate methods.
+
+- (void)imageNode:(ASNetworkImageNode *)imageNode didLoadImage:(UIImage *)image
+{
+    [self setNeedsLayout];
 }
 
 @end
