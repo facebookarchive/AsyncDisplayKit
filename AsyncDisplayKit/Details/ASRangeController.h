@@ -46,6 +46,11 @@
 - (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node;
 
 /**
+ * Clear all working ranges. Useful when performing a `reloadData`. Must be called on the main thread.
+ */
+- (void)reset;
+
+/**
  * Delegate and ultimate data source.  Must not be nil.
  */
 @property (nonatomic, weak) id<ASRangeControllerDelegate> delegate;

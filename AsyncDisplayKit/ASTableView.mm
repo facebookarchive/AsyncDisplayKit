@@ -314,6 +314,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   ASDisplayNodeAssert(self.asyncDelegate, @"ASTableView's asyncDelegate property must be set.");
   ASPerformBlockOnMainThread(^{
+    [_rangeController reset];
     [super reloadData];
   });
   [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
@@ -327,6 +328,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
+  [_rangeController reset];
   [_dataController reloadDataImmediatelyWithAnimationOptions:UITableViewRowAnimationNone];
   [super reloadData];
 }

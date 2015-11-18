@@ -153,6 +153,13 @@
   _queuedRangeUpdate = NO;
 }
 
+- (void)reset
+{
+  ASDisplayNodeAssertMainThread();
+  _rangeIsValid = NO;
+  [_rangeTypeIndexPaths removeAllObjects];
+}
+
 - (BOOL)shouldSkipVisibleNodesForRangeType:(ASLayoutRangeType)rangeType
 {
   return rangeType == ASLayoutRangeTypeRender;

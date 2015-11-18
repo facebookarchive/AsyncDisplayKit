@@ -270,6 +270,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASDisplayNodeAssert(self.asyncDelegate, @"ASCollectionView's asyncDelegate property must be set.");
   ASPerformBlockOnMainThread(^{
     _superIsPendingDataLoad = YES;
+    [_rangeController reset];
     [super reloadData];
   });
   [_dataController reloadDataWithAnimationOptions:kASCollectionViewAnimationNone completion:completion];
@@ -283,6 +284,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
+  [_rangeController reset];
   [_dataController reloadDataImmediatelyWithAnimationOptions:kASCollectionViewAnimationNone];
   [super reloadData];
 }
