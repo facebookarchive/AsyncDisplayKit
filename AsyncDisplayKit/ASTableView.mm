@@ -907,4 +907,24 @@ static BOOL _isInterceptedSelector(SEL sel)
   [super endUpdates];
 }
 
+#pragma mark - Memory Management
+
+- (void)clearContents
+{
+  for (NSArray *section in [_dataController completedNodes]) {
+    for (ASDisplayNode *node in section) {
+      [node recursivelyClearContents];
+    }
+  }
+}
+
+- (void)clearFetchedData
+{
+  for (NSArray *section in [_dataController completedNodes]) {
+    for (ASDisplayNode *node in section) {
+      [node recursivelyClearFetchedData];
+    }
+  }
+}
+
 @end
