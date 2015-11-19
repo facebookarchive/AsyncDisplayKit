@@ -690,7 +690,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   NSArray *visibleIndexPaths = self.indexPathsForVisibleRows;
 
-  if ( _pendingVisibleIndexPath ) {
+  if (_pendingVisibleIndexPath) {
     NSMutableSet *indexPaths = [NSMutableSet setWithArray:self.indexPathsForVisibleRows];
 
     BOOL (^isAfter)(NSIndexPath *, NSIndexPath *) = ^BOOL(NSIndexPath *indexPath, NSIndexPath *anchor) {
@@ -720,7 +720,7 @@ static BOOL _isInterceptedSelector(SEL sel)
       return isAfter(anchor, indexPath);
     };
 
-    if ( [indexPaths containsObject:_pendingVisibleIndexPath]) {
+    if ([indexPaths containsObject:_pendingVisibleIndexPath]) {
       _pendingVisibleIndexPath = nil; // once it has shown up in visibleIndexPaths, we can stop tracking it
     } else if (!isBefore(_pendingVisibleIndexPath, visibleIndexPaths.firstObject) &&
                !isAfter(_pendingVisibleIndexPath, visibleIndexPaths.lastObject)) {

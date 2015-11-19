@@ -31,22 +31,35 @@
 @implementation ASRangeController
 
 - (instancetype)init {
-  if (self = [super init]) {
-
+  self = [super init];
+  if (self != nil) {
     _rangeIsValid = YES;
-    _rangeTypeIndexPaths = [[NSMutableDictionary alloc] init];
-
+    _rangeTypeIndexPaths = [NSMutableDictionary dictionary];
     _rangeTypeHandlers = @{
-                            @(ASLayoutRangeTypeRender): [[ASRangeHandlerRender alloc] init],
-                            @(ASLayoutRangeTypePreload): [[ASRangeHandlerPreload alloc] init],
-                            };
+      @(ASLayoutRangeTypeRender): [[ASRangeHandlerRender alloc] init],
+      @(ASLayoutRangeTypePreload): [[ASRangeHandlerPreload alloc] init],
+    };
   }
 
   return self;
 }
 
+#pragma mark - Cell node view handling
 
-#pragma mark - View manipulation
+- (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node
+{
+  if (node.view.superview == contentView) {
+    // this content view is already correctly configured
+    return;
+  }
+  
+  // clean the content view
+  for (UIView *view in contentView.subviews) {
+    [view removeFromSuperview];
+  }
+  
+  [self moveCellNode:node toView:contentView];
+}
 
 - (void)moveCellNode:(ASCellNode *)node toView:(UIView *)view
 {
@@ -62,8 +75,7 @@
   [view addSubview:node.view];
 }
 
-
-#pragma mark - API
+#pragma mark - Core visible node range managment API
 
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
 {
@@ -76,13 +88,13 @@
   // coalesce these events -- handling them multiple times per runloop is noisy and expensive
   _queuedRangeUpdate = YES;
     
-  [self performSelector:@selector(updateVisibleNodeIndexPaths)
+  [self performSelector:@selector(_updateVisibleNodeIndexPaths)
              withObject:nil
              afterDelay:0
                 inModes:@[ NSRunLoopCommonModes ]];
 }
 
-- (void)updateVisibleNodeIndexPaths
+- (void)_updateVisibleNodeIndexPaths
 {
   if (!_queuedRangeUpdate) {
     return;
@@ -90,7 +102,7 @@
 
   NSArray *visibleNodePaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
 
-  if ( visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
+  if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
     _queuedRangeUpdate = NO;
     return ; // don't do anything for this update, but leave _rangeIsValid to make sure we update it later
   }
@@ -108,13 +120,13 @@
     id rangeKey = @(rangeType);
 
     // this delegate decide what happens when a node is added or removed from a range
-    id<ASRangeHandler> rangeDelegate = _rangeTypeHandlers[rangeKey];
+    id<ASRangeHandler> rangeHandler = _rangeTypeHandlers[rangeKey];
 
     if (!_rangeIsValid || [_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths viewportSize:viewportSize rangeType:rangeType]) {
       NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize rangeType:rangeType];
 
       // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
-      NSMutableSet *removedIndexPaths = _rangeIsValid ? [[_rangeTypeIndexPaths objectForKey:rangeKey] mutableCopy] : [NSMutableSet set];
+      NSMutableSet *removedIndexPaths = _rangeIsValid ? [_rangeTypeIndexPaths[rangeKey] mutableCopy] : [NSMutableSet set];
       [removedIndexPaths minusSet:indexPaths];
       [removedIndexPaths minusSet:visibleNodePathsSet];
 
@@ -123,11 +135,11 @@
         [removedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
           // since this class usually manages large or infinite data sets, the working range
           // directly bounds memory usage by requiring redrawing any content that falls outside the range.
-          [rangeDelegate node:node exitedRangeOfType:rangeType];
+          [rangeHandler node:node exitedRangeOfType:rangeType];
         }];
       }
 
-      // Notify to add indexpaths that are not currently in _rangeTypeIndexPaths
+      // Notify to add index paths that are not currently in _rangeTypeIndexPaths
       NSMutableSet *addedIndexPaths = [indexPaths mutableCopy];
       [addedIndexPaths minusSet:[_rangeTypeIndexPaths objectForKey:rangeKey]];
 
@@ -140,12 +152,12 @@
       if (addedIndexPaths.count) {
         NSArray *addedNodes = [_delegate rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
         [addedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-          [rangeDelegate node:node enteredRangeOfType:rangeType];
+          [rangeHandler node:node enteredRangeOfType:rangeType];
         }];
       }
 
       // set the range indexpaths so that we can remove/add on the next update pass
-      [_rangeTypeIndexPaths setObject:indexPaths forKey:rangeKey];
+      _rangeTypeIndexPaths[rangeKey] = indexPaths;
     }
   }
 
@@ -157,22 +169,6 @@
 {
   return rangeType == ASLayoutRangeTypeRender;
 }
-
-- (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node
-{
-  if (node.view.superview == contentView) {
-    // this content view is already correctly configured
-    return;
-  }
-
-  // clean the content view
-  for (UIView *view in contentView.subviews) {
-    [view removeFromSuperview];
-  }
-
-  [self moveCellNode:node toView:contentView];
-}
-
 
 #pragma mark - ASDataControllerDelegete
 
