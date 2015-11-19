@@ -31,12 +31,6 @@ typedef struct {
 
 - (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType;
 
-@property (nonatomic, assign) ASRangeTuningParameters tuningParameters ASDISPLAYNODE_DEPRECATED;
-
-- (BOOL)shouldUpdateForVisibleIndexPath:(NSArray *)indexPath viewportSize:(CGSize)viewportSize ASDISPLAYNODE_DEPRECATED;
-
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize ASDISPLAYNODE_DEPRECATED;
-
 @optional
 
 - (void)insertNodesAtIndexPaths:(NSArray *)indexPaths withSizes:(NSArray *)nodeSizes;

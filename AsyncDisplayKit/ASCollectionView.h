@@ -416,9 +416,3 @@
 - (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section;
 
 @end
-
-@interface ASCollectionView (Deprecated)
-
-@property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters ASDISPLAYNODE_DEPRECATED;
-
-@end
