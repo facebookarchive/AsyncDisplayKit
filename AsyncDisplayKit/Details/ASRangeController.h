@@ -46,7 +46,10 @@
 - (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node;
 
 /**
- * 
+ * An object that describes the layout behavior of the ranged component (table view, collection view, etc.)
+ *
+ * Used primarily for providing the current range of index paths and identifying when the
+ * range controller should invalidate its range.
  */
 @property (nonatomic, strong) id<ASLayoutController> layoutController;
 
