@@ -100,7 +100,7 @@
     return;
   }
 
-  NSArray *visibleNodePaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
+  NSArray *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
 
   if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
     _queuedRangeUpdate = NO;
@@ -108,7 +108,7 @@
   }
 
   NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
-  CGSize viewportSize = [_delegate rangeControllerViewportSize:self];
+  CGSize viewportSize = [_dataSource viewportSizeForRangeController:self];
 
   // the layout controller needs to know what the current visible indices are to calculate range offsets
   if ([_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)]) {
@@ -123,7 +123,9 @@
     id<ASRangeHandler> rangeHandler = _rangeTypeHandlers[rangeKey];
 
     if (!_rangeIsValid || [_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths viewportSize:viewportSize rangeType:rangeType]) {
-      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize rangeType:rangeType];
+      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
+                                                       viewportSize:viewportSize
+                                                          rangeType:rangeType];
 
       // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
       NSMutableSet *removedIndexPaths = _rangeIsValid ? [_rangeTypeIndexPaths[rangeKey] mutableCopy] : [NSMutableSet set];
@@ -131,17 +133,17 @@
       [removedIndexPaths minusSet:visibleNodePathsSet];
 
       if (removedIndexPaths.count) {
-        NSArray *removedNodes = [_delegate rangeController:self nodesAtIndexPaths:[removedIndexPaths allObjects]];
-        [removedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+        NSArray *removedNodes = [_dataSource rangeController:self nodesAtIndexPaths:[removedIndexPaths allObjects]];
+        for (ASCellNode *node in removedNodes) {
           // since this class usually manages large or infinite data sets, the working range
           // directly bounds memory usage by requiring redrawing any content that falls outside the range.
           [rangeHandler node:node exitedRangeOfType:rangeType];
-        }];
+        }
       }
 
       // Notify to add index paths that are not currently in _rangeTypeIndexPaths
       NSMutableSet *addedIndexPaths = [indexPaths mutableCopy];
-      [addedIndexPaths minusSet:[_rangeTypeIndexPaths objectForKey:rangeKey]];
+      [addedIndexPaths minusSet:_rangeTypeIndexPaths[rangeKey]];
 
       // The preload range (for example) should include nodes that are visible
       // TODO: remove this once we have removed the dependency on Core Animation's -display
@@ -150,10 +152,10 @@
       }
       
       if (addedIndexPaths.count) {
-        NSArray *addedNodes = [_delegate rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
-        [addedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
+        NSArray *addedNodes = [_dataSource rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
+        for (ASCellNode *node in addedNodes) {
           [rangeHandler node:node enteredRangeOfType:rangeType];
-        }];
+        }
       }
 
       // set the range indexpaths so that we can remove/add on the next update pass
@@ -174,13 +176,13 @@
 
 - (void)dataControllerBeginUpdates:(ASDataController *)dataController {
   ASPerformBlockOnMainThread(^{
-    [_delegate rangeControllerBeginUpdates:self];
+    [_delegate didBeginUpdatesInRangeController:self];
   });
 }
 
 - (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
   ASPerformBlockOnMainThread(^{
-    [_delegate rangeController:self endUpdatesAnimated:animated completion:completion];
+    [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
   });
 }
 

@@ -12,7 +12,6 @@
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 #import <AsyncDisplayKit/ASScrollDirection.h>
 
-
 typedef struct {
   CGFloat leadingBufferScreenfuls;
   CGFloat trailingBufferScreenfuls;
