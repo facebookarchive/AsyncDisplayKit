@@ -67,3 +67,27 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignSelf) {
   /** Expand to fill cross axis */
   ASStackLayoutAlignSelfStretch,
 };
+
+/** Orientation of children along horizontal axis */
+typedef NS_ENUM(NSUInteger, ASHorizontalAlignment) {
+  /** No alignment specified. Default value */
+  ASHorizontalAlignmentNone,
+  /** Left aligned */
+  ASAlignmentLeft,
+  /** Center aligned */
+  ASAlignmentMiddle,
+  /** Right aligned */
+  ASAlignmentRight,
+};
+
+/** Orientation of children along vertical axis */
+typedef NS_ENUM(NSUInteger, ASVerticalAlignment) {
+  /** No alignment specified. Default value */
+  ASVerticalAlignmentNone,
+  /** Top aligned */
+  ASAlignmentTop,
+  /** Center aligned */
+  ASAlignmentCenter,
+  /** Bottom aligned */
+  ASAlignmentBottom,
+};
