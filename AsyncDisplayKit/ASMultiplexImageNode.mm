@@ -19,6 +19,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASLog.h"
 #import "ASPhotosFrameworkImageRequest.h"
+#import "ASEqualityHelpers.h"
 
 #if !AS_IOS8_SDK_OR_LATER
 #error ASMultiplexImageNode can be used on iOS 7, but must be linked against the iOS 8 SDK.
@@ -308,7 +309,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 #pragma mark - Core Internal
 - (void)_setDisplayedImageIdentifier:(id)displayedImageIdentifier withImage:(UIImage *)image
 {
-  if (_displayedImageIdentifier == displayedImageIdentifier)
+  if (ASObjectIsEqual(displayedImageIdentifier, _displayedImageIdentifier))
     return;
 
   _displayedImageIdentifier = [displayedImageIdentifier copy];
@@ -332,7 +333,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (void)_setDownloadIdentifier:(id)downloadIdentifier
 {
-  if (_downloadIdentifier == downloadIdentifier)
+  if (ASObjectIsEqual(downloadIdentifier, _downloadIdentifier))
     return;
 
   [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
