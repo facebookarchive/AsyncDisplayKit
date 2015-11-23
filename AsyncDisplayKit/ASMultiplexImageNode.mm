@@ -184,10 +184,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   [_phImageRequestOperation cancel];
   
-  if (_downloadIdentifier) {
-    [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
-    _downloadIdentifier = nil;
-  }
+  [self _setDownloadIdentifier:nil];
 }
 
 - (void)clearFetchedData
@@ -197,12 +194,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   if ([self _shouldClearFetchedImageData]) {
     
     [_phImageRequestOperation cancel];
-    
-    if (_downloadIdentifier) {
-      [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
-      _downloadIdentifier = nil;
-    }
-    
+
+    [self _setDownloadIdentifier:nil];
+
     // setting this to nil makes the node fetch images the next time its display starts
     _loadedImageIdentifier = nil;
     self.image = nil;
