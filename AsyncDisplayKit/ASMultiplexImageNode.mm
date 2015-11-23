@@ -217,7 +217,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   // We may now be displaying the loaded identifier, if they're different.
   UIImage *displayedImage = self.image;
   if (displayedImage) {
-    if (![_displayedImageIdentifier isEqual:_loadedImageIdentifier])
+    if (!ASObjectIsEqual(_displayedImageIdentifier, _loadedImageIdentifier))
       [self _setDisplayedImageIdentifier:_loadedImageIdentifier withImage:displayedImage];
 
     // Delegateify
@@ -281,7 +281,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
   OSSpinLockLock(&_imageIdentifiersLock);
 
-  if ([_imageIdentifiers isEqual:imageIdentifiers]) {
+  if (ASObjectIsEqual(_imageIdentifiers, imageIdentifiers)) {
     OSSpinLockUnlock(&_imageIdentifiersLock);
     return;
   }
@@ -386,7 +386,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // If we've already loaded the best identifier, we've got nothing else to do.
   id bestImageIdentifier = _imageIdentifiers.firstObject;
-  if (!bestImageIdentifier || [_loadedImageIdentifier isEqual:bestImageIdentifier]) {
+  if (!bestImageIdentifier || ASObjectIsEqual(_loadedImageIdentifier, bestImageIdentifier)) {
     OSSpinLockUnlock(&_imageIdentifiersLock);
     return nil;
   }
@@ -434,7 +434,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       return;
 
     // Only nil out the loading identifier if the loading identifier hasn't changed.
-    if ([strongSelf.loadingImageIdentifier isEqual:nextImageIdentifier]) {
+    if (ASObjectIsEqual(strongSelf.loadingImageIdentifier, nextImageIdentifier)) {
       strongSelf.loadingImageIdentifier = nil;
     }
     [strongSelf _finishedLoadingImage:image forIdentifier:imageIdentifier error:error];
@@ -491,7 +491,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       }
 
       // If the next image to load has changed, bail.
-      if (![[strongSelf _nextImageIdentifierToDownload] isEqual:nextImageIdentifier]) {
+      if (!ASObjectIsEqual([strongSelf _nextImageIdentifierToDownload], nextImageIdentifier)) {
         finishedLoadingBlock(nil, nil, [NSError errorWithDomain:ASMultiplexImageNodeErrorDomain code:ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged userInfo:nil]);
         return;
       }
