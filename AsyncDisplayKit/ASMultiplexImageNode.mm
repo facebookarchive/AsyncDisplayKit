@@ -19,6 +19,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASLog.h"
 #import "ASPhotosFrameworkImageRequest.h"
+#import "ASEqualityHelpers.h"
 
 #if !AS_IOS8_SDK_OR_LATER
 #error ASMultiplexImageNode can be used on iOS 7, but must be linked against the iOS 8 SDK.
@@ -192,12 +193,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   if ([self _shouldClearFetchedImageData]) {
     
     [_phImageRequestOperation cancel];
-    
-    if (_downloadIdentifier) {
-      [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
-      _downloadIdentifier = nil;
-    }
-    
+
+    [self _setDownloadIdentifier:nil];
+
     // setting this to nil makes the node fetch images the next time its display starts
     _loadedImageIdentifier = nil;
     self.image = nil;
@@ -218,7 +216,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   // We may now be displaying the loaded identifier, if they're different.
   UIImage *displayedImage = self.image;
   if (displayedImage) {
-    if (![_displayedImageIdentifier isEqual:_loadedImageIdentifier])
+    if (!ASObjectIsEqual(_displayedImageIdentifier, _loadedImageIdentifier))
       [self _setDisplayedImageIdentifier:_loadedImageIdentifier withImage:displayedImage];
 
     // Delegateify
@@ -282,7 +280,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
   OSSpinLockLock(&_imageIdentifiersLock);
 
-  if ([_imageIdentifiers isEqual:imageIdentifiers]) {
+  if (ASObjectIsEqual(_imageIdentifiers, imageIdentifiers)) {
     OSSpinLockUnlock(&_imageIdentifiersLock);
     return;
   }
@@ -304,7 +302,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 #pragma mark - Core Internal
 - (void)_setDisplayedImageIdentifier:(id)displayedImageIdentifier withImage:(UIImage *)image
 {
-  if (_displayedImageIdentifier == displayedImageIdentifier)
+  if (ASObjectIsEqual(displayedImageIdentifier, _displayedImageIdentifier))
     return;
 
   _displayedImageIdentifier = [displayedImageIdentifier copy];
@@ -328,7 +326,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (void)_setDownloadIdentifier:(id)downloadIdentifier
 {
-  if (_downloadIdentifier == downloadIdentifier)
+  if (ASObjectIsEqual(downloadIdentifier, _downloadIdentifier))
     return;
 
   [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
@@ -387,7 +385,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // If we've already loaded the best identifier, we've got nothing else to do.
   id bestImageIdentifier = _imageIdentifiers.firstObject;
-  if (!bestImageIdentifier || [_loadedImageIdentifier isEqual:bestImageIdentifier]) {
+  if (!bestImageIdentifier || ASObjectIsEqual(_loadedImageIdentifier, bestImageIdentifier)) {
     OSSpinLockUnlock(&_imageIdentifiersLock);
     return nil;
   }
@@ -435,7 +433,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       return;
 
     // Only nil out the loading identifier if the loading identifier hasn't changed.
-    if ([strongSelf.loadingImageIdentifier isEqual:nextImageIdentifier]) {
+    if (ASObjectIsEqual(strongSelf.loadingImageIdentifier, nextImageIdentifier)) {
       strongSelf.loadingImageIdentifier = nil;
     }
     [strongSelf _finishedLoadingImage:image forIdentifier:imageIdentifier error:error];
@@ -492,7 +490,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       }
 
       // If the next image to load has changed, bail.
-      if (![[strongSelf _nextImageIdentifierToDownload] isEqual:nextImageIdentifier]) {
+      if (!ASObjectIsEqual([strongSelf _nextImageIdentifierToDownload], nextImageIdentifier)) {
         finishedLoadingBlock(nil, nil, [NSError errorWithDomain:ASMultiplexImageNodeErrorDomain code:ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged userInfo:nil]);
         return;
       }
