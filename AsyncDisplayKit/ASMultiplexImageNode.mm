@@ -177,14 +177,13 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 }
 
 #pragma mark - ASDisplayNode Overrides
+
 - (void)clearContents
 {
   [super clearContents]; // This actually clears the contents, so we need to do this first for our displayedImageIdentifier to be meaningful.
   [self _setDisplayedImageIdentifier:nil withImage:nil];
 
-  [_phImageRequestOperation cancel];
-  
-  [self _setDownloadIdentifier:nil];
+  // NOTE: We intentionally do not cancel image downloads until `clearFetchedData`.
 }
 
 - (void)clearFetchedData
