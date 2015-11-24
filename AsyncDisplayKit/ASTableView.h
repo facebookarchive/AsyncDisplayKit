@@ -359,9 +359,3 @@
 - (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView;
 
 @end
-
-@interface ASTableView (Deprecated)
-
-@property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters ASDISPLAYNODE_DEPRECATED;
-
-@end
