@@ -305,8 +305,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (BOOL)_needInvalidateRenderer:(CGSize)newSize
 {
-  BOOL hasViewOrLayer = self.view || self.layer;
-  return hasViewOrLayer && !CGSizeEqualToSize(newSize, _constrainedSize);
+  return !CGSizeEqualToSize(newSize, _constrainedSize);
 }
 
 #pragma mark - Shadow Drawer Management
