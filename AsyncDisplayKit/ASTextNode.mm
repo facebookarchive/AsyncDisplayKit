@@ -287,18 +287,20 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   _renderer = nil;
 }
 
-- (void)_invalidateRendererIfNeeded {
+- (void)_invalidateRendererIfNeeded
+{
   [self _invalidateRendererIfNeeded:[self displaySize]];
 }
 
-- (CGSize)displaySize {
+- (CGSize)displaySize
+{
   CGSize resultSize = CGSizeZero;
   if (self.isLayerBacked) {
     resultSize = self.layer.bounds.size;
   } else {
     resultSize = self.view.bounds.size;
   }
-  
+
   return resultSize;
 }
 
