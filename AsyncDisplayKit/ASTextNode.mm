@@ -289,19 +289,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (void)_invalidateRendererIfNeeded
 {
-  [self _invalidateRendererIfNeeded:[self displaySize]];
-}
-
-- (CGSize)displaySize
-{
-  CGSize resultSize = CGSizeZero;
-  if (self.isLayerBacked) {
-    resultSize = self.layer.bounds.size;
-  } else {
-    resultSize = self.view.bounds.size;
-  }
-
-  return resultSize;
+  [self _invalidateRendererIfNeeded:self.bounds.size];
 }
 
 - (void)_invalidateRendererIfNeeded:(CGSize)newSize
@@ -317,7 +305,8 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (BOOL)_needInvalidateRenderer:(CGSize)newSize
 {
-  return !CGSizeEqualToSize(newSize, _constrainedSize);
+  BOOL hasViewOrLayer = self.view || self.layer;
+  return hasViewOrLayer && !CGSizeEqualToSize(newSize, _constrainedSize);
 }
 
 #pragma mark - Shadow Drawer Management
