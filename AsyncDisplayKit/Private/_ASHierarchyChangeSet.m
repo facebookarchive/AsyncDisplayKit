@@ -219,9 +219,11 @@
   
   __block ASDataControllerAnimationOptions currentOptions = 0;
   __block NSMutableIndexSet *currentIndexes = nil;
-  NSUInteger lastIndex = allIndexes.lastIndex;
-  
-  NSEnumerationOptions options = type == _ASHierarchyChangeTypeDelete ? NSEnumerationReverse : kNilOptions;
+
+  BOOL reverse = (type == _ASHierarchyChangeTypeDelete);
+  NSEnumerationOptions options = reverse ? NSEnumerationReverse : kNilOptions;
+  NSUInteger endIndex = reverse ? allIndexes.firstIndex : allIndexes.lastIndex;
+
   [allIndexes enumerateIndexesWithOptions:options usingBlock:^(NSUInteger idx, __unused BOOL * stop) {
     ASDataControllerAnimationOptions options = [animationOptions[@(idx)] integerValue];
     BOOL endingCurrentGroup = NO;
@@ -237,7 +239,7 @@
       endingCurrentGroup = YES;
     }
     
-    BOOL endingLastGroup = (currentIndexes != nil && lastIndex == idx);
+    BOOL endingLastGroup = (currentIndexes != nil && endIndex == idx);
     
     if (endingCurrentGroup || endingLastGroup) {
       _ASHierarchySectionChange *change = [[_ASHierarchySectionChange alloc] initWithChangeType:type indexSet:currentIndexes animationOptions:currentOptions];
