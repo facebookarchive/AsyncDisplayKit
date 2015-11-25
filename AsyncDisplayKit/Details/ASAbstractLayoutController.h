@@ -17,8 +17,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
 
-@property (nonatomic, assign) ASRangeTuningParameters tuningParameters ASDISPLAYNODE_DEPRECATED;
-
 @end
 
 NS_ASSUME_NONNULL_END

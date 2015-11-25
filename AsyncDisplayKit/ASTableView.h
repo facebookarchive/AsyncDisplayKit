@@ -361,10 +361,4 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface ASTableView (Deprecated)
-
-@property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters ASDISPLAYNODE_DEPRECATED;
-
-@end
-
 NS_ASSUME_NONNULL_END

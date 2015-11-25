@@ -14,8 +14,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class ASCellNode;
-
 typedef struct {
   CGFloat leadingBufferScreenfuls;
   CGFloat trailingBufferScreenfuls;
@@ -33,12 +31,6 @@ typedef struct {
 - (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray<NSIndexPath *> *)indexPaths viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType;
 
 - (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType;
-
-@property (nonatomic, assign) ASRangeTuningParameters tuningParameters ASDISPLAYNODE_DEPRECATED;
-
-- (BOOL)shouldUpdateForVisibleIndexPath:(NSIndexPath *)indexPath viewportSize:(CGSize)viewportSize ASDISPLAYNODE_DEPRECATED;
-
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize ASDISPLAYNODE_DEPRECATED;
 
 @optional
 
