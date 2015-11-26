@@ -34,6 +34,21 @@ typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
 
 @interface _ASHierarchyChangeSet : NSObject
 
+/// @precondition The change set must be completed.
+@property (nonatomic, strong, readonly) NSIndexSet *deletedSections;
+/// @precondition The change set must be completed.
+@property (nonatomic, strong, readonly) NSIndexSet *insertedSections;
+/// @precondition The change set must be completed.
+@property (nonatomic, strong, readonly) NSIndexSet *reloadedSections;
+
+/**
+ Get the section index after the update for the given section before the update.
+ 
+ @precondition The change set must be completed.
+ @returns The new section index, or NSNotFound if the given section was deleted.
+ */
+- (NSInteger)newSectionForOldSection:(NSInteger)oldSection;
+
 @property (nonatomic, readonly) BOOL completed;
 
 /// Call this once the change set has been constructed to prevent future modifications to the changeset. Calling this more than once is a programmer error.

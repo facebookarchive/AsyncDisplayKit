@@ -99,6 +99,17 @@
   }
 }
 
+- (NSInteger)newSectionForOldSection:(NSInteger)oldSection
+{
+  [self _ensureCompleted];
+  if ([_deletedSections containsIndex:oldSection]) {
+    return NSNotFound;
+  }
+
+  NSInteger indexAfterDeletes = oldSection - [_deletedSections countOfIndexesInRange:NSMakeRange(0, oldSection)];
+  return indexAfterDeletes + [_insertedSections countOfIndexesInRange:NSMakeRange(0, indexAfterDeletes)];
+}
+
 - (void)deleteItems:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options
 {
   [self _ensureNotCompleted];
@@ -162,15 +173,31 @@
     [_ASHierarchySectionChange sortAndCoalesceChanges:_insertSectionChanges];
     [_ASHierarchySectionChange sortAndCoalesceChanges:_reloadSectionChanges];
 
-    // Item deletes in deleted sections need not be reported.
-    NSIndexSet *deletedSections = [_ASHierarchySectionChange allIndexesInChanges:_deleteSectionChanges];
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:deletedSections];
+    _deletedSections = [[_ASHierarchySectionChange allIndexesInChanges:_deleteSectionChanges] copy];
+    _insertedSections = [[_ASHierarchySectionChange allIndexesInChanges:_insertSectionChanges] copy];
+    _reloadedSections = [[_ASHierarchySectionChange allIndexesInChanges:_reloadSectionChanges] copy];
 
-    // Item reloads/inserts in reloaded/inserted sections need not be reported.
-    NSMutableIndexSet *reloadedAndInsertedSections = [_ASHierarchySectionChange allIndexesInChanges:_reloadSectionChanges];
-    [reloadedAndInsertedSections addIndexes:[_ASHierarchySectionChange allIndexesInChanges:_insertSectionChanges]];
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_reloadItemChanges ignoringChangesInSections:reloadedAndInsertedSections];
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:reloadedAndInsertedSections];
+    // These are invalid old section indexes.
+    NSMutableIndexSet *deletedOrReloaded = [_deletedSections mutableCopy];
+    [deletedOrReloaded addIndexes:_reloadedSections];
+
+    // These are invalid new section indexes.
+    NSMutableIndexSet *insertedOrReloaded = [_insertedSections mutableCopy];
+
+    // Get the new section that each reloaded section index corresponds to.
+    [_reloadedSections enumerateIndexesUsingBlock:^(NSUInteger oldIndex, __unused BOOL * stop) {
+      NSUInteger newIndex = [self newSectionForOldSection:oldIndex];
+      if (newIndex != NSNotFound) {
+        [insertedOrReloaded addIndex:newIndex];
+      }
+    }];
+
+    // Ignore item reloads/deletes in reloaded/deleted sections.
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:deletedOrReloaded];
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_reloadItemChanges ignoringChangesInSections:deletedOrReloaded];
+
+    // Ignore item inserts in reloaded(new)/inserted sections.
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:insertedOrReloaded];
   }
 }
 
