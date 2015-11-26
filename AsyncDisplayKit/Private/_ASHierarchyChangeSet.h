@@ -34,13 +34,6 @@ typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
 
 @interface _ASHierarchyChangeSet : NSObject
 
-@property (nonatomic, strong, readonly) NSIndexSet *deletedSections;
-@property (nonatomic, strong, readonly) NSIndexSet *insertedSections;
-@property (nonatomic, strong, readonly) NSIndexSet *reloadedSections;
-@property (nonatomic, strong, readonly) NSArray *insertedItems;
-@property (nonatomic, strong, readonly) NSArray *deletedItems;
-@property (nonatomic, strong, readonly) NSArray *reloadedItems;
-
 @property (nonatomic, readonly) BOOL completed;
 
 /// Call this once the change set has been constructed to prevent future modifications to the changeset. Calling this more than once is a programmer error.

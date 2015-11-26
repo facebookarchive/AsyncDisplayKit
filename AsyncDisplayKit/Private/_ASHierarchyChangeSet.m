@@ -17,6 +17,9 @@
  Assumes: `changes` is [_ASHierarchySectionChange] all with the same changeType
  */
 + (void)sortAndCoalesceChanges:(NSMutableArray *)changes;
+
+/// Returns all the indexes from all the `indexSet`s of the given `_ASHierarchySectionChange` objects.
++ (NSMutableIndexSet *)allIndexesInChanges:(NSArray *)changes;
 @end
 
 @interface _ASHierarchyItemChange ()
@@ -40,26 +43,12 @@
 
 @end
 
-@implementation _ASHierarchyChangeSet {
-  NSMutableIndexSet *_deletedSections;
-  NSMutableIndexSet *_insertedSections;
-  NSMutableIndexSet *_reloadedSections;
-  NSMutableArray *_insertedItems;
-  NSMutableArray *_deletedItems;
-  NSMutableArray *_reloadedItems;
-}
+@implementation _ASHierarchyChangeSet
 
 - (instancetype)init
 {
   self = [super init];
   if (self) {
-    _deletedSections = [NSMutableIndexSet new];
-    _insertedSections = [NSMutableIndexSet new];
-    _reloadedSections = [NSMutableIndexSet new];
-    
-    _deletedItems = [NSMutableArray new];
-    _insertedItems = [NSMutableArray new];
-    _reloadedItems = [NSMutableArray new];
     
     _insertItemChanges = [NSMutableArray new];
     _deleteItemChanges = [NSMutableArray new];
@@ -172,9 +161,16 @@
     [_ASHierarchySectionChange sortAndCoalesceChanges:_deleteSectionChanges];
     [_ASHierarchySectionChange sortAndCoalesceChanges:_insertSectionChanges];
     [_ASHierarchySectionChange sortAndCoalesceChanges:_reloadSectionChanges];
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:_deletedSections];
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_reloadItemChanges ignoringChangesInSections:_reloadedSections];
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:_insertedSections];
+
+    // Item deletes in deleted sections need not be reported.
+    NSIndexSet *deletedSections = [_ASHierarchySectionChange allIndexesInChanges:_deleteSectionChanges];
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:deletedSections];
+
+    // Item reloads/inserts in reloaded/inserted sections need not be reported.
+    NSMutableIndexSet *reloadedAndInsertedSections = [_ASHierarchySectionChange allIndexesInChanges:_reloadSectionChanges];
+    [reloadedAndInsertedSections addIndexes:[_ASHierarchySectionChange allIndexesInChanges:_insertSectionChanges]];
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_reloadItemChanges ignoringChangesInSections:reloadedAndInsertedSections];
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:reloadedAndInsertedSections];
   }
 }
 
@@ -247,6 +243,15 @@
   }
 
   [changes setArray:result];
+}
+
++ (NSMutableIndexSet *)allIndexesInChanges:(NSArray *)changes
+{
+  NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
+  for (_ASHierarchySectionChange *change in changes) {
+    [indexes addIndexes:change.indexSet];
+  }
+  return indexes;
 }
 
 @end
