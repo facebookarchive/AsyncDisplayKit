@@ -241,7 +241,7 @@
   NSMutableArray *result = [NSMutableArray new];
   
   __block ASDataControllerAnimationOptions currentOptions = 0;
-  __block NSMutableIndexSet *currentIndexes = [NSMutableIndexSet indexSet];
+  NSMutableIndexSet *currentIndexes = [NSMutableIndexSet indexSet];
 
   NSEnumerationOptions options = type == _ASHierarchyChangeTypeDelete ? NSEnumerationReverse : kNilOptions;
 
