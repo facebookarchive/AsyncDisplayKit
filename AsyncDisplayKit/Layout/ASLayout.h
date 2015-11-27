@@ -12,6 +12,8 @@
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASLayoutable.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 extern CGPoint const CGPointNull;
 
 extern BOOL CGPointIsNull(CGPoint point);
@@ -30,7 +32,7 @@ extern BOOL CGPointIsNull(CGPoint point);
 /** 
  * Array of ASLayouts. Each must have a valid non-null position.
  */
-@property (nonatomic, readonly) NSArray *sublayouts;
+@property (nonatomic, readonly) NSArray<ASLayout *> *sublayouts;
 
 /**
  * Initializer.
@@ -46,7 +48,7 @@ extern BOOL CGPointIsNull(CGPoint point);
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                                       size:(CGSize)size
                                   position:(CGPoint)position
-                                sublayouts:(NSArray *)sublayouts;
+                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
 /**
  * Convenience initializer that has CGPointNull position.
@@ -62,7 +64,7 @@ extern BOOL CGPointIsNull(CGPoint point);
  */
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                                       size:(CGSize)size
-                                sublayouts:(NSArray *)sublayouts;
+                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
 /**
  * Convenience that has CGPointNull position and no sublayouts. 
@@ -89,3 +91,5 @@ extern BOOL CGPointIsNull(CGPoint point);
 - (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *evaluatedLayout))predicateBlock;
 
 @end
+
+NS_ASSUME_NONNULL_END

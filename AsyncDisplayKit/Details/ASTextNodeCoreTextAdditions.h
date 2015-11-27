@@ -11,6 +11,7 @@
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 /**
@@ -81,3 +82,5 @@ ASDISPLAYNODE_EXTERN_C_END
 + (instancetype)paragraphStyleWithCTParagraphStyle:(CTParagraphStyleRef)coreTextParagraphStyle;
 
 @end
+
+NS_ASSUME_NONNULL_END

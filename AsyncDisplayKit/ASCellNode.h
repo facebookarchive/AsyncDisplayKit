@@ -8,6 +8,8 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class ASCellNode;
 
 typedef NSUInteger ASCellNodeAnimation;
@@ -76,10 +78,10 @@ typedef NSUInteger ASCellNodeAnimation;
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.
  */
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)touchesCancelled:(nullable NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not.
@@ -106,3 +108,5 @@ typedef NSUInteger ASCellNodeAnimation;
 @property (nonatomic, copy) NSString *text;
 
 @end
+
+NS_ASSUME_NONNULL_END

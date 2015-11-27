@@ -11,6 +11,8 @@
 #import <AsyncDisplayKit/ASDimension.h>
 #import "ASFlowLayoutController.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class ASCellNode;
 @class ASDataController;
 
@@ -68,22 +70,22 @@ typedef NSUInteger ASDataControllerAnimationOptions;
  Called for batch update.
  */
 - (void)dataControllerBeginUpdates:(ASDataController *)dataController;
-- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
+- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL))completion;
 
 /**
  Called for insertion of elements.
  */
-- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for deletion of elements.
  */
-- (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for insertion of sections.
  */
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray<NSArray<ASCellNode *> *> *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for deletion of sections.
@@ -140,7 +142,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)endUpdates;
 
-- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL))completion;
 
 - (void)insertSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
@@ -150,11 +152,11 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)insertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)deleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  * Re-measures all loaded nodes in the backing store.
@@ -166,7 +168,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^)())completion;
+- (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
 
 - (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
@@ -176,15 +178,17 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 
 - (NSUInteger)numberOfRowsInSection:(NSUInteger)section;
 
-- (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath;
+- (nullable ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath;
 
-- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
 
-- (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths;
+- (NSArray<ASCellNode *> *)nodesAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
 
 /**
  * Direct access to the nodes that have completed calculation and layout
  */
-- (NSArray *)completedNodes;
+- (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
 
 @end
+
+NS_ASSUME_NONNULL_END

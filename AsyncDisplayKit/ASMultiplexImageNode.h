@@ -11,8 +11,12 @@
 
 #import <Photos/Photos.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol ASMultiplexImageNodeDelegate;
 @protocol ASMultiplexImageNodeDataSource;
+
+typedef id<NSCopying, NSObject> ASImageIdentifier;
 
 extern NSString *const ASMultiplexImageNodeErrorDomain;
 
@@ -50,8 +54,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  * @abstract ASMultiplexImageNode is an image node that can load and display multiple versions of an image.  For
  * example, it can display a low-resolution version of an image while the high-resolution version is loading.
  *
- * @discussion ASMultiplexImageNode begins loading images when its <imageIdentifiers> property  is set.  For each image
- * identifier, the data source can either return a UIImage directly, or a URL the image node should load.
+ * @discussion ASMultiplexImageNode begins loading images when its <esource can either return a UIImage directly, or a URL the image node should load.
  */
 @interface ASMultiplexImageNode : ASImageNode
 
@@ -62,7 +65,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  * @discussion If `cache` is nil, the receiver will not attempt to retrieve images from a cache before downloading them.
  * @returns An initialized ASMultiplexImageNode.
  */
-- (instancetype)initWithCache:(id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithCache:(nullable id<ASImageCacheProtocol>)cache downloader:(nullable id<ASImageDownloaderProtocol>)downloader NS_DESIGNATED_INITIALIZER;
 
 /**
  * @abstract The delegate, which must conform to the <ASMultiplexImageNodeDelegate> protocol.
@@ -92,10 +95,10 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  *
  * @see <downloadsIntermediateImages> for more information on the image loading process.
  */
-@property (nonatomic, readwrite, copy) NSArray *imageIdentifiers;
+@property (nonatomic, readwrite, copy) NSArray<ASImageIdentifier> *imageIdentifiers;
 
 /**
- * @abstract Notify the receiver that its data source has new UIImages or NSURLs available for <imageIdentifiers>.
+ * @abstract Notify the receiver SSAAthat its data source has new UIImages or NSURLs available for <imageIdentifiers>.
  *
  * @discussion If a higher-quality image than is currently displayed is now available, it will be loaded.
  */
@@ -106,12 +109,12 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  *
  * @discussion This value may differ from <displayedImageIdentifier> if the image hasn't yet been displayed.
  */
-@property (nonatomic, readonly) id loadedImageIdentifier;
+@property (nullable, nonatomic, readonly) ASImageIdentifier loadedImageIdentifier;
 
 /**
  * @abstract The identifier for the image that the receiver is currently displaying, or nil.
  */
-@property (nonatomic, readonly) id displayedImageIdentifier;
+@property (nullable, nonatomic, readonly) ASImageIdentifier displayedImageIdentifier;
 
 /**
  * @abstract The image manager that this image node should use when requesting images from the Photos framework. If this is `nil` (the default), then `PHImageManager.defaultManager` is used.
@@ -146,7 +149,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  */
 - (void)multiplexImageNode:(ASMultiplexImageNode *)imageNode
  didUpdateDownloadProgress:(CGFloat)downloadProgress
-    forImageWithIdentifier:(id)imageIdentifier;
+    forImageWithIdentifier:(ASImageIdentifier)imageIdentifier;
 
 /**
  * @abstract Notification that the image node's download has finished.
@@ -155,8 +158,8 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  * @param error The error that occurred while downloading, if one occurred; nil otherwise.
  */
 - (void)multiplexImageNode:(ASMultiplexImageNode *)imageNode
-didFinishDownloadingImageWithIdentifier:(id)imageIdentifier
-                     error:(NSError *)error;
+didFinishDownloadingImageWithIdentifier:(ASImageIdentifier)imageIdentifier
+                     error:(nullable NSError *)error;
 
 /**
  * @abstract Notification that the image node's image was updated.
@@ -169,10 +172,10 @@ didFinishDownloadingImageWithIdentifier:(id)imageIdentifier
  * @see <[ASMultiplexImageNodeDelegate multiplexImageNode:didDisplayUpdatedImage:withIdentifier:]>.
  */
 - (void)multiplexImageNode:(ASMultiplexImageNode *)imageNode
-            didUpdateImage:(UIImage *)image
-            withIdentifier:(id)imageIdentifier
-                 fromImage:(UIImage *)previousImage
-            withIdentifier:(id)previousImageIdentifier;
+            didUpdateImage:(nullable UIImage *)image
+            withIdentifier:(nullable ASImageIdentifier)imageIdentifier
+                 fromImage:(nullable UIImage *)previousImage
+            withIdentifier:(nullable ASImageIdentifier)previousImageIdentifier;
 
 /**
  * @abstract Notification that the image node displayed a new image.
@@ -182,8 +185,8 @@ didFinishDownloadingImageWithIdentifier:(id)imageIdentifier
  * @discussion This method is only called when `image` changes, and not on subsequent redisplays of the same image.
  */
 - (void)multiplexImageNode:(ASMultiplexImageNode *)imageNode
-    didDisplayUpdatedImage:(UIImage *)image
-            withIdentifier:(id)imageIdentifier;
+    didDisplayUpdatedImage:(nullable UIImage *)image
+            withIdentifier:(nullable ASImageIdentifier)imageIdentifier;
 
 /**
  * @abstract Notification that the image node finished displaying an image.
@@ -211,7 +214,7 @@ didFinishDownloadingImageWithIdentifier:(id)imageIdentifier
  * URL to the image via -multiplexImageNode:URLForImageIdentifier:.
  * @returns A UIImage corresponding to `imageIdentifier`, or nil if none is available.
  */
-- (UIImage *)multiplexImageNode:(ASMultiplexImageNode *)imageNode imageForImageIdentifier:(id)imageIdentifier;
+- (nullable UIImage *)multiplexImageNode:(ASMultiplexImageNode *)imageNode imageForImageIdentifier:(ASImageIdentifier)imageIdentifier;
 
 /**
  * @abstract An image URL for the specified identifier.
@@ -224,7 +227,7 @@ didFinishDownloadingImageWithIdentifier:(id)imageIdentifier
  * @return An NSURL for the image identified by `imageIdentifier`, or nil if none is available.
  * @see `+[NSURL URLWithAssetLocalIdentifier:targetSize:contentMode:options:]` below.
  */
-- (NSURL *)multiplexImageNode:(ASMultiplexImageNode *)imageNode URLForImageIdentifier:(id)imageIdentifier;
+- (nullable NSURL *)multiplexImageNode:(ASMultiplexImageNode *)imageNode URLForImageIdentifier:(ASImageIdentifier)imageIdentifier;
 
 /**
  * @abstract A PHAsset for the specific asset local identifier
@@ -236,7 +239,7 @@ didFinishDownloadingImageWithIdentifier:(id)imageIdentifier
  * @note This method may be called from any thread.
  * @return A PHAsset corresponding to `assetLocalIdentifier`, or nil if none is available.
  */
-- (PHAsset *)multiplexImageNode:(ASMultiplexImageNode *)imageNode assetForLocalIdentifier:(NSString *)assetLocalIdentifier;
+- (nullable PHAsset *)multiplexImageNode:(ASMultiplexImageNode *)imageNode assetForLocalIdentifier:(NSString *)assetLocalIdentifier;
 
 @end
 
@@ -258,3 +261,5 @@ didFinishDownloadingImageWithIdentifier:(id)imageIdentifier
                                options:(PHImageRequestOptions *)options;
 
 @end
+
+NS_ASSUME_NONNULL_END

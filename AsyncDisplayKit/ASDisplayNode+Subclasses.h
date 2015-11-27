@@ -15,6 +15,8 @@
 
 @class ASLayoutSpec;
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * The subclass header _ASDisplayNode+Subclasses_ defines the following methods that either must or can be overriden by
  * subclasses of ASDisplayNode.
@@ -85,7 +87,7 @@
  *
  * @warning Subclasses must not override this; it returns the last cached layout and is never expensive.
  */
-@property (nonatomic, readonly, assign) ASLayout *calculatedLayout;
+@property (nullable, nonatomic, readonly, assign) ASLayout *calculatedLayout;
 
 /** @name View Lifecycle */
 
@@ -191,7 +193,7 @@
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
 + (void)drawRect:(CGRect)bounds
-  withParameters:(id<NSObject>)parameters
+  withParameters:(nullable id<NSObject>)parameters
      isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
    isRasterizing:(BOOL)isRasterizing;
 
@@ -208,7 +210,7 @@
  *
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
-+ (UIImage *)displayWithParameters:(id<NSObject>)parameters
++ (nullable UIImage *)displayWithParameters:(nullable id<NSObject>)parameters
                        isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock;
 
 /**
@@ -218,7 +220,7 @@
  *
  * @note Called on the main thread only
  */
-- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
+- (nullable id<NSObject>)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
 
 /**
  * @abstract Indicates that the receiver is about to display.
@@ -305,7 +307,7 @@
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
 
 /**
  * @abstract Tells the node when touches moved in its view.
@@ -313,7 +315,7 @@
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
 
 /**
  * @abstract Tells the node when touches ended in its view.
@@ -321,7 +323,7 @@
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
 
 /**
  * @abstract Tells the node when touches was cancelled in its view.
@@ -329,7 +331,7 @@
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void)touchesCancelled:(nullable NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
 
 
 /** @name Managing Gesture Recognizers */
@@ -359,7 +361,7 @@
  * 1) allows sending events to plain UIViews that don't have attached nodes,
  * 2) hitTest: is never called before the views are created.
  */
-- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event;
+- (nullable UIView *)hitTest:(CGPoint)point withEvent:(nullable UIEvent *)event;
 
 
 /** @name Observing node-related changes */
@@ -410,7 +412,7 @@
  *
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
-- (UIImage *)placeholderImage;
+- (nullable UIImage *)placeholderImage;
 
 
 /** @name Description */
@@ -428,7 +430,7 @@
 @interface ASDisplayNode (ASDisplayNodePrivate)
 // This method has proven helpful in a few rare scenarios, similar to a category extension on UIView,
 // but it's considered private API for now and its use should not be encouraged.
-- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass;
+- (nullable ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass;
 
 // The two methods below will eventually be exposed, but their names are subject to change.
 /**
@@ -465,3 +467,5 @@
 
 #define ASDisplayNodeAssertThreadAffinity(viewNode)   ASDisplayNodeAssert(!viewNode || ASDisplayNodeThreadIsMain() || !(viewNode).nodeLoaded, @"Incorrect display node thread affinity - this method should not be called off the main thread after the ASDisplayNode's view or layer have been created")
 #define ASDisplayNodeCAssertThreadAffinity(viewNode) ASDisplayNodeCAssert(!viewNode || ASDisplayNodeThreadIsMain() || !(viewNode).nodeLoaded, @"Incorrect display node thread affinity - this method should not be called off the main thread after the ASDisplayNode's view or layer have been created")
+
+NS_ASSUME_NONNULL_END

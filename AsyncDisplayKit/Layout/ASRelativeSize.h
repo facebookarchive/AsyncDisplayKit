@@ -33,6 +33,7 @@ typedef struct {
 extern ASRelativeSizeRange const ASRelativeSizeRangeUnconstrained;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
+NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -
 #pragma mark ASRelativeSize
@@ -70,4 +71,5 @@ extern BOOL ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRange lhs,
 extern ASSizeRange ASRelativeSizeRangeResolve(ASRelativeSizeRange relativeSizeRange,
                                                        CGSize parentSize);
 
+NS_ASSUME_NONNULL_END
 ASDISPLAYNODE_EXTERN_C_END

@@ -10,6 +10,8 @@
 
 #import "ASBaseDefines.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef NS_OPTIONS(NSInteger, ASScrollDirection) {
   ASScrollDirectionNone  = 0,
   ASScrollDirectionRight = 1 << 0,
@@ -32,3 +34,5 @@ BOOL ASScrollDirectionContainsUp(ASScrollDirection scrollDirection);
 BOOL ASScrollDirectionContainsDown(ASScrollDirection scrollDirection);
 
 ASDISPLAYNODE_EXTERN_C_END
+
+NS_ASSUME_NONNULL_END

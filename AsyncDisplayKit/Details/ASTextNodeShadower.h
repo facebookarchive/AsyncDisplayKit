@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * @abstract Negates/inverts a UIEdgeInsets.
@@ -67,3 +68,5 @@ static inline UIEdgeInsets ASDNEdgeInsetsInvert(UIEdgeInsets insets)
 - (void)setShadowInContext:(CGContextRef)context;
 
 @end
+
+NS_ASSUME_NONNULL_END

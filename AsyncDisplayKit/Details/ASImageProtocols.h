@@ -9,6 +9,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASImageCacheProtocol <NSObject>
 
@@ -23,9 +24,9 @@
   @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image. This method should not block
       the calling thread as it is likely to be called from the main thread.
  */
-- (void)fetchCachedImageWithURL:(NSURL *)URL
-                  callbackQueue:(dispatch_queue_t)callbackQueue
-                     completion:(void (^)(CGImageRef imageFromCache))completion;
+- (void)fetchCachedImageWithURL:(nullable NSURL *)URL
+                  callbackQueue:(nullable dispatch_queue_t)callbackQueue
+                     completion:(void (^)(CGImageRef _Nullable imageFromCache))completion;
 
 @end
 
@@ -42,16 +43,14 @@
   @param completion The block to be invoked when the download has completed, or has failed.
   @param image The image that was downloaded, if the image could be successfully downloaded; nil otherwise.
   @param error An error describing why the download of `URL` failed, if the download failed; nil otherwise.
-  @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image and an error describing why the 
-      download failed. This method is likely to be called on the main thread, so any custom implementations should make
-      sure to background any expensive download operations.
+  @discussion This method is likely to be called on the main thread, so any custom implementations should make sure to background any expensive download operations.
   @result An opaque identifier to be used in canceling the download, via `cancelImageDownloadForIdentifier:`. You must 
       retain the identifier if you wish to use it later.
  */
-- (id)downloadImageWithURL:(NSURL *)URL
-             callbackQueue:(dispatch_queue_t)callbackQueue
-     downloadProgressBlock:(void (^)(CGFloat progress))downloadProgressBlock
-                completion:(void (^)(CGImageRef image, NSError *error))completion;
+- (nullable id)downloadImageWithURL:(NSURL *)URL
+             callbackQueue:(nullable dispatch_queue_t)callbackQueue
+     downloadProgressBlock:(void (^ _Nullable)(CGFloat progress))downloadProgressBlock
+                completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion;
 
 /**
   @abstract Cancels an image download.
@@ -59,6 +58,8 @@
       `downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:`.
   @discussion This method has no effect if `downloadIdentifier` is nil.
  */
-- (void)cancelImageDownloadForIdentifier:(id)downloadIdentifier;
+- (void)cancelImageDownloadForIdentifier:(nullable id)downloadIdentifier;
 
 @end
+
+NS_ASSUME_NONNULL_END

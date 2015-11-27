@@ -27,7 +27,7 @@ class ViewController: UIViewController, ASTableViewDataSource, ASTableViewDelega
     self.tableView.asyncDelegate = self
   }
 
-  required init(coder aDecoder: NSCoder) {
+  required init?(coder aDecoder: NSCoder) {
     fatalError("storyboards are incompatible with truth and beauty")
   }
 
