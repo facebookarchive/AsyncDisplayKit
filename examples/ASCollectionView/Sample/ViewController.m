@@ -13,6 +13,7 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "SupplementaryNode.h"
+#import "ItemNode.h"
 
 @interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
 {
@@ -78,11 +79,7 @@
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   NSString *text = [NSString stringWithFormat:@"[%zd.%zd] says hi", indexPath.section, indexPath.item];
-  ASTextCellNode *node = [[ASTextCellNode alloc] init];
-  node.text = text;
-  node.backgroundColor = [UIColor lightGrayColor];
-  
-  return node;
+  return [[ItemNode alloc] initWithString:text];
 }
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath

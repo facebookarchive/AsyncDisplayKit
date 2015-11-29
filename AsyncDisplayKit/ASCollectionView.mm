@@ -115,13 +115,22 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 @implementation _ASCollectionViewCell
 
+- (void)setNode:(ASCellNode *)node
+{
+  _node = node;
+  node.selected = self.selected;
+  node.highlighted = self.highlighted;
+}
+
 - (void)setSelected:(BOOL)selected
 {
+  [super setSelected:selected];
   _node.selected = selected;
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
+  [super setHighlighted:highlighted];
   _node.highlighted = highlighted;
 }
 
@@ -479,11 +488,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  
-  [_rangeController configureContentView:cell.contentView forCellNode:node];
-  
   cell.node = node;
-  
+  [_rangeController configureContentView:cell.contentView forCellNode:node];
   return cell;
 }
 
