@@ -144,7 +144,6 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 
 /** @name Getting view and layer */
 
-
 /** 
  * @abstract Returns a view.
  *
@@ -181,13 +180,16 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  */
 @property (nonatomic, readonly, retain) CALayer *layer;
 
+/**
+ * @abstract Returns the Interface State of the node.
+ *
+ * @return The current ASInterfaceState of the node, indicating whether it is visible and other situational properties.
+ *
+ * @see ASInterfaceState
+ */
 @property (nonatomic, readonly) ASInterfaceState interfaceState;
 
-- (void)enterInterfaceState:(ASInterfaceState)interfaceState;
-- (void)exitInterfaceState:(ASInterfaceState)interfaceState;
-
 /** @name Managing dimensions */
-
 
 /**
  * @abstract Asks the node to measure and return the size that best fits its subnodes.

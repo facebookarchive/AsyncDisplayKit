@@ -11,6 +11,7 @@
 #import "ASAssert.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASMultiDimensionalArrayUtils.h"
+#import "ASRangeHandlerVisible.h"
 #import "ASRangeHandlerRender.h"
 #import "ASRangeHandlerPreload.h"
 #import "ASInternalHelpers.h"
@@ -36,6 +37,7 @@
     _rangeIsValid = YES;
     _rangeTypeIndexPaths = [NSMutableDictionary dictionary];
     _rangeTypeHandlers = @{
+      @(ASLayoutRangeTypeVisible): [[ASRangeHandlerVisible alloc] init],
       @(ASLayoutRangeTypeRender): [[ASRangeHandlerRender alloc] init],
       @(ASLayoutRangeTypePreload): [[ASRangeHandlerPreload alloc] init],
     };

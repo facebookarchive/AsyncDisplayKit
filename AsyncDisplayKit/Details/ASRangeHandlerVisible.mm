@@ -6,22 +6,20 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASRangeHandlerPreload.h"
+#import "ASRangeHandlerVisible.h"
 #import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
 
-@implementation ASRangeHandlerPreload
+@implementation ASRangeHandlerVisible
 
 - (void)node:(ASDisplayNode *)node enteredRangeOfType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType == ASLayoutRangeTypePreload, @"Preload delegate should not handle other ranges");
-  [node enterInterfaceState:ASInterfaceStateFetchData];
+  [node enterInterfaceState:ASInterfaceStateVisible];
 }
 
 - (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType == ASLayoutRangeTypePreload, @"Preload delegate should not handle other ranges");
-  [node exitInterfaceState:ASInterfaceStateFetchData];
+  [node exitInterfaceState:ASInterfaceStateVisible];
 }
 
 @end

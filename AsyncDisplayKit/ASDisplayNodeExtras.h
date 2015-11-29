@@ -25,6 +25,14 @@ extern ASDisplayNode *ASLayerToDisplayNode(CALayer *layer);
 extern ASDisplayNode *ASViewToDisplayNode(UIView *view);
 
 /**
+ This function will walk the layer heirarchy, spanning discontinuous sections of the node heirarchy (e.g. the layers
+ of UIKit intermediate views in UIViewControllers, UITableView, UICollectionView).
+ In the event that a node's backing layer is not created yet, the function will only walk the direct subnodes instead
+ of forcing the layer heirarchy to be created.
+ */
+void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, void(^block)(ASDisplayNode *node));
+
+/**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.
  */
 extern id ASDisplayNodeFind(ASDisplayNode *node, BOOL (^block)(ASDisplayNode *node));

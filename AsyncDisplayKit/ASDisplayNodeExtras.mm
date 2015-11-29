@@ -10,14 +10,40 @@
 
 #import "ASDisplayNodeInternal.h"
 
-ASDisplayNode *ASLayerToDisplayNode(CALayer *layer)
+inline ASDisplayNode *ASLayerToDisplayNode(CALayer *layer)
 {
   return layer.asyncdisplaykit_node;
 }
 
-ASDisplayNode *ASViewToDisplayNode(UIView *view)
+inline ASDisplayNode *ASViewToDisplayNode(UIView *view)
 {
   return view.asyncdisplaykit_node;
+}
+
+void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, void(^block)(ASDisplayNode *node))
+{
+  if (!node) {
+    ASDisplayNodeCAssertNotNil(layer, @"Cannot recursively perform with nil node and nil layer");
+    ASDisplayNodeCAssertMainThread();
+    node = ASLayerToDisplayNode(layer);
+  }
+  
+  if (node) {
+    block(node);
+  }
+  if (!layer && [node isNodeLoaded]) {
+    layer = node.layer;
+  }
+  
+  if (layer) {
+    for (CALayer *sublayer in [layer sublayers]) {
+      ASDisplayNodePerformBlockOnEveryNode(sublayer, nil, block);
+    }
+  } else if (node) {
+    for (ASDisplayNode *subnode in [node subnodes]) {
+      ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
+    }
+  }
 }
 
 id ASDisplayNodeFind(ASDisplayNode *node, BOOL (^block)(ASDisplayNode *node))

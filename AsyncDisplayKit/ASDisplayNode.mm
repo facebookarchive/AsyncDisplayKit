@@ -1650,6 +1650,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   _placeholderImage = nil;
 }
 
+// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or exitInterfaceState:
 - (void)recursivelyClearContents
 {
   for (ASDisplayNode *subnode in self.subnodes) {
@@ -1663,6 +1664,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   // subclass override
 }
 
+// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or enterInterfaceState:
 - (void)recursivelyFetchData
 {
   for (ASDisplayNode *subnode in self.subnodes) {
@@ -1676,6 +1678,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   // subclass override
 }
 
+// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or exitInterfaceState:
 - (void)recursivelyClearFetchedData
 {
   for (ASDisplayNode *subnode in self.subnodes) {
@@ -1731,42 +1734,16 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState
 {
-  recursivelyPerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState |= interfaceState;
   });
 }
 
 - (void)exitInterfaceState:(ASInterfaceState)interfaceState
 {
-  recursivelyPerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
-    node.interfaceState &= (!interfaceState);
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+    node.interfaceState &= (~interfaceState);
   });
-}
-
-void recursivelyPerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, void(^performOnNode)(ASDisplayNode *node))
-{
-  if (!node) {
-    ASDisplayNodeCAssertNotNil(layer, @"Cannot recursively perform with nil node and nil layer");
-    ASDisplayNodeCAssertMainThread();
-    node = [layer asyncdisplaykit_node];
-  }
-  
-  if (node) {
-    performOnNode(node);
-  }
-  if (!layer && [node isNodeLoaded]) {
-    layer = node.layer;
-  }
-  
-  if (layer) {
-    for (CALayer *sublayer in [layer sublayers]) {
-      recursivelyPerformBlockOnEveryNode(sublayer, nil, performOnNode);
-    }
-  } else if (node) {
-    for (ASDisplayNode *subnode in [node subnodes]) {
-      recursivelyPerformBlockOnEveryNode(nil, subnode, performOnNode);
-    }
-  }
 }
 
 - (void)layout
@@ -1825,6 +1802,7 @@ void recursivelyPerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, voi
 
 - (void)setNeedsDisplayAtScale:(CGFloat)contentsScale
 {
+  ASDN::MutexLocker l(_propertyLock);
   if (contentsScale != self.contentsScaleForDisplay) {
     self.contentsScaleForDisplay = contentsScale;
     [self setNeedsDisplay];
@@ -1833,12 +1811,9 @@ void recursivelyPerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, voi
 
 - (void)recursivelySetNeedsDisplayAtScale:(CGFloat)contentsScale
 {
-  [self setNeedsDisplayAtScale:contentsScale];
-
-  ASDN::MutexLocker l(_propertyLock);
-  for (ASDisplayNode *child in _subnodes) {
-    [child recursivelySetNeedsDisplayAtScale:contentsScale];
-  }
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+    [node setNeedsDisplayAtScale:contentsScale];
+  });
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -1974,6 +1949,7 @@ void recursivelyPerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, voi
   _recursivelySetDisplaySuspended(self, nil, flag);
 }
 
+// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or a variant with a condition / test block.
 static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer, BOOL flag)
 {
   // If there is no layer, but node whose its view is loaded, then we can traverse down its layer hierarchy.  Otherwise we must stick to the node hierarchy to avoid loading views prematurely.  Note that for nodes that haven't loaded their views, they can't possibly have subviews/sublayers, so we don't need to traverse the layer hierarchy for them.
