@@ -46,7 +46,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
   ASInterfaceStateMeasureLayout = 1 << 1,
   /** The element is likely enough to come onscreen that disk and/or network data required for display should be fetched. */
   ASInterfaceStateFetchData     = 1 << 2,
-  /** The elemant is very likely to become visible, and concurrent rendering should be executed for any -setNeedsDisplay. */
+  /** The element is very likely to become visible, and concurrent rendering should be executed for any -setNeedsDisplay. */
   ASInterfaceStateDisplay       = 1 << 3,
   /** The element is physically onscreen by at least 1 pixel.
    In practice, all other bit fields should also be set when this flag is set. */
