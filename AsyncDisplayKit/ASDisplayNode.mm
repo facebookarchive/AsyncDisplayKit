@@ -1691,6 +1691,39 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 - (void)setInterfaceState:(ASInterfaceState)interfaceState
 {
   if (interfaceState != _interfaceState) {
+    if ((interfaceState & ASInterfaceStateMeasureLayout) != (_interfaceState & ASInterfaceStateMeasureLayout)) {
+      // Trigger asynchronous measurement if it is not already cached or being calculated.
+    }
+    
+    // Entered or exited data loading state.
+    if ((interfaceState & ASInterfaceStateFetchData) != (_interfaceState & ASInterfaceStateFetchData)) {
+      if (interfaceState & ASInterfaceStateFetchData) {
+        [self fetchData];
+      } else {
+        [self clearFetchedData];
+      }
+    }
+
+    // Entered or exited contents rendering state.
+    if ((interfaceState & ASInterfaceStateDisplay) != (_interfaceState & ASInterfaceStateDisplay)) {
+      if (interfaceState & ASInterfaceStateDisplay) {
+        // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
+        [self setDisplaySuspended:NO];
+      } else {
+        [self setDisplaySuspended:YES];
+        [self clearContents];
+      }
+    }
+
+    // Entered or exited data loading state.
+    if ((interfaceState & ASInterfaceStateVisible) != (_interfaceState & ASInterfaceStateVisible)) {
+      if (interfaceState & ASInterfaceStateVisible) {
+        // Consider providing a -didBecomeVisible.
+      } else {
+        // Consider providing a -didBecomeInvisible.
+      }
+    }
+    
     _interfaceState = interfaceState;
   }
 }
