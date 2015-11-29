@@ -125,7 +125,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;
 - (BOOL)__shouldSize;
-- (void)__exitedHierarchy;
 
 // Core implementation of -measureWithSizeRange:. Must be called with _propertyLock held.
 - (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize;
