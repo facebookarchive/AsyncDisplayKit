@@ -1729,6 +1729,46 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   }
 }
 
+- (void)enterInterfaceState:(ASInterfaceState)interfaceState
+{
+  recursivelyPerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+    node.interfaceState |= interfaceState;
+  });
+}
+
+- (void)exitInterfaceState:(ASInterfaceState)interfaceState
+{
+  recursivelyPerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+    node.interfaceState &= (!interfaceState);
+  });
+}
+
+void recursivelyPerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, void(^performOnNode)(ASDisplayNode *node))
+{
+  if (!node) {
+    ASDisplayNodeCAssertNotNil(layer, @"Cannot recursively perform with nil node and nil layer");
+    ASDisplayNodeCAssertMainThread();
+    node = [layer asyncdisplaykit_node];
+  }
+  
+  if (node) {
+    performOnNode(node);
+  }
+  if (!layer && [node isNodeLoaded]) {
+    layer = node.layer;
+  }
+  
+  if (layer) {
+    for (CALayer *sublayer in [layer sublayers]) {
+      recursivelyPerformBlockOnEveryNode(sublayer, nil, performOnNode);
+    }
+  } else if (node) {
+    for (ASDisplayNode *subnode in [node subnodes]) {
+      recursivelyPerformBlockOnEveryNode(nil, subnode, performOnNode);
+    }
+  }
+}
+
 - (void)layout
 {
   ASDisplayNodeAssertMainThread();

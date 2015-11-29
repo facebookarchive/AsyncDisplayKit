@@ -16,13 +16,13 @@
 - (void)node:(ASDisplayNode *)node enteredRangeOfType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssert(rangeType == ASLayoutRangeTypePreload, @"Preload delegate should not handle other ranges");
-  [node recursivelyFetchData];
+  [node enterInterfaceState:ASInterfaceStateFetchData];
 }
 
 - (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssert(rangeType == ASLayoutRangeTypePreload, @"Preload delegate should not handle other ranges");
-  [node recursivelyClearFetchedData];
+  [node exitInterfaceState:ASInterfaceStateFetchData];
 }
 
 @end

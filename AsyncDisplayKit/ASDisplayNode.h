@@ -181,7 +181,10 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  */
 @property (nonatomic, readonly, retain) CALayer *layer;
 
-@property (nonatomic, readwrite) ASInterfaceState interfaceState;
+@property (nonatomic, readonly) ASInterfaceState interfaceState;
+
+- (void)enterInterfaceState:(ASInterfaceState)interfaceState;
+- (void)exitInterfaceState:(ASInterfaceState)interfaceState;
 
 /** @name Managing dimensions */
 
