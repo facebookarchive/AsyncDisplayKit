@@ -664,7 +664,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASSizeRange constrainedSize;
+  ASSizeRange constrainedSize = CGSizeZero;
   if (_layoutInspector) {
     constrainedSize = [_layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
   }
