@@ -287,6 +287,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   
   _imageIdentifiers = [imageIdentifiers copy];
   OSSpinLockUnlock(&_imageIdentifiersLock);
+  if (self.interfaceState & ASInterfaceStateFetchData) {
+    [self fetchData];
+  }
 }
 
 - (void)reloadImageIdentifierSources
