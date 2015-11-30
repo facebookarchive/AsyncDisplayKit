@@ -116,6 +116,7 @@
   
   // At this point, the node's layer may validly be present either in the workingWindow, or in the contentsView of a cell.
   [node.layer removeFromSuperlayer];
+
 #else
   if (![node isLayerBacked]) {
     [node.view removeFromSuperview];
