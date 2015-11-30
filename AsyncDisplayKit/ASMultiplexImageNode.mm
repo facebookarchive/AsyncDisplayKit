@@ -276,9 +276,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (void)setImageIdentifiers:(NSArray *)imageIdentifiers
 {
-  ASDN::MutexLocker l(_imageIdentifiersLock);
+  _imageIdentifiersLock.lock();
 
   if (ASObjectIsEqual(_imageIdentifiers, imageIdentifiers)) {
+    _imageIdentifiersLock.unlock();
     return;
   }
 
