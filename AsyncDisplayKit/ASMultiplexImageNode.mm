@@ -271,7 +271,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 - (NSArray *)imageIdentifiers
 {
   ASDN::MutexLocker l(_imageIdentifiersLock);
-  return [_imageIdentifiers copy];
+  return _imageIdentifiers;
 }
 
 - (void)setImageIdentifiers:(NSArray *)imageIdentifiers
@@ -282,7 +282,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     return;
   }
 
-  _imageIdentifiers = [_imageIdentifiers copy];
+  _imageIdentifiers = [[NSArray alloc] initWithArray:imageIdentifiers copyItems:YES];
   _imageIdentifiersLock.unlock();
 
   if (self.interfaceState & ASInterfaceStateFetchData) {
