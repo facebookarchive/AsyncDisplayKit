@@ -306,7 +306,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   if (ASObjectIsEqual(displayedImageIdentifier, _displayedImageIdentifier))
     return;
 
-  _displayedImageIdentifier = [displayedImageIdentifier copy];
+  _displayedImageIdentifier = displayedImageIdentifier;
 
   // Delegateify.
   // Note that we're using the params here instead of self.image and _displayedImageIdentifier because those can change before the async block below executes.
@@ -365,7 +365,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     UIImage *image = [_dataSource multiplexImageNode:self imageForImageIdentifier:imageIdentifier];
     if (image) {
       if (imageIdentifierOut) {
-        *imageIdentifierOut = [imageIdentifier copy];
+        *imageIdentifierOut = imageIdentifier;
       }
 
       return image;
