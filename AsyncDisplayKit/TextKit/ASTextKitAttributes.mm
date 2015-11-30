@@ -33,5 +33,5 @@ size_t ASTextKitAttributes::hash() const
     std::hash<CGFloat>()(shadowOpacity),
     std::hash<CGFloat>()(shadowRadius),
   };
-  return CKIntegerArrayHash(subhashes, sizeof(subhashes) / sizeof(subhashes[0]));
+  return ASIntegerArrayHash(subhashes, sizeof(subhashes) / sizeof(subhashes[0]));
 }

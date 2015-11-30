@@ -15,12 +15,12 @@
 #import <stdio.h>
 #import <string>
 
-NSUInteger CKIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count)
+NSUInteger ASIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count)
 {
   uint64_t result = subhashes[0];
   for (int ii = 1; ii < count; ++ii) {
-    result = CKHashCombine(result, subhashes[ii]);
+    result = ASHashCombine(result, subhashes[ii]);
   }
-  return CKHash64ToNative(result);
+  return ASHash64ToNative(result);
 }
 

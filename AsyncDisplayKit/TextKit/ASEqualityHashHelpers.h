@@ -16,7 +16,7 @@
 // This is the Hash128to64 function from Google's cityhash (available
 // under the MIT License).  We use it to reduce multiple 64 bit hashes
 // into a single hash.
-inline uint64_t CKHashCombine(const uint64_t upper, const uint64_t lower) {
+inline uint64_t ASHashCombine(const uint64_t upper, const uint64_t lower) {
   // Murmur-inspired hashing.
   const uint64_t kMul = 0x9ddfea08eb382d69ULL;
   uint64_t a = (lower ^ upper) * kMul;
@@ -28,13 +28,13 @@ inline uint64_t CKHashCombine(const uint64_t upper, const uint64_t lower) {
 }
 
 #if __LP64__
-inline size_t CKHash64ToNative(uint64_t key) {
+inline size_t ASHash64ToNative(uint64_t key) {
   return key;
 }
 #else
 
 // Thomas Wang downscaling hash function
-inline size_t CKHash64ToNative(uint64_t key) {
+inline size_t ASHash64ToNative(uint64_t key) {
   key = (~key) + (key << 18);
   key = key ^ (key >> 31);
   key = key * 21;
@@ -45,9 +45,9 @@ inline size_t CKHash64ToNative(uint64_t key) {
 }
 #endif
 
-NSUInteger CKIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count);
+NSUInteger ASIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count);
 
-namespace CK {
+namespace AS {
   // Default is not an ObjC class
   template<typename T, typename V = bool>
   struct is_objc_class : std::false_type { };
@@ -56,7 +56,7 @@ namespace CK {
   template<typename T>
   struct is_objc_class<T, typename std::enable_if<std::is_convertible<T, id>::value, bool>::type> : std::true_type { };
   
-  // CKUtils::hash<T>()(value) -> either std::hash<T> if c++ or [o hash] if ObjC object.
+  // ASUtils::hash<T>()(value) -> either std::hash<T> if c++ or [o hash] if ObjC object.
   template <typename T, typename Enable = void> struct hash;
   
   // For non-objc types, defer to std::hash
@@ -91,7 +91,7 @@ namespace CK {
   
 };
 
-namespace CKTupleOperations
+namespace ASTupleOperations
 {
   // Recursive case (hash up to Index)
   template <class Tuple, size_t Index = std::tuple_size<Tuple>::value - 1>
@@ -101,8 +101,8 @@ namespace CKTupleOperations
     {
       size_t prev = _hash_helper<Tuple, Index-1>::hash(tuple);
       using TypeForIndex = typename std::tuple_element<Index,Tuple>::type;
-      size_t thisHash = CK::hash<TypeForIndex>()(std::get<Index>(tuple));
-      return CKHashCombine(prev, thisHash);
+      size_t thisHash = AS::hash<TypeForIndex>()(std::get<Index>(tuple));
+      return ASHashCombine(prev, thisHash);
     }
   };
   
@@ -113,7 +113,7 @@ namespace CKTupleOperations
     static size_t hash(Tuple const& tuple)
     {
       using TypeForIndex = typename std::tuple_element<0,Tuple>::type;
-      return CK::hash<TypeForIndex>()(std::get<0>(tuple));
+      return AS::hash<TypeForIndex>()(std::get<0>(tuple));
     }
   };
   
@@ -127,7 +127,7 @@ namespace CKTupleOperations
       using TypeForIndex = typename std::tuple_element<Index,Tuple>::type;
       auto aValue = std::get<Index>(a);
       auto bValue = std::get<Index>(b);
-      return prev && CK::is_equal<TypeForIndex>()(aValue, bValue);
+      return prev && AS::is_equal<TypeForIndex>()(aValue, bValue);
     }
   };
   
@@ -140,7 +140,7 @@ namespace CKTupleOperations
       using TypeForIndex = typename std::tuple_element<0,Tuple>::type;
       auto& aValue = std::get<0>(a);
       auto& bValue = std::get<0>(b);
-      return CK::is_equal<TypeForIndex>()(aValue, bValue);
+      return AS::is_equal<TypeForIndex>()(aValue, bValue);
     }
   };
   
