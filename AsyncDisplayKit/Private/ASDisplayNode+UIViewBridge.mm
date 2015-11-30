@@ -206,7 +206,7 @@
   CGRect  bounds      = (CGRect){ origin, rect.size };
   CGPoint position    = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
                                     rect.origin.y + rect.size.height * anchorPoint.y);
-  
+
   if (useLayer) {
     _layer.bounds = bounds;
     _layer.position = position;
