@@ -63,7 +63,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // Image flags.
   BOOL _downloadsIntermediateImages; // Defaults to NO.
-  OSSpinLock _imageIdentifiersLock;
+  ASDN::Mutex _imageIdentifiersLock;
   NSArray *_imageIdentifiers;
   id _loadedImageIdentifier;
   id _loadingImageIdentifier;
@@ -270,23 +270,21 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (NSArray *)imageIdentifiers
 {
-  OSSpinLockLock(&_imageIdentifiersLock);
-  NSArray *imageIdentifiers = [_imageIdentifiers copy];
-  OSSpinLockUnlock(&_imageIdentifiersLock);
-  return imageIdentifiers;
+  ASDN::MutexLocker l(_imageIdentifiersLock);
+  return [_imageIdentifiers copy];
 }
 
 - (void)setImageIdentifiers:(NSArray *)imageIdentifiers
 {
-  OSSpinLockLock(&_imageIdentifiersLock);
+  ASDN::MutexLocker l(_imageIdentifiersLock);
 
   if (ASObjectIsEqual(_imageIdentifiers, imageIdentifiers)) {
-    OSSpinLockUnlock(&_imageIdentifiersLock);
     return;
   }
-  
-  _imageIdentifiers = [imageIdentifiers copy];
-  OSSpinLockUnlock(&_imageIdentifiersLock);
+
+  _imageIdentifiers = [_imageIdentifiers copy];
+  _imageIdentifiersLock.unlock();
+
   if (self.interfaceState & ASInterfaceStateFetchData) {
     [self fetchData];
   }
@@ -355,11 +353,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (UIImage *)_bestImmediatelyAvailableImageFromDataSource:(id *)imageIdentifierOut
 {
-  OSSpinLockLock(&_imageIdentifiersLock);
+  ASDN::MutexLocker l(_imageIdentifiersLock);
 
   // If we don't have any identifiers to load or don't implement the image DS method, bail.
   if ([_imageIdentifiers count] == 0 || !_dataSourceFlags.image) {
-    OSSpinLockUnlock(&_imageIdentifiersLock);
     return nil;
   }
 
@@ -371,12 +368,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
         *imageIdentifierOut = [imageIdentifier copy];
       }
 
-      OSSpinLockUnlock(&_imageIdentifiersLock);
       return image;
     }
   }
 
-  OSSpinLockUnlock(&_imageIdentifiersLock);
   return nil;
 }
 
@@ -384,12 +379,11 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 #pragma mark -
 - (id)_nextImageIdentifierToDownload
 {
-  OSSpinLockLock(&_imageIdentifiersLock);
+  ASDN::MutexLocker l(_imageIdentifiersLock);
 
   // If we've already loaded the best identifier, we've got nothing else to do.
   id bestImageIdentifier = _imageIdentifiers.firstObject;
   if (!bestImageIdentifier || ASObjectIsEqual(_loadedImageIdentifier, bestImageIdentifier)) {
-    OSSpinLockUnlock(&_imageIdentifiersLock);
     return nil;
   }
 
@@ -412,8 +406,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       nextImageIdentifierToDownload = _imageIdentifiers[loadedIndex - 1];
     }
   }
-
-  OSSpinLockUnlock(&_imageIdentifiersLock);
 
   return nextImageIdentifierToDownload;
 }
@@ -683,9 +675,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   if (error && !([error.domain isEqual:ASMultiplexImageNodeErrorDomain] && error.code == ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged))
     return;
 
-  OSSpinLockLock(&_imageIdentifiersLock);
+
+  _imageIdentifiersLock.lock();
   NSUInteger imageIdentifierCount = [_imageIdentifiers count];
-  OSSpinLockUnlock(&_imageIdentifiersLock);
+  _imageIdentifiersLock.unlock();
 
   // Update our image if we got one, or if we're not supposed to display one at all.
   // We explicitly perform this check because our datasource often doesn't give back immediately available images, even though we might have downloaded one already.
