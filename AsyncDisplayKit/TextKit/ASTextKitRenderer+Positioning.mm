@@ -258,7 +258,7 @@ static const CGFloat ASTextKitRendererTextCapHeightPadding = 1.3;
   return properGlyphRect;
 }
 
-- (void)enumerateTextIndexesAtPosition:(CGPoint)externalPosition usingBlock:(ck_text_component_index_block_t)block
+- (void)enumerateTextIndexesAtPosition:(CGPoint)externalPosition usingBlock:(as_text_component_index_block_t)block
 {
   // This method is a little complex because it has to call out to client code from inside an enumeration that needs
   // to achieve a lock on the textkit components.  It cannot call out to client code from within that lock so we just

@@ -10,7 +10,7 @@
 
 #import "ASTextKitRenderer.h"
 
-typedef void (^ck_text_component_index_block_t)(NSUInteger characterIndex,
+typedef void (^as_text_component_index_block_t)(NSUInteger characterIndex,
                                                 CGRect glyphBoundingRect,
                                                 BOOL *stop);
 
@@ -79,7 +79,7 @@ typedef NS_ENUM(NSUInteger, ASTextKitRendererMeasureOption) {
  Triggers initialization of textkit components, truncation, and sizing.
  */
 - (void)enumerateTextIndexesAtPosition:(CGPoint)position
-                            usingBlock:(ck_text_component_index_block_t)block;
+                            usingBlock:(as_text_component_index_block_t)block;
 
 /**
  Returns the single text index whose glyph's centroid is closest to the given position.
