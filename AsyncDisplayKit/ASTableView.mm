@@ -179,6 +179,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   CGFloat _nodesConstrainedWidth;
   BOOL _ignoreNodesConstrainedWidthChange;
+  BOOL _queuedNodeHeightUpdate;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -909,10 +910,26 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark - ASCellNodeLayoutDelegate
 
-- (void)nodeDidRelayout:(ASCellNode *)node
+- (void)nodeDidRelayoutWithSizeChange:(ASCellNode *)node
 {
   ASDisplayNodeAssertMainThread();
-  // Cause UITableView to requery for the new height of this node
+
+  if (_queuedNodeHeightUpdate) {
+    return;
+  }
+
+  _queuedNodeHeightUpdate = YES;
+  [self performSelector:@selector(requeryNodeHeights)
+             withObject:nil
+             afterDelay:0
+                inModes:@[ NSRunLoopCommonModes ]];
+}
+
+// Cause UITableView to requery for the new height of this node
+- (void)requeryNodeHeights
+{
+  _queuedNodeHeightUpdate = NO;
+
   [super beginUpdates];
   [super endUpdates];
 }
