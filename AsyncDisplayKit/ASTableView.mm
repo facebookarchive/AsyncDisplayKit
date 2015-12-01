@@ -21,7 +21,7 @@
 // FIXME: Temporary nonsense import until method names are finalized and exposed
 #import "ASDisplayNode+Subclasses.h"
 
-static NSString * const reuseIdentifier = @"_ASCollectionViewCell";
+static NSString * const reuseIdentifier = @"_ASTableViewCell";
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
