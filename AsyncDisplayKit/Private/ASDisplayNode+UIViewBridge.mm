@@ -206,7 +206,7 @@
   CGRect  bounds      = (CGRect){ origin, rect.size };
   CGPoint position    = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
                                     rect.origin.y + rect.size.height * anchorPoint.y);
-  
+
   if (useLayer) {
     _layer.bounds = bounds;
     _layer.position = position;
@@ -218,12 +218,10 @@
 
 - (void)setNeedsDisplay
 {
-  ASDisplayNode *rasterizedContainerNode = [self __rasterizedContainerNode];
-  if (rasterizedContainerNode) {
-    [rasterizedContainerNode setNeedsDisplay];
-  } else {
-    [_layer setNeedsDisplay];
-  }
+  _bridge_prologue;
+  // Send the message to the view/layer first, as __setNeedsDisplay may call -displayIfNeeded.
+  _messageToViewOrLayer(setNeedsDisplay);
+  [self __setNeedsDisplay];
 }
 
 - (void)setNeedsLayout
