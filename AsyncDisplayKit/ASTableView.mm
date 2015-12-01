@@ -21,7 +21,7 @@
 // FIXME: Temporary nonsense import until method names are finalized and exposed
 #import "ASDisplayNode+Subclasses.h"
 
-static NSString * const reuseIdentifier = @"_ASTableViewCell";
+static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -226,7 +226,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   // and should not trigger a relayout.
   _ignoreNodesConstrainedWidthChange = (_nodesConstrainedWidth == 0);
 
-  [self registerClass:_ASTableViewCell.class forCellReuseIdentifier:reuseIdentifier];
+  [self registerClass:_ASTableViewCell.class forCellReuseIdentifier:kCellReuseIdentifier];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -532,7 +532,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  _ASTableViewCell *cell = [self dequeueReusableCellWithIdentifier:reuseIdentifier forIndexPath:indexPath];
+  _ASTableViewCell *cell = [self dequeueReusableCellWithIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
   cell.delegate = self;
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];

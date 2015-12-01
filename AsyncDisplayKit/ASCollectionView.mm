@@ -22,7 +22,7 @@
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
-static NSString * const reuseIdentifier = @"_ASCollectionViewCell";
+static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 #pragma mark -
 #pragma mark Proxying.
@@ -246,7 +246,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   self.backgroundColor = [UIColor whiteColor];
   
-  [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:reuseIdentifier];
+  [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
   
   return self;
 }
@@ -484,7 +484,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
   cell.node = node;
