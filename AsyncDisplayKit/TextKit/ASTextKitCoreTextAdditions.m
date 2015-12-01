@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASTextNodeCoreTextAdditions.h"
+#import "ASTextKitCoreTextAdditions.h"
 
 #import <CoreText/CTFont.h>
 #import <CoreText/CTStringAttributes.h>
@@ -155,7 +155,7 @@ NSAttributedString *ASCleanseAttributedStringOfCoreTextAttributes(NSAttributedSt
 
 #pragma mark -
 #pragma mark -
-@implementation NSParagraphStyle (ASTextNodeCoreTextAdditions)
+@implementation NSParagraphStyle (ASTextKitCoreTextAdditions)
 
 + (instancetype)paragraphStyleWithCTParagraphStyle:(CTParagraphStyleRef)coreTextParagraphStyle;
 {

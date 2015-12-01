@@ -63,7 +63,7 @@ ASDISPLAYNODE_EXTERN_C_END
 
 #pragma mark -
 #pragma mark -
-@interface NSParagraphStyle (ASTextNodeCoreTextAdditions)
+@interface NSParagraphStyle (ASTextKitCoreTextAdditions)
 
 /**
   @abstract Returns an NSParagraphStyle initialized with the paragraph specifiers from the given CTParagraphStyleRef.
