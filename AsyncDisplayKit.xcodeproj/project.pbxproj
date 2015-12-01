@@ -188,6 +188,7 @@
 		257754C41BEE458E00737CA5 /* ASTextNodeWordKerner.m in Sources */ = {isa = PBXBuildFile; fileRef = 257754BD1BEE458E00737CA5 /* ASTextNodeWordKerner.m */; };
 		258FF4271C0D152600A83844 /* ASRangeHandlerVisible.h in Headers */ = {isa = PBXBuildFile; fileRef = 258FF4251C0D152600A83844 /* ASRangeHandlerVisible.h */; };
 		258FF4281C0D152600A83844 /* ASRangeHandlerVisible.mm in Sources */ = {isa = PBXBuildFile; fileRef = 258FF4261C0D152600A83844 /* ASRangeHandlerVisible.mm */; };
+		25A977EF1C0D2A5500406B62 /* ASRangeHandlerVisible.mm in Sources */ = {isa = PBXBuildFile; fileRef = 258FF4261C0D152600A83844 /* ASRangeHandlerVisible.mm */; };
 		25BAA16F1C0D18D2002747C7 /* ASRangeHandlerVisible.h in Headers */ = {isa = PBXBuildFile; fileRef = 258FF4251C0D152600A83844 /* ASRangeHandlerVisible.h */; };
 		2767E9411BB19BD600EA9B77 /* ASViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2767E9421BB19BD600EA9B77 /* ASViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ACC945AA1BA9E7C1005E1FB8 /* ASViewController.m */; };
@@ -1798,6 +1799,7 @@
 				34EFC7661B701CD200AD841F /* ASRelativeSize.mm in Sources */,
 				254C6B851BF94F8A003EC431 /* ASTextKitAttributes.mm in Sources */,
 				509E68601B3AED8E009B9150 /* ASScrollDirection.m in Sources */,
+				25A977EF1C0D2A5500406B62 /* ASRangeHandlerVisible.mm in Sources */,
 				B35062091B010EFD0018CF92 /* ASScrollNode.m in Sources */,
 				B35062561B010EFD0018CF92 /* ASSentinel.m in Sources */,
 				9C8221981BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */,
