@@ -1707,7 +1707,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   // Assume that _layout was flattened and is 1-level deep.
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
     ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.");
-    CGRect subnodeFrame = (CGRect){ subnodeLayout.position, subnodeLayout.size};
+    CGRect subnodeFrame = (CGRect){ subnodeLayout.position, subnodeLayout.size };
     ASDisplayNode *subnode = ((ASDisplayNode *)subnodeLayout.layoutableObject);
     
     CGPoint origin      = subnode.bounds.origin;
