@@ -55,10 +55,11 @@
   ASDisplayNodeAssertThreadAffinity(self);  
   CGSize oldSize = self.calculatedSize;
   [super setNeedsLayout];
-  
-  if (_layoutDelegate != nil && !CGSizeEqualToSize(oldSize, self.calculatedSize)) {
+
+  if (_layoutDelegate != nil) {
+    BOOL sizeChanged = !CGSizeEqualToSize(oldSize, self.calculatedSize);
     ASPerformBlockOnMainThread(^{
-      [_layoutDelegate nodeDidRelayoutWithSizeChange:self];
+      [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }
 }

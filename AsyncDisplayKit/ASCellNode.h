@@ -15,13 +15,13 @@ typedef NSUInteger ASCellNodeAnimation;
 @protocol ASCellNodeLayoutDelegate <NSObject>
 
 /**
- * Notifies the delegate that the specified cell node has done a relayout
- * that resulted in a change of `calculatedSize`.
+ * Notifies the delegate that the specified cell node has done a relayout.
  * The notification is done on main thread.
  *
  * @param node A node informing the delegate about the relayout.
+ * @param sizeChanged `YES` if the node's `calculatedSize` changed during the relayout, `NO` otherwise.
  */
-- (void)nodeDidRelayoutWithSizeChange:(ASCellNode *)node;
+- (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
 @end
 
 /**

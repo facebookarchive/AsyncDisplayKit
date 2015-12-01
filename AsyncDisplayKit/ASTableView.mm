@@ -910,11 +910,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark - ASCellNodeLayoutDelegate
 
-- (void)nodeDidRelayoutWithSizeChange:(ASCellNode *)node
+- (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();
 
-  if (_queuedNodeHeightUpdate) {
+  if (!sizeChanged || _queuedNodeHeightUpdate) {
     return;
   }
 
