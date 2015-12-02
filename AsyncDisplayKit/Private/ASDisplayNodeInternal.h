@@ -72,6 +72,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
   NSMutableSet *_pendingDisplayNodes;
 
   _ASPendingState *_pendingViewState;
+  
+  ASInterfaceState _interfaceState;
 
   struct ASDisplayNodeFlags {
     // public properties
@@ -116,10 +118,13 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 // Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
 
+// These methods are recursive, and either union or remove the provided interfaceState to all sub-elements.
+- (void)enterInterfaceState:(ASInterfaceState)interfaceState;
+- (void)exitInterfaceState:(ASInterfaceState)interfaceState;
+
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;
 - (BOOL)__shouldSize;
-- (void)__exitedHierarchy;
 
 // Core implementation of -measureWithSizeRange:. Must be called with _propertyLock held.
 - (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize;

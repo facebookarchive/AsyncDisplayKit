@@ -26,14 +26,19 @@
   }
   
   _tuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
+  _tuningParameters[ASLayoutRangeTypeVisible] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  _tuningParameters[ASLayoutRangeTypeRender] = {
+    .leadingBufferScreenfuls = 1.5,
+    .trailingBufferScreenfuls = 0.75
+  };
   _tuningParameters[ASLayoutRangeTypePreload] = {
     .leadingBufferScreenfuls = 3,
     .trailingBufferScreenfuls = 2
   };
-  _tuningParameters[ASLayoutRangeTypeRender] = {
-    .leadingBufferScreenfuls = 2,
-    .trailingBufferScreenfuls = 1
-  };
+
   
   return self;
 }
@@ -49,6 +54,7 @@
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  ASDisplayNodeAssert(rangeType != ASLayoutRangeTypeVisible, @"Must not set Visible range tuning parameters (always 0, 0)");
   _tuningParameters[rangeType] = tuningParameters;
 }
 

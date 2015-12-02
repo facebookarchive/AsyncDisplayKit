@@ -379,11 +379,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return YES;
 }
 
-- (void)__exitedHierarchy
-{
-
-}
-
 - (UIView *)_viewToLoad
 {
   UIView *view;
@@ -787,55 +782,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return transform;
 }
 
-static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possibleAncestor, ASDisplayNode *possibleDescendent)
-{
-  ASDisplayNode *supernode = possibleDescendent;
-  while (supernode) {
-    if (supernode == possibleAncestor) {
-      return YES;
-    }
-    supernode = supernode.supernode;
-  }
-
-  return NO;
-}
-
-/**
- * NOTE: It is an error to try to convert between nodes which do not share a common ancestor. This behavior is
- * disallowed in UIKit documentation and the behavior is left undefined. The output does not have a rigorously defined
- * failure mode (i.e. returning CGPointZero or returning the point exactly as passed in). Rather than track the internal
- * undefined and undocumented behavior of UIKit in ASDisplayNode, this operation is defined to be incorrect in all
- * circumstances and must be fixed wherever encountered.
- */
-static inline ASDisplayNode *_ASDisplayNodeFindClosestCommonAncestor(ASDisplayNode *node1, ASDisplayNode *node2)
-{
-  ASDisplayNode *possibleAncestor = node1;
-  while (possibleAncestor) {
-    if (_ASDisplayNodeIsAncestorOfDisplayNode(possibleAncestor, node2)) {
-      break;
-    }
-    possibleAncestor = possibleAncestor.supernode;
-  }
-
-  ASDisplayNodeCAssertNotNil(possibleAncestor, @"Could not find a common ancestor between node1: %@ and node2: %@", node1, node2);
-  return possibleAncestor;
-}
-
-static inline ASDisplayNode *_getRootNode(ASDisplayNode *node)
-{
-  // node <- supernode on each loop
-  // previous <- node on each loop where node is not nil
-  // previous is the final non-nil value of supernode, i.e. the root node
-  ASDisplayNode *previousNode = node;
-  while ((node = [node supernode])) {
-    previousNode = node;
-  }
-  return previousNode;
-}
-
 static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNode *referenceNode, ASDisplayNode *targetNode)
 {
-  ASDisplayNode *ancestor = _ASDisplayNodeFindClosestCommonAncestor(referenceNode, targetNode);
+  ASDisplayNode *ancestor = ASDisplayNodeFindClosestCommonAncestor(referenceNode, targetNode);
 
   // Transform into global (away from reference coordinate space)
   CATransform3D transformToGlobal = [referenceNode _transformToAncestor:ancestor];
@@ -850,7 +799,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : _getRootNode(self);
+  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(node, self);
@@ -865,7 +814,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : _getRootNode(self);
+  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(self, node);
@@ -880,7 +829,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : _getRootNode(self);
+  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(node, self);
@@ -895,7 +844,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : _getRootNode(self);
+  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(self, node);
@@ -1614,6 +1563,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)__didLoad
 {
+  ASDN::MutexLocker l(_propertyLock);
   if (_nodeLoadedBlock) {
     _nodeLoadedBlock(self);
     _nodeLoadedBlock = nil;
@@ -1638,8 +1588,6 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_flags.isExitingHierarchy, @"You should never call -didExitHierarchy directly. Appearance is automatically managed by ASDisplayNode");
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
-
-  [self __exitedHierarchy];
 }
 
 - (void)clearContents
@@ -1650,6 +1598,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   _placeholderImage = nil;
 }
 
+// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or exitInterfaceState:
 - (void)recursivelyClearContents
 {
   for (ASDisplayNode *subnode in self.subnodes) {
@@ -1663,6 +1612,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   // subclass override
 }
 
+// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or enterInterfaceState:
 - (void)recursivelyFetchData
 {
   for (ASDisplayNode *subnode in self.subnodes) {
@@ -1676,12 +1626,74 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   // subclass override
 }
 
+// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or exitInterfaceState:
 - (void)recursivelyClearFetchedData
 {
   for (ASDisplayNode *subnode in self.subnodes) {
     [subnode recursivelyClearFetchedData];
   }
   [self clearFetchedData];
+}
+
+- (ASInterfaceState)interfaceState
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _interfaceState;
+}
+
+- (void)setInterfaceState:(ASInterfaceState)interfaceState
+{
+  ASDN::MutexLocker l(_propertyLock);
+  if (interfaceState != _interfaceState) {
+    if ((interfaceState & ASInterfaceStateMeasureLayout) != (_interfaceState & ASInterfaceStateMeasureLayout)) {
+      // Trigger asynchronous measurement if it is not already cached or being calculated.
+    }
+    
+    // Entered or exited data loading state.
+    if ((interfaceState & ASInterfaceStateFetchData) != (_interfaceState & ASInterfaceStateFetchData)) {
+      if (interfaceState & ASInterfaceStateFetchData) {
+        [self fetchData];
+      } else {
+        [self clearFetchedData];
+      }
+    }
+
+    // Entered or exited contents rendering state.
+    if ((interfaceState & ASInterfaceStateDisplay) != (_interfaceState & ASInterfaceStateDisplay)) {
+      if (interfaceState & ASInterfaceStateDisplay) {
+        // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
+        [self setDisplaySuspended:NO];
+      } else {
+        [self setDisplaySuspended:YES];
+        [self clearContents];
+      }
+    }
+
+    // Entered or exited data loading state.
+    if ((interfaceState & ASInterfaceStateVisible) != (_interfaceState & ASInterfaceStateVisible)) {
+      if (interfaceState & ASInterfaceStateVisible) {
+        // Consider providing a -didBecomeVisible.
+      } else {
+        // Consider providing a -didBecomeInvisible.
+      }
+    }
+    
+    _interfaceState = interfaceState;
+  }
+}
+
+- (void)enterInterfaceState:(ASInterfaceState)interfaceState
+{
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+    node.interfaceState |= interfaceState;
+  });
+}
+
+- (void)exitInterfaceState:(ASInterfaceState)interfaceState
+{
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+    node.interfaceState &= (~interfaceState);
+  });
 }
 
 - (void)layout
@@ -1740,6 +1752,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)setNeedsDisplayAtScale:(CGFloat)contentsScale
 {
+  ASDN::MutexLocker l(_propertyLock);
   if (contentsScale != self.contentsScaleForDisplay) {
     self.contentsScaleForDisplay = contentsScale;
     [self setNeedsDisplay];
@@ -1748,12 +1761,9 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)recursivelySetNeedsDisplayAtScale:(CGFloat)contentsScale
 {
-  [self setNeedsDisplayAtScale:contentsScale];
-
-  ASDN::MutexLocker l(_propertyLock);
-  for (ASDisplayNode *child in _subnodes) {
-    [child recursivelySetNeedsDisplayAtScale:contentsScale];
-  }
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+    [node setNeedsDisplayAtScale:contentsScale];
+  });
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -1889,6 +1899,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   _recursivelySetDisplaySuspended(self, nil, flag);
 }
 
+// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or a variant with a condition / test block.
 static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer, BOOL flag)
 {
   // If there is no layer, but node whose its view is loaded, then we can traverse down its layer hierarchy.  Otherwise we must stick to the node hierarchy to avoid loading views prematurely.  Note that for nodes that haven't loaded their views, they can't possibly have subviews/sublayers, so we don't need to traverse the layer hierarchy for them.

@@ -17,6 +17,9 @@
  Assumes: `changes` is [_ASHierarchySectionChange] all with the same changeType
  */
 + (void)sortAndCoalesceChanges:(NSMutableArray *)changes;
+
+/// Returns all the indexes from all the `indexSet`s of the given `_ASHierarchySectionChange` objects.
++ (NSMutableIndexSet *)allIndexesInChanges:(NSArray *)changes;
 @end
 
 @interface _ASHierarchyItemChange ()
@@ -40,26 +43,12 @@
 
 @end
 
-@implementation _ASHierarchyChangeSet {
-  NSMutableIndexSet *_deletedSections;
-  NSMutableIndexSet *_insertedSections;
-  NSMutableIndexSet *_reloadedSections;
-  NSMutableArray *_insertedItems;
-  NSMutableArray *_deletedItems;
-  NSMutableArray *_reloadedItems;
-}
+@implementation _ASHierarchyChangeSet
 
 - (instancetype)init
 {
   self = [super init];
   if (self) {
-    _deletedSections = [NSMutableIndexSet new];
-    _insertedSections = [NSMutableIndexSet new];
-    _reloadedSections = [NSMutableIndexSet new];
-    
-    _deletedItems = [NSMutableArray new];
-    _insertedItems = [NSMutableArray new];
-    _reloadedItems = [NSMutableArray new];
     
     _insertItemChanges = [NSMutableArray new];
     _deleteItemChanges = [NSMutableArray new];
@@ -108,6 +97,17 @@
     default:
       NSAssert(NO, @"Request for item changes with invalid type: %lu", (long)changeType);
   }
+}
+
+- (NSInteger)newSectionForOldSection:(NSInteger)oldSection
+{
+  [self _ensureCompleted];
+  if ([_deletedSections containsIndex:oldSection]) {
+    return NSNotFound;
+  }
+
+  NSInteger indexAfterDeletes = oldSection - [_deletedSections countOfIndexesInRange:NSMakeRange(0, oldSection)];
+  return indexAfterDeletes + [_insertedSections countOfIndexesInRange:NSMakeRange(0, indexAfterDeletes)];
 }
 
 - (void)deleteItems:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options
@@ -172,9 +172,32 @@
     [_ASHierarchySectionChange sortAndCoalesceChanges:_deleteSectionChanges];
     [_ASHierarchySectionChange sortAndCoalesceChanges:_insertSectionChanges];
     [_ASHierarchySectionChange sortAndCoalesceChanges:_reloadSectionChanges];
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:_deletedSections];
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_reloadItemChanges ignoringChangesInSections:_reloadedSections];
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:_insertedSections];
+
+    _deletedSections = [[_ASHierarchySectionChange allIndexesInChanges:_deleteSectionChanges] copy];
+    _insertedSections = [[_ASHierarchySectionChange allIndexesInChanges:_insertSectionChanges] copy];
+    _reloadedSections = [[_ASHierarchySectionChange allIndexesInChanges:_reloadSectionChanges] copy];
+
+    // These are invalid old section indexes.
+    NSMutableIndexSet *deletedOrReloaded = [_deletedSections mutableCopy];
+    [deletedOrReloaded addIndexes:_reloadedSections];
+
+    // These are invalid new section indexes.
+    NSMutableIndexSet *insertedOrReloaded = [_insertedSections mutableCopy];
+
+    // Get the new section that each reloaded section index corresponds to.
+    [_reloadedSections enumerateIndexesUsingBlock:^(NSUInteger oldIndex, __unused BOOL * stop) {
+      NSUInteger newIndex = [self newSectionForOldSection:oldIndex];
+      if (newIndex != NSNotFound) {
+        [insertedOrReloaded addIndex:newIndex];
+      }
+    }];
+
+    // Ignore item reloads/deletes in reloaded/deleted sections.
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:deletedOrReloaded];
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_reloadItemChanges ignoringChangesInSections:deletedOrReloaded];
+
+    // Ignore item inserts in reloaded(new)/inserted sections.
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:insertedOrReloaded];
   }
 }
 
@@ -218,36 +241,44 @@
   NSMutableArray *result = [NSMutableArray new];
   
   __block ASDataControllerAnimationOptions currentOptions = 0;
-  __block NSMutableIndexSet *currentIndexes = nil;
-  NSUInteger lastIndex = allIndexes.lastIndex;
-  
+  NSMutableIndexSet *currentIndexes = [NSMutableIndexSet indexSet];
+
   NSEnumerationOptions options = type == _ASHierarchyChangeTypeDelete ? NSEnumerationReverse : kNilOptions;
+
   [allIndexes enumerateIndexesWithOptions:options usingBlock:^(NSUInteger idx, __unused BOOL * stop) {
     ASDataControllerAnimationOptions options = [animationOptions[@(idx)] integerValue];
-    BOOL endingCurrentGroup = NO;
-    
-    if (currentIndexes == nil) {
-      // Starting a new group
-      currentIndexes = [NSMutableIndexSet indexSetWithIndex:idx];
-      currentOptions = options;
-    } else if (options == currentOptions) {
-      // Continuing the current group
-      [currentIndexes addIndex:idx];
-    } else {
-      endingCurrentGroup = YES;
-    }
-    
-    BOOL endingLastGroup = (currentIndexes != nil && lastIndex == idx);
-    
-    if (endingCurrentGroup || endingLastGroup) {
-      _ASHierarchySectionChange *change = [[_ASHierarchySectionChange alloc] initWithChangeType:type indexSet:currentIndexes animationOptions:currentOptions];
+
+    // End the previous group if needed.
+    if (options != currentOptions && currentIndexes.count > 0) {
+      _ASHierarchySectionChange *change = [[_ASHierarchySectionChange alloc] initWithChangeType:type indexSet:[currentIndexes copy] animationOptions:currentOptions];
       [result addObject:change];
-      currentOptions = 0;
-      currentIndexes = nil;
+      [currentIndexes removeAllIndexes];
     }
+
+    // Start a new group if needed.
+    if (currentIndexes.count == 0) {
+      currentOptions = options;
+    }
+
+    [currentIndexes addIndex:idx];
   }];
-  
+
+  // Finish up the last group.
+  if (currentIndexes.count > 0) {
+    _ASHierarchySectionChange *change = [[_ASHierarchySectionChange alloc] initWithChangeType:type indexSet:[currentIndexes copy] animationOptions:currentOptions];
+    [result addObject:change];
+  }
+
   [changes setArray:result];
+}
+
++ (NSMutableIndexSet *)allIndexesInChanges:(NSArray *)changes
+{
+  NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
+  for (_ASHierarchySectionChange *change in changes) {
+    [indexes addIndexes:change.indexSet];
+  }
+  return indexes;
 }
 
 @end
@@ -301,36 +332,34 @@
 
   // Create new changes by grouping sorted changes by animation option
   NSMutableArray *result = [NSMutableArray new];
-  
+
   ASDataControllerAnimationOptions currentOptions = 0;
-  NSMutableArray *currentIndexPaths = nil;
-  NSIndexPath *lastIndexPath = allIndexPaths.lastObject;
-  
+  NSMutableArray *currentIndexPaths = [NSMutableArray array];
+
   for (NSIndexPath *indexPath in allIndexPaths) {
     ASDataControllerAnimationOptions options = [animationOptions[indexPath] integerValue];
-    BOOL endingCurrentGroup = NO;
-    
-    if (currentIndexPaths == nil) {
-      // Starting a new group
-      currentIndexPaths = [NSMutableArray arrayWithObject:indexPath];
-      currentOptions = options;
-    } else if (options == currentOptions) {
-      // Continuing the current group
-      [currentIndexPaths addObject:indexPath];
-    } else {
-      endingCurrentGroup = YES;
-    }
-    
-    BOOL endingLastGroup = (currentIndexPaths != nil && (NSOrderedSame == [lastIndexPath compare:indexPath]));
 
-    if (endingCurrentGroup || endingLastGroup) {
-      _ASHierarchyItemChange *change = [[_ASHierarchyItemChange alloc] initWithChangeType:type indexPaths:currentIndexPaths animationOptions:currentOptions presorted:YES];
+    // End the previous group if needed.
+    if (options != currentOptions && currentIndexPaths.count > 0) {
+      _ASHierarchyItemChange *change = [[_ASHierarchyItemChange alloc] initWithChangeType:type indexPaths:[currentIndexPaths copy] animationOptions:currentOptions presorted:YES];
       [result addObject:change];
-      currentOptions = 0;
-      currentIndexPaths = nil;
+      [currentIndexPaths removeAllObjects];
     }
+
+    // Start a new group if needed.
+    if (currentIndexPaths.count == 0) {
+      currentOptions = options;
+    }
+
+    [currentIndexPaths addObject:indexPath];
   }
-  
+
+  // Finish up the last group.
+  if (currentIndexPaths.count > 0) {
+    _ASHierarchyItemChange *change = [[_ASHierarchyItemChange alloc] initWithChangeType:type indexPaths:[currentIndexPaths copy] animationOptions:currentOptions presorted:YES];
+    [result addObject:change];
+  }
+
   [changes setArray:result];
 }
 

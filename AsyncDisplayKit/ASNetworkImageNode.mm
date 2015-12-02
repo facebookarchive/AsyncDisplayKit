@@ -81,9 +81,10 @@
 
   if (reset || _URL == nil)
     self.image = _defaultImage;
-
-  if (self.nodeLoaded && self.layer.superlayer)
-    [self _lazilyLoadImageIfNecessary];
+  
+  if (self.interfaceState & ASInterfaceStateFetchData) {
+    [self fetchData];
+  }
 }
 
 - (NSURL *)URL

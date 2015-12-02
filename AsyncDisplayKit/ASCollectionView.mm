@@ -20,8 +20,8 @@
 // FIXME: Temporary nonsense import until method names are finalized and exposed
 #import "ASDisplayNode+Subclasses.h"
 
-const static NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
-
+static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
+static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 
 #pragma mark -
 #pragma mark Proxying.
@@ -115,13 +115,22 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 @implementation _ASCollectionViewCell
 
+- (void)setNode:(ASCellNode *)node
+{
+  _node = node;
+  node.selected = self.selected;
+  node.highlighted = self.highlighted;
+}
+
 - (void)setSelected:(BOOL)selected
 {
+  [super setSelected:selected];
   _node.selected = selected;
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
+  [super setHighlighted:highlighted];
   _node.highlighted = highlighted;
 }
 
@@ -479,11 +488,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  
-  [_rangeController configureContentView:cell.contentView forCellNode:node];
-  
   cell.node = node;
-  
+  [_rangeController configureContentView:cell.contentView forCellNode:node];
   return cell;
 }
 
@@ -664,7 +670,17 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASSizeRange constrainedSize;
+  ASSizeRange constrainedSize = kInvalidSizeRange;
+  if (_layoutInspector) {
+    constrainedSize = [_layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
+  }
+  
+  if (!ASSizeRangeEqualToSizeRange(constrainedSize, kInvalidSizeRange)) {
+    return constrainedSize;
+  }
+  
+  // TODO: Move this logic into the flow layout inspector. Create a simple inspector for non-flow layouts that don't
+  // implement a custom inspector.
   if (_asyncDataSourceImplementsConstrainedSizeForNode) {
     constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
   } else {

@@ -70,7 +70,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @abstract The maximum number of lines to render of the text before truncation.
  @default 0 (No limit)
  */
-@property (nonatomic, assign) NSUInteger maximumLineCount;
+@property (nonatomic, assign) NSUInteger maximumNumberOfLines;
 
 /**
  @abstract The number of lines in the text. Text must have been sized first.
