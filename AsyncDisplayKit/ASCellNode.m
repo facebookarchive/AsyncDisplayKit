@@ -18,6 +18,9 @@
 #pragma mark -
 #pragma mark ASCellNode
 
+//#define LOG(...) NSLog(__VA_ARGS__)
+#define LOG(...)
+
 @implementation ASCellNode
 
 - (instancetype)init
@@ -65,24 +68,24 @@
 - (void)clearFetchedData
 {
   [super clearFetchedData];
-  NSLog(@"%p - clearFetchedData", self);
+  LOG(@"%p - clearFetchedData", self);
 }
 
 - (void)fetchData
 {
   [super fetchData];
-  NSLog(@"%p - fetchData", self);
+  LOG(@"%p - fetchData", self);
 }
 
 - (void)clearContents
 {
   [super clearContents];
-  NSLog(@"%p - clearContents", self);
+  LOG(@"%p - clearContents", self);
 }
 
 - (void)dealloc
 {
-  NSLog(@"%p - dealloc", self);
+  LOG(@"%p - dealloc", self);
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
