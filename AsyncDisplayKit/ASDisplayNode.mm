@@ -1705,14 +1705,17 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   }
 
   // Assume that _layout was flattened and is 1-level deep.
-  ASDisplayNode *subnode = nil;
-  CGRect subnodeFrame = CGRectZero;
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
     ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.");
-    subnodeFrame.origin = subnodeLayout.position;
-    subnodeFrame.size = subnodeLayout.size;
-    subnode = ((ASDisplayNode *)subnodeLayout.layoutableObject);
-    [subnode setFrame:subnodeFrame];
+    CGRect subnodeFrame = (CGRect){ subnodeLayout.position, subnodeLayout.size };
+    ASDisplayNode *subnode = ((ASDisplayNode *)subnodeLayout.layoutableObject);
+    
+    CGPoint origin      = subnode.bounds.origin;
+    CGPoint anchorPoint = subnode.anchorPoint;
+    
+    subnode.bounds = (CGRect){ origin, subnodeFrame.size };
+    subnode.position = CGPointMake(subnodeFrame.origin.x + subnodeFrame.size.width * anchorPoint.x,
+                                   subnodeFrame.origin.y + subnodeFrame.size.height * anchorPoint.y);
   }
 }
 
