@@ -10,6 +10,8 @@
 
 #import <UIKit/UIKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol ASLayoutableAsciiArtProtocol <NSObject>
 /**
  *  Returns an ascii-art representation of this object and its children.
@@ -41,7 +43,7 @@
  *  |  ASTextNode  ASTextNode  ASTextNode  |
  *  ----------------------------------------
  */
-+ (NSString *)horizontalBoxStringForChildren:(NSArray *)children parent:(NSString *)parent;
++ (NSString *)horizontalBoxStringForChildren:(NSArray<NSString *> *)children parent:(NSString *)parent;
 
 /**
  *  Renders an ascii art box with the children aligned vertically.
@@ -52,8 +54,8 @@
  *   |     ASTextNode    |
  *   ---------------------
  */
-+ (NSString *)verticalBoxStringForChildren:(NSArray *)children parent:(NSString *)parent;
++ (NSString *)verticalBoxStringForChildren:(NSArray<NSString *> *)children parent:(NSString *)parent;
 
 @end
 
-
+NS_ASSUME_NONNULL_END
