@@ -37,17 +37,17 @@ extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node);
  In the event that a node's backing layer is not created yet, the function will only walk the direct subnodes instead
  of forcing the layer heirarchy to be created.
  */
-extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, void(^block)(ASDisplayNode *node));
+extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.
  */
-extern id ASDisplayNodeFind(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
+extern id _Nullable ASDisplayNodeFind(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node of kind class.
  */
-extern id ASDisplayNodeFindClass(ASDisplayNode *start, Class c);
+extern id _Nullable ASDisplayNodeFindClass(ASDisplayNode *start, Class c);
 
 /**
  * Given two nodes, finds their most immediate common parent.  Used for geometry conversion methods.
