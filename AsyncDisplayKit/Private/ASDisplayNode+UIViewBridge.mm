@@ -172,14 +172,15 @@
 {
   _bridge_prologue;
 
-  // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
-#if DEBUG
-  // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
-  ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
-#endif
-
   if (_flags.synchronous && !_flags.layerBacked) {
     // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
+    
+    // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
+#if DEBUG
+    // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
+    ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
+#endif
+
     _setToViewOnly(frame, rect);
   } else {
     // This is by far the common case / hot path.
