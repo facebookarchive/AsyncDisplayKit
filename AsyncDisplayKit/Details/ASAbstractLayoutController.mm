@@ -26,14 +26,19 @@
   }
   
   _tuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
+  _tuningParameters[ASLayoutRangeTypeVisible] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  _tuningParameters[ASLayoutRangeTypeRender] = {
+    .leadingBufferScreenfuls = 1.5,
+    .trailingBufferScreenfuls = 0.75
+  };
   _tuningParameters[ASLayoutRangeTypePreload] = {
     .leadingBufferScreenfuls = 3,
     .trailingBufferScreenfuls = 2
   };
-  _tuningParameters[ASLayoutRangeTypeRender] = {
-    .leadingBufferScreenfuls = 2,
-    .trailingBufferScreenfuls = 1
-  };
+
   
   return self;
 }
@@ -49,36 +54,11 @@
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  ASDisplayNodeAssert(rangeType != ASLayoutRangeTypeVisible, @"Must not set Visible range tuning parameters (always 0, 0)");
   _tuningParameters[rangeType] = tuningParameters;
 }
 
-// Support for the deprecated tuningParameters property
-- (ASRangeTuningParameters)tuningParameters
-{
-  return [self tuningParametersForRangeType:ASLayoutRangeTypeRender];
-}
-
-// Support for the deprecated tuningParameters property
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters
-{
-  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
-}
-
-#pragma mark - Index Path Range Support
-
-// Support for deprecated method
-- (BOOL)shouldUpdateForVisibleIndexPath:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize
-{
-  return [self shouldUpdateForVisibleIndexPaths:indexPaths viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
-}
-
-// Support for the deprecated method
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize
-{
-  return [self indexPathsForScrolling:scrollDirection viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
-}
-
-#pragma mark - Abstract
+#pragma mark - Abstract Index Path Range Support
 
 - (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
 {

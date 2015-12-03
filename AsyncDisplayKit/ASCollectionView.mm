@@ -20,8 +20,9 @@
 // FIXME: Temporary nonsense import until method names are finalized and exposed
 #import "ASDisplayNode+Subclasses.h"
 
-const static NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
-
+static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
+static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
+static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 #pragma mark -
 #pragma mark Proxying.
@@ -115,13 +116,22 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 @implementation _ASCollectionViewCell
 
+- (void)setNode:(ASCellNode *)node
+{
+  _node = node;
+  node.selected = self.selected;
+  node.highlighted = self.highlighted;
+}
+
 - (void)setSelected:(BOOL)selected
 {
+  [super setSelected:selected];
   _node.selected = selected;
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
+  [super setHighlighted:highlighted];
   _node.highlighted = highlighted;
 }
 
@@ -130,7 +140,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate> {
   _ASCollectionViewProxy *_proxyDataSource;
   _ASCollectionViewProxy *_proxyDelegate;
 
@@ -199,6 +209,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];
 
   _rangeController = [[ASRangeController alloc] init];
+  _rangeController.dataSource = self;
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
 
@@ -235,7 +246,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   self.backgroundColor = [UIColor whiteColor];
   
-  [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
+  [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
   
   return self;
 }
@@ -473,16 +484,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  static NSString *reuseIdentifier = @"_ASCollectionViewCell";
-  
-  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  
-  [_rangeController configureContentView:cell.contentView forCellNode:node];
-  
   cell.node = node;
-  
+  [_rangeController configureContentView:cell.contentView forCellNode:node];
   return cell;
 }
 
@@ -663,7 +669,17 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASSizeRange constrainedSize;
+  ASSizeRange constrainedSize = kInvalidSizeRange;
+  if (_layoutInspector) {
+    constrainedSize = [_layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
+  }
+  
+  if (!ASSizeRangeEqualToSizeRange(constrainedSize, kInvalidSizeRange)) {
+    return constrainedSize;
+  }
+  
+  // TODO: Move this logic into the flow layout inspector. Create a simple inspector for non-flow layouts that don't
+  // implement a custom inspector.
   if (_asyncDataSourceImplementsConstrainedSizeForNode) {
     constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
   } else {
@@ -767,14 +783,35 @@ static BOOL _isInterceptedSelector(SEL sel)
   return [_layoutInspector collectionView:self numberOfSectionsForSupplementaryNodeOfKind:kind];
 }
 
-#pragma mark - ASRangeControllerDelegate.
+#pragma mark - ASRangeControllerDataSource
 
-- (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController {
+- (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
+{
+  ASDisplayNodeAssertMainThread();
+  return [self indexPathsForVisibleItems];
+}
+
+- (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController
+{
+  ASDisplayNodeAssertMainThread();
+  return self.bounds.size;
+}
+
+- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
+{
+  return [_dataController nodesAtIndexPaths:indexPaths];
+}
+
+#pragma mark - ASRangeControllerDelegate
+
+- (void)didBeginUpdatesInRangeController:(ASRangeController *)rangeController
+{
   ASDisplayNodeAssertMainThread();
   _performingBatchUpdates = YES;
 }
 
-- (void)rangeController:(ASRangeController *)rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
+- (void)rangeController:(ASRangeController *)rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+{
   ASDisplayNodeAssertMainThread();
 
   if (!self.asyncDataSource || _superIsPendingDataLoad) {
@@ -794,23 +831,6 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   [_batchUpdateBlocks removeAllObjects];
   _performingBatchUpdates = NO;
-}
-
-- (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController
-{
-  ASDisplayNodeAssertMainThread();
-  return [self indexPathsForVisibleItems];
-}
-
-- (CGSize)rangeControllerViewportSize:(ASRangeController *)rangeController
-{
-  ASDisplayNodeAssertMainThread();
-  return self.bounds.size;
-}
-
-- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
-{
-  return [_dataController nodesAtIndexPaths:indexPaths];
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
@@ -896,6 +916,26 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASDisplayNodeAssertMainThread();
   // Cause UICollectionView to requery for the new height of this node
   [super performBatchUpdates:^{} completion:nil];
+}
+
+#pragma mark - Memory Management
+
+- (void)clearContents
+{
+  for (NSArray *section in [_dataController completedNodes]) {
+    for (ASDisplayNode *node in section) {
+      [node recursivelyClearContents];
+    }
+  }
+}
+
+- (void)clearFetchedData
+{
+  for (NSArray *section in [_dataController completedNodes]) {
+    for (ASDisplayNode *node in section) {
+      [node recursivelyClearFetchedData];
+    }
+  }
 }
 
 @end

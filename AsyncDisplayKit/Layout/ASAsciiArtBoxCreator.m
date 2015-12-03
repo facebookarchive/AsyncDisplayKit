@@ -8,7 +8,6 @@
  *
  */
 
-@import UIKit;
 #import "ASAsciiArtBoxCreator.h"
 
 static const NSUInteger kDebugBoxPadding = 2;

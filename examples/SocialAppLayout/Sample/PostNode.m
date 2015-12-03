@@ -14,6 +14,9 @@
 #import "LikesNode.h"
 #import "CommentsNode.h"
 
+@interface PostNode() <ASNetworkImageNodeDelegate>
+@end
+
 @implementation PostNode
 
 - (instancetype)initWithPost:(Post *)post {
@@ -28,7 +31,7 @@
         _nameNode = [[ASTextNode alloc] init];
         _nameNode.attributedString = [[NSAttributedString alloc] initWithString:_post.name
                                                                      attributes:[TextStyles nameStyle]];
-        _nameNode.maximumLineCount = 1;
+        _nameNode.maximumNumberOfLines = 1;
         [self addSubnode:_nameNode];
         
         // username node
@@ -37,7 +40,7 @@
                                                                      attributes:[TextStyles usernameStyle]];
         _usernameNode.flexShrink = YES; //if name and username don't fit to cell width, allow username shrink
         _usernameNode.truncationMode = NSLineBreakByTruncatingTail;
-        _usernameNode.maximumLineCount = 1;
+        _usernameNode.maximumNumberOfLines = 1;
         
         [self addSubnode:_usernameNode];
         
@@ -90,6 +93,7 @@
             _mediaNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
             _mediaNode.cornerRadius = 4.0;
             _mediaNode.URL = [NSURL URLWithString:_post.media];
+            _mediaNode.delegate = self;
             _mediaNode.imageModificationBlock = ^UIImage *(UIImage *image) {
                 
                 UIImage *modifiedImage;
@@ -256,6 +260,14 @@
 {
     // the node tapped a link, open it
     [[UIApplication sharedApplication] openURL:URL];
+}
+
+#pragma mark -
+#pragma mark ASNetworkImageNodeDelegate methods.
+
+- (void)imageNode:(ASNetworkImageNode *)imageNode didLoadImage:(UIImage *)image
+{
+    [self setNeedsLayout];
 }
 
 @end

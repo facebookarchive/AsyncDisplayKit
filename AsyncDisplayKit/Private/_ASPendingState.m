@@ -18,6 +18,7 @@
 
   UIViewAutoresizing autoresizingMask;
   unsigned int edgeAntialiasingMask;
+  CGRect frame;   // Frame is only to be used for synchronous views wrapped by nodes (see setFrame:)
   CGRect bounds;
   CGColorRef backgroundColor;
   id contents;
@@ -60,6 +61,7 @@
     int setNeedsDisplayOnBoundsChange:1;
     int setAutoresizesSubviews:1;
     int setAutoresizingMask:1;
+    int setFrame:1;
     int setBounds:1;
     int setBackgroundColor:1;
     int setTintColor:1;
@@ -103,6 +105,7 @@
 
 @synthesize clipsToBounds=clipsToBounds;
 @synthesize opaque=opaque;
+@synthesize frame=frame;
 @synthesize bounds=bounds;
 @synthesize backgroundColor=backgroundColor;
 @synthesize contents=contents;
@@ -150,6 +153,7 @@
   // Set defaults, these come from the defaults specified in CALayer and UIView
   clipsToBounds = NO;
   opaque = YES;
+  frame = CGRectZero;
   bounds = CGRectZero;
   backgroundColor = nil;
   tintColor = [UIColor colorWithRed:0.0 green:0.478 blue:1.0 alpha:1.0];
@@ -248,6 +252,12 @@
 {
   autoresizingMask = mask;
   _flags.setAutoresizingMask = YES;
+}
+
+- (void)setFrame:(CGRect)newFrame
+{
+  frame = newFrame;
+  _flags.setFrame = YES;
 }
 
 - (void)setBounds:(CGRect)newBounds
@@ -626,6 +636,9 @@
 
   if (_flags.setOpaque)
     ASDisplayNodeAssert(layer.opaque == opaque, @"Didn't set opaque as desired");
+  
+  if (_flags.setFrame)
+    ASDisplayNodeAssert(NO, @"Frame property should only be used for synchronously wrapped nodes.  See setFrame: in ASDisplayNode+UIViewBridge");
 }
 
 - (void)applyToView:(UIView *)view
@@ -649,6 +662,11 @@
   if (_flags.setZPosition)
     layer.zPosition = zPosition;
 
+  // This should only be used for synchronous views wrapped by nodes.
+  if (_flags.setFrame && !(_flags.setBounds && _flags.setPosition)) {
+    view.frame = frame;
+  }
+  
   if (_flags.setBounds)
     view.bounds = bounds;
 

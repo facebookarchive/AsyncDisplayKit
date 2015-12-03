@@ -260,6 +260,20 @@
  */
 @property (nonatomic) BOOL automaticallyAdjustsContentOffset;
 
+/**
+ * Triggers all loaded ASCellNodes to destroy displayed contents (freeing a lot of memory).
+ *
+ * @discussion This method should only be called by ASTableNode.  To be removed in a later release.
+ */
+- (void)clearContents;
+
+/**
+ * Triggers all loaded ASCellNodes to purge any data fetched from the network or disk (freeing memory).
+ *
+ * @discussion This method should only be called by ASTableNode.  To be removed in a later release.
+ */
+- (void)clearFetchedData;
+
 @end
 
 
@@ -343,11 +357,5 @@
  * should occur.
  */
 - (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView;
-
-@end
-
-@interface ASTableView (Deprecated)
-
-@property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters ASDISPLAYNODE_DEPRECATED;
 
 @end
