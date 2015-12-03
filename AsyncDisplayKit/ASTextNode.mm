@@ -831,15 +831,18 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 {
   [super touchesMoved:touches withEvent:event];
 
-  CGPoint point = [[touches anyObject] locationInView:self.view];
-  NSRange range = NSMakeRange(0, 0);
-  [self _linkAttributeValueAtPoint:point
-                     attributeName:NULL
-                             range:&range
-     inAdditionalTruncationMessage:NULL];
+  // If touch has moved out of the current highlight range, clear the highlight.
+  if (_highlightRange.length > 0) {
+    NSRange range = NSMakeRange(0, 0);
+    CGPoint point = [[touches anyObject] locationInView:self.view];
+    [self _linkAttributeValueAtPoint:point
+                       attributeName:NULL
+                               range:&range
+       inAdditionalTruncationMessage:NULL];
 
-  if (!NSEqualRanges(_highlightRange, range)) {
-    [self _clearHighlightIfNecessary];
+    if (!NSEqualRanges(_highlightRange, range)) {
+      [self _clearHighlightIfNecessary];
+    }
   }
 }
 
