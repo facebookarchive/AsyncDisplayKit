@@ -778,11 +778,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   ASDisplayNodeAssertMainThread();
 
-  UITouch *touch = [touches anyObject];
-
-  UIView *view = touch.view;
-  CGPoint point = [touch locationInView:view];
-  point = [self.view convertPoint:point fromView:view];
+  CGPoint point = [[touches anyObject] locationInView:self.view];
 
   NSRange range = NSMakeRange(0, 0);
   NSString *linkAttributeName = nil;
@@ -835,7 +831,16 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 {
   [super touchesMoved:touches withEvent:event];
 
-  [self _clearHighlightIfNecessary];
+  CGPoint point = [[touches anyObject] locationInView:self.view];
+  NSRange range = NSMakeRange(0, 0);
+  [self _linkAttributeValueAtPoint:point
+                     attributeName:NULL
+                             range:&range
+     inAdditionalTruncationMessage:NULL];
+
+  if (!NSEqualRanges(_highlightRange, range)) {
+    [self _clearHighlightIfNecessary];
+  }
 }
 
 - (void)_handleLongPress:(UILongPressGestureRecognizer *)longPressRecognizer
