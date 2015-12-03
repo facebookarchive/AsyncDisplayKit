@@ -8,38 +8,36 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import <MapKit/MapKit.h>
-@interface ASMapNode : ASControlNode
+
+@interface ASMapNode : ASImageNode
+
 - (instancetype)initWithCoordinate:(CLLocationCoordinate2D)coordinate NS_DESIGNATED_INITIALIZER;
+
 /**
- This is the snapshot shot image node, this will be hidden (but not nil) when .liveMap = YES
+ This is the MKMapView that is the live map part of ASMapNode. This will be nil if .liveMap = NO. Note, MKMapView is *not* thread-safe.
  */
-@property (nonatomic, readonly) ASImageNode *mapImage;
-/**
- This is the ASDisplayNode that backs the MKMapView. This will be nil if .liveMap = NO. To access the underlying MKMapView, in order to set a delegate for example, use (MKMapView *)mapView.view;
- */
-@property (nonatomic, readonly) ASDisplayNode *mapView;
+@property (nonatomic, readonly) MKMapView *mapView;
+
 /**
  Set this to YES to turn the snapshot into an interactive MKMapView and vice versa. Defaults to NO.
  */
 @property (nonatomic, assign, getter=isLiveMap) BOOL liveMap;
-/**
- @abstract Explicitly set the size of the map and therefore the size of ASMapNode. Defaults to CGSizeMake(constrainedSize.max.width, 256).
- @discussion If the mapSize width or height is greater than the available space, then ASMapNode will take the maximum space available.
- @result The current size of the ASMapNode.
- */
-@property (nonatomic, assign) CGSize mapSize;
+
 /**
  @abstract Whether ASMapNode should automatically request a new map snapshot to correspond to the new node size. Defaults to YES.
  @discussion If mapSize is set then this will be set to NO, since the size will be the same in all orientations.
  */
-@property (nonatomic, assign) BOOL automaticallyReloadsMapImageOnOrientationChange;
+@property (nonatomic, assign) BOOL needsMapReloadOnBoundsChange;
+
 /**
- Set the delegate of the MKMapView.
+ Set the delegate of the MKMapView. This can be set even before mapView is created and will be set on the map in the case that the liveMap mode is engaged.
  */
 @property (nonatomic, weak) id <MKMapViewDelegate> mapDelegate;
+
 /**
- * @discussion This method adds annotations to the static map view and also to the live map view.
+ * @discussion This method set the annotations of the static map view and also to the live map view. Passing an empty array clears the map of any annotations.
  * @param annotations An array of objects that conform to the MKAnnotation protocol
  */
-- (void)addAnnotations:(NSArray *)annotations;
+- (void)setAnnotations:(NSArray *)annotations;
+
 @end
