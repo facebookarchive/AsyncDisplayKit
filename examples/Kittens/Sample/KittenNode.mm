@@ -29,7 +29,6 @@ static const CGFloat kInnerPadding = 10.0f;
   ASNetworkImageNode *_imageNode;
   ASTextNode *_textNode;
   ASDisplayNode *_divider;
-  ASMapNode *_map;
   BOOL _isImageEnlarged;
   BOOL _swappedTextAndImage;
 }
@@ -89,22 +88,6 @@ static const CGFloat kInnerPadding = 10.0f;
 //  _imageNode.contentMode = UIViewContentModeCenter;
   [_imageNode addTarget:self action:@selector(toggleNodesSwap) forControlEvents:ASControlNodeEventTouchUpInside];
   [self addSubnode:_imageNode];
-  
-  MKPointAnnotation *point1 = [[MKPointAnnotation alloc]init];
-  point1.coordinate = CLLocationCoordinate2DMake(55.864237, -4.251806);
-  point1.title = @"Best fish & chip shop";
-  point1.subtitle = @"Everrrrrr";
-  
-  
-  MKPointAnnotation *point2 = [[MKPointAnnotation alloc]init];
-  point2.coordinate = CLLocationCoordinate2DMake(55.861, -4.251806);
-  point2.title = @"The 2nd Best fish & chip shop";
-  point2.subtitle = @"Everrrrrr";
-  
-  _map = [[ASMapNode alloc]initWithCoordinate:CLLocationCoordinate2DMake(55.864237, -4.251806)];
-  [_map addTarget:self action:@selector(makeMapInteractive) forControlEvents:ASControlNodeEventTouchUpInside];
-  [_map setAnnotations:@[point1,point2]];
-  [self addSubnode:_map];
 
   // lorem ipsum text, plus some nice styling
   _textNode = [[ASTextNode alloc] init];
@@ -148,25 +131,16 @@ static const CGFloat kInnerPadding = 10.0f;
             NSParagraphStyleAttributeName: style };
 }
 
-- (void)makeMapInteractive
-{
-  [_map setLiveMap:YES];
-}
-
 #if UseAutomaticLayout
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   _imageNode.preferredFrameSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
   _textNode.flexShrink = YES;
-
-  ASRatioLayoutSpec *ratioSpec = [[ASRatioLayoutSpec alloc]init];
-  ratioSpec.ratio = 0.5;
-  ratioSpec.child = _map;
   
   ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
-  stackSpec.direction = ASStackLayoutDirectionVertical;
+  stackSpec.direction = ASStackLayoutDirectionHorizontal;
   stackSpec.spacing = kInnerPadding;
-  [stackSpec setChildren:!_swappedTextAndImage ? @[ratioSpec,_imageNode, _textNode] : @[ratioSpec,_textNode, _imageNode]];
+  [stackSpec setChildren:!_swappedTextAndImage ? @[_imageNode, _textNode] : @[_textNode, _imageNode]];
   
   ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
   insetSpec.insets = UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding);
