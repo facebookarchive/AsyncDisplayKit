@@ -1695,7 +1695,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
 
   [node.view removeFromSuperview];
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(!node.hasFetchedData);
   XCTAssert(node.interfaceState == ASInterfaceStateNone);
 }
 
