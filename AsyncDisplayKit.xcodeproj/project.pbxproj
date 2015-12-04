@@ -950,10 +950,9 @@
 		058D09E1195D050800B7D73C /* Details */ = {
 			isa = PBXGroup;
 			children = (
+				25B171EA1C12242700508A7A /* Data Controller */,
 				CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */,
 				CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */,
-				251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */,
-				251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */,
 				251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */,
 				251B8EF51BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m */,
 				251B8EF61BBB3D690087C538 /* ASDataController+Subclasses.h */,
@@ -969,10 +968,6 @@
 				299DA1A81A828D2900162D41 /* ASBatchContext.mm */,
 				205F0E1B1B373A2C007741D0 /* ASCollectionViewLayoutController.h */,
 				205F0E1C1B373A2C007741D0 /* ASCollectionViewLayoutController.mm */,
-				464052191A3F83C40061C0BA /* ASDataController.h */,
-				4640521A1A3F83C40061C0BA /* ASDataController.mm */,
-				AC026B671BD57D6F00BBC17E /* ASChangeSetDataController.h */,
-				AC026B681BD57D6F00BBC17E /* ASChangeSetDataController.m */,
 				05A6D05819D0EB64002DD95E /* ASDealloc2MainObject.h */,
 				05A6D05919D0EB64002DD95E /* ASDealloc2MainObject.m */,
 				4640521B1A3F83C40061C0BA /* ASFlowLayoutController.h */,
@@ -1108,6 +1103,19 @@
 				2577548F1BED289A00737CA5 /* ASEqualityHashHelpers.mm */,
 			);
 			name = TextKit;
+			sourceTree = "<group>";
+		};
+		25B171EA1C12242700508A7A /* Data Controller */ = {
+			isa = PBXGroup;
+			children = (
+				251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */,
+				251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */,
+				464052191A3F83C40061C0BA /* ASDataController.h */,
+				4640521A1A3F83C40061C0BA /* ASDataController.mm */,
+				AC026B671BD57D6F00BBC17E /* ASChangeSetDataController.h */,
+				AC026B681BD57D6F00BBC17E /* ASChangeSetDataController.m */,
+			);
+			name = "Data Controller";
 			sourceTree = "<group>";
 		};
 		AC6456051B0A333200CF11B8 /* Layout */ = {
