@@ -51,21 +51,17 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
   /** The element is physically onscreen by at least 1 pixel.
    In practice, all other bit fields should also be set when this flag is set. */
   ASInterfaceStateVisible       = 1 << 3,
+
+  /**
+   * The node is not contained in a cell but it is in a window.
+   *
+   * Currently we only set `interfaceState` to other values for
+   * nodes contained in table views or collection views.
+   */
+  ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay | ASInterfaceStateVisible,
 };
 
-/**
- * Currently we only set `interfaceState` for
- * nodes contained in table views or collection views.
- 
- * Nodes that aren't contained in cells will be in this state when
- * they are in the view hierarchy, and `ASInterfaceStateNone` when
- * they aren't.
- */
-static const ASInterfaceState ASInterfaceStateInHierarchy =
-    ASInterfaceStateMeasureLayout
-  | ASInterfaceStateFetchData
-  | ASInterfaceStateDisplay
-  | ASInterfaceStateVisible;
+
 
 /**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
