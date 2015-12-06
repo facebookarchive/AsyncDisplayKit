@@ -1585,7 +1585,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   ASDisplayNodeAssert(_flags.isEnteringHierarchy, @"You should never call -willEnterHierarchy directly. Appearance is automatically managed by ASDisplayNode");
   ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
 
-  if (![self supportsInterfaceState]) {
+  if (![self supportsRangeManagedInterfaceState]) {
     self.interfaceState = ASInterfaceStateInHierarchy;
   }
 }
@@ -1596,7 +1596,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   ASDisplayNodeAssert(_flags.isExitingHierarchy, @"You should never call -didExitHierarchy directly. Appearance is automatically managed by ASDisplayNode");
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
   
-  if (![self supportsInterfaceState]) {
+  if (![self supportsRangeManagedInterfaceState]) {
     self.interfaceState = ASInterfaceStateNone;
   }
 }
@@ -1647,18 +1647,12 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 }
 
 /**
- * We currently only set interface state on nodes
- * in table/collection views. For other nodes, if they are
- * in the hierarchy we return `Unknown`, otherwise we return `None`.
- *
- * TODO: Avoid traversing up node hierarchy due to possible deadlock.
- * @see https://github.com/facebook/AsyncDisplayKit/issues/900
- * Possible solution is to push `isInCellNode` state downward on `addSubnode`/`removeFromSupernode`.
+ * We currently only set interface state on nodes in table/collection views. For other nodes, if they are
+ * in the hierarchy we enable all ASInterfaceState types with `ASInterfaceStateInHierarchy`, otherwise `None`.
  */
-- (BOOL)supportsInterfaceState
+- (BOOL)supportsRangeManagedInterfaceState
 {
-  return ([self isKindOfClass:ASCellNode.class]
-      || [self _supernodeWithClass:ASCellNode.class checkViewHierarchy:NO] != nil);
+  return (_hierarchyState & ASHierarchyStateRangeManaged);
 }
 
 - (ASInterfaceState)interfaceState
