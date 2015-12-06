@@ -87,7 +87,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     
   BOOL rasterizingFromAscendent = (_hierarchyState & ASHierarchyStateRasterized);
 
-  // if super node is rasterizing descendents, subnodes will not have had layout calls becase they don't have layers
+  // if super node is rasterizing descendents, subnodes will not have had layout calls because they don't have layers
   if (rasterizingFromAscendent) {
     [self __layout];
   }

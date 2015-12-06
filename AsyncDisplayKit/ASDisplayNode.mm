@@ -633,12 +633,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)setShouldRasterizeDescendants:(BOOL)shouldRasterize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(_propertyLock);
-  
-  if (_flags.shouldRasterizeDescendants == shouldRasterize)
-    return;
-  
-  _flags.shouldRasterizeDescendants = shouldRasterize;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    
+    if (_flags.shouldRasterizeDescendants == shouldRasterize)
+      return;
+    
+    _flags.shouldRasterizeDescendants = shouldRasterize;
+  }
   
   if (self.isNodeLoaded) {
     // Recursively tear down or build up subnodes.
@@ -661,6 +663,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       // nodes that have shouldBypassEnsureDisplay set (such as image nodes) so they are rasterized.
       [self recursivelyDisplayImmediately];
     }
+  } else {
+    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode *node) {
+      if (shouldRasterize) {
+        [node enterHierarchyState:ASHierarchyStateRasterized];
+      } else {
+        [node exitHierarchyState:ASHierarchyStateRasterized];
+      }
+    });
   }
 }
 
@@ -962,7 +972,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   [oldSubnode removeFromSupernode];
   [_subnodes insertObject:subnode atIndex:subnodeIndex];
 
-  // Don't bother inserting the view/layer if in a rasterized subtree, becuase there are no layers in the hierarchy and none of this could possibly work.
+  // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.
   if (!_flags.shouldRasterizeDescendants && [self __shouldLoadViewOrLayer]) {
     if (_layer) {
       ASDisplayNodeCAssertMainThread();
@@ -1083,7 +1093,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   NSInteger aboveSubnodeIndex = [_subnodes indexOfObjectIdenticalTo:above];
   NSInteger aboveSublayerIndex = NSNotFound;
 
-  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, becuase there are no layers in the hierarchy and none of this could possibly work.
+  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.
   if (!_flags.shouldRasterizeDescendants && [self __shouldLoadViewOrLayer]) {
     if (_layer) {
       aboveSublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:above.layer];
@@ -1336,16 +1346,33 @@ static NSInteger incrementIfFound(NSInteger i) {
   return _supernode;
 }
 
-- (void)__setSupernode:(ASDisplayNode *)supernode
+- (void)__setSupernode:(ASDisplayNode *)newSupernode
 {
-  ASDN::MutexLocker l(_propertyLock);
-  if (_supernode != supernode) {
-    ASHierarchyState oldHierarchyState = _supernode.hierarchyState;
-    _supernode = supernode;
-    if (_supernode) {
-      [self enterHierarchyState:_supernode.hierarchyState];
+  BOOL supernodeDidChange = NO;
+  ASDisplayNode *oldSupernode = nil;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    if (_supernode != newSupernode) {
+      oldSupernode = _supernode;  // Access supernode properties outside of lock to avoid remote chance of deadlock,
+                                  // in case supernode implementation must access one of our properties.
+      _supernode = newSupernode;
+      supernodeDidChange = YES;
+    }
+  }
+  
+  if (supernodeDidChange) {
+    ASHierarchyState stateToEnterOrExit = (newSupernode ? newSupernode.hierarchyState
+                                                        : oldSupernode.hierarchyState);
+    
+    BOOL parentWasOrIsRasterized        = (newSupernode ? newSupernode.shouldRasterizeDescendants
+                                                        : oldSupernode.shouldRasterizeDescendants);
+    if (parentWasOrIsRasterized) {
+      stateToEnterOrExit |= ASHierarchyStateRasterized;
+    }
+    if (newSupernode) {
+      [self enterHierarchyState:stateToEnterOrExit];
     } else {
-      [self exitHierarchyState:oldHierarchyState];
+      [self exitHierarchyState:stateToEnterOrExit];
     }
   }
 }

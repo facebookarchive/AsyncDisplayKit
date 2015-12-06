@@ -7,6 +7,7 @@
  */
 
 #import "ASSnapshotTestCase.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNodeInternal.h"
 
 @implementation ASSnapshotTestCase
@@ -46,6 +47,7 @@
 
 + (void)hackilySynchronouslyRecursivelyRenderNode:(ASDisplayNode *)node
 {
+// TODO: Reconfigure this to be able to use [node recursivelyEnsureDisplay];
   [self _recursivelySetDisplaysAsynchronously:NO forNode:node];
   [self _recursivelyLayoutAndDisplayNode:node];
 }
