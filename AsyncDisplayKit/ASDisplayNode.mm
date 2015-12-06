@@ -1643,14 +1643,20 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)setInterfaceState:(ASInterfaceState)interfaceState
 {
-  ASDN::MutexLocker l(_propertyLock);
-  if (interfaceState != _interfaceState) {
-    if ((interfaceState & ASInterfaceStateMeasureLayout) != (_interfaceState & ASInterfaceStateMeasureLayout)) {
+  ASInterfaceState oldValue;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    oldValue = _interfaceState;
+    _interfaceState = interfaceState;
+  }
+
+  if (interfaceState != oldValue) {
+    if ((interfaceState & ASInterfaceStateMeasureLayout) != (oldValue & ASInterfaceStateMeasureLayout)) {
       // Trigger asynchronous measurement if it is not already cached or being calculated.
     }
     
     // Entered or exited data loading state.
-    if ((interfaceState & ASInterfaceStateFetchData) != (_interfaceState & ASInterfaceStateFetchData)) {
+    if ((interfaceState & ASInterfaceStateFetchData) != (oldValue & ASInterfaceStateFetchData)) {
       if (interfaceState & ASInterfaceStateFetchData) {
         [self fetchData];
       } else {
@@ -1659,7 +1665,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
     }
 
     // Entered or exited contents rendering state.
-    if ((interfaceState & ASInterfaceStateDisplay) != (_interfaceState & ASInterfaceStateDisplay)) {
+    if ((interfaceState & ASInterfaceStateDisplay) != (oldValue & ASInterfaceStateDisplay)) {
       if (interfaceState & ASInterfaceStateDisplay) {
         // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
         [self setDisplaySuspended:NO];
@@ -1670,15 +1676,14 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
     }
 
     // Entered or exited data loading state.
-    if ((interfaceState & ASInterfaceStateVisible) != (_interfaceState & ASInterfaceStateVisible)) {
+    if ((interfaceState & ASInterfaceStateVisible) != (oldValue & ASInterfaceStateVisible)) {
       if (interfaceState & ASInterfaceStateVisible) {
         // Consider providing a -didBecomeVisible.
       } else {
         // Consider providing a -didBecomeInvisible.
       }
     }
-    
-    _interfaceState = interfaceState;
+
   }
 }
 
