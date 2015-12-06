@@ -43,17 +43,27 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 {
   /** The element is not predicted to be onscreen soon and preloading should not be performed */
-  ASInterfaceStateNone          = 1 << 0,
+  ASInterfaceStateNone          = 0,
   /** The element may be added to a view soon that could become visible.  Measure the layout, including size calculation. */
-  ASInterfaceStateMeasureLayout = 1 << 1,
+  ASInterfaceStateMeasureLayout = 1 << 0,
   /** The element is likely enough to come onscreen that disk and/or network data required for display should be fetched. */
-  ASInterfaceStateFetchData     = 1 << 2,
+  ASInterfaceStateFetchData     = 1 << 1,
   /** The element is very likely to become visible, and concurrent rendering should be executed for any -setNeedsDisplay. */
-  ASInterfaceStateDisplay       = 1 << 3,
+  ASInterfaceStateDisplay       = 1 << 2,
   /** The element is physically onscreen by at least 1 pixel.
    In practice, all other bit fields should also be set when this flag is set. */
-  ASInterfaceStateVisible       = 1 << 4,
+  ASInterfaceStateVisible       = 1 << 3,
+
+  /**
+   * The node is not contained in a cell but it is in a window.
+   *
+   * Currently we only set `interfaceState` to other values for
+   * nodes contained in table views or collection views.
+   */
+  ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay | ASInterfaceStateVisible,
 };
+
+
 
 /**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view

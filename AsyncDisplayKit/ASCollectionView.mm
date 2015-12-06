@@ -156,6 +156,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   BOOL _asyncDelegateImplementsInsetSection;
   BOOL _collectionViewLayoutImplementsInsetSection;
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
+  BOOL _queuedNodeSizeUpdate;
 
   ASBatchContext *_batchContext;
   
@@ -911,10 +912,26 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark - ASCellNodeDelegate
 
-- (void)nodeDidRelayout:(ASCellNode *)node
+- (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();
-  // Cause UICollectionView to requery for the new height of this node
+
+  if (!sizeChanged || _queuedNodeSizeUpdate) {
+    return;
+  }
+
+  _queuedNodeSizeUpdate = YES;
+  [self performSelector:@selector(requeryNodeSizes)
+             withObject:nil
+             afterDelay:0
+                inModes:@[ NSRunLoopCommonModes ]];
+}
+
+// Cause UICollectionView to requery for the new size of all nodes
+- (void)requeryNodeSizes
+{
+  _queuedNodeSizeUpdate = NO;
+
   [super performBatchUpdates:^{} completion:nil];
 }
 

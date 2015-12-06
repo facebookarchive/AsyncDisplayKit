@@ -394,13 +394,15 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   return [self _linkAttributeValueAtPoint:point
                             attributeName:attributeNameOut
                                     range:rangeOut
-            inAdditionalTruncationMessage:NULL];
+            inAdditionalTruncationMessage:NULL
+                          forHighlighting:NO];
 }
 
 - (id)_linkAttributeValueAtPoint:(CGPoint)point
                    attributeName:(out NSString **)attributeNameOut
                            range:(out NSRange *)rangeOut
    inAdditionalTruncationMessage:(out BOOL *)inAdditionalTruncationMessageOut
+                 forHighlighting:(BOOL)highlighting
 {
   ASTextKitRenderer *renderer = [self _renderer];
   NSRange visibleRange = renderer.visibleRanges[0];
@@ -453,10 +455,10 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
         continue;
       }
 
-      // Check if delegate implements optional method, if not assume NO.
-      // Should the text be highlightable/touchable?
-      if (![_delegate respondsToSelector:@selector(textNode:shouldHighlightLinkAttribute:value:atPoint:)] ||
-          ![_delegate textNode:self shouldHighlightLinkAttribute:name value:value atPoint:point]) {
+      // If highlighting, check with delegate first. If not implemented, assume YES.
+      if (highlighting
+          && [_delegate respondsToSelector:@selector(textNode:shouldHighlightLinkAttribute:value:atPoint:)]
+          && ![_delegate textNode:self shouldHighlightLinkAttribute:name value:value atPoint:point]) {
         value = nil;
         name = nil;
       }
@@ -758,7 +760,8 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   id linkAttributeValue = [self _linkAttributeValueAtPoint:point
                                              attributeName:&linkAttributeName
                                                      range:&range
-                             inAdditionalTruncationMessage:&inAdditionalTruncationMessage];
+                             inAdditionalTruncationMessage:&inAdditionalTruncationMessage
+                                           forHighlighting:YES];
 
   NSUInteger lastCharIndex = NSIntegerMax;
   BOOL linkCrossesVisibleRange = (lastCharIndex > range.location) && (lastCharIndex < NSMaxRange(range) - 1);
@@ -778,11 +781,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   ASDisplayNodeAssertMainThread();
 
-  UITouch *touch = [touches anyObject];
-
-  UIView *view = touch.view;
-  CGPoint point = [touch locationInView:view];
-  point = [self.view convertPoint:point fromView:view];
+  CGPoint point = [[touches anyObject] locationInView:self.view];
 
   NSRange range = NSMakeRange(0, 0);
   NSString *linkAttributeName = nil;
@@ -791,7 +790,8 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   id linkAttributeValue = [self _linkAttributeValueAtPoint:point
                                              attributeName:&linkAttributeName
                                                      range:&range
-                             inAdditionalTruncationMessage:&inAdditionalTruncationMessage];
+                             inAdditionalTruncationMessage:&inAdditionalTruncationMessage
+                                           forHighlighting:YES];
 
   NSUInteger lastCharIndex = NSIntegerMax;
   BOOL linkCrossesVisibleRange = (lastCharIndex > range.location) && (lastCharIndex < NSMaxRange(range) - 1);
@@ -835,7 +835,20 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 {
   [super touchesMoved:touches withEvent:event];
 
-  [self _clearHighlightIfNecessary];
+  // If touch has moved out of the current highlight range, clear the highlight.
+  if (_highlightRange.length > 0) {
+    NSRange range = NSMakeRange(0, 0);
+    CGPoint point = [[touches anyObject] locationInView:self.view];
+    [self _linkAttributeValueAtPoint:point
+                       attributeName:NULL
+                               range:&range
+       inAdditionalTruncationMessage:NULL
+                     forHighlighting:YES];
+
+    if (!NSEqualRanges(_highlightRange, range)) {
+      [self _clearHighlightIfNecessary];
+    }
+  }
 }
 
 - (void)_handleLongPress:(UILongPressGestureRecognizer *)longPressRecognizer

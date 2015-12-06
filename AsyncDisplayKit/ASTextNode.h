@@ -247,7 +247,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @param attribute The attribute that was tapped. Will not be nil.
  @param value The value of the tapped attribute.
  @param point The point within textNode, in textNode's coordinate system, that was touched to trigger a highlight.
- @discussion If not implemented, the default value is NO.
+ @discussion If not implemented, the default value is YES.
  @return YES if the entity attribute should be a link, NO otherwise.
  */
 - (BOOL)textNode:(ASTextNode *)textNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;

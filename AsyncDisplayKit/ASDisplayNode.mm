@@ -24,6 +24,7 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutSpec.h"
+#import "ASCellNode.h"
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
 
@@ -1581,6 +1582,10 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_flags.isEnteringHierarchy, @"You should never call -willEnterHierarchy directly. Appearance is automatically managed by ASDisplayNode");
   ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
+
+  if (![self supportsInterfaceState]) {
+    self.interfaceState = ASInterfaceStateInHierarchy;
+  }
 }
 
 - (void)didExitHierarchy
@@ -1588,6 +1593,10 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_flags.isExitingHierarchy, @"You should never call -didExitHierarchy directly. Appearance is automatically managed by ASDisplayNode");
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
+  
+  if (![self supportsInterfaceState]) {
+    self.interfaceState = ASInterfaceStateNone;
+  }
 }
 
 - (void)clearContents
@@ -1635,6 +1644,20 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
   [self clearFetchedData];
 }
 
+/**
+ * We currently only set interface state on nodes
+ * in table/collection views. For other nodes, if they are
+ * in the hierarchy we return `Unknown`, otherwise we return `None`.
+ *
+ * TODO: Avoid traversing up node hierarchy due to possible deadlock.
+ * @see https://github.com/facebook/AsyncDisplayKit/issues/900
+ * Possible solution is to push `isInCellNode` state downward on `addSubnode`/`removeFromSupernode`.
+ */
+- (BOOL)supportsInterfaceState {
+  return ([self isKindOfClass:ASCellNode.class]
+      || [self _supernodeWithClass:ASCellNode.class checkViewHierarchy:NO] != nil);
+}
+
 - (ASInterfaceState)interfaceState
 {
   ASDN::MutexLocker l(_propertyLock);
@@ -1643,14 +1666,20 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)setInterfaceState:(ASInterfaceState)interfaceState
 {
-  ASDN::MutexLocker l(_propertyLock);
-  if (interfaceState != _interfaceState) {
-    if ((interfaceState & ASInterfaceStateMeasureLayout) != (_interfaceState & ASInterfaceStateMeasureLayout)) {
+  ASInterfaceState oldValue;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    oldValue = _interfaceState;
+    _interfaceState = interfaceState;
+  }
+
+  if (interfaceState != oldValue) {
+    if ((interfaceState & ASInterfaceStateMeasureLayout) != (oldValue & ASInterfaceStateMeasureLayout)) {
       // Trigger asynchronous measurement if it is not already cached or being calculated.
     }
     
     // Entered or exited data loading state.
-    if ((interfaceState & ASInterfaceStateFetchData) != (_interfaceState & ASInterfaceStateFetchData)) {
+    if ((interfaceState & ASInterfaceStateFetchData) != (oldValue & ASInterfaceStateFetchData)) {
       if (interfaceState & ASInterfaceStateFetchData) {
         [self fetchData];
       } else {
@@ -1659,7 +1688,7 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
     }
 
     // Entered or exited contents rendering state.
-    if ((interfaceState & ASInterfaceStateDisplay) != (_interfaceState & ASInterfaceStateDisplay)) {
+    if ((interfaceState & ASInterfaceStateDisplay) != (oldValue & ASInterfaceStateDisplay)) {
       if (interfaceState & ASInterfaceStateDisplay) {
         // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
         [self setDisplaySuspended:NO];
@@ -1670,15 +1699,14 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
     }
 
     // Entered or exited data loading state.
-    if ((interfaceState & ASInterfaceStateVisible) != (_interfaceState & ASInterfaceStateVisible)) {
+    if ((interfaceState & ASInterfaceStateVisible) != (oldValue & ASInterfaceStateVisible)) {
       if (interfaceState & ASInterfaceStateVisible) {
         // Consider providing a -didBecomeVisible.
       } else {
         // Consider providing a -didBecomeInvisible.
       }
     }
-    
-    _interfaceState = interfaceState;
+
   }
 }
 
@@ -1871,13 +1899,16 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 // This method has proved helpful in a few rare scenarios, similar to a category extension on UIView, but assumes knowledge of _ASDisplayView.
 // It's considered private API for now and its use should not be encouraged.
-- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass
+- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy
 {
   ASDisplayNode *supernode = self.supernode;
   while (supernode) {
     if ([supernode isKindOfClass:supernodeClass])
       return supernode;
     supernode = supernode.supernode;
+  }
+  if (!checkViewHierarchy) {
+    return nil;
   }
 
   UIView *view = self.view.superview;
