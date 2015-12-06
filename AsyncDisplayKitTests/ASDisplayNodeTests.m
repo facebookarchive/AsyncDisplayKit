@@ -15,6 +15,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeTestsHelper.h"
 #import "UIView+ASConvenience.h"
+#import "ASCellNode.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
@@ -76,11 +77,15 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 + (dispatch_queue_t)asyncSizingQueue;
 - (id)initWithViewClass:(Class)viewClass;
 - (id)initWithLayerClass:(Class)layerClass;
+
+// FIXME: Importing ASDisplayNodeInternal.h causes a heap of problems.
+- (void)enterInterfaceState:(ASInterfaceState)interfaceState;
 @end
 
 @interface ASTestDisplayNode : ASDisplayNode
 @property (atomic, copy) void (^willDeallocBlock)(ASTestDisplayNode *node);
 @property (atomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
+@property (atomic) BOOL hasFetchedData;
 @end
 
 @interface ASTestResponderNode : ASTestDisplayNode
@@ -91,6 +96,18 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   return _calculateSizeBlock ? _calculateSizeBlock(self, constrainedSize) : CGSizeZero;
+}
+
+- (void)fetchData
+{
+  [super fetchData];
+  self.hasFetchedData = YES;
+}
+
+- (void)clearFetchedData
+{
+  [super clearFetchedData];
+  self.hasFetchedData = NO;
 }
 
 - (void)dealloc
@@ -1661,6 +1678,48 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 - (void)testBackgroundColorOpaqueRelationshipNoLayer
 {
   [self checkBackgroundColorOpaqueRelationshipWithViewLoaded:NO layerBacked:YES];
+}
+
+// Check that nodes who have no cell node (no range controller)
+// do get their `fetchData` called, and they do report
+// the fetch data interface state.
+- (void)testInterfaceStateForNonCellNode
+{
+  ASTestWindow *window = [ASTestWindow new];
+  ASTestDisplayNode *node = [ASTestDisplayNode new];
+  XCTAssert(node.interfaceState == ASInterfaceStateNone);
+  XCTAssert(!node.hasFetchedData);
+
+  [window addSubview:node.view];
+  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
+
+  [node.view removeFromSuperview];
+  XCTAssert(!node.hasFetchedData);
+  XCTAssert(node.interfaceState == ASInterfaceStateNone);
+}
+
+// Check that nodes who have no cell node (no range controller)
+// do get their `fetchData` called, and they do report
+// the fetch data interface state.
+- (void)testInterfaceStateForCellNode
+{
+    ASCellNode *cellNode = [ASCellNode new];
+    ASTestDisplayNode *node = [ASTestDisplayNode new];
+    XCTAssert(node.interfaceState == ASInterfaceStateNone);
+    XCTAssert(!node.hasFetchedData);
+
+    // Simulate range handler updating cell node.
+    [cellNode addSubnode:node];
+    [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+    XCTAssert(node.hasFetchedData);
+    XCTAssert(node.interfaceState == ASInterfaceStateFetchData);
+
+    // If the node goes into a view it should not adopt the `InHierarchy` state.
+    ASTestWindow *window = [ASTestWindow new];
+    [window addSubview:cellNode.view];
+    XCTAssert(node.hasFetchedData);
+    XCTAssert(node.interfaceState == ASInterfaceStateFetchData);
 }
 
 - (void)testInitWithViewClass

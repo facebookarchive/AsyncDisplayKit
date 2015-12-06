@@ -366,7 +366,7 @@
 
 
 /**
- * Called just before the view is added to a superview.
+ * Called just before the view is added to a window.
  */
 - (void)willEnterHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
 
@@ -426,9 +426,13 @@
 @end
 
 @interface ASDisplayNode (ASDisplayNodePrivate)
-// This method has proven helpful in a few rare scenarios, similar to a category extension on UIView,
-// but it's considered private API for now and its use should not be encouraged.
-- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass;
+/**
+ * This method has proven helpful in a few rare scenarios, similar to a category extension on UIView,
+ * but it's considered private API for now and its use should not be encouraged.
+ * @param checkViewHierarchy If YES, and no supernode can be found, method will walk up from `self.view` to find a supernode.
+ * If YES, this method must be called on the main thread and the node must not be layer-backed.
+ */
+- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy;
 
 // The two methods below will eventually be exposed, but their names are subject to change.
 /**
