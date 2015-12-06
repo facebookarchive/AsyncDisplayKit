@@ -10,16 +10,14 @@
 #import "ASTableViewInternal.h"
 
 #import "ASAssert.h"
+#import "ASBatchFetching.h"
 #import "ASChangeSetDataController.h"
 #import "ASCollectionViewLayoutController.h"
-#import "ASLayoutController.h"
-#import "ASRangeController.h"
-#import "ASBatchFetching.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-
-// FIXME: Temporary nonsense import until method names are finalized and exposed
-#import "ASDisplayNode+Subclasses.h"
+#import "ASLayoutController.h"
+#import "ASRangeController.h"
 
 static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
@@ -829,6 +827,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
+  [node enterHierarchyState:ASHierarchyStateRangeManaged];
+  
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
   if (node.layoutDelegate == nil) {
     node.layoutDelegate = self;
