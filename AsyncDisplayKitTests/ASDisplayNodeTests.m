@@ -1719,7 +1719,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
     ASTestWindow *window = [ASTestWindow new];
     [window addSubview:cellNode.view];
     XCTAssert(node.hasFetchedData);
-    XCTAssert(node.interfaceState == ASInterfaceStateFetchData);
+    XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
 }
 
 - (void)testInitWithViewClass

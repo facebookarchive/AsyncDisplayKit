@@ -6,19 +6,16 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASCollectionView.h"
-
 #import "ASAssert.h"
-#import "ASCollectionViewLayoutController.h"
-#import "ASRangeController.h"
-#import "ASCollectionDataController.h"
 #import "ASBatchFetching.h"
-#import "UICollectionViewLayout+ASConvenience.h"
-#import "ASInternalHelpers.h"
+#import "ASCollectionView.h"
+#import "ASCollectionDataController.h"
+#import "ASCollectionViewLayoutController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
-
-// FIXME: Temporary nonsense import until method names are finalized and exposed
-#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASInternalHelpers.h"
+#import "ASRangeController.h"
+#import "UICollectionViewLayout+ASConvenience.h"
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
@@ -661,6 +658,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
+  [node enterHierarchyState:ASHierarchyStateRangeManaged];
+  
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
   if (node.layoutDelegate == nil) {
     node.layoutDelegate = self;

@@ -441,6 +441,8 @@
 		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
+		DE6EA3221C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */; };
+		DE6EA3231C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */; };
 		DECBD6E71BE56E1900CF4905 /* ASButtonNode.h in Headers */ = {isa = PBXBuildFile; fileRef = DECBD6E51BE56E1900CF4905 /* ASButtonNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DECBD6E81BE56E1900CF4905 /* ASButtonNode.h in Headers */ = {isa = PBXBuildFile; fileRef = DECBD6E51BE56E1900CF4905 /* ASButtonNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DECBD6E91BE56E1900CF4905 /* ASButtonNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECBD6E61BE56E1900CF4905 /* ASButtonNode.mm */; };
@@ -725,6 +727,7 @@
 		D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.release.xcconfig"; sourceTree = "<group>"; };
 		D785F6601A74327E00291744 /* ASScrollNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASScrollNode.h; sourceTree = "<group>"; };
 		D785F6611A74327E00291744 /* ASScrollNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASScrollNode.m; sourceTree = "<group>"; };
+		DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASDisplayNode+FrameworkPrivate.h"; sourceTree = "<group>"; };
 		DECBD6E51BE56E1900CF4905 /* ASButtonNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASButtonNode.h; sourceTree = "<group>"; };
 		DECBD6E61BE56E1900CF4905 /* ASButtonNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASButtonNode.mm; sourceTree = "<group>"; };
 		EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AsyncDisplayKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1045,6 +1048,7 @@
 				058D0A09195D050800B7D73C /* ASDisplayNode+DebugTiming.h */,
 				058D0A0A195D050800B7D73C /* ASDisplayNode+DebugTiming.mm */,
 				058D0A0B195D050800B7D73C /* ASDisplayNode+UIViewBridge.mm */,
+				DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */,
 				058D0A0C195D050800B7D73C /* ASDisplayNodeInternal.h */,
 				058D0A0D195D050800B7D73C /* ASImageNode+CGExtras.h */,
 				058D0A0E195D050800B7D73C /* ASImageNode+CGExtras.m */,
@@ -1231,6 +1235,7 @@
 				257754B11BEE44CD00737CA5 /* ASTextKitShadower.h in Headers */,
 				058D0A7B195D05F900B7D73C /* ASDisplayNodeInternal.h in Headers */,
 				0587F9BD1A7309ED00AFF0BA /* ASEditableTextNode.h in Headers */,
+				DE6EA3221C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */,
 				1950C4491A3BB5C1005C8279 /* ASEqualityHelpers.h in Headers */,
 				257754A81BEE44CD00737CA5 /* ASTextKitContext.h in Headers */,
 				464052221A3F83C40061C0BA /* ASFlowLayoutController.h in Headers */,
@@ -1340,6 +1345,7 @@
 				254C6B791BF94DF4003EC431 /* ASTextKitEntityAttribute.h in Headers */,
 				509E68631B3AEDB4009B9150 /* ASCollectionViewLayoutController.h in Headers */,
 				B35061F71B010EFD0018CF92 /* ASCollectionViewProtocols.h in Headers */,
+				DE6EA3231C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */,
 				B35061FA1B010EFD0018CF92 /* ASControlNode+Subclasses.h in Headers */,
 				B35061F81B010EFD0018CF92 /* ASControlNode.h in Headers */,
 				B35062171B010EFD0018CF92 /* ASDataController.h in Headers */,

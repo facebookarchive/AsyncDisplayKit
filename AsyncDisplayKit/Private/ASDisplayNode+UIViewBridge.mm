@@ -8,9 +8,11 @@
 
 #import "_ASCoreAnimationExtras.h"
 #import "_ASPendingState.h"
+#import "ASInternalHelpers.h"
 #import "ASAssert.h"
-#import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEqualityHelpers.h"
 
 /**
@@ -219,9 +221,22 @@
 
 - (void)setNeedsDisplay
 {
-  ASDisplayNode *rasterizedContainerNode = [self __rasterizedContainerNode];
-  if (rasterizedContainerNode) {
-    [rasterizedContainerNode setNeedsDisplay];
+  if (_hierarchyState & ASHierarchyStateRasterized) {
+    ASPerformBlockOnMainThread(^{
+      // The below operation must be performed on the main thread to ensure against an extremely rare deadlock, where a parent node
+      // begins materializing the view / layer heirarchy (locking itself or a descendant) while this node walks up
+      // the tree and requires locking that node to access .shouldRasterizeDescendants.
+      // For this reason, this method should be avoided when possible.  Use _hierarchyState & ASHierarchyStateRasterized.
+      ASDisplayNodeAssertMainThread();
+      ASDisplayNode *rasterizedContainerNode = self.supernode;
+      while (rasterizedContainerNode) {
+        if (rasterizedContainerNode.shouldRasterizeDescendants) {
+          break;
+        }
+        rasterizedContainerNode = rasterizedContainerNode.supernode;
+      }
+      [rasterizedContainerNode setNeedsDisplay];
+    });
   } else {
     [_layer setNeedsDisplay];
   }

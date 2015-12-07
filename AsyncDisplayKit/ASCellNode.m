@@ -25,7 +25,7 @@
   if (!(self = [super init]))
     return nil;
 
-  // use UITableViewCell defaults
+  // Use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
 
