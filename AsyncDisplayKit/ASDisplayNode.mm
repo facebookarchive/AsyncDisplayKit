@@ -657,6 +657,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         [node __loadNode];
       }
     });
+    if (!shouldRasterize) {
+      // At this point all of our subnodes have their layers or views recreated, but we haven't added
+      // them to ours yet.  This is because our node is already loaded, and the above recursion
+      // is only performed on our subnodes -- not self.
+      [self _addSubnodeViewsAndLayers];
+    }
     
     if (self.interfaceState & ASInterfaceStateVisible) {
       // TODO: Change this to recursivelyEnsureDisplay - but need a variant that does not skip
@@ -1735,6 +1741,9 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState
 {
+  if (interfaceState == ASInterfaceStateNone) {
+    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
+  }
   ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState |= interfaceState;
   });
@@ -1742,6 +1751,9 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)exitInterfaceState:(ASInterfaceState)interfaceState
 {
+  if (interfaceState == ASInterfaceStateNone) {
+    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
+  }
   ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState &= (~interfaceState);
   });
@@ -1769,6 +1781,9 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)enterHierarchyState:(ASHierarchyState)hierarchyState
 {
+  if (hierarchyState == ASHierarchyStateNormal) {
+    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
+  }
   ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.hierarchyState |= hierarchyState;
   });
@@ -1776,6 +1791,9 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)exitHierarchyState:(ASHierarchyState)hierarchyState
 {
+  if (hierarchyState == ASHierarchyStateNormal) {
+    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
+  }
   ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.hierarchyState &= (~hierarchyState);
   });
