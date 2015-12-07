@@ -391,14 +391,18 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   NSArray *indexPaths = [self indexPathsForVisibleItems];
   NSMutableArray *visibleNodes = [[NSMutableArray alloc] init];
-
-  [indexPaths enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-    ASCellNode *visibleNode = [self nodeForItemAtIndexPath:obj];
-    [visibleNodes addObject:visibleNode];
-  }];
-
+  
+  for (NSIndexPath *indexPath in indexPaths) {
+    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
+    if (node) {
+      // It is possible for UICollectionView to return indexPaths before the node is completed.
+      [visibleNodes addObject:node];
+    }
+  }
+  
   return visibleNodes;
 }
+
 
 #pragma mark Assertions.
 

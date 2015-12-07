@@ -379,11 +379,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   NSArray *indexPaths = [self indexPathsForVisibleRows];
   NSMutableArray *visibleNodes = [[NSMutableArray alloc] init];
 
-  [indexPaths enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-    ASCellNode *visibleNode = [self nodeForRowAtIndexPath:obj];
-    [visibleNodes addObject:visibleNode];
-  }];
-
+  for (NSIndexPath *indexPath in indexPaths) {
+    ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
+    if (node) {
+      // It is possible for UITableView to return indexPaths before the node is completed.
+      [visibleNodes addObject:node];
+    }
+  }
+  
   return visibleNodes;
 }
 
