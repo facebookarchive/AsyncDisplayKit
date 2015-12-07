@@ -28,22 +28,30 @@
   NSMutableDictionary *_pendingIndexPaths;
 }
 
+- (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled
+{
+  self = [super initWithAsyncDataFetching:asyncDataFetchingEnabled];
+  if (self != nil) {
+    _pendingNodes = [NSMutableDictionary dictionary];
+    _pendingIndexPaths = [NSMutableDictionary dictionary];
+  }
+  return self;
+}
+
 - (void)prepareForReloadData
 {
-  _pendingNodes = [NSMutableDictionary dictionary];
-  _pendingIndexPaths = [NSMutableDictionary dictionary];
-
-  [[self supplementaryKinds] enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+  NSArray *kinds = [self supplementaryKinds];
+  for (NSString *kind in kinds) {
     LOG(@"Populating elements of kind: %@", kind);
     NSMutableArray *indexPaths = [NSMutableArray array];
     NSMutableArray *nodes = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind withMutableNodes:nodes mutableIndexPaths:indexPaths];
     _pendingNodes[kind] = nodes;
     _pendingIndexPaths[kind] = indexPaths;
-
+    
     // Measure loaded nodes before leaving the main thread
     [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
-  }];
+  }
 }
 
 - (void)willReloadData
@@ -56,7 +64,7 @@
     NSArray *editingNodes = [self editingNodesOfKind:kind];
     NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodes.count)];
     [self deleteSectionsOfKind:kind atIndexSet:indexSet completion:nil];
-
+    
     // Insert each section
     NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryNodeOfKind:kind];
     NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
@@ -75,7 +83,8 @@
 
 - (void)prepareForInsertSections:(NSIndexSet *)sections
 {
-  [[self supplementaryKinds] enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+  NSArray *kinds = [self supplementaryKinds];
+  for (NSString *kind in kinds) {
     LOG(@"Populating elements of kind: %@, for sections: %@", kind, sections);
     NSMutableArray *nodes = [NSMutableArray array];
     NSMutableArray *indexPaths = [NSMutableArray array];
@@ -85,7 +94,7 @@
     
     // Measure loaded nodes before leaving the main thread
     [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
-  }];
+  }
 }
 
 - (void)willInsertSections:(NSIndexSet *)sections
@@ -97,25 +106,29 @@
     }
     
     [self insertSections:sectionArray ofKind:kind atIndexSet:sections completion:nil];
-    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:_pendingIndexPaths[kind] completion:nil];
-    _pendingNodes[kind] = nil;
-    _pendingIndexPaths[kind] = nil;
+    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:_pendingIndexPaths[kind] completion:^(NSArray *nodes, NSArray *indexPaths) {
+      [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
+    }];
+    [_pendingNodes removeObjectForKey:kind];
+    [_pendingIndexPaths removeObjectForKey:kind];
   }];
 }
 
 - (void)willDeleteSections:(NSIndexSet *)sections
 {
-  [[self supplementaryKinds] enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+  NSArray *kinds = [self supplementaryKinds];
+  for (NSString *kind in kinds) {
     NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], sections);
     
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
     [self deleteSectionsOfKind:kind atIndexSet:sections completion:nil];
-  }];
+  }
 }
 
 - (void)prepareForReloadSections:(NSIndexSet *)sections
 {
-  [[self supplementaryKinds] enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+  NSArray *kinds = [self supplementaryKinds];
+  for (NSString *kind in kinds) {
     NSMutableArray *nodes = [NSMutableArray array];
     NSMutableArray *indexPaths = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableNodes:nodes mutableIndexPaths:indexPaths];
@@ -124,7 +137,7 @@
     
     // Measure loaded nodes before leaving the main thread
     [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
-  }];
+  }
 }
 
 - (void)willReloadSections:(NSIndexSet *)sections
@@ -134,14 +147,15 @@
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
     // reinsert the elements
     [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:_pendingIndexPaths[kind] completion:nil];
-    _pendingNodes[kind] = nil;
-    _pendingIndexPaths[kind] = nil;
+    [_pendingNodes removeObjectForKey:kind];
+    [_pendingIndexPaths removeObjectForKey:kind];
   }];
 }
 
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
-  [[self supplementaryKinds] enumerateObjectsUsingBlock:^(NSString *kind, NSUInteger idx, BOOL *stop) {
+  NSArray *kinds = [self supplementaryKinds];
+  for (NSString *kind in kinds) {
     NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], [NSIndexSet indexSetWithIndex:section]);
     NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths([self editingNodesOfKind:kind], indexPaths);
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
@@ -153,7 +167,7 @@
       [updatedIndexPaths addObject:[sectionIndexPath indexPathByAddingIndex:[indexPath indexAtPosition:indexPath.length - 1]]];
     }];
     [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
-  }];
+  }
 }
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
