@@ -1696,45 +1696,46 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)setInterfaceState:(ASInterfaceState)newState
 {
-  ASInterfaceState oldState;
+  ASInterfaceState oldState = ASInterfaceStateNone;
   {
     ASDN::MutexLocker l(_propertyLock);
+    if (_interfaceState == newState) {
+      return;
+    }
     oldState = _interfaceState;
     _interfaceState = newState;
   }
 
-  if (newState != oldState) {
-    if ((newState & ASInterfaceStateMeasureLayout) != (oldState & ASInterfaceStateMeasureLayout)) {
-      // Trigger asynchronous measurement if it is not already cached or being calculated.
+  if ((newState & ASInterfaceStateMeasureLayout) != (oldState & ASInterfaceStateMeasureLayout)) {
+    // Trigger asynchronous measurement if it is not already cached or being calculated.
+  }
+  
+  // Entered or exited data loading state.
+  if ((newState & ASInterfaceStateFetchData) != (oldState & ASInterfaceStateFetchData)) {
+    if (newState & ASInterfaceStateFetchData) {
+      [self fetchData];
+    } else {
+      [self clearFetchedData];
     }
-    
-    // Entered or exited data loading state.
-    if ((newState & ASInterfaceStateFetchData) != (oldState & ASInterfaceStateFetchData)) {
-      if (newState & ASInterfaceStateFetchData) {
-        [self fetchData];
-      } else {
-        [self clearFetchedData];
-      }
-    }
+  }
 
-    // Entered or exited contents rendering state.
-    if ((newState & ASInterfaceStateDisplay) != (oldState & ASInterfaceStateDisplay)) {
-      if (newState & ASInterfaceStateDisplay) {
-        // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
-        [self setDisplaySuspended:NO];
-      } else {
-        [self setDisplaySuspended:YES];
-        [self clearContents];
-      }
+  // Entered or exited contents rendering state.
+  if ((newState & ASInterfaceStateDisplay) != (oldState & ASInterfaceStateDisplay)) {
+    if (newState & ASInterfaceStateDisplay) {
+      // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
+      [self setDisplaySuspended:NO];
+    } else {
+      [self setDisplaySuspended:YES];
+      [self clearContents];
     }
+  }
 
-    // Entered or exited data loading state.
-    if ((newState & ASInterfaceStateVisible) != (oldState & ASInterfaceStateVisible)) {
-      if (newState & ASInterfaceStateVisible) {
-        // Consider providing a -didBecomeVisible.
-      } else {
-        // Consider providing a -didBecomeInvisible.
-      }
+  // Entered or exited data loading state.
+  if ((newState & ASInterfaceStateVisible) != (oldState & ASInterfaceStateVisible)) {
+    if (newState & ASInterfaceStateVisible) {
+      // Consider providing a -didBecomeVisible.
+    } else {
+      // Consider providing a -didBecomeInvisible.
     }
   }
 }
@@ -1767,9 +1768,12 @@ void recursivelyEnsureDisplayForLayer(CALayer *layer)
 
 - (void)setHierarchyState:(ASHierarchyState)newState
 {
-  ASHierarchyState oldState;
+  ASHierarchyState oldState = ASHierarchyStateNormal;
   {
     ASDN::MutexLocker l(_propertyLock);
+    if (_hierarchyState == newState) {
+      return;
+    }
     oldState = _hierarchyState;
     _hierarchyState = newState;
   }
