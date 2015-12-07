@@ -22,7 +22,7 @@ pod 'AsyncDisplayKit'
 
 (ASDK can also be used as a regular static library:  Copy the project to your
 codebase manually, adding `AsyncDisplayKit.xcodeproj` to your workspace.  Add
-`libAsyncDisplayKit.a`, AssetsLibrary, and Photos to the "Link Binary With
+`libAsyncDisplayKit.a`, MapKit, AssetsLibrary, and Photos to the "Link Binary With
 Libraries" build phase.  Include `-lc++ -ObjC` in your project linker flags.)
 
 Import the framework header, or create an [Objective-C bridging

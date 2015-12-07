@@ -16,6 +16,7 @@
 		058969281ABCE1750059CE2A /* libAsyncDisplayKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 058969271ABCE1750059CE2A /* libAsyncDisplayKit.a */; };
 		0589692A1ABCE17C0059CE2A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058969291ABCE17C0059CE2A /* AssetsLibrary.framework */; };
 		0589692C1ABCE1820059CE2A /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0589692B1ABCE1820059CE2A /* Photos.framework */; };
+		92DD2FEC1BF4D8BB0074C9DD /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92DD2FEB1BF4D8BB0074C9DD /* MapKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		058969271ABCE1750059CE2A /* libAsyncDisplayKit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libAsyncDisplayKit.a; path = "../../build/Debug-iphoneos/libAsyncDisplayKit.a"; sourceTree = "<group>"; };
 		058969291ABCE17C0059CE2A /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		0589692B1ABCE1820059CE2A /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
+		92DD2FEB1BF4D8BB0074C9DD /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92DD2FEC1BF4D8BB0074C9DD /* MapKit.framework in Frameworks */,
 				0589692C1ABCE1820059CE2A /* Photos.framework in Frameworks */,
 				0589692A1ABCE17C0059CE2A /* AssetsLibrary.framework in Frameworks */,
 				058969281ABCE1750059CE2A /* libAsyncDisplayKit.a in Frameworks */,
@@ -51,6 +54,7 @@
 		058968E61ABCE06E0059CE2A = {
 			isa = PBXGroup;
 			children = (
+				92DD2FEB1BF4D8BB0074C9DD /* MapKit.framework */,
 				0589692B1ABCE1820059CE2A /* Photos.framework */,
 				058969291ABCE17C0059CE2A /* AssetsLibrary.framework */,
 				058969271ABCE1750059CE2A /* libAsyncDisplayKit.a */,
