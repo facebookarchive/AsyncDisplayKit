@@ -14,7 +14,7 @@
 #import "ASCellNode.h"
 #import "ASDisplayNode.h"
 #import "ASMultidimensionalArrayUtils.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
@@ -208,7 +208,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
   NSMutableArray *completedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(editingNodes);
   
-  ASDisplayNodePerformBlockOnMainThread(^{
+  ASPerformBlockOnMainThread(^{
     _completedNodes[kind] = completedNodes;
     if (completionBlock) {
       completionBlock(nodes, indexPaths);
@@ -227,7 +227,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   ASDeleteElementsInMultidimensionalArrayAtIndexPaths(editingNodes, indexPaths);
   _editingNodes[kind] = editingNodes;
 
-  ASDisplayNodePerformBlockOnMainThread(^{
+  ASPerformBlockOnMainThread(^{
     NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_completedNodes[kind], indexPaths);
     ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_completedNodes[kind], indexPaths);
     if (completionBlock) {
@@ -250,7 +250,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
   NSArray *sectionsForCompleted = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(sections);
   
-  ASDisplayNodePerformBlockOnMainThread(^{
+  ASPerformBlockOnMainThread(^{
     [_completedNodes[kind] insertObjects:sectionsForCompleted atIndexes:indexSet];
     if (completionBlock) {
       completionBlock(sections, indexSet);
@@ -263,7 +263,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   if (indexSet.count == 0)
     return;
   [_editingNodes[kind] removeObjectsAtIndexes:indexSet];
-  ASDisplayNodePerformBlockOnMainThread(^{
+  ASPerformBlockOnMainThread(^{
     [_completedNodes[kind] removeObjectsAtIndexes:indexSet];
     if (completionBlock) {
       completionBlock(indexSet);
@@ -512,7 +512,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     LOG(@"endUpdatesWithCompletion - beginning");
 
     [_editingTransactionQueue addOperationWithBlock:^{
-      ASDisplayNodePerformBlockOnMainThread(^{
+      ASPerformBlockOnMainThread(^{
         // Deep copy _completedNodes to _externalCompletedNodes.
         // Any external queries from now on will be done on _externalCompletedNodes, to guarantee data consistency with the delegate.
         _externalCompletedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(_completedNodes[ASDataControllerRowNodeKind]);
@@ -532,7 +532,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_pendingEditCommandBlocks removeAllObjects];
     
     [_editingTransactionQueue addOperationWithBlock:^{
-      ASDisplayNodePerformBlockOnMainThread(^{
+      ASPerformBlockOnMainThread(^{
         // Now that the transaction is done, _completedNodes can be accessed externally again.
         _externalCompletedNodes = nil;
         
@@ -819,7 +819,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // i.e there might be some nodes that were measured using the old constrained size but haven't been added to _completedNodes
     // (see _layoutNodes:atIndexPaths:withAnimationOptions:).
     [_editingTransactionQueue addOperationWithBlock:^{
-      ASDisplayNodePerformBlockOnMainThread(^{
+      ASPerformBlockOnMainThread(^{
         for (NSString *kind in [_completedNodes keyEnumerator]) {
           [self _relayoutNodesOfKind:kind];
         }
@@ -902,7 +902,20 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
-  return [self completedNodes][indexPath.section][indexPath.row];
+  
+  NSArray *completedNodes = [self completedNodes];
+  NSInteger section = indexPath.section;
+  NSInteger row = indexPath.row;
+  ASCellNode *node = nil;
+  
+  if (section >= 0 && row >= 0 && section < completedNodes.count) {
+    NSArray *completedNodesSection = completedNodes[section];
+    if (row < completedNodesSection.count) {
+      node = completedNodesSection[row];
+    }
+  }
+  
+  return node;
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;

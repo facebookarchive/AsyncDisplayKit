@@ -224,16 +224,6 @@
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths;
 
 /**
- * Relayouts the specified item.
- *
- * @param indexPath The index path identifying the item to relayout.
- *
- * @discussion This method must be called from the main thread. The relayout is excuted on main thread.
- * The node of the specified item must be updated to cause layout changes before this method is called.
- */
-- (void)relayoutItemAtIndexPath:(NSIndexPath *)indexPath;
-
-/**
  * Moves the item at a specified location to a destination location.
  *
  * @param indexPath The index path identifying the item to move.
@@ -290,6 +280,20 @@
  * @returns a bitmask of ASScrollDirection values.
  */
 - (ASScrollDirection)scrollableDirections;
+
+/**
+ * Triggers all loaded ASCellNodes to destroy displayed contents (freeing a lot of memory).
+ *
+ * @discussion This method should only be called by ASCollectionNode.  To be removed in a later release.
+ */
+- (void)clearContents;
+
+/**
+ * Triggers all loaded ASCellNodes to purge any data fetched from the network or disk (freeing memory).
+ *
+ * @discussion This method should only be called by ASCollectionNode.  To be removed in a later release.
+ */
+- (void)clearFetchedData;
 
 @end
 
@@ -424,11 +428,5 @@
  * Asks the delegate for the size of the footer in the specified section.
  */
 - (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section;
-
-@end
-
-@interface ASCollectionView (Deprecated)
-
-@property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters ASDISPLAYNODE_DEPRECATED;
 
 @end

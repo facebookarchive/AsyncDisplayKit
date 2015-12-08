@@ -23,10 +23,10 @@
 @interface ASNetworkImageNode : ASImageNode
 
 /**
- * The designated initializer.
+ * The designated initializer.  Cache and Downloader are WEAK references.
  *
- * @param cache The object that implements a cache of images for the image node.
- * @param downloader The object that implements image downloading for the image node.  Must not be nil.
+ * @param cache The object that implements a cache of images for the image node.  Weak reference.
+ * @param downloader The object that implements image downloading for the image node.  Must not be nil.  Weak reference.
  *
  * @discussion If `cache` is nil, the receiver will not attempt to retrieve images from a cache before downloading them.
  *

@@ -7,17 +7,50 @@
  */
 
 #import "ASDisplayNodeExtras.h"
-
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 
-ASDisplayNode *ASLayerToDisplayNode(CALayer *layer)
+extern ASDisplayNode *ASLayerToDisplayNode(CALayer *layer)
 {
   return layer.asyncdisplaykit_node;
 }
 
-ASDisplayNode *ASViewToDisplayNode(UIView *view)
+extern ASDisplayNode *ASViewToDisplayNode(UIView *view)
 {
   return view.asyncdisplaykit_node;
+}
+
+extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, void(^block)(ASDisplayNode *node))
+{
+  if (!node) {
+    ASDisplayNodeCAssertNotNil(layer, @"Cannot recursively perform with nil node and nil layer");
+    ASDisplayNodeCAssertMainThread();
+    node = ASLayerToDisplayNode(layer);
+  }
+  
+  if (node) {
+    block(node);
+  }
+  if (!layer && [node isNodeLoaded]) {
+    layer = node.layer;
+  }
+  
+  if (layer) {
+    for (CALayer *sublayer in [layer sublayers]) {
+      ASDisplayNodePerformBlockOnEveryNode(sublayer, nil, block);
+    }
+  } else if (node) {
+    for (ASDisplayNode *subnode in [node subnodes]) {
+      ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
+    }
+  }
+}
+
+extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^block)(ASDisplayNode *node))
+{
+  for (ASDisplayNode *subnode in node.subnodes) {
+    ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
+  }
 }
 
 id ASDisplayNodeFind(ASDisplayNode *node, BOOL (^block)(ASDisplayNode *node))
@@ -120,6 +153,45 @@ extern id ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c)
   return ASDisplayNodeFindFirstSubnode(start, ^(ASDisplayNode *n) {
     return [n isKindOfClass:c];
   });
+}
+
+static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possibleAncestor, ASDisplayNode *possibleDescendent)
+{
+  ASDisplayNode *supernode = possibleDescendent;
+  while (supernode) {
+    if (supernode == possibleAncestor) {
+      return YES;
+    }
+    supernode = supernode.supernode;
+  }
+  
+  return NO;
+}
+
+extern ASDisplayNode *ASDisplayNodeFindClosestCommonAncestor(ASDisplayNode *node1, ASDisplayNode *node2)
+{
+  ASDisplayNode *possibleAncestor = node1;
+  while (possibleAncestor) {
+    if (_ASDisplayNodeIsAncestorOfDisplayNode(possibleAncestor, node2)) {
+      break;
+    }
+    possibleAncestor = possibleAncestor.supernode;
+  }
+  
+  ASDisplayNodeCAssertNotNil(possibleAncestor, @"Could not find a common ancestor between node1: %@ and node2: %@", node1, node2);
+  return possibleAncestor;
+}
+
+extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node)
+{
+  // node <- supernode on each loop
+  // previous <- node on each loop where node is not nil
+  // previous is the final non-nil value of supernode, i.e. the root node
+  ASDisplayNode *previousNode = node;
+  while ((node = [node supernode])) {
+    previousNode = node;
+  }
+  return previousNode;
 }
 
 #pragma mark - Placeholders

@@ -49,6 +49,12 @@
 
 #pragma mark - ASCollectionViewLayoutInspecting
 
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  // TODO: Provide constrained size for flow layout item nodes
+  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+}
+
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   CGSize constrainedSize;

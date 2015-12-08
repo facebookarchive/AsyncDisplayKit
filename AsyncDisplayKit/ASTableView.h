@@ -215,18 +215,6 @@
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
- * Relayouts the specified row using a given animation effect.
- *
- * @param indexPath The index path identifying the row to relayout.
- *
- * @param animation A constant that indicates how the relayout is to be animated. See UITableViewRowAnimation.
- *
- * @discussion This method must be called from the main thread. The relayout is excuted on main thread. 
- * The node of the specified row must be updated to cause layout changes before this method is called.
- */
-- (void)relayoutRowAtIndexPath:(NSIndexPath *)indexPath withRowAnimation:(UITableViewRowAnimation)animation;
-
-/**
  * Moves the row at a specified location to a destination location.
  *
  * @param indexPath The index path identifying the row to move.
@@ -271,6 +259,20 @@
  * default is NO.
  */
 @property (nonatomic) BOOL automaticallyAdjustsContentOffset;
+
+/**
+ * Triggers all loaded ASCellNodes to destroy displayed contents (freeing a lot of memory).
+ *
+ * @discussion This method should only be called by ASTableNode.  To be removed in a later release.
+ */
+- (void)clearContents;
+
+/**
+ * Triggers all loaded ASCellNodes to purge any data fetched from the network or disk (freeing memory).
+ *
+ * @discussion This method should only be called by ASTableNode.  To be removed in a later release.
+ */
+- (void)clearFetchedData;
 
 @end
 
@@ -355,11 +357,5 @@
  * should occur.
  */
 - (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView;
-
-@end
-
-@interface ASTableView (Deprecated)
-
-@property (nonatomic, assign) ASRangeTuningParameters rangeTuningParameters ASDISPLAYNODE_DEPRECATED;
 
 @end

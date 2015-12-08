@@ -9,9 +9,7 @@
 #import "ASViewController.h"
 #import "ASAssert.h"
 #import "ASDimension.h"
-
-// FIXME: Temporary nonsense import until method names are finalized and exposed
-#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 
 @implementation ASViewController
 {
@@ -40,9 +38,7 @@
 - (void)viewWillLayoutSubviews
 {
   [super viewWillLayoutSubviews];
-  CGSize viewSize = self.view.bounds.size;
-  ASSizeRange constrainedSize = ASSizeRangeMake(viewSize, viewSize);
-  [_node measureWithSizeRange:constrainedSize];
+  [_node measureWithSizeRange:[self nodeConstrainedSize]];
 }
 
 - (void)viewDidLayoutSubviews
@@ -59,6 +55,14 @@
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
   [_node recursivelyFetchData];
+}
+
+// MARK: - Layout Helpers
+
+- (ASSizeRange)nodeConstrainedSize
+{
+  CGSize viewSize = self.view.bounds.size;
+  return ASSizeRangeMake(viewSize, viewSize);
 }
 
 @end

@@ -12,7 +12,8 @@
 #import "ViewController.h"
 #import "ScreenNode.h"
 
-@interface ViewController() {
+@interface ViewController()
+{
   ScreenNode *_screenNode;
 }
 
@@ -28,10 +29,6 @@
 
   _screenNode = node;
 
-  // tap to reload
-  UITapGestureRecognizer *gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(reload:)];
-  [_screenNode.textNode.view addGestureRecognizer:gr];
-
   return self;
 }
 
@@ -40,10 +37,6 @@
   // This should be done before calling super's viewWillAppear which triggers data fetching on the node.
   [_screenNode start];
   [super viewWillAppear:animated];
-}
-
-- (void)reload:(id)sender {
-  [_screenNode reload];
 }
 
 - (BOOL)prefersStatusBarHidden

@@ -12,7 +12,7 @@
 
 #import "ASDisplayNode+Subclasses.h"
 #import "ASEqualityHelpers.h"
-#import "ASTextNodeTextKitHelpers.h"
+#import "ASTextKitHelpers.h"
 #import "ASTextNodeWordKerner.h"
 #import "ASThread.h"
 
@@ -78,7 +78,8 @@
   _textKitComponents.layoutManager.delegate = self;
   _wordKerner = [[ASTextNodeWordKerner alloc] init];
   _returnKeyType = UIReturnKeyDefault;
-
+  _textContainerInset = UIEdgeInsetsZero;
+  
   // Create the placeholder scaffolding.
   _placeholderTextKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
   _placeholderTextKitComponents.layoutManager.delegate = self;
@@ -122,7 +123,7 @@
       textView.backgroundColor = nil;
       textView.opaque = NO;
     }
-    textView.textContainerInset = UIEdgeInsetsZero;
+    textView.textContainerInset = self.textContainerInset;
     textView.clipsToBounds = NO; // We don't want selection handles cut off.
   };
 
@@ -173,6 +174,15 @@
     _textKitComponents.textView.backgroundColor = backgroundColor;
   }
   _placeholderTextKitComponents.textView.backgroundColor = backgroundColor;
+}
+
+- (void)setTextContainerInset:(UIEdgeInsets)textContainerInset
+{
+  ASDN::MutexLocker l(_textKitLock);
+
+  _textContainerInset = textContainerInset;
+  _textKitComponents.textView.textContainerInset = textContainerInset;
+  _placeholderTextKitComponents.textView.textContainerInset = textContainerInset;
 }
 
 - (void)setOpaque:(BOOL)opaque

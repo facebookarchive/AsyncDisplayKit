@@ -8,9 +8,11 @@
 
 #import "_ASCoreAnimationExtras.h"
 #import "_ASPendingState.h"
+#import "ASInternalHelpers.h"
 #import "ASAssert.h"
-#import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEqualityHelpers.h"
 
 /**
@@ -67,6 +69,41 @@
  */
 @implementation ASDisplayNode (UIViewBridge)
 
+- (BOOL)canBecomeFirstResponder
+{
+  return NO;
+}
+
+- (BOOL)canResignFirstResponder
+{
+  return YES;
+}
+
+- (BOOL)isFirstResponder
+{
+  ASDisplayNodeAssertMainThread();
+  return _view != nil && [_view isFirstResponder];
+}
+
+// Note: this implicitly loads the view if it hasn't been loaded yet.
+- (BOOL)becomeFirstResponder
+{
+  ASDisplayNodeAssertMainThread();
+  return !self.layerBacked && [self canBecomeFirstResponder] && [self.view becomeFirstResponder];
+}
+
+- (BOOL)resignFirstResponder
+{
+  ASDisplayNodeAssertMainThread();
+  return !self.layerBacked && [self canResignFirstResponder] && [_view resignFirstResponder];
+}
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender
+{
+  ASDisplayNodeAssertMainThread();
+  return !self.layerBacked && [self.view canPerformAction:action withSender:sender];
+}
+
 - (CGFloat)alpha
 {
   _bridge_prologue;
@@ -85,7 +122,7 @@
   return _getFromLayer(cornerRadius);
 }
 
--(void)setCornerRadius:(CGFloat)newCornerRadius
+- (void)setCornerRadius:(CGFloat)newCornerRadius
 {
   _bridge_prologue;
   _setToLayer(cornerRadius, newCornerRadius);
@@ -137,20 +174,69 @@
 {
   _bridge_prologue;
 
-  // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
+  if (_flags.synchronous && !_flags.layerBacked) {
+    // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
+    
+    // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
 #if DEBUG
-  // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
-  ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
+    // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
+    ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
 #endif
 
-  [self __setSafeFrame:rect];
+    _setToViewOnly(frame, rect);
+  } else {
+    // This is by far the common case / hot path.
+    [self __setSafeFrame:rect];
+  }
+}
+
+/**
+ * Sets a new frame to this node by changing its bounds and position. This method can be safely called even if
+ * the transform is a non-identity transform, because bounds and position can be set instead of frame.
+ * This is NOT called for synchronous nodes (wrapping regular views), which may rely on a [UIView setFrame:] call.
+ * A notable example of the latter is UITableView, which won't resize its internal container if only layer bounds are set.
+ */
+- (void)__setSafeFrame:(CGRect)rect
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
+  
+  BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
+  
+  CGPoint origin      = (useLayer ? _layer.bounds.origin : self.bounds.origin);
+  CGPoint anchorPoint = (useLayer ? _layer.anchorPoint   : self.anchorPoint);
+  
+  CGRect  bounds      = (CGRect){ origin, rect.size };
+  CGPoint position    = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
+                                    rect.origin.y + rect.size.height * anchorPoint.y);
+  
+  if (useLayer) {
+    _layer.bounds = bounds;
+    _layer.position = position;
+  } else {
+    self.bounds = bounds;
+    self.position = position;
+  }
 }
 
 - (void)setNeedsDisplay
 {
-  ASDisplayNode *rasterizedContainerNode = [self __rasterizedContainerNode];
-  if (rasterizedContainerNode) {
-    [rasterizedContainerNode setNeedsDisplay];
+  if (_hierarchyState & ASHierarchyStateRasterized) {
+    ASPerformBlockOnMainThread(^{
+      // The below operation must be performed on the main thread to ensure against an extremely rare deadlock, where a parent node
+      // begins materializing the view / layer heirarchy (locking itself or a descendant) while this node walks up
+      // the tree and requires locking that node to access .shouldRasterizeDescendants.
+      // For this reason, this method should be avoided when possible.  Use _hierarchyState & ASHierarchyStateRasterized.
+      ASDisplayNodeAssertMainThread();
+      ASDisplayNode *rasterizedContainerNode = self.supernode;
+      while (rasterizedContainerNode) {
+        if (rasterizedContainerNode.shouldRasterizeDescendants) {
+          break;
+        }
+        rasterizedContainerNode = rasterizedContainerNode.supernode;
+      }
+      [rasterizedContainerNode setNeedsDisplay];
+    });
   } else {
     [_layer setNeedsDisplay];
   }

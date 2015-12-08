@@ -10,26 +10,40 @@
 
 #import "ASDisplayNode.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
+
+@interface ASRangeHandlerRender ()
+@property (nonatomic,readonly) UIWindow *workingWindow;
+@end
 
 @implementation ASRangeHandlerRender
+@synthesize workingWindow = _workingWindow;
 
-+ (UIWindow *)workingWindow
+- (UIWindow *)workingWindow
 {
   ASDisplayNodeAssertMainThread();
-  
+
   // we add nodes' views to this invisible window to start async rendering
   // TODO: Replace this with directly triggering display https://github.com/facebook/AsyncDisplayKit/issues/315
-  static UIWindow *workingWindow = nil;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    workingWindow = [[UIWindow alloc] initWithFrame:CGRectZero];
-    workingWindow.windowLevel = UIWindowLevelNormal - 1000;
-    workingWindow.userInteractionEnabled = NO;
-    workingWindow.hidden = YES;
-    workingWindow.alpha = 0.0;
-  });
-  return workingWindow;
+  // Update: Latest attempt is at https://github.com/facebook/AsyncDisplayKit/pull/828
+
+  if (!_workingWindow) {
+    _workingWindow = [[UIWindow alloc] initWithFrame:CGRectZero];
+    _workingWindow.windowLevel = UIWindowLevelNormal - 1000;
+    _workingWindow.userInteractionEnabled = NO;
+    _workingWindow.hidden = YES;
+    _workingWindow.alpha = 0.0;
+  }
+
+  return _workingWindow;
+}
+
+- (void)dealloc
+{
+  for(CALayer *layer in [self.workingWindow.layer.sublayers copy]) {
+    ASDisplayNode *node = layer.asyncdisplaykit_node;
+    [self node:node exitedRangeOfType:ASLayoutRangeTypeRender];
+  }
 }
 
 - (void)node:(ASDisplayNode *)node enteredRangeOfType:(ASLayoutRangeType)rangeType
@@ -37,14 +51,21 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(rangeType == ASLayoutRangeTypeRender, @"Render delegate should not handle other ranges");
 
-  [node recursivelySetDisplaySuspended:NO];
+  // If a node had previously been onscreen but now is only in the working range,
+  // ensure its view is not orphaned in a UITableViewCell in the reuse pool.
+  if (![node isLayerBacked] && node.view.superview) {
+    [node.view removeFromSuperview];
+  }
+  
+  // The node un-suspends display.
+  [node enterInterfaceState:ASInterfaceStateDisplay];
 
   // Add the node's layer to an off-screen window to trigger display and mark its contents as non-volatile.
   // Use the layer directly to avoid the substantial overhead of UIView heirarchy manipulations.
   // Any view-backed nodes will still create their views in order to assemble the layer heirarchy, and they will
   // also assemble a view subtree for the node, but we avoid the much more significant expense triggered by a view
   // being added or removed from an onscreen window (responder chain setup, will/DidMoveToWindow: recursive calls, etc)
-  [[[[self class] workingWindow] layer] addSublayer:node.layer];
+  [[[self workingWindow] layer] addSublayer:node.layer];
 }
 
 - (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType
@@ -69,9 +90,10 @@
   // preservation of this content could result in the app being killed, which is not likely preferable over briefly seeing placeholders in the event the user scrolls backwards.
   // Nonetheless, future changes to the implementation will likely eliminate this behavior to simplify debugging and extensibility of working range functionality.
   
-  [node recursivelySetDisplaySuspended:YES];
+  // The node calls clearCurrentContents and suspends display
+  [node exitInterfaceState:ASInterfaceStateDisplay];
   
-  if (node.layer.superlayer != [[[self class] workingWindow] layer]) {
+  if (node.layer.superlayer != [[self workingWindow] layer]) {
     // In this case, the node has previously passed through the working range (or it is zero), and it has now fallen outside the working range.
     if (![node isLayerBacked]) {
       // If the node is view-backed, we need to make sure to remove the view (which is now present in the containing cell contentsView).
@@ -82,7 +104,6 @@
   
   // At this point, the node's layer may validly be present either in the workingWindow, or in the contentsView of a cell.
   [node.layer removeFromSuperlayer];
-  [node recursivelyClearContents];
 }
 
 @end

@@ -13,7 +13,7 @@
 #import <AsyncDisplayKit/ASFlowLayoutController.h>
 #import <AsyncDisplayKit/ASLayoutController.h>
 
-
+@protocol ASRangeControllerDataSource;
 @protocol ASRangeControllerDelegate;
 
 /**
@@ -46,49 +46,46 @@
 - (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node;
 
 /**
- * Delegate and ultimate data source.  Must not be nil.
+ * An object that describes the layout behavior of the ranged component (table view, collection view, etc.)
+ *
+ * Used primarily for providing the current range of index paths and identifying when the
+ * range controller should invalidate its range.
+ */
+@property (nonatomic, strong) id<ASLayoutController> layoutController;
+
+/**
+ * The underlying data source for the range controller
+ */
+@property (nonatomic, weak) id<ASRangeControllerDataSource> dataSource;
+
+/**
+ * Delegate for handling range controller events. Must not be nil.
  */
 @property (nonatomic, weak) id<ASRangeControllerDelegate> delegate;
 
-@property (nonatomic, strong) id<ASLayoutController> layoutController;
-
 @end
 
-
 /**
- * <ASRangeController> delegate.  For example, <ASTableView>.
+ * Data source for ASRangeController.
+ *
+ * Allows the range controller to perform external queries on the range. 
+ * Ex. range nodes, visible index paths, and viewport size.
  */
-@protocol ASRangeControllerDelegate <NSObject>
+@protocol ASRangeControllerDataSource <NSObject>
 
 /**
  * @param rangeController Sender.
  *
  * @returns an array of index paths corresponding to the nodes currently visible onscreen (i.e., the visible range).
  */
-- (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController;
+- (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController;
 
 /**
  * @param rangeController Sender.
  *
  * @returns the receiver's viewport size (i.e., the screen space occupied by the visible range).
  */
-- (CGSize)rangeControllerViewportSize:(ASRangeController *)rangeController;
-
-/**
- * Begin updates.
- *
- * @param rangeController Sender.
- */
-- (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController;
-
-/**
- * End updates.
- *
- * @param rangeController Sender.
- * @param animated NO if all animations are disabled. YES otherwise.
- * @param completion Completion block.
- */
-- (void)rangeController:(ASRangeController * )rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
+- (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController;
 
 /**
  * Fetch nodes at specific index paths.
@@ -98,6 +95,29 @@
  * @param indexPaths Index paths.
  */
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths;
+
+@end
+
+/**
+ * Delegate for ASRangeController.
+ */
+@protocol ASRangeControllerDelegate <NSObject>
+
+/**
+ * Begin updates.
+ *
+ * @param rangeController Sender.
+ */
+- (void)didBeginUpdatesInRangeController:(ASRangeController *)rangeController;
+
+/**
+ * End updates.
+ *
+ * @param rangeController Sender.
+ * @param animated NO if all animations are disabled. YES otherwise.
+ * @param completion Completion block.
+ */
+- (void)rangeController:(ASRangeController * )rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
 
 /**
  * Called for nodes insertion.

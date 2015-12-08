@@ -10,14 +10,15 @@
 
 #import "ASBasicImageDownloader.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASThread.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEqualityHelpers.h"
+#import "ASThread.h"
 
 @interface ASNetworkImageNode ()
 {
   ASDN::RecursiveMutex _lock;
-  id<ASImageCacheProtocol> _cache;
-  id<ASImageDownloaderProtocol> _downloader;
+  __weak id<ASImageCacheProtocol> _cache;
+  __weak id<ASImageDownloaderProtocol> _downloader;
 
   // Only access any of these with _lock.
   __weak id<ASNetworkImageNodeDelegate> _delegate;
@@ -30,9 +31,7 @@
 
   BOOL _imageLoaded;
 }
-
 @end
-
 
 @implementation ASNetworkImageNode
 
@@ -51,7 +50,7 @@
 
 - (instancetype)init
 {
-  return [self initWithCache:nil downloader:[[ASBasicImageDownloader alloc] init]];
+  return [self initWithCache:nil downloader:[ASBasicImageDownloader sharedImageDownloader]];
 }
 
 - (void)dealloc
@@ -81,9 +80,10 @@
 
   if (reset || _URL == nil)
     self.image = _defaultImage;
-
-  if (self.nodeLoaded && self.layer.superlayer)
-    [self _lazilyLoadImageIfNecessary];
+  
+  if (self.interfaceState & ASInterfaceStateFetchData) {
+    [self fetchData];
+  }
 }
 
 - (NSURL *)URL

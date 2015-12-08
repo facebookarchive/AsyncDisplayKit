@@ -8,6 +8,7 @@
 
 #import "ASCellNode.h"
 
+#import "ASInternalHelpers.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASTextNode.h>
@@ -24,7 +25,7 @@
   if (!(self = [super init]))
     return nil;
 
-  // use UITableViewCell defaults
+  // Use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
 
@@ -47,6 +48,20 @@
 {
   // ASRangeController expects ASCellNodes to be view-backed.  (Layer-backing is supported on ASCellNode subnodes.)
   ASDisplayNodeAssert(!layerBacked, @"ASCellNode does not support layer-backing.");
+}
+
+- (void)setNeedsLayout
+{
+  ASDisplayNodeAssertThreadAffinity(self);  
+  CGSize oldSize = self.calculatedSize;
+  [super setNeedsLayout];
+
+  if (_layoutDelegate != nil) {
+    BOOL sizeChanged = !CGSizeEqualToSize(oldSize, self.calculatedSize);
+    ASPerformBlockOnMainThread(^{
+      [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
+    });
+  }
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -122,7 +137,7 @@ static const CGFloat kFontSize = 18.0f;
   _text = [text copy];
   _textNode.attributedString = [[NSAttributedString alloc] initWithString:_text
                                                                attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:kFontSize]}];
-
+  [self setNeedsLayout];
 }
 
 @end

@@ -150,7 +150,8 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 - (NSString *)asciiArtString
 {
-  return [ASLayoutSpec asciiArtStringForChildren:@[self.child] parentName:[self asciiArtName]];
+  NSArray *children = self.child ? @[self.child] : self.children;
+  return [ASLayoutSpec asciiArtStringForChildren:children parentName:[self asciiArtName]];
 }
 
 - (NSString *)asciiArtName

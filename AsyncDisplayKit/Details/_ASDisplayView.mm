@@ -15,6 +15,7 @@
 #import "ASAssert.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Subclasses.h"
 
 @interface _ASDisplayView ()

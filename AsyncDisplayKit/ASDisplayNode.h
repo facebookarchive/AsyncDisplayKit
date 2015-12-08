@@ -33,6 +33,37 @@ typedef CALayer *(^ASDisplayNodeLayerBlock)();
 typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 
 /**
+ Interface state is available on ASDisplayNode and ASViewController, and
+ allows checking whether a node is in an interface situation where it is prudent to trigger certain
+ actions: measurement, data fetching, display, and visibility (the latter for animations or other onscreen-only effects).
+ */
+
+typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
+{
+  /** The element is not predicted to be onscreen soon and preloading should not be performed */
+  ASInterfaceStateNone          = 0,
+  /** The element may be added to a view soon that could become visible.  Measure the layout, including size calculation. */
+  ASInterfaceStateMeasureLayout = 1 << 0,
+  /** The element is likely enough to come onscreen that disk and/or network data required for display should be fetched. */
+  ASInterfaceStateFetchData     = 1 << 1,
+  /** The element is very likely to become visible, and concurrent rendering should be executed for any -setNeedsDisplay. */
+  ASInterfaceStateDisplay       = 1 << 2,
+  /** The element is physically onscreen by at least 1 pixel.
+   In practice, all other bit fields should also be set when this flag is set. */
+  ASInterfaceStateVisible       = 1 << 3,
+
+  /**
+   * The node is not contained in a cell but it is in a window.
+   *
+   * Currently we only set `interfaceState` to other values for
+   * nodes contained in table views or collection views.
+   */
+  ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay | ASInterfaceStateVisible,
+};
+
+
+
+/**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
  * hierarchy off the main thread, and could do rendering off the main thread as well.
  *
@@ -123,7 +154,6 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 
 /** @name Getting view and layer */
 
-
 /** 
  * @abstract Returns a view.
  *
@@ -160,9 +190,16 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  */
 @property (nonatomic, readonly, retain) CALayer *layer;
 
+/**
+ * @abstract Returns the Interface State of the node.
+ *
+ * @return The current ASInterfaceState of the node, indicating whether it is visible and other situational properties.
+ *
+ * @see ASInterfaceState
+ */
+@property (nonatomic, readonly) ASInterfaceState interfaceState;
 
 /** @name Managing dimensions */
-
 
 /**
  * @abstract Asks the node to measure and return the size that best fits its subnodes.
@@ -506,16 +543,6 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  */
 - (CGRect)convertRect:(CGRect)rect fromNode:(ASDisplayNode *)node;
 
-/** @name UIResponder methods */
-
-// By default these fall through to the underlying view, but can be overridden.
-- (BOOL)canBecomeFirstResponder;                                            // default==NO
-- (BOOL)becomeFirstResponder;                                               // default==NO (no-op)
-- (BOOL)canResignFirstResponder;                                            // default==YES
-- (BOOL)resignFirstResponder;                                               // default==NO (no-op)
-- (BOOL)isFirstResponder;
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender;
-
 @end
 
 
@@ -559,14 +586,9 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * 
  * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
  * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
- * 
- * Note: If the relayout causes a change in size of the root node that is attached to a container view, 
- * the container view must be notified to relayout. 
- * For ASTableView and ASCollectionView, instead of calling this method directly, 
- * it is recommended to call -relayoutRowAtIndexPath:withRowAnimation and -relayoutItemAtIndexPath: respectively.
  *
- * @see [ASTableView relayoutRowAtIndexPath:withRowAnimation:]
- * @see [ASCollectionView relayoutItemAtIndexPath:]
+ * Note: ASCellNode has special behavior in that calling this method will automatically notify 
+ * the containing ASTableView / ASCollectionView that the cell should be resized, if necessary.
  */
 - (void)setNeedsLayout;
 
@@ -621,6 +643,15 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 @property (atomic, assign)           CGFloat shadowRadius;                  // default=3
 @property (atomic, assign)           CGFloat borderWidth;                   // default=0
 @property (atomic, assign)           CGColorRef borderColor;                // default=opaque rgb black
+
+// UIResponder methods
+// By default these fall through to the underlying view, but can be overridden.
+- (BOOL)canBecomeFirstResponder;                                            // default==NO
+- (BOOL)becomeFirstResponder;                                               // default==NO (no-op)
+- (BOOL)canResignFirstResponder;                                            // default==YES
+- (BOOL)resignFirstResponder;                                               // default==NO (no-op)
+- (BOOL)isFirstResponder;
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender;
 
 // Accessibility support
 @property (atomic, assign)           BOOL isAccessibilityElement;

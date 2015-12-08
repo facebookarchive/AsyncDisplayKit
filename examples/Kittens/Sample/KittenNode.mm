@@ -185,6 +185,7 @@ static const CGFloat kInnerPadding = 10.0f;
 - (void)toggleImageEnlargement
 {
   _isImageEnlarged = !_isImageEnlarged;
+  [self setNeedsLayout];
 }
 
 - (void)toggleNodesSwap
@@ -201,6 +202,29 @@ static const CGFloat kInnerPadding = 10.0f;
       self.alpha = 1;
     }];
   }];
+}
+
+- (void)updateBackgroundColor
+{
+  if (self.highlighted) {
+    self.backgroundColor = [UIColor lightGrayColor];
+  } else if (self.selected) {
+    self.backgroundColor = [UIColor blueColor];
+  } else {
+    self.backgroundColor = [UIColor whiteColor];
+  }
+}
+
+- (void)setSelected:(BOOL)selected
+{
+  [super setSelected:selected];
+  [self updateBackgroundColor];
+}
+
+- (void)setHighlighted:(BOOL)highlighted
+{
+  [super setHighlighted:highlighted];
+  [self updateBackgroundColor];
 }
 
 @end

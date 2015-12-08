@@ -68,7 +68,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @abstract The maximum number of lines to render of the text before truncation.
  @default 0 (No limit)
  */
-@property (nonatomic, assign) NSUInteger maximumLineCount;
+@property (nonatomic, assign) NSUInteger maximumNumberOfLines;
 
 /**
  @abstract The number of lines in the text. Text must have been sized first.
@@ -78,6 +78,15 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 @property (nonatomic, strong) NSArray *exclusionPaths;
 
 #pragma mark - Placeholders
+
+/**
+ * @abstract ASTextNode has a special placeholder behavior when placeholderEnabled is YES.
+ *
+ * @discussion Defaults to NO.  When YES, it draws rectangles for each line of text,
+ * following the true shape of the text's wrapping.  This visually mirrors the overall
+ * shape and weight of paragraphs, making the appearance of the finished text less jarring.
+ */
+@property (nonatomic, assign) BOOL placeholderEnabled;
 
 /**
  @abstract The placeholder color.
@@ -236,7 +245,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @param attribute The attribute that was tapped. Will not be nil.
  @param value The value of the tapped attribute.
  @param point The point within textNode, in textNode's coordinate system, that was touched to trigger a highlight.
- @discussion If not implemented, the default value is NO.
+ @discussion If not implemented, the default value is YES.
  @return YES if the entity attribute should be a link, NO otherwise.
  */
 - (BOOL)textNode:(ASTextNode *)textNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;

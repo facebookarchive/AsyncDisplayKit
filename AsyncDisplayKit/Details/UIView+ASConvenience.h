@@ -45,14 +45,15 @@
  */
 @protocol ASDisplayNodeViewProperties
 
-@property (nonatomic, assign)                           BOOL clipsToBounds;
-@property (nonatomic, getter=isHidden)                  BOOL hidden;
-@property (nonatomic, assign)                           BOOL autoresizesSubviews;
-@property (nonatomic, assign)                           UIViewAutoresizing autoresizingMask;
-@property (nonatomic, retain)                           UIColor *tintColor;
-@property (nonatomic, assign)                           CGFloat alpha;
-@property (nonatomic, assign)                           CGRect bounds;
-@property (nonatomic, assign)                           UIViewContentMode contentMode;
+@property (nonatomic, assign)           BOOL clipsToBounds;
+@property (nonatomic, getter=isHidden)  BOOL hidden;
+@property (nonatomic, assign)           BOOL autoresizesSubviews;
+@property (nonatomic, assign)           UIViewAutoresizing autoresizingMask;
+@property (nonatomic, retain)           UIColor *tintColor;
+@property (nonatomic, assign)           CGFloat alpha;
+@property (nonatomic, assign)           CGRect bounds;
+@property (nonatomic, assign)           CGRect frame;   // Only for use with nodes wrapping synchronous views
+@property (nonatomic, assign)           UIViewContentMode contentMode;
 @property (nonatomic, assign, getter=isUserInteractionEnabled) BOOL userInteractionEnabled;
 @property (nonatomic, assign, getter=isExclusiveTouch) BOOL exclusiveTouch;
 @property (nonatomic, assign, getter=asyncdisplaykit_isAsyncTransactionContainer, setter = asyncdisplaykit_setAsyncTransactionContainer:) BOOL asyncdisplaykit_asyncTransactionContainer;

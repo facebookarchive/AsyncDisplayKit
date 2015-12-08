@@ -8,6 +8,21 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+@class ASCellNode;
+
+typedef NSUInteger ASCellNodeAnimation;
+
+@protocol ASCellNodeLayoutDelegate <NSObject>
+
+/**
+ * Notifies the delegate that the specified cell node has done a relayout.
+ * The notification is done on main thread.
+ *
+ * @param node A node informing the delegate about the relayout.
+ * @param sizeChanged `YES` if the node's `calculatedSize` changed during the relayout, `NO` otherwise.
+ */
+- (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
+@end
 
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
@@ -54,6 +69,11 @@
 @property (nonatomic, assign) BOOL highlighted;
 
 /*
+ * A delegate to be notified (on main thread) after a relayout.
+ */
+@property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
+
+/*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.
  */
@@ -61,6 +81,17 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not.
+ *
+ * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
+ * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
+ * The delegate will then be notified on main thread.
+ *
+ * This method can be called inside of an animation block (to animate all of the layout changes).
+ */
+- (void)setNeedsLayout;
 
 @end
 

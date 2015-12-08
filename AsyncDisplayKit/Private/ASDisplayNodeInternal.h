@@ -20,16 +20,16 @@
 #import "ASLayoutOptions.h"
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
-void ASDisplayNodePerformBlockOnMainThread(void (^block)());
 void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)());
 
-typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
-  ASDisplayNodeMethodOverrideNone = 0,
-  ASDisplayNodeMethodOverrideTouchesBegan          = 1 << 0,
-  ASDisplayNodeMethodOverrideTouchesCancelled      = 1 << 1,
-  ASDisplayNodeMethodOverrideTouchesEnded          = 1 << 2,
-  ASDisplayNodeMethodOverrideTouchesMoved          = 1 << 3,
-  ASDisplayNodeMethodOverrideLayoutSpecThatFits    = 1 << 4
+typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
+{
+  ASDisplayNodeMethodOverrideNone               = 0,
+  ASDisplayNodeMethodOverrideTouchesBegan       = 1 << 0,
+  ASDisplayNodeMethodOverrideTouchesCancelled   = 1 << 1,
+  ASDisplayNodeMethodOverrideTouchesEnded       = 1 << 2,
+  ASDisplayNodeMethodOverrideTouchesMoved       = 1 << 3,
+  ASDisplayNodeMethodOverrideLayoutSpecThatFits = 1 << 4
 };
 
 @class _ASPendingState;
@@ -73,7 +73,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
   NSMutableSet *_pendingDisplayNodes;
 
   _ASPendingState *_pendingViewState;
-
+  
   struct ASDisplayNodeFlags {
     // public properties
     unsigned synchronous:1;
@@ -117,20 +117,15 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 // Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
 
+
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;
 - (BOOL)__shouldSize;
-- (void)__exitedHierarchy;
 
 // Core implementation of -measureWithSizeRange:. Must be called with _propertyLock held.
 - (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize;
 
 - (void)__setNeedsLayout;
-/**
- * Sets a new frame to this node by changing its bounds and position. This method can be safely called even if the transform property 
- * contains a non-identity transform, because bounds and position can be changed in such case.
- */
-- (void)__setSafeFrame:(CGRect)rect;
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 
@@ -150,9 +145,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 // Display the node's view/layer immediately on the current thread, bypassing the background thread rendering. Will be deprecated.
 - (void)displayImmediately;
 
-// Returns the ancestor node that rasterizes descendants, or nil if none.
-- (ASDisplayNode *)__rasterizedContainerNode;
-
 // Alternative initialiser for backing with a custom view class.  Supports asynchronous display with _ASDisplayView subclasses.
 - (id)initWithViewClass:(Class)viewClass;
 
@@ -161,12 +153,12 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides) {
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
 
-@end
+/**
+ * This method has proven helpful in a few rare scenarios, similar to a category extension on UIView,
+ * but it's considered private API for now and its use should not be encouraged.
+ * @param checkViewHierarchy If YES, and no supernode can be found, method will walk up from `self.view` to find a supernode.
+ * If YES, this method must be called on the main thread and the node must not be layer-backed.
+ */
+- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy;
 
-@interface UIView (ASDisplayNodeInternal)
-@property (nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
-@end
-
-@interface CALayer (ASDisplayNodeInternal)
-@property (nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
 @end
