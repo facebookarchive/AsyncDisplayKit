@@ -381,10 +381,13 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 {
   // Offset the text origin by any shadow padding
   UIEdgeInsets shadowPadding = [self shadowPadding];
-  CGPoint textOrigin = CGPointMake(self.bounds.origin.x - shadowPadding.left, self.bounds.origin.y - shadowPadding.top);
+  CGPoint textOrigin = CGPointMake(self.bounds.origin.x - shadowPadding.left, 0.0f);
   
   switch (_verticalTextAlignment)
   {
+    case ASTextNodeVerticalTextAlignmentTop:
+      textOrigin.y = self.bounds.origin.y - shadowPadding.top;
+      break;
     case ASTextNodeVerticalTextAlignmentCenter:
       textOrigin.y += (self.bounds.size.height - [self _renderer].size.height) / 2.0f;
       break;
