@@ -10,7 +10,7 @@
 
 #import "ASDisplayNode.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 
 @interface ASRangeHandlerRender ()
 @property (nonatomic,readonly) UIWindow *workingWindow;
@@ -57,7 +57,8 @@
     [node.view removeFromSuperview];
   }
   
-  [node recursivelySetDisplaySuspended:NO];
+  // The node un-suspends display.
+  [node enterInterfaceState:ASInterfaceStateDisplay];
 
   // Add the node's layer to an off-screen window to trigger display and mark its contents as non-volatile.
   // Use the layer directly to avoid the substantial overhead of UIView heirarchy manipulations.
@@ -89,7 +90,8 @@
   // preservation of this content could result in the app being killed, which is not likely preferable over briefly seeing placeholders in the event the user scrolls backwards.
   // Nonetheless, future changes to the implementation will likely eliminate this behavior to simplify debugging and extensibility of working range functionality.
   
-  [node recursivelySetDisplaySuspended:YES];
+  // The node calls clearCurrentContents and suspends display
+  [node exitInterfaceState:ASInterfaceStateDisplay];
   
   if (node.layer.superlayer != [[self workingWindow] layer]) {
     // In this case, the node has previously passed through the working range (or it is zero), and it has now fallen outside the working range.
@@ -102,7 +104,6 @@
   
   // At this point, the node's layer may validly be present either in the workingWindow, or in the contentsView of a cell.
   [node.layer removeFromSuperlayer];
-  [node recursivelyClearContents];
 }
 
 @end

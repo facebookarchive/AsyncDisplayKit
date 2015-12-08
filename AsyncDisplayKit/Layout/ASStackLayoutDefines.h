@@ -33,6 +33,21 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutJustifyContent) {
    On underflow, children are right/bottom-aligned within this spec's bounds.
    */
   ASStackLayoutJustifyContentEnd,
+  /**
+   On overflow or if the stack has only 1 child, this value is identical to ASStackLayoutJustifyContentStart.
+   Otherwise, the starting edge of the first child is at the starting edge of the stack, 
+   the ending edge of the last child is at the ending edge of the stack, and the remaining children
+   are distributed so that the spacing between any two adjacent ones is the same.
+   If there is a remaining space after spacing division, it is combined with the last spacing (i.e the one between the last 2 children).
+   */
+  ASStackLayoutJustifyContentSpaceBetween,
+  /**
+   On overflow or if the stack has only 1 child, this value is identical to ASStackLayoutJustifyContentCenter.
+   Otherwise, children are distributed such that the spacing between any two adjacent ones is the same,
+   and the spacing between the first/last child and the stack edges is half the size of the spacing between children.
+   If there is a remaining space after spacing division, it is combined with the last spacing (i.e the one between the last child and the stack ending edge).
+   */
+  ASStackLayoutJustifyContentSpaceAround
 };
 
 /** Orientation of children along cross axis */
@@ -66,4 +81,28 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignSelf) {
   ASStackLayoutAlignSelfCenter,
   /** Expand to fill cross axis */
   ASStackLayoutAlignSelfStretch,
+};
+
+/** Orientation of children along horizontal axis */
+typedef NS_ENUM(NSUInteger, ASHorizontalAlignment) {
+  /** No alignment specified. Default value */
+  ASHorizontalAlignmentNone,
+  /** Left aligned */
+  ASAlignmentLeft,
+  /** Center aligned */
+  ASAlignmentMiddle,
+  /** Right aligned */
+  ASAlignmentRight,
+};
+
+/** Orientation of children along vertical axis */
+typedef NS_ENUM(NSUInteger, ASVerticalAlignment) {
+  /** No alignment specified. Default value */
+  ASVerticalAlignmentNone,
+  /** Top aligned */
+  ASAlignmentTop,
+  /** Center aligned */
+  ASAlignmentCenter,
+  /** Bottom aligned */
+  ASAlignmentBottom,
 };

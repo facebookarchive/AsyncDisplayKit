@@ -10,8 +10,9 @@
 
 #import "ASBasicImageDownloader.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASThread.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEqualityHelpers.h"
+#import "ASThread.h"
 
 @interface ASNetworkImageNode ()
 {
@@ -30,9 +31,7 @@
 
   BOOL _imageLoaded;
 }
-
 @end
-
 
 @implementation ASNetworkImageNode
 
@@ -81,9 +80,10 @@
 
   if (reset || _URL == nil)
     self.image = _defaultImage;
-
-  if (self.nodeLoaded && self.layer.superlayer)
-    [self _lazilyLoadImageIfNecessary];
+  
+  if (self.interfaceState & ASInterfaceStateFetchData) {
+    [self fetchData];
+  }
 }
 
 - (NSURL *)URL

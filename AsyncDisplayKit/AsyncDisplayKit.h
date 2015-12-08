@@ -13,6 +13,7 @@
 #import <AsyncDisplayKit/ASImageNode.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASButtonNode.h>
+#import <AsyncDisplayKit/ASMapNode.h>
 
 #import <AsyncDisplayKit/ASEditableTextNode.h>
 
@@ -65,12 +66,6 @@
 #import <AsyncDisplayKit/ASRangeHandler.h>
 #import <AsyncDisplayKit/ASRangeHandlerPreload.h>
 #import <AsyncDisplayKit/ASRangeHandlerRender.h>
-#import <AsyncDisplayKit/ASTextNodeCoreTextAdditions.h>
-#import <AsyncDisplayKit/ASTextNodeRenderer.h>
-#import <AsyncDisplayKit/ASTextNodeShadower.h>
-#import <AsyncDisplayKit/ASTextNodeTextKitHelpers.h>
-#import <AsyncDisplayKit/ASTextNodeTypes.h>
-#import <AsyncDisplayKit/ASTextNodeWordKerner.h>
 #import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/CGRect+ASConvenience.h>
 #import <AsyncDisplayKit/NSMutableAttributedString+TextKitAdditions.h>

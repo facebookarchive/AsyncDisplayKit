@@ -25,7 +25,7 @@
 
 @implementation ASStackLayoutSpec
 {
- ASDN::RecursiveMutex _propertyLock;
+  ASDN::RecursiveMutex _propertyLock;
 }
 
 - (instancetype)init
@@ -58,8 +58,10 @@
     return nil;
   }
   _direction = direction;
-  _alignItems = alignItems;
   _spacing = spacing;
+  _horizontalAlignment = ASHorizontalAlignmentNone;
+  _verticalAlignment = ASVerticalAlignmentNone;
+  _alignItems = alignItems;
   _justifyContent = justifyContent;
   
   [self setChildren:children];
@@ -69,18 +71,44 @@
 - (void)setDirection:(ASStackLayoutDirection)direction
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _direction = direction;
+  if (_direction != direction) {
+    _direction = direction;
+    [self resolveHorizontalAlignment];
+    [self resolveVerticalAlignment];
+  }
+}
+
+- (void)setHorizontalAlignment:(ASHorizontalAlignment)horizontalAlignment
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  if (_horizontalAlignment != horizontalAlignment) {
+    _horizontalAlignment = horizontalAlignment;
+    [self resolveHorizontalAlignment];
+  }
+}
+
+- (void)setVerticalAlignment:(ASVerticalAlignment)verticalAlignment
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  if (_verticalAlignment != verticalAlignment) {
+    _verticalAlignment = verticalAlignment;
+    [self resolveVerticalAlignment];
+  }
 }
 
 - (void)setAlignItems:(ASStackLayoutAlignItems)alignItems
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  ASDisplayNodeAssert(_horizontalAlignment == ASHorizontalAlignmentNone, @"Cannot set this property directly because horizontalAlignment is being used");
+  ASDisplayNodeAssert(_verticalAlignment == ASVerticalAlignmentNone, @"Cannot set this property directly because verticalAlignment is being used");
   _alignItems = alignItems;
 }
 
 - (void)setJustifyContent:(ASStackLayoutJustifyContent)justifyContent
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  ASDisplayNodeAssert(_horizontalAlignment == ASHorizontalAlignmentNone, @"Cannot set this property directly because horizontalAlignment is being used");
+  ASDisplayNodeAssert(_verticalAlignment == ASVerticalAlignmentNone, @"Cannot set this property directly because verticalAlignment is being used");
   _justifyContent = justifyContent;
 }
 
@@ -109,6 +137,10 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  if (self.children.count == 0) {
+    return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+  }
+  
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
   BOOL needsBaselinePass = _baselineRelativeArrangement || _alignItems == ASStackLayoutAlignItemsBaselineFirst || _alignItems == ASStackLayoutAlignItemsBaselineLast;
   
@@ -147,6 +179,24 @@
   return [ASLayout layoutWithLayoutableObject:self
                                          size:ASSizeRangeClamp(constrainedSize, finalSize)
                                    sublayouts:sublayouts];
+}
+
+- (void)resolveHorizontalAlignment
+{
+  if (_direction == ASStackLayoutDirectionHorizontal) {
+    _justifyContent = justifyContent(_horizontalAlignment, _justifyContent);
+  } else {
+    _alignItems = alignment(_horizontalAlignment, _alignItems);
+  }
+}
+
+- (void)resolveVerticalAlignment
+{
+  if (_direction == ASStackLayoutDirectionHorizontal) {
+    _alignItems = alignment(_verticalAlignment, _alignItems);
+  } else {
+    _justifyContent = justifyContent(_verticalAlignment, _justifyContent);
+  }
 }
 
 @end

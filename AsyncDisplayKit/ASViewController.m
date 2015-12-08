@@ -9,9 +9,7 @@
 #import "ASViewController.h"
 #import "ASAssert.h"
 #import "ASDimension.h"
-
-// FIXME: Temporary nonsense import until method names are finalized and exposed
-#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 
 @implementation ASViewController
 {

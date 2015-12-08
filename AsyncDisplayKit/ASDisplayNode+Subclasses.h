@@ -366,7 +366,7 @@
 
 
 /**
- * Called just before the view is added to a superview.
+ * Called just before the view is added to a window.
  */
 - (void)willEnterHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
 
@@ -412,9 +412,7 @@
  */
 - (UIImage *)placeholderImage;
 
-
 /** @name Description */
-
 
 /**
  * @abstract Return a description of the node
@@ -422,44 +420,6 @@
  * @discussion The function that gets called for each display node in -recursiveDescription
  */
 - (NSString *)descriptionForRecursiveDescription;
-
-@end
-
-@interface ASDisplayNode (ASDisplayNodePrivate)
-// This method has proven helpful in a few rare scenarios, similar to a category extension on UIView,
-// but it's considered private API for now and its use should not be encouraged.
-- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass;
-
-// The two methods below will eventually be exposed, but their names are subject to change.
-/**
- * @abstract Ensure that all rendering is complete for this node and its descendents.
- *
- * @discussion Calling this method on the main thread after a node is added to the view heirarchy will ensure that
- * placeholder states are never visible to the user.  It is used by ASTableView, ASCollectionView, and ASViewController
- * to implement their respective ".neverShowPlaceholders" option.
- *
- * If all nodes have layer.contents set and/or their layer does not have -needsDisplay set, the method will return immediately.
- *
- * This method is capable of handling a mixed set of nodes, with some not having started display, some in progress on an
- * asynchronous display operation, and some already finished.
- *
- * In order to guarantee against deadlocks, this method should only be called on the main thread.
- * It may block on the private queue, [_ASDisplayLayer displayQueue]
- */
-- (void)recursivelyEnsureDisplay;
-
-/**
- * @abstract Allows a node to bypass all ensureDisplay passes.  Defaults to NO.
- *
- * @discussion Nodes that are expensive to draw and expected to have placeholder even with
- * .neverShowPlaceholders enabled should set this to YES.
- *
- * ASImageNode uses the default of NO, as it is often used for UI images that are expected to synchronize with ensureDisplay.
- *
- * ASNetworkImageNode and ASMultiplexImageNode set this to YES, because they load data from a database or server,
- * and are expected to support a placeholder state given that display is often blocked on slow data fetching.
- */
-@property (nonatomic, assign) BOOL shouldBypassEnsureDisplay;
 
 @end
 

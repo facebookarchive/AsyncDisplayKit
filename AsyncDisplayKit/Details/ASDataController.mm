@@ -902,7 +902,20 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
-  return [self completedNodes][indexPath.section][indexPath.row];
+  
+  NSArray *completedNodes = [self completedNodes];
+  NSInteger section = indexPath.section;
+  NSInteger row = indexPath.row;
+  ASCellNode *node = nil;
+  
+  if (section >= 0 && row >= 0 && section < completedNodes.count) {
+    NSArray *completedNodesSection = completedNodes[section];
+    if (row < completedNodesSection.count) {
+      node = completedNodesSection[row];
+    }
+  }
+  
+  return node;
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;

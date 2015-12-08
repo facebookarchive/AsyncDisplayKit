@@ -17,8 +17,10 @@
 #import "ASAvailability.h"
 #import "ASBaseDefines.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASLog.h"
 #import "ASPhotosFrameworkImageRequest.h"
+#import "ASEqualityHelpers.h"
 
 #if !AS_IOS8_SDK_OR_LATER
 #error ASMultiplexImageNode can be used on iOS 7, but must be linked against the iOS 8 SDK.
@@ -62,7 +64,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // Image flags.
   BOOL _downloadsIntermediateImages; // Defaults to NO.
-  OSSpinLock _imageIdentifiersLock;
+  ASDN::Mutex _imageIdentifiersLock;
   NSArray *_imageIdentifiers;
   id _loadedImageIdentifier;
   id _loadingImageIdentifier;
@@ -176,17 +178,13 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 }
 
 #pragma mark - ASDisplayNode Overrides
+
 - (void)clearContents
 {
   [super clearContents]; // This actually clears the contents, so we need to do this first for our displayedImageIdentifier to be meaningful.
   [self _setDisplayedImageIdentifier:nil withImage:nil];
 
-  [_phImageRequestOperation cancel];
-  
-  if (_downloadIdentifier) {
-    [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
-    _downloadIdentifier = nil;
-  }
+  // NOTE: We intentionally do not cancel image downloads until `clearFetchedData`.
 }
 
 - (void)clearFetchedData
@@ -196,12 +194,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   if ([self _shouldClearFetchedImageData]) {
     
     [_phImageRequestOperation cancel];
-    
-    if (_downloadIdentifier) {
-      [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
-      _downloadIdentifier = nil;
-    }
-    
+
+    [self _setDownloadIdentifier:nil];
+
     // setting this to nil makes the node fetch images the next time its display starts
     _loadedImageIdentifier = nil;
     self.image = nil;
@@ -222,7 +217,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   // We may now be displaying the loaded identifier, if they're different.
   UIImage *displayedImage = self.image;
   if (displayedImage) {
-    if (![_displayedImageIdentifier isEqual:_loadedImageIdentifier])
+    if (!ASObjectIsEqual(_displayedImageIdentifier, _loadedImageIdentifier))
       [self _setDisplayedImageIdentifier:_loadedImageIdentifier withImage:displayedImage];
 
     // Delegateify
@@ -276,23 +271,24 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (NSArray *)imageIdentifiers
 {
-  OSSpinLockLock(&_imageIdentifiersLock);
-  NSArray *imageIdentifiers = [_imageIdentifiers copy];
-  OSSpinLockUnlock(&_imageIdentifiersLock);
-  return imageIdentifiers;
+  ASDN::MutexLocker l(_imageIdentifiersLock);
+  return _imageIdentifiers;
 }
 
 - (void)setImageIdentifiers:(NSArray *)imageIdentifiers
 {
-  OSSpinLockLock(&_imageIdentifiersLock);
+  {
+    ASDN::MutexLocker l(_imageIdentifiersLock);
+    if (ASObjectIsEqual(_imageIdentifiers, imageIdentifiers)) {
+      return;
+    }
 
-  if ([_imageIdentifiers isEqual:imageIdentifiers]) {
-    OSSpinLockUnlock(&_imageIdentifiersLock);
-    return;
+    _imageIdentifiers = [[NSArray alloc] initWithArray:imageIdentifiers copyItems:YES];
   }
-  
-  _imageIdentifiers = [imageIdentifiers copy];
-  OSSpinLockUnlock(&_imageIdentifiersLock);
+
+  if (self.interfaceState & ASInterfaceStateFetchData) {
+    [self fetchData];
+  }
 }
 
 - (void)reloadImageIdentifierSources
@@ -308,10 +304,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 #pragma mark - Core Internal
 - (void)_setDisplayedImageIdentifier:(id)displayedImageIdentifier withImage:(UIImage *)image
 {
-  if (_displayedImageIdentifier == displayedImageIdentifier)
+  if (ASObjectIsEqual(displayedImageIdentifier, _displayedImageIdentifier))
     return;
 
-  _displayedImageIdentifier = [displayedImageIdentifier copy];
+  _displayedImageIdentifier = displayedImageIdentifier;
 
   // Delegateify.
   // Note that we're using the params here instead of self.image and _displayedImageIdentifier because those can change before the async block below executes.
@@ -332,7 +328,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (void)_setDownloadIdentifier:(id)downloadIdentifier
 {
-  if (_downloadIdentifier == downloadIdentifier)
+  if (ASObjectIsEqual(downloadIdentifier, _downloadIdentifier))
     return;
 
   [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
@@ -358,11 +354,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (UIImage *)_bestImmediatelyAvailableImageFromDataSource:(id *)imageIdentifierOut
 {
-  OSSpinLockLock(&_imageIdentifiersLock);
+  ASDN::MutexLocker l(_imageIdentifiersLock);
 
   // If we don't have any identifiers to load or don't implement the image DS method, bail.
   if ([_imageIdentifiers count] == 0 || !_dataSourceFlags.image) {
-    OSSpinLockUnlock(&_imageIdentifiersLock);
     return nil;
   }
 
@@ -371,15 +366,13 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     UIImage *image = [_dataSource multiplexImageNode:self imageForImageIdentifier:imageIdentifier];
     if (image) {
       if (imageIdentifierOut) {
-        *imageIdentifierOut = [imageIdentifier copy];
+        *imageIdentifierOut = imageIdentifier;
       }
 
-      OSSpinLockUnlock(&_imageIdentifiersLock);
       return image;
     }
   }
 
-  OSSpinLockUnlock(&_imageIdentifiersLock);
   return nil;
 }
 
@@ -387,12 +380,11 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 #pragma mark -
 - (id)_nextImageIdentifierToDownload
 {
-  OSSpinLockLock(&_imageIdentifiersLock);
+  ASDN::MutexLocker l(_imageIdentifiersLock);
 
   // If we've already loaded the best identifier, we've got nothing else to do.
   id bestImageIdentifier = _imageIdentifiers.firstObject;
-  if (!bestImageIdentifier || [_loadedImageIdentifier isEqual:bestImageIdentifier]) {
-    OSSpinLockUnlock(&_imageIdentifiersLock);
+  if (!bestImageIdentifier || ASObjectIsEqual(_loadedImageIdentifier, bestImageIdentifier)) {
     return nil;
   }
 
@@ -416,8 +408,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     }
   }
 
-  OSSpinLockUnlock(&_imageIdentifiersLock);
-
   return nextImageIdentifierToDownload;
 }
 
@@ -439,7 +429,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       return;
 
     // Only nil out the loading identifier if the loading identifier hasn't changed.
-    if ([strongSelf.loadingImageIdentifier isEqual:nextImageIdentifier]) {
+    if (ASObjectIsEqual(strongSelf.loadingImageIdentifier, nextImageIdentifier)) {
       strongSelf.loadingImageIdentifier = nil;
     }
     [strongSelf _finishedLoadingImage:image forIdentifier:imageIdentifier error:error];
@@ -496,7 +486,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       }
 
       // If the next image to load has changed, bail.
-      if (![[strongSelf _nextImageIdentifierToDownload] isEqual:nextImageIdentifier]) {
+      if (!ASObjectIsEqual([strongSelf _nextImageIdentifierToDownload], nextImageIdentifier)) {
         finishedLoadingBlock(nil, nil, [NSError errorWithDomain:ASMultiplexImageNodeErrorDomain code:ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged userInfo:nil]);
         return;
       }
@@ -686,9 +676,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   if (error && !([error.domain isEqual:ASMultiplexImageNodeErrorDomain] && error.code == ASMultiplexImageNodeErrorCodeBestImageIdentifierChanged))
     return;
 
-  OSSpinLockLock(&_imageIdentifiersLock);
+
+  _imageIdentifiersLock.lock();
   NSUInteger imageIdentifierCount = [_imageIdentifiers count];
-  OSSpinLockUnlock(&_imageIdentifiersLock);
+  _imageIdentifiersLock.unlock();
 
   // Update our image if we got one, or if we're not supposed to display one at all.
   // We explicitly perform this check because our datasource often doesn't give back immediately available images, even though we might have downloaded one already.
