@@ -98,10 +98,6 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  */
 - (id)init;
 
-
-- (id)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock;
-- (id)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
-
 /**
  * @abstract Alternative initializer with a block to create the backing view.
  *

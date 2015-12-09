@@ -14,7 +14,7 @@
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "MosaicCollectionViewLayout.h"
 #import "SupplementaryNode.h"
-#import "ImageCellNode.h"
+#import "ImageViewController.h"
 
 static NSUInteger kNumberOfImages = 14;
 
@@ -92,7 +92,13 @@ static NSUInteger kNumberOfImages = 14;
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[ImageCellNode alloc] initWithImage:_sections[indexPath.section][indexPath.item]];
+  ASCellNode *node = [[ASCellNode alloc] initWithViewControllerBlock:^UIViewController *{
+    return [[ImageViewController alloc] initWithImage:_sections[indexPath.section][indexPath.item]];
+  }];
+  
+  return node;
+  
+  //[[ImageCellNode alloc] initWithImage:_sections[indexPath.section][indexPath.item]];
 }
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath

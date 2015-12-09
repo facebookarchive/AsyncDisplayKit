@@ -93,6 +93,15 @@ typedef NSUInteger ASCellNodeAnimation;
  */
 - (void)setNeedsLayout;
 
+
+
+/* TODO: WRITE DOCUMENTATION */
+
+- (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock;
+- (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
+
+
+
 @end
 
 

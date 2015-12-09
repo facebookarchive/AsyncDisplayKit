@@ -18,6 +18,13 @@
 #pragma mark -
 #pragma mark ASCellNode
 
+@interface ASCellNode (){
+ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
+ASDisplayNode *_viewControllerNode;
+UIViewController *_viewController;
+}
+@end
+
 @implementation ASCellNode
 
 - (instancetype)init
@@ -32,6 +39,35 @@
   return self;
 }
 
+- (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock
+{
+  return [self initWithViewControllerBlock:viewControllerBlock didLoadBlock:nil];
+}
+
+- (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
+{
+  if (!(self = [super init]))
+    return nil;
+  
+  ASDisplayNodeAssertNotNil(viewControllerBlock, @"should initialize with a valid block that returns a UIViewController");
+  
+  _viewController = viewControllerBlock();
+  _viewControllerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
+        return _viewController.view;
+      } didLoadBlock:didLoadBlock];
+  
+  [self addSubnode:_viewControllerNode];
+  
+  _nodeLoadedBlock = didLoadBlock;  //not sure where i should plug in to call this...
+  return self;
+}
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize {
+  _viewControllerNode.frame = (CGRect){{0,0}, constrainedSize.max};
+  
+  return [super layoutSpecThatFits:constrainedSize];
+}
+
 - (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
@@ -40,9 +76,8 @@
 
 - (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
-  return [super initWithViewBlock:viewBlock didLoadBlock:didLoadBlock];
-//  ASDisplayNodeAssertNotSupported();
-//  return nil;
+  ASDisplayNodeAssertNotSupported();
+  return nil;
 }
 
 - (void)setLayerBacked:(BOOL)layerBacked
@@ -70,6 +105,9 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesBegan:touches withEvent:event];
+//  if (_viewController) {
+//    [_viewController touchesBegan:touches withEvent:event];
+//  }
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -77,6 +115,9 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesMoved:touches withEvent:event];
+//  if (_viewController) {
+//    [_viewController touchesMoved:touches withEvent:event];
+//  }
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -84,6 +125,9 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesEnded:touches withEvent:event];
+//  if (_viewController) {
+//    [_viewController touchesEnded:touches withEvent:event];
+//  }
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
@@ -91,6 +135,9 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesCancelled:touches withEvent:event];
+//  if (_viewController) {
+//    [_viewController touchesCancelled:touches withEvent:event];
+//  }
 }
 
 @end
