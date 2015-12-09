@@ -40,8 +40,9 @@
 
 - (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
-  ASDisplayNodeAssertNotSupported();
-  return nil;
+  return [super initWithViewBlock:viewBlock didLoadBlock:didLoadBlock];
+//  ASDisplayNodeAssertNotSupported();
+//  return nil;
 }
 
 - (void)setLayerBacked:(BOOL)layerBacked

@@ -251,6 +251,25 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return self;
 }
 
+- (id)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock
+{
+  return [self initWithViewControllerBlock:viewControllerBlock didLoadBlock:nil];
+}
+
+- (id)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
+{
+  if (!(self = [super init]))
+    return nil;
+  
+  ASDisplayNodeAssertNotNil(viewControllerBlock, @"should initialize with a valid block that returns a UIViewController");
+
+  return [self initWithViewBlock:^UIView *{
+    UIViewController *vc = viewControllerBlock();
+    vc.view.clipsToBounds = YES; // not sure this is the way to go, doesn't really make it better per se
+    return vc.view;
+  } didLoadBlock:didLoadBlock];
+}
+
 - (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
 {
   return [self initWithViewBlock:viewBlock didLoadBlock:nil];
@@ -270,7 +289,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   return self;
 }
-
 
 - (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock
 {

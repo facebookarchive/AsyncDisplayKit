@@ -23,6 +23,11 @@
 typedef UIView *(^ASDisplayNodeViewBlock)();
 
 /**
+ * UIView creation block. Used to create the backing view of a new display node.
+ */
+typedef UIViewController *(^ASDisplayNodeViewControllerBlock)();
+
+/**
  * CALayer creation block. Used to create the backing layer of a new display node.
  */
 typedef CALayer *(^ASDisplayNodeLayerBlock)();
@@ -93,6 +98,9 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  */
 - (id)init;
 
+
+- (id)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock;
+- (id)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
 
 /**
  * @abstract Alternative initializer with a block to create the backing view.
