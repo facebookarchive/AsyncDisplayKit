@@ -190,8 +190,8 @@
 		258FF4281C0D152600A83844 /* ASRangeHandlerVisible.mm in Sources */ = {isa = PBXBuildFile; fileRef = 258FF4261C0D152600A83844 /* ASRangeHandlerVisible.mm */; };
 		25A977EF1C0D2A5500406B62 /* ASRangeHandlerVisible.mm in Sources */ = {isa = PBXBuildFile; fileRef = 258FF4261C0D152600A83844 /* ASRangeHandlerVisible.mm */; };
 		25BAA16F1C0D18D2002747C7 /* ASRangeHandlerVisible.h in Headers */ = {isa = PBXBuildFile; fileRef = 258FF4251C0D152600A83844 /* ASRangeHandlerVisible.h */; };
-		25E327561C16819500A2170C /* ASPagerNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 25E327541C16819500A2170C /* ASPagerNode.h */; };
-		25E327571C16819500A2170C /* ASPagerNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 25E327541C16819500A2170C /* ASPagerNode.h */; };
+		25E327561C16819500A2170C /* ASPagerNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 25E327541C16819500A2170C /* ASPagerNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		25E327571C16819500A2170C /* ASPagerNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 25E327541C16819500A2170C /* ASPagerNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		25E327581C16819500A2170C /* ASPagerNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 25E327551C16819500A2170C /* ASPagerNode.m */; };
 		25E327591C16819500A2170C /* ASPagerNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 25E327551C16819500A2170C /* ASPagerNode.m */; };
 		2767E9411BB19BD600EA9B77 /* ASViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -899,6 +899,8 @@
 				0516FA3F1A1563D200B4EBED /* ASMultiplexImageNode.mm */,
 				055B9FA61A1C154B00035D6D /* ASNetworkImageNode.h */,
 				055B9FA71A1C154B00035D6D /* ASNetworkImageNode.mm */,
+				25E327541C16819500A2170C /* ASPagerNode.h */,
+				25E327551C16819500A2170C /* ASPagerNode.m */,
 				D785F6601A74327E00291744 /* ASScrollNode.h */,
 				D785F6611A74327E00291744 /* ASScrollNode.m */,
 				B0F880581BEAEC7500D17647 /* ASTableNode.h */,
@@ -917,8 +919,6 @@
 				AC6456051B0A333200CF11B8 /* Layout */,
 				257754661BED245B00737CA5 /* TextKit */,
 				058D09B2195D04C000B7D73C /* Supporting Files */,
-				25E327541C16819500A2170C /* ASPagerNode.h */,
-				25E327551C16819500A2170C /* ASPagerNode.m */,
 			);
 			path = AsyncDisplayKit;
 			sourceTree = "<group>";

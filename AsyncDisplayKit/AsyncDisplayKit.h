@@ -30,6 +30,8 @@
 
 #import <AsyncDisplayKit/ASScrollNode.h>
 
+#import <AsyncDisplayKit/ASPagerNode.h>
+
 #import <AsyncDisplayKit/ASViewController.h>
 
 #import <AsyncDisplayKit/ASChangeSetDataController.h>

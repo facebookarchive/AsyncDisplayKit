@@ -8,15 +8,7 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@class ASPagerNode;
-
-@protocol ASPagerNodeDataSource <NSObject>
-
-- (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode;
-
-- (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index;
-
-@end
+@protocol ASPagerNodeDataSource;
 
 @interface ASPagerNode : ASCollectionNode
 
@@ -25,5 +17,13 @@
 - (void)reloadData;
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
+
+@end
+
+@protocol ASPagerNodeDataSource <NSObject>
+
+- (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode;
+
+- (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index;
 
 @end
