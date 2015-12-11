@@ -304,7 +304,6 @@ static BOOL _isInterceptedSelector(SEL sel)
     
     _asyncDataSource = nil;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
-    super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
     
   } else {
     _asyncDataSource = asyncDataSource;
@@ -329,7 +328,6 @@ static BOOL _isInterceptedSelector(SEL sel)
     // in UIScrollViewAccessibility.
     _asyncDelegate = nil;
     _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
-    super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
     
   } else {
     _asyncDelegate = asyncDelegate;
