@@ -16,6 +16,7 @@
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
+#import "ASThread.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -26,12 +27,22 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 static void *kASSizingQueueContext = &kASSizingQueueContext;
 
+@interface ASMainQueueSerialQueue : NSObject
+{
+  ASDN::Mutex _serialQueueLock;
+  NSMutableArray *_blocks;
+}
+
+- (void)performBlockOnMainThread:(dispatch_block_t)block;
+
+@end
+
 @interface ASDataController () {
   NSMutableArray *_externalCompletedNodes;    // Main thread only.  External data access can immediately query this if available.
   NSMutableDictionary *_completedNodes;       // Main thread only.  External data access can immediately query this if _externalCompletedNodes is unavailable.
   NSMutableDictionary *_editingNodes;         // Modified on _editingTransactionQueue only.  Updates propogated to _completedNodes.
   
-  
+  ASMainQueueSerialQueue *_mainSerialQueue;
   
   NSMutableArray *_pendingEditCommandBlocks;  // To be run on the main thread.  Handles begin/endUpdates tracking.
   NSOperationQueue *_editingTransactionQueue; // Serial background queue.  Dispatches concurrent layout and manages _editingNodes.
@@ -62,6 +73,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
   _completedNodes[ASDataControllerRowNodeKind] = [NSMutableArray array];
   _editingNodes[ASDataControllerRowNodeKind] = [NSMutableArray array];
+  
+  _mainSerialQueue = [[ASMainQueueSerialQueue alloc] init];
   
   _pendingEditCommandBlocks = [NSMutableArray array];
   
@@ -208,12 +221,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
   NSMutableArray *completedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(editingNodes);
   
-  ASPerformBlockOnMainThread(^{
+  [_mainSerialQueue performBlockOnMainThread:^{
     _completedNodes[kind] = completedNodes;
     if (completionBlock) {
       completionBlock(nodes, indexPaths);
     }
-  });
+  }];
 }
 
 - (void)deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
@@ -227,13 +240,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   ASDeleteElementsInMultidimensionalArrayAtIndexPaths(editingNodes, indexPaths);
   _editingNodes[kind] = editingNodes;
 
-  ASPerformBlockOnMainThread(^{
+  [_mainSerialQueue performBlockOnMainThread:^{
     NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_completedNodes[kind], indexPaths);
     ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_completedNodes[kind], indexPaths);
     if (completionBlock) {
       completionBlock(nodes, indexPaths);
     }
-  });
+  }];
 }
 
 - (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSArray *sections, NSIndexSet *indexSet))completionBlock
@@ -250,12 +263,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
   NSArray *sectionsForCompleted = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(sections);
   
-  ASPerformBlockOnMainThread(^{
+  [_mainSerialQueue performBlockOnMainThread:^{
     [_completedNodes[kind] insertObjects:sectionsForCompleted atIndexes:indexSet];
     if (completionBlock) {
       completionBlock(sections, indexSet);
     }
-  });
+  }];
 }
 
 - (void)deleteSectionsOfKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSIndexSet *indexSet))completionBlock
@@ -263,12 +276,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   if (indexSet.count == 0)
     return;
   [_editingNodes[kind] removeObjectsAtIndexes:indexSet];
-  ASPerformBlockOnMainThread(^{
+  [_mainSerialQueue performBlockOnMainThread:^{
     [_completedNodes[kind] removeObjectsAtIndexes:indexSet];
     if (completionBlock) {
       completionBlock(indexSet);
     }
-  });
+  }];
 }
 
 #pragma mark - Internal Data Querying + Editing
@@ -512,14 +525,14 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     LOG(@"endUpdatesWithCompletion - beginning");
 
     [_editingTransactionQueue addOperationWithBlock:^{
-      ASPerformBlockOnMainThread(^{
+      [_mainSerialQueue performBlockOnMainThread:^{
         // Deep copy _completedNodes to _externalCompletedNodes.
         // Any external queries from now on will be done on _externalCompletedNodes, to guarantee data consistency with the delegate.
         _externalCompletedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(_completedNodes[ASDataControllerRowNodeKind]);
 
         LOG(@"endUpdatesWithCompletion - begin updates call to delegate");
         [_delegate dataControllerBeginUpdates:self];
-      });
+      }];
     }];
 
     // Running these commands may result in blocking on an _editingTransactionQueue operation that started even before -beginUpdates.
@@ -532,13 +545,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_pendingEditCommandBlocks removeAllObjects];
     
     [_editingTransactionQueue addOperationWithBlock:^{
-      ASPerformBlockOnMainThread(^{
+      [_mainSerialQueue performBlockOnMainThread:^{
         // Now that the transaction is done, _completedNodes can be accessed externally again.
         _externalCompletedNodes = nil;
         
         LOG(@"endUpdatesWithCompletion - calling delegate end");
         [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
-      });
+      }];
     }];
   }
 }
@@ -819,11 +832,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // i.e there might be some nodes that were measured using the old constrained size but haven't been added to _completedNodes
     // (see _layoutNodes:atIndexPaths:withAnimationOptions:).
     [_editingTransactionQueue addOperationWithBlock:^{
-      ASPerformBlockOnMainThread(^{
+      [_mainSerialQueue performBlockOnMainThread:^{
         for (NSString *kind in [_completedNodes keyEnumerator]) {
           [self _relayoutNodesOfKind:kind];
         }
-      });
+      }];
     }];
   }];
 }
@@ -968,6 +981,50 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }];
     }];
   }];
+}
+
+@end
+
+@implementation ASMainQueueSerialQueue
+
+- (instancetype)init
+{
+  if (!(self = [super init])) {
+    return nil;
+  }
+  
+  _blocks = [[NSMutableArray alloc] init];
+  return self;
+}
+
+- (void)performBlockOnMainThread:(dispatch_block_t)block
+{
+  ASDN::MutexLocker l(_serialQueueLock);
+  [_blocks addObject:block];
+  [self runBlocks];
+}
+
+- (void)runBlocks
+{
+  dispatch_block_t mainThread = ^{
+    ASDN::MutexLocker l(_serialQueueLock);
+    
+    for (NSUInteger i = 0; i < _blocks.count; i++) {
+      dispatch_block_t block = [_blocks objectAtIndex:i];
+      block();
+    }
+    
+    [_blocks removeAllObjects];
+  };
+  
+  if ([NSThread isMainThread]) {
+    ASDN::MutexUnlocker u(_serialQueueLock);
+    mainThread();
+  } else {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      mainThread();
+    });
+  }
 }
 
 @end
