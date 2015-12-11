@@ -1001,24 +1001,28 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   ASDN::MutexLocker l(_serialQueueLock);
   [_blocks addObject:block];
+  ASDN::MutexUnlocker u(_serialQueueLock);
   [self runBlocks];
 }
 
 - (void)runBlocks
 {
   dispatch_block_t mainThread = ^{
-    ASDN::MutexLocker l(_serialQueueLock);
-    
-    for (NSUInteger i = 0; i < _blocks.count; i++) {
-      dispatch_block_t block = [_blocks objectAtIndex:i];
+    do {
+      ASDN::MutexLocker l(_serialQueueLock);
+      dispatch_block_t block;
+      if (_blocks.count > 0) {
+        block = [_blocks objectAtIndex:0];
+        [_blocks removeObjectAtIndex:0];
+      } else {
+        break;
+      }
+      ASDN::MutexUnlocker u(_serialQueueLock);
       block();
-    }
-    
-    [_blocks removeAllObjects];
+    } while (true);
   };
   
   if ([NSThread isMainThread]) {
-    ASDN::MutexUnlocker u(_serialQueueLock);
     mainThread();
   } else {
     dispatch_async(dispatch_get_main_queue(), ^{
