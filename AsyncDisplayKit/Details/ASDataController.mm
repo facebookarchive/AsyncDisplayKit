@@ -13,10 +13,10 @@
 #import "ASAssert.h"
 #import "ASCellNode.h"
 #import "ASDisplayNode.h"
+#import "ASMainSerialQueue.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-#import "ASThread.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -27,22 +27,12 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 static void *kASSizingQueueContext = &kASSizingQueueContext;
 
-@interface ASMainQueueSerialQueue : NSObject
-{
-  ASDN::Mutex _serialQueueLock;
-  NSMutableArray *_blocks;
-}
-
-- (void)performBlockOnMainThread:(dispatch_block_t)block;
-
-@end
-
 @interface ASDataController () {
   NSMutableArray *_externalCompletedNodes;    // Main thread only.  External data access can immediately query this if available.
   NSMutableDictionary *_completedNodes;       // Main thread only.  External data access can immediately query this if _externalCompletedNodes is unavailable.
   NSMutableDictionary *_editingNodes;         // Modified on _editingTransactionQueue only.  Updates propogated to _completedNodes.
   
-  ASMainQueueSerialQueue *_mainSerialQueue;
+  ASMainSerialQueue *_mainSerialQueue;
   
   NSMutableArray *_pendingEditCommandBlocks;  // To be run on the main thread.  Handles begin/endUpdates tracking.
   NSOperationQueue *_editingTransactionQueue; // Serial background queue.  Dispatches concurrent layout and manages _editingNodes.
@@ -74,7 +64,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   _completedNodes[ASDataControllerRowNodeKind] = [NSMutableArray array];
   _editingNodes[ASDataControllerRowNodeKind] = [NSMutableArray array];
   
-  _mainSerialQueue = [[ASMainQueueSerialQueue alloc] init];
+  _mainSerialQueue = [[ASMainSerialQueue alloc] init];
   
   _pendingEditCommandBlocks = [NSMutableArray array];
   
@@ -981,54 +971,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }];
     }];
   }];
-}
-
-@end
-
-@implementation ASMainQueueSerialQueue
-
-- (instancetype)init
-{
-  if (!(self = [super init])) {
-    return nil;
-  }
-  
-  _blocks = [[NSMutableArray alloc] init];
-  return self;
-}
-
-- (void)performBlockOnMainThread:(dispatch_block_t)block
-{
-  ASDN::MutexLocker l(_serialQueueLock);
-  [_blocks addObject:block];
-  ASDN::MutexUnlocker u(_serialQueueLock);
-  [self runBlocks];
-}
-
-- (void)runBlocks
-{
-  dispatch_block_t mainThread = ^{
-    do {
-      ASDN::MutexLocker l(_serialQueueLock);
-      dispatch_block_t block;
-      if (_blocks.count > 0) {
-        block = [_blocks objectAtIndex:0];
-        [_blocks removeObjectAtIndex:0];
-      } else {
-        break;
-      }
-      ASDN::MutexUnlocker u(_serialQueueLock);
-      block();
-    } while (true);
-  };
-  
-  if ([NSThread isMainThread]) {
-    mainThread();
-  } else {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      mainThread();
-    });
-  }
 }
 
 @end
