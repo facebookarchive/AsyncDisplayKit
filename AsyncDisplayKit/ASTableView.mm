@@ -301,8 +301,11 @@ static BOOL _isInterceptedSelector(SEL sel)
   super.dataSource = nil;
 
   if (asyncDataSource == nil) {
+    
     _asyncDataSource = nil;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+    super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
+    
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
@@ -319,12 +322,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   // super.delegate in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
   super.delegate = nil;
+  
 
   if (asyncDelegate == nil) {
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
     // in UIScrollViewAccessibility.
     _asyncDelegate = nil;
     _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+    super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
     
   } else {
     _asyncDelegate = asyncDelegate;
