@@ -7,8 +7,9 @@
  */
 
 #import "ASDisplayNode.h"
-#import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASLayoutOptionsPrivate.h"
 
 #import <objc/runtime.h>
@@ -24,6 +25,7 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutSpec.h"
+#import "ASCellNode.h"
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
 
@@ -36,6 +38,9 @@
 - (void)_staticInitialize;
 
 @end
+
+//#define LOG(...) NSLog(__VA_ARGS__)
+#define LOG(...)
 
 // Conditionally time these scopes to our debug ivars (only exist in debug/profile builds)
 #if TIME_DISPLAYNODE_OPS
@@ -345,17 +350,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Core
 
-- (void)__tearDown:(BOOL)tearDown subnodesOfNode:(ASDisplayNode *)node
-{
-  for (ASDisplayNode *subnode in node.subnodes) {
-    if (tearDown) {
-      [subnode __unloadNode];
-    } else {
-      [subnode __loadNode];
-    }
-  }
-}
-
 - (void)__unloadNode
 {
   ASDisplayNodeAssertThreadAffinity(self);
@@ -379,22 +373,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self layer];
 }
 
-- (ASDisplayNode *)__rasterizedContainerNode
-{
-  ASDisplayNode *node = self.supernode;
-  while (node) {
-    if (node.shouldRasterizeDescendants) {
-      return node;
-    }
-    node = node.supernode;
-  }
-  
-  return nil;
-}
-
 - (BOOL)__shouldLoadViewOrLayer
 {
-  return ![self __rasterizedContainerNode];
+  return !(_hierarchyState & ASHierarchyStateRasterized);
 }
 
 - (BOOL)__shouldSize
@@ -669,28 +650,58 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertThreadAffinity(self);
   //NSLog(@"About to descendants lock for %p, %@", self, [self class]);
   ASDN::MutexLocker l(_propertyLock);
+  ASDisplayNodeAssert(!((_hierarchyState & ASHierarchyStateRasterized) && _flags.shouldRasterizeDescendants),
+                      @"Subnode of a rasterized node should not have redundant shouldRasterizeDescendants enabled");
   return _flags.shouldRasterizeDescendants;
 }
 
-- (void)setShouldRasterizeDescendants:(BOOL)flag
+- (void)setShouldRasterizeDescendants:(BOOL)shouldRasterize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(_propertyLock);
-  
-  if (_flags.shouldRasterizeDescendants == flag)
-    return;
-  
-  _flags.shouldRasterizeDescendants = flag;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    
+    if (_flags.shouldRasterizeDescendants == shouldRasterize)
+      return;
+    
+    _flags.shouldRasterizeDescendants = shouldRasterize;
+  }
   
   if (self.isNodeLoaded) {
-    //recursively tear down or build up subnodes
+    // Recursively tear down or build up subnodes.
+    // TODO: When disabling rasterization, preserve rasterized backing store as placeholderImage
+    // while the newly materialized subtree finishes rendering.  Then destroy placeholderImage to save memory.
     [self recursivelyClearContents];
-    [self __tearDown:flag subnodesOfNode:self];
-    if (flag == NO) {
+    
+    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode *node) {
+      if (shouldRasterize) {
+        [node enterHierarchyState:ASHierarchyStateRasterized];
+        [node __unloadNode];
+      } else {
+        [node exitHierarchyState:ASHierarchyStateRasterized];
+        [node __loadNode];
+      }
+    });
+    if (!shouldRasterize) {
+      // At this point all of our subnodes have their layers or views recreated, but we haven't added
+      // them to ours yet.  This is because our node is already loaded, and the above recursion
+      // is only performed on our subnodes -- not self.
       [self _addSubnodeViewsAndLayers];
     }
     
-    [self recursivelyEnsureDisplay];
+    if (self.interfaceState & ASInterfaceStateVisible) {
+      // TODO: Change this to recursivelyEnsureDisplay - but need a variant that does not skip
+      // nodes that have shouldBypassEnsureDisplay set (such as image nodes) so they are rasterized.
+      [self recursivelyDisplayImmediately];
+    }
+  } else {
+    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode *node) {
+      if (shouldRasterize) {
+        [node enterHierarchyState:ASHierarchyStateRasterized];
+      } else {
+        [node exitHierarchyState:ASHierarchyStateRasterized];
+      }
+    });
   }
 }
 
@@ -1007,8 +1018,8 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   [oldSubnode removeFromSupernode];
   [_subnodes insertObject:subnode atIndex:subnodeIndex];
 
-  // Don't bother inserting the view/layer if in a rasterized subtree, becuase there are no layers in the hierarchy and none of this could possibly work.
-  if (!_flags.shouldRasterizeDescendants && ![self __rasterizedContainerNode]) {
+  // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.
+  if (!_flags.shouldRasterizeDescendants && [self __shouldLoadViewOrLayer]) {
     if (_layer) {
       ASDisplayNodeCAssertMainThread();
 
@@ -1128,8 +1139,8 @@ static NSInteger incrementIfFound(NSInteger i) {
   NSInteger aboveSubnodeIndex = [_subnodes indexOfObjectIdenticalTo:above];
   NSInteger aboveSublayerIndex = NSNotFound;
 
-  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, becuase there are no layers in the hierarchy and none of this could possibly work.
-  if (!_flags.shouldRasterizeDescendants && ![self __rasterizedContainerNode]) {
+  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.
+  if (!_flags.shouldRasterizeDescendants && [self __shouldLoadViewOrLayer]) {
     if (_layer) {
       aboveSublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:above.layer];
       ASDisplayNodeAssert(aboveSublayerIndex != NSNotFound, @"Somehow above's supernode is self, yet we could not find it in our layers to replace");
@@ -1381,10 +1392,35 @@ static NSInteger incrementIfFound(NSInteger i) {
   return _supernode;
 }
 
-- (void)__setSupernode:(ASDisplayNode *)supernode
+- (void)__setSupernode:(ASDisplayNode *)newSupernode
 {
-  ASDN::MutexLocker l(_propertyLock);
-  _supernode = supernode;
+  BOOL supernodeDidChange = NO;
+  ASDisplayNode *oldSupernode = nil;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    if (_supernode != newSupernode) {
+      oldSupernode = _supernode;  // Access supernode properties outside of lock to avoid remote chance of deadlock,
+                                  // in case supernode implementation must access one of our properties.
+      _supernode = newSupernode;
+      supernodeDidChange = YES;
+    }
+  }
+  
+  if (supernodeDidChange) {
+    ASHierarchyState stateToEnterOrExit = (newSupernode ? newSupernode.hierarchyState
+                                                        : oldSupernode.hierarchyState);
+    
+    BOOL parentWasOrIsRasterized        = (newSupernode ? newSupernode.shouldRasterizeDescendants
+                                                        : oldSupernode.shouldRasterizeDescendants);
+    if (parentWasOrIsRasterized) {
+      stateToEnterOrExit |= ASHierarchyStateRasterized;
+    }
+    if (newSupernode) {
+      [self enterHierarchyState:stateToEnterOrExit];
+    } else {
+      [self exitHierarchyState:stateToEnterOrExit];
+    }
+  }
 }
 
 // Track that a node will be displayed as part of the current node hierarchy.
@@ -1628,6 +1664,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_flags.isEnteringHierarchy, @"You should never call -willEnterHierarchy directly. Appearance is automatically managed by ASDisplayNode");
   ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
+
+  if (![self supportsRangeManagedInterfaceState]) {
+    self.interfaceState = ASInterfaceStateInHierarchy;
+  }
 }
 
 - (void)didExitHierarchy
@@ -1635,6 +1675,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_flags.isExitingHierarchy, @"You should never call -didExitHierarchy directly. Appearance is automatically managed by ASDisplayNode");
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
+  
+  if (![self supportsRangeManagedInterfaceState]) {
+    self.interfaceState = ASInterfaceStateNone;
+  }
 }
 
 - (void)clearContents
@@ -1682,55 +1726,72 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   [self clearFetchedData];
 }
 
+/**
+ * We currently only set interface state on nodes in table/collection views. For other nodes, if they are
+ * in the hierarchy we enable all ASInterfaceState types with `ASInterfaceStateInHierarchy`, otherwise `None`.
+ */
+- (BOOL)supportsRangeManagedInterfaceState
+{
+  return (_hierarchyState & ASHierarchyStateRangeManaged);
+}
+
 - (ASInterfaceState)interfaceState
 {
   ASDN::MutexLocker l(_propertyLock);
   return _interfaceState;
 }
 
-- (void)setInterfaceState:(ASInterfaceState)interfaceState
+- (void)setInterfaceState:(ASInterfaceState)newState
 {
-  ASDN::MutexLocker l(_propertyLock);
-  if (interfaceState != _interfaceState) {
-    if ((interfaceState & ASInterfaceStateMeasureLayout) != (_interfaceState & ASInterfaceStateMeasureLayout)) {
-      // Trigger asynchronous measurement if it is not already cached or being calculated.
+  ASInterfaceState oldState = ASInterfaceStateNone;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    if (_interfaceState == newState) {
+      return;
     }
-    
-    // Entered or exited data loading state.
-    if ((interfaceState & ASInterfaceStateFetchData) != (_interfaceState & ASInterfaceStateFetchData)) {
-      if (interfaceState & ASInterfaceStateFetchData) {
-        [self fetchData];
-      } else {
-        [self clearFetchedData];
-      }
-    }
+    oldState = _interfaceState;
+    _interfaceState = newState;
+  }
 
-    // Entered or exited contents rendering state.
-    if ((interfaceState & ASInterfaceStateDisplay) != (_interfaceState & ASInterfaceStateDisplay)) {
-      if (interfaceState & ASInterfaceStateDisplay) {
-        // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
-        [self setDisplaySuspended:NO];
-      } else {
-        [self setDisplaySuspended:YES];
-        [self clearContents];
-      }
+  if ((newState & ASInterfaceStateMeasureLayout) != (oldState & ASInterfaceStateMeasureLayout)) {
+    // Trigger asynchronous measurement if it is not already cached or being calculated.
+  }
+  
+  // Entered or exited data loading state.
+  if ((newState & ASInterfaceStateFetchData) != (oldState & ASInterfaceStateFetchData)) {
+    if (newState & ASInterfaceStateFetchData) {
+      [self fetchData];
+    } else {
+      [self clearFetchedData];
     }
+  }
 
-    // Entered or exited data loading state.
-    if ((interfaceState & ASInterfaceStateVisible) != (_interfaceState & ASInterfaceStateVisible)) {
-      if (interfaceState & ASInterfaceStateVisible) {
-        // Consider providing a -didBecomeVisible.
-      } else {
-        // Consider providing a -didBecomeInvisible.
-      }
+  // Entered or exited contents rendering state.
+  if ((newState & ASInterfaceStateDisplay) != (oldState & ASInterfaceStateDisplay)) {
+    if (newState & ASInterfaceStateDisplay) {
+      // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
+      [self setDisplaySuspended:NO];
+    } else {
+      [self setDisplaySuspended:YES];
+      [self clearContents];
     }
-    
-    _interfaceState = interfaceState;
+  }
+
+  // Entered or exited data loading state.
+  if ((newState & ASInterfaceStateVisible) != (oldState & ASInterfaceStateVisible)) {
+    if (newState & ASInterfaceStateVisible) {
+      // Consider providing a -didBecomeVisible.
+    } else {
+      // Consider providing a -didBecomeInvisible.
+    }
   }
 }
 
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState
 {
+  if (interfaceState == ASInterfaceStateNone) {
+    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
+  }
   ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState |= interfaceState;
   });
@@ -1738,8 +1799,54 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)exitInterfaceState:(ASInterfaceState)interfaceState
 {
+  if (interfaceState == ASInterfaceStateNone) {
+    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
+  }
   ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState &= (~interfaceState);
+  });
+}
+
+- (ASHierarchyState)hierarchyState
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _hierarchyState;
+}
+
+- (void)setHierarchyState:(ASHierarchyState)newState
+{
+  ASHierarchyState oldState = ASHierarchyStateNormal;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    if (_hierarchyState == newState) {
+      return;
+    }
+    oldState = _hierarchyState;
+    _hierarchyState = newState;
+  }
+  
+  if (newState != oldState) {
+    LOG(@"setHierarchyState: oldState = %lu, newState = %lu", (unsigned long)oldState, (unsigned long)newState);
+  }
+}
+
+- (void)enterHierarchyState:(ASHierarchyState)hierarchyState
+{
+  if (hierarchyState == ASHierarchyStateNormal) {
+    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
+  }
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+    node.hierarchyState |= hierarchyState;
+  });
+}
+
+- (void)exitHierarchyState:(ASHierarchyState)hierarchyState
+{
+  if (hierarchyState == ASHierarchyStateNormal) {
+    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
+  }
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+    node.hierarchyState &= (~hierarchyState);
   });
 }
 
@@ -1918,13 +2025,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 // This method has proved helpful in a few rare scenarios, similar to a category extension on UIView, but assumes knowledge of _ASDisplayView.
 // It's considered private API for now and its use should not be encouraged.
-- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass
+- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy
 {
   ASDisplayNode *supernode = self.supernode;
   while (supernode) {
     if ([supernode isKindOfClass:supernodeClass])
       return supernode;
     supernode = supernode.supernode;
+  }
+  if (!checkViewHierarchy) {
+    return nil;
   }
 
   UIView *view = self.view.superview;

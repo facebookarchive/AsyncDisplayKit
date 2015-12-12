@@ -10,16 +10,16 @@
 #import "ASTableViewInternal.h"
 
 #import "ASAssert.h"
+#import "ASBatchFetching.h"
 #import "ASChangeSetDataController.h"
 #import "ASCollectionViewLayoutController.h"
-#import "ASLayoutController.h"
-#import "ASRangeController.h"
-#import "ASBatchFetching.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
+#import "ASLayoutController.h"
+#import "ASRangeController.h"
 
-// FIXME: Temporary nonsense import until method names are finalized and exposed
-#import "ASDisplayNode+Subclasses.h"
+static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -179,6 +179,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   CGFloat _nodesConstrainedWidth;
   BOOL _ignoreNodesConstrainedWidthChange;
+  BOOL _queuedNodeHeightUpdate;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -223,6 +224,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   // If the initial size is 0, expect a size change very soon which is part of the initial configuration
   // and should not trigger a relayout.
   _ignoreNodesConstrainedWidthChange = (_nodesConstrainedWidth == 0);
+
+  [self registerClass:_ASTableViewCell.class forCellReuseIdentifier:kCellReuseIdentifier];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
@@ -376,11 +379,14 @@ static BOOL _isInterceptedSelector(SEL sel)
   NSArray *indexPaths = [self indexPathsForVisibleRows];
   NSMutableArray *visibleNodes = [[NSMutableArray alloc] init];
 
-  [indexPaths enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-    ASCellNode *visibleNode = [self nodeForRowAtIndexPath:obj];
-    [visibleNodes addObject:visibleNode];
-  }];
-
+  for (NSIndexPath *indexPath in indexPaths) {
+    ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
+    if (node) {
+      // It is possible for UITableView to return indexPaths before the node is completed.
+      [visibleNodes addObject:node];
+    }
+  }
+  
   return visibleNodes;
 }
 
@@ -528,13 +534,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  static NSString *reuseIdentifier = @"_ASTableViewCell";
-
-  _ASTableViewCell *cell = [self dequeueReusableCellWithIdentifier:reuseIdentifier];
-  if (!cell) {
-    cell = [[_ASTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
-    cell.delegate = self;
-  }
+  _ASTableViewCell *cell = [self dequeueReusableCellWithIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
+  cell.delegate = self;
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
   [_rangeController configureContentView:cell.contentView forCellNode:node];
@@ -829,6 +830,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
+  [node enterHierarchyState:ASHierarchyStateRangeManaged];
+  
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
   if (node.layoutDelegate == nil) {
     node.layoutDelegate = self;
@@ -909,10 +912,26 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark - ASCellNodeLayoutDelegate
 
-- (void)nodeDidRelayout:(ASCellNode *)node
+- (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();
-  // Cause UITableView to requery for the new height of this node
+
+  if (!sizeChanged || _queuedNodeHeightUpdate) {
+    return;
+  }
+
+  _queuedNodeHeightUpdate = YES;
+  [self performSelector:@selector(requeryNodeHeights)
+             withObject:nil
+             afterDelay:0
+                inModes:@[ NSRunLoopCommonModes ]];
+}
+
+// Cause UITableView to requery for the new height of this node
+- (void)requeryNodeHeights
+{
+  _queuedNodeHeightUpdate = NO;
+
   [super beginUpdates];
   [super endUpdates];
 }

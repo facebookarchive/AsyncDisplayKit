@@ -10,7 +10,7 @@
 
 #import "ASDisplayNode.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 
 #define USE_WORKING_WINDOW 1
 

@@ -8,9 +8,11 @@
 
 #import "_ASCoreAnimationExtras.h"
 #import "_ASPendingState.h"
+#import "ASInternalHelpers.h"
 #import "ASAssert.h"
-#import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEqualityHelpers.h"
 
 /**
@@ -172,14 +174,15 @@
 {
   _bridge_prologue;
 
-  // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
-#if DEBUG
-  // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
-  ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
-#endif
-
   if (_flags.synchronous && !_flags.layerBacked) {
     // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
+    
+    // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
+#if DEBUG
+    // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
+    ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
+#endif
+
     _setToViewOnly(frame, rect);
   } else {
     // This is by far the common case / hot path.
@@ -219,9 +222,26 @@
 - (void)setNeedsDisplay
 {
   _bridge_prologue;
-  // Send the message to the view/layer first, as __setNeedsDisplay may call -displayIfNeeded.
-  _messageToViewOrLayer(setNeedsDisplay);
-  [self __setNeedsDisplay];
+
+  if (_hierarchyState & ASHierarchyStateRasterized) {
+    ASPerformBlockOnMainThread(^{
+      // The below operation must be performed on the main thread to ensure against an extremely rare deadlock, where a parent node
+      // begins materializing the view / layer heirarchy (locking itself or a descendant) while this node walks up
+      // the tree and requires locking that node to access .shouldRasterizeDescendants.
+      // For this reason, this method should be avoided when possible.  Use _hierarchyState & ASHierarchyStateRasterized.
+      ASDisplayNodeAssertMainThread();
+      ASDisplayNode *rasterizedContainerNode = self.supernode;
+      while (rasterizedContainerNode) {
+        if (rasterizedContainerNode.shouldRasterizeDescendants) {
+          break;
+        }
+        rasterizedContainerNode = rasterizedContainerNode.supernode;
+      }
+      [rasterizedContainerNode setNeedsDisplay];
+    });
+  } else {
+    _messageToViewOrLayer(setNeedsDisplay);
+  }
 }
 
 - (void)setNeedsLayout

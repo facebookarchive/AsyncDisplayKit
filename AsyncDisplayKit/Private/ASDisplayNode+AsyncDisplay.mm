@@ -10,6 +10,7 @@
 #import "_ASAsyncTransaction.h"
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 
 @implementation ASDisplayNode (AsyncDisplay)
 
@@ -84,9 +85,9 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     return;
   }
     
-  BOOL rasterizingFromAscendent = [self __rasterizedContainerNode] != nil;
+  BOOL rasterizingFromAscendent = (_hierarchyState & ASHierarchyStateRasterized);
 
-  // if super node is rasterizing descendents, subnodes will not have had layout calls becase they don't have layers
+  // if super node is rasterizing descendents, subnodes will not have had layout calls because they don't have layers
   if (rasterizingFromAscendent) {
     [self __layout];
   }
@@ -178,7 +179,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = nil;
 
-  ASDisplayNodeAssert(rasterizing || ![self __rasterizedContainerNode], @"Rasterized descendants should never display unless being drawn into the rasterized container.");
+  ASDisplayNodeAssert(rasterizing || !(_hierarchyState & ASHierarchyStateRasterized), @"Rasterized descendants should never display unless being drawn into the rasterized container.");
 
   if (!rasterizing && self.shouldRasterizeDescendants) {
     CGRect bounds = self.bounds;
@@ -296,7 +297,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
   ASDN::MutexLocker l(_propertyLock);
 
-  if ([self __rasterizedContainerNode]) {
+  if (_hierarchyState & ASHierarchyStateRasterized) {
     return;
   }
 

@@ -6,22 +6,20 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASCollectionView.h"
-
 #import "ASAssert.h"
-#import "ASCollectionViewLayoutController.h"
-#import "ASRangeController.h"
-#import "ASCollectionDataController.h"
 #import "ASBatchFetching.h"
-#import "UICollectionViewLayout+ASConvenience.h"
-#import "ASInternalHelpers.h"
+#import "ASCollectionView.h"
+#import "ASCollectionDataController.h"
+#import "ASCollectionViewLayoutController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
-
-// FIXME: Temporary nonsense import until method names are finalized and exposed
-#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASInternalHelpers.h"
+#import "ASRangeController.h"
+#import "UICollectionViewLayout+ASConvenience.h"
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
+static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 #pragma mark -
 #pragma mark Proxying.
@@ -155,6 +153,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   BOOL _asyncDelegateImplementsInsetSection;
   BOOL _collectionViewLayoutImplementsInsetSection;
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
+  BOOL _queuedNodeSizeUpdate;
 
   ASBatchContext *_batchContext;
   
@@ -245,7 +244,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   self.backgroundColor = [UIColor whiteColor];
   
-  [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:@"_ASCollectionViewCell"];
+  [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
   
   return self;
 }
@@ -392,14 +391,18 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   NSArray *indexPaths = [self indexPathsForVisibleItems];
   NSMutableArray *visibleNodes = [[NSMutableArray alloc] init];
-
-  [indexPaths enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-    ASCellNode *visibleNode = [self nodeForItemAtIndexPath:obj];
-    [visibleNodes addObject:visibleNode];
-  }];
-
+  
+  for (NSIndexPath *indexPath in indexPaths) {
+    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
+    if (node) {
+      // It is possible for UICollectionView to return indexPaths before the node is completed.
+      [visibleNodes addObject:node];
+    }
+  }
+  
   return visibleNodes;
 }
+
 
 #pragma mark Assertions.
 
@@ -483,9 +486,7 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  static NSString *reuseIdentifier = @"_ASCollectionViewCell";
-  
-  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
 
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
   cell.node = node;
@@ -661,6 +662,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
+  [node enterHierarchyState:ASHierarchyStateRangeManaged];
+  
   ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
   if (node.layoutDelegate == nil) {
     node.layoutDelegate = self;
@@ -912,10 +915,26 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 #pragma mark - ASCellNodeDelegate
 
-- (void)nodeDidRelayout:(ASCellNode *)node
+- (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();
-  // Cause UICollectionView to requery for the new height of this node
+
+  if (!sizeChanged || _queuedNodeSizeUpdate) {
+    return;
+  }
+
+  _queuedNodeSizeUpdate = YES;
+  [self performSelector:@selector(requeryNodeSizes)
+             withObject:nil
+             afterDelay:0
+                inModes:@[ NSRunLoopCommonModes ]];
+}
+
+// Cause UICollectionView to requery for the new size of all nodes
+- (void)requeryNodeSizes
+{
+  _queuedNodeSizeUpdate = NO;
+
   [super performBatchUpdates:^{} completion:nil];
 }
 

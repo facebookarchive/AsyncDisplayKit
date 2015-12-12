@@ -8,7 +8,7 @@
 
 #import "ASRangeHandlerVisible.h"
 #import "ASDisplayNode.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 
 @implementation ASRangeHandlerVisible
 
