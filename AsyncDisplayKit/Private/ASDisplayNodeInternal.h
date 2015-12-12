@@ -108,6 +108,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 
 }
 
++ (void)scheduleNodeForDisplay:(ASDisplayNode *)node;
+
 // The _ASDisplayLayer backing the node, if any.
 @property (nonatomic, readonly, retain) _ASDisplayLayer *asyncLayer;
 

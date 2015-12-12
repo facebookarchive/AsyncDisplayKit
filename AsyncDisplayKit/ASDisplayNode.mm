@@ -742,20 +742,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self displayImmediately];
 }
 
-- (void)__setNeedsDisplay
-{
-  ASDN::MutexLocker l(_propertyLock);
-  //NSLog(@"About to find parent rasterize for %@", self);
-  ASDisplayNode *rasterizedContainerNode = [self __rasterizedContainerNode];
-  if (rasterizedContainerNode) {
-    [rasterizedContainerNode setNeedsDisplay];
-  } else {
-    if (_layer && !self.isSynchronous && self.displaysAsynchronously) {
-      [ASDisplayNode scheduleNodeForDisplay:self];
-    }
-  }
-}
-
 - (void)__setNeedsLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);

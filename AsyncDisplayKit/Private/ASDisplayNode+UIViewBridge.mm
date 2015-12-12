@@ -240,7 +240,17 @@
       [rasterizedContainerNode setNeedsDisplay];
     });
   } else {
+    // If not rasterized (and therefore we certainly have a view or layer),
+    // Send the message to the view/layer first, as scheduleNodeForDisplay may call -displayIfNeeded.
+    // Wrapped / synchronous nodes created with initWithView/LayerBlock: do not need scheduleNodeForDisplay,
+    // as they don't need to display in the working range at all - since at all times onscreen, one
+    // -setNeedsDisplay to the CALayer will result in a synchronous display in the next frame.
+
     _messageToViewOrLayer(setNeedsDisplay);
+    if (_layer && !self.isSynchronous) {
+      [ASDisplayNode scheduleNodeForDisplay:self];
+    }
+
   }
 }
 
