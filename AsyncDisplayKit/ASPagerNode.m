@@ -8,6 +8,8 @@
 
 #import "ASPagerNode.h"
 
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
+
 @interface ASPagerNode () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout> {
   UICollectionViewFlowLayout *_flowLayout;
 }
