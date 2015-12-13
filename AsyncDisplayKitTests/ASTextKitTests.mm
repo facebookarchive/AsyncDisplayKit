@@ -26,7 +26,7 @@ static UITextView *UITextViewWithAttributes(const ASTextKitAttributes &attribute
   textView.textContainer.lineFragmentPadding = 0.f;
   textView.textContainer.maximumNumberOfLines = attributes.maximumNumberOfLines;
   textView.textContainerInset = UIEdgeInsetsZero;
-  textView.layoutManager.usesFontLeading = NO;
+  textView.layoutManager.usesFontLeading = YES;
   textView.attributedText = attributes.attributedString;
   return textView;
 }
