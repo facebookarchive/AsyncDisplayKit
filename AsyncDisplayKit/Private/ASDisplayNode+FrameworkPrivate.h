@@ -19,6 +19,8 @@
 #import "ASThread.h"
 #import "ASLayoutOptions.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  Hierarchy state is propogated from nodes to all of their children when certain behaviors are required from the subtree.
  Examples include rasterization and external driving of the .interfaceState property.
@@ -101,9 +103,11 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
 @end
 
 @interface UIView (ASDisplayNodeInternal)
-@property (nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
+@property (nullable, nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
 @end
 
 @interface CALayer (ASDisplayNodeInternal)
-@property (nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
+@property (nullable, nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
 @end
+
+NS_ASSUME_NONNULL_END
