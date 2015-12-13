@@ -7,8 +7,8 @@
  */
 
 #import "ASDisplayNodeExtras.h"
-
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 
 extern ASDisplayNode *ASLayerToDisplayNode(CALayer *layer)
 {
@@ -43,6 +43,13 @@ extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *
     for (ASDisplayNode *subnode in [node subnodes]) {
       ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
     }
+  }
+}
+
+extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^block)(ASDisplayNode *node))
+{
+  for (ASDisplayNode *subnode in node.subnodes) {
+    ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
   }
 }
 

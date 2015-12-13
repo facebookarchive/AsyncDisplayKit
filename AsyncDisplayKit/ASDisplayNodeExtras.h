@@ -40,6 +40,12 @@ extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node);
 extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
 
 /**
+ Identical to ASDisplayNodePerformBlockOnEveryNode, except it does not run the block on the
+ node provided directly to the function call - only on all descendants.
+ */
+extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^block)(ASDisplayNode *node));
+
+/**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.
  */
 extern id _Nullable ASDisplayNodeFind(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
