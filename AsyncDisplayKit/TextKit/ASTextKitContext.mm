@@ -36,7 +36,7 @@
     // Create the TextKit component stack with our default configuration.
     _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
     _layoutManager = layoutManagerFactory ? layoutManagerFactory() : [[NSLayoutManager alloc] init];
-    _layoutManager.usesFontLeading = NO;
+    _layoutManager.usesFontLeading = YES;
     [_textStorage addLayoutManager:_layoutManager];
     _textContainer = [[NSTextContainer alloc] initWithSize:constrainedSize];
     // We want the text laid out up to the very edges of the container.
