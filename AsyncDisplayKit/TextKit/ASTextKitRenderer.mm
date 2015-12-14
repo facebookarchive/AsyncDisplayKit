@@ -82,12 +82,18 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   CGRect constrainedRect = {CGPointZero, _constrainedSize};
   __block CGRect boundingRect;
   [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
-    NSParagraphStyle *paragraphStyle = [textStorage attributesAtIndex:[layoutManager characterIndexForGlyphAtIndex:0]
-                                                       effectiveRange:NULL][NSParagraphStyleAttributeName];
-
     boundingRect = [layoutManager usedRectForTextContainer:textContainer];
     
+    NSRange visibleGlyphRange = [layoutManager glyphRangeForBoundingRect:constrainedRect
+                                                         inTextContainer:textContainer];
+    NSInteger lastVisibleGlyphIndex = (NSMaxRange(visibleGlyphRange) - 1);
+    NSInteger lastVisibleGlyphAttributeIndex = [layoutManager characterIndexForGlyphAtIndex:lastVisibleGlyphIndex];
+    
+    NSParagraphStyle *paragraphStyle = [textStorage attributesAtIndex:lastVisibleGlyphAttributeIndex
+                                        effectiveRange:NULL][NSParagraphStyleAttributeName];
+    
     // Work around line spacing of the last line not getting taken into account
+    // (rdar://23885167)
     if (paragraphStyle.lineSpacing > 0) {
       CGSize boundingSize = boundingRect.size;
       CGSize sizeWithLineSpacing = CGSizeMake(boundingSize.width,
