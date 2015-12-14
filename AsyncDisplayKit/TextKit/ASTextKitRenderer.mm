@@ -87,8 +87,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
     boundingRect = [layoutManager usedRectForTextContainer:textContainer];
     
-    // Fixes an issue where the line spacing of the last line is not taken into
-    // account in usedRectForTextContainer
+    // Work around line spacing of the last line not getting taken into account
     if (paragraphStyle.lineSpacing > 0) {
       CGSize boundingSize = boundingRect.size;
       CGSize sizeWithLineSpacing = CGSizeMake(boundingSize.width,
