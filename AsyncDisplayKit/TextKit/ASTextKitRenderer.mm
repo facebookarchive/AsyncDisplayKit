@@ -83,6 +83,25 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   __block CGRect boundingRect;
   [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     boundingRect = [layoutManager usedRectForTextContainer:textContainer];
+    
+    // Work around line spacing of the last line not getting taken into account
+    // (rdar://23885167)
+    NSRange visibleGlyphRange = [layoutManager glyphRangeForBoundingRect:constrainedRect
+                                                         inTextContainer:textContainer];
+    NSInteger lastVisibleGlyphIndex = (NSMaxRange(visibleGlyphRange) - 1);
+    NSInteger lastVisibleGlyphAttributeIndex = [layoutManager characterIndexForGlyphAtIndex:lastVisibleGlyphIndex];
+    
+    NSParagraphStyle *paragraphStyle = [textStorage attributesAtIndex:lastVisibleGlyphAttributeIndex
+                                        effectiveRange:NULL][NSParagraphStyleAttributeName];
+    
+    if (paragraphStyle.lineSpacing > 0) {
+      CGSize boundingSize = boundingRect.size;
+      CGSize sizeWithLineSpacing = CGSizeMake(boundingSize.width,
+                                              boundingSize.height + paragraphStyle.lineSpacing);
+      boundingRect = (CGRect){ .origin = boundingRect.origin,
+                               .size = sizeWithLineSpacing };
+    }
+
   }];
 
   // TextKit often returns incorrect glyph bounding rects in the horizontal direction, so we clip to our bounding rect
