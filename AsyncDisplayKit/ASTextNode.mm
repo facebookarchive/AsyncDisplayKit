@@ -223,25 +223,13 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 - (void)setFrame:(CGRect)frame
 {
   [super setFrame:frame];
-  if (!CGSizeEqualToSize(frame.size, _constrainedSize)) {
-    // Our bounds have changed to a size that is not identical to our constraining size,
-    // so our previous layout information is invalid, and TextKit may draw at the
-    // incorrect origin.
-    _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
-    [self _invalidateRenderer];
-  }
+  [self _invalidateRendererIfNeeded:frame.size];
 }
 
 - (void)setBounds:(CGRect)bounds
 {
   [super setBounds:bounds];
-  if (!CGSizeEqualToSize(bounds.size, _constrainedSize)) {
-    // Our bounds have changed to a size that is not identical to our constraining size,
-    // so our previous layout information is invalid, and TextKit may draw at the
-    // incorrect origin.
-    _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
-    [self _invalidateRenderer];
-  }
+  [self _invalidateRendererIfNeeded:bounds.size];
 }
 
 #pragma mark - Renderer Management
@@ -281,6 +269,27 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
     });
   }
   _renderer = nil;
+}
+
+- (void)_invalidateRendererIfNeeded
+{
+  [self _invalidateRendererIfNeeded:self.bounds.size];
+}
+
+- (void)_invalidateRendererIfNeeded:(CGSize)newSize
+{
+  if ([self _needInvalidateRenderer:newSize]) {
+    // Our bounds of frame have changed to a size that is not identical to our constraining size,
+    // so our previous layout information is invalid, and TextKit may draw at the
+    // incorrect origin.
+    _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
+    [self _invalidateRenderer];
+  }
+}
+
+- (BOOL)_needInvalidateRenderer:(CGSize)newSize
+{
+  return !CGSizeEqualToSize(newSize, _constrainedSize);
 }
 
 #pragma mark - Modifying User Text
@@ -377,6 +386,8 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
+  [self _invalidateRendererIfNeeded];
+
   // Offset the text origin by any shadow padding
   UIEdgeInsets shadowPadding = [self shadowPadding];
   CGPoint textOrigin = CGPointMake(self.bounds.origin.x - shadowPadding.left, self.bounds.origin.y - shadowPadding.top);
