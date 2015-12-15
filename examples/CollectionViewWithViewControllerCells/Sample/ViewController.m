@@ -97,8 +97,6 @@ static NSUInteger kNumberOfImages = 14;
   }];
   
   return node;
-  
-  //[[ImageCellNode alloc] initWithImage:_sections[indexPath.section][indexPath.item]];
 }
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath

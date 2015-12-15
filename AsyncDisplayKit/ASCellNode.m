@@ -52,6 +52,12 @@ UIViewController *_viewController;
   ASDisplayNodeAssertNotNil(viewControllerBlock, @"should initialize with a valid block that returns a UIViewController");
   
   _viewController = viewControllerBlock();
+  
+  NSLog(@"%d", _viewController.view.gestureRecognizers.count);
+//  for (UIGestureRecognizer *recognizer in [_viewController.view gestureRecognizers]) {
+//
+//  }
+  
   _viewControllerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
         return _viewController.view;
       } didLoadBlock:didLoadBlock];
