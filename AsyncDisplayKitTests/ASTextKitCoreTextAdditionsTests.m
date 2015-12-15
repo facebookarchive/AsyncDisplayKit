@@ -12,6 +12,11 @@
 
 #import "ASTextKitCoreTextAdditions.h"
 
+BOOL floatsCloseEnough(CGFloat float1, CGFloat float2) {
+  CGFloat epsilon = 0.00001;
+  return (fabs(float1 - float2) < epsilon);
+}
+
 @interface ASTextKitCoreTextAdditionsTests : XCTestCase
 
 @end
@@ -44,5 +49,21 @@
   XCTAssertTrue([testString isEqualToAttributedString:actualCleansedString], @"Expected the output string %@ to be the same as the input %@ if there are no core text attributes", actualCleansedString, testString);
 }
 
+- (void)testNSParagraphStyleNoCleansing
+{
+  NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+  paragraphStyle.lineSpacing = 10.0;
+
+  //NSUnderlineStyleAttributeName flags the unsupported CT attribute check
+  NSDictionary *attributes = @{NSParagraphStyleAttributeName:paragraphStyle,
+                               NSUnderlineStyleAttributeName:@(NSUnderlineStyleSingle)};
+
+  NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:@"Test" attributes:attributes];
+  NSAttributedString *cleansedString = ASCleanseAttributedStringOfCoreTextAttributes(attributedString);
+
+  NSParagraphStyle *cleansedParagraphStyle = [cleansedString attribute:NSParagraphStyleAttributeName atIndex:0 effectiveRange:NULL];
+
+  XCTAssertTrue(floatsCloseEnough(cleansedParagraphStyle.lineSpacing, paragraphStyle.lineSpacing), @"Expected the output line spacing: %f to be equal to the input line spacing: %f", cleansedParagraphStyle.lineSpacing, paragraphStyle.lineSpacing);
+}
 
 @end
