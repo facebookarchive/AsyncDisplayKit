@@ -17,19 +17,18 @@
   MKMapSnapshotter *_snapshotter;
   MKMapSnapshotOptions *_options;
   NSArray *_annotations;
-  ASDisplayNode *_mapNode;
   CLLocationCoordinate2D _centerCoordinateOfMap;
 }
 @end
 
 @implementation ASMapNode
 
-@synthesize liveMap = _liveMap;
 @synthesize needsMapReloadOnBoundsChange = _needsMapReloadOnBoundsChange;
 @synthesize mapDelegate = _mapDelegate;
+@synthesize region = _region;
 
 #pragma mark - Lifecycle
-- (instancetype)initWithRegion:(MKCoordinateRegion)region
+- (instancetype)init
 {
   if (!(self = [super init])) {
     return nil;
@@ -38,11 +37,12 @@
   self.clipsToBounds = YES;
   
   _needsMapReloadOnBoundsChange = YES;
-  _liveMap = NO;
+  
   _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
+  _region = MKCoordinateRegionMake(CLLocationCoordinate2DMake(43.432858, 13.183671), MKCoordinateSpanMake(0.2, 0.2));
   
   _options = [[MKMapSnapshotOptions alloc] init];
-  _options.region = region;
+  _options.region = _region;
   
   return self;
 }
@@ -50,7 +50,7 @@
 - (void)didLoad
 {
   [super didLoad];
-  if (self.isLiveMap && !_mapNode) {
+  if ([self wasLiveMapPreviously]) {
     self.userInteractionEnabled = YES;
     [self addLiveMap];
   }
@@ -59,7 +59,7 @@
 - (void)fetchData
 {
   [super fetchData];
-  if (_liveMap && !_mapNode) {
+  if ([self wasLiveMapPreviously]) {
     [self addLiveMap];
   } else {
     [self setUpSnapshotter];
@@ -70,27 +70,27 @@
 - (void)clearFetchedData
 {
   [super clearFetchedData];
-  [self removeLiveMap];
+  if (self.isLiveMap) {
+    [self removeLiveMap];
+  }
 }
 
 #pragma mark - Settings
 
 - (BOOL)isLiveMap
 {
-  ASDN::MutexLocker l(_propertyLock);
-  return _liveMap;
+  return (_mapView != nil);
 }
 
 - (void)setLiveMap:(BOOL)liveMap
 {
-  ASDN::MutexLocker l(_propertyLock);
-  if (liveMap == _liveMap) {
-    return;
-  }
-  _liveMap = liveMap;
   liveMap ? [self addLiveMap] : [self removeLiveMap];
 }
 
+- (BOOL)wasLiveMapPreviously
+{
+  return CLLocationCoordinate2DIsValid(_centerCoordinateOfMap);
+}
 
 - (BOOL)needsMapReloadOnBoundsChange
 {
@@ -104,6 +104,24 @@
   _needsMapReloadOnBoundsChange = needsMapReloadOnBoundsChange;
 }
 
+- (MKCoordinateRegion)region
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _region;
+}
+
+- (void)setRegion:(MKCoordinateRegion)region
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _region = region;
+  if (self.isLiveMap) {
+    [_mapView setRegion:_region animated:YES];
+  } else {
+    _options.region = _region;
+    [self resetSnapshotter];
+    [self takeSnapshot];
+  }
+}
 
 #pragma mark - Snapshotter
 
@@ -164,55 +182,49 @@
 #pragma mark - Actions
 - (void)addLiveMap
 {
-  if (self.isNodeLoaded && !_mapNode) {
+  ASDisplayNodeAssertMainThread();
+  if (!self.isLiveMap) {
     __weak ASMapNode *weakSelf = self;
-    _mapNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-      _mapView = [[MKMapView alloc] initWithFrame:CGRectZero];
-      _mapView.delegate = _mapDelegate;
-      [_mapView setRegion:_options.region];
-      [_mapView addAnnotations:_annotations];
-      [weakSelf setNeedsLayout];
-      return _mapView;
-    }];
-    [self addSubnode:_mapNode];
+    _mapView = [[MKMapView alloc] initWithFrame:CGRectZero];
+    _mapView.delegate = weakSelf.mapDelegate;
+    [_mapView setRegion:_options.region];
+    [_mapView addAnnotations:_annotations];
+    [weakSelf setNeedsLayout];
+    [weakSelf.view addSubview:_mapView];
     
     if (CLLocationCoordinate2DIsValid(_centerCoordinateOfMap)) {
       [_mapView setCenterCoordinate:_centerCoordinateOfMap];
+    } else {
+      _centerCoordinateOfMap = _options.region.center;
     }
   }
 }
 
 - (void)removeLiveMap
 {
-  if (_mapNode) {
-    _centerCoordinateOfMap = _mapView.centerCoordinate;
-    [_mapNode removeFromSupernode];
-    _mapView = nil;
-    _mapNode = nil;
-  }
+  _centerCoordinateOfMap = _mapView.centerCoordinate;
+  [_mapView removeFromSuperview];
+  _mapView = nil;
 }
 
 - (void)setAnnotations:(NSArray *)annotations
 {
   ASDN::MutexLocker l(_propertyLock);
   _annotations = [annotations copy];
-  if (annotations.count != _annotations.count) {
-    // Redraw
-    [self setNeedsDisplay];
-    if (_mapView) {
-      [_mapView removeAnnotations:_mapView.annotations];
-      [_mapView addAnnotations:annotations];
-    }
+  if (self.isLiveMap) {
+    [_mapView removeAnnotations:_mapView.annotations];
+    [_mapView addAnnotations:annotations];
+  } else {
+    [self takeSnapshot];
   }
 }
-
 
 #pragma mark - Layout
 // Layout isn't usually needed in the box model, but since we are making use of MKMapView which is hidden in an ASDisplayNode this is preferred.
 - (void)layout
 {
   [super layout];
-  if (_mapView) {
+  if (self.isLiveMap) {
     _mapView.frame = CGRectMake(0.0f, 0.0f, self.calculatedSize.width, self.calculatedSize.height);
   } else {
     // If our bounds.size is different from our current snapshot size, then let's request a new image from MKMapSnapshotter.
@@ -223,5 +235,4 @@
     }
   }
 }
-
 @end
