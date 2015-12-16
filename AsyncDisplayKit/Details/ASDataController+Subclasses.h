@@ -40,7 +40,7 @@
  * @discussion Once nodes have loaded their views, we can't layout in the background so this is a chance
  * to do so immediately on the main thread.
  */
-- (void)layoutLoadedNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths;
+- (void)layoutMainThreadAttachedNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths;
 
 /**
  * Provides the size range for a specific node during the layout process.
