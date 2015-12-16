@@ -49,7 +49,7 @@
     _pendingIndexPaths[kind] = indexPaths;
     
     // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+    [self layoutMainThreadAttachedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
   }
 }
 
@@ -91,7 +91,7 @@
     _pendingIndexPaths[kind] = indexPaths;
     
     // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+    [self layoutMainThreadAttachedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
   }
 }
 
@@ -132,7 +132,7 @@
     _pendingIndexPaths[kind] = indexPaths;
     
     // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+    [self layoutMainThreadAttachedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
   }
 }
 

@@ -172,6 +172,8 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  */
 @property (atomic, readonly, assign, getter=isNodeLoaded) BOOL nodeLoaded;
 
+@property (atomic, readonly, assign, getter=isRecursivelyDetachedFromMainThread) BOOL recursivelyDetachedFromMainThread;
+
 /** 
  * @abstract Returns whether the node rely on a layer instead of a view.
  *
