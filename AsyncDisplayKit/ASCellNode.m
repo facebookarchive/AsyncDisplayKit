@@ -19,10 +19,11 @@
 #pragma mark ASCellNode
 
 @interface ASCellNode (){
-ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
-ASDisplayNode *_viewControllerNode;
-UIViewController *_viewController;
+  ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
+  ASDisplayNode *_viewControllerNode;
+  UIViewController *_viewController;
 }
+
 @end
 
 @implementation ASCellNode
@@ -53,24 +54,18 @@ UIViewController *_viewController;
   
   _viewController = viewControllerBlock();
   
-  NSLog(@"%d", _viewController.view.gestureRecognizers.count);
-//  for (UIGestureRecognizer *recognizer in [_viewController.view gestureRecognizers]) {
-//
-//  }
-  
   _viewControllerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
         return _viewController.view;
       } didLoadBlock:didLoadBlock];
   
   [self addSubnode:_viewControllerNode];
   
-  _nodeLoadedBlock = didLoadBlock;  //not sure where i should plug in to call this...
+  _nodeLoadedBlock = didLoadBlock;
   return self;
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize {
   _viewControllerNode.frame = (CGRect){{0,0}, constrainedSize.max};
-  
   return [super layoutSpecThatFits:constrainedSize];
 }
 
@@ -111,9 +106,6 @@ UIViewController *_viewController;
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesBegan:touches withEvent:event];
-//  if (_viewController) {
-//    [_viewController touchesBegan:touches withEvent:event];
-//  }
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -121,9 +113,6 @@ UIViewController *_viewController;
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesMoved:touches withEvent:event];
-//  if (_viewController) {
-//    [_viewController touchesMoved:touches withEvent:event];
-//  }
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -131,9 +120,6 @@ UIViewController *_viewController;
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesEnded:touches withEvent:event];
-//  if (_viewController) {
-//    [_viewController touchesEnded:touches withEvent:event];
-//  }
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
@@ -141,9 +127,6 @@ UIViewController *_viewController;
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesCancelled:touches withEvent:event];
-//  if (_viewController) {
-//    [_viewController touchesCancelled:touches withEvent:event];
-//  }
 }
 
 @end

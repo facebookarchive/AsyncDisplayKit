@@ -98,6 +98,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  */
 - (id)init;
 
+
 /**
  * @abstract Alternative initializer with a block to create the backing view.
  *

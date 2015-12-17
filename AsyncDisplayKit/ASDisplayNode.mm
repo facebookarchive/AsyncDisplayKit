@@ -140,7 +140,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     overrides |= ASDisplayNodeMethodOverrideLayoutSpecThatFits;
   }
 
-
   return overrides;
 }
 
@@ -291,7 +290,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   return self;
 }
-
 
 - (void)dealloc
 {
