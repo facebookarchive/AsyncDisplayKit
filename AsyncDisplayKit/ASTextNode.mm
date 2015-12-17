@@ -183,7 +183,12 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
     [self setNeedsDisplay];
   });
-  return [[self _renderer] size];
+
+  // Ceil the size to the pixel grid so it renders cleanly.
+  CGSize result = [[self _renderer] size];
+  result.width = ASCeilPixelValue(result.width);
+  result.height = ASCeilPixelValue(result.height);
+  return result;
 }
 
 - (void)displayDidFinish
