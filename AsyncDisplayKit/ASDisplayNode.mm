@@ -1421,7 +1421,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
 }
 
-// Check if we still have any detached subnode and
+// Check if we still have any detached subnode and update detachment accordingly
 - (void)__updateMainThreadDetachment {
   BOOL allSubnodesAreDetached = YES;
   for (ASDisplayNode *subnode in _subnodes) {

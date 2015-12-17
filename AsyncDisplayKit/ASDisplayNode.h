@@ -172,6 +172,11 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  */
 @property (atomic, readonly, assign, getter=isNodeLoaded) BOOL nodeLoaded;
 
+/**
+ * @abstract Reflects the fact of node and it's subnodes being thread agnostic.
+ *
+ * @return YES if node and it's subnodes hierarchy is safe to manipulate on any thread; NO otherwise.
+ */
 @property (atomic, readonly, assign, getter=isRecursivelyDetachedFromMainThread) BOOL recursivelyDetachedFromMainThread;
 
 /** 
