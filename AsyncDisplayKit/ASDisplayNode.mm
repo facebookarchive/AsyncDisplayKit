@@ -446,7 +446,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [self _setupPlaceholderLayer];
   }
 
-  self.recursivelyDetachedFromMainThread = NO;
+  [self _setRecursivelyDetachedFromMainThread:NO];
 }
 
 - (UIView *)view
@@ -502,13 +502,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)setRecursivelyDetachedFromMainThread:(BOOL)recursivelyDetachedFromMainThread {
   ASDN::MutexLocker l(_propertyLock);
 
+  [self _setRecursivelyDetachedFromMainThread:recursivelyDetachedFromMainThread];
+}
+
+- (void)_setRecursivelyDetachedFromMainThread:(BOOL)recursivelyDetachedFromMainThread {
   if (_flags.isRecursivelyDetachedFromMainThread == recursivelyDetachedFromMainThread)
     return;
 
   _flags.isRecursivelyDetachedFromMainThread = recursivelyDetachedFromMainThread;
 
   if (recursivelyDetachedFromMainThread) {
-    [self.supernode __verifyMainThreadDetachment];
+    [self.supernode __updateMainThreadDetachment];
   } else {
     self.supernode.recursivelyDetachedFromMainThread = recursivelyDetachedFromMainThread;
   }
@@ -1191,7 +1195,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
 
   if (! subnode.recursivelyDetachedFromMainThread){
-    self.recursivelyDetachedFromMainThread = subnode.recursivelyDetachedFromMainThread;
+    [self _setRecursivelyDetachedFromMainThread:NO];
   }
 }
 
@@ -1407,17 +1411,18 @@ static NSInteger incrementIfFound(NSInteger i) {
     } else {
       [self exitHierarchyState:stateToEnterOrExit];
     }
-    if (!self.recursivelyDetachedFromMainThread) {
-      newSupernode.recursivelyDetachedFromMainThread = NO;
-      [oldSupernode __verifyMainThreadDetachment];
+    {
+      ASDN::MutexLocker l(_propertyLock);
+      if (!_flags.isRecursivelyDetachedFromMainThread) {
+        newSupernode.recursivelyDetachedFromMainThread = NO;
+        [oldSupernode __updateMainThreadDetachment];
+      }
     }
   }
 }
 
-// Check if we still have any detached subnode
-- (void)__verifyMainThreadDetachment {
-  ASDN::MutexLocker l(_propertyLock);
-
+// Check if we still have any detached subnode and
+- (void)__updateMainThreadDetachment {
   BOOL allSubnodesAreDetached = YES;
   for (ASDisplayNode *subnode in _subnodes) {
     if (!subnode.recursivelyDetachedFromMainThread) {
@@ -1426,7 +1431,7 @@ static NSInteger incrementIfFound(NSInteger i) {
     }
   }
 
-  self.recursivelyDetachedFromMainThread = allSubnodesAreDetached;
+  [self _setRecursivelyDetachedFromMainThread:allSubnodesAreDetached];
 }
 
 // Track that a node will be displayed as part of the current node hierarchy.

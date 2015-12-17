@@ -166,7 +166,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     for (NSUInteger k = j; k < j + batchCount; k++) {
       ASCellNode *node = nodes[k];
-      if (!node.isRecursivelyDetachedFromMainThread) {
+      if (node.isRecursivelyDetachedFromMainThread) {
         nodeBoundSizes[k] = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPaths[k]];
       }
     }
