@@ -211,8 +211,9 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 {
   [super didLoad];
 
-  // If we are view-backed, support gesture interaction.
-  if (!self.isLayerBacked) {
+  // If we are view-backed and the delegate cares, support the long-press callback.
+  SEL longPressCallback = @selector(textNode:longPressedLinkAttribute:value:atPoint:textRange:);
+  if (!self.isLayerBacked && [self.delegate respondsToSelector:longPressCallback]) {
     _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(_handleLongPress:)];
     _longPressGestureRecognizer.cancelsTouchesInView = self.longPressCancelsTouches;
     _longPressGestureRecognizer.delegate = self;
