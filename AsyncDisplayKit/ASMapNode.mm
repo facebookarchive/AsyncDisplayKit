@@ -17,70 +17,80 @@
   MKMapSnapshotter *_snapshotter;
   MKMapSnapshotOptions *_options;
   NSArray *_annotations;
-  ASDisplayNode *_mapNode;
   CLLocationCoordinate2D _centerCoordinateOfMap;
 }
 @end
 
 @implementation ASMapNode
 
-@synthesize liveMap = _liveMap;
 @synthesize needsMapReloadOnBoundsChange = _needsMapReloadOnBoundsChange;
 @synthesize mapDelegate = _mapDelegate;
+@synthesize region = _region;
 
-- (instancetype)initWithCoordinate:(CLLocationCoordinate2D)coordinate
+#pragma mark - Lifecycle
+- (instancetype)init
 {
   if (!(self = [super init])) {
     return nil;
   }
   self.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
   self.clipsToBounds = YES;
-
+  
   _needsMapReloadOnBoundsChange = YES;
-  _liveMap = NO;
+  
   _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
-
+  _region = MKCoordinateRegionMake(CLLocationCoordinate2DMake(43.432858, 13.183671), MKCoordinateSpanMake(0.2, 0.2));
+  
   _options = [[MKMapSnapshotOptions alloc] init];
-  _options.region = MKCoordinateRegionMakeWithDistance(coordinate, 1000, 1000);;
+  _options.region = _region;
   
   return self;
 }
 
-- (void)setAnnotations:(NSArray *)annotations
+- (void)didLoad
 {
-  ASDN::MutexLocker l(_propertyLock);
-  _annotations = [annotations copy];
-  if (annotations.count != _annotations.count) {
-    // Redraw
-    [self setNeedsDisplay];
+  [super didLoad];
+  if ([self wasLiveMapPreviously]) {
+    self.userInteractionEnabled = YES;
+    [self addLiveMap];
   }
 }
 
-- (void)setUpSnapshotter
+- (void)fetchData
 {
-  if (!_snapshotter) {
-    ASDisplayNodeAssert(!CGSizeEqualToSize(CGSizeZero, self.calculatedSize), @"self.calculatedSize can not be zero. Make sure that you are setting a preferredFrameSize or wrapping ASMapNode in a ASRatioLayoutSpec or similar.");
-      _options.size = self.calculatedSize;
-      _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:_options];
+  [super fetchData];
+  if ([self wasLiveMapPreviously]) {
+    [self addLiveMap];
+  } else {
+    [self setUpSnapshotter];
+    [self takeSnapshot];
   }
 }
+
+- (void)clearFetchedData
+{
+  [super clearFetchedData];
+  if (self.isLiveMap) {
+    [self removeLiveMap];
+  }
+}
+
+#pragma mark - Settings
 
 - (BOOL)isLiveMap
 {
-  ASDN::MutexLocker l(_propertyLock);
-  return _liveMap;
+  return (_mapView != nil);
 }
 
 - (void)setLiveMap:(BOOL)liveMap
 {
-  ASDN::MutexLocker l(_propertyLock);
-  if (liveMap == _liveMap) {
-    return;
-  }
-  _liveMap = liveMap;
   liveMap ? [self addLiveMap] : [self removeLiveMap];
 }
 
+- (BOOL)wasLiveMapPreviously
+{
+  return CLLocationCoordinate2DIsValid(_centerCoordinateOfMap);
+}
 
 - (BOOL)needsMapReloadOnBoundsChange
 {
@@ -94,23 +104,26 @@
   _needsMapReloadOnBoundsChange = needsMapReloadOnBoundsChange;
 }
 
-- (void)fetchData
+- (MKCoordinateRegion)region
 {
-  [super fetchData];
-  if (_liveMap && !_mapNode) {
-    [self addLiveMap];
-  }
-  else {
-    [self setUpSnapshotter];
+  ASDN::MutexLocker l(_propertyLock);
+  return _region;
+}
+
+- (void)setRegion:(MKCoordinateRegion)region
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _region = region;
+  if (self.isLiveMap) {
+    [_mapView setRegion:_region animated:YES];
+  } else {
+    _options.region = _region;
+    [self resetSnapshotter];
     [self takeSnapshot];
   }
 }
 
-- (void)clearFetchedData
-{
-  [super clearFetchedData];
-  [self removeLiveMap];
-}
+#pragma mark - Snapshotter
 
 - (void)takeSnapshot
 {
@@ -150,42 +163,60 @@
   }
 }
 
-- (void)resetSnapshotter
+- (void)setUpSnapshotter
 {
-  if (!_snapshotter.isLoading) {
+  if (!_snapshotter) {
+    ASDisplayNodeAssert(!CGSizeEqualToSize(CGSizeZero, self.calculatedSize), @"self.calculatedSize can not be zero. Make sure that you are setting a preferredFrameSize or wrapping ASMapNode in a ASRatioLayoutSpec or similar.");
     _options.size = self.calculatedSize;
     _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:_options];
   }
 }
 
-#pragma mark - Action
+- (void)resetSnapshotter
+{
+  if (!_snapshotter.isLoading) {
+    _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:_options];
+  }
+}
+
+#pragma mark - Actions
 - (void)addLiveMap
 {
-  if (self.isNodeLoaded && !_mapNode) {
-    _mapNode = [[ASDisplayNode alloc]initWithViewBlock:^UIView *{
-      _mapView = [[MKMapView alloc]initWithFrame:CGRectMake(0.0f, 0.0f, self.calculatedSize.width, self.calculatedSize.height)];
-      _mapView.delegate = _mapDelegate;
-      [_mapView setRegion:_options.region];
-      [_mapView addAnnotations:_annotations];
-      return _mapView;
-    }];
-    [self addSubnode:_mapNode];
+  ASDisplayNodeAssertMainThread();
+  if (!self.isLiveMap) {
+    __weak ASMapNode *weakSelf = self;
+    _mapView = [[MKMapView alloc] initWithFrame:CGRectZero];
+    _mapView.delegate = weakSelf.mapDelegate;
+    [_mapView setRegion:_options.region];
+    [_mapView addAnnotations:_annotations];
+    [weakSelf setNeedsLayout];
+    [weakSelf.view addSubview:_mapView];
     
     if (CLLocationCoordinate2DIsValid(_centerCoordinateOfMap)) {
       [_mapView setCenterCoordinate:_centerCoordinateOfMap];
+    } else {
+      _centerCoordinateOfMap = _options.region.center;
     }
   }
 }
 
 - (void)removeLiveMap
 {
-  if (_mapNode) {
-    _centerCoordinateOfMap = _mapView.centerCoordinate;
-    [_mapNode removeFromSupernode];
-    _mapView = nil;
-    _mapNode = nil;
+  _centerCoordinateOfMap = _mapView.centerCoordinate;
+  [_mapView removeFromSuperview];
+  _mapView = nil;
+}
+
+- (void)setAnnotations:(NSArray *)annotations
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _annotations = [annotations copy];
+  if (self.isLiveMap) {
+    [_mapView removeAnnotations:_mapView.annotations];
+    [_mapView addAnnotations:annotations];
+  } else {
+    [self takeSnapshot];
   }
-  self.image = nil;
 }
 
 #pragma mark - Layout
@@ -193,18 +224,15 @@
 - (void)layout
 {
   [super layout];
-  if (_mapView) {
+  if (self.isLiveMap) {
     _mapView.frame = CGRectMake(0.0f, 0.0f, self.calculatedSize.width, self.calculatedSize.height);
-  }
-  else {
+  } else {
     // If our bounds.size is different from our current snapshot size, then let's request a new image from MKMapSnapshotter.
-    if (!CGSizeEqualToSize(_options.size, self.bounds.size)) {
-      if (_needsMapReloadOnBoundsChange && self.image) {
-        [self resetSnapshotter];
-        [self takeSnapshot];
-      }
+    if (!CGSizeEqualToSize(_options.size, self.bounds.size) && _needsMapReloadOnBoundsChange) {
+      _options.size = self.bounds.size;
+      [self resetSnapshotter];
+      [self takeSnapshot];
     }
   }
 }
-
 @end

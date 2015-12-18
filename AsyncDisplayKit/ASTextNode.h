@@ -194,6 +194,9 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 
 /**
  @abstract Responds to actions from links in the text node.
+ @discussion The delegate must be set before the node is loaded, and implement
+             textNode:longPressedLinkAttribute:value:atPoint:textRange: in order for
+             the long press gesture recognizer to be installed.
  */
 @property (nonatomic, weak) id<ASTextNodeDelegate> delegate;
 
@@ -233,6 +236,8 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @param value The value of the tapped attribute.
  @param point The point within textNode, in textNode's coordinate system, that was tapped.
  @param textRange The range of highlighted text.
+ @discussion In addition to implementing this method, the delegate must be set on the text
+             node before it is loaded (the recognizer is created in -didLoad)
  */
 - (void)textNode:(ASTextNode *)textNode longPressedLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point textRange:(NSRange)textRange;
 
