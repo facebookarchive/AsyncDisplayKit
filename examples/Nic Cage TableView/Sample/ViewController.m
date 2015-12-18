@@ -18,9 +18,9 @@
 #import "NicCageNode.h"
 
 
-static const NSInteger kLitterSize = 20;            // intial number of kitten cells in ASTableView
-static const NSInteger kLitterBatchSize = 10;       // number of kitten cells to add to ASTableView
-static const NSInteger kMaxLitterSize = 100;        // max number of kitten cells allowed in ASTableView
+static const NSInteger kCageSize = 20;            // intial number of Cage cells in ASTableView
+static const NSInteger kCageBatchSize = 10;       // number of Cage cells to add to ASTableView
+static const NSInteger kMaxCageSize = 100;        // max number of Cage cells allowed in ASTableView
 
 @interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
 {
@@ -55,11 +55,11 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
   _tableView.asyncDelegate = self;
 
   // populate our "data source" with some random kittens
-  _kittenDataSource = [self createLitterWithSize:kLitterSize];
+  _kittenDataSource = [self createLitterWithSize:kCageSize];
 
   _blurbNodeIndexPath = [NSIndexPath indexPathForItem:0 inSection:0];
   
-  self.title = @"Kittens";
+  self.title = @"Nic Cage";
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit
                                                                                          target:self
                                                                                          action:@selector(toggleEditingMode)];
@@ -69,18 +69,16 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 
 - (NSMutableArray *)createLitterWithSize:(NSInteger)litterSize
 {
-  NSMutableArray *kittens = [NSMutableArray arrayWithCapacity:litterSize];
+  NSMutableArray *cages = [NSMutableArray arrayWithCapacity:litterSize];
   for (NSInteger i = 0; i < litterSize; i++) {
       
-    // placekitten.com will return the same kitten picture if the same pixel height & width are requested,
-    // so generate kittens with different width & height values.
     u_int32_t deltaX = arc4random_uniform(10) - 5;
     u_int32_t deltaY = arc4random_uniform(10) - 5;
     CGSize size = CGSizeMake(350 + 2 * deltaX, 350 + 4 * deltaY);
       
-    [kittens addObject:[NSValue valueWithCGSize:size]];
+    [cages addObject:[NSValue valueWithCGSize:size]];
   }
-  return kittens;
+  return cages;
 }
 
 - (void)setKittenDataSource:(NSMutableArray *)kittenDataSource {
@@ -160,7 +158,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 
 - (BOOL)shouldBatchFetchForTableView:(UITableView *)tableView
 {
-  return _kittenDataSource.count < kMaxLitterSize;
+  return _kittenDataSource.count < kMaxCageSize;
 }
 
 - (void)tableView:(UITableView *)tableView willBeginBatchFetchWithContext:(ASBatchContext *)context
@@ -170,7 +168,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
     dispatch_async(dispatch_get_main_queue(), ^{
         
       // populate a new array of random-sized kittens
-      NSArray *moarKittens = [self createLitterWithSize:kLitterBatchSize];
+      NSArray *moarKittens = [self createLitterWithSize:kCageBatchSize];
 
       NSMutableArray *indexPaths = [[NSMutableArray alloc] init];
         

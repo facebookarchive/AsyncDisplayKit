@@ -1,13 +1,6 @@
 
 
 #import "ASVideoNode.h"
-#import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
-
-@interface ASDisplayNode ()
-- (void)setInterfaceState:(ASInterfaceState)newState;
-@end
 
 @interface ASVideoNode () {
   ASDN::RecursiveMutex _lock;
@@ -24,13 +17,16 @@
 
 @end
 
+@interface ASDisplayNode ()
+- (void)setInterfaceState:(ASInterfaceState)newState;
+@end
+
 @implementation ASVideoNode
 
 - (instancetype)init {
   if (!(self = [super init])) { return nil; }
   
   _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{ return [[AVPlayerLayer alloc] init]; }];
-  
   [self addSubnode:_playerNode];
   
   self.gravity = ASVideoGravityResizeAspect;
@@ -114,7 +110,7 @@
 - (void)fetchData
 {
   [super fetchData];
-  
+
   @try {
     [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
   }
@@ -124,17 +120,45 @@
 
   {
     ASDN::MutexLocker l(_lock);
-
     _currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
     [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
 
-    [((AVPlayerLayer *)_playerNode.layer).player replaceCurrentItemWithPlayerItem:_currentItem];
+    if (((AVPlayerLayer *)_playerNode.layer).player) {
+      [((AVPlayerLayer *)_playerNode.layer).player replaceCurrentItemWithPlayerItem:_currentItem];
+    } else {
+      ((AVPlayerLayer *)_playerNode.layer).player = [[AVPlayer alloc] initWithPlayerItem:_currentItem];
+    }
+
   }
-  
   if (_shouldAutoPlay) {
     [self play];
   }
 }
+
+//- (void)fetchData
+//{
+//  [super fetchData];
+//  
+//  @try {
+//    [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
+//  }
+//  @catch (NSException * __unused exception) {
+//    NSLog(@"unnecessary removal in fetch data");
+//  }
+//  
+//  {
+//    ASDN::MutexLocker l(_lock);
+//    
+//    _currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
+//    [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
+//    
+//    [((AVPlayerLayer *)_playerNode.layer).player replaceCurrentItemWithPlayerItem:_currentItem];
+//  }
+//  
+//  if (_shouldAutoPlay) {
+//    [self play];
+//  }
+//}
 
 - (void)clearFetchedData
 {
@@ -150,7 +174,7 @@
 - (void)setPlayButton:(ASButtonNode *)playButton
 {
   ASDN::MutexLocker l(_lock);
-
+  
   _playButton = playButton;
   
   [self addSubnode:playButton];
@@ -161,7 +185,7 @@
 - (ASButtonNode *)playButton
 {
   ASDN::MutexLocker l(_lock);
-
+  
   return _playButton;
 }
 
@@ -188,7 +212,7 @@
 
 - (void)setGravity:(ASVideoGravity)gravity {
   ASDN::MutexLocker l(_lock);
-
+  
   switch (gravity) {
     case ASVideoGravityResize:
       ((AVPlayerLayer *)_playerNode.layer).videoGravity = AVLayerVideoGravityResize;
@@ -208,7 +232,7 @@
 - (ASVideoGravity)gravity;
 {
   ASDN::MutexLocker l(_lock);
-
+  
   if ([((AVPlayerLayer *)_playerNode.layer).contentsGravity isEqualToString:AVLayerVideoGravityResize]) {
     return ASVideoGravityResize;
   }
@@ -222,7 +246,7 @@
 - (void)play;
 {
   ASDN::MutexLocker l(_lock);
-
+  
   [[((AVPlayerLayer *)_playerNode.layer) player] play];
   _shouldBePlaying = YES;
   _playButton.alpha = 0.0;
@@ -231,7 +255,7 @@
       UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] initWithFrame:_playButton.frame];
       spinnnerView.color = [UIColor whiteColor];
       [spinnnerView startAnimating];
-
+      
       return spinnnerView;
     }];
     
@@ -246,8 +270,8 @@
 
 - (void)pause;
 {
-//  ASDN::MutexLocker l(_lock);
-
+  ASDN::MutexLocker l(_lock);
+  
   [[((AVPlayerLayer *)_playerNode.layer) player] pause];
   _shouldBePlaying = NO;
   _playButton.alpha = 1.0;
@@ -265,3 +289,4 @@
 }
 
 @end
+
