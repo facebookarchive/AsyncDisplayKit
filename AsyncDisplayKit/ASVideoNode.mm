@@ -1,17 +1,25 @@
 
 
 #import "ASVideoNode.h"
+#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
+
+@interface ASDisplayNode ()
+- (void)setInterfaceState:(ASInterfaceState)newState;
+@end
 
 @interface ASVideoNode () {
   ASDN::RecursiveMutex _lock;
   
   __weak id<ASVideoNodeDatasource> _datasource;
   
-  AVPlayer *_player;
   BOOL _shouldBePlaying;
   AVAsset *_asset;
+  AVPlayerItem *_currentItem;
   ASButtonNode *_playButton;
   ASDisplayNode *_playerNode;
+  ASDisplayNode *_spinner;
 }
 
 @end
@@ -22,16 +30,79 @@
   if (!(self = [super init])) { return nil; }
   
   _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{ return [[AVPlayerLayer alloc] init]; }];
+  
   [self addSubnode:_playerNode];
   
   self.gravity = ASVideoGravityResizeAspect;
   
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(restartVideo:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+  
   return self;
+}
+
+- (void)setInterfaceState:(ASInterfaceState)newState
+{
+  [super setInterfaceState:newState];
+  
+  if (!(newState & ASInterfaceStateVisible)) {
+    [self pause];
+    [_spinner removeFromSupernode];
+  } else {
+    if (_shouldBePlaying) {
+      [self play];
+    }
+    if (_spinner) {
+      [self addSubnode:_spinner];
+    }
+  }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+  if ([[change objectForKey:@"new"] integerValue] == AVPlayerItemStatusReadyToPlay) {
+    if ([self.subnodes containsObject:_spinner]) {
+      [_spinner removeFromSupernode];
+      _spinner = nil;
+    }
+  }
+  
+  if ([[change objectForKey:@"new"] integerValue] == AVPlayerItemStatusFailed) {
+    
+  }
+}
+
+- (void)restartVideo:(NSNotification *)notification
+{
+  if ( [[[notification object] asset] isEqual:_asset]) {
+    [[((AVPlayerLayer *)_playerNode.layer) player] seekToTime:CMTimeMakeWithSeconds(0, 1)];
+    
+    if (_autorepeat) {
+      [self play];
+    } else {
+      [self pause];
+    }
+  }
 }
 
 - (void)layoutDidFinish
 {
   _playerNode.frame = self.bounds;
+}
+
+- (void)didLoad {
+  [super didLoad];
+  
+  UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped)];
+  [self.view addGestureRecognizer:tap];
+}
+
+- (void)tapped
+{
+  if (_shouldBePlaying) {
+    [self pause];
+  } else {
+    [self play];
+  }
 }
 
 - (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
@@ -44,13 +115,24 @@
 {
   [super fetchData];
   
+  @try {
+    [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
+  }
+  @catch (NSException * __unused exception) {
+    NSLog(@"unnecessary removal in fetch data");
+  }
+
   {
     ASDN::MutexLocker l(_lock);
-    AVPlayerItem *item = [[AVPlayerItem alloc] initWithAsset:_asset];
-    ((AVPlayerLayer *)_playerNode.layer).player = [[AVPlayer alloc] initWithPlayerItem:item];
-    if (_shouldBePlaying) {
-        [[((AVPlayerLayer *)_playerNode.layer) player] play];
-    }
+
+    _currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
+    [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
+
+    [((AVPlayerLayer *)_playerNode.layer).player replaceCurrentItemWithPlayerItem:_currentItem];
+  }
+  
+  if (_shouldAutoPlay) {
+    [self play];
   }
 }
 
@@ -72,14 +154,8 @@
   _playButton = playButton;
   
   [self addSubnode:playButton];
-  [self.view bringSubviewToFront:playButton.view];
   
-  [_playButton addTarget:self action:@selector(playButtonWasTouchedUpInside) forControlEvents:ASControlNodeEventTouchUpInside];
-}
-
-- (void)playButtonWasTouchedUpInside
-{
-  [self play];
+  [_playButton addTarget:self action:@selector(play) forControlEvents:ASControlNodeEventTouchUpInside];
 }
 
 - (ASButtonNode *)playButton
@@ -106,6 +182,7 @@
 
 - (AVAsset *)asset
 {
+  ASDN::MutexLocker l(_lock);
   return _asset;
 }
 
@@ -148,14 +225,43 @@
 
   [[((AVPlayerLayer *)_playerNode.layer) player] play];
   _shouldBePlaying = YES;
+  _playButton.alpha = 0.0;
+  if ([self ready] && ![self.subnodes containsObject:_spinner]) {
+    _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
+      UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] initWithFrame:_playButton.frame];
+      spinnnerView.color = [UIColor whiteColor];
+      [spinnnerView startAnimating];
+
+      return spinnnerView;
+    }];
+    
+    [self addSubnode:_spinner];
+  }
+}
+
+- (BOOL)ready;
+{
+  return [((AVPlayerLayer *)_playerNode.layer) player].currentItem.status != AVPlayerItemStatusReadyToPlay;
 }
 
 - (void)pause;
 {
-  ASDN::MutexLocker l(_lock);
+//  ASDN::MutexLocker l(_lock);
 
   [[((AVPlayerLayer *)_playerNode.layer) player] pause];
   _shouldBePlaying = NO;
+  _playButton.alpha = 1.0;
+}
+
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  @try {
+    [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
+  }
+  @catch (NSException * __unused exception) {
+    NSLog(@"unnecessary removal in dealloc");
+  }
 }
 
 @end

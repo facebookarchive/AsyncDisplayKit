@@ -7,13 +7,9 @@ typedef NS_ENUM(NSUInteger, ASVideoGravity) {
   ASVideoGravityResize
 };
 
-// set up boolean to repeat video
-// set up delegate methods to provide play button
-// tapping should play and pause
-
-@interface ASVideoNode : ASDisplayNode
+@interface ASVideoNode : ASDisplayNode<_ASDisplayLayerDelegate>
 @property (atomic, strong, readwrite) AVAsset *asset;
-@property (nonatomic, assign, readwrite) BOOL shouldRepeat;
+@property (nonatomic, assign, readwrite) BOOL shouldAutoPlay;
 @property (atomic) ASVideoGravity gravity;
 @property (atomic) BOOL autorepeat;
 @property (atomic) ASButtonNode *playButton;

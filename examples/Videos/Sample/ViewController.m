@@ -21,55 +21,79 @@
 {
   [super viewWillAppear:animated];
 
-  _videoNode = [[ASVideoNode alloc] init];
+  ASVideoNode *guitarVideo = [self guitarVideo];
+  [self.view addSubnode:guitarVideo];
+  
+  ASVideoNode *nicCageVideo = [self nicCageVideo];
+  [self.view addSubnode:nicCageVideo];
+  
+  ASVideoNode *simonVideo = [self simonVideo];
+  [self.view addSubnode:simonVideo];
+}
 
-  _videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-3045b261-7e93-4492-b7e5-5d6358376c9f-editedLiveAndDie.mov"]];
+- (ASVideoNode *)guitarVideo;
+{
+  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
   
-  _videoNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height/3);
+  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-3045b261-7e93-4492-b7e5-5d6358376c9f-editedLiveAndDie.mov"]];
   
-  _videoNode.backgroundColor = [UIColor lightGrayColor];
+  videoNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
   
-//  _videoNode.autorepeat = YES; //need to implement
-//  _videoNode.autoPlay = YES; //need to implement
+  videoNode.gravity = ASVideoGravityResizeAspectFill;
   
+  videoNode.backgroundColor = [UIColor lightGrayColor];
+  
+  videoNode.playButton = [self playButton];
+  return videoNode;
+}
+
+- (ASVideoNode *)nicCageVideo;
+{
+  ASVideoNode *nicCageVideo = [[ASVideoNode alloc] init];
+  
+  nicCageVideo.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
+  
+  nicCageVideo.frame = CGRectMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3, [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+  
+  nicCageVideo.gravity = ASVideoGravityResize;
+  
+  nicCageVideo.backgroundColor = [UIColor lightGrayColor];
+  nicCageVideo.autorepeat = YES;
+  nicCageVideo.playButton = [self playButton];
+
+  return nicCageVideo;
+}
+
+- (ASVideoNode *)simonVideo;
+{
+  ASVideoNode *simonVideo = [[ASVideoNode alloc] init];
+  
+  NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"simon" ofType:@"mp4"]];
+  simonVideo.asset = [AVAsset assetWithURL:url];
+  
+  simonVideo.frame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - ([UIScreen mainScreen].bounds.size.height/3), [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+  
+  simonVideo.gravity = ASVideoGravityResizeAspect;
+  
+  simonVideo.backgroundColor = [UIColor lightGrayColor];
+  simonVideo.autorepeat = YES;
+  simonVideo.playButton = [self playButton];
+  simonVideo.shouldAutoPlay = YES;
+  
+  return simonVideo;
+}
+
+- (ASButtonNode *)playButton;
+{
   ASButtonNode *playButton = [[ASButtonNode alloc] init];
-  playButton.bounds = CGRectMake(0, 0, 150, 150);
-  playButton.position = CGPointMake(_videoNode.bounds.size.width/2, _videoNode.bounds.size.height/2);
   
   UIImage *image = [UIImage imageNamed:@"playButton@2x.png"];
   [playButton setImage:image forState:ASButtonStateNormal];
-  [playButton measure:CGSizeMake(100, 100)];
-  
-  _videoNode.playButton = playButton;
-  
-  _videoNode.gravity = ASVideoGravityResizeAspectFill;
-  
-  [self.view addSubnode:_videoNode];
-  
-//  NSLog(@"%@", _videoNode.asset);
-  
-//  ASButtonNode *playButton2 = [[ASButtonNode alloc] init];
-////  playButton2.bounds = CGRectMake(0, 0, 50, 50);
-//  
-//  UIImage *image2 = [UIImage imageNamed:@"playButton@2x.png"];
-//  [playButton2 setImage:image2 forState:ASButtonStateNormal];
-//
-////  playButton2.contentMode = UIViewContentModeScaleAspectFit;
-//  playButton2.clipsToBounds = YES;
-//  playButton2.layer.borderColor = [UIColor orangeColor].CGColor;
-//  playButton2.layer.borderWidth = 1.0;
-//  
-//  [playButton2 measure:CGSizeMake(100, 100)];
-////  playButton2.preferredFrameSize = CGSizeMake(100, 100);
-//  playButton2.position = CGPointMake(150, 300);
-//  playButton2.bounds = (CGRect){{0, 0}, playButton2.calculatedSize};
-//  
-//  [self.view addSubview:playButton2.view];
-}
+  [playButton measure:CGSizeMake(50, 50)];
+  playButton.bounds = CGRectMake(0, 0, playButton.calculatedSize.width, playButton.calculatedSize.height);
+  playButton.position = CGPointMake([UIScreen mainScreen].bounds.size.width/4, ([UIScreen mainScreen].bounds.size.height/3)/2);
 
-- (void)viewDidAppear:(BOOL)animated
-{
-  
+  return playButton;
 }
 
 - (BOOL)prefersStatusBarHidden
