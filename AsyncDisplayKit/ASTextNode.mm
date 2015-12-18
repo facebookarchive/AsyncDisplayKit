@@ -306,6 +306,11 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   _attributedString = ASCleanseAttributedStringOfCoreTextAttributes(attributedString);
 
+  // Sync the truncation string with attributes from the updated _attributedString
+  // Without this, the size calculation of the text with truncation applied will
+  // not take into account the attributes of attributedString in the last line
+  [self _updateComposedTruncationString];
+  
   // We need an entirely new renderer
   [self _invalidateRenderer];
 
@@ -1025,9 +1030,14 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 #pragma mark - Truncation Message
 
-- (void)_invalidateTruncationString
+- (void)_updateComposedTruncationString
 {
   _composedTruncationString = [self _prepareTruncationStringForDrawing:[self _composedTruncationString]];
+}
+
+- (void)_invalidateTruncationString
+{
+  [self _updateComposedTruncationString];
   [self _invalidateRenderer];
   ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
     [self setNeedsDisplay];
