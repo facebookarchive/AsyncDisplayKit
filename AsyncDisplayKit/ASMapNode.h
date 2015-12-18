@@ -11,7 +11,10 @@
 
 @interface ASMapNode : ASImageNode
 
-- (instancetype)initWithCoordinate:(CLLocationCoordinate2D)coordinate NS_DESIGNATED_INITIALIZER;
+/**
+ The current region of ASMapNode. This can be set at any time and ASMapNode will animate the change.
+ */
+@property (nonatomic, assign) MKCoordinateRegion region;
 
 /**
  This is the MKMapView that is the live map part of ASMapNode. This will be nil if .liveMap = NO. Note, MKMapView is *not* thread-safe.
