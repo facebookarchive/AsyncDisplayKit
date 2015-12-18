@@ -23,6 +23,7 @@
 
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
+#import "ASLayout.h"
 
 static const NSTimeInterval ASTextNodeHighlightFadeOutDuration = 0.15;
 static const NSTimeInterval ASTextNodeHighlightFadeInDuration = 0.1;
@@ -290,7 +291,29 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (BOOL)_needInvalidateRenderer:(CGSize)newSize
 {
-  return !CGSizeEqualToSize(newSize, _constrainedSize);
+  if (!_renderer) {
+    return YES;
+  }
+  
+  // If the size is not the same as the constraint we provided to the renderer, start out assuming we need
+  // a new one.  However, there are common cases where the constrained size doesn't need to be the same as calculated.
+  CGSize oldSize = _renderer.constrainedSize;
+  
+  if (CGSizeEqualToSize(newSize, oldSize)) {
+    return NO;
+  } else {
+    // It is very common to have a constrainedSize with a concrete, specific width but +Inf height.
+    // In this case, as long as the text node has bounds as large as the full calculatedLayout suggests,
+    // it means that the text has all the room it needs (as it was not vertically bounded).  So, we will not
+    // experience truncation and don't need to recreate the renderer with the size it already calculated,
+    // as this would essentially serve to set its constrainedSize to be its calculatedSize (unnecessary).
+    ASLayout *layout = self.calculatedLayout;
+    if (layout != nil && CGSizeEqualToSize(newSize, layout.size)) {
+      return NO;
+    } else {
+      return YES;
+    }
+  }
 }
 
 #pragma mark - Modifying User Text
