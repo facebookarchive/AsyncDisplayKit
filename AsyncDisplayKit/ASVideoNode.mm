@@ -26,7 +26,11 @@
 - (instancetype)init {
   if (!(self = [super init])) { return nil; }
   
-  _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{ return [[AVPlayerLayer alloc] init]; }];
+  _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
+    AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
+    playerLayer.player = [[AVPlayer alloc] init];
+    return playerLayer;
+  }];
   [self addSubnode:_playerNode];
   
   self.gravity = ASVideoGravityResizeAspect;
