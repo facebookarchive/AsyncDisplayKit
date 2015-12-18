@@ -139,31 +139,6 @@
   }
 }
 
-//- (void)fetchData
-//{
-//  [super fetchData];
-//  
-//  @try {
-//    [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
-//  }
-//  @catch (NSException * __unused exception) {
-//    NSLog(@"unnecessary removal in fetch data");
-//  }
-//  
-//  {
-//    ASDN::MutexLocker l(_lock);
-//    
-//    _currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
-//    [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
-//    
-//    [((AVPlayerLayer *)_playerNode.layer).player replaceCurrentItemWithPlayerItem:_currentItem];
-//  }
-//  
-//  if (_shouldAutoPlay) {
-//    [self play];
-//  }
-//}
-
 - (void)clearFetchedData
 {
   [super clearFetchedData];
@@ -279,6 +254,11 @@
   [[((AVPlayerLayer *)_playerNode.layer) player] pause];
   _shouldBePlaying = NO;
   _playButton.alpha = 1.0;
+}
+
+- (AVPlayerItem *)currentItem
+{
+  return _currentItem;
 }
 
 - (void)dealloc

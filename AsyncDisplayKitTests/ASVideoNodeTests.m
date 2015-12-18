@@ -11,35 +11,39 @@
 #import "ASVideoNode.h"
 
 @interface ASVideoNodeTests : XCTestCase
+@end
 
+@interface ASVideoNode ()
+@property (atomic, readonly) AVPlayerItem *currentItem;
+@property (atomic) ASInterfaceState interfaceState;
 @end
 
 @implementation ASVideoNodeTests
 
-- (void)testVideoNodeReplacesAVPlayerWhenNewURLIsSet {
+- (void)testVideoNodeReplacesAVPlayerItemWhenNewURLIsSet {
   ASVideoNode *videoNode = [[ASVideoNode alloc] init];
+  videoNode.interfaceState = ASInterfaceStateFetchData;
   videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
-  [videoNode fetchData];
-  AVPlayer *player = ((AVPlayerLayer *)videoNode.layer).player;
+  
+  AVPlayerItem *item = [videoNode currentItem];
   
   videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"secondURL"]];
-  [videoNode fetchData];
-  AVPlayer *secondPlayer = ((AVPlayerLayer *)videoNode.layer).player;
- 
-  XCTAssertNotEqualObjects(player, secondPlayer);
+  AVPlayerItem *secondItem = [videoNode currentItem];
+  
+  XCTAssertNotEqualObjects(item, secondItem);
 }
 
-- (void)testVideoNodeDoesNotMakeNewPlayerWhenURLIsTheSame {
+- (void)testVideoNodeDoesNotReplaceAVPlayerItemWhenSameURLIsSet {
   ASVideoNode *videoNode = [[ASVideoNode alloc] init];
-  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
-  [videoNode fetchData];
-  
-  AVPlayer *firstPlayer = ((AVPlayerLayer *)videoNode.layer).player;
-  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  videoNode.interfaceState = ASInterfaceStateFetchData;
 
-  AVPlayer *secondPlayer = ((AVPlayerLayer *)videoNode.layer).player;
+  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  AVPlayerItem *item = [videoNode currentItem];
   
-  XCTAssertEqualObjects(firstPlayer, secondPlayer);
+  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  AVPlayerItem *secondItem = [videoNode currentItem];
+  
+  XCTAssertEqualObjects(item, secondItem);
 }
 
 @end
