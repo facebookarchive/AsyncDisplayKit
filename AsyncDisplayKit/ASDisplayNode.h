@@ -685,7 +685,6 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  * @param node The node to be added.
  */
 - (void)addSubnode:(ASDisplayNode *)node;
-- (NSString *)name;
 @end
 
 /** CALayer(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to a CALayer. */
@@ -696,7 +695,6 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  * @param node The node to be added.
  */
 - (void)addSubnode:(ASDisplayNode *)node;
-- (NSString *)name;
 @end
 
 @interface ASDisplayNode (Deprecated)
