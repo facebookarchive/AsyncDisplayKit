@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASCollectionView.h>
 
 /**
  * ASCollectionNode is a node based class that wraps an ASCollectionView. It can be used
