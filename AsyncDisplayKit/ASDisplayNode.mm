@@ -2279,11 +2279,6 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   }
 }
 
-- (NSString *)name
-{
-  return self.asyncdisplaykit_node.name;
-}
-
 @end
 
 @implementation CALayer (AsyncDisplayKit)
@@ -2291,11 +2286,6 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 - (void)addSubnode:(ASDisplayNode *)node
 {
   [self addSublayer:node.layer];
-}
-
-- (NSString *)name
-{
-  return self.asyncdisplaykit_node.name;
 }
 
 @end
