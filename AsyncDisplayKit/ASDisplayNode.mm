@@ -1849,8 +1849,28 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   CGRect subnodeFrame = CGRectZero;
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
     ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.");
-    subnodeFrame.origin = subnodeLayout.position;
-    subnodeFrame.size = subnodeLayout.size;
+    CGPoint adjustedOrigin = subnodeLayout.position;
+    if (isfinite(adjustedOrigin.x) == NO) {
+      ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
+      adjustedOrigin.x = 0;
+    }
+    if (isfinite(adjustedOrigin.y) == NO) {
+      ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
+      adjustedOrigin.y = 0;
+    }
+    subnodeFrame.origin = adjustedOrigin;
+    
+    CGSize adjustedSize = subnodeLayout.size;
+    if (isfinite(adjustedSize.width) == NO) {
+      ASDisplayNodeAssert(0, @"subnodeLayout has an invalid size");
+      adjustedSize.width = 0;
+    }
+    if (isfinite(adjustedSize.height) == NO) {
+      ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
+      adjustedSize.height = 0;
+    }
+    subnodeFrame.size = adjustedSize;
+    
     subnode = ((ASDisplayNode *)subnodeLayout.layoutableObject);
     [subnode setFrame:subnodeFrame];
   }
@@ -2293,11 +2313,6 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   }
 }
 
-- (NSString *)name
-{
-  return self.asyncdisplaykit_node.name;
-}
-
 @end
 
 @implementation CALayer (AsyncDisplayKit)
@@ -2305,11 +2320,6 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 - (void)addSubnode:(ASDisplayNode *)node
 {
   [self addSublayer:node.layer];
-}
-
-- (NSString *)name
-{
-  return self.asyncdisplaykit_node.name;
 }
 
 @end

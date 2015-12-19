@@ -36,11 +36,11 @@ static CALayer *layerWithName(NSString *name) {
 }
 
 static NSString *orderStringFromSublayers(CALayer *l) {
-  return [[l.sublayers valueForKey:@"name"] componentsJoinedByString:@","];
+  return [[[l.sublayers valueForKey:@"asyncdisplaykit_node"] valueForKey:@"name"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubviews(UIView *v) {
-  return [[v.subviews valueForKey:@"name"] componentsJoinedByString:@","];
+  return [[[v.subviews valueForKey:@"asyncdisplaykit_node"] valueForKey:@"name"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubnodes(ASDisplayNode *n) {

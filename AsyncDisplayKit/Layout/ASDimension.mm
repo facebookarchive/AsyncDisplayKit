@@ -57,7 +57,7 @@ CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat parent
     case ASRelativeDimensionTypePoints:
       return dimension.value;
     case ASRelativeDimensionTypePercent:
-      return round(dimension.value * parent);
+      return dimension.value * parent;
   }
 }
 
