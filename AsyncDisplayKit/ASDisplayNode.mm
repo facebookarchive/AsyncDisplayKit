@@ -950,6 +950,10 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
     _subnodes = [[NSMutableArray alloc] init];
 
   [_subnodes addObject:subnode];
+  
+  // This call will apply our .hierarchyState to the new subnode.
+  // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.
+  [subnode __setSupernode:self];
 
   if (self.nodeLoaded) {
     // If this node has a view or layer, force the subnode to also create its view or layer and add it to the hierarchy here.
@@ -969,8 +973,6 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   if (isMovingEquivalentParents) {
     [subnode __decrementVisibilityNotificationsDisabled];
   }
-
-  [subnode __setSupernode:self];
 }
 
 /*
@@ -1267,7 +1269,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 }
 
 // This uses the layer hieararchy for safety. Who knows what people might do and it would be bad to have visibilty out of sync
-- (BOOL)__hasParentWithVisibilityNotificationsDisabled
+- (BOOL)__selfOrParentHasVisibilityNotificationsDisabled
 {
   CALayer *layer = _layer;
   do {
@@ -1287,7 +1289,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"Should not cause recursive __enterHierarchy");
-  if (!self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
+  if (!self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
     self.inHierarchy = YES;
     _flags.isEnteringHierarchy = YES;
     if (self.shouldRasterizeDescendants) {
@@ -1309,7 +1311,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"Should not cause recursive __exitHierarchy");
-  if (self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __hasParentWithVisibilityNotificationsDisabled]) {
+  if (self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
     self.inHierarchy = NO;
 
     [self.asyncLayer cancelAsyncDisplay];
@@ -1805,6 +1807,19 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     }
     oldState = _hierarchyState;
     _hierarchyState = newState;
+  }
+  
+  // Entered or exited contents rendering state.
+  if ((newState & ASHierarchyStateRangeManaged) != (oldState & ASHierarchyStateRangeManaged)) {
+    if (newState & ASHierarchyStateRangeManaged) {
+      [self enterInterfaceState:self.supernode.interfaceState];
+    } else {
+      // The case of exiting a range-managed state should be fairly rare.  Adding or removing the node
+      // to a view hierarchy will cause its interfaceState to be either fully set or unset (all fields),
+      // but because we might be about to be added to a view hierarchy, exiting the interface state now
+      // would cause inefficient churn.  The tradeoff is that we may not clear contents / fetched data
+      // for nodes that are removed from a managed state and then retained but not used (bad idea anyway!)
+    }
   }
   
   if (newState != oldState) {
