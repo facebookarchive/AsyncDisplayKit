@@ -224,6 +224,12 @@ static BOOL _isInterceptedSelector(SEL sel)
   // If the initial size is 0, expect a size change very soon which is part of the initial configuration
   // and should not trigger a relayout.
   _ignoreNodesConstrainedWidthChange = (_nodesConstrainedWidth == 0);
+  
+  _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+  
+  _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+  super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
 
   [self registerClass:_ASTableViewCell.class forCellReuseIdentifier:kCellReuseIdentifier];
 }
@@ -292,15 +298,19 @@ static BOOL _isInterceptedSelector(SEL sel)
   // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to nil out
   // super.dataSource in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
+  super.dataSource = nil;
+
   if (asyncDataSource == nil) {
-    super.dataSource = nil;
+    
     _asyncDataSource = nil;
-    _proxyDataSource = nil;
+    _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+    
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
-    super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
   }
+  
+  super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
 }
 
 - (void)setAsyncDelegate:(id<ASTableViewDelegate>)asyncDelegate
@@ -310,17 +320,21 @@ static BOOL _isInterceptedSelector(SEL sel)
   // will return as nil (ARC magic) even though the _proxyDelegate still exists. It's really important to nil out
   // super.delegate in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
+  super.delegate = nil;
+  
+
   if (asyncDelegate == nil) {
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
     // in UIScrollViewAccessibility.
-    super.delegate = nil;
     _asyncDelegate = nil;
-    _proxyDelegate = nil; 
+    _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+    
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:asyncDelegate interceptor:self];
-    super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
   }
+  
+  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
 }
 
 - (void)reloadDataWithCompletion:(void (^)())completion
