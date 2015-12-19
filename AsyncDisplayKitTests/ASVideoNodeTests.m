@@ -36,11 +36,12 @@
 - (void)testVideoNodeDoesNotReplaceAVPlayerItemWhenSameURLIsSet {
   ASVideoNode *videoNode = [[ASVideoNode alloc] init];
   videoNode.interfaceState = ASInterfaceStateFetchData;
+  AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
 
-  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  videoNode.asset = asset;
   AVPlayerItem *item = [videoNode currentItem];
   
-  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  videoNode.asset = asset;
   AVPlayerItem *secondItem = [videoNode currentItem];
   
   XCTAssertEqualObjects(item, secondItem);
