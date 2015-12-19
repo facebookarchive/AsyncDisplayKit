@@ -247,10 +247,12 @@
     // -setNeedsDisplay to the CALayer will result in a synchronous display in the next frame.
 
     _messageToViewOrLayer(setNeedsDisplay);
+
+#if !USE_WORKING_WINDOW
     if (_layer && !self.isSynchronous) {
       [ASDisplayNode scheduleNodeForDisplay:self];
     }
-
+#endif
   }
 }
 

@@ -567,7 +567,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  //NSLog(@"About to measure lock for %@", self);
   ASDN::MutexLocker l(_propertyLock);
   return [self __measureWithSizeRange:constrainedSize];
 }
@@ -648,7 +647,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (BOOL)shouldRasterizeDescendants
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  //NSLog(@"About to descendants lock for %p, %@", self, [self class]);
   ASDN::MutexLocker l(_propertyLock);
   ASDisplayNodeAssert(!((_hierarchyState & ASHierarchyStateRasterized) && _flags.shouldRasterizeDescendants),
                       @"Subnode of a rasterized node should not have redundant shouldRasterizeDescendants enabled");
@@ -1518,8 +1516,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)__recursivelyTriggerDisplayAndBlock:(BOOL)shouldBlock
 {
   ASDisplayNodeAssertMainThread();
-//  ASDisplayNodeAssert(self.isNodeLoaded, @"Node must have layer or view loaded to use -recursivelyEnsureDisplay");
-//  ASDisplayNodeAssert(self.inHierarchy && (self.isLayerBacked || self.view.window != nil), @"Node must be in a hierarchy to use -recursivelyEnsureDisplay");
   
   CALayer *layer = self.layer;
   // -layoutIfNeeded is recursive, and even walks up to superlayers to check if they need layout,
@@ -2160,7 +2156,9 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   return _replaceAsyncSentinel != nil;
 }
 
-// FIXME: This method doesn't appear to be called, and should be removed.
+// FIXME: This method doesn't appear to be called, and could be removed.
+// However, it may be useful for an API similar to what Paper used to create a new node hierarchy,
+// trigger asynchronous measurement and display on it, and have it swap out and replace an old hierarchy.
 - (ASSentinel *)_asyncReplaceSentinel
 {
   ASDN::MutexLocker l(_propertyLock);

@@ -18,9 +18,6 @@
 #pragma mark -
 #pragma mark ASCellNode
 
-//#define LOG(...) NSLog(__VA_ARGS__)
-#define LOG(...)
-
 @implementation ASCellNode
 
 - (instancetype)init
@@ -65,29 +62,6 @@
       [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }
-}
-
-- (void)clearFetchedData
-{
-  [super clearFetchedData];
-  LOG(@"%p - clearFetchedData", self);
-}
-
-- (void)fetchData
-{
-  [super fetchData];
-  LOG(@"%p - fetchData", self);
-}
-
-- (void)clearContents
-{
-  [super clearContents];
-  LOG(@"%p - clearContents", self);
-}
-
-- (void)dealloc
-{
-  LOG(@"%p - dealloc", self);
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event

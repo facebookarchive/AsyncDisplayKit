@@ -12,8 +12,6 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
-#define USE_WORKING_WINDOW 1
-
 @interface ASRangeHandlerRender ()
 @property (nonatomic,readonly) UIWindow *workingWindow;
 @end
