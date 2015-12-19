@@ -62,6 +62,7 @@
                                                                 effectiveRange:NULL];
   NSParagraphStyle *paragraphStyle = [textStorage attributesAtIndex:[layoutManager characterIndexForGlyphAtIndex:lastVisibleGlyphIndex]
                                                      effectiveRange:NULL][NSParagraphStyleAttributeName];
+  
   // We assume LTR so long as the writing direction is not
   BOOL rtlWritingDirection = paragraphStyle ? paragraphStyle.baseWritingDirection == NSWritingDirectionRightToLeft : NO;
   // We only want to treat the trunction rect as left-aligned in the case that we are right-aligned and our writing

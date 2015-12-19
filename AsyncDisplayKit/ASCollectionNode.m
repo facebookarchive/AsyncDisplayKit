@@ -7,6 +7,7 @@
 //
 
 #import "ASCollectionNode.h"
+#import "ASDisplayNode+Subclasses.h"
 
 @implementation ASCollectionNode
 

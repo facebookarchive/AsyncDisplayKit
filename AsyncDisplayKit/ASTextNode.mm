@@ -23,6 +23,7 @@
 
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
+#import "ASLayout.h"
 
 static const NSTimeInterval ASTextNodeHighlightFadeOutDuration = 0.15;
 static const NSTimeInterval ASTextNodeHighlightFadeInDuration = 0.1;
@@ -211,8 +212,9 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 {
   [super didLoad];
 
-  // If we are view-backed, support gesture interaction.
-  if (!self.isLayerBacked) {
+  // If we are view-backed and the delegate cares, support the long-press callback.
+  SEL longPressCallback = @selector(textNode:longPressedLinkAttribute:value:atPoint:textRange:);
+  if (!self.isLayerBacked && [self.delegate respondsToSelector:longPressCallback]) {
     _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(_handleLongPress:)];
     _longPressGestureRecognizer.cancelsTouchesInView = self.longPressCancelsTouches;
     _longPressGestureRecognizer.delegate = self;
@@ -223,25 +225,13 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 - (void)setFrame:(CGRect)frame
 {
   [super setFrame:frame];
-  if (!CGSizeEqualToSize(frame.size, _constrainedSize)) {
-    // Our bounds have changed to a size that is not identical to our constraining size,
-    // so our previous layout information is invalid, and TextKit may draw at the
-    // incorrect origin.
-    _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
-    [self _invalidateRenderer];
-  }
+  [self _invalidateRendererIfNeeded:frame.size];
 }
 
 - (void)setBounds:(CGRect)bounds
 {
   [super setBounds:bounds];
-  if (!CGSizeEqualToSize(bounds.size, _constrainedSize)) {
-    // Our bounds have changed to a size that is not identical to our constraining size,
-    // so our previous layout information is invalid, and TextKit may draw at the
-    // incorrect origin.
-    _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
-    [self _invalidateRenderer];
-  }
+  [self _invalidateRendererIfNeeded:bounds.size];
 }
 
 #pragma mark - Renderer Management
@@ -283,6 +273,49 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   _renderer = nil;
 }
 
+- (void)_invalidateRendererIfNeeded
+{
+  [self _invalidateRendererIfNeeded:self.bounds.size];
+}
+
+- (void)_invalidateRendererIfNeeded:(CGSize)newSize
+{
+  if ([self _needInvalidateRenderer:newSize]) {
+    // Our bounds of frame have changed to a size that is not identical to our constraining size,
+    // so our previous layout information is invalid, and TextKit may draw at the
+    // incorrect origin.
+    _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
+    [self _invalidateRenderer];
+  }
+}
+
+- (BOOL)_needInvalidateRenderer:(CGSize)newSize
+{
+  if (!_renderer) {
+    return YES;
+  }
+  
+  // If the size is not the same as the constraint we provided to the renderer, start out assuming we need
+  // a new one.  However, there are common cases where the constrained size doesn't need to be the same as calculated.
+  CGSize oldSize = _renderer.constrainedSize;
+  
+  if (CGSizeEqualToSize(newSize, oldSize)) {
+    return NO;
+  } else {
+    // It is very common to have a constrainedSize with a concrete, specific width but +Inf height.
+    // In this case, as long as the text node has bounds as large as the full calculatedLayout suggests,
+    // it means that the text has all the room it needs (as it was not vertically bounded).  So, we will not
+    // experience truncation and don't need to recreate the renderer with the size it already calculated,
+    // as this would essentially serve to set its constrainedSize to be its calculatedSize (unnecessary).
+    ASLayout *layout = self.calculatedLayout;
+    if (layout != nil && CGSizeEqualToSize(newSize, layout.size)) {
+      return NO;
+    } else {
+      return YES;
+    }
+  }
+}
+
 #pragma mark - Modifying User Text
 
 - (void)setAttributedString:(NSAttributedString *)attributedString {
@@ -296,6 +329,11 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   _attributedString = ASCleanseAttributedStringOfCoreTextAttributes(attributedString);
 
+  // Sync the truncation string with attributes from the updated _attributedString
+  // Without this, the size calculation of the text with truncation applied will
+  // not take into account the attributes of attributedString in the last line
+  [self _updateComposedTruncationString];
+  
   // We need an entirely new renderer
   [self _invalidateRenderer];
 
@@ -377,6 +415,8 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
+  [self _invalidateRendererIfNeeded];
+
   // Offset the text origin by any shadow padding
   UIEdgeInsets shadowPadding = [self shadowPadding];
   CGPoint textOrigin = CGPointMake(self.bounds.origin.x - shadowPadding.left, self.bounds.origin.y - shadowPadding.top);
@@ -1013,9 +1053,14 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 #pragma mark - Truncation Message
 
-- (void)_invalidateTruncationString
+- (void)_updateComposedTruncationString
 {
   _composedTruncationString = [self _prepareTruncationStringForDrawing:[self _composedTruncationString]];
+}
+
+- (void)_invalidateTruncationString
+{
+  [self _updateComposedTruncationString];
   [self _invalidateRenderer];
   ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
     [self setNeedsDisplay];

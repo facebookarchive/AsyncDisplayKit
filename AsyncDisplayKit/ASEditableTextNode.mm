@@ -124,7 +124,6 @@
       textView.opaque = NO;
     }
     textView.textContainerInset = self.textContainerInset;
-    textView.clipsToBounds = NO; // We don't want selection handles cut off.
   };
 
   // Create and configure the placeholder text view.

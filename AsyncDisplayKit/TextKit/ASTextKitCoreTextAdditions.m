@@ -88,7 +88,7 @@ NSDictionary *NSAttributedStringAttributesForCoreTextAttributes(NSDictionary *co
       cleanAttributes[NSForegroundColorAttributeName] = [UIColor colorWithCGColor:(CGColorRef)coreTextValue];
     }
     // kCTParagraphStyleAttributeName -> NSParagraphStyleAttributeName
-    else if ([coreTextKey isEqualToString:(NSString *)kCTParagraphStyleAttributeName]) {
+    else if ([coreTextKey isEqualToString:(NSString *)kCTParagraphStyleAttributeName] && ![coreTextValue isKindOfClass:[NSParagraphStyle class]]) {
       cleanAttributes[NSParagraphStyleAttributeName] = [NSParagraphStyle paragraphStyleWithCTParagraphStyle:(CTParagraphStyleRef)coreTextValue];
     }
     // kCTStrokeWidthAttributeName -> NSStrokeWidthAttributeName
