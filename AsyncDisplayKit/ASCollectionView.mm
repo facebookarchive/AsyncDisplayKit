@@ -259,6 +259,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   // Sometimes the UIKit classes can call back to their delegate even during deallocation.
   // This bug might be iOS 7-specific.
+  _proxyDelegate = nil;
+  _proxyDataSource = nil;
   super.delegate  = nil;
   super.dataSource = nil;
 }

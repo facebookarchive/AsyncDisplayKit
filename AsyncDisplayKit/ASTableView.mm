@@ -272,6 +272,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   // Sometimes the UIKit classes can call back to their delegate even during deallocation.
   // This bug might be iOS 7-specific.
+  _proxyDelegate = nil;
+  _proxyDataSource = nil;
   super.delegate  = nil;
   super.dataSource = nil;
 }
@@ -301,10 +303,8 @@ static BOOL _isInterceptedSelector(SEL sel)
   super.dataSource = nil;
 
   if (asyncDataSource == nil) {
-    
     _asyncDataSource = nil;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
-    
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
@@ -322,13 +322,11 @@ static BOOL _isInterceptedSelector(SEL sel)
 
   super.delegate = nil;
   
-
   if (asyncDelegate == nil) {
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
     // in UIScrollViewAccessibility.
     _asyncDelegate = nil;
     _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
-    
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:asyncDelegate interceptor:self];
