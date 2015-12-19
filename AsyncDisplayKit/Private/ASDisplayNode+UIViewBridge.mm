@@ -221,6 +221,8 @@
 
 - (void)setNeedsDisplay
 {
+  _bridge_prologue;
+
   if (_hierarchyState & ASHierarchyStateRasterized) {
     ASPerformBlockOnMainThread(^{
       // The below operation must be performed on the main thread to ensure against an extremely rare deadlock, where a parent node
@@ -238,7 +240,19 @@
       [rasterizedContainerNode setNeedsDisplay];
     });
   } else {
-    [_layer setNeedsDisplay];
+    // If not rasterized (and therefore we certainly have a view or layer),
+    // Send the message to the view/layer first, as scheduleNodeForDisplay may call -displayIfNeeded.
+    // Wrapped / synchronous nodes created with initWithView/LayerBlock: do not need scheduleNodeForDisplay,
+    // as they don't need to display in the working range at all - since at all times onscreen, one
+    // -setNeedsDisplay to the CALayer will result in a synchronous display in the next frame.
+
+    _messageToViewOrLayer(setNeedsDisplay);
+
+#if !USE_WORKING_WINDOW
+    if (_layer && !self.isSynchronous) {
+      [ASDisplayNode scheduleNodeForDisplay:self];
+    }
+#endif
   }
 }
 
