@@ -1225,17 +1225,24 @@ static NSInteger incrementIfFound(NSInteger i) {
   if (!_supernode)
     return;
 
+  // Check to ensure that our view or layer is actually inside of our supernode; otherwise, don't remove it.
+  // Though _ASDisplayView decouples the supernode if it is inserted inside another view hierarchy, this is
+  // more difficult to guarantee with _ASDisplayLayer because CoreAnimation doesn't have a -didMoveToSuperlayer.
+  BOOL shouldRemoveFromSuperviewOrSuperlayer = NO;
+  
+  if (self.nodeLoaded && _supernode.nodeLoaded) {
+    if (_flags.layerBacked) {
+      shouldRemoveFromSuperviewOrSuperlayer = (_layer.superlayer == _supernode.layer);
+    } else {
+      shouldRemoveFromSuperviewOrSuperlayer = (_view.superview == _supernode.view);
+    }
+  }
+
   // Do this before removing the view from the hierarchy, as the node will clear its supernode pointer when its view is removed from the hierarchy.
   [_supernode _removeSubnode:self];
 
-  if (ASDisplayNodeThreadIsMain()) {
-    if (_flags.layerBacked) {
-      [_layer removeFromSuperlayer];
-    } else {
-      [_view removeFromSuperview];
-    }
-  } else {
-    dispatch_async(dispatch_get_main_queue(), ^{
+  if (shouldRemoveFromSuperviewOrSuperlayer) {
+    ASPerformBlockOnMainThread(^{
       if (_flags.layerBacked) {
         [_layer removeFromSuperlayer];
       } else {
@@ -1301,7 +1308,7 @@ static NSInteger incrementIfFound(NSInteger i) {
     _flags.isEnteringHierarchy = NO;
 
     CALayer *layer = self.layer;
-    if (!self.layer.contents) {
+    if (!layer.contents) {
       [layer setNeedsDisplay];
     }
   }
@@ -2317,12 +2324,18 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 @implementation UIView (AsyncDisplayKit)
 
-- (void)addSubnode:(ASDisplayNode *)node
+- (void)addSubnode:(ASDisplayNode *)subnode
 {
-  if (node.layerBacked) {
-    [self.layer addSublayer:node.layer];
+  if (subnode.layerBacked) {
+    // Call -addSubnode: so that we use the asyncdisplaykit_node path if possible.
+    [self.layer addSubnode:subnode];
   } else {
-    [self addSubview:node.view];
+    ASDisplayNode *selfNode = self.asyncdisplaykit_node;
+    if (selfNode) {
+      [selfNode addSubnode:subnode];
+    } else {
+      [self addSubview:subnode.view];
+    }
   }
 }
 
@@ -2330,9 +2343,14 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 @implementation CALayer (AsyncDisplayKit)
 
-- (void)addSubnode:(ASDisplayNode *)node
+- (void)addSubnode:(ASDisplayNode *)subnode
 {
-  [self addSublayer:node.layer];
+  ASDisplayNode *selfNode = self.asyncdisplaykit_node;
+  if (selfNode) {
+    [selfNode addSubnode:subnode];
+  } else {
+    [self addSublayer:subnode.layer];
+  }
 }
 
 @end

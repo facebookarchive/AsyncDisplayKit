@@ -63,6 +63,22 @@
   return self;
 }
 
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+  BOOL visible = (newWindow != nil);
+  if (visible && !_node.inHierarchy) {
+    [_node __enterHierarchy];
+  }
+}
+
+- (void)didMoveToWindow
+{
+  BOOL visible = (self.window != nil);
+  if (!visible && _node.inHierarchy) {
+    [_node __exitHierarchy];
+  }
+}
+
 - (void)willMoveToSuperview:(UIView *)newSuperview
 {
   // Keep the node alive while the view is in a view hierarchy.  This helps ensure that async-drawing views can always
@@ -76,28 +92,53 @@
   else if (currentSuperview && !newSuperview) {
     self.keepalive_node = nil;
   }
-}
+  
+  if (newSuperview) {
+    ASDisplayNode *supernode = _node.supernode;
+    BOOL supernodeLoaded = supernode.nodeLoaded;
+    ASDisplayNodeAssert(!supernode.isLayerBacked, @"Shouldn't be possible for _ASDisplayView's supernode to be layer-backed.");
+    
+    BOOL needsSupernodeUpdate = NO;
 
-- (void)willMoveToWindow:(UIWindow *)newWindow
-{
-  BOOL visible = newWindow != nil;
-  if (visible && !_node.inHierarchy) {
-    [_node __enterHierarchy];
-  } else if (!visible && _node.inHierarchy) {
-    [_node __exitHierarchy];
+    if (supernode) {
+      // If we have a supernode, compensate for users directly messing with views by updating to any new supernode.
+      needsSupernodeUpdate = (!supernodeLoaded || supernode.view != newSuperview);
+    } else {
+      // If we have no supernode and we are now in a view hierarchy, check to see if we can hook up to a supernode.
+      needsSupernodeUpdate = (newSuperview != nil);
+    }
+
+    if (needsSupernodeUpdate) {
+      // -removeFromSupernode is called by -addSubnode:, if it is needed.
+      [newSuperview.asyncdisplaykit_node addSubnode:_node];
+    }
   }
+
 }
 
 - (void)didMoveToSuperview
 {
-  // FIXME maybe move this logic into ASDisplayNode addSubnode/removeFromSupernode
-  UIView *superview = self.superview;
-
-  // If superview's node is different from supernode's view, fix it by setting supernode to the new superview's node.  Got that?
-  if (!superview)
-    [_node __setSupernode:nil];
-  else if (superview != _node.supernode.view)
-    [_node __setSupernode:superview.asyncdisplaykit_node];
+  ASDisplayNode *supernode = _node.supernode;
+  ASDisplayNodeAssert(!supernode.isLayerBacked, @"Shouldn't be possible for superview's node to be layer-backed.");
+  
+  if (supernode) {
+    ASDisplayNodeAssertTrue(_node.nodeLoaded);
+    UIView *superview = self.superview;
+    BOOL supernodeLoaded = supernode.nodeLoaded;
+    BOOL needsSupernodeRemoval = NO;
+    
+    if (superview) {
+      // If our new superview is not the same as the supernode's view, or the supernode has no view, disconnect.
+      needsSupernodeRemoval = (!supernodeLoaded || supernode.view != superview);
+    } else {
+      // If supernode is loaded but our superview is nil, the user manually removed us, so disconnect supernode.
+      needsSupernodeRemoval = supernodeLoaded;
+    }
+    if (needsSupernodeRemoval) {
+      // The node will only disconnect from its supernode, not removeFromSuperview, in this condition.
+      [_node removeFromSupernode];
+    }
+  }
 }
 
 - (void)setNeedsDisplay
