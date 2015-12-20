@@ -105,7 +105,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   NSTimeInterval _debugTimeToAddSubnodeViews;
   NSTimeInterval _debugTimeForDidLoad;
 #endif
-
 }
 
 + (void)scheduleNodeForDisplay:(ASDisplayNode *)node;

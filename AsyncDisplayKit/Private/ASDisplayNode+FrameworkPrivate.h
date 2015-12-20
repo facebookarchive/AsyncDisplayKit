@@ -37,14 +37,17 @@
 typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
 {
   /** The node may or may not have a supernode, but no supernode has a special hierarchy-influencing option enabled. */
-  ASHierarchyStateNormal       = 0,
+  ASHierarchyStateNormal                  = 0,
   /** The node has a supernode with .shouldRasterizeDescendants = YES.
       Note: the root node of the rasterized subtree (the one with the property set on it) will NOT have this state set. */
-  ASHierarchyStateRasterized   = 1 << 0,
+  ASHierarchyStateRasterized              = 1 << 0,
   /** The node or one of its supernodes is managed by a class like ASRangeController.  Most commonly, these nodes are
       ASCellNode objects or a subnode of one, and are used in ASTableView or ASCollectionView.
       These nodes also recieve regular updates to the .interfaceState property with more detailed status information. */
-  ASHierarchyStateRangeManaged = 1 << 1,
+  ASHierarchyStateRangeManaged            = 1 << 1,
+  /** Down-propogated version of _flags.visibilityNotificationsDisabled.  This flag is very rarely set, but by having it
+      locally available to nodes, they do not have to walk up supernodes at the critical points it is checked. */
+  ASHierarchyStateTransitioningSupernodes = 1 << 2
 };
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
