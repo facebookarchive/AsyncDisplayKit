@@ -101,8 +101,17 @@
     BOOL needsSupernodeUpdate = NO;
 
     if (supernode) {
-      // If we have a supernode, compensate for users directly messing with views by updating to any new supernode.
-      needsSupernodeUpdate = (!supernodeLoaded || supernode.view != newSuperview);
+      if (supernodeLoaded) {
+        if (supernode.layerBacked) {
+          // See comment in -didMoveToSuperview.  This case should be avoided, but is possible with app-level coding errors.
+          needsSupernodeUpdate = (supernode.layer != newSuperview.layer);
+        } else {
+          // If we have a supernode, compensate for users directly messing with views by hitching up to any new supernode.
+          needsSupernodeUpdate = (supernode.view != newSuperview);
+        }
+      } else {
+        needsSupernodeUpdate = YES;
+      }
     } else {
       // If we have no supernode and we are now in a view hierarchy, check to see if we can hook up to a supernode.
       needsSupernodeUpdate = (newSuperview != nil);
@@ -129,11 +138,23 @@
     
     if (superview) {
       // If our new superview is not the same as the supernode's view, or the supernode has no view, disconnect.
-      needsSupernodeRemoval = (!supernodeLoaded || supernode.view != superview);
+      if (supernodeLoaded) {
+        if (supernode.layerBacked) {
+          // As asserted at the top, this shouldn't be possible, but in production with assertions disabled it can happen.
+          // We try to make such code behave as well as feasible because it's not that hard of an error to make if some deep
+          // child node of a layer-backed node happens to be view-backed, but it is not supported and should be avoided.
+          needsSupernodeRemoval = (supernode.layer != superview.layer);
+        } else {
+          needsSupernodeRemoval = (supernode.view != superview);
+        }
+      } else {
+        needsSupernodeRemoval = YES;
+      }
     } else {
       // If supernode is loaded but our superview is nil, the user manually removed us, so disconnect supernode.
       needsSupernodeRemoval = supernodeLoaded;
     }
+    
     if (needsSupernodeRemoval) {
       // The node will only disconnect from its supernode, not removeFromSuperview, in this condition.
       [_node removeFromSupernode];

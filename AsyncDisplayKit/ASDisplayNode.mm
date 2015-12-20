@@ -996,13 +996,14 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   if (isMovingEquivalentParents) {
     [subnode __incrementVisibilityNotificationsDisabled];
   }
+  
   [subnode removeFromSupernode];
-
+  [oldSubnode removeFromSupernode];
+  
   if (!_subnodes)
     _subnodes = [[NSMutableArray alloc] init];
-
-  [oldSubnode removeFromSupernode];
   [_subnodes insertObject:subnode atIndex:subnodeIndex];
+  [subnode __setSupernode:self];
 
   // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.
   if (!_flags.shouldRasterizeDescendants && [self __shouldLoadViewOrLayer]) {
@@ -1030,8 +1031,6 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   if (isMovingEquivalentParents) {
     [subnode __decrementVisibilityNotificationsDisabled];
   }
-
-  [subnode __setSupernode:self];
 }
 
 - (void)replaceSubnode:(ASDisplayNode *)oldSubnode withSubnode:(ASDisplayNode *)replacementSubnode
@@ -1231,7 +1230,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   BOOL shouldRemoveFromSuperviewOrSuperlayer = NO;
   
   if (self.nodeLoaded && _supernode.nodeLoaded) {
-    if (_flags.layerBacked) {
+    if (_flags.layerBacked || _supernode.layerBacked) {
       shouldRemoveFromSuperviewOrSuperlayer = (_layer.superlayer == _supernode.layer);
     } else {
       shouldRemoveFromSuperviewOrSuperlayer = (_view.superview == _supernode.view);
