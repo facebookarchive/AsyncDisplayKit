@@ -1342,9 +1342,12 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [parent insertSubnode:c belowSubnode:b];
   XCTAssertEqualObjects(orderStringFromSublayers(parent.layer), @"a,e,d,c,b", @"Didn't match");
 
-  XCTAssertEqual(3u, parent.subnodes.count, @"Should have the right subnode count");
+  XCTAssertEqual(4u, parent.subnodes.count, @"Should have the right subnode count");
   XCTAssertEqual(4u, parent.view.subviews.count, @"Should have the right subview count");
   XCTAssertEqual(5u, parent.layer.sublayers.count, @"Should have the right sublayer count");
+  
+  [e removeFromSuperlayer];
+  XCTAssertEqual(4u, parent.layer.sublayers.count, @"Should have the right sublayer count");
 
   //TODO: assert that things deallocate immediately and don't have latent autoreleases in here
   [parent release];
@@ -1352,6 +1355,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [b release];
   [c release];
   [d release];
+  [e release];
 }
 
 - (void)testAppleBugInsertSubview
@@ -1415,11 +1419,11 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [parent.view insertSubview:d aboveSubview:a.view];
   XCTAssertEqualObjects(orderStringFromSublayers(parent.layer), @"a,d,b", @"Didn't match");
 
-  // (a,e,d,b) => (a,d,>c<,b)
+  // (a,d,b) => (a,d,>c<,b)
   [parent insertSubnode:c belowSubnode:b];
   XCTAssertEqualObjects(orderStringFromSublayers(parent.layer), @"a,d,c,b", @"Didn't match");
 
-  XCTAssertEqual(3u, parent.subnodes.count, @"Should have the right subnode count");
+  XCTAssertEqual(4u, parent.subnodes.count, @"Should have the right subnode count");
   XCTAssertEqual(4u, parent.view.subviews.count, @"Should have the right subview count");
   XCTAssertEqual(4u, parent.layer.sublayers.count, @"Should have the right sublayer count");
 
