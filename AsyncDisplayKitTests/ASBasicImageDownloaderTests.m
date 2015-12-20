@@ -16,8 +16,9 @@
 
 @implementation ASBasicImageDownloaderTests
 
-- (void)testAsynchronouslyDownloadTheSameURLTwice {
-    ASBasicImageDownloader *downloader = [ASBasicImageDownloader new];
+- (void)testAsynchronouslyDownloadTheSameURLTwice
+{
+    ASBasicImageDownloader *downloader = [ASBasicImageDownloader sharedImageDownloader];
     
     NSURL *URL = [NSURL URLWithString:@"http://wrongPath/wrongResource.png"];
     

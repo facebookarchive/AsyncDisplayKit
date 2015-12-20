@@ -1251,6 +1251,19 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
 }
 
+- (BOOL)__visibilityNotificationsDisabled
+{
+  // Currently, this method is only used by the testing infrastructure to verify this internal feature.
+  ASDN::MutexLocker l(_propertyLock);
+  return _flags.visibilityNotificationsDisabled > 0;
+}
+
+- (BOOL)__selfOrParentHasVisibilityNotificationsDisabled
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return (_hierarchyState & ASHierarchyStateTransitioningSupernodes);
+}
+
 - (void)__incrementVisibilityNotificationsDisabled
 {
   ASDN::MutexLocker l(_propertyLock);
@@ -1280,12 +1293,6 @@ static NSInteger incrementIfFound(NSInteger i) {
     // the ASHierarchyState bit cleared (the only value checked when reading this state).
     [self exitHierarchyState:ASHierarchyStateTransitioningSupernodes];
   }
-}
-
-- (BOOL)__selfOrParentHasVisibilityNotificationsDisabled
-{
-  ASDN::MutexLocker l(_propertyLock);
-  return (_hierarchyState & ASHierarchyStateTransitioningSupernodes);
 }
 
 - (void)__enterHierarchy

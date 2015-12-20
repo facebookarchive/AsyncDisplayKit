@@ -205,14 +205,14 @@ static const char *kContextKey = NSStringFromClass(ASBasicImageDownloaderContext
   static ASBasicImageDownloader *sharedImageDownloader = nil;
   static dispatch_once_t once = 0;
   dispatch_once(&once, ^{
-    sharedImageDownloader = [[ASBasicImageDownloader alloc] init];
+    sharedImageDownloader = [[ASBasicImageDownloader alloc] _init];
   });
   return sharedImageDownloader;
 }
 
 #pragma mark Lifecycle.
 
-- (instancetype)init
+- (instancetype)_init
 {
   if (!(self = [super init]))
     return nil;

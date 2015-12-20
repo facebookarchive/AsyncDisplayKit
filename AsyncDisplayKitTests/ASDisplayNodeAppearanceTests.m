@@ -49,6 +49,7 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 
 @interface ASDisplayNode (PrivateStuffSoWeDontPullInCPPInternalH)
 - (BOOL)__visibilityNotificationsDisabled;
+- (BOOL)__selfOrParentHasVisibilityNotificationsDisabled;
 - (id)initWithViewClass:(Class)viewClass;
 - (id)initWithLayerClass:(Class)layerClass;
 @end
@@ -360,6 +361,7 @@ static UIView *viewWithName(NSString *name) {
   }
   if (useManualDisable) {
     XCTAssertTrue([child __visibilityNotificationsDisabled], @"Should not have re-enabled yet");
+    XCTAssertTrue([child __selfOrParentHasVisibilityNotificationsDisabled], @"Should not have re-enabled yet");
     ASDisplayNodeEnableHierarchyNotifications(child);
   }
 
@@ -377,6 +379,7 @@ static UIView *viewWithName(NSString *name) {
   }
   if (useManualDisable) {
     XCTAssertTrue([child __visibilityNotificationsDisabled], @"Should not have re-enabled yet");
+    XCTAssertTrue([child __selfOrParentHasVisibilityNotificationsDisabled], @"Should not have re-enabled yet");
     ASDisplayNodeEnableHierarchyNotifications(child);
   }
 
@@ -390,6 +393,7 @@ static UIView *viewWithName(NSString *name) {
 
   // Make sure that we don't leave these unbalanced
   XCTAssertFalse([child __visibilityNotificationsDisabled], @"Unbalanced visibility notifications calls");
+  XCTAssertFalse([child __selfOrParentHasVisibilityNotificationsDisabled], @"Should not have re-enabled yet");
 
   [window release];
 }
