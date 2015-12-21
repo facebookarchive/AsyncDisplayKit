@@ -31,6 +31,17 @@ typedef enum : NSUInteger {
  */
 @property (nonatomic, assign) BOOL laysOutHorizontally;
 
+/** Horizontally align content(text or image).
+ Defaults to ASAlignmentMiddle.
+ */
+@property (nonatomic, assign) ASHorizontalAlignment contentHorizontalAlignment;
+
+/** Vertically align content(text or image).
+ Defaults to ASAlignmentCenter.
+ */
+@property (nonatomic, assign) ASVerticalAlignment contentVerticalAlignment;
+
+
 - (NSAttributedString *)attributedTitleForState:(ASButtonState)state;
 - (void)setAttributedTitle:(NSAttributedString *)title forState:(ASButtonState)state;
 

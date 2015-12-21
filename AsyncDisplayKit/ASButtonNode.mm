@@ -195,8 +195,8 @@
   ASStackLayoutSpec *stack = [[ASStackLayoutSpec alloc] init];
   stack.direction = self.laysOutHorizontally ? ASStackLayoutDirectionHorizontal : ASStackLayoutDirectionVertical;
   stack.spacing = self.contentSpacing;
-  stack.justifyContent = ASStackLayoutJustifyContentCenter;
-  stack.alignItems = ASStackLayoutAlignItemsCenter;
+  stack.horizontalAlignment = self.contentHorizontalAlignment ? self.contentHorizontalAlignment : ASAlignmentMiddle;
+  stack.verticalAlignment = self.contentVerticalAlignment ? self.contentVerticalAlignment  : ASAlignmentCenter;
   
   NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:2];
   if (self.imageNode.image) {
