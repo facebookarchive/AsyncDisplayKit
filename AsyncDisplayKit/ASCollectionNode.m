@@ -45,6 +45,16 @@
 
 #pragma mark - ASCollectionView Forwards
 
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.view tuningParametersForRangeType:rangeType];
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.view setTuningParameters:tuningParameters forRangeType:rangeType];
+}
+
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   [self.view reloadDataWithCompletion:completion];

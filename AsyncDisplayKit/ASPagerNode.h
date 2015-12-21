@@ -14,8 +14,6 @@
 
 @property (weak, nonatomic) id<ASPagerNodeDataSource> dataSource;
 
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
-
 @end
 
 @protocol ASPagerNodeDataSource <NSObject>

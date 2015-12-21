@@ -49,11 +49,6 @@
   [self setTuningParameters:renderParams forRangeType:ASLayoutRangeTypeRender];
 }
 
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
-{
-  [self.view setTuningParameters:tuningParameters forRangeType:rangeType];
-}
-
 #pragma mark - ASCollectionViewDataSource
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
