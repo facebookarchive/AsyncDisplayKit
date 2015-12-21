@@ -27,19 +27,25 @@
   
   self = [super initWithCollectionViewLayout:_flowLayout];
   if (self != nil) {
-    self.view.asyncDataSource = self;
-    self.view.asyncDelegate = self;
-    
-    self.view.pagingEnabled = YES;
-    self.view.allowsSelection = NO;
-    self.view.showsVerticalScrollIndicator = NO;
-    self.view.showsHorizontalScrollIndicator = NO;
-    
-    ASRangeTuningParameters tuningParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
-    [self setTuningParameters:tuningParams forRangeType:ASLayoutRangeTypePreload];
-    [self setTuningParameters:tuningParams forRangeType:ASLayoutRangeTypeRender];
   }
   return self;
+}
+
+- (void)didLoad
+{
+  [super didLoad];
+  
+  self.view.asyncDataSource = self;
+  self.view.asyncDelegate = self;
+  
+  self.view.pagingEnabled = YES;
+  self.view.allowsSelection = NO;
+  self.view.showsVerticalScrollIndicator = NO;
+  self.view.showsHorizontalScrollIndicator = NO;
+  
+  ASRangeTuningParameters tuningParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
+  [self setTuningParameters:tuningParams forRangeType:ASLayoutRangeTypePreload];
+  [self setTuningParameters:tuningParams forRangeType:ASLayoutRangeTypeRender];
 }
 
 - (void)reloadData
