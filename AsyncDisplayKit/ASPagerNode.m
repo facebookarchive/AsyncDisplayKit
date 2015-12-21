@@ -43,9 +43,10 @@
   self.view.showsVerticalScrollIndicator = NO;
   self.view.showsHorizontalScrollIndicator = NO;
   
-  ASRangeTuningParameters tuningParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
-  [self setTuningParameters:tuningParams forRangeType:ASLayoutRangeTypePreload];
-  [self setTuningParameters:tuningParams forRangeType:ASLayoutRangeTypeRender];
+  ASRangeTuningParameters preloadParams = { .leadingBufferScreenfuls = 2.0, .trailingBufferScreenfuls = 2.0 };
+  ASRangeTuningParameters renderParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
+  [self setTuningParameters:preloadParams forRangeType:ASLayoutRangeTypePreload];
+  [self setTuningParameters:renderParams forRangeType:ASLayoutRangeTypeRender];
 }
 
 - (void)reloadData
