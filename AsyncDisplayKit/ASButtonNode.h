@@ -31,12 +31,12 @@ typedef enum : NSUInteger {
  */
 @property (nonatomic, assign) BOOL laysOutHorizontally;
 
-/** Horizontally align content(text or image).
+/** Horizontally align content (text or image).
  Defaults to ASAlignmentMiddle.
  */
 @property (nonatomic, assign) ASHorizontalAlignment contentHorizontalAlignment;
 
-/** Vertically align content(text or image).
+/** Vertically align content (text or image).
  Defaults to ASAlignmentCenter.
  */
 @property (nonatomic, assign) ASVerticalAlignment contentVerticalAlignment;

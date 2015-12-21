@@ -39,6 +39,9 @@
     _titleNode = [[ASTextNode alloc] init];
     _imageNode = [[ASImageNode alloc] init];
     
+    _contentHorizontalAlignment = ASAlignmentMiddle;
+    _contentVerticalAlignment = ASAlignmentCenter;
+    
     [self addSubnode:_titleNode];
     [self addSubnode:_imageNode];
     
@@ -195,8 +198,8 @@
   ASStackLayoutSpec *stack = [[ASStackLayoutSpec alloc] init];
   stack.direction = self.laysOutHorizontally ? ASStackLayoutDirectionHorizontal : ASStackLayoutDirectionVertical;
   stack.spacing = self.contentSpacing;
-  stack.horizontalAlignment = self.contentHorizontalAlignment ? self.contentHorizontalAlignment : ASAlignmentMiddle;
-  stack.verticalAlignment = self.contentVerticalAlignment ? self.contentVerticalAlignment  : ASAlignmentCenter;
+  stack.horizontalAlignment = _contentHorizontalAlignment;
+  stack.verticalAlignment = _contentVerticalAlignment;
   
   NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:2];
   if (self.imageNode.image) {
