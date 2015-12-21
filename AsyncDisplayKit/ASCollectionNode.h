@@ -18,4 +18,28 @@
 
 @property (nonatomic, readonly) ASCollectionView *view;
 
+/**
+ * Reload everything from scratch, destroying the working range and all cached nodes.
+ *
+ * @param completion block to run on completion of asynchronous loading or nil. If supplied, the block is run on
+ * the main thread.
+ * @warning This method is substantially more expensive than UICollectionView's version.
+ */
+- (void)reloadDataWithCompletion:(void (^)())completion;
+
+/**
+ * Reload everything from scratch, destroying the working range and all cached nodes.
+ *
+ * @warning This method is substantially more expensive than UICollectionView's version.
+ */
+- (void)reloadData;
+
+/**
+ * Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.
+ *
+ * @warning This method is substantially more expensive than UICollectionView's version and will block the main thread
+ * while all the cells load.
+ */
+- (void)reloadDataImmediately;
+
 @end

@@ -43,4 +43,21 @@
   [self.view clearFetchedData];
 }
 
+#pragma mark - ASCollectionView Forwards
+
+- (void)reloadDataWithCompletion:(void (^)())completion
+{
+  [self.view reloadDataWithCompletion:completion];
+}
+
+- (void)reloadData
+{
+  [self.view reloadData];
+}
+
+- (void)reloadDataImmediately
+{
+  [self.view reloadDataImmediately];
+}
+
 @end

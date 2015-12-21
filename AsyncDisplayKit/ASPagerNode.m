@@ -49,11 +49,6 @@
   [self setTuningParameters:renderParams forRangeType:ASLayoutRangeTypeRender];
 }
 
-- (void)reloadData
-{
-  [self.view reloadData];
-}
-
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
   [self.view setTuningParameters:tuningParameters forRangeType:rangeType];
