@@ -18,10 +18,11 @@
 #pragma mark -
 #pragma mark ASCellNode
 
-@interface ASCellNode (){
+@interface ASCellNode ()
+{
   ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
-  ASDisplayNode *_viewControllerNode;
   UIViewController *_viewController;
+  ASDisplayNode *_viewControllerNode;
 }
 
 @end
@@ -40,11 +41,6 @@
   return self;
 }
 
-- (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock
-{
-  return [self initWithViewControllerBlock:viewControllerBlock didLoadBlock:nil];
-}
-
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   if (!(self = [super init]))
@@ -52,21 +48,40 @@
   
   ASDisplayNodeAssertNotNil(viewControllerBlock, @"should initialize with a valid block that returns a UIViewController");
   
-  _viewController = viewControllerBlock();
+  if (viewControllerBlock) {
+    _viewController = viewControllerBlock();
+    
+    __weak UIViewController *weakViewController = _viewController;
+    _viewControllerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
+      return weakViewController.view;
+    } didLoadBlock:didLoadBlock];
+    
+    [self addSubnode:_viewControllerNode];
+    _nodeLoadedBlock = didLoadBlock;
+  }
   
-  _viewControllerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-        return _viewController.view;
-      } didLoadBlock:didLoadBlock];
-  
-  [self addSubnode:_viewControllerNode];
-  
-  _nodeLoadedBlock = didLoadBlock;
   return self;
 }
 
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize {
-  _viewControllerNode.frame = (CGRect){{0,0}, constrainedSize.max};
-  return [super layoutSpecThatFits:constrainedSize];
+//- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+//{
+//  _viewControllerNode.frame = (CGRect){{0,0}, constrainedSize.max};
+//  NSLog(@"%f %f", constrainedSize.max.width, constrainedSize.max.height);
+//  return [super layoutSpecThatFits:constrainedSize];
+//}
+
+- (void)layout
+{
+  [super layout];
+  
+  _viewControllerNode.frame = self.bounds;
+}
+
+- (void)layoutDidFinish
+{
+  [super layoutDidFinish];
+
+  _viewControllerNode.frame = self.bounds;
 }
 
 - (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
@@ -135,7 +150,8 @@
 #pragma mark -
 #pragma mark ASTextCellNode
 
-@interface ASTextCellNode () {
+@interface ASTextCellNode ()
+{
   NSString *_text;
   ASTextNode *_textNode;
 }

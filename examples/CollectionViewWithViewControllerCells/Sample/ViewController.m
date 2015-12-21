@@ -94,7 +94,10 @@ static NSUInteger kNumberOfImages = 14;
 {
   ASCellNode *node = [[ASCellNode alloc] initWithViewControllerBlock:^UIViewController *{
     return [[ImageViewController alloc] initWithImage:_sections[indexPath.section][indexPath.item]];
-  }];
+  } didLoadBlock:nil];
+  
+  node.layer.borderWidth = 1.0;
+  node.layer.borderColor = [UIColor blackColor].CGColor;
   
   return node;
 }
