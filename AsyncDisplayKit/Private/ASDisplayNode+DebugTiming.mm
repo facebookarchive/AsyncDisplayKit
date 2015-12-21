@@ -7,11 +7,9 @@
  */
 
 #import "ASDisplayNode+DebugTiming.h"
-
 #import "ASDisplayNodeInternal.h"
 
 @implementation ASDisplayNode (DebugTiming)
-
 
 #if TIME_DISPLAYNODE_OPS
 - (NSTimeInterval)debugTimeToCreateView
@@ -82,7 +80,5 @@
 }
 
 #endif
-
-
 
 @end

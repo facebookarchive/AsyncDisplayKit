@@ -1253,8 +1253,15 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (BOOL)__visibilityNotificationsDisabled
 {
+  // Currently, this method is only used by the testing infrastructure to verify this internal feature.
   ASDN::MutexLocker l(_propertyLock);
   return _flags.visibilityNotificationsDisabled > 0;
+}
+
+- (BOOL)__selfOrParentHasVisibilityNotificationsDisabled
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return (_hierarchyState & ASHierarchyStateTransitioningSupernodes);
 }
 
 - (void)__incrementVisibilityNotificationsDisabled
@@ -1262,33 +1269,30 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDN::MutexLocker l(_propertyLock);
   const size_t maxVisibilityIncrement = (1ULL<<VISIBILITY_NOTIFICATIONS_DISABLED_BITS) - 1ULL;
   ASDisplayNodeAssert(_flags.visibilityNotificationsDisabled < maxVisibilityIncrement, @"Oops, too many increments of the visibility notifications API");
-  if (_flags.visibilityNotificationsDisabled < maxVisibilityIncrement)
+  if (_flags.visibilityNotificationsDisabled < maxVisibilityIncrement) {
     _flags.visibilityNotificationsDisabled++;
+  }
+  if (_flags.visibilityNotificationsDisabled == 1) {
+    // Must have just transitioned from 0 to 1.  Notify all subnodes that we are in a disabled state.
+    [self enterHierarchyState:ASHierarchyStateTransitioningSupernodes];
+  }
 }
 
 - (void)__decrementVisibilityNotificationsDisabled
 {
   ASDN::MutexLocker l(_propertyLock);
   ASDisplayNodeAssert(_flags.visibilityNotificationsDisabled > 0, @"Can't decrement past 0");
-  if (_flags.visibilityNotificationsDisabled > 0)
+  if (_flags.visibilityNotificationsDisabled > 0) {
     _flags.visibilityNotificationsDisabled--;
-}
-
-// This uses the layer hieararchy for safety. Who knows what people might do and it would be bad to have visibilty out of sync
-- (BOOL)__selfOrParentHasVisibilityNotificationsDisabled
-{
-  CALayer *layer = _layer;
-  do {
-    ASDisplayNode *node = ASLayerToDisplayNode(layer);
-    if (node) {
-      if (node->_flags.visibilityNotificationsDisabled) {
-        return YES;
-      }
-    }
-    layer = layer.superlayer;
-  } while (layer);
-
-  return NO;
+  }
+  if (_flags.visibilityNotificationsDisabled == 0) {
+    // Must have just transitioned from 1 to 0.  Notify all subnodes that we are no longer in a disabled state.
+    // FIXME: This system should be revisited when refactoring and consolidating the implementation of the
+    // addSubnode: and insertSubnode:... methods.  As implemented, though logically irrelevant for expected use cases,
+    // multiple nodes in the subtree below may have a non-zero visibilityNotification count and still have
+    // the ASHierarchyState bit cleared (the only value checked when reading this state).
+    [self exitHierarchyState:ASHierarchyStateTransitioningSupernodes];
+  }
 }
 
 - (void)__enterHierarchy
