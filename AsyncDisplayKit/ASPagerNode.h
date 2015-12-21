@@ -14,6 +14,8 @@
 
 @property (weak, nonatomic) id<ASPagerNodeDataSource> dataSource;
 
+- (void)scrollToPageAtIndex:(NSInteger)index animated:(BOOL)animated;
+
 @end
 
 @protocol ASPagerNodeDataSource <NSObject>

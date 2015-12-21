@@ -49,6 +49,14 @@
   [self setTuningParameters:renderParams forRangeType:ASLayoutRangeTypeRender];
 }
 
+#pragma mark - Helpers
+
+- (void)scrollToPageAtIndex:(NSInteger)index animated:(BOOL)animated
+{
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+  [self.view scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionLeft animated:animated];
+}
+
 #pragma mark - ASCollectionViewDataSource
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
