@@ -6,14 +6,18 @@
 {
   ASDN::RecursiveMutex _lock;
   
-  __weak id<ASVideoNodeDataSource> _dataSource;
-  
+  __weak id<ASVideoNodeDelegate> _delegate;
+
   BOOL _shouldBePlaying;
   AVAsset *_asset;
+  
   AVPlayerItem *_currentItem;
+  AVPlayer *_player;
+  
   ASButtonNode *_playButton;
   ASDisplayNode *_playerNode;
   ASDisplayNode *_spinner;
+  ASVideoGravity _gravity;
 }
 
 @end
@@ -27,13 +31,6 @@
 - (instancetype)init
 {
   if (!(self = [super init])) { return nil; }
-  
-  _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
-    AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
-    playerLayer.player = [[AVPlayer alloc] init];
-    return playerLayer;
-  }];
-  [self addSubnode:_playerNode];
   
   self.gravity = ASVideoGravityResizeAspect;
   
@@ -51,11 +48,16 @@
   
   if (!(newState & ASInterfaceStateVisible)) {
     [self pause];
+    [(UIActivityIndicatorView *)_spinner.view stopAnimating];
     [_spinner removeFromSupernode];
   } else {
     if (_shouldBePlaying) {
       [self play];
     }
+  }
+
+  if (newState & ASInterfaceStateVisible) {
+    [self displayDidFinish];
   }
 }
 
@@ -76,7 +78,8 @@
 - (void)didPlayToEnd:(NSNotification *)notification
 {
   if (ASObjectIsEqual([[notification object] asset], _asset)) {
-    [[((AVPlayerLayer *)_playerNode.layer) player] seekToTime:CMTimeMakeWithSeconds(0, 1)];
+    [_delegate videoDidReachEnd:self];
+    [_player seekToTime:CMTimeMakeWithSeconds(0, 1)];
     
     if (_autorepeat) {
       [self play];
@@ -90,6 +93,12 @@
 {
   [super layout];
   _playerNode.frame = self.bounds;
+  
+  CGFloat horizontalDiff = (self.bounds.size.width - _playButton.bounds.size.width)/2;
+  CGFloat verticalDiff = (self.bounds.size.height - _playButton.bounds.size.height)/2;
+  _playButton.hitTestSlop = UIEdgeInsetsMake(-verticalDiff, -horizontalDiff, -verticalDiff, -horizontalDiff);
+  
+  _spinner.frame = _playButton.frame;
 }
 
 - (void)tapped
@@ -123,16 +132,45 @@
     _currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
     [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
 
-    if (((AVPlayerLayer *)_playerNode.layer).player) {
-      [((AVPlayerLayer *)_playerNode.layer).player replaceCurrentItemWithPlayerItem:_currentItem];
+    if (_player) {
+      [_player replaceCurrentItemWithPlayerItem:_currentItem];
     } else {
-      ((AVPlayerLayer *)_playerNode.layer).player = [[AVPlayer alloc] initWithPlayerItem:_currentItem];
+      _player = [[AVPlayer alloc] initWithPlayerItem:_currentItem];
     }
-
   }
+}
+
+// FIXME: Adopt interfaceStateDidChange API
+- (void)displayDidFinish
+{
+  [super displayDidFinish];
+  
+  ASDN::MutexLocker l(_lock);
+  
+  _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
+    AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
+    playerLayer.player = _player;
+    playerLayer.videoGravity = [self videoGravity];
+    return playerLayer;
+  }];
+  
+  [self insertSubnode:_playerNode atIndex:0];
+
   if (_shouldAutoplay) {
     [self play];
   }
+}
+
+- (NSString *)videoGravity
+{
+  if (_gravity == ASVideoGravityResize) {
+    return AVLayerVideoGravityResize;
+  }
+  if (_gravity == ASVideoGravityResizeAspectFill) {
+    return AVLayerVideoGravityResizeAspectFill;
+  }
+  
+  return AVLayerVideoGravityResizeAspect;
 }
 
 - (void)clearFetchedData
@@ -142,9 +180,12 @@
   {
     ASDN::MutexLocker l(_lock);
     ((AVPlayerLayer *)_playerNode.layer).player = nil;
+    _player = nil;
     _shouldBePlaying = NO;
   }
 }
+
+#pragma mark - Video Properties
 
 - (void)setPlayButton:(ASButtonNode *)playButton
 {
@@ -174,6 +215,7 @@
   
   _asset = asset;
   
+  // FIXME: Adopt -setNeedsFetchData when it is available
   if (self.interfaceState & ASInterfaceStateFetchData) {
     [self fetchData];
   }
@@ -183,6 +225,12 @@
 {
   ASDN::MutexLocker l(_lock);
   return _asset;
+}
+
+- (AVPlayer *)player
+{
+  ASDN::MutexLocker l(_lock);
+  return _player;
 }
 
 - (void)setGravity:(ASVideoGravity)gravity
@@ -203,21 +251,18 @@
       ((AVPlayerLayer *)_playerNode.layer).videoGravity = AVLayerVideoGravityResizeAspect;
       break;
   }
+  
+  _gravity = gravity;
 }
 
 - (ASVideoGravity)gravity
 {
   ASDN::MutexLocker l(_lock);
   
-  if (ASObjectIsEqual(((AVPlayerLayer *)_playerNode.layer).contentsGravity, AVLayerVideoGravityResize)) {
-    return ASVideoGravityResize;
-  }
-  if (ASObjectIsEqual(((AVPlayerLayer *)_playerNode.layer).contentsGravity, AVLayerVideoGravityResizeAspectFill)) {
-    return ASVideoGravityResizeAspectFill;
-  }
-  
-  return ASVideoGravityResizeAspect;
+  return _gravity;
 }
+
+#pragma mark - Video Playback
 
 - (void)play
 {
@@ -225,54 +270,72 @@
   
   if (!_spinner) {
     _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-      UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] initWithFrame:_playButton.frame];
+      UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
       spinnnerView.color = [UIColor whiteColor];
-      [spinnnerView startAnimating];
       
       return spinnnerView;
     }];
   }
   
-  if (![self ready]) {
-    [self addSubnode:_spinner];
-  }
-  
-  [[((AVPlayerLayer *)_playerNode.layer) player] play];
+  [_player play];
   _shouldBePlaying = YES;
   _playButton.alpha = 0.0;
-//  if ([self ready] && ![self.subnodes containsObject:_spinner]) {
-//  }
+  
+  if (![self ready] && _shouldBePlaying && (self.interfaceState & ASInterfaceStateVisible)) {
+    [self addSubnode:_spinner];
+    [(UIActivityIndicatorView *)_spinner.view startAnimating];
+  }
 }
 
 - (BOOL)ready
 {
-  return [((AVPlayerLayer *)_playerNode.layer) player].currentItem.status == AVPlayerItemStatusReadyToPlay;
+  return _currentItem.status == AVPlayerItemStatusReadyToPlay;
 }
 
 - (void)pause
 {
   ASDN::MutexLocker l(_lock);
   
-  [[((AVPlayerLayer *)_playerNode.layer) player] pause];
+  [_player pause];
   [((UIActivityIndicatorView *)_spinner.view) stopAnimating];
   _shouldBePlaying = NO;
   _playButton.alpha = 1.0;
 }
 
-- (AVPlayerItem *)currentItem
+- (BOOL)isPlaying
 {
-  return _currentItem;
+  ASDN::MutexLocker l(_lock);
+  
+  return (_player.rate > 0 && !_player.error);
 }
+
+#pragma mark - Property Accessors for Tests
 
 - (ASDisplayNode *)spinner
 {
+  ASDN::MutexLocker l(_lock);
   return _spinner;
 }
 
 - (AVPlayerItem *)curentItem
 {
+  ASDN::MutexLocker l(_lock);
   return _currentItem;
 }
+
+- (ASDisplayNode *)playerNode
+{
+  ASDN::MutexLocker l(_lock);
+  return _playerNode;
+}
+
+- (BOOL)shouldBePlaying
+{
+  ASDN::MutexLocker l(_lock);
+  return _shouldBePlaying;
+}
+
+#pragma mark - Lifecycle
 
 - (void)dealloc
 {

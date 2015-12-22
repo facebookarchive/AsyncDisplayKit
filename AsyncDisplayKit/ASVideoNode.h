@@ -7,25 +7,28 @@ typedef NS_ENUM(NSUInteger, ASVideoGravity) {
   ASVideoGravityResize
 };
 
+@protocol ASVideoNodeDelegate;
+
 @interface ASVideoNode : ASControlNode<_ASDisplayLayerDelegate>
 @property (atomic, strong, readwrite) AVAsset *asset;
+@property (atomic, strong, readonly) AVPlayer *player;
+@property (atomic, strong, readonly) AVPlayerItem *currentItem;
 @property (nonatomic, assign, readwrite) BOOL shouldAutoplay;
 @property (atomic) ASVideoGravity gravity;
 @property (atomic) BOOL autorepeat;
 @property (atomic) ASButtonNode *playButton;
-@property (atomic) AVPlayer *player;
+
+@property (atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
 
 - (void)play;
 - (void)pause;
 
+- (BOOL)isPlaying;
+
 @end
 
 @protocol ASVideoNodeDelegate <NSObject>
+@optional
+- (void)videoDidReachEnd:(ASVideoNode *)videoNode;
 @end
 
-@protocol ASVideoNodeDataSource <NSObject>
-@optional
-- (ASButtonNode *)playButtonForVideoNode:(ASVideoNode *)videoNode;
-- (UIImage *)thumbnailForVideoNode:(ASVideoNode *) videoNode;
-- (NSURL *)thumbnailURLForVideoNode:(ASVideoNode *)videoNode;
-@end

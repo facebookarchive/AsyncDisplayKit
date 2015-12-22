@@ -11,45 +11,51 @@
 #import "ASVideoNode.h"
 
 @interface ASVideoNodeTests : XCTestCase
+{
+  ASVideoNode *_videoNode;
+  AVAsset *_firstAsset;
+  AVAsset *_secondAsset;
+}
 @end
 
 @interface ASVideoNode ()
-@property (atomic, readonly) AVPlayerItem *currentItem;
 @property (atomic) ASInterfaceState interfaceState;
 @property (atomic) ASDisplayNode *spinner;
-@end
-
-@interface AVPlayerItem ()
-@property (nonatomic) AVPlayerItemStatus status;
+@property (atomic) ASDisplayNode *playerNode;
+@property (atomic) BOOL shouldBePlaying;
 @end
 
 @implementation ASVideoNodeTests
 
+- (void)setUp
+{
+  _videoNode = [[ASVideoNode alloc] init];
+  _firstAsset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  _secondAsset = [AVAsset assetWithURL:[NSURL URLWithString:@"secondURL"]];
+}
+
 - (void)testVideoNodeReplacesAVPlayerItemWhenNewURLIsSet
 {
-  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
-  videoNode.interfaceState = ASInterfaceStateFetchData;
-  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  _videoNode.interfaceState = ASInterfaceStateFetchData;
+  _videoNode.asset = _firstAsset;
   
-  AVPlayerItem *item = [videoNode currentItem];
+  AVPlayerItem *item = [_videoNode currentItem];
   
-  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"secondURL"]];
-  AVPlayerItem *secondItem = [videoNode currentItem];
+  _videoNode.asset = _secondAsset;
+  AVPlayerItem *secondItem = [_videoNode currentItem];
   
   XCTAssertNotEqualObjects(item, secondItem);
 }
 
 - (void)testVideoNodeDoesNotReplaceAVPlayerItemWhenSameURLIsSet
 {
-  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
-  videoNode.interfaceState = ASInterfaceStateFetchData;
-  AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  _videoNode.interfaceState = ASInterfaceStateFetchData;
 
-  videoNode.asset = asset;
-  AVPlayerItem *item = [videoNode currentItem];
+  _videoNode.asset = _firstAsset;
+  AVPlayerItem *item = [_videoNode currentItem];
   
-  videoNode.asset = asset;
-  AVPlayerItem *secondItem = [videoNode currentItem];
+  _videoNode.asset = _firstAsset;
+  AVPlayerItem *secondItem = [_videoNode currentItem];
   
   XCTAssertEqualObjects(item, secondItem);
 }
@@ -58,53 +64,73 @@
 
 - (void)testSpinnerDefaultsToNil
 {
-  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
-  
-  XCTAssertNil(videoNode.spinner);
+  XCTAssertNil(_videoNode.spinner);
 }
 
 - (void)testOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnode
 {
-  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
-  videoNode.interfaceState = ASInterfaceStateFetchData;
-  AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
-  videoNode.asset = asset;
+  _videoNode.interfaceState = ASInterfaceStateFetchData;
+  _videoNode.asset = _firstAsset;
   
-  [videoNode play];
+  [_videoNode play];
   
-  XCTAssertNotNil(videoNode.spinner);
+  XCTAssertNotNil(_videoNode.spinner);
 }
 
 - (void)testOnPauseSpinnerIsPausedIfPresent
 {
-  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
-  videoNode.interfaceState = ASInterfaceStateFetchData;
-  AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
-  videoNode.asset = asset;
+  _videoNode.interfaceState = ASInterfaceStateFetchData;
+  _videoNode.asset = _firstAsset;
   
-  [videoNode play];
+  [_videoNode play];
   
-  [videoNode pause];
+  [_videoNode pause];
   
-  XCTAssertFalse(((UIActivityIndicatorView *)videoNode.spinner.view).isAnimating);
+  XCTAssertFalse(((UIActivityIndicatorView *)_videoNode.spinner.view).isAnimating);
 }
 
 - (void)testOnVideoReadySpinnerIsStoppedAndRemoved
 {
-  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
-  videoNode.interfaceState = ASInterfaceStateFetchData;
-  AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
-  videoNode.asset = asset;
+  _videoNode.interfaceState = ASInterfaceStateFetchData;
+  _videoNode.asset = _firstAsset;
 
-  [videoNode play];
-  [videoNode observeValueForKeyPath:@"status" ofObject:[videoNode currentItem] change:@{@"new" : @(AVPlayerItemStatusReadyToPlay)} context:NULL];
+  [_videoNode play];
+  [_videoNode observeValueForKeyPath:@"status" ofObject:[_videoNode currentItem] change:@{@"new" : @(AVPlayerItemStatusReadyToPlay)} context:NULL];
   
-  XCTAssertFalse(((UIActivityIndicatorView *)videoNode.spinner.view).isAnimating);
+  XCTAssertFalse(((UIActivityIndicatorView *)_videoNode.spinner.view).isAnimating);
 }
 
-- (void)testPlayButtonUserInteractionIsNotEnabled
+- (void)testPlayerDefaultsToNil
 {
+  XCTAssertNil(_videoNode.player);
+}
+
+- (void)testPlayerIsCreatedInFetchData
+{
+  _videoNode.asset = _firstAsset;
+
+  _videoNode.interfaceState = ASInterfaceStateFetchData;
   
+  XCTAssertNotNil(_videoNode.player);
+}
+
+- (void)testPlayerLayerNodeIsAddedOnDisplayDidFinish
+{
+  _videoNode.asset = _firstAsset;
+
+  [_videoNode displayDidFinish];
+  
+  XCTAssert([_videoNode.subnodes containsObject:_videoNode.playerNode]);
+}
+
+- (void)testVideoStartsPlayingOnDidDisplayIfAutoplayIsSet
+{
+  _videoNode.asset = _firstAsset;
+  _videoNode.shouldAutoplay = YES;
+  
+  [_videoNode displayDidFinish];
+  
+  XCTAssertTrue(_videoNode.shouldBePlaying);
 }
 
 @end

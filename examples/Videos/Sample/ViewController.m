@@ -11,7 +11,7 @@
 
 #import "ViewController.h"
 
-@interface ViewController()
+@interface ViewController()<ASVideoNodeDelegate>
 @property (nonatomic) ASVideoNode *videoNode;
 @end
 
@@ -50,6 +50,8 @@
 - (ASVideoNode *)nicCageVideo;
 {
   ASVideoNode *nicCageVideo = [[ASVideoNode alloc] init];
+  
+  nicCageVideo.delegate = self;
   
   nicCageVideo.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
   
@@ -100,6 +102,11 @@
 - (BOOL)prefersStatusBarHidden
 {
   return YES;
+}
+
+- (void)videoDidReachEnd:(ASVideoNode *)videoNode
+{
+  //Do something with your video if you so desire.
 }
 
 @end
