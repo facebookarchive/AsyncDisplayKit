@@ -11,6 +11,7 @@
 #import "ASLayout.h"
 #import "ASAssert.h"
 #import "ASLayoutSpecUtilities.h"
+#import "ASInternalHelpers.h"
 #import <stack>
 
 CGPoint const CGPointNull = {NAN, NAN};
@@ -37,8 +38,12 @@ extern BOOL CGPointIsNull(CGPoint point)
   ASLayout *l = [super new];
   if (l) {
     l->_layoutableObject = layoutableObject;
-    l->_size = size;
-    l->_position = position;
+    l->_size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
+    if (CGPointIsNull(position) == NO) {
+      l->_position = CGPointMake(ASCeilPixelValue(position.x), ASCeilPixelValue(position.y));
+    } else {
+      l->_position = position;
+    }
     l->_sublayouts = [sublayouts copy];
   }
   return l;

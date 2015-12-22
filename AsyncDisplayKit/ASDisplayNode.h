@@ -25,6 +25,11 @@ NS_ASSUME_NONNULL_BEGIN
 typedef UIView * _Nonnull(^ASDisplayNodeViewBlock)();
 
 /**
+ * UIView creation block. Used to create the backing view of a new display node.
+ */
+typedef UIViewController *(^ASDisplayNodeViewControllerBlock)();
+
+/**
  * CALayer creation block. Used to create the backing layer of a new display node.
  */
 typedef CALayer * _Nonnull(^ASDisplayNodeLayerBlock)();
@@ -687,7 +692,6 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  * @param node The node to be added.
  */
 - (void)addSubnode:(ASDisplayNode *)node;
-- (NSString *)name;
 @end
 
 /** CALayer(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to a CALayer. */
@@ -698,7 +702,6 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  * @param node The node to be added.
  */
 - (void)addSubnode:(ASDisplayNode *)node;
-- (NSString *)name;
 @end
 
 

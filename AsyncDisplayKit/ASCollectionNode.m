@@ -7,6 +7,7 @@
 //
 
 #import "ASCollectionNode.h"
+#import "ASDisplayNode+Subclasses.h"
 
 @implementation ASCollectionNode
 
@@ -41,6 +42,33 @@
 {
   [super clearFetchedData];
   [self.view clearFetchedData];
+}
+
+#pragma mark - ASCollectionView Forwards
+
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.view tuningParametersForRangeType:rangeType];
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.view setTuningParameters:tuningParameters forRangeType:rangeType];
+}
+
+- (void)reloadDataWithCompletion:(void (^)())completion
+{
+  [self.view reloadDataWithCompletion:completion];
+}
+
+- (void)reloadData
+{
+  [self.view reloadData];
+}
+
+- (void)reloadDataImmediately
+{
+  [self.view reloadDataImmediately];
 }
 
 @end
