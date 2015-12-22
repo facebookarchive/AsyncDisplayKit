@@ -17,8 +17,9 @@
 @end
 
 @implementation ASRangeHandlerRender
-@synthesize workingWindow = _workingWindow;
 
+#if USE_WORKING_WINDOW
+@synthesize workingWindow = _workingWindow;
 - (UIWindow *)workingWindow
 {
   ASDisplayNodeAssertMainThread();
@@ -45,6 +46,7 @@
     [self node:node exitedRangeOfType:ASLayoutRangeTypeRender];
   }
 }
+#endif
 
 - (void)node:(ASDisplayNode *)node enteredRangeOfType:(ASLayoutRangeType)rangeType
 {
@@ -60,12 +62,17 @@
   // The node un-suspends display.
   [node enterInterfaceState:ASInterfaceStateDisplay];
 
+  
+#if USE_WORKING_WINDOW
   // Add the node's layer to an off-screen window to trigger display and mark its contents as non-volatile.
   // Use the layer directly to avoid the substantial overhead of UIView heirarchy manipulations.
   // Any view-backed nodes will still create their views in order to assemble the layer heirarchy, and they will
   // also assemble a view subtree for the node, but we avoid the much more significant expense triggered by a view
   // being added or removed from an onscreen window (responder chain setup, will/DidMoveToWindow: recursive calls, etc)
   [[[self workingWindow] layer] addSublayer:node.layer];
+#else
+  [node recursivelyEnsureDisplay];  // Need to do this without waiting
+#endif
 }
 
 - (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType
@@ -93,6 +100,7 @@
   // The node calls clearCurrentContents and suspends display
   [node exitInterfaceState:ASInterfaceStateDisplay];
   
+#if USE_WORKING_WINDOW
   if (node.layer.superlayer != [[self workingWindow] layer]) {
     // In this case, the node has previously passed through the working range (or it is zero), and it has now fallen outside the working range.
     if (![node isLayerBacked]) {
@@ -104,6 +112,13 @@
   
   // At this point, the node's layer may validly be present either in the workingWindow, or in the contentsView of a cell.
   [node.layer removeFromSuperlayer];
+#else
+  if (![node isLayerBacked]) {
+    [node.view removeFromSuperview];
+  } else {
+    [node.layer removeFromSuperlayer];
+  }
+#endif
 }
 
 @end

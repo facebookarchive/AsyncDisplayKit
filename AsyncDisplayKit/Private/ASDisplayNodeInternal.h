@@ -105,8 +105,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   NSTimeInterval _debugTimeToAddSubnodeViews;
   NSTimeInterval _debugTimeForDidLoad;
 #endif
-
 }
+
++ (void)scheduleNodeForDisplay:(ASDisplayNode *)node;
 
 // The _ASDisplayLayer backing the node, if any.
 @property (nonatomic, readonly, retain) _ASDisplayLayer *asyncLayer;
@@ -134,6 +135,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
 - (BOOL)__visibilityNotificationsDisabled;
+- (BOOL)__selfOrParentHasVisibilityNotificationsDisabled;
 - (void)__incrementVisibilityNotificationsDisabled;
 - (void)__decrementVisibilityNotificationsDisabled;
 

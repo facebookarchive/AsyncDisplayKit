@@ -16,4 +16,7 @@
 
 + (instancetype)sharedImageDownloader;
 
++ (instancetype)new __attribute__((unavailable("+[ASBasicImageDownloader sharedImageDownloader] must be used.")));
+- (instancetype)init __attribute__((unavailable("+[ASBasicImageDownloader sharedImageDownloader] must be used.")));
+
 @end
