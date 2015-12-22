@@ -1220,28 +1220,33 @@ static NSInteger incrementIfFound(NSInteger i) {
 - (void)removeFromSupernode
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(_propertyLock);
-  if (!_supernode)
-    return;
-
-  // Check to ensure that our view or layer is actually inside of our supernode; otherwise, don't remove it.
-  // Though _ASDisplayView decouples the supernode if it is inserted inside another view hierarchy, this is
-  // more difficult to guarantee with _ASDisplayLayer because CoreAnimation doesn't have a -didMoveToSuperlayer.
   BOOL shouldRemoveFromSuperviewOrSuperlayer = NO;
   
-  if (self.nodeLoaded && _supernode.nodeLoaded) {
-    if (_flags.layerBacked || _supernode.layerBacked) {
-      shouldRemoveFromSuperviewOrSuperlayer = (_layer.superlayer == _supernode.layer);
-    } else {
-      shouldRemoveFromSuperviewOrSuperlayer = (_view.superview == _supernode.view);
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    if (!_supernode)
+      return;
+
+    // Check to ensure that our view or layer is actually inside of our supernode; otherwise, don't remove it.
+    // Though _ASDisplayView decouples the supernode if it is inserted inside another view hierarchy, this is
+    // more difficult to guarantee with _ASDisplayLayer because CoreAnimation doesn't have a -didMoveToSuperlayer.
+    
+    if (self.nodeLoaded && _supernode.nodeLoaded) {
+      if (_flags.layerBacked || _supernode.layerBacked) {
+        shouldRemoveFromSuperviewOrSuperlayer = (_layer.superlayer == _supernode.layer);
+      } else {
+        shouldRemoveFromSuperviewOrSuperlayer = (_view.superview == _supernode.view);
+      }
     }
   }
-
+  
   // Do this before removing the view from the hierarchy, as the node will clear its supernode pointer when its view is removed from the hierarchy.
+  // This call may result in the object being destroyed.
   [_supernode _removeSubnode:self];
 
   if (shouldRemoveFromSuperviewOrSuperlayer) {
     ASPerformBlockOnMainThread(^{
+      ASDN::MutexLocker l(_propertyLock);
       if (_flags.layerBacked) {
         [_layer removeFromSuperlayer];
       } else {
@@ -1869,7 +1874,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNode *subnode = nil;
   CGRect subnodeFrame = CGRectZero;
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
-    ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.");
+    ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.  self = %@, subnodes = %@", self, _subnodes);
     CGPoint adjustedOrigin = subnodeLayout.position;
     if (isfinite(adjustedOrigin.x) == NO) {
       ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
