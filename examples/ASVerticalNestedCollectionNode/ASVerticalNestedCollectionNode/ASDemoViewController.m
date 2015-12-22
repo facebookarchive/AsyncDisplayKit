@@ -38,6 +38,8 @@
         for (id<ASCollectionViewDataSource, ASCollectionViewDelegate> dataSource in _embeddedCollectionNodes) {
             UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
             ASCollectionNode *collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:flowLayout];
+            
+            // Note: Heres the issue since we can't calculate size without first setting the data source, and can't layout if we access the view of the node (causes thread affinity assert)
             collectionNode.view.asyncDataSource = dataSource;
             collectionNode.view.asyncDelegate = dataSource;
             [collectionNodes addObject:collectionNode];
