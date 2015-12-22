@@ -14,9 +14,7 @@
 
 @property (weak, nonatomic) id<ASPagerNodeDataSource> dataSource;
 
-- (void)reloadData;
-
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
+- (void)scrollToPageAtIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end
 
