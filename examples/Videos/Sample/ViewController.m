@@ -78,7 +78,7 @@
   simonVideo.backgroundColor = [UIColor lightGrayColor];
   simonVideo.autorepeat = YES;
   simonVideo.playButton = [self playButton];
-  simonVideo.shouldAutoPlay = YES;
+  simonVideo.shouldAutoplay = YES;
   
   return simonVideo;
 }
@@ -92,6 +92,7 @@
   [playButton measure:CGSizeMake(50, 50)];
   playButton.bounds = CGRectMake(0, 0, playButton.calculatedSize.width, playButton.calculatedSize.height);
   playButton.position = CGPointMake([UIScreen mainScreen].bounds.size.width/4, ([UIScreen mainScreen].bounds.size.height/3)/2);
+  [playButton setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:ASButtonStateHighlighted];
 
   return playButton;
 }

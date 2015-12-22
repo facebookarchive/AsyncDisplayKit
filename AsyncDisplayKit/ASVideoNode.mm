@@ -2,10 +2,11 @@
 
 #import "ASVideoNode.h"
 
-@interface ASVideoNode () {
+@interface ASVideoNode ()
+{
   ASDN::RecursiveMutex _lock;
   
-  __weak id<ASVideoNodeDatasource> _datasource;
+  __weak id<ASVideoNodeDataSource> _dataSource;
   
   BOOL _shouldBePlaying;
   AVAsset *_asset;
@@ -23,7 +24,8 @@
 
 @implementation ASVideoNode
 
-- (instancetype)init {
+- (instancetype)init
+{
   if (!(self = [super init])) { return nil; }
   
   _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
@@ -35,11 +37,14 @@
   
   self.gravity = ASVideoGravityResizeAspect;
   
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(restartVideo:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+  [self addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
   
   return self;
 }
 
+// FIXME: Adopt interfaceStateDidChange API
 - (void)setInterfaceState:(ASInterfaceState)newState
 {
   [super setInterfaceState:newState];
@@ -50,9 +55,6 @@
   } else {
     if (_shouldBePlaying) {
       [self play];
-    }
-    if (_spinner) {
-      [self addSubnode:_spinner];
     }
   }
 }
@@ -71,9 +73,9 @@
   }
 }
 
-- (void)restartVideo:(NSNotification *)notification
+- (void)didPlayToEnd:(NSNotification *)notification
 {
-  if ( [[[notification object] asset] isEqual:_asset]) {
+  if (ASObjectIsEqual([[notification object] asset], _asset)) {
     [[((AVPlayerLayer *)_playerNode.layer) player] seekToTime:CMTimeMakeWithSeconds(0, 1)];
     
     if (_autorepeat) {
@@ -84,16 +86,10 @@
   }
 }
 
-- (void)layoutDidFinish
+- (void)layout
 {
+  [super layout];
   _playerNode.frame = self.bounds;
-}
-
-- (void)didLoad {
-  [super didLoad];
-  
-  UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped)];
-  [self.view addGestureRecognizer:tap];
 }
 
 - (void)tapped
@@ -134,7 +130,7 @@
     }
 
   }
-  if (_shouldAutoPlay) {
+  if (_shouldAutoplay) {
     [self play];
   }
 }
@@ -189,7 +185,8 @@
   return _asset;
 }
 
-- (void)setGravity:(ASVideoGravity)gravity {
+- (void)setGravity:(ASVideoGravity)gravity
+{
   ASDN::MutexLocker l(_lock);
   
   switch (gravity) {
@@ -208,28 +205,25 @@
   }
 }
 
-- (ASVideoGravity)gravity;
+- (ASVideoGravity)gravity
 {
   ASDN::MutexLocker l(_lock);
   
-  if ([((AVPlayerLayer *)_playerNode.layer).contentsGravity isEqualToString:AVLayerVideoGravityResize]) {
+  if (ASObjectIsEqual(((AVPlayerLayer *)_playerNode.layer).contentsGravity, AVLayerVideoGravityResize)) {
     return ASVideoGravityResize;
   }
-  if ([((AVPlayerLayer *)_playerNode.layer).contentsGravity isEqualToString:AVLayerVideoGravityResizeAspectFill]) {
+  if (ASObjectIsEqual(((AVPlayerLayer *)_playerNode.layer).contentsGravity, AVLayerVideoGravityResizeAspectFill)) {
     return ASVideoGravityResizeAspectFill;
   }
   
   return ASVideoGravityResizeAspect;
 }
 
-- (void)play;
+- (void)play
 {
   ASDN::MutexLocker l(_lock);
   
-  [[((AVPlayerLayer *)_playerNode.layer) player] play];
-  _shouldBePlaying = YES;
-  _playButton.alpha = 0.0;
-  if ([self ready] && ![self.subnodes containsObject:_spinner]) {
+  if (!_spinner) {
     _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
       UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] initWithFrame:_playButton.frame];
       spinnnerView.color = [UIColor whiteColor];
@@ -237,26 +231,45 @@
       
       return spinnnerView;
     }];
-    
+  }
+  
+  if (![self ready]) {
     [self addSubnode:_spinner];
   }
+  
+  [[((AVPlayerLayer *)_playerNode.layer) player] play];
+  _shouldBePlaying = YES;
+  _playButton.alpha = 0.0;
+//  if ([self ready] && ![self.subnodes containsObject:_spinner]) {
+//  }
 }
 
-- (BOOL)ready;
+- (BOOL)ready
 {
-  return [((AVPlayerLayer *)_playerNode.layer) player].currentItem.status != AVPlayerItemStatusReadyToPlay;
+  return [((AVPlayerLayer *)_playerNode.layer) player].currentItem.status == AVPlayerItemStatusReadyToPlay;
 }
 
-- (void)pause;
+- (void)pause
 {
   ASDN::MutexLocker l(_lock);
   
   [[((AVPlayerLayer *)_playerNode.layer) player] pause];
+  [((UIActivityIndicatorView *)_spinner.view) stopAnimating];
   _shouldBePlaying = NO;
   _playButton.alpha = 1.0;
 }
 
 - (AVPlayerItem *)currentItem
+{
+  return _currentItem;
+}
+
+- (ASDisplayNode *)spinner
+{
+  return _spinner;
+}
+
+- (AVPlayerItem *)curentItem
 {
   return _currentItem;
 }

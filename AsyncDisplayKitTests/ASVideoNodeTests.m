@@ -16,11 +16,17 @@
 @interface ASVideoNode ()
 @property (atomic, readonly) AVPlayerItem *currentItem;
 @property (atomic) ASInterfaceState interfaceState;
+@property (atomic) ASDisplayNode *spinner;
+@end
+
+@interface AVPlayerItem ()
+@property (nonatomic) AVPlayerItemStatus status;
 @end
 
 @implementation ASVideoNodeTests
 
-- (void)testVideoNodeReplacesAVPlayerItemWhenNewURLIsSet {
+- (void)testVideoNodeReplacesAVPlayerItemWhenNewURLIsSet
+{
   ASVideoNode *videoNode = [[ASVideoNode alloc] init];
   videoNode.interfaceState = ASInterfaceStateFetchData;
   videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
@@ -33,7 +39,8 @@
   XCTAssertNotEqualObjects(item, secondItem);
 }
 
-- (void)testVideoNodeDoesNotReplaceAVPlayerItemWhenSameURLIsSet {
+- (void)testVideoNodeDoesNotReplaceAVPlayerItemWhenSameURLIsSet
+{
   ASVideoNode *videoNode = [[ASVideoNode alloc] init];
   videoNode.interfaceState = ASInterfaceStateFetchData;
   AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
@@ -45,6 +52,59 @@
   AVPlayerItem *secondItem = [videoNode currentItem];
   
   XCTAssertEqualObjects(item, secondItem);
+}
+
+//Touch Handling
+
+- (void)testSpinnerDefaultsToNil
+{
+  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
+  
+  XCTAssertNil(videoNode.spinner);
+}
+
+- (void)testOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnode
+{
+  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
+  videoNode.interfaceState = ASInterfaceStateFetchData;
+  AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  videoNode.asset = asset;
+  
+  [videoNode play];
+  
+  XCTAssertNotNil(videoNode.spinner);
+}
+
+- (void)testOnPauseSpinnerIsPausedIfPresent
+{
+  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
+  videoNode.interfaceState = ASInterfaceStateFetchData;
+  AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  videoNode.asset = asset;
+  
+  [videoNode play];
+  
+  [videoNode pause];
+  
+  XCTAssertFalse(((UIActivityIndicatorView *)videoNode.spinner.view).isAnimating);
+}
+
+- (void)testOnVideoReadySpinnerIsStoppedAndRemoved
+{
+  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
+  videoNode.interfaceState = ASInterfaceStateFetchData;
+  AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  videoNode.asset = asset;
+
+  [videoNode play];
+  [videoNode observeValueForKeyPath:@"status" ofObject:[videoNode currentItem] change:@{@"new" : @(AVPlayerItemStatusReadyToPlay)} context:NULL];
+  
+  XCTAssertFalse(((UIActivityIndicatorView *)videoNode.spinner.view).isAnimating);
+}
+
+- (void)testPlayButtonUserInteractionIsNotEnabled
+{
+  
 }
 
 @end

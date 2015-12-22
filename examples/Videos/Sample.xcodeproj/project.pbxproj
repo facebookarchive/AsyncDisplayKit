@@ -18,6 +18,7 @@
 		AE8E41191C228A4A00913AC4 /* bearacrat@2x.jpg in Resources */ = {isa = PBXBuildFile; fileRef = AE8E41181C228A4A00913AC4 /* bearacrat@2x.jpg */; };
 		AE8E411B1C23634C00913AC4 /* simon.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AE8E411A1C235A6000913AC4 /* simon.mp4 */; };
 		AED850671C22679200183ED3 /* playButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AED850661C22679200183ED3 /* playButton@2x.png */; };
+		AEE1F2C01C293CF1005E0577 /* playButtonSelected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AEE1F2BF1C293CF1005E0577 /* playButtonSelected@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		AE8E41181C228A4A00913AC4 /* bearacrat@2x.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "bearacrat@2x.jpg"; sourceTree = "<group>"; };
 		AE8E411A1C235A6000913AC4 /* simon.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = simon.mp4; sourceTree = "<group>"; };
 		AED850661C22679200183ED3 /* playButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "playButton@2x.png"; sourceTree = "<group>"; };
+		AEE1F2BF1C293CF1005E0577 /* playButtonSelected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "playButtonSelected@2x.png"; sourceTree = "<group>"; };
 		C068F1D3F0CC317E895FCDAB /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -78,6 +80,7 @@
 			isa = PBXGroup;
 			children = (
 				AED850661C22679200183ED3 /* playButton@2x.png */,
+				AEE1F2BF1C293CF1005E0577 /* playButtonSelected@2x.png */,
 				AE8E41181C228A4A00913AC4 /* bearacrat@2x.jpg */,
 				AE8E411A1C235A6000913AC4 /* simon.mp4 */,
 				05E2128819D4DB510098F589 /* AppDelegate.h */,
@@ -186,6 +189,7 @@
 				6C2C82AC19EE274300767484 /* Default-667h@2x.png in Resources */,
 				AE8E411B1C23634C00913AC4 /* simon.mp4 in Resources */,
 				6C2C82AD19EE274300767484 /* Default-736h@3x.png in Resources */,
+				AEE1F2C01C293CF1005E0577 /* playButtonSelected@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
