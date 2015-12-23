@@ -14,7 +14,8 @@
  */
 @interface ASCollectionNode : ASDisplayNode
 
-- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
 
 @property (nonatomic, readonly) ASCollectionView *view;
 

@@ -193,10 +193,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
-//  ASCollectionNode *collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
-//  collectionNode.frame = frame;
-//  return collectionNode.view;
-  return [self _initWithFrame:frame collectionViewLayout:layout];
+  ASCollectionNode *collectionNode = [[ASCollectionNode alloc] initWithFrame:frame collectionViewLayout:layout];
+  return collectionNode.view;
 }
 
 // FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
