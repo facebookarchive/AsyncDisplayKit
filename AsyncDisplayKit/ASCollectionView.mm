@@ -242,6 +242,12 @@ static BOOL _isInterceptedSelector(SEL sel)
   
   _registeredSupplementaryKinds = [NSMutableSet set];
   
+  _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+  super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+  
+  _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
+  super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
+  
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
@@ -253,6 +259,8 @@ static BOOL _isInterceptedSelector(SEL sel)
 {
   // Sometimes the UIKit classes can call back to their delegate even during deallocation.
   // This bug might be iOS 7-specific.
+  _proxyDelegate = nil;
+  _proxyDataSource = nil;
   super.delegate  = nil;
   super.dataSource = nil;
 }
@@ -315,17 +323,19 @@ static BOOL _isInterceptedSelector(SEL sel)
   // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to nil out
   // super.dataSource in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
+  super.dataSource = nil;
+
   if (asyncDataSource == nil) {
-    super.dataSource = nil;
     _asyncDataSource = nil;
-    _proxyDataSource = nil;
+    _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
     _asyncDataSourceImplementsConstrainedSizeForNode = NO;
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
-    super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
     _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
   }
+  
+  super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
 }
 
 - (void)setAsyncDelegate:(id<ASCollectionViewDelegate>)asyncDelegate
@@ -335,19 +345,21 @@ static BOOL _isInterceptedSelector(SEL sel)
   // will return as nil (ARC magic) even though the _proxyDelegate still exists. It's really important to nil out
   // super.delegate in this case because calls to _ASTableViewProxy will start failing and cause crashes.
 
+  super.delegate = nil;
+
   if (asyncDelegate == nil) {
     // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
     // in UIScrollViewAccessibility.
-    super.delegate = nil;
     _asyncDelegate = nil;
-    _proxyDelegate = nil;
+    _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:[NSNull null] interceptor:self];
     _asyncDelegateImplementsInsetSection = NO;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
-    super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
     _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
+  
+  super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
 
   [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
 }
