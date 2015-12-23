@@ -9,6 +9,10 @@
 #import "ASCollectionNode.h"
 #import "ASDisplayNode+Subclasses.h"
 
+@interface ASCollectionView (Internal)
+- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
+@end
+
 @implementation ASCollectionNode
 
 - (instancetype)init
@@ -20,7 +24,12 @@
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
 {
-  if (self = [super initWithViewBlock:^UIView *{ return [[ASCollectionView alloc] initWithCollectionViewLayout:layout]; }]) {
+  return [self initWithFrame:CGRectZero collectionViewLayout:layout];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
+{
+  if (self = [super initWithViewBlock:^UIView *{ return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout]; }]) {
     return self;
   }
   return nil;
@@ -29,6 +38,11 @@
 - (ASCollectionView *)view
 {
   return (ASCollectionView *)[super view];
+}
+
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+  
 }
 
 - (void)clearContents

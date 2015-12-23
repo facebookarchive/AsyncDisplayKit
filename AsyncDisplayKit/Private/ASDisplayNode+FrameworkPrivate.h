@@ -57,6 +57,9 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
   ASHierarchyState _hierarchyState;
 }
 
+// The view class to use when creating a new display node instance. Defaults to _ASDisplayView.
++ (Class)viewClass;
+
 // These methods are recursive, and either union or remove the provided interfaceState to all sub-elements.
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState;
 - (void)exitInterfaceState:(ASInterfaceState)interfaceState;

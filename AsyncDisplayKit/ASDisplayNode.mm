@@ -1722,6 +1722,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   [self clearFetchedData];
 }
 
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+}
+
 /**
  * We currently only set interface state on nodes in table/collection views. For other nodes, if they are
  * in the hierarchy we enable all ASInterfaceState types with `ASInterfaceStateInHierarchy`, otherwise `None`.
@@ -1776,11 +1780,17 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // Entered or exited data loading state.
   if ((newState & ASInterfaceStateVisible) != (oldState & ASInterfaceStateVisible)) {
     if (newState & ASInterfaceStateVisible) {
-      // Consider providing a -didBecomeVisible.
+      [self visibilityDidChange:YES];
     } else {
-      // Consider providing a -didBecomeInvisible.
+      [self visibilityDidChange:NO];
     }
   }
+  
+  [self interfaceStateDidChange:newState fromState:oldState];
+}
+
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
+{
 }
 
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState
