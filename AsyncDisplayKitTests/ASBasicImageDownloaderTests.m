@@ -1,5 +1,5 @@
 //
-//  ASBasicImageDownloaderTests.m
+//  ASZBasicImageDownloaderTests.m
 //  AsyncDisplayKit
 //
 //  Created by Victor Mayorov on 10/06/15.
@@ -10,11 +10,12 @@
 
 #import <AsyncDisplayKit/ASBasicImageDownloader.h>
 
-@interface ASBasicImageDownloaderTests : XCTestCase
+// Z in the name to delay running until after the test instance is operating normally.
+@interface ASZBasicImageDownloaderTests : XCTestCase
 
 @end
 
-@implementation ASBasicImageDownloaderTests
+@implementation ASZBasicImageDownloaderTests
 
 - (void)testAsynchronouslyDownloadTheSameURLTwice
 {
