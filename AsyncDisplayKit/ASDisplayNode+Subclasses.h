@@ -37,34 +37,7 @@
 
 @interface ASDisplayNode (Subclassing)
 
-
-/** @name View Configuration */
-
-
-/**
- * @return The view class to use when creating a new display node instance. Defaults to _ASDisplayView.
- */
-+ (Class)viewClass;
-
-
 /** @name Properties */
-
-
-/**
- * @abstract The scale factor to apply to the rendering.
- *
- * @discussion Use setNeedsDisplayAtScale: to set a value and then after display, the display node will set the layer's
- * contentsScale. This is to prevent jumps when re-rasterizing at a different contentsScale.
- * Read this property if you need to know the future contentsScale of your layer, eg in drawParameters.
- *
- * @see setNeedsDisplayAtScale:
- */
-@property (nonatomic, assign, readonly) CGFloat contentsScaleForDisplay;
-
-/**
- * @abstract Whether the view or layer of this display node is currently in a window
- */
-@property (nonatomic, readonly, assign, getter=isInHierarchy) BOOL inHierarchy;
 
 /**
  * @abstract Return the calculated layout.
@@ -190,10 +163,9 @@
  *
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
-+ (void)drawRect:(CGRect)bounds
-  withParameters:(id<NSObject>)parameters
-     isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
-   isRasterizing:(BOOL)isRasterizing;
++ (void)drawRect:(CGRect)bounds withParameters:(id<NSObject>)parameters
+                                   isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
+                                 isRasterizing:(BOOL)isRasterizing;
 
 /**
  * @summary Delegate override to provide new layer contents as a UIImage.
@@ -236,6 +208,33 @@
  */
 - (void)displayDidFinish ASDISPLAYNODE_REQUIRES_SUPER;
 
+/** @name Observing node-related changes */
+
+/**
+ * @abstract Called whenever any bit in the ASInterfaceState bitfield is changed.
+ *
+ * @discussion Subclasses may use this to monitor when they become visible, should free cached data, and much more.
+ * @see ASInterfaceState
+ */
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState;
+
+- (void)visibilityDidChange:(BOOL)isVisible;
+
+/**
+ * Called just before the view is added to a window.
+ */
+- (void)willEnterHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * Called after the view is removed from the window.
+ */
+- (void)didExitHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Whether the view or layer of this display node is currently in a window
+ */
+@property (nonatomic, readonly, assign, getter=isInHierarchy) BOOL inHierarchy;
+
 /**
  * @abstract Indicates that the node should fetch any external data, such as images.
  *
@@ -244,6 +243,23 @@
  * The data may be remote and accessed via the network, but could also be a local database query.
  */
 - (void)fetchData ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * Provides an opportunity to clear any fetched data (e.g. remote / network or database-queried) on the current node.
+ *
+ * @discussion This will not clear data recursively for all subnodes. Either call -recursivelyClearFetchedData or
+ * selectively clear fetched data.
+ */
+- (void)clearFetchedData ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
+ * on the current node.
+ *
+ * @discussion Called by -recursivelyClearContents. Base class implements self.contents = nil, clearing any backing
+ * store, for asynchronous regeneration when needed.
+ */
+- (void)clearContents ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Indicates that the receiver is about to display its subnodes. This method is not called if there are no
@@ -266,7 +282,6 @@
  * completed.
  */
 - (void)subnodeDisplayDidFinish:(ASDisplayNode *)subnode ASDISPLAYNODE_REQUIRES_SUPER;
-
 
 /**
  * @abstract Marks the receiver's bounds as needing to be redrawn, with a scale value.
@@ -294,6 +309,17 @@
  * @see contentsScaleForDisplay
  */
 - (void)recursivelySetNeedsDisplayAtScale:(CGFloat)contentsScale;
+
+/**
+ * @abstract The scale factor to apply to the rendering.
+ *
+ * @discussion Use setNeedsDisplayAtScale: to set a value and then after display, the display node will set the layer's
+ * contentsScale. This is to prevent jumps when re-rasterizing at a different contentsScale.
+ * Read this property if you need to know the future contentsScale of your layer, eg in drawParameters.
+ *
+ * @see setNeedsDisplayAtScale:
+ */
+@property (nonatomic, assign, readonly) CGFloat contentsScaleForDisplay;
 
 
 /** @name Touch handling */
@@ -361,38 +387,6 @@
  */
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event;
 
-
-/** @name Observing node-related changes */
-
-
-/**
- * Called just before the view is added to a window.
- */
-- (void)willEnterHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * Called after the view is removed from the window.
- */
-- (void)didExitHierarchy ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
- * on the current node.
- *
- * @discussion Called by -recursivelyClearContents. Base class implements self.contents = nil, clearing any backing
- * store, for asynchronous regeneration when needed.
- */
-- (void)clearContents ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * Provides an opportunity to clear any fetched data (e.g. remote / network or database-queried) on the current node.
- *
- * @discussion This will not clear data recursively for all subnodes. Either call -recursivelyClearFetchedData or
- * selectively clear fetched data.
- */
-- (void)clearFetchedData ASDISPLAYNODE_REQUIRES_SUPER;
-
-
 /** @name Placeholders */
 
 /**
@@ -411,6 +405,7 @@
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
 - (UIImage *)placeholderImage;
+
 
 /** @name Description */
 

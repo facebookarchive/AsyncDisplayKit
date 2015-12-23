@@ -65,4 +65,9 @@
   return ASSizeRangeMake(viewSize, viewSize);
 }
 
+- (ASInterfaceState)interfaceState
+{
+  return _node.interfaceState;
+}
+
 @end
