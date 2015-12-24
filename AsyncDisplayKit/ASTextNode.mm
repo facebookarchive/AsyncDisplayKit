@@ -97,6 +97,8 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 #pragma mark - NSObject
 
+static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
+
 - (instancetype)init
 {
   if (self = [super init]) {
@@ -120,7 +122,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
     self.opaque = NO;
     self.backgroundColor = [UIColor clearColor];
 
-    self.linkAttributeNames = @[ NSLinkAttributeName ];
+    self.linkAttributeNames = DefaultLinkAttributeNames;
 
     // Accessibility
     self.isAccessibilityElement = YES;

@@ -144,6 +144,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 // Call didExitHierarchy if necessary and set inHierarchy = NO if visibility notifications are enabled on all of its parents
 - (void)__exitHierarchy;
 
+// Helper method to summarize whether or not the node run through the display process
+- (BOOL)__implementsDisplay;
+
 // Display the node's view/layer immediately on the current thread, bypassing the background thread rendering. Will be deprecated.
 - (void)displayImmediately;
 

@@ -1470,9 +1470,9 @@ static NSInteger incrementIfFound(NSInteger i) {
 }
 
 // Helper method to summarize whether or not the node run through the display process
-- (BOOL)_implementsDisplay
+- (BOOL)__implementsDisplay
 {
-  return _flags.implementsDrawRect == YES || _flags.implementsImageDisplay == YES;
+  return _flags.implementsDrawRect == YES || _flags.implementsImageDisplay == YES || self.shouldRasterizeDescendants;
 }
 
 - (void)_setupPlaceholderLayer
@@ -1502,7 +1502,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // (even a runloop observer at a late call order will not stop the next frame from compositing, showing placeholders).
   
   ASDisplayNode *node = [layer asyncdisplaykit_node];
-  if (!layer.contents && [node _implementsDisplay]) {
+  if (!layer.contents && [node __implementsDisplay]) {
     // For layers that do get displayed here, this immediately kicks off the work on the concurrent -[_ASDisplayLayer displayQueue].
     // At the same time, it creates an associated _ASAsyncTransaction, which we can use to block on display completion.  See ASDisplayNode+AsyncDisplay.mm.
     [layer displayIfNeeded];
@@ -2148,7 +2148,7 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 
   self.asyncLayer.displaySuspended = flag;
 
-  if ([self _implementsDisplay]) {
+  if ([self __implementsDisplay]) {
     if (flag) {
       [_supernode subnodeDisplayDidFinish:self];
     } else {

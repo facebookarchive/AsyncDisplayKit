@@ -20,13 +20,14 @@
 
 - (instancetype)init
 {
-  _flowLayout = [[UICollectionViewFlowLayout alloc] init];
-  _flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-  _flowLayout.minimumInteritemSpacing = 0;
-  _flowLayout.minimumLineSpacing = 0;
+  UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+  flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+  flowLayout.minimumInteritemSpacing = 0;
+  flowLayout.minimumLineSpacing = 0;
   
-  self = [super initWithCollectionViewLayout:_flowLayout];
+  self = [super initWithCollectionViewLayout:flowLayout];
   if (self != nil) {
+    _flowLayout = flowLayout;
   }
   return self;
 }

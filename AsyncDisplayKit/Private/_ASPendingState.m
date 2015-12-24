@@ -135,19 +135,24 @@
 @synthesize borderColor=borderColor;
 @synthesize asyncdisplaykit_asyncTransactionContainer=asyncTransactionContainer;
 
+
+static CGColorRef blackColorRef = NULL;
+static UIColor *defaultTintColor = nil;
+
 - (id)init
 {
   if (!(self = [super init]))
     return nil;
 
-  // Default UIKit color is an RGB color
-  static CGColorRef black;
+
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
+    // Default UIKit color is an RGB color
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    black = CGColorCreate(colorSpace, (CGFloat[]){0,0,0,1} );
-    CFRetain(black);
+    blackColorRef = CGColorCreate(colorSpace, (CGFloat[]){0,0,0,1} );
+    CFRetain(blackColorRef);
     CGColorSpaceRelease(colorSpace);
+    defaultTintColor = [UIColor colorWithRed:0.0 green:0.478 blue:1.0 alpha:1.0];
   });
 
   // Set defaults, these come from the defaults specified in CALayer and UIView
@@ -156,7 +161,7 @@
   frame = CGRectZero;
   bounds = CGRectZero;
   backgroundColor = nil;
-  tintColor = [UIColor colorWithRed:0.0 green:0.478 blue:1.0 alpha:1.0];
+  tintColor = defaultTintColor;
   contents = nil;
   isHidden = NO;
   needsDisplayOnBoundsChange = NO;
@@ -172,14 +177,12 @@
   transform = CATransform3DIdentity;
   sublayerTransform = CATransform3DIdentity;
   userInteractionEnabled = YES;
-  CFRetain(black);
-  shadowColor = black;
+  shadowColor = blackColorRef;
   shadowOpacity = 0.0;
   shadowOffset = CGSizeMake(0, -3);
   shadowRadius = 3;
   borderWidth = 0;
-  CFRetain(black);
-  borderColor = black;
+  borderColor = blackColorRef;
   isAccessibilityElement = NO;
   accessibilityLabel = nil;
   accessibilityHint = nil;
@@ -376,7 +379,9 @@
     return;
   }
 
-  CGColorRelease(shadowColor);
+  if (shadowColor != blackColorRef) {
+    CGColorRelease(shadowColor);
+  }
   shadowColor = color;
   CGColorRetain(shadowColor);
 
@@ -413,7 +418,9 @@
     return;
   }
 
-  CGColorRelease(borderColor);
+  if (borderColor != blackColorRef) {
+    CGColorRelease(borderColor);
+  }
   borderColor = color;
   CGColorRetain(borderColor);
 
@@ -1002,8 +1009,14 @@
 - (void)dealloc
 {
   CGColorRelease(backgroundColor);
-  CGColorRelease(shadowColor);
-  CGColorRelease(borderColor);
+  
+  if (shadowColor != blackColorRef) {
+    CGColorRelease(shadowColor);
+  }
+  
+  if (borderColor != blackColorRef) {
+    CGColorRelease(borderColor);
+  }
 }
 
 @end

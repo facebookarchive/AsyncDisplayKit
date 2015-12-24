@@ -76,7 +76,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   if (!(self = [super init]))
     return nil;
 
-  _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
   _enabled = YES;
 
   // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
@@ -214,6 +213,10 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // Convert nil to [NSNull null] so that it can be used as a key for NSMapTable.
   if (!target)
     target = [NSNull null];
+  
+  if (!_controlEventDispatchTable) {
+    _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
+  }
 
   // Enumerate the events in the mask, adding the target-action pair for each control event included in controlEventMask
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEventMask, ^
