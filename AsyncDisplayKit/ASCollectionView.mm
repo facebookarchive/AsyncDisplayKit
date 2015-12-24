@@ -8,6 +8,7 @@
 
 #import "ASAssert.h"
 #import "ASBatchFetching.h"
+#import "ASDelegateProxy.h"
 #import "ASCollectionView.h"
 #import "ASCollectionNode.h"
 #import "ASCollectionDataController.h"
@@ -21,87 +22,6 @@
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
-
-#pragma mark -
-#pragma mark Proxying.
-
-/**
- * ASCollectionView intercepts and/or overrides a few of UICollectionView's critical data source and delegate methods.
- *
- * Any selector included in this function *MUST* be implemented by ASCollectionView.
- */
-static BOOL _isInterceptedSelector(SEL sel)
-{
-  return (
-          // handled by ASCollectionView node<->cell machinery
-          sel == @selector(collectionView:cellForItemAtIndexPath:) ||
-          sel == @selector(collectionView:layout:sizeForItemAtIndexPath:) ||
-          sel == @selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:) ||
-          
-          // handled by ASRangeController
-          sel == @selector(numberOfSectionsInCollectionView:) ||
-          sel == @selector(collectionView:numberOfItemsInSection:) ||
-          
-          // used for ASRangeController visibility updates
-          sel == @selector(collectionView:willDisplayCell:forItemAtIndexPath:) ||
-          sel == @selector(collectionView:didEndDisplayingCell:forItemAtIndexPath:) ||
-          
-          // used for batch fetching API
-          sel == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
-          );
-}
-
-
-/**
- * Stand-in for UICollectionViewDataSource and UICollectionViewDelegate.  Any method calls we intercept are routed to ASCollectionView;
- * everything else leaves AsyncDisplayKit safely and arrives at the original intended data source and delegate.
- */
-@interface _ASCollectionViewProxy : NSProxy
-- (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASCollectionView *)interceptor;
-@end
-
-@implementation _ASCollectionViewProxy {
-  id<NSObject> __weak _target;
-  ASCollectionView * __weak _interceptor;
-}
-
-- (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASCollectionView *)interceptor
-{
-  // -[NSProxy init] is undefined
-  if (!self) {
-    return nil;
-  }
-  
-  ASDisplayNodeAssert(target, @"target must not be nil");
-  ASDisplayNodeAssert(interceptor, @"interceptor must not be nil");
-  
-  _target = target;
-  _interceptor = interceptor;
-  
-  return self;
-}
-
-- (BOOL)respondsToSelector:(SEL)aSelector
-{
-  ASDisplayNodeAssert(_target, @"target must not be nil"); // catch weak ref's being nilled early
-  ASDisplayNodeAssert(_interceptor, @"interceptor must not be nil");
-  
-  return (_isInterceptedSelector(aSelector) || [_target respondsToSelector:aSelector]);
-}
-
-- (id)forwardingTargetForSelector:(SEL)aSelector
-{
-  ASDisplayNodeAssert(_target, @"target must not be nil"); // catch weak ref's being nilled early
-  ASDisplayNodeAssert(_interceptor, @"interceptor must not be nil");
-  
-  if (_isInterceptedSelector(aSelector)) {
-    return _interceptor;
-  }
-  
-  return [_target respondsToSelector:aSelector] ? _target : nil;
-}
-
-@end
 
 #pragma mark -
 #pragma mark ASCellNode<->UICollectionViewCell bridging.
@@ -138,9 +58,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate> {
-  _ASCollectionViewProxy *_proxyDataSource;
-  _ASCollectionViewProxy *_proxyDelegate;
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor> {
+  ASCollectionViewProxy *_proxyDataSource;
+  ASCollectionViewProxy *_proxyDelegate;
   
   ASCollectionDataController *_dataController;
   ASRangeController *_rangeController;
@@ -155,6 +75,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   BOOL _collectionViewLayoutImplementsInsetSection;
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
   BOOL _queuedNodeSizeUpdate;
+  BOOL _isDeallocating;
   
   ASBatchContext *_batchContext;
   
@@ -244,6 +165,12 @@ static BOOL _isInterceptedSelector(SEL sel)
     _layoutInspector = [self flowLayoutInspector];
   }
   
+  _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
+  super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+  
+  _proxyDataSource = [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
+  super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
+  
   _registeredSupplementaryKinds = [NSMutableSet set];
   
   self.backgroundColor = [UIColor whiteColor];
@@ -255,10 +182,10 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 - (void)dealloc
 {
-  // Sometimes the UIKit classes can call back to their delegate even during deallocation.
-  // This bug might be iOS 7-specific.
-  super.delegate  = nil;
-  super.dataSource = nil;
+  // Sometimes the UIKit classes can call back to their delegate even during deallocation, due to animation completion blocks etc.
+  _isDeallocating = YES;
+  [self setAsyncDelegate:nil];
+  [self setAsyncDataSource:nil];
 }
 
 /**
@@ -312,24 +239,35 @@ static BOOL _isInterceptedSelector(SEL sel)
   ASDisplayNodeAssert(delegate == nil, @"ASCollectionView uses asyncDelegate, not UICollectionView's delegate property.");
 }
 
+- (void)proxyTargetHasDeallocated:(ASDelegateProxy *)proxy
+{
+  if (proxy == _proxyDelegate) {
+    [self setAsyncDelegate:nil];
+  } else if (proxy == _proxyDataSource) {
+    [self setAsyncDataSource:nil];
+  }
+}
+
 - (void)setAsyncDataSource:(id<ASCollectionViewDataSource>)asyncDataSource
 {
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDataSource in the ViewController's dealloc. In this case our _asyncDataSource
   // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to nil out
-  // super.dataSource in this case because calls to _ASTableViewProxy will start failing and cause crashes.
+  // super.dataSource in this case because calls to ASCollectionViewProxy will start failing and cause crashes.
+
+  super.dataSource = nil;
   
   if (asyncDataSource == nil) {
-    super.dataSource = nil;
     _asyncDataSource = nil;
-    _proxyDataSource = nil;
+    _proxyDataSource = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
     _asyncDataSourceImplementsConstrainedSizeForNode = NO;
   } else {
     _asyncDataSource = asyncDataSource;
-    _proxyDataSource = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
-    super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
+    _proxyDataSource = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
   }
+  
+  super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
 }
 
 - (void)setAsyncDelegate:(id<ASCollectionViewDelegate>)asyncDelegate
@@ -337,21 +275,24 @@ static BOOL _isInterceptedSelector(SEL sel)
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDelegate in the ViewController's dealloc. In this case our _asyncDelegate
   // will return as nil (ARC magic) even though the _proxyDelegate still exists. It's really important to nil out
-  // super.delegate in this case because calls to _ASTableViewProxy will start failing and cause crashes.
+  // super.delegate in this case because calls to ASCollectionViewProxy will start failing and cause crashes.
+  
+  // Order is important here, the asyncDelegate must be callable while nilling super.delegate to avoid random crashes
+  // in UIScrollViewAccessibility.
+
+  super.delegate = nil;
   
   if (asyncDelegate == nil) {
-    // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
-    // in UIScrollViewAccessibility.
-    super.delegate = nil;
     _asyncDelegate = nil;
-    _proxyDelegate = nil;
+    _proxyDelegate = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
     _asyncDelegateImplementsInsetSection = NO;
   } else {
     _asyncDelegate = asyncDelegate;
-    _proxyDelegate = [[_ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
-    super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
+    _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
+  
+  super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
   [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
 }

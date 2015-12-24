@@ -13,6 +13,7 @@
 #import "ASBatchFetching.h"
 #import "ASChangeSetDataController.h"
 #import "ASCollectionViewLayoutController.h"
+#import "ASDelegateProxy.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -23,87 +24,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
-
-#pragma mark -
-#pragma mark Proxying.
-
-/**
- * ASTableView intercepts and/or overrides a few of UITableView's critical data source and delegate methods.
- *
- * Any selector included in this function *MUST* be implemented by ASTableView.
- */
-static BOOL _isInterceptedSelector(SEL sel)
-{
-  return (
-          // handled by ASTableView node<->cell machinery
-          sel == @selector(tableView:cellForRowAtIndexPath:) ||
-          sel == @selector(tableView:heightForRowAtIndexPath:) ||
-
-          // handled by ASRangeController
-          sel == @selector(numberOfSectionsInTableView:) ||
-          sel == @selector(tableView:numberOfRowsInSection:) ||
-
-          // used for ASRangeController visibility updates
-          sel == @selector(tableView:willDisplayCell:forRowAtIndexPath:) ||
-          sel == @selector(tableView:didEndDisplayingCell:forRowAtIndexPath:) ||
-
-          // used for batch fetching API
-          sel == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
-          );
-}
-
-
-/**
- * Stand-in for UITableViewDataSource and UITableViewDelegate.  Any method calls we intercept are routed to ASTableView;
- * everything else leaves AsyncDisplayKit safely and arrives at the original intended data source and delegate.
- */
-@interface _ASTableViewProxy : NSProxy
-- (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASTableView *)interceptor;
-@end
-
-@implementation _ASTableViewProxy {
-  id<NSObject> __weak _target;
-  ASTableView * __weak _interceptor;
-}
-
-- (instancetype)initWithTarget:(id<NSObject>)target interceptor:(ASTableView *)interceptor
-{
-  // -[NSProxy init] is undefined
-  if (!self) {
-    return nil;
-  }
-
-  ASDisplayNodeAssert(target, @"target must not be nil");
-  ASDisplayNodeAssert(interceptor, @"interceptor must not be nil");
-
-  _target = target;
-  _interceptor = interceptor;
-
-  return self;
-}
-
-- (BOOL)respondsToSelector:(SEL)aSelector
-{
-  ASDisplayNodeAssert(_target, @"target must not be nil"); // catch weak ref's being nilled early
-  ASDisplayNodeAssert(_interceptor, @"interceptor must not be nil");
-
-  return (_isInterceptedSelector(aSelector) || [_target respondsToSelector:aSelector]);
-}
-
-- (id)forwardingTargetForSelector:(SEL)aSelector
-{
-  ASDisplayNodeAssert(_target, @"target must not be nil"); // catch weak ref's being nilled early
-  ASDisplayNodeAssert(_interceptor, @"interceptor must not be nil");
-
-  if (_isInterceptedSelector(aSelector)) {
-    return _interceptor;
-  }
-
-  return [_target respondsToSelector:aSelector] ? _target : nil;
-}
-
-@end
-
 
 #pragma mark -
 #pragma mark ASCellNode<->UITableViewCell bridging.
@@ -156,13 +76,12 @@ static BOOL _isInterceptedSelector(SEL sel)
 
 @end
 
-
 #pragma mark -
 #pragma mark ASTableView
 
-@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeLayoutDelegate> {
-  _ASTableViewProxy *_proxyDataSource;
-  _ASTableViewProxy *_proxyDelegate;
+@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor> {
+  ASTableViewProxy *_proxyDataSource;
+  ASTableViewProxy *_proxyDelegate;
 
   ASFlowLayoutController *_layoutController;
 
@@ -180,6 +99,7 @@ static BOOL _isInterceptedSelector(SEL sel)
   CGFloat _nodesConstrainedWidth;
   BOOL _ignoreNodesConstrainedWidthChange;
   BOOL _queuedNodeHeightUpdate;
+  BOOL _isDeallocating;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -224,6 +144,12 @@ static BOOL _isInterceptedSelector(SEL sel)
   // If the initial size is 0, expect a size change very soon which is part of the initial configuration
   // and should not trigger a relayout.
   _ignoreNodesConstrainedWidthChange = (_nodesConstrainedWidth == 0);
+  
+  _proxyDelegate = [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
+  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+  
+  _proxyDataSource = [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
+  super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
 
   [self registerClass:_ASTableViewCell.class forCellReuseIdentifier:kCellReuseIdentifier];
 }
@@ -265,9 +191,9 @@ static BOOL _isInterceptedSelector(SEL sel)
 - (void)dealloc
 {
   // Sometimes the UIKit classes can call back to their delegate even during deallocation.
-  // This bug might be iOS 7-specific.
-  super.delegate  = nil;
-  super.dataSource = nil;
+  _isDeallocating = YES;
+  [self setAsyncDelegate:nil];
+  [self setAsyncDataSource:nil];
 }
 
 #pragma mark -
@@ -290,17 +216,19 @@ static BOOL _isInterceptedSelector(SEL sel)
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDataSource in the ViewController's dealloc. In this case our _asyncDataSource
   // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to nil out
-  // super.dataSource in this case because calls to _ASTableViewProxy will start failing and cause crashes.
-
+  // super.dataSource in this case because calls to ASTableViewProxy will start failing and cause crashes.
+  
+  super.dataSource = nil;
+  
   if (asyncDataSource == nil) {
-    super.dataSource = nil;
     _asyncDataSource = nil;
-    _proxyDataSource = nil;
+    _proxyDataSource = _isDeallocating ? nil : [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
   } else {
     _asyncDataSource = asyncDataSource;
-    _proxyDataSource = [[_ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
-    super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
+    _proxyDataSource = [[ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
   }
+  
+  super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
 }
 
 - (void)setAsyncDelegate:(id<ASTableViewDelegate>)asyncDelegate
@@ -308,18 +236,30 @@ static BOOL _isInterceptedSelector(SEL sel)
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDelegate in the ViewController's dealloc. In this case our _asyncDelegate
   // will return as nil (ARC magic) even though the _proxyDelegate still exists. It's really important to nil out
-  // super.delegate in this case because calls to _ASTableViewProxy will start failing and cause crashes.
+  // super.delegate in this case because calls to ASTableViewProxy will start failing and cause crashes.
+  
+  // Order is important here, the asyncDelegate must be callable while nilling super.delegate to avoid random crashes
+  // in UIScrollViewAccessibility.
 
+  super.delegate = nil;
+  
   if (asyncDelegate == nil) {
-    // order is important here, the delegate must be callable while nilling super.delegate to avoid random crashes
-    // in UIScrollViewAccessibility.
-    super.delegate = nil;
     _asyncDelegate = nil;
-    _proxyDelegate = nil; 
+    _proxyDelegate = _isDeallocating ? nil : [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
   } else {
     _asyncDelegate = asyncDelegate;
-    _proxyDelegate = [[_ASTableViewProxy alloc] initWithTarget:asyncDelegate interceptor:self];
-    super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+    _proxyDelegate = [[ASTableViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
+  }
+  
+  super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
+}
+
+- (void)proxyTargetHasDeallocated:(ASDelegateProxy *)proxy
+{
+  if (proxy == _proxyDelegate) {
+    [self setAsyncDelegate:nil];
+  } else if (proxy == _proxyDataSource) {
+    [self setAsyncDataSource:nil];
   }
 }
 

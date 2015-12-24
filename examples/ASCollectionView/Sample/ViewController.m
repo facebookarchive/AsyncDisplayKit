@@ -18,6 +18,7 @@
 @interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
 {
   ASCollectionView *_collectionView;
+  NSArray *_data;
 }
 
 @end
@@ -37,7 +38,7 @@
   layout.headerReferenceSize = CGSizeMake(50.0, 50.0);
   layout.footerReferenceSize = CGSizeMake(50.0, 50.0);
   
-  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:YES];
+  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   _collectionView.asyncDataSource = self;
   _collectionView.asyncDelegate = self;
   _collectionView.backgroundColor = [UIColor whiteColor];
@@ -45,8 +46,10 @@
   [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
   
+#if !SIMULATE_WEB_RESPONSE
   self.navigationItem.leftItemsSupplementBackButton = YES;
   self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(reloadTapped)];
+#endif
   
   return self;
 }
@@ -56,6 +59,31 @@
   [super viewDidLoad];
   
   [self.view addSubview:_collectionView];
+
+#if SIMULATE_WEB_RESPONSE
+  __weak typeof(self) weakSelf = self;
+  void(^mockWebService)() = ^{
+    NSLog(@"ViewController \"got data from a web service\"");
+    ViewController *strongSelf = weakSelf;
+    if (strongSelf != nil)
+    {
+      NSLog(@"ViewController is not nil");
+      strongSelf->_data = [[NSArray alloc] init];
+      [strongSelf->_collectionView performBatchUpdates:^{
+        [strongSelf->_collectionView insertSections:[[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, 100)]];
+      } completion:nil];
+      NSLog(@"ViewController finished updating collectionView");
+    }
+    else {
+      NSLog(@"ViewController is nil - won't update collectionView");
+    }
+  };
+  
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), mockWebService);
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    [self.navigationController popViewControllerAnimated:YES];
+  });
+#endif
 }
 
 - (void)viewWillLayoutSubviews
@@ -101,7 +129,11 @@
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
+#if SIMULATE_WEB_RESPONSE
+  return _data == nil ? 0 : 100;
+#else
   return 100;
+#endif
 }
 
 - (void)collectionViewLockDataSource:(ASCollectionView *)collectionView
@@ -124,5 +156,12 @@
 - (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
   return UIEdgeInsetsMake(20.0, 20.0, 20.0, 20.0);
 }
+
+#if SIMULATE_WEB_RESPONSE
+-(void)dealloc
+{
+  NSLog(@"ViewController is deallocing");
+}
+#endif
 
 @end
