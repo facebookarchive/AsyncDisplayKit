@@ -82,10 +82,8 @@
 
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
-  ASDisplayNodeAssert(_interceptor, @"interceptor must not be nil");
-  
   if ([self interceptsSelector:aSelector]) {
-    return YES;
+    return (_interceptor != nil);
   } else {
     // Also return NO if _target has become nil due to zeroing weak reference (or placeholder initialization).
     return [_target respondsToSelector:aSelector];
@@ -94,8 +92,6 @@
 
 - (id)forwardingTargetForSelector:(SEL)aSelector
 {
-  ASDisplayNodeAssert(_interceptor, @"interceptor must not be nil");
-  
   if ([self interceptsSelector:aSelector]) {
     return _interceptor;
   } else {
