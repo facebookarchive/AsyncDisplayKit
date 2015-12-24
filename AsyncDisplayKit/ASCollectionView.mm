@@ -184,10 +184,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   // Sometimes the UIKit classes can call back to their delegate even during deallocation, due to animation completion blocks etc.
   _isDeallocating = YES;
-  NSLog(@"before dealloc - delegate - %@, datasource - %@, proxyDelegate - %@, proxyDatasource - %@", self.asyncDelegate, self.asyncDataSource, _proxyDelegate, _proxyDataSource);
   [self setAsyncDelegate:nil];
   [self setAsyncDataSource:nil];
-  NSLog(@"after dealloc - delegate - %@, datasource - %@, proxyDelegate - %@, proxyDatasource - %@", self.asyncDelegate, self.asyncDataSource, _proxyDelegate, _proxyDataSource);
 }
 
 /**
@@ -269,8 +267,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
   }
   
-  NSLog(@"setAsyncDataSource - %@, proxy - %@, deallocating - %d", asyncDataSource, _proxyDataSource, _isDeallocating);
-  
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
 }
 
@@ -295,9 +291,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
   }
-  
-  NSLog(@"setAsyncDelegate - %@, proxy - %@, deallocating - %d", asyncDelegate, _proxyDelegate, _isDeallocating);
-  
+    
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
   [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
