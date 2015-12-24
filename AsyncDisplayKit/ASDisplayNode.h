@@ -66,6 +66,16 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
   ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay | ASInterfaceStateVisible,
 };
 
+@protocol ASDisplayNodeDelegate <NSObject>
+
+@optional
+
+- (ASLayout *)displayNode:(ASDisplayNode *)displayNode layoutThatFits:(ASSizeRange)constrainedSize;
+
+- (ASLayoutSpec *)displayNode:(ASDisplayNode *)displayNode layoutSpecThatFits:(ASSizeRange)constrainedSize;
+
+@end
+
 /**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
  * hierarchy off the main thread, and could do rendering off the main thread as well.
@@ -203,6 +213,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, readonly) ASInterfaceState interfaceState;
 
+/**
+ * @abstract The display node's delegate object.
+ */
+@property (nonatomic, weak) id<ASDisplayNodeDelegate> delegate;
 
 /** @name Managing dimensions */
 

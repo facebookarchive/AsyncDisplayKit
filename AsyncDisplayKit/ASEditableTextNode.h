@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASEditableTextNode : ASDisplayNode
 
 // @abstract The text node's delegate, which must conform to the <ASEditableTextNodeDelegate> protocol.
-@property (nonatomic, readwrite, weak) id <ASEditableTextNodeDelegate> delegate;
+@property (nonatomic, weak) id <ASEditableTextNodeDelegate, ASDisplayNodeDelegate> delegate;
 
 #pragma mark - Configuration
 

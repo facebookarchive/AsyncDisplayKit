@@ -61,7 +61,7 @@
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
-    return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
+  return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
 }
 
 void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)())
@@ -591,7 +591,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   //  - we haven't already
   //  - the constrained size range is different
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
-    _layout = [self calculateLayoutThatFits:constrainedSize];
+    if (_flags.delegateImplementsLayout) {
+      _layout = [self.delegate displayNode:self layoutThatFits:constrainedSize];
+    }
+    
+    // When the delegate doesn't handle creating the layout, use the default behavior
+    if (!_layout) {
+      _layout = [self calculateLayoutThatFits:constrainedSize];
+    }
+
     _constrainedSize = constrainedSize;
     _flags.isMeasured = YES;
   }
@@ -1584,8 +1592,14 @@ static BOOL ShouldUseNewRenderingRange = NO;
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  ASLayoutSpec *layoutSpec;
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
-    ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    layoutSpec = [self layoutSpecThatFits:constrainedSize];
+  } else if (_flags.delegateImplementsLayoutSpec) {
+    layoutSpec = [self.delegate displayNode:self layoutSpecThatFits:constrainedSize];
+  }
+  
+  if (layoutSpec) {
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
@@ -1941,6 +1955,13 @@ static BOOL ShouldUseNewRenderingRange = NO;
   ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.hierarchyState &= (~hierarchyState);
   });
+}
+
+- (void)setDelegate:(id<ASDisplayNodeDelegate>)delegate
+{
+  _delegate = delegate;
+  _flags.delegateImplementsLayout = [delegate respondsToSelector:@selector(displayNode:layoutThatFits:)] ? 1 : 0;
+  _flags.delegateImplementsLayoutSpec = [delegate respondsToSelector:@selector(displayNode:layoutSpecThatFits:)] ? 1 : 0;
 }
 
 - (void)layout
