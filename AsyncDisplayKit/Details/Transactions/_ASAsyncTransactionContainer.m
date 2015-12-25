@@ -10,19 +10,53 @@
 
 #import "_ASAsyncTransaction.h"
 #import "_ASAsyncTransactionGroup.h"
+#import <objc/runtime.h>
+
+static const char *ASDisplayNodeAssociatedTransactionsKey = "ASAssociatedTransactions";
+static const char *ASDisplayNodeAssociatedCurrentTransactionKey = "ASAssociatedCurrentTransaction";
 
 @implementation CALayer (ASAsyncTransactionContainerTransactions)
-@dynamic asyncdisplaykit_asyncLayerTransactions;
-@dynamic asyncdisplaykit_currentAsyncLayerTransaction;
+
+- (_ASAsyncTransaction *)asyncdisplaykit_currentAsyncLayerTransaction
+{
+  return objc_getAssociatedObject(self, ASDisplayNodeAssociatedCurrentTransactionKey);
+}
+
+- (void)asyncdisplaykit_setCurrentAsyncLayerTransaction:(_ASAsyncTransaction *)transaction
+{
+  objc_setAssociatedObject(self, ASDisplayNodeAssociatedCurrentTransactionKey, transaction, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NSHashTable *)asyncdisplaykit_asyncLayerTransactions
+{
+  return objc_getAssociatedObject(self, ASDisplayNodeAssociatedTransactionsKey);
+}
+
+- (void)asyncdisplaykit_setAsyncLayerTransactions:(NSHashTable *)transactions
+{
+  objc_setAssociatedObject(self, ASDisplayNodeAssociatedTransactionsKey, transactions, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
 
 // No-ops in the base class. Mostly exposed for testing.
 - (void)asyncdisplaykit_asyncTransactionContainerWillBeginTransaction:(_ASAsyncTransaction *)transaction {}
 - (void)asyncdisplaykit_asyncTransactionContainerDidCompleteTransaction:(_ASAsyncTransaction *)transaction {}
 @end
 
+static const char *ASAsyncTransactionIsContainerKey = "ASTransactionIsContainer";
+
 @implementation CALayer (ASDisplayNodeAsyncTransactionContainer)
 
-@dynamic asyncdisplaykit_asyncTransactionContainer;
+- (BOOL)asyncdisplaykit_isAsyncTransactionContainer
+{
+  CFBooleanRef isContainerBool = (__bridge CFBooleanRef)objc_getAssociatedObject(self, ASAsyncTransactionIsContainerKey);
+  BOOL isContainer = (isContainerBool == kCFBooleanTrue);
+  return isContainer;
+}
+
+- (void)asyncdisplaykit_setAsyncTransactionContainer:(BOOL)isContainer
+{
+  objc_setAssociatedObject(self, ASAsyncTransactionIsContainerKey, (id)(isContainer ? kCFBooleanTrue : kCFBooleanFalse), OBJC_ASSOCIATION_ASSIGN);
+}
 
 - (ASAsyncTransactionContainerState)asyncdisplaykit_asyncTransactionContainerState
 {

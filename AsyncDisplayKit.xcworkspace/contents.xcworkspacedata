@@ -2,12 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:AsyncDisplayKit/Details/ASDelegateProxy.h">
-   </FileRef>
-   <FileRef
-      location = "group:AsyncDisplayKit/Details/ASDelegateProxy.m">
-   </FileRef>
-   <FileRef
       location = "group:AsyncDisplayKit.xcodeproj">
    </FileRef>
    <FileRef
