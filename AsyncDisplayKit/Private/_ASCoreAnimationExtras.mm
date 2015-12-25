@@ -119,11 +119,31 @@ NSString *const ASDisplayNodeCAContentsGravityFromUIContentMode(UIViewContentMod
   return nil;
 }
 
+#define ContentModeCacheSize 10
 UIViewContentMode ASDisplayNodeUIContentModeFromCAContentsGravity(NSString *const contentsGravity)
 {
-  for (int i=0; i < ARRAY_COUNT(UIContentModeCAGravityLUT); i++) {
+  static int currentCacheIndex = 0;
+  static NSMutableArray *cachedStrings = [NSMutableArray arrayWithCapacity:ContentModeCacheSize];
+  static UIViewContentMode cachedModes[ContentModeCacheSize] = {};
+  
+  NSInteger foundCacheIndex = [cachedStrings indexOfObjectIdenticalTo:contentsGravity];
+  if (foundCacheIndex != NSNotFound && foundCacheIndex < ContentModeCacheSize) {
+    return cachedModes[foundCacheIndex];
+  }
+  
+  for (int i = 0; i < ARRAY_COUNT(UIContentModeCAGravityLUT); i++) {
     if (ASObjectIsEqual(UIContentModeCAGravityLUT[i].string, contentsGravity)) {
-      return UIContentModeCAGravityLUT[i].contentMode;
+      UIViewContentMode foundContentMode = UIContentModeCAGravityLUT[i].contentMode;
+      
+      if (currentCacheIndex < ContentModeCacheSize) {
+        // Cache the input value.  This is almost always a different pointer than in our LUT and will frequently
+        // be the same value for an overwhelming majority of inputs.
+        [cachedStrings addObject:contentsGravity];
+        cachedModes[currentCacheIndex] = foundContentMode;
+        currentCacheIndex++;
+      }
+      
+      return foundContentMode;
     }
   }
 
