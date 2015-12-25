@@ -9,7 +9,7 @@
 #import <AsyncDisplayKit/ASCollectionNode.h>
 
 @class ASPagerNode;
-@protocol ASPagerNodeDataSource
+@protocol ASPagerNodeDataSource <NSObject>
 // This method replaces -collectionView:numberOfItemsInSection:
 - (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode;
 
@@ -33,7 +33,8 @@
 @property (weak, nonatomic) id <ASCollectionDelegate>  delegate;
 
 // Data Source is required, and uses a different protocol from ASCollectionNode.
-@property (weak, nonatomic) id <ASPagerNodeDataSource> dataSource;
+- (void)setDataSource:(id <ASPagerNodeDataSource>)dataSource;
+- (id <ASPagerNodeDataSource>)dataSource;
 
 - (void)scrollToPageAtIndex:(NSInteger)index animated:(BOOL)animated;
 
