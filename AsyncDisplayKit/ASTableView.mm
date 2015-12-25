@@ -8,6 +8,7 @@
 
 #import "ASTableView.h"
 #import "ASTableViewInternal.h"
+#import "ASTableNode.h"
 
 #import "ASAssert.h"
 #import "ASBatchFetching.h"
@@ -159,6 +160,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return [self initWithFrame:frame style:style asyncDataFetching:NO];
 }
 
+// FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
   return [self initWithFrame:frame style:style dataControllerClass:[self.class dataControllerClass] asyncDataFetching:asyncDataFetchingEnabled];
@@ -166,26 +168,25 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
+  ASTableNode *tableNode = [[ASTableNode alloc] initWithStyle:style];
+  tableNode.frame = frame;
+  return tableNode.view;
+}
+  
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style
+{
   if (!(self = [super initWithFrame:frame style:style]))
     return nil;
-
-  // FIXME: asyncDataFetching is currently unreliable for some use cases.
-  // https://github.com/facebook/AsyncDisplayKit/issues/385
-  asyncDataFetchingEnabled = NO;
   
-  [self configureWithDataControllerClass:dataControllerClass asyncDataFetching:asyncDataFetchingEnabled];
+  [self configureWithDataControllerClass:[self.class dataControllerClass] asyncDataFetching:NO];
   
   return self;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
-  if (!(self = [super initWithCoder:aDecoder]))
-    return nil;
-
-  [self configureWithDataControllerClass:[self.class dataControllerClass] asyncDataFetching:NO];
-
-  return self;
+  NSLog(@"Warning: AsyncDisplayKit is not designed to be used with Interface Builder.  Table properties set in IB will be lost.");
+  return [self initWithFrame:CGRectZero style:UITableViewStylePlain];
 }
 
 - (void)dealloc

@@ -84,6 +84,15 @@
   }
 }
 
+- (id <ASCollectionDelegate>)delegate
+{
+  if ([self pendingState]) {
+    return _pendingState.delegate;
+  } else {
+    return self.view.asyncDelegate;
+  }
+}
+
 - (void)setDataSource:(id <ASCollectionDataSource>)dataSource
 {
   if ([self pendingState]) {
@@ -91,6 +100,15 @@
   } else {
     ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded if pendingState doesn't exist");
     self.view.asyncDataSource = dataSource;
+  }
+}
+
+- (id <ASCollectionDataSource>)dataSource
+{
+  if ([self pendingState]) {
+    return _pendingState.dataSource;
+  } else {
+    return self.view.asyncDataSource;
   }
 }
 

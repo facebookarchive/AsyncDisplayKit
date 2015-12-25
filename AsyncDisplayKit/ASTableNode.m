@@ -20,11 +20,15 @@
 @property (nonatomic) _ASTablePendingState *pendingState;
 @end
 
+@interface ASTableView ()
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style;
+@end
+
 @implementation ASTableNode
 
 - (instancetype)initWithStyle:(UITableViewStyle)style
 {
-  if (self = [super initWithViewBlock:^UIView *{ return [[ASTableView alloc] initWithFrame:CGRectZero style:style]; }]) {
+  if (self = [super initWithViewBlock:^UIView *{ return [[ASTableView alloc] _initWithFrame:CGRectZero style:style]; }]) {
     return self;
   }
   return nil;
@@ -63,6 +67,15 @@
   }
 }
 
+- (id <ASTableDelegate>)delegate
+{
+  if ([self pendingState]) {
+    return _pendingState.delegate;
+  } else {
+    return self.view.asyncDelegate;
+  }
+}
+
 - (void)setDataSource:(id <ASTableDataSource>)dataSource
 {
   if ([self pendingState]) {
@@ -70,6 +83,15 @@
   } else {
     ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
     self.view.asyncDataSource = dataSource;
+  }
+}
+
+- (id <ASTableDataSource>)dataSource
+{
+  if ([self pendingState]) {
+    return _pendingState.dataSource;
+  } else {
+    return self.view.asyncDataSource;
   }
 }
 
