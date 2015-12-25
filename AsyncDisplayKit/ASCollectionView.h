@@ -286,6 +286,8 @@
 /**
  * This is a node-based UICollectionViewDataSource.
  */
+@protocol ASCollectionDataSource <ASCollectionViewDataSource>
+@end
 @protocol ASCollectionViewDataSource <ASCommonCollectionViewDataSource, NSObject>
 
 /**
@@ -347,6 +349,8 @@
 /**
  * This is a node-based UICollectionViewDelegate.
  */
+@protocol ASCollectionDelegate <ASCollectionViewDelegate>
+@end
 @protocol ASCollectionViewDelegate <ASCommonCollectionViewDelegate, NSObject>
 
 @optional

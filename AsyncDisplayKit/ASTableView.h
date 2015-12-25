@@ -280,6 +280,8 @@
 /**
  * This is a node-based UITableViewDataSource.
  */
+@protocol ASTableDataSource <ASTableViewDataSource>
+@end
 @protocol ASTableViewDataSource <ASCommonTableViewDataSource, NSObject>
 
 /**
@@ -324,6 +326,8 @@
  * Note that -tableView:heightForRowAtIndexPath: has been removed; instead, your custom ASCellNode subclasses are
  * responsible for deciding their preferred onscreen height in -calculateSizeThatFits:.
  */
+@protocol ASTableDelegate <ASTableViewDelegate>
+@end
 @protocol ASTableViewDelegate <ASCommonTableViewDelegate, NSObject>
 
 @optional

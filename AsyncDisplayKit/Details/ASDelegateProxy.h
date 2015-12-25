@@ -49,3 +49,7 @@
 
 @interface ASCollectionViewProxy : ASDelegateProxy
 @end
+
+@interface ASPagerNodeProxy : ASDelegateProxy
+@end
+

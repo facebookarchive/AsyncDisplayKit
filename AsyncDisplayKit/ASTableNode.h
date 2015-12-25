@@ -18,4 +18,8 @@
 
 @property (nonatomic, readonly) ASTableView *view;
 
+// These properties can be set without triggering the view to be created, so it's fine to set them in -init.
+@property (weak, nonatomic) id <ASTableDelegate>   delegate;
+@property (weak, nonatomic) id <ASTableDataSource> dataSource;
+
 @end

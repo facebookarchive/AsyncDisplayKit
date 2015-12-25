@@ -60,6 +60,20 @@
 
 @end
 
+@implementation ASPagerNodeProxy
+
+- (BOOL)interceptsSelector:(SEL)selector
+{
+  return (
+          // handled by ASPagerNodeDataSource node<->cell machinery
+          selector == @selector(collectionView:nodeForItemAtIndexPath:) ||
+          selector == @selector(collectionView:numberOfItemsInSection:) ||
+          selector == @selector(collectionView:constrainedSizeForNodeAtIndexPath:)
+          );
+}
+
+@end
+
 @implementation ASDelegateProxy {
   id <NSObject> __weak _target;
   id <ASDelegateProxyInterceptor> __weak _interceptor;
