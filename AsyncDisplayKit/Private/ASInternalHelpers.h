@@ -18,6 +18,7 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector);
 BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL selector);
 void ASPerformBlockOnMainThread(void (^block)());
+void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT 
 
 CGFloat ASScreenScale();
 

@@ -57,6 +57,18 @@ void ASPerformBlockOnMainThread(void (^block)())
   }
 }
 
+void ASPerformBlockOnBackgroundThread(void (^block)())
+{
+  if ([NSThread isMainThread]) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      block();
+    });
+  } else {
+    block();
+  }
+}
+
+
 CGFloat ASScreenScale()
 {
   static CGFloat _scale;

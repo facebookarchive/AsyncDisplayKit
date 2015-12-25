@@ -62,6 +62,15 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 - (void)dealloc
 {
   CGColorRelease(_backgroundColor);
+  
+  // Destruction of the layout managers/containers/text storage is quite
+  // expensive, and can take some time, so we dispatch onto a bg queue to
+  // actually dealloc.
+  __block ASTextKitRenderer *renderer = _renderer;
+  ASPerformBlockOnBackgroundThread(^{
+    renderer = nil;
+  });
+  _renderer = nil;
 }
 
 @end
@@ -157,6 +166,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   if (_shadowColor != NULL) {
     CGColorRelease(_shadowColor);
   }
+  
+  [self _invalidateRenderer];
 
   if (_longPressGestureRecognizer) {
     _longPressGestureRecognizer.delegate = nil;
@@ -189,6 +200,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   return [[self _renderer] size];
 }
 
+// FIXME: Re-evaluate if it is still the right decision to clear the renderer at this stage.
+// This code was written before TextKit and when 512MB devices were still the overwhelming majority.
 - (void)displayDidFinish
 {
   [super displayDidFinish];
@@ -263,16 +276,17 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 - (void)_invalidateRenderer
 {
   ASDN::MutexLocker l(_rendererLock);
+  
   if (_renderer) {
     // Destruction of the layout managers/containers/text storage is quite
     // expensive, and can take some time, so we dispatch onto a bg queue to
     // actually dealloc.
     __block ASTextKitRenderer *renderer = _renderer;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    ASPerformBlockOnBackgroundThread(^{
       renderer = nil;
     });
+    _renderer = nil;
   }
-  _renderer = nil;
 }
 
 - (void)_invalidateRendererIfNeeded
@@ -320,7 +334,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Modifying User Text
 
-- (void)setAttributedString:(NSAttributedString *)attributedString {
+- (void)setAttributedString:(NSAttributedString *)attributedString
+{
   if (ASObjectIsEqual(attributedString, _attributedString)) {
     return;
   }
