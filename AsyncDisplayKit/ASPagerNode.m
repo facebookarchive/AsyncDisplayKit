@@ -20,7 +20,7 @@
 @end
 
 @implementation ASPagerNode
-@dynamic delegate;
+@dynamic delegate, dataSource;
 
 - (instancetype)init
 {

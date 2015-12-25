@@ -9,15 +9,12 @@
 #import <AsyncDisplayKit/ASCollectionNode.h>
 
 @class ASPagerNode;
-
-@protocol ASPagerNodeDataSource <ASCollectionDataSource>
-
+@protocol ASPagerNodeDataSource
 // This method replaces -collectionView:numberOfItemsInSection:
 - (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode;
 
 // This method replaces -collectionView:nodeForItemAtIndexPath:
 - (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index;
-
 @end
 
 @interface ASPagerNode : ASCollectionNode
