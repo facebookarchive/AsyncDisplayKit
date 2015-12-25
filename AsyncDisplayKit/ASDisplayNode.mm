@@ -2317,7 +2317,6 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 @implementation UIView (ASDisplayNodeInternal)
-@dynamic asyncdisplaykit_node;
 
 - (void)setAsyncdisplaykit_node:(ASDisplayNode *)node
 {
@@ -2326,16 +2325,24 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (ASDisplayNode *)asyncdisplaykit_node
 {
-  ASDisplayNode *node = objc_getAssociatedObject(self, ASDisplayNodeAssociatedNodeKey);
-  return node;
+  return objc_getAssociatedObject(self, ASDisplayNodeAssociatedNodeKey);
 }
 
 @end
 
 @implementation CALayer (ASDisplayNodeInternal)
-@dynamic asyncdisplaykit_node;
-@end
 
+- (void)setAsyncdisplaykit_node:(ASDisplayNode *)node
+{
+  objc_setAssociatedObject(self, ASDisplayNodeAssociatedNodeKey, node, OBJC_ASSOCIATION_ASSIGN); // Weak reference to avoid cycle, since the node retains the layer.
+}
+
+- (ASDisplayNode *)asyncdisplaykit_node
+{
+  return objc_getAssociatedObject(self, ASDisplayNodeAssociatedNodeKey);
+}
+
+@end
 
 @implementation UIView (AsyncDisplayKit)
 
