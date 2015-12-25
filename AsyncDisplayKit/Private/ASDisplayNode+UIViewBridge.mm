@@ -446,19 +446,27 @@
 {
   _bridge_prologue;
   if (__loaded) {
-    return ASDisplayNodeUIContentModeFromCAContentsGravity(_layer.contentsGravity);
+    if (_flags.layerBacked) {
+      return ASDisplayNodeUIContentModeFromCAContentsGravity(_layer.contentsGravity);
+    } else {
+      return _view.contentMode;
+    }
   } else {
     return self.pendingViewState.contentMode;
   }
 }
 
-- (void)setContentMode:(UIViewContentMode)mode
+- (void)setContentMode:(UIViewContentMode)contentMode
 {
   _bridge_prologue;
   if (__loaded) {
-    _layer.contentsGravity = ASDisplayNodeCAContentsGravityFromUIContentMode(mode);
+    if (_flags.layerBacked) {
+      _layer.contentsGravity = ASDisplayNodeCAContentsGravityFromUIContentMode(contentMode);
+    } else {
+      _view.contentMode = contentMode;
+    }
   } else {
-    self.pendingViewState.contentMode = mode;
+    self.pendingViewState.contentMode = contentMode;
   }
 }
 

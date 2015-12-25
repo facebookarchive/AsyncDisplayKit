@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASMapNode : ASImageNode
 
 /**
- The current region of ASMapNode. This can be set at any time and ASMapNode will animate the change.
+ The current region of ASMapNode. This can be set at any time and ASMapNode will animate the change. This property may be set from a background thread before the node is loaded, and will automatically be applied to define the region of the static snapshot (if .liveMap = NO) or the internal MKMapView (otherwise).
  */
 @property (nonatomic, assign) MKCoordinateRegion region;
 
@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, readonly) MKMapView *mapView;
 
 /**
- Set this to YES to turn the snapshot into an interactive MKMapView and vice versa. Defaults to NO.
+ Set this to YES to turn the snapshot into an interactive MKMapView and vice versa. Defaults to NO. This property may be set on a background thread before the node is loaded, and will automatically be actioned, once the node is loaded. 
  */
 @property (nonatomic, assign, getter=isLiveMap) BOOL liveMap;
 

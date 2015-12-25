@@ -7,18 +7,16 @@
  */
 
 #import <UIKit/UIKit.h>
-
 #import <AsyncDisplayKit/ASRangeController.h>
 #import <AsyncDisplayKit/ASTableViewProtocols.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASBatchContext.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 @class ASCellNode;
-@protocol ASTableViewDataSource;
-@protocol ASTableViewDelegate;
-
-NS_ASSUME_NONNULL_BEGIN
+@protocol ASTableDataSource;
+@protocol ASTableDelegate;
 
 /**
  * Node-based table view.
@@ -28,8 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASTableView : UITableView
 
-@property (nonatomic, weak) id<ASTableViewDelegate> asyncDelegate;      // must not be nil
-@property (nonatomic, weak) id<ASTableViewDataSource> asyncDataSource;
+@property (nonatomic, weak) id<ASTableDelegate>   asyncDelegate;
+@property (nonatomic, weak) id<ASTableDataSource> asyncDataSource;
 
 /**
  * Initializer.
@@ -281,7 +279,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * This is a node-based UITableViewDataSource.
  */
-@protocol ASTableViewDataSource <ASCommonTableViewDataSource, NSObject>
+@protocol ASTableDataSource <ASCommonTableViewDataSource, NSObject>
 
 /**
  * Similar to -tableView:cellForRowAtIndexPath:.
@@ -318,6 +316,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@protocol ASTableViewDataSource <ASTableDataSource>
+@end
 
 /**
  * This is a node-based UITableViewDelegate.
@@ -325,7 +325,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Note that -tableView:heightForRowAtIndexPath: has been removed; instead, your custom ASCellNode subclasses are
  * responsible for deciding their preferred onscreen height in -calculateSizeThatFits:.
  */
-@protocol ASTableViewDelegate <ASCommonTableViewDelegate, NSObject>
+@protocol ASTableDelegate <ASCommonTableViewDelegate, NSObject>
 
 @optional
 
@@ -361,4 +361,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+<<<<<<< HEAD
 NS_ASSUME_NONNULL_END
+=======
+@protocol ASTableViewDelegate <ASTableDelegate>;
+@end
+>>>>>>> master

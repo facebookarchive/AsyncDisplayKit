@@ -16,7 +16,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASCollectionNode : ASDisplayNode
 
-- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
+
+@property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
+@property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
 
 @property (nonatomic, readonly) ASCollectionView *view;
 

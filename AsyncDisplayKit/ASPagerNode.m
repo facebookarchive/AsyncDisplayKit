@@ -7,41 +7,77 @@
 //
 
 #import "ASPagerNode.h"
+#import "ASDelegateProxy.h"
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface ASPagerNode () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout> {
+@interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor> {
   UICollectionViewFlowLayout *_flowLayout;
+  ASPagerNodeProxy *_proxy;
+  id <ASPagerNodeDataSource> _pagerDataSource;
 }
 
 @end
 
 @implementation ASPagerNode
+@dynamic delegate;
 
 - (instancetype)init
 {
-  _flowLayout = [[UICollectionViewFlowLayout alloc] init];
-  _flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-  _flowLayout.minimumInteritemSpacing = 0;
-  _flowLayout.minimumLineSpacing = 0;
+  UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+  flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+  flowLayout.minimumInteritemSpacing = 0;
+  flowLayout.minimumLineSpacing = 0;
   
-  self = [super initWithCollectionViewLayout:_flowLayout];
+  return [self initWithFlowLayout:flowLayout];
+}
+
+- (instancetype)initWithFlowLayout:(UICollectionViewFlowLayout *)flowLayout
+{
+  self = [super initWithCollectionViewLayout:flowLayout];
   if (self != nil) {
+    _flowLayout = flowLayout;
   }
   return self;
+}
+
+- (ASCollectionView *)collectionView
+{
+  return self.view;
+}
+
+- (void)setDataSource:(id <ASPagerNodeDataSource>)pagerDataSource
+{
+  if (pagerDataSource != _pagerDataSource) {
+    _pagerDataSource = pagerDataSource;
+    _proxy = pagerDataSource ? [[ASPagerNodeProxy alloc] initWithTarget:pagerDataSource interceptor:self] : nil;
+    super.dataSource = (id <ASCollectionDataSource>)_proxy;
+  }
+}
+
+- (void)proxyTargetHasDeallocated:(ASDelegateProxy *)proxy
+{
+  [self setDataSource:nil];
+}
+
+- (id <ASPagerNodeDataSource>)dataSource
+{
+  return _pagerDataSource;
 }
 
 - (void)didLoad
 {
   [super didLoad];
   
-  self.view.asyncDataSource = self;
-  self.view.asyncDelegate = self;
+  ASCollectionView *cv = self.view;
+  cv.asyncDataSource = self;
+  cv.asyncDelegate = self;
   
-  self.view.pagingEnabled = YES;
-  self.view.allowsSelection = NO;
-  self.view.showsVerticalScrollIndicator = NO;
-  self.view.showsHorizontalScrollIndicator = NO;
+  cv.pagingEnabled = YES;
+  cv.allowsSelection = NO;
+  cv.showsVerticalScrollIndicator = NO;
+  cv.showsHorizontalScrollIndicator = NO;
+  cv.scrollsToTop = NO;
   
   ASRangeTuningParameters preloadParams = { .leadingBufferScreenfuls = 2.0, .trailingBufferScreenfuls = 2.0 };
   ASRangeTuningParameters renderParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
@@ -61,14 +97,14 @@
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayNodeAssert(self.dataSource != nil, @"ASPagerNode must have a data source to load paging nodes");
-  return [self.dataSource pagerNode:self nodeAtIndex:indexPath.item];
+  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load paging nodes");
+  return [_pagerDataSource pagerNode:self nodeAtIndex:indexPath.item];
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-  ASDisplayNodeAssert(self.dataSource != nil, @"ASPagerNode must have a data source to load paging nodes");
-  return [self.dataSource numberOfPagesInPagerNode:self];
+  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load paging nodes");
+  return [_pagerDataSource numberOfPagesInPagerNode:self];
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath

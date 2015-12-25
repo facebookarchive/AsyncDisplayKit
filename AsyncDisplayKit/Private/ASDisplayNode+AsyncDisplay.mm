@@ -175,8 +175,6 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
 - (asyncdisplaykit_async_transaction_operation_block_t)_displayBlockWithAsynchronous:(BOOL)asynchronous isCancelledBlock:(asdisplaynode_iscancelled_block_t)isCancelledBlock rasterizing:(BOOL)rasterizing
 {
-  id nodeClass = [self class];
-
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = nil;
 
   ASDisplayNodeAssert(rasterizing || !(_hierarchyState & ASHierarchyStateRasterized), @"Rasterized descendants should never display unless being drawn into the rasterized container.");
@@ -235,7 +233,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
       ASDN_DELAY_FOR_DISPLAY();
 
-      UIImage *result = [nodeClass displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      UIImage *result = [[self class] displayWithParameters:drawParameters isCancelled:isCancelledBlock];
       __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
       return result;
     };
@@ -265,7 +263,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
         UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, contentsScaleForDisplay);
       }
 
-      [nodeClass drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      [[self class] drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
 
       if (isCancelledBlock()) {
         if (!rasterizing) {

@@ -32,7 +32,9 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 @implementation ASTextKitRenderer {
   CGSize _calculatedSize;
+  BOOL _sizeIsCalculated;
 }
+@synthesize attributes = _attributes, context = _context, shadower = _shadower, truncater = _truncater;
 
 #pragma mark - Initialization
 
@@ -42,30 +44,50 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   if (self = [super init]) {
     _constrainedSize = constrainedSize;
     _attributes = attributes;
+    _sizeIsCalculated = NO;
+  }
+  return self;
+}
 
+- (ASTextKitShadower *)shadower
+{
+  if (!_shadower) {
+    ASTextKitAttributes attributes = _attributes;
     _shadower = [[ASTextKitShadower alloc] initWithShadowOffset:attributes.shadowOffset
                                                     shadowColor:attributes.shadowColor
                                                   shadowOpacity:attributes.shadowOpacity
                                                    shadowRadius:attributes.shadowRadius];
+  }
+  return _shadower;
+}
 
+- (ASTextKitTailTruncater *)truncater
+{
+  if (!_truncater) {
+    ASTextKitAttributes attributes = _attributes;
     // We must inset the constrained size by the size of the shadower.
-    CGSize shadowConstrainedSize = [_shadower insetSizeWithConstrainedSize:_constrainedSize];
+    CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:_constrainedSize];
+    _truncater = [[ASTextKitTailTruncater alloc] initWithContext:[self context]
+                                      truncationAttributedString:attributes.truncationAttributedString
+                                          avoidTailTruncationSet:attributes.avoidTailTruncationSet ?: _defaultAvoidTruncationCharacterSet()
+                                                 constrainedSize:shadowConstrainedSize];
+  }
+  return _truncater;
+}
 
+- (ASTextKitContext *)context
+{
+  if (!_context) {
+    ASTextKitAttributes attributes = _attributes;
+    CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:_constrainedSize];
     _context = [[ASTextKitContext alloc] initWithAttributedString:attributes.attributedString
                                                     lineBreakMode:attributes.lineBreakMode
                                              maximumNumberOfLines:attributes.maximumNumberOfLines
                                                    exclusionPaths:attributes.exclusionPaths
                                                   constrainedSize:shadowConstrainedSize
                                              layoutManagerFactory:attributes.layoutManagerFactory];
-
-    _truncater = [[ASTextKitTailTruncater alloc] initWithContext:_context
-                                      truncationAttributedString:attributes.truncationAttributedString
-                                          avoidTailTruncationSet:attributes.avoidTailTruncationSet ?: _defaultAvoidTruncationCharacterSet()
-                                                 constrainedSize:shadowConstrainedSize];
-
-    [self _calculateSize];
   }
-  return self;
+  return _context;
 }
 
 #pragma mark - Sizing
@@ -74,14 +96,14 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
   // -usedRectForTextContainer:).
-  [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
+  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     [layoutManager ensureLayoutForTextContainer:textContainer];
   }];
 
 
   CGRect constrainedRect = {CGPointZero, _constrainedSize};
   __block CGRect boundingRect;
-  [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
+  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     boundingRect = [layoutManager usedRectForTextContainer:textContainer];
   }];
 
@@ -94,6 +116,10 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (CGSize)size
 {
+  if (!_sizeIsCalculated) {
+    [self _calculateSize];
+    _sizeIsCalculated = YES;
+  }
   return _calculatedSize;
 }
 
@@ -104,13 +130,13 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   // We add an assertion so we can track the rare conditions where a graphics context is not present
   ASDisplayNodeAssertNotNil(context, @"This is no good without a context.");
 
-  CGRect shadowInsetBounds = [_shadower insetRectWithConstrainedRect:bounds];
+  CGRect shadowInsetBounds = [[self shadower] insetRectWithConstrainedRect:bounds];
 
   CGContextSaveGState(context);
-  [_shadower setShadowInContext:context];
+  [[self shadower] setShadowInContext:context];
   UIGraphicsPushContext(context);
 
-  [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
+  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     NSRange glyphRange = [layoutManager glyphRangeForTextContainer:textContainer];
     [layoutManager drawBackgroundForGlyphRange:glyphRange atPoint:shadowInsetBounds.origin];
     [layoutManager drawGlyphsForGlyphRange:glyphRange atPoint:shadowInsetBounds.origin];
@@ -125,7 +151,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 - (NSUInteger)lineCount
 {
   __block NSUInteger lineCount = 0;
-  [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
+  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     for (NSRange lineRange = { 0, 0 }; NSMaxRange(lineRange) < [layoutManager numberOfGlyphs]; lineCount++) {
       [layoutManager lineFragmentRectForGlyphAtIndex:NSMaxRange(lineRange) effectiveRange:&lineRange];
     }
@@ -135,7 +161,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (std::vector<NSRange>)visibleRanges
 {
-  return _truncater.visibleRanges;
+  return [self truncater].visibleRanges;
 }
 
 @end

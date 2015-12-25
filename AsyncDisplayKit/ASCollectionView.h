@@ -12,11 +12,11 @@
 #import <AsyncDisplayKit/ASCollectionViewProtocols.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASBatchContext.h>
-
+#import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
 
 @class ASCellNode;
-@protocol ASCollectionViewDataSource;
-@protocol ASCollectionViewDelegate;
+@protocol ASCollectionDataSource;
+@protocol ASCollectionDelegate;
 @protocol ASCollectionViewLayoutInspecting;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -29,10 +29,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASCollectionView : UICollectionView
 
+/**
+ * Initializer.
+ *
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
+ */
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
 
-@property (nonatomic, weak) id<ASCollectionViewDataSource> asyncDataSource;
-@property (nonatomic, weak) id<ASCollectionViewDelegate> asyncDelegate;       // must not be nil
+@property (nonatomic, weak) id<ASCollectionDelegate>   asyncDelegate;
+@property (nonatomic, weak) id<ASCollectionDataSource> asyncDataSource;
 
 /**
  * Tuning parameters for a range type.
@@ -53,27 +59,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @param rangeType The range type to set the tuning parameters for.
  */
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
-
-/**
- * Initializer.
- *
- * @param frame The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview 
- * in which you plan to add it. This frame is passed to the superclass during initialization.
- * 
- * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. 
- * Must not be nil.
- *
- * @param asyncDataFetchingEnabled Enable the data fetching in async mode.
- *
- * @discussion If asyncDataFetching is enabled, the `ASCollectionView` will fetch data through `collectionView:numberOfRowsInSection:` and
- * `collectionView:nodeForRowAtIndexPath:` in async mode from background thread. Otherwise, the methods will be invoked synchronically
- * from calling thread.
- * Enabling asyncDataFetching could avoid blocking main thread for `ASCellNode` allocation, which is frequently reported issue for
- * large scale data. On another hand, the application code need take the responsibility to avoid data inconsistence. Specifically,
- * we will lock the data source through `collectionViewLockDataSource`, and unlock it by `collectionViewUnlockDataSource` after the data fetching.
- * The application should not update the data source while the data source is locked, to keep data consistence.
- */
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled;
 
 /**
  * The number of screens left to scroll before the delegate -collectionView:beginBatchFetchingWithContext: is called.
@@ -303,7 +288,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * This is a node-based UICollectionViewDataSource.
  */
-@protocol ASCollectionViewDataSource <ASCommonCollectionViewDataSource, NSObject>
+#define ASCollectionViewDataSource ASCollectionDataSource
+@protocol ASCollectionDataSource <ASCommonCollectionViewDataSource, NSObject>
 
 /**
  * Similar to -collectionView:cellForItemAtIndexPath:.
@@ -364,7 +350,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * This is a node-based UICollectionViewDelegate.
  */
-@protocol ASCollectionViewDelegate <ASCommonCollectionViewDelegate, NSObject>
+#define ASCollectionViewDelegate ASCollectionDelegate
+@protocol ASCollectionDelegate <ASCommonCollectionViewDelegate, NSObject>
 
 @optional
 
@@ -430,6 +417,12 @@ NS_ASSUME_NONNULL_BEGIN
  * Asks the delegate for the size of the footer in the specified section.
  */
 - (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section;
+
+@end
+
+@interface ASCollectionView (Deprecated)
+
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled ASDISPLAYNODE_DEPRECATED;
 
 @end
 
