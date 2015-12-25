@@ -21,17 +21,29 @@
 @end
 
 @interface ASTableView ()
-- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style;
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass;
 @end
 
 @implementation ASTableNode
 
-- (instancetype)initWithStyle:(UITableViewStyle)style
+- (instancetype)_initWithStyle:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
 {
-  if (self = [super initWithViewBlock:^UIView *{ return [[ASTableView alloc] _initWithFrame:CGRectZero style:style]; }]) {
+  if (self = [super initWithViewBlock:^UIView *{ return [[ASTableView alloc] _initWithFrame:CGRectZero
+                                                                                      style:style
+                                                                        dataControllerClass:dataControllerClass]; }]) {
     return self;
   }
   return nil;
+}
+
+- (instancetype)initWithStyle:(UITableViewStyle)style
+{
+  return [self _initWithStyle:style dataControllerClass:nil];
+}
+
+- (instancetype)init
+{
+  return [self _initWithStyle:UITableViewStylePlain dataControllerClass:nil];
 }
 
 - (void)didLoad

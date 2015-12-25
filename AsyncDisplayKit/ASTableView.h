@@ -7,17 +7,14 @@
  */
 
 #import <UIKit/UIKit.h>
-
 #import <AsyncDisplayKit/ASRangeController.h>
 #import <AsyncDisplayKit/ASTableViewProtocols.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASBatchContext.h>
 
-
 @class ASCellNode;
-@protocol ASTableViewDataSource;
-@protocol ASTableViewDelegate;
-
+@protocol ASTableDataSource;
+@protocol ASTableDelegate;
 
 /**
  * Node-based table view.
@@ -27,8 +24,8 @@
  */
 @interface ASTableView : UITableView
 
-@property (nonatomic, weak) id<ASTableViewDelegate> asyncDelegate;      // must not be nil
-@property (nonatomic, weak) id<ASTableViewDataSource> asyncDataSource;
+@property (nonatomic, weak) id<ASTableDelegate>   asyncDelegate;
+@property (nonatomic, weak) id<ASTableDataSource> asyncDataSource;
 
 /**
  * Initializer.
@@ -280,9 +277,8 @@
 /**
  * This is a node-based UITableViewDataSource.
  */
-@protocol ASTableDataSource <ASTableViewDataSource>
-@end
-@protocol ASTableViewDataSource <ASCommonTableViewDataSource, NSObject>
+#define ASTableViewDataSource ASTableDataSource
+@protocol ASTableDataSource <ASCommonTableViewDataSource, NSObject>
 
 /**
  * Similar to -tableView:cellForRowAtIndexPath:.
@@ -326,9 +322,8 @@
  * Note that -tableView:heightForRowAtIndexPath: has been removed; instead, your custom ASCellNode subclasses are
  * responsible for deciding their preferred onscreen height in -calculateSizeThatFits:.
  */
-@protocol ASTableDelegate <ASTableViewDelegate>
-@end
-@protocol ASTableViewDelegate <ASCommonTableViewDelegate, NSObject>
+#define ASTableViewDelegate ASTableDelegate
+@protocol ASTableDelegate <ASCommonTableViewDelegate, NSObject>
 
 @optional
 

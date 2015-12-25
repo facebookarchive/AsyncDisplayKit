@@ -15,8 +15,8 @@
 #import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
 
 @class ASCellNode;
-@protocol ASCollectionViewDataSource;
-@protocol ASCollectionViewDelegate;
+@protocol ASCollectionDataSource;
+@protocol ASCollectionDelegate;
 @protocol ASCollectionViewLayoutInspecting;
 
 /**
@@ -35,8 +35,8 @@
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
 
-@property (nonatomic, weak) id<ASCollectionViewDataSource> asyncDataSource;
-@property (nonatomic, weak) id<ASCollectionViewDelegate> asyncDelegate;       // must not be nil
+@property (nonatomic, weak) id<ASCollectionDelegate>   asyncDelegate;
+@property (nonatomic, weak) id<ASCollectionDataSource> asyncDataSource;
 
 /**
  * Tuning parameters for a range type.
@@ -286,9 +286,8 @@
 /**
  * This is a node-based UICollectionViewDataSource.
  */
-@protocol ASCollectionDataSource <ASCollectionViewDataSource>
-@end
-@protocol ASCollectionViewDataSource <ASCommonCollectionViewDataSource, NSObject>
+#define ASCollectionViewDataSource ASCollectionDataSource
+@protocol ASCollectionDataSource <ASCommonCollectionViewDataSource, NSObject>
 
 /**
  * Similar to -collectionView:cellForItemAtIndexPath:.
@@ -349,9 +348,8 @@
 /**
  * This is a node-based UICollectionViewDelegate.
  */
-@protocol ASCollectionDelegate <ASCollectionViewDelegate>
-@end
-@protocol ASCollectionViewDelegate <ASCommonCollectionViewDelegate, NSObject>
+#define ASCollectionViewDelegate ASCollectionDelegate
+@protocol ASCollectionDelegate <ASCommonCollectionViewDelegate, NSObject>
 
 @optional
 

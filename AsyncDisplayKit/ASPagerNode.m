@@ -11,7 +11,7 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface ASPagerNode () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout> {
+@interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor> {
   UICollectionViewFlowLayout *_flowLayout;
   ASPagerNodeProxy *_proxy;
   id <ASPagerNodeDataSource> _pagerDataSource;
@@ -20,6 +20,7 @@
 @end
 
 @implementation ASPagerNode
+@dynamic delegate;
 
 - (instancetype)init
 {
@@ -50,8 +51,13 @@
   if (pagerDataSource != _pagerDataSource) {
     _pagerDataSource = pagerDataSource;
     _proxy = pagerDataSource ? [[ASPagerNodeProxy alloc] initWithTarget:pagerDataSource interceptor:self] : nil;
-    super.dataSource = _proxy;
+    super.dataSource = (id <ASCollectionDataSource>)_proxy;
   }
+}
+
+- (void)proxyTargetHasDeallocated:(ASDelegateProxy *)proxy
+{
+  [self setDataSource:nil];
 }
 
 - (id <ASPagerNodeDataSource>)dataSource

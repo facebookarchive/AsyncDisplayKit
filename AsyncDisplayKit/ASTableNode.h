@@ -14,7 +14,8 @@
  */
 @interface ASTableNode : ASDisplayNode
 
-- (instancetype)initWithStyle:(UITableViewStyle)style NS_DESIGNATED_INITIALIZER;
+- (instancetype)init; // UITableViewStylePlain
+- (instancetype)initWithStyle:(UITableViewStyle)style;
 
 @property (nonatomic, readonly) ASTableView *view;
 

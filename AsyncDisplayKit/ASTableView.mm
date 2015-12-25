@@ -21,6 +21,8 @@
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
 
+#import <CoreFoundation/CoreFoundation.h>
+
 static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 //#define LOG(...) NSLog(__VA_ARGS__)
@@ -79,6 +81,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 #pragma mark -
 #pragma mark ASTableView
+
+@interface ASTableNode ()
+- (instancetype)_initWithStyle:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass;
+@end
 
 @interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor> {
   ASTableViewProxy *_proxyDataSource;
@@ -168,17 +174,21 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
-  ASTableNode *tableNode = [[ASTableNode alloc] initWithStyle:style];
-  tableNode.frame = frame;
-  return tableNode.view;
+//  ASTableNode *tableNode = [[ASTableNode alloc] _initWithStyle:style dataControllerClass:dataControllerClass];
+//  tableNode.frame = frame;
+//  return tableNode.view;
+  return [self _initWithFrame:frame style:style dataControllerClass:dataControllerClass];
 }
   
-- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
 {
   if (!(self = [super initWithFrame:frame style:style]))
     return nil;
   
-  [self configureWithDataControllerClass:[self.class dataControllerClass] asyncDataFetching:NO];
+  if (!dataControllerClass) {
+    dataControllerClass = [self.class dataControllerClass];
+  }
+  [self configureWithDataControllerClass:dataControllerClass asyncDataFetching:NO];
   
   return self;
 }

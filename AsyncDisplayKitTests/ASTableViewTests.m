@@ -52,7 +52,6 @@
   if (_willDeallocBlock) {
     _willDeallocBlock(self);
   }
-  [super dealloc];
 }
 
 @end
@@ -78,7 +77,6 @@
   if (_willDeallocBlock) {
     _willDeallocBlock(self);
   }
-  [super dealloc];
 }
 
 @end
@@ -130,6 +128,7 @@
 
 @implementation ASTableViewTests
 
+// TODO: Convert this to ARC.
 - (void)DISABLED_testTableViewDoesNotRetainItselfAndDelegate
 {
   ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
@@ -148,11 +147,11 @@
   
   tableView.asyncDataSource = delegate;
   tableView.asyncDelegate = delegate;
-  
-  [delegate release];
+
+//  [delegate release];
   XCTAssertTrue(delegateDidDealloc, @"unexpected delegate lifetime:%@", delegate);
   
-  XCTAssertNoThrow([tableView release], @"unexpected exception when deallocating table view:%@", tableView);
+//  XCTAssertNoThrow([tableView release], @"unexpected exception when deallocating table view:%@", tableView);
   XCTAssertTrue(tableViewDidDealloc, @"unexpected table view lifetime:%@", tableView);
 }
 
@@ -399,7 +398,10 @@
                                                                 style:UITableViewStylePlain
                                                     asyncDataFetching:YES];
   ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
-  
+#if  ! __has_feature(objc_arc)
+#error This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
   tableView.asyncDelegate = dataSource;
   tableView.asyncDataSource = dataSource;
   
