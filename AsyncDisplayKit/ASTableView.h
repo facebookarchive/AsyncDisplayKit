@@ -361,9 +361,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-<<<<<<< HEAD
-NS_ASSUME_NONNULL_END
-=======
-@protocol ASTableViewDelegate <ASTableDelegate>;
+@protocol ASTableViewDelegate <ASTableDelegate>
 @end
->>>>>>> master
+
+NS_ASSUME_NONNULL_END

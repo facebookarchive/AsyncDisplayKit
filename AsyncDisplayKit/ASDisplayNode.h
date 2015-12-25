@@ -27,7 +27,7 @@ typedef UIView * _Nonnull(^ASDisplayNodeViewBlock)();
 /**
  * UIView creation block. Used to create the backing view of a new display node.
  */
-typedef UIViewController *(^ASDisplayNodeViewControllerBlock)();
+typedef UIViewController * _Nonnull(^ASDisplayNodeViewControllerBlock)();
 
 /**
  * CALayer creation block. Used to create the backing layer of a new display node.
