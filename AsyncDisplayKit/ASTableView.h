@@ -277,7 +277,6 @@
 /**
  * This is a node-based UITableViewDataSource.
  */
-#define ASTableViewDataSource ASTableDataSource
 @protocol ASTableDataSource <ASCommonTableViewDataSource, NSObject>
 
 /**
@@ -315,6 +314,8 @@
 
 @end
 
+@protocol ASTableViewDataSource <ASTableDataSource>
+@end
 
 /**
  * This is a node-based UITableViewDelegate.
@@ -322,7 +323,6 @@
  * Note that -tableView:heightForRowAtIndexPath: has been removed; instead, your custom ASCellNode subclasses are
  * responsible for deciding their preferred onscreen height in -calculateSizeThatFits:.
  */
-#define ASTableViewDelegate ASTableDelegate
 @protocol ASTableDelegate <ASCommonTableViewDelegate, NSObject>
 
 @optional
@@ -357,4 +357,7 @@
  */
 - (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView;
 
+@end
+
+@protocol ASTableViewDelegate <ASTableDelegate>;
 @end
