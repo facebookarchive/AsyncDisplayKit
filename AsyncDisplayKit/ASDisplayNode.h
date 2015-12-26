@@ -15,8 +15,6 @@
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 #import <AsyncDisplayKit/ASLayoutable.h>
 
-NS_ASSUME_NONNULL_BEGIN
-
 @class ASDisplayNode;
 
 /**
@@ -37,7 +35,7 @@ typedef CALayer * _Nonnull(^ASDisplayNodeLayerBlock)();
 /**
  * ASDisplayNode loaded callback block. This block is called BEFORE the -didLoad method and is always called on the main thread.
  */
-typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
+typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode * _Nonnull node);
 
 /**
  Interface state is available on ASDisplayNode and ASViewController, and
@@ -86,6 +84,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  *
  */
 
+NS_ASSUME_NONNULL_BEGIN
 @interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
 
 
@@ -195,7 +194,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  * @warning The first access to it must be on the main thread, and should only be used on the main thread thereafter as 
  * well.
  */
-@property (nonatomic, readonly, retain) CALayer *layer;
+@property (nonatomic, readonly, retain) CALayer * _Nonnull layer;
 
 /**
  * @abstract Returns the Interface State of the node.
@@ -568,7 +567,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 
 @end
 
-
+NS_ASSUME_NONNULL_END
 /**
  * ## UIView bridge
  *
@@ -599,7 +598,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  */
 - (void)setNeedsLayout;
 
-@property (atomic, retain)           id contents;                           // default=nil
+@property (atomic, retain, nullable) id contents;                           // default=nil
 @property (atomic, assign)           BOOL clipsToBounds;                    // default==NO
 @property (atomic, getter=isOpaque)  BOOL opaque;                           // default==YES
 
@@ -644,12 +643,12 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 
 @property (atomic, assign, getter=isUserInteractionEnabled) BOOL userInteractionEnabled; // default=YES (NO for layer-backed nodes)
 @property (atomic, assign, getter=isExclusiveTouch) BOOL exclusiveTouch;    // default=NO
-@property (atomic, assign)           CGColorRef shadowColor;                // default=opaque rgb black
+@property (atomic, assign, nullable) CGColorRef shadowColor;                // default=opaque rgb black
 @property (atomic, assign)           CGFloat shadowOpacity;                 // default=0.0
 @property (atomic, assign)           CGSize shadowOffset;                   // default=(0, -3)
 @property (atomic, assign)           CGFloat shadowRadius;                  // default=3
 @property (atomic, assign)           CGFloat borderWidth;                   // default=0
-@property (atomic, assign)           CGColorRef borderColor;                // default=opaque rgb black
+@property (atomic, assign, nullable) CGColorRef borderColor;                // default=opaque rgb black
 
 // UIResponder methods
 // By default these fall through to the underlying view, but can be overridden.
@@ -658,7 +657,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 - (BOOL)canResignFirstResponder;                                            // default==YES
 - (BOOL)resignFirstResponder;                                               // default==NO (no-op)
 - (BOOL)isFirstResponder;
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender;
+- (BOOL)canPerformAction:(nonnull SEL)action withSender:(nonnull id)sender;
 
 // Accessibility support
 @property (atomic, assign)           BOOL isAccessibilityElement;
@@ -691,7 +690,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  *
  * @param node The node to be added.
  */
-- (void)addSubnode:(ASDisplayNode *)node;
+- (void)addSubnode:(nonnull ASDisplayNode *)node;
 @end
 
 /** CALayer(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to a CALayer. */
@@ -701,7 +700,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
  *
  * @param node The node to be added.
  */
-- (void)addSubnode:(ASDisplayNode *)node;
+- (void)addSubnode:(nonnull ASDisplayNode *)node;
 @end
 
 
@@ -712,5 +711,3 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 @property (nonatomic, assign) BOOL placeholderFadesOut ASDISPLAYNODE_DEPRECATED;
 
 @end
-
-NS_ASSUME_NONNULL_END
