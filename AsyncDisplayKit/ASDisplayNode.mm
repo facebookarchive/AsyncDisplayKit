@@ -1560,6 +1560,17 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return _flags.shouldBypassEnsureDisplay;
 }
 
+static BOOL ShouldUseNewRenderingRange = NO;
+
++ (BOOL)shouldUseNewRenderingRange
+{
+  return ShouldUseNewRenderingRange;
+}
++ (void)setShouldUseNewRenderingRange:(BOOL)shouldUseNewRenderingRange
+{
+  ShouldUseNewRenderingRange = shouldUseNewRenderingRange;
+}
+
 #pragma mark - For Subclasses
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize

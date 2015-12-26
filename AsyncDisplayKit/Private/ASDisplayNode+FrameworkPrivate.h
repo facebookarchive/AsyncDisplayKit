@@ -20,10 +20,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-// Project-wide control for whether the offscreen UIWindow is used for display, or if
-// ASDK's internal system for coalescing and triggering display events is used.
-#define USE_WORKING_WINDOW 1
-
 /**
  Hierarchy state is propogated from nodes to all of their children when certain behaviors are required from the subtree.
  Examples include rasterization and external driving of the .interfaceState property.
