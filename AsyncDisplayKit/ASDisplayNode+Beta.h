@@ -8,6 +8,9 @@
 
 @interface ASDisplayNode (Beta)
 
++ (BOOL)shouldUseNewRenderingRange;
++ (void)setShouldUseNewRenderingRange:(BOOL)shouldUseNewRenderingRange;
+
 /** @name Layout */
 
 
