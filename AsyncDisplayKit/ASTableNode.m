@@ -6,7 +6,9 @@
 //  Copyright © 2015 Facebook. All rights reserved.
 //
 
+#import "ASFlowLayoutController.h"
 #import "ASTableNode.h"
+#import "ASDisplayNode+Subclasses.h"
 
 @interface _ASTablePendingState : NSObject
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;

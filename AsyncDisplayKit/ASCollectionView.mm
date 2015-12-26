@@ -9,7 +9,6 @@
 #import "ASAssert.h"
 #import "ASBatchFetching.h"
 #import "ASDelegateProxy.h"
-#import "ASCollectionView.h"
 #import "ASCollectionNode.h"
 #import "ASCollectionDataController.h"
 #import "ASCollectionViewLayoutController.h"

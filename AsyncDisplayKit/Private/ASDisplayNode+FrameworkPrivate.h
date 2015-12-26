@@ -11,7 +11,6 @@
 // These methods must never be called or overridden by other classes.
 //
 
-#import "_ASDisplayLayer.h"
 #import "_AS-objc-internal.h"
 #import "ASDisplayNodeExtraIvars.h"
 #import "ASDisplayNode.h"
@@ -52,7 +51,7 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
   ASHierarchyStateTransitioningSupernodes = 1 << 2
 };
 
-@interface ASDisplayNode () <_ASDisplayLayerDelegate>
+@interface ASDisplayNode ()
 {
 @protected
   ASInterfaceState _interfaceState;

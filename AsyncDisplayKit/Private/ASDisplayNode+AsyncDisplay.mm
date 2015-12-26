@@ -8,9 +8,13 @@
 
 #import "_ASCoreAnimationExtras.h"
 #import "_ASAsyncTransaction.h"
+#import "_ASDisplayLayer.h"
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+
+@interface ASDisplayNode () <_ASDisplayLayerDelegate>
+@end
 
 @implementation ASDisplayNode (AsyncDisplay)
 

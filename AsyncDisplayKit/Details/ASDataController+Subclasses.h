@@ -6,7 +6,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASDataController.h"
+#ifndef ASDataControllerSubclasses_Included
+#define ASDataControllerSubclasses_Included
+
+//#import "ASDataController.h"
 
 @interface ASDataController (Subclasses)
 
@@ -157,3 +160,5 @@
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 @end
+
+#endif

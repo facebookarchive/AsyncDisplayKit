@@ -6,19 +6,21 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#ifndef ASDataController_Included
+#define ASDataController_Included
+
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
-#import "ASFlowLayoutController.h"
+#import <AsyncDisplayKit/ASFlowLayoutController.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class ASCellNode;
 @class ASDataController;
 
-FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
-
 typedef NSUInteger ASDataControllerAnimationOptions;
+FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
 /**
  Data source for data controller
@@ -192,3 +194,5 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 @end
 
 NS_ASSUME_NONNULL_END
+
+#endif

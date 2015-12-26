@@ -11,13 +11,15 @@
 // These methods must never be called or overridden by other classes.
 //
 
-#import "_ASDisplayLayer.h"
 #import "_AS-objc-internal.h"
 #import "ASDisplayNodeExtraIvars.h"
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
 #import "ASLayoutOptions.h"
+
+@protocol _ASDisplayLayerDelegate;
+@class _ASDisplayLayer;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)());
@@ -39,7 +41,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 
 #define TIME_DISPLAYNODE_OPS (DEBUG || PROFILE)
 
-@interface ASDisplayNode () <_ASDisplayLayerDelegate>
+@interface ASDisplayNode ()
 {
 @protected
   // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.

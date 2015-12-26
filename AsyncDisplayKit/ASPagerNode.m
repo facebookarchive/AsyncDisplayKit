@@ -8,8 +8,7 @@
 
 #import "ASPagerNode.h"
 #import "ASDelegateProxy.h"
-
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import "ASDisplayNode+Subclasses.h"
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor> {
   UICollectionViewFlowLayout *_flowLayout;
