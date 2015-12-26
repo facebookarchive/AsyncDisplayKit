@@ -6,7 +6,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASImageNode.h>
 
 typedef enum : NSUInteger {
   ASButtonStateNormal,

@@ -18,12 +18,14 @@
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-  return [self initWithNode:nil];
+  ASDisplayNodeAssert(NO, @"ASViewController requires using -initWithNode:");
+  return [self initWithNode:[[ASDisplayNode alloc] init]];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
-  return [self initWithNode:nil];
+  ASDisplayNodeAssert(NO, @"ASViewController requires using -initWithNode:");
+  return [self initWithNode:[[ASDisplayNode alloc] init]];
 }
 
 - (instancetype)initWithNode:(ASDisplayNode *)node

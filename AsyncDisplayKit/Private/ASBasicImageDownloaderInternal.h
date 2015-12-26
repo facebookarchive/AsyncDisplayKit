@@ -6,9 +6,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASThread.h"
-
-
 @interface ASBasicImageDownloaderContext : NSObject
 
 + (ASBasicImageDownloaderContext *)contextForURL:(NSURL *)URL;

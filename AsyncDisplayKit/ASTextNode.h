@@ -8,6 +8,8 @@
 
 #import <AsyncDisplayKit/ASControlNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol ASTextNodeDelegate;
 
 /**
@@ -36,7 +38,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @discussion Defaults to nil, no text is shown.
  For inline image attachments, add an attribute of key NSAttachmentAttributeName, with a value of an NSTextAttachment.
  */
-@property (nonatomic, copy) NSAttributedString *attributedString;
+@property (nullable, nonatomic, copy) NSAttributedString *attributedString;
 
 #pragma mark - Truncation
 
@@ -44,14 +46,14 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @abstract The attributedString to use when the text must be truncated.
  @discussion Defaults to a localized ellipsis character.
  */
-@property (nonatomic, copy) NSAttributedString *truncationAttributedString;
+@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedString;
 
 /**
  @summary The second attributed string appended for truncation.
  @discussion This string will be highlighted on touches.
  @default nil
  */
-@property (nonatomic, copy) NSAttributedString *additionalTruncationMessage;
+@property (nullable, nonatomic, copy) NSAttributedString *additionalTruncationMessage;
 
 /**
  @abstract Determines how the text is truncated to fit within the receiver's maximum size.
@@ -75,7 +77,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @property (nonatomic, readonly, assign) NSUInteger lineCount;
 
-@property (nonatomic, strong) NSArray *exclusionPaths;
+@property (nullable, nonatomic, strong) NSArray<UIBezierPath *> *exclusionPaths;
 
 #pragma mark - Placeholders
 
@@ -91,7 +93,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 /**
  @abstract The placeholder color.
  */
-@property (nonatomic, strong) UIColor *placeholderColor;
+@property (nullable, nonatomic, strong) UIColor *placeholderColor;
 
 /**
  @abstract Inset each line of the placeholder.
@@ -127,7 +129,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  a line break, the rects returned will be on opposite sides and different lines). The rects returned
  are in the coordinate system of the receiver.
  */
-- (NSArray *)rectsForTextRange:(NSRange)textRange;
+- (NSArray<NSValue *> *)rectsForTextRange:(NSRange)textRange;
 
 /**
  @abstract Returns an array of rects used for highlighting the characters in a given text range.
@@ -138,7 +140,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  are in the coordinate system of the receiver. This method is useful for visual coordination with a
  highlighted range of text.
  */
-- (NSArray *)highlightRectsForTextRange:(NSRange)textRange;
+- (NSArray<NSValue *> *)highlightRectsForTextRange:(NSRange)textRange;
 
 /**
  @abstract Returns a bounding rect for the given text range.
@@ -162,7 +164,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 /**
  @abstract The set of attribute names to consider links.  Defaults to NSLinkAttributeName.
  */
-@property (nonatomic, copy) NSArray *linkAttributeNames;
+@property (nonatomic, copy) NSArray<NSString *> *linkAttributeNames;
 
 /**
  @abstract Indicates whether the receiver has an entity at a given point.
@@ -171,7 +173,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @param rangeOut The ultimate range of the found text. Can be NULL.
  @result YES if an entity exists at `point`; NO otherwise.
  */
-- (id)linkAttributeValueAtPoint:(CGPoint)point attributeName:(out NSString **)attributeNameOut range:(out NSRange *)rangeOut;
+- (nullable id)linkAttributeValueAtPoint:(CGPoint)point attributeName:(out NSString * _Nullable * _Nullable)attributeNameOut range:(out NSRange * _Nullable)rangeOut;
 
 /**
  @abstract The style to use when highlighting text.
@@ -267,3 +269,5 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 - (BOOL)textNode:(ASTextNode *)textNode shouldLongPressLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;
 
 @end
+
+NS_ASSUME_NONNULL_END

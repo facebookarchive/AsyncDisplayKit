@@ -87,7 +87,7 @@ static void _ASCollectDisplayNodes(NSMutableArray *array, CALayer *layer)
     _ASCollectDisplayNodes(array, sublayer);
 }
 
-extern NSArray *ASCollectDisplayNodes(ASDisplayNode *node)
+extern NSArray<ASDisplayNode *> *ASCollectDisplayNodes(ASDisplayNode *node)
 {
   NSMutableArray *list = [NSMutableArray array];
   for (CALayer *sublayer in node.layer.sublayers) {
@@ -112,14 +112,14 @@ static void _ASDisplayNodeFindAllSubnodes(NSMutableArray *array, ASDisplayNode *
   }
 }
 
-extern NSArray *ASDisplayNodeFindAllSubnodes(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node))
+extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodes(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node))
 {
   NSMutableArray *list = [NSMutableArray array];
   _ASDisplayNodeFindAllSubnodes(list, start, block);
   return list;
 }
 
-extern NSArray *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c)
+extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c)
 {
   return ASDisplayNodeFindAllSubnodes(start, ^(ASDisplayNode *n) {
     return [n isKindOfClass:c];
@@ -143,12 +143,12 @@ static ASDisplayNode *_ASDisplayNodeFindFirstSubnode(ASDisplayNode *startNode, B
   return nil;
 }
 
-extern id ASDisplayNodeFindFirstSubnode(ASDisplayNode *startNode, BOOL (^block)(ASDisplayNode *node))
+extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnode(ASDisplayNode *startNode, BOOL (^block)(ASDisplayNode *node))
 {
   return _ASDisplayNodeFindFirstSubnode(startNode, NO, block);
 }
 
-extern id ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c)
+extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c)
 {
   return ASDisplayNodeFindFirstSubnode(start, ^(ASDisplayNode *n) {
     return [n isKindOfClass:c];

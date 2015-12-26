@@ -6,8 +6,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASImageNode.h>
 #import <MapKit/MapKit.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface ASMapNode : ASImageNode
 
@@ -19,7 +21,7 @@
 /**
  This is the MKMapView that is the live map part of ASMapNode. This will be nil if .liveMap = NO. Note, MKMapView is *not* thread-safe.
  */
-@property (nonatomic, readonly) MKMapView *mapView;
+@property (nullable, nonatomic, readonly) MKMapView *mapView;
 
 /**
  Set this to YES to turn the snapshot into an interactive MKMapView and vice versa. Defaults to NO. This property may be set on a background thread before the node is loaded, and will automatically be actioned, once the node is loaded. 
@@ -41,6 +43,8 @@
  * @discussion This method set the annotations of the static map view and also to the live map view. Passing an empty array clears the map of any annotations.
  * @param annotations An array of objects that conform to the MKAnnotation protocol
  */
-- (void)setAnnotations:(NSArray *)annotations;
+- (void)setAnnotations:(NSArray<id<MKAnnotation>> *)annotations;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -6,7 +6,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
@@ -48,6 +47,9 @@
 #else
 #define TIME_SCOPED(outVar)
 #endif
+
+@interface ASDisplayNode () <_ASDisplayLayerDelegate>
+@end
 
 @implementation ASDisplayNode
 

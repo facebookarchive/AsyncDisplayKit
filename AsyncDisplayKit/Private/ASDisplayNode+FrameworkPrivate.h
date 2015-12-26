@@ -11,13 +11,14 @@
 // These methods must never be called or overridden by other classes.
 //
 
-#import "_ASDisplayLayer.h"
 #import "_AS-objc-internal.h"
 #import "ASDisplayNodeExtraIvars.h"
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
 #import "ASLayoutOptions.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 // Project-wide control for whether the offscreen UIWindow is used for display, or if
 // ASDK's internal system for coalescing and triggering display events is used.
@@ -50,7 +51,7 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
   ASHierarchyStateTransitioningSupernodes = 1 << 2
 };
 
-@interface ASDisplayNode () <_ASDisplayLayerDelegate>
+@interface ASDisplayNode ()
 {
 @protected
   ASInterfaceState _interfaceState;
@@ -111,9 +112,11 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
 @end
 
 @interface UIView (ASDisplayNodeInternal)
-@property (nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
+@property (nullable, nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
 @end
 
 @interface CALayer (ASDisplayNodeInternal)
-@property (nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
+@property (nullable, nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
 @end
+
+NS_ASSUME_NONNULL_END

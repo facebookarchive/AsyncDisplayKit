@@ -6,9 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASTableView.h"
 #import "ASTableViewInternal.h"
-#import "ASTableNode.h"
 
 #import "ASAssert.h"
 #import "ASBatchFetching.h"

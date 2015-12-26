@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface ASViewController : UIViewController
 
 - (instancetype)initWithNode:(ASDisplayNode *)node NS_DESIGNATED_INITIALIZER;
@@ -39,3 +41,5 @@
 - (ASSizeRange)nodeConstrainedSize;
 
 @end
+
+NS_ASSUME_NONNULL_END

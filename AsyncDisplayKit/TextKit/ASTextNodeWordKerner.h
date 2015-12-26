@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/NSLayoutManager.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
   @abstract This class acts as the NSLayoutManagerDelegate for ASTextNode.
@@ -28,3 +29,5 @@
  */
 
 @end
+
+NS_ASSUME_NONNULL_END

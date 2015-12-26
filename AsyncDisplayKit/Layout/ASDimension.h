@@ -35,6 +35,7 @@ typedef struct {
 extern ASRelativeDimension const ASRelativeDimensionUnconstrained;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
+NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark ASRelativeDimension
 
@@ -70,4 +71,5 @@ extern BOOL ASSizeRangeEqualToSizeRange(ASSizeRange lhs, ASSizeRange rhs);
 
 extern NSString *NSStringFromASSizeRange(ASSizeRange sizeRange);
 
+NS_ASSUME_NONNULL_END
 ASDISPLAYNODE_EXTERN_C_END

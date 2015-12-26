@@ -10,18 +10,21 @@
 
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  Lays out a single layoutable child, then lays out a background layoutable instance behind it stretched to its size.
  */
 @interface ASBackgroundLayoutSpec : ASLayoutSpec
 
-@property (nonatomic, strong) id<ASLayoutable> background;
+@property (nullable, nonatomic, strong) id<ASLayoutable> background;
 
 /**
- @param child A child that is laid out to determine the size of this spec. If this is nil, then this method
-        returns nil.
- @param background A layoutable object that is laid out behind the child. May be nil, in which case the background is omitted.
+ @param child A child that is laid out to determine the size of this spec.
+ @param background A layoutable object that is laid out behind the child. If this is nil, the background is omitted.
  */
-+ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(nullable id<ASLayoutable>)background;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -11,6 +11,8 @@
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  *  Layout options that can be defined for an ASLayoutable being added to a ASStackLayoutSpec.
  */
@@ -64,3 +66,5 @@
 @property (nonatomic, readwrite) CGFloat descender;
 
 @end
+
+NS_ASSUME_NONNULL_END

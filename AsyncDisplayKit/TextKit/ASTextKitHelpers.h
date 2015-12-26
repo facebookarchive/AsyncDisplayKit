@@ -12,6 +12,8 @@
 #import <UIKit/UIKit.h>
 #import "ASBaseDefines.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 ASDISPLAYNODE_INLINE CGFloat ceilPixelValueForScale(CGFloat f, CGFloat scale)
 {
   // Round up to device pixel (.5 on retina)
@@ -35,7 +37,7 @@ ASDISPLAYNODE_INLINE CGSize ceilSizeValue(CGSize s)
  @return An `ASTextKitComponents` containing the created components. The text view component will be nil.
  @discussion The returned components will be hooked up together, so they are ready for use as a system upon return.
  */
-+ (ASTextKitComponents *)componentsWithAttributedSeedString:(NSAttributedString *)attributedSeedString
++ (ASTextKitComponents *)componentsWithAttributedSeedString:(nullable NSAttributedString *)attributedSeedString
                                           textContainerSize:(CGSize)textContainerSize;
 
 /**
@@ -49,6 +51,8 @@ ASDISPLAYNODE_INLINE CGSize ceilSizeValue(CGSize s)
 @property (nonatomic, strong, readonly) NSTextStorage *textStorage;
 @property (nonatomic, strong, readonly) NSTextContainer *textContainer;
 @property (nonatomic, strong, readonly) NSLayoutManager *layoutManager;
-@property (nonatomic, strong) UITextView *textView;
+@property (nullable, nonatomic, strong) UITextView *textView;
 
 @end
+
+NS_ASSUME_NONNULL_END

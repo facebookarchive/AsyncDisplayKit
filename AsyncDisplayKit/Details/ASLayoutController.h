@@ -12,6 +12,10 @@
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 #import <AsyncDisplayKit/ASScrollDirection.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+@class ASCellNode;
+
 typedef struct {
   CGFloat leadingBufferScreenfuls;
   CGFloat trailingBufferScreenfuls;
@@ -26,20 +30,22 @@ typedef struct {
  */
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
 
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType;
+- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray<NSIndexPath *> *)indexPaths viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType;
 
 - (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType;
 
 @optional
 
-- (void)insertNodesAtIndexPaths:(NSArray *)indexPaths withSizes:(NSArray *)nodeSizes;
+- (void)insertNodesAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withSizes:(NSArray<NSValue *> *)nodeSizes;
 
-- (void)deleteNodesAtIndexPaths:(NSArray *)indexPaths;
+- (void)deleteNodesAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
 
-- (void)insertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet;
+- (void)insertSections:(NSArray<NSArray <ASCellNode *>*> *)sections atIndexSet:(NSIndexSet *)indexSet;
 
 - (void)deleteSectionsAtIndexSet:(NSIndexSet *)indexSet;
 
-- (void)setVisibleNodeIndexPaths:(NSArray *)indexPaths;
+- (void)setVisibleNodeIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
 
 @end
+
+NS_ASSUME_NONNULL_END

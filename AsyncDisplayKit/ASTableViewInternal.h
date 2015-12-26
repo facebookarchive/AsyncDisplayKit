@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Facebook. All rights reserved.
 //
 
-#import "ASTableView.h"
+#import "ASTableNode.h"
 
 @class ASDataController;
 

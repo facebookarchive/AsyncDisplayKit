@@ -11,6 +11,8 @@
 #import <AsyncDisplayKit/ASLayoutable.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /** A layout spec is an immutable object that describes a layout, loosely inspired by React. */
 @interface ASLayoutSpec : NSObject <ASLayoutable>
 
@@ -70,7 +72,7 @@
  * For good measure, in these layout specs it probably makes sense to define
  * setChild: and setChild:forIdentifier: methods to do something appropriate or to assert.
  */
-- (void)setChildren:(NSArray *)children;
+- (void)setChildren:(NSArray<id<ASLayoutable>> *)children;
 
 /**
  * Get child methods
@@ -84,17 +86,18 @@
  */
 
 /** Returns the child added to this layout spec using the default identifier. */
-- (id<ASLayoutable>)child;
+- (nullable id<ASLayoutable>)child;
 
 /**
  * Returns the child added to this layout spec using the given identifier.
  *
  * @param identifier An identifier associated withe the child.
  */
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
+- (nullable id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
 
 /** Returns all children added to this layout spec. */
-- (NSArray *)children;
+- (NSArray<id<ASLayoutable>> *)children;
+
 @end
 
 @interface ASLayoutSpec (Debugging) <ASLayoutableAsciiArtProtocol>
@@ -105,3 +108,6 @@
 + (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName;
 
 @end
+
+NS_ASSUME_NONNULL_END
+

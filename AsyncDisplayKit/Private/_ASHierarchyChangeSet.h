@@ -7,7 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ASDataController.h"
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+
+typedef NSUInteger ASDataControllerAnimationOptions;
 
 typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
   _ASHierarchyChangeTypeReload,
