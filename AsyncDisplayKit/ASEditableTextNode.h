@@ -8,6 +8,7 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASEditableTextNodeDelegate;
 
@@ -29,7 +30,7 @@
 @property (nonatomic, readonly, strong) UITextView *textView;
 
 //! @abstract The attributes to apply to new text being entered by the user.
-@property (nonatomic, readwrite, strong) NSDictionary *typingAttributes;
+@property (nonatomic, readwrite, strong, nullable) NSDictionary<NSString *, id> *typingAttributes;
 
 //! @abstract The range of text currently selected. If length is zero, the range is the cursor location.
 @property (nonatomic, readwrite, assign) NSRange selectedRange;
@@ -46,14 +47,14 @@
   @abstract The styled placeholder text displayed by the text node while no text is entered
   @discussion The placeholder is displayed when the user has not entered any text and the keyboard is not visible.
  */
-@property (nonatomic, readwrite, strong) NSAttributedString *attributedPlaceholderText;
+@property (nonatomic, readwrite, strong, nullable) NSAttributedString *attributedPlaceholderText;
 
 #pragma mark - Modifying User Text
 /**
   @abstract The styled text displayed by the receiver.
   @discussion When the placeholder is displayed (as indicated by -isDisplayingPlaceholder), this value is nil. Otherwise, this value is the attributed text the user has entered. This value can be modified regardless of whether the receiver is the first responder (and thus, editing) or not. Changing this value from nil to non-nil will result in the placeholder being hidden, and the new value being displayed.
  */
-@property (nonatomic, readwrite, copy) NSAttributedString *attributedText;
+@property (nonatomic, readwrite, copy, nullable) NSAttributedString *attributedText;
 
 #pragma mark - Managing The Keyboard
 //! @abstract The text input mode used by the receiver's keyboard, if it is visible. This value is undefined if the receiver is not the first responder.
@@ -144,3 +145,5 @@
 
 
 @end
+
+NS_ASSUME_NONNULL_END

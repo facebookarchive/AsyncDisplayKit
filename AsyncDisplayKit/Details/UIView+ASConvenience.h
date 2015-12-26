@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 
 /**
  These are the properties we support from CALayer (implemented in the pending state)
@@ -18,7 +20,7 @@
 @property (nonatomic, assign) CGPoint position;
 @property (nonatomic, assign) CGFloat zPosition;
 @property (nonatomic, assign) CGPoint anchorPoint;
-@property (nonatomic, retain) id contents;
+@property (nullable, nonatomic, retain) id contents;
 @property (nonatomic, assign) CGFloat cornerRadius;
 @property (nonatomic, assign) CGFloat contentsScale;
 @property (nonatomic, assign) CATransform3D transform;
@@ -45,15 +47,15 @@
  */
 @protocol ASDisplayNodeViewProperties
 
-@property (nonatomic, assign)           BOOL clipsToBounds;
-@property (nonatomic, getter=isHidden)  BOOL hidden;
-@property (nonatomic, assign)           BOOL autoresizesSubviews;
-@property (nonatomic, assign)           UIViewAutoresizing autoresizingMask;
-@property (nonatomic, retain)           UIColor *tintColor;
-@property (nonatomic, assign)           CGFloat alpha;
-@property (nonatomic, assign)           CGRect bounds;
-@property (nonatomic, assign)           CGRect frame;   // Only for use with nodes wrapping synchronous views
-@property (nonatomic, assign)           UIViewContentMode contentMode;
+@property (nonatomic, assign)           		BOOL clipsToBounds;
+@property (nonatomic, getter=isHidden)  		BOOL hidden;
+@property (nonatomic, assign)           		BOOL autoresizesSubviews;
+@property (nonatomic, assign)           		UIViewAutoresizing autoresizingMask;
+@property (nonatomic, retain, null_resettable)  UIColor *tintColor;
+@property (nonatomic, assign)           		CGFloat alpha;
+@property (nonatomic, assign)           		CGRect bounds;
+@property (nonatomic, assign)           		CGRect frame;   // Only for use with nodes wrapping synchronous views
+@property (nonatomic, assign)           		UIViewContentMode contentMode;
 @property (nonatomic, assign, getter=isUserInteractionEnabled) BOOL userInteractionEnabled;
 @property (nonatomic, assign, getter=isExclusiveTouch) BOOL exclusiveTouch;
 @property (nonatomic, assign, getter=asyncdisplaykit_isAsyncTransactionContainer, setter = asyncdisplaykit_setAsyncTransactionContainer:) BOOL asyncdisplaykit_asyncTransactionContainer;
@@ -76,6 +78,8 @@
  */
 
 // Accessibility identification support
-@property (nonatomic, copy)          NSString *accessibilityIdentifier;
+@property (nullable, nonatomic, copy)          NSString *accessibilityIdentifier;
 
 @end
+
+NS_ASSUME_NONNULL_END

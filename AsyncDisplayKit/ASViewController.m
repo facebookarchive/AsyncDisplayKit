@@ -16,6 +16,18 @@
   BOOL _ensureDisplayed;
 }
 
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+  ASDisplayNodeAssert(NO, @"ASViewController requires using -initWithNode:");
+  return [self initWithNode:[[ASDisplayNode alloc] init]];
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
+{
+  ASDisplayNodeAssert(NO, @"ASViewController requires using -initWithNode:");
+  return [self initWithNode:[[ASDisplayNode alloc] init]];
+}
+
 - (instancetype)initWithNode:(ASDisplayNode *)node
 {
   if (!(self = [super initWithNibName:nil bundle:nil])) {
@@ -63,6 +75,11 @@
 {
   CGSize viewSize = self.view.bounds.size;
   return ASSizeRangeMake(viewSize, viewSize);
+}
+
+- (ASInterfaceState)interfaceState
+{
+  return _node.interfaceState;
 }
 
 @end

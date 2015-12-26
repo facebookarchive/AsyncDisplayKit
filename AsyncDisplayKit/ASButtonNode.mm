@@ -7,8 +7,9 @@
  */
 
 #import "ASButtonNode.h"
-
-#import <AsyncDisplayKit/ASThread.h>
+#import "ASStackLayoutSpec.h"
+#import "ASThread.h"
+#import "ASDisplayNode+Subclasses.h"
 
 @interface ASButtonNode ()
 {
@@ -38,6 +39,9 @@
 
     _titleNode = [[ASTextNode alloc] init];
     _imageNode = [[ASImageNode alloc] init];
+    
+    _contentHorizontalAlignment = ASAlignmentMiddle;
+    _contentVerticalAlignment = ASAlignmentCenter;
     
     [self addSubnode:_titleNode];
     [self addSubnode:_imageNode];
@@ -195,8 +199,8 @@
   ASStackLayoutSpec *stack = [[ASStackLayoutSpec alloc] init];
   stack.direction = self.laysOutHorizontally ? ASStackLayoutDirectionHorizontal : ASStackLayoutDirectionVertical;
   stack.spacing = self.contentSpacing;
-  stack.justifyContent = ASStackLayoutJustifyContentCenter;
-  stack.alignItems = ASStackLayoutAlignItemsCenter;
+  stack.horizontalAlignment = _contentHorizontalAlignment;
+  stack.verticalAlignment = _contentVerticalAlignment;
   
   NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:2];
   if (self.imageNode.image) {

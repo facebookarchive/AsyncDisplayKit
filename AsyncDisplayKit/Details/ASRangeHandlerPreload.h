@@ -10,6 +10,10 @@
 
 #import <AsyncDisplayKit/ASRangeHandler.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface ASRangeHandlerPreload : NSObject <ASRangeHandler>
 
 @end
+
+NS_ASSUME_NONNULL_END

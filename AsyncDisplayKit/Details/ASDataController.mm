@@ -17,6 +17,7 @@
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
+#import "ASFlowLayoutController.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)

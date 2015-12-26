@@ -34,6 +34,8 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
   ASCenterLayoutSpecSizingOptionMinimumXY = ASCenterLayoutSpecSizingOptionMinimumX | ASCenterLayoutSpecSizingOptionMinimumY,
 };
 
+NS_ASSUME_NONNULL_BEGIN
+
 /** Lays out a single layoutable child and position it so that it is centered into the layout bounds. */
 @interface ASCenterLayoutSpec : ASLayoutSpec
 
@@ -54,3 +56,5 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
                                                child:(id<ASLayoutable>)child;
 
 @end
+
+NS_ASSUME_NONNULL_END

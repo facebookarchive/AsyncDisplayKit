@@ -6,23 +6,25 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASImageNode.h>
 #import <MapKit/MapKit.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface ASMapNode : ASImageNode
 
 /**
- The current region of ASMapNode. This can be set at any time and ASMapNode will animate the change.
+ The current region of ASMapNode. This can be set at any time and ASMapNode will animate the change. This property may be set from a background thread before the node is loaded, and will automatically be applied to define the region of the static snapshot (if .liveMap = NO) or the internal MKMapView (otherwise).
  */
 @property (nonatomic, assign) MKCoordinateRegion region;
 
 /**
  This is the MKMapView that is the live map part of ASMapNode. This will be nil if .liveMap = NO. Note, MKMapView is *not* thread-safe.
  */
-@property (nonatomic, readonly) MKMapView *mapView;
+@property (nullable, nonatomic, readonly) MKMapView *mapView;
 
 /**
- Set this to YES to turn the snapshot into an interactive MKMapView and vice versa. Defaults to NO.
+ Set this to YES to turn the snapshot into an interactive MKMapView and vice versa. Defaults to NO. This property may be set on a background thread before the node is loaded, and will automatically be actioned, once the node is loaded. 
  */
 @property (nonatomic, assign, getter=isLiveMap) BOOL liveMap;
 
@@ -41,6 +43,8 @@
  * @discussion This method set the annotations of the static map view and also to the live map view. Passing an empty array clears the map of any annotations.
  * @param annotations An array of objects that conform to the MKAnnotation protocol
  */
-- (void)setAnnotations:(NSArray *)annotations;
+- (void)setAnnotations:(NSArray<id<MKAnnotation>> *)annotations;
 
 @end
+
+NS_ASSUME_NONNULL_END

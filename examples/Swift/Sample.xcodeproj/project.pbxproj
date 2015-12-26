@@ -129,6 +129,8 @@
 		050E7C6619D22E19004363C2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {

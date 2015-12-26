@@ -11,13 +11,15 @@
 // These methods must never be called or overridden by other classes.
 //
 
-#import "_ASDisplayLayer.h"
 #import "_AS-objc-internal.h"
 #import "ASDisplayNodeExtraIvars.h"
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
 #import "ASLayoutOptions.h"
+
+@protocol _ASDisplayLayerDelegate;
+@class _ASDisplayLayer;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)());
@@ -39,7 +41,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 
 #define TIME_DISPLAYNODE_OPS (DEBUG || PROFILE)
 
-@interface ASDisplayNode () <_ASDisplayLayerDelegate>
+@interface ASDisplayNode ()
 {
 @protected
   // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.
@@ -143,6 +145,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 - (void)__enterHierarchy;
 // Call didExitHierarchy if necessary and set inHierarchy = NO if visibility notifications are enabled on all of its parents
 - (void)__exitHierarchy;
+
+// Helper method to summarize whether or not the node run through the display process
+- (BOOL)__implementsDisplay;
 
 // Display the node's view/layer immediately on the current thread, bypassing the background thread rendering. Will be deprecated.
 - (void)displayImmediately;

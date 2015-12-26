@@ -8,7 +8,7 @@
  *
  */
 
-#import "ASLayoutSpec.h"
+#import "ASLayoutOptionsPrivate.h"
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
@@ -16,7 +16,6 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutOptions.h"
-#import "ASLayoutOptionsPrivate.h"
 #import "ASThread.h"
 
 #import <objc/runtime.h>

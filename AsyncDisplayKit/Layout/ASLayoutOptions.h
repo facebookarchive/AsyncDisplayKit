@@ -9,7 +9,10 @@
  */
 
 #import <Foundation/Foundation.h>
-#import <AsyncDisplayKit/ASLayoutSpec.h>
+#import <AsyncDisplayKit/ASStaticLayoutable.h>
+#import <AsyncDisplayKit/ASStackLayoutable.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASLayoutable;
 
@@ -52,7 +55,7 @@
  *
  *  @return a new instance of ASLayoutOptions
  */
-- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable;
+- (instancetype)initWithLayoutable:(nullable id<ASLayoutable>)layoutable NS_DESIGNATED_INITIALIZER;
 
 /**
  *  Copies the values of layoutOptions into self. This is useful when placing a layoutable inside of another. Consider
@@ -83,3 +86,6 @@
 @property (nonatomic, readwrite) CGPoint layoutPosition;
 
 @end
+
+NS_ASSUME_NONNULL_END
+

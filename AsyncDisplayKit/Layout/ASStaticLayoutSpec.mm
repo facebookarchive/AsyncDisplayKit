@@ -14,7 +14,6 @@
 #import "ASLayoutOptions.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-#import "ASStaticLayoutable.h"
 
 @implementation ASStaticLayoutSpec
 
@@ -39,33 +38,34 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  CGSize size = {
-    constrainedSize.max.width,
-    constrainedSize.max.height
-  };
+  CGSize maxConstrainedSize = CGSizeMake(constrainedSize.max.width, constrainedSize.max.height);
+  
+  NSArray *children = self.children;
+  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:children.count];
 
-  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:self.children.count];
-  for (id<ASLayoutable> child in self.children) {
-    CGSize autoMaxSize = {
-      constrainedSize.max.width - child.layoutPosition.x,
-      constrainedSize.max.height - child.layoutPosition.y
-    };
-    ASSizeRange childConstraint = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, child.sizeRange)
-      ? ASSizeRangeMake({0, 0}, autoMaxSize)
-      : ASRelativeSizeRangeResolve(child.sizeRange, size);
+  for (id<ASLayoutable> child in children) {
+    CGPoint layoutPosition = child.layoutPosition;
+    CGSize autoMaxSize = CGSizeMake(maxConstrainedSize.width  - layoutPosition.x,
+                                    maxConstrainedSize.height - layoutPosition.y);
+    
+    ASRelativeSizeRange childSizeRange = child.sizeRange;
+    BOOL childIsUnconstrained = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, childSizeRange);
+    ASSizeRange childConstraint = childIsUnconstrained ? ASSizeRangeMake({0, 0}, autoMaxSize)
+                                                       : ASRelativeSizeRangeResolve(childSizeRange, maxConstrainedSize);
+    
     ASLayout *sublayout = [child measureWithSizeRange:childConstraint];
-    sublayout.position = child.layoutPosition;
+    sublayout.position = layoutPosition;
     [sublayouts addObject:sublayout];
   }
   
-  size.width = constrainedSize.min.width;
-  for (ASLayout *sublayout in sublayouts) {
-    size.width = MAX(size.width, sublayout.position.x + sublayout.size.width);
-  }
+  CGSize size = CGSizeMake(constrainedSize.min.width, constrainedSize.min.height);
 
-  size.height = constrainedSize.min.height;
   for (ASLayout *sublayout in sublayouts) {
-    size.height = MAX(size.height, sublayout.position.y + sublayout.size.height);
+    CGPoint sublayoutPosition = sublayout.position;
+    CGSize  sublayoutSize     = sublayout.size;
+    
+    size.width  = MAX(size.width,  sublayoutPosition.x + sublayoutSize.width);
+    size.height = MAX(size.height, sublayoutPosition.y + sublayoutSize.height);
   }
 
   return [ASLayout layoutWithLayoutableObject:self
@@ -75,12 +75,12 @@
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
-  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
+  ASDisplayNodeAssert(NO, @"ASStaticLayoutSpec only supports setChildren");
 }
 
 - (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
 {
-  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports children");
+  ASDisplayNodeAssert(NO, @"ASStaticLayoutSpec only supports children");
   return nil;
 }
 

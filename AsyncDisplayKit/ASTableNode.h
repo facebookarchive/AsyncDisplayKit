@@ -6,7 +6,7 @@
 //  Copyright © 2015 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASTableView.h>
 
 /**
  * ASTableNode is a node based class that wraps an ASTableView. It can be used
@@ -14,8 +14,13 @@
  */
 @interface ASTableNode : ASDisplayNode
 
-- (instancetype)initWithStyle:(UITableViewStyle)style NS_DESIGNATED_INITIALIZER;
+- (instancetype)init; // UITableViewStylePlain
+- (instancetype)initWithStyle:(UITableViewStyle)style;
 
 @property (nonatomic, readonly) ASTableView *view;
+
+// These properties can be set without triggering the view to be created, so it's fine to set them in -init.
+@property (weak, nonatomic) id <ASTableDelegate>   delegate;
+@property (weak, nonatomic) id <ASTableDataSource> dataSource;
 
 @end

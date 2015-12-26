@@ -11,6 +11,8 @@
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 #import <AsyncDisplayKit/ASRelativeSize.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * A layout spec that positions children at fixed positions.
  * 
@@ -21,6 +23,8 @@
 /**
  @param children Children to be positioned at fixed positions, each conforms to ASStaticLayoutable
  */
-+ (instancetype)staticLayoutSpecWithChildren:(NSArray *)children;
++ (instancetype)staticLayoutSpecWithChildren:(NSArray<id<ASStaticLayoutable>> *)children;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -10,8 +10,9 @@
 
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASDataController.h>
-#import <AsyncDisplayKit/ASFlowLayoutController.h>
 #import <AsyncDisplayKit/ASLayoutController.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASRangeControllerDataSource;
 @protocol ASRangeControllerDelegate;
@@ -78,7 +79,7 @@
  *
  * @returns an array of index paths corresponding to the nodes currently visible onscreen (i.e., the visible range).
  */
-- (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController;
+- (NSArray<NSIndexPath *> *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController;
 
 /**
  * @param rangeController Sender.
@@ -130,7 +131,7 @@
  *
  * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
  */
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  * Called for nodes deletion.
@@ -143,7 +144,7 @@
  *
  * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
  */
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  * Called for section insertion.
@@ -168,3 +169,5 @@
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 @end
+
+NS_ASSUME_NONNULL_END

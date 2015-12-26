@@ -11,6 +11,8 @@
 
 #import <UIKit/UIKit.h>
 
+#define SIMULATE_WEB_RESPONSE 0
+
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;

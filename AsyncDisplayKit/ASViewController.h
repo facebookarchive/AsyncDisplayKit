@@ -9,16 +9,27 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface ASViewController : UIViewController
 
+- (instancetype)initWithNode:(ASDisplayNode *)node NS_DESIGNATED_INITIALIZER;
+
 @property (nonatomic, strong, readonly) ASDisplayNode *node;
+
+/**
+ * @abstract Passthrough property to the the .interfaceState of the node.
+ * @return The current ASInterfaceState of the node, indicating whether it is visible and other situational properties.
+ * @see ASInterfaceState
+ */
+@property (nonatomic, readonly) ASInterfaceState interfaceState;
+
 
 // AsyncDisplayKit 2.0 BETA: This property is still being tested, but it allows
 // blocking as a view controller becomes visible to ensure no placeholders flash onscreen.
 // Refer to examples/SynchronousConcurrency, AsyncViewController.m
 @property (nonatomic, assign) BOOL neverShowPlaceholders;
 
-- (instancetype)initWithNode:(ASDisplayNode *)node;
 
 /**
  * The constrained size used to measure the backing node.
@@ -30,3 +41,5 @@
 - (ASSizeRange)nodeConstrainedSize;
 
 @end
+
+NS_ASSUME_NONNULL_END
