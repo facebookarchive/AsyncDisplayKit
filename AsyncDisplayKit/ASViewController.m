@@ -57,7 +57,7 @@
 {
   if (_ensureDisplayed && self.neverShowPlaceholders) {
     _ensureDisplayed = NO;
-    [self.node recursivelyEnsureDisplay];
+    [self.node recursivelyEnsureDisplaySynchronously:YES];
   }
   [super viewDidLayoutSubviews];
 }

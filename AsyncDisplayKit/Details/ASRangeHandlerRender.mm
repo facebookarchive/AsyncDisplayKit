@@ -65,7 +65,7 @@
 
   
   if (![ASDisplayNode shouldUseNewRenderingRange]) {
-    [node recursivelyEnsureDisplay];  // Need to do this without waiting
+    [node recursivelyEnsureDisplaySynchronously:NO];
   } else {
     // Add the node's layer to an off-screen window to trigger display and mark its contents as non-volatile.
     // Use the layer directly to avoid the substantial overhead of UIView heirarchy manipulations.

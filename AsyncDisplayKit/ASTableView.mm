@@ -558,7 +558,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   ASCellNode *cellNode = [self nodeForRowAtIndexPath:indexPath];
   if (cellNode.neverShowPlaceholders) {
-    [cellNode recursivelyEnsureDisplay];
+    [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
 }
 

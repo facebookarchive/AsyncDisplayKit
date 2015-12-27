@@ -527,7 +527,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   ASCellNode *cellNode = [self nodeForItemAtIndexPath:indexPath];
   if (cellNode.neverShowPlaceholders) {
-    [cellNode recursivelyEnsureDisplay];
+    [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
 }
 
