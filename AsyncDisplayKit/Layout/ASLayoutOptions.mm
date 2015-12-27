@@ -56,10 +56,10 @@ static Class gDefaultLayoutOptionsClass = nil;
 
 - (instancetype)init
 {
-  return [self initWithLayoutable:nil];
+  return nil;
 }
 
-- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable;
+- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
 {
   self = [super init];
   if (self) {

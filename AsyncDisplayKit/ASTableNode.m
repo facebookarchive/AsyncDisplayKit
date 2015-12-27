@@ -7,7 +7,7 @@
 //
 
 #import "ASFlowLayoutController.h"
-#import "ASTableNode.h"
+#import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 
 @interface _ASTablePendingState : NSObject
@@ -28,11 +28,22 @@
 
 @implementation ASTableNode
 
-- (instancetype)_initWithStyle:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
+- (instancetype)_initWithTableView:(ASTableView *)tableView
 {
-  if (self = [super initWithViewBlock:^UIView *{ return [[ASTableView alloc] _initWithFrame:CGRectZero
-                                                                                      style:style
-                                                                        dataControllerClass:dataControllerClass]; }]) {
+  if (self = [super initWithViewBlock:^UIView *{ return tableView; }]) {
+    __unused ASTableView *tableView = [self view];
+    return self;
+  }
+  return nil;
+}
+
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
+{
+  ASDisplayNodeViewBlock tableViewBlock = ^UIView *{
+    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass ownedByNode:YES];
+  };
+
+  if (self = [super initWithViewBlock:tableViewBlock]) {
     return self;
   }
   return nil;
@@ -40,12 +51,12 @@
 
 - (instancetype)initWithStyle:(UITableViewStyle)style
 {
-  return [self _initWithStyle:style dataControllerClass:nil];
+  return [self _initWithFrame:CGRectZero style:style dataControllerClass:nil];
 }
 
 - (instancetype)init
 {
-  return [self _initWithStyle:UITableViewStylePlain dataControllerClass:nil];
+  return [self _initWithFrame:CGRectZero style:UITableViewStylePlain dataControllerClass:nil];
 }
 
 - (void)didLoad
