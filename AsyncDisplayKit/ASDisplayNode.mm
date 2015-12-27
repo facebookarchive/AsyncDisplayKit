@@ -1775,18 +1775,22 @@ static BOOL ShouldUseNewRenderingRange = NO;
     if (newState & ASInterfaceStateFetchData) {
       [self fetchData];
     } else {
-      [self clearFetchedData];
+      if ([self supportsRangeManagedInterfaceState]) {
+        [self clearFetchedData];
+      }
     }
   }
 
   // Entered or exited contents rendering state.
   if ((newState & ASInterfaceStateDisplay) != (oldState & ASInterfaceStateDisplay)) {
-    if (newState & ASInterfaceStateDisplay) {
-      // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
-      [self setDisplaySuspended:NO];
-    } else {
-      [self setDisplaySuspended:YES];
-      [self clearContents];
+    if ([self supportsRangeManagedInterfaceState]) {
+      if (newState & ASInterfaceStateDisplay) {
+        // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
+        [self setDisplaySuspended:NO];
+      } else {
+        [self setDisplaySuspended:YES];
+        [self clearContents];
+      }
     }
   }
 
