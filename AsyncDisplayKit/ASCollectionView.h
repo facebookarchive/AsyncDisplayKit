@@ -22,10 +22,16 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * Node-based collection view.
+ * Asynchronous UICollectionView with Intelligent Preloading capabilities.
  *
- * ASCollectionView is a version of UICollectionView that uses nodes -- specifically, ASCellNode subclasses -- with asynchronous
- * pre-rendering instead of synchronously loading UICollectionViewCells.
+ * ASCollectionNode is recommended over ASCollectionView.  This class exists for adoption convenience.
+ *
+ * ASCollectionView is a true subclass of UICollectionView, meaning it is pointer-compatible
+ * with code that currently uses UICollectionView.
+ *
+ * The main difference is that asyncDataSource expects -nodeForItemAtIndexPath, an ASCellNode, and
+ * the sizeForItemAtIndexPath: method is eliminated (as are the performance problems caused by it).
+ * This is made possible because ASCellNodes can calculate their own size, and preload ahead of time.
  */
 @interface ASCollectionView : UICollectionView
 

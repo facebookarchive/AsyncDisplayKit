@@ -205,6 +205,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, readonly) ASInterfaceState interfaceState;
 
+
 /** @name Managing dimensions */
 
 /**

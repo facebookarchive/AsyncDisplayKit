@@ -22,7 +22,7 @@
 @end
 
 @interface ASCollectionView ()
-- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
+- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout ownedByNode:(BOOL)ownedByNode;
 @end
 
 @implementation ASCollectionNode
@@ -40,10 +40,19 @@
   return [self initWithFrame:CGRectZero collectionViewLayout:layout];
 }
 
+- (instancetype)_initWithCollectionView:(ASCollectionView *)collectionView
+{
+  if (self = [super initWithViewBlock:^UIView *{ return collectionView; }]) {
+    __unused ASCollectionView *collectionView = [self view];
+    return self;
+  }
+  return nil;
+}
+
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout];
+    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout ownedByNode:YES];
   };
   
   if (self = [super initWithViewBlock:collectionViewBlock]) {
