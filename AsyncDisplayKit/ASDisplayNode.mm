@@ -1543,9 +1543,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   recursivelyTriggerDisplayForLayer(layer, shouldBlock);
 }
 
-- (void)recursivelyEnsureDisplay
+- (void)recursivelyEnsureDisplaySynchronously:(BOOL)synchronously
 {
-  [self __recursivelyTriggerDisplayAndBlock:YES];
+  [self __recursivelyTriggerDisplayAndBlock:synchronously];
 }
 
 - (void)setShouldBypassEnsureDisplay:(BOOL)shouldBypassEnsureDisplay

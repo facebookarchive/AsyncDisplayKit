@@ -90,7 +90,7 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
  * In order to guarantee against deadlocks, this method should only be called on the main thread.
  * It may block on the private queue, [_ASDisplayLayer displayQueue]
  */
-- (void)recursivelyEnsureDisplay;
+- (void)recursivelyEnsureDisplaySynchronously:(BOOL)synchronously;
 
 /**
  * @abstract Allows a node to bypass all ensureDisplay passes.  Defaults to NO.
