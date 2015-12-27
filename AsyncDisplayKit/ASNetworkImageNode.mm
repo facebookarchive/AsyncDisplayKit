@@ -191,7 +191,7 @@
           _imageLoaded = YES;
 
           if (self.shouldCacheImage) {
-            self.image = [UIImage imageNamed:_URL.path];
+            self.image = [UIImage imageNamed:[_URL.path stringByReplacingOccurrencesOfString:@"/" withString:@""]];
           } else {
             self.image = [UIImage imageWithContentsOfFile:_URL.path];
           }
