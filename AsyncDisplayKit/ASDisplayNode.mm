@@ -1770,6 +1770,10 @@ static BOOL ShouldUseNewRenderingRange = NO;
     // Trigger asynchronous measurement if it is not already cached or being calculated.
   }
   
+  // For the FetchData and Display ranges, we don't want to call -clear* if not being managed by a range controller.
+  // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
+  // Still, the interfaceState should be updated to the current state of the node; just don't act on the transition.
+  
   // Entered or exited data loading state.
   if ((newState & ASInterfaceStateFetchData) != (oldState & ASInterfaceStateFetchData)) {
     if (newState & ASInterfaceStateFetchData) {
