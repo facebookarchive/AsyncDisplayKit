@@ -25,7 +25,7 @@ static const CGFloat kInnerPadding = 10.0f;
 @interface KittenNode ()
 {
   CGSize _kittenSize;
-
+  
   ASNetworkImageNode *_imageNode;
   ASTextNode *_textNode;
   ASDisplayNode *_divider;
@@ -42,7 +42,7 @@ static const CGFloat kInnerPadding = 10.0f;
 + (NSArray *)placeholders
 {
   static NSArray *placeholders = nil;
-
+  
   static dispatch_once_t once;
   dispatch_once(&once, ^{
     placeholders = @[
@@ -68,7 +68,7 @@ static const CGFloat kInnerPadding = 10.0f;
                      @"Sollicitudin feed me et ac in viverra catnip, nunc eat I don't like that food iaculis give me fish.",
                      ];
   });
-
+  
   return placeholders;
 }
 
@@ -76,30 +76,30 @@ static const CGFloat kInnerPadding = 10.0f;
 {
   if (!(self = [super init]))
     return nil;
-
+  
   _kittenSize = size;
-
+  
   // kitten image, with a solid background colour serving as placeholder
   _imageNode = [[ASNetworkImageNode alloc] init];
   _imageNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
   _imageNode.URL = [NSURL URLWithString:[NSString stringWithFormat:@"https://placekitten.com/%zd/%zd",
-                                                                   (NSInteger)roundl(_kittenSize.width),
-                                                                   (NSInteger)roundl(_kittenSize.height)]];
-//  _imageNode.contentMode = UIViewContentModeCenter;
+                                         (NSInteger)roundl(_kittenSize.width),
+                                         (NSInteger)roundl(_kittenSize.height)]];
+  //  _imageNode.contentMode = UIViewContentModeCenter;
   [_imageNode addTarget:self action:@selector(toggleNodesSwap) forControlEvents:ASControlNodeEventTouchUpInside];
   [self addSubnode:_imageNode];
-
+  
   // lorem ipsum text, plus some nice styling
   _textNode = [[ASTextNode alloc] init];
   _textNode.attributedString = [[NSAttributedString alloc] initWithString:[self kittyIpsum]
                                                                attributes:[self textStyle]];
   [self addSubnode:_textNode];
-
+  
   // hairline cell separator
   _divider = [[ASDisplayNode alloc] init];
   _divider.backgroundColor = [UIColor lightGrayColor];
   [self addSubnode:_divider];
-
+  
   return self;
 }
 
@@ -109,24 +109,24 @@ static const CGFloat kInnerPadding = 10.0f;
   u_int32_t ipsumCount = (u_int32_t)[placeholders count];
   u_int32_t location = arc4random_uniform(ipsumCount);
   u_int32_t length = arc4random_uniform(ipsumCount - location);
-
+  
   NSMutableString *string = [placeholders[location] mutableCopy];
   for (u_int32_t i = location + 1; i < location + length; i++) {
     [string appendString:(i % 2 == 0) ? @"\n" : @"  "];
     [string appendString:placeholders[i]];
   }
-
+  
   return string;
 }
 
 - (NSDictionary *)textStyle
 {
   UIFont *font = [UIFont fontWithName:@"HelveticaNeue" size:12.0f];
-
+  
   NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
   style.paragraphSpacing = 0.5 * font.lineHeight;
   style.hyphenationFactor = 1.0;
-
+  
   return @{ NSFontAttributeName: font,
             NSParagraphStyleAttributeName: style };
 }
@@ -164,7 +164,7 @@ static const CGFloat kInnerPadding = 10.0f;
   CGSize imageSize = CGSizeMake(kImageSize, kImageSize);
   CGSize textSize = [_textNode measure:CGSizeMake(constrainedSize.width - kImageSize - 2 * kOuterPadding - kInnerPadding,
                                                   constrainedSize.height)];
-
+  
   // ensure there's room for the text
   CGFloat requiredHeight = MAX(textSize.height, imageSize.height);
   return CGSizeMake(constrainedSize.width, requiredHeight + 2 * kOuterPadding);
@@ -174,9 +174,9 @@ static const CGFloat kInnerPadding = 10.0f;
 {
   CGFloat pixelHeight = 1.0f / [[UIScreen mainScreen] scale];
   _divider.frame = CGRectMake(0.0f, 0.0f, self.calculatedSize.width, pixelHeight);
-
+  
   _imageNode.frame = CGRectMake(kOuterPadding, kOuterPadding, kImageSize, kImageSize);
-
+  
   CGSize textSize = _textNode.calculatedSize;
   _textNode.frame = CGRectMake(kOuterPadding + kImageSize + kInnerPadding, kOuterPadding, textSize.width, textSize.height);
 }
