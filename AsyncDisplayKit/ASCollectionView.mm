@@ -99,6 +99,16 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
 
+// Used only when ASCollectionView is created directly rather than through ASCollectionNode.
+// We create a node so that logic related to appearance, memory management, etc can be located there
+// for both the node-based and view-based version of the table.
+// This also permits sharing logic with ASTableNode, as the superclass is not UIKit-controlled.
+@property (nonatomic, retain) ASCollectionNode *strongCollectionNode;
+
+@end
+
+@interface ASCollectionNode ()
+- (instancetype)_initWithCollectionView:(ASCollectionView *)collectionView;
 @end
 
 @implementation ASCollectionView
@@ -108,25 +118,30 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
 {
-  return [self initWithFrame:CGRectZero collectionViewLayout:layout];
+  return [self _initWithFrame:CGRectZero collectionViewLayout:layout ownedByNode:NO];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
-  ASCollectionNode *collectionNode = [[ASCollectionNode alloc] initWithFrame:frame collectionViewLayout:layout];
-  return collectionNode.view;
+  return [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
 }
 
 // FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
-  return [self initWithFrame:frame collectionViewLayout:layout];
+  return [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
 }
 
-- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
+- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout ownedByNode:(BOOL)ownedByNode
 {
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
+  
+  if (!ownedByNode) {
+    // See commentary at the definition of .strongCollectionNode for why we create an ASCollectionNode.
+    ASCollectionNode *collectionNode = [[ASCollectionNode alloc] _initWithCollectionView:self];
+    self.strongCollectionNode = collectionNode;
+  }
   
   _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];
   
@@ -527,7 +542,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   ASCellNode *cellNode = [self nodeForItemAtIndexPath:indexPath];
   if (cellNode.neverShowPlaceholders) {
-    [cellNode recursivelyEnsureDisplay];
+    [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
 }
 

@@ -13,6 +13,7 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Beta.h"
 #import "ASEqualityHelpers.h"
 
 /**
@@ -248,11 +249,11 @@
 
     _messageToViewOrLayer(setNeedsDisplay);
 
-#if !USE_WORKING_WINDOW
-    if (_layer && !self.isSynchronous) {
-      [ASDisplayNode scheduleNodeForDisplay:self];
+    if ([ASDisplayNode shouldUseNewRenderingRange]) {
+      if (_layer && !self.isSynchronous) {
+        [ASDisplayNode scheduleNodeForDisplay:self];
+      }
     }
-#endif
   }
 }
 

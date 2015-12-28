@@ -81,7 +81,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 #pragma mark ASTableView
 
 @interface ASTableNode ()
-- (instancetype)_initWithStyle:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass;
+- (instancetype)_initWithTableView:(ASTableView *)tableView;
 @end
 
 @interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor> {
@@ -110,6 +110,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 @property (atomic, assign) BOOL asyncDataSourceLocked;
 @property (nonatomic, retain, readwrite) ASDataController *dataController;
 
+// Used only when ASTableView is created directly rather than through ASTableNode.
+// We create a node so that logic related to appearance, memory management, etc can be located there
+// for both the node-based and view-based version of the table.
+// This also permits sharing logic with ASCollectionNode, as the superclass is not UIKit-controlled.
+@property (nonatomic, retain) ASTableNode *strongTableNode;
+
 @end
 
 @implementation ASTableView
@@ -122,7 +128,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 #pragma mark -
 #pragma mark Lifecycle
 
-- (void)configureWithDataControllerClass:(Class)dataControllerClass asyncDataFetching:(BOOL)asyncDataFetching
+- (void)configureWithDataControllerClass:(Class)dataControllerClass
 {
   _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
   
@@ -131,13 +137,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
   
-  _dataController = [[dataControllerClass alloc] initWithAsyncDataFetching:asyncDataFetching];
+  _dataController = [[dataControllerClass alloc] initWithAsyncDataFetching:NO];
   _dataController.dataSource = self;
   _dataController.delegate = _rangeController;
   
   _layoutController.dataSource = _dataController;
 
-  _asyncDataFetchingEnabled = asyncDataFetching;
+  _asyncDataFetchingEnabled = NO;
   _asyncDataSourceLocked = NO;
 
   _leadingScreensForBatching = 1.0;
@@ -161,32 +167,32 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
 {
-  return [self initWithFrame:frame style:style asyncDataFetching:NO];
+  return [self _initWithFrame:frame style:style dataControllerClass:nil ownedByNode:NO];
 }
 
 // FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
-  return [self initWithFrame:frame style:style dataControllerClass:[self.class dataControllerClass] asyncDataFetching:asyncDataFetchingEnabled];
+  return [self _initWithFrame:frame style:style dataControllerClass:nil ownedByNode:NO];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass asyncDataFetching:(BOOL)asyncDataFetchingEnabled
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass ownedByNode:(BOOL)ownedByNode
 {
-//  ASTableNode *tableNode = [[ASTableNode alloc] _initWithStyle:style dataControllerClass:dataControllerClass];
-//  tableNode.frame = frame;
-//  return tableNode.view;
-  return [self _initWithFrame:frame style:style dataControllerClass:dataControllerClass];
-}
-  
-- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
-{
-  if (!(self = [super initWithFrame:frame style:style]))
+  if (!(self = [super initWithFrame:frame style:style])) {
     return nil;
+  }
   
   if (!dataControllerClass) {
     dataControllerClass = [self.class dataControllerClass];
   }
-  [self configureWithDataControllerClass:dataControllerClass asyncDataFetching:NO];
+  
+  [self configureWithDataControllerClass:dataControllerClass];
+  
+  if (!ownedByNode) {
+    // See commentary at the definition of .strongTableNode for why we create an ASTableNode.
+    ASTableNode *tableNode = [[ASTableNode alloc] _initWithTableView:self];
+    self.strongTableNode = tableNode;
+  }
   
   return self;
 }
@@ -558,7 +564,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   ASCellNode *cellNode = [self nodeForRowAtIndexPath:indexPath];
   if (cellNode.neverShowPlaceholders) {
-    [cellNode recursivelyEnsureDisplay];
+    [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
 }
 

@@ -10,7 +10,7 @@
 
 #import "ASAssert.h"
 #import "ASMultidimensionalArrayUtils.h"
-#import "ASDisplayNode.h"
+#import "ASCellNode.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDataController+Subclasses.h"
 
@@ -142,7 +142,9 @@
     NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], sections);
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
     // reinsert the elements
-    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:_pendingIndexPaths[kind] completion:nil];
+    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:_pendingIndexPaths[kind] completion:^(NSArray *nodes, NSArray *indexPaths) {
+      [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
+    }];
     [_pendingNodes removeObjectForKey:kind];
     [_pendingIndexPaths removeObjectForKey:kind];
   }];
@@ -187,7 +189,8 @@
     for (NSUInteger i = 0; i < rowNum; i++) {
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
       [indexPaths addObject:indexPath];
-      [nodes addObject:[self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath]];
+      ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
+      [nodes addObject:supplementaryNode];
     }
   }];
 }
@@ -208,7 +211,17 @@
 - (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
-  return [self completedNodesOfKind:kind][indexPath.section][indexPath.item];
+  NSArray *nodesOfKind = [self completedNodesOfKind:kind];
+  NSInteger section = indexPath.section;
+  if (section < nodesOfKind.count) {
+    NSArray *nodesOfKindInSection = nodesOfKind[section];
+    NSInteger itemIndex = indexPath.item;
+    if (itemIndex < nodesOfKindInSection.count) {
+      return nodesOfKindInSection[itemIndex];
+    }
+  }
+  ASDisplayNodeAssert(NO, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self.collectionDataSource);
+  return [[ASCellNode alloc] init];
 }
 
 #pragma mark - Private Helpers

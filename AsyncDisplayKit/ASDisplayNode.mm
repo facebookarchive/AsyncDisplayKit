@@ -1543,9 +1543,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   recursivelyTriggerDisplayForLayer(layer, shouldBlock);
 }
 
-- (void)recursivelyEnsureDisplay
+- (void)recursivelyEnsureDisplaySynchronously:(BOOL)synchronously
 {
-  [self __recursivelyTriggerDisplayAndBlock:YES];
+  [self __recursivelyTriggerDisplayAndBlock:synchronously];
 }
 
 - (void)setShouldBypassEnsureDisplay:(BOOL)shouldBypassEnsureDisplay
@@ -1558,6 +1558,17 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(_propertyLock);
   return _flags.shouldBypassEnsureDisplay;
+}
+
+static BOOL ShouldUseNewRenderingRange = NO;
+
++ (BOOL)shouldUseNewRenderingRange
+{
+  return ShouldUseNewRenderingRange;
+}
++ (void)setShouldUseNewRenderingRange:(BOOL)shouldUseNewRenderingRange
+{
+  ShouldUseNewRenderingRange = shouldUseNewRenderingRange;
 }
 
 #pragma mark - For Subclasses
@@ -1759,23 +1770,31 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     // Trigger asynchronous measurement if it is not already cached or being calculated.
   }
   
+  // For the FetchData and Display ranges, we don't want to call -clear* if not being managed by a range controller.
+  // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
+  // Still, the interfaceState should be updated to the current state of the node; just don't act on the transition.
+  
   // Entered or exited data loading state.
   if ((newState & ASInterfaceStateFetchData) != (oldState & ASInterfaceStateFetchData)) {
     if (newState & ASInterfaceStateFetchData) {
       [self fetchData];
     } else {
-      [self clearFetchedData];
+      if ([self supportsRangeManagedInterfaceState]) {
+        [self clearFetchedData];
+      }
     }
   }
 
   // Entered or exited contents rendering state.
   if ((newState & ASInterfaceStateDisplay) != (oldState & ASInterfaceStateDisplay)) {
-    if (newState & ASInterfaceStateDisplay) {
-      // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
-      [self setDisplaySuspended:NO];
-    } else {
-      [self setDisplaySuspended:YES];
-      [self clearContents];
+    if ([self supportsRangeManagedInterfaceState]) {
+      if (newState & ASInterfaceStateDisplay) {
+        // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
+        [self setDisplaySuspended:NO];
+      } else {
+        [self setDisplaySuspended:YES];
+        [self clearContents];
+      }
     }
   }
 

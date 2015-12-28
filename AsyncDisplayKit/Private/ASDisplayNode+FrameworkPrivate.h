@@ -20,10 +20,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-// Project-wide control for whether the offscreen UIWindow is used for display, or if
-// ASDK's internal system for coalescing and triggering display events is used.
-#define USE_WORKING_WINDOW 1
-
 /**
  Hierarchy state is propogated from nodes to all of their children when certain behaviors are required from the subtree.
  Examples include rasterization and external driving of the .interfaceState property.
@@ -94,7 +90,7 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
  * In order to guarantee against deadlocks, this method should only be called on the main thread.
  * It may block on the private queue, [_ASDisplayLayer displayQueue]
  */
-- (void)recursivelyEnsureDisplay;
+- (void)recursivelyEnsureDisplaySynchronously:(BOOL)synchronously;
 
 /**
  * @abstract Allows a node to bypass all ensureDisplay passes.  Defaults to NO.

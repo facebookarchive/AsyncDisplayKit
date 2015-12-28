@@ -19,10 +19,16 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASTableDelegate;
 
 /**
- * Node-based table view.
+ * Asynchronous UITableView with Intelligent Preloading capabilities.
  *
- * ASTableView is a version of UITableView that uses nodes -- specifically, ASCellNode subclasses -- with asynchronous
- * pre-rendering instead of synchronously loading UITableViewCells.
+ * ASTableNode is recommended over ASTableView.  This class is provided for adoption convenience.
+ *
+ * ASTableView is a true subclass of UITableView, meaning it is pointer-compatible with code that
+ * currently uses UITableView
+ *
+ * The main difference is that asyncDataSource expects -nodeForRowAtIndexPath, an ASCellNode, and
+ * the heightForRowAtIndexPath: method is eliminated (as are the performance problems caused by it).
+ * This is made possible because ASCellNodes can calculate their own size, and preload ahead of time.
  */
 @interface ASTableView : UITableView
 
