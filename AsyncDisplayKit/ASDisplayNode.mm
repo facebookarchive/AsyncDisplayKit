@@ -234,6 +234,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
+  _pendingViewState = [_ASPendingState new];
 }
 
 - (id)init
@@ -339,7 +340,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _layer = nil;
 
   [self __setSupernode:nil];
-  _pendingViewState = nil;
   _replaceAsyncSentinel = nil;
 
   _displaySentinel = nil;
@@ -353,11 +353,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
-  
-  if (_flags.layerBacked)
-    _pendingViewState = [_ASPendingState pendingViewStateFromLayer:_layer];
-  else
-    _pendingViewState = [_ASPendingState pendingViewStateFromView:_view];
     
   [_view removeFromSuperview];
   _view = nil;
@@ -2039,15 +2034,6 @@ static BOOL ShouldUseNewRenderingRange = NO;
 
 
 #pragma mark - Pending View State
-- (_ASPendingState *)pendingViewState
-{
-  if (!_pendingViewState) {
-    _pendingViewState = [[_ASPendingState alloc] init];
-    ASDisplayNodeAssertNotNil(_pendingViewState, @"should have created a pendingViewState");
-  }
-
-  return _pendingViewState;
-}
 
 - (void)_applyPendingStateToViewOrLayer
 {
@@ -2063,8 +2049,6 @@ static BOOL ShouldUseNewRenderingRange = NO;
   } else {
     [_pendingViewState applyToView:_view];
   }
-
-  _pendingViewState = nil;
 
   // TODO: move this into real pending state
   if (_flags.displaySuspended) {

@@ -15,6 +15,7 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASEqualityHelpers.h"
+#import "ASMainQueueTransaction.h"
 
 /**
  * The following macros are conveniences to help in the common tasks related to the bridging that ASDisplayNode does to UIView and CALayer.
@@ -107,44 +108,65 @@
 
 - (CGFloat)alpha
 {
-  _bridge_prologue;
-  return _getFromViewOrLayer(opacity, alpha);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->alpha;
 }
 
 - (void)setAlpha:(CGFloat)newAlpha
 {
-  _bridge_prologue;
-  _setToViewOrLayer(opacity, newAlpha, alpha, newAlpha);
+  ASDN::MutexLocker l(_propertyLock);
+  if (self.nodeLoaded) {
+    _pendingViewState->alpha = newAlpha;
+    [ASMainQueueTransaction performOnMainThread:^{
+      _setToViewOrLayer(opacity, newAlpha, alpha, newAlpha);
+    }];
+  } else {
+    _pendingViewState.alpha = newAlpha;
+  }
 }
 
 - (CGFloat)cornerRadius
 {
-  _bridge_prologue;
-  return _getFromLayer(cornerRadius);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->cornerRadius;
 }
 
 - (void)setCornerRadius:(CGFloat)newCornerRadius
 {
-  _bridge_prologue;
-  _setToLayer(cornerRadius, newCornerRadius);
+  ASDN::MutexLocker l(_propertyLock);
+  if (self.nodeLoaded) {
+    _pendingViewState->cornerRadius = newCornerRadius;
+    [ASMainQueueTransaction performOnMainThread:^{
+      _setToLayer(cornerRadius, newCornerRadius);
+    }];
+  } else {
+    _pendingViewState.cornerRadius = newCornerRadius;
+  }
 }
 
 - (CGFloat)contentsScale
 {
-  _bridge_prologue;
-  return _getFromLayer(contentsScale);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->contentsScale;
 }
 
 - (void)setContentsScale:(CGFloat)newContentsScale
 {
-  _bridge_prologue;
-  _setToLayer(contentsScale, newContentsScale);
+  ASDN::MutexLocker l(_propertyLock);
+  if (self.nodeLoaded) {
+    _pendingViewState->contentsScale = newContentsScale;
+    [ASMainQueueTransaction performOnMainThread:^{
+      _setToLayer(contentsScale, newContentsScale);
+    }];
+  } else {
+    _pendingViewState.contentsScale = newContentsScale;
+  }
 }
 
 - (CGRect)bounds
 {
-  _bridge_prologue;
-  return _getFromViewOrLayer(bounds, bounds);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->bounds;
 }
 
 - (void)setBounds:(CGRect)newBounds
@@ -259,15 +281,16 @@
 
 - (void)setNeedsLayout
 {
-  _bridge_prologue;
   [self __setNeedsLayout];
-  _messageToViewOrLayer(setNeedsLayout);
+  [ASMainQueueTransaction performOnMainThread:^{
+    _messageToViewOrLayer(setNeedsLayout);
+  }];
 }
 
 - (BOOL)isOpaque
 {
-  _bridge_prologue;
-  return _getFromLayer(opaque);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->opaque;
 }
 
 - (void)setOpaque:(BOOL)newOpaque
@@ -284,9 +307,9 @@
 
 - (BOOL)isUserInteractionEnabled
 {
-  _bridge_prologue;
+  ASDN::MutexLocker l(_propertyLock);
   if (_flags.layerBacked) return NO;
-  return _getFromViewOnly(userInteractionEnabled);
+  return _pendingViewState->userInteractionEnabled;
 }
 
 - (void)setUserInteractionEnabled:(BOOL)enabled
@@ -297,8 +320,8 @@
 
 - (BOOL)isExclusiveTouch
 {
-  _bridge_prologue;
-  return _getFromViewOnly(exclusiveTouch);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->exclusiveTouch;
 }
 
 - (void)setExclusiveTouch:(BOOL)exclusiveTouch
@@ -309,8 +332,8 @@
 
 - (BOOL)clipsToBounds
 {
-  _bridge_prologue;
-  return _getFromViewOrLayer(masksToBounds, clipsToBounds);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->clipsToBounds;
 }
 
 - (void)setClipsToBounds:(BOOL)clips
@@ -321,8 +344,8 @@
 
 - (CGPoint)anchorPoint
 {
-  _bridge_prologue;
-  return _getFromLayer(anchorPoint);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->anchorPoint;
 }
 
 - (void)setAnchorPoint:(CGPoint)newAnchorPoint
@@ -333,8 +356,8 @@
 
 - (CGPoint)position
 {
-  _bridge_prologue;
-  return _getFromLayer(position);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->position;
 }
 
 - (void)setPosition:(CGPoint)newPosition
@@ -345,8 +368,8 @@
 
 - (CGFloat)zPosition
 {
-  _bridge_prologue;
-  return _getFromLayer(zPosition);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->zPosition;
 }
 
 - (void)setZPosition:(CGFloat)newPosition
@@ -357,8 +380,8 @@
 
 - (CATransform3D)transform
 {
-  _bridge_prologue;
-  return _getFromLayer(transform);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->transform;
 }
 
 - (void)setTransform:(CATransform3D)newTransform
@@ -369,8 +392,8 @@
 
 - (CATransform3D)subnodeTransform
 {
-  _bridge_prologue;
-  return _getFromLayer(sublayerTransform);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->sublayerTransform;
 }
 
 - (void)setSubnodeTransform:(CATransform3D)newSubnodeTransform
@@ -381,8 +404,8 @@
 
 - (id)contents
 {
-  _bridge_prologue;
-  return _getFromLayer(contents);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->contents;
 }
 
 - (void)setContents:(id)newContents
@@ -393,8 +416,8 @@
 
 - (BOOL)isHidden
 {
-  _bridge_prologue;
-  return _getFromViewOrLayer(hidden, hidden);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->hidden;
 }
 
 - (void)setHidden:(BOOL)flag
@@ -405,8 +428,8 @@
 
 - (BOOL)needsDisplayOnBoundsChange
 {
-  _bridge_prologue;
-  return _getFromLayer(needsDisplayOnBoundsChange);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->needsDisplayOnBoundsChange;
 }
 
 - (void)setNeedsDisplayOnBoundsChange:(BOOL)flag
@@ -417,9 +440,9 @@
 
 - (BOOL)autoresizesSubviews
 {
-  _bridge_prologue;
   ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
-  return _getFromViewOnly(autoresizesSubviews);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->autoresizesSubviews;
 }
 
 - (void)setAutoresizesSubviews:(BOOL)flag
@@ -431,9 +454,9 @@
 
 - (UIViewAutoresizing)autoresizingMask
 {
-  _bridge_prologue;
   ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
-  return _getFromViewOnly(autoresizingMask);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->autoresizingMask;
 }
 
 - (void)setAutoresizingMask:(UIViewAutoresizing)mask
@@ -445,16 +468,8 @@
 
 - (UIViewContentMode)contentMode
 {
-  _bridge_prologue;
-  if (__loaded) {
-    if (_flags.layerBacked) {
-      return ASDisplayNodeUIContentModeFromCAContentsGravity(_layer.contentsGravity);
-    } else {
-      return _view.contentMode;
-    }
-  } else {
-    return self.pendingViewState.contentMode;
-  }
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->contentMode;
 }
 
 - (void)setContentMode:(UIViewContentMode)contentMode
@@ -473,8 +488,8 @@
 
 - (UIColor *)backgroundColor
 {
-  _bridge_prologue;
-  return [UIColor colorWithCGColor:_getFromLayer(backgroundColor)];
+  ASDN::MutexLocker l(_propertyLock);
+  return [UIColor colorWithCGColor:_pendingViewState->backgroundColor];
 }
 
 - (void)setBackgroundColor:(UIColor *)newBackgroundColor
@@ -492,9 +507,9 @@
 
 - (UIColor *)tintColor
 {
-    _bridge_prologue;
-    ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
-    return _getFromViewOnly(tintColor);
+  ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->tintColor;
 }
 
 - (void)setTintColor:(UIColor *)color
@@ -511,8 +526,8 @@
 
 - (CGColorRef)shadowColor
 {
-  _bridge_prologue;
-  return _getFromLayer(shadowColor);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->shadowColor;
 }
 
 - (void)setShadowColor:(CGColorRef)colorValue
@@ -523,8 +538,8 @@
 
 - (CGFloat)shadowOpacity
 {
-  _bridge_prologue;
-  return _getFromLayer(shadowOpacity);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->shadowOpacity;
 }
 
 - (void)setShadowOpacity:(CGFloat)opacity
@@ -535,8 +550,8 @@
 
 - (CGSize)shadowOffset
 {
-  _bridge_prologue;
-  return _getFromLayer(shadowOffset);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->shadowOffset;
 }
 
 - (void)setShadowOffset:(CGSize)offset
@@ -547,8 +562,8 @@
 
 - (CGFloat)shadowRadius
 {
-  _bridge_prologue;
-  return _getFromLayer(shadowRadius);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->shadowRadius;
 }
 
 - (void)setShadowRadius:(CGFloat)radius
@@ -559,8 +574,8 @@
 
 - (CGFloat)borderWidth
 {
-  _bridge_prologue;
-  return _getFromLayer(borderWidth);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->borderWidth;
 }
 
 - (void)setBorderWidth:(CGFloat)width
@@ -571,8 +586,8 @@
 
 - (CGColorRef)borderColor
 {
-  _bridge_prologue;
-  return _getFromLayer(borderColor);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->borderColor;
 }
 
 - (void)setBorderColor:(CGColorRef)colorValue
@@ -583,8 +598,8 @@
 
 - (BOOL)allowsEdgeAntialiasing
 {
-  _bridge_prologue;
-  return _getFromLayer(allowsEdgeAntialiasing);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->allowsEdgeAntialiasing;
 }
 
 - (void)setAllowsEdgeAntialiasing:(BOOL)allowsEdgeAntialiasing
@@ -595,8 +610,8 @@
 
 - (unsigned int)edgeAntialiasingMask
 {
-  _bridge_prologue;
-  return _getFromLayer(edgeAntialiasingMask);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->edgeAntialiasingMask;
 }
 
 - (void)setEdgeAntialiasingMask:(unsigned int)edgeAntialiasingMask
@@ -607,8 +622,8 @@
 
 - (BOOL)isAccessibilityElement
 {
-  _bridge_prologue;
-  return _getFromViewOnly(isAccessibilityElement);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->isAccessibilityElement;
 }
 
 - (void)setIsAccessibilityElement:(BOOL)isAccessibilityElement
@@ -619,8 +634,8 @@
 
 - (NSString *)accessibilityLabel
 {
-  _bridge_prologue;
-  return _getFromViewOnly(accessibilityLabel);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->accessibilityLabel;
 }
 
 - (void)setAccessibilityLabel:(NSString *)accessibilityLabel
@@ -631,8 +646,8 @@
 
 - (NSString *)accessibilityHint
 {
-  _bridge_prologue;
-  return _getFromViewOnly(accessibilityHint);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->accessibilityHint;
 }
 
 - (void)setAccessibilityHint:(NSString *)accessibilityHint
@@ -643,8 +658,8 @@
 
 - (NSString *)accessibilityValue
 {
-  _bridge_prologue;
-  return _getFromViewOnly(accessibilityValue);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->accessibilityValue;
 }
 
 - (void)setAccessibilityValue:(NSString *)accessibilityValue
@@ -655,8 +670,8 @@
 
 - (UIAccessibilityTraits)accessibilityTraits
 {
-  _bridge_prologue;
-  return _getFromViewOnly(accessibilityTraits);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->accessibilityTraits;
 }
 
 - (void)setAccessibilityTraits:(UIAccessibilityTraits)accessibilityTraits
@@ -667,8 +682,8 @@
 
 - (CGRect)accessibilityFrame
 {
-  _bridge_prologue;
-  return _getFromViewOnly(accessibilityFrame);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->accessibilityFrame;
 }
 
 - (void)setAccessibilityFrame:(CGRect)accessibilityFrame
@@ -679,8 +694,8 @@
 
 - (NSString *)accessibilityLanguage
 {
-  _bridge_prologue;
-  return _getFromViewOnly(accessibilityLanguage);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->accessibilityLanguage;
 }
 
 - (void)setAccessibilityLanguage:(NSString *)accessibilityLanguage
@@ -691,8 +706,8 @@
 
 - (BOOL)accessibilityElementsHidden
 {
-  _bridge_prologue;
-  return _getFromViewOnly(accessibilityElementsHidden);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->accessibilityElementsHidden;
 }
 
 - (void)setAccessibilityElementsHidden:(BOOL)accessibilityElementsHidden
@@ -703,8 +718,8 @@
 
 - (BOOL)accessibilityViewIsModal
 {
-  _bridge_prologue;
-  return _getFromViewOnly(accessibilityViewIsModal);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->accessibilityViewIsModal;
 }
 
 - (void)setAccessibilityViewIsModal:(BOOL)accessibilityViewIsModal
@@ -715,8 +730,8 @@
 
 - (BOOL)shouldGroupAccessibilityChildren
 {
-  _bridge_prologue;
-  return _getFromViewOnly(shouldGroupAccessibilityChildren);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->shouldGroupAccessibilityChildren;
 }
 
 - (void)setShouldGroupAccessibilityChildren:(BOOL)shouldGroupAccessibilityChildren
@@ -727,8 +742,8 @@
 
 - (NSString *)accessibilityIdentifier
 {
-  _bridge_prologue;
-  return _getFromViewOnly(accessibilityIdentifier);
+  ASDN::MutexLocker l(_propertyLock);
+  return _pendingViewState->accessibilityIdentifier;
 }
 
 - (void)setAccessibilityIdentifier:(NSString *)accessibilityIdentifier
