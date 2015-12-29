@@ -14,48 +14,13 @@
 
 @implementation _ASPendingState
 {
-  @package //Expose all ivars for ASDisplayNode to bypass getters for efficiency
-
-  UIViewAutoresizing autoresizingMask;
-  unsigned int edgeAntialiasingMask;
-  CGRect frame;   // Frame is only to be used for synchronous views wrapped by nodes (see setFrame:)
-  CGRect bounds;
-  CGColorRef backgroundColor;
-  id contents;
-  CGFloat alpha;
-  CGFloat cornerRadius;
-  UIViewContentMode contentMode;
-  CGPoint anchorPoint;
-  CGPoint position;
-  CGFloat zPosition;
-  CGFloat contentsScale;
-  CATransform3D transform;
-  CATransform3D sublayerTransform;
-  CGColorRef shadowColor;
-  CGFloat shadowOpacity;
-  CGSize shadowOffset;
-  CGFloat shadowRadius;
-  CGFloat borderWidth;
-  CGColorRef borderColor;
-  BOOL asyncTransactionContainer;
-  BOOL isAccessibilityElement;
-  NSString *accessibilityLabel;
-  NSString *accessibilityHint;
-  NSString *accessibilityValue;
-  UIAccessibilityTraits accessibilityTraits;
-  CGRect accessibilityFrame;
-  NSString *accessibilityLanguage;
-  BOOL accessibilityElementsHidden;
-  BOOL accessibilityViewIsModal;
-  BOOL shouldGroupAccessibilityChildren;
-  NSString *accessibilityIdentifier;
 
   struct {
     // Properties
     int needsDisplay:1;
     int needsLayout:1;
 
-    // Flags indicating that a given property should be applied to the view at creation
+    // Flags indicating that a given property should be applied to the view
     int setClipsToBounds:1;
     int setOpaque:1;
     int setNeedsDisplayOnBoundsChange:1;

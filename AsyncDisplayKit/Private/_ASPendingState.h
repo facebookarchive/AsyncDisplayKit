@@ -20,7 +20,52 @@
  When you want to configure a view from this pending state information, just call -applyToView:
  */
 
-@interface _ASPendingState : NSObject <ASDisplayNodeViewProperties, ASDisplayProperties>
+@interface _ASPendingState : NSObject <ASDisplayNodeViewProperties, ASDisplayProperties> {
+  @package
+
+  UIViewAutoresizing autoresizingMask;
+  unsigned int edgeAntialiasingMask;
+  CGRect frame;   // Frame is only to be used for synchronous views wrapped by nodes (see setFrame:)
+  CGRect bounds;
+  CGColorRef backgroundColor;
+  id contents;
+  CGFloat alpha;
+  CGFloat cornerRadius;
+  UIViewContentMode contentMode;
+  CGPoint anchorPoint;
+  CGPoint position;
+  CGFloat zPosition;
+  CGFloat contentsScale;
+  CATransform3D transform;
+  CATransform3D sublayerTransform;
+  CGColorRef shadowColor;
+  CGFloat shadowOpacity;
+  CGSize shadowOffset;
+  CGFloat shadowRadius;
+  CGFloat borderWidth;
+  CGColorRef borderColor;
+  UIColor *tintColor;
+  BOOL opaque;
+  BOOL allowsEdgeAntialiasing;
+  BOOL autoresizesSubviews;
+  BOOL needsDisplayOnBoundsChange;
+  BOOL hidden;
+  BOOL clipsToBounds;
+  BOOL exclusiveTouch;
+  BOOL userInteractionEnabled;
+  BOOL asyncTransactionContainer;
+  BOOL isAccessibilityElement;
+  NSString *accessibilityLabel;
+  NSString *accessibilityHint;
+  NSString *accessibilityValue;
+  UIAccessibilityTraits accessibilityTraits;
+  CGRect accessibilityFrame;
+  NSString *accessibilityLanguage;
+  BOOL accessibilityElementsHidden;
+  BOOL accessibilityViewIsModal;
+  BOOL shouldGroupAccessibilityChildren;
+  NSString *accessibilityIdentifier;
+}
 
 // Supports all of the properties included in the ASDisplayNodeViewProperties protocol
 

@@ -451,6 +451,10 @@
 		B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
 		C78F7E2A1BF7808300CDEAFC /* ASTableNode.m in Sources */ = {isa = PBXBuildFile; fileRef = B0F880591BEAEC7500D17647 /* ASTableNode.m */; };
 		C78F7E2B1BF7809800CDEAFC /* ASTableNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B0F880581BEAEC7500D17647 /* ASTableNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CC4CA2D91C2F73AE003D381F /* ASMainQueueTransaction.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4CA2D71C2F73AE003D381F /* ASMainQueueTransaction.h */; };
+		CC4CA2DA1C2F73AE003D381F /* ASMainQueueTransaction.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4CA2D71C2F73AE003D381F /* ASMainQueueTransaction.h */; };
+		CC4CA2DB1C2F73AE003D381F /* ASMainQueueTransaction.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4CA2D81C2F73AE003D381F /* ASMainQueueTransaction.m */; };
+		CC4CA2DC1C2F73AE003D381F /* ASMainQueueTransaction.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4CA2D81C2F73AE003D381F /* ASMainQueueTransaction.m */; };
 		CC7FD9DE1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC7FD9DF1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; };
 		CC7FD9E11BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */; };
@@ -751,6 +755,8 @@
 		B0F880591BEAEC7500D17647 /* ASTableNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableNode.m; sourceTree = "<group>"; };
 		B35061DA1B010EDF0018CF92 /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncDisplayKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B35061DD1B010EDF0018CF92 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../AsyncDisplayKit-iOS/Info.plist"; sourceTree = "<group>"; };
+		CC4CA2D71C2F73AE003D381F /* ASMainQueueTransaction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMainQueueTransaction.h; sourceTree = "<group>"; };
+		CC4CA2D81C2F73AE003D381F /* ASMainQueueTransaction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASMainQueueTransaction.m; sourceTree = "<group>"; };
 		CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPhotosFrameworkImageRequest.h; sourceTree = "<group>"; };
 		CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequest.m; sourceTree = "<group>"; };
 		CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequestTests.m; sourceTree = "<group>"; };
@@ -965,6 +971,7 @@
 				058D0A2D195D057000B7D73C /* ASDisplayLayerTests.m */,
 				058D0A2E195D057000B7D73C /* ASDisplayNodeAppearanceTests.m */,
 				058D0A2F195D057000B7D73C /* ASDisplayNodeTests.m */,
+				CC4CA2D51C2F55F1003D381F /* ASDisplayNodeUIKitPropertiesTests.m */,
 				058D0A30195D057000B7D73C /* ASDisplayNodeTestsHelper.h */,
 				058D0A31195D057000B7D73C /* ASDisplayNodeTestsHelper.m */,
 				052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */,
@@ -1068,6 +1075,8 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				CC4CA2D71C2F73AE003D381F /* ASMainQueueTransaction.h */,
+				CC4CA2D81C2F73AE003D381F /* ASMainQueueTransaction.m */,
 				AC026B6D1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h */,
 				AC026B6E1BD57DBF00BBC17E /* _ASHierarchyChangeSet.m */,
 				9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */,
@@ -1306,6 +1315,7 @@
 				ACF6ED221B17843500DA7C62 /* ASInsetLayoutSpec.h in Headers */,
 				ACF6ED4B1B17847A00DA7C62 /* ASInternalHelpers.h in Headers */,
 				ACF6ED241B17843500DA7C62 /* ASLayout.h in Headers */,
+				CC4CA2D91C2F73AE003D381F /* ASMainQueueTransaction.h in Headers */,
 				251B8EFB1BBB3D690087C538 /* ASDataController+Subclasses.h in Headers */,
 				ACF6ED2A1B17843500DA7C62 /* ASLayoutable.h in Headers */,
 				9CDC18CC1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */,
@@ -1443,6 +1453,7 @@
 				0442850E1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */,
 				DE8BEAC21C2DF3FC00D57C12 /* ASDelegateProxy.h in Headers */,
 				B35062041B010EFD0018CF92 /* ASMultiplexImageNode.h in Headers */,
+				CC4CA2DA1C2F73AE003D381F /* ASMainQueueTransaction.h in Headers */,
 				DECBD6E81BE56E1900CF4905 /* ASButtonNode.h in Headers */,
 				B35062241B010EFD0018CF92 /* ASMutableAttributedStringBuilder.h in Headers */,
 				B35062061B010EFD0018CF92 /* ASNetworkImageNode.h in Headers */,
@@ -1763,6 +1774,7 @@
 				ACC945AB1BA9E7C1005E1FB8 /* ASViewController.m in Sources */,
 				B0F8805B1BEAEC7500D17647 /* ASTableNode.m in Sources */,
 				205F0E221B376416007741D0 /* CGRect+ASConvenience.m in Sources */,
+				CC4CA2DB1C2F73AE003D381F /* ASMainQueueTransaction.m in Sources */,
 				257754B21BEE44CD00737CA5 /* ASTextKitShadower.mm in Sources */,
 				058D0A21195D050800B7D73C /* NSMutableAttributedString+TextKitAdditions.m in Sources */,
 				205F0E101B371875007741D0 /* UICollectionViewLayout+ASConvenience.m in Sources */,
@@ -1893,6 +1905,7 @@
 				254C6B8D1BF94F8A003EC431 /* ASEqualityHashHelpers.mm in Sources */,
 				254C6B871BF94F8A003EC431 /* ASTextKitEntityAttribute.m in Sources */,
 				34566CB31BC1213700715E6B /* ASPhotosFrameworkImageRequest.m in Sources */,
+				CC4CA2DC1C2F73AE003D381F /* ASMainQueueTransaction.m in Sources */,
 				254C6B831BF94F8A003EC431 /* ASTextKitCoreTextAdditions.m in Sources */,
 				B350623B1B010EFD0018CF92 /* NSMutableAttributedString+TextKitAdditions.m in Sources */,
 				044284FD1BAA365100D16268 /* UICollectionViewLayout+ASConvenience.m in Sources */,

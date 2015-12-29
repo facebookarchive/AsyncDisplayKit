@@ -1843,4 +1843,16 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   XCTAssert(node.bounds.size.height == 8, @"Wrong ASDisplayNode.bounds.size.height");
 }
 
+#pragma mark UIKit Properties Threading
+
+- (void)testThatSettingAUIKitPropertyInTheBackgroundCausesItToBeSetOnMain
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  [node view];
+  dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    node.alpha = 0;
+  });
+  // FIXME: Flesh out this test.
+}
+
 @end
