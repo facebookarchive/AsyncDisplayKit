@@ -61,16 +61,16 @@ In Swift:
 
 ```swift
 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) {
-            let node = ASTextNode()
-            node.attributedString = NSAttributedString(string: "hello")
-            node.measure(CGSize(width: screenWidth, height: CGFloat.max))
-            node.frame = CGRect(origin: CGPointZero, size: node.calculatedSize)
+  let node = ASTextNode()
+  node.attributedString = NSAttributedString(string: "hello")
+  node.measure(CGSize(width: screenWidth, height: CGFloat.max))
+  node.frame = CGRect(origin: CGPointZero, size: node.calculatedSize)
             
-            // self.view isn't a node, so we can only use it on the main thread
-            dispatch_async(dispatch_get_main_queue()) {
-                self.view.addSubview(node.view)
-            }
-        }
+  // self.view isn't a node, so we can only use it on the main thread
+  dispatch_async(dispatch_get_main_queue()) {
+   self.view.addSubview(node.view)
+  }
+}
 ```
 
 AsyncDisplayKit at a glance:
