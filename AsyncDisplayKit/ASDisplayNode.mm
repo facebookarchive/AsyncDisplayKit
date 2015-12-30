@@ -352,8 +352,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)__unloadNode
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  ASDisplayNodeAssert([self isNodeLoaded], @"Implementation shouldn't call __unloadNode if not loaded: %@", self);
   ASDN::MutexLocker l(_propertyLock);
-  
+
   if (_flags.layerBacked)
     _pendingViewState = [_ASPendingState pendingViewStateFromLayer:_layer];
   else

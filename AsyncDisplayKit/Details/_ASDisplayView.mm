@@ -151,8 +151,11 @@
         needsSupernodeRemoval = YES;
       }
     } else {
-      // If supernode is loaded but our superview is nil, the user manually removed us, so disconnect supernode.
-      needsSupernodeRemoval = supernodeLoaded;
+      // If supernode is loaded but our superview is nil, the user likely manually removed us, so disconnect supernode.
+      // The unlikely alternative: we are in __unloadNode, with shouldRasterizeSubnodes just having been turned on.
+      // In the latter case, we don't want to disassemble the node hierarchy because all views are intentionally being destroyed.
+      BOOL nodeIsRasterized = ((_node.hierarchyState & ASHierarchyStateRasterized) == ASHierarchyStateRasterized);
+      needsSupernodeRemoval = (supernodeLoaded && !nodeIsRasterized);
     }
     
     if (needsSupernodeRemoval) {

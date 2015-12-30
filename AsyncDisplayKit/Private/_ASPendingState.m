@@ -798,8 +798,13 @@ static UIColor *defaultTintColor = nil;
     view.accessibilityIdentifier = accessibilityIdentifier;
 }
 
+// FIXME: Make this more efficient by tracking which properties are set rather than reading everything.
 + (_ASPendingState *)pendingViewStateFromLayer:(CALayer *)layer
 {
+  if (!layer) {
+    return nil;
+  }
+  
   _ASPendingState *pendingState = [[_ASPendingState alloc] init];
   
   pendingState.anchorPoint = layer.anchorPoint;
@@ -877,8 +882,13 @@ static UIColor *defaultTintColor = nil;
   return pendingState;
 }
 
+// FIXME: Make this more efficient by tracking which properties are set rather than reading everything.
 + (_ASPendingState *)pendingViewStateFromView:(UIView *)view
 {
+  if (!view) {
+    return nil;
+  }
+  
   _ASPendingState *pendingState = [[_ASPendingState alloc] init];
   
   CALayer *layer = view.layer;
