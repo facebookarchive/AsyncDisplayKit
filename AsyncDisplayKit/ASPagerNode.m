@@ -19,7 +19,7 @@
 @end
 
 @implementation ASPagerNode
-@dynamic delegate;
+@dynamic view, delegate, dataSource;
 
 - (instancetype)init
 {
@@ -31,6 +31,12 @@
   return [self initWithFlowLayout:flowLayout];
 }
 
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
+{
+  ASDisplayNodeAssert([layout isKindOfClass:[UICollectionViewFlowLayout class]], @"ASPagerNode requires a flow layout.");
+  return [self initWithFlowLayout:(UICollectionViewFlowLayout *)layout];
+}
+
 - (instancetype)initWithFlowLayout:(UICollectionViewFlowLayout *)flowLayout
 {
   self = [super initWithCollectionViewLayout:flowLayout];
@@ -38,11 +44,6 @@
     _flowLayout = flowLayout;
   }
   return self;
-}
-
-- (ASCollectionView *)collectionView
-{
-  return self.view;
 }
 
 - (void)setDataSource:(id <ASPagerNodeDataSource>)pagerDataSource
@@ -69,8 +70,6 @@
   [super didLoad];
   
   ASCollectionView *cv = self.view;
-  cv.asyncDataSource = self;
-  cv.asyncDelegate = self;
   
   cv.pagingEnabled = YES;
   cv.allowsSelection = NO;

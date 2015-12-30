@@ -26,13 +26,14 @@
 - (instancetype)initWithFlowLayout:(UICollectionViewFlowLayout *)flowLayout;
 
 // The underlying ASCollectionView object.
-- (ASCollectionView *)collectionView;
+@property (nonatomic, readonly) ASCollectionView *view;
 
 // Delegate is optional, and uses the same protocol as ASCollectionNode.
 // This includes UIScrollViewDelegate as well as most methods from UICollectionViewDelegate, like willDisplay...
-@property (weak, nonatomic) id <ASCollectionDelegate>  delegate;
+@property (nonatomic, weak) id <ASCollectionDelegate> delegate;
 
 // Data Source is required, and uses a different protocol from ASCollectionNode.
+//@property (nonatomic, weak) id <ASPagerNodeDataSource> dataSource;
 - (void)setDataSource:(id <ASPagerNodeDataSource>)dataSource;
 - (id <ASPagerNodeDataSource>)dataSource;
 
