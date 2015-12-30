@@ -134,4 +134,18 @@
     return _socialAppDataSource.count;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    PostNode *postNode = (PostNode *)[_tableView nodeForRowAtIndexPath:indexPath];
+    Post *post = _socialAppDataSource[indexPath.row];
+  
+    BOOL shouldRasterize = postNode.shouldRasterizeDescendants;
+    shouldRasterize = !shouldRasterize;
+    postNode.shouldRasterizeDescendants = shouldRasterize;
+    
+    NSLog(@"%@ rasterization for %@'s post: %@", shouldRasterize ? @"Enabling" : @"Disabling", post.name, postNode);
+    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
 @end
