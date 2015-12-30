@@ -17,6 +17,7 @@
 #import "ASInternalHelpers.h"
 #import "ASRangeController.h"
 #import "UICollectionViewLayout+ASConvenience.h"
+#import "_ASDisplayLayer.h"
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
@@ -112,6 +113,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 @end
 
 @implementation ASCollectionView
+
+// Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASCollectionNode.
++ (Class)layerClass
+{
+  return [_ASDisplayLayer class];
+}
 
 #pragma mark -
 #pragma mark Lifecycle.
@@ -221,7 +228,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  ASDisplayNodeAssert(self.asyncDelegate, @"ASCollectionView's asyncDelegate property must be set.");
   ASPerformBlockOnMainThread(^{
     _superIsPendingDataLoad = YES;
     [super reloadData];
@@ -557,6 +563,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)layoutSubviews
 {
+  if (_zeroContentInsets) {
+    self.contentInset = UIEdgeInsetsZero;
+  }
+  
   if (! CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, self.bounds.size)) {
     _maxSizeForNodesConstrainedSize = self.bounds.size;
     
