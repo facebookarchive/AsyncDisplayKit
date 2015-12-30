@@ -17,6 +17,8 @@
 - (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index;
 @end
 
+// WARNING: ASPagerNode is new in AsyncDisplayKit 1.9.4 and not yet widely tested.
+// Details of its API or behavior may change in future releases
 @interface ASPagerNode : ASCollectionNode
 
 // Configures a default horizontal, paging flow layout with 0 inter-item spacing.

@@ -288,6 +288,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)clearFetchedData;
 
+/**
+ * Forces the .contentInset to be UIEdgeInsetsZero.
+ *
+ * @discussion By default, UIKit sets the top inset to the navigation bar height, even for horizontally
+ * scrolling views.  This can only be disabled by setting a property on the containing UIViewController,
+ * automaticallyAdjustsScrollViewInsets, which may not be accessible.  ASPagerNode uses this to ensure
+ * its flow layout behaves predictably and does not log undefined layout warnings.
+ */
+@property (nonatomic) BOOL zeroContentInsets;
+
 @end
 
 

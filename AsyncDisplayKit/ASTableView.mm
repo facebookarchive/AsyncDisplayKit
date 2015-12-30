@@ -18,6 +18,7 @@
 #import "ASLayout.h"
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
+#import "_ASDisplayLayer.h"
 
 #import <CoreFoundation/CoreFoundation.h>
 
@@ -119,6 +120,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 @end
 
 @implementation ASTableView
+
+// Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASTableNode.
++ (Class)layerClass
+{
+  return [_ASDisplayLayer class];
+}
 
 + (Class)dataControllerClass
 {
@@ -280,7 +287,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  ASDisplayNodeAssert(self.asyncDelegate, @"ASTableView's asyncDelegate property must be set.");
   ASPerformBlockOnMainThread(^{
     [super reloadData];
   });
