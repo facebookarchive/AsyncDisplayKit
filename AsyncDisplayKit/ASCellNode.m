@@ -63,13 +63,6 @@
   return self;
 }
 
-//- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
-//{
-//  _viewControllerNode.frame = (CGRect){{0,0}, constrainedSize.max};
-//  NSLog(@"%f %f", constrainedSize.max.width, constrainedSize.max.height);
-//  return [super layoutSpecThatFits:constrainedSize];
-//}
-
 - (void)layout
 {
   [super layout];
