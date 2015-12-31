@@ -413,9 +413,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     if (backgroundColor) {
       CGContextSetFillColorWithColor(context, backgroundColor);
       CGContextSetBlendMode(context, kCGBlendModeCopy);
-      // outset the background fill to cover fractional errors when drawing at a
-      // small contentsScale.
-      CGContextFillRect(context, CGRectInset(bounds, -2, -2));
+      CGContextFillRect(context, CGContextGetClipBoundingBox(context));
       CGContextSetBlendMode(context, kCGBlendModeNormal);
     }
   }
