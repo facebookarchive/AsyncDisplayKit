@@ -54,7 +54,7 @@ static NSUInteger kNumberOfImages = 14;
   
   _layoutInspector = [[MosaicCollectionViewLayoutInspector alloc] init];
   
-  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:YES];
+  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   _collectionView.asyncDataSource = self;
   _collectionView.asyncDelegate = self;
   _collectionView.layoutInspector = _layoutInspector;
