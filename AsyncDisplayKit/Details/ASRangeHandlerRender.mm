@@ -64,7 +64,7 @@
   [node enterInterfaceState:ASInterfaceStateDisplay];
 
   
-  if (![ASDisplayNode shouldUseNewRenderingRange]) {
+  if ([ASDisplayNode shouldUseNewRenderingRange]) {
     [node recursivelyEnsureDisplaySynchronously:NO];
   } else {
     // Add the node's layer to an off-screen window to trigger display and mark its contents as non-volatile.
@@ -101,7 +101,7 @@
   // The node calls clearCurrentContents and suspends display
   [node exitInterfaceState:ASInterfaceStateDisplay];
   
-  if (![ASDisplayNode shouldUseNewRenderingRange]) {
+  if ([ASDisplayNode shouldUseNewRenderingRange]) {
     if (![node isLayerBacked]) {
       [node.view removeFromSuperview];
     } else {
