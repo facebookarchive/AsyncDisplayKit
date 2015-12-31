@@ -63,7 +63,14 @@
 {
   RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
   elementNode.preferredFrameSize = _elementSize;
+  elementNode.indexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:_pageNumber];
   return elementNode;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  [tableView deselectRowAtIndexPath:indexPath animated:NO];
+  [_tableNode.view reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (void)layout

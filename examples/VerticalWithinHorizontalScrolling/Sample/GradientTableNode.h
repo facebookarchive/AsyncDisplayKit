@@ -19,4 +19,6 @@
 
 - (instancetype)initWithElementSize:(CGSize)size;
 
+@property (nonatomic) NSInteger pageNumber;
+
 @end

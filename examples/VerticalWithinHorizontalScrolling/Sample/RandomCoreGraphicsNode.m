@@ -42,4 +42,24 @@
   CGColorSpaceRelease(colorSpace);
 }
 
+#if 0
+- (void)fetchData
+{
+  NSLog(@"fetchData - %@, %@", self, self.indexPath);
+  [super fetchData];
+}
+
+- (void)clearFetchedData
+{
+  NSLog(@"clearFetchedData - %@, %@", self, self.indexPath);
+  [super clearFetchedData];
+}
+
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+  NSLog(@"visibilityDidChange:%d - %@, %@", isVisible, self, self.indexPath);
+  [super visibilityDidChange:isVisible];
+}
+#endif
+
 @end
