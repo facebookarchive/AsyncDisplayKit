@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @class ASDelegateProxy;
-@protocol ASDelegateProxyInterceptor
+@protocol ASDelegateProxyInterceptor <NSObject>
 @required
 // Called if the target object is discovered to be nil if it had been non-nil at init time.
 // This happens if the object is deallocated, because the proxy must maintain a weak reference to avoid cycles.
@@ -25,7 +25,7 @@
 
 @interface ASDelegateProxy : NSProxy
 
-- (instancetype)initWithTarget:(id<NSObject>)target interceptor:(id <ASDelegateProxyInterceptor>)interceptor;
+- (instancetype)initWithTarget:(id <NSObject>)target interceptor:(id <ASDelegateProxyInterceptor>)interceptor;
 
 // This method must be overridden by a subclass.
 - (BOOL)interceptsSelector:(SEL)selector;

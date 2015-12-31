@@ -10,4 +10,6 @@
 
 @interface RandomCoreGraphicsNode : ASCellNode
 
+@property (nonatomic) NSIndexPath *indexPath;
+
 @end

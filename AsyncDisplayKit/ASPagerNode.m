@@ -29,17 +29,12 @@
   flowLayout.minimumInteritemSpacing = 0;
   flowLayout.minimumLineSpacing = 0;
   
-  return [self initWithFlowLayout:flowLayout];
+  return [self initWithCollectionViewLayout:flowLayout];
 }
 
-- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewFlowLayout *)flowLayout;
 {
-  ASDisplayNodeAssert([layout isKindOfClass:[UICollectionViewFlowLayout class]], @"ASPagerNode requires a flow layout.");
-  return [self initWithFlowLayout:(UICollectionViewFlowLayout *)layout];
-}
-
-- (instancetype)initWithFlowLayout:(UICollectionViewFlowLayout *)flowLayout
-{
+  ASDisplayNodeAssert([flowLayout isKindOfClass:[UICollectionViewFlowLayout class]], @"ASPagerNode requires a flow layout.");
   self = [super initWithCollectionViewLayout:flowLayout];
   if (self != nil) {
     _flowLayout = flowLayout;
