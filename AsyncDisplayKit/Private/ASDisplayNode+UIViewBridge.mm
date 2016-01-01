@@ -250,7 +250,8 @@
     _messageToViewOrLayer(setNeedsDisplay);
 
     if ([ASDisplayNode shouldUseNewRenderingRange]) {
-      if (_layer && !self.isSynchronous) {
+      BOOL shouldDisplay = ((_interfaceState & ASInterfaceStateDisplay) == ASInterfaceStateDisplay);
+      if (_layer && !_flags.synchronous && shouldDisplay) {
         [ASDisplayNode scheduleNodeForDisplay:self];
       }
     }

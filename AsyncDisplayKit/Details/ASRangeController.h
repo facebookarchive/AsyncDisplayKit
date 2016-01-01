@@ -26,6 +26,11 @@ NS_ASSUME_NONNULL_BEGIN
  * This includes cancelling those asynchronous operations as cells fall outside of the working ranges.
  */
 @interface ASRangeController : ASDealloc2MainObject <ASDataControllerDelegate>
+{
+  id<ASLayoutController>                  _layoutController;
+  __weak id<ASRangeControllerDataSource>  _dataSource;
+  __weak id<ASRangeControllerDelegate>    _delegate;
+}
 
 /**
  * Notify the range controller that the visible range has been updated.
@@ -46,6 +51,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node;
 
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
+
 /**
  * An object that describes the layout behavior of the ranged component (table view, collection view, etc.)
  *
@@ -64,6 +72,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, weak) id<ASRangeControllerDelegate> delegate;
 
+@end
+
+@interface ASRangeControllerStable : ASRangeController
+@end
+
+@interface ASRangeControllerBeta : ASRangeController
 @end
 
 /**
@@ -88,14 +102,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController;
 
-/**
- * Fetch nodes at specific index paths.
- *
- * @param rangeController Sender.
- *
- * @param indexPaths Index paths.
- */
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths;
+
+- (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
 

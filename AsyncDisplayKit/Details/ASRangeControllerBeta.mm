@@ -72,26 +72,19 @@
   }
 
   CGSize viewportSize = [_dataSource viewportSizeForRangeController:self];
+  [_layoutController setViewportSize:viewportSize];
 
   // the layout controller needs to know what the current visible indices are to calculate range offsets
   if ([_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)]) {
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
   
-  NSSet *fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
-                                                            viewportSize:viewportSize
-                                                               rangeType:ASLayoutRangeTypeFetchData];
-  
-  NSSet *displayIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection
-                                                            viewportSize:viewportSize
-                                                               rangeType:ASLayoutRangeTypeDisplay];
-  
-  NSSet *visibleIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection
-                                                            viewportSize:viewportSize
-                                                               rangeType:ASLayoutRangeTypeVisible];
+  NSSet *fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData];
+  NSSet *displayIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
+  NSSet *visibleIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
 
-  NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
-//  NSLog(@"visible sets are equal: %d", [visibleIndexPaths isEqualToSet:visibleNodePathsSet]);
+  //NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
+  //NSLog(@"visible sets are equal: %d", [visibleIndexPaths isEqualToSet:visibleNodePathsSet]);
   
   // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
   NSMutableSet *allIndexPaths = [fetchDataIndexPaths mutableCopy];

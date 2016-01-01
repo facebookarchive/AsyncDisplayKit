@@ -60,6 +60,7 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
 // These methods are recursive, and either union or remove the provided interfaceState to all sub-elements.
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState;
 - (void)exitInterfaceState:(ASInterfaceState)interfaceState;
+- (void)recursivelySetInterfaceState:(ASInterfaceState)interfaceState;
 
 // These methods are recursive, and either union or remove the provided hierarchyState to all sub-elements.
 - (void)enterHierarchyState:(ASHierarchyState)hierarchyState;

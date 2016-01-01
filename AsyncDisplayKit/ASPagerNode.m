@@ -9,6 +9,7 @@
 #import "ASPagerNode.h"
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "UICollectionViewLayout+ASConvenience.h"
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
@@ -34,7 +35,7 @@
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewFlowLayout *)flowLayout;
 {
-  ASDisplayNodeAssert([flowLayout isKindOfClass:[UICollectionViewFlowLayout class]], @"ASPagerNode requires a flow layout.");
+  ASDisplayNodeAssert([flowLayout asdk_isFlowLayout], @"ASPagerNode requires a flow layout.");
   self = [super initWithCollectionViewLayout:flowLayout];
   if (self != nil) {
     _flowLayout = flowLayout;
@@ -61,8 +62,8 @@
   
   ASRangeTuningParameters preloadParams = { .leadingBufferScreenfuls = 2.0, .trailingBufferScreenfuls = 2.0 };
   ASRangeTuningParameters renderParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
-  [self setTuningParameters:preloadParams forRangeType:ASLayoutRangeTypePreload];
-  [self setTuningParameters:renderParams forRangeType:ASLayoutRangeTypeRender];
+  [self setTuningParameters:preloadParams forRangeType:ASLayoutRangeTypeFetchData];
+  [self setTuningParameters:renderParams forRangeType:ASLayoutRangeTypeDisplay];
 }
 
 #pragma mark - Helpers

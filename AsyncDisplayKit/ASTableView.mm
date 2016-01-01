@@ -13,6 +13,7 @@
 #import "ASChangeSetDataController.h"
 #import "ASCollectionViewLayoutController.h"
 #import "ASDelegateProxy.h"
+#import "ASDisplayNode+Beta.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -85,7 +86,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (instancetype)_initWithTableView:(ASTableView *)tableView;
 @end
 
-@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor> {
+@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate,
+                           ASDataControllerSource,     _ASTableViewCellDelegate,
+                           ASCellNodeLayoutDelegate,    ASDelegateProxyInterceptor>
+{
   ASTableViewProxy *_proxyDataSource;
   ASTableViewProxy *_proxyDelegate;
 
@@ -139,7 +143,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
   
-  _rangeController = [[ASRangeController alloc] init];
+  _rangeController = [ASDisplayNode shouldUseNewRenderingRange] ? [[ASRangeControllerBeta alloc] init]
+                                                                : [[ASRangeControllerStable alloc] init];
   _rangeController.layoutController = _layoutController;
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
@@ -317,12 +322,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASRangeTuningParameters)rangeTuningParameters
 {
-  return [self tuningParametersForRangeType:ASLayoutRangeTypeRender];
+  return [self tuningParametersForRangeType:ASLayoutRangeTypeDisplay];
 }
 
 - (void)setRangeTuningParameters:(ASRangeTuningParameters)tuningParameters
 {
-  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
+  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeDisplay];
 }
 
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -682,6 +687,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
 {
   return [_dataController nodesAtIndexPaths:indexPaths];
+}
+
+- (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController nodeAtIndexPath:indexPath];
 }
 
 - (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController

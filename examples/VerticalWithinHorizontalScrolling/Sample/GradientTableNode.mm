@@ -51,7 +51,7 @@
   ASRangeTuningParameters rangeTuningParameters;
   rangeTuningParameters.leadingBufferScreenfuls = 1.0;
   rangeTuningParameters.trailingBufferScreenfuls = 0.5;
-  [_tableNode.view setTuningParameters:rangeTuningParameters forRangeType:ASLayoutRangeTypeRender];
+  [_tableNode.view setTuningParameters:rangeTuningParameters forRangeType:ASLayoutRangeTypeDisplay];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section

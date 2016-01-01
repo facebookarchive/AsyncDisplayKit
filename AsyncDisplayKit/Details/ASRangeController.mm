@@ -15,34 +15,61 @@
 #import "ASRangeHandlerRender.h"
 #import "ASRangeHandlerPreload.h"
 #import "ASInternalHelpers.h"
+#import "ASLayoutController.h"
+#import "ASLayoutRangeType.h"
 
-@interface ASRangeController () {
+@implementation ASRangeController
+
+- (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
+{
+}
+
+- (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node
+{
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
+{
+  [_layoutController setTuningParameters:tuningParameters forRangeType:rangeType];
+}
+
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
+{
+  return [_layoutController tuningParametersForRangeType:rangeType];
+}
+
+@end
+
+@interface ASRangeControllerStable ()
+{
   BOOL _rangeIsValid;
-
+  
   // keys should be ASLayoutRangeTypes and values NSSets containing NSIndexPaths
   NSMutableDictionary *_rangeTypeIndexPaths;
   NSDictionary *_rangeTypeHandlers;
   BOOL _queuedRangeUpdate;
-
+  
   ASScrollDirection _scrollDirection;
 }
 
 @end
 
-@implementation ASRangeController
+@implementation ASRangeControllerStable
 
-- (instancetype)init {
-  self = [super init];
-  if (self != nil) {
-    _rangeIsValid = YES;
-    _rangeTypeIndexPaths = [NSMutableDictionary dictionary];
-    _rangeTypeHandlers = @{
-      @(ASLayoutRangeTypeVisible): [[ASRangeHandlerVisible alloc] init],
-      @(ASLayoutRangeTypeRender): [[ASRangeHandlerRender alloc] init],
-      @(ASLayoutRangeTypePreload): [[ASRangeHandlerPreload alloc] init],
-    };
+- (instancetype)init
+{
+  if (!(self = [super init])) {
+    return nil;
   }
-
+  
+  _rangeIsValid = YES;
+  _rangeTypeIndexPaths = [NSMutableDictionary dictionary];
+  _rangeTypeHandlers = @{
+                         @(ASLayoutRangeTypeVisible)  : [[ASRangeHandlerVisible alloc] init],
+                         @(ASLayoutRangeTypeDisplay)  : [[ASRangeHandlerRender alloc] init],
+                         @(ASLayoutRangeTypeFetchData): [[ASRangeHandlerPreload alloc] init],
+                         };
+  
   return self;
 }
 
@@ -111,12 +138,13 @@
 
   NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
   CGSize viewportSize = [_dataSource viewportSizeForRangeController:self];
+  [_layoutController setViewportSize:viewportSize];
 
   // the layout controller needs to know what the current visible indices are to calculate range offsets
   if ([_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)]) {
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
-
+  
   for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
     ASLayoutRangeType rangeType = (ASLayoutRangeType)i;
     id rangeKey = @(rangeType);
@@ -124,10 +152,8 @@
     // this delegate decide what happens when a node is added or removed from a range
     id<ASRangeHandler> rangeHandler = _rangeTypeHandlers[rangeKey];
 
-    if (!_rangeIsValid || [_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths viewportSize:viewportSize rangeType:rangeType]) {
-      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
-                                                       viewportSize:viewportSize
-                                                          rangeType:rangeType];
+    if (!_rangeIsValid || [_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths rangeType:rangeType]) {
+      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:rangeType];
 
       // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
       // This value may be nil for the first call of this method.
@@ -172,7 +198,7 @@
 
 - (BOOL)shouldSkipVisibleNodesForRangeType:(ASLayoutRangeType)rangeType
 {
-  return rangeType == ASLayoutRangeTypeRender;
+  return rangeType == ASLayoutRangeTypeDisplay;
 }
 
 #pragma mark - ASDataControllerDelegete
