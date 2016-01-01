@@ -14,6 +14,7 @@
 #import "ASCollectionViewLayoutController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Beta.h"
 #import "ASInternalHelpers.h"
 #import "ASRangeController.h"
 #import "UICollectionViewLayout+ASConvenience.h"
@@ -150,9 +151,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     self.strongCollectionNode = collectionNode;
   }
   
-  _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];
+  _layoutController = [ASDisplayNode shouldUseNewRenderingRange] ?
+                                  [[ASCollectionViewLayoutControllerBeta alloc] initWithCollectionView:self] :
+                                  [[ASCollectionViewLayoutControllerStable alloc] initWithCollectionView:self];
   
-  _rangeController = [[ASRangeController alloc] init];
+  _rangeController = [ASDisplayNode shouldUseNewRenderingRange] ? [[ASRangeControllerBeta alloc] init]
+                                                                : [[ASRangeControllerStable alloc] init];
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
@@ -319,22 +323,22 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  [_layoutController setTuningParameters:tuningParameters forRangeType:rangeType];
+  [_rangeController setTuningParameters:tuningParameters forRangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [_layoutController tuningParametersForRangeType:rangeType];
+  return [_rangeController tuningParametersForRangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)rangeTuningParameters
 {
-  return [self tuningParametersForRangeType:ASLayoutRangeTypeRender];
+  return [self tuningParametersForRangeType:ASLayoutRangeTypeDisplay];
 }
 
 - (void)setRangeTuningParameters:(ASRangeTuningParameters)tuningParameters
 {
-  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
+  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeDisplay];
 }
 
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
@@ -773,6 +777,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
 {
   return [_dataController nodesAtIndexPaths:indexPaths];
+}
+
+- (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController nodeAtIndexPath:indexPath];
 }
 
 #pragma mark - ASRangeControllerDelegate

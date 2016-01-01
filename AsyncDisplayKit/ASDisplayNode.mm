@@ -203,20 +203,26 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertMainThread();
   static NSMutableSet *nodesToDisplay = nil;
   static BOOL displayScheduled = NO;
-  if (!nodesToDisplay) {
-    nodesToDisplay = [[NSMutableSet alloc] init];
+  static ASDN::RecursiveMutex displaySchedulerLock;
+  {
+    ASDN::MutexLocker l(displaySchedulerLock);
+    if (!nodesToDisplay) {
+      nodesToDisplay = [[NSMutableSet alloc] init];
+    }
+    [nodesToDisplay addObject:node];
   }
-  [nodesToDisplay addObject:node];
   if (!displayScheduled) {
     displayScheduled = YES;
     // It's essenital that any layout pass that is scheduled during the current
     // runloop has a chance to be applied / scheduled, so always perform this after the current runloop.
     dispatch_async(dispatch_get_main_queue(), ^{
+      ASDN::MutexLocker l(displaySchedulerLock);
       displayScheduled = NO;
-      for (ASDisplayNode *node in nodesToDisplay) {
+      NSSet *displayingNodes = [nodesToDisplay copy];
+      nodesToDisplay = nil;
+      for (ASDisplayNode *node in displayingNodes) {
         [node __recursivelyTriggerDisplayAndBlock:NO];
       }
-      nodesToDisplay = nil;
     });
   }
 }
@@ -1833,6 +1839,15 @@ static BOOL ShouldUseNewRenderingRange = NO;
   ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState &= (~interfaceState);
   });
+}
+
+- (void)recursivelySetInterfaceState:(ASInterfaceState)interfaceState
+{
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+    node.interfaceState = interfaceState;
+  });
+  // FIXME: This should also be called in setInterfaceState: if it isn't being applied recursively.
+  [ASDisplayNode scheduleNodeForDisplay:self];
 }
 
 - (ASHierarchyState)hierarchyState

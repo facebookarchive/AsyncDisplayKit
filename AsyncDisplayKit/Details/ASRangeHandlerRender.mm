@@ -44,7 +44,7 @@
   if (![ASDisplayNode shouldUseNewRenderingRange]) {
     for (CALayer *layer in [self.workingWindow.layer.sublayers copy]) {
       ASDisplayNode *node = layer.asyncdisplaykit_node;
-      [self node:node exitedRangeOfType:ASLayoutRangeTypeRender];
+      [self node:node exitedRangeOfType:ASLayoutRangeTypeDisplay];
     }
   }
 }
@@ -52,7 +52,7 @@
 - (void)node:(ASDisplayNode *)node enteredRangeOfType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(rangeType == ASLayoutRangeTypeRender, @"Render delegate should not handle other ranges");
+  ASDisplayNodeAssert(rangeType == ASLayoutRangeTypeDisplay, @"Render delegate should not handle other ranges");
 
   // If a node had previously been onscreen but now is only in the working range,
   // ensure its view is not orphaned in a UITableViewCell in the reuse pool.
@@ -64,6 +64,7 @@
   [node enterInterfaceState:ASInterfaceStateDisplay];
 
   
+  ASDisplayNodeAssert(![ASDisplayNode shouldUseNewRenderingRange], @"It should no longer be possible to reach this point with the new display range enabled");
   if ([ASDisplayNode shouldUseNewRenderingRange]) {
     [node recursivelyEnsureDisplaySynchronously:NO];
   } else {
@@ -79,7 +80,7 @@
 - (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(rangeType == ASLayoutRangeTypeRender, @"Render delegate should not handle other ranges");
+  ASDisplayNodeAssert(rangeType == ASLayoutRangeTypeDisplay, @"Render delegate should not handle other ranges");
 
   // This code is tricky.  There are several possible states a node can be in when it reaches this point.
   // 1. Layer-backed vs view-backed nodes.  AS of this writing, only ASCellNodes arrive here, which are always view-backed —
@@ -100,6 +101,8 @@
   
   // The node calls clearCurrentContents and suspends display
   [node exitInterfaceState:ASInterfaceStateDisplay];
+  
+  ASDisplayNodeAssert(![ASDisplayNode shouldUseNewRenderingRange], @"It should no longer be possible to reach this point with the new display range enabled");
   
   if ([ASDisplayNode shouldUseNewRenderingRange]) {
     if (![node isLayerBacked]) {
