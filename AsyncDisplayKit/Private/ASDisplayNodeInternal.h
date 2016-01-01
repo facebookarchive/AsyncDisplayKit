@@ -84,6 +84,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
     unsigned shouldRasterizeDescendants:1;
     unsigned shouldBypassEnsureDisplay:1;
     unsigned displaySuspended:1;
+    unsigned isRecursivelyDetachedFromMainThread:1;
 
     // whether custom drawing is enabled
     unsigned implementsDrawRect:1;
@@ -134,6 +135,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 
 // Changed before calling willEnterHierarchy / didExitHierarchy.
 @property (nonatomic, readwrite, assign, getter = isInHierarchy) BOOL inHierarchy;
+
+// Used to track the fact of being thread agnostic over subnodes hierarchy
+@property (atomic, readwrite, assign, getter=isRecursivelyDetachedFromMainThread) BOOL recursivelyDetachedFromMainThread;
 
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
 - (BOOL)__visibilityNotificationsDisabled;

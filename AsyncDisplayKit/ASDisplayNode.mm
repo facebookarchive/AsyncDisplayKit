@@ -104,6 +104,7 @@ static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *i
 
   flags.isInHierarchy = NO;
   flags.displaysAsynchronously = YES;
+  flags.isRecursivelyDetachedFromMainThread = YES;
   flags.implementsDrawRect = ([c respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
   flags.implementsImageDisplay = ([c respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
   if (instance) {
@@ -473,6 +474,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (self.placeholderEnabled) {
     [self _setupPlaceholderLayer];
   }
+
+  [self _setRecursivelyDetachedFromMainThread:NO];
 }
 
 - (UIView *)view
@@ -518,6 +521,30 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(_propertyLock);
   return (_view != nil || (_flags.layerBacked && _layer != nil));
+}
+
+- (BOOL)isRecursivelyDetachedFromMainThread {
+  ASDN::MutexLocker l(_propertyLock);
+  return _flags.isRecursivelyDetachedFromMainThread;
+}
+
+- (void)setRecursivelyDetachedFromMainThread:(BOOL)recursivelyDetachedFromMainThread {
+  ASDN::MutexLocker l(_propertyLock);
+
+  [self _setRecursivelyDetachedFromMainThread:recursivelyDetachedFromMainThread];
+}
+
+- (void)_setRecursivelyDetachedFromMainThread:(BOOL)recursivelyDetachedFromMainThread {
+  if (_flags.isRecursivelyDetachedFromMainThread == recursivelyDetachedFromMainThread)
+    return;
+
+  _flags.isRecursivelyDetachedFromMainThread = recursivelyDetachedFromMainThread;
+
+  if (recursivelyDetachedFromMainThread) {
+    [self.supernode __updateMainThreadDetachment];
+  } else {
+    self.supernode.recursivelyDetachedFromMainThread = recursivelyDetachedFromMainThread;
+  }
 }
 
 - (NSString *)name
@@ -1197,6 +1224,10 @@ static NSInteger incrementIfFound(NSInteger i) {
     ASDisplayNodeAssert(subnode.isLayerBacked, @"Cannot add a subview to a layer-backed node; only sublayers permitted.");
     [_layer addSublayer:subnode.layer];
   }
+
+  if (! subnode.recursivelyDetachedFromMainThread){
+    [self _setRecursivelyDetachedFromMainThread:NO];
+  }
 }
 
 - (void)_addSubnodeViewsAndLayers
@@ -1427,7 +1458,27 @@ static NSInteger incrementIfFound(NSInteger i) {
     } else {
       [self exitHierarchyState:stateToEnterOrExit];
     }
+    {
+      ASDN::MutexLocker l(_propertyLock);
+      if (!_flags.isRecursivelyDetachedFromMainThread) {
+        newSupernode.recursivelyDetachedFromMainThread = NO;
+        [oldSupernode __updateMainThreadDetachment];
+      }
+    }
   }
+}
+
+// Check if we still have any detached subnode and update detachment accordingly
+- (void)__updateMainThreadDetachment {
+  BOOL allSubnodesAreDetached = YES;
+  for (ASDisplayNode *subnode in _subnodes) {
+    if (!subnode.recursivelyDetachedFromMainThread) {
+      allSubnodesAreDetached = NO;
+      break;
+    }
+  }
+
+  [self _setRecursivelyDetachedFromMainThread:allSubnodesAreDetached];
 }
 
 // Track that a node will be displayed as part of the current node hierarchy.

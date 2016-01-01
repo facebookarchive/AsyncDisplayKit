@@ -47,9 +47,9 @@
     [self _populateSupplementaryNodesOfKind:kind withMutableNodes:nodes mutableIndexPaths:indexPaths];
     _pendingNodes[kind] = nodes;
     _pendingIndexPaths[kind] = indexPaths;
-    
-    // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+
+    // Measure main thread attached nodes before leaving the main thread
+    [self layoutMainThreadAttachedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
   }
 }
 
@@ -89,9 +89,9 @@
     [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableNodes:nodes mutableIndexPaths:indexPaths];
     _pendingNodes[kind] = nodes;
     _pendingIndexPaths[kind] = indexPaths;
-    
-    // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+
+    // Measure main thread attached nodes before leaving the main thread
+    [self layoutMainThreadAttachedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
   }
 }
 
@@ -131,8 +131,8 @@
     _pendingNodes[kind] = nodes;
     _pendingIndexPaths[kind] = indexPaths;
     
-    // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+    // Measure main thread attached nodes before leaving the main thread
+    [self layoutMainThreadAttachedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
   }
 }
 

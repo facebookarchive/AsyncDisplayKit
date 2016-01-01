@@ -1068,6 +1068,33 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertTrue(didDealloc, @"unexpected node lifetime");
 }
 
+- (void)testAttachedNodeEnteringLeavingHierarchy {
+  ASDisplayNode *parent = [[ASDisplayNode alloc] init];
+  XCTAssertTrue(parent.isRecursivelyDetachedFromMainThread);
+
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  [subnode view];
+  XCTAssertFalse(subnode.isRecursivelyDetachedFromMainThread);
+
+  [parent addSubnode:subnode];
+  XCTAssertFalse(parent.isRecursivelyDetachedFromMainThread);
+
+  [subnode removeFromSupernode];
+  XCTAssertTrue(parent.isRecursivelyDetachedFromMainThread);
+}
+
+- (void)testAttachingSubnode {
+  ASDisplayNode *parent = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode1 = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode2 = [[ASDisplayNode alloc] init];
+  [parent addSubnode:subnode1];
+  [subnode1 addSubnode:subnode2];
+
+  XCTAssertTrue(parent.isRecursivelyDetachedFromMainThread);
+  [subnode2 view];
+  XCTAssertFalse(parent.isRecursivelyDetachedFromMainThread);
+}
+
 - (void)testSubnodes
 {
   ASDisplayNode *parent = [[ASDisplayNode alloc] init];
