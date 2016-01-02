@@ -7,10 +7,8 @@
  */
 
 #import "ASAbstractLayoutController.h"
-
-#include <vector>
-
 #import "ASAssert.h"
+#include <vector>
 
 @interface ASAbstractLayoutController () {
   std::vector<ASRangeTuningParameters> _tuningParameters;

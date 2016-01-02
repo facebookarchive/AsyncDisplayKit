@@ -124,6 +124,7 @@
     NSLog(@"indexPath %@, Visible: %d, Display: %d, FetchData: %d", indexPath, [visibleIndexPaths containsObject:indexPath], [displayIndexPaths containsObject:indexPath], [fetchDataIndexPaths containsObject:indexPath]);
   }
 */
+
   
   _rangeIsValid = YES;
   _queuedRangeUpdate = NO;
