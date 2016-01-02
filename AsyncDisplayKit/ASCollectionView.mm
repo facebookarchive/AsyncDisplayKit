@@ -105,7 +105,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 // We create a node so that logic related to appearance, memory management, etc can be located there
 // for both the node-based and view-based version of the table.
 // This also permits sharing logic with ASTableNode, as the superclass is not UIKit-controlled.
-@property (nonatomic, retain) ASCollectionNode *strongCollectionNode;
+@property (nonatomic, strong) ASCollectionNode *strongCollectionNode;
+
+// Always set, whether ASCollectionView is created directly or via ASCollectionNode.
+@property (nonatomic, weak)   ASCollectionNode *collectionNode;
 
 @end
 
@@ -221,8 +224,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_flowLayoutInspector == nil) {
     UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
     ASDisplayNodeAssertNotNil(layout, @"Collection view layout must be a flow layout to use the built-in inspector");
-    _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self
-                                                                                    flowLayout:layout];
+    _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
   }
   return _flowLayoutInspector;
 }
@@ -323,14 +325,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  [_rangeController setTuningParameters:tuningParameters forRangeType:rangeType];
+  [_collectionNode setTuningParameters:tuningParameters forRangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [_rangeController tuningParametersForRangeType:rangeType];
+  return [_collectionNode tuningParametersForRangeType:rangeType];
 }
 
+// These deprecated methods harken back from a time where only one range type existed.
 - (ASRangeTuningParameters)rangeTuningParameters
 {
   return [self tuningParametersForRangeType:ASLayoutRangeTypeDisplay];
@@ -761,6 +764,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 }
 
 #pragma mark - ASRangeControllerDataSource
+
+- (ASRangeController *)rangeController
+{
+  return _rangeController;
+}
 
 - (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
 {
