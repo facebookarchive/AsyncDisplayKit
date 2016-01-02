@@ -339,7 +339,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEvents, ^
     (ASControlNodeEvent controlEvent)
     {
-      NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)];
+      NSMapTable *eventDispatchTable = [[_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)] copy];
 
       // For each target interested in this event...
       for (id target in eventDispatchTable)
