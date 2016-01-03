@@ -339,6 +339,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEvents, ^
     (ASControlNodeEvent controlEvent)
     {
+      // Use a copy to itereate, the action perform could call remove causing a mutation crash.
       NSMapTable *eventDispatchTable = [[_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)] copy];
 
       // For each target interested in this event...
