@@ -132,19 +132,11 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 
-// Changed before calling willEnterHierarchy / didExitHierarchy.
-@property (nonatomic, readwrite, assign, getter = isInHierarchy) BOOL inHierarchy;
-
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
 - (BOOL)__visibilityNotificationsDisabled;
 - (BOOL)__selfOrParentHasVisibilityNotificationsDisabled;
 - (void)__incrementVisibilityNotificationsDisabled;
 - (void)__decrementVisibilityNotificationsDisabled;
-
-// Call willEnterHierarchy if necessary and set inHierarchy = YES if visibility notifications are enabled on all of its parents
-- (void)__enterHierarchy;
-// Call didExitHierarchy if necessary and set inHierarchy = NO if visibility notifications are enabled on all of its parents
-- (void)__exitHierarchy;
 
 // Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay;

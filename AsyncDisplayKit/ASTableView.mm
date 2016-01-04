@@ -121,6 +121,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 // This also permits sharing logic with ASCollectionNode, as the superclass is not UIKit-controlled.
 @property (nonatomic, retain) ASTableNode *strongTableNode;
 
+// Always set, whether ASCollectionView is created directly or via ASCollectionNode.
+@property (nonatomic, weak)   ASTableNode *tableNode;
+
 @end
 
 @implementation ASTableView
@@ -700,6 +703,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return self.bounds.size;
 }
 
+- (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
+{
+  return self.tableNode.interfaceState;
+}
+
 #pragma mark - ASRangeControllerDelegate
 
 - (void)didBeginUpdatesInRangeController:(ASRangeController *)rangeController
@@ -940,6 +948,27 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     for (ASDisplayNode *node in section) {
       [node recursivelyClearFetchedData];
     }
+  }
+}
+
+#pragma mark - _ASDisplayView behavior substitutions
+// Need these to drive interfaceState so we know when we are visible, if not nested in another range-managing element.
+// Because our superclass is a true UIKit class, we cannot also subclass _ASDisplayView.
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+  BOOL visible = (newWindow != nil);
+  ASDisplayNode *node = self.tableNode;
+  if (visible && !node.inHierarchy) {
+    [node __enterHierarchy];
+  }
+}
+
+- (void)didMoveToWindow
+{
+  BOOL visible = (self.window != nil);
+  ASDisplayNode *node = self.tableNode;
+  if (!visible && node.inHierarchy) {
+    [node __exitHierarchy];
   }
 }
 

@@ -12,6 +12,8 @@
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASLayoutController.h>
 
+#define RangeControllerLoggingEnabled 0
+
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASRangeControllerDataSource;
@@ -101,6 +103,15 @@ NS_ASSUME_NONNULL_BEGIN
  * @returns the receiver's viewport size (i.e., the screen space occupied by the visible range).
  */
 - (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController;
+
+/**
+ * @param rangeController Sender.
+ *
+ * @returns the ASInterfaceState of the node that this controller is powering.  This allows nested range controllers
+ * to collaborate with one another, as an outer controller may set bits in .interfaceState such as Visible.
+ * If this controller is an orthogonally scrolling element, it waits until it is visible to preload outside the viewport.
+ */
+- (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController;
 
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths;
 

@@ -9,6 +9,7 @@
 #import "ASCollectionNode.h"
 #import "ASCollectionInternal.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASRangeController.h"
 #include <vector>
 
 @interface _ASCollectionPendingState : NSObject
@@ -97,12 +98,12 @@
 {
   [super didLoad];
   
+  ASCollectionView *view = self.view;
+  view.collectionNode    = self;
+  
   if (_pendingState) {
     _ASCollectionPendingState *pendingState = _pendingState;
-    self.pendingState = nil;
-    
-    ASCollectionView *view = self.view;
-    view.collectionNode    = self;
+    self.pendingState      = nil;
     view.asyncDelegate     = pendingState.delegate;
     view.asyncDataSource   = pendingState.dataSource;
   }
@@ -160,10 +161,13 @@
   return (ASCollectionView *)[super view];
 }
 
+#if RangeControllerLoggingEnabled
 - (void)visibilityDidChange:(BOOL)isVisible
 {
+  [super visibilityDidChange:isVisible];
   NSLog(@"%@ - visible: %d", self, isVisible);
 }
+#endif
 
 - (void)clearContents
 {
