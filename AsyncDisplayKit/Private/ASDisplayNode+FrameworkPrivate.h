@@ -66,6 +66,13 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
 - (void)enterHierarchyState:(ASHierarchyState)hierarchyState;
 - (void)exitHierarchyState:(ASHierarchyState)hierarchyState;
 
+// Changed before calling willEnterHierarchy / didExitHierarchy.
+@property (nonatomic, readwrite, assign, getter = isInHierarchy) BOOL inHierarchy;
+// Call willEnterHierarchy if necessary and set inHierarchy = YES if visibility notifications are enabled on all of its parents
+- (void)__enterHierarchy;
+// Call didExitHierarchy if necessary and set inHierarchy = NO if visibility notifications are enabled on all of its parents
+- (void)__exitHierarchy;
+
 /**
  * @abstract Returns the Hierarchy State of the node.
  *

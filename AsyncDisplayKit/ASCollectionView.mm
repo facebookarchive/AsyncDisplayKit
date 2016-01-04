@@ -782,6 +782,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return self.bounds.size;
 }
 
+- (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
+{
+  return self.collectionNode.interfaceState;
+}
+
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
 {
   return [_dataController nodesAtIndexPaths:indexPaths];
@@ -941,6 +946,27 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     for (ASDisplayNode *node in section) {
       [node exitInterfaceState:ASInterfaceStateFetchData];
     }
+  }
+}
+
+#pragma mark - _ASDisplayView behavior substitutions
+// Need these to drive interfaceState so we know when we are visible, if not nested in another range-managing element.
+// Because our superclass is a true UIKit class, we cannot also subclass _ASDisplayView.
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+  BOOL visible = (newWindow != nil);
+  ASDisplayNode *node = self.collectionNode;
+  if (visible && !node.inHierarchy) {
+    [node __enterHierarchy];
+  }
+}
+
+- (void)didMoveToWindow
+{
+  BOOL visible = (self.window != nil);
+  ASDisplayNode *node = self.collectionNode;
+  if (!visible && node.inHierarchy) {
+    [node __exitHierarchy];
   }
 }
 

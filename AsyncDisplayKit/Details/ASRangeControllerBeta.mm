@@ -17,6 +17,21 @@
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
+extern BOOL ASInterfaceStateIncludesVisible(ASInterfaceState interfaceState)
+{
+  return ((interfaceState & ASInterfaceStateVisible) == ASInterfaceStateVisible);
+}
+
+extern BOOL ASInterfaceStateIncludesDisplay(ASInterfaceState interfaceState)
+{
+  return ((interfaceState & ASInterfaceStateDisplay) == ASInterfaceStateDisplay);
+}
+
+extern BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
+{
+  return ((interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
+}
+
 @interface ASRangeControllerBeta ()
 {
   BOOL _rangeIsValid;
@@ -79,52 +94,91 @@
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
   
-  NSSet *fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData];
-  NSSet *displayIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
+  ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
+  
   NSSet *visibleIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
-
-  //NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
-  //NSLog(@"visible sets are equal: %d", [visibleIndexPaths isEqualToSet:visibleNodePathsSet]);
   
-  // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
-  NSMutableSet *allIndexPaths = [fetchDataIndexPaths mutableCopy];
-  [allIndexPaths unionSet:displayIndexPaths];
-  [allIndexPaths unionSet:visibleIndexPaths];
-  
+#if RangeControllerLoggingEnabled
   NSMutableArray *modified = [NSMutableArray array];
+#endif
   
-  for (NSIndexPath *indexPath in allIndexPaths) {
-    // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.
-    // For consistency, make sure each node knows that it should measure itself if something changes.
-    ASInterfaceState interfaceState = ASInterfaceStateMeasureLayout;
+  if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
+    // If we are already visible, get busy!  Better get started on preloading before the user scrolls more...
+    NSSet *fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData];
+    NSSet *displayIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
+  
+    // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
+    NSMutableSet *allIndexPaths = [fetchDataIndexPaths mutableCopy];
+    [allIndexPaths unionSet:displayIndexPaths];
+    [allIndexPaths unionSet:visibleIndexPaths];
     
-    if ([fetchDataIndexPaths containsObject:indexPath]) {
-      interfaceState |= ASInterfaceStateFetchData;
+    for (NSIndexPath *indexPath in allIndexPaths) {
+      // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.
+      // For consistency, make sure each node knows that it should measure itself if something changes.
+      ASInterfaceState interfaceState = ASInterfaceStateMeasureLayout;
+      
+      if ([fetchDataIndexPaths containsObject:indexPath]) {
+        interfaceState |= ASInterfaceStateFetchData;
+      }
+      if ([displayIndexPaths containsObject:indexPath]) {
+        interfaceState |= ASInterfaceStateDisplay;
+      }
+      if ([visibleIndexPaths containsObject:indexPath]) {
+        interfaceState |= ASInterfaceStateVisible;
+      }
+      
+      ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
+      ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
+      // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
+      if (node.interfaceState != interfaceState) {
+#if RangeControllerLoggingEnabled
+        [modified addObject:indexPath];
+#endif
+        [node recursivelySetInterfaceState:interfaceState];
+      }
     }
-    if ([displayIndexPaths containsObject:indexPath]) {
-      interfaceState |= ASInterfaceStateDisplay;
-    }
-    if ([visibleIndexPaths containsObject:indexPath]) {
-      interfaceState |= ASInterfaceStateVisible;
-    }
+  } else {
+    // If selfInterfaceState isn't visible, then visibleIndexPaths represents what /will/ be immediately visible at the
+    // instant we come onscreen.  So, fetch data and display all of those things, but don't waste resources preloading yet.
+    // We handle this as a separate case to minimize set operations for offscreen preloading, including containsObject:.
     
-    ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
-    ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
-    // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
-    if (node.interfaceState != interfaceState) {
-      [modified addObject:indexPath];
-      [node recursivelySetInterfaceState:interfaceState];
+    for (NSIndexPath *indexPath in visibleIndexPaths) {
+      // Set Layout, Fetch Data, Display.  DO NOT set Visible: even though these elements are in the visible range / "viewport",
+      // our overall container object is itself not visible yet.  The moment it becomes visible, we will run the condition above.
+      ASInterfaceState interfaceState = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay;
+      
+      ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
+      ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
+      // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
+      if (node.interfaceState != interfaceState) {
+#if RangeControllerLoggingEnabled
+        [modified addObject:indexPath];
+#endif
+        [node recursivelySetInterfaceState:interfaceState];
+      }
     }
   }
   
-/*
+#if RangeControllerLoggingEnabled
+  NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
+  BOOL setsAreEqual = [visibleIndexPaths isEqualToSet:visibleNodePathsSet];
+  NSLog(@"visible sets are equal: %d", setsAreEqual);
+  if (!setsAreEqual) {
+    NSLog(@"standard: %@", visibleIndexPaths);
+    NSLog(@"custom: %@", visibleNodePathsSet);
+  }
+  
   [modified sortUsingSelector:@selector(compare:)];
   
   for (NSIndexPath *indexPath in modified) {
-    NSLog(@"indexPath %@, Visible: %d, Display: %d, FetchData: %d", indexPath, [visibleIndexPaths containsObject:indexPath], [displayIndexPaths containsObject:indexPath], [fetchDataIndexPaths containsObject:indexPath]);
+    ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
+    ASInterfaceState interfaceState = node.interfaceState;
+    BOOL inVisible = ASInterfaceStateIncludesVisible(interfaceState);
+    BOOL inDisplay = ASInterfaceStateIncludesDisplay(interfaceState);
+    BOOL inFetchData = ASInterfaceStateIncludesFetchData(interfaceState);
+    NSLog(@"indexPath %@, Visible: %d, Display: %d, FetchData: %d", indexPath, inVisible, inDisplay, inFetchData);
   }
-*/
-
+#endif
   
   _rangeIsValid = YES;
   _queuedRangeUpdate = NO;

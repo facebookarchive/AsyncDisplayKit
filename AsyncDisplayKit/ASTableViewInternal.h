@@ -13,6 +13,7 @@
 @interface ASTableView (Internal)
 
 @property (nonatomic, retain, readonly) ASDataController *dataController;
+@property (nonatomic, weak, readwrite) ASTableNode *tableNode;
 
 /**
  * Initializer.
