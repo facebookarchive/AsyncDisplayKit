@@ -11,11 +11,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ASViewController : UIViewController
+@interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController
 
-- (instancetype)initWithNode:(ASDisplayNode *)node NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithNode:(DisplayNodeType)node NS_DESIGNATED_INITIALIZER;
 
-@property (nonatomic, strong, readonly) ASDisplayNode *node;
+@property (nonatomic, strong, readonly) DisplayNodeType node;
 
 /**
  * @abstract Passthrough property to the the .interfaceState of the node.
