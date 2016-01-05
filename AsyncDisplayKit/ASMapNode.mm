@@ -15,7 +15,6 @@
 {
   ASDN::RecursiveMutex _propertyLock;
   MKMapSnapshotter *_snapshotter;
-  MKMapSnapshotOptions *_options;
   NSArray *_annotations;
   CLLocationCoordinate2D _centerCoordinateOfMap;
 }
@@ -25,7 +24,7 @@
 
 @synthesize needsMapReloadOnBoundsChange = _needsMapReloadOnBoundsChange;
 @synthesize mapDelegate = _mapDelegate;
-@synthesize region = _region;
+@synthesize options = _options;
 @synthesize liveMap = _liveMap;
 
 #pragma mark - Lifecycle
@@ -41,11 +40,9 @@
   _liveMap = NO;
   _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
   
-  //Default world-scale view
-  _region = MKCoordinateRegionForMapRect(MKMapRectWorld);
-  
   _options = [[MKMapSnapshotOptions alloc] init];
-  _options.region = _region;
+  //Default world-scale view
+  _options.region = MKCoordinateRegionForMapRect(MKMapRectWorld);
   
   return self;
 }
@@ -116,20 +113,19 @@
   _needsMapReloadOnBoundsChange = needsMapReloadOnBoundsChange;
 }
 
-- (MKCoordinateRegion)region
+- (MKMapSnapshotOptions *)options
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _region;
+  return _options;
 }
 
-- (void)setRegion:(MKCoordinateRegion)region
+- (void)setOptions:(MKMapSnapshotOptions *)options
 {
   ASDN::MutexLocker l(_propertyLock);
-  _region = region;
+  _options = options;
   if (self.isLiveMap) {
-    [_mapView setRegion:_region animated:YES];
+    [self applySnapshotOptions];
   } else {
-    _options.region = _region;
     [self resetSnapshotter];
     [self takeSnapshot];
   }
@@ -190,6 +186,15 @@
   _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:_options];
 }
 
+- (void)applySnapshotOptions
+{
+  [_mapView setCamera:_options.camera animated:YES];
+  [_mapView setRegion:_options.region animated:YES];
+  [_mapView setMapType:_options.mapType];
+  _mapView.showsBuildings = _options.showsBuildings;
+  _mapView.showsPointsOfInterest = _options.showsPointsOfInterest;
+}
+
 #pragma mark - Actions
 - (void)addLiveMap
 {
@@ -198,7 +203,7 @@
     __weak ASMapNode *weakSelf = self;
     _mapView = [[MKMapView alloc] initWithFrame:CGRectZero];
     _mapView.delegate = weakSelf.mapDelegate;
-    [_mapView setRegion:_options.region];
+    [weakSelf applySnapshotOptions];
     [_mapView addAnnotations:_annotations];
     [weakSelf setNeedsLayout];
     [weakSelf.view addSubview:_mapView];
@@ -229,7 +234,7 @@
 }
 
 #pragma mark - Layout
-// Layout isn't usually needed in the box model, but since we are making use of MKMapView which is hidden in an ASDisplayNode this is preferred.
+// Layout isn't usually needed in the box model, but since we are making use of MKMapView this is preferred.
 - (void)layout
 {
   [super layout];

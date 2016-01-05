@@ -12,9 +12,9 @@
 @interface ASMapNode : ASImageNode
 
 /**
- The current region of ASMapNode. This can be set at any time and ASMapNode will animate the change. This property may be set from a background thread before the node is loaded, and will automatically be applied to define the region of the static snapshot (if .liveMap = NO) or the internal MKMapView (otherwise).
+ The current options of ASMapNode. This can be set at any time and ASMapNode will animate the change. This property may be set from a background thread before the node is loaded, and will automatically be applied to define the behavior of the static snapshot (if .liveMap = NO) or the internal MKMapView (otherwise).
  */
-@property (nonatomic, assign) MKCoordinateRegion region;
+@property (nonatomic, readwrite) MKMapSnapshotOptions *options;
 
 /**
  This is the MKMapView that is the live map part of ASMapNode. This will be nil if .liveMap = NO. Note, MKMapView is *not* thread-safe.
