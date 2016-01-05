@@ -235,11 +235,31 @@
     // otherwise _updateVisibleNodeIndexPaths may try to retrieve nodes from dataSource that aren't there anymore
     for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
       id rangeKey = @((ASLayoutRangeType)i);
+
       NSMutableSet *rangePaths = [_rangeTypeIndexPaths[rangeKey] mutableCopy];
-      for (NSIndexPath *path in indexPaths) {
-        [rangePaths removeObject:path];
+      for (NSIndexPath *pathToRemove in indexPaths) {
+        [rangePaths removeObject:pathToRemove];
       }
-      _rangeTypeIndexPaths[rangeKey] = rangePaths;
+        
+      // After removing paths we are left with gaps; We need to shift all remaining index paths
+      // so that there are no gaps left
+      NSMutableSet *shiftedRangePaths = [NSMutableSet new];
+      for (NSIndexPath *path in rangePaths) {
+        int shift = 0;
+        for (NSIndexPath *pathToRemove in indexPaths) {
+          if (pathToRemove.section == path.section && pathToRemove.item < path.item) {
+            // removed path was before this path, we need to shift it back
+            ++shift;
+          }
+        }
+        NSIndexPath *shifted = path;
+        if (shift > 0) {
+          shifted = [NSIndexPath indexPathForItem:path.item - shift inSection:path.section];
+        }
+        [shiftedRangePaths addObject:shifted];
+      }
+
+      _rangeTypeIndexPaths[rangeKey] = shiftedRangePaths;
     }
     
     [_delegate rangeController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
@@ -270,7 +290,26 @@
           [rangePaths removeObject:path];
         }
       }
-      _rangeTypeIndexPaths[rangeKey] = rangePaths;
+        
+      // After removing paths we are left with gaps; We need to shift all remaining index paths
+      // so that there are no gaps left
+      NSMutableSet *shiftedRangePaths = [NSMutableSet new];
+      for (NSIndexPath *path in rangePaths) {
+        __block int shift = 0;
+        [indexSet enumerateIndexesUsingBlock:^(NSUInteger indexToRemove, BOOL *stop) {
+          if (indexToRemove < path.section) {
+            ++shift;
+          }
+        }];
+
+        NSIndexPath *shifted = path;
+        if (shift > 0) {
+          shifted = [NSIndexPath indexPathForItem:path.item inSection:path.section - shift];
+        }
+        [shiftedRangePaths addObject:shifted];
+      }
+        
+      _rangeTypeIndexPaths[rangeKey] = shiftedRangePaths;
     }
     
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
