@@ -17,7 +17,7 @@
   
   NSAttributedString *_normalAttributedTitle;
   NSAttributedString *_highlightedAttributedTitle;
-  NSAttributedString *_seletedAttributedTitle;
+  NSAttributedString *_selectedAttributedTitle;
   NSAttributedString *_disabledAttributedTitle;
   
   UIImage *_normalImage;
@@ -88,8 +88,8 @@
     newTitle = _disabledAttributedTitle;
   } else if (self.highlighted && _highlightedAttributedTitle) {
     newTitle = _highlightedAttributedTitle;
-  } else if (self.selected && _seletedAttributedTitle) {
-    newTitle = _seletedAttributedTitle;
+  } else if (self.selected && _selectedAttributedTitle) {
+    newTitle = _selectedAttributedTitle;
   } else {
     newTitle = _normalAttributedTitle;
   }
@@ -143,10 +143,13 @@
       return _highlightedAttributedTitle;
       
     case ASControlStateSelected:
-      return _seletedAttributedTitle;
+      return _selectedAttributedTitle;
       
     case ASControlStateDisabled:
       return _disabledAttributedTitle;
+          
+    default:
+      return _normalAttributedTitle;
   }
 }
 
@@ -163,11 +166,14 @@
       break;
       
     case ASControlStateSelected:
-      _seletedAttributedTitle = [title copy];
+      _selectedAttributedTitle = [title copy];
       break;
       
     case ASControlStateDisabled:
       _disabledAttributedTitle = [title copy];
+      break;
+      
+    default:
       break;
   }
   [self updateTitle];
@@ -188,6 +194,9 @@
       
     case ASControlStateDisabled:
       return _disabledImage;
+      
+    default:
+      return _normalImage;
   }
 }
 
@@ -209,6 +218,9 @@
       
     case ASControlStateDisabled:
       _disabledImage = image;
+      break;
+      
+    default:
       break;
   }
   [self updateImage];
