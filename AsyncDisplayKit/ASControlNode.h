@@ -66,7 +66,7 @@ typedef NS_OPTIONS(NSUInteger, ASControlState) {
  @abstract Indicates whether or not the receiver is highlighted.
  @discussion This is set automatically when the receiver is tapped.
  */
-@property (nonatomic, assign, getter=isSeleted) BOOL selected;
+@property (nonatomic, assign, getter=isSelected) BOOL selected;
 
 #pragma mark - Tracking Touches
 /**
