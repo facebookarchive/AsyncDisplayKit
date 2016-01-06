@@ -186,6 +186,10 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // Send the appropriate touch-up control event.
   CGRect expandedBounds = CGRectInset(self.view.bounds, kASControlNodeExpandedInset, kASControlNodeExpandedInset);
   BOOL touchUpIsInsideExpandedBounds = CGRectContainsPoint(expandedBounds, touchLocation);
+  
+  if (touchUpIsInsideExpandedBounds) {
+    self.selected = !self.selected;
+  }
 
   [self sendActionsForControlEvents:(touchUpIsInsideExpandedBounds ? ASControlNodeEventTouchUpInside : ASControlNodeEventTouchUpOutside)
                           withEvent:event];
