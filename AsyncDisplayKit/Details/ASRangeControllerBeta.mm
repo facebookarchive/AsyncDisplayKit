@@ -37,6 +37,7 @@ extern BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
   BOOL _rangeIsValid;
   BOOL _queuedRangeUpdate;
   ASScrollDirection _scrollDirection;
+  NSMutableSet *_allPreviousIndexPaths;
 }
 
 @end
@@ -111,6 +112,12 @@ extern BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
     NSMutableSet *allIndexPaths = [fetchDataIndexPaths mutableCopy];
     [allIndexPaths unionSet:displayIndexPaths];
     [allIndexPaths unionSet:visibleIndexPaths];
+    
+    // Sets are magical.  Add anything we had applied interfaceState to in the last update, so we can clear any
+    // range flags it still has enabled.  Most of the time, all but a few elements are equal; a large programmatic
+    // scroll or major main thread stall could cause entirely disjoint sets, but we must visit all.
+    [allIndexPaths unionSet:_allPreviousIndexPaths];
+    _allPreviousIndexPaths = allIndexPaths;
     
     for (NSIndexPath *indexPath in allIndexPaths) {
       // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.
