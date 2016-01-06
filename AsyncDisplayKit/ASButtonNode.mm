@@ -53,23 +53,23 @@
 
 - (void)setEnabled:(BOOL)enabled
 {
-    [super setEnabled:enabled];
-    [self updateImage];
-    [self updateTitle];
+  [super setEnabled:enabled];
+  [self updateImage];
+  [self updateTitle];
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
-    [super setHighlighted:highlighted];
-    [self updateImage];
-    [self updateTitle];
+  [super setHighlighted:highlighted];
+  [self updateImage];
+  [self updateTitle];
 }
 
 - (void)setSelected:(BOOL)selected
 {
-    [super setSelected:selected];
-    [self updateImage];
-    [self updateTitle];
+  [super setSelected:selected];
+  [self updateImage];
+  [self updateTitle];
 }
 
 - (void)updateImage
