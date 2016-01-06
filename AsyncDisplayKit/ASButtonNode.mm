@@ -47,16 +47,29 @@
     
     [self addSubnode:_titleNode];
     [self addSubnode:_imageNode];
-    
-    [self addTarget:self action:@selector(controlEventUpdated:) forControlEvents:ASControlNodeEventAllEvents];
   }
   return self;
 }
 
-- (void)controlEventUpdated:(ASControlNode *)node
+- (void)setEnabled:(BOOL)enabled
 {
-  [self updateImage];
-  [self updateTitle];
+    [super setEnabled:enabled];
+    [self updateImage];
+    [self updateTitle];
+}
+
+- (void)setHighlighted:(BOOL)highlighted
+{
+    [super setHighlighted:highlighted];
+    [self updateImage];
+    [self updateTitle];
+}
+
+- (void)setSelected:(BOOL)selected
+{
+    [super setSelected:selected];
+    [self updateImage];
+    [self updateTitle];
 }
 
 - (void)updateImage
