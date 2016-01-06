@@ -17,10 +17,12 @@
   
   NSAttributedString *_normalAttributedTitle;
   NSAttributedString *_highlightedAttributedTitle;
+  NSAttributedString *_seletedAttributedTitle;
   NSAttributedString *_disabledAttributedTitle;
   
   UIImage *_normalImage;
   UIImage *_highlightedImage;
+  UIImage *_selectedImage;
   UIImage *_disabledImage;
 }
 
@@ -66,6 +68,8 @@
     newImage = _disabledImage;
   } else if (self.highlighted && _highlightedImage) {
     newImage = _highlightedImage;
+  } else if (self.selected && _selectedImage) {
+    newImage = _selectedImage;
   } else {
     newImage = _normalImage;
   }
@@ -84,6 +88,8 @@
     newTitle = _disabledAttributedTitle;
   } else if (self.highlighted && _highlightedAttributedTitle) {
     newTitle = _highlightedAttributedTitle;
+  } else if (self.selected && _seletedAttributedTitle) {
+    newTitle = _seletedAttributedTitle;
   } else {
     newTitle = _normalAttributedTitle;
   }
@@ -126,68 +132,82 @@
   [self setNeedsLayout];
 }
 
-- (NSAttributedString *)attributedTitleForState:(ASButtonState)state
+- (NSAttributedString *)attributedTitleForState:(ASControlState)state
 {
   ASDN::MutexLocker l(_propertyLock);
   switch (state) {
-    case ASButtonStateNormal:
+    case ASControlStateNormal:
       return _normalAttributedTitle;
       
-    case ASButtonStateHighlighted:
+    case ASControlStateHighlighted:
       return _highlightedAttributedTitle;
       
-    case ASButtonStateDisabled:
+    case ASControlStateSelected:
+      return _seletedAttributedTitle;
+      
+    case ASControlStateDisabled:
       return _disabledAttributedTitle;
   }
 }
 
-- (void)setAttributedTitle:(NSAttributedString *)title forState:(ASButtonState)state
+- (void)setAttributedTitle:(NSAttributedString *)title forState:(ASControlState)state
 {
   ASDN::MutexLocker l(_propertyLock);
   switch (state) {
-    case ASButtonStateNormal:
+    case ASControlStateNormal:
       _normalAttributedTitle = [title copy];
       break;
       
-    case ASButtonStateHighlighted:
+    case ASControlStateHighlighted:
       _highlightedAttributedTitle = [title copy];
       break;
       
-    case ASButtonStateDisabled:
+    case ASControlStateSelected:
+      _seletedAttributedTitle = [title copy];
+      break;
+      
+    case ASControlStateDisabled:
       _disabledAttributedTitle = [title copy];
       break;
   }
   [self updateTitle];
 }
 
-- (UIImage *)imageForState:(ASButtonState)state
+- (UIImage *)imageForState:(ASControlState)state
 {
   ASDN::MutexLocker l(_propertyLock);
   switch (state) {
-    case ASButtonStateNormal:
+    case ASControlStateNormal:
       return _normalImage;
       
-    case ASButtonStateHighlighted:
+    case ASControlStateHighlighted:
       return _highlightedImage;
       
-    case ASButtonStateDisabled:
+    case ASControlStateSelected:
+      return _selectedImage;
+      
+    case ASControlStateDisabled:
       return _disabledImage;
   }
 }
 
-- (void)setImage:(UIImage *)image forState:(ASButtonState)state
+- (void)setImage:(UIImage *)image forState:(ASControlState)state
 {
   ASDN::MutexLocker l(_propertyLock);
   switch (state) {
-    case ASButtonStateNormal:
+    case ASControlStateNormal:
       _normalImage = image;
       break;
       
-    case ASButtonStateHighlighted:
+    case ASControlStateHighlighted:
       _highlightedImage = image;
       break;
       
-    case ASButtonStateDisabled:
+    case ASControlStateSelected:
+      _selectedImage = image;
+      break;
+      
+    case ASControlStateDisabled:
       _disabledImage = image;
       break;
   }

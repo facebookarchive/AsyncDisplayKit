@@ -9,12 +9,6 @@
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASImageNode.h>
 
-typedef enum : NSUInteger {
-  ASButtonStateNormal,
-  ASButtonStateHighlighted,
-  ASButtonStateDisabled,
-} ASButtonState;
-
 @interface ASButtonNode : ASControlNode
 
 @property (nonatomic, readonly) ASTextNode *titleNode;
@@ -43,10 +37,10 @@ typedef enum : NSUInteger {
 @property (nonatomic, assign) ASVerticalAlignment contentVerticalAlignment;
 
 
-- (NSAttributedString *)attributedTitleForState:(ASButtonState)state;
-- (void)setAttributedTitle:(NSAttributedString *)title forState:(ASButtonState)state;
+- (NSAttributedString *)attributedTitleForState:(ASControlState)state;
+- (void)setAttributedTitle:(NSAttributedString *)title forState:(ASControlState)state;
 
-- (UIImage *)imageForState:(ASButtonState)state;
-- (void)setImage:(UIImage *)image forState:(ASButtonState)state;
+- (UIImage *)imageForState:(ASControlState)state;
+- (void)setImage:(UIImage *)image forState:(ASControlState)state;
 
 @end
