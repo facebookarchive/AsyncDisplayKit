@@ -60,7 +60,7 @@ typedef NS_OPTIONS(NSUInteger, ASControlState) {
   @abstract Indicates whether or not the receiver is highlighted.
   @discussion This is set automatically when the there is a touch inside the control and removed on exit or touch up. This is different from touchInside in that it includes an area around the control, rather than just for touches inside the control.
  */
-@property (nonatomic, readonly, assign, getter=isHighlighted) BOOL highlighted;
+@property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
 
 /**
  @abstract Indicates whether or not the receiver is highlighted.
