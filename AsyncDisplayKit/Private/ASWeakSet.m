@@ -9,7 +9,7 @@
 #import "ASWeakSet.h"
 
 @interface ASWeakSet<__covariant ObjectType> ()
-@property (nonatomic, strong, readonly) NSMapTable<NSNull *, NSNull *> *mapTable;
+@property (nonatomic, strong, readonly) NSMapTable<ObjectType, NSNull *> *mapTable;
 @end
 
 @implementation ASWeakSet
