@@ -61,7 +61,7 @@
  */
 - (NSUInteger)count
 {
-  NSInteger count = 0;
+  NSUInteger count = 0;
   for (__unused id object in _mapTable) {
     count += 1;
   }
