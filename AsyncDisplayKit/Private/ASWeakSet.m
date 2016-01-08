@@ -51,6 +51,14 @@
   return YES;
 }
 
+/**
+ Note: The `count` property of NSMapTable is unreliable
+ in the case of weak-to-strong map tables because entries
+ whose keys have been deallocated are not removed immediately.
+ 
+ In order to get the true count we have to fall back to using
+ fast enumeration.
+ */
 - (NSUInteger)count
 {
   NSInteger count = 0;
