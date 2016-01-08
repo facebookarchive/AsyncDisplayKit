@@ -981,6 +981,17 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
   _contentsScaleForDisplay = contentsScaleForDisplay;
 }
 
+- (void)applyPendingViewState
+{
+  ASDisplayNodeAssertMainThread();
+  if (self.layerBacked) {
+    [_pendingViewState applyToLayer:self.layer];
+  } else {
+    [_pendingViewState applyToView:self.view];
+  }
+  [_pendingViewState clearChanges];
+}
+
 - (void)displayImmediately
 {
   ASDisplayNodeAssertMainThread();
@@ -2366,13 +2377,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // for the view/layer are still valid.
   ASDN::MutexLocker l(_propertyLock);
 
-  if (_flags.layerBacked) {
-    [_pendingViewState applyToLayer:_layer];
-  } else {
-    [_pendingViewState applyToView:_view];
-  }
-
-  _pendingViewState = nil;
+  [self applyPendingViewState];
 
   // TODO: move this into real pending state
   if (_flags.displaySuspended) {

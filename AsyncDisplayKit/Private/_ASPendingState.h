@@ -30,4 +30,8 @@
 + (_ASPendingState *)pendingViewStateFromLayer:(CALayer *)layer;
 + (_ASPendingState *)pendingViewStateFromView:(UIView *)view;
 
+@property (nonatomic, readonly) BOOL hasChanges;
+
+- (void)clearChanges;
+
 @end

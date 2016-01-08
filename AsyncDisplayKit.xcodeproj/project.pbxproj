@@ -455,6 +455,16 @@
 		B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
 		C78F7E2A1BF7808300CDEAFC /* ASTableNode.m in Sources */ = {isa = PBXBuildFile; fileRef = B0F880591BEAEC7500D17647 /* ASTableNode.m */; };
 		C78F7E2B1BF7809800CDEAFC /* ASTableNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B0F880581BEAEC7500D17647 /* ASTableNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CC3B20831C3F76D600798563 /* ASPendingStateController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20811C3F76D600798563 /* ASPendingStateController.h */; };
+		CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20811C3F76D600798563 /* ASPendingStateController.h */; };
+		CC3B20851C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
+		CC3B20861C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
+		CC3B20891C3F7A5400798563 /* ASWeakSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20871C3F7A5400798563 /* ASWeakSet.h */; };
+		CC3B208A1C3F7A5400798563 /* ASWeakSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20871C3F7A5400798563 /* ASWeakSet.h */; };
+		CC3B208B1C3F7A5400798563 /* ASWeakSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20881C3F7A5400798563 /* ASWeakSet.m */; };
+		CC3B208C1C3F7A5400798563 /* ASWeakSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20881C3F7A5400798563 /* ASWeakSet.m */; };
+		CC3B208E1C3F7D0A00798563 /* ASWeakSetTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */; };
+		CC3B20901C3F892D00798563 /* ASPendingStateControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208F1C3F892D00798563 /* ASPendingStateControllerTests.m */; };
 		CC7FD9DE1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC7FD9DF1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; };
 		CC7FD9E11BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */; };
@@ -786,6 +796,12 @@
 		B30BF6511C5964B0004FCD53 /* ASLayoutManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASLayoutManager.m; path = TextKit/ASLayoutManager.m; sourceTree = "<group>"; };
 		B35061DA1B010EDF0018CF92 /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncDisplayKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B35061DD1B010EDF0018CF92 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../AsyncDisplayKit-iOS/Info.plist"; sourceTree = "<group>"; };
+		CC3B20811C3F76D600798563 /* ASPendingStateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPendingStateController.h; sourceTree = "<group>"; };
+		CC3B20821C3F76D600798563 /* ASPendingStateController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASPendingStateController.mm; sourceTree = "<group>"; };
+		CC3B20871C3F7A5400798563 /* ASWeakSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASWeakSet.h; sourceTree = "<group>"; };
+		CC3B20881C3F7A5400798563 /* ASWeakSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASWeakSet.m; sourceTree = "<group>"; };
+		CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASWeakSetTests.m; sourceTree = "<group>"; };
+		CC3B208F1C3F892D00798563 /* ASPendingStateControllerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPendingStateControllerTests.m; sourceTree = "<group>"; };
 		CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPhotosFrameworkImageRequest.h; sourceTree = "<group>"; };
 		CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequest.m; sourceTree = "<group>"; };
 		CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequestTests.m; sourceTree = "<group>"; };
@@ -1002,6 +1018,8 @@
 			children = (
 				DBC453211C5FD97200B16017 /* ASDisplayNodeImplicitHierarchyTests.m */,
 				DBC452DD1C5C6A6A00B16017 /* ArrayDiffingTests.m */,
+				CC3B208F1C3F892D00798563 /* ASPendingStateControllerTests.m */,
+				CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */,
 				057D02C01AC0A66700C7AC3C /* AsyncDisplayKitTestHost */,
 				056D21501ABCEDA1001107EF /* ASSnapshotTestCase.h */,
 				05EA6FE61AC0966E00E35788 /* ASSnapshotTestCase.mm */,
@@ -1123,6 +1141,10 @@
 			children = (
 				DB55C25F1C6408D6004EDCF5 /* _ASTransitionContext.h */,
 				DB55C2601C6408D6004EDCF5 /* _ASTransitionContext.m */,
+				CC3B20811C3F76D600798563 /* ASPendingStateController.h */,
+				CC3B20821C3F76D600798563 /* ASPendingStateController.mm */,
+				CC3B20871C3F7A5400798563 /* ASWeakSet.h */,
+				CC3B20881C3F7A5400798563 /* ASWeakSet.m */,
 				AC026B6D1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h */,
 				AC026B6E1BD57DBF00BBC17E /* _ASHierarchyChangeSet.m */,
 				9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */,
@@ -1413,6 +1435,7 @@
 				257754B51BEE44CD00737CA5 /* ASTextKitTruncating.h in Headers */,
 				ACF6ED4F1B17847A00DA7C62 /* ASStackPositionedLayout.h in Headers */,
 				257754A71BEE44CD00737CA5 /* ASTextKitAttributes.h in Headers */,
+				CC3B20891C3F7A5400798563 /* ASWeakSet.h in Headers */,
 				ACF6ED511B17847A00DA7C62 /* ASStackUnpositionedLayout.h in Headers */,
 				9C6BB3B21B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */,
 				ACF6ED311B17843500DA7C62 /* ASStaticLayoutSpec.h in Headers */,
@@ -1421,6 +1444,7 @@
 				257754C11BEE458E00737CA5 /* ASTextKitHelpers.h in Headers */,
 				B30BF6521C5964B0004FCD53 /* ASLayoutManager.h in Headers */,
 				0574D5E219C110940097DC25 /* ASTableViewProtocols.h in Headers */,
+				CC3B20831C3F76D600798563 /* ASPendingStateController.h in Headers */,
 				058D0A51195D05CB00B7D73C /* ASTextNode.h in Headers */,
 				058D0A81195D05F900B7D73C /* ASThread.h in Headers */,
 				ACC945A91BA9E7A0005E1FB8 /* ASViewController.h in Headers */,
@@ -1475,6 +1499,7 @@
 				B35061F51B010EFD0018CF92 /* ASCollectionView.h in Headers */,
 				254C6B791BF94DF4003EC431 /* ASTextKitEntityAttribute.h in Headers */,
 				509E68631B3AEDB4009B9150 /* ASCollectionViewLayoutController.h in Headers */,
+				CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */,
 				B35061F71B010EFD0018CF92 /* ASCollectionViewProtocols.h in Headers */,
 				DE6EA3231C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */,
 				B35061FA1B010EFD0018CF92 /* ASControlNode+Subclasses.h in Headers */,
@@ -1517,6 +1542,7 @@
 				34EFC7791B701D3600AD841F /* ASLayoutSpecUtilities.h in Headers */,
 				B350625C1B010F070018CF92 /* ASLog.h in Headers */,
 				0442850E1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */,
+				CC3B208A1C3F7A5400798563 /* ASWeakSet.h in Headers */,
 				DE8BEAC21C2DF3FC00D57C12 /* ASDelegateProxy.h in Headers */,
 				B35062041B010EFD0018CF92 /* ASMultiplexImageNode.h in Headers */,
 				DECBD6E81BE56E1900CF4905 /* ASButtonNode.h in Headers */,
@@ -1611,6 +1637,7 @@
 				058D09B9195D04C000B7D73C /* Frameworks */,
 				058D09BA195D04C000B7D73C /* Resources */,
 				3B9D88CDF51B429C8409E4B6 /* Copy Pods Resources */,
+				78B4649EC16385BFAFD84D49 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1740,6 +1767,21 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		78B4649EC16385BFAFD84D49 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1799,6 +1841,7 @@
 				257754C41BEE458E00737CA5 /* ASTextNodeWordKerner.m in Sources */,
 				058D0A1A195D050800B7D73C /* ASHighlightOverlayLayer.mm in Sources */,
 				058D0A2B195D050800B7D73C /* ASImageNode+CGExtras.m in Sources */,
+				CC3B208B1C3F7A5400798563 /* ASWeakSet.m in Sources */,
 				058D0A16195D050800B7D73C /* ASImageNode.mm in Sources */,
 				430E7C911B4C23F100697A4C /* ASIndexPath.m in Sources */,
 				ACF6ED231B17843500DA7C62 /* ASInsetLayoutSpec.mm in Sources */,
@@ -1815,6 +1858,7 @@
 				058D0A1B195D050800B7D73C /* ASMutableAttributedStringBuilder.m in Sources */,
 				055B9FA91A1C154B00035D6D /* ASNetworkImageNode.mm in Sources */,
 				AEB7B01B1C5962EA00662EF4 /* ASDefaultPlayButton.m in Sources */,
+				CC3B20851C3F76D600798563 /* ASPendingStateController.mm in Sources */,
 				ACF6ED2C1B17843500DA7C62 /* ASOverlayLayoutSpec.mm in Sources */,
 				0442850F1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */,
 				257754921BED28F300737CA5 /* ASEqualityHashHelpers.mm in Sources */,
@@ -1861,6 +1905,7 @@
 				ACF6ED5C1B178DC700DA7C62 /* ASCenterLayoutSpecSnapshotTests.mm in Sources */,
 				9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.m in Sources */,
 				2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */,
+				CC3B208E1C3F7D0A00798563 /* ASWeakSetTests.m in Sources */,
 				ACF6ED5D1B178DC700DA7C62 /* ASDimensionTests.mm in Sources */,
 				058D0A38195D057000B7D73C /* ASDisplayLayerTests.m in Sources */,
 				2538B6F31BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m in Sources */,
@@ -1883,6 +1928,7 @@
 				AEEC47E41C21D3D200EC1693 /* ASVideoNodeTests.m in Sources */,
 				254C6B521BF8FE6D003EC431 /* ASTextKitTruncationTests.mm in Sources */,
 				058D0A3D195D057000B7D73C /* ASTextKitCoreTextAdditionsTests.m in Sources */,
+				CC3B20901C3F892D00798563 /* ASPendingStateControllerTests.m in Sources */,
 				058D0A40195D057000B7D73C /* ASTextNodeTests.m in Sources */,
 				DBC453221C5FD97200B16017 /* ASDisplayNodeImplicitHierarchyTests.m in Sources */,
 				058D0A41195D057000B7D73C /* ASTextNodeWordKernerTests.mm in Sources */,
@@ -1936,6 +1982,7 @@
 				B35061FF1B010EFD0018CF92 /* ASDisplayNodeExtras.mm in Sources */,
 				B35062011B010EFD0018CF92 /* ASEditableTextNode.mm in Sources */,
 				254C6B881BF94F8A003EC431 /* ASTextKitRenderer.mm in Sources */,
+				CC3B208C1C3F7A5400798563 /* ASWeakSet.m in Sources */,
 				B350621C1B010EFD0018CF92 /* ASFlowLayoutController.mm in Sources */,
 				B350621E1B010EFD0018CF92 /* ASHighlightOverlayLayer.mm in Sources */,
 				B35062541B010EFD0018CF92 /* ASImageNode+CGExtras.m in Sources */,
@@ -1950,6 +1997,7 @@
 				DECBD6EA1BE56E1900CF4905 /* ASButtonNode.mm in Sources */,
 				254C6B841BF94F8A003EC431 /* ASTextNodeWordKerner.m in Sources */,
 				34EFC76B1B701CEB00AD841F /* ASLayoutSpec.mm in Sources */,
+				CC3B20861C3F76D600798563 /* ASPendingStateController.mm in Sources */,
 				254C6B8C1BF94F8A003EC431 /* ASTextKitTailTruncater.mm in Sources */,
 				B35062051B010EFD0018CF92 /* ASMultiplexImageNode.mm in Sources */,
 				B35062251B010EFD0018CF92 /* ASMutableAttributedStringBuilder.m in Sources */,

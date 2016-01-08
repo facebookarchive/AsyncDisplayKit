@@ -178,6 +178,8 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
 
+- (void)applyPendingViewState;
+
 /**
  * // TODO: NOT YET IMPLEMENTED
  *
