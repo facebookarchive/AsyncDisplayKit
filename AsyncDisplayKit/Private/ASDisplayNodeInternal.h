@@ -50,6 +50,9 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 @interface ASDisplayNode ()
 {
+@package
+  _ASPendingState *_pendingViewState;
+
 @protected
   // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.
   ASDN::RecursiveMutex _propertyLock;
@@ -92,8 +95,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
   // keeps track of nodes/subnodes that have not finished display, used with placeholders
   NSMutableSet *_pendingDisplayNodes;
-
-  _ASPendingState *_pendingViewState;
   
   struct ASDisplayNodeFlags {
     // public properties

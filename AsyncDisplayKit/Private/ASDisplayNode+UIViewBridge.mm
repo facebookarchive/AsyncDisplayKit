@@ -16,6 +16,7 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASEqualityHelpers.h"
+#import "ASPendingStateController.h"
 
 /**
  * The following macros are conveniences to help in the common tasks related to the bridging that ASDisplayNode does to UIView and CALayer.
@@ -42,11 +43,25 @@
 #define _bridge_prologue ()
 #endif
 
-#define _setToViewOrLayer(layerProperty, layerValueExpr, viewAndPendingViewStateProperty, viewAndPendingViewStateExpr) __loaded ? \
-   (_view ? _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr) : _layer.layerProperty = (layerValueExpr))\
- : self.pendingViewState.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr)
+/// Returns YES if the property set should be applied to view/layer immediately.
+ASDISPLAYNODE_INLINE BOOL ASDisplayNodeMarkDirtyIfNeeded(ASDisplayNode *node) {
+  if (NSThread.isMainThread) {
+    return node.nodeLoaded;
+  } else {
+    if (node.nodeLoaded && !node->_pendingViewState.hasChanges) {
+      [ASPendingStateController.sharedInstance registerNode:node];
+    }
+    return NO;
+  }
+};
 
-#define _setToViewOnly(viewAndPendingViewStateProperty, viewAndPendingViewStateExpr) __loaded ? _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr) : self.pendingViewState.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr)
+#define _setToViewOrLayer(layerProperty, layerValueExpr, viewAndPendingViewStateProperty, viewAndPendingViewStateExpr) BOOL shouldApply = ASDisplayNodeMarkDirtyIfNeeded(self); \
+  _pendingViewState.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); \
+  if (shouldApply) { (_view ? _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr) : _layer.layerProperty = (layerValueExpr)); }
+
+#define _setToViewOnly(viewAndPendingViewStateProperty, viewAndPendingViewStateExpr) BOOL shouldApply = ASDisplayNodeMarkDirtyIfNeeded(self); \
+_pendingViewState.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); \
+if (shouldApply) { _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); }
 
 #define _getFromPendingViewState(viewAndPendingViewStateProperty) _pendingViewState.viewAndPendingViewStateProperty
 
@@ -217,7 +232,6 @@
     // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
     ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
 #endif
-
     _setToViewOnly(frame, rect);
   } else {
     // This is by far the common case / hot path.
@@ -307,16 +321,10 @@
 
 - (void)setOpaque:(BOOL)newOpaque
 {
-  BOOL prevOpaque = self.opaque;
-
   _bridge_prologue;
-  if (prevOpaque != newOpaque) {
-    [self setNeedsDisplay];
-  }
+  _setToViewOrLayer(opaque, newOpaque, opaque, newOpaque);
 
-  if (NSThread.isMainThread) {
-    _setToLayer(opaque, newOpaque);
-  }
+  // TODO: Mark as needs display if value changed?
 }
 
 - (BOOL)isUserInteractionEnabled

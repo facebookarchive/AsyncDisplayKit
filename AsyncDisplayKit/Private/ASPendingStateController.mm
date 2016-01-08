@@ -10,6 +10,7 @@
 #import "ASThread.h"
 #import "ASWeakSet.h"
 #import "ASDisplayNode.h"
+#import "ASAssert.h"
 
 @interface ASPendingStateController()
 {
@@ -56,6 +57,7 @@
 
 - (void)registerNode:(ASDisplayNode *)node
 {
+  ASDisplayNodeAssert(node.nodeLoaded, @"Expected display node to be loaded before it was registered with ASPendingStateController. Node: %@", node);
   ASDN::MutexLocker l(_lock);
   [_dirtyNodes addObject:node];
 

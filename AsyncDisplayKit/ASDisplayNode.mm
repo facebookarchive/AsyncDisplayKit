@@ -277,6 +277,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
+  _pendingViewState = [_ASPendingState new];
 }
 
 - (id)init
@@ -2358,15 +2359,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 
 #pragma mark - Pending View State
-- (_ASPendingState *)pendingViewState
-{
-  if (!_pendingViewState) {
-    _pendingViewState = [[_ASPendingState alloc] init];
-    ASDisplayNodeAssertNotNil(_pendingViewState, @"should have created a pendingViewState");
-  }
-
-  return _pendingViewState;
-}
 
 - (void)_applyPendingStateToViewOrLayer
 {
