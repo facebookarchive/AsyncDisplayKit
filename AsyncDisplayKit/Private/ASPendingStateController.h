@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
  have been set on background threads.
  
  This controller will enqueue run-loop events to flush changes
- but if you need 
+ but if you need them flushed now you can call `flush` from the main thread.
  */
 @interface ASPendingStateController : NSObject
 
@@ -36,7 +36,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)flush;
 
 /**
- Register this node as having pending state that needs
+ Register this node as having pending state that needs to be copied
+ over to the view/layer. This is called automatically by display nodes
+ when their view/layer properties are set post-load on background threads.
  */
 - (void)registerNode:(ASDisplayNode *)node;
 
