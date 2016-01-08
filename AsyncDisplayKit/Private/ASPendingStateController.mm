@@ -82,7 +82,7 @@
 - (void)flushNow
 {
   ASDN::MutexLocker l(_lock);
-  for (__unused ASDisplayNode *node in _dirtyNodes) {
+  for (ASDisplayNode *node in _dirtyNodes) {
     [node applyPendingViewState];
   }
   [_dirtyNodes removeAllObjects];
