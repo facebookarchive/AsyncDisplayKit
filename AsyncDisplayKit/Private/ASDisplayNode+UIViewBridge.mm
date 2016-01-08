@@ -21,15 +21,15 @@
  * The following macros are conveniences to help in the common tasks related to the bridging that ASDisplayNode does to UIView and CALayer.
  * In general, a property can either be:
  *   - Always sent to the layer or view's layer
- *       use _getFromLayer / _setToLayer
+ *       use _getFromPendingViewState / _setToLayer
  *   - Bridged to the view if view-backed or the layer if layer-backed
  *       use _getFromViewOrLayer / _setToViewOrLayer / _messageToViewOrLayer
  *   - Only applicable if view-backed
- *       use _setToViewOnly / _getFromViewOnly
+ *       use _setToViewOnly / _getFromPendingViewState
  *   - Has differing types on views and layers, or custom ASDisplayNode-specific behavior is desired
  *       manually implement
  *
- *  _bridge_prologue is defined to either take an appropriate lock or assert thread affinity. Add it at the beginning of any bridged methods.
+ *  _bridge_prologue is defined to take the node's property lock. Add it at the beginning of any bridged methods.
  */
 
 #define DISPLAYNODE_USE_LOCKS 1
@@ -37,15 +37,10 @@
 #define __loaded (_layer != nil)
 
 #if DISPLAYNODE_USE_LOCKS
-#define _bridge_prologue ASDisplayNodeAssertThreadAffinity(self); ASDN::MutexLocker l(_propertyLock)
+#define _bridge_prologue ASDN::MutexLocker l(_propertyLock)
 #else
-#define _bridge_prologue ASDisplayNodeAssertThreadAffinity(self)
+#define _bridge_prologue ()
 #endif
-
-
-#define _getFromViewOrLayer(layerProperty, viewAndPendingViewStateProperty) __loaded ? \
-  (_view ? _view.viewAndPendingViewStateProperty : _layer.layerProperty )\
- : self.pendingViewState.viewAndPendingViewStateProperty
 
 #define _setToViewOrLayer(layerProperty, layerValueExpr, viewAndPendingViewStateProperty, viewAndPendingViewStateExpr) __loaded ? \
    (_view ? _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr) : _layer.layerProperty = (layerValueExpr))\
@@ -53,9 +48,7 @@
 
 #define _setToViewOnly(viewAndPendingViewStateProperty, viewAndPendingViewStateExpr) __loaded ? _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr) : self.pendingViewState.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr)
 
-#define _getFromViewOnly(viewAndPendingViewStateProperty) __loaded ? _view.viewAndPendingViewStateProperty : self.pendingViewState.viewAndPendingViewStateProperty
-
-#define _getFromLayer(layerProperty) __loaded ? _layer.layerProperty : self.pendingViewState.layerProperty
+#define _getFromPendingViewState(viewAndPendingViewStateProperty) _pendingViewState.viewAndPendingViewStateProperty
 
 #define _setToLayer(layerProperty, layerValueExpr) __loaded ? _layer.layerProperty = (layerValueExpr) : self.pendingViewState.layerProperty = (layerValueExpr)
 
@@ -149,7 +142,7 @@
 - (CGFloat)alpha
 {
   _bridge_prologue;
-  return _getFromViewOrLayer(opacity, alpha);
+  return _getFromPendingViewState(alpha);
 }
 
 - (void)setAlpha:(CGFloat)newAlpha
@@ -161,7 +154,7 @@
 - (CGFloat)cornerRadius
 {
   _bridge_prologue;
-  return _getFromLayer(cornerRadius);
+  return _getFromPendingViewState(cornerRadius);
 }
 
 - (void)setCornerRadius:(CGFloat)newCornerRadius
@@ -173,7 +166,7 @@
 - (CGFloat)contentsScale
 {
   _bridge_prologue;
-  return _getFromLayer(contentsScale);
+  return _getFromPendingViewState(contentsScale);
 }
 
 - (void)setContentsScale:(CGFloat)newContentsScale
@@ -185,7 +178,7 @@
 - (CGRect)bounds
 {
   _bridge_prologue;
-  return _getFromViewOrLayer(bounds, bounds);
+  return _getFromPendingViewState(bounds);
 }
 
 - (void)setBounds:(CGRect)newBounds
@@ -309,7 +302,7 @@
 - (BOOL)isOpaque
 {
   _bridge_prologue;
-  return _getFromLayer(opaque);
+  return _getFromPendingViewState(opaque);
 }
 
 - (void)setOpaque:(BOOL)newOpaque
@@ -317,10 +310,12 @@
   BOOL prevOpaque = self.opaque;
 
   _bridge_prologue;
-  _setToLayer(opaque, newOpaque);
-
   if (prevOpaque != newOpaque) {
     [self setNeedsDisplay];
+  }
+
+  if (NSThread.isMainThread) {
+    _setToLayer(opaque, newOpaque);
   }
 }
 
@@ -328,7 +323,7 @@
 {
   _bridge_prologue;
   if (_flags.layerBacked) return NO;
-  return _getFromViewOnly(userInteractionEnabled);
+  return _getFromPendingViewState(userInteractionEnabled);
 }
 
 - (void)setUserInteractionEnabled:(BOOL)enabled
@@ -340,7 +335,7 @@
 - (BOOL)isExclusiveTouch
 {
   _bridge_prologue;
-  return _getFromViewOnly(exclusiveTouch);
+  return _getFromPendingViewState(exclusiveTouch);
 }
 
 - (void)setExclusiveTouch:(BOOL)exclusiveTouch
@@ -352,7 +347,7 @@
 - (BOOL)clipsToBounds
 {
   _bridge_prologue;
-  return _getFromViewOrLayer(masksToBounds, clipsToBounds);
+  return _getFromPendingViewState(clipsToBounds);
 }
 
 - (void)setClipsToBounds:(BOOL)clips
@@ -364,7 +359,7 @@
 - (CGPoint)anchorPoint
 {
   _bridge_prologue;
-  return _getFromLayer(anchorPoint);
+  return _getFromPendingViewState(anchorPoint);
 }
 
 - (void)setAnchorPoint:(CGPoint)newAnchorPoint
@@ -376,7 +371,7 @@
 - (CGPoint)position
 {
   _bridge_prologue;
-  return _getFromLayer(position);
+  return _getFromPendingViewState(position);
 }
 
 - (void)setPosition:(CGPoint)newPosition
@@ -388,7 +383,7 @@
 - (CGFloat)zPosition
 {
   _bridge_prologue;
-  return _getFromLayer(zPosition);
+  return _getFromPendingViewState(zPosition);
 }
 
 - (void)setZPosition:(CGFloat)newPosition
@@ -400,7 +395,7 @@
 - (CATransform3D)transform
 {
   _bridge_prologue;
-  return _getFromLayer(transform);
+  return _getFromPendingViewState(transform);
 }
 
 - (void)setTransform:(CATransform3D)newTransform
@@ -412,7 +407,7 @@
 - (CATransform3D)subnodeTransform
 {
   _bridge_prologue;
-  return _getFromLayer(sublayerTransform);
+  return _getFromPendingViewState(sublayerTransform);
 }
 
 - (void)setSubnodeTransform:(CATransform3D)newSubnodeTransform
@@ -424,7 +419,7 @@
 - (id)contents
 {
   _bridge_prologue;
-  return _getFromLayer(contents);
+  return _getFromPendingViewState(contents);
 }
 
 - (void)setContents:(id)newContents
@@ -436,7 +431,7 @@
 - (BOOL)isHidden
 {
   _bridge_prologue;
-  return _getFromViewOrLayer(hidden, hidden);
+  return _getFromPendingViewState(hidden);
 }
 
 - (void)setHidden:(BOOL)flag
@@ -448,7 +443,7 @@
 - (BOOL)needsDisplayOnBoundsChange
 {
   _bridge_prologue;
-  return _getFromLayer(needsDisplayOnBoundsChange);
+  return _getFromPendingViewState(needsDisplayOnBoundsChange);
 }
 
 - (void)setNeedsDisplayOnBoundsChange:(BOOL)flag
@@ -461,7 +456,7 @@
 {
   _bridge_prologue;
   ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
-  return _getFromViewOnly(autoresizesSubviews);
+  return _getFromPendingViewState(autoresizesSubviews);
 }
 
 - (void)setAutoresizesSubviews:(BOOL)flag
@@ -475,7 +470,7 @@
 {
   _bridge_prologue;
   ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
-  return _getFromViewOnly(autoresizingMask);
+  return _getFromPendingViewState(autoresizingMask);
 }
 
 - (void)setAutoresizingMask:(UIViewAutoresizing)mask
@@ -516,7 +511,7 @@
 - (UIColor *)backgroundColor
 {
   _bridge_prologue;
-  return [UIColor colorWithCGColor:_getFromLayer(backgroundColor)];
+  return [UIColor colorWithCGColor:_getFromPendingViewState(backgroundColor)];
 }
 
 - (void)setBackgroundColor:(UIColor *)newBackgroundColor
@@ -536,7 +531,7 @@
 {
     _bridge_prologue;
     ASDisplayNodeAssert(!_flags.layerBacked, @"Danger: this property is undefined on layer-backed nodes.");
-    return _getFromViewOnly(tintColor);
+    return _getFromPendingViewState(tintColor);
 }
 
 - (void)setTintColor:(UIColor *)color
@@ -554,7 +549,7 @@
 - (CGColorRef)shadowColor
 {
   _bridge_prologue;
-  return _getFromLayer(shadowColor);
+  return _getFromPendingViewState(shadowColor);
 }
 
 - (void)setShadowColor:(CGColorRef)colorValue
@@ -566,7 +561,7 @@
 - (CGFloat)shadowOpacity
 {
   _bridge_prologue;
-  return _getFromLayer(shadowOpacity);
+  return _getFromPendingViewState(shadowOpacity);
 }
 
 - (void)setShadowOpacity:(CGFloat)opacity
@@ -578,7 +573,7 @@
 - (CGSize)shadowOffset
 {
   _bridge_prologue;
-  return _getFromLayer(shadowOffset);
+  return _getFromPendingViewState(shadowOffset);
 }
 
 - (void)setShadowOffset:(CGSize)offset
@@ -590,7 +585,7 @@
 - (CGFloat)shadowRadius
 {
   _bridge_prologue;
-  return _getFromLayer(shadowRadius);
+  return _getFromPendingViewState(shadowRadius);
 }
 
 - (void)setShadowRadius:(CGFloat)radius
@@ -602,7 +597,7 @@
 - (CGFloat)borderWidth
 {
   _bridge_prologue;
-  return _getFromLayer(borderWidth);
+  return _getFromPendingViewState(borderWidth);
 }
 
 - (void)setBorderWidth:(CGFloat)width
@@ -614,7 +609,7 @@
 - (CGColorRef)borderColor
 {
   _bridge_prologue;
-  return _getFromLayer(borderColor);
+  return _getFromPendingViewState(borderColor);
 }
 
 - (void)setBorderColor:(CGColorRef)colorValue
@@ -626,7 +621,7 @@
 - (BOOL)allowsEdgeAntialiasing
 {
   _bridge_prologue;
-  return _getFromLayer(allowsEdgeAntialiasing);
+  return _getFromPendingViewState(allowsEdgeAntialiasing);
 }
 
 - (void)setAllowsEdgeAntialiasing:(BOOL)allowsEdgeAntialiasing
@@ -638,7 +633,7 @@
 - (unsigned int)edgeAntialiasingMask
 {
   _bridge_prologue;
-  return _getFromLayer(edgeAntialiasingMask);
+  return _getFromPendingViewState(edgeAntialiasingMask);
 }
 
 - (void)setEdgeAntialiasingMask:(unsigned int)edgeAntialiasingMask
@@ -650,7 +645,7 @@
 - (BOOL)isAccessibilityElement
 {
   _bridge_prologue;
-  return _getFromViewOnly(isAccessibilityElement);
+  return _getFromPendingViewState(isAccessibilityElement);
 }
 
 - (void)setIsAccessibilityElement:(BOOL)isAccessibilityElement
@@ -662,7 +657,7 @@
 - (NSString *)accessibilityLabel
 {
   _bridge_prologue;
-  return _getFromViewOnly(accessibilityLabel);
+  return _getFromPendingViewState(accessibilityLabel);
 }
 
 - (void)setAccessibilityLabel:(NSString *)accessibilityLabel
@@ -674,7 +669,7 @@
 - (NSString *)accessibilityHint
 {
   _bridge_prologue;
-  return _getFromViewOnly(accessibilityHint);
+  return _getFromPendingViewState(accessibilityHint);
 }
 
 - (void)setAccessibilityHint:(NSString *)accessibilityHint
@@ -686,7 +681,7 @@
 - (NSString *)accessibilityValue
 {
   _bridge_prologue;
-  return _getFromViewOnly(accessibilityValue);
+  return _getFromPendingViewState(accessibilityValue);
 }
 
 - (void)setAccessibilityValue:(NSString *)accessibilityValue
@@ -698,7 +693,7 @@
 - (UIAccessibilityTraits)accessibilityTraits
 {
   _bridge_prologue;
-  return _getFromViewOnly(accessibilityTraits);
+  return _getFromPendingViewState(accessibilityTraits);
 }
 
 - (void)setAccessibilityTraits:(UIAccessibilityTraits)accessibilityTraits
@@ -710,7 +705,7 @@
 - (CGRect)accessibilityFrame
 {
   _bridge_prologue;
-  return _getFromViewOnly(accessibilityFrame);
+  return _getFromPendingViewState(accessibilityFrame);
 }
 
 - (void)setAccessibilityFrame:(CGRect)accessibilityFrame
@@ -722,7 +717,7 @@
 - (NSString *)accessibilityLanguage
 {
   _bridge_prologue;
-  return _getFromViewOnly(accessibilityLanguage);
+  return _getFromPendingViewState(accessibilityLanguage);
 }
 
 - (void)setAccessibilityLanguage:(NSString *)accessibilityLanguage
@@ -734,7 +729,7 @@
 - (BOOL)accessibilityElementsHidden
 {
   _bridge_prologue;
-  return _getFromViewOnly(accessibilityElementsHidden);
+  return _getFromPendingViewState(accessibilityElementsHidden);
 }
 
 - (void)setAccessibilityElementsHidden:(BOOL)accessibilityElementsHidden
@@ -746,7 +741,7 @@
 - (BOOL)accessibilityViewIsModal
 {
   _bridge_prologue;
-  return _getFromViewOnly(accessibilityViewIsModal);
+  return _getFromPendingViewState(accessibilityViewIsModal);
 }
 
 - (void)setAccessibilityViewIsModal:(BOOL)accessibilityViewIsModal
@@ -758,7 +753,7 @@
 - (BOOL)shouldGroupAccessibilityChildren
 {
   _bridge_prologue;
-  return _getFromViewOnly(shouldGroupAccessibilityChildren);
+  return _getFromPendingViewState(shouldGroupAccessibilityChildren);
 }
 
 - (void)setShouldGroupAccessibilityChildren:(BOOL)shouldGroupAccessibilityChildren
@@ -770,7 +765,7 @@
 - (NSString *)accessibilityIdentifier
 {
   _bridge_prologue;
-  return _getFromViewOnly(accessibilityIdentifier);
+  return _getFromPendingViewState(accessibilityIdentifier);
 }
 
 - (void)setAccessibilityIdentifier:(NSString *)accessibilityIdentifier
@@ -787,7 +782,7 @@
 - (BOOL)asyncdisplaykit_isAsyncTransactionContainer
 {
   _bridge_prologue;
-  return _getFromViewOrLayer(asyncdisplaykit_isAsyncTransactionContainer, asyncdisplaykit_isAsyncTransactionContainer);
+  return _getFromPendingViewState(asyncdisplaykit_isAsyncTransactionContainer);
 }
 
 - (void)asyncdisplaykit_setAsyncTransactionContainer:(BOOL)asyncTransactionContainer
