@@ -985,6 +985,7 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 - (void)applyPendingViewState
 {
   ASDisplayNodeAssertMainThread();
+  ASDN::MutexLocker l(_propertyLock);
   if (self.layerBacked) {
     [_pendingViewState applyToLayer:self.layer];
   } else {
