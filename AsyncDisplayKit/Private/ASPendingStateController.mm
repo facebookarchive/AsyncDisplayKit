@@ -9,8 +9,8 @@
 #import "ASPendingStateController.h"
 #import "ASThread.h"
 #import "ASWeakSet.h"
-#import "ASDisplayNode.h"
 #import "ASAssert.h"
+#import "ASDisplayNodeInternal.h"
 
 @interface ASPendingStateController()
 {
@@ -83,7 +83,7 @@
 {
   ASDN::MutexLocker l(_lock);
   for (__unused ASDisplayNode *node in _dirtyNodes) {
-    // TODO: apply pending state.
+    [node applyPendingViewState];
   }
   [_dirtyNodes removeAllObjects];
   _flags.pendingFlush = NO;
