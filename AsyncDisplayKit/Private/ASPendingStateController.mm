@@ -79,6 +79,13 @@
   [self performSelectorOnMainThread:@selector(flushNow) withObject:nil waitUntilDone:NO modes:@[ NSRunLoopCommonModes ]];
 }
 
+/**
+ * NOTE: There is a small re-entrancy hazard here.
+ * If the user gives us a subclass of UIView/CALayer that
+ * adds side-effects to property sets, and one side effect
+ * waits on a background thread that sets a view/layer property
+ * on a loaded node, then we've got a deadlock.
+ */
 - (void)flushNow
 {
   ASDN::MutexLocker l(_lock);
