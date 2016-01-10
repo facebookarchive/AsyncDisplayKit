@@ -198,14 +198,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
   
   if (!dataControllerClass) {
-    dataControllerClass = [self.class dataControllerClass];
+    dataControllerClass = [[self class] dataControllerClass];
   }
   
   [self configureWithDataControllerClass:dataControllerClass];
   
   if (!ownedByNode) {
     // See commentary at the definition of .strongTableNode for why we create an ASTableNode.
-    ASTableNode *tableNode = [[ASTableNode alloc] _initWithTableView:self];
+    // FIXME: The _view pointer of the node retains us, but the node will die immediately if we don't
+    // retain it.  At the moment there isn't a great solution to this, so we can't yet move our core
+    // logic to ASTableNode (required to have a shared superclass with ASCollection*).
+    ASTableNode *tableNode = nil; //[[ASTableNode alloc] _initWithTableView:self];
     self.strongTableNode = tableNode;
   }
   
@@ -331,6 +334,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)setRangeTuningParameters:(ASRangeTuningParameters)tuningParameters
 {
   [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeDisplay];
+}
+
+- (NSArray<NSArray <ASCellNode *> *> *)completedNodes
+{
+  return [_dataController completedNodes];
 }
 
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath

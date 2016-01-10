@@ -150,7 +150,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   if (!ownedByNode) {
     // See commentary at the definition of .strongCollectionNode for why we create an ASCollectionNode.
-    ASCollectionNode *collectionNode = [[ASCollectionNode alloc] _initWithCollectionView:self];
+    // FIXME: The _view pointer of the node retains us, but the node will die immediately if we don't
+    // retain it.  At the moment there isn't a great solution to this, so we can't yet move our core
+    // logic to ASCollectionNode (required to have a shared superclass with ASTable*).
+    ASCollectionNode *collectionNode = nil; //[[ASCollectionNode alloc] _initWithCollectionView:self];
     self.strongCollectionNode = collectionNode;
   }
   
@@ -347,6 +350,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   return [[_dataController nodeAtIndexPath:indexPath] calculatedSize];
+}
+
+- (NSArray<NSArray <ASCellNode *> *> *)completedNodes
+{
+  return [_dataController completedNodes];
 }
 
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
