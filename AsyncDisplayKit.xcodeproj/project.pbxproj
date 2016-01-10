@@ -495,6 +495,13 @@
 			remoteGlobalIDString = 058D09AB195D04C000B7D73C;
 			remoteInfo = AsyncDisplayKit;
 		};
+		DEACA2B11C425DC400FA9DDF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 058D09A4195D04C000B7D73C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 058D09AB195D04C000B7D73C;
+			remoteInfo = AsyncDisplayKit;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1524,6 +1531,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				DEACA2B21C425DC400FA9DDF /* PBXTargetDependency */,
 			);
 			name = AsyncDisplayKitTestHost;
 			productName = AsyncDisplayKitTestHost;
@@ -1938,6 +1946,11 @@
 			isa = PBXTargetDependency;
 			target = 058D09AB195D04C000B7D73C /* AsyncDisplayKit */;
 			targetProxy = 058D09C2195D04C000B7D73C /* PBXContainerItemProxy */;
+		};
+		DEACA2B21C425DC400FA9DDF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 058D09AB195D04C000B7D73C /* AsyncDisplayKit */;
+			targetProxy = DEACA2B11C425DC400FA9DDF /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

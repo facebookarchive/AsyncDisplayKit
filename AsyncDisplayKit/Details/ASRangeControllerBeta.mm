@@ -17,21 +17,6 @@
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
-extern BOOL ASInterfaceStateIncludesVisible(ASInterfaceState interfaceState)
-{
-  return ((interfaceState & ASInterfaceStateVisible) == ASInterfaceStateVisible);
-}
-
-extern BOOL ASInterfaceStateIncludesDisplay(ASInterfaceState interfaceState)
-{
-  return ((interfaceState & ASInterfaceStateDisplay) == ASInterfaceStateDisplay);
-}
-
-extern BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
-{
-  return ((interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
-}
-
 @interface ASRangeControllerBeta ()
 {
   BOOL _rangeIsValid;

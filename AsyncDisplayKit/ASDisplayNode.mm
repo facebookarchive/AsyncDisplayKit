@@ -198,12 +198,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return [_ASDisplayLayer class];
 }
 
-+ (void)scheduleNodeForDisplay:(ASDisplayNode *)node
++ (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert([ASDisplayNode shouldUseNewRenderingRange], @"+scheduleNodeForRecursiveDisplay: should never be called without the new rendering range enabled");
   static NSMutableSet *nodesToDisplay = nil;
   static BOOL displayScheduled = NO;
   static ASDN::RecursiveMutex displaySchedulerLock;
+  
   {
     ASDN::MutexLocker l(displaySchedulerLock);
     if (!nodesToDisplay) {
@@ -211,6 +213,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
     [nodesToDisplay addObject:node];
   }
+  
   if (!displayScheduled) {
     displayScheduled = YES;
     // It's essenital that any layout pass that is scheduled during the current
@@ -1557,13 +1560,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)setShouldBypassEnsureDisplay:(BOOL)shouldBypassEnsureDisplay
 {
-  ASDN::MutexLocker l(_propertyLock);
   _flags.shouldBypassEnsureDisplay = shouldBypassEnsureDisplay;
 }
 
 - (BOOL)shouldBypassEnsureDisplay
 {
-  ASDN::MutexLocker l(_propertyLock);
   return _flags.shouldBypassEnsureDisplay;
 }
 
@@ -1612,7 +1613,7 @@ static BOOL ShouldUseNewRenderingRange = NO;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  return [ASLayoutSpec new];
+  return nil;
 }
 
 - (ASLayout *)calculatedLayout
@@ -1772,7 +1773,7 @@ static BOOL ShouldUseNewRenderingRange = NO;
     oldState = _interfaceState;
     _interfaceState = newState;
   }
-
+  
   if ((newState & ASInterfaceStateMeasureLayout) != (oldState & ASInterfaceStateMeasureLayout)) {
     // Trigger asynchronous measurement if it is not already cached or being calculated.
   }
@@ -1782,8 +1783,11 @@ static BOOL ShouldUseNewRenderingRange = NO;
   // Still, the interfaceState should be updated to the current state of the node; just don't act on the transition.
   
   // Entered or exited data loading state.
-  if ((newState & ASInterfaceStateFetchData) != (oldState & ASInterfaceStateFetchData)) {
-    if (newState & ASInterfaceStateFetchData) {
+  BOOL nowFetchData = ASInterfaceStateIncludesFetchData(newState);
+  BOOL wasFetchData = ASInterfaceStateIncludesFetchData(oldState);
+  
+  if (nowFetchData != wasFetchData) {
+    if (nowFetchData) {
       [self fetchData];
     } else {
       if ([self supportsRangeManagedInterfaceState]) {
@@ -1793,21 +1797,42 @@ static BOOL ShouldUseNewRenderingRange = NO;
   }
 
   // Entered or exited contents rendering state.
-  if ((newState & ASInterfaceStateDisplay) != (oldState & ASInterfaceStateDisplay)) {
+  BOOL nowDisplay = ASInterfaceStateIncludesDisplay(newState);
+  BOOL wasDisplay = ASInterfaceStateIncludesDisplay(oldState);
+
+  if (nowDisplay != wasDisplay) {
     if ([self supportsRangeManagedInterfaceState]) {
-      if (newState & ASInterfaceStateDisplay) {
+      if (nowDisplay) {
         // Once the working window is eliminated (ASRangeHandlerRender), trigger display directly here.
         [self setDisplaySuspended:NO];
       } else {
         [self setDisplaySuspended:YES];
         [self clearContents];
       }
+    } else {
+      // NOTE: This case isn't currently supported as setInterfaceState: isn't exposed externally, and all
+      // internal use cases are range-managed.  When a node is visible, don't mess with display - CA will start it.
+      if ([ASDisplayNode shouldUseNewRenderingRange] && !ASInterfaceStateIncludesVisible(newState)) {
+        // Check __implementsDisplay purely for efficiency - it's faster even than calling -asyncLayer.
+        if ([self __implementsDisplay]) {
+          if (nowDisplay) {
+            [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
+          } else {
+            [[self asyncLayer] cancelAsyncDisplay];
+            [self clearContents];
+          }
+        }
+      }
     }
   }
 
-  // Entered or exited data loading state.
-  if ((newState & ASInterfaceStateVisible) != (oldState & ASInterfaceStateVisible)) {
-    if (newState & ASInterfaceStateVisible) {
+  // Became visible or invisible.  When range-managed, this represents literal visibility - at least one pixel
+  // is onscreen.  If not range-managed, we can't guarantee more than the node being present in an onscreen window.
+  BOOL nowVisible = ASInterfaceStateIncludesVisible(newState);
+  BOOL wasVisible = ASInterfaceStateIncludesVisible(oldState);
+
+  if (nowVisible != wasVisible) {
+    if (nowVisible) {
       [self visibilityDidChange:YES];
     } else {
       [self visibilityDidChange:NO];
@@ -1843,11 +1868,23 @@ static BOOL ShouldUseNewRenderingRange = NO;
 
 - (void)recursivelySetInterfaceState:(ASInterfaceState)interfaceState
 {
+  ASInterfaceState oldState = self.interfaceState;
+  ASInterfaceState newState = interfaceState;
   ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState = interfaceState;
   });
-  // FIXME: This should also be called in setInterfaceState: if it isn't being applied recursively.
-  [ASDisplayNode scheduleNodeForDisplay:self];
+  
+  if ([self supportsRangeManagedInterfaceState]) {
+    // Instead of each node in the recursion assuming it needs to schedule itself for display,
+    // setInterfaceState: skips this when handling range-managed nodes (our whole subtree has this set).
+    // If our range manager intends for us to be displayed right now, and didn't before, get started!
+    
+    BOOL nowDisplay = ASInterfaceStateIncludesDisplay(newState);
+    BOOL wasDisplay = ASInterfaceStateIncludesDisplay(oldState);
+    if (nowDisplay && (nowDisplay != wasDisplay)) {
+      [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
+    }
+  }
 }
 
 - (ASHierarchyState)hierarchyState
