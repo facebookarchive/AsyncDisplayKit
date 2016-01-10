@@ -109,7 +109,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 #endif
 }
 
-+ (void)scheduleNodeForDisplay:(ASDisplayNode *)node;
++ (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node;
 
 // The _ASDisplayLayer backing the node, if any.
 @property (nonatomic, readonly, retain) _ASDisplayLayer *asyncLayer;

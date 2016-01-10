@@ -17,21 +17,6 @@
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
-extern BOOL ASInterfaceStateIncludesVisible(ASInterfaceState interfaceState)
-{
-  return ((interfaceState & ASInterfaceStateVisible) == ASInterfaceStateVisible);
-}
-
-extern BOOL ASInterfaceStateIncludesDisplay(ASInterfaceState interfaceState)
-{
-  return ((interfaceState & ASInterfaceStateDisplay) == ASInterfaceStateDisplay);
-}
-
-extern BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
-{
-  return ((interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
-}
-
 @interface ASRangeControllerBeta ()
 {
   BOOL _rangeIsValid;
@@ -95,36 +80,48 @@ extern BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
   
+  NSArray *allNodes = [_dataSource completedNodes];
+  NSArray *currentSectionNodes = nil;
+  NSInteger currentSectionIndex = -1; // Will be unequal to any indexPath.section, so we set currentSectionNodes.
+  
+  NSUInteger numberOfSections = [allNodes count];
+  NSUInteger numberOfNodesInSection = 0;
+  
+  NSSet *visibleIndexPaths  = [NSSet setWithArray:visibleNodePaths];
+                        //  = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
+  NSSet *displayIndexPaths = nil;
+  NSSet *fetchDataIndexPaths = nil;
+  NSMutableSet *allIndexPaths = nil;
+  NSMutableArray *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
+  
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
-  
-  NSSet *visibleIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
-  
-#if RangeControllerLoggingEnabled
-  NSMutableArray *modified = [NSMutableArray array];
-#endif
   
   if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
     // If we are already visible, get busy!  Better get started on preloading before the user scrolls more...
-    NSSet *fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData];
-    NSSet *displayIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
+    fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData];
+    displayIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
   
     // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
-    NSMutableSet *allIndexPaths = [fetchDataIndexPaths mutableCopy];
+    allIndexPaths = [fetchDataIndexPaths mutableCopy];
     [allIndexPaths unionSet:displayIndexPaths];
     [allIndexPaths unionSet:visibleIndexPaths];
+  } else {
+    allIndexPaths = [visibleIndexPaths mutableCopy];
+  }
+  
+  // Sets are magical.  Add anything we had applied interfaceState to in the last update, so we can clear any
+  // range flags it still has enabled.  Most of the time, all but a few elements are equal; a large programmatic
+  // scroll or major main thread stall could cause entirely disjoint sets, but we must visit all.
+  NSSet *allCurrentIndexPaths = [allIndexPaths copy];
+  [allIndexPaths unionSet:_allPreviousIndexPaths];
+  _allPreviousIndexPaths = allCurrentIndexPaths;
+  
+  for (NSIndexPath *indexPath in allIndexPaths) {
+    // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.
+    // For consistency, make sure each node knows that it should measure itself if something changes.
+    ASInterfaceState interfaceState = ASInterfaceStateMeasureLayout;
     
-    // Sets are magical.  Add anything we had applied interfaceState to in the last update, so we can clear any
-    // range flags it still has enabled.  Most of the time, all but a few elements are equal; a large programmatic
-    // scroll or major main thread stall could cause entirely disjoint sets, but we must visit all.
-    NSSet *allCurrentIndexPaths = [allIndexPaths copy];
-    [allIndexPaths unionSet:_allPreviousIndexPaths];
-    _allPreviousIndexPaths = allCurrentIndexPaths;
-    
-    for (NSIndexPath *indexPath in allIndexPaths) {
-      // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.
-      // For consistency, make sure each node knows that it should measure itself if something changes.
-      ASInterfaceState interfaceState = ASInterfaceStateMeasureLayout;
-      
+    if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
       if ([fetchDataIndexPaths containsObject:indexPath]) {
         interfaceState |= ASInterfaceStateFetchData;
       }
@@ -134,38 +131,48 @@ extern BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
       if ([visibleIndexPaths containsObject:indexPath]) {
         interfaceState |= ASInterfaceStateVisible;
       }
-      
-      ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
-      ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
-      // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
-      if (node.interfaceState != interfaceState) {
-#if RangeControllerLoggingEnabled
-        [modified addObject:indexPath];
-#endif
-        [node recursivelySetInterfaceState:interfaceState];
-      }
-    }
-  } else {
-    // If selfInterfaceState isn't visible, then visibleIndexPaths represents what /will/ be immediately visible at the
-    // instant we come onscreen.  So, fetch data and display all of those things, but don't waste resources preloading yet.
-    // We handle this as a separate case to minimize set operations for offscreen preloading, including containsObject:.
-    
-    for (NSIndexPath *indexPath in visibleIndexPaths) {
+    } else {
+      // If selfInterfaceState isn't visible, then visibleIndexPaths represents what /will/ be immediately visible at the
+      // instant we come onscreen.  So, fetch data and display all of those things, but don't waste resources preloading yet.
+      // We handle this as a separate case to minimize set operations for offscreen preloading, including containsObject:.
+
       // Set Layout, Fetch Data, Display.  DO NOT set Visible: even though these elements are in the visible range / "viewport",
       // our overall container object is itself not visible yet.  The moment it becomes visible, we will run the condition above.
-      ASInterfaceState interfaceState = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay;
+      if ([allCurrentIndexPaths containsObject:indexPath]) {
+        // We might be looking at an indexPath that was previously in-range, but now we need to clear it.
+        // In that case we'll just set it back to MeasureLayout.  Only set Display | FetchData if in allCurrentIndexPaths.
+        interfaceState |= ASInterfaceStateDisplay;
+        interfaceState |= ASInterfaceStateFetchData;
+      }
+    }
+    
+    NSInteger section = indexPath.section;
+    NSInteger row     = indexPath.row;
+    
+    if (section >= 0 && row >= 0 && section < numberOfSections) {
+      if (section != currentSectionIndex) {
+        // Often we'll be dealing with indexPaths in the same section, but the set isn't sorted and we may even bounce
+        // between the same ones.  Still, this saves dozens of method calls to access the inner array and count.
+        currentSectionNodes = [allNodes objectAtIndex:section];
+        numberOfNodesInSection = [currentSectionNodes count];
+        currentSectionIndex = section;
+      }
       
-      ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
-      ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
-      // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
-      if (node.interfaceState != interfaceState) {
-#if RangeControllerLoggingEnabled
-        [modified addObject:indexPath];
-#endif
-        [node recursivelySetInterfaceState:interfaceState];
+      if (row < numberOfNodesInSection) {
+        ASDisplayNode *node = [currentSectionNodes objectAtIndex:row];
+        
+        ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
+        // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
+        if (node.interfaceState != interfaceState) {
+          [modifiedIndexPaths addObject:indexPath];
+          [node recursivelySetInterfaceState:interfaceState];
+        }
       }
     }
   }
+  
+  _rangeIsValid = YES;
+  _queuedRangeUpdate = NO;
   
 #if RangeControllerLoggingEnabled
   NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
@@ -176,9 +183,9 @@ extern BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
     NSLog(@"custom: %@", visibleNodePathsSet);
   }
   
-  [modified sortUsingSelector:@selector(compare:)];
+  [modifiedIndexPaths sortUsingSelector:@selector(compare:)];
   
-  for (NSIndexPath *indexPath in modified) {
+  for (NSIndexPath *indexPath in modifiedIndexPaths) {
     ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
     ASInterfaceState interfaceState = node.interfaceState;
     BOOL inVisible = ASInterfaceStateIncludesVisible(interfaceState);
@@ -187,9 +194,6 @@ extern BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
     NSLog(@"indexPath %@, Visible: %d, Display: %d, FetchData: %d", indexPath, inVisible, inDisplay, inFetchData);
   }
 #endif
-  
-  _rangeIsValid = YES;
-  _queuedRangeUpdate = NO;
 }
 
 #pragma mark - Cell node view handling
