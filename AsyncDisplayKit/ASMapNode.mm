@@ -39,11 +39,6 @@
   _needsMapReloadOnBoundsChange = YES;
   _liveMap = NO;
   _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
-  
-  _options = [[MKMapSnapshotOptions alloc] init];
-  //Default world-scale view
-  _options.region = MKCoordinateRegionForMapRect(MKMapRectWorld);
-  
   return self;
 }
 
@@ -176,7 +171,9 @@
 - (void)setUpSnapshotter
 {
   ASDisplayNodeAssert(!CGSizeEqualToSize(CGSizeZero, self.calculatedSize), @"self.calculatedSize can not be zero. Make sure that you are setting a preferredFrameSize or wrapping ASMapNode in a ASRatioLayoutSpec or similar.");
-  _options.size = self.calculatedSize;
+  if (!_options) {
+    [self createInitialOptions];
+  }
   _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:_options];
 }
 
@@ -184,6 +181,14 @@
 {
   [_snapshotter cancel];
   _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:_options];
+}
+
+- (void)createInitialOptions
+{
+  _options = [[MKMapSnapshotOptions alloc] init];
+  //Default world-scale view
+  _options.region = MKCoordinateRegionForMapRect(MKMapRectWorld);
+  _options.size = self.calculatedSize;
 }
 
 - (void)applySnapshotOptions
@@ -203,6 +208,9 @@
     __weak ASMapNode *weakSelf = self;
     _mapView = [[MKMapView alloc] initWithFrame:CGRectZero];
     _mapView.delegate = weakSelf.mapDelegate;
+    if (!_options) {
+      [weakSelf createInitialOptions];
+    }
     [weakSelf applySnapshotOptions];
     [_mapView addAnnotations:_annotations];
     [weakSelf setNeedsLayout];
