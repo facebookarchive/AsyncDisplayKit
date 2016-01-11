@@ -43,6 +43,9 @@
 @interface ASRangeControllerStable ()
 {
   BOOL _rangeIsValid;
+
+  BOOL _dataControllerIsUpdating;
+  BOOL _pendingUpdateVisibleNodeIndexPaths;
   
   // keys should be ASLayoutRangeTypes and values NSSets containing NSIndexPaths
   NSMutableDictionary *_rangeTypeIndexPaths;
@@ -129,6 +132,15 @@
     return;
   }
 
+  if (_dataControllerIsUpdating) {
+    // When data controller is updating, it returns _externalCompletedNodes instead of _completeNodes;
+    // But when adding/removing items, _externalCompletedNodes get out of sync, because only _completedNodes are being updated;
+    // When that happens, our index paths in _rangeTypeIndexPaths exist in _completeNodes, but might not exist in
+    // _externalCompleteNodes; So while data controller is updating we postpone updating visible node index paths
+    _pendingUpdateVisibleNodeIndexPaths = YES;
+    return;
+  }
+
   NSArray *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
 
   if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
@@ -206,6 +218,7 @@
 - (void)dataControllerBeginUpdates:(ASDataController *)dataController
 {
   ASPerformBlockOnMainThread(^{
+    _dataControllerIsUpdating = YES;
     [_delegate didBeginUpdatesInRangeController:self];
   });
 }
@@ -213,7 +226,12 @@
 - (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASPerformBlockOnMainThread(^{
+    _dataControllerIsUpdating = NO;
     [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
+    if (_pendingUpdateVisibleNodeIndexPaths) {
+      _pendingUpdateVisibleNodeIndexPaths = NO;
+      [self _updateVisibleNodeIndexPaths];
+    }
   });
 }
 
