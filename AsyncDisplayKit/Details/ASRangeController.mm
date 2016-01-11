@@ -222,6 +222,28 @@
   ASDisplayNodeAssert(nodes.count == indexPaths.count, @"Invalid index path");
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
+      
+    // We're inserting nodes so we need to appropriately shift indexes of _rangeTypeIndexPaths
+    for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
+      id rangeKey = @((ASLayoutRangeType)i);
+      NSSet *rangePaths = _rangeTypeIndexPaths[rangeKey];
+      NSMutableSet *shiftedRangePaths = [NSMutableSet new];
+      for (NSIndexPath *path in rangePaths) {
+        int shift = 0;
+        for (NSIndexPath *pathToInsert in indexPaths) {
+          // if inserted index path is before this one, we need to shift it
+          if (pathToInsert.section == path.section && (pathToInsert.item <= path.item + shift)) {
+            ++shift;
+          }
+        }
+        NSIndexPath *shifted = path;
+        if (shift > 0) {
+          shifted = [NSIndexPath indexPathForItem:path.item + shift inSection:path.section];
+        }
+        [shiftedRangePaths addObject:shifted];
+      }
+      _rangeTypeIndexPaths[rangeKey] = shiftedRangePaths;
+    }
     [_delegate rangeController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
@@ -271,6 +293,30 @@
   ASDisplayNodeAssert(sections.count == indexSet.count, @"Invalid sections");
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
+    
+    for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
+      id rangeKey = @((ASLayoutRangeType)i);
+      NSMutableSet *rangePaths = [_rangeTypeIndexPaths[rangeKey] mutableCopy];
+          
+      // When inserting sections we need to update _rangeTypeIndexPaths to reflect shifted sections
+      NSMutableSet *shiftedRangePaths = [NSMutableSet new];
+      for (NSIndexPath *path in rangePaths) {
+        __block int shift = 0;
+        [indexSet enumerateIndexesUsingBlock:^(NSUInteger indexToAdd, BOOL *stop) {
+          if (indexToAdd <= (path.section + shift)) {
+            ++shift;
+          }
+        }];
+          
+        NSIndexPath *shifted = path;
+        if (shift > 0) {
+          shifted = [NSIndexPath indexPathForItem:path.item inSection:path.section + shift];
+        }
+        [shiftedRangePaths addObject:shifted];
+      }
+      _rangeTypeIndexPaths[rangeKey] = shiftedRangePaths;
+    }
+
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   });
 }
