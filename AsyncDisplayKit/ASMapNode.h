@@ -12,9 +12,9 @@
 @interface ASMapNode : ASImageNode
 
 /**
- The current options of ASMapNode. This can be set at any time and ASMapNode will animate the change. This property may be set from a background thread before the node is loaded, and will automatically be applied to define the behavior of the static snapshot (if .liveMap = NO) or the internal MKMapView (otherwise).
+ The current options of ASMapNode. This can be set at any time and ASMapNode will animate the change.<br><br>This property may be set from a background thread before the node is loaded, and will automatically be applied to define the behavior of the static snapshot (if .liveMap = NO) or the internal MKMapView (otherwise).<br><br> Changes to the region and camera options will only be animated when when the liveMap mode is enabled, otherwise these options will be applied statically to the new snapshot. <br><br> The options object is used to specify properties even when the liveMap mode is enabled, allowing seamless transitions between the snapshot and liveMap (as well as back to the snapshot).
  */
-@property (nonatomic, readwrite) MKMapSnapshotOptions *options;
+@property (nonatomic, strong) MKMapSnapshotOptions *options;
 
 /**
  This is the MKMapView that is the live map part of ASMapNode. This will be nil if .liveMap = NO. Note, MKMapView is *not* thread-safe.
@@ -38,7 +38,7 @@
 @property (nonatomic, weak) id <MKMapViewDelegate> mapDelegate;
 
 /**
- * @discussion This method set the annotations of the static map view and also to the live map view. Passing an empty array clears the map of any annotations.
+ * @discussion This method sets the annotations of the static map view and also to the live map view. Passing an empty array clears the map of any annotations.
  * @param annotations An array of objects that conform to the MKAnnotation protocol
  */
 - (void)setAnnotations:(NSArray *)annotations;
