@@ -376,7 +376,7 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 
 - (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath;
-- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNodeForItemAtIndexPath:(NSIndexPath *)indexPath;
+- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Receive a message that the collectionView is near the end of its data set and more data should be fetched if 
@@ -405,6 +405,11 @@ NS_ASSUME_NONNULL_BEGIN
  * should occur.
  */
 - (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView;
+
+/**
+ * Use `collectionView:didEndDisplayingNode:forItemAtIndexPath:` instead.
+ */
+- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
 
 @end
 

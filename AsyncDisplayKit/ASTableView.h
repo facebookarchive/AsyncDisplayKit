@@ -336,7 +336,8 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 
 - (void)tableView:(ASTableView *)tableView willDisplayNodeForRowAtIndexPath:(NSIndexPath *)indexPath;
-- (void)tableView:(ASTableView *)tableView didEndDisplayingNodeForRowAtIndexPath:(NSIndexPath *)indexPath;
+
+- (void)tableView:(ASTableView *)tableView didEndDisplayingNode:(ASCellNode *)node forRowAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Receive a message that the tableView is near the end of its data set and more data should be fetched if necessary.
@@ -364,6 +365,11 @@ NS_ASSUME_NONNULL_BEGIN
  * should occur.
  */
 - (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView;
+
+/**
+ * Use `tableView:didEndDisplayNode:forRowAtIndexPath` instead.
+ */
+- (void)tableView:(ASTableView *)tableView didEndDisplayingNodeForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
 
 @end
 
