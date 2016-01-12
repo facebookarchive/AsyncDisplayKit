@@ -716,9 +716,11 @@ static UIColor *defaultTintColor = nil;
   if (_flags.setUserInteractionEnabled)
     view.userInteractionEnabled = userInteractionEnabled;
 
+  #if TARGET_OS_IOS
   if (_flags.setExclusiveTouch)
     view.exclusiveTouch = exclusiveTouch;
-
+  #endif
+    
   if (_flags.setShadowColor)
     layer.shadowColor = shadowColor;
 
@@ -943,10 +945,10 @@ static UIColor *defaultTintColor = nil;
   
   pendingState.userInteractionEnabled = view.userInteractionEnabled;
   (pendingState->_flags).setUserInteractionEnabled = YES;
-  
+#if TARGET_OS_IOS
   pendingState.exclusiveTouch = view.exclusiveTouch;
   (pendingState->_flags).setExclusiveTouch = YES;
-  
+#endif
   pendingState.shadowColor = layer.shadowColor;
   (pendingState->_flags).setShadowColor = YES;
   

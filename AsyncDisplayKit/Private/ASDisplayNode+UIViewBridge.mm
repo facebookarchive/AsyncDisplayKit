@@ -298,7 +298,7 @@
   _bridge_prologue;
   _setToViewOnly(userInteractionEnabled, enabled);
 }
-
+#if TARGET_OS_IOS
 - (BOOL)isExclusiveTouch
 {
   _bridge_prologue;
@@ -310,7 +310,7 @@
   _bridge_prologue;
   _setToViewOnly(exclusiveTouch, exclusiveTouch);
 }
-
+#endif
 - (BOOL)clipsToBounds
 {
   _bridge_prologue;

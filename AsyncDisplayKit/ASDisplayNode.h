@@ -641,7 +641,9 @@ NS_ASSUME_NONNULL_END
 @property (atomic, assign)           UIViewContentMode contentMode;         // default=UIViewContentModeScaleToFill
 
 @property (atomic, assign, getter=isUserInteractionEnabled) BOOL userInteractionEnabled; // default=YES (NO for layer-backed nodes)
+#if TARGET_OS_IOS
 @property (atomic, assign, getter=isExclusiveTouch) BOOL exclusiveTouch;    // default=NO
+#endif
 @property (atomic, assign, nullable) CGColorRef shadowColor;                // default=opaque rgb black
 @property (atomic, assign)           CGFloat shadowOpacity;                 // default=0.0
 @property (atomic, assign)           CGSize shadowOffset;                   // default=(0, -3)
