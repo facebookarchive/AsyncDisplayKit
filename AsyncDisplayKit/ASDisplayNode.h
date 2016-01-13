@@ -660,6 +660,16 @@ NS_ASSUME_NONNULL_END
 - (BOOL)isFirstResponder;
 - (BOOL)canPerformAction:(nonnull SEL)action withSender:(nonnull id)sender;
 
+#if TARGET_OS_TV
+//Focus Engine
+- (void)setNeedsFocusUpdate;
+- (BOOL)canBecomeFocused;
+- (void)updateFocusIfNeeded;
+- (void)didUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context withAnimationCoordinator:(nonnull UIFocusAnimationCoordinator *)coordinator;
+- (BOOL)shouldUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context;
+- (nullable UIView *)preferredFocusedView;
+#endif
+
 // Accessibility support
 @property (atomic, assign)           BOOL isAccessibilityElement;
 @property (nullable, atomic, copy)   NSString *accessibilityLabel;

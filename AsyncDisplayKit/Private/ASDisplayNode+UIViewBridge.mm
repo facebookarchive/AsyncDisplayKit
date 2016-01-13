@@ -81,6 +81,46 @@
   return YES;
 }
 
+#if TARGET_OS_TV
+// Focus Engine
+- (BOOL)canBecomeFocused
+{
+  return YES;
+}
+
+- (void)setNeedsFocusUpdate
+{
+  ASDisplayNodeAssertMainThread();
+  [_view setNeedsFocusUpdate];
+}
+
+- (void)updateFocusIfNeeded
+{
+  ASDisplayNodeAssertMainThread();
+  [_view updateFocusIfNeeded];
+}
+
+- (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
+{
+  return YES;
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+  
+}
+
+- (UIView *)preferredFocusedView
+{
+  if (self.nodeLoaded) {
+    return _view;
+  }
+  else {
+    return nil;
+  }
+}
+#endif
+
 - (BOOL)isFirstResponder
 {
   ASDisplayNodeAssertMainThread();
