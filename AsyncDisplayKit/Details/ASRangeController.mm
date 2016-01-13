@@ -156,8 +156,7 @@
       NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:rangeType];
 
       // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
-      // This value may be nil for the first call of this method.
-      NSMutableSet *removedIndexPaths = [_rangeTypeIndexPaths[rangeKey] mutableCopy];
+      NSMutableSet *removedIndexPaths = _rangeIsValid ? [_rangeTypeIndexPaths[rangeKey] mutableCopy] : [NSMutableSet set];
       [removedIndexPaths minusSet:indexPaths];
       [removedIndexPaths minusSet:visibleNodePathsSet];
 
