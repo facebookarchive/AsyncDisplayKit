@@ -54,7 +54,7 @@ static NSUInteger kNumberOfImages = 14;
   
   _layoutInspector = [[MosaicCollectionViewLayoutInspector alloc] init];
   
-  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:YES];
+  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   _collectionView.asyncDataSource = self;
   _collectionView.asyncDelegate = self;
   _collectionView.layoutInspector = _layoutInspector;
@@ -101,11 +101,13 @@ static NSUInteger kNumberOfImages = 14;
   return [[SupplementaryNode alloc] initWithText:text];
 }
 
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
   return _sections.count;
 }
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
   return [_sections[section] count];
 }
 

@@ -8,12 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSInteger, ASLayoutRangeType) {
-  ASLayoutRangeTypeVisible = 0,
-  ASLayoutRangeTypeDisplay,
-  ASLayoutRangeTypeFetchData,
-  ASLayoutRangeTypeCount
-};
+#import <AsyncDisplayKit/ASRangeController.h>
+#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASDataController.h>
+#import <AsyncDisplayKit/ASLayoutController.h>
 
-#define ASLayoutRangeTypeRender ASLayoutRangeTypeDisplay
-#define ASLayoutRangeTypePreload ASLayoutRangeTypeFetchData
+NS_ASSUME_NONNULL_BEGIN
+
+// ASRangeControllerBeta defined in ASRangeController.h
+
+NS_ASSUME_NONNULL_END

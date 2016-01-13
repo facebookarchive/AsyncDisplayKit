@@ -7,7 +7,10 @@
 //
 
 #import "ASCollectionNode.h"
+#import "ASCollectionInternal.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASRangeController.h"
+#include <vector>
 
 @interface _ASCollectionPendingState : NSObject
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
@@ -17,12 +20,39 @@
 @implementation _ASCollectionPendingState
 @end
 
+#if 0  // This is not used yet, but will provide a way to avoid creating the view to set range values.
+@implementation _ASCollectionPendingState
+{
+  std::vector<ASRangeTuningParameters> _tuningParameters;
+}
+
+- (instancetype)init
+{
+  if (!(self = [super init])) {
+    return nil;
+  }
+  _tuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
+  return self;
+}
+
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
+{
+  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  return _tuningParameters[rangeType];
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
+{
+  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  ASDisplayNodeAssert(rangeType != ASLayoutRangeTypeVisible, @"Must not set Visible range tuning parameters (always 0, 0)");
+  _tuningParameters[rangeType] = tuningParameters;
+}
+
+@end
+#endif
+
 @interface ASCollectionNode ()
 @property (nonatomic) _ASCollectionPendingState *pendingState;
-@end
-
-@interface ASCollectionView ()
-- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
 @end
 
 @implementation ASCollectionNode
@@ -40,10 +70,22 @@
   return [self initWithFrame:CGRectZero collectionViewLayout:layout];
 }
 
+- (instancetype)_initWithCollectionView:(ASCollectionView *)collectionView
+{
+  ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{ return collectionView; };
+  
+  if (self = [super initWithViewBlock:collectionViewBlock]) {
+    // ASCollectionView created directly by the app.  Trigger -loadView to set up collectionNode pointer.
+    __unused ASCollectionView *collectionView = [self view];
+    return self;
+  }
+  return nil;
+}
+
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout];
+    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout ownedByNode:YES];
   };
   
   if (self = [super initWithViewBlock:collectionViewBlock]) {
@@ -56,11 +98,12 @@
 {
   [super didLoad];
   
+  ASCollectionView *view = self.view;
+  view.collectionNode    = self;
+  
   if (_pendingState) {
     _ASCollectionPendingState *pendingState = _pendingState;
-    self.pendingState = nil;
-    
-    ASCollectionView *view = self.view;
+    self.pendingState      = nil;
     view.asyncDelegate     = pendingState.delegate;
     view.asyncDataSource   = pendingState.dataSource;
   }
@@ -118,10 +161,13 @@
   return (ASCollectionView *)[super view];
 }
 
+#if RangeControllerLoggingEnabled
 - (void)visibilityDidChange:(BOOL)isVisible
 {
-  
+  [super visibilityDidChange:isVisible];
+  NSLog(@"%@ - visible: %d", self, isVisible);
 }
+#endif
 
 - (void)clearContents
 {
@@ -139,12 +185,12 @@
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [self.view tuningParametersForRangeType:rangeType];
+  return [self.view.rangeController tuningParametersForRangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  return [self.view setTuningParameters:tuningParameters forRangeType:rangeType];
+  return [self.view.rangeController setTuningParameters:tuningParameters forRangeType:rangeType];
 }
 
 - (void)reloadDataWithCompletion:(void (^)())completion

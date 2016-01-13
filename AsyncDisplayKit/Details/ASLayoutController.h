@@ -28,11 +28,14 @@ typedef struct {
  *
  * Defaults to a trailing buffer of one screenful and a leading buffer of two screenfuls.
  */
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
+
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
 
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray<NSIndexPath *> *)indexPaths viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType;
+// FIXME: This method can be removed once ASRangeControllerBeta becomes the main version.
+- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray<NSIndexPath *> *)indexPaths rangeType:(ASLayoutRangeType)rangeType;
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType;
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType;
 
 @optional
 
@@ -45,6 +48,9 @@ typedef struct {
 - (void)deleteSectionsAtIndexSet:(NSIndexSet *)indexSet;
 
 - (void)setVisibleNodeIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
+
+- (void)setViewportSize:(CGSize)viewportSize;
+- (CGSize)viewportSize;
 
 @end
 

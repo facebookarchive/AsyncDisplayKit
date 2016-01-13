@@ -14,9 +14,11 @@
 #import "ASCollectionViewLayoutController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Beta.h"
 #import "ASInternalHelpers.h"
 #import "ASRangeController.h"
 #import "UICollectionViewLayout+ASConvenience.h"
+#import "_ASDisplayLayer.h"
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
@@ -99,38 +101,68 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
 
+// Used only when ASCollectionView is created directly rather than through ASCollectionNode.
+// We create a node so that logic related to appearance, memory management, etc can be located there
+// for both the node-based and view-based version of the table.
+// This also permits sharing logic with ASTableNode, as the superclass is not UIKit-controlled.
+@property (nonatomic, strong) ASCollectionNode *strongCollectionNode;
+
+// Always set, whether ASCollectionView is created directly or via ASCollectionNode.
+@property (nonatomic, weak)   ASCollectionNode *collectionNode;
+
+@end
+
+@interface ASCollectionNode ()
+- (instancetype)_initWithCollectionView:(ASCollectionView *)collectionView;
 @end
 
 @implementation ASCollectionView
+
+// Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASCollectionNode.
++ (Class)layerClass
+{
+  return [_ASDisplayLayer class];
+}
 
 #pragma mark -
 #pragma mark Lifecycle.
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
 {
-  return [self initWithFrame:CGRectZero collectionViewLayout:layout];
+  return [self _initWithFrame:CGRectZero collectionViewLayout:layout ownedByNode:NO];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
-  ASCollectionNode *collectionNode = [[ASCollectionNode alloc] initWithFrame:frame collectionViewLayout:layout];
-  return collectionNode.view;
+  return [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
 }
 
 // FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
-  return [self initWithFrame:frame collectionViewLayout:layout];
+  return [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
 }
 
-- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
+- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout ownedByNode:(BOOL)ownedByNode
 {
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
   
-  _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];
+  if (!ownedByNode) {
+    // See commentary at the definition of .strongCollectionNode for why we create an ASCollectionNode.
+    // FIXME: The _view pointer of the node retains us, but the node will die immediately if we don't
+    // retain it.  At the moment there isn't a great solution to this, so we can't yet move our core
+    // logic to ASCollectionNode (required to have a shared superclass with ASTable*).
+    ASCollectionNode *collectionNode = nil; //[[ASCollectionNode alloc] _initWithCollectionView:self];
+    self.strongCollectionNode = collectionNode;
+  }
   
-  _rangeController = [[ASRangeController alloc] init];
+  _layoutController = [ASDisplayNode shouldUseNewRenderingRange] ?
+                                  [[ASCollectionViewLayoutControllerBeta alloc] initWithCollectionView:self] :
+                                  [[ASCollectionViewLayoutControllerStable alloc] initWithCollectionView:self];
+  
+  _rangeController = [ASDisplayNode shouldUseNewRenderingRange] ? [[ASRangeControllerBeta alloc] init]
+                                                                : [[ASRangeControllerStable alloc] init];
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
@@ -195,8 +227,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_flowLayoutInspector == nil) {
     UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
     ASDisplayNodeAssertNotNil(layout, @"Collection view layout must be a flow layout to use the built-in inspector");
-    _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self
-                                                                                    flowLayout:layout];
+    _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
   }
   return _flowLayoutInspector;
 }
@@ -206,7 +237,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  ASDisplayNodeAssert(self.asyncDelegate, @"ASCollectionView's asyncDelegate property must be set.");
   ASPerformBlockOnMainThread(^{
     _superIsPendingDataLoad = YES;
     [super reloadData];
@@ -298,27 +328,33 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  [_layoutController setTuningParameters:tuningParameters forRangeType:rangeType];
+  [_collectionNode setTuningParameters:tuningParameters forRangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [_layoutController tuningParametersForRangeType:rangeType];
+  return [_collectionNode tuningParametersForRangeType:rangeType];
 }
 
+// These deprecated methods harken back from a time where only one range type existed.
 - (ASRangeTuningParameters)rangeTuningParameters
 {
-  return [self tuningParametersForRangeType:ASLayoutRangeTypeRender];
+  return [self tuningParametersForRangeType:ASLayoutRangeTypeDisplay];
 }
 
 - (void)setRangeTuningParameters:(ASRangeTuningParameters)tuningParameters
 {
-  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
+  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeDisplay];
 }
 
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   return [[_dataController nodeAtIndexPath:indexPath] calculatedSize];
+}
+
+- (NSArray<NSArray <ASCellNode *> *> *)completedNodes
+{
+  return [_dataController completedNodes];
 }
 
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -527,7 +563,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   ASCellNode *cellNode = [self nodeForItemAtIndexPath:indexPath];
   if (cellNode.neverShowPlaceholders) {
-    [cellNode recursivelyEnsureDisplay];
+    [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
 }
 
@@ -542,6 +578,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)layoutSubviews
 {
+  if (_zeroContentInsets) {
+    self.contentInset = UIEdgeInsetsZero;
+  }
+  
   if (! CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, self.bounds.size)) {
     _maxSizeForNodesConstrainedSize = self.bounds.size;
     
@@ -733,6 +773,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 #pragma mark - ASRangeControllerDataSource
 
+- (ASRangeController *)rangeController
+{
+  return _rangeController;
+}
+
 - (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
@@ -745,9 +790,19 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return self.bounds.size;
 }
 
+- (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
+{
+  return self.collectionNode.interfaceState;
+}
+
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
 {
   return [_dataController nodesAtIndexPaths:indexPaths];
+}
+
+- (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController nodeAtIndexPath:indexPath];
 }
 
 #pragma mark - ASRangeControllerDelegate
@@ -901,5 +956,55 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     }
   }
 }
+
+#pragma mark - _ASDisplayView behavior substitutions
+// Need these to drive interfaceState so we know when we are visible, if not nested in another range-managing element.
+// Because our superclass is a true UIKit class, we cannot also subclass _ASDisplayView.
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+  BOOL visible = (newWindow != nil);
+  ASDisplayNode *node = self.collectionNode;
+  if (visible && !node.inHierarchy) {
+    [node __enterHierarchy];
+  }
+}
+
+- (void)didMoveToWindow
+{
+  BOOL visible = (self.window != nil);
+  ASDisplayNode *node = self.collectionNode;
+  if (!visible && node.inHierarchy) {
+    [node __exitHierarchy];
+  }
+}
+
+#pragma mark - UICollectionView dead-end intercepts
+
+#if ASDISPLAYNODE_ASSERTIONS_ENABLED // Remove implementations entirely for efficiency if not asserting.
+
+// intercepted due to not being supported by ASCollectionView (prevent bugs caused by usage)
+
+- (BOOL)collectionView:(UICollectionView *)collectionView canMoveItemAtIndexPath:(NSIndexPath *)indexPath NS_AVAILABLE_IOS(9_0)
+{
+  ASDisplayNodeAssert(![self.asyncDataSource respondsToSelector:_cmd], @"%@ is not supported by ASCollectionView - please remove or disable this data source method.", NSStringFromSelector(_cmd));
+  return NO;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView moveItemAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath*)destinationIndexPath NS_AVAILABLE_IOS(9_0)
+{
+  ASDisplayNodeAssert(![self.asyncDataSource respondsToSelector:_cmd], @"%@ is not supported by ASCollectionView - please remove or disable this data source method.", NSStringFromSelector(_cmd));
+}
+
+- (void)collectionView:(UICollectionView *)collectionView willDisplaySupplementaryView:(UICollectionReusableView *)view forElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssert(![self.asyncDataSource respondsToSelector:_cmd], @"%@ is not supported by ASCollectionView - please remove or disable this delegate method.", NSStringFromSelector(_cmd));
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingSupplementaryView:(UICollectionReusableView *)view forElementOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssert(![self.asyncDataSource respondsToSelector:_cmd], @"%@ is not supported by ASCollectionView - please remove or disable this delegate method.", NSStringFromSelector(_cmd));
+}
+
+#endif
 
 @end

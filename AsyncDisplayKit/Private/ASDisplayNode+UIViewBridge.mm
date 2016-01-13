@@ -11,8 +11,10 @@
 #import "ASInternalHelpers.h"
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Beta.h"
 #import "ASEqualityHelpers.h"
 
 /**
@@ -248,11 +250,14 @@
 
     _messageToViewOrLayer(setNeedsDisplay);
 
-#if !USE_WORKING_WINDOW
-    if (_layer && !self.isSynchronous) {
-      [ASDisplayNode scheduleNodeForDisplay:self];
+    if ([ASDisplayNode shouldUseNewRenderingRange]) {
+      BOOL nowDisplay = ASInterfaceStateIncludesDisplay(_interfaceState);
+      // FIXME: This should not need to recursively display, so create a non-recursive variant.
+      // The semantics of setNeedsDisplay (as defined by CALayer behavior) are not recursive.
+      if (_layer && !_flags.synchronous && nowDisplay && [self __implementsDisplay]) {
+        [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
+      }
     }
-#endif
   }
 }
 

@@ -66,8 +66,6 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
   ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay | ASInterfaceStateVisible,
 };
 
-
-
 /**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
  * hierarchy off the main thread, and could do rendering off the main thread as well.
@@ -204,6 +202,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASInterfaceState
  */
 @property (nonatomic, readonly) ASInterfaceState interfaceState;
+
 
 /** @name Managing dimensions */
 

@@ -39,7 +39,8 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
 #pragma mark - Visible Indices
 
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
+// FIXME: This method can be removed once ASRangeControllerBeta becomes the main version.
+- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths rangeType:(ASLayoutRangeType)rangeType
 {
   if (!indexPaths.count || rangeType >= _rangesByType.size()) {
     return NO;
@@ -73,10 +74,11 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
  * IndexPath array for the element in the working range.
  */
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType
 {
   CGFloat viewportScreenMetric;
   ASScrollDirection leadingDirection;
+  CGSize viewportSize = [self viewportSize];
 
   if (_layoutDirection == ASFlowLayoutDirectionHorizontal) {
     ASDisplayNodeAssert(scrollDirection == ASScrollDirectionNone || scrollDirection == ASScrollDirectionLeft || scrollDirection == ASScrollDirectionRight, @"Invalid scroll direction");

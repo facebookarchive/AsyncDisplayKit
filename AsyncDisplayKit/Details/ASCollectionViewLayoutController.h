@@ -19,4 +19,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface ASCollectionViewLayoutControllerStable : ASCollectionViewLayoutController
+@end
+
+@interface ASCollectionViewLayoutControllerBeta : ASCollectionViewLayoutController
+@end
+
 NS_ASSUME_NONNULL_END

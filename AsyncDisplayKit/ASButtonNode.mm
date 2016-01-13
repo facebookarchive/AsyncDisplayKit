@@ -17,10 +17,12 @@
   
   NSAttributedString *_normalAttributedTitle;
   NSAttributedString *_highlightedAttributedTitle;
+  NSAttributedString *_selectedAttributedTitle;
   NSAttributedString *_disabledAttributedTitle;
   
   UIImage *_normalImage;
   UIImage *_highlightedImage;
+  UIImage *_selectedImage;
   UIImage *_disabledImage;
 }
 
@@ -45,14 +47,27 @@
     
     [self addSubnode:_titleNode];
     [self addSubnode:_imageNode];
-    
-    [self addTarget:self action:@selector(controlEventUpdated:) forControlEvents:ASControlNodeEventAllEvents];
   }
   return self;
 }
 
-- (void)controlEventUpdated:(ASControlNode *)node
+- (void)setEnabled:(BOOL)enabled
 {
+  [super setEnabled:enabled];
+  [self updateImage];
+  [self updateTitle];
+}
+
+- (void)setHighlighted:(BOOL)highlighted
+{
+  [super setHighlighted:highlighted];
+  [self updateImage];
+  [self updateTitle];
+}
+
+- (void)setSelected:(BOOL)selected
+{
+  [super setSelected:selected];
   [self updateImage];
   [self updateTitle];
 }
@@ -66,6 +81,8 @@
     newImage = _disabledImage;
   } else if (self.highlighted && _highlightedImage) {
     newImage = _highlightedImage;
+  } else if (self.selected && _selectedImage) {
+    newImage = _selectedImage;
   } else {
     newImage = _normalImage;
   }
@@ -84,6 +101,8 @@
     newTitle = _disabledAttributedTitle;
   } else if (self.highlighted && _highlightedAttributedTitle) {
     newTitle = _highlightedAttributedTitle;
+  } else if (self.selected && _selectedAttributedTitle) {
+    newTitle = _selectedAttributedTitle;
   } else {
     newTitle = _normalAttributedTitle;
   }
@@ -126,69 +145,95 @@
   [self setNeedsLayout];
 }
 
-- (NSAttributedString *)attributedTitleForState:(ASButtonState)state
+- (NSAttributedString *)attributedTitleForState:(ASControlState)state
 {
   ASDN::MutexLocker l(_propertyLock);
   switch (state) {
-    case ASButtonStateNormal:
+    case ASControlStateNormal:
       return _normalAttributedTitle;
       
-    case ASButtonStateHighlighted:
+    case ASControlStateHighlighted:
       return _highlightedAttributedTitle;
       
-    case ASButtonStateDisabled:
+    case ASControlStateSelected:
+      return _selectedAttributedTitle;
+      
+    case ASControlStateDisabled:
       return _disabledAttributedTitle;
+          
+    default:
+      return _normalAttributedTitle;
   }
 }
 
-- (void)setAttributedTitle:(NSAttributedString *)title forState:(ASButtonState)state
+- (void)setAttributedTitle:(NSAttributedString *)title forState:(ASControlState)state
 {
   ASDN::MutexLocker l(_propertyLock);
   switch (state) {
-    case ASButtonStateNormal:
+    case ASControlStateNormal:
       _normalAttributedTitle = [title copy];
       break;
       
-    case ASButtonStateHighlighted:
+    case ASControlStateHighlighted:
       _highlightedAttributedTitle = [title copy];
       break;
       
-    case ASButtonStateDisabled:
+    case ASControlStateSelected:
+      _selectedAttributedTitle = [title copy];
+      break;
+      
+    case ASControlStateDisabled:
       _disabledAttributedTitle = [title copy];
+      break;
+      
+    default:
       break;
   }
   [self updateTitle];
 }
 
-- (UIImage *)imageForState:(ASButtonState)state
+- (UIImage *)imageForState:(ASControlState)state
 {
   ASDN::MutexLocker l(_propertyLock);
   switch (state) {
-    case ASButtonStateNormal:
+    case ASControlStateNormal:
       return _normalImage;
       
-    case ASButtonStateHighlighted:
+    case ASControlStateHighlighted:
       return _highlightedImage;
       
-    case ASButtonStateDisabled:
+    case ASControlStateSelected:
+      return _selectedImage;
+      
+    case ASControlStateDisabled:
       return _disabledImage;
+      
+    default:
+      return _normalImage;
   }
 }
 
-- (void)setImage:(UIImage *)image forState:(ASButtonState)state
+- (void)setImage:(UIImage *)image forState:(ASControlState)state
 {
   ASDN::MutexLocker l(_propertyLock);
   switch (state) {
-    case ASButtonStateNormal:
+    case ASControlStateNormal:
       _normalImage = image;
       break;
       
-    case ASButtonStateHighlighted:
+    case ASControlStateHighlighted:
       _highlightedImage = image;
       break;
       
-    case ASButtonStateDisabled:
+    case ASControlStateSelected:
+      _selectedImage = image;
+      break;
+      
+    case ASControlStateDisabled:
       _disabledImage = image;
+      break;
+      
+    default:
       break;
   }
   [self updateImage];

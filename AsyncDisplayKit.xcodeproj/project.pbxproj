@@ -40,7 +40,7 @@
 		056D21551ABCEF50001107EF /* ASImageNodeSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 056D21541ABCEF50001107EF /* ASImageNodeSnapshotTests.m */; };
 		0574D5E219C110940097DC25 /* ASTableViewProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = 0574D5E119C110610097DC25 /* ASTableViewProtocols.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		057D02C41AC0A66700C7AC3C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 057D02C31AC0A66700C7AC3C /* main.m */; };
-		057D02C71AC0A66700C7AC3C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 057D02C61AC0A66700C7AC3C /* AppDelegate.m */; };
+		057D02C71AC0A66700C7AC3C /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 057D02C61AC0A66700C7AC3C /* AppDelegate.mm */; };
 		0587F9BD1A7309ED00AFF0BA /* ASEditableTextNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 0587F9BB1A7309ED00AFF0BA /* ASEditableTextNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0587F9BE1A7309ED00AFF0BA /* ASEditableTextNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0587F9BC1A7309ED00AFF0BA /* ASEditableTextNode.mm */; };
 		058D09B0195D04C000B7D73C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
@@ -112,8 +112,8 @@
 		05F20AA41A15733C00DCA68A /* ASImageProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = 05F20AA31A15733C00DCA68A /* ASImageProtocols.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		18C2ED7E1B9B7DE800F627B3 /* ASCollectionNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 18C2ED7C1B9B7DE800F627B3 /* ASCollectionNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		18C2ED7F1B9B7DE800F627B3 /* ASCollectionNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 18C2ED7C1B9B7DE800F627B3 /* ASCollectionNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		18C2ED801B9B7DE800F627B3 /* ASCollectionNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C2ED7D1B9B7DE800F627B3 /* ASCollectionNode.m */; };
-		18C2ED831B9B7DE800F627B3 /* ASCollectionNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C2ED7D1B9B7DE800F627B3 /* ASCollectionNode.m */; };
+		18C2ED801B9B7DE800F627B3 /* ASCollectionNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18C2ED7D1B9B7DE800F627B3 /* ASCollectionNode.mm */; };
+		18C2ED831B9B7DE800F627B3 /* ASCollectionNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18C2ED7D1B9B7DE800F627B3 /* ASCollectionNode.mm */; };
 		1950C4491A3BB5C1005C8279 /* ASEqualityHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 1950C4481A3BB5C1005C8279 /* ASEqualityHelpers.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		204C979E1B362CB3002B1083 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 204C979D1B362CB3002B1083 /* Default-568h@2x.png */; };
 		205F0E0F1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -462,16 +462,25 @@
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
 		DE040EF91C2B40AC004692FF /* ASCollectionViewFlowLayoutInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DE0702FC1C3671E900D7DE62 /* libAsyncDisplayKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AC195D04C000B7D73C /* libAsyncDisplayKit.a */; };
 		DE6EA3221C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */; };
 		DE6EA3231C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */; };
 		DE8BEAC11C2DF3FC00D57C12 /* ASDelegateProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE8BEABF1C2DF3FC00D57C12 /* ASDelegateProxy.h */; };
 		DE8BEAC21C2DF3FC00D57C12 /* ASDelegateProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE8BEABF1C2DF3FC00D57C12 /* ASDelegateProxy.h */; };
 		DE8BEAC31C2DF3FC00D57C12 /* ASDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DE8BEAC01C2DF3FC00D57C12 /* ASDelegateProxy.m */; };
 		DE8BEAC41C2DF3FC00D57C12 /* ASDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DE8BEAC01C2DF3FC00D57C12 /* ASDelegateProxy.m */; };
+		DEC146B61C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = DEC146B41C37A16A004A0EE7 /* ASCollectionInternal.h */; };
+		DEC146B71C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = DEC146B41C37A16A004A0EE7 /* ASCollectionInternal.h */; };
+		DEC146B81C37A16A004A0EE7 /* ASCollectionInternal.m in Sources */ = {isa = PBXBuildFile; fileRef = DEC146B51C37A16A004A0EE7 /* ASCollectionInternal.m */; };
+		DEC146B91C37A16A004A0EE7 /* ASCollectionInternal.m in Sources */ = {isa = PBXBuildFile; fileRef = DEC146B51C37A16A004A0EE7 /* ASCollectionInternal.m */; };
 		DECBD6E71BE56E1900CF4905 /* ASButtonNode.h in Headers */ = {isa = PBXBuildFile; fileRef = DECBD6E51BE56E1900CF4905 /* ASButtonNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DECBD6E81BE56E1900CF4905 /* ASButtonNode.h in Headers */ = {isa = PBXBuildFile; fileRef = DECBD6E51BE56E1900CF4905 /* ASButtonNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DECBD6E91BE56E1900CF4905 /* ASButtonNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECBD6E61BE56E1900CF4905 /* ASButtonNode.mm */; };
 		DECBD6EA1BE56E1900CF4905 /* ASButtonNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECBD6E61BE56E1900CF4905 /* ASButtonNode.mm */; };
+		DECC2ECD1C35C1C600388446 /* ASRangeControllerBeta.h in Headers */ = {isa = PBXBuildFile; fileRef = DECC2ECB1C35C1C600388446 /* ASRangeControllerBeta.h */; };
+		DECC2ECE1C35C1C600388446 /* ASRangeControllerBeta.h in Headers */ = {isa = PBXBuildFile; fileRef = DECC2ECB1C35C1C600388446 /* ASRangeControllerBeta.h */; };
+		DECC2ECF1C35C1C600388446 /* ASRangeControllerBeta.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECC2ECC1C35C1C600388446 /* ASRangeControllerBeta.mm */; };
+		DECC2ED01C35C1C600388446 /* ASRangeControllerBeta.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECC2ECC1C35C1C600388446 /* ASRangeControllerBeta.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -483,6 +492,13 @@
 			remoteInfo = AsyncDisplayKitTestHost;
 		};
 		058D09C2195D04C000B7D73C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 058D09A4195D04C000B7D73C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 058D09AB195D04C000B7D73C;
+			remoteInfo = AsyncDisplayKit;
+		};
+		DEACA2B11C425DC400FA9DDF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 058D09A4195D04C000B7D73C /* Project object */;
 			proxyType = 1;
@@ -533,7 +549,7 @@
 		057D02C21AC0A66700C7AC3C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		057D02C31AC0A66700C7AC3C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		057D02C51AC0A66700C7AC3C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		057D02C61AC0A66700C7AC3C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		057D02C61AC0A66700C7AC3C /* AppDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
 		0587F9BB1A7309ED00AFF0BA /* ASEditableTextNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASEditableTextNode.h; sourceTree = "<group>"; };
 		0587F9BC1A7309ED00AFF0BA /* ASEditableTextNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = ASEditableTextNode.mm; sourceTree = "<group>"; };
 		058D09AC195D04C000B7D73C /* libAsyncDisplayKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAsyncDisplayKit.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -607,7 +623,7 @@
 		05EA6FE61AC0966E00E35788 /* ASSnapshotTestCase.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASSnapshotTestCase.mm; sourceTree = "<group>"; };
 		05F20AA31A15733C00DCA68A /* ASImageProtocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASImageProtocols.h; sourceTree = "<group>"; };
 		18C2ED7C1B9B7DE800F627B3 /* ASCollectionNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionNode.h; sourceTree = "<group>"; };
-		18C2ED7D1B9B7DE800F627B3 /* ASCollectionNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionNode.m; sourceTree = "<group>"; };
+		18C2ED7D1B9B7DE800F627B3 /* ASCollectionNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASCollectionNode.mm; sourceTree = "<group>"; };
 		1950C4481A3BB5C1005C8279 /* ASEqualityHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASEqualityHelpers.h; sourceTree = "<group>"; };
 		204C979D1B362CB3002B1083 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Default-568h@2x.png"; sourceTree = "<group>"; };
 		205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UICollectionViewLayout+ASConvenience.h"; sourceTree = "<group>"; };
@@ -766,8 +782,12 @@
 		DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASDisplayNode+FrameworkPrivate.h"; sourceTree = "<group>"; };
 		DE8BEABF1C2DF3FC00D57C12 /* ASDelegateProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDelegateProxy.h; sourceTree = "<group>"; };
 		DE8BEAC01C2DF3FC00D57C12 /* ASDelegateProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDelegateProxy.m; sourceTree = "<group>"; };
+		DEC146B41C37A16A004A0EE7 /* ASCollectionInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASCollectionInternal.h; path = Details/ASCollectionInternal.h; sourceTree = "<group>"; };
+		DEC146B51C37A16A004A0EE7 /* ASCollectionInternal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASCollectionInternal.m; path = Details/ASCollectionInternal.m; sourceTree = "<group>"; };
 		DECBD6E51BE56E1900CF4905 /* ASButtonNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASButtonNode.h; sourceTree = "<group>"; };
 		DECBD6E61BE56E1900CF4905 /* ASButtonNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASButtonNode.mm; sourceTree = "<group>"; };
+		DECC2ECB1C35C1C600388446 /* ASRangeControllerBeta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeControllerBeta.h; sourceTree = "<group>"; };
+		DECC2ECC1C35C1C600388446 /* ASRangeControllerBeta.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRangeControllerBeta.mm; sourceTree = "<group>"; };
 		EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AsyncDisplayKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB07EABBCF28656C6297BC2D /* Pods-AsyncDisplayKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -777,6 +797,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE0702FC1C3671E900D7DE62 /* libAsyncDisplayKit.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -825,7 +846,7 @@
 			children = (
 				204C979D1B362CB3002B1083 /* Default-568h@2x.png */,
 				057D02C51AC0A66700C7AC3C /* AppDelegate.h */,
-				057D02C61AC0A66700C7AC3C /* AppDelegate.m */,
+				057D02C61AC0A66700C7AC3C /* AppDelegate.mm */,
 				057D02C11AC0A66700C7AC3C /* Supporting Files */,
 			);
 			name = AsyncDisplayKitTestHost;
@@ -891,10 +912,12 @@
 				055F1A3A19ABD43F004DAFF1 /* ASCellNode.h */,
 				AC6456071B0A335000CF11B8 /* ASCellNode.m */,
 				18C2ED7C1B9B7DE800F627B3 /* ASCollectionNode.h */,
-				18C2ED7D1B9B7DE800F627B3 /* ASCollectionNode.m */,
+				18C2ED7D1B9B7DE800F627B3 /* ASCollectionNode.mm */,
 				AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */,
 				AC3C4A501A1139C100143C57 /* ASCollectionView.mm */,
 				AC3C4A531A113EEC00143C57 /* ASCollectionViewProtocols.h */,
+				DEC146B41C37A16A004A0EE7 /* ASCollectionInternal.h */,
+				DEC146B51C37A16A004A0EE7 /* ASCollectionInternal.m */,
 				058D09D5195D050800B7D73C /* ASControlNode.h */,
 				058D09D6195D050800B7D73C /* ASControlNode.m */,
 				DECBD6E51BE56E1900CF4905 /* ASButtonNode.h */,
@@ -1038,6 +1061,8 @@
 				058D09E9195D050800B7D73C /* ASMutableAttributedStringBuilder.m */,
 				055F1A3619ABD413004DAFF1 /* ASRangeController.h */,
 				055F1A3719ABD413004DAFF1 /* ASRangeController.mm */,
+				DECC2ECB1C35C1C600388446 /* ASRangeControllerBeta.h */,
+				DECC2ECC1C35C1C600388446 /* ASRangeControllerBeta.mm */,
 				292C599C1A956527007E5DD6 /* ASRangeHandler.h */,
 				258FF4251C0D152600A83844 /* ASRangeHandlerVisible.h */,
 				258FF4261C0D152600A83844 /* ASRangeHandlerVisible.mm */,
@@ -1325,6 +1350,7 @@
 				9C65A72A1BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h in Headers */,
 				292C599F1A956527007E5DD6 /* ASLayoutRangeType.h in Headers */,
 				257754B61BEE44CD00737CA5 /* ASEqualityHashHelpers.h in Headers */,
+				DECC2ECD1C35C1C600388446 /* ASRangeControllerBeta.h in Headers */,
 				ACF6ED261B17843500DA7C62 /* ASLayoutSpec.h in Headers */,
 				ACF6ED4D1B17847A00DA7C62 /* ASLayoutSpecUtilities.h in Headers */,
 				AC026B6F1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h in Headers */,
@@ -1366,6 +1392,7 @@
 				ACC945A91BA9E7A0005E1FB8 /* ASViewController.h in Headers */,
 				6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */,
 				257754AD1BEE44CD00737CA5 /* ASTextKitRenderer+Positioning.h in Headers */,
+				DEC146B61C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */,
 				205F0E211B376416007741D0 /* CGRect+ASConvenience.h in Headers */,
 				058D0A66195D05DC00B7D73C /* NSMutableAttributedString+TextKitAdditions.h in Headers */,
 				205F0E0F1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h in Headers */,
@@ -1383,6 +1410,7 @@
 				B350623C1B010EFD0018CF92 /* _ASAsyncTransaction.h in Headers */,
 				B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */,
 				B350623F1B010EFD0018CF92 /* _ASAsyncTransactionContainer.h in Headers */,
+				DECC2ECE1C35C1C600388446 /* ASRangeControllerBeta.h in Headers */,
 				254C6B7E1BF94DF4003EC431 /* ASTextKitTailTruncater.h in Headers */,
 				B35062411B010EFD0018CF92 /* _ASAsyncTransactionGroup.h in Headers */,
 				B35062491B010EFD0018CF92 /* _ASCoreAnimationExtras.h in Headers */,
@@ -1441,6 +1469,7 @@
 				34EFC75F1B701C8600AD841F /* ASInsetLayoutSpec.h in Headers */,
 				34EFC75D1B701BE900AD841F /* ASInternalHelpers.h in Headers */,
 				34EFC7671B701CD900AD841F /* ASLayout.h in Headers */,
+				DEC146B71C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */,
 				34EFC7691B701CE100AD841F /* ASLayoutable.h in Headers */,
 				9CDC18CD1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */,
 				B35062201B010EFD0018CF92 /* ASLayoutController.h in Headers */,
@@ -1512,6 +1541,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				DEACA2B21C425DC400FA9DDF /* PBXTargetDependency */,
 			);
 			name = AsyncDisplayKitTestHost;
 			productName = AsyncDisplayKitTestHost;
@@ -1698,7 +1728,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				057D02C71AC0A66700C7AC3C /* AppDelegate.m in Sources */,
+				057D02C71AC0A66700C7AC3C /* AppDelegate.mm in Sources */,
 				057D02C41AC0A66700C7AC3C /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1726,7 +1756,7 @@
 				AC6456091B0A335000CF11B8 /* ASCellNode.m in Sources */,
 				DE8BEAC31C2DF3FC00D57C12 /* ASDelegateProxy.m in Sources */,
 				ACF6ED1D1B17843500DA7C62 /* ASCenterLayoutSpec.mm in Sources */,
-				18C2ED801B9B7DE800F627B3 /* ASCollectionNode.m in Sources */,
+				18C2ED801B9B7DE800F627B3 /* ASCollectionNode.mm in Sources */,
 				92DD2FE41BF4B97E0074C9DD /* ASMapNode.mm in Sources */,
 				AC3C4A521A1139C100143C57 /* ASCollectionView.mm in Sources */,
 				205F0E1E1B373A2C007741D0 /* ASCollectionViewLayoutController.mm in Sources */,
@@ -1739,6 +1769,7 @@
 				058D0A2A195D050800B7D73C /* ASDisplayNode+UIViewBridge.mm in Sources */,
 				25E327581C16819500A2170C /* ASPagerNode.m in Sources */,
 				058D0A14195D050800B7D73C /* ASDisplayNode.mm in Sources */,
+				DEC146B81C37A16A004A0EE7 /* ASCollectionInternal.m in Sources */,
 				058D0A15195D050800B7D73C /* ASDisplayNodeExtras.mm in Sources */,
 				AEEC47E21C20C2DD00EC1693 /* ASVideoNode.mm in Sources */,
 				0587F9BE1A7309ED00AFF0BA /* ASEditableTextNode.mm in Sources */,
@@ -1781,6 +1812,7 @@
 				257754BE1BEE458E00737CA5 /* ASTextKitHelpers.mm in Sources */,
 				257754A91BEE44CD00737CA5 /* ASTextKitContext.mm in Sources */,
 				ACF6ED501B17847A00DA7C62 /* ASStackPositionedLayout.mm in Sources */,
+				DECC2ECF1C35C1C600388446 /* ASRangeControllerBeta.mm in Sources */,
 				ACF6ED521B17847A00DA7C62 /* ASStackUnpositionedLayout.mm in Sources */,
 				257754A61BEE44CD00737CA5 /* ASTextKitAttributes.mm in Sources */,
 				ACF6ED321B17843500DA7C62 /* ASStaticLayoutSpec.mm in Sources */,
@@ -1861,7 +1893,7 @@
 				B35062161B010EFD0018CF92 /* ASBatchContext.mm in Sources */,
 				AC47D9421B3B891B00AAEE9D /* ASCellNode.m in Sources */,
 				34EFC7641B701CC600AD841F /* ASCenterLayoutSpec.mm in Sources */,
-				18C2ED831B9B7DE800F627B3 /* ASCollectionNode.m in Sources */,
+				18C2ED831B9B7DE800F627B3 /* ASCollectionNode.mm in Sources */,
 				B35061F61B010EFD0018CF92 /* ASCollectionView.mm in Sources */,
 				509E68641B3AEDB7009B9150 /* ASCollectionViewLayoutController.mm in Sources */,
 				B35061F91B010EFD0018CF92 /* ASControlNode.m in Sources */,
@@ -1871,6 +1903,7 @@
 				B350624E1B010EFD0018CF92 /* ASDisplayNode+AsyncDisplay.mm in Sources */,
 				25E327591C16819500A2170C /* ASPagerNode.m in Sources */,
 				B35062501B010EFD0018CF92 /* ASDisplayNode+DebugTiming.mm in Sources */,
+				DEC146B91C37A16A004A0EE7 /* ASCollectionInternal.m in Sources */,
 				254C6B891BF94F8A003EC431 /* ASTextKitRenderer+Positioning.mm in Sources */,
 				B35062511B010EFD0018CF92 /* ASDisplayNode+UIViewBridge.mm in Sources */,
 				B35061FC1B010EFD0018CF92 /* ASDisplayNode.mm in Sources */,
@@ -1912,6 +1945,7 @@
 				9C8221981BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */,
 				34EFC7721B701D0300AD841F /* ASStackLayoutSpec.mm in Sources */,
 				34EFC7761B701D2A00AD841F /* ASStackPositionedLayout.mm in Sources */,
+				DECC2ED01C35C1C600388446 /* ASRangeControllerBeta.mm in Sources */,
 				34EFC7781B701D3100AD841F /* ASStackUnpositionedLayout.mm in Sources */,
 				AC026B6C1BD57D6F00BBC17E /* ASChangeSetDataController.m in Sources */,
 				34EFC7741B701D0A00AD841F /* ASStaticLayoutSpec.mm in Sources */,
@@ -1942,6 +1976,11 @@
 			target = 058D09AB195D04C000B7D73C /* AsyncDisplayKit */;
 			targetProxy = 058D09C2195D04C000B7D73C /* PBXContainerItemProxy */;
 		};
+		DEACA2B21C425DC400FA9DDF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 058D09AB195D04C000B7D73C /* AsyncDisplayKit */;
+			targetProxy = DEACA2B11C425DC400FA9DDF /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -1963,13 +2002,13 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = YES;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = AsyncDisplayKitTestHost/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1984,9 +2023,9 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = YES;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				INFOPLIST_FILE = AsyncDisplayKitTestHost/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2070,13 +2109,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_CODE_COVERAGE = YES;
 				DSTROOT = /tmp/AsyncDisplayKit.dst;
 				GCC_INPUT_FILETYPE = automatic;
-				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = YES;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AsyncDisplayKit/AsyncDisplayKit-Prefix.pch";
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				OTHER_CFLAGS = "-Wall";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2089,13 +2130,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_CODE_COVERAGE = YES;
 				DSTROOT = /tmp/AsyncDisplayKit.dst;
 				GCC_INPUT_FILETYPE = automatic;
-				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = YES;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AsyncDisplayKit/AsyncDisplayKit-Prefix.pch";
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				OTHER_CFLAGS = "-Wall";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2114,7 +2157,7 @@
 					"$(inherited)",
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 				);
-				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = YES;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AsyncDisplayKit/AsyncDisplayKit-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2126,6 +2169,7 @@
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				INFOPLIST_FILE = "AsyncDisplayKitTests/AsyncDisplayKitTests-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AsyncDisplayKitTestHost.app/AsyncDisplayKitTestHost";
 				WRAPPER_EXTENSION = xctest;
@@ -2142,7 +2186,7 @@
 					"$(inherited)",
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 				);
-				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = YES;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AsyncDisplayKit/AsyncDisplayKit-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2153,6 +2197,7 @@
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				INFOPLIST_FILE = "AsyncDisplayKitTests/AsyncDisplayKitTests-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AsyncDisplayKitTestHost.app/AsyncDisplayKitTestHost";
 				WRAPPER_EXTENSION = xctest;

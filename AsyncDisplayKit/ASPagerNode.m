@@ -9,8 +9,10 @@
 #import "ASPagerNode.h"
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "UICollectionViewLayout+ASConvenience.h"
 
-@interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor> {
+@interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
+{
   UICollectionViewFlowLayout *_flowLayout;
   ASPagerNodeProxy *_proxy;
   id <ASPagerNodeDataSource> _pagerDataSource;
@@ -19,7 +21,7 @@
 @end
 
 @implementation ASPagerNode
-@dynamic delegate;
+@dynamic view, delegate, dataSource;
 
 - (instancetype)init
 {
@@ -28,11 +30,12 @@
   flowLayout.minimumInteritemSpacing = 0;
   flowLayout.minimumLineSpacing = 0;
   
-  return [self initWithFlowLayout:flowLayout];
+  return [self initWithCollectionViewLayout:flowLayout];
 }
 
-- (instancetype)initWithFlowLayout:(UICollectionViewFlowLayout *)flowLayout
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewFlowLayout *)flowLayout;
 {
+  ASDisplayNodeAssert([flowLayout asdk_isFlowLayout], @"ASPagerNode requires a flow layout.");
   self = [super initWithCollectionViewLayout:flowLayout];
   if (self != nil) {
     _flowLayout = flowLayout;
@@ -40,37 +43,11 @@
   return self;
 }
 
-- (ASCollectionView *)collectionView
-{
-  return self.view;
-}
-
-- (void)setDataSource:(id <ASPagerNodeDataSource>)pagerDataSource
-{
-  if (pagerDataSource != _pagerDataSource) {
-    _pagerDataSource = pagerDataSource;
-    _proxy = pagerDataSource ? [[ASPagerNodeProxy alloc] initWithTarget:pagerDataSource interceptor:self] : nil;
-    super.dataSource = (id <ASCollectionDataSource>)_proxy;
-  }
-}
-
-- (void)proxyTargetHasDeallocated:(ASDelegateProxy *)proxy
-{
-  [self setDataSource:nil];
-}
-
-- (id <ASPagerNodeDataSource>)dataSource
-{
-  return _pagerDataSource;
-}
-
 - (void)didLoad
 {
   [super didLoad];
   
   ASCollectionView *cv = self.view;
-  cv.asyncDataSource = self;
-  cv.asyncDelegate = self;
   
   cv.pagingEnabled = YES;
   cv.allowsSelection = NO;
@@ -78,10 +55,15 @@
   cv.showsHorizontalScrollIndicator = NO;
   cv.scrollsToTop = NO;
   
+  // Zeroing contentInset is important, as UIKit will set the top inset for the navigation bar even though
+  // our view is only horizontally scrollable.  This causes UICollectionViewFlowLayout to log a warning.
+  // From here we cannot disable this directly (UIViewController's automaticallyAdjustsScrollViewInsets).
+  cv.zeroContentInsets = YES;
+  
   ASRangeTuningParameters preloadParams = { .leadingBufferScreenfuls = 2.0, .trailingBufferScreenfuls = 2.0 };
   ASRangeTuningParameters renderParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
-  [self setTuningParameters:preloadParams forRangeType:ASLayoutRangeTypePreload];
-  [self setTuningParameters:renderParams forRangeType:ASLayoutRangeTypeRender];
+  [self setTuningParameters:preloadParams forRangeType:ASLayoutRangeTypeFetchData];
+  [self setTuningParameters:renderParams forRangeType:ASLayoutRangeTypeDisplay];
 }
 
 #pragma mark - Helpers
@@ -96,19 +78,41 @@
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load paging nodes");
-  return [_pagerDataSource pagerNode:self nodeAtIndex:indexPath.item];
+  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
+  ASCellNode *pageNode = [_pagerDataSource pagerNode:self nodeAtIndex:indexPath.item];
+  return pageNode;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load paging nodes");
+  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
   return [_pagerDataSource numberOfPagesInPagerNode:self];
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   return ASSizeRangeMake(CGSizeZero, self.view.bounds.size);
+}
+
+#pragma mark - Data Source Proxy
+
+- (id <ASPagerNodeDataSource>)dataSource
+{
+  return _pagerDataSource;
+}
+
+- (void)setDataSource:(id <ASPagerNodeDataSource>)pagerDataSource
+{
+  if (pagerDataSource != _pagerDataSource) {
+    _pagerDataSource = pagerDataSource;
+    _proxy = pagerDataSource ? [[ASPagerNodeProxy alloc] initWithTarget:pagerDataSource interceptor:self] : nil;
+    super.dataSource = (id <ASCollectionDataSource>)_proxy;
+  }
+}
+
+- (void)proxyTargetHasDeallocated:(ASDelegateProxy *)proxy
+{
+  [self setDataSource:nil];
 }
 
 @end

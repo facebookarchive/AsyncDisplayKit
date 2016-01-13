@@ -54,7 +54,13 @@
           selector == @selector(collectionView:didEndDisplayingCell:forItemAtIndexPath:) ||
           
           // used for batch fetching API
-          selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
+          selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:) ||
+          
+          // intercepted due to not being supported by ASCollectionView (prevent bugs caused by usage)
+          selector == @selector(collectionView:canMoveItemAtIndexPath:) ||
+          selector == @selector(collectionView:moveItemAtIndexPath:toIndexPath:) ||
+          selector == @selector(collectionView:willDisplaySupplementaryView:forElementKind:atIndexPath:) ||
+          selector == @selector(collectionView:didEndDisplayingSupplementaryView:forElementOfKind:atIndexPath:)
           );
 }
 
@@ -97,7 +103,7 @@
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
   if ([self interceptsSelector:aSelector]) {
-    return (_interceptor != nil);
+    return [_interceptor respondsToSelector:aSelector];
   } else {
     // Also return NO if _target has become nil due to zeroing weak reference (or placeholder initialization).
     return [_target respondsToSelector:aSelector];

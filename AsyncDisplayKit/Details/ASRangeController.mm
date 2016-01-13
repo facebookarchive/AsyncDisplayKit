@@ -15,34 +15,61 @@
 #import "ASRangeHandlerRender.h"
 #import "ASRangeHandlerPreload.h"
 #import "ASInternalHelpers.h"
+#import "ASLayoutController.h"
+#import "ASLayoutRangeType.h"
 
-@interface ASRangeController () {
+@implementation ASRangeController
+
+- (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
+{
+}
+
+- (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node
+{
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
+{
+  [_layoutController setTuningParameters:tuningParameters forRangeType:rangeType];
+}
+
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
+{
+  return [_layoutController tuningParametersForRangeType:rangeType];
+}
+
+@end
+
+@interface ASRangeControllerStable ()
+{
   BOOL _rangeIsValid;
-
+  
   // keys should be ASLayoutRangeTypes and values NSSets containing NSIndexPaths
   NSMutableDictionary *_rangeTypeIndexPaths;
   NSDictionary *_rangeTypeHandlers;
   BOOL _queuedRangeUpdate;
-
+  
   ASScrollDirection _scrollDirection;
 }
 
 @end
 
-@implementation ASRangeController
+@implementation ASRangeControllerStable
 
-- (instancetype)init {
-  self = [super init];
-  if (self != nil) {
-    _rangeIsValid = YES;
-    _rangeTypeIndexPaths = [NSMutableDictionary dictionary];
-    _rangeTypeHandlers = @{
-      @(ASLayoutRangeTypeVisible): [[ASRangeHandlerVisible alloc] init],
-      @(ASLayoutRangeTypeRender): [[ASRangeHandlerRender alloc] init],
-      @(ASLayoutRangeTypePreload): [[ASRangeHandlerPreload alloc] init],
-    };
+- (instancetype)init
+{
+  if (!(self = [super init])) {
+    return nil;
   }
-
+  
+  _rangeIsValid = YES;
+  _rangeTypeIndexPaths = [NSMutableDictionary dictionary];
+  _rangeTypeHandlers = @{
+                         @(ASLayoutRangeTypeVisible)  : [[ASRangeHandlerVisible alloc] init],
+                         @(ASLayoutRangeTypeDisplay)  : [[ASRangeHandlerRender alloc] init],
+                         @(ASLayoutRangeTypeFetchData): [[ASRangeHandlerPreload alloc] init],
+                         };
+  
   return self;
 }
 
@@ -111,12 +138,13 @@
 
   NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
   CGSize viewportSize = [_dataSource viewportSizeForRangeController:self];
+  [_layoutController setViewportSize:viewportSize];
 
   // the layout controller needs to know what the current visible indices are to calculate range offsets
   if ([_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)]) {
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
-
+  
   for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
     ASLayoutRangeType rangeType = (ASLayoutRangeType)i;
     id rangeKey = @(rangeType);
@@ -124,13 +152,12 @@
     // this delegate decide what happens when a node is added or removed from a range
     id<ASRangeHandler> rangeHandler = _rangeTypeHandlers[rangeKey];
 
-    if (!_rangeIsValid || [_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths viewportSize:viewportSize rangeType:rangeType]) {
-      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
-                                                       viewportSize:viewportSize
-                                                          rangeType:rangeType];
+    if (!_rangeIsValid || [_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths rangeType:rangeType]) {
+      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:rangeType];
 
       // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
-      NSMutableSet *removedIndexPaths = _rangeIsValid ? [_rangeTypeIndexPaths[rangeKey] mutableCopy] : [NSMutableSet set];
+      // This value may be nil for the first call of this method.
+      NSMutableSet *removedIndexPaths = [_rangeTypeIndexPaths[rangeKey] mutableCopy];
       [removedIndexPaths minusSet:indexPaths];
       [removedIndexPaths minusSet:visibleNodePathsSet];
 
@@ -171,66 +198,81 @@
 
 - (BOOL)shouldSkipVisibleNodesForRangeType:(ASLayoutRangeType)rangeType
 {
-  return rangeType == ASLayoutRangeTypeRender;
+  return rangeType == ASLayoutRangeTypeDisplay;
 }
 
 #pragma mark - ASDataControllerDelegete
 
-- (void)dataControllerBeginUpdates:(ASDataController *)dataController {
+- (void)dataControllerBeginUpdates:(ASDataController *)dataController
+{
   ASPerformBlockOnMainThread(^{
     [_delegate didBeginUpdatesInRangeController:self];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
+- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+{
   ASPerformBlockOnMainThread(^{
     [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
+- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
   ASDisplayNodeAssert(nodes.count == indexPaths.count, @"Invalid index path");
-
-  NSMutableArray *nodeSizes = [NSMutableArray arrayWithCapacity:nodes.count];
-  [nodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-    [nodeSizes addObject:[NSValue valueWithCGSize:node.calculatedSize]];
-  }];
-
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
     [_delegate rangeController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
+- (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
+    
+    // When removing nodes we need to make sure that removed indexPaths are not left in _rangeTypeIndexPaths,
+    // otherwise _updateVisibleNodeIndexPaths may try to retrieve nodes from dataSource that aren't there anymore
+    for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
+      id rangeKey = @((ASLayoutRangeType)i);
+      NSMutableSet *rangePaths = [_rangeTypeIndexPaths[rangeKey] mutableCopy];
+      for (NSIndexPath *path in indexPaths) {
+        [rangePaths removeObject:path];
+      }
+      _rangeTypeIndexPaths[rangeKey] = rangePaths;
+    }
+    
     [_delegate rangeController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
   ASDisplayNodeAssert(sections.count == indexSet.count, @"Invalid sections");
-
-  NSMutableArray *sectionNodeSizes = [NSMutableArray arrayWithCapacity:sections.count];
-
-  [sections enumerateObjectsUsingBlock:^(NSArray *nodes, NSUInteger idx, BOOL *stop) {
-    NSMutableArray *nodeSizes = [NSMutableArray arrayWithCapacity:nodes.count];
-    [nodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx2, BOOL *stop2) {
-      [nodeSizes addObject:[NSValue valueWithCGSize:node.calculatedSize]];
-    }];
-    [sectionNodeSizes addObject:nodeSizes];
-  }];
-
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
+- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
+    
+    // When removing nodes we need to make sure that removed indexPaths are not left in _rangeTypeIndexPaths,
+    // otherwise _updateVisibleNodeIndexPaths may try to retrieve nodes from dataSource that aren't there anymore
+    for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
+      id rangeKey = @((ASLayoutRangeType)i);
+      NSMutableSet *rangePaths = [_rangeTypeIndexPaths[rangeKey] mutableCopy];
+      for (NSIndexPath *path in _rangeTypeIndexPaths[rangeKey]) {
+        if ([indexSet containsIndex:path.section]) {
+          [rangePaths removeObject:path];
+        }
+      }
+      _rangeTypeIndexPaths[rangeKey] = rangePaths;
+    }
+    
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   });
 }

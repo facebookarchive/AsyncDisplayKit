@@ -15,6 +15,7 @@
 #import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
 
 @class ASCellNode;
+@class ASCollectionNode;
 @protocol ASCollectionDataSource;
 @protocol ASCollectionDelegate;
 @protocol ASCollectionViewLayoutInspecting;
@@ -22,10 +23,16 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * Node-based collection view.
+ * Asynchronous UICollectionView with Intelligent Preloading capabilities.
  *
- * ASCollectionView is a version of UICollectionView that uses nodes -- specifically, ASCellNode subclasses -- with asynchronous
- * pre-rendering instead of synchronously loading UICollectionViewCells.
+ * ASCollectionNode is recommended over ASCollectionView.  This class exists for adoption convenience.
+ *
+ * ASCollectionView is a true subclass of UICollectionView, meaning it is pointer-compatible
+ * with code that currently uses UICollectionView.
+ *
+ * The main difference is that asyncDataSource expects -nodeForItemAtIndexPath, an ASCellNode, and
+ * the sizeForItemAtIndexPath: method is eliminated (as are the performance problems caused by it).
+ * This is made possible because ASCellNodes can calculate their own size, and preload ahead of time.
  */
 @interface ASCollectionView : UICollectionView
 
@@ -36,6 +43,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
+
+// The corresponding ASCollectionNode, which exists even if directly allocating & handling the view class.
+@property (nonatomic, weak, readonly) ASCollectionNode *collectionNode;
 
 @property (nonatomic, weak) id<ASCollectionDelegate>   asyncDelegate;
 @property (nonatomic, weak) id<ASCollectionDataSource> asyncDataSource;
@@ -281,6 +291,16 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method should only be called by ASCollectionNode.  To be removed in a later release.
  */
 - (void)clearFetchedData;
+
+/**
+ * Forces the .contentInset to be UIEdgeInsetsZero.
+ *
+ * @discussion By default, UIKit sets the top inset to the navigation bar height, even for horizontally
+ * scrolling views.  This can only be disabled by setting a property on the containing UIViewController,
+ * automaticallyAdjustsScrollViewInsets, which may not be accessible.  ASPagerNode uses this to ensure
+ * its flow layout behaves predictably and does not log undefined layout warnings.
+ */
+@property (nonatomic) BOOL zeroContentInsets;
 
 @end
 

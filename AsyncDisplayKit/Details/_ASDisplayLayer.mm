@@ -110,6 +110,8 @@
   ASDisplayNodeAssertMainThread();
 
   ASDN::MutexLocker l(_displaySuspendedLock);
+  // FIXME: Reconsider whether we should cancel a display in progress.
+  // We should definitely cancel a display that is scheduled, but unstarted display.
   [self cancelAsyncDisplay];
 
   // Short circuit if display is suspended. When resumed, we will setNeedsDisplay at that time.

@@ -15,36 +15,6 @@
 #import "CGRect+ASConvenience.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 
-struct ASDirectionalScreenfulBuffer {
-  CGFloat positiveDirection; // Positive relative to iOS Core Animation layer coordinate space.
-  CGFloat negativeDirection;
-};
-typedef struct ASDirectionalScreenfulBuffer ASDirectionalScreenfulBuffer;
-
-ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferHorizontal(ASScrollDirection scrollDirection,
-                                                                    ASRangeTuningParameters rangeTuningParameters)
-{
-  ASDirectionalScreenfulBuffer horizontalBuffer = {0, 0};
-  BOOL movingRight = ASScrollDirectionContainsRight(scrollDirection);
-  horizontalBuffer.positiveDirection = movingRight ? rangeTuningParameters.leadingBufferScreenfuls :
-                                                     rangeTuningParameters.trailingBufferScreenfuls;
-  horizontalBuffer.negativeDirection = movingRight ? rangeTuningParameters.trailingBufferScreenfuls :
-                                                     rangeTuningParameters.leadingBufferScreenfuls;
-  return horizontalBuffer;
-}
-
-ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferVertical(ASScrollDirection scrollDirection,
-                                                                  ASRangeTuningParameters rangeTuningParameters)
-{
-  ASDirectionalScreenfulBuffer verticalBuffer = {0, 0};
-  BOOL movingDown = ASScrollDirectionContainsDown(scrollDirection);
-  verticalBuffer.positiveDirection = movingDown ? rangeTuningParameters.leadingBufferScreenfuls :
-                                                  rangeTuningParameters.trailingBufferScreenfuls;
-  verticalBuffer.negativeDirection = movingDown ? rangeTuningParameters.trailingBufferScreenfuls :
-                                                  rangeTuningParameters.leadingBufferScreenfuls;
-  return verticalBuffer;
-}
-
 struct ASRangeGeometry {
   CGRect rangeBounds;
   CGRect updateBounds;
@@ -57,9 +27,9 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 
 @interface ASCollectionViewLayoutController ()
 {
+  @package
   ASCollectionView * __weak _collectionView;
   UICollectionViewLayout * __strong _collectionViewLayout;
-  std::vector<CGRect> _updateRangeBoundsIndexedByRangeType;
   ASScrollDirection _scrollableDirections;
 }
 @end
@@ -75,61 +45,32 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   _scrollableDirections = [collectionView scrollableDirections];
   _collectionView = collectionView;
   _collectionViewLayout = [collectionView collectionViewLayout];
+  return self;
+}
+
+@end
+
+@implementation ASCollectionViewLayoutControllerStable
+{
+  std::vector<CGRect> _updateRangeBoundsIndexedByRangeType;
+}
+
+- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView
+{
+  if (!(self = [super initWithCollectionView:collectionView])) {
+    return nil;
+  }
+  
   _updateRangeBoundsIndexedByRangeType = std::vector<CGRect>(ASLayoutRangeTypeCount);
   return self;
 }
 
-#pragma mark -
-#pragma mark Index Paths in Range
-
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection
-                     viewportSize:(CGSize)viewportSize
-                        rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType
 {
-  ASRangeGeometry rangeGeometry = [self rangeGeometryWithScrollDirection:scrollDirection
-                                                   rangeTuningParameters:[self tuningParametersForRangeType:rangeType]];
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType];
+  ASRangeGeometry rangeGeometry = [self rangeGeometryWithScrollDirection:scrollDirection tuningParameters:tuningParameters];
   _updateRangeBoundsIndexedByRangeType[rangeType] = rangeGeometry.updateBounds;
   return [self indexPathsForItemsWithinRangeBounds:rangeGeometry.rangeBounds];
-}
-
-- (ASRangeGeometry)rangeGeometryWithScrollDirection:(ASScrollDirection)scrollDirection
-                              rangeTuningParameters:(ASRangeTuningParameters)rangeTuningParameters
-{
-  CGRect rangeBounds = _collectionView.bounds;
-  CGRect updateBounds = _collectionView.bounds;
-  
-  //scrollable directions can change for non-flow layouts
-  if ([_collectionViewLayout asdk_isFlowLayout] == NO) {
-    _scrollableDirections = [_collectionView scrollableDirections];
-  }
-  
-  BOOL canScrollHorizontally = ASScrollDirectionContainsHorizontalDirection(_scrollableDirections);
-  if (canScrollHorizontally) {
-    ASDirectionalScreenfulBuffer horizontalBuffer = ASDirectionalScreenfulBufferHorizontal(scrollDirection,
-                                                                                           rangeTuningParameters);
-    rangeBounds = asdk_CGRectExpandHorizontally(rangeBounds,
-                                                horizontalBuffer.negativeDirection,
-                                                horizontalBuffer.positiveDirection);
-    // Update bounds is at most 95% of the next/previous screenful and at least half of tuning parameter value.
-    updateBounds = asdk_CGRectExpandHorizontally(updateBounds,
-                                                 MIN(horizontalBuffer.negativeDirection * 0.5, 0.95),
-                                                 MIN(horizontalBuffer.positiveDirection * 0.5, 0.95));
-  }
-  
-  BOOL canScrollVertically = ASScrollDirectionContainsVerticalDirection(_scrollableDirections);
-  if (canScrollVertically) {
-    ASDirectionalScreenfulBuffer verticalBuffer = ASDirectionalScreenfulBufferVertical(scrollDirection,
-                                                                                       rangeTuningParameters);
-    rangeBounds = asdk_CGRectExpandVertically(rangeBounds,
-                                              verticalBuffer.negativeDirection,
-                                              verticalBuffer.positiveDirection);
-    // Update bounds is at most 95% of the next/previous screenful and at least half of tuning parameter value.
-    updateBounds = asdk_CGRectExpandVertically(updateBounds,
-                                               MIN(verticalBuffer.negativeDirection * 0.5, 0.95),
-                                               MIN(verticalBuffer.positiveDirection * 0.5, 0.95));
-  }
-
-  return {rangeBounds, updateBounds};
 }
 
 - (NSSet *)indexPathsForItemsWithinRangeBounds:(CGRect)rangeBounds
@@ -144,13 +85,31 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return indexPathSet;
 }
 
-#pragma mark -
-#pragma mark Should Update Range
-
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths
-                            viewportSize:(CGSize)viewportSize
-                               rangeType:(ASLayoutRangeType)rangeType
+- (ASRangeGeometry)rangeGeometryWithScrollDirection:(ASScrollDirection)scrollDirection
+                                   tuningParameters:(ASRangeTuningParameters)tuningParameters
 {
+  CGRect rangeBounds = _collectionView.bounds;
+  CGRect updateBounds = _collectionView.bounds;
+  
+  // Scrollable directions can change for non-flow layouts
+  if ([_collectionViewLayout asdk_isFlowLayout] == NO) {
+    _scrollableDirections = [_collectionView scrollableDirections];
+  }
+  
+  rangeBounds = CGRectExpandToRangeWithScrollableDirections(rangeBounds, tuningParameters, _scrollableDirections, scrollDirection);
+  
+  ASRangeTuningParameters updateTuningParameters = tuningParameters;
+  updateTuningParameters.leadingBufferScreenfuls = MIN(updateTuningParameters.leadingBufferScreenfuls * 0.5, 0.95);
+  updateTuningParameters.trailingBufferScreenfuls = MIN(updateTuningParameters.trailingBufferScreenfuls * 0.5, 0.95);
+  
+  updateBounds = CGRectExpandToRangeWithScrollableDirections(updateBounds, updateTuningParameters, _scrollableDirections, scrollDirection);
+
+  return {rangeBounds, updateBounds};
+}
+
+- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths rangeType:(ASLayoutRangeType)rangeType
+{
+  CGSize viewportSize = [self viewportSize];
   CGRect updateRangeBounds = _updateRangeBoundsIndexedByRangeType[rangeType];
   if (CGRectIsEmpty(updateRangeBounds)) {
     return YES;
@@ -166,6 +125,43 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   } else {
     return YES;
   }
+}
+
+@end
+
+
+@implementation ASCollectionViewLayoutControllerBeta
+
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType
+{
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType];
+  CGRect rangeBounds = [self rangeBoundsWithScrollDirection:scrollDirection rangeTuningParameters:tuningParameters];
+  return [self indexPathsForItemsWithinRangeBounds:rangeBounds];
+}
+
+- (NSSet *)indexPathsForItemsWithinRangeBounds:(CGRect)rangeBounds
+{
+  NSArray *layoutAttributes = [_collectionViewLayout layoutAttributesForElementsInRect:rangeBounds];
+  NSMutableSet *indexPathSet = [NSMutableSet setWithCapacity:layoutAttributes.count];
+  for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
+    //ASDisplayNodeAssert(![indexPathSet containsObject:la.indexPath], @"Shouldn't already contain indexPath");
+    ASDisplayNodeAssert(la.representedElementCategory != UICollectionElementCategoryDecorationView, @"UICollectionView decoration views are not supported by ASCollectionView");
+    [indexPathSet addObject:la.indexPath];
+  }
+  return indexPathSet;
+}
+
+- (CGRect)rangeBoundsWithScrollDirection:(ASScrollDirection)scrollDirection
+                   rangeTuningParameters:(ASRangeTuningParameters)tuningParameters
+{
+  CGRect rect = _collectionView.bounds;
+  
+  // Scrollable directions can change for non-flow layouts
+  if ([_collectionViewLayout asdk_isFlowLayout] == NO) {
+    _scrollableDirections = [_collectionView scrollableDirections];
+  }
+  
+  return CGRectExpandToRangeWithScrollableDirections(rect, tuningParameters, _scrollableDirections, scrollDirection);
 }
 
 @end

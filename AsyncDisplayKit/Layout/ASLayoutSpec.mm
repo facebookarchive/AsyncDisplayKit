@@ -39,7 +39,6 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   if (!(self = [super init])) {
     return nil;
   }
-  _layoutChildren = [NSMutableDictionary dictionary];
   _isMutable = YES;
   return self;
 }
@@ -54,11 +53,6 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 - (id<ASLayoutable>)finalLayoutable
 {
   return self;
-}
-
-- (void)setChild:(id<ASLayoutable>)child;
-{
-  [self setChild:child forIdentifier:kDefaultChildKey];
 }
 
 - (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
@@ -86,6 +80,19 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
     }
   }
   return child;
+}
+
+- (NSMutableDictionary *)layoutChildren
+{
+  if (!_layoutChildren) {
+    _layoutChildren = [NSMutableDictionary dictionary];
+  }
+  return _layoutChildren;
+}
+
+- (void)setChild:(id<ASLayoutable>)child;
+{
+  [self setChild:child forIdentifier:kDefaultChildKey];
 }
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier

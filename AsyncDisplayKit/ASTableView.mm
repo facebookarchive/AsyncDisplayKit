@@ -13,11 +13,13 @@
 #import "ASChangeSetDataController.h"
 #import "ASCollectionViewLayoutController.h"
 #import "ASDelegateProxy.h"
+#import "ASDisplayNode+Beta.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
+#import "_ASDisplayLayer.h"
 
 #import <CoreFoundation/CoreFoundation.h>
 
@@ -81,10 +83,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 #pragma mark ASTableView
 
 @interface ASTableNode ()
-- (instancetype)_initWithStyle:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass;
+- (instancetype)_initWithTableView:(ASTableView *)tableView;
 @end
 
-@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor> {
+@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate,
+                           ASDataControllerSource,     _ASTableViewCellDelegate,
+                           ASCellNodeLayoutDelegate,    ASDelegateProxyInterceptor>
+{
   ASTableViewProxy *_proxyDataSource;
   ASTableViewProxy *_proxyDelegate;
 
@@ -110,9 +115,24 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 @property (atomic, assign) BOOL asyncDataSourceLocked;
 @property (nonatomic, retain, readwrite) ASDataController *dataController;
 
+// Used only when ASTableView is created directly rather than through ASTableNode.
+// We create a node so that logic related to appearance, memory management, etc can be located there
+// for both the node-based and view-based version of the table.
+// This also permits sharing logic with ASCollectionNode, as the superclass is not UIKit-controlled.
+@property (nonatomic, retain) ASTableNode *strongTableNode;
+
+// Always set, whether ASCollectionView is created directly or via ASCollectionNode.
+@property (nonatomic, weak)   ASTableNode *tableNode;
+
 @end
 
 @implementation ASTableView
+
+// Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASTableNode.
++ (Class)layerClass
+{
+  return [_ASDisplayLayer class];
+}
 
 + (Class)dataControllerClass
 {
@@ -122,22 +142,23 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 #pragma mark -
 #pragma mark Lifecycle
 
-- (void)configureWithDataControllerClass:(Class)dataControllerClass asyncDataFetching:(BOOL)asyncDataFetching
+- (void)configureWithDataControllerClass:(Class)dataControllerClass
 {
   _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
   
-  _rangeController = [[ASRangeController alloc] init];
+  _rangeController = [ASDisplayNode shouldUseNewRenderingRange] ? [[ASRangeControllerBeta alloc] init]
+                                                                : [[ASRangeControllerStable alloc] init];
   _rangeController.layoutController = _layoutController;
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
   
-  _dataController = [[dataControllerClass alloc] initWithAsyncDataFetching:asyncDataFetching];
+  _dataController = [[dataControllerClass alloc] initWithAsyncDataFetching:NO];
   _dataController.dataSource = self;
   _dataController.delegate = _rangeController;
   
   _layoutController.dataSource = _dataController;
 
-  _asyncDataFetchingEnabled = asyncDataFetching;
+  _asyncDataFetchingEnabled = NO;
   _asyncDataSourceLocked = NO;
 
   _leadingScreensForBatching = 1.0;
@@ -161,32 +182,35 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
 {
-  return [self initWithFrame:frame style:style asyncDataFetching:NO];
+  return [self _initWithFrame:frame style:style dataControllerClass:nil ownedByNode:NO];
 }
 
 // FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
-  return [self initWithFrame:frame style:style dataControllerClass:[self.class dataControllerClass] asyncDataFetching:asyncDataFetchingEnabled];
+  return [self _initWithFrame:frame style:style dataControllerClass:nil ownedByNode:NO];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass asyncDataFetching:(BOOL)asyncDataFetchingEnabled
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass ownedByNode:(BOOL)ownedByNode
 {
-//  ASTableNode *tableNode = [[ASTableNode alloc] _initWithStyle:style dataControllerClass:dataControllerClass];
-//  tableNode.frame = frame;
-//  return tableNode.view;
-  return [self _initWithFrame:frame style:style dataControllerClass:dataControllerClass];
-}
-  
-- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
-{
-  if (!(self = [super initWithFrame:frame style:style]))
+  if (!(self = [super initWithFrame:frame style:style])) {
     return nil;
+  }
   
   if (!dataControllerClass) {
-    dataControllerClass = [self.class dataControllerClass];
+    dataControllerClass = [[self class] dataControllerClass];
   }
-  [self configureWithDataControllerClass:dataControllerClass asyncDataFetching:NO];
+  
+  [self configureWithDataControllerClass:dataControllerClass];
+  
+  if (!ownedByNode) {
+    // See commentary at the definition of .strongTableNode for why we create an ASTableNode.
+    // FIXME: The _view pointer of the node retains us, but the node will die immediately if we don't
+    // retain it.  At the moment there isn't a great solution to this, so we can't yet move our core
+    // logic to ASTableNode (required to have a shared superclass with ASCollection*).
+    ASTableNode *tableNode = nil; //[[ASTableNode alloc] _initWithTableView:self];
+    self.strongTableNode = tableNode;
+  }
   
   return self;
 }
@@ -274,7 +298,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  ASDisplayNodeAssert(self.asyncDelegate, @"ASTableView's asyncDelegate property must be set.");
   ASPerformBlockOnMainThread(^{
     [super reloadData];
   });
@@ -305,12 +328,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASRangeTuningParameters)rangeTuningParameters
 {
-  return [self tuningParametersForRangeType:ASLayoutRangeTypeRender];
+  return [self tuningParametersForRangeType:ASLayoutRangeTypeDisplay];
 }
 
 - (void)setRangeTuningParameters:(ASRangeTuningParameters)tuningParameters
 {
-  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
+  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeDisplay];
+}
+
+- (NSArray<NSArray <ASCellNode *> *> *)completedNodes
+{
+  return [_dataController completedNodes];
 }
 
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -558,7 +586,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   ASCellNode *cellNode = [self nodeForRowAtIndexPath:indexPath];
   if (cellNode.neverShowPlaceholders) {
-    [cellNode recursivelyEnsureDisplay];
+    [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
 }
 
@@ -672,10 +700,20 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return [_dataController nodesAtIndexPaths:indexPaths];
 }
 
+- (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController nodeAtIndexPath:indexPath];
+}
+
 - (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
   return self.bounds.size;
+}
+
+- (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
+{
+  return self.tableNode.interfaceState;
 }
 
 #pragma mark - ASRangeControllerDelegate
@@ -918,6 +956,27 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     for (ASDisplayNode *node in section) {
       [node recursivelyClearFetchedData];
     }
+  }
+}
+
+#pragma mark - _ASDisplayView behavior substitutions
+// Need these to drive interfaceState so we know when we are visible, if not nested in another range-managing element.
+// Because our superclass is a true UIKit class, we cannot also subclass _ASDisplayView.
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+  BOOL visible = (newWindow != nil);
+  ASDisplayNode *node = self.tableNode;
+  if (visible && !node.inHierarchy) {
+    [node __enterHierarchy];
+  }
+}
+
+- (void)didMoveToWindow
+{
+  BOOL visible = (self.window != nil);
+  ASDisplayNode *node = self.tableNode;
+  if (!visible && node.inHierarchy) {
+    [node __exitHierarchy];
   }
 }
 

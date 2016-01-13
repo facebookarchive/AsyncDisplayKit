@@ -34,6 +34,13 @@ typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent)
   ASControlNodeEventAllEvents         = 0xFFFFFFFF
 };
 
+typedef NS_OPTIONS(NSUInteger, ASControlState) {
+    ASControlStateNormal       = 0,
+    ASControlStateHighlighted  = 1 << 0,                  // used when ASControlNode isHighlighted is set
+    ASControlStateDisabled     = 1 << 1,
+    ASControlStateSelected     = 1 << 2,                  // used when ASControlNode isSeleted is set
+    ASControlStateReserved     = 0xFF000000               // flags reserved for internal framework use
+};
 
 /**
   @abstract ASControlNode is the base class for control nodes (such as buttons), or nodes that track touches to invoke targets with action messages.
@@ -53,7 +60,13 @@ typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent)
   @abstract Indicates whether or not the receiver is highlighted.
   @discussion This is set automatically when the there is a touch inside the control and removed on exit or touch up. This is different from touchInside in that it includes an area around the control, rather than just for touches inside the control.
  */
-@property (nonatomic, readonly, assign, getter=isHighlighted) BOOL highlighted;
+@property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
+
+/**
+ @abstract Indicates whether or not the receiver is highlighted.
+ @discussion This is set automatically when the receiver is tapped.
+ */
+@property (nonatomic, assign, getter=isSelected) BOOL selected;
 
 #pragma mark - Tracking Touches
 /**

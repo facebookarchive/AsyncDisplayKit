@@ -13,6 +13,7 @@
 @interface ASTableView (Internal)
 
 @property (nonatomic, retain, readonly) ASDataController *dataController;
+@property (nonatomic, weak, readwrite) ASTableNode *tableNode;
 
 /**
  * Initializer.
@@ -26,6 +27,6 @@
  *
  * @param asyncDataFetchingEnabled This option is reserved for future use, and currently a no-op.
  */
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass asyncDataFetching:(BOOL)asyncDataFetchingEnabled;
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass ownedByNode:(BOOL)ownedByNode;
 
 @end

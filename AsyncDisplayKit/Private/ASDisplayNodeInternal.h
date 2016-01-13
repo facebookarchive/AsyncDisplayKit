@@ -109,7 +109,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 #endif
 }
 
-+ (void)scheduleNodeForDisplay:(ASDisplayNode *)node;
++ (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node;
 
 // The _ASDisplayLayer backing the node, if any.
 @property (nonatomic, readonly, retain) _ASDisplayLayer *asyncLayer;
@@ -132,19 +132,11 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 
-// Changed before calling willEnterHierarchy / didExitHierarchy.
-@property (nonatomic, readwrite, assign, getter = isInHierarchy) BOOL inHierarchy;
-
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
 - (BOOL)__visibilityNotificationsDisabled;
 - (BOOL)__selfOrParentHasVisibilityNotificationsDisabled;
 - (void)__incrementVisibilityNotificationsDisabled;
 - (void)__decrementVisibilityNotificationsDisabled;
-
-// Call willEnterHierarchy if necessary and set inHierarchy = YES if visibility notifications are enabled on all of its parents
-- (void)__enterHierarchy;
-// Call didExitHierarchy if necessary and set inHierarchy = NO if visibility notifications are enabled on all of its parents
-- (void)__exitHierarchy;
 
 // Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay;
@@ -159,6 +151,20 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 - (id)initWithLayerClass:(Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
+
+/**
+ * // TODO: NOT YET IMPLEMENTED
+ *
+ * @abstract Prevents interface state changes from affecting the node, until disabled.
+ *
+ * @discussion Useful to avoid flashing after removing a node from the hierarchy and re-adding it.
+ * Removing a node from the hierarchy will cause it to exit the Display state, clearing its contents.
+ * For some animations, it's desirable to be able to remove a node without causing it to re-display.
+ * Once re-enabled, the interface state will be updated to the same value it would have been.
+ *
+ * @see ASInterfaceState
+ */
+@property (nonatomic, assign) BOOL interfaceStateSuspended;
 
 /**
  * This method has proven helpful in a few rare scenarios, similar to a category extension on UIView,

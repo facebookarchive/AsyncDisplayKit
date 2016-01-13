@@ -7,8 +7,9 @@
 //
 
 #import "ASFlowLayoutController.h"
-#import "ASTableNode.h"
+#import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASRangeController.h"
 
 @interface _ASTablePendingState : NSObject
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
@@ -28,11 +29,24 @@
 
 @implementation ASTableNode
 
-- (instancetype)_initWithStyle:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
+- (instancetype)_initWithTableView:(ASTableView *)tableView
 {
-  if (self = [super initWithViewBlock:^UIView *{ return [[ASTableView alloc] _initWithFrame:CGRectZero
-                                                                                      style:style
-                                                                        dataControllerClass:dataControllerClass]; }]) {
+  // Avoid a retain cycle.  In this case, the ASTableView is creating us, and strongly retains us.
+  ASTableView * __weak weakTableView = tableView;
+  if (self = [super initWithViewBlock:^UIView *{ return weakTableView; }]) {
+    __unused __weak ASTableView *view = [self view];
+    return self;
+  }
+  return nil;
+}
+
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
+{
+  ASDisplayNodeViewBlock tableViewBlock = ^UIView *{
+    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass ownedByNode:YES];
+  };
+
+  if (self = [super initWithViewBlock:tableViewBlock]) {
     return self;
   }
   return nil;
@@ -40,23 +54,24 @@
 
 - (instancetype)initWithStyle:(UITableViewStyle)style
 {
-  return [self _initWithStyle:style dataControllerClass:nil];
+  return [self _initWithFrame:CGRectZero style:style dataControllerClass:nil];
 }
 
 - (instancetype)init
 {
-  return [self _initWithStyle:UITableViewStylePlain dataControllerClass:nil];
+  return [self _initWithFrame:CGRectZero style:UITableViewStylePlain dataControllerClass:nil];
 }
 
 - (void)didLoad
 {
   [super didLoad];
   
+  ASTableView *view = self.view;
+  view.tableNode    = self;
+  
   if (_pendingState) {
     _ASTablePendingState *pendingState = _pendingState;
-    self.pendingState = nil;
-    
-    ASTableView *view    = self.view;
+    self.pendingState    = nil;
     view.asyncDelegate   = pendingState.delegate;
     view.asyncDataSource = pendingState.dataSource;
   }
@@ -113,6 +128,14 @@
 {
   return (ASTableView *)[super view];
 }
+
+#if RangeControllerLoggingEnabled
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+  [super visibilityDidChange:isVisible];
+  NSLog(@"%@ - visible: %d", self, isVisible);
+}
+#endif
 
 - (void)clearContents
 {

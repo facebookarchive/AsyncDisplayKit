@@ -12,6 +12,23 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+// Because inline methods can't be extern'd and need to be part of the translation unit of code
+// that compiles with them to actually inline, we both declare and define these in the header.
+inline BOOL ASInterfaceStateIncludesVisible(ASInterfaceState interfaceState)
+{
+  return ((interfaceState & ASInterfaceStateVisible) == ASInterfaceStateVisible);
+}
+
+inline BOOL ASInterfaceStateIncludesDisplay(ASInterfaceState interfaceState)
+{
+  return ((interfaceState & ASInterfaceStateDisplay) == ASInterfaceStateDisplay);
+}
+
+inline BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
+{
+  return ((interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
+}
+
 NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN

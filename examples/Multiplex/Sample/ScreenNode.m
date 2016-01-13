@@ -60,7 +60,7 @@
   NSDictionary *attributes = @{NSFontAttributeName: [UIFont fontWithName:@"HelveticaNeue-Light" size:22.0f]};
   NSAttributedString *string = [[NSAttributedString alloc] initWithString:text
                                                                attributes:attributes];
-  [_buttonNode setAttributedTitle:string forState:ASButtonStateNormal];
+  [_buttonNode setAttributedTitle:string forState:ASControlStateNormal];
   [self setNeedsLayout];
 }
 

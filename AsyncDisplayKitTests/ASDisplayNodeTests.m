@@ -1702,7 +1702,11 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
 
   [node.view removeFromSuperview];
-  XCTAssert(!node.hasFetchedData);
+  // We don't want to call -clearFetchedData on nodes that aren't being managed by a range controller.
+  // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
+  // Still, the interfaceState should be None to reflect the current state of the node.
+  // We just don't proactively clear contents or fetched data for this state transition.
+  XCTAssert(node.hasFetchedData);
   XCTAssert(node.interfaceState == ASInterfaceStateNone);
 }
 

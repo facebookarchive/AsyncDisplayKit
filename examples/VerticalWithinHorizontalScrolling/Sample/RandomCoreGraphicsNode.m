@@ -42,4 +42,55 @@
   CGColorSpaceRelease(colorSpace);
 }
 
+- (instancetype)init
+{
+  if (!(self = [super init])) {
+    return nil;
+  }
+  
+  _indexPathTextNode = [[ASTextNode alloc] init];
+  [self addSubnode:_indexPathTextNode];
+  
+  return self;
+}
+
+- (void)setIndexPath:(NSIndexPath *)indexPath
+{
+  _indexPath = indexPath;
+  _indexPathTextNode.attributedString = [[NSAttributedString alloc] initWithString:[indexPath description] attributes:nil];
+}
+
+//- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+//{
+//  ASStackLayoutSpec *stackSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:@[_indexPathTextNode]];
+//  stackSpec.flexGrow = YES;
+//  return stackSpec;
+//}
+
+- (void)layout
+{
+  _indexPathTextNode.frame = self.bounds;
+  [super layout];
+}
+
+#if 0
+- (void)fetchData
+{
+  NSLog(@"fetchData - %@, %@", self, self.indexPath);
+  [super fetchData];
+}
+
+- (void)clearFetchedData
+{
+  NSLog(@"clearFetchedData - %@, %@", self, self.indexPath);
+  [super clearFetchedData];
+}
+
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+  NSLog(@"visibilityDidChange:%d - %@, %@", isVisible, self, self.indexPath);
+  [super visibilityDidChange:isVisible];
+}
+#endif
+
 @end
