@@ -570,10 +570,18 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
-  
+
+  if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNode:forItemAtIndexPath:)]) {
+    ASCellNode *node = ((_ASCollectionViewCell *)cell).node;
+    ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
+    [_asyncDelegate collectionView:self didEndDisplayingNode:node forItemAtIndexPath:indexPath];
+  }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
     [_asyncDelegate collectionView:self didEndDisplayingNodeForItemAtIndexPath:indexPath];
   }
+#pragma clang diagnostic pop
 }
 
 - (void)layoutSubviews
