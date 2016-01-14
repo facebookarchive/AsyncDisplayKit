@@ -170,6 +170,14 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   if (!self.enabled)
     return;
 
+  // On iPhone 6s, iOS 9.2 (and maybe other versions) sometimes calls -touchesEnded:withEvent:
+  // twice on the view for one call to -touchesBegan:withEvent:. On ASControlNode, it used to
+  // trigger an action twice unintentionally. Now, we ignore that event if we're not in a tracking
+  // state in order to have a correct behavior.
+  // It might be related to that issue: http://www.openradar.me/22910171
+  if (!self.tracking)
+    return;
+
   NSParameterAssert([touches count] == 1);
   UITouch *theTouch = [touches anyObject];
   CGPoint touchLocation = [theTouch locationInView:self.view];

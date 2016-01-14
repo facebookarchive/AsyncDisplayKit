@@ -336,7 +336,17 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 
 - (void)tableView:(ASTableView *)tableView willDisplayNodeForRowAtIndexPath:(NSIndexPath *)indexPath;
-- (void)tableView:(ASTableView *)tableView didEndDisplayingNodeForRowAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Informs the delegate that the table view did remove the provided node from the view hierarchy.
+ * This may be caused by the node scrolling out of view, or by deleting the row
+ * or its containing section with @c deleteRowsAtIndexPaths:withRowAnimation: or @c deleteSections:withRowAnimation: .
+ *
+ * @param tableView The sender.
+ * @param node The node which was removed from the view hierarchy.
+ * @param indexPath The index path at which the node was located before the removal.
+ */
+- (void)tableView:(ASTableView *)tableView didEndDisplayingNode:(ASCellNode *)node forRowAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Receive a message that the tableView is near the end of its data set and more data should be fetched if necessary.
@@ -364,6 +374,14 @@ NS_ASSUME_NONNULL_BEGIN
  * should occur.
  */
 - (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView;
+
+/**
+ * Informs the delegate that the table view did remove the node which was previously
+ * at the given index path from the view hierarchy.
+ *
+ * This method is deprecated. Use @c tableView:didEndDisplayingNode:forRowAtIndexPath: instead.
+ */
+- (void)tableView:(ASTableView *)tableView didEndDisplayingNodeForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
 
 @end
 

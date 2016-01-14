@@ -376,7 +376,17 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 
 - (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath;
-- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNodeForItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Informs the delegate that the collection view did remove the provided node from the view hierarchy.
+ * This may be caused by the node scrolling out of view, or by deleting the item
+ * or its containing section with @c deleteItemsAtIndexPaths: or @c deleteSections: .
+ * 
+ * @param collectionView The sender.
+ * @param node The node which was removed from the view hierarchy.
+ * @param indexPath The index path at which the node was located before it was removed.
+ */
+- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Receive a message that the collectionView is near the end of its data set and more data should be fetched if 
@@ -405,6 +415,14 @@ NS_ASSUME_NONNULL_BEGIN
  * should occur.
  */
 - (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView;
+
+/**
+ * Informs the delegate that the collection view did remove the node which was previously
+ * at the given index path from the view hierarchy.
+ *
+ * This method is deprecated. Use @c collectionView:didEndDisplayingNode:forItemAtIndexPath: instead.
+ */
+- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
 
 @end
 

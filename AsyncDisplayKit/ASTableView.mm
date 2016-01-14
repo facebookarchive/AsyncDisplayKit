@@ -598,9 +598,18 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
+  if ([_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNode:forRowAtIndexPath:)]) {
+    ASCellNode *node = ((_ASTableViewCell *)cell).node;
+    ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
+    [_asyncDelegate tableView:self didEndDisplayingNode:node forRowAtIndexPath:indexPath];
+  }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   if ([_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNodeForRowAtIndexPath:)]) {
     [_asyncDelegate tableView:self didEndDisplayingNodeForRowAtIndexPath:indexPath];
   }
+#pragma clang diagnostic pop
 }
 
 

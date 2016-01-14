@@ -900,7 +900,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSUInteger)numberOfRowsInSection:(NSUInteger)section
 {
   ASDisplayNodeAssertMainThread();
-  return [[self completedNodes][section] count];
+  NSArray *completedNodes = [self completedNodes];
+  return (section < completedNodes.count) ? [completedNodes[section] count] : 0;
 }
 
 - (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath
