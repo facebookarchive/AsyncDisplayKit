@@ -14,6 +14,7 @@
 
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASStackLayoutSpec.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 #import <AsyncDisplayKit/ASVideoNode.h>
@@ -21,7 +22,6 @@
 static const CGFloat kImageSize = 80.0f;
 static const CGFloat kOuterPadding = 16.0f;
 static const CGFloat kInnerPadding = 10.0f;
-
 
 @interface NicCageNode ()
 {
@@ -82,8 +82,9 @@ static const CGFloat kInnerPadding = 10.0f;
   _kittenSize = size;
 
   _videoNode = [[ASVideoNode alloc] init];
+//  _videoNode.shouldAutoplay = YES;
   _videoNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
-  _videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
+  _videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
 
   [self addSubnode:_videoNode];
 

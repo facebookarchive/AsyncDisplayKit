@@ -38,7 +38,7 @@
 
   return _workingWindow;
 }
-
+  
 - (void)dealloc
 {
   if (![ASDisplayNode shouldUseNewRenderingRange]) {
@@ -64,7 +64,7 @@
   [node enterInterfaceState:ASInterfaceStateDisplay];
 
   
-  ASDisplayNodeAssert(![ASDisplayNode shouldUseNewRenderingRange], @"It should no longer be possible to reach this point with the new display range enabled");
+//  ASDisplayNodeAssert(![ASDisplayNode shouldUseNewRenderingRange], @"It should no longer be possible to reach this point with the new display range enabled");
   if ([ASDisplayNode shouldUseNewRenderingRange]) {
     [node recursivelyEnsureDisplaySynchronously:NO];
   } else {
@@ -102,7 +102,7 @@
   // The node calls clearCurrentContents and suspends display
   [node exitInterfaceState:ASInterfaceStateDisplay];
   
-  ASDisplayNodeAssert(![ASDisplayNode shouldUseNewRenderingRange], @"It should no longer be possible to reach this point with the new display range enabled");
+//  ASDisplayNodeAssert(![ASDisplayNode shouldUseNewRenderingRange], @"It should no longer be possible to reach this point with the new display range enabled");
   
   if ([ASDisplayNode shouldUseNewRenderingRange]) {
     if (![node isLayerBacked]) {

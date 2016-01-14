@@ -1,6 +1,7 @@
 
 
 #import "ASVideoNode.h"
+#import "ASDisplayNode+Beta.h"
 
 @interface ASVideoNode ()
 {
@@ -9,6 +10,10 @@
   __weak id<ASVideoNodeDelegate> _delegate;
 
   BOOL _shouldBePlaying;
+  
+  BOOL _shouldAutorepeat;
+  BOOL _shouldAutoplay;
+
   AVAsset *_asset;
   
   AVPlayerItem *_currentItem;
@@ -17,13 +22,9 @@
   ASButtonNode *_playButton;
   ASDisplayNode *_playerNode;
   ASDisplayNode *_spinner;
-  ASVideoGravity _gravity;
+  NSString *_gravity;
 }
 
-@end
-
-@interface ASDisplayNode ()
-- (void)setInterfaceState:(ASInterfaceState)newState;
 @end
 
 @implementation ASVideoNode
@@ -32,32 +33,32 @@
 {
   if (!(self = [super init])) { return nil; }
   
-  self.gravity = ASVideoGravityResizeAspect;
+  [ASDisplayNode setShouldUseNewRenderingRange:YES];
+  
+  self.gravity = AVLayerVideoGravityResizeAspect;
   
   [self addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
-  
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
-  
+    
   return self;
 }
 
-// FIXME: Adopt interfaceStateDidChange API
-- (void)setInterfaceState:(ASInterfaceState)newState
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
 {
-  [super setInterfaceState:newState];
-  
   if (!(newState & ASInterfaceStateVisible)) {
-    [self pause];
-    [(UIActivityIndicatorView *)_spinner.view stopAnimating];
-    [_spinner removeFromSupernode];
+    if (oldState & ASInterfaceStateVisible) {
+      if (_shouldBePlaying) {
+        [self pause];
+        _shouldBePlaying = YES;
+      } else {
+        [self pause];
+      }
+      [(UIActivityIndicatorView *)_spinner.view stopAnimating];
+      [_spinner removeFromSupernode];
+    }
   } else {
     if (_shouldBePlaying) {
       [self play];
     }
-  }
-
-  if (newState & ASInterfaceStateVisible) {
-    [self displayDidFinish];
   }
 }
 
@@ -78,10 +79,12 @@
 - (void)didPlayToEnd:(NSNotification *)notification
 {
   if (ASObjectIsEqual([[notification object] asset], _asset)) {
-    [_delegate videoDidReachEnd:self];
+    if ([_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)]) {
+      [_delegate videoPlaybackDidFinish:self];
+    }
     [_player seekToTime:CMTimeMakeWithSeconds(0, 1)];
     
-    if (_autorepeat) {
+    if (_shouldAutorepeat) {
       [self play];
     } else {
       [self pause];
@@ -92,13 +95,35 @@
 - (void)layout
 {
   [super layout];
-  _playerNode.frame = self.bounds;
   
-  CGFloat horizontalDiff = (self.bounds.size.width - _playButton.bounds.size.width)/2;
-  CGFloat verticalDiff = (self.bounds.size.height - _playButton.bounds.size.height)/2;
+  CGRect bounds = self.bounds;
+  _playerNode.frame = bounds;
+  _playerNode.layer.frame = bounds;
+  
+  CGFloat horizontalDiff = (bounds.size.width - _playButton.bounds.size.width)/2;
+  CGFloat verticalDiff = (bounds.size.height - _playButton.bounds.size.height)/2;
   _playButton.hitTestSlop = UIEdgeInsetsMake(-verticalDiff, -horizontalDiff, -verticalDiff, -horizontalDiff);
   
-  _spinner.frame = _playButton.frame;
+  _spinner.bounds = CGRectMake(0, 0, 44, 44);
+  _spinner.position = CGPointMake(bounds.size.width/2, bounds.size.height/2);
+}
+
+- (void)didLoad
+{
+  [super didLoad];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+  
+  _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
+    AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
+    if (!_player) {
+      _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+    }
+    playerLayer.player = _player;
+    playerLayer.videoGravity = [self gravity];
+    return playerLayer;
+  }];
+  
+  [self insertSubnode:_playerNode atIndex:0];
 }
 
 - (void)tapped
@@ -140,38 +165,6 @@
   }
 }
 
-// FIXME: Adopt interfaceStateDidChange API
-- (void)displayDidFinish
-{
-  [super displayDidFinish];
-  
-  ASDN::MutexLocker l(_lock);
-  
-  _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
-    AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
-    playerLayer.player = _player;
-    playerLayer.videoGravity = [self videoGravity];
-    return playerLayer;
-  }];
-  
-  [self insertSubnode:_playerNode atIndex:0];
-
-  if (_shouldAutoplay) {
-    [self play];
-  }
-}
-
-- (NSString *)videoGravity
-{
-  if (_gravity == ASVideoGravityResize) {
-    return AVLayerVideoGravityResize;
-  }
-  if (_gravity == ASVideoGravityResizeAspectFill) {
-    return AVLayerVideoGravityResizeAspectFill;
-  }
-  
-  return AVLayerVideoGravityResizeAspect;
-}
 
 - (void)clearFetchedData
 {
@@ -181,7 +174,27 @@
     ASDN::MutexLocker l(_lock);
     ((AVPlayerLayer *)_playerNode.layer).player = nil;
     _player = nil;
-    _shouldBePlaying = NO;
+  }
+}
+
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+  ASDN::MutexLocker l(_lock);
+  
+  if (_shouldAutoplay && _playerNode.isNodeLoaded) {
+    [self play];
+  }
+  if (isVisible) {
+    if (_playerNode.isNodeLoaded) {
+      if (!_player) {
+        _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+      }
+      ((AVPlayerLayer *)_playerNode.layer).player = _player;
+    }
+  
+    if (_shouldBePlaying) {
+      [self play];
+    }
   }
 }
 
@@ -233,29 +246,16 @@
   return _player;
 }
 
-- (void)setGravity:(ASVideoGravity)gravity
+- (void)setGravity:(NSString *)gravity
 {
   ASDN::MutexLocker l(_lock);
-  
-  switch (gravity) {
-    case ASVideoGravityResize:
-      ((AVPlayerLayer *)_playerNode.layer).videoGravity = AVLayerVideoGravityResize;
-      break;
-    case ASVideoGravityResizeAspect:
-      ((AVPlayerLayer *)_playerNode.layer).videoGravity = AVLayerVideoGravityResizeAspect;
-      break;
-    case ASVideoGravityResizeAspectFill:
-      ((AVPlayerLayer *)_playerNode.layer).videoGravity = AVLayerVideoGravityResizeAspectFill;
-      break;
-    default:
-      ((AVPlayerLayer *)_playerNode.layer).videoGravity = AVLayerVideoGravityResizeAspect;
-      break;
+  if (_playerNode.isNodeLoaded) {
+    ((AVPlayerLayer *)_playerNode.layer).videoGravity = gravity;
   }
-  
   _gravity = gravity;
 }
 
-- (ASVideoGravity)gravity
+- (NSString *)gravity
 {
   ASDN::MutexLocker l(_lock);
   
@@ -323,6 +323,12 @@
   return _currentItem;
 }
 
+- (void)setCurrentItem:(AVPlayerItem *)currentItem
+{
+  ASDN::MutexLocker l(_lock);
+  _currentItem = currentItem;
+}
+
 - (ASDisplayNode *)playerNode
 {
   ASDN::MutexLocker l(_lock);
@@ -339,7 +345,7 @@
 
 - (void)dealloc
 {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
   @try {
     [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
   }

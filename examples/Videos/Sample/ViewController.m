@@ -39,7 +39,7 @@
   
   videoNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
   
-  videoNode.gravity = ASVideoGravityResizeAspectFill;
+  videoNode.gravity = AVLayerVideoGravityResizeAspectFill;
   
   videoNode.backgroundColor = [UIColor lightGrayColor];
   
@@ -53,14 +53,14 @@
   
   nicCageVideo.delegate = self;
   
-  nicCageVideo.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
+  nicCageVideo.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
   
   nicCageVideo.frame = CGRectMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3, [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
   
-  nicCageVideo.gravity = ASVideoGravityResize;
+  nicCageVideo.gravity = AVLayerVideoGravityResize;
   
   nicCageVideo.backgroundColor = [UIColor lightGrayColor];
-  nicCageVideo.autorepeat = YES;
+  nicCageVideo.shouldAutorepeat = YES;
   nicCageVideo.playButton = [self playButton];
 
   return nicCageVideo;
@@ -78,7 +78,7 @@
   simonVideo.gravity = ASVideoGravityResizeAspect;
   
   simonVideo.backgroundColor = [UIColor lightGrayColor];
-  simonVideo.autorepeat = YES;
+  simonVideo.shouldAutorepeat = YES;
   simonVideo.playButton = [self playButton];
   simonVideo.shouldAutoplay = YES;
   
@@ -90,11 +90,11 @@
   ASButtonNode *playButton = [[ASButtonNode alloc] init];
   
   UIImage *image = [UIImage imageNamed:@"playButton@2x.png"];
-  [playButton setImage:image forState:ASButtonStateNormal];
+  [playButton setImage:image forState:ASControlStateNormal];
   [playButton measure:CGSizeMake(50, 50)];
   playButton.bounds = CGRectMake(0, 0, playButton.calculatedSize.width, playButton.calculatedSize.height);
   playButton.position = CGPointMake([UIScreen mainScreen].bounds.size.width/4, ([UIScreen mainScreen].bounds.size.height/3)/2);
-  [playButton setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:ASButtonStateHighlighted];
+  [playButton setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:ASControlStateHighlighted];
 
   return playButton;
 }
@@ -102,11 +102,6 @@
 - (BOOL)prefersStatusBarHidden
 {
   return YES;
-}
-
-- (void)videoDidReachEnd:(ASVideoNode *)videoNode
-{
-  //Do something with your video if you so desire.
 }
 
 @end

@@ -18,11 +18,24 @@
 }
 @end
 
-@interface ASVideoNode ()
+@interface ASVideoNode () {
+  ASDisplayNode *_playerNode;
+}
 @property (atomic) ASInterfaceState interfaceState;
 @property (atomic) ASDisplayNode *spinner;
 @property (atomic) ASDisplayNode *playerNode;
 @property (atomic) BOOL shouldBePlaying;
+
+- (void)setPlayerNode:(ASDisplayNode *)playerNode;
+@end
+
+@implementation ASVideoNode (Test)
+
+- (void)setPlayerNode:(ASDisplayNode *)playerNode
+{
+  _playerNode = playerNode;
+}
+
 @end
 
 @implementation ASVideoNodeTests
@@ -114,21 +127,48 @@
   XCTAssertNotNil(_videoNode.player);
 }
 
-- (void)testPlayerLayerNodeIsAddedOnDisplayDidFinish
+- (void)testPlayerLayerNodeIsAddedOnDidLoad
 {
   _videoNode.asset = _firstAsset;
 
-  [_videoNode displayDidFinish];
+  [_videoNode didLoad];
   
   XCTAssert([_videoNode.subnodes containsObject:_videoNode.playerNode]);
 }
 
-- (void)testVideoStartsPlayingOnDidDisplayIfAutoplayIsSet
+- (void)testVideoStartsPlayingOnDidDidBecomeVisibleWhenShouldAutoplay
 {
   _videoNode.asset = _firstAsset;
   _videoNode.shouldAutoplay = YES;
+  _videoNode.playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
+    AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
+    return playerLayer;
+  }];
+  _videoNode.playerNode.layer.frame = CGRectZero;
   
-  [_videoNode displayDidFinish];
+  [_videoNode visibilityDidChange:YES];
+
+  XCTAssertTrue(_videoNode.shouldBePlaying);
+}
+
+- (void)testVideoShouldPauseWhenItLeavesVisibleButShouldKnowPlayingShouldRestartLater
+{
+  _videoNode.asset = _firstAsset;
+  [_videoNode play];
+  
+  [_videoNode interfaceStateDidChange:ASInterfaceStateNone fromState:ASInterfaceStateVisible];
+
+  XCTAssertFalse(_videoNode.isPlaying);
+  XCTAssertTrue(_videoNode.shouldBePlaying);
+}
+
+- (void)testVideoThatIsPlayingWhenItLeavesVisibleRangeStartsAgainWhenItComesBack
+{
+  _videoNode.asset = _firstAsset;
+  [_videoNode play];
+  
+  [_videoNode interfaceStateDidChange:ASInterfaceStateVisible fromState:ASInterfaceStateNone];
+  [_videoNode interfaceStateDidChange:ASInterfaceStateNone fromState:ASInterfaceStateVisible];
   
   XCTAssertTrue(_videoNode.shouldBePlaying);
 }

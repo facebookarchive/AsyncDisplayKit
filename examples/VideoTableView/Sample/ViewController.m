@@ -16,7 +16,7 @@
 
 #import "BlurbNode.h"
 #import "NicCageNode.h"
-
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 
 static const NSInteger kCageSize = 20;            // intial number of Cage cells in ASTableView
 static const NSInteger kCageBatchSize = 10;       // number of Cage cells to add to ASTableView
@@ -37,7 +37,6 @@ static const NSInteger kMaxCageSize = 100;        // max number of Cage cells al
 @property (atomic, assign) BOOL dataSourceLocked;
 
 @end
-
 
 @implementation ViewController
 
@@ -108,7 +107,6 @@ static const NSInteger kMaxCageSize = 100;        // max number of Cage cells al
 {
   [_tableView setEditing:!_tableView.editing animated:YES];
 }
-
 
 #pragma mark -
 #pragma mark ASTableView.
