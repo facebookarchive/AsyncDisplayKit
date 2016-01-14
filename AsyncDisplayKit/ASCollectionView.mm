@@ -20,6 +20,8 @@
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "_ASDisplayLayer.h"
 
+#import "ASCollectionViewLayoutFacilitatorProtocol.h"
+
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
@@ -67,6 +69,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
   ASCollectionViewFlowLayoutInspector *_flowLayoutInspector;
+    
+  id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
   BOOL _performingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
@@ -135,6 +139,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
   return [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
+{
+  self = [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
+  _layoutFacilitator = layoutFacilitator;
+  return self;
 }
 
 // FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
@@ -412,12 +423,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)insertSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  [_layoutFacilitator collectionViewInsertingSectionsAtIndexSet:sections];
   [_dataController insertSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  [_layoutFacilitator collectionViewDeletingSectionsAtIndexSet:sections];
   [_dataController deleteSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
@@ -436,6 +449,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  [_layoutFacilitator collectionViewInsertingCellAtIndexPaths:indexPaths];
   [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
