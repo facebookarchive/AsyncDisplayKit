@@ -15,7 +15,7 @@
 {
   UICollectionViewFlowLayout *_flowLayout;
   ASPagerNodeProxy *_proxy;
-  id <ASPagerNodeDataSource> _pagerDataSource;
+  __weak id <ASPagerNodeDataSource> _pagerDataSource;
 }
 
 @end
