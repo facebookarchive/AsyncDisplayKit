@@ -16,16 +16,31 @@
 #import "ASTextNodeWordKerner.h"
 #import "ASThread.h"
 
-//! @abstract This subclass exists solely to ensure the text view's panGestureRecognizer never begins, because it's sporadically enabled by UITextView. It will be removed pending rdar://14729288.
-@interface _ASDisabledPanUITextView : UITextView
+//! @abstract This subclass forces the parent UITextView's scrollEnabled property to always be true. Instead, it disables the panGestureRecognizer when scrollEnabled is set to false. This ensures that the contentSize is caculated correctly.
+//! See issue: https://github.com/facebook/AsyncDisplayKit/issues/1063
+@interface ASPanningOverriddenUITextView : UITextView
+{
+  BOOL _shouldBlockPanGesture;
+}
 @end
 
-@implementation _ASDisabledPanUITextView
+@implementation ASPanningOverriddenUITextView
+
+- (BOOL)scrollEnabled
+{
+  return _shouldBlockPanGesture;
+}
+
+- (void)setScrollEnabled:(BOOL)scrollEnabled
+{
+  _shouldBlockPanGesture = !scrollEnabled;
+  [super setScrollEnabled:YES];
+}
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
-  // Never allow our pans to begin.
-  if (gestureRecognizer == self.panGestureRecognizer)
+  // Never allow our pans to begin when _shouldBlockPanGesture is true.
+  if (_shouldBlockPanGesture && gestureRecognizer == self.panGestureRecognizer)
     return NO;
 
   // Otherwise, proceed as usual.
@@ -207,11 +222,18 @@
 #pragma mark - Configuration
 @synthesize delegate = _delegate;
 
+- (void)setScrollEnabled:(BOOL)scrollEnabled
+{
+  ASDN::MutexLocker l(_textKitLock);
+  _scrollEnabled = scrollEnabled;
+  [_textKitComponents.textView setScrollEnabled:_scrollEnabled];
+}
+
 - (UITextView *)textView
 {
   ASDisplayNodeAssertMainThread();
   if (!_textKitComponents.textView) {
-    _textKitComponents.textView = [[_ASDisabledPanUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
+    _textKitComponents.textView = [[ASPanningOverriddenUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
   }
   return _textKitComponents.textView;
 }
