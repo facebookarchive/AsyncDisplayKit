@@ -20,7 +20,6 @@
 
 @interface ASCellNode ()
 {
-  ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
   UIViewController *_viewController;
   ASDisplayNode *_viewControllerNode;
 }
@@ -49,15 +48,13 @@
   ASDisplayNodeAssertNotNil(viewControllerBlock, @"should initialize with a valid block that returns a UIViewController");
   
   if (viewControllerBlock) {
-    _viewController = viewControllerBlock();
     
-    __weak UIViewController *weakViewController = _viewController;
     _viewControllerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-      return weakViewController.view;
+      _viewController = viewControllerBlock();
+      return _viewController.view;
     } didLoadBlock:didLoadBlock];
     
     [self addSubnode:_viewControllerNode];
-    _nodeLoadedBlock = didLoadBlock;
   }
   
   return self;
