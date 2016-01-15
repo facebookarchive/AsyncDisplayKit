@@ -72,6 +72,13 @@
   [self updateTitle];
 }
 
+- (void)setDisplaysAsynchronously:(BOOL)displaysAsynchronously
+{
+  [super setDisplaysAsynchronously:displaysAsynchronously];
+  [self.imageNode setDisplaysAsynchronously:displaysAsynchronously];
+  [self.titleNode setDisplaysAsynchronously:displaysAsynchronously];
+}
+
 - (void)updateImage
 {
   ASDN::MutexLocker l(_propertyLock);
