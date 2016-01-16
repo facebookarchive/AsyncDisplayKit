@@ -72,7 +72,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 
 - (ASLayout * _Nullable)displayNode:(ASDisplayNode * _Nonnull)displayNode layoutThatFits:(ASSizeRange)constrainedSize;
 
-- (ASLayoutSpec * _Nonnull)displayNode:(ASDisplayNode * _Nonnull)displayNode layoutSpecThatFits:(ASSizeRange)constrainedSize;
+- (ASLayoutSpec * _Nullable)displayNode:(ASDisplayNode * _Nonnull)displayNode layoutSpecThatFits:(ASSizeRange)constrainedSize;
 
 @end
 
