@@ -90,9 +90,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
     unsigned implementsImageDisplay:1;
     unsigned implementsDrawParameters:1;
     
-    // delegate implementations
-    unsigned delegateImplementsLayout:1;
-    unsigned delegateImplementsLayoutSpec:1;
+    // interface delegate implementations
+    unsigned interfaceDelegateImplementsLayout:1;
+    unsigned interfaceDelegateImplementsLayoutSpec:1;
 
     // internal state
     unsigned isMeasured:1;

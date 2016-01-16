@@ -591,8 +591,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   //  - we haven't already
   //  - the constrained size range is different
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
-    if (_flags.delegateImplementsLayout) {
-      _layout = [self.delegate displayNode:self layoutThatFits:constrainedSize];
+    if (_flags.interfaceDelegateImplementsLayout) {
+      _layout = [self.interfaceDelegate displayNode:self layoutThatFits:constrainedSize];
     }
     
     // When the delegate doesn't handle creating the layout, use the default behavior
@@ -1595,8 +1595,8 @@ static BOOL ShouldUseNewRenderingRange = NO;
   ASLayoutSpec *layoutSpec;
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
     layoutSpec = [self layoutSpecThatFits:constrainedSize];
-  } else if (_flags.delegateImplementsLayoutSpec) {
-    layoutSpec = [self.delegate displayNode:self layoutSpecThatFits:constrainedSize];
+  } else if (_flags.interfaceDelegateImplementsLayoutSpec) {
+    layoutSpec = [self.interfaceDelegate displayNode:self layoutSpecThatFits:constrainedSize];
   }
   
   if (layoutSpec) {
@@ -1957,11 +1957,11 @@ static BOOL ShouldUseNewRenderingRange = NO;
   });
 }
 
-- (void)setDelegate:(id<ASDisplayNodeDelegate>)delegate
+- (void)setInterfaceDelegate:(id<ASDisplayNodeInterfaceDelegate>)interfaceDelegate
 {
-  _delegate = delegate;
-  _flags.delegateImplementsLayout = [delegate respondsToSelector:@selector(displayNode:layoutThatFits:)] ? 1 : 0;
-  _flags.delegateImplementsLayoutSpec = [delegate respondsToSelector:@selector(displayNode:layoutSpecThatFits:)] ? 1 : 0;
+  _interfaceDelegate = interfaceDelegate;
+  _flags.interfaceDelegateImplementsLayout = [interfaceDelegate respondsToSelector:@selector(displayNode:layoutThatFits:)] ? 1 : 0;
+  _flags.interfaceDelegateImplementsLayoutSpec = [interfaceDelegate respondsToSelector:@selector(displayNode:layoutSpecThatFits:)] ? 1 : 0;
 }
 
 - (void)layout

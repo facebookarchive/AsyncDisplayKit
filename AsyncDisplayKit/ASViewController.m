@@ -11,7 +11,7 @@
 #import "ASDimension.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
-@interface ASViewController () <ASDisplayNodeDelegate> {
+@interface ASViewController () <ASDisplayNodeInterfaceDelegate> {
   BOOL _ensureDisplayed;
 }
 
@@ -40,7 +40,7 @@
   ASDisplayNodeAssertNotNil(node, @"Node must not be nil");
   ASDisplayNodeAssertTrue(!node.layerBacked);
   _node = node;
-  node.delegate = self;
+  node.interfaceDelegate = self;
   
   return self;
 }

@@ -66,13 +66,13 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
   ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay | ASInterfaceStateVisible,
 };
 
-@protocol ASDisplayNodeDelegate <NSObject>
+@protocol ASDisplayNodeInterfaceDelegate <NSObject>
 
 @optional
 
-- (ASLayout *)displayNode:(ASDisplayNode *)displayNode layoutThatFits:(ASSizeRange)constrainedSize;
+- (ASLayout * _Nullable)displayNode:(ASDisplayNode * _Nonnull)displayNode layoutThatFits:(ASSizeRange)constrainedSize;
 
-- (ASLayoutSpec *)displayNode:(ASDisplayNode *)displayNode layoutSpecThatFits:(ASSizeRange)constrainedSize;
+- (ASLayoutSpec * _Nonnull)displayNode:(ASDisplayNode * _Nonnull)displayNode layoutSpecThatFits:(ASSizeRange)constrainedSize;
 
 @end
 
@@ -216,7 +216,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @abstract The display node's delegate object.
  */
-@property (nonatomic, weak) id<ASDisplayNodeDelegate> delegate;
+@property (nonatomic, weak) id<ASDisplayNodeInterfaceDelegate> interfaceDelegate;
 
 /** @name Managing dimensions */
 
