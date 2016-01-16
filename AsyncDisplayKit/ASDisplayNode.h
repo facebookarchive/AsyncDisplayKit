@@ -214,7 +214,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) ASInterfaceState interfaceState;
 
 /**
- * @abstract The display node's delegate object.
+ * @abstract The display node's delegate for handling interface operations (ie. external layout, layoutSpec definition).
  */
 @property (nonatomic, weak) id<ASDisplayNodeInterfaceDelegate> interfaceDelegate;
 
