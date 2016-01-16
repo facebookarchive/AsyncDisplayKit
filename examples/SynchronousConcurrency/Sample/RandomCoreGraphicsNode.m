@@ -46,48 +46,4 @@
   return [self description];
 }
 
-- (NSDictionary *)textStyle
-{
-  UIFont *font = [UIFont fontWithName:@"HelveticaNeue" size:36.0f];
-  
-  NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-  style.paragraphSpacing = 0.5 * font.lineHeight;
-  style.hyphenationFactor = 1.0;
-  
-  return @{ NSFontAttributeName: font,
-            NSParagraphStyleAttributeName: style };
-}
-
-- (instancetype)init
-{
-  if (!(self = [super init])) {
-    return nil;
-  }
-  
-  _textNode = [[ASTextNode alloc] init];
-  _textNode.placeholderEnabled = NO;
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:@"Hello, ASDK!"
-                                                               attributes:[self textStyle]];
-  [self addSubnode:_textNode];
-  
-  return self;
-}
-
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
-{
-  [_textNode measure:constrainedSize];
-  return CGSizeMake(constrainedSize.width, 100);
-}
-
-- (void)layout
-{
-  CGSize boundsSize = self.bounds.size;
-  CGSize textSize = _textNode.calculatedSize;
-  CGRect textRect = CGRectMake(roundf((boundsSize.width - textSize.width) / 2.0),
-                               roundf((boundsSize.height - textSize.height) / 2.0),
-                               textSize.width,
-                               textSize.height);
-  _textNode.frame = textRect;
-}
-
 @end

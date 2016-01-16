@@ -9,13 +9,21 @@
 #import "AsyncViewController.h"
 #import "RandomCoreGraphicsNode.h"
 
-@implementation AsyncViewController
+@implementation AsyncViewController {
+  ASTextNode *_textNode;
+}
 
 - (instancetype)init
 {
   if (!(self = [super initWithNode:[[RandomCoreGraphicsNode alloc] init]])) {
     return nil;
   }
+  
+  _textNode = [[ASTextNode alloc] init];
+  _textNode.placeholderEnabled = NO;
+  _textNode.attributedString = [[NSAttributedString alloc] initWithString:@"Hello, ASDK!"
+                                                               attributes:[self _textStyle]];
+  [self.node addSubnode:_textNode];
 
   self.neverShowPlaceholders = YES;
   self.tabBarItem = [[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemFavorites tag:0];
@@ -32,6 +40,23 @@
 {
   [self.node recursivelyClearContents];
   [super viewDidDisappear:animated];
+}
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  return [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_textNode];
+}
+
+- (NSDictionary *)_textStyle
+{
+  UIFont *font = [UIFont fontWithName:@"HelveticaNeue" size:36.0f];
+  
+  NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+  style.paragraphSpacing = 0.5 * font.lineHeight;
+  style.hyphenationFactor = 1.0;
+  
+  return @{ NSFontAttributeName: font,
+            NSParagraphStyleAttributeName: style };
 }
 
 @end
