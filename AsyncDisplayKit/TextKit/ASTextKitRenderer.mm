@@ -111,7 +111,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   // to make sure our width calculations aren't being offset by glyphs going beyond the constrained rect.
   boundingRect = CGRectIntersection(boundingRect, {.size = constrainedRect.size});
 
-  _calculatedSize = [_shadower outsetSizeWithInsetSize:boundingRect.size];
+  _calculatedSize = [_shadower outsetSizeWithInsetSize:CGSizeMake(boundingRect.size.width + boundingRect.origin.x, boundingRect.size.height + boundingRect.origin.y)];
 }
 
 - (CGSize)size
