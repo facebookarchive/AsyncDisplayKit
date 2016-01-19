@@ -252,6 +252,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
+  _superIsPendingDataLoad = YES;
   [_dataController reloadDataImmediatelyWithAnimationOptions:kASCollectionViewAnimationNone];
   [super reloadData];
 }
