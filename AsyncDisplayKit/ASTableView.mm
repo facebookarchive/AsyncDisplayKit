@@ -722,7 +722,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
 {
-  return self.tableNode.interfaceState;
+  ASTableNode *tableNode = self.tableNode;
+  if (tableNode) {
+    return self.tableNode.interfaceState;
+  } else {
+    // Until we can always create an associated ASTableNode without a retain cycle,
+    // we might be on our own to try to guess if we're visible.  The node normally
+    // handles this even if it is the root / directly added to the view hierarchy.
+    return (self.window != nil ? ASInterfaceStateVisible : ASInterfaceStateNone);
+  }
 }
 
 #pragma mark - ASRangeControllerDelegate
