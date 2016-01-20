@@ -801,7 +801,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
 {
-  return self.collectionNode.interfaceState;
+  ASCollectionNode *collectionNode = self.collectionNode;
+  if (collectionNode) {
+    return self.collectionNode.interfaceState;
+  } else {
+    // Until we can always create an associated ASCollectionNode without a retain cycle,
+    // we might be on our own to try to guess if we're visible.  The node normally
+    // handles this even if it is the root / directly added to the view hierarchy.
+    return (self.window != nil ? ASInterfaceStateVisible : ASInterfaceStateNone);
+  }
 }
 
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
