@@ -126,9 +126,9 @@
 
 - (void)addCompletionBlock:(asyncdisplaykit_async_transaction_completion_block_t)completion
 {
-  __weak typeof(self) weakSelf = self;
+  __weak __typeof__(self) weakSelf = self;
   [self addOperationWithBlock:^(){return (id<NSObject>)nil;} queue:_callbackQueue completion:^(id<NSObject> value, BOOL canceled) {
-    typeof(self) strongSelf = weakSelf;
+    __typeof__(self) strongSelf = weakSelf;
     completion(strongSelf, canceled);
   }];
 }
