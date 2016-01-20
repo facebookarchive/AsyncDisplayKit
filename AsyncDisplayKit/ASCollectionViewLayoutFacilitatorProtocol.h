@@ -11,9 +11,8 @@
 
 @protocol ASCollectionViewLayoutFacilitatorProtocol <NSObject>
 
-- (void)collectionViewInsertingCellAtIndexPaths:(NSArray *)indexPaths;
-- (void)collectionViewInsertingSectionsAtIndexSet:(NSIndexSet *)indexes;
-- (void)collectionViewDeletingSectionsAtIndexSet:(NSIndexSet *)indexes;
+- (void)collectionViewEditingCellsAtIndexPaths:(NSArray *)indexPaths;
+- (void)collectionViewEditingSectionsAtIndexSet:(NSIndexSet *)indexes;
 
 @end
 
