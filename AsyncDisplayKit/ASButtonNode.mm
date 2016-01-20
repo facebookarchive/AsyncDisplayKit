@@ -48,7 +48,12 @@
     _titleNode = [[ASTextNode alloc] init];
     _imageNode = [[ASImageNode alloc] init];
     _backgroundImageNode = [[ASImageNode alloc] init];
+    [_backgroundImageNode setContentMode:UIViewContentModeScaleToFill];
     
+    [_titleNode setLayerBacked:YES];
+    [_imageNode setLayerBacked:YES];
+    [_backgroundImageNode setLayerBacked:YES];
+      
     _contentHorizontalAlignment = ASAlignmentMiddle;
     _contentVerticalAlignment = ASAlignmentCenter;
     
@@ -57,6 +62,12 @@
     [self addSubnode:_imageNode];
   }
   return self;
+}
+
+- (void)setLayerBacked:(BOOL)layerBacked
+{
+  ASDisplayNodeAssert(!layerBacked, @"ASButtonNode must not be layer backed!");
+  [super setLayerBacked:layerBacked];
 }
 
 - (void)setEnabled:(BOOL)enabled

@@ -47,7 +47,7 @@
 - (NSAttributedString * _Nullable)attributedTitleForState:(ASControlState)state;
 
 /**
- *  Sets the styled title to use for the specified state.
+ *  Sets the styled title to use for the specified state. This will reset styled title previously set with -setTitle:withFont:withColor:forState.
  *
  *  @param title The styled text string to use for the title.
  *  @param state The state that uses the specified title. The possible values are described in ASControlState.
@@ -55,7 +55,7 @@
 - (void)setAttributedTitle:(nullable NSAttributedString *)title forState:(ASControlState)state;
 
 /**
- *  Sets the title to use for the specified state.
+ *  Sets the title to use for the specified state. This will reset styled title previously set with -setAttributedTitle:forState.
  *
  *  @param title The styled text string to use for the title.
  *  @param font The font to use for the title.
