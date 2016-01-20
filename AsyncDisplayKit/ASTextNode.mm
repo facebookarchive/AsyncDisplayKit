@@ -336,12 +336,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)setAttributedString:(NSAttributedString *)attributedString
 {
-  if (ASObjectIsEqual(attributedString, _attributedString)) {
-    return;
-  }
-
   if (attributedString == nil) {
     attributedString = [[NSAttributedString alloc] initWithString:@"" attributes:nil];
+  }
+
+  if (ASObjectIsEqual(attributedString, _attributedString)) {
+    return;
   }
 
   _attributedString = ASCleanseAttributedStringOfCoreTextAttributes(attributedString);
