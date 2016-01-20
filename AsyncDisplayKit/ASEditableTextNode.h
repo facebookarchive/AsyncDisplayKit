@@ -25,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  @abstract Enable scrolling on the textView
+ @default true
  */
 @property (nonatomic) BOOL scrollEnabled;
 
