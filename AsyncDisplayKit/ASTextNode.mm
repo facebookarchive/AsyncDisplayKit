@@ -270,6 +270,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .lineBreakMode = _truncationMode,
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
+    .minimumScaleFactor = _minimumScaleFactor,
   };
 }
 
@@ -1048,6 +1049,17 @@ static NSAttributedString *DefaultTruncationAttributedString()
 {
   NSRange visibleRange = [self _renderer].visibleRanges[0];
   return visibleRange.length < _attributedString.length;
+}
+
+- (void)setMinimumScaleFactor:(CGFloat)minimumScaleFactor
+{
+  if (_minimumScaleFactor != minimumScaleFactor) {
+    _minimumScaleFactor = minimumScaleFactor;
+    [self _invalidateRenderer];
+    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+      [self setNeedsDisplay];
+    });
+  }
 }
 
 - (void)setMaximumNumberOfLines:(NSUInteger)maximumNumberOfLines

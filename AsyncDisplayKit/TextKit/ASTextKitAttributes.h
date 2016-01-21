@@ -82,6 +82,10 @@ struct ASTextKitAttributes {
    */
   CGFloat shadowRadius;
   /**
+   The minimum scale that the textnode can apply to fit long words in constrained size.
+   */
+  CGFloat minimumScaleFactor;
+  /**
    A pointer to a function that that returns a custom layout manager subclass. If nil, defaults to NSLayoutManager.
    */
   NSLayoutManager *(*layoutManagerFactory)(void);
@@ -103,6 +107,7 @@ struct ASTextKitAttributes {
       [shadowColor copy],
       shadowOpacity,
       shadowRadius,
+      minimumScaleFactor,
       layoutManagerFactory
     };
   };
@@ -114,6 +119,7 @@ struct ASTextKitAttributes {
     && maximumNumberOfLines == other.maximumNumberOfLines
     && shadowOpacity == other.shadowOpacity
     && shadowRadius == other.shadowRadius
+    && minimumScaleFactor == other.minimumScaleFactor
     && layoutManagerFactory == other.layoutManagerFactory
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)
     && _objectsEqual(exclusionPaths, other.exclusionPaths)

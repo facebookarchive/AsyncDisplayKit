@@ -15,6 +15,7 @@
 #import "ASTextKitContext.h"
 #import "ASTextKitShadower.h"
 #import "ASTextKitTailTruncater.h"
+#import "ASTextKitFontSizeAdjuster.h"
 #import "ASTextKitTruncating.h"
 
 static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
@@ -34,7 +35,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   CGSize _calculatedSize;
   BOOL _sizeIsCalculated;
 }
-@synthesize attributes = _attributes, context = _context, shadower = _shadower, truncater = _truncater;
+@synthesize attributes = _attributes, context = _context, shadower = _shadower, truncater = _truncater, fontSizeAdjuster = _fontSizeAdjuster;
 
 #pragma mark - Initialization
 
@@ -75,6 +76,19 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   return _truncater;
 }
 
+- (ASTextKitFontSizeAdjuster *)fontSizeAdjuster
+{
+  if (!_fontSizeAdjuster) {
+    ASTextKitAttributes attributes = _attributes;
+    // We must inset the constrained size by the size of the shadower.
+    CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:_constrainedSize];
+    _fontSizeAdjuster = [[ASTextKitFontSizeAdjuster alloc] initWithContext:[self context]
+                                                        minimumScaleFactor:attributes.minimumScaleFactor
+                                                           constrainedSize:shadowConstrainedSize];
+  }
+  return _fontSizeAdjuster;
+}
+
 - (ASTextKitContext *)context
 {
   if (!_context) {
@@ -94,12 +108,15 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (void)_calculateSize
 {
+  if (_attributes.minimumScaleFactor < 1 && _attributes.minimumScaleFactor > 0) {
+    [[self fontSizeAdjuster] adjustFontSize];
+  }
+
   // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
   // -usedRectForTextContainer:).
   [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     [layoutManager ensureLayoutForTextContainer:textContainer];
   }];
-
 
   CGRect constrainedRect = {CGPointZero, _constrainedSize};
   __block CGRect boundingRect;

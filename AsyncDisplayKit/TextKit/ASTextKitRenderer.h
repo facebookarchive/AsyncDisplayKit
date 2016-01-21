@@ -16,6 +16,7 @@
 
 @class ASTextKitContext;
 @class ASTextKitShadower;
+@class ASTextKitFontSizeAdjuster;
 @protocol ASTextKitTruncating;
 
 /**
@@ -46,6 +47,8 @@ dvlkferufedgjnhjjfhldjedlunvtdtv
 @property (nonatomic, strong, readonly) ASTextKitContext *context;
 
 @property (nonatomic, strong, readonly) id<ASTextKitTruncating> truncater;
+
+@property (nonatomic, strong, readonly) ASTextKitFontSizeAdjuster *fontSizeAdjuster;
 
 @property (nonatomic, strong, readonly) ASTextKitShadower *shadower;
 

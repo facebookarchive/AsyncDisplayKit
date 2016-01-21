@@ -73,6 +73,12 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 @property (nonatomic, assign) NSUInteger maximumNumberOfLines;
 
 /**
+ @abstract The minimum scale that the textnode can apply to fit long words.
+ @default 0 (No scaling)
+ */
+@property (nonatomic, assign) CGFloat minimumScaleFactor;
+
+/**
  @abstract The number of lines in the text. Text must have been sized first.
  */
 @property (nonatomic, readonly, assign) NSUInteger lineCount;
