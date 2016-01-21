@@ -9,6 +9,9 @@
 #import "_ASAsyncTransaction.h"
 #import "_ASAsyncTransactionGroup.h"
 #import "ASAssert.h"
+#import "ASThread.h"
+#import <list>
+#import <map>
 
 @interface ASDisplayNodeAsyncTransactionOperation : NSObject
 - (id)initWithOperationCompletionBlock:(asyncdisplaykit_async_transaction_operation_completion_block_t)operationCompletionBlock;
@@ -47,9 +50,220 @@
 
 @end
 
+// Lightweight operation queue for _ASAsyncTransaction that limits number of spawned threads
+class ASAsyncTransactionQueue
+{
+public:
+  
+  // Similar to dispatch_group_t
+  class Group
+  {
+  public:
+    // call when group is no longer needed; after last scheduled operation the group will delete itself
+    virtual void release() = 0;
+    
+    // schedule block on given queue
+    virtual void schedule(dispatch_queue_t queue, dispatch_block_t block) = 0;
+    
+    // dispatch block on given queue when all previously scheduled blocks finished executing
+    virtual void notify(dispatch_queue_t queue, dispatch_block_t block) = 0;
+    
+    // used when manually executing blocks
+    virtual void enter() = 0;
+    virtual void leave() = 0;
+    
+    // wait until all scheduled blocks finished executing
+    virtual void wait() = 0;
+    
+  protected:
+    virtual ~Group() { }; // call release() instead
+  };
+  
+  // Create new group
+  Group *createGroup();
+  
+  static ASAsyncTransactionQueue &instance();
+  
+private:
+  
+  struct GroupNotify
+  {
+    dispatch_block_t _block;
+    dispatch_queue_t _queue;
+  };
+  
+  class GroupImpl : public Group
+  {
+  public:
+    GroupImpl(ASAsyncTransactionQueue &queue)
+      : _pendingOperations(0)
+      , _releaseCalled(false)
+      , _queue(queue)
+    {
+    }
+    
+    virtual void release();
+    virtual void schedule(dispatch_queue_t queue, dispatch_block_t block);
+    virtual void notify(dispatch_queue_t queue, dispatch_block_t block);
+    virtual void enter();
+    virtual void leave();
+    virtual void wait();
+    
+    int _pendingOperations;
+    std::list<GroupNotify> _notifyList;
+    ASDN::Condition _condition;
+    BOOL _releaseCalled;
+    ASAsyncTransactionQueue &_queue;
+  };
+  
+  struct Operation
+  {
+    dispatch_block_t _block;
+    GroupImpl *_group;
+  };
+  
+  struct DispatchEntry // entry for each
+  {
+    std::list<Operation> _operations;
+    int _threadCount;
+  };
+  
+  std::map<dispatch_queue_t, DispatchEntry> _entries;
+  ASDN::Mutex _mutex;
+};
+
+ASAsyncTransactionQueue::Group* ASAsyncTransactionQueue::createGroup()
+{
+  Group *res = new GroupImpl(*this);
+  return res;
+}
+
+void ASAsyncTransactionQueue::GroupImpl::release()
+{
+  ASDN::MutexLocker locker(_queue._mutex);
+  
+  if (_pendingOperations == 0)  {
+    delete this;
+  } else {
+    _releaseCalled = true;
+  }
+}
+
+void ASAsyncTransactionQueue::GroupImpl::schedule(dispatch_queue_t queue, dispatch_block_t block)
+{
+  ASAsyncTransactionQueue &q = _queue;
+  ASDN::MutexLocker locker(q._mutex);
+  
+  DispatchEntry &entry = q._entries[queue];
+  
+  Operation operation;
+  operation._block = block;
+  operation._group = this;
+  entry._operations.push_back(operation);
+  
+  ++_pendingOperations; // enter group
+  
+  NSUInteger maxThreads = [NSProcessInfo processInfo].activeProcessorCount;
+  if (maxThreads < 2) { // it is reasonable to have at least two working threads, also
+    maxThreads = 2;     // [_ASDisplayLayerTests testTransaction] requires at least two threads
+  }
+
+#if 0
+  // Bit questionable - we can give main thread more CPU time during tracking;
+  if (maxThreads > 1 && [[NSRunLoop mainRunLoop].currentMode isEqualToString:UITrackingRunLoopMode])
+    --maxThreads;
+#endif
+  
+  if (entry._threadCount < maxThreads) { // we need to spawn another thread
+
+    ++entry._threadCount;
+    
+    dispatch_async(queue, ^{
+      ASDN::MutexLocker lock(q._mutex);
+      
+      // go until there are no more pending operations
+      while (!entry._operations.empty()) {
+        Operation operation = entry._operations.front();
+        entry._operations.pop_front();
+        {
+          ASDN::MutexUnlocker unlock(q._mutex);
+          if (operation._block) {
+            operation._block();
+          }
+          operation._group->leave();
+          operation._block = 0; // the block must be freed while mutex is unlocked
+        }
+      }
+      --entry._threadCount;
+      
+      if (entry._threadCount == 0) {
+        NSCAssert(entry._operations.empty(), @"No working threads but operations are still scheduled"); // this shouldn't happen
+        q._entries.erase(queue);
+      }
+    });
+  }
+}
+
+void ASAsyncTransactionQueue::GroupImpl::notify(dispatch_queue_t queue, dispatch_block_t block)
+{
+  ASDN::MutexLocker locker(_queue._mutex);
+  
+  if (_pendingOperations == 0) {
+    dispatch_async(queue, block);
+  } else {
+    GroupNotify notify;
+    notify._block = block;
+    notify._queue = queue;
+    _notifyList.push_back(notify);
+  }
+}
+
+void ASAsyncTransactionQueue::GroupImpl::enter()
+{
+  ASDN::MutexLocker locker(_queue._mutex);
+  ++_pendingOperations;
+}
+
+void ASAsyncTransactionQueue::GroupImpl::leave()
+{
+  ASDN::MutexLocker locker(_queue._mutex);
+  --_pendingOperations;
+  
+  if (_pendingOperations == 0) {
+    std::list<GroupNotify> notifyList;
+    _notifyList.swap(notifyList);
+    
+    for (GroupNotify & notify : notifyList) {
+      dispatch_async(notify._queue, notify._block);
+    }
+    
+    _condition.signal();
+    
+    // there was attempt to release the group before, but we still
+    // had operations scheduled so now is good time
+    if (_releaseCalled) {
+      delete this;
+    }
+  }
+}
+
+void ASAsyncTransactionQueue::GroupImpl::wait()
+{
+  ASDN::MutexLocker locker(_queue._mutex);
+  while (_pendingOperations > 0) {
+    _condition.wait(_queue._mutex);
+  }
+}
+
+ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
+{
+  static ASAsyncTransactionQueue *instance = new ASAsyncTransactionQueue();
+  return *instance;
+}
+
 @implementation _ASAsyncTransaction
 {
-  dispatch_group_t _group;
+  ASAsyncTransactionQueue::Group *_group;
   NSMutableArray *_operations;
 }
 
@@ -75,6 +289,9 @@
 {
   // Uncommitted transactions break our guarantees about releasing completion blocks on callbackQueue.
   ASDisplayNodeAssert(_state != ASAsyncTransactionStateOpen, @"Uncommitted ASAsyncTransactions are not allowed");
+  if (_group) {
+    _group->release();
+  }
 }
 
 #pragma mark -
@@ -91,13 +308,13 @@
 
   ASDisplayNodeAsyncTransactionOperation *operation = [[ASDisplayNodeAsyncTransactionOperation alloc] initWithOperationCompletionBlock:completion];
   [_operations addObject:operation];
-  dispatch_group_async(_group, queue, ^{
+  _group->schedule(queue, ^{
     @autoreleasepool {
       if (_state != ASAsyncTransactionStateCanceled) {
-        dispatch_group_enter(_group);
+        _group->enter();
         block(^(id<NSObject> value){
           operation.value = value;
-          dispatch_group_leave(_group);
+          _group->leave();
         });
       }
     }
@@ -115,7 +332,7 @@
 
   ASDisplayNodeAsyncTransactionOperation *operation = [[ASDisplayNodeAsyncTransactionOperation alloc] initWithOperationCompletionBlock:completion];
   [_operations addObject:operation];
-  dispatch_group_async(_group, queue, ^{
+  _group->schedule(queue, ^{
     @autoreleasepool {
       if (_state != ASAsyncTransactionStateCanceled) {
         operation.value = block();
@@ -154,7 +371,7 @@
   } else {
     ASDisplayNodeAssert(_group != NULL, @"If there are operations, dispatch group should have been created");
     
-    dispatch_group_notify(_group, _callbackQueue, ^{
+    _group->notify(_callbackQueue, ^{
       // _callbackQueue is the main queue in current practice (also asserted in -waitUntilComplete).
       // This code should be reviewed before taking on significantly different use cases.
       ASDisplayNodeAssertMainThread();
@@ -188,7 +405,7 @@
   if (_state != ASAsyncTransactionStateComplete) {
     if (_group) {
       ASDisplayNodeAssertTrue(_callbackQueue == dispatch_get_main_queue());
-      dispatch_group_wait(_group, DISPATCH_TIME_FOREVER);
+      _group->wait();
       
       // At this point, the asynchronous operation may have completed, but the runloop
       // observer has not committed the batch of transactions we belong to.  It's important to
@@ -213,7 +430,7 @@
 {
   // Lazily initialize _group and _operations to avoid overhead in the case where no operations are added to the transaction
   if (_group == NULL) {
-    _group = dispatch_group_create();
+    _group = ASAsyncTransactionQueue::instance().createGroup();
   }
   if (_operations == nil) {
     _operations = [[NSMutableArray alloc] init];
@@ -222,7 +439,7 @@
 
 - (NSString *)description
 {
-  return [NSString stringWithFormat:@"<_ASAsyncTransaction: %p - _state = %lu, _group = %@, _operations = %@>", self, (unsigned long)_state, _group, _operations];
+  return [NSString stringWithFormat:@"<_ASAsyncTransaction: %p - _state = %lu, _group = %p, _operations = %@>", self, (unsigned long)_state, _group, _operations];
 }
 
 @end
