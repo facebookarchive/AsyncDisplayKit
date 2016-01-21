@@ -13,7 +13,7 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASBatchContext.h>
 #import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
-#import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
+#import "ASCollectionViewLayoutFacilitatorProtocol.h"
 
 @class ASCellNode;
 @class ASCollectionNode;
