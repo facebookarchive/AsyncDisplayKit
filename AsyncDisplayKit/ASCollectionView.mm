@@ -20,8 +20,6 @@
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "_ASDisplayLayer.h"
 
-#import "ASCollectionViewLayoutFacilitatorProtocol.h"
-
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
@@ -156,6 +154,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout ownedByNode:(BOOL)ownedByNode
 {
+  return [self _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:nil ownedByNode:ownedByNode];
+}
+
+- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator ownedByNode:(BOOL)ownedByNode
+{
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
   
@@ -206,6 +209,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if ([layout asdk_isFlowLayout]) {
     _layoutInspector = [self flowLayoutInspector];
   }
+  _layoutFacilitator = layoutFacilitator;
   
   _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;

@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator;
 
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
