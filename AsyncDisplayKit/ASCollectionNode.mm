@@ -8,6 +8,7 @@
 
 #import "ASCollectionNode.h"
 #import "ASCollectionInternal.h"
+#import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASRangeController.h"
 #include <vector>

@@ -13,13 +13,13 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASBatchContext.h>
 #import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
-#import "ASCollectionViewLayoutFacilitatorProtocol.h"
 
 @class ASCellNode;
 @class ASCollectionNode;
 @protocol ASCollectionDataSource;
 @protocol ASCollectionDelegate;
 @protocol ASCollectionViewLayoutInspecting;
+@protocol ASCollectionViewLayoutFacilitatorProtocol;
 
 NS_ASSUME_NONNULL_BEGIN
 
