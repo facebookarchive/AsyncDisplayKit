@@ -16,8 +16,19 @@
 #import "ASTextNodeWordKerner.h"
 #import "ASThread.h"
 
-//! @abstract This subclass forces the parent UITextView's scrollEnabled property to always be true. Instead, it disables the panGestureRecognizer when scrollEnabled is set to false. This ensures that the contentSize is caculated correctly.
-//! See issue: https://github.com/facebook/AsyncDisplayKit/issues/1063
+/**
+ @abstract As originally reported in rdar://14729288, when scrollEnabled = NO,
+   UITextView does not calculate its contentSize. This makes it difficult 
+   for a client to embed a UITextView inside a different scroll view with 
+   other content (setting scrollEnabled = NO on the UITextView itself,
+   because the containing scroll view will handle the gesture)...
+   because accessing contentSize is typically necessary to perform layout.
+   Apple later closed the issue as expected behavior. This works around
+   the issue by ensuring that contentSize is always calculated, while
+   still providing control over the UITextView's scrolling.
+
+ See issue: https://github.com/facebook/AsyncDisplayKit/issues/1063
+ */
 @interface ASPanningOverriddenUITextView : UITextView
 {
   BOOL _shouldBlockPanGesture;
