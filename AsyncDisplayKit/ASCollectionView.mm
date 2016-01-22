@@ -140,13 +140,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
-{
-  self = [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
-  _layoutFacilitator = layoutFacilitator;
-  return self;
-}
-
 // FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {

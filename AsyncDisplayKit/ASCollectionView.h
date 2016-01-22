@@ -44,7 +44,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator;
 
 // The corresponding ASCollectionNode, which exists even if directly allocating & handling the view class.
 @property (nonatomic, weak, readonly) ASCollectionNode *collectionNode;
