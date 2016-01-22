@@ -55,7 +55,7 @@
 
 - (void)willReloadData
 {
-  [_pendingNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
+  [_pendingNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {    
     // Remove everything that existed before the reload, now that we're ready to insert replacements
     NSArray *indexPaths = [self indexPathsForEditingNodesOfKind:kind];
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
