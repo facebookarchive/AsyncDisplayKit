@@ -42,6 +42,7 @@
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 #import <AsyncDisplayKit/ASBackgroundLayoutSpec.h>
 #import <AsyncDisplayKit/ASCenterLayoutSpec.h>
+#import <AsyncDisplayKit/ASRelativePositionLayoutSpec.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 #import <AsyncDisplayKit/ASOverlayLayoutSpec.h>
 #import <AsyncDisplayKit/ASRatioLayoutSpec.h>
