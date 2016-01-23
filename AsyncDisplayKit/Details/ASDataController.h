@@ -94,11 +94,6 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  */
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-/**
- Called for data reload.
- */
-- (void)dataControllerDidReloadData:(ASDataController *)dataController;
-
 @end
 
 /**
@@ -175,9 +170,9 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)reloadDataWithCompletion:(void (^ _Nullable)())completion;
+- (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
 
-- (void)reloadDataImmediately;
+- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /** @name Data Querying */
 
