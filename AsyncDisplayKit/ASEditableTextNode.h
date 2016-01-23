@@ -24,6 +24,12 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Configuration
 
 /**
+ @abstract Enable scrolling on the textView
+ @default true
+ */
+@property (nonatomic) BOOL scrollEnabled;
+
+/**
   @abstract Access to underlying UITextView for more configuration options.
   @warning This property should only be used on the main thread and should not be accessed before the editable text node's view is created.
  */

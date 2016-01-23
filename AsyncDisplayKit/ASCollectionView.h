@@ -19,6 +19,7 @@
 @protocol ASCollectionDataSource;
 @protocol ASCollectionDelegate;
 @protocol ASCollectionViewLayoutInspecting;
+@protocol ASCollectionViewLayoutFacilitatorProtocol;
 
 NS_ASSUME_NONNULL_BEGIN
 

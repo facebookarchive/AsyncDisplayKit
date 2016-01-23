@@ -8,6 +8,8 @@
 
 #import <AsyncDisplayKit/ASCollectionView.h>
 
+@protocol ASCollectionViewLayoutFacilitatorProtocol;
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**

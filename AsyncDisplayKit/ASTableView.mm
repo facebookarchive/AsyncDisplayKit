@@ -34,7 +34,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 @class _ASTableViewCell;
 
 @protocol _ASTableViewCellDelegate <NSObject>
-- (void)willLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell;
+- (void)didLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell;
 @end
 
 @interface _ASTableViewCell : UITableViewCell
@@ -47,8 +47,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)layoutSubviews
 {
-  [_delegate willLayoutSubviewsOfTableViewCell:self];
   [super layoutSubviews];
+  [_delegate didLayoutSubviewsOfTableViewCell:self];
 }
 
 - (void)didTransitionToState:(UITableViewCellStateMask)state
@@ -722,7 +722,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
 {
-  return self.tableNode.interfaceState;
+  ASTableNode *tableNode = self.tableNode;
+  if (tableNode) {
+    return self.tableNode.interfaceState;
+  } else {
+    // Until we can always create an associated ASTableNode without a retain cycle,
+    // we might be on our own to try to guess if we're visible.  The node normally
+    // handles this even if it is the root / directly added to the view hierarchy.
+    return (self.window != nil ? ASInterfaceStateVisible : ASInterfaceStateNone);
+  }
 }
 
 #pragma mark - ASRangeControllerDelegate
@@ -895,7 +903,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 #pragma mark - _ASTableViewCellDelegate
 
-- (void)willLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
+- (void)didLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
 {
   CGFloat contentViewWidth = tableViewCell.contentView.bounds.size.width;
   ASCellNode *node = tableViewCell.node;

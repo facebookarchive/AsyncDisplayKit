@@ -16,16 +16,42 @@
 #import "ASTextNodeWordKerner.h"
 #import "ASThread.h"
 
-//! @abstract This subclass exists solely to ensure the text view's panGestureRecognizer never begins, because it's sporadically enabled by UITextView. It will be removed pending rdar://14729288.
-@interface _ASDisabledPanUITextView : UITextView
+/**
+ @abstract As originally reported in rdar://14729288, when scrollEnabled = NO,
+   UITextView does not calculate its contentSize. This makes it difficult 
+   for a client to embed a UITextView inside a different scroll view with 
+   other content (setting scrollEnabled = NO on the UITextView itself,
+   because the containing scroll view will handle the gesture)...
+   because accessing contentSize is typically necessary to perform layout.
+   Apple later closed the issue as expected behavior. This works around
+   the issue by ensuring that contentSize is always calculated, while
+   still providing control over the UITextView's scrolling.
+
+ See issue: https://github.com/facebook/AsyncDisplayKit/issues/1063
+ */
+@interface ASPanningOverriddenUITextView : UITextView
+{
+  BOOL _shouldBlockPanGesture;
+}
 @end
 
-@implementation _ASDisabledPanUITextView
+@implementation ASPanningOverriddenUITextView
+
+- (BOOL)scrollEnabled
+{
+  return _shouldBlockPanGesture;
+}
+
+- (void)setScrollEnabled:(BOOL)scrollEnabled
+{
+  _shouldBlockPanGesture = !scrollEnabled;
+  [super setScrollEnabled:YES];
+}
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
-  // Never allow our pans to begin.
-  if (gestureRecognizer == self.panGestureRecognizer)
+  // Never allow our pans to begin when _shouldBlockPanGesture is true.
+  if (_shouldBlockPanGesture && gestureRecognizer == self.panGestureRecognizer)
     return NO;
 
   // Otherwise, proceed as usual.
@@ -207,11 +233,18 @@
 #pragma mark - Configuration
 @synthesize delegate = _delegate;
 
+- (void)setScrollEnabled:(BOOL)scrollEnabled
+{
+  ASDN::MutexLocker l(_textKitLock);
+  _scrollEnabled = scrollEnabled;
+  [_textKitComponents.textView setScrollEnabled:_scrollEnabled];
+}
+
 - (UITextView *)textView
 {
   ASDisplayNodeAssertMainThread();
   if (!_textKitComponents.textView) {
-    _textKitComponents.textView = [[_ASDisabledPanUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
+    _textKitComponents.textView = [[ASPanningOverriddenUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
   }
   return _textKitComponents.textView;
 }

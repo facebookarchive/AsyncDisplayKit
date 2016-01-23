@@ -2,9 +2,10 @@
 
 [![Build Status](https://travis-ci.org/facebook/AsyncDisplayKit.svg)](https://travis-ci.org/facebook/AsyncDisplayKit)
 [![Coverage Status](https://coveralls.io/repos/facebook/AsyncDisplayKit/badge.svg?branch=master)](https://coveralls.io/r/facebook/AsyncDisplayKit?branch=master)
- [![Version](http://img.shields.io/cocoapods/v/AsyncDisplayKit.svg)](http://cocoapods.org/?q=AsyncDisplayKit)
- [![Platform](http://img.shields.io/cocoapods/p/AsyncDisplayKit.svg)]()
- [![License](http://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
+[![Version](https://img.shields.io/cocoapods/v/AsyncDisplayKit.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Platform](https://img.shields.io/cocoapods/p/AsyncDisplayKit.svg)]()
+[![License](https://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
+[![Downloads](https://img.shields.io/badge/downloads-%3E120k-green.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
 
 AsyncDisplayKit is an iOS framework that keeps even the most complex user
 interfaces smooth and responsive.  It was originally built to make Facebook's
