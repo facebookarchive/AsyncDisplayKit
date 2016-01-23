@@ -1,3 +1,10 @@
+/* Copyright (c) 2014-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
@@ -8,6 +15,10 @@ typedef NS_ENUM(NSUInteger, ASVideoGravity) {
 };
 
 @protocol ASVideoNodeDelegate;
+
+// If you need ASVideoNode, please use AsyncDisplayKit master until this comment is removed.
+// As of 1.9.6, ASVideoNode accidentally triggers creating the AVPlayerLayer even before playing
+// the video.  Using a lot of them intended to show static frame placeholders will be slow.
 
 @interface ASVideoNode : ASControlNode
 @property (atomic, strong, readwrite) AVAsset *asset;
