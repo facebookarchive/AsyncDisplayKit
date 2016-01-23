@@ -5,7 +5,7 @@
 //  Created by Adlai Holler on 9/25/15.
 //  Copyright © 2015 Facebook. All rights reserved.
 //
-
+#if TARGET_OS_IOS
 #import "ASPhotosFrameworkImageRequest.h"
 #import "ASBaseDefines.h"
 #import "ASAvailability.h"
@@ -159,3 +159,4 @@ static NSString *const _ASPhotosURLQueryKeyCropHeight = @"crop_h";
 }
 
 @end
+#endif

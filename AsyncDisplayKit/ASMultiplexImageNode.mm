@@ -6,12 +6,12 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASMultiplexImageNode.h"
+#if TARGET_OS_IOS
 
+#import "ASMultiplexImageNode.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 
 #import <Photos/Photos.h>
-
 #import <libkern/OSAtomic.h>
 
 #import "ASAvailability.h"
@@ -112,6 +112,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
  */
 - (void)_fetchImageWithIdentifierFromCache:(id)imageIdentifier URL:(NSURL *)imageURL completion:(void (^)(UIImage *image))completionBlock;
 
+#if TARGET_OS_IOS
 /**
   @abstract Loads the image corresponding to the given assetURL from the device's Assets Library.
   @param imageIdentifier The identifier for the image to be loaded. May not be nil.
@@ -131,7 +132,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     @param error An error describing why the load failed, if it failed; nil otherwise.
  */
 - (void)_loadPHAssetWithRequest:(ASPhotosFrameworkImageRequest *)request identifier:(id)imageIdentifier completion:(void (^)(UIImage *image, NSError *error))completionBlock;
-
+#endif
 /**
  @abstract Downloads the image corresponding to the given imageIdentifier from the given URL.
  @param imageIdentifier The identifier for the image to be downloaded. May not be nil.
@@ -262,7 +263,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   _dataSource = dataSource;
   _dataSourceFlags.image = [_dataSource respondsToSelector:@selector(multiplexImageNode:imageForImageIdentifier:)];
   _dataSourceFlags.URL = [_dataSource respondsToSelector:@selector(multiplexImageNode:URLForImageIdentifier:)];
+  #if TARGET_OS_IOS
   _dataSourceFlags.asset = [_dataSource respondsToSelector:@selector(multiplexImageNode:assetForLocalIdentifier:)];
+  #endif
 }
 
 #pragma mark -
@@ -455,6 +458,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     return;
   }
 
+  #if TARGET_OS_IOS
   // If it's an assets-library URL, we need to fetch it from the assets library.
   if ([[nextImageURL scheme] isEqualToString:kAssetsLibraryURLScheme]) {
     // Load the asset.
@@ -470,6 +474,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       finishedLoadingBlock(image, nextImageIdentifier, error);
     }];
   }
+  #endif
   else // Otherwise, it's a web URL that we can download.
   {
     // First, check the cache.
@@ -499,7 +504,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     }];
   }
 }
-
+#if TARGET_OS_IOS
 - (void)_loadALAssetWithIdentifier:(id)imageIdentifier URL:(NSURL *)assetURL completion:(void (^)(UIImage *image, NSError *error))completionBlock
 {
   ASDisplayNodeAssertNotNil(imageIdentifier, @"imageIdentifier is required");
@@ -609,7 +614,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   _phImageRequestOperation = newImageRequestOp;
   [phImageRequestQueue addOperation:newImageRequestOp];
 }
-
+#endif
 - (void)_fetchImageWithIdentifierFromCache:(id)imageIdentifier URL:(NSURL *)imageURL completion:(void (^)(UIImage *image))completionBlock
 {
   ASDisplayNodeAssertNotNil(imageIdentifier, @"imageIdentifier is required");
@@ -708,7 +713,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 }
 
 @end
-
+#if TARGET_OS_IOS
 @implementation NSURL (ASPhotosFrameworkURLs)
 
 + (NSURL *)URLWithAssetLocalIdentifier:(NSString *)assetLocalIdentifier targetSize:(CGSize)targetSize contentMode:(PHImageContentMode)contentMode options:(PHImageRequestOptions *)options
@@ -721,3 +726,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 }
 
 @end
+#endif
+
+#endif
