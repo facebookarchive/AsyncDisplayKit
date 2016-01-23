@@ -34,7 +34,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 @class _ASTableViewCell;
 
 @protocol _ASTableViewCellDelegate <NSObject>
-- (void)willLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell;
+- (void)didLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell;
 @end
 
 @interface _ASTableViewCell : UITableViewCell
@@ -48,7 +48,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)layoutSubviews
 {
   [super layoutSubviews];
-  [_delegate willLayoutSubviewsOfTableViewCell:self];
+  [_delegate didLayoutSubviewsOfTableViewCell:self];
 }
 
 - (void)didTransitionToState:(UITableViewCellStateMask)state
@@ -911,7 +911,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 #pragma mark - _ASTableViewCellDelegate
 
-- (void)willLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
+- (void)didLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
 {
   CGFloat contentViewWidth = tableViewCell.contentView.bounds.size.width;
   ASCellNode *node = tableViewCell.node;
