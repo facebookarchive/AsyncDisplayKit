@@ -43,6 +43,9 @@
 @interface ASRangeControllerStable ()
 {
   BOOL _rangeIsValid;
+
+  BOOL _dataControllerIsUpdating;
+  BOOL _pendingUpdateVisibleNodeIndexPaths;
   
   // keys should be ASLayoutRangeTypes and values NSSets containing NSIndexPaths
   NSMutableDictionary *_rangeTypeIndexPaths;
@@ -129,6 +132,15 @@
     return;
   }
 
+  if (_dataControllerIsUpdating) {
+    // When data controller is updating, it returns _externalCompletedNodes instead of _completeNodes;
+    // But when adding/removing items, _externalCompletedNodes get out of sync, because only _completedNodes are being updated;
+    // When that happens, our index paths in _rangeTypeIndexPaths exist in _completeNodes, but might not exist in
+    // _externalCompleteNodes; So while data controller is updating we postpone updating visible node index paths
+    _pendingUpdateVisibleNodeIndexPaths = YES;
+    return;
+  }
+
   NSArray *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
 
   if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
@@ -205,6 +217,7 @@
 - (void)dataControllerBeginUpdates:(ASDataController *)dataController
 {
   ASPerformBlockOnMainThread(^{
+    _dataControllerIsUpdating = YES;
     [_delegate didBeginUpdatesInRangeController:self];
   });
 }
@@ -212,7 +225,12 @@
 - (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASPerformBlockOnMainThread(^{
+    _dataControllerIsUpdating = NO;
     [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
+    if (_pendingUpdateVisibleNodeIndexPaths) {
+      _pendingUpdateVisibleNodeIndexPaths = NO;
+      [self _updateVisibleNodeIndexPaths];
+    }
   });
 }
 
@@ -221,6 +239,28 @@
   ASDisplayNodeAssert(nodes.count == indexPaths.count, @"Invalid index path");
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
+      
+    // We're inserting nodes so we need to appropriately shift indexes of _rangeTypeIndexPaths
+    for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
+      id rangeKey = @((ASLayoutRangeType)i);
+      NSSet *rangePaths = _rangeTypeIndexPaths[rangeKey];
+      NSMutableSet *shiftedRangePaths = [NSMutableSet new];
+      for (NSIndexPath *path in rangePaths) {
+        int shift = 0;
+        for (NSIndexPath *pathToInsert in indexPaths) {
+          // if inserted index path is before this one, we need to shift it
+          if (pathToInsert.section == path.section && (pathToInsert.item <= path.item + shift)) {
+            ++shift;
+          }
+        }
+        NSIndexPath *shifted = path;
+        if (shift > 0) {
+          shifted = [NSIndexPath indexPathForItem:path.item + shift inSection:path.section];
+        }
+        [shiftedRangePaths addObject:shifted];
+      }
+      _rangeTypeIndexPaths[rangeKey] = shiftedRangePaths;
+    }
     [_delegate rangeController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
@@ -234,11 +274,31 @@
     // otherwise _updateVisibleNodeIndexPaths may try to retrieve nodes from dataSource that aren't there anymore
     for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
       id rangeKey = @((ASLayoutRangeType)i);
+
       NSMutableSet *rangePaths = [_rangeTypeIndexPaths[rangeKey] mutableCopy];
-      for (NSIndexPath *path in indexPaths) {
-        [rangePaths removeObject:path];
+      for (NSIndexPath *pathToRemove in indexPaths) {
+        [rangePaths removeObject:pathToRemove];
       }
-      _rangeTypeIndexPaths[rangeKey] = rangePaths;
+        
+      // After removing paths we are left with gaps; We need to shift all remaining index paths
+      // so that there are no gaps left
+      NSMutableSet *shiftedRangePaths = [NSMutableSet new];
+      for (NSIndexPath *path in rangePaths) {
+        int shift = 0;
+        for (NSIndexPath *pathToRemove in indexPaths) {
+          if (pathToRemove.section == path.section && pathToRemove.item < path.item) {
+            // removed path was before this path, we need to shift it back
+            ++shift;
+          }
+        }
+        NSIndexPath *shifted = path;
+        if (shift > 0) {
+          shifted = [NSIndexPath indexPathForItem:path.item - shift inSection:path.section];
+        }
+        [shiftedRangePaths addObject:shifted];
+      }
+
+      _rangeTypeIndexPaths[rangeKey] = shiftedRangePaths;
     }
     
     [_delegate rangeController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
@@ -250,6 +310,30 @@
   ASDisplayNodeAssert(sections.count == indexSet.count, @"Invalid sections");
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
+    
+    for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
+      id rangeKey = @((ASLayoutRangeType)i);
+      NSMutableSet *rangePaths = [_rangeTypeIndexPaths[rangeKey] mutableCopy];
+          
+      // When inserting sections we need to update _rangeTypeIndexPaths to reflect shifted sections
+      NSMutableSet *shiftedRangePaths = [NSMutableSet new];
+      for (NSIndexPath *path in rangePaths) {
+        __block int shift = 0;
+        [indexSet enumerateIndexesUsingBlock:^(NSUInteger indexToAdd, BOOL *stop) {
+          if (indexToAdd <= (path.section + shift)) {
+            ++shift;
+          }
+        }];
+          
+        NSIndexPath *shifted = path;
+        if (shift > 0) {
+          shifted = [NSIndexPath indexPathForItem:path.item inSection:path.section + shift];
+        }
+        [shiftedRangePaths addObject:shifted];
+      }
+      _rangeTypeIndexPaths[rangeKey] = shiftedRangePaths;
+    }
+
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   });
 }
@@ -269,7 +353,26 @@
           [rangePaths removeObject:path];
         }
       }
-      _rangeTypeIndexPaths[rangeKey] = rangePaths;
+        
+      // After removing paths we are left with gaps; We need to shift all remaining index paths
+      // so that there are no gaps left
+      NSMutableSet *shiftedRangePaths = [NSMutableSet new];
+      for (NSIndexPath *path in rangePaths) {
+        __block int shift = 0;
+        [indexSet enumerateIndexesUsingBlock:^(NSUInteger indexToRemove, BOOL *stop) {
+          if (indexToRemove < path.section) {
+            ++shift;
+          }
+        }];
+
+        NSIndexPath *shifted = path;
+        if (shift > 0) {
+          shifted = [NSIndexPath indexPathForItem:path.item inSection:path.section - shift];
+        }
+        [shiftedRangePaths addObject:shifted];
+      }
+        
+      _rangeTypeIndexPaths[rangeKey] = shiftedRangePaths;
     }
     
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
