@@ -6,12 +6,12 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASMultiplexImageNode.h"
 #if TARGET_OS_IOS
+
+#import "ASMultiplexImageNode.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 
 #import <Photos/Photos.h>
-#endif
 #import <libkern/OSAtomic.h>
 
 #import "ASAvailability.h"
@@ -726,4 +726,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 }
 
 @end
+#endif
+
 #endif
