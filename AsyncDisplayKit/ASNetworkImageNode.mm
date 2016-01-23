@@ -168,14 +168,14 @@
   _cacheUUID = nil;
 }
 
-- (void)_downloadImageWithCompletion:(void (^)(CGImageRef))finished
+- (void)_downloadImageWithCompletion:(void (^)(CGImageRef, NSError*))finished
 {
   _imageDownload = [_downloader downloadImageWithURL:_URL
                                        callbackQueue:dispatch_get_main_queue()
                                downloadProgressBlock:NULL
                                           completion:^(CGImageRef responseImage, NSError *error) {
                                             if (finished != NULL) {
-                                              finished(responseImage);
+                                              finished(responseImage, error);
                                             }
                                           }];
 }
@@ -210,7 +210,7 @@
       }
     } else {
       __weak __typeof__(self) weakSelf = self;
-      void (^finished)(CGImageRef) = ^(CGImageRef responseImage) {
+      void (^finished)(CGImageRef, NSError *) = ^(CGImageRef responseImage, NSError *error) {
         __typeof__(self) strongSelf = weakSelf;
         if (strongSelf == nil) {
           return;
@@ -232,6 +232,9 @@
         if (responseImage != NULL) {
           [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
         }
+        else if (error && [strongSelf->_delegate respondsToSelector:@selector(imageNode:didFailWithError:)]) {
+          [strongSelf->_delegate imageNode:strongSelf didFailWithError:error];
+        }
       };
 
       if (_cache != nil) {
@@ -247,7 +250,7 @@
           if (image == NULL && _downloader != nil) {
             [self _downloadImageWithCompletion:finished];
           } else {
-            finished(image);
+            finished(image, NULL);
           }
         };
 
