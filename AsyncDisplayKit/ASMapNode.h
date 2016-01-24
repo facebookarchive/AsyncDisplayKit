@@ -36,7 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, getter=isLiveMap) BOOL liveMap;
 
 /**
- @abstract Whether ASMapNode should automatically request a new map snapshot to correspond to the new node size. Defaults to YES.
+ @abstract Whether ASMapNode should automatically request a new map snapshot to correspond to the new node size.
+ @default Default value is YES.
  @discussion If mapSize is set then this will be set to NO, since the size will be the same in all orientations.
  */
 @property (nonatomic, assign) BOOL needsMapReloadOnBoundsChange;

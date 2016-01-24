@@ -117,7 +117,10 @@
   if (!_options) {
     _options = [[MKMapSnapshotOptions alloc] init];
     _options.region = MKCoordinateRegionForMapRect(MKMapRectWorld);
-    _options.size = self.calculatedSize;
+    CGSize calculatedSize = self.calculatedSize;
+    if (!CGSizeEqualToSize(calculatedSize, CGSizeZero)) {
+      _options.size = calculatedSize;
+    }
   }
   return _options;
 }
@@ -250,6 +253,24 @@
 }
 
 #pragma mark - Layout
+- (void)setSnapshotSizeIfNeeded:(CGSize)snapshotSize
+{
+  if (!CGSizeEqualToSize(self.options.size, snapshotSize)) {
+    _options.size = snapshotSize;
+    [self resetSnapshotter];
+  }
+}
+
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+{
+  CGSize size = self.preferredFrameSize;
+  if (CGSizeEqualToSize(size, CGSizeZero)) {
+    size = constrainedSize;
+  }
+  [self setSnapshotSizeIfNeeded:size];
+  return constrainedSize;
+}
+
 // Layout isn't usually needed in the box model, but since we are making use of MKMapView this is preferred.
 - (void)layout
 {
@@ -258,9 +279,10 @@
     _mapView.frame = CGRectMake(0.0f, 0.0f, self.calculatedSize.width, self.calculatedSize.height);
   } else {
     // If our bounds.size is different from our current snapshot size, then let's request a new image from MKMapSnapshotter.
-    if (!CGSizeEqualToSize(_options.size, self.bounds.size) && _needsMapReloadOnBoundsChange) {
-      _options.size = self.bounds.size;
-      [self resetSnapshotter];
+    if (_needsMapReloadOnBoundsChange) {
+      [self setSnapshotSizeIfNeeded:self.bounds.size];
+      // FIXME: Adding a check for FetchData here seems to cause intermittent map load failures, but shouldn't.
+      // if (ASInterfaceStateIncludesFetchData(self.interfaceState)) {
       [self takeSnapshot];
     }
   }
