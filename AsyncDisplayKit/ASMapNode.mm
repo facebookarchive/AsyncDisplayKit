@@ -114,6 +114,11 @@
 - (MKMapSnapshotOptions *)options
 {
   ASDN::MutexLocker l(_propertyLock);
+  if (!_options) {
+    _options = [[MKMapSnapshotOptions alloc] init];
+    _options.region = MKCoordinateRegionForMapRect(MKMapRectWorld);
+    _options.size = self.calculatedSize;
+  }
   return _options;
 }
 
@@ -127,6 +132,16 @@
     [self resetSnapshotter];
     [self takeSnapshot];
   }
+}
+
+- (MKCoordinateRegion)region
+{
+  return self.options.region;
+}
+
+- (void)setRegion:(MKCoordinateRegion)region
+{
+  self.options.region = region;
 }
 
 #pragma mark - Snapshotter
@@ -174,33 +189,25 @@
 - (void)setUpSnapshotter
 {
   ASDisplayNodeAssert(!CGSizeEqualToSize(CGSizeZero, self.calculatedSize), @"self.calculatedSize can not be zero. Make sure that you are setting a preferredFrameSize or wrapping ASMapNode in a ASRatioLayoutSpec or similar.");
-  if (!_options) {
-    [self createInitialOptions];
-  }
-  _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:_options];
+  _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:self.options];
 }
 
 - (void)resetSnapshotter
 {
+  // FIXME: The semantics of this method / name would suggest that we cancel + destroy the snapshotter,
+  // but not that we create a new one.  We should probably only create the new one in -takeSnapshot or something.
   [_snapshotter cancel];
-  _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:_options];
-}
-
-- (void)createInitialOptions
-{
-  _options = [[MKMapSnapshotOptions alloc] init];
-  //Default world-scale view
-  _options.region = MKCoordinateRegionForMapRect(MKMapRectWorld);
-  _options.size = self.calculatedSize;
+  _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:self.options];
 }
 
 - (void)applySnapshotOptions
 {
-  [_mapView setCamera:_options.camera animated:YES];
-  [_mapView setRegion:_options.region animated:YES];
-  [_mapView setMapType:_options.mapType];
-  _mapView.showsBuildings = _options.showsBuildings;
-  _mapView.showsPointsOfInterest = _options.showsPointsOfInterest;
+  MKMapSnapshotOptions *options = self.options;
+  [_mapView setCamera:options.camera animated:YES];
+  [_mapView setRegion:options.region animated:YES];
+  [_mapView setMapType:options.mapType];
+  _mapView.showsBuildings = options.showsBuildings;
+  _mapView.showsPointsOfInterest = options.showsPointsOfInterest;
 }
 
 #pragma mark - Actions
@@ -211,9 +218,6 @@
     __weak ASMapNode *weakSelf = self;
     _mapView = [[MKMapView alloc] initWithFrame:CGRectZero];
     _mapView.delegate = weakSelf.mapDelegate;
-    if (!_options) {
-      [weakSelf createInitialOptions];
-    }
     [weakSelf applySnapshotOptions];
     [_mapView addAnnotations:_annotations];
     [weakSelf setNeedsLayout];
@@ -227,6 +231,7 @@
 
 - (void)removeLiveMap
 {
+  // FIXME: With MKCoordinateRegion, isn't the center coordinate fully specified?  Do we need this?
   _centerCoordinateOfMap = _mapView.centerCoordinate;
   [_mapView removeFromSuperview];
   _mapView = nil;

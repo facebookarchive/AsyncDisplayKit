@@ -19,6 +19,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, strong) MKMapSnapshotOptions *options;
 
+/** The region is simply the sub-field on the options object.  If the objects object is reset,
+    this will in effect be overwritten and become the value of the .region property on that object.
+    Defaults to MKCoordinateRegionForMapRect(MKMapRectWorld).
+ */
+@property (nonatomic, assign) MKCoordinateRegion region;
+
 /**
  This is the MKMapView that is the live map part of ASMapNode. This will be nil if .liveMap = NO. Note, MKMapView is *not* thread-safe.
  */
