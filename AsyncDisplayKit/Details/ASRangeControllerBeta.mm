@@ -22,7 +22,7 @@
   BOOL _rangeIsValid;
   BOOL _queuedRangeUpdate;
   ASScrollDirection _scrollDirection;
-  NSSet *_allPreviousIndexPaths;
+  NSSet<NSIndexPath *> *_allPreviousIndexPaths;
 }
 
 @end
@@ -65,7 +65,7 @@
   }
 
   // FIXME: Consider if we need to check this separately from the range calculation below.
-  NSArray *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
+  NSArray<NSIndexPath *> *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
 
   if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
     _queuedRangeUpdate = NO;
@@ -80,19 +80,22 @@
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
   
-  NSArray *allNodes = [_dataSource completedNodes];
-  NSArray *currentSectionNodes = nil;
+  NSArray<NSArray *> *allNodes = [_dataSource completedNodes];  // 2D array: section arrays, each containing nodes.
+  NSArray<ASDisplayNode *> *currentSectionNodes = nil;
   NSInteger currentSectionIndex = -1; // Will be unequal to any indexPath.section, so we set currentSectionNodes.
   
   NSUInteger numberOfSections = [allNodes count];
   NSUInteger numberOfNodesInSection = 0;
   
-  NSSet *visibleIndexPaths  = [NSSet setWithArray:visibleNodePaths];
+  NSSet<NSIndexPath *> *visibleIndexPaths  = [NSSet setWithArray:visibleNodePaths];
                         //  = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
-  NSSet *displayIndexPaths = nil;
-  NSSet *fetchDataIndexPaths = nil;
-  NSMutableSet *allIndexPaths = nil;
-  NSMutableArray *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
+  NSSet<NSIndexPath *> *displayIndexPaths = nil;
+  NSSet<NSIndexPath *> *fetchDataIndexPaths = nil;
+  NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
+  
+  // Prioritize the order in which we visit each.  Visible nodes should be updated first so they are enqueued on
+  // the network or display queues before offscreen, preloading nodes are.
+  NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
   
@@ -102,20 +105,22 @@
     displayIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
   
     // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
-    allIndexPaths = [fetchDataIndexPaths mutableCopy];
+    // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
+    // This means that during iteration, we will first visit visible, then display, then fetch data nodes.
+    // Nodes within the visible range may be getting their first display and fetch data call too, so enqueue them first.
     [allIndexPaths unionSet:displayIndexPaths];
-    [allIndexPaths unionSet:visibleIndexPaths];
-  } else {
-    allIndexPaths = [visibleIndexPaths mutableCopy];
+    [allIndexPaths unionSet:fetchDataIndexPaths];
   }
   
   // Sets are magical.  Add anything we had applied interfaceState to in the last update, so we can clear any
   // range flags it still has enabled.  Most of the time, all but a few elements are equal; a large programmatic
   // scroll or major main thread stall could cause entirely disjoint sets, but we must visit all.
-  NSSet *allCurrentIndexPaths = [allIndexPaths copy];
+  
+  // Calling set on NSMutableOrderedSet just references the underlying data store, so we must copy it.
+  NSSet<NSIndexPath *> *allCurrentIndexPaths = [[allIndexPaths set] copy];
   [allIndexPaths unionSet:_allPreviousIndexPaths];
   _allPreviousIndexPaths = allCurrentIndexPaths;
-  
+    
   for (NSIndexPath *indexPath in allIndexPaths) {
     // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.
     // For consistency, make sure each node knows that it should measure itself if something changes.
