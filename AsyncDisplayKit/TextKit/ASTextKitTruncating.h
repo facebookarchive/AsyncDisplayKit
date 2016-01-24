@@ -31,7 +31,6 @@
  */
 - (instancetype)initWithContext:(ASTextKitContext *)context
      truncationAttributedString:(NSAttributedString *)truncationAttributedString
-         avoidTailTruncationSet:(NSCharacterSet *)avoidTailTruncationSet
-                constrainedSize:(CGSize)constrainedSize;
+         avoidTailTruncationSet:(NSCharacterSet *)avoidTailTruncationSet;
 
 @end

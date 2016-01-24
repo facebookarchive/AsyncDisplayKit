@@ -37,7 +37,6 @@
 
 /**
  Designated Initializer
-dvlkferufedgjnhjjfhldjedlunvtdtv
  @discussion Sizing will occur as a result of initialization, so be careful when/where you use this.
  */
 - (instancetype)initWithTextKitAttributes:(const ASTextKitAttributes &)textComponentAttributes
@@ -51,7 +50,7 @@ dvlkferufedgjnhjjfhldjedlunvtdtv
 
 @property (nonatomic, assign, readonly) ASTextKitAttributes attributes;
 
-@property (nonatomic, assign, readonly) CGSize constrainedSize;
+@property (nonatomic, assign, readwrite) CGSize constrainedSize;
 
 #pragma mark - Drawing
 /*
