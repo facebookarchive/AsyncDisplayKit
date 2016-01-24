@@ -28,6 +28,26 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 };
 
 /**
+ * The vertical alignment of text within a node.
+ */
+typedef NS_ENUM(NSUInteger, ASTextNodeVerticalTextAlignment) {
+  /**
+   * Aligns the content vertically at the top in the node (the default).
+   */
+  ASTextNodeVerticalTextAlignmentTop,
+  
+  /**
+   * Aligns the content vertically in the center of the node.
+   */
+  ASTextNodeVerticalTextAlignmentCenter,
+  
+  /**
+   * Aligns the content vertically at the bottom in the node.
+   */
+  ASTextNodeVerticalTextAlignmentBottom
+};
+
+/**
  @abstract Draws interactive rich text.
  @discussion Backed by TextKit.
  */
@@ -71,6 +91,12 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @default 0 (No limit)
  */
 @property (nonatomic, assign) NSUInteger maximumNumberOfLines;
+
+/**
+ @abstract The vertical alignment of text within the receiver.
+ @discussion Defaults to ASTextNodeVerticalTextAlignmentTop
+ */
+@property (nonatomic, assign) ASTextNodeVerticalTextAlignment verticalTextAlignment;
 
 /**
  @abstract The number of lines in the text. Text must have been sized first.

@@ -126,6 +126,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
     _truncationMode = NSLineBreakByWordWrapping;
     _composedTruncationString = DefaultTruncationAttributedString();
+    
+    _verticalTextAlignment = ASTextNodeVerticalTextAlignmentTop;
 
     // The common case is for a text node to be non-opaque and blended over some background.
     self.opaque = NO;
@@ -434,7 +436,22 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   // Offset the text origin by any shadow padding
   UIEdgeInsets shadowPadding = [self shadowPadding];
-  CGPoint textOrigin = CGPointMake(self.bounds.origin.x - shadowPadding.left, self.bounds.origin.y - shadowPadding.top);
+  CGPoint textOrigin = CGPointMake(self.bounds.origin.x - shadowPadding.left, 0.0f);
+  
+  switch (_verticalTextAlignment)
+  {
+    case ASTextNodeVerticalTextAlignmentTop:
+      textOrigin.y = self.bounds.origin.y - shadowPadding.top;
+      break;
+    case ASTextNodeVerticalTextAlignmentCenter:
+      textOrigin.y += (self.bounds.size.height - [self _renderer].size.height) / 2.0f;
+      break;
+    case ASTextNodeVerticalTextAlignmentBottom:
+      textOrigin.y = self.bounds.size.height - shadowPadding.top - shadowPadding.bottom - [self _renderer].size.height;
+    default:
+      break;
+  }
+  
   return [[ASTextNodeDrawParameters alloc] initWithRenderer:[self _renderer]
                                                  textOrigin:textOrigin
                                             backgroundColor:self.backgroundColor.CGColor];

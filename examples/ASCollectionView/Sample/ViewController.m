@@ -14,6 +14,7 @@
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "SupplementaryNode.h"
 #import "ItemNode.h"
+#import "TextNode.h"
 
 @interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
 {
@@ -106,6 +107,10 @@
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
+  if (indexPath.section == 0) {
+    return [[TextNode alloc] initWithString:@"AsyncDisplayKit is an iOS framework that keeps even the most complex user interfaces smooth and responsive." verticalTextAlignment:(indexPath.row % 3)];
+  }
+  
   NSString *text = [NSString stringWithFormat:@"[%zd.%zd] says hi", indexPath.section, indexPath.item];
   return [[ItemNode alloc] initWithString:text];
 }
