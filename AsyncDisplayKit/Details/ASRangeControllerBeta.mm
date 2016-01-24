@@ -109,7 +109,15 @@
   if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
     // If we are already visible, get busy!  Better get started on preloading before the user scrolls more...
     fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData];
-    displayIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
+
+    ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeFetchData];
+    ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeDisplay];
+    if (parametersDisplay.leadingBufferScreenfuls == parametersFetchData.leadingBufferScreenfuls &&
+        parametersDisplay.trailingBufferScreenfuls == parametersFetchData.trailingBufferScreenfuls) {
+      displayIndexPaths = fetchDataIndexPaths;
+    } else {
+      displayIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
+    }
   
     // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
     // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
