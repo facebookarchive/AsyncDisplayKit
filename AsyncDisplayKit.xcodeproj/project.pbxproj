@@ -270,6 +270,7 @@
 		7A06A73B1C35F08800FE8DAA /* ASRelativeLayoutSpec.h in Headers */ = {isa = PBXBuildFile; fileRef = 7A06A7391C35F08800FE8DAA /* ASRelativeLayoutSpec.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7AB338661C55B3420055FDE8 /* ASRelativeLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7A06A7381C35F08800FE8DAA /* ASRelativeLayoutSpec.mm */; };
 		7AB338671C55B3460055FDE8 /* ASRelativeLayoutSpec.h in Headers */ = {isa = PBXBuildFile; fileRef = 7A06A7391C35F08800FE8DAA /* ASRelativeLayoutSpec.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7AB338691C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7AB338681C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm */; };
 		92DD2FE31BF4B97E0074C9DD /* ASMapNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 92DD2FE11BF4B97E0074C9DD /* ASMapNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		92DD2FE41BF4B97E0074C9DD /* ASMapNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */; };
 		92DD2FE61BF4D05E0074C9DD /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92DD2FE51BF4D05E0074C9DD /* MapKit.framework */; };
@@ -709,6 +710,7 @@
 		6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; path = AsyncDisplayKit.h; sourceTree = "<group>"; };
 		7A06A7381C35F08800FE8DAA /* ASRelativeLayoutSpec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASRelativeLayoutSpec.mm; path = AsyncDisplayKit/Layout/ASRelativeLayoutSpec.mm; sourceTree = "<group>"; };
 		7A06A7391C35F08800FE8DAA /* ASRelativeLayoutSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASRelativeLayoutSpec.h; path = AsyncDisplayKit/Layout/ASRelativeLayoutSpec.h; sourceTree = "<group>"; };
+		7AB338681C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRelativeLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		92DD2FE11BF4B97E0074C9DD /* ASMapNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMapNode.h; sourceTree = "<group>"; };
 		92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMapNode.mm; sourceTree = "<group>"; };
 		92DD2FE51BF4D05E0074C9DD /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -993,6 +995,7 @@
 				05EA6FE61AC0966E00E35788 /* ASSnapshotTestCase.mm */,
 				056D21541ABCEF50001107EF /* ASImageNodeSnapshotTests.m */,
 				ACF6ED531B178DC700DA7C62 /* ASCenterLayoutSpecSnapshotTests.mm */,
+				7AB338681C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm */,
 				ACF6ED551B178DC700DA7C62 /* ASInsetLayoutSpecSnapshotTests.mm */,
 				ACF6ED591B178DC700DA7C62 /* ASOverlayLayoutSpecSnapshotTests.mm */,
 				ACF6ED5A1B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm */,
@@ -1861,6 +1864,7 @@
 				058D0A3C195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m in Sources */,
 				ACF6ED611B178DC700DA7C62 /* ASOverlayLayoutSpecSnapshotTests.mm in Sources */,
 				ACF6ED621B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm in Sources */,
+				7AB338691C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm in Sources */,
 				254C6B541BF8FF2A003EC431 /* ASTextKitTests.mm in Sources */,
 				05EA6FE71AC0966E00E35788 /* ASSnapshotTestCase.mm in Sources */,
 				ACF6ED631B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm in Sources */,
