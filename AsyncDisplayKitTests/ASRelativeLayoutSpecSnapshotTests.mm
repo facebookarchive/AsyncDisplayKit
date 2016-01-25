@@ -25,7 +25,7 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
 - (void)setUp
 {
   [super setUp];
-  self.recordMode = NO;
+  self.recordMode = YES;
 }
 
 - (void)testWithOptions
