@@ -1573,7 +1573,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return _flags.shouldBypassEnsureDisplay;
 }
 
-static BOOL ShouldUseNewRenderingRange = NO;
+static BOOL ShouldUseNewRenderingRange = YES;
 
 + (BOOL)shouldUseNewRenderingRange
 {
