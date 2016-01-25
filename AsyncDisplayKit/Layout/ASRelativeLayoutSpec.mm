@@ -1,19 +1,19 @@
 //
-//  ASRelativePositionLayoutSpec.m
+//  ASRelativeLayoutSpec.m
 //  Pods
 //
 //  Created by Samuel Stow on 12/31/15.
 //
 //
 
-#import "ASRelativePositionLayoutSpec.h"
+#import "ASRelativeLayoutSpec.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
-@implementation ASRelativePositionLayoutSpec
+@implementation ASRelativeLayoutSpec
 
-- initWithHorizontalPosition:(ASRelativePositionLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativePositionLayoutSpecPosition)verticalPosition sizingOption:(ASRelativePositionLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
+- initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
 {
     if (!(self = [super init])) {
         return nil;
@@ -26,23 +26,23 @@
     return self;
 }
 
-+ (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativePositionLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativePositionLayoutSpecPosition)verticalPosition sizingOption:(ASRelativePositionLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
++ (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
 {
     return [[self alloc] initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:child];
 }
 
-- (void)setHorizontalPosition:(ASRelativePositionLayoutSpecPosition)horizontalPosition
+- (void)setHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
 {
     ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
     _horizontalPosition = horizontalPosition;
 }
 
-- (void)setVerticalPosition:(ASRelativePositionLayoutSpecPosition)verticalPosition {
+- (void)setVerticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition {
     ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
     _verticalPosition = verticalPosition;
 }
 
-- (void)setSizingOption:(ASRelativePositionLayoutSpecSizingOption)sizingOption
+- (void)setSizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
 {
     ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
     _sizingOption = sizingOption;
@@ -55,11 +55,11 @@
         constrainedSize.max.height
     };
     
-    BOOL reduceWidth = (_horizontalPosition & ASRelativePositionLayoutSpecPositionCenter) != 0 ||
-    (_horizontalPosition & ASRelativePositionLayoutSpecPositionMax) != 0;
+    BOOL reduceWidth = (_horizontalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
+    (_horizontalPosition & ASRelativeLayoutSpecPositionEnd) != 0;
     
-    BOOL reduceHeight = (_verticalPosition & ASRelativePositionLayoutSpecPositionCenter) != 0 ||
-    (_verticalPosition & ASRelativePositionLayoutSpecPositionMax) != 0;
+    BOOL reduceHeight = (_verticalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
+    (_verticalPosition & ASRelativeLayoutSpecPositionEnd) != 0;
     
     // Layout the child
     const CGSize minChildSize = {
@@ -77,11 +77,11 @@
     
     // If minimum size options are set, attempt to shrink the size to the size of the child
     size = ASSizeRangeClamp(constrainedSize, {
-        MIN(size.width, (_sizingOption & ASRelativePositionLayoutSpecSizingOptionOptionMinimumX) != 0 ? sublayout.size.width : size.width),
-        MIN(size.height, (_sizingOption & ASRelativePositionLayoutSpecSizingOptionOptionMinimumY) != 0 ? sublayout.size.height : size.height)
+        MIN(size.width, (_sizingOption & ASRelativeLayoutSpecSizingOptionMinimumWidth) != 0 ? sublayout.size.width : size.width),
+        MIN(size.height, (_sizingOption & ASRelativeLayoutSpecSizingOptionMinimumHeight) != 0 ? sublayout.size.height : size.height)
     });
     
-    // Compute the centered postion for the child
+    // Compute the position for the child on each axis according to layout parameters
     CGFloat xPosition = [self proportionOfAxisForAxisPosition:_horizontalPosition];
     CGFloat yPosition = [self proportionOfAxisForAxisPosition:_verticalPosition];
     
@@ -104,10 +104,10 @@
     return nil;
 }
 
-- (CGFloat)proportionOfAxisForAxisPosition:(ASRelativePositionLayoutSpecPosition)position {
-    if ((position & ASRelativePositionLayoutSpecPositionCenter) != 0) {
+- (CGFloat)proportionOfAxisForAxisPosition:(ASRelativeLayoutSpecPosition)position {
+    if ((position & ASRelativeLayoutSpecPositionCenter) != 0) {
         return 0.5f;
-    } else if ((position & ASRelativePositionLayoutSpecPositionMax) != 0) {
+    } else if ((position & ASRelativeLayoutSpecPositionEnd) != 0) {
         return 1.0f;
     } else {
         return 0.0f;
