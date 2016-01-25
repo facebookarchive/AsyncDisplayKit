@@ -479,6 +479,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   ASTextKitRenderer *renderer = [self _renderer];
   NSRange visibleRange = renderer.visibleRanges[0];
   NSAttributedString *attributedString = _attributedString;
+  NSRange clampedRange = NSIntersectionRange(visibleRange, NSMakeRange(0, attributedString.length));
 
   // Check in a 9-point region around the actual touch point so we make sure
   // we get the best attribute for the touch.
@@ -519,7 +520,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
     for (NSString *attributeName in _linkAttributeNames) {
       NSRange range;
-      id value = [attributedString attribute:attributeName atIndex:characterIndex longestEffectiveRange:&range inRange:visibleRange];
+      id value = [attributedString attribute:attributeName atIndex:characterIndex longestEffectiveRange:&range inRange:clampedRange];
       NSString *name = attributeName;
 
       if (value == nil || name == nil) {
