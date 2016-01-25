@@ -45,8 +45,6 @@
   
   _previewQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
   
-  [ASDisplayNode setShouldUseNewRenderingRange:YES];
-
 #if DEBUG
   NSLog(@"*** Warning: ASVideoNode is a new component - the 1.9.6 version may cause performance hiccups.");
 #endif
