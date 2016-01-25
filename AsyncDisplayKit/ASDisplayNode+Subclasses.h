@@ -91,6 +91,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)layoutDidFinish;
 
+/**
+ * @abstract Called on a background thread if !isNodeLoaded - called on the main thread if isNodeLoaded.
+ *
+ * @discussion When the .calculatedLayout property is set to a new ASLayout (directly from -calculateLayoutThatFits: or
+ * calculated via use of -layoutSpecThatFits:), subclasses may inspect it here.
+ */
+- (void)calculatedLayoutDidChange;
 
 /** @name Layout calculation */
 

@@ -185,19 +185,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - ASDisplayNode
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
-{
-  ASDisplayNodeAssert(constrainedSize.width >= 0, @"Constrained width for text (%f) is too  narrow", constrainedSize.width);
-  ASDisplayNodeAssert(constrainedSize.height >= 0, @"Constrained height for text (%f) is too short", constrainedSize.height);
-
-  _constrainedSize = constrainedSize;
-  [self _invalidateRenderer];
-  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-    [self setNeedsDisplay];
-  });
-  return [[self _renderer] size];
-}
-
 // FIXME: Re-evaluate if it is still the right decision to clear the renderer at this stage.
 // This code was written before TextKit and when 512MB devices were still the overwhelming majority.
 - (void)displayDidFinish
@@ -303,6 +290,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
+#pragma mark - Layout and Sizing
+
 - (BOOL)_needInvalidateRendererForBoundsSize:(CGSize)boundsSize
 {
   if (!_renderer) {
@@ -323,7 +312,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // as this would essentially serve to set its constrainedSize to be its calculatedSize (unnecessary).
     ASLayout *layout = self.calculatedLayout;
     if (layout != nil && CGSizeEqualToSize(boundsSize, layout.size)) {
-      if (!CGSizeEqualToSize(boundsSize, rendererConstrainedSize)) {
+      if (boundsSize.width != rendererConstrainedSize.width) {
         // Don't bother changing _constrainedSize, as ASDisplayNode's -measure: method would have a cache miss
         // and ask us to recalculate layout if it were called with the same calculatedSize that got us to this point!
         _renderer.constrainedSize = boundsSize;
@@ -333,6 +322,32 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
       return YES;
     }
   }
+}
+
+- (void)calculatedLayoutDidChange
+{
+  ASLayout *layout = self.calculatedLayout;
+  if (layout != nil) {
+    _renderer.constrainedSize = layout.size;
+  }
+}
+
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+{
+  ASDisplayNodeAssert(constrainedSize.width >= 0, @"Constrained width for text (%f) is too  narrow", constrainedSize.width);
+  ASDisplayNodeAssert(constrainedSize.height >= 0, @"Constrained height for text (%f) is too short", constrainedSize.height);
+  
+  _constrainedSize = constrainedSize;
+  
+  // Instead of invalidating the renderer, in case this is a new call with a different constrained size,
+  // just update the size of the NSTextContainer that is owned by the renderer's internal context object.
+  [self _renderer].constrainedSize = _constrainedSize;
+  
+  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+    [self setNeedsDisplay];
+  });
+  
+  return [[self _renderer] size];
 }
 
 #pragma mark - Modifying User Text
