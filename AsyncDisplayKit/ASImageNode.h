@@ -86,7 +86,7 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
  * @discussion Can be used to add image effects (such as rounding, adding
  * borders, or other pattern overlays) without extraneous display calls.
  */
-@property (nullable, nonatomic, readwrite, copy) asimagenode_modification_block_t imageModificationBlock;
+@property (nonatomic, readwrite, copy) asimagenode_modification_block_t imageModificationBlock;
 
 /**
  * @abstract Marks the receiver as needing display and performs a block after
