@@ -594,6 +594,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _layout = [self calculateLayoutThatFits:constrainedSize];
     _constrainedSize = constrainedSize;
     _flags.isMeasured = YES;
+    [self calculatedLayoutDidChange];
   }
 
   ASDisplayNodeAssertTrue(_layout.layoutableObject == self);
@@ -613,6 +614,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   return _layout;
+}
+
+- (void)calculatedLayoutDidChange
+{
 }
 
 - (BOOL)displaysAsynchronously
