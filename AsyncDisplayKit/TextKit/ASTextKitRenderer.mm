@@ -17,6 +17,9 @@
 #import "ASTextKitTailTruncater.h"
 #import "ASTextKitTruncating.h"
 
+//#define LOG(...) NSLog(__VA_ARGS__)
+#define LOG(...)
+
 static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   static NSCharacterSet *truncationCharacterSet;
@@ -65,12 +68,10 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   if (!_truncater) {
     ASTextKitAttributes attributes = _attributes;
-    // We must inset the constrained size by the size of the shadower.
-    CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:_constrainedSize];
+    NSCharacterSet *avoidTailTruncationSet = attributes.avoidTailTruncationSet ? : _defaultAvoidTruncationCharacterSet();
     _truncater = [[ASTextKitTailTruncater alloc] initWithContext:[self context]
                                       truncationAttributedString:attributes.truncationAttributedString
-                                          avoidTailTruncationSet:attributes.avoidTailTruncationSet ?: _defaultAvoidTruncationCharacterSet()
-                                                 constrainedSize:shadowConstrainedSize];
+                                          avoidTailTruncationSet:avoidTailTruncationSet];
   }
   return _truncater;
 }
@@ -79,6 +80,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   if (!_context) {
     ASTextKitAttributes attributes = _attributes;
+    // We must inset the constrained size by the size of the shadower.
     CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:_constrainedSize];
     _context = [[ASTextKitContext alloc] initWithAttributedString:attributes.attributedString
                                                     lineBreakMode:attributes.lineBreakMode
@@ -91,6 +93,30 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 }
 
 #pragma mark - Sizing
+
+- (CGSize)size
+{
+  if (!_sizeIsCalculated) {
+    [self _calculateSize];
+    _sizeIsCalculated = YES;
+  }
+  return _calculatedSize;
+}
+
+- (void)setConstrainedSize:(CGSize)constrainedSize
+{
+  if (!CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
+    _sizeIsCalculated = NO;
+    _constrainedSize = constrainedSize;
+    // If the context isn't created yet, it will be initialized with the appropriate size when next accessed.
+    if (_context) {
+      // If we're updating an existing context, make sure to use the same inset logic used during initialization.
+      // This codepath allows us to reuse the
+      CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:constrainedSize];
+      _context.constrainedSize = shadowConstrainedSize;
+    }
+  }
+}
 
 - (void)_calculateSize
 {
@@ -111,16 +137,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   // to make sure our width calculations aren't being offset by glyphs going beyond the constrained rect.
   boundingRect = CGRectIntersection(boundingRect, {.size = constrainedRect.size});
 
-  _calculatedSize = [_shadower outsetSizeWithInsetSize:CGSizeMake(boundingRect.size.width + boundingRect.origin.x, boundingRect.size.height + boundingRect.origin.y)];
-}
-
-- (CGSize)size
-{
-  if (!_sizeIsCalculated) {
-    [self _calculateSize];
-    _sizeIsCalculated = YES;
-  }
-  return _calculatedSize;
+  _calculatedSize = [_shadower outsetSizeWithInsetSize:boundingRect.size];
 }
 
 #pragma mark - Drawing
@@ -136,8 +153,12 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   [[self shadower] setShadowInContext:context];
   UIGraphicsPushContext(context);
 
+  LOG(@"%@, shadowInsetBounds = %@",self, NSStringFromCGRect(shadowInsetBounds));
+  
   [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
+    LOG(@"usedRect: %@", NSStringFromCGRect([layoutManager usedRectForTextContainer:textContainer]));
     NSRange glyphRange = [layoutManager glyphRangeForTextContainer:textContainer];
+    LOG(@"boundingRect: %@", NSStringFromCGRect([layoutManager boundingRectForGlyphRange:glyphRange inTextContainer:textContainer]));
     [layoutManager drawBackgroundForGlyphRange:glyphRange atPoint:shadowInsetBounds.origin];
     [layoutManager drawGlyphsForGlyphRange:glyphRange atPoint:shadowInsetBounds.origin];
   }];

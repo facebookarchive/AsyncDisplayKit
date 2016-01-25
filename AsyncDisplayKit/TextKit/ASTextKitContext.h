@@ -30,6 +30,8 @@
                          constrainedSize:(CGSize)constrainedSize
                     layoutManagerFactory:(NSLayoutManager*(*)(void))layoutManagerFactory;
 
+@property (nonatomic, assign, readwrite) CGSize constrainedSize;
+
 /**
  All operations on TextKit values MUST occur within this locked context.  Simultaneous access (even non-mutative) to
  TextKit components may cause crashes.

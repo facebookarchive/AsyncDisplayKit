@@ -49,6 +49,16 @@
   return self;
 }
 
+- (CGSize)constrainedSize
+{
+  return _textContainer.size;
+}
+
+- (void)setConstrainedSize:(CGSize)constrainedSize
+{
+  _textContainer.size = constrainedSize;
+}
+
 - (void)performBlockWithLockedTextKitComponents:(void (^)(NSLayoutManager *,
                                                           NSTextStorage *,
                                                           NSTextContainer *))block

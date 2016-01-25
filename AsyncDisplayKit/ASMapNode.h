@@ -19,6 +19,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, strong) MKMapSnapshotOptions *options;
 
+/** The region is simply the sub-field on the options object.  If the objects object is reset,
+    this will in effect be overwritten and become the value of the .region property on that object.
+    Defaults to MKCoordinateRegionForMapRect(MKMapRectWorld).
+ */
+@property (nonatomic, assign) MKCoordinateRegion region;
+
 /**
  This is the MKMapView that is the live map part of ASMapNode. This will be nil if .liveMap = NO. Note, MKMapView is *not* thread-safe.
  */
@@ -30,7 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, getter=isLiveMap) BOOL liveMap;
 
 /**
- @abstract Whether ASMapNode should automatically request a new map snapshot to correspond to the new node size. Defaults to YES.
+ @abstract Whether ASMapNode should automatically request a new map snapshot to correspond to the new node size.
+ @default Default value is YES.
  @discussion If mapSize is set then this will be set to NO, since the size will be the same in all orientations.
  */
 @property (nonatomic, assign) BOOL needsMapReloadOnBoundsChange;

@@ -35,13 +35,13 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (instancetype)initWithRenderer:(ASTextKitRenderer *)renderer
                       textOrigin:(CGPoint)textOrigin
-                 backgroundColor:(CGColorRef)backgroundColor;
+                 backgroundColor:(UIColor *)backgroundColor;
 
 @property (nonatomic, strong, readonly) ASTextKitRenderer *renderer;
 
 @property (nonatomic, assign, readonly) CGPoint textOrigin;
 
-@property (nonatomic, assign, readonly) CGColorRef backgroundColor;
+@property (nonatomic, strong, readonly) UIColor *backgroundColor;
 
 @end
 
@@ -49,20 +49,18 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 - (instancetype)initWithRenderer:(ASTextKitRenderer *)renderer
                       textOrigin:(CGPoint)textOrigin
-                 backgroundColor:(CGColorRef)backgroundColor
+                 backgroundColor:(UIColor *)backgroundColor
 {
   if (self = [super init]) {
     _renderer = renderer;
     _textOrigin = textOrigin;
-    _backgroundColor = CGColorRetain(backgroundColor);
+    _backgroundColor = backgroundColor;
   }
   return self;
 }
 
 - (void)dealloc
 {
-  CGColorRelease(_backgroundColor);
-  
   // Destruction of the layout managers/containers/text storage is quite
   // expensive, and can take some time, so we dispatch onto a bg queue to
   // actually dealloc.
@@ -182,23 +180,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   NSString *truncationString = [_composedTruncationString string];
   if (plainString.length > 50)
     plainString = [[plainString substringToIndex:50] stringByAppendingString:@"\u2026"];
-  return [NSString stringWithFormat:@"<%@: %p; text = \"%@\"; truncation string = \"%@\"; frame = %@>", self.class, self, plainString, truncationString, self.nodeLoaded ? NSStringFromCGRect(self.layer.frame) : nil];
+  return [NSString stringWithFormat:@"<%@: %p; text = \"%@\"; truncation string = \"%@\"; frame = %@; renderer = %p>", self.class, self, plainString, truncationString, self.nodeLoaded ? NSStringFromCGRect(self.layer.frame) : nil, _renderer];
 }
 
 #pragma mark - ASDisplayNode
-
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
-{
-  ASDisplayNodeAssert(constrainedSize.width >= 0, @"Constrained width for text (%f) is too  narrow", constrainedSize.width);
-  ASDisplayNodeAssert(constrainedSize.height >= 0, @"Constrained height for text (%f) is too short", constrainedSize.height);
-
-  _constrainedSize = constrainedSize;
-  [self _invalidateRenderer];
-  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-    [self setNeedsDisplay];
-  });
-  return [[self _renderer] size];
-}
 
 // FIXME: Re-evaluate if it is still the right decision to clear the renderer at this stage.
 // This code was written before TextKit and when 512MB devices were still the overwhelming majority.
@@ -240,13 +225,13 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 - (void)setFrame:(CGRect)frame
 {
   [super setFrame:frame];
-  [self _invalidateRendererIfNeeded:frame.size];
+  [self _invalidateRendererIfNeededForBoundsSize:frame.size];
 }
 
 - (void)setBounds:(CGRect)bounds
 {
   [super setBounds:bounds];
-  [self _invalidateRendererIfNeeded:bounds.size];
+  [self _invalidateRendererIfNeededForBoundsSize:bounds.size];
 }
 
 #pragma mark - Renderer Management
@@ -291,12 +276,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)_invalidateRendererIfNeeded
 {
-  [self _invalidateRendererIfNeeded:self.bounds.size];
+  [self _invalidateRendererIfNeededForBoundsSize:self.bounds.size];
 }
 
-- (void)_invalidateRendererIfNeeded:(CGSize)newSize
+- (void)_invalidateRendererIfNeededForBoundsSize:(CGSize)boundsSize
 {
-  if ([self _needInvalidateRenderer:newSize]) {
+  if ([self _needInvalidateRendererForBoundsSize:boundsSize]) {
     // Our bounds of frame have changed to a size that is not identical to our constraining size,
     // so our previous layout information is invalid, and TextKit may draw at the
     // incorrect origin.
@@ -305,7 +290,9 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
-- (BOOL)_needInvalidateRenderer:(CGSize)newSize
+#pragma mark - Layout and Sizing
+
+- (BOOL)_needInvalidateRendererForBoundsSize:(CGSize)boundsSize
 {
   if (!_renderer) {
     return YES;
@@ -313,9 +300,9 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   // If the size is not the same as the constraint we provided to the renderer, start out assuming we need
   // a new one.  However, there are common cases where the constrained size doesn't need to be the same as calculated.
-  CGSize oldSize = _renderer.constrainedSize;
+  CGSize rendererConstrainedSize = _renderer.constrainedSize;
   
-  if (CGSizeEqualToSize(newSize, oldSize)) {
+  if (CGSizeEqualToSize(boundsSize, rendererConstrainedSize)) {
     return NO;
   } else {
     // It is very common to have a constrainedSize with a concrete, specific width but +Inf height.
@@ -324,12 +311,43 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // experience truncation and don't need to recreate the renderer with the size it already calculated,
     // as this would essentially serve to set its constrainedSize to be its calculatedSize (unnecessary).
     ASLayout *layout = self.calculatedLayout;
-    if (layout != nil && CGSizeEqualToSize(newSize, layout.size)) {
+    if (layout != nil && CGSizeEqualToSize(boundsSize, layout.size)) {
+      if (boundsSize.width != rendererConstrainedSize.width) {
+        // Don't bother changing _constrainedSize, as ASDisplayNode's -measure: method would have a cache miss
+        // and ask us to recalculate layout if it were called with the same calculatedSize that got us to this point!
+        _renderer.constrainedSize = boundsSize;
+      }
       return NO;
     } else {
       return YES;
     }
   }
+}
+
+- (void)calculatedLayoutDidChange
+{
+  ASLayout *layout = self.calculatedLayout;
+  if (layout != nil) {
+    _renderer.constrainedSize = layout.size;
+  }
+}
+
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+{
+  ASDisplayNodeAssert(constrainedSize.width >= 0, @"Constrained width for text (%f) is too  narrow", constrainedSize.width);
+  ASDisplayNodeAssert(constrainedSize.height >= 0, @"Constrained height for text (%f) is too short", constrainedSize.height);
+  
+  _constrainedSize = constrainedSize;
+  
+  // Instead of invalidating the renderer, in case this is a new call with a different constrained size,
+  // just update the size of the NSTextContainer that is owned by the renderer's internal context object.
+  [self _renderer].constrainedSize = _constrainedSize;
+  
+  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
+    [self setNeedsDisplay];
+  });
+  
+  return [[self _renderer] size];
 }
 
 #pragma mark - Modifying User Text
@@ -409,12 +427,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   // Fill background
   if (!isRasterizing) {
-    CGColorRef backgroundColor = parameters.backgroundColor;
+    UIColor *backgroundColor = parameters.backgroundColor;
     if (backgroundColor) {
-      CGContextSetFillColorWithColor(context, backgroundColor);
-      CGContextSetBlendMode(context, kCGBlendModeCopy);
-      CGContextFillRect(context, CGContextGetClipBoundingBox(context));
-      CGContextSetBlendMode(context, kCGBlendModeNormal);
+      [backgroundColor setFill];
+      UIRectFillUsingBlendMode(CGContextGetClipBoundingBox(context), kCGBlendModeCopy);
     }
   }
 
@@ -430,14 +446,15 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
-  [self _invalidateRendererIfNeeded];
+  CGRect bounds = self.bounds;
+  [self _invalidateRendererIfNeededForBoundsSize:bounds.size];
 
   // Offset the text origin by any shadow padding
   UIEdgeInsets shadowPadding = [self shadowPadding];
-  CGPoint textOrigin = CGPointMake(self.bounds.origin.x - shadowPadding.left, self.bounds.origin.y - shadowPadding.top);
+  CGPoint textOrigin = CGPointMake(bounds.origin.x - shadowPadding.left, bounds.origin.y - shadowPadding.top);
   return [[ASTextNodeDrawParameters alloc] initWithRenderer:[self _renderer]
                                                  textOrigin:textOrigin
-                                            backgroundColor:self.backgroundColor.CGColor];
+                                            backgroundColor:self.backgroundColor];
 }
 
 #pragma mark - Attributes
