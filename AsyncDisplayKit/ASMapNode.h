@@ -7,6 +7,7 @@
  */
 
 #import <AsyncDisplayKit/ASImageNode.h>
+#if TARGET_OS_IOS
 #import <MapKit/MapKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -14,7 +15,13 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASMapNode : ASImageNode
 
 /**
- The current region of ASMapNode. This can be set at any time and ASMapNode will animate the change. This property may be set from a background thread before the node is loaded, and will automatically be applied to define the region of the static snapshot (if .liveMap = NO) or the internal MKMapView (otherwise).
+ The current options of ASMapNode. This can be set at any time and ASMapNode will animate the change.<br><br>This property may be set from a background thread before the node is loaded, and will automatically be applied to define the behavior of the static snapshot (if .liveMap = NO) or the internal MKMapView (otherwise).<br><br> Changes to the region and camera options will only be animated when when the liveMap mode is enabled, otherwise these options will be applied statically to the new snapshot. <br><br> The options object is used to specify properties even when the liveMap mode is enabled, allowing seamless transitions between the snapshot and liveMap (as well as back to the snapshot).
+ */
+@property (nonatomic, strong) MKMapSnapshotOptions *options;
+
+/** The region is simply the sub-field on the options object.  If the objects object is reset,
+    this will in effect be overwritten and become the value of the .region property on that object.
+    Defaults to MKCoordinateRegionForMapRect(MKMapRectWorld).
  */
 @property (nonatomic, assign) MKCoordinateRegion region;
 
@@ -29,7 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, getter=isLiveMap) BOOL liveMap;
 
 /**
- @abstract Whether ASMapNode should automatically request a new map snapshot to correspond to the new node size. Defaults to YES.
+ @abstract Whether ASMapNode should automatically request a new map snapshot to correspond to the new node size.
+ @default Default value is YES.
  @discussion If mapSize is set then this will be set to NO, since the size will be the same in all orientations.
  */
 @property (nonatomic, assign) BOOL needsMapReloadOnBoundsChange;
@@ -40,7 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id <MKMapViewDelegate> mapDelegate;
 
 /**
- * @discussion This method set the annotations of the static map view and also to the live map view. Passing an empty array clears the map of any annotations.
+ * @discussion This method sets the annotations of the static map view and also to the live map view. Passing an empty array clears the map of any annotations.
  * @param annotations An array of objects that conform to the MKAnnotation protocol
  */
 - (void)setAnnotations:(NSArray<id<MKAnnotation>> *)annotations;
@@ -48,3 +56,5 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+
+#endif

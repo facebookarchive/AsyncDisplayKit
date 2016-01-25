@@ -235,7 +235,21 @@
     UIRectFill({ .size = backingSize });
   }
 
-  [image drawInRect:imageDrawRect];
+  // iOS 9 appears to contain a thread safety regression when drawing the same CGImageRef on
+  // multiple threads concurrently.  In fact, instead of crashing, it appears to deadlock.
+  // The issue is present in Mac OS X El Capitan and has been seen hanging Pro apps like Adobe Premier,
+  // as well as iOS games, and a small number of ASDK apps that provide the same image reference
+  // to many separate ASImageNodes.  A workaround is to set .displaysAsynchronously = NO for the nodes
+  // that may get the same pointer for a given UI asset image, etc.
+  // FIXME: We should replace @synchronized here, probably using a global, locked NSMutableSet, and
+  // only if the object already exists in the set we should create a semaphore to signal waiting threads
+  // upon removal of the object from the set when the operation completes.
+  // Another option is to have ASDisplayNode+AsyncDisplay coordinate these cases, and share the decoded buffer.
+  // Details tracked in https://github.com/facebook/AsyncDisplayKit/issues/1068
+  
+  @synchronized(image) {
+    [image drawInRect:imageDrawRect];
+  }
 
   if (isCancelled()) {
     UIGraphicsEndImageContext();

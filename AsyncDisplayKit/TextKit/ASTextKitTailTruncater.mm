@@ -18,7 +18,6 @@
   __weak ASTextKitContext *_context;
   NSAttributedString *_truncationAttributedString;
   NSCharacterSet *_avoidTailTruncationSet;
-  CGSize _constrainedSize;
 }
 @synthesize visibleRanges = _visibleRanges;
 @synthesize truncationStringRect = _truncationStringRect;
@@ -26,13 +25,11 @@
 - (instancetype)initWithContext:(ASTextKitContext *)context
      truncationAttributedString:(NSAttributedString *)truncationAttributedString
          avoidTailTruncationSet:(NSCharacterSet *)avoidTailTruncationSet
-                constrainedSize:(CGSize)constrainedSize
 {
   if (self = [super init]) {
     _context = context;
     _truncationAttributedString = truncationAttributedString;
     _avoidTailTruncationSet = avoidTailTruncationSet;
-    _constrainedSize = constrainedSize;
 
     [self _truncate];
   }

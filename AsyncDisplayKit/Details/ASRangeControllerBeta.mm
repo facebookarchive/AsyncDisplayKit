@@ -21,8 +21,9 @@
 {
   BOOL _rangeIsValid;
   BOOL _queuedRangeUpdate;
+  BOOL _layoutControllerImplementsSetVisibleIndexPaths;
   ASScrollDirection _scrollDirection;
-  NSSet *_allPreviousIndexPaths;
+  NSSet<NSIndexPath *> *_allPreviousIndexPaths;
 }
 
 @end
@@ -58,63 +59,83 @@
   });
 }
 
+- (void)setLayoutController:(id<ASLayoutController>)layoutController
+{
+  _layoutController = layoutController;
+  _layoutControllerImplementsSetVisibleIndexPaths = [_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
+}
+
 - (void)_updateVisibleNodeIndexPaths
 {
-  if (!_queuedRangeUpdate) {
+  ASDisplayNodeAssert(_layoutController, @"An ASLayoutController is required by ASRangeController");
+  if (!_queuedRangeUpdate || !_layoutController) {
     return;
   }
 
-  // FIXME: Consider if we need to check this separately from the range calculation below.
-  NSArray *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
+  // TODO: Consider if we need to use this codepath, or can rely on something more similar to the data & display ranges
+  // Example: ... = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
+  NSArray<NSIndexPath *> *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
 
   if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
     _queuedRangeUpdate = NO;
     return; // don't do anything for this update, but leave _rangeIsValid == NO to make sure we update it later
   }
 
-  CGSize viewportSize = [_dataSource viewportSizeForRangeController:self];
-  [_layoutController setViewportSize:viewportSize];
+  [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
 
   // the layout controller needs to know what the current visible indices are to calculate range offsets
-  if ([_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)]) {
+  if (_layoutControllerImplementsSetVisibleIndexPaths) {
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
   
-  NSArray *allNodes = [_dataSource completedNodes];
-  NSArray *currentSectionNodes = nil;
-  NSInteger currentSectionIndex = -1; // Will be unequal to any indexPath.section, so we set currentSectionNodes.
-  
+  // allNodes is a 2D array: it contains arrays for each section, each containing nodes.
+  NSArray<NSArray *> *allNodes = [_dataSource completedNodes];
   NSUInteger numberOfSections = [allNodes count];
+  
+  NSArray<ASDisplayNode *> *currentSectionNodes = nil;
+  NSInteger currentSectionIndex = -1; // Set to -1 so we don't match any indexPath.section on the first iteration.
   NSUInteger numberOfNodesInSection = 0;
   
-  NSSet *visibleIndexPaths  = [NSSet setWithArray:visibleNodePaths];
-                        //  = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
-  NSSet *displayIndexPaths = nil;
-  NSSet *fetchDataIndexPaths = nil;
-  NSMutableSet *allIndexPaths = nil;
-  NSMutableArray *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
+  NSSet<NSIndexPath *> *visibleIndexPaths = [NSSet setWithArray:visibleNodePaths];
+  NSSet<NSIndexPath *> *displayIndexPaths = nil;
+  NSSet<NSIndexPath *> *fetchDataIndexPaths = nil;
+  
+  // Prioritize the order in which we visit each.  Visible nodes should be updated first so they are enqueued on
+  // the network or display queues before preloading (offscreen) nodes are enqueued.
+  NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
   
   if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
     // If we are already visible, get busy!  Better get started on preloading before the user scrolls more...
     fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData];
-    displayIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
+
+    ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeFetchData];
+    ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeDisplay];
+    if (parametersDisplay.leadingBufferScreenfuls == parametersFetchData.leadingBufferScreenfuls &&
+        parametersDisplay.trailingBufferScreenfuls == parametersFetchData.trailingBufferScreenfuls) {
+      displayIndexPaths = fetchDataIndexPaths;
+    } else {
+      displayIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
+    }
   
     // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
-    allIndexPaths = [fetchDataIndexPaths mutableCopy];
+    // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
+    // This means that during iteration, we will first visit visible, then display, then fetch data nodes.
     [allIndexPaths unionSet:displayIndexPaths];
-    [allIndexPaths unionSet:visibleIndexPaths];
-  } else {
-    allIndexPaths = [visibleIndexPaths mutableCopy];
+    [allIndexPaths unionSet:fetchDataIndexPaths];
   }
   
-  // Sets are magical.  Add anything we had applied interfaceState to in the last update, so we can clear any
+  // Add anything we had applied interfaceState to in the last update, but is no longer in range, so we can clear any
   // range flags it still has enabled.  Most of the time, all but a few elements are equal; a large programmatic
-  // scroll or major main thread stall could cause entirely disjoint sets, but we must visit all.
-  NSSet *allCurrentIndexPaths = [allIndexPaths copy];
+  // scroll or major main thread stall could cause entirely disjoint sets.  In either case we must visit all.
+  // Calling "-set" on NSMutableOrderedSet just references the underlying mutable data store, so we must copy it.
+  NSSet<NSIndexPath *> *allCurrentIndexPaths = [[allIndexPaths set] copy];
   [allIndexPaths unionSet:_allPreviousIndexPaths];
   _allPreviousIndexPaths = allCurrentIndexPaths;
+  
+  // This array is only used if logging is enabled.
+  NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
   
   for (NSIndexPath *indexPath in allIndexPaths) {
     // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.

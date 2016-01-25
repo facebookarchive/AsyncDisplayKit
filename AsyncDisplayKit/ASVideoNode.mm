@@ -1,7 +1,12 @@
-
+/* Copyright (c) 2014-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
 
 #import "ASVideoNode.h"
-#import "ASDisplayNode+Beta.h"
 
 @interface ASVideoNode ()
 {
@@ -34,11 +39,17 @@
 
 - (instancetype)init
 {
-  if (!(self = [super init])) { return nil; }
+  if (!(self = [super init])) {
+    return nil;
+  }
   
   _previewQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
   
   [ASDisplayNode setShouldUseNewRenderingRange:YES];
+
+#if DEBUG
+  NSLog(@"*** Warning: ASVideoNode is a new component - the 1.9.6 version may cause performance hiccups.");
+#endif
   
   self.gravity = AVLayerVideoGravityResizeAspect;
   

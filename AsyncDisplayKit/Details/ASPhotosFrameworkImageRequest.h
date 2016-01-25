@@ -5,7 +5,7 @@
 //  Created by Adlai Holler on 9/25/15.
 //  Copyright © 2015 Facebook. All rights reserved.
 //
-
+#if TARGET_OS_IOS
 #import <Foundation/Foundation.h>
 #import <Photos/Photos.h>
 
@@ -64,3 +64,4 @@ extern NSString *const ASPhotosURLScheme;
 @end
 
 // NS_ASSUME_NONNULL_END
+#endif

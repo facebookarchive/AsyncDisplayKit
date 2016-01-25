@@ -48,12 +48,13 @@
   [super didLoad];
   
   ASCollectionView *cv = self.view;
-  
+#if TARGET_OS_IOS
   cv.pagingEnabled = YES;
+  cv.scrollsToTop = NO;
+#endif
   cv.allowsSelection = NO;
   cv.showsVerticalScrollIndicator = NO;
   cv.showsHorizontalScrollIndicator = NO;
-  cv.scrollsToTop = NO;
   
   // Zeroing contentInset is important, as UIKit will set the top inset for the navigation bar even though
   // our view is only horizontally scrollable.  This causes UICollectionViewFlowLayout to log a warning.

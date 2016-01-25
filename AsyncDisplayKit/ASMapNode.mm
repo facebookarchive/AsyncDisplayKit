@@ -6,6 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#if TARGET_OS_IOS
 #import "ASMapNode.h"
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
@@ -17,7 +18,6 @@
 {
   ASDN::RecursiveMutex _propertyLock;
   MKMapSnapshotter *_snapshotter;
-  MKMapSnapshotOptions *_options;
   NSArray *_annotations;
   CLLocationCoordinate2D _centerCoordinateOfMap;
 }
@@ -27,7 +27,7 @@
 
 @synthesize needsMapReloadOnBoundsChange = _needsMapReloadOnBoundsChange;
 @synthesize mapDelegate = _mapDelegate;
-@synthesize region = _region;
+@synthesize options = _options;
 @synthesize liveMap = _liveMap;
 
 #pragma mark - Lifecycle
@@ -42,13 +42,6 @@
   _needsMapReloadOnBoundsChange = YES;
   _liveMap = NO;
   _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
-  
-  //Default world-scale view
-  _region = MKCoordinateRegionForMapRect(MKMapRectWorld);
-  
-  _options = [[MKMapSnapshotOptions alloc] init];
-  _options.region = _region;
-  
   return self;
 }
 
@@ -118,23 +111,40 @@
   _needsMapReloadOnBoundsChange = needsMapReloadOnBoundsChange;
 }
 
-- (MKCoordinateRegion)region
+- (MKMapSnapshotOptions *)options
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _region;
+  if (!_options) {
+    _options = [[MKMapSnapshotOptions alloc] init];
+    _options.region = MKCoordinateRegionForMapRect(MKMapRectWorld);
+    CGSize calculatedSize = self.calculatedSize;
+    if (!CGSizeEqualToSize(calculatedSize, CGSizeZero)) {
+      _options.size = calculatedSize;
+    }
+  }
+  return _options;
+}
+
+- (void)setOptions:(MKMapSnapshotOptions *)options
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _options = options;
+  if (self.isLiveMap) {
+    [self applySnapshotOptions];
+  } else {
+    [self resetSnapshotter];
+    [self takeSnapshot];
+  }
+}
+
+- (MKCoordinateRegion)region
+{
+  return self.options.region;
 }
 
 - (void)setRegion:(MKCoordinateRegion)region
 {
-  ASDN::MutexLocker l(_propertyLock);
-  _region = region;
-  if (self.isLiveMap) {
-    [_mapView setRegion:_region animated:YES];
-  } else {
-    _options.region = _region;
-    [self resetSnapshotter];
-    [self takeSnapshot];
-  }
+  self.options.region = region;
 }
 
 #pragma mark - Snapshotter
@@ -182,14 +192,25 @@
 - (void)setUpSnapshotter
 {
   ASDisplayNodeAssert(!CGSizeEqualToSize(CGSizeZero, self.calculatedSize), @"self.calculatedSize can not be zero. Make sure that you are setting a preferredFrameSize or wrapping ASMapNode in a ASRatioLayoutSpec or similar.");
-  _options.size = self.calculatedSize;
-  _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:_options];
+  _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:self.options];
 }
 
 - (void)resetSnapshotter
 {
+  // FIXME: The semantics of this method / name would suggest that we cancel + destroy the snapshotter,
+  // but not that we create a new one.  We should probably only create the new one in -takeSnapshot or something.
   [_snapshotter cancel];
-  _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:_options];
+  _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:self.options];
+}
+
+- (void)applySnapshotOptions
+{
+  MKMapSnapshotOptions *options = self.options;
+  [_mapView setCamera:options.camera animated:YES];
+  [_mapView setRegion:options.region animated:YES];
+  [_mapView setMapType:options.mapType];
+  _mapView.showsBuildings = options.showsBuildings;
+  _mapView.showsPointsOfInterest = options.showsPointsOfInterest;
 }
 
 #pragma mark - Actions
@@ -200,7 +221,7 @@
     __weak ASMapNode *weakSelf = self;
     _mapView = [[MKMapView alloc] initWithFrame:CGRectZero];
     _mapView.delegate = weakSelf.mapDelegate;
-    [_mapView setRegion:_options.region];
+    [weakSelf applySnapshotOptions];
     [_mapView addAnnotations:_annotations];
     [weakSelf setNeedsLayout];
     [weakSelf.view addSubview:_mapView];
@@ -213,6 +234,7 @@
 
 - (void)removeLiveMap
 {
+  // FIXME: With MKCoordinateRegion, isn't the center coordinate fully specified?  Do we need this?
   _centerCoordinateOfMap = _mapView.centerCoordinate;
   [_mapView removeFromSuperview];
   _mapView = nil;
@@ -231,7 +253,25 @@
 }
 
 #pragma mark - Layout
-// Layout isn't usually needed in the box model, but since we are making use of MKMapView which is hidden in an ASDisplayNode this is preferred.
+- (void)setSnapshotSizeIfNeeded:(CGSize)snapshotSize
+{
+  if (!CGSizeEqualToSize(self.options.size, snapshotSize)) {
+    _options.size = snapshotSize;
+    [self resetSnapshotter];
+  }
+}
+
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+{
+  CGSize size = self.preferredFrameSize;
+  if (CGSizeEqualToSize(size, CGSizeZero)) {
+    size = constrainedSize;
+  }
+  [self setSnapshotSizeIfNeeded:size];
+  return constrainedSize;
+}
+
+// Layout isn't usually needed in the box model, but since we are making use of MKMapView this is preferred.
 - (void)layout
 {
   [super layout];
@@ -239,11 +279,13 @@
     _mapView.frame = CGRectMake(0.0f, 0.0f, self.calculatedSize.width, self.calculatedSize.height);
   } else {
     // If our bounds.size is different from our current snapshot size, then let's request a new image from MKMapSnapshotter.
-    if (!CGSizeEqualToSize(_options.size, self.bounds.size) && _needsMapReloadOnBoundsChange) {
-      _options.size = self.bounds.size;
-      [self resetSnapshotter];
+    if (_needsMapReloadOnBoundsChange) {
+      [self setSnapshotSizeIfNeeded:self.bounds.size];
+      // FIXME: Adding a check for FetchData here seems to cause intermittent map load failures, but shouldn't.
+      // if (ASInterfaceStateIncludesFetchData(self.interfaceState)) {
       [self takeSnapshot];
     }
   }
 }
 @end
+#endif

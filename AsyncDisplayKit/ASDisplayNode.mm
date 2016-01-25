@@ -594,6 +594,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _layout = [self calculateLayoutThatFits:constrainedSize];
     _constrainedSize = constrainedSize;
     _flags.isMeasured = YES;
+    [self calculatedLayoutDidChange];
   }
 
   ASDisplayNodeAssertTrue(_layout.layoutableObject == self);
@@ -613,6 +614,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   return _layout;
+}
+
+- (void)calculatedLayoutDidChange
+{
 }
 
 - (BOOL)displaysAsynchronously
@@ -2312,6 +2317,38 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   return self;
 }
 
+#if TARGET_OS_TV
+#pragma mark - UIFocusEnvironment Protocol (tvOS)
+
+- (void)setNeedsFocusUpdate
+{
+  
+}
+
+- (void)updateFocusIfNeeded
+{
+  
+}
+
+- (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
+{
+  return YES;
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+  
+}
+
+- (UIView *)preferredFocusedView
+{
+  if (self.nodeLoaded) {
+    return self.view;
+  } else {
+    return nil;
+  }
+}
+#endif
 @end
 
 @implementation ASDisplayNode (Debugging)
