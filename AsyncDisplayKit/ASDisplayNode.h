@@ -69,7 +69,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 /**
  * Default drawing priority for display node
  */
-extern NSUInteger const ASDefaultDrawingPriority;
+extern NSInteger const ASDefaultDrawingPriority;
 
 /**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
@@ -486,7 +486,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion Defaults to ASDefaultDrawingPriority. There may be multiple drawing threads, and some of them may
  * decide to perform operations in queued order (regardless of drawingPriority)
  */
-@property (nonatomic, assign) NSUInteger drawingPriority;
+@property (nonatomic, assign) NSInteger drawingPriority;
 
 /** @name Hit Testing */
 

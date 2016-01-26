@@ -29,7 +29,7 @@ typedef NS_ENUM(NSUInteger, ASAsyncTransactionState) {
   ASAsyncTransactionStateComplete
 };
 
-extern NSUInteger const ASDefaultTransactionPriority;
+extern NSInteger const ASDefaultTransactionPriority;
 
 /**
  @summary ASAsyncTransaction provides lightweight transaction semantics for asynchronous operations.
@@ -110,7 +110,7 @@ extern NSUInteger const ASDefaultTransactionPriority;
  operations in the transaction are completed. Executed and released on callbackQueue.
  */
 - (void)addOperationWithBlock:(asyncdisplaykit_async_transaction_operation_block_t)block
-                     priority:(NSUInteger)priority
+                     priority:(NSInteger)priority
                         queue:(dispatch_queue_t)queue
                    completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion;
 
@@ -149,7 +149,7 @@ extern NSUInteger const ASDefaultTransactionPriority;
  operations in the transaction are completed. Executed and released on callbackQueue.
  */
 - (void)addAsyncOperationWithBlock:(asyncdisplaykit_async_transaction_async_operation_block_t)block
-                          priority:(NSUInteger)priority
+                          priority:(NSInteger)priority
                              queue:(dispatch_queue_t)queue
                         completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion;
 
