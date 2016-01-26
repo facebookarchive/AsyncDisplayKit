@@ -948,12 +948,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
-      _superIsPendingDataLoad = YES;
       [super reloadData];
     }];
   } else {
     [UIView performWithoutAnimation:^{
-      _superIsPendingDataLoad = YES;
       [super reloadData];
     }];
   }
