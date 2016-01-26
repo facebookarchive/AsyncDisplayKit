@@ -472,6 +472,17 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       
       void (^transactionBlock)() = ^{
         LOG(@"Edit Transaction - reloadData");
+
+        // Use _externalCompletedNodes to avoid data inconsistency.
+        // If _externCompletedNodes is not nil, this command is part of a batch of updates (see endUpdatesAnimated:completion:)
+        BOOL useExternalCompletedNodes = (_externalCompletedNodes == nil);
+        if (useExternalCompletedNodes) {
+          [_mainSerialQueue performBlockOnMainThread:^{
+            // Deep copy _completedNodes to _externalCompletedNodes.
+            // Any external queries from now on will be done on _externalCompletedNodes, to guarantee data consistency with the delegate.
+            _externalCompletedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(_completedNodes[ASDataControllerRowNodeKind]);
+          }];
+        }
         
         // Remove everything that existed before the reload, now that we're ready to insert replacements
         [self deleteAllNodesOfKind:ASDataControllerRowNodeKind];
@@ -488,8 +499,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         
         [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths];
         
-        if (_delegateDidReloadData || completion) {
+        if (useExternalCompletedNodes || _delegateDidReloadData || completion) {
           [_mainSerialQueue performBlockOnMainThread:^{
+            if (useExternalCompletedNodes) {
+              // Now that the reload is done, _completedNodes can be accessed externally again.
+              _externalCompletedNodes = nil;
+            }
             if (_delegateDidReloadData) {
               [_delegate dataControllerDidReloadData:self];
             }
