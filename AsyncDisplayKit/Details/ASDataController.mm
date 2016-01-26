@@ -43,6 +43,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   BOOL _delegateDidDeleteNodes;
   BOOL _delegateDidInsertSections;
   BOOL _delegateDidDeleteSections;
+  BOOL _delegateDidReloadData;
 }
 
 @property (atomic, assign) NSUInteger batchUpdateCounter;
@@ -92,6 +93,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   _delegateDidDeleteNodes     = [_delegate respondsToSelector:@selector(dataController:didDeleteNodes:atIndexPaths:withAnimationOptions:)];
   _delegateDidInsertSections  = [_delegate respondsToSelector:@selector(dataController:didInsertSections:atIndexSet:withAnimationOptions:)];
   _delegateDidDeleteSections  = [_delegate respondsToSelector:@selector(dataController:didDeleteSectionsAtIndexSet:withAnimationOptions:)];
+  _delegateDidReloadData      = [_delegate respondsToSelector:@selector(dataControllerDidReloadData:)];
 }
 
 + (NSUInteger)parallelProcessorCount
@@ -146,11 +148,27 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 /**
  * Measures and defines the layout for each node in optimized batches on an editing queue, inserting the results into the backing store.
  */
+- (void)_batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths
+{
+  [self _batchLayoutNodes:nodes atIndexPaths:indexPaths andNotifyDelegate:NO withAnimationOptions:0];
+}
+
+/**
+ * Measures and defines the layout for each node in optimized batches on an editing queue, inserting the results into the backing store.
+ */
 - (void)_batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  [self _batchLayoutNodes:nodes atIndexPaths:indexPaths andNotifyDelegate:YES withAnimationOptions:animationOptions];
+}
+
+/**
+ * Measures and defines the layout for each node in optimized batches on an editing queue, inserting the results into the backing store.
+ */
+- (void)_batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths andNotifyDelegate:(BOOL)shouldNotifyDelegate withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   [self batchLayoutNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
     // Insert finished nodes into data storage
-    [self _insertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [self _insertNodes:nodes atIndexPaths:indexPaths andNotifyDelegate:shouldNotifyDelegate withAnimationOptions:animationOptions];
   }];
 }
 
@@ -240,6 +258,14 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
+- (void)deleteAllNodesOfKind:(NSString *)kind
+{
+  [_editingNodes[kind] removeAllObjects];
+  [_mainSerialQueue performBlockOnMainThread:^{
+    [_completedNodes[kind] removeAllObjects];
+  }];
+}
+
 - (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSArray *sections, NSIndexSet *indexSet))completionBlock
 {
   if (indexSet.count == 0)
@@ -278,6 +304,17 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 #pragma mark - Internal Data Querying + Editing
 
 /**
+ * Inserts the specified nodes into the given index paths and doesn't notify the delegate of newly inserted nodes.
+ *
+ * @discussion Nodes are first inserted into the editing store, then the completed store is replaced by a deep copy
+ * of the editing nodes.
+ */
+- (void)_insertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths
+{
+  [self _insertNodes:nodes atIndexPaths:indexPaths andNotifyDelegate:NO withAnimationOptions:0];
+}
+
+/**
  * Inserts the specified nodes into the given index paths and notifies the delegate of newly inserted nodes.
  *
  * @discussion Nodes are first inserted into the editing store, then the completed store is replaced by a deep copy
@@ -285,10 +322,26 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_insertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self insertNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
-    if (_delegateDidInsertNodes)
-      [_delegate dataController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
-  }];
+  [self _insertNodes:nodes atIndexPaths:indexPaths andNotifyDelegate:YES withAnimationOptions:animationOptions];
+}
+
+/**
+ * Inserts the specified nodes into the given index paths and notifies the delegate of newly inserted nodes.
+ *
+ * @discussion Nodes are first inserted into the editing store, then the completed store is replaced by a deep copy
+ * of the editing nodes. The delegate is invoked on the main thread.
+ */
+- (void)_insertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths andNotifyDelegate:(BOOL)shouldNotifyDelegate withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  void (^completionBlock)(NSArray *nodes, NSArray *indexPaths) = nil;
+  if (shouldNotifyDelegate) {
+    completionBlock = ^(NSArray *nodes, NSArray *indexPaths) {
+      if (_delegateDidInsertNodes)
+        [_delegate dataController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    };
+  }
+  
+  [self insertNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:completionBlock];
 }
 
 /**
@@ -306,17 +359,45 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 }
 
 /**
+ * Inserts sections, represented as arrays, into the backing store at the given indicies and doesn't notify the delegate.
+ *
+ * @discussion The section arrays are inserted into the editing store, then a deep copy of the sections are inserted
+ * in the completed store on the main thread.
+ */
+- (void)_insertSections:(NSMutableArray *)sections atIndexSet:(NSIndexSet *)indexSet
+{
+  [self _insertSections:sections atIndexSet:indexSet andNotifyDelegate:NO withAnimationOptions:0];
+}
+
+/**
+ * Inserts sections, represented as arrays, into the backing store at the given indicies and doesn't notify the delegate.
+ *
+ * @discussion The section arrays are inserted into the editing store, then a deep copy of the sections are inserted
+ * in the completed store on the main thread.
+ */
+- (void)_insertSections:(NSMutableArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  [self _insertSections:sections atIndexSet:indexSet andNotifyDelegate:YES withAnimationOptions:animationOptions];
+}
+
+/**
  * Inserts sections, represented as arrays, into the backing store at the given indicies and notifies the delegate.
  *
  * @discussion The section arrays are inserted into the editing store, then a deep copy of the sections are inserted
  * in the completed store on the main thread. The delegate is invoked on the main thread.
  */
-- (void)_insertSections:(NSMutableArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)_insertSections:(NSMutableArray *)sections atIndexSet:(NSIndexSet *)indexSet andNotifyDelegate:(BOOL)shouldNotifyDelegate withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self insertSections:sections ofKind:ASDataControllerRowNodeKind atIndexSet:indexSet completion:^(NSArray *sections, NSIndexSet *indexSet) {
-    if (_delegateDidInsertSections)
-      [_delegate dataController:self didInsertSections:sections atIndexSet:indexSet withAnimationOptions:animationOptions];
-  }];
+  
+  void (^completionBlock)(NSArray *sections, NSIndexSet *indexSet) = nil;
+  if (shouldNotifyDelegate) {
+    completionBlock = ^(NSArray *sections, NSIndexSet *indexSet) {
+      if (_delegateDidInsertSections)
+        [_delegate dataController:self didInsertSections:sections atIndexSet:indexSet withAnimationOptions:animationOptions];
+    };
+  }
+  
+  [self insertSections:sections ofKind:ASDataControllerRowNodeKind atIndexSet:indexSet completion:completionBlock];
 }
 
 /**
@@ -361,17 +442,17 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
-- (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^)())completion
+- (void)reloadDataWithCompletion:(void (^)())completion
 {
-  [self _reloadDataWithAnimationOptions:animationOptions synchronously:NO completion:completion];
+  [self _reloadDataSynchronously:NO completion:completion];
 }
 
-- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)reloadDataImmediately
 {
-  [self _reloadDataWithAnimationOptions:animationOptions synchronously:YES completion:nil];
+  [self _reloadDataSynchronously:YES completion:nil];
 }
 
-- (void)_reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions synchronously:(BOOL)synchronously completion:(void (^)())completion
+- (void)_reloadDataSynchronously:(BOOL)synchronously completion:(void (^)())completion
 {
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
@@ -393,12 +474,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         LOG(@"Edit Transaction - reloadData");
         
         // Remove everything that existed before the reload, now that we're ready to insert replacements
-        NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_editingNodes[ASDataControllerRowNodeKind]);
-        [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-        
-        NSMutableArray *editingNodes = _editingNodes[ASDataControllerRowNodeKind];
-        NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodes.count)];
-        [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
+        [self deleteAllNodesOfKind:ASDataControllerRowNodeKind];
         
         [self willReloadData];
         
@@ -408,12 +484,19 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
           [sections addObject:[[NSMutableArray alloc] init]];
         }
         
-        [self _insertSections:sections atIndexSet:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)] withAnimationOptions:animationOptions];
+        [self _insertSections:sections atIndexSet:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)]];
         
-        [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
+        [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths];
         
-        if (completion) {
-          dispatch_async(dispatch_get_main_queue(), completion);
+        if (_delegateDidReloadData || completion) {
+          [_mainSerialQueue performBlockOnMainThread:^{
+            if (_delegateDidReloadData) {
+              [_delegate dataControllerDidReloadData:self];
+            }
+            if (completion) {
+              completion();
+            }
+          }];
         }
       };
       

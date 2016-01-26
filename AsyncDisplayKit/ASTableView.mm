@@ -298,10 +298,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  ASPerformBlockOnMainThread(^{
-    [super reloadData];
-  });
-  [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
+  [_dataController reloadDataWithCompletion:completion];
 }
 
 - (void)reloadData
@@ -312,8 +309,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController reloadDataImmediatelyWithAnimationOptions:UITableViewRowAnimationNone];
-  [super reloadData];
+  [_dataController reloadDataImmediately];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
@@ -843,6 +839,18 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
+}
+
+- (void)rangeControllerDidReloadData:(ASRangeController *)rangeController
+{
+  ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView reloadData");
+  
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
+  [super reloadData];
 }
 
 #pragma mark - ASDataControllerDelegate
