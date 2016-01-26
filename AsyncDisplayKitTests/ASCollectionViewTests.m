@@ -110,7 +110,7 @@
   XCTAssertEqualObjects([collectionView supplementaryNodeKindsInDataController:nil], @[UICollectionElementKindSectionHeader]);
 }
 
-- (void)DISABLED_testCollectionViewController
+- (void)testCollectionViewController
 {
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
 
