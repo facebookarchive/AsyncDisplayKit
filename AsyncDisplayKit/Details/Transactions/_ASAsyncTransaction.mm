@@ -163,16 +163,11 @@ void ASAsyncTransactionQueue::GroupImpl::schedule(dispatch_queue_t queue, dispat
   
   ++_pendingOperations; // enter group
   
-  NSUInteger maxThreads = [NSProcessInfo processInfo].activeProcessorCount;
-  if (maxThreads < 2) { // it is reasonable to have at least two working threads, also
-    maxThreads = 2;     // [_ASDisplayLayerTests testTransaction] requires at least two threads
-  }
+  NSUInteger maxThreads = [NSProcessInfo processInfo].activeProcessorCount * 2;
 
-#if 0
-  // Bit questionable - we can give main thread more CPU time during tracking;
-  if (maxThreads > 1 && [[NSRunLoop mainRunLoop].currentMode isEqualToString:UITrackingRunLoopMode])
+  // Bit questionable maybe - we can give main thread more CPU time during tracking;
+  if ([[NSRunLoop mainRunLoop].currentMode isEqualToString:UITrackingRunLoopMode])
     --maxThreads;
-#endif
   
   if (entry._threadCount < maxThreads) { // we need to spawn another thread
 
