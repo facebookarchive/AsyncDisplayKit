@@ -88,6 +88,8 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
                                                    exclusionPaths:attributes.exclusionPaths
                                                   constrainedSize:shadowConstrainedSize
                                              layoutManagerFactory:attributes.layoutManagerFactory];
+
+    [self truncater];
   }
   return _context;
 }
