@@ -17,6 +17,13 @@
 #define NumberOfRowsPerSection 20
 #define NumberOfReloadIterations 50
 
+typedef enum : NSUInteger {
+  ReloadData,
+  ReloadRows,
+  ReloadSections,
+  ReloadTypeMax
+} ReloadType;
+
 @interface ASTestDataController : ASChangeSetDataController
 @property (atomic) int numberOfAllNodesRelayouts;
 @end
@@ -210,7 +217,7 @@
   for (int i = 0; i < NumberOfReloadIterations; ++i) {
     UITableViewRowAnimation rowAnimation = (arc4random_uniform(2) == 0 ? UITableViewRowAnimationMiddle : UITableViewRowAnimationNone);
     BOOL animatedScroll               = (arc4random_uniform(2) == 0 ? YES : NO);
-    BOOL reloadRowsInsteadOfSections  = (arc4random_uniform(2) == 0 ? YES : NO);
+    ReloadType reloadType             = (arc4random_uniform(ReloadTypeMax));
     NSTimeInterval runLoopDelay       = ((arc4random_uniform(2) == 0) ? (1.0 / (1 + arc4random_uniform(500))) : 0);
     BOOL useBeginEndUpdates           = (arc4random_uniform(3) == 0 ? YES : NO);
 
@@ -221,14 +228,21 @@
       [tableView beginUpdates];
     }
     
-    if (reloadRowsInsteadOfSections) {
-      NSArray *indexPaths = [self randomIndexPathsExisting:YES];
-      //NSLog(@"reloading rows: %@", indexPaths);
-      [tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:rowAnimation];
-    } else {
-      NSIndexSet *sections = [self randomIndexSet];
-      //NSLog(@"reloading sections: %@", sections);
-      [tableView reloadSections:sections withRowAnimation:rowAnimation];
+    switch (reloadType) {
+      case ReloadData:
+        [tableView reloadData];
+        break;
+        
+      case ReloadRows:
+        [tableView reloadRowsAtIndexPaths:[self randomIndexPathsExisting:YES] withRowAnimation:rowAnimation];
+        break;
+        
+      case ReloadSections:
+        [tableView reloadSections:[self randomIndexSet] withRowAnimation:rowAnimation];
+        break;
+        
+      default:
+        break;
     }
     
     [tableView setContentOffset:CGPointMake(0, arc4random_uniform(tableView.contentSize.height - tableView.bounds.size.height)) animated:animatedScroll];
