@@ -7,6 +7,7 @@
  */
 
 #import "ASTextNode.h"
+#import "ASTextNode+Beta.h"
 
 #import <AsyncDisplayKit/_ASDisplayLayer.h>
 #import <AsyncDisplayKit/ASAssert.h>
