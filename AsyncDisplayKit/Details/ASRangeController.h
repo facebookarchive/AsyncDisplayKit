@@ -190,13 +190,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-/**
- * Called for data reload.
- *
- * @param rangeController Sender.
- */
-- (void)rangeControllerDidReloadData:(ASRangeController *)rangeController;
-
 @end
 
 NS_ASSUME_NONNULL_END

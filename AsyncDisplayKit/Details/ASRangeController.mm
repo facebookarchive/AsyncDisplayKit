@@ -276,17 +276,4 @@
   });
 }
 
-- (void)dataControllerDidReloadData:(ASDataController *)dataController
-{
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    
-    // When reload data we need to make sure that _rangeTypeIndexPaths is cleared as well,
-    // otherwise _updateVisibleNodeIndexPaths may try to retrieve nodes from dataSource that aren't there anymore
-    [_rangeTypeIndexPaths removeAllObjects];
-    
-    [_delegate rangeControllerDidReloadData:self];
-  });
-}
-
 @end
