@@ -7,7 +7,7 @@
 //
 
 
-@interface ASDisplayNode (Beta)
+@interface ASTextNode ()
 
 /**
  @abstract The minimum scale that the textnode can apply to fit long words.
