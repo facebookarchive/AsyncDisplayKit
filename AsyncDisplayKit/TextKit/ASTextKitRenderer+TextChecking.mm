@@ -72,11 +72,12 @@
 
   if (truncationTokenRange.location == NSNotFound) {
     // The truncation string didn't specify a substring which should be highlighted, so we just highlight it all
-    truncationTokenRange = { 0, self.attributes.truncationAttributedString.length };
+    truncationTokenRange = { 0, truncationAttributedString.length };
   }
 
   truncationTokenRange.location += NSMaxRange(visibleRange);
-
+  
+  __block CGFloat minDistance = CGFLOAT_MAX;
   [self enumerateTextIndexesAtPosition:point usingBlock:^(NSUInteger index, CGRect glyphBoundingRect, BOOL *stop){
     if (index >= truncationTokenRange.location) {
       result = [[ASTextKitTextCheckingResult alloc] initWithType:ASTextKitTextCheckingTypeTruncation
@@ -86,14 +87,13 @@
       NSRange range;
       NSDictionary *attributes = [attributedString attributesAtIndex:index effectiveRange:&range];
       ASTextKitEntityAttribute *entityAttribute = attributes[ASTextKitEntityAttributeName];
-      if (entityAttribute) {
+      CGFloat distance = hypot(CGRectGetMidX(glyphBoundingRect) - point.x, CGRectGetMidY(glyphBoundingRect) - point.y);
+      if (entityAttribute && distance < minDistance) {
         result = [[ASTextKitTextCheckingResult alloc] initWithType:ASTextKitTextCheckingTypeEntity
                                                    entityAttribute:entityAttribute
                                                              range:range];
+        minDistance = distance;
       }
-    }
-    if (result != nil) {
-      *stop = YES;
     }
   }];
   return result;
