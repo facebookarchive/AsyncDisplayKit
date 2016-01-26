@@ -358,7 +358,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     
     // Adding this displayBlock operation to the transaction will start it IMMEDIATELY.
     // The only function of the transaction commit is to gate the calling of the completionBlock.
-    [transaction addOperationWithBlock:displayBlock queue:[_ASDisplayLayer displayQueue] completion:completionBlock];
+    [transaction addOperationWithBlock:displayBlock priority:self.drawingPriority queue:[_ASDisplayLayer displayQueue] completion:completionBlock];
   } else {
     UIImage *contents = (UIImage *)displayBlock();
     completionBlock(contents, NO);

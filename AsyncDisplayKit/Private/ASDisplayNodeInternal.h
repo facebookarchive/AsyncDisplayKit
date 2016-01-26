@@ -84,6 +84,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
     unsigned shouldRasterizeDescendants:1;
     unsigned shouldBypassEnsureDisplay:1;
     unsigned displaySuspended:1;
+    unsigned hasCustomDrawingPriority:1;
 
     // whether custom drawing is enabled
     unsigned implementsDrawRect:1;

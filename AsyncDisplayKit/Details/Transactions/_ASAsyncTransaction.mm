@@ -13,6 +13,8 @@
 #import <list>
 #import <map>
 
+NSUInteger const ASDefaultTransactionPriority = 128;
+
 @interface ASDisplayNodeAsyncTransactionOperation : NSObject
 - (id)initWithOperationCompletionBlock:(asyncdisplaykit_async_transaction_operation_completion_block_t)operationCompletionBlock;
 @property (nonatomic, copy) asyncdisplaykit_async_transaction_operation_completion_block_t operationCompletionBlock;
@@ -63,7 +65,7 @@ public:
     virtual void release() = 0;
     
     // schedule block on given queue
-    virtual void schedule(dispatch_queue_t queue, dispatch_block_t block) = 0;
+    virtual void schedule(NSUInteger priority, dispatch_queue_t queue, dispatch_block_t block) = 0;
     
     // dispatch block on given queue when all previously scheduled blocks finished executing
     virtual void notify(dispatch_queue_t queue, dispatch_block_t block) = 0;
@@ -103,7 +105,7 @@ private:
     }
     
     virtual void release();
-    virtual void schedule(dispatch_queue_t queue, dispatch_block_t block);
+    virtual void schedule(NSUInteger priority, dispatch_queue_t queue, dispatch_block_t block);
     virtual void notify(dispatch_queue_t queue, dispatch_block_t block);
     virtual void enter();
     virtual void leave();
@@ -120,12 +122,21 @@ private:
   {
     dispatch_block_t _block;
     GroupImpl *_group;
+    NSUInteger _priority;
   };
-  
-  struct DispatchEntry // entry for each
+    
+  struct DispatchEntry // entry for each dispatch queue
   {
-    std::list<Operation> _operations;
+    typedef std::list<Operation> OperationQueue;
+    typedef std::list<OperationQueue::iterator> OperationIteratorList; // each item points to operation queue
+    typedef std::map<NSUInteger, OperationIteratorList> OperationPriorityMap; // sorted by priority
+
+    OperationQueue _operationQueue;
+    OperationPriorityMap _operationPriorityMap;
     int _threadCount;
+      
+    Operation popNextOperation(bool respectPriority);  // assumes locked mutex
+    void pushOperation(Operation operation);           // assumes locked mutex
   };
   
   std::map<dispatch_queue_t, DispatchEntry> _entries;
@@ -149,7 +160,44 @@ void ASAsyncTransactionQueue::GroupImpl::release()
   }
 }
 
-void ASAsyncTransactionQueue::GroupImpl::schedule(dispatch_queue_t queue, dispatch_block_t block)
+ASAsyncTransactionQueue::Operation ASAsyncTransactionQueue::DispatchEntry::popNextOperation(bool respectPriority)
+{
+  NSCAssert(!_operationQueue.empty() && !_operationPriorityMap.empty(), @"No scheduled operations available");
+
+  OperationQueue::iterator queueIterator;
+  OperationPriorityMap::iterator mapIterator;
+  
+  if (respectPriority) {
+    mapIterator = --_operationPriorityMap.end();  // highest priority "bucket"
+    queueIterator = *mapIterator->second.begin();
+  } else {
+    queueIterator = _operationQueue.begin();
+    mapIterator = _operationPriorityMap.find(queueIterator->_priority);
+  }
+  
+  // no matter what, first item in "bucket" must match item in queue
+  NSCAssert(mapIterator->second.front() == queueIterator, @"Queue inconsistency");
+  
+  Operation res = *queueIterator;
+  _operationQueue.erase(queueIterator);
+  
+  mapIterator->second.pop_front();
+  if (mapIterator->second.empty()) {
+    _operationPriorityMap.erase(mapIterator);
+  }
+
+  return res;
+}
+
+void ASAsyncTransactionQueue::DispatchEntry::pushOperation(ASAsyncTransactionQueue::Operation operation)
+{
+  _operationQueue.push_back(operation);
+
+  OperationIteratorList &list = _operationPriorityMap[operation._priority];
+  list.push_back(--_operationQueue.end());
+}
+
+void ASAsyncTransactionQueue::GroupImpl::schedule(NSUInteger priority, dispatch_queue_t queue, dispatch_block_t block)
 {
   ASAsyncTransactionQueue &q = _queue;
   ASDN::MutexLocker locker(q._mutex);
@@ -159,7 +207,8 @@ void ASAsyncTransactionQueue::GroupImpl::schedule(dispatch_queue_t queue, dispat
   Operation operation;
   operation._block = block;
   operation._group = this;
-  entry._operations.push_back(operation);
+  operation._priority = priority;
+  entry.pushOperation(operation);
   
   ++_pendingOperations; // enter group
   
@@ -171,15 +220,16 @@ void ASAsyncTransactionQueue::GroupImpl::schedule(dispatch_queue_t queue, dispat
   
   if (entry._threadCount < maxThreads) { // we need to spawn another thread
 
+    // first thread will take operations in queue order (regardless of priority), other threads will respect priority
+    bool respectPriority = entry._threadCount > 0;
     ++entry._threadCount;
     
     dispatch_async(queue, ^{
       ASDN::MutexLocker lock(q._mutex);
       
       // go until there are no more pending operations
-      while (!entry._operations.empty()) {
-        Operation operation = entry._operations.front();
-        entry._operations.pop_front();
+      while (!entry._operationQueue.empty()) {
+        Operation operation = entry.popNextOperation(respectPriority);
         {
           ASDN::MutexUnlocker unlock(q._mutex);
           if (operation._block) {
@@ -192,7 +242,7 @@ void ASAsyncTransactionQueue::GroupImpl::schedule(dispatch_queue_t queue, dispat
       --entry._threadCount;
       
       if (entry._threadCount == 0) {
-        NSCAssert(entry._operations.empty(), @"No working threads but operations are still scheduled"); // this shouldn't happen
+        NSCAssert(entry._operationQueue.empty() || entry._operationPriorityMap.empty(), @"No working threads but operations are still scheduled"); // this shouldn't happen
         q._entries.erase(queue);
       }
     });
@@ -296,6 +346,17 @@ ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
                              queue:(dispatch_queue_t)queue
                         completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion
 {
+  [self addAsyncOperationWithBlock:block
+                          priority:ASDefaultTransactionPriority
+                             queue:queue
+                        completion:completion];
+}
+
+- (void)addAsyncOperationWithBlock:(asyncdisplaykit_async_transaction_async_operation_block_t)block
+                          priority:(NSUInteger)priority
+                             queue:(dispatch_queue_t)queue
+                        completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion
+{
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_state == ASAsyncTransactionStateOpen, @"You can only add operations to open transactions");
 
@@ -303,7 +364,7 @@ ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
 
   ASDisplayNodeAsyncTransactionOperation *operation = [[ASDisplayNodeAsyncTransactionOperation alloc] initWithOperationCompletionBlock:completion];
   [_operations addObject:operation];
-  _group->schedule(queue, ^{
+  _group->schedule(priority, queue, ^{
     @autoreleasepool {
       if (_state != ASAsyncTransactionStateCanceled) {
         _group->enter();
@@ -320,6 +381,17 @@ ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
                         queue:(dispatch_queue_t)queue
                    completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion
 {
+    [self addOperationWithBlock:block
+                       priority:ASDefaultTransactionPriority
+                          queue:queue
+                     completion:completion];
+}
+
+- (void)addOperationWithBlock:(asyncdisplaykit_async_transaction_operation_block_t)block
+                     priority:(NSUInteger)priority
+                        queue:(dispatch_queue_t)queue
+                   completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion
+{
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_state == ASAsyncTransactionStateOpen, @"You can only add operations to open transactions");
 
@@ -327,7 +399,7 @@ ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
 
   ASDisplayNodeAsyncTransactionOperation *operation = [[ASDisplayNodeAsyncTransactionOperation alloc] initWithOperationCompletionBlock:completion];
   [_operations addObject:operation];
-  _group->schedule(queue, ^{
+  _group->schedule(priority, queue, ^{
     @autoreleasepool {
       if (_state != ASAsyncTransactionStateCanceled) {
         operation.value = block();
