@@ -67,6 +67,11 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 };
 
 /**
+ * Default drawing priority for display node
+ */
+extern NSUInteger const ASDefaultDrawingPriority;
+
+/**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
  * hierarchy off the main thread, and could do rendering off the main thread as well.
  *
@@ -475,6 +480,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) NSTimeInterval placeholderFadeDuration;
 
+/**
+ * @abstract Determines drawing priority of the node. Nodes with higher priority will be drawn earlier.
+ *
+ * @discussion Defaults to ASDefaultDrawingPriority. There may be multiple drawing threads, and some of them may
+ * decide to perform operations in queued order (regardless of drawingPriority)
+ */
+@property (nonatomic, assign) NSUInteger drawingPriority;
 
 /** @name Hit Testing */
 
