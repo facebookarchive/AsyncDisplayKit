@@ -13,7 +13,6 @@
 {
   __weak ASTextKitContext *_context;
   CGFloat _minimumScaleFactor;
-  CGSize _constrainedSize;
 }
 
 - (instancetype)initWithContext:(ASTextKitContext *)context
@@ -27,7 +26,6 @@
   }
   return self;
 }
-
 
 - (CGSize)sizeForAttributedString:(NSAttributedString *)attrString
 {
