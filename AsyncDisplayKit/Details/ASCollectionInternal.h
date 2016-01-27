@@ -14,7 +14,7 @@
 @interface ASCollectionView ()
 - (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator ownedByNode:(BOOL)ownedByNode;
 
-@property (nonatomic, strong, readonly) ASDataController *dataController;
 @property (nonatomic, weak, readwrite) ASCollectionNode *collectionNode;
+@property (nonatomic, strong, readonly) ASDataController *dataController;
 @property (nonatomic, strong, readonly) ASRangeController *rangeController;
 @end

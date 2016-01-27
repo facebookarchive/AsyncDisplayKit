@@ -189,12 +189,12 @@
 
 - (void)beginUpdates
 {
-    [self.view.dataController beginUpdates];
+  [self.view.dataController beginUpdates];
 }
 
 - (void)endUpdatesAnimated:(BOOL)animated
 {
-    [self.view.dataController endUpdatesAnimated:animated completion:nil];
+  [self.view.dataController endUpdatesAnimated:animated completion:nil];
 }
 
 #pragma mark - ASCollectionView Forwards

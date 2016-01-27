@@ -398,7 +398,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASDataController *)dataController
 {
-    return _dataController;
+  return _dataController;
 }
 
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
@@ -856,6 +856,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   ASPerformBlockWithoutAnimation(!animated, ^{
+    [_layoutFacilitator collectionViewWillPerformBatchUpdates];
     [super performBatchUpdates:^{
       for (dispatch_block_t block in _batchUpdateBlocks) {
         block();
@@ -870,17 +871,18 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  [_layoutFacilitator collectionViewEditingCellsAtIndexPaths:indexPaths];
   if (!self.asyncDataSource || _superIsPendingDataLoad) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
   if (_performingBatchUpdates) {
+    [_layoutFacilitator collectionViewBatchingCellEditsAtIndexPaths:indexPaths];
     [_batchUpdateBlocks addObject:^{
       [super insertItemsAtIndexPaths:indexPaths];
     }];
   } else {
     [UIView performWithoutAnimation:^{
+      [_layoutFacilitator collectionViewEditingCellsAtIndexPaths:indexPaths];
       [super insertItemsAtIndexPaths:indexPaths];
     }];
   }
@@ -895,11 +897,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   if (_performingBatchUpdates) {
+    [_layoutFacilitator collectionViewBatchingCellEditsAtIndexPaths:indexPaths];
     [_batchUpdateBlocks addObject:^{
       [super deleteItemsAtIndexPaths:indexPaths];
     }];
   } else {
     [UIView performWithoutAnimation:^{
+      [_layoutFacilitator collectionViewEditingCellsAtIndexPaths:indexPaths];
       [super deleteItemsAtIndexPaths:indexPaths];
     }];
   }
@@ -908,17 +912,18 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  [_layoutFacilitator collectionViewEditingSectionsAtIndexSet:indexSet];
   if (!self.asyncDataSource || _superIsPendingDataLoad) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
   if (_performingBatchUpdates) {
+    [_layoutFacilitator collectionViewBatchingSectionEditsAtIndexes:indexSet];
     [_batchUpdateBlocks addObject:^{
       [super insertSections:indexSet];
     }];
   } else {
     [UIView performWithoutAnimation:^{
+      [_layoutFacilitator collectionViewEditingSectionsAtIndexSet:indexSet];
       [super insertSections:indexSet];
     }];
   }
@@ -927,17 +932,18 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  [_layoutFacilitator collectionViewEditingSectionsAtIndexSet:indexSet];
   if (!self.asyncDataSource || _superIsPendingDataLoad) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
   if (_performingBatchUpdates) {
+    [_layoutFacilitator collectionViewBatchingSectionEditsAtIndexes:indexSet];
     [_batchUpdateBlocks addObject:^{
       [super deleteSections:indexSet];
     }];
   } else {
     [UIView performWithoutAnimation:^{
+      [_layoutFacilitator collectionViewEditingSectionsAtIndexSet:indexSet];
       [super deleteSections:indexSet];
     }];
   }

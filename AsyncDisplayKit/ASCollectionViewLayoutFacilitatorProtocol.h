@@ -25,6 +25,27 @@
  */
 - (void)collectionViewEditingSectionsAtIndexSet:(NSIndexSet *)indexes;
 
+/**
+ * Inform that the collectionView is adding some cell updates into a batch,
+ * and will perform these batch updates at a later point
+ *
+ * NOTE: used in combination with -collectionViewWillPerformBatchUpdates
+ */
+- (void)collectionViewBatchingCellEditsAtIndexPaths:(NSArray *)indexPaths;
+
+/**
+ * Inform that the collectionView is adding some section updates into a batch, 
+ * and will perform these batch updates at a later point
+ *
+ * NOTE: used in combination with -collectionViewWillPerformBatchUpdates
+ */
+- (void)collectionViewBatchingSectionEditsAtIndexes:(NSIndexSet *)indexes;
+
+/**
+ * Informs the delegate that the collectionView is about to call performBatchUpdates
+ */
+- (void)collectionViewWillPerformBatchUpdates;
+
 @end
 
 #endif /* ASCollectionViewLayoutFacilitatorProtocol_h */
