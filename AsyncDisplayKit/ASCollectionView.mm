@@ -396,6 +396,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 #pragma mark Assertions.
 
+- (ASDataController *)dataController
+{
+    return _dataController;
+}
+
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
