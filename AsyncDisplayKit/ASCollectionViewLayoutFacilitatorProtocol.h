@@ -17,29 +17,23 @@
 
 /**
  * Inform that the collectionView is editing the cells at a list of indexPaths
+ *
+ * @param indexPaths, an array of NSIndexPath objects of cells being/will be edited.
+ * @param isBatched, indicates whether the editing operation will be batched by the collectionView
+ *
+ * NOTE: when isBatched, used in combination with -collectionViewWillPerformBatchUpdates
  */
-- (void)collectionViewEditingCellsAtIndexPaths:(NSArray *)indexPaths;
+- (void)collectionViewWillEditCellsAtIndexPaths:(NSArray *)indexPaths batched:(BOOL)isBatched;
 
 /**
  * Inform that the collectionView is editing the sections at a set of indexes
- */
-- (void)collectionViewEditingSectionsAtIndexSet:(NSIndexSet *)indexes;
-
-/**
- * Inform that the collectionView is adding some cell updates into a batch,
- * and will perform these batch updates at a later point
  *
- * NOTE: used in combination with -collectionViewWillPerformBatchUpdates
- */
-- (void)collectionViewBatchingCellEditsAtIndexPaths:(NSArray *)indexPaths;
-
-/**
- * Inform that the collectionView is adding some section updates into a batch, 
- * and will perform these batch updates at a later point
+ * @param indexes, an NSIndexSet of section indexes being/will be edited.
+ * @param isBatched, indicates whether the editing operation will be batched by the collectionView
  *
- * NOTE: used in combination with -collectionViewWillPerformBatchUpdates
+ * NOTE: when isBatched, used in combination with -collectionViewWillPerformBatchUpdates
  */
-- (void)collectionViewBatchingSectionEditsAtIndexes:(NSIndexSet *)indexes;
+- (void)collectionViewWillEditSectionsAtIndexSet:(NSIndexSet *)indexes batched:(BOOL)batched;
 
 /**
  * Informs the delegate that the collectionView is about to call performBatchUpdates

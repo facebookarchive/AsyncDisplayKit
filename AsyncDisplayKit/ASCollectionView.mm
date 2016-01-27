@@ -876,13 +876,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewBatchingCellEditsAtIndexPaths:indexPaths];
+    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super insertItemsAtIndexPaths:indexPaths];
     }];
   } else {
+    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     [UIView performWithoutAnimation:^{
-      [_layoutFacilitator collectionViewEditingCellsAtIndexPaths:indexPaths];
       [super insertItemsAtIndexPaths:indexPaths];
     }];
   }
@@ -891,19 +891,18 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  [_layoutFacilitator collectionViewEditingCellsAtIndexPaths:indexPaths];
   if (!self.asyncDataSource || _superIsPendingDataLoad) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewBatchingCellEditsAtIndexPaths:indexPaths];
+    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super deleteItemsAtIndexPaths:indexPaths];
     }];
   } else {
+    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     [UIView performWithoutAnimation:^{
-      [_layoutFacilitator collectionViewEditingCellsAtIndexPaths:indexPaths];
       [super deleteItemsAtIndexPaths:indexPaths];
     }];
   }
@@ -917,13 +916,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewBatchingSectionEditsAtIndexes:indexSet];
+    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super insertSections:indexSet];
     }];
   } else {
+    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
-      [_layoutFacilitator collectionViewEditingSectionsAtIndexSet:indexSet];
       [super insertSections:indexSet];
     }];
   }
@@ -937,13 +936,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewBatchingSectionEditsAtIndexes:indexSet];
+    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super deleteSections:indexSet];
     }];
   } else {
+    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
-      [_layoutFacilitator collectionViewEditingSectionsAtIndexSet:indexSet];
       [super deleteSections:indexSet];
     }];
   }
