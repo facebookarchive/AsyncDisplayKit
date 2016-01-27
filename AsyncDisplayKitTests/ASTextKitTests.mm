@@ -18,7 +18,9 @@
 
 @end
 
-static UITextView *UITextViewWithAttributes(const ASTextKitAttributes &attributes, const CGSize constrainedSize)
+static UITextView *UITextViewWithAttributes(const ASTextKitAttributes &attributes,
+                                            const CGSize constrainedSize,
+                                            NSDictionary *linkTextAttributes)
 {
   UITextView *textView = [[UITextView alloc] initWithFrame:{ .size = constrainedSize }];
   textView.backgroundColor = [UIColor clearColor];
@@ -28,12 +30,15 @@ static UITextView *UITextViewWithAttributes(const ASTextKitAttributes &attribute
   textView.textContainerInset = UIEdgeInsetsZero;
   textView.layoutManager.usesFontLeading = NO;
   textView.attributedText = attributes.attributedString;
+  textView.linkTextAttributes = linkTextAttributes;
   return textView;
 }
 
-static UIImage *UITextViewImageWithAttributes(const ASTextKitAttributes &attributes, const CGSize constrainedSize)
+static UIImage *UITextViewImageWithAttributes(const ASTextKitAttributes &attributes,
+                                              const CGSize constrainedSize,
+                                              NSDictionary *linkTextAttributes)
 {
-  UITextView *textView = UITextViewWithAttributes(attributes, constrainedSize);
+  UITextView *textView = UITextViewWithAttributes(attributes, constrainedSize, linkTextAttributes);
   UIGraphicsBeginImageContextWithOptions(constrainedSize, NO, 0);
   CGContextRef context = UIGraphicsGetCurrentContext();
   
@@ -68,10 +73,11 @@ static UIImage *ASTextKitImageWithAttributes(const ASTextKitAttributes &attribut
   return snapshot;
 }
 
-static BOOL checkAttributes(const ASTextKitAttributes &attributes, const CGSize constrainedSize)
+// linkTextAttributes are only applied to UITextView
+static BOOL checkAttributes(const ASTextKitAttributes &attributes, const CGSize constrainedSize, NSDictionary *linkTextAttributes)
 {
   FBSnapshotTestController *controller = [[FBSnapshotTestController alloc] init];
-  UIImage *labelImage = UITextViewImageWithAttributes(attributes, constrainedSize);
+  UIImage *labelImage = UITextViewImageWithAttributes(attributes, constrainedSize, linkTextAttributes);
   UIImage *textKitImage = ASTextKitImageWithAttributes(attributes, constrainedSize);
   return [controller compareReferenceImage:labelImage toImage:textKitImage error:nil];
 }
@@ -83,7 +89,7 @@ static BOOL checkAttributes(const ASTextKitAttributes &attributes, const CGSize 
   ASTextKitAttributes attributes {
     .attributedString = [[NSAttributedString alloc] initWithString:@"hello" attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:12]}]
   };
-  XCTAssert(checkAttributes(attributes, { 100, 100 }));
+  XCTAssert(checkAttributes(attributes, { 100, 100 }, nil));
 }
 
 - (void)testChangingAPropertyChangesHash
@@ -130,7 +136,42 @@ static BOOL checkAttributes(const ASTextKitAttributes &attributes, const CGSize 
   ASTextKitAttributes attributes {
     .attributedString = attrStr
   };
-  XCTAssert(checkAttributes(attributes, { 100, 100 }));
+  XCTAssert(checkAttributes(attributes, { 100, 100 }, nil));
+}
+
+- (void)testLinkInTextUsesForegroundColor
+{
+  NSDictionary *linkTextAttributes = @{ NSForegroundColorAttributeName : [UIColor redColor],
+                                        // UITextView adds underline by default and we can't get rid of it
+                                        // so we have to choose a style and color and match it in the text kit version
+                                        // for this test
+                                        NSUnderlineStyleAttributeName : @(NSUnderlineStyleSingle),
+                                        NSUnderlineColorAttributeName: [UIColor redColor],
+                                        };
+  NSDictionary *textAttributes = @{NSFontAttributeName : [UIFont systemFontOfSize:12],
+                                   };
+
+  NSString *prefixString = @"click ";
+  NSString *linkString = @"this link";
+  NSString *textString = [prefixString stringByAppendingString:linkString];
+  
+  NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:textString attributes:textAttributes];
+  NSURL *linkURL = [NSURL URLWithString:@"https://github.com/facebook/AsyncDisplayKit/issues/967"];
+  NSRange selectedRange = (NSRange){prefixString.length, linkString.length};
+
+  [attrStr addAttribute:NSLinkAttributeName value:linkURL range:selectedRange];
+  
+  for (NSString *attributeName in linkTextAttributes.keyEnumerator) {
+    [attrStr addAttribute:attributeName
+                    value:linkTextAttributes[NSUnderlineStyleAttributeName]
+                    range:selectedRange];
+  }
+  
+  ASTextKitAttributes textKitattributes {
+    .attributedString = attrStr
+  };
+
+  XCTAssert(checkAttributes(textKitattributes, { 100, 100 }, linkTextAttributes));
 }
 
 @end
