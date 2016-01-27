@@ -100,6 +100,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   } _flags;
 
   ASDisplayNodeExtraIvars _extra;
+  
+  BOOL _needsDataFetch;
 
 #if TIME_DISPLAYNODE_OPS
 @public

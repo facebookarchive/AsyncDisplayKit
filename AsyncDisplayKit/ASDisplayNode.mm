@@ -1727,6 +1727,15 @@ static BOOL ShouldUseNewRenderingRange = YES;
   // subclass override
 }
 
+- (void)setNeedsDataFetch
+{
+  if (ASInterfaceStateIncludesFetchData(_interfaceState)) {
+    [self fetchData];
+  } else {
+    _needsDataFetch = YES;
+  }
+}
+
 // TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or enterInterfaceState:
 - (void)recursivelyFetchData
 {
@@ -1793,9 +1802,10 @@ static BOOL ShouldUseNewRenderingRange = YES;
   BOOL nowFetchData = ASInterfaceStateIncludesFetchData(newState);
   BOOL wasFetchData = ASInterfaceStateIncludesFetchData(oldState);
   
-  if (nowFetchData != wasFetchData) {
-    if (nowFetchData) {
+  if (nowFetchData != wasFetchData || _needsDataFetch) {
+    if (nowFetchData || _needsDataFetch) {
       [self fetchData];
+      _needsDataFetch = NO;
     } else {
       if ([self supportsRangeManagedInterfaceState]) {
         [self clearFetchedData];
