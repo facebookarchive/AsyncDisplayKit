@@ -45,10 +45,18 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
 
 - (void)testWithSizingOptions
 {
-  [self testWithHorizontalPosition:ASRelativeLayoutSpecPositionStart verticalPosition:ASRelativeLayoutSpecPositionStart sizingOptions:ASRelativeLayoutSpecSizingOptionDefault];
-    [self testWithHorizontalPosition:ASRelativeLayoutSpecPositionStart verticalPosition:ASRelativeLayoutSpecPositionStart sizingOptions:ASRelativeLayoutSpecSizingOptionMinimumWidth];
-    [self testWithHorizontalPosition:ASRelativeLayoutSpecPositionStart verticalPosition:ASRelativeLayoutSpecPositionStart sizingOptions:ASRelativeLayoutSpecSizingOptionMinimumHeight];
-    [self testWithHorizontalPosition:ASRelativeLayoutSpecPositionStart verticalPosition:ASRelativeLayoutSpecPositionStart sizingOptions:ASRelativeLayoutSpecSizingOptionMinimumSize];
+  [self testWithHorizontalPosition:ASRelativeLayoutSpecPositionStart
+                  verticalPosition:ASRelativeLayoutSpecPositionStart
+                     sizingOptions:ASRelativeLayoutSpecSizingOptionDefault];
+  [self testWithHorizontalPosition:ASRelativeLayoutSpecPositionStart
+                  verticalPosition:ASRelativeLayoutSpecPositionStart
+                     sizingOptions:ASRelativeLayoutSpecSizingOptionMinimumWidth];
+  [self testWithHorizontalPosition:ASRelativeLayoutSpecPositionStart
+                  verticalPosition:ASRelativeLayoutSpecPositionStart
+                     sizingOptions:ASRelativeLayoutSpecSizingOptionMinimumHeight];
+  [self testWithHorizontalPosition:ASRelativeLayoutSpecPositionStart
+                  verticalPosition:ASRelativeLayoutSpecPositionStart
+                     sizingOptions:ASRelativeLayoutSpecSizingOptionMinimumSize];
 }
 
 - (void)testWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
