@@ -13,7 +13,7 @@
 #import <list>
 #import <map>
 
-NSUInteger const ASDefaultTransactionPriority = 128;
+NSInteger const ASDefaultTransactionPriority = 0;
 
 @interface ASDisplayNodeAsyncTransactionOperation : NSObject
 - (id)initWithOperationCompletionBlock:(asyncdisplaykit_async_transaction_operation_completion_block_t)operationCompletionBlock;
@@ -65,7 +65,7 @@ public:
     virtual void release() = 0;
     
     // schedule block on given queue
-    virtual void schedule(NSUInteger priority, dispatch_queue_t queue, dispatch_block_t block) = 0;
+    virtual void schedule(NSInteger priority, dispatch_queue_t queue, dispatch_block_t block) = 0;
     
     // dispatch block on given queue when all previously scheduled blocks finished executing
     virtual void notify(dispatch_queue_t queue, dispatch_block_t block) = 0;
@@ -105,7 +105,7 @@ private:
     }
     
     virtual void release();
-    virtual void schedule(NSUInteger priority, dispatch_queue_t queue, dispatch_block_t block);
+    virtual void schedule(NSInteger priority, dispatch_queue_t queue, dispatch_block_t block);
     virtual void notify(dispatch_queue_t queue, dispatch_block_t block);
     virtual void enter();
     virtual void leave();
@@ -122,14 +122,14 @@ private:
   {
     dispatch_block_t _block;
     GroupImpl *_group;
-    NSUInteger _priority;
+    NSInteger _priority;
   };
     
   struct DispatchEntry // entry for each dispatch queue
   {
     typedef std::list<Operation> OperationQueue;
     typedef std::list<OperationQueue::iterator> OperationIteratorList; // each item points to operation queue
-    typedef std::map<NSUInteger, OperationIteratorList> OperationPriorityMap; // sorted by priority
+    typedef std::map<NSInteger, OperationIteratorList> OperationPriorityMap; // sorted by priority
 
     OperationQueue _operationQueue;
     OperationPriorityMap _operationPriorityMap;
@@ -197,7 +197,7 @@ void ASAsyncTransactionQueue::DispatchEntry::pushOperation(ASAsyncTransactionQue
   list.push_back(--_operationQueue.end());
 }
 
-void ASAsyncTransactionQueue::GroupImpl::schedule(NSUInteger priority, dispatch_queue_t queue, dispatch_block_t block)
+void ASAsyncTransactionQueue::GroupImpl::schedule(NSInteger priority, dispatch_queue_t queue, dispatch_block_t block)
 {
   ASAsyncTransactionQueue &q = _queue;
   ASDN::MutexLocker locker(q._mutex);
@@ -353,7 +353,7 @@ ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
 }
 
 - (void)addAsyncOperationWithBlock:(asyncdisplaykit_async_transaction_async_operation_block_t)block
-                          priority:(NSUInteger)priority
+                          priority:(NSInteger)priority
                              queue:(dispatch_queue_t)queue
                         completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion
 {
@@ -388,7 +388,7 @@ ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
 }
 
 - (void)addOperationWithBlock:(asyncdisplaykit_async_transaction_operation_block_t)block
-                     priority:(NSUInteger)priority
+                     priority:(NSInteger)priority
                         queue:(dispatch_queue_t)queue
                    completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion
 {

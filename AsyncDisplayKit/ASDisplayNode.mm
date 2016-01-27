@@ -26,7 +26,7 @@
 #import "ASLayoutSpec.h"
 #import "ASCellNode.h"
 
-NSUInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
+NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
 
@@ -2240,7 +2240,7 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 
 static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
-- (void)setDrawingPriority:(NSUInteger)drawingPriority
+- (void)setDrawingPriority:(NSInteger)drawingPriority
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
@@ -2249,18 +2249,18 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
     objc_setAssociatedObject(self, ASDisplayNodeDrawingPriorityKey, nil, OBJC_ASSOCIATION_ASSIGN);
   } else {
     _flags.hasCustomDrawingPriority = YES;
-    objc_setAssociatedObject(self, ASDisplayNodeDrawingPriorityKey, [NSNumber numberWithUnsignedInteger:drawingPriority], OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, ASDisplayNodeDrawingPriorityKey, [NSNumber numberWithInteger:drawingPriority], OBJC_ASSOCIATION_RETAIN);
   }
 }
 
--(NSUInteger)drawingPriority
+-(NSInteger)drawingPriority
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
   if (!_flags.hasCustomDrawingPriority)
     return ASDefaultDrawingPriority;
   else
-    return [objc_getAssociatedObject(self, ASDisplayNodeDrawingPriorityKey) unsignedIntegerValue];
+    return [objc_getAssociatedObject(self, ASDisplayNodeDrawingPriorityKey) integerValue];
 }
 
 - (BOOL)isInHierarchy
