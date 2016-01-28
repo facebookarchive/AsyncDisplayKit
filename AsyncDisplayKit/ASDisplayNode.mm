@@ -1730,7 +1730,7 @@ static BOOL ShouldUseNewRenderingRange = YES;
 - (void)setNeedsDataFetch
 {
   if (ASInterfaceStateIncludesFetchData(_interfaceState)) {
-    [self fetchData];
+    [self recursivelyFetchData];
   } else {
     _needsDataFetch = YES;
   }
@@ -1802,10 +1802,13 @@ static BOOL ShouldUseNewRenderingRange = YES;
   BOOL nowFetchData = ASInterfaceStateIncludesFetchData(newState);
   BOOL wasFetchData = ASInterfaceStateIncludesFetchData(oldState);
   
-  if (nowFetchData != wasFetchData || _needsDataFetch) {
-    if (nowFetchData || _needsDataFetch) {
+  // When a node has been queued up for a data fetch via setNeedsDataFetch, override the default behavior
+  if (_needsDataFetch) {
+    [self recursivelyFetchData];
+    _needsDataFetch = NO;
+  } else if (nowFetchData != wasFetchData) {
+    if (nowFetchData) {
       [self fetchData];
-      _needsDataFetch = NO;
     } else {
       if ([self supportsRangeManagedInterfaceState]) {
         [self clearFetchedData];
