@@ -1727,6 +1727,13 @@ static BOOL ShouldUseNewRenderingRange = YES;
   // subclass override
 }
 
+- (void)setNeedsDataFetch
+{
+  if (ASInterfaceStateIncludesFetchData(_interfaceState)) {
+    [self recursivelyFetchData];
+  }
+}
+
 // TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or enterInterfaceState:
 - (void)recursivelyFetchData
 {

@@ -100,7 +100,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   } _flags;
 
   ASDisplayNodeExtraIvars _extra;
-
+  
 #if TIME_DISPLAYNODE_OPS
 @public
   NSTimeInterval _debugTimeToCreateView;

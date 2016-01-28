@@ -442,7 +442,6 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @see displaySuspended and setNeedsDisplay
  */
-
 - (void)recursivelyClearContents;
 
 /**
@@ -464,6 +463,12 @@ NS_ASSUME_NONNULL_BEGIN
  * @see [ASDisplayNode(Subclassing) fetchData] and [ASDisplayNode(Subclassing) clearFetchedData]
  */
 - (void)recursivelyFetchData;
+
+/**
+ * @abstract Triggers a call to fetchData for nodes in the preload range
+ * @discussion Recursively calls fetchData immediately if the node is currently within the preload range.
+ */
+- (void)setNeedsDataFetch;
 
 /**
  * @abstract Toggle displaying a placeholder over the node that covers content until the node and all subnodes are
