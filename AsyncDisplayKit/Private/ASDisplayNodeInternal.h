@@ -87,7 +87,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
     unsigned hasCustomDrawingPriority:1;
 
     // whether custom drawing is enabled
+    unsigned implementsInstanceDrawRect:1;
     unsigned implementsDrawRect:1;
+    unsigned implementsInstanceImageDisplay:1;
     unsigned implementsImageDisplay:1;
     unsigned implementsDrawParameters:1;
 
@@ -101,6 +103,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 
   ASDisplayNodeExtraIvars _extra;
   
+  ASDisplayNodeContextModifier _preContextModifier;
+  ASDisplayNodeContextModifier _postContextModifier;
+
 #if TIME_DISPLAYNODE_OPS
 @public
   NSTimeInterval _debugTimeToCreateView;

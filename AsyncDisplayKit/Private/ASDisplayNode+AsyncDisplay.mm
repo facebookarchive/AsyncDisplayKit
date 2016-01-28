@@ -12,6 +12,7 @@
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Beta.h"
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
 @end
@@ -224,25 +225,30 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
       return image;
     };
-  } else if (_flags.implementsImageDisplay) {
+  } else if (_flags.implementsInstanceImageDisplay || _flags.implementsImageDisplay) {
     // Capture drawParameters from delegate on main thread
     id drawParameters = [self drawParameters];
-
+    
     displayBlock = ^id{
       __ASDisplayLayerIncrementConcurrentDisplayCount(asynchronous, rasterizing);
       if (isCancelledBlock()) {
         __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
         return nil;
       }
-
+      
       ASDN_DELAY_FOR_DISPLAY();
-
-      UIImage *result = [[self class] displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      
+      UIImage *result = nil;
+      if (_flags.implementsInstanceImageDisplay) {
+        result = [self displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      } else {
+        result = [[self class] displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      }
       __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
       return result;
     };
-
-  } else if (_flags.implementsDrawRect) {
+    
+  } else if (_flags.implementsInstanceDrawRect || _flags.implementsDrawRect) {
 
     CGRect bounds = self.bounds;
     if (CGRectIsEmpty(bounds)) {
@@ -267,7 +273,20 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
         UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, contentsScaleForDisplay);
       }
 
-      [[self class] drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      CGContextRef currentContext = UIGraphicsGetCurrentContext();
+      if (_preContextModifier) {
+        _preContextModifier(currentContext);
+      }
+      
+      if (_flags.implementsInstanceDrawRect) {
+        [self drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      } else {
+        [[self class] drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      }
+      
+      if (_postContextModifier) {
+        _postContextModifier(currentContext);
+      }
 
       if (isCancelledBlock()) {
         if (!rasterizing) {
@@ -368,6 +387,30 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 - (void)cancelDisplayAsyncLayer:(_ASDisplayLayer *)asyncLayer
 {
   [_displaySentinel increment];
+}
+
+- (ASDisplayNodeContextModifier)willDisplayNodeContentBlock
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _preContextModifier;
+}
+
+- (ASDisplayNodeContextModifier)didDisplayNodeContentBlock
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _postContextModifier;
+}
+
+- (void)setWillDisplayNodeContentBlock:(ASDisplayNodeContextModifier)contextModifier
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _preContextModifier = contextModifier;
+}
+
+- (void)setDidDisplayNodeContentBlock:(ASDisplayNodeContextModifier)contextModifier;
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _postContextModifier = contextModifier;
 }
 
 @end
