@@ -148,7 +148,7 @@ static BOOL checkAttributes(const ASTextKitAttributes &attributes, const CGSize 
                                         // so we have to choose a style and color and match it in the text kit version
                                         // for this test
                                         NSUnderlineStyleAttributeName : @(NSUnderlineStyleSingle),
-                                        NSUnderlineColorAttributeName: [UIColor redColor],
+                                        NSUnderlineColorAttributeName: [UIColor blueColor],
                                         };
   NSDictionary *textAttributes = @{NSFontAttributeName : [UIFont systemFontOfSize:12],
                                    };
@@ -165,7 +165,7 @@ static BOOL checkAttributes(const ASTextKitAttributes &attributes, const CGSize 
   
   for (NSString *attributeName in linkTextAttributes.keyEnumerator) {
     [attrStr addAttribute:attributeName
-                    value:linkTextAttributes[NSUnderlineStyleAttributeName]
+                    value:linkTextAttributes[attributeName]
                     range:selectedRange];
   }
   
