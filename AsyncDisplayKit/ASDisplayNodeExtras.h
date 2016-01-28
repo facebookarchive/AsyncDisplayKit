@@ -36,24 +36,23 @@ inline BOOL ASInterfaceStateIncludesMeasureLayout(ASInterfaceState interfaceStat
 
 inline NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfaceState)
 {
-  NSMutableString *result = [NSMutableString stringWithString:@"{ "];
+  NSMutableArray *states = [NSMutableArray array];
   if (interfaceState == ASInterfaceStateNone) {
-    [result appendString:@"No state"];
+    [states addObject:@"No state"];
   }
   if (ASInterfaceStateIncludesMeasureLayout(interfaceState)) {
-    [result appendString:@"MeasureLayout"];
+    [states addObject:@"MeasureLayout"];
   }
   if (ASInterfaceStateIncludesFetchData(interfaceState)) {
-    [result appendString:@" | FetchData"];
+    [states addObject:@" | FetchData"];
   }
   if (ASInterfaceStateIncludesDisplay(interfaceState)) {
-    [result appendString:@" | Display"];
+    [states addObject:@" | Display"];
   }
   if (ASInterfaceStateIncludesVisible(interfaceState)) {
-    [result appendString:@" | Visible"];
+    [states addObject:@" | Visible"];
   }
-  [result appendString:@" }"];
-  return result;
+  return [NSString stringWithFormat:@"{ %@ }", [states componentsJoinedByString:@" | "]];
 }
 
 NS_ASSUME_NONNULL_BEGIN
