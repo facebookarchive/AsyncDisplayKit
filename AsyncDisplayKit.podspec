@@ -13,6 +13,7 @@ Pod::Spec.new do |spec|
       'AsyncDisplayKit/*.h',
       'AsyncDisplayKit/Details/**/*.h',
       'AsyncDisplayKit/Layout/*.h',
+      'AsyncDisplayKit/TextKit/*.h',
       'Base/*.h'
   ]
 
