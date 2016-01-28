@@ -44,13 +44,13 @@ inline NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfa
     [result appendString:@"MeasureLayout"];
   }
   if (ASInterfaceStateIncludesFetchData(interfaceState)) {
-    [result appendString:@" - FetchData"];
+    [result appendString:@" | FetchData"];
   }
   if (ASInterfaceStateIncludesDisplay(interfaceState)) {
-    [result appendString:@" - Display"];
+    [result appendString:@" | Display"];
   }
   if (ASInterfaceStateIncludesVisible(interfaceState)) {
-    [result appendString:@" - Visible"];
+    [result appendString:@" | Visible"];
   }
   [result appendString:@" }"];
   return result;
