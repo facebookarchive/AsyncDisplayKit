@@ -10,6 +10,8 @@
 
 #import "ASBaseDefines.h"
 
+#include <CoreGraphics/CGAffineTransform.h>
+
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_OPTIONS(NSInteger, ASScrollDirection) {
@@ -32,6 +34,7 @@ BOOL ASScrollDirectionContainsRight(ASScrollDirection scrollDirection);
 BOOL ASScrollDirectionContainsLeft(ASScrollDirection scrollDirection);
 BOOL ASScrollDirectionContainsUp(ASScrollDirection scrollDirection);
 BOOL ASScrollDirectionContainsDown(ASScrollDirection scrollDirection);
+ASScrollDirection ASScrollDirectionApplyTransform(ASScrollDirection scrollDirection, CGAffineTransform transform);
 
 ASDISPLAYNODE_EXTERN_C_END
 
