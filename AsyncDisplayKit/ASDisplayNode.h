@@ -465,8 +465,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)recursivelyFetchData;
 
 /**
- * @abstract Triggers a call to fetchData for nodes in the preload range
- * @discussion Recursively calls fetchData immediately if the node is currently within the preload range.
+ * @abstract Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStateFetchData
  */
 - (void)setNeedsDataFetch;
 
