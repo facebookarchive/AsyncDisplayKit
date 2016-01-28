@@ -10,6 +10,7 @@
 
 @interface ASTextKitFontSizeAdjuster : NSObject
 
+@property (nonatomic, assign) CGSize constrainedSize;
 
 - (instancetype)initWithContext:(ASTextKitContext *)context
              minimumScaleFactor:(CGFloat)minimumScaleFactor
