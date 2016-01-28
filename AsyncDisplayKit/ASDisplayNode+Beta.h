@@ -6,8 +6,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "_ASDisplayLayer.h"
-
 @interface ASDisplayNode (Beta)
 
 + (BOOL)shouldUseNewRenderingRange;
@@ -22,10 +20,6 @@
  */
 - (void)recursivelyEnsureDisplaySynchronously:(BOOL)synchronously;
 
-- (void)drawRect:(CGRect)bounds withParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing;
-
-- (UIImage *)displayWithParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled;
-
 /**
  * @abstract allow modification of a context before the node's content is drawn
  *
@@ -34,13 +28,13 @@
  * restoring context if necessary. Restoring can be done in contextDidDisplayNodeContent
  * This block can be called from *any* thread and it is unsafe to access any UIKit main thread properties from it.
  */
-@property (nonatomic, strong) ASDisplayNodeContextModifier willDisplayNodeContentBlock;
+@property (nonatomic, strong) ASDisplayNodeContextModifier willDisplayNodeContentWithRenderingContext;
 
 /**
  * @abstract allow modification of a context after the node's content is drawn
  *
  * @discussion
  */
-@property (nonatomic, strong) ASDisplayNodeContextModifier didDisplayNodeContentBlock;
+@property (nonatomic, strong) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
 
 @end

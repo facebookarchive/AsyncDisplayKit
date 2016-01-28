@@ -274,8 +274,8 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       }
 
       CGContextRef currentContext = UIGraphicsGetCurrentContext();
-      if (_preContextModifier) {
-        _preContextModifier(currentContext);
+      if (_willDisplayNodeContentWithRenderingContext) {
+        _willDisplayNodeContentWithRenderingContext(currentContext);
       }
       
       if (_flags.implementsInstanceDrawRect) {
@@ -284,8 +284,8 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
         [[self class] drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
       }
       
-      if (_postContextModifier) {
-        _postContextModifier(currentContext);
+      if (_didDisplayNodeContentWithRenderingContext) {
+        _didDisplayNodeContentWithRenderingContext(currentContext);
       }
 
       if (isCancelledBlock()) {
@@ -389,28 +389,28 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   [_displaySentinel increment];
 }
 
-- (ASDisplayNodeContextModifier)willDisplayNodeContentBlock
+- (ASDisplayNodeContextModifier)willDisplayNodeContentWithRenderingContext
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _preContextModifier;
+  return _willDisplayNodeContentWithRenderingContext;
 }
 
-- (ASDisplayNodeContextModifier)didDisplayNodeContentBlock
+- (ASDisplayNodeContextModifier)didDisplayNodeContentWithRenderingContext
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _postContextModifier;
+  return _didDisplayNodeContentWithRenderingContext;
 }
 
-- (void)setWillDisplayNodeContentBlock:(ASDisplayNodeContextModifier)contextModifier
+- (void)setWillDisplayNodeContentWithRenderingContext:(ASDisplayNodeContextModifier)contextModifier
 {
   ASDN::MutexLocker l(_propertyLock);
-  _preContextModifier = contextModifier;
+  _willDisplayNodeContentWithRenderingContext = contextModifier;
 }
 
-- (void)setDidDisplayNodeContentBlock:(ASDisplayNodeContextModifier)contextModifier;
+- (void)setDidDisplayNodeContentWithRenderingContext:(ASDisplayNodeContextModifier)contextModifier;
 {
   ASDN::MutexLocker l(_propertyLock);
-  _postContextModifier = contextModifier;
+  _didDisplayNodeContentWithRenderingContext = contextModifier;
 }
 
 @end

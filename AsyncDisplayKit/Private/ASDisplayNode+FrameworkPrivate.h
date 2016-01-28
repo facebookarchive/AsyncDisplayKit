@@ -17,6 +17,7 @@
 #import "ASSentinel.h"
 #import "ASThread.h"
 #import "ASLayoutOptions.h"
+#import "_ASDisplayLayer.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -99,6 +100,18 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
  * It may block on the private queue, [_ASDisplayLayer displayQueue]
  */
 - (void)recursivelyEnsureDisplaySynchronously:(BOOL)synchronously;
+
+/**
+ * @abstract instance version of drawRect class method
+ * @see drawRect:withParameters:isCancelled:isRasterizing class method
+ */
+- (void)drawRect:(CGRect)bounds withParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing;
+
+/**
+ * @abstract instance version of display class method
+ * @see displayWithParameters:isCancelled class method
+ */
+- (UIImage *)displayWithParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled;
 
 /**
  * @abstract Allows a node to bypass all ensureDisplay passes.  Defaults to NO.

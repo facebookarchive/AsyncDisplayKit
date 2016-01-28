@@ -103,8 +103,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 
   ASDisplayNodeExtraIvars _extra;
   
-  ASDisplayNodeContextModifier _preContextModifier;
-  ASDisplayNodeContextModifier _postContextModifier;
+  ASDisplayNodeContextModifier _willDisplayNodeContentWithRenderingContext;
+  ASDisplayNodeContextModifier _didDisplayNodeContentWithRenderingContext;
 
 #if TIME_DISPLAYNODE_OPS
 @public

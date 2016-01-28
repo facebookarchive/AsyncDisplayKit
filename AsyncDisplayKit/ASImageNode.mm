@@ -170,8 +170,8 @@
   
   ASDN::MutexUnlocker u(_imageLock);
   
-  ASDisplayNodeContextModifier preContextBlock = self.willDisplayNodeContentBlock;
-  ASDisplayNodeContextModifier postContextBlock = self.didDisplayNodeContentBlock;
+  ASDisplayNodeContextModifier preContextBlock = self.willDisplayNodeContentWithRenderingContext;
+  ASDisplayNodeContextModifier postContextBlock = self.didDisplayNodeContentWithRenderingContext;
   
   BOOL hasValidCropBounds = cropEnabled && !CGRectIsNull(cropDisplayBounds) && !CGRectIsEmpty(cropDisplayBounds);
   
@@ -286,12 +286,21 @@
   [super displayDidFinish];
 
   ASDN::MutexLocker l(_imageLock);
+
+  void (^displayCompletionBlock)(BOOL canceled) = _displayCompletionBlock;
+  UIImage *image = _image;
+  
+  ASDN::MutexLocker u(_imageLock);
+  
   // If we've got a block to perform after displaying, do it.
-  if (_image && _displayCompletionBlock) {
+  if (image && displayCompletionBlock) {
 
     // FIXME: _displayCompletionBlock is not protected by lock
-    _displayCompletionBlock(NO);
+    displayCompletionBlock(NO);
+    
+    ASDN::MutexLocker l(_imageLock);
     _displayCompletionBlock = nil;
+    ASDN::MutexLocker u(_imageLock);
   }
 }
 
