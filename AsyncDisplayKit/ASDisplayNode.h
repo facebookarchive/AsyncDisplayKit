@@ -465,9 +465,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)recursivelyFetchData;
 
 /**
- * @abstract Marks the node as needing to call fetchData
- * @discussion If the node is outside of the preload range, it is queued to call fetchData the next time it enters the range.
- * Otherwise, fetchData is called immediately if the node is currently within the preload range.
+ * @abstract Triggers a call to fetchData for nodes in the preload range
+ * @discussion Recursively calls fetchData immediately if the node is currently within the preload range.
  */
 - (void)setNeedsDataFetch;
 
