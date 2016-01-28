@@ -853,13 +853,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   if (_contentOffsetAdjustmentTopVisibleRow != nil) {
     __block NSInteger adjustedSection = _contentOffsetAdjustmentTopVisibleRow.section;
+    __block NSInteger adjustedRow = _contentOffsetAdjustmentTopVisibleRow.row;
     [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-        if (adjustedSection >= idx) {
+        if (adjustedSection > idx) {
           adjustedSection--;
+        } else if (adjustedSection == idx) {
+          adjustedRow = 0;
         }
     }];
 
-    _contentOffsetAdjustmentTopVisibleRow = [NSIndexPath indexPathForRow:_contentOffsetAdjustmentTopVisibleRow.row
+    _contentOffsetAdjustmentTopVisibleRow = [NSIndexPath indexPathForRow:adjustedRow
                                                                inSection:adjustedSection];
   }
 
