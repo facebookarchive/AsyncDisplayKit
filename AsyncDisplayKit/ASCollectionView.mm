@@ -182,7 +182,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _batchContext = [[ASBatchContext alloc] init];
   
   _leadingScreensForBatching = 1.0;
-  
+  _trailingScreensForBatching = 1.0;
+
   _asyncDataFetchingEnabled = NO;
   _asyncDataSourceLocked = NO;
   
@@ -636,12 +637,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (BOOL)shouldBatchFetch
+- (BOOL)shouldBatchFetchAtTail:(BOOL)atTail
 {
   // if the delegate does not respond to this method, there is no point in starting to fetch
-  BOOL canFetch = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)];
-  if (canFetch && [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)]) {
-    return [_asyncDelegate shouldBatchFetchForCollectionView:self];
+  BOOL canFetch = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:atTail:)];
+  if (canFetch && [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:atTail:)]) {
+    return [_asyncDelegate shouldBatchFetchForCollectionView:self atTail:atTail];
   } else {
     return canFetch;
   }
@@ -651,14 +652,22 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
   
-  if (![self shouldBatchFetch]) {
+  BOOL isScrollingTowardsTail;
+  ASScrollDirection scrollDirection = [self scrollDirection];
+  if (ASScrollDirectionContainsVerticalDirection(scrollDirection)) {
+    isScrollingTowardsTail = scrollDirection == ASScrollDirectionUp;
+  } else {
+    isScrollingTowardsTail = scrollDirection == ASScrollDirectionLeft;
+  }
+  
+  if (![self shouldBatchFetchAtTail:isScrollingTowardsTail]) {
     return;
   }
   
-  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
+  if (ASDisplayShouldFetchBatchForContext(_batchContext, scrollDirection, isScrollingTowardsTail, self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching, _trailingScreensForBatching)) {
     [_batchContext beginBatchFetching];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      [_asyncDelegate collectionView:self willBeginBatchFetchWithContext:_batchContext];
+      [_asyncDelegate collectionView:self willBeginBatchFetchWithContext:_batchContext atTail:isScrollingTowardsTail];
     });
   }
 }

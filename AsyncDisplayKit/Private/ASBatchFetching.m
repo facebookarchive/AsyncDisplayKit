@@ -10,33 +10,31 @@
 
 BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
                                     ASScrollDirection scrollDirection,
+                                    BOOL isScrollingTowardsTail,
                                     CGRect bounds,
                                     CGSize contentSize,
                                     CGPoint targetOffset,
-                                    CGFloat leadingScreens) {
+                                    CGFloat leadingScreens,
+                                    CGFloat trailingScreens) {
   // do not allow fetching if a batch is already in-flight and hasn't been completed or cancelled
   if ([context isFetching]) {
     return NO;
   }
 
-  // only Up and Left scrolls are currently supported (tail loading)
-  if (scrollDirection != ASScrollDirectionUp && scrollDirection != ASScrollDirectionLeft) {
-    return NO;
-  }
-
   // no fetching for null states
   if (leadingScreens <= 0.0 ||
+      trailingScreens <= 0.0 ||
       CGRectEqualToRect(bounds, CGRectZero)) {
     return NO;
   }
 
   CGFloat viewLength, offset, contentLength;
 
-  if (scrollDirection == ASScrollDirectionUp) {
+  if (ASScrollDirectionContainsVerticalDirection(scrollDirection)) {
     viewLength = bounds.size.height;
     offset = targetOffset.y;
     contentLength = contentSize.height;
-  } else { // horizontal
+  } else {
     viewLength = bounds.size.width;
     offset = targetOffset.x;
     contentLength = contentSize.width;
@@ -44,9 +42,23 @@ BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
 
   // target offset will always be 0 if the content size is smaller than the viewport
   BOOL hasSmallContent = offset == 0.0 && contentLength < viewLength;
-
-  CGFloat triggerDistance = viewLength * leadingScreens;
-  CGFloat remainingDistance = contentLength - viewLength - offset;
-
-  return hasSmallContent || remainingDistance <= triggerDistance;
+  CGFloat triggerDistance, remainingDistance;
+  /*  
+   *  ______
+   * |      |
+   *  ______  <-- if ASScrollDirectionDown and trailingScreens == 1, trigger when this is on screen
+   * |      |
+   *  ______  <-- if ASScrollDirectionUp and leadingScreens == 1, trigger when this is on screen
+   * |      |
+   *  ______
+   *
+   */
+  if (isScrollingTowardsTail) {
+    triggerDistance = viewLength * leadingScreens;
+    remainingDistance = contentLength - viewLength - offset;
+  } else {
+    triggerDistance = viewLength * trailingScreens;
+    remainingDistance = offset - viewLength;
+  }
+  return hasSmallContent || (remainingDistance <= triggerDistance);
 }
