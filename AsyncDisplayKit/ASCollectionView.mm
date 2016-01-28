@@ -637,8 +637,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
 {
   _deceleratingVelocity = CGPointMake(
-    scrollView.contentOffset.x - targetContentOffset->x,
-    scrollView.contentOffset.y - targetContentOffset->y
+    scrollView.contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
+    scrollView.contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
   );
 
   [self handleBatchFetchScrollingToOffset:*targetContentOffset];
