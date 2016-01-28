@@ -274,7 +274,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       }
 
       CGContextRef currentContext = UIGraphicsGetCurrentContext();
-      if (_willDisplayNodeContentWithRenderingContext) {
+      if (currentContext && _willDisplayNodeContentWithRenderingContext) {
         _willDisplayNodeContentWithRenderingContext(currentContext);
       }
       
@@ -284,7 +284,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
         [[self class] drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
       }
       
-      if (_didDisplayNodeContentWithRenderingContext) {
+      if (currentContext && _didDisplayNodeContentWithRenderingContext) {
         _didDisplayNodeContentWithRenderingContext(currentContext);
       }
 

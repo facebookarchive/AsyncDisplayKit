@@ -238,7 +238,7 @@
   }
   
   CGContextRef context = UIGraphicsGetCurrentContext();
-  if (preContextBlock) {
+  if (context && preContextBlock) {
     preContextBlock(context);
   }
   
@@ -258,7 +258,7 @@
     [image drawInRect:imageDrawRect];
   }
   
-  if (postContextBlock) {
+  if (context && postContextBlock) {
     postContextBlock(context);
   }
   
