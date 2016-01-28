@@ -12,6 +12,8 @@
 
 #import "ASTextKitContext.h"
 
+#import "ASLayoutManager.h"
+
 @implementation ASTextKitContext
 {
   // All TextKit operations (even non-mutative ones) must be executed serially.
@@ -35,7 +37,7 @@
     std::lock_guard<std::mutex> l(__static_mutex);
     // Create the TextKit component stack with our default configuration.
     _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
-    _layoutManager = layoutManagerFactory ? layoutManagerFactory() : [[NSLayoutManager alloc] init];
+    _layoutManager = layoutManagerFactory ? layoutManagerFactory() : [[ASLayoutManager alloc] init];
     _layoutManager.usesFontLeading = NO;
     [_textStorage addLayoutManager:_layoutManager];
     _textContainer = [[NSTextContainer alloc] initWithSize:constrainedSize];

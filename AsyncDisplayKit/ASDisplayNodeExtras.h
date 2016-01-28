@@ -29,6 +29,32 @@ inline BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
   return ((interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
 }
 
+inline BOOL ASInterfaceStateIncludesMeasureLayout(ASInterfaceState interfaceState)
+{
+  return ((interfaceState & ASInterfaceStateMeasureLayout) == ASInterfaceStateMeasureLayout);
+}
+
+inline NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfaceState)
+{
+  NSMutableArray *states = [NSMutableArray array];
+  if (interfaceState == ASInterfaceStateNone) {
+    [states addObject:@"No state"];
+  }
+  if (ASInterfaceStateIncludesMeasureLayout(interfaceState)) {
+    [states addObject:@"MeasureLayout"];
+  }
+  if (ASInterfaceStateIncludesFetchData(interfaceState)) {
+    [states addObject:@" | FetchData"];
+  }
+  if (ASInterfaceStateIncludesDisplay(interfaceState)) {
+    [states addObject:@" | Display"];
+  }
+  if (ASInterfaceStateIncludesVisible(interfaceState)) {
+    [states addObject:@" | Visible"];
+  }
+  return [NSString stringWithFormat:@"{ %@ }", [states componentsJoinedByString:@" | "]];
+}
+
 NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
