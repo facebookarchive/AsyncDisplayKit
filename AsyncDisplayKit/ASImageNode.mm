@@ -145,8 +145,6 @@
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
 {
-  BOOL hasValidCropBounds = _cropEnabled && !CGRectIsNull(_cropDisplayBounds) && !CGRectIsEmpty(_cropDisplayBounds);
-
   return [[_ASImageNodeDrawParameters alloc] initWithBounds:self.bounds
                                                      opaque:self.opaque
                                               contentsScale:self.contentsScaleForDisplay
@@ -177,7 +175,6 @@
   
   CGRect bounds = (hasValidCropBounds ? cropDisplayBounds : parameters.bounds);
   BOOL isOpaque = parameters.opaque;
-  CGFloat contentsScaleForDisplay = parameters.contentsScale;
   UIColor *backgroundColor = parameters.backgroundColor;
   UIViewContentMode contentMode = parameters.contentMode;
   

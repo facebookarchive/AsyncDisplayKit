@@ -102,18 +102,6 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
 - (void)recursivelyEnsureDisplaySynchronously:(BOOL)synchronously;
 
 /**
- * @abstract instance version of drawRect class method
- * @see drawRect:withParameters:isCancelled:isRasterizing class method
- */
-- (void)drawRect:(CGRect)bounds withParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing;
-
-/**
- * @abstract instance version of display class method
- * @see displayWithParameters:isCancelled class method
- */
-- (UIImage *)displayWithParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled;
-
-/**
  * @abstract Allows a node to bypass all ensureDisplay passes.  Defaults to NO.
  *
  * @discussion Nodes that are expensive to draw and expected to have placeholder even with

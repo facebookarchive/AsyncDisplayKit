@@ -40,7 +40,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode * _Nonnull node);
 /**
  * ASDisplayNode will / did render node content in context.
  */
-typedef void (^ASDisplayNodeContextModifier)(CGContextRef context);
+typedef void (^ASDisplayNodeContextModifier)(_Nonnull CGContextRef context);
 
 /**
  Interface state is available on ASDisplayNode and ASViewController, and
