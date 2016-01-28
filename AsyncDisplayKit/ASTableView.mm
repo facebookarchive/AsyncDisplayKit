@@ -105,6 +105,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   NSIndexPath *_contentOffsetAdjustmentTopVisibleRow;
   CGFloat _contentOffsetAdjustment;
+  
+  CGPoint _deceleratingVelocity;
 
   CGFloat _nodesConstrainedWidth;
   BOOL _ignoreNodesConstrainedWidthChange;
@@ -563,14 +565,23 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASScrollDirection)scrollDirection
 {
-  CGPoint scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
+  CGPoint scrollVelocity;
+  if (self.isTracking) {
+    scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
+  } else {
+    scrollVelocity = _deceleratingVelocity;
+  }
+  return [self _scrollDirectionForVelocity:scrollVelocity];
+}
+
+- (ASScrollDirection)_scrollDirectionForVelocity:(CGPoint)velocity
+{
   ASScrollDirection direction = ASScrollDirectionNone;
-  if (scrollVelocity.y > 0) {
+  if (velocity.y > 0) {
     direction = ASScrollDirectionDown;
   } else {
     direction = ASScrollDirectionUp;
   }
-  
   return direction;
 }
 
@@ -618,6 +629,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
 {
+  _deceleratingVelocity = CGPointMake(
+    scrollView.contentOffset.x - targetContentOffset->x,
+    scrollView.contentOffset.y - targetContentOffset->y
+  );
+
   [self handleBatchFetchScrollingToOffset:*targetContentOffset];
 
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
