@@ -88,6 +88,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   NSMutableSet *_registeredSupplementaryKinds;
   
+  CGPoint _deceleratingVelocity;
+  
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
    
@@ -516,11 +518,16 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASScrollDirection)scrollDirection
 {
-  CGPoint scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
-  return [self scrollDirectionForVelocity:scrollVelocity];
+  CGPoint scrollVelocity;
+  if (self.isTracking) {
+    scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
+  } else {
+    scrollVelocity = _deceleratingVelocity;
+  }
+  return [self _scrollDirectionForVelocity:scrollVelocity];
 }
 
-- (ASScrollDirection)scrollDirectionForVelocity:(CGPoint)scrollVelocity
+- (ASScrollDirection)_scrollDirectionForVelocity:(CGPoint)scrollVelocity
 {
   ASScrollDirection direction = ASScrollDirectionNone;
   ASScrollDirection scrollableDirections = [self scrollableDirections];
@@ -570,7 +577,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:[self scrollDirection]];
   
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)]) {
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
@@ -629,6 +636,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
 {
+  _deceleratingVelocity = CGPointMake(
+    scrollView.contentOffset.x - targetContentOffset->x,
+    scrollView.contentOffset.y - targetContentOffset->y
+  );
+
   [self handleBatchFetchScrollingToOffset:*targetContentOffset];
   
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
