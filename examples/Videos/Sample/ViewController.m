@@ -43,7 +43,7 @@
   
   videoNode.backgroundColor = [UIColor lightGrayColor];
   
-  videoNode.playButton = [self playButton];
+//  videoNode.playButton = [self playButton];
   return videoNode;
 }
 
@@ -61,7 +61,7 @@
   
   nicCageVideo.backgroundColor = [UIColor lightGrayColor];
   nicCageVideo.shouldAutorepeat = YES;
-  nicCageVideo.playButton = [self playButton];
+//  nicCageVideo.playButton = [self playButton];
 
   return nicCageVideo;
 }
@@ -75,11 +75,11 @@
   
   simonVideo.frame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - ([UIScreen mainScreen].bounds.size.height/3), [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
   
-  simonVideo.gravity = ASVideoGravityResizeAspect;
+  simonVideo.gravity = AVLayerVideoGravityResizeAspect;
   
   simonVideo.backgroundColor = [UIColor lightGrayColor];
   simonVideo.shouldAutorepeat = YES;
-  simonVideo.playButton = [self playButton];
+//  simonVideo.playButton = [self playButton];
   simonVideo.shouldAutoplay = YES;
   
   return simonVideo;

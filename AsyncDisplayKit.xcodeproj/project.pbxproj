@@ -360,6 +360,8 @@
 		ACF6ED611B178DC700DA7C62 /* ASOverlayLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED591B178DC700DA7C62 /* ASOverlayLayoutSpecSnapshotTests.mm */; };
 		ACF6ED621B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED5A1B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm */; };
 		ACF6ED631B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED5B1B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm */; };
+		AEB7B01A1C5962EA00662EF4 /* ASDefaultPlayButton.h in Headers */ = {isa = PBXBuildFile; fileRef = AEB7B0181C5962EA00662EF4 /* ASDefaultPlayButton.h */; };
+		AEB7B01B1C5962EA00662EF4 /* ASDefaultPlayButton.m in Sources */ = {isa = PBXBuildFile; fileRef = AEB7B0191C5962EA00662EF4 /* ASDefaultPlayButton.m */; };
 		AEEC47E11C20C2DD00EC1693 /* ASVideoNode.h in Headers */ = {isa = PBXBuildFile; fileRef = AEEC47DF1C20C2DD00EC1693 /* ASVideoNode.h */; };
 		AEEC47E21C20C2DD00EC1693 /* ASVideoNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = AEEC47E01C20C2DD00EC1693 /* ASVideoNode.mm */; };
 		AEEC47E41C21D3D200EC1693 /* ASVideoNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AEEC47E31C21D3D200EC1693 /* ASVideoNodeTests.m */; };
@@ -778,6 +780,8 @@
 		ACF6ED591B178DC700DA7C62 /* ASOverlayLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASOverlayLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		ACF6ED5A1B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRatioLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		ACF6ED5B1B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASStackLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
+		AEB7B0181C5962EA00662EF4 /* ASDefaultPlayButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDefaultPlayButton.h; sourceTree = "<group>"; };
+		AEB7B0191C5962EA00662EF4 /* ASDefaultPlayButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDefaultPlayButton.m; sourceTree = "<group>"; };
 		AEEC47DF1C20C2DD00EC1693 /* ASVideoNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASVideoNode.h; sourceTree = "<group>"; };
 		AEEC47E01C20C2DD00EC1693 /* ASVideoNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASVideoNode.mm; sourceTree = "<group>"; };
 		AEEC47E31C21D3D200EC1693 /* ASVideoNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASVideoNodeTests.m; sourceTree = "<group>"; };
@@ -1153,6 +1157,8 @@
 				ACF6ED4A1B17847A00DA7C62 /* ASStackUnpositionedLayout.mm */,
 				0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */,
 				0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */,
+				AEB7B0181C5962EA00662EF4 /* ASDefaultPlayButton.h */,
+				AEB7B0191C5962EA00662EF4 /* ASDefaultPlayButton.m */,
 			);
 			path = Private;
 			sourceTree = "<group>";
@@ -1315,6 +1321,7 @@
 				205F0E191B37339C007741D0 /* ASAbstractLayoutController.h in Headers */,
 				058D0A82195D060300B7D73C /* ASAssert.h in Headers */,
 				0516FA3C1A15563400B4EBED /* ASAvailability.h in Headers */,
+				AEB7B01A1C5962EA00662EF4 /* ASDefaultPlayButton.h in Headers */,
 				ACF6ED1A1B17843500DA7C62 /* ASBackgroundLayoutSpec.h in Headers */,
 				058D0A83195D060300B7D73C /* ASBaseDefines.h in Headers */,
 				054963491A1EA066000F8E56 /* ASBasicImageDownloader.h in Headers */,
@@ -1801,6 +1808,7 @@
 				A32FEDD61C501B6A004F642A /* ASTextKitFontSizeAdjuster.m in Sources */,
 				058D0A1B195D050800B7D73C /* ASMutableAttributedStringBuilder.m in Sources */,
 				055B9FA91A1C154B00035D6D /* ASNetworkImageNode.mm in Sources */,
+				AEB7B01B1C5962EA00662EF4 /* ASDefaultPlayButton.m in Sources */,
 				ACF6ED2C1B17843500DA7C62 /* ASOverlayLayoutSpec.mm in Sources */,
 				0442850F1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */,
 				257754921BED28F300737CA5 /* ASEqualityHashHelpers.mm in Sources */,
