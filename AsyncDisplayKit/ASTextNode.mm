@@ -102,7 +102,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
   
-  // Forwards NSLayoutManagerDelegate methods related to word kerning
+  ASDN::Mutex _wordKernerLock;
   ASTextNodeWordKerner *_wordKerner;
   
 }
@@ -148,8 +148,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // on the special placeholder behavior of ASTextNode.
     _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
     _placeholderInsets = UIEdgeInsetsMake(1.0, 0.0, 1.0, 0.0);
-    
-    _wordKerner = [[ASTextNodeWordKerner alloc] init];
   }
 
   return self;
@@ -264,7 +262,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
     .minimumScaleFactor = _minimumScaleFactor,
-    .layoutManagerDelegate = _wordKerner,
+    .layoutManagerDelegate = [self _wordKerner],
   };
 }
 
@@ -298,6 +296,15 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
     [self _invalidateRenderer];
   }
+}
+
+- (ASTextNodeWordKerner *)_wordKerner
+{
+    ASDN::MutexLocker l(_wordKernerLock);
+    if (_wordKerner == nil) {
+        _wordKerner = [[ASTextNodeWordKerner alloc] init];
+    }
+    return _wordKerner;
 }
 
 #pragma mark - Layout and Sizing
