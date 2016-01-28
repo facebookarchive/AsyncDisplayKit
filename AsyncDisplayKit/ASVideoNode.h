@@ -8,12 +8,6 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-typedef NS_ENUM(NSUInteger, ASVideoGravity) {
-  ASVideoGravityResizeAspect,
-  ASVideoGravityResizeAspectFill,
-  ASVideoGravityResize
-};
-
 @protocol ASVideoNodeDelegate;
 
 // If you need ASVideoNode, please use AsyncDisplayKit master until this comment is removed.
