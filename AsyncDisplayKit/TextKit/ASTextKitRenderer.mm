@@ -101,7 +101,8 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
                                              maximumNumberOfLines:attributes.maximumNumberOfLines
                                                    exclusionPaths:attributes.exclusionPaths
                                                   constrainedSize:shadowConstrainedSize
-                                             layoutManagerFactory:attributes.layoutManagerFactory];
+                                             layoutManagerFactory:attributes.layoutManagerFactory
+                                            layoutManagerDelegate:attributes.layoutManagerDelegate];
 
     [self truncater];
   }

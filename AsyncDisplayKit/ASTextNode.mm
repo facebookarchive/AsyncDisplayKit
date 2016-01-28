@@ -21,6 +21,7 @@
 #import "ASTextKitRenderer.h"
 #import "ASTextKitRenderer+Positioning.h"
 #import "ASTextKitShadower.h"
+#import "ASTextNodeWordKerner.h"
 
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
@@ -74,7 +75,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 @end
 
-@interface ASTextNode () <UIGestureRecognizerDelegate>
+@interface ASTextNode () <UIGestureRecognizerDelegate, NSLayoutManagerDelegate>
 
 @end
 
@@ -100,6 +101,10 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   ASTextKitRenderer *_renderer;
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
+  
+  // Forwards NSLayoutManagerDelegate methods related to word kerning
+  ASTextNodeWordKerner *_wordKerner;
+  
 }
 @dynamic placeholderEnabled;
 
@@ -143,6 +148,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // on the special placeholder behavior of ASTextNode.
     _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
     _placeholderInsets = UIEdgeInsetsMake(1.0, 0.0, 1.0, 0.0);
+    
+    _wordKerner = [[ASTextNodeWordKerner alloc] init];
   }
 
   return self;
@@ -257,6 +264,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
     .minimumScaleFactor = _minimumScaleFactor,
+    .layoutManagerDelegate = _wordKerner,
   };
 }
 

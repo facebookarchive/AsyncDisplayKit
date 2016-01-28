@@ -72,8 +72,8 @@
                                                                       maximumNumberOfLines:1
                                                                             exclusionPaths:nil
                                                                            constrainedSize:constrainedRect.size
-                                                                      layoutManagerFactory:nil];
-
+                                                                      layoutManagerFactory:nil
+                                                                     layoutManagerDelegate:nil];
   __block CGRect truncationUsedRect;
 
   [truncationContext performBlockWithLockedTextKitComponents:^(NSLayoutManager *truncationLayoutManager, NSTextStorage *truncationTextStorage, NSTextContainer *truncationTextContainer) {

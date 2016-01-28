@@ -89,6 +89,11 @@ struct ASTextKitAttributes {
    A pointer to a function that that returns a custom layout manager subclass. If nil, defaults to NSLayoutManager.
    */
   NSLayoutManager *(*layoutManagerFactory)(void);
+  
+  /**
+   An optional delegate for the NSLayoutManager
+   */
+  id<NSLayoutManagerDelegate> layoutManagerDelegate;
 
   /**
    We provide an explicit copy function so we can use aggregate initializer syntax while providing copy semantics for

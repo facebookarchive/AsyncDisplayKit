@@ -16,6 +16,7 @@
 
 #import <AsyncDisplayKit/ASStackLayoutSpec.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASTextNodeTypes.h>
 
 static const CGFloat kImageSize = 80.0f;
 static const CGFloat kOuterPadding = 16.0f;
@@ -128,7 +129,8 @@ static const CGFloat kInnerPadding = 10.0f;
   style.hyphenationFactor = 1.0;
   
   return @{ NSFontAttributeName: font,
-            NSParagraphStyleAttributeName: style };
+            NSParagraphStyleAttributeName: style,
+            ASTextNodeWordKerningAttributeName : @.5};
 }
 
 #if UseAutomaticLayout
