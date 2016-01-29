@@ -154,19 +154,26 @@
 
 - (UIImage *)displayWithParameters:(_ASImageNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
 {
-  ASDN::MutexLocker l(_imageLock);
-  UIImage *image = _image;
-  if (!image) {
-    return nil;
+  UIImage *image;
+  BOOL cropEnabled;
+  CGFloat contentsScale;
+  CGRect cropDisplayBounds;
+  CGRect cropRect;
+  asimagenode_modification_block_t imageModificationBlock;
+  
+  {
+    ASDN::MutexLocker l(_imageLock);
+    image = _image;
+    if (!image) {
+      return nil;
+    }
+    
+    cropEnabled = _cropEnabled;
+    contentsScale = _contentsScaleForDisplay;
+    cropDisplayBounds = _cropDisplayBounds;
+    cropRect = _cropRect;
+    imageModificationBlock = _imageModificationBlock;
   }
-  
-  BOOL cropEnabled = _cropEnabled;
-  CGFloat contentsScale = _contentsScaleForDisplay;
-  CGRect cropDisplayBounds = _cropDisplayBounds;
-  CGRect cropRect = _cropRect;
-  asimagenode_modification_block_t imageModificationBlock = _imageModificationBlock;
-  
-  ASDN::MutexUnlocker u(_imageLock);
   
   ASDisplayNodeContextModifier preContextBlock = self.willDisplayNodeContentWithRenderingContext;
   ASDisplayNodeContextModifier postContextBlock = self.didDisplayNodeContentWithRenderingContext;
@@ -292,7 +299,6 @@
   // If we've got a block to perform after displaying, do it.
   if (image && displayCompletionBlock) {
 
-    // FIXME: _displayCompletionBlock is not protected by lock
     displayCompletionBlock(NO);
     
     ASDN::MutexLocker l(_imageLock);
@@ -311,7 +317,6 @@
   }
 
   // Stash the block and call-site queue. We'll invoke it in -displayDidFinish.
-  // FIXME: _displayCompletionBlock not protected by lock
   ASDN::MutexLocker l(_imageLock);
   if (_displayCompletionBlock != displayCompletionBlock) {
     _displayCompletionBlock = [displayCompletionBlock copy];

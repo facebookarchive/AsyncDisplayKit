@@ -217,7 +217,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Renderer Management
 
-//only safe to call on the main thread
+//only safe to call on the main thread because self.bounds is only safe to call on the main thread one our node is loaded
 - (ASTextKitRenderer *)_renderer
 {
   return [self _rendererWithBounds:self.bounds];
@@ -415,7 +415,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   ASTextKitRenderer *renderer = [self _rendererWithBounds:parameters.bounds];
   UIEdgeInsets shadowPadding = [self shadowPaddingWithRenderer:renderer];
-  CGPoint textOrigin = CGPointMake(parameters.bounds.origin.x - shadowPadding.left, parameters.bounds.origin.y - shadowPadding.top);
+  CGPoint boundsOrigin = parameters.bounds.origin;
+  CGPoint textOrigin = CGPointMake(boundsOrigin.x - shadowPadding.left, boundsOrigin.y - shadowPadding.top);
   
   // Fill background
   if (!isRasterizing) {
@@ -998,7 +999,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
-//only safe to call on main thread
+//only safe to call on main thread, because [self _renderer] is only safe to call on the main thread
 - (UIEdgeInsets)shadowPadding
 {
   return [self shadowPaddingWithRenderer:[self _renderer]];

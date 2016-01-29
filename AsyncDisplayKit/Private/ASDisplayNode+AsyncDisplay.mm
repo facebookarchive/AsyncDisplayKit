@@ -239,6 +239,8 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       ASDN_DELAY_FOR_DISPLAY();
       
       UIImage *result = nil;
+      //We can't call _willDisplayNodeContentWithRenderingContext or _didDisplayNodeContentWithRenderingContext because we don't
+      //have a context. We rely on implementors of displayWithParameters:isCancelled: to call
       if (_flags.implementsInstanceImageDisplay) {
         result = [self displayWithParameters:drawParameters isCancelled:isCancelledBlock];
       } else {
