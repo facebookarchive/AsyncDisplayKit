@@ -18,6 +18,7 @@
 #import "_ASPendingState.h"
 #import "_ASDisplayView.h"
 #import "_ASScopeTimer.h"
+#import "_ASCoreAnimationExtras.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
 
@@ -615,7 +616,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
 
     if (_placeholderLayer) {
-      _placeholderLayer.contents = (id)_placeholderImage.CGImage;
+      [self setupPlaceholderLayerContents];
     }
   }
 
@@ -2011,10 +2012,21 @@ static BOOL ShouldUseNewRenderingRange = YES;
   if (_placeholderImage && _placeholderLayer && self.layer.contents == nil) {
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
-    _placeholderLayer.contents = (id)_placeholderImage.CGImage;
+    [self setupPlaceholderLayerContents];
     _placeholderLayer.opacity = 1.0;
     [CATransaction commit];
     [self.layer addSublayer:_placeholderLayer];
+  }
+}
+
+- (void)setupPlaceholderLayerContents
+{
+  BOOL stretchable = !UIEdgeInsetsEqualToEdgeInsets(_placeholderImage.capInsets, UIEdgeInsetsZero);
+  if (stretchable) {
+    ASDisplayNodeSetupLayerContentsWithResizableImage(_placeholderLayer, _placeholderImage);
+  } else {
+    _placeholderLayer.contentsScale = self.contentsScale;
+    _placeholderLayer.contents = (id)_placeholderImage.CGImage;
   }
 }
 
