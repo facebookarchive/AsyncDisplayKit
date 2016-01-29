@@ -43,7 +43,6 @@
   
   videoNode.backgroundColor = [UIColor lightGrayColor];
   
-//  videoNode.playButton = [self playButton];
   return videoNode;
 }
 
@@ -61,7 +60,8 @@
   
   nicCageVideo.backgroundColor = [UIColor lightGrayColor];
   nicCageVideo.shouldAutorepeat = YES;
-//  nicCageVideo.playButton = [self playButton];
+  nicCageVideo.shouldAutoplay = YES;
+  nicCageVideo.muted = YES;
 
   return nicCageVideo;
 }
@@ -79,7 +79,6 @@
   
   simonVideo.backgroundColor = [UIColor lightGrayColor];
   simonVideo.shouldAutorepeat = YES;
-//  simonVideo.playButton = [self playButton];
   simonVideo.shouldAutoplay = YES;
   
   return simonVideo;
@@ -97,6 +96,15 @@
   [playButton setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:ASControlStateHighlighted];
 
   return playButton;
+}
+
+- (void)videoNodeWasTapped:(ASVideoNode *)videoNode
+{
+  if (videoNode.player.muted == YES) {
+    videoNode.player.muted = NO;
+  } else {
+    videoNode.player.muted = YES;
+  }
 }
 
 - (BOOL)prefersStatusBarHidden

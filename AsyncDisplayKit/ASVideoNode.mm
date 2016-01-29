@@ -19,6 +19,8 @@
   
   BOOL _shouldAutorepeat;
   BOOL _shouldAutoplay;
+  
+  BOOL _muted;
 
   AVAsset *_asset;
   
@@ -31,6 +33,7 @@
   ASDisplayNode *_playerNode;
   ASDisplayNode *_spinner;
   NSString *_gravity;
+  
   dispatch_queue_t _previewQueue;
 }
 
@@ -137,6 +140,7 @@
       AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
       if (!_player) {
         _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+        _player.muted = _muted;
       }
       playerLayer.player = _player;
       playerLayer.videoGravity = [self gravity];
@@ -176,10 +180,14 @@
 
 - (void)tapped
 {
-  if (_shouldBePlaying) {
-    [self pause];
+  if (self.delegate && [self.delegate respondsToSelector:@selector(videoNodeWasTapped:)]) {
+    [self.delegate videoNodeWasTapped:self];
   } else {
-    [self play];
+    if (_shouldBePlaying) {
+      [self pause];
+    } else {
+      [self play];
+    }
   }
 }
 
@@ -209,10 +217,10 @@
       [_player replaceCurrentItemWithPlayerItem:_currentItem];
     } else {
       _player = [[AVPlayer alloc] initWithPlayerItem:_currentItem];
+      _player.muted = _muted;
     }
   }
 }
-
 
 - (void)clearFetchedData
 {
@@ -231,11 +239,14 @@
   
   if (_shouldAutoplay && _playerNode.isNodeLoaded) {
     [self play];
+  } else if (_shouldAutoplay) {
+    _shouldBePlaying = YES;
   }
   if (isVisible) {
     if (_playerNode.isNodeLoaded) {
       if (!_player) {
         _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+        _player.muted = _muted;
       }
       ((AVPlayerLayer *)_playerNode.layer).player = _player;
     }
@@ -256,7 +267,7 @@
   
   [self addSubnode:playButton];
   
-  [_playButton addTarget:self action:@selector(play) forControlEvents:ASControlNodeEventTouchUpInside];
+  [_playButton addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
 }
 
 - (ASButtonNode *)playButton
@@ -310,6 +321,20 @@
   return _gravity;
 }
 
+- (BOOL)muted
+{
+  ASDN::MutexLocker l(_lock);
+
+  return _muted;
+}
+
+- (void)setMuted:(BOOL)muted
+{
+  ASDN::MutexLocker l(_lock);
+
+  _muted = muted;
+}
+
 #pragma mark - Video Playback
 
 - (void)play
@@ -330,6 +355,7 @@
       AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
       if (!_player) {
         _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+        _player.muted = _muted;
       }
       playerLayer.player = _player;
       playerLayer.videoGravity = [self gravity];

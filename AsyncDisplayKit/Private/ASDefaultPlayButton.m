@@ -44,7 +44,6 @@
   // Circle Drawing
   UIBezierPath *ovalPath = [UIBezierPath bezierPathWithOvalInRect: buttonBounds];
   [[UIColor colorWithWhite:0.0 alpha:0.5] setFill];
-  [ovalPath stroke];
   [ovalPath fill];
   
   // Triangle Drawing
