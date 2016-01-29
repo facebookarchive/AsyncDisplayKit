@@ -64,7 +64,7 @@ NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
-    return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
+  return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
 }
 
 void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)())
