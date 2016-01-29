@@ -27,24 +27,18 @@
   CGRect buttonBounds = CGRectMake(originX, bounds.size.height/4, bounds.size.width/2, bounds.size.height/2);
   CGFloat widthHeight = buttonBounds.size.width;
 
+  //When the video isn't a square, the lower bound should be used to figure out the circle size
   if (bounds.size.width < bounds.size.height) {
-    //then use the width to determine the rect size then calculate the origin x y
     widthHeight = bounds.size.width/2;
     originX = (bounds.size.width - widthHeight)/2;
     buttonBounds = CGRectMake(originX, (bounds.size.height - widthHeight)/2, widthHeight, widthHeight);
   }
   if (bounds.size.width > bounds.size.height) {
-    //use the height
     widthHeight = bounds.size.height/2;
     originX = (bounds.size.width - widthHeight)/2;
     buttonBounds = CGRectMake(originX, (bounds.size.height - widthHeight)/2, widthHeight, widthHeight);
   }
-  
-  if (!isRasterizing) {
-    [[UIColor clearColor] set];
-    UIRectFill(bounds);
-  }
-  
+
   CGContextRef context = UIGraphicsGetCurrentContext();
 
   // Circle Drawing
