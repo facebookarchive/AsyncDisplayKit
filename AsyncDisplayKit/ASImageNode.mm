@@ -238,15 +238,15 @@
   // will do its rounding on pixel instead of point boundaries
   UIGraphicsBeginImageContextWithOptions(backingSize, isOpaque, 1.0);
   
+  CGContextRef context = UIGraphicsGetCurrentContext();
+  if (context && preContextBlock) {
+    preContextBlock(context);
+  }
+  
   // if view is opaque, fill the context with background color
   if (isOpaque && backgroundColor) {
     [backgroundColor setFill];
     UIRectFill({ .size = backingSize });
-  }
-  
-  CGContextRef context = UIGraphicsGetCurrentContext();
-  if (context && preContextBlock) {
-    preContextBlock(context);
   }
   
   // iOS 9 appears to contain a thread safety regression when drawing the same CGImageRef on
