@@ -1,0 +1,67 @@
+//
+//  NSArray+Diffing.m
+//  AsyncDisplayKit
+//
+//  Created by Levi McCallum on 1/29/16.
+//  Copyright © 2016 Facebook. All rights reserved.
+//
+
+#import "NSArray+Diffing.h"
+
+@implementation NSArray (Diffing)
+
+- (void)asdk_diffWithArray:(NSArray *)array insertions:(NSMutableIndexSet **)insertions deletions:(NSMutableIndexSet **)deletions
+{
+  NSIndexSet *commonIndexes = [self _asdk_commonIndexesWithArray:array];
+  
+  if (insertions) {
+    NSArray *commonObjects = [self objectsAtIndexes:commonIndexes];
+    for (NSInteger i = 0, j = 0; i < commonObjects.count || j < array.count;) {
+      if (i < commonObjects.count && j < array.count && [commonObjects[i] isEqual:array[j]]) {
+        i++; j++;
+      } else {
+        [*insertions addIndex:j];
+        j++;
+      }
+    }
+  }
+  
+  if (deletions) {
+    for (NSInteger i = 0; i < self.count; i++) {
+      if (![commonIndexes containsIndex:i]) {
+        [*deletions addIndex:i];
+      }
+    }
+  }
+}
+
+- (NSIndexSet *)_asdk_commonIndexesWithArray:(NSArray *)array
+{
+  NSInteger lengths[self.count+1][array.count+1];
+  for (NSInteger i = self.count; i >= 0; i--) {
+    for (NSInteger j = array.count; j >= 0; j--) {
+      if (i == self.count || j == array.count) {
+        lengths[i][j] = 0;
+      } else if ([self[i] isEqual:array[j]]) {
+        lengths[i][j] = 1 + lengths[i+1][j+1];
+      } else {
+        lengths[i][j] = MAX(lengths[i+1][j], lengths[i][j+1]);
+      }
+    }
+  }
+  
+  NSMutableIndexSet *common = [NSMutableIndexSet indexSet];
+  for (NSInteger i = 0, j = 0; i < self.count && j < array.count;) {
+    if ([self[i] isEqual:array[j]]) {
+      [common addIndex:i];
+      i++; j++;
+    } else if (lengths[i+1][j] >= lengths[i][j+1]) {
+      i++;
+    } else {
+      j++;
+    }
+  }
+  return common;
+}
+
+@end

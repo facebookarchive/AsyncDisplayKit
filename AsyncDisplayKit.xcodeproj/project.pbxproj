@@ -475,6 +475,8 @@
 		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
+		DBC452DB1C5BF64600B16017 /* NSArray+Diffing.h in Headers */ = {isa = PBXBuildFile; fileRef = DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */; };
+		DBC452DC1C5BF64600B16017 /* NSArray+Diffing.m in Sources */ = {isa = PBXBuildFile; fileRef = DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */; };
 		DE040EF91C2B40AC004692FF /* ASCollectionViewFlowLayoutInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DE0702FC1C3671E900D7DE62 /* libAsyncDisplayKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AC195D04C000B7D73C /* libAsyncDisplayKit.a */; };
 		DE6EA3221C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */; };
@@ -802,6 +804,8 @@
 		D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.release.xcconfig"; sourceTree = "<group>"; };
 		D785F6601A74327E00291744 /* ASScrollNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASScrollNode.h; sourceTree = "<group>"; };
 		D785F6611A74327E00291744 /* ASScrollNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASScrollNode.m; sourceTree = "<group>"; };
+		DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+Diffing.h"; sourceTree = "<group>"; };
+		DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Diffing.m"; sourceTree = "<group>"; };
 		DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASDisplayNode+FrameworkPrivate.h"; sourceTree = "<group>"; };
 		DE8BEABF1C2DF3FC00D57C12 /* ASDelegateProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDelegateProxy.h; sourceTree = "<group>"; };
 		DE8BEAC01C2DF3FC00D57C12 /* ASDelegateProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDelegateProxy.m; sourceTree = "<group>"; };
@@ -1164,6 +1168,8 @@
 				0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */,
 				AEB7B0181C5962EA00662EF4 /* ASDefaultPlayButton.h */,
 				AEB7B0191C5962EA00662EF4 /* ASDefaultPlayButton.m */,
+				DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */,
+				DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */,
 			);
 			path = Private;
 			sourceTree = "<group>";
@@ -1354,6 +1360,7 @@
 				ACF6ED201B17843500DA7C62 /* ASDimension.h in Headers */,
 				058D0A78195D05F900B7D73C /* ASDisplayNode+DebugTiming.h in Headers */,
 				DECBD6E71BE56E1900CF4905 /* ASButtonNode.h in Headers */,
+				DBC452DB1C5BF64600B16017 /* NSArray+Diffing.h in Headers */,
 				058D0A4C195D05CB00B7D73C /* ASDisplayNode+Subclasses.h in Headers */,
 				258FF4271C0D152600A83844 /* ASRangeHandlerVisible.h in Headers */,
 				058D0A4A195D05CB00B7D73C /* ASDisplayNode.h in Headers */,
@@ -1782,6 +1789,7 @@
 				ACF6ED1D1B17843500DA7C62 /* ASCenterLayoutSpec.mm in Sources */,
 				18C2ED801B9B7DE800F627B3 /* ASCollectionNode.mm in Sources */,
 				92DD2FE41BF4B97E0074C9DD /* ASMapNode.mm in Sources */,
+				DBC452DC1C5BF64600B16017 /* NSArray+Diffing.m in Sources */,
 				AC3C4A521A1139C100143C57 /* ASCollectionView.mm in Sources */,
 				205F0E1E1B373A2C007741D0 /* ASCollectionViewLayoutController.mm in Sources */,
 				058D0A13195D050800B7D73C /* ASControlNode.m in Sources */,
