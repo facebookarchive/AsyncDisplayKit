@@ -524,7 +524,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } else {
     scrollVelocity = _deceleratingVelocity;
   }
-  return [self _scrollDirectionForVelocity:scrollVelocity];
+  
+  ASScrollDirection scrollDirection = [self _scrollDirectionForVelocity:scrollVelocity];
+  return ASScrollDirectionApplyTransform(scrollDirection, self.transform);
 }
 
 - (ASScrollDirection)_scrollDirectionForVelocity:(CGPoint)scrollVelocity

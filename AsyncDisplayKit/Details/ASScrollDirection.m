@@ -34,3 +34,30 @@ BOOL ASScrollDirectionContainsUp(ASScrollDirection scrollDirection) {
 BOOL ASScrollDirectionContainsDown(ASScrollDirection scrollDirection) {
   return (scrollDirection & ASScrollDirectionDown) != 0;
 }
+
+ASScrollDirection ASScrollDirectionInvertHorizontally(ASScrollDirection scrollDirection) {
+  if (scrollDirection == ASScrollDirectionRight) {
+    return ASScrollDirectionLeft;
+  } else if (scrollDirection == ASScrollDirectionLeft) {
+    return ASScrollDirectionRight;
+  }
+  return scrollDirection;
+}
+
+ASScrollDirection ASScrollDirectionInvertVertically(ASScrollDirection scrollDirection) {
+  if (scrollDirection == ASScrollDirectionUp) {
+    return ASScrollDirectionDown;
+  } else if (scrollDirection == ASScrollDirectionDown) {
+    return ASScrollDirectionUp;
+  }
+  return scrollDirection;
+}
+
+ASScrollDirection ASScrollDirectionApplyTransform(ASScrollDirection scrollDirection, CGAffineTransform transform) {
+  if ((transform.a < 0) && ASScrollDirectionContainsHorizontalDirection(scrollDirection)) {
+    return ASScrollDirectionInvertHorizontally(scrollDirection);
+  } else if ((transform.d < 0) && ASScrollDirectionContainsVerticalDirection(scrollDirection)) {
+    return ASScrollDirectionInvertVertically(scrollDirection);
+  }
+  return scrollDirection;
+}
