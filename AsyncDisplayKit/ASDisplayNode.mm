@@ -622,16 +622,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertTrue(_layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(_layout.size.height >= 0.0);
 
-  // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed to have a placeholder ready to go
-  // also if a node has no size, it should not have a placeholder
-  if (self.placeholderEnabled && [self _displaysAsynchronously] && _layout.size.width > 0.0 && _layout.size.height > 0.0) {
-    if (!_placeholderImage) {
-      _placeholderImage = [self placeholderImage];
-    }
-
-    if (_placeholderLayer) {
-      [self setupPlaceholderLayerContents];
-    }
+  // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed
+  // to have a placeholder ready to go. Also, if a node has no size it should not have a placeholder
+  if (self.placeholderEnabled && [self _displaysAsynchronously] &&
+      _layout.size.width > 0.0 && _layout.size.height > 0.0) {
+    [self __generatePlaceholder];
   }
 
   return _layout;
@@ -639,6 +634,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)calculatedLayoutDidChange
 {
+  // subclass override
+}
+
+- (void)__generatePlaceholder
+{
+  if (!_placeholderImage) {
+    _placeholderImage = [self placeholderImage];
+  }
+  
+  if (_placeholderLayer) {
+    [self setupPlaceholderLayerContents];
+  }
 }
 
 - (BOOL)displaysAsynchronously
@@ -819,7 +826,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
   if (CGRectEqualToRect(self.bounds, CGRectZero)) {
-    return;     // Performing layout on a zero-bounds view often results in frame calculations with negative sizes after applying margins, which will cause measureWithSizeRange: on subnodes to assert.
+    // Performing layout on a zero-bounds view often results in frame calculations
+    // with negative sizes after applying margins, which will cause
+    // measureWithSizeRange: on subnodes to assert.
+    return;
   }
   _placeholderLayer.frame = self.bounds;
   [self layout];
