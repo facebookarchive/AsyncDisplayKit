@@ -52,6 +52,9 @@ NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 #endif
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
+
+@property (assign, nonatomic) BOOL implicitNodeHierarchyManagement;
+
 @end
 
 @implementation ASDisplayNode
@@ -61,6 +64,17 @@ NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 @synthesize name = _name;
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
+
+static BOOL usesImplicitHierarchyManagement = FALSE;
+
++ (BOOL)usesImplicitHierarchyManagement {
+  return usesImplicitHierarchyManagement;
+}
+
++ (void)setUsesImplicitHierarchyManagement:(BOOL)enabled
+{
+  usesImplicitHierarchyManagement = enabled;
+}
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
@@ -1606,8 +1620,11 @@ static BOOL ShouldUseNewRenderingRange = YES;
       layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
-      return ASObjectIsEqual(layout, evaluatedLayout) == NO &&
-             [evaluatedLayout.layoutableObject isKindOfClass:[ASDisplayNode class]];
+      if ([[self class] usesImplicitHierarchyManagement]) {
+        return ASObjectIsEqual(layout, evaluatedLayout) == NO && [evaluatedLayout.layoutableObject isKindOfClass:[ASDisplayNode class]];
+      } else {
+        return [_subnodes containsObject:evaluatedLayout.layoutableObject];
+      }
     }];
   } else {
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,

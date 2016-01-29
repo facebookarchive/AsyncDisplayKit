@@ -94,7 +94,7 @@ extern BOOL CGPointIsNull(CGPoint point)
       }
     }
   }
-  
+
   return [ASLayout layoutWithLayoutableObject:_layoutableObject size:_size sublayouts:flattenedSublayouts];
 }
 
