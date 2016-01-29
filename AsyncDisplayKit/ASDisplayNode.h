@@ -38,6 +38,11 @@ typedef CALayer * _Nonnull(^ASDisplayNodeLayerBlock)();
 typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode * _Nonnull node);
 
 /**
+ * ASDisplayNode will / did render node content in context.
+ */
+typedef void (^ASDisplayNodeContextModifier)(_Nonnull CGContextRef context);
+
+/**
  Interface state is available on ASDisplayNode and ASViewController, and
  allows checking whether a node is in an interface situation where it is prudent to trigger certain
  actions: measurement, data fetching, display, and visibility (the latter for animations or other onscreen-only effects).

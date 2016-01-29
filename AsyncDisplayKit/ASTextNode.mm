@@ -35,13 +35,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 @interface ASTextNodeDrawParameters : NSObject
 
-- (instancetype)initWithRenderer:(ASTextKitRenderer *)renderer
-                      textOrigin:(CGPoint)textOrigin
-                 backgroundColor:(UIColor *)backgroundColor;
-
-@property (nonatomic, strong, readonly) ASTextKitRenderer *renderer;
-
-@property (nonatomic, assign, readonly) CGPoint textOrigin;
+@property (nonatomic, assign, readonly) CGRect bounds;
 
 @property (nonatomic, strong, readonly) UIColor *backgroundColor;
 
@@ -49,28 +43,14 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 @implementation ASTextNodeDrawParameters
 
-- (instancetype)initWithRenderer:(ASTextKitRenderer *)renderer
-                      textOrigin:(CGPoint)textOrigin
-                 backgroundColor:(UIColor *)backgroundColor
+- (instancetype)initWithBounds:(CGRect)bounds
+               backgroundColor:(UIColor *)backgroundColor
 {
   if (self = [super init]) {
-    _renderer = renderer;
-    _textOrigin = textOrigin;
+    _bounds = bounds;
     _backgroundColor = backgroundColor;
   }
   return self;
-}
-
-- (void)dealloc
-{
-  // Destruction of the layout managers/containers/text storage is quite
-  // expensive, and can take some time, so we dispatch onto a bg queue to
-  // actually dealloc.
-  __block ASTextKitRenderer *renderer = _renderer;
-  ASPerformBlockOnBackgroundThread(^{
-    renderer = nil;
-  });
-  _renderer = nil;
 }
 
 @end
@@ -242,11 +222,17 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Renderer Management
 
+//only safe to call on the main thread because self.bounds is only safe to call on the main thread one our node is loaded
 - (ASTextKitRenderer *)_renderer
+{
+  return [self _rendererWithBounds:self.bounds];
+}
+
+- (ASTextKitRenderer *)_rendererWithBounds:(CGRect)bounds
 {
   ASDN::MutexLocker l(_rendererLock);
   if (_renderer == nil) {
-    CGSize constrainedSize = _constrainedSize.width != -INFINITY ? _constrainedSize : self.bounds.size;
+    CGSize constrainedSize = _constrainedSize.width != -INFINITY ? _constrainedSize : bounds.size;
     _renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:[self _rendererAttributes]
                                                      constrainedSize:constrainedSize];
   }
@@ -435,13 +421,18 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Drawing
 
-+ (void)drawRect:(CGRect)bounds withParameters:(ASTextNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing
+- (void)drawRect:(CGRect)bounds withParameters:(ASTextNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing
 {
   CGContextRef context = UIGraphicsGetCurrentContext();
   ASDisplayNodeAssert(context, @"This is no good without a context.");
-
+  
   CGContextSaveGState(context);
-
+  
+  ASTextKitRenderer *renderer = [self _rendererWithBounds:parameters.bounds];
+  UIEdgeInsets shadowPadding = [self shadowPaddingWithRenderer:renderer];
+  CGPoint boundsOrigin = parameters.bounds.origin;
+  CGPoint textOrigin = CGPointMake(boundsOrigin.x - shadowPadding.left, boundsOrigin.y - shadowPadding.top);
+  
   // Fill background
   if (!isRasterizing) {
     UIColor *backgroundColor = parameters.backgroundColor;
@@ -450,28 +441,20 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
       UIRectFillUsingBlendMode(CGContextGetClipBoundingBox(context), kCGBlendModeCopy);
     }
   }
-
+  
   // Draw shadow
-  [[parameters.renderer shadower] setShadowInContext:context];
-
+  [[renderer shadower] setShadowInContext:context];
+  
   // Draw text
-  bounds.origin = parameters.textOrigin;
-  [parameters.renderer drawInContext:context bounds:bounds];
-
+  bounds.origin = textOrigin;
+  [renderer drawInContext:context bounds:bounds];
+  
   CGContextRestoreGState(context);
 }
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
-  CGRect bounds = self.bounds;
-  [self _invalidateRendererIfNeededForBoundsSize:bounds.size];
-
-  // Offset the text origin by any shadow padding
-  UIEdgeInsets shadowPadding = [self shadowPadding];
-  CGPoint textOrigin = CGPointMake(bounds.origin.x - shadowPadding.left, bounds.origin.y - shadowPadding.top);
-  return [[ASTextNodeDrawParameters alloc] initWithRenderer:[self _renderer]
-                                                 textOrigin:textOrigin
-                                            backgroundColor:self.backgroundColor];
+  return [[ASTextNodeDrawParameters alloc] initWithBounds:self.bounds backgroundColor:self.backgroundColor];
 }
 
 #pragma mark - Attributes
@@ -1031,9 +1014,15 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
+//only safe to call on main thread, because [self _renderer] is only safe to call on the main thread
 - (UIEdgeInsets)shadowPadding
 {
-  return [self _renderer].shadower.shadowPadding;
+  return [self shadowPaddingWithRenderer:[self _renderer]];
+}
+
+- (UIEdgeInsets)shadowPaddingWithRenderer:(ASTextKitRenderer *)renderer
+{
+  return renderer.shadower.shadowPadding;
 }
 
 #pragma mark - Truncation Message
