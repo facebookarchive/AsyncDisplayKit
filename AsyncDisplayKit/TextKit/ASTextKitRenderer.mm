@@ -103,8 +103,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
                                                   constrainedSize:shadowConstrainedSize
                                              layoutManagerFactory:attributes.layoutManagerFactory
                                             layoutManagerDelegate:attributes.layoutManagerDelegate];
-
-    [self truncater];
   }
   return _context;
 }
@@ -138,6 +136,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (void)_calculateSize
 {
+  [self truncater];
   if (_attributes.minimumScaleFactor < 1 && _attributes.minimumScaleFactor > 0) {
     [[self fontSizeAdjuster] adjustFontSize];
   }
