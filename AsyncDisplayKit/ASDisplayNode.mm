@@ -1606,7 +1606,8 @@ static BOOL ShouldUseNewRenderingRange = YES;
       layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
-      return [_subnodes containsObject:evaluatedLayout.layoutableObject];
+      return ASObjectIsEqual(layout, evaluatedLayout) == NO &&
+             [evaluatedLayout.layoutableObject isKindOfClass:[ASDisplayNode class]];
     }];
   } else {
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
