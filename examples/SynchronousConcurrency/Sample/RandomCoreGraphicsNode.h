@@ -9,8 +9,5 @@
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 @interface RandomCoreGraphicsNode : ASCellNode
-{
-  ASTextNode *_textNode;
-}
 
 @end

@@ -24,12 +24,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, readonly) ASInterfaceState interfaceState;
 
-
 // AsyncDisplayKit 2.0 BETA: This property is still being tested, but it allows
 // blocking as a view controller becomes visible to ensure no placeholders flash onscreen.
 // Refer to examples/SynchronousConcurrency, AsyncViewController.m
 @property (nonatomic, assign) BOOL neverShowPlaceholders;
-
 
 /**
  * The constrained size used to measure the backing node.
@@ -39,6 +37,10 @@ NS_ASSUME_NONNULL_BEGIN
  * backing node.
  */
 - (ASSizeRange)nodeConstrainedSize;
+
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize;
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize;
 
 @end
 

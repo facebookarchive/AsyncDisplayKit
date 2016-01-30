@@ -11,10 +11,13 @@
 #import "ASDimension.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
-@implementation ASViewController
-{
+@interface ASViewController () <ASDisplayNodeInterfaceDelegate> {
   BOOL _ensureDisplayed;
 }
+
+@end
+
+@implementation ASViewController
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -37,6 +40,7 @@
   ASDisplayNodeAssertNotNil(node, @"Node must not be nil");
   ASDisplayNodeAssertTrue(!node.layerBacked);
   _node = node;
+  node.interfaceDelegate = self;
   
   return self;
 }
@@ -80,6 +84,28 @@
 - (ASInterfaceState)interfaceState
 {
   return _node.interfaceState;
+}
+
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
+{
+  return nil;
+}
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  return nil;
+}
+
+#pragma mark - ASDisplayNodeDelegate
+
+- (ASLayout *)displayNode:(ASDisplayNode *)displayNode layoutThatFits:(ASSizeRange)constrainedSize
+{
+  return [self layoutThatFits:constrainedSize];
+}
+
+- (ASLayoutSpec *)displayNode:(ASDisplayNode *)displayNode layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  return [self layoutSpecThatFits:constrainedSize];
 }
 
 @end

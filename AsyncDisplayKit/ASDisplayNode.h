@@ -71,6 +71,16 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
   ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay | ASInterfaceStateVisible,
 };
 
+@protocol ASDisplayNodeInterfaceDelegate <NSObject>
+
+@optional
+
+- (ASLayout * _Nullable)displayNode:(ASDisplayNode * _Nonnull)displayNode layoutThatFits:(ASSizeRange)constrainedSize;
+
+- (ASLayoutSpec * _Nullable)displayNode:(ASDisplayNode * _Nonnull)displayNode layoutSpecThatFits:(ASSizeRange)constrainedSize;
+
+@end
+
 /**
  * Default drawing priority for display node
  */
@@ -213,6 +223,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, readonly) ASInterfaceState interfaceState;
 
+/**
+ * @abstract The display node's delegate for handling interface operations (ie. external layout, layoutSpec definition).
+ */
+@property (nonatomic, weak) id<ASDisplayNodeInterfaceDelegate> interfaceDelegate;
 
 /** @name Managing dimensions */
 
