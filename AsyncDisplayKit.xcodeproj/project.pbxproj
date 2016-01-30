@@ -477,6 +477,7 @@
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
 		DBC452DB1C5BF64600B16017 /* NSArray+Diffing.h in Headers */ = {isa = PBXBuildFile; fileRef = DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */; };
 		DBC452DC1C5BF64600B16017 /* NSArray+Diffing.m in Sources */ = {isa = PBXBuildFile; fileRef = DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */; };
+		DBC452DE1C5C6A6A00B16017 /* ArrayDiffingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DBC452DD1C5C6A6A00B16017 /* ArrayDiffingTests.m */; };
 		DE040EF91C2B40AC004692FF /* ASCollectionViewFlowLayoutInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DE0702FC1C3671E900D7DE62 /* libAsyncDisplayKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AC195D04C000B7D73C /* libAsyncDisplayKit.a */; };
 		DE6EA3221C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */; };
@@ -806,6 +807,7 @@
 		D785F6611A74327E00291744 /* ASScrollNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASScrollNode.m; sourceTree = "<group>"; };
 		DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+Diffing.h"; sourceTree = "<group>"; };
 		DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Diffing.m"; sourceTree = "<group>"; };
+		DBC452DD1C5C6A6A00B16017 /* ArrayDiffingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ArrayDiffingTests.m; sourceTree = "<group>"; };
 		DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASDisplayNode+FrameworkPrivate.h"; sourceTree = "<group>"; };
 		DE8BEABF1C2DF3FC00D57C12 /* ASDelegateProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDelegateProxy.h; sourceTree = "<group>"; };
 		DE8BEAC01C2DF3FC00D57C12 /* ASDelegateProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDelegateProxy.m; sourceTree = "<group>"; };
@@ -1004,6 +1006,7 @@
 		058D09C5195D04C000B7D73C /* AsyncDisplayKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				DBC452DD1C5C6A6A00B16017 /* ArrayDiffingTests.m */,
 				057D02C01AC0A66700C7AC3C /* AsyncDisplayKitTestHost */,
 				056D21501ABCEDA1001107EF /* ASSnapshotTestCase.h */,
 				05EA6FE61AC0966E00E35788 /* ASSnapshotTestCase.mm */,
@@ -1899,6 +1902,7 @@
 				058D0A3D195D057000B7D73C /* ASTextKitCoreTextAdditionsTests.m in Sources */,
 				058D0A40195D057000B7D73C /* ASTextNodeTests.m in Sources */,
 				058D0A41195D057000B7D73C /* ASTextNodeWordKernerTests.mm in Sources */,
+				DBC452DE1C5C6A6A00B16017 /* ArrayDiffingTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
