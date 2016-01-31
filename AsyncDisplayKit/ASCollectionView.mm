@@ -17,7 +17,6 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASInternalHelpers.h"
-#import "ASRangeController.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "_ASDisplayLayer.h"
 
@@ -241,6 +240,19 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
   }
   return _flowLayoutInspector;
+}
+
+- (ASInterfaceState)interfaceState
+{
+  ASCollectionNode *collectionNode = self.collectionNode;
+  if (collectionNode) {
+    return collectionNode.interfaceState;
+  } else {
+    // Until we can always create an associated ASCollectionNode without a retain cycle,
+    // we might be on our own to try to guess if we're visible.  The node normally
+    // handles this even if it is the root / directly added to the view hierarchy.
+    return (self.window != nil ? ASInterfaceStateVisible : ASInterfaceStateNone);
+  }
 }
 
 #pragma mark -
@@ -535,16 +547,16 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASScrollDirection scrollableDirections = [self scrollableDirections];
   
   if (ASScrollDirectionContainsHorizontalDirection(scrollableDirections)) { // Can scroll horizontally.
-    if (scrollVelocity.x >= 0) {
+    if (scrollVelocity.x > 0) {
       direction |= ASScrollDirectionRight;
-    } else {
+    } else if (scrollVelocity.x < 0) {
       direction |= ASScrollDirectionLeft;
     }
   }
   if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) { // Can scroll vertically.
-    if (scrollVelocity.y >= 0) {
+    if (scrollVelocity.y > 0) {
       direction |= ASScrollDirectionDown;
-    } else {
+    } else if (scrollVelocity.y < 0) {
       direction |= ASScrollDirectionUp;
     }
   }
@@ -829,15 +841,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
 {
-  ASCollectionNode *collectionNode = self.collectionNode;
-  if (collectionNode) {
-    return self.collectionNode.interfaceState;
-  } else {
-    // Until we can always create an associated ASCollectionNode without a retain cycle,
-    // we might be on our own to try to guess if we're visible.  The node normally
-    // handles this even if it is the root / directly added to the view hierarchy.
-    return (self.window != nil ? ASInterfaceStateVisible : ASInterfaceStateNone);
-  }
+  return self.interfaceState;
 }
 
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
