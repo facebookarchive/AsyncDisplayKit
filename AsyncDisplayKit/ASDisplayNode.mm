@@ -639,7 +639,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   if (_placeholderLayer) {
-    [self setupPlaceholderLayerContents];
+    [self _setupPlaceholderLayerContents];
   }
 }
 
@@ -2035,14 +2035,14 @@ static BOOL ShouldUseNewRenderingRange = YES;
   if (_placeholderImage && _placeholderLayer && self.layer.contents == nil) {
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
-    [self setupPlaceholderLayerContents];
+    [self _setupPlaceholderLayerContents];
     _placeholderLayer.opacity = 1.0;
     [CATransaction commit];
     [self.layer addSublayer:_placeholderLayer];
   }
 }
 
-- (void)setupPlaceholderLayerContents
+- (void)_setupPlaceholderLayerContents
 {
   BOOL stretchable = !UIEdgeInsetsEqualToEdgeInsets(_placeholderImage.capInsets, UIEdgeInsetsZero);
   if (stretchable) {
