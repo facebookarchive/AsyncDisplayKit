@@ -84,7 +84,7 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
     }
 
     ViewController.fetchDataWithCompletion { resultCount in
-      let action = Action.EndBatchFetch(resultCount: 20)
+      let action = Action.EndBatchFetch(resultCount: resultCount)
       let oldState = self.state
       self.state = ViewController.handleAction(action, fromState: oldState)
       self.renderDiff(oldState)
