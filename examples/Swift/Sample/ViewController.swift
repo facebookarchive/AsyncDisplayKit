@@ -15,9 +15,9 @@ import AsyncDisplayKit
 final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate {
 
   struct State {
-    var rowCount: Int
-    var showingSpinner: Bool
-    static let empty = State(rowCount: 20, showingSpinner: false)
+    var itemCount: Int
+    var fetchingMore: Bool
+    static let empty = State(itemCount: 20, fetchingMore: false)
   }
 
   enum Action {
@@ -48,8 +48,11 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
   // MARK: ASTableView data source and delegate.
 
   func tableView(tableView: ASTableView, nodeForRowAtIndexPath indexPath: NSIndexPath) -> ASCellNode {
-    NSLog("Number of rows %d", tableView.numberOfRowsInSection(0))
-    if state.showingSpinner && indexPath.row == tableView.numberOfRowsInSection(0) - 1 {
+    // Should read the row count directly from table view but
+    // https://github.com/facebook/AsyncDisplayKit/issues/1159
+    let rowCount = self.tableView(tableView, numberOfRowsInSection: 0)
+
+    if state.fetchingMore && indexPath.row == rowCount - 1 {
       return TailLoadingCellNode()
     }
 
@@ -64,40 +67,39 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
   }
 
   func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    var count = state.rowCount
-    if state.showingSpinner {
+    var count = state.itemCount
+    if state.fetchingMore {
       count += 1
     }
     return count
   }
 
   func tableView(tableView: ASTableView, willBeginBatchFetchWithContext context: ASBatchContext) {
-    context.cancelBatchFetching()
+    /// This call will come in on a background thread. Switch to main
+    /// to add our spinner, then fire off our fetch.
     dispatch_async(dispatch_get_main_queue()) {
       let oldState = self.state
       self.state = ViewController.handleAction(.BeginBatchFetch, fromState: oldState)
-      self.render(oldState)
+      self.renderDiff(oldState)
     }
-    return;
 
-    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(NSTimeInterval(NSEC_PER_SEC) * 3))
-    dispatch_after(time, dispatch_get_main_queue()) {
+    ViewController.fetchDataWithCompletion { resultCount in
       let action = Action.EndBatchFetch(resultCount: 20)
       let oldState = self.state
       self.state = ViewController.handleAction(action, fromState: oldState)
-      self.render(oldState)
-    	context.completeBatchFetching(true)
+      self.renderDiff(oldState)
+      context.completeBatchFetching(true)
     }
   }
 
-  func render(oldState: State) {
+  private func renderDiff(oldState: State) {
     let tableView = tableNode.view
     tableView.beginUpdates()
 
     // Add or remove items
-    let rowCountChange = state.rowCount - oldState.rowCount
+    let rowCountChange = state.itemCount - oldState.itemCount
     if rowCountChange > 0 {
-      let indexPaths = (oldState.rowCount..<state.rowCount).map { index in
+      let indexPaths = (oldState.itemCount..<state.itemCount).map { index in
         NSIndexPath(forRow: index, inSection: 0)
       }
       tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .None)
@@ -106,27 +108,37 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
     }
 
     // Add or remove spinner.
-    if state.showingSpinner && !oldState.showingSpinner {
-      if state.showingSpinner {
+    if state.fetchingMore != oldState.fetchingMore {
+      if state.fetchingMore {
         // Add spinner.
-        let spinnerIndexPath = NSIndexPath(forRow: state.rowCount, inSection: 0)
+        let spinnerIndexPath = NSIndexPath(forRow: state.itemCount, inSection: 0)
         tableView.insertRowsAtIndexPaths([ spinnerIndexPath ], withRowAnimation: .None)
       } else {
         // Remove spinner.
-        let spinnerIndexPath = NSIndexPath(forRow: oldState.rowCount, inSection: 0)
+        let spinnerIndexPath = NSIndexPath(forRow: oldState.itemCount, inSection: 0)
         tableView.deleteRowsAtIndexPaths([ spinnerIndexPath ], withRowAnimation: .None)
       }
     }
     tableView.endUpdatesAnimated(false, completion: nil)
   }
 
-  static func handleAction(action: Action, var fromState state: State) -> State {
+  /// (Pretend) fetches some new items and calls the
+  /// completion handler on the main thread.
+  private static func fetchDataWithCompletion(completion: (Int) -> Void) {
+    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(NSTimeInterval(NSEC_PER_SEC) * 0.5))
+    dispatch_after(time, dispatch_get_main_queue()) {
+      let resultCount = Int(arc4random_uniform(20))
+      completion(resultCount)
+    }
+  }
+
+  private static func handleAction(action: Action, var fromState state: State) -> State {
     switch action {
     case .BeginBatchFetch:
-      state.showingSpinner = true
+      state.fetchingMore = true
     case let .EndBatchFetch(resultCount):
-      state.rowCount += resultCount
-      state.showingSpinner = false
+      state.itemCount += resultCount
+      state.fetchingMore = false
     }
     return state
   }
