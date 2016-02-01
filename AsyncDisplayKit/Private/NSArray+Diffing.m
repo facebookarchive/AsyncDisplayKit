@@ -12,13 +12,20 @@
 
 - (void)asdk_diffWithArray:(NSArray *)array insertions:(NSIndexSet **)insertions deletions:(NSIndexSet **)deletions
 {
-  NSIndexSet *commonIndexes = [self _asdk_commonIndexesWithArray:array];
+  [self asdk_diffWithArray:array insertions:insertions deletions:deletions compareBlock:^BOOL(id lhs, id rhs) {
+    return [lhs isEqual:rhs];
+  }];
+}
+
+- (void)asdk_diffWithArray:(NSArray *)array insertions:(NSIndexSet **)insertions deletions:(NSIndexSet **)deletions compareBlock:(BOOL (^)(id lhs, id rhs))comparison
+{
+  NSIndexSet *commonIndexes = [self _asdk_commonIndexesWithArray:array compareBlock:comparison];
   
   if (insertions) {
     NSArray *commonObjects = [self objectsAtIndexes:commonIndexes];
     NSMutableIndexSet *insertionIndexes = [NSMutableIndexSet indexSet];
     for (NSInteger i = 0, j = 0; i < commonObjects.count || j < array.count;) {
-      if (i < commonObjects.count && j < array.count && [commonObjects[i] isEqual:array[j]]) {
+      if (i < commonObjects.count && j < array.count && comparison(commonObjects[i], array[j])) {
         i++; j++;
       } else {
         [insertionIndexes addIndex:j];
@@ -39,7 +46,7 @@
   }
 }
 
-- (NSIndexSet *)_asdk_commonIndexesWithArray:(NSArray *)array
+- (NSIndexSet *)_asdk_commonIndexesWithArray:(NSArray *)array compareBlock:(BOOL (^)(id lhs, id rhs))comparison
 {
   NSInteger lengths[self.count+1][array.count+1];
   for (NSInteger i = self.count; i >= 0; i--) {
@@ -56,7 +63,7 @@
   
   NSMutableIndexSet *common = [NSMutableIndexSet indexSet];
   for (NSInteger i = 0, j = 0; i < self.count && j < array.count;) {
-    if ([self[i] isEqual:array[j]]) {
+    if (comparison(self[i], array[j])) {
       [common addIndex:i];
       i++; j++;
     } else if (lengths[i+1][j] >= lengths[i][j+1]) {
