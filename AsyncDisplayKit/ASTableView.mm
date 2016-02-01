@@ -831,6 +831,25 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
+- (void)rangeController:(ASRangeController *)rangeController didReloadNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView reloadRows:%ld rows", indexPaths.count);
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
+  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    [super reloadRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
+  });
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
+  }
+}
+
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();

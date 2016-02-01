@@ -267,6 +267,14 @@
   });
 }
 
+- (void)dataController:(ASDataController *)dataController didReloadNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions{
+  ASDisplayNodeAssert(nodes.count == indexPaths.count, @"Invalid index path");
+  ASPerformBlockOnMainThread(^{
+    _rangeIsValid = NO;
+    [_delegate rangeController:self didReloadNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+  });
+}
+
 - (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASPerformBlockOnMainThread(^{
