@@ -597,13 +597,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASDN::MutexLocker l(_propertyLock);
-  return [self __measureWithSizeRange:constrainedSize];
-}
-
-- (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize
-{
   ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
 
   if (![self __shouldSize])
     return nil;
