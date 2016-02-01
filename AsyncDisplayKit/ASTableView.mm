@@ -580,7 +580,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASScrollDirection direction = ASScrollDirectionNone;
   if (velocity.y > 0) {
     direction = ASScrollDirectionDown;
-  } else {
+  } else if (velocity.y < 0) {
     direction = ASScrollDirectionUp;
   }
   return direction;
