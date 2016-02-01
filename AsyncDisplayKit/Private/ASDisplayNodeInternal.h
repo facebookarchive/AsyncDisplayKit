@@ -59,6 +59,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   ASSizeRange _constrainedSize;
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
+  NSArray<ASDisplayNode *> *_insertedSubnodes;
+  NSArray<ASDisplayNode *> *_deletedSubnodes;
 
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
@@ -131,8 +133,11 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 - (BOOL)__shouldLoadViewOrLayer;
 - (BOOL)__shouldSize;
 
-// Invoked by a call to setNeedsLayout to the underlying view
+/**
+ Invoked by a call to setNeedsLayout to the underlying view
+ */
 - (void)__setNeedsLayout;
+
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 

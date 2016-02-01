@@ -608,7 +608,20 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   //  - we haven't already
   //  - the constrained size range is different
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
-    _layout = [self calculateLayoutThatFits:constrainedSize];
+    ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
+    
+    if (_layout) {
+      NSIndexSet *insertions, *deletions;
+      [_layout.sublayouts asdk_diffWithArray:newLayout.sublayouts insertions:&insertions deletions:&deletions];
+      _insertedSubnodes = [self _filterLayouts:newLayout.sublayouts withIndexes:insertions];
+      _deletedSubnodes = [self _filterLayouts:newLayout.sublayouts withIndexes:deletions];
+    } else {
+      NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.sublayouts count])];
+      _insertedSubnodes = [self _filterLayouts:newLayout.sublayouts withIndexes:indexes];
+      _deletedSubnodes = @[];
+    }
+    
+    _layout = newLayout;
     _constrainedSize = constrainedSize;
     _flags.isMeasured = YES;
     [self calculatedLayoutDidChange];
@@ -626,6 +639,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   return _layout;
+}
+
+- (NSArray<ASDisplayNode *> *)_filterLayouts:(NSArray<ASLayout *> *)layouts withIndexes:(NSIndexSet *)indexes
+{
+  NSMutableArray<ASDisplayNode *> *result = [NSMutableArray array];
+  [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+    ASDisplayNode *node = (ASDisplayNode *)layouts[idx].layoutableObject;
+    ASDisplayNodeAssertNotNil(node, @"A flattened layout must consist exclusively of node sublayouts");
+    [result addObject:node];
+  }];
+  return result;
 }
 
 - (void)calculatedLayoutDidChange
@@ -1998,7 +2022,9 @@ static BOOL ShouldUseNewRenderingRange = YES;
   ASDisplayNode *subnode = nil;
   CGRect subnodeFrame = CGRectZero;
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
-    ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.  self = %@, subnodes = %@", self, _subnodes);
+    if (![[self class] usesImplicitHierarchyManagement]) {
+      ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.  self = %@, subnodes = %@", self, _subnodes);
+    }
     CGPoint adjustedOrigin = subnodeLayout.position;
     if (isfinite(adjustedOrigin.x) == NO) {
       ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
@@ -2023,6 +2049,10 @@ static BOOL ShouldUseNewRenderingRange = YES;
     
     subnode = ((ASDisplayNode *)subnodeLayout.layoutableObject);
     [subnode setFrame:subnodeFrame];
+  }
+  
+  for (ASDisplayNode *node in _insertedSubnodes) {
+    [self addSubnode:node];
   }
 }
 
