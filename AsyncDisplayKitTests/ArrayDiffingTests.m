@@ -57,8 +57,7 @@
   ];
   
   for (NSArray *test in tests) {
-    NSMutableIndexSet *insertions = [NSMutableIndexSet indexSet];
-    NSMutableIndexSet *deletions = [NSMutableIndexSet indexSet];
+    NSIndexSet *insertions, *deletions;
     [test[0] asdk_diffWithArray:test[1] insertions:&insertions deletions:&deletions];
     for (NSNumber *index in (NSArray *)test[2]) {
       XCTAssert([insertions containsIndex:[index integerValue]]);

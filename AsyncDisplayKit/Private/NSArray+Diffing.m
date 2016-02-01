@@ -10,28 +10,32 @@
 
 @implementation NSArray (Diffing)
 
-- (void)asdk_diffWithArray:(NSArray *)array insertions:(NSMutableIndexSet **)insertions deletions:(NSMutableIndexSet **)deletions
+- (void)asdk_diffWithArray:(NSArray *)array insertions:(NSIndexSet **)insertions deletions:(NSIndexSet **)deletions
 {
   NSIndexSet *commonIndexes = [self _asdk_commonIndexesWithArray:array];
   
   if (insertions) {
     NSArray *commonObjects = [self objectsAtIndexes:commonIndexes];
+    NSMutableIndexSet *insertionIndexes = [NSMutableIndexSet indexSet];
     for (NSInteger i = 0, j = 0; i < commonObjects.count || j < array.count;) {
       if (i < commonObjects.count && j < array.count && [commonObjects[i] isEqual:array[j]]) {
         i++; j++;
       } else {
-        [*insertions addIndex:j];
+        [insertionIndexes addIndex:j];
         j++;
       }
     }
+    *insertions = insertionIndexes;
   }
   
   if (deletions) {
+    NSMutableIndexSet *deletionIndexes = [NSMutableIndexSet indexSet];
     for (NSInteger i = 0; i < self.count; i++) {
       if (![commonIndexes containsIndex:i]) {
-        [*deletions addIndex:i];
+        [deletionIndexes addIndex:i];
       }
     }
+    *deletions = deletionIndexes;
   }
 }
 

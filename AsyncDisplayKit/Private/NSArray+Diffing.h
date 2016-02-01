@@ -13,6 +13,6 @@
 /**
  * Uses a bottom-up memoized longest common subsequence solution to identify differences. Runs in O(mn) complexity.
  */
-- (void)asdk_diffWithArray:(NSArray *)array insertions:(NSMutableIndexSet **)insertions deletions:(NSMutableIndexSet **)deletions;
+- (void)asdk_diffWithArray:(NSArray *)array insertions:(NSIndexSet **)insertions deletions:(NSIndexSet **)deletions;
 
 @end

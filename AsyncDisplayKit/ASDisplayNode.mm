@@ -21,6 +21,7 @@
 #import "_ASCoreAnimationExtras.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
+#import "NSArray+Diffing.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
