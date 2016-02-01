@@ -169,6 +169,19 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
+ * Called for nodes reload.
+ *
+ * @param rangeController Sender.
+ *
+ * @param nodes Inserted nodes.
+ *
+ * @param indexPaths Index path of inserted nodes.
+ *
+ * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
+ */
+- (void)rangeController:(ASRangeController *)rangeController didReloadNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+/**
  * Called for section insertion.
  *
  * @param rangeController Sender.

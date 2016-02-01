@@ -40,6 +40,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   
   BOOL _asyncDataFetchingEnabled;
   BOOL _delegateDidInsertNodes;
+  BOOL _delegateDidReloadNodes;
   BOOL _delegateDidDeleteNodes;
   BOOL _delegateDidInsertSections;
   BOOL _delegateDidDeleteSections;
@@ -90,6 +91,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   // Interrogate our delegate to understand its capabilities, optimizing away expensive respondsToSelector: calls later.
   _delegateDidInsertNodes     = [_delegate respondsToSelector:@selector(dataController:didInsertNodes:atIndexPaths:withAnimationOptions:)];
   _delegateDidDeleteNodes     = [_delegate respondsToSelector:@selector(dataController:didDeleteNodes:atIndexPaths:withAnimationOptions:)];
+  _delegateDidReloadNodes     = [_delegate respondsToSelector:@selector(dataController:didReloadNodes:atIndexPaths:withAnimationOptions:)];
   _delegateDidInsertSections  = [_delegate respondsToSelector:@selector(dataController:didInsertSections:atIndexSet:withAnimationOptions:)];
   _delegateDidDeleteSections  = [_delegate respondsToSelector:@selector(dataController:didDeleteSectionsAtIndexSet:withAnimationOptions:)];
 }
@@ -110,6 +112,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)batchLayoutNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
 {
+  if (indexPaths.count == 0)
+      return;
+
   NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
   
   // Processing in batches
@@ -240,6 +245,17 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
+- (void)reloadNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths withUpdatedNodes:(NSArray *)updatedNodes completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
+{
+  if (indexPaths.count == 0)
+    return;
+
+  [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
+  [self batchLayoutNodes:updatedNodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
+    [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:completionBlock];
+  }];
+}
+
 - (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSArray *sections, NSIndexSet *indexSet))completionBlock
 {
   if (indexSet.count == 0)
@@ -302,6 +318,15 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   [self deleteNodesOfKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
     if (_delegateDidDeleteNodes)
       [_delegate dataController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+  }];
+}
+
+
+- (void)_reloadNodesAtIndexPaths:(NSArray *)indexPaths withUpdatedNodes:(NSArray *)updatedNodes withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  [self reloadNodesOfKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths withUpdatedNodes:updatedNodes completion:^(NSArray *nodes, NSArray *indexPaths) {
+    if (_delegateDidReloadNodes)
+      [_delegate dataController:self didReloadNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   }];
 }
 
@@ -647,11 +672,37 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes[ASDataControllerRowNodeKind], sections);
         
         LOG(@"Edit Transaction - reloadSections: updatedIndexPaths: %@, indexPaths: %@, _editingNodes: %@", updatedIndexPaths, indexPaths, ASIndexPathsForMultidimensionalArray(_editingNodes[ASDataControllerRowNodeKind]));
-        
-        [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-        
-        // reinsert the elements
-        [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
+
+          NSMutableSet *oldPaths = [NSMutableSet setWithArray:indexPaths];
+
+          NSMutableArray *insertedNodes = [[NSMutableArray alloc] init];
+          NSMutableArray *reloadedNodes = [[NSMutableArray alloc] init];
+          NSMutableArray *insertedIndexPaths = [[NSMutableArray alloc] init];
+          NSMutableArray *reloadedIndexPaths = [[NSMutableArray alloc] init];
+
+          for (int i = 0; i < updatedNodes.count; i++ ) {
+              NSIndexPath *path = updatedIndexPaths[i];
+              NSIndexPath *node = updatedNodes[i];
+              if ([oldPaths containsObject:path]) {
+                  [oldPaths removeObject:path];
+                  [reloadedIndexPaths addObject:path];
+                  [reloadedNodes addObject:node];
+              } else {
+                  [insertedIndexPaths addObject:path];
+                  [insertedNodes addObject:node];
+              }
+          }
+
+          NSArray *deletedIndexPath = [oldPaths allObjects];
+
+          // reload existing nodes
+          [self _reloadNodesAtIndexPaths:reloadedIndexPaths withUpdatedNodes:reloadedNodes withAnimationOptions:animationOptions];
+
+          // insert new nodes
+          [self _batchLayoutNodes:insertedNodes atIndexPaths:insertedIndexPaths withAnimationOptions:animationOptions];
+
+          // delete nodes not in sections
+          [self _deleteNodesAtIndexPaths:deletedIndexPath withAnimationOptions:animationOptions];
       }];
     }];
   }];
@@ -805,8 +856,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
-        [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-        [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+        [self _reloadNodesAtIndexPaths:indexPaths withUpdatedNodes:nodes withAnimationOptions:animationOptions];
       }];
     }];
   }];
