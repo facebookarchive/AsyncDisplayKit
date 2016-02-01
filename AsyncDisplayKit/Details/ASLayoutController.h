@@ -25,17 +25,22 @@ typedef struct {
 
 /**
  * Tuning parameters for the range.
- *
- * Defaults to a trailing buffer of one screenful and a leading buffer of two screenfuls.
  */
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
 
+- (void)setMinimumTuningParameters:(ASRangeTuningParameters)minimumTuningParameters forRangeType:(ASLayoutRangeType)rangeType;
+
+- (ASRangeTuningParameters)minimumTuningParametersForRangeType:(ASLayoutRangeType)rangeType;
+
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType isFullRange:(BOOL)isFullRange;
+
 // FIXME: This method can be removed once ASRangeControllerBeta becomes the main version.
+// TODO: Now that it is the main version, can we remove this now?
 - (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray<NSIndexPath *> *)indexPaths rangeType:(ASLayoutRangeType)rangeType;
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType;
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange;
 
 @optional
 

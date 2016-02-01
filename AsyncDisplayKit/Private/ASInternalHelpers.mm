@@ -68,7 +68,6 @@ void ASPerformBlockOnBackgroundThread(void (^block)())
   }
 }
 
-
 CGFloat ASScreenScale()
 {
   static CGFloat _scale;

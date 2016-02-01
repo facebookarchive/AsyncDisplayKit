@@ -24,6 +24,7 @@
   BOOL _layoutControllerImplementsSetVisibleIndexPaths;
   ASScrollDirection _scrollDirection;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
+  BOOL _didUseFullRange;
 }
 
 @end
@@ -105,26 +106,28 @@
   NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
-  
-  if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
-    // If we are already visible, get busy!  Better get started on preloading before the user scrolls more...
-    fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData];
+  BOOL selfIsVisible = (ASInterfaceStateIncludesVisible(selfInterfaceState));
+  BOOL selfIsScrolling = (_scrollDirection != ASScrollDirectionNone);
+  // If we are already visible and scrolling, get busy!  Better get started on preloading before the user scrolls more...
+  // If we used full range, don't switch to minimum range now. That will destroy all the hard work done before.
+  BOOL shouldUseFullRange = ((selfIsVisible && selfIsScrolling) || _didUseFullRange);
 
-    ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeFetchData];
-    ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeDisplay];
-    if (parametersDisplay.leadingBufferScreenfuls == parametersFetchData.leadingBufferScreenfuls &&
-        parametersDisplay.trailingBufferScreenfuls == parametersFetchData.trailingBufferScreenfuls) {
-      displayIndexPaths = fetchDataIndexPaths;
-    } else {
-      displayIndexPaths   = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay];
-    }
-  
-    // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
-    // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
-    // This means that during iteration, we will first visit visible, then display, then fetch data nodes.
-    [allIndexPaths unionSet:displayIndexPaths];
-    [allIndexPaths unionSet:fetchDataIndexPaths];
+  fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData shouldUseFullRange:shouldUseFullRange];
+
+  ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeDisplay isFullRange:shouldUseFullRange];
+  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeFetchData isFullRange:shouldUseFullRange];
+  if (parametersDisplay.leadingBufferScreenfuls == parametersFetchData.leadingBufferScreenfuls &&
+      parametersDisplay.trailingBufferScreenfuls == parametersFetchData.trailingBufferScreenfuls) {
+    displayIndexPaths = fetchDataIndexPaths;
+  } else {
+    displayIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay shouldUseFullRange:shouldUseFullRange];
   }
+  
+  // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
+  // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
+  // This means that during iteration, we will first visit visible, then display, then fetch data nodes.
+  [allIndexPaths unionSet:displayIndexPaths];
+  [allIndexPaths unionSet:fetchDataIndexPaths];
   
   // Add anything we had applied interfaceState to in the last update, but is no longer in range, so we can clear any
   // range flags it still has enabled.  Most of the time, all but a few elements are equal; a large programmatic
@@ -133,6 +136,7 @@
   NSSet<NSIndexPath *> *allCurrentIndexPaths = [[allIndexPaths set] copy];
   [allIndexPaths unionSet:_allPreviousIndexPaths];
   _allPreviousIndexPaths = allCurrentIndexPaths;
+  _didUseFullRange = shouldUseFullRange;
   
   if (!_rangeIsValid) {
     [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];

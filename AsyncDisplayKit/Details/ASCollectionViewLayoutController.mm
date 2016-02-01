@@ -66,9 +66,9 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return self;
 }
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange
 {
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType];
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType isFullRange:shouldUseFullRange];
   ASRangeGeometry rangeGeometry = [self rangeGeometryWithScrollDirection:scrollDirection tuningParameters:tuningParameters];
   _updateRangeBoundsIndexedByRangeType[rangeType] = rangeGeometry.updateBounds;
   return [self indexPathsForItemsWithinRangeBounds:rangeGeometry.rangeBounds];
@@ -133,9 +133,9 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 
 @implementation ASCollectionViewLayoutControllerBeta
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange
 {
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType];
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType isFullRange:shouldUseFullRange];
   CGRect rangeBounds = [self rangeBoundsWithScrollDirection:scrollDirection rangeTuningParameters:tuningParameters];
   return [self indexPathsForItemsWithinRangeBounds:rangeBounds];
 }
@@ -163,21 +163,6 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   }
   
   return CGRectExpandToRangeWithScrollableDirections(rect, tuningParameters, _scrollableDirections, scrollDirection);
-}
-
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
-{
-    BOOL isVisible = ASInterfaceStateIncludesVisible(_collectionView.interfaceState);
-    BOOL isScrolling = (_collectionView.scrollDirection != ASScrollDirectionNone);
-    // When the collecion view is not visible or not scrolling, make display range only as big as visible range.
-    // This reduce early creation of views and layers.
-    if (!isVisible || !isScrolling) {
-        if (rangeType == ASLayoutRangeTypeDisplay) {
-            return [super tuningParametersForRangeType:ASLayoutRangeTypeVisible];
-        }
-    }
-    
-    return [super tuningParametersForRangeType:rangeType];
 }
 
 @end
