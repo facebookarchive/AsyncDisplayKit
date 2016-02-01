@@ -13,6 +13,7 @@
 		6C5053DB19EE266A00E385DE /* Default-667h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C5053D919EE266A00E385DE /* Default-667h@2x.png */; };
 		6C5053DC19EE266A00E385DE /* Default-736h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C5053DA19EE266A00E385DE /* Default-736h@3x.png */; };
 		92E46E91A7D47AEC5B2B2F55 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC29F18AE7C8C204A5CD4F2 /* Pods.framework */; };
+		CCB01CAB1C5FEA6E00CA64C4 /* TailLoadingCellNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB01CAA1C5FEA6E00CA64C4 /* TailLoadingCellNode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		6C5053DA19EE266A00E385DE /* Default-736h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-736h@3x.png"; sourceTree = SOURCE_ROOT; };
 		7FC29F18AE7C8C204A5CD4F2 /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		841652076B3E9351337AA7C7 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		CCB01CAA1C5FEA6E00CA64C4 /* TailLoadingCellNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TailLoadingCellNode.swift; sourceTree = "<group>"; };
 		E3EE87D12CE3EF73FAE2EF02 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -64,6 +66,7 @@
 		050E7C7019D22E19004363C2 /* Sample */ = {
 			isa = PBXGroup;
 			children = (
+				CCB01CAA1C5FEA6E00CA64C4 /* TailLoadingCellNode.swift */,
 				050E7C7319D22E19004363C2 /* AppDelegate.swift */,
 				050E7C7519D22E19004363C2 /* ViewController.swift */,
 				050E7C7119D22E19004363C2 /* Supporting Files */,
@@ -130,7 +133,7 @@
 			attributes = {
 				LastSwiftMigration = 0700;
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
 					050E7C6D19D22E19004363C2 = {
@@ -222,6 +225,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCB01CAB1C5FEA6E00CA64C4 /* TailLoadingCellNode.swift in Sources */,
 				050E7C7619D22E19004363C2 /* ViewController.swift in Sources */,
 				050E7C7419D22E19004363C2 /* AppDelegate.swift in Sources */,
 			);
@@ -250,6 +254,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -314,6 +319,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Sample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.AsyncDisplayKit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -325,6 +331,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Sample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.AsyncDisplayKit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

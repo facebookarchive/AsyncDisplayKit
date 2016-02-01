@@ -165,28 +165,24 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 
 - (void)tableView:(UITableView *)tableView willBeginBatchFetchWithContext:(ASBatchContext *)context
 {
-  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    sleep(1);
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-      // populate a new array of random-sized kittens
-      NSArray *moarKittens = [self createLitterWithSize:kLitterBatchSize];
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    // populate a new array of random-sized kittens
+    NSArray *moarKittens = [self createLitterWithSize:kLitterBatchSize];
 
-      NSMutableArray *indexPaths = [[NSMutableArray alloc] init];
-        
-      // find number of kittens in the data source and create their indexPaths
-      NSInteger existingRows = _kittenDataSource.count + 1;
-        
-      for (NSInteger i = 0; i < moarKittens.count; i++) {
-        [indexPaths addObject:[NSIndexPath indexPathForRow:existingRows + i inSection:0]];
-      }
+    NSMutableArray *indexPaths = [[NSMutableArray alloc] init];
+      
+    // find number of kittens in the data source and create their indexPaths
+    NSInteger existingRows = _kittenDataSource.count + 1;
+      
+    for (NSInteger i = 0; i < moarKittens.count; i++) {
+      [indexPaths addObject:[NSIndexPath indexPathForRow:existingRows + i inSection:0]];
+    }
 
-      // add new kittens to the data source & notify table of new indexpaths
-      [_kittenDataSource addObjectsFromArray:moarKittens];
-      [tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
+    // add new kittens to the data source & notify table of new indexpaths
+    [_kittenDataSource addObjectsFromArray:moarKittens];
+    [tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
 
-      [context completeBatchFetching:YES];
-    });
+    [context completeBatchFetching:YES];
   });
 }
 
