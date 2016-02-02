@@ -98,7 +98,8 @@ NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 
 static BOOL usesImplicitHierarchyManagement = FALSE;
 
-+ (BOOL)usesImplicitHierarchyManagement {
++ (BOOL)usesImplicitHierarchyManagement
+{
   return usesImplicitHierarchyManagement;
 }
 
@@ -645,11 +646,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       [_layout.sublayouts asdk_diffWithArray:newLayout.sublayouts insertions:&insertions deletions:&deletions compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
         return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
       }];
-      _insertedSubnodes = [self _filterSublayouts:newLayout.sublayouts withIndexes:insertions];
-      _deletedSubnodes = [self _filterSublayouts:_layout.sublayouts withIndexes:deletions];
+      _insertedSubnodes = [self _filterNodesInLayouts:newLayout.sublayouts withIndexes:insertions];
+      _deletedSubnodes = [self _filterNodesInLayouts:_layout.sublayouts withIndexes:deletions];
     } else {
       NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.sublayouts count])];
-      _insertedSubnodes = [self _filterSublayouts:newLayout.sublayouts withIndexes:indexes];
+      _insertedSubnodes = [self _filterNodesInLayouts:newLayout.sublayouts withIndexes:indexes];
       _deletedSubnodes = @[];
     }
 
@@ -667,13 +668,19 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // to have a placeholder ready to go. Also, if a node has no size it should not have a placeholder
   if (self.placeholderEnabled && [self _displaysAsynchronously] &&
       _layout.size.width > 0.0 && _layout.size.height > 0.0) {
-    [self __generatePlaceholder];
+    if (!_placeholderImage) {
+      _placeholderImage = [self placeholderImage];
+    }
+    
+    if (_placeholderLayer) {
+      [self _setupPlaceholderLayerContents];
+    }
   }
 
   return _layout;
 }
 
-- (NSArray<_ASDisplayNodePosition *> *)_filterSublayouts:(NSArray<ASLayout *> *)layouts withIndexes:(NSIndexSet *)indexes
+- (NSArray<_ASDisplayNodePosition *> *)_filterNodesInLayouts:(NSArray<ASLayout *> *)layouts withIndexes:(NSIndexSet *)indexes
 {
   NSMutableArray<_ASDisplayNodePosition *> *result = [NSMutableArray array];
   [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
@@ -687,17 +694,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)calculatedLayoutDidChange
 {
   // subclass override
-}
-
-- (void)__generatePlaceholder
-{
-  if (!_placeholderImage) {
-    _placeholderImage = [self placeholderImage];
-  }
-  
-  if (_placeholderLayer) {
-    [self _setupPlaceholderLayerContents];
-  }
 }
 
 - (BOOL)displaysAsynchronously
@@ -2055,7 +2051,7 @@ static BOOL ShouldUseNewRenderingRange = YES;
   CGRect subnodeFrame = CGRectZero;
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
     if (![[self class] usesImplicitHierarchyManagement]) {
-      ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.  self = %@, subnodes = %@", self, _subnodes);
+      ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Sublayouts must only contain subnodes' layout.  self = %@, subnodes = %@", self, _subnodes);
     }
     CGPoint adjustedOrigin = subnodeLayout.position;
     if (isfinite(adjustedOrigin.x) == NO) {
@@ -2084,10 +2080,6 @@ static BOOL ShouldUseNewRenderingRange = YES;
   }
   
   if ([[self class] usesImplicitHierarchyManagement]) {
-    if (!_managedSubnodes) {
-      _managedSubnodes = [NSMutableArray array];
-    }
-    
     for (_ASDisplayNodePosition *position in _deletedSubnodes) {
       [self _implicitlyRemoveSubnode:position.node atIndex:position.index];
     }
@@ -2100,6 +2092,12 @@ static BOOL ShouldUseNewRenderingRange = YES;
 
 - (void)_implicitlyInsertSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
 {
+  ASDisplayNodeAssertThreadAffinity(self);
+
+  if (!_managedSubnodes) {
+    _managedSubnodes = [NSMutableArray array];
+  }
+
   ASDisplayNodeAssert(idx <= [_managedSubnodes count], @"index needs to be in range of the current managed subnodes");
   if (idx == [_managedSubnodes count]) {
     [_managedSubnodes addObject:node];
@@ -2111,6 +2109,12 @@ static BOOL ShouldUseNewRenderingRange = YES;
 
 - (void)_implicitlyRemoveSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
 {
+  ASDisplayNodeAssertThreadAffinity(self);
+
+  if (!_managedSubnodes) {
+    _managedSubnodes = [NSMutableArray array];
+  }
+
   [_managedSubnodes removeObjectAtIndex:idx];
   [node removeFromSupernode];
 }
