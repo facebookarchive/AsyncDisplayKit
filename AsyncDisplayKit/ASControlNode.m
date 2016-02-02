@@ -93,10 +93,16 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     self.userInteractionEnabled = NO;
   }
 }
+
+- (BOOL)shouldTrackTouches
+{
+  return self.isTargetAdded && self.enabled;
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.enabled)
+  if (!self.shouldTrackTouches)
     return;
 
   ASControlNodeEvent controlEventMask = 0;
@@ -132,7 +138,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.enabled)
+  if (!self.shouldTrackTouches)
     return;
 
   NSParameterAssert([touches count] == 1);
@@ -158,7 +164,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.enabled)
+  if (!self.shouldTrackTouches)
     return;
 
   // We're no longer tracking and there is no touch to be inside.
@@ -177,7 +183,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.enabled)
+  if (!self.shouldTrackTouches)
     return;
 
   // On iPhone 6s, iOS 9.2 (and maybe other versions) sometimes calls -touchesEnded:withEvent:
@@ -264,6 +270,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       [targetActions addObject:NSStringFromSelector(action)];
     });
 
+  self.targetAdded = YES;
   self.userInteractionEnabled = YES;
 }
 
