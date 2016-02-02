@@ -21,6 +21,7 @@
 #import "_ASCoreAnimationExtras.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
+#import "NSArray+Diffing.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -28,6 +29,36 @@
 #import "ASCellNode.h"
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
+
+@interface _ASDisplayNodePosition : NSObject
+
+@property (nonatomic, assign) NSUInteger index;
+@property (nonatomic, strong) ASDisplayNode *node;
+
++ (instancetype)positionWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index;
+
+- (instancetype)initWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index;
+
+@end
+
+@implementation _ASDisplayNodePosition
+
++ (instancetype)positionWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index
+{
+  return [[self alloc] initWithNode:node atIndex:index];
+}
+
+- (instancetype)initWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index
+{
+  self = [super init];
+  if (self) {
+    _node = node;
+    _index = index;
+  }
+  return self;
+}
+
+@end
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
 
@@ -52,6 +83,9 @@ NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 #endif
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
+
+@property (assign, nonatomic) BOOL implicitNodeHierarchyManagement;
+
 @end
 
 @implementation ASDisplayNode
@@ -62,9 +96,21 @@ NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
+static BOOL usesImplicitHierarchyManagement = FALSE;
+
++ (BOOL)usesImplicitHierarchyManagement
+{
+  return usesImplicitHierarchyManagement;
+}
+
++ (void)setUsesImplicitHierarchyManagement:(BOOL)enabled
+{
+  usesImplicitHierarchyManagement = enabled;
+}
+
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
-    return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
+  return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
 }
 
 void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)())
@@ -583,13 +629,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASDN::MutexLocker l(_propertyLock);
-  return [self __measureWithSizeRange:constrainedSize];
-}
-
-- (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize
-{
   ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
 
   if (![self __shouldSize])
     return nil;
@@ -598,7 +639,22 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   //  - we haven't already
   //  - the constrained size range is different
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
-    _layout = [self calculateLayoutThatFits:constrainedSize];
+    ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
+
+    if (_layout) {
+      NSIndexSet *insertions, *deletions;
+      [_layout.sublayouts asdk_diffWithArray:newLayout.sublayouts insertions:&insertions deletions:&deletions compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
+        return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
+      }];
+      _insertedSubnodes = [self _filterNodesInLayouts:newLayout.sublayouts withIndexes:insertions];
+      _deletedSubnodes = [self _filterNodesInLayouts:_layout.sublayouts withIndexes:deletions];
+    } else {
+      NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.sublayouts count])];
+      _insertedSubnodes = [self _filterNodesInLayouts:newLayout.sublayouts withIndexes:indexes];
+      _deletedSubnodes = @[];
+    }
+
+    _layout = newLayout;
     _constrainedSize = constrainedSize;
     _flags.isMeasured = YES;
     [self calculatedLayoutDidChange];
@@ -608,23 +664,36 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertTrue(_layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(_layout.size.height >= 0.0);
 
-  // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed to have a placeholder ready to go
-  // also if a node has no size, it should not have a placeholder
-  if (self.placeholderEnabled && [self _displaysAsynchronously] && _layout.size.width > 0.0 && _layout.size.height > 0.0) {
+  // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed
+  // to have a placeholder ready to go. Also, if a node has no size it should not have a placeholder
+  if (self.placeholderEnabled && [self _displaysAsynchronously] &&
+      _layout.size.width > 0.0 && _layout.size.height > 0.0) {
     if (!_placeholderImage) {
       _placeholderImage = [self placeholderImage];
     }
-
+    
     if (_placeholderLayer) {
-      [self setupPlaceholderLayerContents];
+      [self _setupPlaceholderLayerContents];
     }
   }
 
   return _layout;
 }
 
+- (NSArray<_ASDisplayNodePosition *> *)_filterNodesInLayouts:(NSArray<ASLayout *> *)layouts withIndexes:(NSIndexSet *)indexes
+{
+  NSMutableArray<_ASDisplayNodePosition *> *result = [NSMutableArray array];
+  [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+    ASDisplayNode *node = (ASDisplayNode *)layouts[idx].layoutableObject;
+    ASDisplayNodeAssertNotNil(node, @"A flattened layout must consist exclusively of node sublayouts");
+    [result addObject:[_ASDisplayNodePosition positionWithNode:node atIndex:idx]];
+  }];
+  return result;
+}
+
 - (void)calculatedLayoutDidChange
 {
+  // subclass override
 }
 
 - (BOOL)displaysAsynchronously
@@ -805,7 +874,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
   if (CGRectEqualToRect(self.bounds, CGRectZero)) {
-    return;     // Performing layout on a zero-bounds view often results in frame calculations with negative sizes after applying margins, which will cause measureWithSizeRange: on subnodes to assert.
+    // Performing layout on a zero-bounds view often results in frame calculations
+    // with negative sizes after applying margins, which will cause
+    // measureWithSizeRange: on subnodes to assert.
+    return;
   }
   _placeholderLayer.frame = self.bounds;
   [self layout];
@@ -1606,7 +1678,11 @@ static BOOL ShouldUseNewRenderingRange = YES;
       layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
-      return [_subnodes containsObject:evaluatedLayout.layoutableObject];
+      if ([[self class] usesImplicitHierarchyManagement]) {
+        return ASObjectIsEqual(layout, evaluatedLayout) == NO && [evaluatedLayout.layoutableObject isKindOfClass:[ASDisplayNode class]];
+      } else {
+        return [_subnodes containsObject:evaluatedLayout.layoutableObject];
+      }
     }];
   } else {
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
@@ -1974,7 +2050,9 @@ static BOOL ShouldUseNewRenderingRange = YES;
   ASDisplayNode *subnode = nil;
   CGRect subnodeFrame = CGRectZero;
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
-    ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Cached sublayouts must only contain subnodes' layout.  self = %@, subnodes = %@", self, _subnodes);
+    if (![[self class] usesImplicitHierarchyManagement]) {
+      ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Sublayouts must only contain subnodes' layout.  self = %@, subnodes = %@", self, _subnodes);
+    }
     CGPoint adjustedOrigin = subnodeLayout.position;
     if (isfinite(adjustedOrigin.x) == NO) {
       ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
@@ -2000,6 +2078,45 @@ static BOOL ShouldUseNewRenderingRange = YES;
     subnode = ((ASDisplayNode *)subnodeLayout.layoutableObject);
     [subnode setFrame:subnodeFrame];
   }
+  
+  if ([[self class] usesImplicitHierarchyManagement]) {
+    for (_ASDisplayNodePosition *position in _deletedSubnodes) {
+      [self _implicitlyRemoveSubnode:position.node atIndex:position.index];
+    }
+    
+    for (_ASDisplayNodePosition *position in _insertedSubnodes) {
+      [self _implicitlyInsertSubnode:position.node atIndex:position.index];
+    }
+  }
+}
+
+- (void)_implicitlyInsertSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+
+  if (!_managedSubnodes) {
+    _managedSubnodes = [NSMutableArray array];
+  }
+
+  ASDisplayNodeAssert(idx <= [_managedSubnodes count], @"index needs to be in range of the current managed subnodes");
+  if (idx == [_managedSubnodes count]) {
+    [_managedSubnodes addObject:node];
+  } else {
+    [_managedSubnodes insertObject:node atIndex:idx];
+  }
+  [self addSubnode:node];
+}
+
+- (void)_implicitlyRemoveSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+
+  if (!_managedSubnodes) {
+    _managedSubnodes = [NSMutableArray array];
+  }
+
+  [_managedSubnodes removeObjectAtIndex:idx];
+  [node removeFromSupernode];
 }
 
 - (void)displayWillStart
@@ -2012,14 +2129,14 @@ static BOOL ShouldUseNewRenderingRange = YES;
   if (_placeholderImage && _placeholderLayer && self.layer.contents == nil) {
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
-    [self setupPlaceholderLayerContents];
+    [self _setupPlaceholderLayerContents];
     _placeholderLayer.opacity = 1.0;
     [CATransaction commit];
     [self.layer addSublayer:_placeholderLayer];
   }
 }
 
-- (void)setupPlaceholderLayerContents
+- (void)_setupPlaceholderLayerContents
 {
   BOOL stretchable = !UIEdgeInsetsEqualToEdgeInsets(_placeholderImage.capInsets, UIEdgeInsetsZero);
   if (stretchable) {

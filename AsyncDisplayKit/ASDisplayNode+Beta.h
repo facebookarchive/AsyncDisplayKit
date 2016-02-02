@@ -11,6 +11,9 @@
 + (BOOL)shouldUseNewRenderingRange;
 + (void)setShouldUseNewRenderingRange:(BOOL)shouldUseNewRenderingRange;
 
++ (BOOL)usesImplicitHierarchyManagement;
++ (void)setUsesImplicitHierarchyManagement:(BOOL)enabled;
+
 /** @name Layout */
 
 
