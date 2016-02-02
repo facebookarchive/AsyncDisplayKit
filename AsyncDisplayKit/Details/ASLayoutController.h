@@ -16,34 +16,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class ASCellNode;
 
-typedef NS_ENUM(NSUInteger, ASLayoutRangeMode) {
-  ASLayoutRangeModeMinimum = 0,
-  ASLayoutRangeModeFull,
-  ASLayoutRangeModeCount
-};
-
 typedef struct {
   CGFloat leadingBufferScreenfuls;
   CGFloat trailingBufferScreenfuls;
 } ASRangeTuningParameters;
 
 @protocol ASLayoutController <NSObject>
-
-/**
- * Tuning parameters for the range type in full mode. This method is deprecated. 
- * Instead, use -setTuningParameters:forRangeMode:rangeType:
- *
- * @see setTuningParameters:forRangeMode:rangeType:
- */
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED;
-
-/**
- * Get tuning parameters for the range type in full mode. This method is deprecated.
- * Instead, use -tuningParametersForRangeMode:rangeType:
- *
- * @see tuningParametersForRangeMode:rangeType:
- */
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED;
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 

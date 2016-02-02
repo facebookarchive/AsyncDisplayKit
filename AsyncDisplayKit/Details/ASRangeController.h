@@ -53,8 +53,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node;
 
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 /**
  * An object that describes the layout behavior of the ranged component (table view, collection view, etc.)
