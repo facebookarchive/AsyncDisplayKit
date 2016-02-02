@@ -10,9 +10,10 @@
 		050E7C7419D22E19004363C2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050E7C7319D22E19004363C2 /* AppDelegate.swift */; };
 		050E7C7619D22E19004363C2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050E7C7519D22E19004363C2 /* ViewController.swift */; };
 		05DDD8DB19D2336300013C30 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 05DDD8DA19D2336300013C30 /* Default-568h@2x.png */; };
-		4690009EF79C47BBA8FDBAD4 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2ACC614D420B4E90B7EE3BCE /* libPods.a */; };
 		6C5053DB19EE266A00E385DE /* Default-667h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C5053D919EE266A00E385DE /* Default-667h@2x.png */; };
 		6C5053DC19EE266A00E385DE /* Default-736h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C5053DA19EE266A00E385DE /* Default-736h@3x.png */; };
+		92E46E91A7D47AEC5B2B2F55 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC29F18AE7C8C204A5CD4F2 /* Pods.framework */; };
+		CCB01CAB1C5FEA6E00CA64C4 /* TailLoadingCellNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB01CAA1C5FEA6E00CA64C4 /* TailLoadingCellNode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,11 +22,11 @@
 		050E7C7319D22E19004363C2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		050E7C7519D22E19004363C2 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		05DDD8DA19D2336300013C30 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Default-568h@2x.png"; sourceTree = "<group>"; };
-		05DDD8DC19D2341D00013C30 /* AsyncDisplayKit-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AsyncDisplayKit-Bridging-Header.h"; sourceTree = "<group>"; };
-		2ACC614D420B4E90B7EE3BCE /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C5053D919EE266A00E385DE /* Default-667h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-667h@2x.png"; sourceTree = SOURCE_ROOT; };
 		6C5053DA19EE266A00E385DE /* Default-736h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-736h@3x.png"; sourceTree = SOURCE_ROOT; };
+		7FC29F18AE7C8C204A5CD4F2 /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		841652076B3E9351337AA7C7 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		CCB01CAA1C5FEA6E00CA64C4 /* TailLoadingCellNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TailLoadingCellNode.swift; sourceTree = "<group>"; };
 		E3EE87D12CE3EF73FAE2EF02 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -34,7 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4690009EF79C47BBA8FDBAD4 /* libPods.a in Frameworks */,
+				92E46E91A7D47AEC5B2B2F55 /* Pods.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +66,7 @@
 		050E7C7019D22E19004363C2 /* Sample */ = {
 			isa = PBXGroup;
 			children = (
+				CCB01CAA1C5FEA6E00CA64C4 /* TailLoadingCellNode.swift */,
 				050E7C7319D22E19004363C2 /* AppDelegate.swift */,
 				050E7C7519D22E19004363C2 /* ViewController.swift */,
 				050E7C7119D22E19004363C2 /* Supporting Files */,
@@ -75,7 +77,6 @@
 		050E7C7119D22E19004363C2 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				05DDD8DC19D2341D00013C30 /* AsyncDisplayKit-Bridging-Header.h */,
 				050E7C7219D22E19004363C2 /* Info.plist */,
 				05DDD8DA19D2336300013C30 /* Default-568h@2x.png */,
 				6C5053D919EE266A00E385DE /* Default-667h@2x.png */,
@@ -87,7 +88,7 @@
 		092C2001FE124604891D6E90 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				2ACC614D420B4E90B7EE3BCE /* libPods.a */,
+				7FC29F18AE7C8C204A5CD4F2 /* Pods.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -113,6 +114,7 @@
 				050E7C6B19D22E19004363C2 /* Frameworks */,
 				050E7C6C19D22E19004363C2 /* Resources */,
 				941C5E41C54B4613A2D3B760 /* Copy Pods Resources */,
+				1F5A9F09F5875F61862D0783 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -131,7 +133,7 @@
 			attributes = {
 				LastSwiftMigration = 0700;
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
 					050E7C6D19D22E19004363C2 = {
@@ -171,6 +173,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		1F5A9F09F5875F61862D0783 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		941C5E41C54B4613A2D3B760 /* Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -208,6 +225,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCB01CAB1C5FEA6E00CA64C4 /* TailLoadingCellNode.swift in Sources */,
 				050E7C7619D22E19004363C2 /* ViewController.swift in Sources */,
 				050E7C7419D22E19004363C2 /* AppDelegate.swift in Sources */,
 			);
@@ -236,6 +254,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -300,8 +319,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Sample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.AsyncDisplayKit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "Sample/AsyncDisplayKit-Bridging-Header.h";
 			};
 			name = Debug;
 		};
@@ -312,8 +331,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Sample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.AsyncDisplayKit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "Sample/AsyncDisplayKit-Bridging-Header.h";
 			};
 			name = Release;
 		};
