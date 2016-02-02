@@ -35,6 +35,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 };
 
 @class _ASPendingState;
+@class _ASDisplayNodePosition;
 
 // Allow 2^n increments of begin disabling hierarchy notifications
 #define VISIBILITY_NOTIFICATIONS_DISABLED_BITS 4
@@ -59,8 +60,12 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   ASSizeRange _constrainedSize;
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
-  NSArray<ASDisplayNode *> *_insertedSubnodes;
-  NSArray<ASDisplayNode *> *_deletedSubnodes;
+
+  // Subnodes implicitly managed by layout changes
+  NSMutableArray<ASDisplayNode *> *_managedSubnodes;
+  
+  NSArray<_ASDisplayNodePosition *> *_insertedSubnodes;
+  NSArray<_ASDisplayNodePosition *> *_deletedSubnodes;
 
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;

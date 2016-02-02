@@ -30,6 +30,36 @@
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 
+@interface _ASDisplayNodePosition : NSObject
+
+@property (nonatomic, assign) NSUInteger index;
+@property (nonatomic, strong) ASDisplayNode *node;
+
++ (instancetype)positionWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index;
+
+- (instancetype)initWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index;
+
+@end
+
+@implementation _ASDisplayNodePosition
+
++ (instancetype)positionWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index
+{
+  return [[self alloc] initWithNode:node atIndex:index];
+}
+
+- (instancetype)initWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index
+{
+  self = [super init];
+  if (self) {
+    _node = node;
+    _index = index;
+  }
+  return self;
+}
+
+@end
+
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
 
 /**
@@ -609,18 +639,20 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   //  - the constrained size range is different
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
     ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
-    
+
     if (_layout) {
       NSIndexSet *insertions, *deletions;
-      [_layout.sublayouts asdk_diffWithArray:newLayout.sublayouts insertions:&insertions deletions:&deletions];
-      _insertedSubnodes = [self _filterLayouts:newLayout.sublayouts withIndexes:insertions];
-      _deletedSubnodes = [self _filterLayouts:newLayout.sublayouts withIndexes:deletions];
+      [_layout.sublayouts asdk_diffWithArray:newLayout.sublayouts insertions:&insertions deletions:&deletions compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
+        return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
+      }];
+      _insertedSubnodes = [self _filterSublayouts:newLayout.sublayouts withIndexes:insertions];
+      _deletedSubnodes = [self _filterSublayouts:_layout.sublayouts withIndexes:deletions];
     } else {
       NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.sublayouts count])];
-      _insertedSubnodes = [self _filterLayouts:newLayout.sublayouts withIndexes:indexes];
+      _insertedSubnodes = [self _filterSublayouts:newLayout.sublayouts withIndexes:indexes];
       _deletedSubnodes = @[];
     }
-    
+
     _layout = newLayout;
     _constrainedSize = constrainedSize;
     _flags.isMeasured = YES;
@@ -641,13 +673,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _layout;
 }
 
-- (NSArray<ASDisplayNode *> *)_filterLayouts:(NSArray<ASLayout *> *)layouts withIndexes:(NSIndexSet *)indexes
+- (NSArray<_ASDisplayNodePosition *> *)_filterSublayouts:(NSArray<ASLayout *> *)layouts withIndexes:(NSIndexSet *)indexes
 {
-  NSMutableArray<ASDisplayNode *> *result = [NSMutableArray array];
+  NSMutableArray<_ASDisplayNodePosition *> *result = [NSMutableArray array];
   [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
     ASDisplayNode *node = (ASDisplayNode *)layouts[idx].layoutableObject;
     ASDisplayNodeAssertNotNil(node, @"A flattened layout must consist exclusively of node sublayouts");
-    [result addObject:node];
+    [result addObject:[_ASDisplayNodePosition positionWithNode:node atIndex:idx]];
   }];
   return result;
 }
@@ -2051,9 +2083,36 @@ static BOOL ShouldUseNewRenderingRange = YES;
     [subnode setFrame:subnodeFrame];
   }
   
-  for (ASDisplayNode *node in _insertedSubnodes) {
-    [self addSubnode:node];
+  if ([[self class] usesImplicitHierarchyManagement]) {
+    if (!_managedSubnodes) {
+      _managedSubnodes = [NSMutableArray array];
+    }
+    
+    for (_ASDisplayNodePosition *position in _deletedSubnodes) {
+      [self _implicitlyRemoveSubnode:position.node atIndex:position.index];
+    }
+    
+    for (_ASDisplayNodePosition *position in _insertedSubnodes) {
+      [self _implicitlyInsertSubnode:position.node atIndex:position.index];
+    }
   }
+}
+
+- (void)_implicitlyInsertSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
+{
+  ASDisplayNodeAssert(idx <= [_managedSubnodes count], @"index needs to be in range of the current managed subnodes");
+  if (idx == [_managedSubnodes count]) {
+    [_managedSubnodes addObject:node];
+  } else {
+    [_managedSubnodes insertObject:node atIndex:idx];
+  }
+  [self addSubnode:node];
+}
+
+- (void)_implicitlyRemoveSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
+{
+  [_managedSubnodes removeObjectAtIndex:idx];
+  [node removeFromSupernode];
 }
 
 - (void)displayWillStart
