@@ -30,6 +30,10 @@
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
 
+@optional
+
+- (ASDataControllerCellNodeBlock)dataController:(ASCollectionDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
 @end
 
 @interface ASCollectionDataController : ASChangeSetDataController

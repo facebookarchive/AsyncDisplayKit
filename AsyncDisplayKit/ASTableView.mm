@@ -876,6 +876,33 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return node;
 }
 
+- (ASDataControllerCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
+  if (![_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)]) {
+    ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
+    return ^{
+      [node enterHierarchyState:ASHierarchyStateRangeManaged];
+      ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+      if (node.layoutDelegate == nil) {
+        node.layoutDelegate = self;
+      }
+      return node;
+    };
+  }
+
+  ASDataControllerCellNodeBlock block = [_asyncDataSource tableView:self nodeBlockForRowAtIndexPath:indexPath];
+  __weak __typeof__(self) weakSelf = self;
+  ASDataControllerCellNodeBlock configuredNodeBlock = ^{
+    __typeof__(self) strongSelf = weakSelf;
+    ASCellNode *node = block();
+    [node enterHierarchyState:ASHierarchyStateRangeManaged];
+    if (node.layoutDelegate == nil) {
+      node.layoutDelegate = strongSelf;
+    }
+    return node;
+  };
+  return configuredNodeBlock;
+}
+
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   return ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0),

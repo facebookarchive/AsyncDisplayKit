@@ -84,6 +84,17 @@
   return pageNode;
 }
 
+- (ASDataControllerCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
+  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
+  if (![_pagerDataSource respondsToSelector:@selector(pagerNode:nodeBlockAtIndex:)]) {
+    ASCellNode *node = [_pagerDataSource pagerNode:self nodeAtIndex:indexPath.item];
+    return ^{ return node; };
+  }
+  ASDataControllerCellNodeBlock block = [_pagerDataSource pagerNode:self nodeBlockAtIndex:indexPath.item];
+  ASDisplayNodeAssertNotNil(block, @"Invalid node block. Block should be non-nil.");
+  return block;
+}
+
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
   ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");

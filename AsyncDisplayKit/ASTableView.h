@@ -322,13 +322,25 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param indexPath The index path of the requested node.
  *
- * @returns a node for display at this indexpath.  Must be thread-safe (can be called on the main thread or a background
- * queue) and should not implement reuse (it will be called once per row).  Unlike UITableView's version, this method
+ * @returns a node for display at this indexpath. This will be called on the main thread and should not implement reuse (it will be called once per row). Unlike UITableView's version, this method
  * is not called when the row is about to display.
  */
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 @optional
+
+/**
+ * Similar to -tableView:nodeForRowAtIndexPath:.
+ *
+ * @param tableView The sender.
+ *
+ * @param indexPath The index path of the requested node.
+ *
+ * @returns a block that creates the node for display at this indexpath.  Must be thread-safe (can be called on the main thread or a background
+ * queue) and should not implement reuse (it will be called once per row).
+ */
+
+- (ASDataControllerCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Indicator to lock the data source for data fetching in async mode.

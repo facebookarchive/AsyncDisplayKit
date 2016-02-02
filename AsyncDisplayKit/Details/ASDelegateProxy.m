@@ -81,8 +81,9 @@
 @end
 
 @implementation ASDelegateProxy {
-  id <NSObject> __weak _target;
   id <ASDelegateProxyInterceptor> __weak _interceptor;
+@protected
+  NSObject * __weak _target;
 }
 
 - (instancetype)initWithTarget:(id <NSObject>)target interceptor:(id <ASDelegateProxyInterceptor>)interceptor
@@ -128,6 +129,14 @@
 {
   ASDisplayNodeAssert(NO, @"This method must be overridden by subclasses.");
   return NO;
+}
+
+- (nullable NSMethodSignature *)methodSignatureForSelector:(SEL)selector
+{
+  if ([_target isEqual:[NSNull null]]) {
+    return nil;
+  }
+  return [_target methodSignatureForSelector:selector];
 }
 
 @end

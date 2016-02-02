@@ -35,6 +35,15 @@
   return textCellNode;
 }
 
+
+- (ASDataControllerCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
+  return ^{
+    ASTextCellNode *textCellNode = [ASTextCellNode new];
+    textCellNode.text = indexPath.description;
+    return textCellNode;
+  };
+}
+
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
   return self.numberOfSections;
 }

@@ -15,6 +15,12 @@
 
 // This method replaces -collectionView:nodeForItemAtIndexPath:
 - (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index;
+
+@optional
+
+// This method replaces -collectionView:nodeBlockForItemAtIndexPath:
+- (ASDataControllerCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index;
+
 @end
 
 @interface ASPagerNode : ASCollectionNode

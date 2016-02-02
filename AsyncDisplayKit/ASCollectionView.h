@@ -347,13 +347,24 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param indexPath The index path of the requested node.
  *
- * @returns a node for display at this indexpath.  Must be thread-safe (can be called on the main thread or a background
- * queue) and should not implement reuse (it will be called once per row).  Unlike UICollectionView's version, this method
+ * @returns a node for display at this indexpath. This will be called on the main thread and should not implement reuse (it will be called once per row).  Unlike UICollectionView's version, this method
  * is not called when the row is about to display.
  */
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
+
 @optional
+
+/**
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the requested node.
+ *
+ * @returns a block that creates the node for display at this indexpath.  Must be thread-safe (can be called on the main thread or a background
+ *          queue) and should not implement reuse (it will be called once per row).
+ */
+- (ASDataControllerCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Asks the collection view to provide a supplementary node to display in the collection view.

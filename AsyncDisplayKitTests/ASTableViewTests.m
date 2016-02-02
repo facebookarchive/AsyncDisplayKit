@@ -72,6 +72,11 @@
   return nil;
 }
 
+- (ASDataControllerCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  return nil;
+}
+
 - (void)dealloc
 {
   if (_willDeallocBlock) {
@@ -119,6 +124,16 @@
   textCellNode.text = indexPath.description;
   
   return textCellNode;
+}
+
+
+- (ASDataControllerCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  return ^{
+    ASTestTextCellNode *textCellNode = [ASTestTextCellNode new];
+    textCellNode.text = indexPath.description;
+    return textCellNode;
+  };
 }
 
 @end

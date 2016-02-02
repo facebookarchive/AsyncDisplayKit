@@ -24,8 +24,8 @@
 @end
 
 @implementation ASCollectionDataController {
-  NSMutableDictionary *_pendingNodes;
-  NSMutableDictionary *_pendingIndexPaths;
+  NSMutableDictionary<NSString *, NSMutableArray<ASCellNode *> *> *_pendingNodes;
+  NSMutableDictionary<NSString *, NSMutableArray<NSIndexPath *> *> *_pendingIndexPaths;
 }
 
 - (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled
@@ -49,7 +49,7 @@
     _pendingIndexPaths[kind] = indexPaths;
     
     // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
   }
 }
 
@@ -91,7 +91,7 @@
     _pendingIndexPaths[kind] = indexPaths;
     
     // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
   }
 }
 
@@ -132,7 +132,7 @@
     _pendingIndexPaths[kind] = indexPaths;
     
     // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
   }
 }
 
@@ -176,7 +176,14 @@
     for (NSUInteger j = 0; j < rowCount; j++) {
       NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:j];
       [indexPaths addObject:indexPath];
-      [nodes addObject:[self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath]];
+      ASDataControllerCellNodeBlock supplementaryCellBlock;
+      if ([self.collectionDataSource respondsToSelector:@selector(dataController:supplementaryNodeBlockOfKind:atIndexPath:)]) {
+        supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
+      } else {
+        ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
+        supplementaryCellBlock = ^{ return supplementaryNode; };
+      }
+      [nodes addObject:supplementaryCellBlock];
     }
   }
 }
@@ -189,8 +196,14 @@
     for (NSUInteger i = 0; i < rowNum; i++) {
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
       [indexPaths addObject:indexPath];
-      ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
-      [nodes addObject:supplementaryNode];
+      ASDataControllerCellNodeBlock supplementaryCellBlock;
+      if ([self.collectionDataSource respondsToSelector:@selector(dataController:supplementaryNodeBlockOfKind:atIndexPath:)]) {
+        supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
+      } else {
+        ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
+        supplementaryCellBlock = ^{ return supplementaryNode; };
+      }
+      [nodes addObject:supplementaryCellBlock];
     }
   }];
 }

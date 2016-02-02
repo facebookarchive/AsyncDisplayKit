@@ -690,6 +690,33 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return node;
 }
 
+
+- (ASDataControllerCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath
+{
+  if (![_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockAtIndexPath:)]) {
+    ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
+    return ^{
+      [node enterHierarchyState:ASHierarchyStateRangeManaged];
+      ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+      if (node.layoutDelegate == nil) {
+        node.layoutDelegate = self;
+      }
+      return node;
+    };
+  }
+
+  ASDataControllerCellNodeBlock block = [_asyncDataSource collectionView:self nodeBlockAtIndexPath:indexPath];
+  ASDisplayNodeAssertNotNil(block, @"Invalid block, expected nonnull ASDataControllerCellNodeBlock");
+  return ^{
+    ASCellNode *node = block();
+    [node enterHierarchyState:ASHierarchyStateRangeManaged];
+    if (node.layoutDelegate == nil) {
+      node.layoutDelegate = self;
+    }
+    return node;
+  };
+}
+
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASSizeRange constrainedSize = kInvalidSizeRange;
