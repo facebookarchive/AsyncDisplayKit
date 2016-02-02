@@ -1658,6 +1658,7 @@ static BOOL ShouldUseNewRenderingRange = YES;
 {
   return ShouldUseNewRenderingRange;
 }
+
 + (void)setShouldUseNewRenderingRange:(BOOL)shouldUseNewRenderingRange
 {
   ShouldUseNewRenderingRange = shouldUseNewRenderingRange;

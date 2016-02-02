@@ -153,7 +153,7 @@
     id<ASRangeHandler> rangeHandler = _rangeTypeHandlers[rangeKey];
 
     if (!_rangeIsValid || [_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths rangeType:rangeType]) {
-      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:rangeType];
+      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:rangeType shouldUseFullRange:YES];
 
       // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
       NSMutableSet *removedIndexPaths = _rangeIsValid ? [_rangeTypeIndexPaths[rangeKey] mutableCopy] : [NSMutableSet set];

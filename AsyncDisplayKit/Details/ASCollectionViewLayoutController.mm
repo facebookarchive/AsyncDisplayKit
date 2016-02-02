@@ -14,6 +14,7 @@
 #import "ASCollectionView.h"
 #import "CGRect+ASConvenience.h"
 #import "UICollectionViewLayout+ASConvenience.h"
+#import "ASDisplayNodeExtras.h"
 
 struct ASRangeGeometry {
   CGRect rangeBounds;
@@ -65,9 +66,9 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return self;
 }
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange
 {
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType];
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType isFullRange:shouldUseFullRange];
   ASRangeGeometry rangeGeometry = [self rangeGeometryWithScrollDirection:scrollDirection tuningParameters:tuningParameters];
   _updateRangeBoundsIndexedByRangeType[rangeType] = rangeGeometry.updateBounds;
   return [self indexPathsForItemsWithinRangeBounds:rangeGeometry.rangeBounds];
@@ -132,9 +133,9 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 
 @implementation ASCollectionViewLayoutControllerBeta
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange
 {
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType];
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType isFullRange:shouldUseFullRange];
   CGRect rangeBounds = [self rangeBoundsWithScrollDirection:scrollDirection rangeTuningParameters:tuningParameters];
   return [self indexPathsForItemsWithinRangeBounds:rangeBounds];
 }
