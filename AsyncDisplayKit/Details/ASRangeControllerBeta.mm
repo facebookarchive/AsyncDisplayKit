@@ -10,18 +10,13 @@
 
 #import "ASAssert.h"
 #import "ASDisplayNodeExtras.h"
+#import "ASDisplayNodeInternal.h"
 #import "ASMultiDimensionalArrayUtils.h"
 #import "ASRangeHandlerVisible.h"
 #import "ASRangeHandlerRender.h"
 #import "ASRangeHandlerPreload.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-
-typedef NS_ENUM(NSUInteger, ASRangeTypeUsed) {
-    ASRangeTypeUsedNone,
-    ASRangeTypeUsedMinimum,
-    ASRangeTypeUsedFull,
-};
 
 @interface ASRangeControllerBeta ()
 {
@@ -30,7 +25,8 @@ typedef NS_ENUM(NSUInteger, ASRangeTypeUsed) {
   BOOL _layoutControllerImplementsSetVisibleIndexPaths;
   ASScrollDirection _scrollDirection;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
-  ASRangeTypeUsed _rangeTypeUsed;
+  ASLayoutRangeMode _currentRangeMode;
+  BOOL _didRegisterForNotifications;
 }
 
 @end
@@ -44,12 +40,40 @@ typedef NS_ENUM(NSUInteger, ASRangeTypeUsed) {
   }
   
   _rangeIsValid = YES;
-  _rangeTypeUsed = ASRangeTypeUsedNone;
+  _currentRangeMode = ASLayoutRangeModeCount;
   
   return self;
 }
 
+- (void)dealloc
+{
+  if (_didRegisterForNotifications) {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+  }
+}
+
 #pragma mark - Core visible node range managment API
+
++ (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
+                                scrollDirection:(ASScrollDirection)scrollDirection
+                               currentRangeMode:(ASLayoutRangeMode)currentRangeMode
+{
+  // If we used full mode, don't switch to minimum mode. That will destroy all the hard work done before.
+  if (currentRangeMode == ASLayoutRangeModeFull) {
+    return ASLayoutRangeModeFull;
+  }
+  
+  BOOL isVisible = (ASInterfaceStateIncludesVisible(interfaceState));
+  BOOL isScrolling = (scrollDirection != ASScrollDirectionNone);
+  BOOL isUsingMinimumRangeMode = (currentRangeMode == ASLayoutRangeModeMinimum);
+  // If we are already visible and scrolling, get busy!  Better get started on preloading before the user scrolls more...
+  // If we are already visible and finished displaying minimum mode, extend to full mode
+  if (isVisible && (isScrolling || isUsingMinimumRangeMode)) {
+    return ASLayoutRangeModeFull;
+  }
+  
+  return ASLayoutRangeModeMinimum;
+}
 
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
 {
@@ -62,7 +86,7 @@ typedef NS_ENUM(NSUInteger, ASRangeTypeUsed) {
   if (_queuedRangeUpdate) {
     return;
   }
-  
+
   // coalesce these events -- handling them multiple times per runloop is noisy and expensive
   _queuedRangeUpdate = YES;
   
@@ -117,25 +141,25 @@ typedef NS_ENUM(NSUInteger, ASRangeTypeUsed) {
   NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
-  BOOL selfIsVisible = (ASInterfaceStateIncludesVisible(selfInterfaceState));
-  BOOL selfIsScrolling = (_scrollDirection != ASScrollDirectionNone);
-  BOOL didUseMinimumRange = (_rangeTypeUsed == ASRangeTypeUsedMinimum);
-  BOOL didUseFullRange  = (_rangeTypeUsed == ASRangeTypeUsedFull);
-  // If we are already visible and scrolling, get busy!  Better get started on preloading before the user scrolls more...
-  // If we are already visible and did finish displaying minimum range, extend to full range
-  // If we used full range, don't switch to minimum range now. That will destroy all the hard work done before.
-  BOOL useFullRange = ((selfIsVisible && (selfIsScrolling || didUseMinimumRange)) || didUseFullRange);
-  NSLog(@"%@ range: %@", useFullRange ? @"Full" : @"Minimum", [((ASCollectionView *)_delegate).asyncDelegate description]);
+  ASLayoutRangeMode rangeMode = [ASRangeControllerBeta rangeModeForInterfaceState:selfInterfaceState
+                                                                  scrollDirection:_scrollDirection
+                                                                 currentRangeMode:_currentRangeMode];
 
-  fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData shouldUseFullRange:useFullRange];
+  fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
+                                                        rangeMode:rangeMode
+                                                        rangeType:ASLayoutRangeTypeFetchData];
 
-  ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeDisplay isFullRange:useFullRange];
-  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeFetchData isFullRange:useFullRange];
+  ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeMode:rangeMode
+                                                                                    rangeType:ASLayoutRangeTypeDisplay];
+  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
+                                                                                      rangeType:ASLayoutRangeTypeFetchData];
   if (parametersDisplay.leadingBufferScreenfuls == parametersFetchData.leadingBufferScreenfuls &&
       parametersDisplay.trailingBufferScreenfuls == parametersFetchData.trailingBufferScreenfuls) {
     displayIndexPaths = fetchDataIndexPaths;
   } else {
-    displayIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay shouldUseFullRange:useFullRange];
+    displayIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
+                                                        rangeMode:rangeMode
+                                                        rangeType:ASLayoutRangeTypeDisplay];
   }
   
   // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
@@ -151,11 +175,13 @@ typedef NS_ENUM(NSUInteger, ASRangeTypeUsed) {
   NSSet<NSIndexPath *> *allCurrentIndexPaths = [[allIndexPaths set] copy];
   [allIndexPaths unionSet:_allPreviousIndexPaths];
   _allPreviousIndexPaths = allCurrentIndexPaths;
-  _rangeTypeUsed = useFullRange ? ASRangeTypeUsedFull : ASRangeTypeUsedMinimum;
+  _currentRangeMode = rangeMode;
   
   if (!_rangeIsValid) {
     [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];
   }
+
+  [self registerForNotificationsIfNeeded];
   
   // This array is only used if logging is enabled.
   NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
@@ -238,6 +264,33 @@ typedef NS_ENUM(NSUInteger, ASRangeTypeUsed) {
     NSLog(@"indexPath %@, Visible: %d, Display: %d, FetchData: %d", indexPath, inVisible, inDisplay, inFetchData);
   }
 #endif
+}
+
+#pragma mark - Notification observers
+
+- (void)registerForNotificationsIfNeeded
+{
+  if (!_didRegisterForNotifications) {
+    BOOL selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
+    ASLayoutRangeMode nextRangeMode = [ASRangeControllerBeta rangeModeForInterfaceState:selfInterfaceState
+                                                                        scrollDirection:_scrollDirection
+                                                                       currentRangeMode:_currentRangeMode];
+    if (_currentRangeMode != nextRangeMode) {
+      [[NSNotificationCenter defaultCenter] addObserver:self
+                                               selector:@selector(scheduledNodesDidDisplay)
+                                                   name:ASRenderingEngineDidDisplayScheduledNodesNotification
+                                                 object:nil];
+      _didRegisterForNotifications = YES;
+    }
+  }
+}
+
+- (void)scheduledNodesDidDisplay
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  _didRegisterForNotifications = NO;
+
+  [self scheduleRangeUpdate];
 }
 
 #pragma mark - Cell node view handling

@@ -74,7 +74,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
  * IndexPath array for the element in the working range.
  */
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   CGFloat viewportScreenMetric;
   ASScrollDirection leadingDirection;
@@ -92,7 +92,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
     leadingDirection = ASScrollDirectionUp;
   }
 
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType isFullRange:shouldUseFullRange];
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
   CGFloat backScreens = scrollDirection == leadingDirection ? tuningParameters.leadingBufferScreenfuls : tuningParameters.trailingBufferScreenfuls;
   CGFloat frontScreens = scrollDirection == leadingDirection ? tuningParameters.trailingBufferScreenfuls : tuningParameters.leadingBufferScreenfuls;
 
