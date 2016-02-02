@@ -7,6 +7,7 @@
  */
 
 #import "ASControlNode.h"
+#import "ASDisplayNode+Subclasses.h"
 #import "ASControlNode+Subclasses.h"
 
 // UIControl allows dragging some distance outside of the control itself during
@@ -22,6 +23,7 @@
 {
 @private
   // Control Attributes
+  BOOL _targetAdded;
   BOOL _enabled;
   BOOL _highlighted;
 
@@ -46,6 +48,7 @@
 }
 
 // Read-write overrides.
+@property (nonatomic, readwrite, assign, getter=isTargetAdded) BOOL targetAdded;
 @property (nonatomic, readwrite, assign, getter=isTracking) BOOL tracking;
 @property (nonatomic, readwrite, assign, getter=isTouchInside) BOOL touchInside;
 
@@ -77,12 +80,19 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
   _enabled = YES;
 
-  // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
-  self.userInteractionEnabled = NO;
   return self;
 }
 
 #pragma mark - ASDisplayNode Overrides
+- (void)didLoad
+{
+  [super didLoad];
+  
+  // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
+  if (!self.targetAdded) {
+    self.userInteractionEnabled = NO;
+  }
+}
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.

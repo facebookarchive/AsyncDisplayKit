@@ -20,6 +20,12 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASControlNode (Subclassing)
 
 /**
+ @abstract Indicates whether or not at least one target was added to the receiver
+ @discussion YES if the receiver has at least one target; NO otherwise.
+ */
+@property (nonatomic, readonly, assign, getter=isTargetAdded) BOOL targetAdded;
+
+/**
  @abstract Sends action messages for the given control events.
  @param controlEvents A bitmask whose set flags specify the control events for which action messages are sent. See "Control Events" in ASControlNode.h for bitmask constants.
  @param touchEvent An event object encapsulating the information specific to the user event.
