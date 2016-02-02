@@ -48,7 +48,6 @@
 }
 
 // Read-write overrides.
-@property (nonatomic, readwrite, assign, getter=isTargetAdded) BOOL targetAdded;
 @property (nonatomic, readwrite, assign, getter=isTracking) BOOL tracking;
 @property (nonatomic, readwrite, assign, getter=isTouchInside) BOOL touchInside;
 
@@ -89,14 +88,14 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   [super didLoad];
   
   // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
-  if (!self.targetAdded) {
+  if (!_targetAdded) {
     self.userInteractionEnabled = NO;
   }
 }
 
 - (BOOL)shouldTrackTouches
 {
-  return self.isTargetAdded && self.enabled;
+  return _targetAdded && self.enabled;
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -270,7 +269,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       [targetActions addObject:NSStringFromSelector(action)];
     });
 
-  self.targetAdded = YES;
+  _targetAdded = YES;
   self.userInteractionEnabled = YES;
 }
 
