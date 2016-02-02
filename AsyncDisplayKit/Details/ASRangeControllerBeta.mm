@@ -17,6 +17,12 @@
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
+typedef NS_ENUM(NSUInteger, ASRangeTypeUsed) {
+    ASRangeTypeUsedNone,
+    ASRangeTypeUsedMinimum,
+    ASRangeTypeUsedFull,
+};
+
 @interface ASRangeControllerBeta ()
 {
   BOOL _rangeIsValid;
@@ -24,7 +30,7 @@
   BOOL _layoutControllerImplementsSetVisibleIndexPaths;
   ASScrollDirection _scrollDirection;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
-  BOOL _didUseFullRange;
+  ASRangeTypeUsed _rangeTypeUsed;
 }
 
 @end
@@ -38,6 +44,7 @@
   }
   
   _rangeIsValid = YES;
+  _rangeTypeUsed = ASRangeTypeUsedNone;
   
   return self;
 }
@@ -47,11 +54,15 @@
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
 {
   _scrollDirection = scrollDirection;
+  [self scheduleRangeUpdate];
+}
 
+- (void)scheduleRangeUpdate
+{
   if (_queuedRangeUpdate) {
     return;
   }
-
+  
   // coalesce these events -- handling them multiple times per runloop is noisy and expensive
   _queuedRangeUpdate = YES;
   
@@ -108,19 +119,23 @@
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
   BOOL selfIsVisible = (ASInterfaceStateIncludesVisible(selfInterfaceState));
   BOOL selfIsScrolling = (_scrollDirection != ASScrollDirectionNone);
+  BOOL didUseMinimumRange = (_rangeTypeUsed == ASRangeTypeUsedMinimum);
+  BOOL didUseFullRange  = (_rangeTypeUsed == ASRangeTypeUsedFull);
   // If we are already visible and scrolling, get busy!  Better get started on preloading before the user scrolls more...
+  // If we are already visible and did finish displaying minimum range, extend to full range
   // If we used full range, don't switch to minimum range now. That will destroy all the hard work done before.
-  BOOL shouldUseFullRange = ((selfIsVisible && selfIsScrolling) || _didUseFullRange);
+  BOOL useFullRange = ((selfIsVisible && (selfIsScrolling || didUseMinimumRange)) || didUseFullRange);
+  NSLog(@"%@ range: %@", useFullRange ? @"Full" : @"Minimum", [((ASCollectionView *)_delegate).asyncDelegate description]);
 
-  fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData shouldUseFullRange:shouldUseFullRange];
+  fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeFetchData shouldUseFullRange:useFullRange];
 
-  ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeDisplay isFullRange:shouldUseFullRange];
-  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeFetchData isFullRange:shouldUseFullRange];
+  ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeDisplay isFullRange:useFullRange];
+  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeType:ASLayoutRangeTypeFetchData isFullRange:useFullRange];
   if (parametersDisplay.leadingBufferScreenfuls == parametersFetchData.leadingBufferScreenfuls &&
       parametersDisplay.trailingBufferScreenfuls == parametersFetchData.trailingBufferScreenfuls) {
     displayIndexPaths = fetchDataIndexPaths;
   } else {
-    displayIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay shouldUseFullRange:shouldUseFullRange];
+    displayIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeDisplay shouldUseFullRange:useFullRange];
   }
   
   // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
@@ -136,7 +151,7 @@
   NSSet<NSIndexPath *> *allCurrentIndexPaths = [[allIndexPaths set] copy];
   [allIndexPaths unionSet:_allPreviousIndexPaths];
   _allPreviousIndexPaths = allCurrentIndexPaths;
-  _didUseFullRange = shouldUseFullRange;
+  _rangeTypeUsed = useFullRange ? ASRangeTypeUsedFull : ASRangeTypeUsedMinimum;
   
   if (!_rangeIsValid) {
     [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];
