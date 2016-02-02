@@ -24,6 +24,8 @@
 @property (nonatomic, assign, readwrite) BOOL shouldAutoplay;
 @property (nonatomic, assign, readwrite) BOOL shouldAutorepeat;
 
+@property (nonatomic, assign, readwrite) BOOL muted;
+
 @property (atomic) NSString *gravity;
 @property (atomic) ASButtonNode *playButton;
 
@@ -39,5 +41,6 @@
 @protocol ASVideoNodeDelegate <NSObject>
 @optional
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode;
+- (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
 @end
 

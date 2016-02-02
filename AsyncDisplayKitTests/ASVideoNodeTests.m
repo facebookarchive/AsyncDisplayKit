@@ -73,8 +73,6 @@
   XCTAssertEqualObjects(item, secondItem);
 }
 
-//Touch Handling
-
 - (void)testSpinnerDefaultsToNil
 {
   XCTAssertNil(_videoNode.spinner);
