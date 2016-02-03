@@ -72,11 +72,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
 
 /**
- * The number of screens left to scroll before the delegate -collectionView:beginBatchFetchingWithContext: is called.
+ * The number of screens left to scroll before the delegate -collectionView:willBeginBatchFetchWithContext:atTail: is called.
  *
  * Defaults to one screenful.
  */
 @property (nonatomic, assign) CGFloat leadingScreensForBatching;
+
+/**
+ * The number of screens left to scroll backwards before the delegate -collectionView:willBeginBatchFetchWithContext:atTail: is called.
+ *
+ * Defaults to one screenful.
+ */
+@property (nonatomic, assign) CGFloat trailingScreensForBatching;
 
 /**
  * Optional introspection object for the collection view's layout.
@@ -395,19 +402,19 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param collectionView The sender.
  * @param context A context object that must be notified when the batch fetch is completed.
+ * @param atTail If YES, batching is occuring at the tail-end of the collection view. Otherwise, batching is occuring at the head of the collection view.
  *
  * @discussion You must eventually call -completeBatchFetching: with an argument of YES in order to receive future
  * notifications to do batch fetches. This method is called on a background queue.
  *
- * UICollectionView currently only supports batch events for tail loads. If you require a head load, consider
- * implementing a UIRefreshControl.
  */
-- (void)collectionView:(ASCollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context;
+- (void)collectionView:(ASCollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context atTail:(BOOL)atTail;
 
 /**
  * Tell the collectionView if batch fetching should begin.
  *
  * @param collectionView The sender.
+ * @param atTail If YES, batching is occuring at the tail-end of the collection view. Otherwise, batching is occuring at the head of the collection view.
  *
  * @discussion Use this method to conditionally fetch batches. Example use cases are: limiting the total number of
  * objects that can be fetched or no network connection.
@@ -415,7 +422,7 @@ NS_ASSUME_NONNULL_BEGIN
  * If not implemented, the collectionView assumes that it should notify its asyncDelegate when batch fetching
  * should occur.
  */
-- (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView;
+- (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView atTail:(BOOL)atTail;
 
 /**
  * Informs the delegate that the collection view did remove the node which was previously
