@@ -183,8 +183,9 @@
 
   [self registerForNotificationsIfNeeded];
   
-  // This array is only used if logging is enabled.
+#if RangeControllerLoggingEnabled
   NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
+#endif
   
   for (NSIndexPath *indexPath in allIndexPaths) {
     // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.
@@ -234,7 +235,9 @@
         ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
         // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
         if (node.interfaceState != interfaceState) {
+#if RangeControllerLoggingEnabled
           [modifiedIndexPaths addObject:indexPath];
+#endif
           [node recursivelySetInterfaceState:interfaceState];
         }
       }
