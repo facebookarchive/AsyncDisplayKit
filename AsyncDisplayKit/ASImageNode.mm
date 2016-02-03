@@ -66,6 +66,7 @@
 
   // Cropping.
   BOOL _cropEnabled; // Defaults to YES.
+  BOOL _forceUpscaling; //Defaults to NO.
   CGRect _cropRect; // Defaults to CGRectMake(0.5, 0.5, 0, 0)
   CGRect _cropDisplayBounds;
 }
@@ -84,6 +85,7 @@
   self.opaque = NO;
 
   _cropEnabled = YES;
+  _forceUpscaling = NO;
   _cropRect = CGRectMake(0.5, 0.5, 0, 0);
   _cropDisplayBounds = CGRectNull;
   _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
@@ -156,6 +158,7 @@
 {
   UIImage *image;
   BOOL cropEnabled;
+  BOOL forceUpscaling;
   CGFloat contentsScale;
   CGRect cropDisplayBounds;
   CGRect cropRect;
@@ -169,6 +172,7 @@
     }
     
     cropEnabled = _cropEnabled;
+    forceUpscaling = _forceUpscaling;
     contentsScale = _contentsScaleForDisplay;
     cropDisplayBounds = _cropDisplayBounds;
     cropRect = _cropRect;
@@ -223,6 +227,7 @@
                                                  boundsSizeInPixels,
                                                  contentMode,
                                                  cropRect,
+                                                 forceUpscaling,
                                                  &backingSize,
                                                  &imageDrawRect);
   }
@@ -383,6 +388,18 @@
     if (self.nodeLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
       [self setNeedsDisplay];
   });
+}
+
+- (BOOL)forceUpscaling
+{
+  ASDN::MutexLocker l(_imageLock);
+  return _forceUpscaling;
+}
+
+- (void)setForceUpscaling:(BOOL)forceUpscaling
+{
+  ASDN::MutexLocker l(_imageLock);
+  _forceUpscaling = forceUpscaling;
 }
 
 - (asimagenode_modification_block_t)imageModificationBlock
