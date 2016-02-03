@@ -12,6 +12,7 @@
 
 @interface ASAbstractLayoutController () {
   std::vector<ASRangeTuningParameters> _tuningParameters;
+  std::vector<ASRangeTuningParameters> _minimumTuningParameters;
   CGSize _viewportSize;
 }
 @end
@@ -38,6 +39,19 @@
     .trailingBufferScreenfuls = 2
   };
 
+  _minimumTuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
+  _minimumTuningParameters[ASLayoutRangeTypeVisible] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  _minimumTuningParameters[ASLayoutRangeTypeDisplay] = {
+    .leadingBufferScreenfuls = 0.25,
+    .trailingBufferScreenfuls = 0.25
+  };
+  _minimumTuningParameters[ASLayoutRangeTypeFetchData] = {
+    .leadingBufferScreenfuls = 1,
+    .trailingBufferScreenfuls = 1
+  };
   
   return self;
 }
@@ -57,6 +71,24 @@
   _tuningParameters[rangeType] = tuningParameters;
 }
 
+- (ASRangeTuningParameters)minimumTuningParametersForRangeType:(ASLayoutRangeType)rangeType
+{
+  ASDisplayNodeAssert(rangeType < _minimumTuningParameters.size(), @"Requesting a range that is OOB for the configured minimum tuning parameters");
+  return _minimumTuningParameters[rangeType];
+}
+
+- (void)setMinimumTuningParameters:(ASRangeTuningParameters)minimumTuningParameters forRangeType:(ASLayoutRangeType)rangeType
+{
+  ASDisplayNodeAssert(rangeType < _minimumTuningParameters.size(), @"Requesting a range that is OOB for the configured minimum tuning parameters");
+  ASDisplayNodeAssert(rangeType != ASLayoutRangeTypeVisible, @"Must not set Visible range minimum tuning parameters (always 0, 0)");
+  _minimumTuningParameters[rangeType] = minimumTuningParameters;
+}
+
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType isFullRange:(BOOL)isFullRange
+{
+  return isFullRange ? [self tuningParametersForRangeType:rangeType] : [self minimumTuningParametersForRangeType:rangeType];
+}
+
 #pragma mark - Abstract Index Path Range Support
 
 // FIXME: This method can be removed once ASRangeControllerBeta becomes the main version.
@@ -66,7 +98,7 @@
   return NO;
 }
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange
 {
   ASDisplayNodeAssertNotSupported();
   return nil;

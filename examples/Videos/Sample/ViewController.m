@@ -37,13 +37,12 @@
   
   videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-3045b261-7e93-4492-b7e5-5d6358376c9f-editedLiveAndDie.mov"]];
   
-  videoNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+  videoNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height/3);
   
   videoNode.gravity = AVLayerVideoGravityResizeAspectFill;
   
   videoNode.backgroundColor = [UIColor lightGrayColor];
   
-  videoNode.playButton = [self playButton];
   return videoNode;
 }
 
@@ -61,7 +60,8 @@
   
   nicCageVideo.backgroundColor = [UIColor lightGrayColor];
   nicCageVideo.shouldAutorepeat = YES;
-  nicCageVideo.playButton = [self playButton];
+  nicCageVideo.shouldAutoplay = YES;
+  nicCageVideo.muted = YES;
 
   return nicCageVideo;
 }
@@ -75,11 +75,10 @@
   
   simonVideo.frame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - ([UIScreen mainScreen].bounds.size.height/3), [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
   
-  simonVideo.gravity = ASVideoGravityResizeAspect;
+  simonVideo.gravity = AVLayerVideoGravityResizeAspect;
   
   simonVideo.backgroundColor = [UIColor lightGrayColor];
   simonVideo.shouldAutorepeat = YES;
-  simonVideo.playButton = [self playButton];
   simonVideo.shouldAutoplay = YES;
   
   return simonVideo;
@@ -97,6 +96,15 @@
   [playButton setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:ASControlStateHighlighted];
 
   return playButton;
+}
+
+- (void)videoNodeWasTapped:(ASVideoNode *)videoNode
+{
+  if (videoNode.player.muted == YES) {
+    videoNode.player.muted = NO;
+  } else {
+    videoNode.player.muted = YES;
+  }
 }
 
 - (BOOL)prefersStatusBarHidden

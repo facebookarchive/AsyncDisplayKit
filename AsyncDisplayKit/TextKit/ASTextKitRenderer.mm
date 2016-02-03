@@ -101,9 +101,8 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
                                              maximumNumberOfLines:attributes.maximumNumberOfLines
                                                    exclusionPaths:attributes.exclusionPaths
                                                   constrainedSize:shadowConstrainedSize
-                                             layoutManagerFactory:attributes.layoutManagerFactory];
-
-    [self truncater];
+                                             layoutManagerFactory:attributes.layoutManagerFactory
+                                            layoutManagerDelegate:attributes.layoutManagerDelegate];
   }
   return _context;
 }
@@ -137,6 +136,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (void)_calculateSize
 {
+  [self truncater];
   if (_attributes.minimumScaleFactor < 1 && _attributes.minimumScaleFactor > 0) {
     [[self fontSizeAdjuster] adjustFontSize];
   }

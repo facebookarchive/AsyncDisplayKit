@@ -35,6 +35,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 };
 
 @class _ASPendingState;
+@class _ASDisplayNodePosition;
 
 // Allow 2^n increments of begin disabling hierarchy notifications
 #define VISIBILITY_NOTIFICATIONS_DISABLED_BITS 4
@@ -59,6 +60,12 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   ASSizeRange _constrainedSize;
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
+
+  // Subnodes implicitly managed by layout changes
+  NSMutableArray<ASDisplayNode *> *_managedSubnodes;
+  
+  NSArray<_ASDisplayNodePosition *> *_insertedSubnodes;
+  NSArray<_ASDisplayNodePosition *> *_deletedSubnodes;
 
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
@@ -87,7 +94,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
     unsigned hasCustomDrawingPriority:1;
 
     // whether custom drawing is enabled
+    unsigned implementsInstanceDrawRect:1;
     unsigned implementsDrawRect:1;
+    unsigned implementsInstanceImageDisplay:1;
     unsigned implementsImageDisplay:1;
     unsigned implementsDrawParameters:1;
 
@@ -101,6 +110,9 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 
   ASDisplayNodeExtraIvars _extra;
   
+  ASDisplayNodeContextModifier _willDisplayNodeContentWithRenderingContext;
+  ASDisplayNodeContextModifier _didDisplayNodeContentWithRenderingContext;
+
 #if TIME_DISPLAYNODE_OPS
 @public
   NSTimeInterval _debugTimeToCreateView;
@@ -126,10 +138,11 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 - (BOOL)__shouldLoadViewOrLayer;
 - (BOOL)__shouldSize;
 
-// Core implementation of -measureWithSizeRange:. Must be called with _propertyLock held.
-- (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize;
-
+/**
+ Invoked by a call to setNeedsLayout to the underlying view
+ */
 - (void)__setNeedsLayout;
+
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 

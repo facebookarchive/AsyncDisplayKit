@@ -49,6 +49,14 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
 @property (nonatomic, assign, getter=isCropEnabled) BOOL cropEnabled;
 
 /**
+ * @abstract Indicates that efficient downsizing of backing store should *not* be enabled.
+ *
+ * @discussion Defaults to NO. @see ASCroppedImageBackingSizeAndDrawRectInBounds for more
+ * information.
+ */
+@property (nonatomic, assign) BOOL forceUpscaling;
+
+/**
  * @abstract Enables or disables efficient cropping.
  * 
  * @param cropEnabled YES to efficiently crop the receiver's contents such that

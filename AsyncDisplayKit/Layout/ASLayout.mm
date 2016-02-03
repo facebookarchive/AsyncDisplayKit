@@ -12,7 +12,7 @@
 #import "ASAssert.h"
 #import "ASLayoutSpecUtilities.h"
 #import "ASInternalHelpers.h"
-#import <stack>
+#import <queue>
 
 CGPoint const CGPointNull = {NAN, NAN};
 
@@ -71,14 +71,14 @@ extern BOOL CGPointIsNull(CGPoint point)
     BOOL visited;
   };
   
-  // Stack of Contexts, used to keep track of sublayouts while traversing this layout in a DFS fashion.
-  std::stack<Context> stack;
-  stack.push({self, CGPointMake(0, 0), NO});
+  // Stack of Contexts, used to keep track of sublayouts while traversing this layout in a BFS fashion.
+  std::queue<Context> queue;
+  queue.push({self, CGPointMake(0, 0), NO});
   
-  while (!stack.empty()) {
-    Context &context = stack.top();
+  while (!queue.empty()) {
+    Context &context = queue.front();
     if (context.visited) {
-      stack.pop();
+      queue.pop();
     } else {
       context.visited = YES;
       
@@ -90,11 +90,11 @@ extern BOOL CGPointIsNull(CGPoint point)
       }
       
       for (ASLayout *sublayout in context.layout.sublayouts) {
-        stack.push({sublayout, context.absolutePosition + sublayout.position, NO});
+        queue.push({sublayout, context.absolutePosition + sublayout.position, NO});
       }
     }
   }
-  
+
   return [ASLayout layoutWithLayoutableObject:_layoutableObject size:_size sublayouts:flattenedSublayouts];
 }
 

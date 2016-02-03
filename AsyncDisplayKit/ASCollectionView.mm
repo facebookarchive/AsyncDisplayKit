@@ -17,7 +17,6 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASInternalHelpers.h"
-#import "ASRangeController.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "_ASDisplayLayer.h"
 
@@ -87,6 +86,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   BOOL _ignoreMaxSizeChange;
   
   NSMutableSet *_registeredSupplementaryKinds;
+  
+  CGPoint _deceleratingVelocity;
   
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
@@ -517,26 +518,33 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASScrollDirection)scrollDirection
 {
-  CGPoint scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
-  return [self scrollDirectionForVelocity:scrollVelocity];
+  CGPoint scrollVelocity;
+  if (self.isTracking) {
+    scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
+  } else {
+    scrollVelocity = _deceleratingVelocity;
+  }
+  
+  ASScrollDirection scrollDirection = [self _scrollDirectionForVelocity:scrollVelocity];
+  return ASScrollDirectionApplyTransform(scrollDirection, self.transform);
 }
 
-- (ASScrollDirection)scrollDirectionForVelocity:(CGPoint)scrollVelocity
+- (ASScrollDirection)_scrollDirectionForVelocity:(CGPoint)scrollVelocity
 {
   ASScrollDirection direction = ASScrollDirectionNone;
   ASScrollDirection scrollableDirections = [self scrollableDirections];
   
   if (ASScrollDirectionContainsHorizontalDirection(scrollableDirections)) { // Can scroll horizontally.
-    if (scrollVelocity.x >= 0) {
+    if (scrollVelocity.x > 0) {
       direction |= ASScrollDirectionRight;
-    } else {
+    } else if (scrollVelocity.x < 0) {
       direction |= ASScrollDirectionLeft;
     }
   }
   if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) { // Can scroll vertically.
-    if (scrollVelocity.y >= 0) {
+    if (scrollVelocity.y > 0) {
       direction |= ASScrollDirectionDown;
-    } else {
+    } else if (scrollVelocity.y < 0) {
       direction |= ASScrollDirectionUp;
     }
   }
@@ -571,7 +579,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:[self scrollDirection]];
   
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)]) {
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
@@ -630,6 +638,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
 {
+  _deceleratingVelocity = CGPointMake(
+    scrollView.contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
+    scrollView.contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
+  );
+
   [self handleBatchFetchScrollingToOffset:*targetContentOffset];
   
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
@@ -826,7 +839,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   ASCollectionNode *collectionNode = self.collectionNode;
   if (collectionNode) {
-    return self.collectionNode.interfaceState;
+    return collectionNode.interfaceState;
   } else {
     // Until we can always create an associated ASCollectionNode without a retain cycle,
     // we might be on our own to try to guess if we're visible.  The node normally

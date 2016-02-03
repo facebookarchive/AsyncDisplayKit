@@ -13,12 +13,19 @@ Pod::Spec.new do |spec|
       'AsyncDisplayKit/*.h',
       'AsyncDisplayKit/Details/**/*.h',
       'AsyncDisplayKit/Layout/*.h',
-      'Base/*.h'
+      'Base/*.h',
+      'AsyncDisplayKit/TextKit/ASTextNodeTypes.h'
   ]
 
   spec.source_files = [
       'AsyncDisplayKit/**/*.{h,m,mm}',
-      'Base/*.{h,m}'
+      'Base/*.{h,m}',
+      
+      # Most TextKit components are not public because the C++ content
+      # in the headers will cause build errors when using
+      # `use_frameworks!` on 0.39.0 & Swift 2.1.
+      # See https://github.com/facebook/AsyncDisplayKit/issues/1153
+      'AsyncDisplayKit/TextKit/*.h',
   ]
 
   spec.frameworks = 'AssetsLibrary'
