@@ -24,7 +24,6 @@ typedef NS_ENUM(NSUInteger, ASLayoutRangeMode) {
 };
 
 typedef NS_ENUM(NSInteger, ASLayoutRangeType) {
-  ASLayoutRangeTypeVisible = 0,
   ASLayoutRangeTypeDisplay,
   ASLayoutRangeTypeFetchData,
   ASLayoutRangeTypeCount
