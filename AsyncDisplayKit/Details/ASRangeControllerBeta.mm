@@ -182,7 +182,9 @@
     [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];
   }
 
-  [self registerForNotificationsIfNeeded];
+  // TODO Don't register for notifications if this range update doesn't cause any node to enter rendering pipeline.
+  // This can be done once there is an API to observe to (or be notified upon) interface state changes or pipeline enterings
+  [self registerForNotificationsIfNeededForInterfaceState:selfInterfaceState];
   
 #if RangeControllerLoggingEnabled
   NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
@@ -276,11 +278,10 @@
 
 #pragma mark - Notification observers
 
-- (void)registerForNotificationsIfNeeded
+- (void)registerForNotificationsIfNeededForInterfaceState:(ASInterfaceState)interfaceState
 {
   if (!_didRegisterForNotifications) {
-    BOOL selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
-    ASLayoutRangeMode nextRangeMode = [ASRangeControllerBeta rangeModeForInterfaceState:selfInterfaceState
+    ASLayoutRangeMode nextRangeMode = [ASRangeControllerBeta rangeModeForInterfaceState:interfaceState
                                                                         scrollDirection:_scrollDirection
                                                                        currentRangeMode:_currentRangeMode];
     if (_currentRangeMode != nextRangeMode) {
