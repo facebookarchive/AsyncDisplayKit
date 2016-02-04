@@ -146,16 +146,21 @@
                                                                   scrollDirection:_scrollDirection
                                                                  currentRangeMode:_currentRangeMode];
 
-  fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
-                                                        rangeMode:rangeMode
-                                                        rangeType:ASLayoutRangeTypeFetchData];
+  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
+                                                                                      rangeType:ASLayoutRangeTypeFetchData];
+  if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersFetchData, ASRangeTuningParametersZero)) {
+    fetchDataIndexPaths = visibleIndexPaths;
+  } else {
+    fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
+                                                          rangeMode:rangeMode
+                                                          rangeType:ASLayoutRangeTypeFetchData];
+  }
 
   ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeMode:rangeMode
                                                                                     rangeType:ASLayoutRangeTypeDisplay];
-  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
-                                                                                      rangeType:ASLayoutRangeTypeFetchData];
-  if (parametersDisplay.leadingBufferScreenfuls == parametersFetchData.leadingBufferScreenfuls &&
-      parametersDisplay.trailingBufferScreenfuls == parametersFetchData.trailingBufferScreenfuls) {
+  if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, ASRangeTuningParametersZero)) {
+    displayIndexPaths = visibleIndexPaths;
+  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, parametersFetchData)) {
     displayIndexPaths = fetchDataIndexPaths;
   } else {
     displayIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection

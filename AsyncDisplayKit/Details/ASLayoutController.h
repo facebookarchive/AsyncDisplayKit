@@ -21,6 +21,10 @@ typedef struct {
   CGFloat trailingBufferScreenfuls;
 } ASRangeTuningParameters;
 
+FOUNDATION_EXPORT ASRangeTuningParameters const ASRangeTuningParametersZero;
+
+FOUNDATION_EXPORT BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningParameters lhs, ASRangeTuningParameters rhs);
+
 @protocol ASLayoutController <NSObject>
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;

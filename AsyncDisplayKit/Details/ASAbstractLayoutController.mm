@@ -10,6 +10,13 @@
 #import "ASAssert.h"
 #include <vector>
 
+extern ASRangeTuningParameters const ASRangeTuningParametersZero = {};
+
+extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningParameters lhs, ASRangeTuningParameters rhs)
+{
+  return lhs.leadingBufferScreenfuls == rhs.leadingBufferScreenfuls && lhs.trailingBufferScreenfuls == rhs.trailingBufferScreenfuls;
+}
+
 @interface ASAbstractLayoutController () {
   std::vector<std::vector<ASRangeTuningParameters>> _tuningParameters;
   CGSize _viewportSize;
