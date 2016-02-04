@@ -184,7 +184,7 @@
 
   // TODO Don't register for notifications if this range update doesn't cause any node to enter rendering pipeline.
   // This can be done once there is an API to observe to (or be notified upon) interface state changes or pipeline enterings
-  [self registerForNotificationsIfNeededForInterfaceState:selfInterfaceState];
+  [self registerForNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
   
 #if RangeControllerLoggingEnabled
   NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
@@ -278,7 +278,7 @@
 
 #pragma mark - Notification observers
 
-- (void)registerForNotificationsIfNeededForInterfaceState:(ASInterfaceState)interfaceState
+- (void)registerForNotificationsForInterfaceStateIfNeeded:(ASInterfaceState)interfaceState
 {
   if (!_didRegisterForNotifications) {
     ASLayoutRangeMode nextRangeMode = [ASRangeControllerBeta rangeModeForInterfaceState:interfaceState
