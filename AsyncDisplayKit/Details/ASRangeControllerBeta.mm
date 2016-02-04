@@ -59,11 +59,6 @@
                                 scrollDirection:(ASScrollDirection)scrollDirection
                                currentRangeMode:(ASLayoutRangeMode)currentRangeMode
 {
-  // If we used full mode, don't switch to minimum mode. That will destroy all the hard work done before.
-  if (currentRangeMode == ASLayoutRangeModeFull) {
-    return ASLayoutRangeModeFull;
-  }
-  
   BOOL isVisible = (ASInterfaceStateIncludesVisible(interfaceState));
   BOOL isScrolling = (scrollDirection != ASScrollDirectionNone);
   BOOL isUsingMinimumRangeMode = (currentRangeMode == ASLayoutRangeModeMinimum);
