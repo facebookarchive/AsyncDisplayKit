@@ -65,7 +65,6 @@
   _rangeIsValid = YES;
   _rangeTypeIndexPaths = [NSMutableDictionary dictionary];
   _rangeTypeHandlers = @{
-                         @(ASLayoutRangeTypeVisible)  : [[ASRangeHandlerVisible alloc] init],
                          @(ASLayoutRangeTypeDisplay)  : [[ASRangeHandlerRender alloc] init],
                          @(ASLayoutRangeTypeFetchData): [[ASRangeHandlerPreload alloc] init],
                          };
