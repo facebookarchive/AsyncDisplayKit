@@ -60,11 +60,16 @@
   // our view is only horizontally scrollable.  This causes UICollectionViewFlowLayout to log a warning.
   // From here we cannot disable this directly (UIViewController's automaticallyAdjustsScrollViewInsets).
   cv.zeroContentInsets = YES;
+
+  ASRangeTuningParameters minimumRenderParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
+  ASRangeTuningParameters minimumPreloadParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
+  [self setTuningParameters:minimumRenderParams forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypeDisplay];
+  [self setTuningParameters:minimumPreloadParams forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypeFetchData];
   
-  ASRangeTuningParameters preloadParams = { .leadingBufferScreenfuls = 2.0, .trailingBufferScreenfuls = 2.0 };
-  ASRangeTuningParameters renderParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
-  [self setTuningParameters:preloadParams forRangeType:ASLayoutRangeTypeFetchData];
-  [self setTuningParameters:renderParams forRangeType:ASLayoutRangeTypeDisplay];
+  ASRangeTuningParameters fullRenderParams = { .leadingBufferScreenfuls = 2.0, .trailingBufferScreenfuls = 2.0 };
+  ASRangeTuningParameters fullPreloadParams = { .leadingBufferScreenfuls = 2.0, .trailingBufferScreenfuls = 2.0 };
+  [self setTuningParameters:fullRenderParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeDisplay];
+  [self setTuningParameters:fullPreloadParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeFetchData];
 }
 
 #pragma mark - Helpers
