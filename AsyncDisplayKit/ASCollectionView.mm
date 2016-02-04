@@ -347,15 +347,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return [_collectionNode tuningParametersForRangeType:rangeType];
 }
 
-// These deprecated methods harken back from a time where only one range type existed.
-- (ASRangeTuningParameters)rangeTuningParameters
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [self tuningParametersForRangeType:ASLayoutRangeTypeDisplay];
+  [_collectionNode setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
-- (void)setRangeTuningParameters:(ASRangeTuningParameters)tuningParameters
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeDisplay];
+  return [_collectionNode tuningParametersForRangeMode:rangeMode rangeType:rangeType];
 }
 
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath

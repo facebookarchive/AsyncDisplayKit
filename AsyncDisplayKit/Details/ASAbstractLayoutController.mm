@@ -11,8 +11,7 @@
 #include <vector>
 
 @interface ASAbstractLayoutController () {
-  std::vector<ASRangeTuningParameters> _tuningParameters;
-  std::vector<ASRangeTuningParameters> _minimumTuningParameters;
+  std::vector<std::vector<ASRangeTuningParameters>> _tuningParameters;
   CGSize _viewportSize;
 }
 @end
@@ -25,32 +24,32 @@
     return nil;
   }
   
-  _tuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
-  _tuningParameters[ASLayoutRangeTypeVisible] = {
+  _tuningParameters = std::vector<std::vector<ASRangeTuningParameters>> (ASLayoutRangeModeCount, std::vector<ASRangeTuningParameters> (ASLayoutRangeTypeCount));
+  
+  _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypeVisible] = {
     .leadingBufferScreenfuls = 0,
     .trailingBufferScreenfuls = 0
   };
-  _tuningParameters[ASLayoutRangeTypeDisplay] = {
-    .leadingBufferScreenfuls = 1.5,
-    .trailingBufferScreenfuls = 0.75
-  };
-  _tuningParameters[ASLayoutRangeTypeFetchData] = {
-    .leadingBufferScreenfuls = 3,
-    .trailingBufferScreenfuls = 2
-  };
-
-  _minimumTuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
-  _minimumTuningParameters[ASLayoutRangeTypeVisible] = {
-    .leadingBufferScreenfuls = 0,
-    .trailingBufferScreenfuls = 0
-  };
-  _minimumTuningParameters[ASLayoutRangeTypeDisplay] = {
+  _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypeDisplay] = {
     .leadingBufferScreenfuls = 0.25,
     .trailingBufferScreenfuls = 0.25
   };
-  _minimumTuningParameters[ASLayoutRangeTypeFetchData] = {
+  _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypeFetchData] = {
     .leadingBufferScreenfuls = 1,
     .trailingBufferScreenfuls = 1
+  };
+
+  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeVisible] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeDisplay] = {
+    .leadingBufferScreenfuls = 1.5,
+    .trailingBufferScreenfuls = 0.75
+  };
+  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeFetchData] = {
+    .leadingBufferScreenfuls = 3,
+    .trailingBufferScreenfuls = 2
   };
   
   return self;
@@ -60,33 +59,28 @@
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  return _tuningParameters[rangeType];
+  return [self tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  ASDisplayNodeAssert(rangeType != ASLayoutRangeTypeVisible, @"Must not set Visible range tuning parameters (always 0, 0)");
-  _tuningParameters[rangeType] = tuningParameters;
+  return [self setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
-- (ASRangeTuningParameters)minimumTuningParametersForRangeType:(ASLayoutRangeType)rangeType
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType < _minimumTuningParameters.size(), @"Requesting a range that is OOB for the configured minimum tuning parameters");
-  return _minimumTuningParameters[rangeType];
+  ASDisplayNodeAssert(rangeMode < _tuningParameters.size() && rangeType < _tuningParameters[rangeMode].size(),
+                      @"Requesting a range that is OOB for the configured tuning parameters");
+  return _tuningParameters[rangeMode][rangeType];
 }
 
-- (void)setMinimumTuningParameters:(ASRangeTuningParameters)minimumTuningParameters forRangeType:(ASLayoutRangeType)rangeType
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType < _minimumTuningParameters.size(), @"Requesting a range that is OOB for the configured minimum tuning parameters");
-  ASDisplayNodeAssert(rangeType != ASLayoutRangeTypeVisible, @"Must not set Visible range minimum tuning parameters (always 0, 0)");
-  _minimumTuningParameters[rangeType] = minimumTuningParameters;
-}
-
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType isFullRange:(BOOL)isFullRange
-{
-  return isFullRange ? [self tuningParametersForRangeType:rangeType] : [self minimumTuningParametersForRangeType:rangeType];
+  ASDisplayNodeAssert(rangeMode < _tuningParameters.size() && rangeType < _tuningParameters[rangeMode].size(),
+                      @"Setting a range that is OOB for the configured tuning parameters");
+  ASDisplayNodeAssert(rangeType != ASLayoutRangeTypeVisible,
+                      @"Must not set Visible range minimum tuning parameters (always 0, 0)");
+  _tuningParameters[rangeMode][rangeType] = tuningParameters;
 }
 
 #pragma mark - Abstract Index Path Range Support
@@ -98,7 +92,7 @@
   return NO;
 }
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssertNotSupported();
   return nil;

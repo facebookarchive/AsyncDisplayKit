@@ -28,14 +28,14 @@
 {
 }
 
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  [_layoutController setTuningParameters:tuningParameters forRangeType:rangeType];
+  [_layoutController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [_layoutController tuningParametersForRangeType:rangeType];
+  return [_layoutController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
 }
 
 @end
@@ -153,7 +153,9 @@
     id<ASRangeHandler> rangeHandler = _rangeTypeHandlers[rangeKey];
 
     if (!_rangeIsValid || [_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths rangeType:rangeType]) {
-      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:rangeType shouldUseFullRange:YES];
+      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
+                                                          rangeMode:ASLayoutRangeModeFull
+                                                          rangeType:rangeType];
 
       // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
       NSMutableSet *removedIndexPaths = _rangeIsValid ? [_rangeTypeIndexPaths[rangeKey] mutableCopy] : [NSMutableSet set];

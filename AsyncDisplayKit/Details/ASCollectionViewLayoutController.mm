@@ -66,9 +66,9 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return self;
 }
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType isFullRange:shouldUseFullRange];
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
   ASRangeGeometry rangeGeometry = [self rangeGeometryWithScrollDirection:scrollDirection tuningParameters:tuningParameters];
   _updateRangeBoundsIndexedByRangeType[rangeType] = rangeGeometry.updateBounds;
   return [self indexPathsForItemsWithinRangeBounds:rangeGeometry.rangeBounds];
@@ -133,9 +133,9 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 
 @implementation ASCollectionViewLayoutControllerBeta
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType isFullRange:shouldUseFullRange];
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
   CGRect rangeBounds = [self rangeBoundsWithScrollDirection:scrollDirection rangeTuningParameters:tuningParameters];
   return [self indexPathsForItemsWithinRangeBounds:rangeBounds];
 }

@@ -23,24 +23,15 @@ typedef struct {
 
 @protocol ASLayoutController <NSObject>
 
-/**
- * Tuning parameters for the range.
- */
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
-
-- (void)setMinimumTuningParameters:(ASRangeTuningParameters)minimumTuningParameters forRangeType:(ASLayoutRangeType)rangeType;
-
-- (ASRangeTuningParameters)minimumTuningParametersForRangeType:(ASLayoutRangeType)rangeType;
-
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType isFullRange:(BOOL)isFullRange;
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 // FIXME: This method can be removed once ASRangeControllerBeta becomes the main version.
 // TODO: Now that it is the main version, can we remove this now?
 - (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray<NSIndexPath *> *)indexPaths rangeType:(ASLayoutRangeType)rangeType;
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType shouldUseFullRange:(BOOL)shouldUseFullRange;
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 @optional
 
