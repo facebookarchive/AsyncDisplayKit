@@ -644,17 +644,19 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
     ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
 
-    if (_layout) {
-      NSIndexSet *insertions, *deletions;
-      [_layout.sublayouts asdk_diffWithArray:newLayout.sublayouts insertions:&insertions deletions:&deletions compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
-        return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
-      }];
-      _insertedSubnodes = [self _filterNodesInLayouts:newLayout.sublayouts withIndexes:insertions];
-      _deletedSubnodes = [self _filterNodesInLayouts:_layout.sublayouts withIndexes:deletions];
-    } else {
-      NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.sublayouts count])];
-      _insertedSubnodes = [self _filterNodesInLayouts:newLayout.sublayouts withIndexes:indexes];
-      _deletedSubnodes = @[];
+    if ([[self class] usesImplicitHierarchyManagement]) {
+      if (_layout) {
+        NSIndexSet *insertions, *deletions;
+        [_layout.sublayouts asdk_diffWithArray:newLayout.sublayouts insertions:&insertions deletions:&deletions compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
+          return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
+        }];
+        _insertedSubnodes = [self _filterNodesInLayouts:newLayout.sublayouts withIndexes:insertions];
+        _deletedSubnodes = [self _filterNodesInLayouts:_layout.sublayouts withIndexes:deletions];
+      } else {
+        NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.sublayouts count])];
+        _insertedSubnodes = [self _filterNodesInLayouts:newLayout.sublayouts withIndexes:indexes];
+        _deletedSubnodes = @[];
+      }
     }
 
     _layout = newLayout;
