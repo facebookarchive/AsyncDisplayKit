@@ -23,7 +23,6 @@
 {
 @private
   // Control Attributes
-  BOOL _targetAdded;
   BOOL _enabled;
   BOOL _highlighted;
 
@@ -88,14 +87,14 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   [super didLoad];
   
   // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
-  if (!_targetAdded) {
+  if (![self hasTarget]) {
     self.userInteractionEnabled = NO;
   }
 }
 
 - (BOOL)shouldTrackTouches
 {
-  return _targetAdded && self.enabled;
+  return [self hasTarget] && self.enabled;
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -269,7 +268,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       [targetActions addObject:NSStringFromSelector(action)];
     });
 
-  _targetAdded = YES;
   self.userInteractionEnabled = YES;
 }
 
@@ -351,9 +349,16 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       else
         removeActionFromTarget(target, action);
     });
+  
+  self.userInteractionEnabled = [self hasTarget];
 }
 
 #pragma mark -
+- (BOOL)hasTarget
+{
+  return (_controlEventDispatchTable.count > 0);
+}
+
 - (void)sendActionsForControlEvents:(ASControlNodeEvent)controlEvents withEvent:(UIEvent *)event
 {
   NSParameterAssert(controlEvents != 0);
