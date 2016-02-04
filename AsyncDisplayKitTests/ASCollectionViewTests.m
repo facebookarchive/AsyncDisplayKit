@@ -36,7 +36,7 @@
 }
 
 
-- (ASDataControllerCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
   return ^{
     ASTextCellNode *textCellNode = [ASTextCellNode new];
     textCellNode.text = indexPath.description;

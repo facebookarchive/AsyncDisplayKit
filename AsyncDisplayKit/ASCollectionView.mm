@@ -77,6 +77,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   BOOL _asyncDelegateImplementsInsetSection;
   BOOL _collectionViewLayoutImplementsInsetSection;
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
+  BOOL _asyncDataSourceImplementsNodeBlockForItemAtIndexPath;
   BOOL _queuedNodeSizeUpdate;
   BOOL _isDeallocating;
   
@@ -301,10 +302,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDataSource = nil;
     _proxyDataSource = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
     _asyncDataSourceImplementsConstrainedSizeForNode = NO;
+    _asyncDataSourceImplementsNodeBlockForItemAtIndexPath = NO;
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
-    _asyncDataSourceImplementsConstrainedSizeForNode = ([_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] ? 1 : 0);
+    _asyncDataSourceImplementsConstrainedSizeForNode = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
+    _asyncDataSourceImplementsNodeBlockForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
   }
   
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
@@ -691,27 +694,32 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 }
 
 
-- (ASDataControllerCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath
 {
-  if (![_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockAtIndexPath:)]) {
+  if (!_asyncDataSourceImplementsNodeBlockForItemAtIndexPath) {
     ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
+    ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+    __weak __typeof__(self) weakSelf = self;
     return ^{
+      __typeof__(self) strongSelf = weakSelf;
       [node enterHierarchyState:ASHierarchyStateRangeManaged];
-      ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
       if (node.layoutDelegate == nil) {
-        node.layoutDelegate = self;
+        node.layoutDelegate = strongSelf;
       }
       return node;
     };
   }
 
-  ASDataControllerCellNodeBlock block = [_asyncDataSource collectionView:self nodeBlockAtIndexPath:indexPath];
-  ASDisplayNodeAssertNotNil(block, @"Invalid block, expected nonnull ASDataControllerCellNodeBlock");
+  ASCellNodeBlock block = [_asyncDataSource collectionView:self nodeBlockForItemAtIndexPath:indexPath];
+  ASDisplayNodeAssertNotNil(block, @"Invalid block, expected nonnull ASCellNodeBlock");
+  __weak __typeof__(self) weakSelf = self;
   return ^{
+    __typeof__(self) strongSelf = weakSelf;
+
     ASCellNode *node = block();
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.layoutDelegate == nil) {
-      node.layoutDelegate = self;
+      node.layoutDelegate = strongSelf;
     }
     return node;
   };

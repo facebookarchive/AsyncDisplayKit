@@ -24,7 +24,7 @@ typedef NSUInteger ASDataControllerAnimationOptions;
 /**
  * ASCellNode creation block. Used to lazily create the ASCellNode instance for a specified indexPath.
  */
-typedef ASCellNode * _Nonnull(^ASDataControllerCellNodeBlock)();
+typedef ASCellNode * _Nonnull(^ASCellNodeBlock)();
 
 FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
@@ -43,7 +43,7 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 /**
  Fetch the ASCellNode block for specific index path. This block should return the ASCellNode for the specified index path.
  */
-- (ASDataControllerCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath;
+- (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  The constrained size range for layout.

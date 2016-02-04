@@ -17,7 +17,9 @@
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
-@interface ASCollectionDataController ()
+@interface ASCollectionDataController () {
+  BOOL _dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath;
+}
 
 - (id<ASCollectionDataControllerSource>)collectionDataSource;
 
@@ -176,8 +178,8 @@
     for (NSUInteger j = 0; j < rowCount; j++) {
       NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:j];
       [indexPaths addObject:indexPath];
-      ASDataControllerCellNodeBlock supplementaryCellBlock;
-      if ([self.collectionDataSource respondsToSelector:@selector(dataController:supplementaryNodeBlockOfKind:atIndexPath:)]) {
+      ASCellNodeBlock supplementaryCellBlock;
+      if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
         supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
       } else {
         ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
@@ -196,8 +198,8 @@
     for (NSUInteger i = 0; i < rowNum; i++) {
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
       [indexPaths addObject:indexPath];
-      ASDataControllerCellNodeBlock supplementaryCellBlock;
-      if ([self.collectionDataSource respondsToSelector:@selector(dataController:supplementaryNodeBlockOfKind:atIndexPath:)]) {
+      ASCellNodeBlock supplementaryCellBlock;
+      if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
         supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
       } else {
         ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
@@ -247,6 +249,12 @@
 - (id<ASCollectionDataControllerSource>)collectionDataSource
 {
   return (id<ASCollectionDataControllerSource>)self.dataSource;
+}
+
+- (void)setDataSource:(id<ASDataControllerSource>)dataSource
+{
+  [super setDataSource:dataSource];
+  _dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath = [self.collectionDataSource respondsToSelector:@selector(dataController:supplementaryNodeBlockOfKind:atIndexPath:)];
 }
 
 @end

@@ -72,7 +72,7 @@
   return nil;
 }
 
-- (ASDataControllerCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   return nil;
 }
@@ -127,7 +127,7 @@
 }
 
 
-- (ASDataControllerCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   return ^{
     ASTestTextCellNode *textCellNode = [ASTestTextCellNode new];

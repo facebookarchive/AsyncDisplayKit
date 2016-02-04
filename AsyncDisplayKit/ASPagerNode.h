@@ -19,7 +19,7 @@
 @optional
 
 // This method replaces -collectionView:nodeBlockForItemAtIndexPath:
-- (ASDataControllerCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index;
+- (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index;
 
 @end
 
