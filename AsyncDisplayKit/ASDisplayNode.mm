@@ -30,6 +30,7 @@
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
+NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
 
 @interface _ASDisplayNodePosition : NSObject
 
@@ -276,12 +277,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       ASDN::MutexLocker l(displaySchedulerLock);
       displayScheduled = NO;
       NSSet *displayingNodes = [nodesToDisplay copy];
+      CFAbsoluteTime timestamp = CFAbsoluteTimeGetCurrent();
       nodesToDisplay = nil;
       for (ASDisplayNode *node in displayingNodes) {
         [node __recursivelyTriggerDisplayAndBlock:NO];
       }
       [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
-                                                          object:nil];
+                                                          object:displayingNodes
+                                                        userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: [NSNumber numberWithDouble:timestamp]}];
     });
   }
 }

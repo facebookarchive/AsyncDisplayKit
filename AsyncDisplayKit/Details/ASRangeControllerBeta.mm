@@ -27,6 +27,7 @@
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
   ASLayoutRangeMode _currentRangeMode;
   BOOL _didRegisterForNotifications;
+  CFAbsoluteTime _pendingDisplayNodesTimestamp;
 }
 
 @end
@@ -48,7 +49,7 @@
 - (void)dealloc
 {
   if (_didRegisterForNotifications) {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];
   }
 }
 
@@ -243,7 +244,11 @@
       }
     }
   }
-  
+
+  if (_didRegisterForNotifications) {
+    _pendingDisplayNodesTimestamp = CFAbsoluteTimeGetCurrent();
+  }
+
   _rangeIsValid = YES;
   _queuedRangeUpdate = NO;
   
@@ -280,7 +285,7 @@
                                                                        currentRangeMode:_currentRangeMode];
     if (_currentRangeMode != nextRangeMode) {
       [[NSNotificationCenter defaultCenter] addObserver:self
-                                               selector:@selector(scheduledNodesDidDisplay)
+                                               selector:@selector(scheduledNodesDidDisplay:)
                                                    name:ASRenderingEngineDidDisplayScheduledNodesNotification
                                                  object:nil];
       _didRegisterForNotifications = YES;
@@ -288,12 +293,16 @@
   }
 }
 
-- (void)scheduledNodesDidDisplay
+- (void)scheduledNodesDidDisplay:(NSNotification *)notification
 {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-  _didRegisterForNotifications = NO;
-
-  [self scheduleRangeUpdate];
+  CFAbsoluteTime notificationTimestamp = ((NSNumber *)[notification.userInfo objectForKey:ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp]).doubleValue;
+  if (_pendingDisplayNodesTimestamp < notificationTimestamp) {
+    // The rendering engine has processed all the nodes this range controller scheduled. Let's schedule a range update
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];
+    _didRegisterForNotifications = NO;
+    
+    [self scheduleRangeUpdate];
+  }
 }
 
 #pragma mark - Cell node view handling
