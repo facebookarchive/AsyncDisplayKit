@@ -1475,14 +1475,12 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (NSArray *)subnodes
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
   return [_subnodes copy];
 }
 
 - (ASDisplayNode *)supernode
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
   return _supernode;
 }
