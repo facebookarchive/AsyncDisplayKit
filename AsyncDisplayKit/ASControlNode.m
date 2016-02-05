@@ -7,7 +7,6 @@
  */
 
 #import "ASControlNode.h"
-#import "ASDisplayNode+Subclasses.h"
 #import "ASControlNode+Subclasses.h"
 
 // UIControl allows dragging some distance outside of the control itself during
@@ -78,29 +77,16 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
   _enabled = YES;
 
+  // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
+  self.userInteractionEnabled = NO;
   return self;
 }
 
 #pragma mark - ASDisplayNode Overrides
-- (void)didLoad
-{
-  [super didLoad];
-  
-  // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
-  if (![self hasTarget]) {
-    self.userInteractionEnabled = NO;
-  }
-}
-
-- (BOOL)shouldTrackTouches
-{
-  return [self hasTarget] && self.enabled;
-}
-
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.shouldTrackTouches)
+  if (!self.enabled)
     return;
 
   ASControlNodeEvent controlEventMask = 0;
@@ -136,7 +122,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.shouldTrackTouches)
+  if (!self.enabled)
     return;
 
   NSParameterAssert([touches count] == 1);
@@ -162,7 +148,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.shouldTrackTouches)
+  if (!self.enabled)
     return;
 
   // We're no longer tracking and there is no touch to be inside.
@@ -181,7 +167,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.shouldTrackTouches)
+  if (!self.enabled)
     return;
 
   // On iPhone 6s, iOS 9.2 (and maybe other versions) sometimes calls -touchesEnded:withEvent:
@@ -349,16 +335,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       else
         removeActionFromTarget(target, action);
     });
-  
-  self.userInteractionEnabled = [self hasTarget];
 }
 
 #pragma mark -
-- (BOOL)hasTarget
-{
-  return (_controlEventDispatchTable.count > 0);
-}
-
 - (void)sendActionsForControlEvents:(ASControlNodeEvent)controlEvents withEvent:(UIEvent *)event
 {
   NSParameterAssert(controlEvents != 0);
