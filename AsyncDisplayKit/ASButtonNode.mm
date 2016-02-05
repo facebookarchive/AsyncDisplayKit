@@ -196,6 +196,7 @@
   [self setNeedsLayout];
 }
 
+#if TARGET_OS_IOS
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
 {
   NSDictionary *attributes = @{
@@ -207,6 +208,7 @@
                                                                attributes:attributes];
   [self setAttributedTitle:string forState:state];
 }
+#endif
 
 - (NSAttributedString *)attributedTitleForState:(ASControlState)state
 {
