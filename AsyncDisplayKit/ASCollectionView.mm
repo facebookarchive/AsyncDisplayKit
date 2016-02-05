@@ -699,10 +699,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (!_asyncDataSourceImplementsNodeBlockForItemAtIndexPath) {
     ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
     ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+    [node enterHierarchyState:ASHierarchyStateRangeManaged];
     __weak __typeof__(self) weakSelf = self;
     return ^{
       __typeof__(self) strongSelf = weakSelf;
-      [node enterHierarchyState:ASHierarchyStateRangeManaged];
       if (node.layoutDelegate == nil) {
         node.layoutDelegate = strongSelf;
       }
@@ -717,6 +717,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     __typeof__(self) strongSelf = weakSelf;
 
     ASCellNode *node = block();
+    ASDisplayNodeAssertFalse(node.isNodeLoaded);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.layoutDelegate == nil) {
       node.layoutDelegate = strongSelf;
