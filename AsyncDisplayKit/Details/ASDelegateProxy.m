@@ -81,8 +81,8 @@
 @end
 
 @implementation ASDelegateProxy {
-  id <NSObject> __weak _target;
   id <ASDelegateProxyInterceptor> __weak _interceptor;
+  id <NSObject> __weak _target;
 }
 
 - (instancetype)initWithTarget:(id <NSObject>)target interceptor:(id <ASDelegateProxyInterceptor>)interceptor

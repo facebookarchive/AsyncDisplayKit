@@ -16,6 +16,7 @@
   UICollectionViewFlowLayout *_flowLayout;
   ASPagerNodeProxy *_proxy;
   __weak id <ASPagerNodeDataSource> _pagerDataSource;
+  BOOL _pagerDataSourceImplementsNodeBlockAtIndex;
 }
 
 @end
@@ -84,6 +85,16 @@
   return pageNode;
 }
 
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
+  if (!_pagerDataSourceImplementsNodeBlockAtIndex) {
+    ASCellNode *node = [_pagerDataSource pagerNode:self nodeAtIndex:indexPath.item];
+    return ^{ return node; };
+  }
+  return [_pagerDataSource pagerNode:self nodeBlockAtIndex:indexPath.item];
+}
+
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
   ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
@@ -106,6 +117,7 @@
 {
   if (pagerDataSource != _pagerDataSource) {
     _pagerDataSource = pagerDataSource;
+    _pagerDataSourceImplementsNodeBlockAtIndex = [_pagerDataSource respondsToSelector:@selector(pagerNode:nodeBlockAtIndex:)];
     _proxy = pagerDataSource ? [[ASPagerNodeProxy alloc] initWithTarget:pagerDataSource interceptor:self] : nil;
     super.dataSource = (id <ASCollectionDataSource>)_proxy;
   }

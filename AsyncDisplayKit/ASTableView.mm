@@ -876,6 +876,35 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return node;
 }
 
+- (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
+  if (![_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)]) {
+    ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
+    ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
+    __weak __typeof__(self) weakSelf = self;
+    return ^{
+      __typeof__(self) strongSelf = weakSelf;
+      [node enterHierarchyState:ASHierarchyStateRangeManaged];
+      if (node.layoutDelegate == nil) {
+        node.layoutDelegate = strongSelf;
+      }
+      return node;
+    };
+  }
+
+  ASCellNodeBlock block = [_asyncDataSource tableView:self nodeBlockForRowAtIndexPath:indexPath];
+  __weak __typeof__(self) weakSelf = self;
+  ASCellNodeBlock configuredNodeBlock = ^{
+    __typeof__(self) strongSelf = weakSelf;
+    ASCellNode *node = block();
+    [node enterHierarchyState:ASHierarchyStateRangeManaged];
+    if (node.layoutDelegate == nil) {
+      node.layoutDelegate = strongSelf;
+    }
+    return node;
+  };
+  return configuredNodeBlock;
+}
+
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   return ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0),
