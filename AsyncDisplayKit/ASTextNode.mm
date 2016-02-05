@@ -104,6 +104,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     _shadowOpacity = [super shadowOpacity];
     _shadowRadius = [super shadowRadius];
 
+    // Disable user interaction for text node by default.
+    self.userInteractionEnabled = NO;
     self.needsDisplayOnBoundsChange = YES;
 
     _truncationMode = NSLineBreakByWordWrapping;
