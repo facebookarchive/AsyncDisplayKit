@@ -25,7 +25,7 @@
   return [[ASCellNode alloc] init];
 }
 
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   return ^{ return [[ASCellNode alloc] init]; };
 }
