@@ -21,29 +21,33 @@
 {
   NSIndexSet *commonIndexes = [self _asdk_commonIndexesWithArray:array compareBlock:comparison];
   
-  if (insertions) {
-    NSArray *commonObjects = [self objectsAtIndexes:commonIndexes];
-    NSMutableIndexSet *insertionIndexes = [NSMutableIndexSet indexSet];
-    for (NSInteger i = 0, j = 0; i < commonObjects.count || j < array.count;) {
-      if (i < commonObjects.count && j < array.count && comparison(commonObjects[i], array[j])) {
-        i++; j++;
-      } else {
-        [insertionIndexes addIndex:j];
-        j++;
-      }
+  NSArray *commonObjects = [self objectsAtIndexes:commonIndexes];
+  NSMutableIndexSet *insertionIndexes = [NSMutableIndexSet indexSet];
+  for (NSInteger i = 0, j = 0; i < commonObjects.count || j < array.count;) {
+    if (i < commonObjects.count && j < array.count && comparison(commonObjects[i], array[j])) {
+      i++; j++;
+    } else {
+      [insertionIndexes addIndex:j];
+      j++;
     }
-    *insertions = insertionIndexes;
   }
-  
-  if (deletions) {
-    NSMutableIndexSet *deletionIndexes = [NSMutableIndexSet indexSet];
-    for (NSInteger i = 0; i < self.count; i++) {
-      if (![commonIndexes containsIndex:i]) {
-        [deletionIndexes addIndex:i];
+  *insertions = insertionIndexes;
+
+  NSMutableIndexSet *deletionIndexes = [NSMutableIndexSet indexSet];
+  NSInteger offset = 0;
+  NSInteger insertionIndex = -1;
+  for (NSInteger i = 0; i < self.count; i++) {
+    if (![commonIndexes containsIndex:i]) {
+      // Offset deletions such that insertions are performed first
+      NSInteger j = [insertionIndexes indexLessThanOrEqualToIndex:i];
+      if (j != NSNotFound && insertionIndex < j) {
+        offset++;
+        insertionIndex = j;
       }
+      [deletionIndexes addIndex:i + offset];
     }
-    *deletions = deletionIndexes;
   }
+  *deletions = deletionIndexes;
 }
 
 - (NSIndexSet *)_asdk_commonIndexesWithArray:(NSArray *)array compareBlock:(BOOL (^)(id lhs, id rhs))comparison
