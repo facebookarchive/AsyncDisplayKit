@@ -17,6 +17,7 @@
 #import "ASSentinel.h"
 #import "ASThread.h"
 #import "ASLayoutOptions.h"
+#import "_ASTransitionContext.h"
 
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
@@ -63,10 +64,8 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASSizeRange _constrainedSize;
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
-
-  // Subnodes implicitly managed by layout changes
-  NSMutableArray<ASDisplayNode *> *_managedSubnodes;
   
+  _ASTransitionContext *_transitionContext;
   NSArray<_ASDisplayNodePosition *> *_insertedSubnodes;
   NSArray<_ASDisplayNodePosition *> *_deletedSubnodes;
 
@@ -148,6 +147,11 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
+
+/**
+ Clamps the layout's origin or position to 0 if any of the calculated values are infinite.
+ */
+- (CGRect)_adjustedFrameForLayout:(ASLayout *)layout;
 
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
 - (BOOL)__visibilityNotificationsDisabled;

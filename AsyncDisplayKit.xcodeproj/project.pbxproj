@@ -460,6 +460,10 @@
 		CC7FD9E21BB603FF005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
+		DB55C2611C6408D6004EDCF5 /* _ASTransitionContext.h in Headers */ = {isa = PBXBuildFile; fileRef = DB55C25F1C6408D6004EDCF5 /* _ASTransitionContext.h */; };
+		DB55C2631C6408D6004EDCF5 /* _ASTransitionContext.m in Sources */ = {isa = PBXBuildFile; fileRef = DB55C2601C6408D6004EDCF5 /* _ASTransitionContext.m */; };
+		DB55C2661C641AE4004EDCF5 /* ASContextTransitioning.h in Headers */ = {isa = PBXBuildFile; fileRef = DB55C2651C641AE4004EDCF5 /* ASContextTransitioning.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DB55C2671C641AE4004EDCF5 /* ASContextTransitioning.h in Headers */ = {isa = PBXBuildFile; fileRef = DB55C2651C641AE4004EDCF5 /* ASContextTransitioning.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DB7121BCD50849C498C886FB /* libPods-AsyncDisplayKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */; };
 		DBC452DB1C5BF64600B16017 /* NSArray+Diffing.h in Headers */ = {isa = PBXBuildFile; fileRef = DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */; };
 		DBC452DC1C5BF64600B16017 /* NSArray+Diffing.m in Sources */ = {isa = PBXBuildFile; fileRef = DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */; };
@@ -781,6 +785,9 @@
 		D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.release.xcconfig"; sourceTree = "<group>"; };
 		D785F6601A74327E00291744 /* ASScrollNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASScrollNode.h; sourceTree = "<group>"; };
 		D785F6611A74327E00291744 /* ASScrollNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASScrollNode.m; sourceTree = "<group>"; };
+		DB55C25F1C6408D6004EDCF5 /* _ASTransitionContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = _ASTransitionContext.h; path = ../_ASTransitionContext.h; sourceTree = "<group>"; };
+		DB55C2601C6408D6004EDCF5 /* _ASTransitionContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = _ASTransitionContext.m; path = ../_ASTransitionContext.m; sourceTree = "<group>"; };
+		DB55C2651C641AE4004EDCF5 /* ASContextTransitioning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASContextTransitioning.h; sourceTree = "<group>"; };
 		DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+Diffing.h"; sourceTree = "<group>"; };
 		DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Diffing.m"; sourceTree = "<group>"; };
 		DBC452DD1C5C6A6A00B16017 /* ArrayDiffingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ArrayDiffingTests.m; sourceTree = "<group>"; };
@@ -959,6 +966,7 @@
 				ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */,
 				ACC945AA1BA9E7C1005E1FB8 /* ASViewController.m */,
 				6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */,
+				DB55C2651C641AE4004EDCF5 /* ASContextTransitioning.h */,
 				058D09E1195D050800B7D73C /* Details */,
 				058D0A01195D050800B7D73C /* Private */,
 				AC6456051B0A333200CF11B8 /* Layout */,
@@ -1102,6 +1110,8 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				DB55C25F1C6408D6004EDCF5 /* _ASTransitionContext.h */,
+				DB55C2601C6408D6004EDCF5 /* _ASTransitionContext.m */,
 				AC026B6D1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h */,
 				AC026B6E1BD57DBF00BBC17E /* _ASHierarchyChangeSet.m */,
 				9C65A7291BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h */,
@@ -1343,6 +1353,7 @@
 				DE6EA3221C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */,
 				1950C4491A3BB5C1005C8279 /* ASEqualityHelpers.h in Headers */,
 				257754A81BEE44CD00737CA5 /* ASTextKitContext.h in Headers */,
+				DB55C2611C6408D6004EDCF5 /* _ASTransitionContext.h in Headers */,
 				464052221A3F83C40061C0BA /* ASFlowLayoutController.h in Headers */,
 				257754AF1BEE44CD00737CA5 /* ASTextKitRenderer+TextChecking.h in Headers */,
 				058D0A57195D05DC00B7D73C /* ASHighlightOverlayLayer.h in Headers */,
@@ -1352,6 +1363,7 @@
 				430E7C8F1B4C23F100697A4C /* ASIndexPath.h in Headers */,
 				ACF6ED221B17843500DA7C62 /* ASInsetLayoutSpec.h in Headers */,
 				ACF6ED4B1B17847A00DA7C62 /* ASInternalHelpers.h in Headers */,
+				DB55C2661C641AE4004EDCF5 /* ASContextTransitioning.h in Headers */,
 				ACF6ED241B17843500DA7C62 /* ASLayout.h in Headers */,
 				251B8EFB1BBB3D690087C538 /* ASDataController+Subclasses.h in Headers */,
 				ACF6ED2A1B17843500DA7C62 /* ASLayoutable.h in Headers */,
@@ -1501,6 +1513,7 @@
 				34EFC76E1B701CF400AD841F /* ASRatioLayoutSpec.h in Headers */,
 				34EFC7651B701CCC00AD841F /* ASRelativeSize.h in Headers */,
 				254C6B741BF94DF4003EC431 /* ASTextNodeWordKerner.h in Headers */,
+				DB55C2671C641AE4004EDCF5 /* ASContextTransitioning.h in Headers */,
 				68B0277B1C1A79D60041016B /* ASDisplayNode+Beta.h in Headers */,
 				B350622D1B010EFD0018CF92 /* ASScrollDirection.h in Headers */,
 				254C6B751BF94DF4003EC431 /* ASTextKitHelpers.h in Headers */,
@@ -1775,6 +1788,7 @@
 				ACF6ED231B17843500DA7C62 /* ASInsetLayoutSpec.mm in Sources */,
 				ACF6ED4C1B17847A00DA7C62 /* ASInternalHelpers.mm in Sources */,
 				ACF6ED251B17843500DA7C62 /* ASLayout.mm in Sources */,
+				DB55C2631C6408D6004EDCF5 /* _ASTransitionContext.m in Sources */,
 				9C5FA3531B8F6ADF00A62714 /* ASLayoutOptions.mm in Sources */,
 				9C5FA35F1B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */,
 				251B8EFA1BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m in Sources */,
