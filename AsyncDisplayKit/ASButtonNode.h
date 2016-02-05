@@ -38,6 +38,13 @@
 @property (nonatomic, assign) ASVerticalAlignment contentVerticalAlignment;
 
 /**
+ * @discussion insets the title and the image node
+ * 
+ * @param contentEdgeInsets The insets used around the title and image node
+ */
+@property (nonatomic, assign) UIEdgeInsets contentEdgeInsets;
+
+/**
  *  Returns the styled title associated with the specified state.
  *
  *  @param state The state that uses the styled title. The possible values are described in ASControlState.
