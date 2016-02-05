@@ -879,11 +879,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
   if (![_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)]) {
     ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
+    [node enterHierarchyState:ASHierarchyStateRangeManaged];
     ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
     __weak __typeof__(self) weakSelf = self;
     return ^{
       __typeof__(self) strongSelf = weakSelf;
-      [node enterHierarchyState:ASHierarchyStateRangeManaged];
       if (node.layoutDelegate == nil) {
         node.layoutDelegate = strongSelf;
       }
@@ -896,6 +896,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASCellNodeBlock configuredNodeBlock = ^{
     __typeof__(self) strongSelf = weakSelf;
     ASCellNode *node = block();
+    ASDisplayNodeAssertFalse(node.isNodeLoaded);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.layoutDelegate == nil) {
       node.layoutDelegate = strongSelf;
