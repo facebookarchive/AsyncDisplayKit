@@ -90,7 +90,7 @@
   return pageNode;
 }
 
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
   if (!_pagerDataSourceImplementsNodeBlockAtIndex) {
