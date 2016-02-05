@@ -27,6 +27,7 @@
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
   ASLayoutRangeMode _currentRangeMode;
   BOOL _didRegisterForNotifications;
+  CFAbsoluteTime _pendingDisplayNodesTimestamp;
 }
 
 @end
@@ -40,7 +41,7 @@
   }
   
   _rangeIsValid = YES;
-  _currentRangeMode = ASLayoutRangeModeCount;
+  _currentRangeMode = ASLayoutRangeModeInvalid;
   
   return self;
 }
@@ -48,31 +49,22 @@
 - (void)dealloc
 {
   if (_didRegisterForNotifications) {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];
   }
 }
 
 #pragma mark - Core visible node range managment API
 
 + (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
-                                scrollDirection:(ASScrollDirection)scrollDirection
                                currentRangeMode:(ASLayoutRangeMode)currentRangeMode
 {
-  // If we used full mode, don't switch to minimum mode. That will destroy all the hard work done before.
-  if (currentRangeMode == ASLayoutRangeModeFull) {
-    return ASLayoutRangeModeFull;
-  }
-  
   BOOL isVisible = (ASInterfaceStateIncludesVisible(interfaceState));
-  BOOL isScrolling = (scrollDirection != ASScrollDirectionNone);
-  BOOL isUsingMinimumRangeMode = (currentRangeMode == ASLayoutRangeModeMinimum);
-  // If we are already visible and scrolling, get busy!  Better get started on preloading before the user scrolls more...
-  // If we are already visible and finished displaying minimum mode, extend to full mode
-  if (isVisible && (isScrolling || isUsingMinimumRangeMode)) {
-    return ASLayoutRangeModeFull;
+  BOOL isFirstRangeUpdate = (currentRangeMode == ASLayoutRangeModeInvalid);
+  if (!isVisible || isFirstRangeUpdate) {
+    return ASLayoutRangeModeMinimum;
   }
   
-  return ASLayoutRangeModeMinimum;
+  return ASLayoutRangeModeFull;
 }
 
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
@@ -145,16 +137,21 @@
                                                                   scrollDirection:_scrollDirection
                                                                  currentRangeMode:_currentRangeMode];
 
-  fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
-                                                        rangeMode:rangeMode
-                                                        rangeType:ASLayoutRangeTypeFetchData];
+  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
+                                                                                      rangeType:ASLayoutRangeTypeFetchData];
+  if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersFetchData, ASRangeTuningParametersZero)) {
+    fetchDataIndexPaths = visibleIndexPaths;
+  } else {
+    fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
+                                                          rangeMode:rangeMode
+                                                          rangeType:ASLayoutRangeTypeFetchData];
+  }
 
   ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeMode:rangeMode
                                                                                     rangeType:ASLayoutRangeTypeDisplay];
-  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
-                                                                                      rangeType:ASLayoutRangeTypeFetchData];
-  if (parametersDisplay.leadingBufferScreenfuls == parametersFetchData.leadingBufferScreenfuls &&
-      parametersDisplay.trailingBufferScreenfuls == parametersFetchData.trailingBufferScreenfuls) {
+  if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, ASRangeTuningParametersZero)) {
+    displayIndexPaths = visibleIndexPaths;
+  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, parametersFetchData)) {
     displayIndexPaths = fetchDataIndexPaths;
   } else {
     displayIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
@@ -181,10 +178,13 @@
     [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];
   }
 
-  [self registerForNotificationsIfNeeded];
+  // TODO Don't register for notifications if this range update doesn't cause any node to enter rendering pipeline.
+  // This can be done once there is an API to observe to (or be notified upon) interface state changes or pipeline enterings
+  [self registerForNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
   
-  // This array is only used if logging is enabled.
+#if RangeControllerLoggingEnabled
   NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
+#endif
   
   for (NSIndexPath *indexPath in allIndexPaths) {
     // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.
@@ -234,13 +234,19 @@
         ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
         // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
         if (node.interfaceState != interfaceState) {
+#if RangeControllerLoggingEnabled
           [modifiedIndexPaths addObject:indexPath];
+#endif
           [node recursivelySetInterfaceState:interfaceState];
         }
       }
     }
   }
-  
+
+  if (_didRegisterForNotifications) {
+    _pendingDisplayNodesTimestamp = CFAbsoluteTimeGetCurrent();
+  }
+
   _rangeIsValid = YES;
   _queuedRangeUpdate = NO;
   
@@ -268,16 +274,14 @@
 
 #pragma mark - Notification observers
 
-- (void)registerForNotificationsIfNeeded
+- (void)registerForNotificationsForInterfaceStateIfNeeded:(ASInterfaceState)interfaceState
 {
   if (!_didRegisterForNotifications) {
-    BOOL selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
-    ASLayoutRangeMode nextRangeMode = [ASRangeControllerBeta rangeModeForInterfaceState:selfInterfaceState
-                                                                        scrollDirection:_scrollDirection
+    ASLayoutRangeMode nextRangeMode = [ASRangeControllerBeta rangeModeForInterfaceState:interfaceState
                                                                        currentRangeMode:_currentRangeMode];
     if (_currentRangeMode != nextRangeMode) {
       [[NSNotificationCenter defaultCenter] addObserver:self
-                                               selector:@selector(scheduledNodesDidDisplay)
+                                               selector:@selector(scheduledNodesDidDisplay:)
                                                    name:ASRenderingEngineDidDisplayScheduledNodesNotification
                                                  object:nil];
       _didRegisterForNotifications = YES;
@@ -285,12 +289,16 @@
   }
 }
 
-- (void)scheduledNodesDidDisplay
+- (void)scheduledNodesDidDisplay:(NSNotification *)notification
 {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-  _didRegisterForNotifications = NO;
-
-  [self scheduleRangeUpdate];
+  CFAbsoluteTime notificationTimestamp = ((NSNumber *)[notification.userInfo objectForKey:ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp]).doubleValue;
+  if (_pendingDisplayNodesTimestamp < notificationTimestamp) {
+    // The rendering engine has processed all the nodes this range controller scheduled. Let's schedule a range update
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];
+    _didRegisterForNotifications = NO;
+    
+    [self scheduleRangeUpdate];
+  }
 }
 
 #pragma mark - Cell node view handling

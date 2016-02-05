@@ -38,6 +38,7 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 @class _ASDisplayNodePosition;
 
 FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification;
+FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp;
 
 // Allow 2^n increments of begin disabling hierarchy notifications
 #define VISIBILITY_NOTIFICATIONS_DISABLED_BITS 4

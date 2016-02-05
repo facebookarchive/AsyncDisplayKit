@@ -10,6 +10,13 @@
 #import "ASAssert.h"
 #include <vector>
 
+extern ASRangeTuningParameters const ASRangeTuningParametersZero = {};
+
+extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningParameters lhs, ASRangeTuningParameters rhs)
+{
+  return lhs.leadingBufferScreenfuls == rhs.leadingBufferScreenfuls && lhs.trailingBufferScreenfuls == rhs.trailingBufferScreenfuls;
+}
+
 @interface ASAbstractLayoutController () {
   std::vector<std::vector<ASRangeTuningParameters>> _tuningParameters;
   CGSize _viewportSize;
@@ -26,10 +33,6 @@
   
   _tuningParameters = std::vector<std::vector<ASRangeTuningParameters>> (ASLayoutRangeModeCount, std::vector<ASRangeTuningParameters> (ASLayoutRangeTypeCount));
   
-  _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypeVisible] = {
-    .leadingBufferScreenfuls = 0,
-    .trailingBufferScreenfuls = 0
-  };
   _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypeDisplay] = {
     .leadingBufferScreenfuls = 0.25,
     .trailingBufferScreenfuls = 0.25
@@ -39,10 +42,6 @@
     .trailingBufferScreenfuls = 1
   };
 
-  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeVisible] = {
-    .leadingBufferScreenfuls = 0,
-    .trailingBufferScreenfuls = 0
-  };
   _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeDisplay] = {
     .leadingBufferScreenfuls = 1.5,
     .trailingBufferScreenfuls = 0.75
@@ -78,8 +77,6 @@
 {
   ASDisplayNodeAssert(rangeMode < _tuningParameters.size() && rangeType < _tuningParameters[rangeMode].size(),
                       @"Setting a range that is OOB for the configured tuning parameters");
-  ASDisplayNodeAssert(rangeType != ASLayoutRangeTypeVisible,
-                      @"Must not set Visible range minimum tuning parameters (always 0, 0)");
   _tuningParameters[rangeMode][rangeType] = tuningParameters;
 }
 
