@@ -6,9 +6,14 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
 
 @protocol ASContextTransitioning <NSObject>
+
+/**
+ @abstreact Defines if the given transition is animated
+ */
+- (BOOL)isAnimated;
 
 /**
  @abstract The frame for the given node before the transition began.
@@ -22,10 +27,8 @@
  */
 - (CGRect)finalFrameForNode:(ASDisplayNode *)node;
 
-- (NSArray<ASLayout *> *)sublayouts;
-
 /**
- @abstract Invoke this method when the transition is completed in `transitionLayout:`
+ @abstract Invoke this method when the transition is completed in `animateLayoutTransition:`
  @discussion Passing NO to `didComplete` will set the original layout as the new layout.
  */
 - (void)completeTransition:(BOOL)didComplete;

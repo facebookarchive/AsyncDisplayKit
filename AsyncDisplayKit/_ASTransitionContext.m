@@ -36,11 +36,6 @@
   return [_delegate transitionContext:self finalFrameForNode:node];
 }
 
-- (NSArray<ASLayout *> *)sublayouts
-{
-  return [_delegate sublayoutsForTransitioningContext:self];
-}
-
 - (void)completeTransition:(BOOL)didComplete
 {
   [_delegate transitionContext:self didComplete:didComplete];

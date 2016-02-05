@@ -12,9 +12,9 @@
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASContextTransitioning.h>
 
 @class ASLayoutSpec;
-@protocol ASContextTransitioning;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -159,19 +159,14 @@ NS_ASSUME_NONNULL_BEGIN
 /** @name Layout Transitioning */
 
 /**
- @discussion Called right before new nodes are inserted. A great place to setup layer attributes before animation.
- */
-- (void)willTransitionLayout:(id<ASContextTransitioning>)context;
-
-/**
  @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
  */
-- (void)transitionLayout:(id<ASContextTransitioning>)context;
+- (void)animateLayoutTransition:(id<ASContextTransitioning>)context;
 
 /**
  @discussion A place to clean up your nodes after the transition
  */
-- (void)didCompleteTransitionLayout:(id<ASContextTransitioning>)context;
+- (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context;
 
 
 /** @name Drawing */

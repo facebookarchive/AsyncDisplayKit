@@ -19,8 +19,6 @@
 - (CGRect)transitionContext:(_ASTransitionContext *)context initialFrameForNode:(ASDisplayNode *)node;
 - (CGRect)transitionContext:(_ASTransitionContext *)context finalFrameForNode:(ASDisplayNode *)node;
 
-- (NSArray<ASLayout *> *)sublayoutsForTransitioningContext:(_ASTransitionContext *)context;
-
 @end
 
 @interface _ASTransitionContext : NSObject <ASContextTransitioning>
