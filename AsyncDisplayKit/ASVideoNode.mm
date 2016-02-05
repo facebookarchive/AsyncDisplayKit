@@ -5,10 +5,9 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
-
+#if TARGET_OS_IOS
 #import "ASVideoNode.h"
 #import "ASDefaultPlayButton.h"
-
 @interface ASVideoNode ()
 {
   ASDN::RecursiveMutex _lock;
@@ -426,3 +425,4 @@
 }
 
 @end
+#endif

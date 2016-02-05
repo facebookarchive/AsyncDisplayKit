@@ -7,7 +7,7 @@
  */
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
-
+#if TARGET_OS_IOS
 @protocol ASVideoNodeDelegate;
 
 // If you need ASVideoNode, please use AsyncDisplayKit master until this comment is removed.
@@ -40,4 +40,4 @@
 @optional
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode;
 @end
-
+#endif
