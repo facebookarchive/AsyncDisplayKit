@@ -134,7 +134,6 @@
   
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
   ASLayoutRangeMode rangeMode = [ASRangeControllerBeta rangeModeForInterfaceState:selfInterfaceState
-                                                                  scrollDirection:_scrollDirection
                                                                  currentRangeMode:_currentRangeMode];
 
   ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
