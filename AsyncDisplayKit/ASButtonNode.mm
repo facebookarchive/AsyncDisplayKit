@@ -11,6 +11,7 @@
 #import "ASThread.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASBackgroundLayoutSpec.h"
+#import "ASInsetLayoutSpec.h"
 
 @interface ASButtonNode ()
 {
@@ -38,6 +39,9 @@
 
 @synthesize contentSpacing = _contentSpacing;
 @synthesize laysOutHorizontally = _laysOutHorizontally;
+@synthesize contentVerticalAlignment = _contentVerticalAlignment;
+@synthesize contentHorizontalAlignment = _contentHorizontalAlignment;
+@synthesize contentEdgeInsets = _contentEdgeInsets;
 
 - (instancetype)init
 {
@@ -53,9 +57,12 @@
     [_titleNode setLayerBacked:YES];
     [_imageNode setLayerBacked:YES];
     [_backgroundImageNode setLayerBacked:YES];
+    
+    [_titleNode setFlexShrink:YES];
       
     _contentHorizontalAlignment = ASAlignmentMiddle;
     _contentVerticalAlignment = ASAlignmentCenter;
+    _contentEdgeInsets = UIEdgeInsetsZero;
     
     [self addSubnode:_backgroundImageNode];
     [self addSubnode:_titleNode];
@@ -194,6 +201,42 @@
   
   _laysOutHorizontally = laysOutHorizontally;
   [self setNeedsLayout];
+}
+
+- (ASVerticalAlignment)contentVerticalAlignment
+{
+    ASDN::MutexLocker l(_propertyLock);
+    return _contentVerticalAlignment;
+}
+
+- (void)setContentVerticalAlignment:(ASVerticalAlignment)contentVerticalAlignment
+{
+    ASDN::MutexLocker l(_propertyLock);
+    _contentVerticalAlignment = contentVerticalAlignment;
+}
+
+- (ASHorizontalAlignment)contentHorizontalAlignment
+{
+    ASDN::MutexLocker l(_propertyLock);
+    return _contentHorizontalAlignment;
+}
+
+- (void)setContentHorizontalAlignment:(ASHorizontalAlignment)contentHorizontalAlignment
+{
+    ASDN::MutexLocker l(_propertyLock);
+    _contentHorizontalAlignment = contentHorizontalAlignment;
+}
+
+- (UIEdgeInsets)contentEdgeInsets
+{
+    ASDN::MutexLocker l(_propertyLock);
+    return _contentEdgeInsets;
+}
+
+- (void)setContentEdgeInsets:(UIEdgeInsets)contentEdgeInsets
+{
+    ASDN::MutexLocker l(_propertyLock);
+    _contentEdgeInsets = contentEdgeInsets;
 }
 
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
@@ -352,11 +395,18 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
+  UIEdgeInsets contentEdgeInsets;
+  ASLayoutSpec *spec;
   ASStackLayoutSpec *stack = [[ASStackLayoutSpec alloc] init];
-  stack.direction = self.laysOutHorizontally ? ASStackLayoutDirectionHorizontal : ASStackLayoutDirectionVertical;
-  stack.spacing = self.contentSpacing;
-  stack.horizontalAlignment = _contentHorizontalAlignment;
-  stack.verticalAlignment = _contentVerticalAlignment;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    stack.direction = _laysOutHorizontally ? ASStackLayoutDirectionHorizontal : ASStackLayoutDirectionVertical;
+    stack.spacing = _contentSpacing;
+    stack.horizontalAlignment = _contentHorizontalAlignment;
+    stack.verticalAlignment = _contentVerticalAlignment;
+    
+    contentEdgeInsets = _contentEdgeInsets;
+  }
   
   NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:2];
   if (self.imageNode.image) {
@@ -369,12 +419,18 @@
   
   stack.children = children;
   
-  if (self.backgroundImageNode.image) {
-      return [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:stack
-                                                        background:self.backgroundImageNode];
-  } else {
-      return stack;
+  spec = stack;
+  
+  if (UIEdgeInsetsEqualToEdgeInsets(UIEdgeInsetsZero, contentEdgeInsets) == NO) {
+    spec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentEdgeInsets child:spec];
   }
+  
+  if (self.backgroundImageNode.image) {
+    spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec
+                                                      background:self.backgroundImageNode];
+  }
+  
+  return spec;
 }
 
 - (void)layout
