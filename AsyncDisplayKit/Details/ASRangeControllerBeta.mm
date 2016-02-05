@@ -41,7 +41,7 @@
   }
   
   _rangeIsValid = YES;
-  _currentRangeMode = ASLayoutRangeModeCount;
+  _currentRangeMode = ASLayoutRangeModeInvalid;
   
   return self;
 }
@@ -56,19 +56,15 @@
 #pragma mark - Core visible node range managment API
 
 + (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
-                                scrollDirection:(ASScrollDirection)scrollDirection
                                currentRangeMode:(ASLayoutRangeMode)currentRangeMode
 {
   BOOL isVisible = (ASInterfaceStateIncludesVisible(interfaceState));
-  BOOL isScrolling = (scrollDirection != ASScrollDirectionNone);
-  BOOL isUsingMinimumRangeMode = (currentRangeMode == ASLayoutRangeModeMinimum);
-  // If we are already visible and scrolling, get busy!  Better get started on preloading before the user scrolls more...
-  // If we are already visible and finished displaying minimum mode, extend to full mode
-  if (isVisible && (isScrolling || isUsingMinimumRangeMode)) {
-    return ASLayoutRangeModeFull;
+  BOOL isFirstRangeUpdate = (currentRangeMode == ASLayoutRangeModeInvalid);
+  if (!isVisible || isFirstRangeUpdate) {
+    return ASLayoutRangeModeMinimum;
   }
   
-  return ASLayoutRangeModeMinimum;
+  return ASLayoutRangeModeFull;
 }
 
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
@@ -282,7 +278,6 @@
 {
   if (!_didRegisterForNotifications) {
     ASLayoutRangeMode nextRangeMode = [ASRangeControllerBeta rangeModeForInterfaceState:interfaceState
-                                                                        scrollDirection:_scrollDirection
                                                                        currentRangeMode:_currentRangeMode];
     if (_currentRangeMode != nextRangeMode) {
       [[NSNotificationCenter defaultCenter] addObserver:self
