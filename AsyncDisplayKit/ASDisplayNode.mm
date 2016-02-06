@@ -1405,6 +1405,10 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"Should not cause recursive __enterHierarchy");
+  
+  // Profiling has shown that locking this method is benificial, so each of the property accesses don't have to lock and unlock.
+  ASDN::MutexLocker l(_propertyLock);
+  
   if (!self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
     self.inHierarchy = YES;
     _flags.isEnteringHierarchy = YES;
@@ -1427,6 +1431,10 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"Should not cause recursive __exitHierarchy");
+  
+  // Profiling has shown that locking this method is benificial, so each of the property accesses don't have to lock and unlock.
+  ASDN::MutexLocker l(_propertyLock);
+  
   if (self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
     self.inHierarchy = NO;
 

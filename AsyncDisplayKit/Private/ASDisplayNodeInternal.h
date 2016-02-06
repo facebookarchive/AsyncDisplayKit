@@ -43,7 +43,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 // Allow 2^n increments of begin disabling hierarchy notifications
 #define VISIBILITY_NOTIFICATIONS_DISABLED_BITS 4
 
-#define TIME_DISPLAYNODE_OPS (DEBUG || PROFILE)
+#define TIME_DISPLAYNODE_OPS 0 // If you're using this information frequently, try: (DEBUG || PROFILE)
 
 @interface ASDisplayNode ()
 {
