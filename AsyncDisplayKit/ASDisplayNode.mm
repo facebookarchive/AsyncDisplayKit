@@ -655,6 +655,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     if ([[self class] usesImplicitHierarchyManagement]) {
       if (_layout) {
         NSIndexSet *insertions, *deletions;
+        // TODO: Filter the flattened layouts, since it's including nodes that are not in the hierarchy
         [_layout.sublayouts asdk_diffWithArray:newLayout.sublayouts insertions:&insertions deletions:&deletions compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
           return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
         }];
@@ -1084,6 +1085,16 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
     }
     _deletedSubnodes = nil;
   }
+}
+
+- (void)_implicitlyInsertSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
+{
+  [self insertSubnode:node atIndex:idx];
+}
+
+- (void)_implicitlyRemoveSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
+{
+  [node removeFromSupernode];
 }
 
 #pragma mark - _ASTransitionContextDelegate
@@ -2219,16 +2230,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   
   NSLog(@"Adjusted frame: %@", NSStringFromCGRect(subnodeFrame));
   return subnodeFrame;
-}
-
-- (void)_implicitlyInsertSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
-{
-  [self insertSubnode:node atIndex:idx];
-}
-
-- (void)_implicitlyRemoveSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
-{
-  [node removeFromSupernode];
 }
 
 - (void)displayWillStart

@@ -35,6 +35,11 @@ extern BOOL CGPointIsNull(CGPoint point);
 @property (nonatomic, readonly) NSArray<ASLayout *> *sublayouts;
 
 /**
+ Whether the current layout has been flattened
+ */
+@property (nonatomic, readonly) BOOL flattened;
+
+/**
  * Initializer.
  *
  * @param layoutableObject The backing ASLayoutable object.
@@ -48,7 +53,8 @@ extern BOOL CGPointIsNull(CGPoint point);
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                                       size:(CGSize)size
                                   position:(CGPoint)position
-                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
+                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
+                                 flattened:(BOOL)flattened;
 
 /**
  * Convenience initializer that has CGPointNull position.
@@ -77,6 +83,18 @@ extern BOOL CGPointIsNull(CGPoint point);
  */
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
 
+/**
+ * Convenience initializer that is flattened and has CGPointNull position.
+ *
+ * @param layoutableObject The backing ASLayoutable object.
+ *
+ * @param size The size of this layout.
+ *
+ * @param sublayouts Sublayouts belong to the new layout.
+ */
++ (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                                               size:(CGSize)size
+                                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
 /**
  * @abstract Evaluates a given predicate block against each object in the receiving layout tree

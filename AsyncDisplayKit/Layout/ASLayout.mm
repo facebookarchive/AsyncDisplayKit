@@ -27,6 +27,7 @@ extern BOOL CGPointIsNull(CGPoint point)
                                       size:(CGSize)size
                                   position:(CGPoint)position
                                 sublayouts:(NSArray *)sublayouts
+                                 flattened:(BOOL)flattened
 {
   ASDisplayNodeAssert(layoutableObject, @"layoutableObject is required.");
 #if DEBUG
@@ -45,6 +46,7 @@ extern BOOL CGPointIsNull(CGPoint point)
       l->_position = position;
     }
     l->_sublayouts = [sublayouts copy];
+    l->_flattened = flattened;
   }
   return l;
 }
@@ -53,12 +55,19 @@ extern BOOL CGPointIsNull(CGPoint point)
                                       size:(CGSize)size
                                 sublayouts:(NSArray *)sublayouts
 {
-  return [self layoutWithLayoutableObject:layoutableObject size:size position:CGPointNull sublayouts:sublayouts];
+  return [self layoutWithLayoutableObject:layoutableObject size:size position:CGPointNull sublayouts:sublayouts flattened:NO];
 }
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size
 {
   return [self layoutWithLayoutableObject:layoutableObject size:size sublayouts:nil];
+}
+
++ (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                                               size:(CGSize)size
+                                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
+{
+  return [self layoutWithLayoutableObject:layoutableObject size:size position:CGPointNull sublayouts:sublayouts flattened:YES];
 }
 
 - (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *))predicateBlock
@@ -69,6 +78,7 @@ extern BOOL CGPointIsNull(CGPoint point)
     ASLayout *layout;
     CGPoint absolutePosition;
     BOOL visited;
+    BOOL flattened;
   };
   
   // Stack of Contexts, used to keep track of sublayouts while traversing this layout in a BFS fashion.
@@ -86,16 +96,17 @@ extern BOOL CGPointIsNull(CGPoint point)
         [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:context.layout.layoutableObject
                                                                        size:context.layout.size
                                                                    position:context.absolutePosition
-                                                                 sublayouts:nil]];
+                                                                 sublayouts:nil
+                                                                  flattened:context.layout.flattened]];
       }
       
       for (ASLayout *sublayout in context.layout.sublayouts) {
-        queue.push({sublayout, context.absolutePosition + sublayout.position, NO});
+        queue.push({sublayout, context.absolutePosition + sublayout.position, NO, context.layout.flattened});
       }
     }
   }
 
-  return [ASLayout layoutWithLayoutableObject:_layoutableObject size:_size sublayouts:flattenedSublayouts];
+  return [ASLayout flattenedLayoutWithLayoutableObject:_layoutableObject size:_size sublayouts:flattenedSublayouts];
 }
 
 @end
