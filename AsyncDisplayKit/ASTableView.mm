@@ -148,7 +148,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
   
-  _rangeController = [[ASRangeControllerBeta alloc] init];
+  _rangeController = [[ASRangeController alloc] init];
   _rangeController.layoutController = _layoutController;
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
