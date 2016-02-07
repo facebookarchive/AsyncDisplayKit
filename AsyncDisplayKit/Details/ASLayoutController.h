@@ -31,10 +31,6 @@ FOUNDATION_EXPORT BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRan
 
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
-// FIXME: This method can be removed once ASRangeControllerBeta becomes the main version.
-// TODO: Now that it is the main version, can we remove this now?
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray<NSIndexPath *> *)indexPaths rangeType:(ASLayoutRangeType)rangeType;
-
 - (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 @optional

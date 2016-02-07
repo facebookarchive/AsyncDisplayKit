@@ -82,13 +82,6 @@ extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningPar
 
 #pragma mark - Abstract Index Path Range Support
 
-// FIXME: This method can be removed once ASRangeControllerBeta becomes the main version.
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths rangeType:(ASLayoutRangeType)rangeType
-{
-  ASDisplayNodeAssertNotSupported();
-  return NO;
-}
-
 - (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssertNotSupported();
