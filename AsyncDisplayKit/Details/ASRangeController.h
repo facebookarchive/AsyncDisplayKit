@@ -77,9 +77,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface ASRangeControllerStable : ASRangeController
-@end
-
 @interface ASRangeControllerBeta : ASRangeController
 @end
 

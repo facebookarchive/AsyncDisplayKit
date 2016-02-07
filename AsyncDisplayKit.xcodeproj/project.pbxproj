@@ -495,10 +495,6 @@
 		DECBD6E81BE56E1900CF4905 /* ASButtonNode.h in Headers */ = {isa = PBXBuildFile; fileRef = DECBD6E51BE56E1900CF4905 /* ASButtonNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DECBD6E91BE56E1900CF4905 /* ASButtonNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECBD6E61BE56E1900CF4905 /* ASButtonNode.mm */; };
 		DECBD6EA1BE56E1900CF4905 /* ASButtonNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECBD6E61BE56E1900CF4905 /* ASButtonNode.mm */; };
-		DECC2ECD1C35C1C600388446 /* ASRangeControllerBeta.h in Headers */ = {isa = PBXBuildFile; fileRef = DECC2ECB1C35C1C600388446 /* ASRangeControllerBeta.h */; };
-		DECC2ECE1C35C1C600388446 /* ASRangeControllerBeta.h in Headers */ = {isa = PBXBuildFile; fileRef = DECC2ECB1C35C1C600388446 /* ASRangeControllerBeta.h */; };
-		DECC2ECF1C35C1C600388446 /* ASRangeControllerBeta.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECC2ECC1C35C1C600388446 /* ASRangeControllerBeta.mm */; };
-		DECC2ED01C35C1C600388446 /* ASRangeControllerBeta.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECC2ECC1C35C1C600388446 /* ASRangeControllerBeta.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -817,8 +813,6 @@
 		DEC146B51C37A16A004A0EE7 /* ASCollectionInternal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASCollectionInternal.m; path = Details/ASCollectionInternal.m; sourceTree = "<group>"; };
 		DECBD6E51BE56E1900CF4905 /* ASButtonNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASButtonNode.h; sourceTree = "<group>"; };
 		DECBD6E61BE56E1900CF4905 /* ASButtonNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASButtonNode.mm; sourceTree = "<group>"; };
-		DECC2ECB1C35C1C600388446 /* ASRangeControllerBeta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRangeControllerBeta.h; sourceTree = "<group>"; };
-		DECC2ECC1C35C1C600388446 /* ASRangeControllerBeta.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRangeControllerBeta.mm; sourceTree = "<group>"; };
 		EFA731F0396842FF8AB635EE /* libPods-AsyncDisplayKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AsyncDisplayKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB07EABBCF28656C6297BC2D /* Pods-AsyncDisplayKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1097,8 +1091,6 @@
 				058D09E9195D050800B7D73C /* ASMutableAttributedStringBuilder.m */,
 				055F1A3619ABD413004DAFF1 /* ASRangeController.h */,
 				055F1A3719ABD413004DAFF1 /* ASRangeController.mm */,
-				DECC2ECB1C35C1C600388446 /* ASRangeControllerBeta.h */,
-				DECC2ECC1C35C1C600388446 /* ASRangeControllerBeta.mm */,
 				292C599C1A956527007E5DD6 /* ASRangeHandler.h */,
 				258FF4251C0D152600A83844 /* ASRangeHandlerVisible.h */,
 				258FF4261C0D152600A83844 /* ASRangeHandlerVisible.mm */,
@@ -1399,7 +1391,6 @@
 				9C65A72A1BA8EA4D0084DA91 /* ASLayoutOptionsPrivate.h in Headers */,
 				292C599F1A956527007E5DD6 /* ASLayoutRangeType.h in Headers */,
 				257754B61BEE44CD00737CA5 /* ASEqualityHashHelpers.h in Headers */,
-				DECC2ECD1C35C1C600388446 /* ASRangeControllerBeta.h in Headers */,
 				ACF6ED261B17843500DA7C62 /* ASLayoutSpec.h in Headers */,
 				ACF6ED4D1B17847A00DA7C62 /* ASLayoutSpecUtilities.h in Headers */,
 				AC026B6F1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h in Headers */,
@@ -1462,7 +1453,6 @@
 				B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */,
 				B350623F1B010EFD0018CF92 /* _ASAsyncTransactionContainer.h in Headers */,
 				B13CA1011C52004900E031AB /* ASCollectionNode+Beta.h in Headers */,
-				DECC2ECE1C35C1C600388446 /* ASRangeControllerBeta.h in Headers */,
 				254C6B7E1BF94DF4003EC431 /* ASTextKitTailTruncater.h in Headers */,
 				B35062411B010EFD0018CF92 /* _ASAsyncTransactionGroup.h in Headers */,
 				B35062491B010EFD0018CF92 /* _ASCoreAnimationExtras.h in Headers */,
@@ -1853,7 +1843,6 @@
 				257754BE1BEE458E00737CA5 /* ASTextKitHelpers.mm in Sources */,
 				257754A91BEE44CD00737CA5 /* ASTextKitContext.mm in Sources */,
 				ACF6ED501B17847A00DA7C62 /* ASStackPositionedLayout.mm in Sources */,
-				DECC2ECF1C35C1C600388446 /* ASRangeControllerBeta.mm in Sources */,
 				ACF6ED521B17847A00DA7C62 /* ASStackUnpositionedLayout.mm in Sources */,
 				257754A61BEE44CD00737CA5 /* ASTextKitAttributes.mm in Sources */,
 				ACF6ED321B17843500DA7C62 /* ASStaticLayoutSpec.mm in Sources */,
@@ -1990,7 +1979,6 @@
 				9C8221981BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */,
 				34EFC7721B701D0300AD841F /* ASStackLayoutSpec.mm in Sources */,
 				34EFC7761B701D2A00AD841F /* ASStackPositionedLayout.mm in Sources */,
-				DECC2ED01C35C1C600388446 /* ASRangeControllerBeta.mm in Sources */,
 				34EFC7781B701D3100AD841F /* ASStackUnpositionedLayout.mm in Sources */,
 				AC026B6C1BD57D6F00BBC17E /* ASChangeSetDataController.m in Sources */,
 				34EFC7741B701D0A00AD841F /* ASStaticLayoutSpec.mm in Sources */,

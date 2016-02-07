@@ -290,13 +290,11 @@
 
     _messageToViewOrLayer(setNeedsDisplay);
 
-    if ([ASDisplayNode shouldUseNewRenderingRange]) {
-      BOOL nowDisplay = ASInterfaceStateIncludesDisplay(_interfaceState);
-      // FIXME: This should not need to recursively display, so create a non-recursive variant.
-      // The semantics of setNeedsDisplay (as defined by CALayer behavior) are not recursive.
-      if (_layer && !_flags.synchronous && nowDisplay && [self __implementsDisplay]) {
-        [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
-      }
+    BOOL nowDisplay = ASInterfaceStateIncludesDisplay(_interfaceState);
+    // FIXME: This should not need to recursively display, so create a non-recursive variant.
+    // The semantics of setNeedsDisplay (as defined by CALayer behavior) are not recursive.
+    if (_layer && !_flags.synchronous && nowDisplay && [self __implementsDisplay]) {
+      [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
     }
   }
 }

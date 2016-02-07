@@ -14,7 +14,6 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  [ASDisplayNode setShouldUseNewRenderingRange:YES];
   return YES;
 }
 

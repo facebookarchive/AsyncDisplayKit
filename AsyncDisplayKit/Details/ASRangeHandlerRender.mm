@@ -18,36 +18,6 @@
 @end
 
 @implementation ASRangeHandlerRender
-@synthesize workingWindow = _workingWindow;
-
-- (UIWindow *)workingWindow
-{
-  ASDisplayNodeAssertMainThread();
-
-  // we add nodes' views to this invisible window to start async rendering
-  // TODO: Replace this with directly triggering display https://github.com/facebook/AsyncDisplayKit/issues/315
-  // Update: Latest attempt is at https://github.com/facebook/AsyncDisplayKit/pull/828
-
-  if (!_workingWindow && ![ASDisplayNode shouldUseNewRenderingRange]) {
-    _workingWindow = [[UIWindow alloc] initWithFrame:CGRectZero];
-    _workingWindow.windowLevel = UIWindowLevelNormal - 1000;
-    _workingWindow.userInteractionEnabled = NO;
-    _workingWindow.hidden = YES;
-    _workingWindow.alpha = 0.0;
-  }
-
-  return _workingWindow;
-}
-  
-- (void)dealloc
-{
-  if (![ASDisplayNode shouldUseNewRenderingRange]) {
-    for (CALayer *layer in [self.workingWindow.layer.sublayers copy]) {
-      ASDisplayNode *node = layer.asyncdisplaykit_node;
-      [self node:node exitedRangeOfType:ASLayoutRangeTypeDisplay];
-    }
-  }
-}
 
 - (void)node:(ASDisplayNode *)node enteredRangeOfType:(ASLayoutRangeType)rangeType
 {
@@ -65,16 +35,7 @@
 
   
 //  ASDisplayNodeAssert(![ASDisplayNode shouldUseNewRenderingRange], @"It should no longer be possible to reach this point with the new display range enabled");
-  if ([ASDisplayNode shouldUseNewRenderingRange]) {
-    [node recursivelyEnsureDisplaySynchronously:NO];
-  } else {
-    // Add the node's layer to an off-screen window to trigger display and mark its contents as non-volatile.
-    // Use the layer directly to avoid the substantial overhead of UIView heirarchy manipulations.
-    // Any view-backed nodes will still create their views in order to assemble the layer heirarchy, and they will
-    // also assemble a view subtree for the node, but we avoid the much more significant expense triggered by a view
-    // being added or removed from an onscreen window (responder chain setup, will/DidMoveToWindow: recursive calls, etc)
-    [[[self workingWindow] layer] addSublayer:node.layer];
-  }
+  [node recursivelyEnsureDisplaySynchronously:NO];
 }
 
 - (void)node:(ASDisplayNode *)node exitedRangeOfType:(ASLayoutRangeType)rangeType
@@ -103,24 +64,9 @@
   [node exitInterfaceState:ASInterfaceStateDisplay];
   
 //  ASDisplayNodeAssert(![ASDisplayNode shouldUseNewRenderingRange], @"It should no longer be possible to reach this point with the new display range enabled");
-  
-  if ([ASDisplayNode shouldUseNewRenderingRange]) {
-    if (![node isLayerBacked]) {
-      [node.view removeFromSuperview];
-    } else {
-      [node.layer removeFromSuperlayer];
-    }
+  if (![node isLayerBacked]) {
+    [node.view removeFromSuperview];
   } else {
-    if (node.layer.superlayer != [[self workingWindow] layer]) {
-      // In this case, the node has previously passed through the working range (or it is zero), and it has now fallen outside the working range.
-      if (![node isLayerBacked]) {
-        // If the node is view-backed, we need to make sure to remove the view (which is now present in the containing cell contentsView).
-        // Layer-backed nodes will be fully handled by the unconditional removal below.
-        [node.view removeFromSuperview];
-      }
-    }
-    
-    // At this point, the node's layer may validly be present either in the workingWindow, or in the contentsView of a cell.
     [node.layer removeFromSuperlayer];
   }
 }
