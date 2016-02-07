@@ -58,6 +58,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 /**
  @abstract Determines how the text is truncated to fit within the receiver's maximum size.
  @discussion Defaults to NSLineBreakByWordWrapping.
+ @note Setting a truncationMode in attributedString will override the truncation mode set here.
  */
 @property (nonatomic, assign) NSLineBreakMode truncationMode;
 
