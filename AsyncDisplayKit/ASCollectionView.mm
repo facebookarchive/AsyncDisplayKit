@@ -167,7 +167,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     self.strongCollectionNode = collectionNode;
   }
   
-  _layoutController = [[ASCollectionViewLayoutControllerBeta alloc] initWithCollectionView:self];
+  _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];
   
   _rangeController = [[ASRangeController alloc] init];
   _rangeController.dataSource = self;

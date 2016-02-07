@@ -49,10 +49,6 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return self;
 }
 
-@end
-
-@implementation ASCollectionViewLayoutControllerBeta
-
 - (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
