@@ -1,0 +1,1 @@
+ const unsigned char AsyncDisplayKitVersionString[] __attribute__ ((used)) = "@(#)PROGRAM:AsyncDisplayKit  PROJECT:AsyncDisplayKit-1" "\n"; const double AsyncDisplayKitVersionNumber __attribute__ ((used)) = (double)1.;

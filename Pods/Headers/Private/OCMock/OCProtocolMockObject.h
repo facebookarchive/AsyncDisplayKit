@@ -1,0 +1,1 @@
+../../../OCMock/Source/OCMock/OCProtocolMockObject.h

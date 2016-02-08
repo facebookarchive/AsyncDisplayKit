@@ -1,0 +1,2268 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="html/html; charset=utf-8" />
+		<title>ASDisplayNode Class Reference</title>
+		<meta id="xcode-display" name="xcode-display" content="render"/>
+		<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
+		<link rel="stylesheet" type="text/css" media="print" href="../css/stylesPrint.css" />
+		<meta name="generator" content="appledoc 2.2 (build 963)" />
+	</head>
+	<body>
+		<header id="top_header">
+			<div id="library" class="hideInXcode">
+				<h1><a id="libraryTitle" href="../index.html">AsyncDisplayKit </a></h1>
+				<a id="developerHome" href="../index.html">Facebook</a>
+			</div>
+			
+			<div id="title" role="banner">
+				<h1 class="hideInXcode">ASDisplayNode Class Reference</h1>
+			</div>
+			<ul id="headerButtons" role="toolbar">
+				<li id="toc_button">
+					<button aria-label="Show Table of Contents" role="checkbox" class="open" id="table_of_contents"><span class="disclosure"></span>Table of Contents</button>
+				</li>
+				<li id="jumpto_button" role="navigation">
+					<select id="jumpTo">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+	
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+	
+	
+	
+	<option value="properties">Properties</option>
+	
+	<option value="//api/name/calculatedSize">&nbsp;&nbsp;&nbsp;&nbsp;calculatedSize</option>
+	
+	<option value="//api/name/constrainedSizeForCalculatedSize">&nbsp;&nbsp;&nbsp;&nbsp;constrainedSizeForCalculatedSize</option>
+	
+	<option value="//api/name/displaySuspended">&nbsp;&nbsp;&nbsp;&nbsp;displaySuspended</option>
+	
+	<option value="//api/name/displaysAsynchronously">&nbsp;&nbsp;&nbsp;&nbsp;displaysAsynchronously</option>
+	
+	<option value="//api/name/hitTestSlop">&nbsp;&nbsp;&nbsp;&nbsp;hitTestSlop</option>
+	
+	<option value="//api/name/layer">&nbsp;&nbsp;&nbsp;&nbsp;layer</option>
+	
+	<option value="//api/name/layerBacked">&nbsp;&nbsp;&nbsp;&nbsp;layerBacked</option>
+	
+	<option value="//api/name/nodeLoaded">&nbsp;&nbsp;&nbsp;&nbsp;nodeLoaded</option>
+	
+	<option value="//api/name/placeholderEnabled">&nbsp;&nbsp;&nbsp;&nbsp;placeholderEnabled</option>
+	
+	<option value="//api/name/placeholderFadesOut">&nbsp;&nbsp;&nbsp;&nbsp;placeholderFadesOut</option>
+	
+	<option value="//api/name/shouldRasterizeDescendants">&nbsp;&nbsp;&nbsp;&nbsp;shouldRasterizeDescendants</option>
+	
+	<option value="//api/name/subnodes">&nbsp;&nbsp;&nbsp;&nbsp;subnodes</option>
+	
+	<option value="//api/name/supernode">&nbsp;&nbsp;&nbsp;&nbsp;supernode</option>
+	
+	<option value="//api/name/synchronous">&nbsp;&nbsp;&nbsp;&nbsp;synchronous</option>
+	
+	<option value="//api/name/view">&nbsp;&nbsp;&nbsp;&nbsp;view</option>
+	
+	
+	
+	
+	
+	
+	<option value="instance_methods">Instance Methods</option>
+	
+	<option value="//api/name/addSubnode:">&nbsp;&nbsp;&nbsp;&nbsp;- addSubnode:</option>
+	
+	<option value="//api/name/convertPoint:fromNode:">&nbsp;&nbsp;&nbsp;&nbsp;- convertPoint:fromNode:</option>
+	
+	<option value="//api/name/convertPoint:toNode:">&nbsp;&nbsp;&nbsp;&nbsp;- convertPoint:toNode:</option>
+	
+	<option value="//api/name/convertRect:fromNode:">&nbsp;&nbsp;&nbsp;&nbsp;- convertRect:fromNode:</option>
+	
+	<option value="//api/name/convertRect:toNode:">&nbsp;&nbsp;&nbsp;&nbsp;- convertRect:toNode:</option>
+	
+	<option value="//api/name/init">&nbsp;&nbsp;&nbsp;&nbsp;- init</option>
+	
+	<option value="//api/name/initWithLayerClass:">&nbsp;&nbsp;&nbsp;&nbsp;- initWithLayerClass:</option>
+	
+	<option value="//api/name/initWithViewClass:">&nbsp;&nbsp;&nbsp;&nbsp;- initWithViewClass:</option>
+	
+	<option value="//api/name/insertSubnode:aboveSubnode:">&nbsp;&nbsp;&nbsp;&nbsp;- insertSubnode:aboveSubnode:</option>
+	
+	<option value="//api/name/insertSubnode:atIndex:">&nbsp;&nbsp;&nbsp;&nbsp;- insertSubnode:atIndex:</option>
+	
+	<option value="//api/name/insertSubnode:belowSubnode:">&nbsp;&nbsp;&nbsp;&nbsp;- insertSubnode:belowSubnode:</option>
+	
+	<option value="//api/name/measure:">&nbsp;&nbsp;&nbsp;&nbsp;- measure:</option>
+	
+	<option value="//api/name/pointInside:withEvent:">&nbsp;&nbsp;&nbsp;&nbsp;- pointInside:withEvent:</option>
+	
+	<option value="//api/name/recursivelyReclaimMemory">&nbsp;&nbsp;&nbsp;&nbsp;- recursivelyReclaimMemory</option>
+	
+	<option value="//api/name/recursivelySetDisplaySuspended:">&nbsp;&nbsp;&nbsp;&nbsp;- recursivelySetDisplaySuspended:</option>
+	
+	<option value="//api/name/removeFromSupernode">&nbsp;&nbsp;&nbsp;&nbsp;- removeFromSupernode</option>
+	
+	<option value="//api/name/replaceSubnode:withSubnode:">&nbsp;&nbsp;&nbsp;&nbsp;- replaceSubnode:withSubnode:</option>
+	
+	
+	
+</select>
+				</li>
+			</ul>
+		</header>
+		<nav id="tocContainer" class="isShowingTOC">
+			<ul id="toc" role="tree">
+				
+<li role="treeitem"><span class="nodisclosure"></span><span class="sectionName"><a href="#overview">Overview</a></span></li>
+
+
+
+
+<li role="treeitem" id="task_treeitem"><span class="nodisclosure"></span><span class="sectionName"><a href="#tasks">Tasks</a></span><ul>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Initializing a node object">Initializing a node object</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Properties">Properties</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Getting view and layer">Getting view and layer</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Managing dimensions">Managing dimensions</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Managing the nodes hierarchy">Managing the nodes hierarchy</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Drawing and Updating the View">Drawing and Updating the View</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Hit Testing">Hit Testing</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#task_Converting Between View Coordinate Systems">Converting Between View Coordinate Systems</a></span></li>
+	
+</ul></li>
+
+
+
+
+
+<li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#properties">Properties</a></span><ul>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/calculatedSize">calculatedSize</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/constrainedSizeForCalculatedSize">constrainedSizeForCalculatedSize</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/displaySuspended">displaySuspended</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/displaysAsynchronously">displaysAsynchronously</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/hitTestSlop">hitTestSlop</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/layer">layer</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/layerBacked">layerBacked</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/nodeLoaded">nodeLoaded</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/placeholderEnabled">placeholderEnabled</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/placeholderFadesOut">placeholderFadesOut</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/shouldRasterizeDescendants">shouldRasterizeDescendants</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/subnodes">subnodes</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/supernode">supernode</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/synchronous">synchronous</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/view">view</a></span></li>
+	
+</ul></li>
+
+
+
+
+
+<li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#instance_methods">Instance Methods</a></span><ul>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/addSubnode:">addSubnode:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/convertPoint:fromNode:">convertPoint:fromNode:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/convertPoint:toNode:">convertPoint:toNode:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/convertRect:fromNode:">convertRect:fromNode:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/convertRect:toNode:">convertRect:toNode:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/init">init</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/initWithLayerClass:">initWithLayerClass:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/initWithViewClass:">initWithViewClass:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/insertSubnode:aboveSubnode:">insertSubnode:aboveSubnode:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/insertSubnode:atIndex:">insertSubnode:atIndex:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/insertSubnode:belowSubnode:">insertSubnode:belowSubnode:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/measure:">measure:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/pointInside:withEvent:">pointInside:withEvent:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/recursivelyReclaimMemory">recursivelyReclaimMemory</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/recursivelySetDisplaySuspended:">recursivelySetDisplaySuspended:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/removeFromSupernode">removeFromSupernode</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/replaceSubnode:withSubnode:">replaceSubnode:withSubnode:</a></span></li>
+	
+</ul></li>
+
+
+			</ul>
+		</nav>
+		<article>
+			<div id="contents" class="isShowingTOC" role="main">
+				<a title="ASDisplayNode Class Reference" name="top"></a>
+				<div class="main-navigation navigation-top">
+					<ul>
+	<li><a href="../index.html">Index</a></li>
+	<li><a href="../hierarchy.html">Hierarchy</a></li>
+</ul>
+				</div>
+				<div id="header">
+					<div class="section-header">
+						<h1 class="title title-header">ASDisplayNode Class Reference</h1>
+					</div>		
+				</div>
+				<div id="container">	
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<td class="specification-title">Inherits from</td>
+	<td class="specification-value">ASDealloc2MainObject</td>
+</tr><tr>
+	<td class="specification-title">Declared in</td>
+	<td class="specification-value">ASDisplayNode.h</td>
+</tr>
+						</tbody></table></div>
+					
+                    
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>An <code>ASDisplayNode</code> is an abstraction over <code>UIView</code> and <code>CALayer</code> that allows you to perform calculations about a view
+hierarchy off the main thread, and could do rendering off the main thread as well.</p>
+
+<p>The node API is designed to be as similar as possible to <code>UIView</code>. See the README for examples.</p>
+
+<h2>Subclassing</h2>
+
+<p><code>ASDisplayNode</code> can be subclassed to create a new UI element. The subclass header <code>ASDisplayNode+Subclasses</code> provides
+necessary declarations and conveniences.</p>
+
+<p>Commons reasons to subclass includes making a <code>UIView</code> property available and receiving a callback after async
+display.</p>
+					</div>
+					
+					
+					
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						<h2 class="subtitle subtitle-tasks">Tasks</h2>
+						
+						
+						<a title="Initializing a node object" name="task_Initializing a node object"></a>
+						<h3 class="subsubtitle task-title">Initializing a node object</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/init">&ndash;&nbsp;init</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/initWithViewClass:">&ndash;&nbsp;initWithViewClass:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/initWithLayerClass:">&ndash;&nbsp;initWithLayerClass:</a></code>
+	</span>
+	
+	
+</li>
+						</ul>
+						
+						
+						<a title="Properties" name="task_Properties"></a>
+						<h3 class="subsubtitle task-title">Properties</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/synchronous">&nbsp;&nbsp;synchronous</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li>
+						</ul>
+						
+						
+						<a title="Getting view and layer" name="task_Getting view and layer"></a>
+						<h3 class="subsubtitle task-title">Getting view and layer</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/view">&nbsp;&nbsp;view</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/nodeLoaded">&nbsp;&nbsp;nodeLoaded</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/layerBacked">&nbsp;&nbsp;layerBacked</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/layer">&nbsp;&nbsp;layer</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li>
+						</ul>
+						
+						
+						<a title="Managing dimensions" name="task_Managing dimensions"></a>
+						<h3 class="subsubtitle task-title">Managing dimensions</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/measure:">&ndash;&nbsp;measure:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/calculatedSize">&nbsp;&nbsp;calculatedSize</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/constrainedSizeForCalculatedSize">&nbsp;&nbsp;constrainedSizeForCalculatedSize</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li>
+						</ul>
+						
+						
+						<a title="Managing the nodes hierarchy" name="task_Managing the nodes hierarchy"></a>
+						<h3 class="subsubtitle task-title">Managing the nodes hierarchy</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/addSubnode:">&ndash;&nbsp;addSubnode:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/insertSubnode:belowSubnode:">&ndash;&nbsp;insertSubnode:belowSubnode:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/insertSubnode:aboveSubnode:">&ndash;&nbsp;insertSubnode:aboveSubnode:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/insertSubnode:atIndex:">&ndash;&nbsp;insertSubnode:atIndex:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/replaceSubnode:withSubnode:">&ndash;&nbsp;replaceSubnode:withSubnode:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/removeFromSupernode">&ndash;&nbsp;removeFromSupernode</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/subnodes">&nbsp;&nbsp;subnodes</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/supernode">&nbsp;&nbsp;supernode</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li>
+						</ul>
+						
+						
+						<a title="Drawing and Updating the View" name="task_Drawing and Updating the View"></a>
+						<h3 class="subsubtitle task-title">Drawing and Updating the View</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/displaysAsynchronously">&nbsp;&nbsp;displaysAsynchronously</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/shouldRasterizeDescendants">&nbsp;&nbsp;shouldRasterizeDescendants</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/displaySuspended">&nbsp;&nbsp;displaySuspended</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/recursivelySetDisplaySuspended:">&ndash;&nbsp;recursivelySetDisplaySuspended:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/recursivelyReclaimMemory">&ndash;&nbsp;recursivelyReclaimMemory</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/placeholderEnabled">&nbsp;&nbsp;placeholderEnabled</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/placeholderFadesOut">&nbsp;&nbsp;placeholderFadesOut</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li>
+						</ul>
+						
+						
+						<a title="Hit Testing" name="task_Hit Testing"></a>
+						<h3 class="subsubtitle task-title">Hit Testing</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/hitTestSlop">&nbsp;&nbsp;hitTestSlop</a></code>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/pointInside:withEvent:">&ndash;&nbsp;pointInside:withEvent:</a></code>
+	</span>
+	
+	
+</li>
+						</ul>
+						
+						
+						<a title="Converting Between View Coordinate Systems" name="task_Converting Between View Coordinate Systems"></a>
+						<h3 class="subsubtitle task-title">Converting Between View Coordinate Systems</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/convertPoint:toNode:">&ndash;&nbsp;convertPoint:toNode:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/convertPoint:fromNode:">&ndash;&nbsp;convertPoint:fromNode:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/convertRect:toNode:">&ndash;&nbsp;convertRect:toNode:</a></code>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/convertRect:fromNode:">&ndash;&nbsp;convertRect:fromNode:</a></code>
+	</span>
+	
+	
+</li>
+						</ul>
+						
+					</div>
+					
+					
+					
+					
+					
+					<div class="section section-methods">
+						<a title="Properties" name="properties"></a>
+						<h2 class="subtitle subtitle-methods">Properties</h2>
+						
+						<div class="section-method">
+	<a name="//api/name/calculatedSize" title="calculatedSize"></a>
+	<h3 class="subsubtitle method-title">calculatedSize</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Return the calculated size.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign) CGSize calculatedSize</code></div>
+
+    
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>Size already calculated by calculateSizeThatFits:.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Ideal for use by subclasses in -layout, having already prompted their subnodes to calculate their size by
+calling -measure: on them in -calculateSizeThatFits:.</p><div class="warning"><p><strong>Warning:</strong> Subclasses must not override this; it returns the last cached size calculated and is never expensive.</p></div>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/constrainedSizeForCalculatedSize" title="constrainedSizeForCalculatedSize"></a>
+	<h3 class="subsubtitle method-title">constrainedSizeForCalculatedSize</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Return the constrained size used for calculating size.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign) CGSize constrainedSizeForCalculatedSize</code></div>
+
+    
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>The constrained size used by calculateSizeThatFits:.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/displaySuspended" title="displaySuspended"></a>
+	<h3 class="subsubtitle method-title">displaySuspended</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Prevent the node&rsquo;s layer from displaying.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL displaySuspended</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>A subclass may check this flag during -display or -drawInContext: to cancel a display that is already in
+progress.</p>
+
+<p>Defaults to NO. Does not control display for any child or descendant nodes; for that, use
+-recursivelySetDisplaySuspended:.</p>
+
+<p>If a setNeedsDisplay occurs while displaySuspended is YES, and displaySuspended is set to NO, then the
+layer will be automatically displayed.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/displaysAsynchronously" title="displaysAsynchronously"></a>
+	<h3 class="subsubtitle method-title">displaysAsynchronously</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Whether this node&rsquo;s view performs asynchronous rendering.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL displaysAsynchronously</code></div>
+
+    
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>Defaults to YES, except for synchronous views (ie, those created with -initWithViewClass: /
+-initWithLayerClass:), which are always NO.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If this flag is set, then the node will participate in the current asyncdisplaykit_async_transaction and
+do its rendering on the displayQueue instead of the main thread.</p>
+
+<p>Asynchronous rendering proceeds as follows:</p>
+
+<p>When the view is initially added to the hierarchy, it has -needsDisplay true.
+After layout, Core Animation will call -display on the _ASDisplayLayer
+-display enqueues a rendering operation on the displayQueue
+When the render block executes, it calls the delegate display method (-drawRect:&hellip; or -display)
+The delegate provides contents via this method and an operation is added to the asyncdisplaykit_async_transaction
+Once all rendering is complete for the current asyncdisplaykit_async_transaction,
+the completion for the block sets the contents on all of the layers in the same frame</p>
+
+<p>If asynchronous rendering is disabled:</p>
+
+<p>When the view is initially added to the hierarchy, it has -needsDisplay true.
+After layout, Core Animation will call -display on the _ASDisplayLayer
+-display calls  delegate display method (-drawRect:&hellip; or -display) immediately
+-display sets the layer contents immediately with the result</p>
+
+<p>Note: this has nothing to do with -[CALayer drawsAsynchronously].</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/hitTestSlop" title="hitTestSlop"></a>
+	<h3 class="subsubtitle method-title">hitTestSlop</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Bounds insets for hit testing.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) UIEdgeInsets hitTestSlop</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>When set to a non-zero inset, increases the bounds for hit testing to make it easier to tap or perform
+gestures on this node.  Default is UIEdgeInsetsZero.</p>
+
+<p>This affects the default implementation of -hitTest and -pointInside, so subclasses should call super if you override
+it and want hitTestSlop applied.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/layer" title="layer"></a>
+	<h3 class="subsubtitle method-title">layer</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returns a layer.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, retain) CALayer *layer</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>The layer property is lazily initialized, similar to the view property.
+To go the other direction, use ASLayerToDisplayNode() in ASDisplayNodeExtras.h.</p><div class="warning"><p><strong>Warning:</strong> The first access to it must be on the main thread, and should only be used on the main thread thereafter as
+well.</p></div>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/layerBacked" title="layerBacked"></a>
+	<h3 class="subsubtitle method-title">layerBacked</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returns whether the node rely on a layer instead of a view.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, getter=isLayerBacked) BOOL layerBacked</code></div>
+
+    
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>YES if the node rely on a layer, NO otherwise.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/nodeLoaded" title="nodeLoaded"></a>
+	<h3 class="subsubtitle method-title">nodeLoaded</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returns whether a node&rsquo;s backing view or layer is loaded.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (atomic, readonly, assign, getter=isNodeLoaded) BOOL nodeLoaded</code></div>
+
+    
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>YES if a view is loaded, or if layerBacked is YES and layer is not nil; NO otherwise.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/placeholderEnabled" title="placeholderEnabled"></a>
+	<h3 class="subsubtitle method-title">placeholderEnabled</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Toggle displaying a placeholder over the node that covers content until the node and all subnodes are
+displayed.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL placeholderEnabled</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Defaults to NO.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/placeholderFadesOut" title="placeholderFadesOut"></a>
+	<h3 class="subsubtitle method-title">placeholderFadesOut</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Toggle to fade-out the placeholder when a node&rsquo;s contents are finished displaying.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL placeholderFadesOut</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Defaults to NO.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/shouldRasterizeDescendants" title="shouldRasterizeDescendants"></a>
+	<h3 class="subsubtitle method-title">shouldRasterizeDescendants</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Whether to draw all descendant nodes' layers/views into this node&rsquo;s layer/view&rsquo;s backing store.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL shouldRasterizeDescendants</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/subnodes" title="subnodes"></a>
+	<h3 class="subsubtitle method-title">subnodes</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>The receiver&rsquo;s immediate subnodes.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, retain) NSArray *subnodes</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/supernode" title="supernode"></a>
+	<h3 class="subsubtitle method-title">supernode</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>The receiver&rsquo;s supernode.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, weak) ASDisplayNode *supernode</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/synchronous" title="synchronous"></a>
+	<h3 class="subsubtitle method-title">synchronous</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returns whether the node is synchronous.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign, getter=isSynchronous) BOOL synchronous</code></div>
+
+    
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>NO if the node wraps a _ASDisplayView, YES otherwise.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/view" title="view"></a>
+	<h3 class="subsubtitle method-title">view</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returns a view.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, retain) UIView *view</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>The view property is lazily initialized, similar to UIViewController.
+To go the other direction, use ASViewToDisplayNode() in ASDisplayNodeExtras.h.</p><div class="warning"><p><strong>Warning:</strong> The first access to it must be on the main thread, and should only be used on the main thread thereafter as
+well.</p></div>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+					</div>
+					
+					
+					
+					
+					
+					<div class="section section-methods">
+						<a title="Instance Methods" name="instance_methods"></a>
+						<h2 class="subtitle subtitle-methods">Instance Methods</h2>
+						
+						<div class="section-method">
+	<a name="//api/name/addSubnode:" title="addSubnode:"></a>
+	<h3 class="subsubtitle method-title">addSubnode:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Add a node as a subnode to this node.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)addSubnode:(id)<em>subnode</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>subnode</em></dt>
+			<dd><p>The node to be added.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>The subnode&rsquo;s view will automatically be added to this node&rsquo;s view, lazily if the views are not created
+yet.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/convertPoint:fromNode:" title="convertPoint:fromNode:"></a>
+	<h3 class="subsubtitle method-title">convertPoint:fromNode:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Converts a point from the coordinate system of a given node to that of the receiver.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (CGPoint)convertPoint:(id)<em>point</em> fromNode:(id)<em>node</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>point</em></dt>
+			<dd><p>A point specified in the local coordinate system (bounds) of node.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>node</em></dt>
+			<dd><p>The node with point in its coordinate system.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>The point converted to the local coordinate system (bounds) of the receiver.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/convertPoint:toNode:" title="convertPoint:toNode:"></a>
+	<h3 class="subsubtitle method-title">convertPoint:toNode:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Converts a point from the receiver&rsquo;s coordinate system to that of the specified node.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (CGPoint)convertPoint:(id)<em>point</em> toNode:(id)<em>node</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>point</em></dt>
+			<dd><p>A point specified in the local coordinate system (bounds) of the receiver.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>node</em></dt>
+			<dd><p>The node into whose coordinate system point is to be converted.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>The point converted to the coordinate system of node.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/convertRect:fromNode:" title="convertRect:fromNode:"></a>
+	<h3 class="subsubtitle method-title">convertRect:fromNode:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Converts a rectangle from the coordinate system of another node to that of the receiver.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (CGRect)convertRect:(id)<em>rect</em> fromNode:(id)<em>node</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>rect</em></dt>
+			<dd><p>A rectangle specified in the local coordinate system (bounds) of node.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>node</em></dt>
+			<dd><p>The node with rect in its coordinate system.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>The converted rectangle.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/convertRect:toNode:" title="convertRect:toNode:"></a>
+	<h3 class="subsubtitle method-title">convertRect:toNode:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Converts a rectangle from the receiver&rsquo;s coordinate system to that of another view.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (CGRect)convertRect:(id)<em>rect</em> toNode:(id)<em>node</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>rect</em></dt>
+			<dd><p>A rectangle specified in the local coordinate system (bounds) of the receiver.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>node</em></dt>
+			<dd><p>The node that is the target of the conversion operation.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>The converted rectangle.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/init" title="init"></a>
+	<h3 class="subsubtitle method-title">init</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Designated initializer.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (id)init</code></div>
+
+    
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An ASDisplayNode instance whose view will be a subclass that enables asynchronous rendering, and passes
+through -layout and touch handling methods.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/initWithLayerClass:" title="initWithLayerClass:"></a>
+	<h3 class="subsubtitle method-title">initWithLayerClass:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Alternative initializer with a layer class.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (id)initWithLayerClass:(id)<em>layerClass</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>layerClass</em></dt>
+			<dd><p>Any CALayer subclass, such as CATransformLayer.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An ASDisplayNode instance whose layer will be of class layerClass.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If layerClass is not a subclass of _ASDisplayLayer, it will still render synchronously and -layout on the
+node will not be called.
+The layer instance will be created with alloc/init.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/initWithViewClass:" title="initWithViewClass:"></a>
+	<h3 class="subsubtitle method-title">initWithViewClass:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Alternative initializer with a view class.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (id)initWithViewClass:(id)<em>viewClass</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>viewClass</em></dt>
+			<dd><p>Any UIView subclass, such as UIScrollView.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An ASDisplayNode instance whose view will be of class viewClass.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If viewClass is not a subclass of _ASDisplayView, it will still render synchronously and -layout and
+touch handling methods on the node will not be called.
+The view instance will be created with alloc/init.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/insertSubnode:aboveSubnode:" title="insertSubnode:aboveSubnode:"></a>
+	<h3 class="subsubtitle method-title">insertSubnode:aboveSubnode:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Insert a subnode after a given subnode in the list.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)insertSubnode:(id)<em>subnode</em> aboveSubnode:(id)<em>above</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>subnode</em></dt>
+			<dd><p>The node to insert below another node.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>above</em></dt>
+			<dd><p>The sibling node that will be behind the inserted node.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If the views are loaded, the subnode&rsquo;s view will be inserted above the given node&rsquo;s view in the hierarchy
+even if there are other non-displaynode views.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/insertSubnode:atIndex:" title="insertSubnode:atIndex:"></a>
+	<h3 class="subsubtitle method-title">insertSubnode:atIndex:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Insert a subnode at a given index in subnodes.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)insertSubnode:(id)<em>subnode</em> atIndex:(id)<em>idx</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>subnode</em></dt>
+			<dd><p>The node to insert.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>idx</em></dt>
+			<dd><p>The index in the array of the subnodes property at which to insert the node. Subnodes indices start at 0
+and cannot be greater than the number of subnodes.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If this node&rsquo;s view is loaded, ASDisplayNode insert the subnode&rsquo;s view after the subnode at index - 1&rsquo;s
+view even if there are other non-displaynode views.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/insertSubnode:belowSubnode:" title="insertSubnode:belowSubnode:"></a>
+	<h3 class="subsubtitle method-title">insertSubnode:belowSubnode:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Insert a subnode before a given subnode in the list.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)insertSubnode:(id)<em>subnode</em> belowSubnode:(id)<em>below</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>subnode</em></dt>
+			<dd><p>The node to insert below another node.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>below</em></dt>
+			<dd><p>The sibling node that will be above the inserted node.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If the views are loaded, the subnode&rsquo;s view will be inserted below the given node&rsquo;s view in the hierarchy
+even if there are other non-displaynode views.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/measure:" title="measure:"></a>
+	<h3 class="subsubtitle method-title">measure:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Asks the node to calculate and return the size that best fits its subnodes.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (CGSize)measure:(id)<em>constrainedSize</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>constrainedSize</em></dt>
+			<dd><p>The maximum size the receiver should fit in.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>A new size that fits the receiver&rsquo;s subviews.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Though this method does not set the bounds of the view, it does have side effects&ndash;caching both the
+constraint and the result.</p><div class="warning"><p><strong>Warning:</strong> Subclasses must not override this; it caches results from -calculateSizeThatFits:.  Calling this method may
+be expensive if result is not cached.</p></div>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection see-also-section">
+		<h4 class="method-subtitle">See Also</h4>
+		<ul>
+			
+			<li><code><p><a href="../Categories/ASDisplayNode+Subclassing.html#//api/name/calculateSizeThatFits:">[ASDisplayNode(Subclassing) calculateSizeThatFits:]</a></p></code></li>
+			
+		</ul>
+	</div>
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/pointInside:withEvent:" title="pointInside:withEvent:"></a>
+	<h3 class="subsubtitle method-title">pointInside:withEvent:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returns a Boolean value indicating whether the receiver contains the specified point.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (BOOL)pointInside:(id)<em>point</em> withEvent:(id)<em>event</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>point</em></dt>
+			<dd><p>A point that is in the receiver&rsquo;s local coordinate system (bounds).</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>event</em></dt>
+			<dd><p>The event that warranted a call to this method.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>YES if point is inside the receiver&rsquo;s bounds; otherwise, NO.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Includes the &ldquo;slop&rdquo; factor specified with hitTestSlop.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/recursivelyReclaimMemory" title="recursivelyReclaimMemory"></a>
+	<h3 class="subsubtitle method-title">recursivelyReclaimMemory</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Calls -reclaimMemory on the receiver and its subnode hierarchy.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)recursivelyReclaimMemory</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Clears backing stores and other memory-intensive intermediates.
+If the node is removed from a visible hierarchy and then re-added, it will automatically trigger a new asynchronous display,
+as long as displaySuspended is not set.
+If the node remains in the hierarchy throughout, -setNeedsDisplay is required to trigger a new asynchronous display.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection see-also-section">
+		<h4 class="method-subtitle">See Also</h4>
+		<ul>
+			
+			<li><code><p><a href="#//api/name/displaySuspended">@property displaySuspended</a> and setNeedsDisplay</p></code></li>
+			
+		</ul>
+	</div>
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/recursivelySetDisplaySuspended:" title="recursivelySetDisplaySuspended:"></a>
+	<h3 class="subsubtitle method-title">recursivelySetDisplaySuspended:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Prevent the node and its descendants' layer from displaying.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)recursivelySetDisplaySuspended:(id)<em>flag</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>flag</em></dt>
+			<dd><p>YES if display should be prevented or cancelled; NO otherwise.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection see-also-section">
+		<h4 class="method-subtitle">See Also</h4>
+		<ul>
+			
+			<li><code><p><a href="#//api/name/displaySuspended">@property displaySuspended</a></p></code></li>
+			
+		</ul>
+	</div>
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/removeFromSupernode" title="removeFromSupernode"></a>
+	<h3 class="subsubtitle method-title">removeFromSupernode</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Remove this node from its supernode.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)removeFromSupernode</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>The node&rsquo;s view will be automatically removed from the supernode&rsquo;s view.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/replaceSubnode:withSubnode:" title="replaceSubnode:withSubnode:"></a>
+	<h3 class="subsubtitle method-title">replaceSubnode:withSubnode:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Replace subnode with replacementSubnode.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)replaceSubnode:(id)<em>subnode</em> withSubnode:(id)<em>replacementSubnode</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>subnode</em></dt>
+			<dd><p>A subnode of self.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>replacementSubnode</em></dt>
+			<dd><p>A node with which to replace subnode.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Should both subnode and replacementSubnode already be subnodes of self, subnode is removed and
+replacementSubnode inserted in its place.
+If subnode is not a subnode of self, this method will throw an exception.
+If replacementSubnode is nil, this method will throw an exception</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">ASDisplayNode.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+					</div>
+					
+					
+                    
+                    
+                    
+                    
+
+				</div>
+				<div class="main-navigation navigation-bottom">
+					<ul>
+	<li><a href="../index.html">Index</a></li>
+	<li><a href="../hierarchy.html">Hierarchy</a></li>
+</ul>
+				</div>
+				<div id="footer">
+					<hr />
+					<div class="footer-copyright">
+						<p><span class="copyright">&copy; 2015 Facebook. All rights reserved. (Last updated: 2015-01-21)</span><br />
+						
+						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2 (build 963)</a>.</span></p>
+						
+					</div>
+				</div>
+			</div>
+		</article>
+		<script type="text/javascript">
+			function jumpToChange()
+			{
+				window.location.hash = this.options[this.selectedIndex].value;
+			}
+			
+			function toggleTOC()
+			{
+				var contents = document.getElementById('contents');
+				var tocContainer = document.getElementById('tocContainer');
+				
+				if (this.getAttribute('class') == 'open')
+				{
+					this.setAttribute('class', '');
+					contents.setAttribute('class', '');
+					tocContainer.setAttribute('class', '');
+					
+					window.name = "hideTOC";
+				}
+				else
+				{
+					this.setAttribute('class', 'open');
+					contents.setAttribute('class', 'isShowingTOC');
+					tocContainer.setAttribute('class', 'isShowingTOC');
+					
+					window.name = "";
+				}
+				return false;
+			}
+			
+			function toggleTOCEntryChildren(e)
+			{
+				e.stopPropagation();
+				var currentClass = this.getAttribute('class');
+				if (currentClass == 'children') {
+					this.setAttribute('class', 'children open');
+				}
+				else if (currentClass == 'children open') {
+					this.setAttribute('class', 'children');
+				}
+				return false;
+			}
+			
+			function tocEntryClick(e)
+			{
+				e.stopPropagation();
+				return true;
+			}
+			
+			function init()
+			{
+				var selectElement = document.getElementById('jumpTo');
+				selectElement.addEventListener('change', jumpToChange, false);
+				
+				var tocButton = document.getElementById('table_of_contents');
+				tocButton.addEventListener('click', toggleTOC, false);
+				
+				var taskTreeItem = document.getElementById('task_treeitem');
+				if (taskTreeItem.getElementsByTagName('li').length > 0)
+				{
+					taskTreeItem.setAttribute('class', 'children');
+					taskTreeItem.firstChild.setAttribute('class', 'disclosure');
+				}
+				
+				var tocList = document.getElementById('toc');
+				
+				var tocEntries = tocList.getElementsByTagName('li');
+				for (var i = 0; i < tocEntries.length; i++) {
+					tocEntries[i].addEventListener('click', toggleTOCEntryChildren, false);
+				}
+				
+				var tocLinks = tocList.getElementsByTagName('a');
+				for (var i = 0; i < tocLinks.length; i++) {
+					tocLinks[i].addEventListener('click', tocEntryClick, false);
+				}
+				
+				if (window.name == "hideTOC") {
+					toggleTOC.call(tocButton);
+				}
+			}
+			
+			window.onload = init;
+			
+			// If showing in Xcode, hide the TOC and Header
+			if (navigator.userAgent.match(/xcode/i)) {
+				document.getElementById("contents").className = "hideInXcode"
+				document.getElementById("tocContainer").className = "hideInXcode"
+				document.getElementById("top_header").className = "hideInXcode"
+			}
+			
+		</script>
+	</body>
+</html>

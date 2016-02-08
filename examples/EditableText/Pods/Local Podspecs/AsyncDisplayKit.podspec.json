@@ -1,0 +1,58 @@
+{
+  "name": "AsyncDisplayKit",
+  "version": "1.9.5",
+  "license": {
+    "type": "BSD"
+  },
+  "homepage": "http://asyncdisplaykit.org",
+  "authors": {
+    "Scott Goodson": "scottgoodson@gmail.com",
+    "Ryan Nystrom": "rnystrom@fb.com"
+  },
+  "summary": "Smooth asynchronous user interfaces for iOS apps.",
+  "source": {
+    "git": "https://github.com/facebook/AsyncDisplayKit.git",
+    "tag": "1.9.5"
+  },
+  "documentation_url": "http://asyncdisplaykit.org/appledoc/",
+  "public_header_files": [
+    "AsyncDisplayKit/*.h",
+    "AsyncDisplayKit/Details/**/*.h",
+    "AsyncDisplayKit/Layout/*.h",
+    "Base/*.h"
+  ],
+  "source_files": [
+    "AsyncDisplayKit/**/*.{h,m,mm}",
+    "Base/*.{h,m}"
+  ],
+  "frameworks": "AssetsLibrary",
+  "weak_frameworks": [
+    "Photos",
+    "MapKit"
+  ],
+  "requires_arc": true,
+  "exclude_files": [
+    "AsyncDisplayKit/Details/ASDealloc2MainObject.h",
+    "AsyncDisplayKit/Details/ASDealloc2MainObject.m"
+  ],
+  "social_media_url": "https://twitter.com/fbOpenSource",
+  "libraries": "c++",
+  "pod_target_xcconfig": {
+    "CLANG_CXX_LANGUAGE_STANDARD": "c++11",
+    "CLANG_CXX_LIBRARY": "libc++"
+  },
+  "platforms": {
+    "ios": "7.0"
+  },
+  "subspecs": [
+    {
+      "name": "ASDealloc2MainObject",
+      "requires_arc": false,
+      "source_files": [
+        "AsyncDisplayKit/Private/_AS-objc-internal.h",
+        "AsyncDisplayKit/Details/ASDealloc2MainObject.h",
+        "AsyncDisplayKit/Details/ASDealloc2MainObject.m"
+      ]
+    }
+  ]
+}
