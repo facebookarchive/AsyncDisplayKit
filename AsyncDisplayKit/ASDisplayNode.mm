@@ -2228,7 +2228,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   }
   subnodeFrame.size = adjustedSize;
   
-  NSLog(@"Adjusted frame: %@", NSStringFromCGRect(subnodeFrame));
   return subnodeFrame;
 }
 
