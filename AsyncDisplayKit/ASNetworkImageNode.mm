@@ -21,8 +21,8 @@
 @interface ASNetworkImageNode ()
 {
   ASDN::RecursiveMutex _lock;
-  __weak id<ASImageCacheProtocol> _cache;
-  __weak id<ASImageDownloaderProtocol> _downloader;
+  __weak id<ASImageCacheProtocol, ASImageCacheProtocolDeprecated> _cache;
+  __weak id<ASImageDownloaderProtocol, ASImageDownloaderProtocolDeprecated> _downloader;
 
   // Only access any of these with _lock.
   __weak id<ASNetworkImageNodeDelegate> _delegate;
@@ -39,7 +39,8 @@
   BOOL _downloaderSupportsNewProtocol;
   BOOL _downloaderImplementsSetProgress;
   BOOL _downloaderImplementsSetPriority;
-  BOOL _cacherSupportsNewProtocol;
+  BOOL _cacheSupportsNewProtocol;
+  BOOL _cacheSupportsClearing;
 }
 @end
 
@@ -53,16 +54,17 @@
   _cache = cache;
   _downloader = downloader;
   
-  NSAssert([downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)] || [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:)], @"downloader must respond to either downloadImageWithURL:callbackQueue:downloadProgress:completion: or downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:.");
+  ASDisplayNodeAssert([downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)] || [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:)], @"downloader must respond to either downloadImageWithURL:callbackQueue:downloadProgress:completion: or downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:.");
   
-  _downloaderSupportsNewProtocol = [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)] ? YES : NO;
+  _downloaderSupportsNewProtocol = [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)];
   
-  NSAssert([cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] || [cache respondsToSelector:@selector(fetchCachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion: or fetchCachedImageWithURL:callbackQueue:completion:");
+  ASDisplayNodeAssert([cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] || [cache respondsToSelector:@selector(fetchCachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion: or fetchCachedImageWithURL:callbackQueue:completion:");
   
-  _downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)] ? YES : NO;
-  _downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)] ? YES : NO;
+  _downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)];
+  _downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)];
   
-  _cacherSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] ? YES : NO;
+  _cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
+  _cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
   
   _shouldCacheImage = YES;
   self.shouldBypassEnsureDisplay = YES;
@@ -150,44 +152,60 @@
   return _delegate;
 }
 
+/* displayWillStart in ASMultiplexImageNode has a very similar implementation. Changes here are likely necessary
+ in ASMultiplexImageNode as well. */
 - (void)displayWillStart
 {
   [super displayWillStart];
 
   [self fetchData];
   
-  if (self.image == nil) {
-    if (_downloaderImplementsSetPriority) {
-      {
-        ASDN::MutexLocker l(_lock);
-        if (_downloadIdentifier != nil) {
-          [_downloader setPriority:ASImageDownloaderPriorityDisplay withDownloadIdentifier:_downloadIdentifier];
-        }
+  if (self.image == nil && _downloaderImplementsSetPriority) {
+    ASDN::MutexLocker l(_lock);
+    if (_downloadIdentifier != nil) {
+      [_downloader setPriority:ASImageDownloaderPriorityImminent withDownloadIdentifier:_downloadIdentifier];
+    }
+  }
+}
+
+/* visibilityDidChange in ASMultiplexImageNode has a very similar implementation. Changes here are likely necessary
+ in ASMultiplexImageNode as well. */
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+  if (_downloaderImplementsSetPriority) {
+    ASDN::MutexLocker l(_lock);
+    if (_downloadIdentifier != nil) {
+      if (isVisible) {
+        [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:_downloadIdentifier];
+      } else {
+        [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:_downloadIdentifier];
       }
     }
+  }
+  
+  if (_downloaderImplementsSetProgress) {
+    ASDN::MutexLocker l(_lock);
     
-    if (_downloaderImplementsSetProgress) {
-      {
-        ASDN::MutexLocker l(_lock);
-        
-        if (_downloadIdentifier != nil) {
-          __weak __typeof__(self) weakSelf = self;
-          [_downloader setProgressImageBlock:^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
-            __typeof__(self) strongSelf = weakSelf;
-            if (strongSelf == nil) {
-              return;
-            }
-            
-            ASDN::MutexLocker l(_lock);
-            //Getting a result back for a different download identifier, download must not have been successfully canceled
-            if (![strongSelf->_downloadIdentifier isEqual:downloadIdentifier] && downloadIdentifier != nil) {
-              return;
-            }
-            
-            strongSelf.image = progressImage;
-          } callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
-        }
+    if (_downloadIdentifier != nil) {
+      __weak __typeof__(self) weakSelf = self;
+      ASImageDownloaderProgressImage progress = nil;
+      if (isVisible) {
+        progress = ^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
+          __typeof__(self) strongSelf = weakSelf;
+          if (strongSelf == nil) {
+            return;
+          }
+          
+          ASDN::MutexLocker l(_lock);
+          //Getting a result back for a different download identifier, download must not have been successfully canceled
+          if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+            return;
+          }
+          
+          strongSelf.image = progressImage;
+        };
       }
+      [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
     }
   }
 }
@@ -202,6 +220,9 @@
     [self _cancelImageDownload];
     self.image = _defaultImage;
     _imageLoaded = NO;
+    if (_cacheSupportsClearing) {
+      [_cache clearFetchedImageFromCacheWithURL:_URL];
+    }
   }
 }
 
@@ -294,7 +315,7 @@
           ASDN::MutexLocker l(strongSelf->_lock);
           
           //Getting a result back for a different download identifier, download must not have been successfully canceled
-          if (![strongSelf->_downloadIdentifier isEqual:downloadIdentifier] && downloadIdentifier != nil) {
+          if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
               return;
           }
 
@@ -333,18 +354,16 @@
           }
         };
         
-        if (_cacherSupportsNewProtocol) {
+        if (_cacheSupportsNewProtocol) {
           [_cache cachedImageWithURL:_URL
                        callbackQueue:dispatch_get_main_queue()
                           completion:cacheCompletion];
         } else {
-          void (^oldCacheCompletion)(CGImageRef) = ^(CGImageRef image) {
-            cacheCompletion([UIImage imageWithCGImage:image]);
-          };
-          
           [_cache fetchCachedImageWithURL:_URL
                             callbackQueue:dispatch_get_main_queue()
-                               completion:oldCacheCompletion];
+                               completion:^(CGImageRef image) {
+                                 cacheCompletion([UIImage imageWithCGImage:image]);
+                               }];
         }
       } else {
         [self _downloadImageWithCompletion:finished];

@@ -16,12 +16,6 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
 @protocol ASImageCacheProtocol <NSObject>
 
 @optional
-/**
-  @deprecated This method is deprecated @see cachedImageWithURL:callbackQueue:completion: instead
- */
-- (void)fetchCachedImageWithURL:(nullable NSURL *)URL
-                  callbackQueue:(nullable dispatch_queue_t)callbackQueue
-                     completion:(void (^)(CGImageRef _Nullable imageFromCache))completion;
 
 /**
  @abstract Attempts to fetch an image with the given URL from the cache.
@@ -33,9 +27,16 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
  @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image. This method should not block
  the calling thread as it is likely to be called from the main thread.
  */
-- (void)cachedImageWithURL:(nullable NSURL *)URL
-             callbackQueue:(nullable dispatch_queue_t)callbackQueue
+- (void)cachedImageWithURL:(NSURL *)URL
+             callbackQueue:(dispatch_queue_t)callbackQueue
                 completion:(ASImageCacherCompletion)completion;
+
+/**
+ @abstract Called during clearFetchedData. Allows the cache to optionally trim items.
+ @note Depending on your caches implementation you may *not* wish to respond to this method. It is however useful
+ if you have a memory and disk cache in which case you'll likely want to clear out the memory cache.
+ */
+- (void)clearFetchedImageFromCacheWithURL:(NSURL *)URL;
 
 @end
 
@@ -44,8 +45,9 @@ typedef void(^ASImageDownloaderProgress)(CGFloat progress);
 typedef void(^ASImageDownloaderProgressImage)(UIImage *progressImage, id _Nullable downloadIdentifier);
 
 typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
-  ASImageDownloaderPriorityNormal = 0,
-  ASImageDownloaderPriorityDisplay,
+  ASImageDownloaderPriorityPreload = 0,
+  ASImageDownloaderPriorityImminent,
+  ASImageDownloaderPriorityVisible
 };
 
 @protocol ASImageDownloaderProtocol <NSObject>
@@ -62,15 +64,7 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
 
 @optional
 
-//You must implement one of the two following methods
-
-/**
- @deprecated This method is deprecated @see downloadImageWithURL:callbackQueue:downloadProgress:completion: instead
-*/
-- (nullable id)downloadImageWithURL:(NSURL *)URL
-                      callbackQueue:(nullable dispatch_queue_t)callbackQueue
-              downloadProgressBlock:(void (^ _Nullable)(CGFloat progress))downloadProgressBlock
-                         completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion;
+//You must implement the following method OR the deprecated method at the bottom
 
 /**
  @abstract Downloads an image with the given URL.
@@ -110,6 +104,31 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
  */
 - (void)setPriority:(ASImageDownloaderPriority)priority
 withDownloadIdentifier:(id)downloadIdentifier;
+
+@end
+
+@protocol ASImageDownloaderProtocolDeprecated <ASImageDownloaderProtocol>
+
+@optional
+/**
+ @deprecated This method is deprecated @see downloadImageWithURL:callbackQueue:downloadProgress:completion: instead
+ */
+- (nullable id)downloadImageWithURL:(NSURL *)URL
+                      callbackQueue:(nullable dispatch_queue_t)callbackQueue
+              downloadProgressBlock:(void (^ _Nullable)(CGFloat progress))downloadProgressBlock
+                         completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion;
+
+@end
+
+@protocol ASImageCacheProtocolDeprecated <ASImageCacheProtocol>
+
+@optional
+/**
+ @deprecated This method is deprecated @see cachedImageWithURL:callbackQueue:completion: instead
+ */
+- (void)fetchCachedImageWithURL:(nullable NSURL *)URL
+                  callbackQueue:(nullable dispatch_queue_t)callbackQueue
+                     completion:(void (^)(CGImageRef _Nullable imageFromCache))completion;
 
 @end
 
