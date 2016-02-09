@@ -14,6 +14,10 @@
 #import "ASEqualityHelpers.h"
 #import "ASThread.h"
 
+#if PIN_REMOTE_IMAGE
+#import "ASPINRemoteImageDownloader.h"
+#endif
+
 @interface ASNetworkImageNode ()
 {
   ASDN::RecursiveMutex _lock;
@@ -27,9 +31,15 @@
   UIImage *_defaultImage;
 
   NSUUID *_cacheUUID;
-  id _imageDownload;
+  id _downloadIdentifier;
 
   BOOL _imageLoaded;
+  
+  //set on init only
+  BOOL _downloaderSupportsNewProtocol;
+  BOOL _downloaderImplementsSetProgress;
+  BOOL _downloaderImplementsSetPriority;
+  BOOL _cacherSupportsNewProtocol;
 }
 @end
 
@@ -42,6 +52,18 @@
 
   _cache = cache;
   _downloader = downloader;
+  
+  NSAssert([downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)] || [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:)], @"downloader must respond to either downloadImageWithURL:callbackQueue:downloadProgress:completion: or downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:.");
+  
+  _downloaderSupportsNewProtocol = [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)] ? YES : NO;
+  
+  NSAssert([cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] || [cache respondsToSelector:@selector(fetchCachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion: or fetchCachedImageWithURL:callbackQueue:completion:");
+  
+  _downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)] ? YES : NO;
+  _downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)] ? YES : NO;
+  
+  _cacherSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] ? YES : NO;
+  
   _shouldCacheImage = YES;
   self.shouldBypassEnsureDisplay = YES;
 
@@ -50,7 +72,11 @@
 
 - (instancetype)init
 {
+#if PIN_REMOTE_IMAGE
+  return [self initWithCache:[ASPINRemoteImageDownloader sharedDownloader] downloader:[ASPINRemoteImageDownloader sharedDownloader]];
+#else
   return [self initWithCache:nil downloader:[ASBasicImageDownloader sharedImageDownloader]];
+#endif
 }
 
 - (void)dealloc
@@ -129,6 +155,41 @@
   [super displayWillStart];
 
   [self fetchData];
+  
+  if (self.image == nil) {
+    if (_downloaderImplementsSetPriority) {
+      {
+        ASDN::MutexLocker l(_lock);
+        if (_downloadIdentifier != nil) {
+          [_downloader setPriority:ASImageDownloaderPriorityDisplay withDownloadIdentifier:_downloadIdentifier];
+        }
+      }
+    }
+    
+    if (_downloaderImplementsSetProgress) {
+      {
+        ASDN::MutexLocker l(_lock);
+        
+        if (_downloadIdentifier != nil) {
+          __weak __typeof__(self) weakSelf = self;
+          [_downloader setProgressImageBlock:^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
+            __typeof__(self) strongSelf = weakSelf;
+            if (strongSelf == nil) {
+              return;
+            }
+            
+            ASDN::MutexLocker l(_lock);
+            //Getting a result back for a different download identifier, download must not have been successfully canceled
+            if (![strongSelf->_downloadIdentifier isEqual:downloadIdentifier] && downloadIdentifier != nil) {
+              return;
+            }
+            
+            strongSelf.image = progressImage;
+          } callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
+        }
+      }
+    }
+  }
 }
 
 - (void)clearFetchedData
@@ -158,31 +219,44 @@
 
 - (void)_cancelImageDownload
 {
-  if (!_imageDownload) {
+  if (!_downloadIdentifier) {
     return;
   }
 
-  [_downloader cancelImageDownloadForIdentifier:_imageDownload];
-  _imageDownload = nil;
+  if (_downloadIdentifier) {
+    [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
+  }
+  _downloadIdentifier = nil;
 
   _cacheUUID = nil;
 }
 
-- (void)_downloadImageWithCompletion:(void (^)(CGImageRef, NSError*))finished
+- (void)_downloadImageWithCompletion:(void (^)(UIImage *image, NSError*, id downloadIdentifier))finished
 {
-  _imageDownload = [_downloader downloadImageWithURL:_URL
-                                       callbackQueue:dispatch_get_main_queue()
-                               downloadProgressBlock:NULL
-                                          completion:^(CGImageRef responseImage, NSError *error) {
-                                            if (finished != NULL) {
-                                              finished(responseImage, error);
-                                            }
-                                          }];
+  if (_downloaderSupportsNewProtocol) {
+    _downloadIdentifier = [_downloader downloadImageWithURL:_URL
+                                              callbackQueue:dispatch_get_main_queue()
+                                           downloadProgress:NULL
+                                                 completion:^(UIImage * _Nullable image, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
+                                                   if (finished != NULL) {
+                                                     finished(image, error, downloadIdentifier);
+                                                   }
+                                                 }];
+  } else {
+    _downloadIdentifier = [_downloader downloadImageWithURL:_URL
+                                              callbackQueue:dispatch_get_main_queue()
+                                      downloadProgressBlock:NULL
+                                                 completion:^(CGImageRef responseImage, NSError *error) {
+                                                   if (finished != NULL) {
+                                                     finished([UIImage imageWithCGImage:responseImage], error, nil);
+                                                   }
+                                                 }];
+  }
 }
 
 - (void)_lazilyLoadImageIfNecessary
 {
-  if (!_imageLoaded && _URL != nil && _imageDownload == nil) {
+  if (!_imageLoaded && _URL != nil && _downloadIdentifier == nil) {
     if (_URL.isFileURL) {
       {
         ASDN::MutexLocker l(_lock);
@@ -210,7 +284,7 @@
       }
     } else {
       __weak __typeof__(self) weakSelf = self;
-      void (^finished)(CGImageRef, NSError *) = ^(CGImageRef responseImage, NSError *error) {
+      void (^finished)(UIImage *, NSError *, id downloadIdentifier) = ^(UIImage *responseImage, NSError *error, id downloadIdentifier) {
         __typeof__(self) strongSelf = weakSelf;
         if (strongSelf == nil) {
           return;
@@ -218,13 +292,18 @@
 
         {
           ASDN::MutexLocker l(strongSelf->_lock);
+          
+          //Getting a result back for a different download identifier, download must not have been successfully canceled
+          if (![strongSelf->_downloadIdentifier isEqual:downloadIdentifier] && downloadIdentifier != nil) {
+              return;
+          }
 
           if (responseImage != NULL) {
             strongSelf->_imageLoaded = YES;
-            strongSelf.image = [UIImage imageWithCGImage:responseImage];
+            strongSelf.image = responseImage;
           }
 
-          strongSelf->_imageDownload = nil;
+          strongSelf->_downloadIdentifier = nil;
 
           strongSelf->_cacheUUID = nil;
         }
@@ -241,22 +320,32 @@
         NSUUID *cacheUUID = [NSUUID UUID];
         _cacheUUID = cacheUUID;
 
-        void (^cacheCompletion)(CGImageRef) = ^(CGImageRef image) {
+        void (^cacheCompletion)(UIImage *) = ^(UIImage *image) {
           // If the cache UUID changed, that means this request was cancelled.
           if (![_cacheUUID isEqual:cacheUUID]) {
             return;
           }
-
+          
           if (image == NULL && _downloader != nil) {
             [self _downloadImageWithCompletion:finished];
           } else {
-            finished(image, NULL);
+            finished(image, NULL, nil);
           }
         };
-
-        [_cache fetchCachedImageWithURL:_URL
-                          callbackQueue:dispatch_get_main_queue()
-                             completion:cacheCompletion];
+        
+        if (_cacherSupportsNewProtocol) {
+          [_cache cachedImageWithURL:_URL
+                       callbackQueue:dispatch_get_main_queue()
+                          completion:cacheCompletion];
+        } else {
+          void (^oldCacheCompletion)(CGImageRef) = ^(CGImageRef image) {
+            cacheCompletion([UIImage imageWithCGImage:image]);
+          };
+          
+          [_cache fetchCachedImageWithURL:_URL
+                            callbackQueue:dispatch_get_main_queue()
+                               completion:oldCacheCompletion];
+        }
       } else {
         [self _downloadImageWithCompletion:finished];
       }

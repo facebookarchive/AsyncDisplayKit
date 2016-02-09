@@ -230,7 +230,7 @@ static const char *kContextKey = NSStringFromClass(ASBasicImageDownloaderContext
 
 - (id)downloadImageWithURL:(NSURL *)URL
              callbackQueue:(dispatch_queue_t)callbackQueue
-     downloadProgressBlock:(void (^)(CGFloat))downloadProgressBlock
+          downloadProgress:(void (^)(CGFloat))downloadProgressBlock
                 completion:(void (^)(CGImageRef, NSError *))completion
 {
   ASBasicImageDownloaderContext *context = [ASBasicImageDownloaderContext contextForURL:URL];

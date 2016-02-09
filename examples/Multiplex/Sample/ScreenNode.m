@@ -20,7 +20,7 @@
   }
 
   // multiplex image node!
-  // NB:  we're using a custom downloader with an artificial delay for this demo, but ASBasicImageDownloader works too!
+  // NB:  we're using a custom downloader with an artificial delay for this demo, but ASPINRemoteImageDownloader works too!
   _imageNode = [[ASMultiplexImageNode alloc] initWithCache:nil downloader:self];
   _imageNode.dataSource = self;
   _imageNode.delegate = self;
