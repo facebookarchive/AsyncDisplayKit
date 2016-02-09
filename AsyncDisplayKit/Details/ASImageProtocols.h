@@ -17,15 +17,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
   @abstract Attempts to fetch an image with the given URL from the cache.
   @param URL The URL of the image to retrieve from the cache.
-  @param callbackQueue The queue to call `completion` on. If this value is nil, @{ref completion} will be invoked on the 
-      main-queue.
+  @param callbackQueue The queue to call `completion` on.
   @param completion The block to be called when the cache has either hit or missed.
   @param imageFromCache The image that was retrieved from the cache, if the image could be retrieved; nil otherwise.
   @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image. This method should not block
       the calling thread as it is likely to be called from the main thread.
  */
 - (void)fetchCachedImageWithURL:(nullable NSURL *)URL
-                  callbackQueue:(nullable dispatch_queue_t)callbackQueue
+                  callbackQueue:(nonnull dispatch_queue_t)callbackQueue
                      completion:(void (^)(CGImageRef _Nullable imageFromCache))completion;
 
 @end
@@ -36,8 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
   @abstract Downloads an image with the given URL.
   @param URL The URL of the image to download.
-  @param callbackQueue The queue to call `downloadProgressBlock` and `completion` on. If this value is nil, both blocks 
-      will be invoked on the main-queue.
+  @param callbackQueue The queue to call `downloadProgressBlock` and `completion` on.
   @param downloadProgressBlock The block to be invoked when the download of `URL` progresses.
   @param progress The progress of the download, in the range of (0.0, 1.0), inclusive.
   @param completion The block to be invoked when the download has completed, or has failed.
@@ -48,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
       retain the identifier if you wish to use it later.
  */
 - (nullable id)downloadImageWithURL:(NSURL *)URL
-             callbackQueue:(nullable dispatch_queue_t)callbackQueue
+             callbackQueue:(nonnull dispatch_queue_t)callbackQueue
      downloadProgressBlock:(void (^ _Nullable)(CGFloat progress))downloadProgressBlock
                 completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion;
 
