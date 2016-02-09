@@ -124,6 +124,7 @@ extern BOOL CGPointIsNull(CGPoint point);
 
 /**
  * @abstract Returns a valid frame for the current layout computed with the size and position.
+ * @discussion Clamps the layout's origin or position to 0 if any of the calculated values are infinite.
  */
 - (CGRect)frame;
 

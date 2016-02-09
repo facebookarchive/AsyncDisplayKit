@@ -50,7 +50,6 @@
 - (void)viewWillLayoutSubviews
 {
   [super viewWillLayoutSubviews];
-  [_node measureWithSizeRange:[self nodeConstrainedSize]];
 }
 
 - (void)viewDidLayoutSubviews

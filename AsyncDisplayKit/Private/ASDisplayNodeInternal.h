@@ -149,11 +149,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 
-/**
- Clamps the layout's origin or position to 0 if any of the calculated values are infinite.
- */
-- (CGRect)_adjustedFrameForLayout:(ASLayout *)layout;
-
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
 - (BOOL)__visibilityNotificationsDisabled;
 - (BOOL)__selfOrParentHasVisibilityNotificationsDisabled;

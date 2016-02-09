@@ -2164,11 +2164,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     [self __layoutSublayouts];
   } else {
     // Assume that _layout was flattened and is 1-level deep.
-    CGRect subnodeFrame = CGRectZero;
     for (ASLayout *subnodeLayout in _layout.sublayouts) {
       ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Sublayouts must only contain subnodes' layout. self = %@, subnodes = %@", self, _subnodes);
-      subnodeFrame = [self _adjustedFrameForLayout:subnodeLayout];
-      ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = subnodeFrame;
+      ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
     }
   }
 }
@@ -2176,36 +2174,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)__layoutSublayouts
 {
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
-    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [self _adjustedFrameForLayout:subnodeLayout];
+    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
   }
-}
-
-- (CGRect)_adjustedFrameForLayout:(ASLayout *)layout
-{
-  CGRect subnodeFrame = CGRectZero;
-  CGPoint adjustedOrigin = layout.position;
-  if (isfinite(adjustedOrigin.x) == NO) {
-    ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
-    adjustedOrigin.x = 0;
-  }
-  if (isfinite(adjustedOrigin.y) == NO) {
-    ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
-    adjustedOrigin.y = 0;
-  }
-  subnodeFrame.origin = adjustedOrigin;
-  
-  CGSize adjustedSize = layout.size;
-  if (isfinite(adjustedSize.width) == NO) {
-    ASDisplayNodeAssert(0, @"subnodeLayout has an invalid size");
-    adjustedSize.width = 0;
-  }
-  if (isfinite(adjustedSize.height) == NO) {
-    ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
-    adjustedSize.height = 0;
-  }
-  subnodeFrame.size = adjustedSize;
-  
-  return subnodeFrame;
 }
 
 - (void)displayWillStart
