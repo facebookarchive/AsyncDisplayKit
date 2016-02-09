@@ -122,6 +122,11 @@ extern BOOL CGPointIsNull(CGPoint point);
  */
 - (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *evaluatedLayout))predicateBlock;
 
+/**
+ * @abstract Returns a valid frame for the current layout computed with the size and position.
+ */
+- (CGRect)frame;
+
 @end
 
 NS_ASSUME_NONNULL_END

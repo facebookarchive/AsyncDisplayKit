@@ -119,4 +119,32 @@ extern BOOL CGPointIsNull(CGPoint point)
   return [ASLayout flattenedLayoutWithLayoutableObject:_layoutableObject size:_size sublayouts:flattenedSublayouts];
 }
 
+- (CGRect)frame
+{
+  CGRect subnodeFrame = CGRectZero;
+  CGPoint adjustedOrigin = _position;
+  if (isfinite(adjustedOrigin.x) == NO) {
+    ASDisplayNodeAssert(0, @"Layout has an invalid position");
+    adjustedOrigin.x = 0;
+  }
+  if (isfinite(adjustedOrigin.y) == NO) {
+    ASDisplayNodeAssert(0, @"Layout has an invalid position");
+    adjustedOrigin.y = 0;
+  }
+  subnodeFrame.origin = adjustedOrigin;
+  
+  CGSize adjustedSize = _size;
+  if (isfinite(adjustedSize.width) == NO) {
+    ASDisplayNodeAssert(0, @"Layout has an invalid size");
+    adjustedSize.width = 0;
+  }
+  if (isfinite(adjustedSize.height) == NO) {
+    ASDisplayNodeAssert(0, @"Layout has an invalid position");
+    adjustedSize.height = 0;
+  }
+  subnodeFrame.size = adjustedSize;
+  
+  return subnodeFrame;
+}
+
 @end
