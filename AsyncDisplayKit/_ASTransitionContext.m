@@ -8,6 +8,8 @@
 
 #import "_ASTransitionContext.h"
 
+#import "ASLayout.h"
+
 @interface _ASTransitionContext ()
 
 @property (weak, nonatomic) id<_ASTransitionContextDelegate> delegate;
@@ -30,12 +32,31 @@
 
 - (CGRect)initialFrameForNode:(ASDisplayNode *)node
 {
-  return [_delegate transitionContext:self initialFrameForNode:node];
+  for (ASDisplayNode *subnode in [_delegate currentSubnodesWithTransitionContext:self]) {
+    if (node == subnode) {
+      return node.frame;
+    }
+  }
+  return CGRectZero;
 }
 
 - (CGRect)finalFrameForNode:(ASDisplayNode *)node
 {
-  return [_delegate transitionContext:self finalFrameForNode:node];
+  for (ASLayout *layout in _layout.immediateSublayouts) {
+    if (layout.layoutableObject == node) {
+      return [layout frame];
+    }
+  }
+  return CGRectZero;
+}
+
+- (NSArray<ASDisplayNode *> *)subnodes
+{
+  NSMutableArray<ASDisplayNode *> *subnodes = [NSMutableArray array];
+  for (ASLayout *sublayout in _layout.immediateSublayouts) {
+    [subnodes addObject:(ASDisplayNode *)sublayout.layoutableObject];
+  }
+  return subnodes;
 }
 
 - (void)completeTransition:(BOOL)didComplete

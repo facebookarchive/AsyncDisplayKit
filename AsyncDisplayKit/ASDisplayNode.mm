@@ -652,11 +652,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
+  ASLayout *newLayout;
 
   if (![self __shouldSize])
-    return nil;
-
-  ASLayout *newLayout;
+    return newLayout;
   
   // only calculate the size if
   //  - we haven't already
@@ -664,32 +663,29 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
     newLayout = [self calculateLayoutThatFits:constrainedSize];
 
-    if ([[self class] usesImplicitHierarchyManagement]) {
-      if (_layout) {
-        NSIndexSet *insertions, *deletions;
-        [_layout.immediateSublayouts asdk_diffWithArray:newLayout.immediateSublayouts
-                                               insertions:&insertions
-                                                deletions:&deletions
-                                             compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
-          return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
-        }];
-        _insertedSubnodes = [self _nodesInLayout:newLayout atIndexes:insertions];
-        _deletedSubnodes = [self _nodesInLayout:_layout atIndexes:deletions filterNodes:_insertedSubnodes];
-      } else {
-        NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.immediateSublayouts count])];
-        _insertedSubnodes = [self _nodesInLayout:newLayout atIndexes:indexes];
-        _deletedSubnodes = nil;
-      }
-      
-      if (animated) {
-        [self __transitionToLayout:newLayout constrainedSize:constrainedSize animated:animated];
-      } else {
+    if (_layout) {
+      NSIndexSet *insertions, *deletions;
+      [_layout.immediateSublayouts asdk_diffWithArray:newLayout.immediateSublayouts
+                                             insertions:&insertions
+                                              deletions:&deletions
+                                           compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
+        return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
+      }];
+      _insertedSubnodes = [self _nodesInLayout:newLayout atIndexes:insertions];
+      _deletedSubnodes = [self _nodesInLayout:_layout atIndexes:deletions filterNodes:_insertedSubnodes];
+    } else {
+      NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.immediateSublayouts count])];
+      _insertedSubnodes = [self _nodesInLayout:newLayout atIndexes:indexes];
+      _deletedSubnodes = nil;
+    }
+    
+    if (animated) {
+      [self __transitionToLayout:newLayout constrainedSize:constrainedSize animated:animated];
+    } else {
+      if ([[self class] usesImplicitHierarchyManagement]) {
         [self __implicitlyInsertSubnodes];
         [self __implicitlyRemoveSubnodes];
-        [self __updateLayout:newLayout constrainedSize:constrainedSize];
       }
-    } else {
-      // 1.9.x code path
       [self __updateLayout:newLayout constrainedSize:constrainedSize];
     }
   }
@@ -1079,50 +1075,31 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 
 - (void)__implicitlyInsertSubnodes
 {
-  if ([_insertedSubnodes count]) {
-    for (_ASDisplayNodePosition *position in _insertedSubnodes) {
-      [self insertSubnode:position.node atIndex:position.index];
-    }
-    _insertedSubnodes = nil;
+  for (_ASDisplayNodePosition *position in _insertedSubnodes) {
+    [self insertSubnode:position.node atIndex:position.index];
   }
+  _insertedSubnodes = nil;
 }
 
 - (void)__implicitlyRemoveSubnodes
 {
-  if ([_deletedSubnodes count]) {
-    for (_ASDisplayNodePosition *position in _deletedSubnodes) {
-      [position.node removeFromSupernode];
-    }
-    _deletedSubnodes = nil;
+  for (_ASDisplayNodePosition *position in _deletedSubnodes) {
+    [position.node removeFromSupernode];
   }
+  _deletedSubnodes = nil;
 }
 
 #pragma mark - _ASTransitionContextDelegate
+
+- (NSArray<ASDisplayNode *> *)currentSubnodesWithTransitionContext:(_ASTransitionContext *)context
+{
+  return _subnodes;
+}
 
 - (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete
 {
   [self didCompleteTransitionLayout:context];
   _transitionContext = nil;
-}
-
-- (CGRect)transitionContext:(_ASTransitionContext *)context initialFrameForNode:(ASDisplayNode *)node
-{
-  for (ASDisplayNode *subnode in _subnodes) {
-    if (ASObjectIsEqual(node, subnode)) {
-      return node.frame;
-    }
-  }
-  return CGRectNull;
-}
-
-- (CGRect)transitionContext:(_ASTransitionContext *)context finalFrameForNode:(ASDisplayNode *)node
-{
-  for (ASLayout *layout in _layout.sublayouts) {
-    if (ASObjectIsEqual(node, layout.layoutableObject)) {
-      return [self _adjustedFrameForLayout:layout];
-    }
-  }
-  return CGRectNull;
 }
 
 #pragma mark - _ASDisplayLayerDelegate

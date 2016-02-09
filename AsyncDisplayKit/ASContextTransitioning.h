@@ -15,9 +15,20 @@
  */
 - (BOOL)isAnimated;
 
+/**
+ * @abstract The destination layout being transitioned to
+ */
 - (ASLayout *)layout;
 
+/**
+ * @abstrat The destination constrainedSize being transitioned to
+ */
 - (ASSizeRange)constrainedSize;
+
+/**
+ * @abstract Subnodes in the new layout
+ */
+- (NSArray<ASDisplayNode *> *)subnodes;
 
 /**
  @abstract The frame for the given node before the transition began.
