@@ -12,7 +12,6 @@
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASThread.h>
-#import <AsyncDisplayKit/ASContextTransitioning.h>
 
 @class ASLayoutSpec;
 
@@ -154,19 +153,6 @@ NS_ASSUME_NONNULL_BEGIN
  * node, when the contents of the node change in such a way as to require measuring it again.
  */
 - (void)invalidateCalculatedLayout;
-
-
-/** @name Layout Transitioning */
-
-/**
- @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
- */
-- (void)animateLayoutTransition:(id<ASContextTransitioning>)context;
-
-/**
- @discussion A place to clean up your nodes after the transition
- */
-- (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context;
 
 
 /** @name Drawing */

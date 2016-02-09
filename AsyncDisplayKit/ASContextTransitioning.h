@@ -15,6 +15,10 @@
  */
 - (BOOL)isAnimated;
 
+- (ASLayout *)layout;
+
+- (ASSizeRange)constrainedSize;
+
 /**
  @abstract The frame for the given node before the transition began.
  @discussion Returns CGRectNull if the node was not in the hierarchy before the transition.

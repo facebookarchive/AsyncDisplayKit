@@ -25,6 +25,10 @@
 
 @property (assign, readonly, nonatomic, getter=isAnimated) BOOL animated;
 
-- (instancetype)initWithAnimation:(BOOL)animated delegate:(id<_ASTransitionContextDelegate>)delegate;
+@property (strong, readonly) ASLayout *layout;
+
+@property (assign, readonly) ASSizeRange constrainedSize;
+
+- (instancetype)initWithLayout:(ASLayout *)layout constrainedSize:(ASSizeRange)constrainedSize animated:(BOOL)animated delegate:(id<_ASTransitionContextDelegate>)delegate;
 
 @end

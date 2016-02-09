@@ -571,18 +571,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface ASDisplayNode (Transitioning)
-
-/**
- @abstract Invalidates the current layout and begins a relayout of the node to the new layout returned in `calculateLayoutThatFits:`.
-
- @discussion Animation is optional, but will still proceed through the `transitionLayout` methods with `isAnimated == NO`.
- */
-- (void)transitionLayoutWithAnimation:(BOOL)animated;
-
-@end
-
-
 /**
  * Convenience methods for debugging.
  */

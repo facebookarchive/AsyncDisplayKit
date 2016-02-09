@@ -645,17 +645,24 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  return [self measureWithSizeRange:constrainedSize animated:NO];
+}
+
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
+{
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
 
   if (![self __shouldSize])
     return nil;
 
+  ASLayout *newLayout;
+  
   // only calculate the size if
   //  - we haven't already
   //  - the constrained size range is different
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
-    ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
+    newLayout = [self calculateLayoutThatFits:constrainedSize];
 
     if ([[self class] usesImplicitHierarchyManagement]) {
       if (_layout) {
@@ -674,22 +681,37 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         _deletedSubnodes = nil;
       }
       
-      if (!_deferImmediateHierarchyManagement) {
+      if (animated) {
+        [self __transitionToLayout:newLayout constrainedSize:constrainedSize animated:animated];
+      } else {
         [self __implicitlyInsertSubnodes];
         [self __implicitlyRemoveSubnodes];
+        [self __updateLayout:newLayout constrainedSize:constrainedSize];
       }
+    } else {
+      // 1.9.x code path
+      [self __updateLayout:newLayout constrainedSize:constrainedSize];
     }
-
-    _layout = newLayout;
-    _constrainedSize = constrainedSize;
-    _flags.isMeasured = YES;
-    [self calculatedLayoutDidChange];
   }
+  return newLayout;
+}
 
-  ASDisplayNodeAssertTrue(_layout.layoutableObject == self);
-  ASDisplayNodeAssertTrue(_layout.size.width >= 0.0);
-  ASDisplayNodeAssertTrue(_layout.size.height >= 0.0);
+- (void)__updateLayout:(ASLayout *)layout constrainedSize:(ASSizeRange)constrainedSize
+{
+  ASDisplayNodeAssertTrue(layout.layoutableObject == self);
+  ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
+  ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
 
+  _layout = layout;
+  _constrainedSize = constrainedSize;
+  _flags.isMeasured = YES;
+  [self calculatedLayoutDidChange];
+
+  [self __primePlaceholder];
+}
+
+- (void)__primePlaceholder
+{
   // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed
   // to have a placeholder ready to go. Also, if a node has no size it should not have a placeholder
   if (self.placeholderEnabled && [self _displaysAsynchronously] &&
@@ -702,8 +724,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       [self _setupPlaceholderLayerContents];
     }
   }
-
-  return _layout;
 }
 
 /**
@@ -1033,23 +1053,12 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 
 #pragma mark - Layout Transition
 
-- (void)transitionLayoutWithAnimation:(BOOL)animated
+- (void)__transitionToLayout:(ASLayout *)layout constrainedSize:(ASSizeRange)constrainedSize animated:(BOOL)animated
 {
-  [self transitionLayoutThatFits:_constrainedSize animated:animated];
-}
-
-- (void)transitionLayoutThatFits:(ASSizeRange)constrainedSize animated:(BOOL)animated
-{
-  [self invalidateCalculatedLayout];
-  _deferImmediateHierarchyManagement = YES;
-  [self measureWithSizeRange:constrainedSize]; // Generate a new layout
-  _deferImmediateHierarchyManagement = NO;
-  [self __transitionLayoutWithAnimation:animated];
-}
-
-- (void)__transitionLayoutWithAnimation:(BOOL)animated
-{
-  _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated delegate:self];
+  _transitionContext = [[_ASTransitionContext alloc] initWithLayout:layout
+                                                    constrainedSize:constrainedSize
+                                                           animated:animated
+                                                           delegate:self];
   [self __implicitlyInsertSubnodes];
   [self animateLayoutTransition:_transitionContext];
 }
@@ -1063,6 +1072,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (void)didCompleteTransitionLayout:(id<ASContextTransitioning>)context
 {
   [self __implicitlyRemoveSubnodes];
+  [self __updateLayout:context.layout constrainedSize:context.constrainedSize];
 }
 
 #pragma mark - Implicit node hierarchy managagment

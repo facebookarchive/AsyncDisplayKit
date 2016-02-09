@@ -6,6 +6,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#import "ASContextTransitioning.h"
+
 @interface ASDisplayNode (Beta)
 
 + (BOOL)usesImplicitHierarchyManagement;
@@ -36,5 +38,33 @@
  * @discussion
  */
 @property (nonatomic, strong) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
+
+/** @name Layout Transitioning */
+
+/**
+ @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
+ */
+- (void)animateLayoutTransition:(id<ASContextTransitioning>)context;
+
+/**
+ @discussion A place to clean up your nodes after the transition
+ */
+- (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context;
+
+/**
+ @abstract Invalidates the current layout and begins a relayout of the node to the new layout returned in `calculateLayoutThatFits:`.
+ 
+ @discussion Animation is optional, but will still proceed through the `transitionLayout` methods with `isAnimated == NO`.
+ */
+//- (void)transitionLayoutWithAnimation:(BOOL)animated;
+
+/**
+ @abstract Invalidates the current layout and begins a relayout of the node to the new layout returned in `calculateLayoutThatFits:`.
+ 
+ @discussion Animation is optional, but will still proceed through the `transitionLayout` methods with `isAnimated == NO`.
+ */
+//- (void)transitionLayoutThatFits:(ASSizeRange)constrainedSize animated:(BOOL)animated;
+
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated;
 
 @end

@@ -16,10 +16,12 @@
 
 @implementation _ASTransitionContext
 
-- (instancetype)initWithAnimation:(BOOL)animated delegate:(id<_ASTransitionContextDelegate>)delegate
+- (instancetype)initWithLayout:(ASLayout *)layout constrainedSize:(ASSizeRange)constrainedSize animated:(BOOL)animated delegate:(id<_ASTransitionContextDelegate>)delegate
 {
   self = [super init];
   if (self) {
+    _layout = layout;
+    _constrainedSize = constrainedSize;
     _animated = animated;
     _delegate = delegate;
   }
