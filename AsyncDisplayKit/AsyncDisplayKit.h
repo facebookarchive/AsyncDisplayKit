@@ -63,9 +63,6 @@
 #import <AsyncDisplayKit/ASLayoutOptions.h>
 #import <AsyncDisplayKit/ASLog.h>
 #import <AsyncDisplayKit/ASMutableAttributedStringBuilder.h>
-#import <AsyncDisplayKit/ASRangeHandler.h>
-#import <AsyncDisplayKit/ASRangeHandlerPreload.h>
-#import <AsyncDisplayKit/ASRangeHandlerRender.h>
 #import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/CGRect+ASConvenience.h>
 #import <AsyncDisplayKit/NSMutableAttributedString+TextKitAdditions.h>

@@ -8,9 +8,6 @@
 
 @interface ASDisplayNode (Beta)
 
-+ (BOOL)shouldUseNewRenderingRange;
-+ (void)setShouldUseNewRenderingRange:(BOOL)shouldUseNewRenderingRange;
-
 + (BOOL)usesImplicitHierarchyManagement;
 + (void)setUsesImplicitHierarchyManagement:(BOOL)enabled;
 

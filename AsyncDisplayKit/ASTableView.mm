@@ -11,7 +11,6 @@
 #import "ASAssert.h"
 #import "ASBatchFetching.h"
 #import "ASChangeSetDataController.h"
-#import "ASCollectionViewLayoutController.h"
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
@@ -148,8 +147,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
   
-  _rangeController = [ASDisplayNode shouldUseNewRenderingRange] ? [[ASRangeControllerBeta alloc] init]
-                                                                : [[ASRangeControllerStable alloc] init];
+  _rangeController = [[ASRangeController alloc] init];
   _rangeController.layoutController = _layoutController;
   _rangeController.dataSource = self;
   _rangeController.delegate = self;

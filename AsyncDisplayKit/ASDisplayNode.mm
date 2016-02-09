@@ -256,7 +256,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 + (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert([ASDisplayNode shouldUseNewRenderingRange], @"+scheduleNodeForRecursiveDisplay: should never be called without the new rendering range enabled");
   static NSMutableSet *nodesToDisplay = nil;
   static BOOL displayScheduled = NO;
   static ASDN::RecursiveMutex displaySchedulerLock;
@@ -1666,18 +1665,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return _flags.shouldBypassEnsureDisplay;
 }
 
-static BOOL ShouldUseNewRenderingRange = YES;
-
-+ (BOOL)shouldUseNewRenderingRange
-{
-  return ShouldUseNewRenderingRange;
-}
-
-+ (void)setShouldUseNewRenderingRange:(BOOL)shouldUseNewRenderingRange
-{
-  ShouldUseNewRenderingRange = shouldUseNewRenderingRange;
-}
-
 #pragma mark - For Subclasses
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
@@ -1922,7 +1909,7 @@ static BOOL ShouldUseNewRenderingRange = YES;
     } else {
       // NOTE: This case isn't currently supported as setInterfaceState: isn't exposed externally, and all
       // internal use cases are range-managed.  When a node is visible, don't mess with display - CA will start it.
-      if ([ASDisplayNode shouldUseNewRenderingRange] && !ASInterfaceStateIncludesVisible(newState)) {
+      if (!ASInterfaceStateIncludesVisible(newState)) {
         // Check __implementsDisplay purely for efficiency - it's faster even than calling -asyncLayer.
         if ([self __implementsDisplay]) {
           if (nowDisplay) {

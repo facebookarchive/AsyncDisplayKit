@@ -167,12 +167,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     self.strongCollectionNode = collectionNode;
   }
   
-  _layoutController = [ASDisplayNode shouldUseNewRenderingRange] ?
-                                  [[ASCollectionViewLayoutControllerBeta alloc] initWithCollectionView:self] :
-                                  [[ASCollectionViewLayoutControllerStable alloc] initWithCollectionView:self];
+  _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];
   
-  _rangeController = [ASDisplayNode shouldUseNewRenderingRange] ? [[ASRangeControllerBeta alloc] init]
-                                                                : [[ASRangeControllerStable alloc] init];
+  _rangeController = [[ASRangeController alloc] init];
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
