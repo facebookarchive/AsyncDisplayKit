@@ -1,151 +1,116 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
-	<head>
-		<meta http-equiv="Content-Type" content="html/html; charset=utf-8" />
-		<title>ASControlNode Class Reference</title>
-		<meta id="xcode-display" name="xcode-display" content="render"/>
-		<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
-		<link rel="stylesheet" type="text/css" media="print" href="../css/stylesPrint.css" />
-		<meta name="generator" content="appledoc 2.2 (build 963)" />
-	</head>
-	<body>
-		<header id="top_header">
-			<div id="library" class="hideInXcode">
-				<h1><a id="libraryTitle" href="../index.html">AsyncDisplayKit </a></h1>
-				<a id="developerHome" href="../index.html">Facebook</a>
-			</div>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASControlNode Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
 			
-			<div id="title" role="banner">
-				<h1 class="hideInXcode">ASControlNode Class Reference</h1>
-			</div>
-			<ul id="headerButtons" role="toolbar">
-				<li id="toc_button">
-					<button aria-label="Show Table of Contents" role="checkbox" class="open" id="table_of_contents"><span class="disclosure"></span>Table of Contents</button>
-				</li>
-				<li id="jumpto_button" role="navigation">
-					<select id="jumpTo">
+			<h1 id="library-title">
+				<a href="../index.html">AsyncDisplayKit </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Facebook</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
 	<option value="top">Jump To&#133;</option>
 	
 	<option value="overview">Overview</option>
 	
-	
+
 	
 	
 	<option value="tasks">Tasks</option>
 	
 	
+
 	
 	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/enabled">enabled</option>
+		
+		<option value="//api/name/highlighted">highlighted</option>
+		
+		<option value="//api/name/touchInside">touchInside</option>
+		
+		<option value="//api/name/tracking">tracking</option>
+		
+	</optgroup>
 	
-	<option value="properties">Properties</option>
+
 	
-	<option value="//api/name/enabled">&nbsp;&nbsp;&nbsp;&nbsp;enabled</option>
+
 	
-	<option value="//api/name/highlighted">&nbsp;&nbsp;&nbsp;&nbsp;highlighted</option>
-	
-	<option value="//api/name/touchInside">&nbsp;&nbsp;&nbsp;&nbsp;touchInside</option>
-	
-	<option value="//api/name/tracking">&nbsp;&nbsp;&nbsp;&nbsp;tracking</option>
-	
-	
-	
-	
-	
-	
-	<option value="instance_methods">Instance Methods</option>
-	
-	<option value="//api/name/actionsForTarget:forControlEvent:">&nbsp;&nbsp;&nbsp;&nbsp;- actionsForTarget:forControlEvent:</option>
-	
-	<option value="//api/name/addTarget:action:forControlEvents:">&nbsp;&nbsp;&nbsp;&nbsp;- addTarget:action:forControlEvents:</option>
-	
-	<option value="//api/name/allTargets">&nbsp;&nbsp;&nbsp;&nbsp;- allTargets</option>
-	
-	<option value="//api/name/removeTarget:action:forControlEvents:">&nbsp;&nbsp;&nbsp;&nbsp;- removeTarget:action:forControlEvents:</option>
-	
-	<option value="//api/name/sendActionsForControlEvents:withEvent:">&nbsp;&nbsp;&nbsp;&nbsp;- sendActionsForControlEvents:withEvent:</option>
-	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/actionsForTarget:forControlEvent:">- actionsForTarget:forControlEvent:</option>
+		
+		<option value="//api/name/addTarget:action:forControlEvents:">- addTarget:action:forControlEvents:</option>
+		
+		<option value="//api/name/allTargets">- allTargets</option>
+		
+		<option value="//api/name/removeTarget:action:forControlEvents:">- removeTarget:action:forControlEvents:</option>
+		
+		<option value="//api/name/sendActionsForControlEvents:withEvent:">- sendActionsForControlEvents:withEvent:</option>
+		
+	</optgroup>
 	
 	
 </select>
-				</li>
-			</ul>
-		</header>
-		<nav id="tocContainer" class="isShowingTOC">
-			<ul id="toc" role="tree">
-				
-<li role="treeitem"><span class="nodisclosure"></span><span class="sectionName"><a href="#overview">Overview</a></span></li>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
 
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASControlNode Class Reference</h1>
 
-
-
-<li role="treeitem" id="task_treeitem"><span class="nodisclosure"></span><span class="sectionName"><a href="#tasks">Tasks</a></span><ul>
-	
-</ul></li>
-
-
-
-
-
-<li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#properties">Properties</a></span><ul>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/enabled">enabled</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/highlighted">highlighted</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/touchInside">touchInside</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/tracking">tracking</a></span></li>
-	
-</ul></li>
-
-
-
-
-
-<li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#instance_methods">Instance Methods</a></span><ul>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/actionsForTarget:forControlEvent:">actionsForTarget:forControlEvent:</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/addTarget:action:forControlEvents:">addTarget:action:forControlEvents:</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/allTargets">allTargets</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/removeTarget:action:forControlEvents:">removeTarget:action:forControlEvents:</a></span></li>
-	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/sendActionsForControlEvents:withEvent:">sendActionsForControlEvents:withEvent:</a></span></li>
-	
-</ul></li>
-
-
-			</ul>
-		</nav>
-		<article>
-			<div id="contents" class="isShowingTOC" role="main">
-				<a title="ASControlNode Class Reference" name="top"></a>
-				<div class="main-navigation navigation-top">
-					<ul>
-	<li><a href="../index.html">Index</a></li>
-	<li><a href="../hierarchy.html">Hierarchy</a></li>
-</ul>
-				</div>
-				<div id="header">
-					<div class="section-header">
-						<h1 class="title title-header">ASControlNode Class Reference</h1>
-					</div>		
-				</div>
-				<div id="container">	
 					
 					<div class="section section-specification"><table cellspacing="0"><tbody>
 						<tr>
-	<td class="specification-title">Inherits from</td>
-	<td class="specification-value"><a href="../Classes/ASDisplayNode.html">ASDisplayNode</a> : ASDealloc2MainObject</td>
+	<th>Inherits from</th>
+	<td><a href="../Classes/ASDisplayNode.html">ASDisplayNode</a> : ASDealloc2MainObject</td>
 </tr><tr>
-	<td class="specification-title">Declared in</td>
-	<td class="specification-value">ASControlNode.h</td>
+	<th>Declared in</th>
+	<td>ASControlNode.h</td>
 </tr>
 						</tbody></table></div>
 					
-                    
+
                     
 					
 					<div class="section section-overview">
@@ -155,640 +120,525 @@
 					</div>
 					
 					
-					
+
 					
 					
 					<div class="section section-tasks">
 						<a title="Tasks" name="tasks"></a>
-						<h2 class="subtitle subtitle-tasks">Tasks</h2>
 						
-						
+
 						
 						
 
-						<ul class="task-list">
-							<li>
-	<span class="tooltip">
-		<code><a href="#//api/name/enabled">&nbsp;&nbsp;enabled</a></code>
-	</span>
-	<span class="task-item-suffix">property</span>
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/highlighted">&nbsp;&nbsp;highlighted</a></code>
-	</span>
-	<span class="task-item-suffix">property</span>
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/tracking">&nbsp;&nbsp;tracking</a></code>
-	</span>
-	<span class="task-item-suffix">property</span>
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/touchInside">&nbsp;&nbsp;touchInside</a></code>
-	</span>
-	<span class="task-item-suffix">property</span>
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/addTarget:action:forControlEvents:">&ndash;&nbsp;addTarget:action:forControlEvents:</a></code>
-	</span>
-	
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/actionsForTarget:forControlEvent:">&ndash;&nbsp;actionsForTarget:forControlEvent:</a></code>
-	</span>
-	
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/allTargets">&ndash;&nbsp;allTargets</a></code>
-	</span>
-	
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/removeTarget:action:forControlEvents:">&ndash;&nbsp;removeTarget:action:forControlEvents:</a></code>
-	</span>
-	
-	
-</li><li>
-	<span class="tooltip">
-		<code><a href="#//api/name/sendActionsForControlEvents:withEvent:">&ndash;&nbsp;sendActionsForControlEvents:withEvent:</a></code>
-	</span>
-	
-	
-</li>
-						</ul>
-						
-					</div>
-					
-					
-					
-					
-					
-					<div class="section section-methods">
-						<a title="Properties" name="properties"></a>
-						<h2 class="subtitle subtitle-methods">Properties</h2>
-						
-						<div class="section-method">
+						<div class="task-list">
+							<div class="section-method">
 	<a name="//api/name/enabled" title="enabled"></a>
-	<h3 class="subsubtitle method-title">enabled</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Indicates whether or not the receiver is enabled.</p>
-	</div>		
-	
-    
+	<h3 class="method-title"><code><a href="#//api/name/enabled">&nbsp;&nbsp;enabled</a></code>
+</h3>
 
-	<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, getter=isEnabled) BOOL enabled</code></div>
+	<div class="method-info">
+		<div class="pointy-thing"></div>
 
-    
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<p>Specify YES to make the control enabled; otherwise, specify NO to make it disabled. The default value is YES. If the enabled state is NO, the control ignores touch events and subclasses may draw differently.</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/highlighted" title="highlighted"></a>
-	<h3 class="subsubtitle method-title">highlighted</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Indicates whether or not the receiver is highlighted.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign, getter=isHighlighted) BOOL highlighted</code></div>
-
-    
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<p>This is set automatically when the there is a touch inside the control and removed on exit or touch up. This is different from touchInside in that it includes an area around the control, rather than just for touches inside the control.</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/touchInside" title="touchInside"></a>
-	<h3 class="subsubtitle method-title">touchInside</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Indicates whether or not a touch is inside the bounds of the receiver.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign, getter=isTouchInside) BOOL touchInside</code></div>
-
-    
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<p>YES if a touch is inside the receiver&rsquo;s bounds; NO otherwise.</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/tracking" title="tracking"></a>
-	<h3 class="subsubtitle method-title">tracking</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Indicates whether or not the receiver is currently tracking touches related to an event.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign, getter=isTracking) BOOL tracking</code></div>
-
-    
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<p>YES if the receiver is tracking touches; NO otherwise.</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-					</div>
-					
-					
-					
-					
-					
-					<div class="section section-methods">
-						<a title="Instance Methods" name="instance_methods"></a>
-						<h2 class="subtitle subtitle-methods">Instance Methods</h2>
-						
-						<div class="section-method">
-	<a name="//api/name/actionsForTarget:forControlEvent:" title="actionsForTarget:forControlEvent:"></a>
-	<h3 class="subsubtitle method-title">actionsForTarget:forControlEvent:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Returns the actions that are associated with a target and a particular control event.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (NSArray *)actionsForTarget:(id)<em>target</em> forControlEvent:(id)<em>controlEvent</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>target</em></dt>
-			<dd><p>The target object. May not be nil.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>controlEvent</em></dt>
-			<dd><p>A single constant of type ASControlNodeEvent that specifies a particular user action on the control; for a list of these constants, see &ldquo;Control Events&rdquo;. May not be 0 or ASControlNodeEventAllEvents.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	<div class="method-subsection return">
-		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>An array of selector names as NSString objects, or nil if there are no action selectors associated with controlEvent.</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/addTarget:action:forControlEvents:" title="addTarget:action:forControlEvents:"></a>
-	<h3 class="subsubtitle method-title">addTarget:action:forControlEvents:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Adds a target-action pair for a particular event (or events).</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (void)addTarget:(id)<em>target</em> action:(id)<em>action</em> forControlEvents:(id)<em>controlEvents</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>target</em></dt>
-			<dd><p>The object to which the action message is sent. If this is nil, the responder chain is searched for an object willing to respond to the action message. target is not retained.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>action</em></dt>
-			<dd><p>A selector identifying an action message. May optionally include the sender and the event as parameters, in that order. May not be NULL.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>controlEvents</em></dt>
-			<dd><p>A bitmask specifying the control events for which the action message is sent. May not be 0. See &ldquo;Control Events&rdquo; for bitmask constants.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection discussion-section">
-		<h4 class="method-subtitle">Discussion</h4>
-		<p>You may call this method multiple times, and you may specify multiple target-action pairs for a particular event. Targets are held weakly.</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/allTargets" title="allTargets"></a>
-	<h3 class="subsubtitle method-title">allTargets</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Returns all target objects associated with the receiver.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (NSSet *)allTargets</code></div>
-
-    
-	
-	
-	
-	<div class="method-subsection return">
-		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>A set of all targets for the receiver. The set may include NSNull to indicate at least one nil target (meaning, the responder chain is searched for a target.)</p>
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/removeTarget:action:forControlEvents:" title="removeTarget:action:forControlEvents:"></a>
-	<h3 class="subsubtitle method-title">removeTarget:action:forControlEvents:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Removes a target-action pair for a particular event.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (void)removeTarget:(id)<em>target</em> action:(id)<em>action</em> forControlEvents:(id)<em>controlEvents</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>target</em></dt>
-			<dd><p>The target object. Pass nil to remove all targets paired with action and the specified control events.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>action</em></dt>
-			<dd><p>A selector identifying an action message. Pass NULL to remove all action messages paired with target.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>controlEvents</em></dt>
-			<dd><p>A bitmask specifying the control events associated with target and action. See &ldquo;Control Events&rdquo; for bitmask constants. May not be 0.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-						<div class="section-method">
-	<a name="//api/name/sendActionsForControlEvents:withEvent:" title="sendActionsForControlEvents:withEvent:"></a>
-	<h3 class="subsubtitle method-title">sendActionsForControlEvents:withEvent:</h3>
-	
-	
-	
-	<div class="method-subsection brief-description">
-		<p>Sends the actions for the control events for a particular event.</p>
-	</div>		
-	
-    
-
-	<div class="method-subsection method-declaration"><code>- (void)sendActionsForControlEvents:(id)<em>controlEvents</em> withEvent:(id)<em>event</em></code></div>
-
-    
-	
-	<div class="method-subsection arguments-section parameters">
-		<h4 class="method-subtitle parameter-title">Parameters</h4>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>controlEvents</em></dt>
-			<dd><p>A bitmask specifying the control events for which to send actions. See &ldquo;Control Events&rdquo; for bitmask constants. May not be 0.</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>event</em></dt>
-			<dd><p>The event which triggered these control actions. May be nil.</p></dd>
-		</dl>
-		
-	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	<div class="method-subsection declared-in-section">
-		<h4 class="method-subtitle">Declared In</h4>
-		<code class="declared-in-ref">ASControlNode.h</code><br />
-	</div>				
-	
-	
-</div>
-						
-					</div>
-					
-					
-                    
-                    
-                    
-                    
-
-				</div>
-				<div class="main-navigation navigation-bottom">
-					<ul>
-	<li><a href="../index.html">Index</a></li>
-	<li><a href="../hierarchy.html">Hierarchy</a></li>
-</ul>
-				</div>
-				<div id="footer">
-					<hr />
-					<div class="footer-copyright">
-						<p><span class="copyright">&copy; 2015 Facebook. All rights reserved. (Last updated: 2015-01-21)</span><br />
-						
-						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2 (build 963)</a>.</span></p>
-						
-					</div>
-				</div>
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates whether or not the receiver is enabled.</p>
 			</div>
-		</article>
-		<script type="text/javascript">
-			function jumpToChange()
-			{
-				window.location.hash = this.options[this.selectedIndex].value;
-			}
 			
-			function toggleTOC()
-			{
-				var contents = document.getElementById('contents');
-				var tocContainer = document.getElementById('tocContainer');
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, getter=isEnabled) BOOL enabled</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Specify YES to make the control enabled; otherwise, specify NO to make it disabled. The default value is YES. If the enabled state is NO, the control ignores touch events and subclasses may draw differently.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/highlighted" title="highlighted"></a>
+	<h3 class="method-title"><code><a href="#//api/name/highlighted">&nbsp;&nbsp;highlighted</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates whether or not the receiver is highlighted.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign, getter=isHighlighted) BOOL highlighted</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This is set automatically when the there is a touch inside the control and removed on exit or touch up. This is different from touchInside in that it includes an area around the control, rather than just for touches inside the control.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/tracking" title="tracking"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tracking">&nbsp;&nbsp;tracking</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates whether or not the receiver is currently tracking touches related to an event.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign, getter=isTracking) BOOL tracking</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>YES if the receiver is tracking touches; NO otherwise.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/touchInside" title="touchInside"></a>
+	<h3 class="method-title"><code><a href="#//api/name/touchInside">&nbsp;&nbsp;touchInside</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates whether or not a touch is inside the bounds of the receiver.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign, getter=isTouchInside) BOOL touchInside</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>YES if a touch is inside the receiver&rsquo;s bounds; NO otherwise.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/addTarget:action:forControlEvents:" title="addTarget:action:forControlEvents:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/addTarget:action:forControlEvents:">&ndash;&nbsp;addTarget:action:forControlEvents:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Adds a target-action pair for a particular event (or events).</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)addTarget:(id)<em>target</em> action:(SEL)<em>action</em> forControlEvents:(ASControlNodeEvent)<em>controlEvents</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
 				
-				if (this.getAttribute('class') == 'open')
-				{
-					this.setAttribute('class', '');
-					contents.setAttribute('class', '');
-					tocContainer.setAttribute('class', '');
+					<tr>
+						<th scope="row" class="argument-name"><code>target</code></th>
+						<td><p>The object to which the action message is sent. If this is nil, the responder chain is searched for an object willing to respond to the action message. target is not retained.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>action</code></th>
+						<td><p>A selector identifying an action message. May optionally include the sender and the event as parameters, in that order. May not be NULL.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>controlEvents</code></th>
+						<td><p>A bitmask specifying the control events for which the action message is sent. May not be 0. See &ldquo;Control Events&rdquo; for bitmask constants.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>You may call this method multiple times, and you may specify multiple target-action pairs for a particular event. Targets are held weakly.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/actionsForTarget:forControlEvent:" title="actionsForTarget:forControlEvent:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/actionsForTarget:forControlEvent:">&ndash;&nbsp;actionsForTarget:forControlEvent:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns the actions that are associated with a target and a particular control event.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (NSArray *)actionsForTarget:(id)<em>target</em> forControlEvent:(ASControlNodeEvent)<em>controlEvent</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>target</code></th>
+						<td><p>The target object. May not be nil.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>controlEvent</code></th>
+						<td><p>A single constant of type ASControlNodeEvent that specifies a particular user action on the control; for a list of these constants, see &ldquo;Control Events&rdquo;. May not be 0 or ASControlNodeEventAllEvents.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>An array of selector names as NSString objects, or nil if there are no action selectors associated with controlEvent.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/allTargets" title="allTargets"></a>
+	<h3 class="method-title"><code><a href="#//api/name/allTargets">&ndash;&nbsp;allTargets</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns all target objects associated with the receiver.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (NSSet *)allTargets</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A set of all targets for the receiver. The set may include NSNull to indicate at least one nil target (meaning, the responder chain is searched for a target.)</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/removeTarget:action:forControlEvents:" title="removeTarget:action:forControlEvents:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/removeTarget:action:forControlEvents:">&ndash;&nbsp;removeTarget:action:forControlEvents:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Removes a target-action pair for a particular event.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)removeTarget:(id)<em>target</em> action:(SEL)<em>action</em> forControlEvents:(ASControlNodeEvent)<em>controlEvents</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>target</code></th>
+						<td><p>The target object. Pass nil to remove all targets paired with action and the specified control events.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>action</code></th>
+						<td><p>A selector identifying an action message. Pass NULL to remove all action messages paired with target.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>controlEvents</code></th>
+						<td><p>A bitmask specifying the control events associated with target and action. See &ldquo;Control Events&rdquo; for bitmask constants. May not be 0.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/sendActionsForControlEvents:withEvent:" title="sendActionsForControlEvents:withEvent:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/sendActionsForControlEvents:withEvent:">&ndash;&nbsp;sendActionsForControlEvents:withEvent:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Sends the actions for the control events for a particular event.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)sendActionsForControlEvents:(ASControlNodeEvent)<em>controlEvents</em> withEvent:(UIEvent *)<em>event</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>controlEvents</code></th>
+						<td><p>A bitmask specifying the control events for which to send actions. See &ldquo;Control Events&rdquo; for bitmask constants. May not be 0.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>event</code></th>
+						<td><p>The event which triggered these control actions. May be nil.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
 					
-					window.name = "hideTOC";
-				}
-				else
-				{
-					this.setAttribute('class', 'open');
-					contents.setAttribute('class', 'isShowingTOC');
-					tocContainer.setAttribute('class', 'isShowingTOC');
 					
-					window.name = "";
-				}
-				return false;
-			}
-			
-			function toggleTOCEntryChildren(e)
-			{
-				e.stopPropagation();
-				var currentClass = this.getAttribute('class');
-				if (currentClass == 'children') {
-					this.setAttribute('class', 'children open');
-				}
-				else if (currentClass == 'children open') {
-					this.setAttribute('class', 'children');
-				}
-				return false;
-			}
-			
-			function tocEntryClick(e)
-			{
-				e.stopPropagation();
-				return true;
-			}
-			
-			function init()
-			{
-				var selectElement = document.getElementById('jumpTo');
-				selectElement.addEventListener('change', jumpToChange, false);
-				
-				var tocButton = document.getElementById('table_of_contents');
-				tocButton.addEventListener('click', toggleTOC, false);
-				
-				var taskTreeItem = document.getElementById('task_treeitem');
-				if (taskTreeItem.getElementsByTagName('li').length > 0)
-				{
-					taskTreeItem.setAttribute('class', 'children');
-					taskTreeItem.firstChild.setAttribute('class', 'disclosure');
-				}
-				
-				var tocList = document.getElementById('toc');
-				
-				var tocEntries = tocList.getElementsByTagName('li');
-				for (var i = 0; i < tocEntries.length; i++) {
-					tocEntries[i].addEventListener('click', toggleTOCEntryChildren, false);
-				}
-				
-				var tocLinks = tocList.getElementsByTagName('a');
-				for (var i = 0; i < tocLinks.length; i++) {
-					tocLinks[i].addEventListener('click', tocEntryClick, false);
-				}
-				
-				if (window.name == "hideTOC") {
-					toggleTOC.call(tocButton);
-				}
-			}
-			
-			window.onload = init;
-			
-			// If showing in Xcode, hide the TOC and Header
-			if (navigator.userAgent.match(/xcode/i)) {
-				document.getElementById("contents").className = "hideInXcode"
-				document.getElementById("tocContainer").className = "hideInXcode"
-				document.getElementById("top_header").className = "hideInXcode"
-			}
-			
-		</script>
-	</body>
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
 </html>
