@@ -47,6 +47,14 @@ extern BOOL CGPointIsNull(CGPoint point)
     }
     l->_sublayouts = [sublayouts copy];
     l->_flattened = flattened;
+    
+    NSMutableArray<ASLayout *> *result = [NSMutableArray array];
+    for (ASLayout *sublayout in l->_sublayouts) {
+      if (!sublayout.isFlattened) {
+        [result addObject:sublayout];
+      }
+    }
+    l->_immediateSublayouts = result;
   }
   return l;
 }
@@ -81,9 +89,9 @@ extern BOOL CGPointIsNull(CGPoint point)
     BOOL flattened;
   };
   
-  // Stack of Contexts, used to keep track of sublayouts while traversing this layout in a BFS fashion.
+  // Queue used to keep track of sublayouts while traversing this layout in a BFS fashion.
   std::queue<Context> queue;
-  queue.push({self, CGPointMake(0, 0), NO});
+  queue.push({self, CGPointMake(0, 0), NO, NO});
   
   while (!queue.empty()) {
     Context &context = queue.front();
@@ -97,11 +105,13 @@ extern BOOL CGPointIsNull(CGPoint point)
                                                                        size:context.layout.size
                                                                    position:context.absolutePosition
                                                                  sublayouts:nil
-                                                                  flattened:context.layout.flattened]];
+                                                                  flattened:context.flattened]];
       }
       
       for (ASLayout *sublayout in context.layout.sublayouts) {
-        queue.push({sublayout, context.absolutePosition + sublayout.position, NO, context.layout.flattened});
+        // Mark layout trees that have already been flattened for future identification of immediate sublayouts
+        BOOL flattened = context.flattened ?: context.layout.flattened;
+        queue.push({sublayout, context.absolutePosition + sublayout.position, NO, flattened});
       }
     }
   }

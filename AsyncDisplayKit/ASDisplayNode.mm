@@ -60,6 +60,11 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
   return self;
 }
 
+- (NSString *)description
+{
+  return [NSString stringWithFormat:@"<%@ %p node = %@, index = %ld>", self.class, self, _node, (long)_index];
+}
+
 @end
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
@@ -655,14 +660,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     if ([[self class] usesImplicitHierarchyManagement]) {
       if (_layout) {
         NSIndexSet *insertions, *deletions;
-        // TODO: Filter the flattened layouts, since it's including nodes that are not in the hierarchy
-        [_layout.sublayouts asdk_diffWithArray:newLayout.sublayouts insertions:&insertions deletions:&deletions compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
+        [_layout.immediateSublayouts asdk_diffWithArray:newLayout.immediateSublayouts
+                                               insertions:&insertions
+                                                deletions:&deletions
+                                             compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
           return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
         }];
         _insertedSubnodes = [self _nodesInLayout:newLayout atIndexes:insertions];
-        _deletedSubnodes = [self _nodesInLayout:_layout atIndexes:deletions offsetIndexes:insertions];
+        _deletedSubnodes = [self _nodesInLayout:_layout atIndexes:deletions filterNodes:_insertedSubnodes];
       } else {
-        NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.sublayouts count])];
+        NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.immediateSublayouts count])];
         _insertedSubnodes = [self _nodesInLayout:newLayout atIndexes:indexes];
         _deletedSubnodes = nil;
       }
@@ -702,38 +709,31 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 /**
  @abstract Retrieves nodes at the given indexes from the layout's sublayouts
  */
-- (NSArray<_ASDisplayNodePosition *> *)_nodesInLayout:(ASLayout *)layout atIndexes:(NSIndexSet *)indexes
+- (NSMutableArray<_ASDisplayNodePosition *> *)_nodesInLayout:(ASLayout *)layout atIndexes:(NSIndexSet *)indexes
 {
-  NSMutableArray<_ASDisplayNodePosition *> *result = [NSMutableArray array];
-  NSInteger idx = [indexes firstIndex];
-  while (idx != NSNotFound) {
-    ASDisplayNode *node = (ASDisplayNode *)layout.sublayouts[idx].layoutableObject;
-    ASDisplayNodeAssertNotNil(node, @"A flattened layout must consist exclusively of node sublayouts");
-    [result addObject:[_ASDisplayNodePosition positionWithNode:node atIndex:idx]];
-    idx = [indexes indexGreaterThanIndex:idx];
-  }
-  return result;
+  return [self _nodesInLayout:layout atIndexes:indexes filterNodes:nil];
 }
 
 /**
- @abstract Retrieves nodes at the given indexes from the layout's sublayouts, shifting the target index such that insertions can happen before deletions
+ @abstract Retrieves nodes at the given indexes from the layout's sublayouts, skipping nodes that are in the `filterNodes` list
  */
-- (NSArray<_ASDisplayNodePosition *> *)_nodesInLayout:(ASLayout *)layout atIndexes:(NSIndexSet *)indexes offsetIndexes:(NSIndexSet *)offsets
+- (NSMutableArray<_ASDisplayNodePosition *> *)_nodesInLayout:(ASLayout *)layout atIndexes:(NSIndexSet *)indexes filterNodes:(NSArray<_ASDisplayNodePosition *> *)filterNodes
 {
   NSMutableArray<_ASDisplayNodePosition *> *result = [NSMutableArray array];
-  NSInteger offset = 0;
-  NSInteger offsetIndex = -1;
   NSInteger idx = [indexes firstIndex];
   while (idx != NSNotFound) {
-    ASDisplayNode *node = (ASDisplayNode *)layout.sublayouts[idx].layoutableObject;
+    BOOL skip = NO;
+    ASDisplayNode *node = (ASDisplayNode *)layout.immediateSublayouts[idx].layoutableObject;
     ASDisplayNodeAssertNotNil(node, @"A flattened layout must consist exclusively of node sublayouts");
-    // Offset deletions such that insertions can be performed first
-    NSInteger j = [offsets indexLessThanOrEqualToIndex:offsetIndex];
-    if (j != NSNotFound && offsetIndex < j) {
-      offset++;
-      offsetIndex = j;
+    for (_ASDisplayNodePosition *filter in filterNodes) {
+      if (node == filter.node) {
+        skip = YES;
+        break;
+      }
     }
-    [result addObject:[_ASDisplayNodePosition positionWithNode:node atIndex:idx + offset]];
+    if (!skip) {
+      [result addObject:[_ASDisplayNodePosition positionWithNode:node atIndex:idx]];
+    }
     idx = [indexes indexGreaterThanIndex:idx];
   }
   return result;
@@ -1071,7 +1071,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   if ([_insertedSubnodes count]) {
     for (_ASDisplayNodePosition *position in _insertedSubnodes) {
-      [self _implicitlyInsertSubnode:position.node atIndex:position.index];
+      [self insertSubnode:position.node atIndex:position.index];
     }
     _insertedSubnodes = nil;
   }
@@ -1081,20 +1081,10 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   if ([_deletedSubnodes count]) {
     for (_ASDisplayNodePosition *position in _deletedSubnodes) {
-      [self _implicitlyRemoveSubnode:position.node atIndex:position.index];
+      [position.node removeFromSupernode];
     }
     _deletedSubnodes = nil;
   }
-}
-
-- (void)_implicitlyInsertSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
-{
-  [self insertSubnode:node atIndex:idx];
-}
-
-- (void)_implicitlyRemoveSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
-{
-  [node removeFromSupernode];
 }
 
 #pragma mark - _ASTransitionContextDelegate

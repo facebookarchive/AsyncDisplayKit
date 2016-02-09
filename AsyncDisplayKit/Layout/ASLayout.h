@@ -21,23 +21,37 @@ extern BOOL CGPointIsNull(CGPoint point);
 /** Represents a computed immutable layout tree. */
 @interface ASLayout : NSObject
 
+/**
+ * The underlying object described by this layout
+ */
 @property (nonatomic, weak, readonly) id<ASLayoutable> layoutableObject;
+
+/**
+ * Size of the current layout
+ */
 @property (nonatomic, readonly) CGSize size;
+
 /**
  * Position in parent. Default to CGPointNull.
  * 
  * @discussion When being used as a sublayout, this property must not equal CGPointNull.
  */
 @property (nonatomic, readwrite) CGPoint position;
-/** 
+
+/**
  * Array of ASLayouts. Each must have a valid non-null position.
  */
 @property (nonatomic, readonly) NSArray<ASLayout *> *sublayouts;
 
 /**
- Whether the current layout has been flattened
+ * A list of sublayouts that were not already flattened.
  */
-@property (nonatomic, readonly) BOOL flattened;
+@property (nonatomic, readonly) NSArray<ASLayout *> *immediateSublayouts;
+
+/**
+ * A boolean describing if the current layout has been flattened.
+ */
+@property (nonatomic, readonly, getter=isFlattened) BOOL flattened;
 
 /**
  * Initializer.
