@@ -53,12 +53,12 @@
  */
 - (nullable id)downloadImageWithURL:(NSURL *)URL
                       callbackQueue:(dispatch_queue_t)callbackQueue
-              downloadProgressBlock:(void (^)(CGFloat progress))downloadProgressBlock
-                         completion:(void (^)(CGImageRef image, NSError * error, id downloadIdentifier))completion
+                   downloadProgress:(void (^)(CGFloat progress))downloadProgressBlock
+                         completion:(void (^)(UIImage *image, NSError * error, id downloadIdentifier))completion
 {
   return [[PINRemoteImageManager sharedImageManager] downloadImageWithURL:URL completion:^(PINRemoteImageManagerResult *result) {
     dispatch_async(callbackQueue, ^{
-      completion([result.image CGImage], result.error, result.UUID);
+      completion(result.image, result.error, result.UUID);
     });
   }];
 }

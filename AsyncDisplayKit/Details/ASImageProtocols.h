@@ -15,7 +15,7 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
 
 @protocol ASImageCacheProtocol <NSObject>
 
-@required
+@optional
 /**
   @deprecated This method is deprecated @see cachedImageWithURL:callbackQueue:completion: instead
  */
