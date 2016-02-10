@@ -48,6 +48,12 @@
   self.view = _node.view;
 }
 
+- (void)viewWillLayoutSubviews
+{
+  [super viewWillLayoutSubviews];
+  [_node measureWithSizeRange:[self nodeConstrainedSize]];
+}
+
 - (void)viewDidLayoutSubviews
 {
   if (_ensureDisplayed && self.neverShowPlaceholders) {
@@ -60,18 +66,8 @@
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
-  [_node measureWithSizeRange:[self nodeConstrainedSize]];
-
   _ensureDisplayed = YES;
   [_node recursivelyFetchData];
-}
-
-- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
-{
-  [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-  [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-    [self.node transitionLayoutWithSizeRange:ASSizeRangeMake(size, size) animated:[context isAnimated]];
-  } completion:nil];
 }
 
 // MARK: - Layout Helpers
