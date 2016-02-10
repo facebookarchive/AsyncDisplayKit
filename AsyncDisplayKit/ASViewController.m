@@ -59,6 +59,9 @@
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
+
+  [_node measureWithSizeRange:[self nodeConstrainedSize]];
+
   _ensureDisplayed = YES;
   [_node recursivelyFetchData];
 }

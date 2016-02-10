@@ -50,10 +50,18 @@
 - (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context;
 
 /**
- * @abstract Invalidates the current layout and begins a relayout of the node to the new layout returned in `calculateLayoutThatFits:`.
+ * @abstract Transitions the current layout with a new constrained size.
  *
- * @discussion Animation is optional, but will still proceed through the `transitionLayout` methods with `isAnimated == NO`.
+ * @discussion Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
+ * If the passed constrainedSize is the the same as the node's current constrained size, this method is noop.
  */
 - (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated;
+
+/**
+ * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`.
+ *
+ * @discussion Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
+ */
+- (ASLayout *)transitionLayoutWithAnimation:(BOOL)animated;
 
 @end

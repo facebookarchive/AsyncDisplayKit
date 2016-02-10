@@ -675,9 +675,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _pendingLayout;
 }
 
-- (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
+- (ASLayout *)transitionLayoutWithAnimation:(BOOL)animated
 {
   [self invalidateCalculatedLayout];
+  [self transitionLayoutWithSizeRange:_constrainedSize animated:animated];
+}
+
+- (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
+{
   return [self measureWithSizeRange:constrainedSize completion:^{
     _transitionContext = [[_ASTransitionContext alloc] initWithLayout:_pendingLayout
                                                       constrainedSize:constrainedSize
