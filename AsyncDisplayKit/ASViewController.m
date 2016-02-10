@@ -47,11 +47,6 @@
   self.view = _node.view;
 }
 
-- (void)viewWillLayoutSubviews
-{
-  [super viewWillLayoutSubviews];
-}
-
 - (void)viewDidLayoutSubviews
 {
   if (_ensureDisplayed && self.neverShowPlaceholders) {
