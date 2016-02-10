@@ -792,7 +792,7 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 
 - (void)__implicitlyRemoveSubnodes
 {
-  for (NSInteger i = 0; i < [_insertedSubnodes count]; i++) {
+  for (NSInteger i = 0; i < [_removedSubnodes count]; i++) {
     [_removedSubnodes[i] removeFromSupernode];
   }
 }
