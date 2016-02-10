@@ -2172,15 +2172,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     return;
   }
   
-  if ([[self class] usesImplicitHierarchyManagement]) {
-    [self __layoutSublayouts];
-  } else {
-    // Assume that _layout was flattened and is 1-level deep.
-    for (ASLayout *subnodeLayout in _layout.sublayouts) {
-      ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Sublayouts must only contain subnodes' layout. self = %@, subnodes = %@", self, _subnodes);
-      ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
-    }
-  }
+  [self __layoutSublayouts];
 }
 
 - (void)__layoutSublayouts

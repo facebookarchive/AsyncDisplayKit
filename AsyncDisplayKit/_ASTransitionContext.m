@@ -42,7 +42,7 @@
 
 - (CGRect)finalFrameForNode:(ASDisplayNode *)node
 {
-  for (ASLayout *layout in _layout.immediateSublayouts) {
+  for (ASLayout *layout in _layout.sublayouts) {
     if (layout.layoutableObject == node) {
       return [layout frame];
     }
