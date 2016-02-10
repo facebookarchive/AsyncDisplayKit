@@ -294,7 +294,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   // super.dataSource in this case because calls to ASCollectionViewProxy will start failing and cause crashes.
 
   super.dataSource = nil;
-  
   if (asyncDataSource == nil) {
     _asyncDataSource = nil;
     _proxyDataSource = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
@@ -305,6 +304,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _proxyDataSource = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     _asyncDataSourceImplementsConstrainedSizeForNode = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
     _asyncDataSourceImplementsNodeBlockForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
+
+    // Data-source must implement collectionView:nodeForItemAtIndexPath: or collectionView:nodeBlockForItemAtIndexPath:
+    ASDisplayNodeAssertTrue(_asyncDataSourceImplementsNodeBlockForItemAtIndexPath || [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)]);
   }
   
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
@@ -677,19 +679,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 
 #pragma mark - ASDataControllerSource
-
-- (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath
-{
-  ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
-  [node enterHierarchyState:ASHierarchyStateRangeManaged];
-  
-  ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
-  if (node.layoutDelegate == nil) {
-    node.layoutDelegate = self;
-  }
-  return node;
-}
-
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath
 {

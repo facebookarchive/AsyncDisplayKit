@@ -83,13 +83,6 @@
 
 #pragma mark - ASCollectionViewDataSource
 
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
-  ASCellNode *pageNode = [_pagerDataSource pagerNode:self nodeAtIndex:indexPath.item];
-  return pageNode;
-}
-
 - (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
@@ -123,7 +116,10 @@
   if (pagerDataSource != _pagerDataSource) {
     _pagerDataSource = pagerDataSource;
     _pagerDataSourceImplementsNodeBlockAtIndex = [_pagerDataSource respondsToSelector:@selector(pagerNode:nodeBlockAtIndex:)];
+    // Data source must implement pagerNode:nodeBlockAtIndex: or pagerNode:nodeAtIndex:
+    ASDisplayNodeAssertTrue(_pagerDataSourceImplementsNodeBlockAtIndex || [_pagerDataSource respondsToSelector:@selector(pagerNode:nodeAtIndex:)]);
     _proxy = pagerDataSource ? [[ASPagerNodeProxy alloc] initWithTarget:pagerDataSource interceptor:self] : nil;
+    
     super.dataSource = (id <ASCollectionDataSource>)_proxy;
   }
 }

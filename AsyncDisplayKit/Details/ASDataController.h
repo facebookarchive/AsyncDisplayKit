@@ -36,11 +36,6 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 @protocol ASDataControllerSource <NSObject>
 
 /**
- Fetch the ASCellNode for specific index path.
- */
-- (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath;
-
-/**
  Fetch the ASCellNode block for specific index path. This block should return the ASCellNode for the specified index path.
  */
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath;

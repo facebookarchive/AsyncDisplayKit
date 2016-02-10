@@ -315,6 +315,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @protocol ASTableDataSource <ASCommonTableViewDataSource, NSObject>
 
+@optional
+
 /**
  * Similar to -tableView:cellForRowAtIndexPath:.
  *
@@ -327,11 +329,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath;
 
-@optional
 
 /**
- * Similar to -tableView:nodeForRowAtIndexPath:.
- *
+ * Similar to -tableView:nodeForRowAtIndexPath:
+ * This method takes precedence over tableView:nodeForRowAtIndexPath: if implemented.
  * @param tableView The sender.
  *
  * @param indexPath The index path of the requested node.
