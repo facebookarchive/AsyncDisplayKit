@@ -610,34 +610,43 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  return [self measureWithSizeRange:constrainedSize completion:^(ASLayout *pendingLayout, ASSizeRange constrainedSize) {
+  return [self measureWithSizeRange:constrainedSize completion:^{
     if ([[self class] usesImplicitHierarchyManagement]) {
       [self __implicitlyInsertSubnodes];
       [self __implicitlyRemoveSubnodes];
     }
-    [self __applyLayout:pendingLayout constrainedSize:constrainedSize];
+    [self __completeLayoutCalculation];
   }];
 }
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize completion:(void(^)(ASLayout *, ASSizeRange))completion
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize completion:(void(^)())completion
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
   if (![self __shouldSize])
     return nil;
   
-  ASLayout *pendingLayout = _layout;
-
   // only calculate the size if
   //  - we haven't already
   //  - the constrained size range is different
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
-    pendingLayout = [self calculateLayoutThatFits:constrainedSize];
-    [self __calculateSubnodeOperationsWithPendingLayout:pendingLayout currentLayout:_layout];
-    completion(pendingLayout, constrainedSize);
+    _previousLayout = _layout;
+    _layout = [self calculateLayoutThatFits:constrainedSize];
+
+    ASDisplayNodeAssertTrue(_layout.layoutableObject == self);
+    ASDisplayNodeAssertTrue(_layout.size.width >= 0.0);
+    ASDisplayNodeAssertTrue(_layout.size.height >= 0.0);
+    
+    _previousConstrainedSize = _constrainedSize;
+    _constrainedSize = constrainedSize;
+    
+    [self __calculateSubnodeOperationsWithLayout:_layout previousLayout:_previousLayout];
+    _flags.isMeasured = YES;
+
+    completion();
   }
 
-  return pendingLayout;
+  return _layout;
 }
 
 - (ASLayout *)transitionLayoutWithAnimation:(BOOL)animated
@@ -648,50 +657,41 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
 {
-  return [self measureWithSizeRange:constrainedSize completion:^(ASLayout *pendingLayout, ASSizeRange constrainedSize) {
-    _transitionContext = [[_ASTransitionContext alloc] initWithLayout:pendingLayout
-                                                      constrainedSize:constrainedSize
-                                                             animated:animated
-                                                             delegate:self];
+  return [self measureWithSizeRange:constrainedSize completion:^{
+    _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated delegate:self];
     [self __implicitlyInsertSubnodes];
     [self animateLayoutTransition:_transitionContext];
   }];
 }
 
-- (void)__calculateSubnodeOperationsWithPendingLayout:(ASLayout *)pendingLayout currentLayout:(ASLayout *)currentLayout
+- (void)__calculateSubnodeOperationsWithLayout:(ASLayout *)layout previousLayout:(ASLayout *)previousLayout
 {
-  if (_layout) {
+  if (previousLayout) {
     NSIndexSet *insertions, *deletions;
-    [currentLayout.immediateSublayouts asdk_diffWithArray:pendingLayout.immediateSublayouts
+    [previousLayout.immediateSublayouts asdk_diffWithArray:layout.immediateSublayouts
                                          insertions:&insertions
                                           deletions:&deletions
                                        compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
                                          return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
                                        }];
-    filterNodesInLayoutAtIndexes(pendingLayout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
-    filterNodesInLayoutAtIndexesWithIntersectingNodes(currentLayout,
+    filterNodesInLayoutAtIndexes(layout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
+    filterNodesInLayoutAtIndexesWithIntersectingNodes(previousLayout,
                                                       deletions,
                                                       _insertedSubnodes,
                                                       &_removedSubnodes,
                                                       &_removedSubnodePositions);
   } else {
-    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [pendingLayout.immediateSublayouts count])];
-    filterNodesInLayoutAtIndexes(pendingLayout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
+    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [layout.immediateSublayouts count])];
+    filterNodesInLayoutAtIndexes(layout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
     _removedSubnodes = nil;
   }
 }
 
-- (void)__applyLayout:(ASLayout *)layout constrainedSize:(ASSizeRange)constrainedSize
+- (void)__completeLayoutCalculation
 {
-  ASDisplayNodeAssertTrue(layout.layoutableObject == self);
-  ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
-  ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
-
-  _layout = layout;
-  _constrainedSize = constrainedSize;
-  _flags.isMeasured = YES;
   _insertedSubnodes = nil;
   _removedSubnodes = nil;
+  _previousLayout = nil;
   [self calculatedLayoutDidChange];
 
   // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed
@@ -777,7 +777,7 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 - (void)didCompleteTransitionLayout:(id<ASContextTransitioning>)context
 {
   [self __implicitlyRemoveSubnodes];
-  [self __applyLayout:context.layout constrainedSize:context.constrainedSize];
+  [self __completeLayoutCalculation];
 }
 
 #pragma mark - Implicit node hierarchy managagment
@@ -812,6 +812,27 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 - (NSArray<ASDisplayNode *> *)removedSubnodesWithTransitionContext:(_ASTransitionContext *)context
 {
   return _removedSubnodes;
+}
+
+- (ASLayout *)transitionContext:(_ASTransitionContext *)context layoutForKey:(NSString *)key
+{
+  if ([key isEqualToString:ASTransitionContextFromLayoutKey]) {
+    return _previousLayout;
+  } else if ([key isEqualToString:ASTransitionContextToLayoutKey]) {
+    return _layout;
+  } else {
+    return nil;
+  }
+}
+- (ASSizeRange)transitionContext:(_ASTransitionContext *)context constrainedSizeForKey:(NSString *)key
+{
+  if ([key isEqualToString:ASTransitionContextFromLayoutKey]) {
+    return _previousConstrainedSize;
+  } else if ([key isEqualToString:ASTransitionContextToLayoutKey]) {
+    return _constrainedSize;
+  } else {
+    return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+  }
 }
 
 - (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete

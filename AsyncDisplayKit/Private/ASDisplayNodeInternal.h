@@ -62,8 +62,12 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
 
+  ASLayout *_previousLayout;
   ASLayout *_layout;
+
+  ASSizeRange _previousConstrainedSize;
   ASSizeRange _constrainedSize;
+
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
   

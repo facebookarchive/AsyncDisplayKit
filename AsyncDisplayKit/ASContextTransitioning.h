@@ -8,6 +8,9 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+extern NSString * const ASTransitionContextFromLayoutKey;
+extern NSString * const ASTransitionContextToLayoutKey;
+
 @protocol ASContextTransitioning <NSObject>
 
 /**
@@ -16,19 +19,19 @@
 - (BOOL)isAnimated;
 
 /**
- * @abstract The destination layout being transitioned to
+ * @abstract Retrieve either the "from" or "to" layout
  */
-- (ASLayout *)layout;
+- (ASLayout *)layoutForKey:(NSString *)key;
 
 /**
- * @abstrat The destination constrainedSize being transitioned to
+ * @abstract Retrieve either the "from" or "to" constrainedSize
  */
-- (ASSizeRange)constrainedSize;
+- (ASSizeRange)constrainedSizeForKey:(NSString *)key;
 
 /**
- * @abstract Subnodes in the new layout
+ * @abstract Retrieve the subnodes from either the "from" or "to" layout
  */
-- (NSArray<ASDisplayNode *> *)subnodes;
+- (NSArray<ASDisplayNode *> *)subnodesForKey:(NSString *)key;
 
 /**
  * @abstract Subnodes that have been inserted in the layout transition

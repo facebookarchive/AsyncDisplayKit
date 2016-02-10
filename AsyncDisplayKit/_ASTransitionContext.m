@@ -10,6 +10,10 @@
 
 #import "ASLayout.h"
 
+
+NSString * const ASTransitionContextFromLayoutKey = @"org.asyncdisplaykit.ASTransitionContextFromLayoutKey";
+NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransitionContextToLayoutKey";
+
 @interface _ASTransitionContext ()
 
 @property (weak, nonatomic) id<_ASTransitionContextDelegate> delegate;
@@ -18,12 +22,10 @@
 
 @implementation _ASTransitionContext
 
-- (instancetype)initWithLayout:(ASLayout *)layout constrainedSize:(ASSizeRange)constrainedSize animated:(BOOL)animated delegate:(id<_ASTransitionContextDelegate>)delegate
+- (instancetype)initWithAnimation:(BOOL)animated delegate:(id<_ASTransitionContextDelegate>)delegate
 {
   self = [super init];
   if (self) {
-    _layout = layout;
-    _constrainedSize = constrainedSize;
     _animated = animated;
     _delegate = delegate;
   }
@@ -31,6 +33,16 @@
 }
 
 #pragma mark - ASContextTransitioning Protocol Implementation
+
+- (ASLayout *)layoutForKey:(NSString *)key
+{
+  return [_delegate transitionContext:self layoutForKey:key];
+}
+
+- (ASSizeRange)constrainedSizeForKey:(NSString *)key
+{
+  return [_delegate transitionContext:self constrainedSizeForKey:key];
+}
 
 - (CGRect)initialFrameForNode:(ASDisplayNode *)node
 {
@@ -44,7 +56,7 @@
 
 - (CGRect)finalFrameForNode:(ASDisplayNode *)node
 {
-  for (ASLayout *layout in _layout.sublayouts) {
+  for (ASLayout *layout in [self layoutForKey:ASTransitionContextToLayoutKey].sublayouts) {
     if (layout.layoutableObject == node) {
       return [layout frame];
     }
@@ -52,10 +64,10 @@
   return CGRectZero;
 }
 
-- (NSArray<ASDisplayNode *> *)subnodes
+- (NSArray<ASDisplayNode *> *)subnodesForKey:(NSString *)key
 {
   NSMutableArray<ASDisplayNode *> *subnodes = [NSMutableArray array];
-  for (ASLayout *sublayout in _layout.immediateSublayouts) {
+  for (ASLayout *sublayout in [self layoutForKey:key].immediateSublayouts) {
     [subnodes addObject:(ASDisplayNode *)sublayout.layoutableObject];
   }
   return subnodes;
