@@ -49,7 +49,7 @@
                    downloadProgress:(void (^)(CGFloat progress))downloadProgressBlock
                          completion:(void (^)(UIImage *image, NSError * error, id downloadIdentifier))completion
 {
-  return [[PINRemoteImageManager sharedImageManager] downloadImageWithURL:URL completion:^(PINRemoteImageManagerResult *result) {
+  return [[PINRemoteImageManager sharedImageManager] downloadImageWithURL:URL options:PINRemoteImageManagerDownloadOptionsSkipDecode completion:^(PINRemoteImageManagerResult *result) {
     dispatch_async(callbackQueue, ^{
       completion(result.image, result.error, result.UUID);
     });
