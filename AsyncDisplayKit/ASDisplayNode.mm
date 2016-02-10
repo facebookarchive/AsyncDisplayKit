@@ -626,7 +626,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (![self __shouldSize])
     return nil;
   
-  ASLayout *pendingLayout;
+  ASLayout *pendingLayout = _layout;
 
   // only calculate the size if
   //  - we haven't already
