@@ -16,6 +16,9 @@
 @protocol _ASTransitionContextDelegate <NSObject>
 
 - (NSArray<ASDisplayNode *> *)currentSubnodesWithTransitionContext:(_ASTransitionContext *)context;
+- (NSArray<ASDisplayNode *> *)insertedSubnodesWithTransitionContext:(_ASTransitionContext *)context;
+- (NSArray<ASDisplayNode *> *)removedSubnodesWithTransitionContext:(_ASTransitionContext *)context;
+
 - (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete;
 
 @end

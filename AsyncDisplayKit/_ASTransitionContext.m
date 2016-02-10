@@ -30,6 +30,8 @@
   return self;
 }
 
+#pragma mark - ASContextTransitioning Protocol Implementation
+
 - (CGRect)initialFrameForNode:(ASDisplayNode *)node
 {
   for (ASDisplayNode *subnode in [_delegate currentSubnodesWithTransitionContext:self]) {
@@ -57,6 +59,16 @@
     [subnodes addObject:(ASDisplayNode *)sublayout.layoutableObject];
   }
   return subnodes;
+}
+
+- (NSArray<ASDisplayNode *> *)insertedSubnodes
+{
+  return [_delegate insertedSubnodesWithTransitionContext:self];
+}
+
+- (NSArray<ASDisplayNode *> *)removedSubnodes
+{
+  return [_delegate removedSubnodesWithTransitionContext:self];
 }
 
 - (void)completeTransition:(BOOL)didComplete

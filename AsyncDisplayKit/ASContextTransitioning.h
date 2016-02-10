@@ -31,6 +31,16 @@
 - (NSArray<ASDisplayNode *> *)subnodes;
 
 /**
+ * @abstract Subnodes that have been inserted in the layout transition
+ */
+- (NSArray<ASDisplayNode *> *)insertedSubnodes;
+
+/**
+ * @abstract Subnodes that will be removed in the layout transition
+ */
+- (NSArray<ASDisplayNode *> *)removedSubnodes;
+
+/**
  @abstract The frame for the given node before the transition began.
  @discussion Returns CGRectNull if the node was not in the hierarchy before the transition.
  */

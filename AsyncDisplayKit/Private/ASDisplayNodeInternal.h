@@ -19,6 +19,8 @@
 #import "ASLayoutOptions.h"
 #import "_ASTransitionContext.h"
 
+#include <vector>
+
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
 
@@ -66,8 +68,11 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   NSMutableArray *_subnodes;
   
   _ASTransitionContext *_transitionContext;
-  NSArray<_ASDisplayNodePosition *> *_insertedSubnodes;
-  NSArray<_ASDisplayNodePosition *> *_deletedSubnodes;
+
+  NSArray<ASDisplayNode *> *_insertedSubnodes;
+  NSArray<ASDisplayNode *> *_removedSubnodes;
+  std::vector<NSInteger> _insertedSubnodePositions;
+  std::vector<NSInteger> _removedSubnodePositions;
 
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
