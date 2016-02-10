@@ -111,6 +111,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL _ignoreNodesConstrainedWidthChange;
   BOOL _queuedNodeHeightUpdate;
   BOOL _isDeallocating;
+  BOOL _dataSourceImplementsNodeBlockForRowAtIndexPath;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -256,8 +257,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (asyncDataSource == nil) {
     _asyncDataSource = nil;
     _proxyDataSource = _isDeallocating ? nil : [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
+    _dataSourceImplementsNodeBlockForRowAtIndexPath = NO;
   } else {
     _asyncDataSource = asyncDataSource;
+    _dataSourceImplementsNodeBlockForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)];
+    // Data source must implement tableView:nodeBlockForRowAtIndexPath: or tableView:nodeForRowAtIndexPath:
+    ASDisplayNodeAssertTrue(_dataSourceImplementsNodeBlockForRowAtIndexPath || [_asyncDataSource respondsToSelector:@selector(tableView:nodeForRowAtIndexPath:)]);
     _proxyDataSource = [[ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
   }
   
@@ -861,18 +866,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 }
 
 #pragma mark - ASDataControllerDelegate
-
-- (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath
-{
-  ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
-  [node enterHierarchyState:ASHierarchyStateRangeManaged];
-  
-  ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
-  if (node.layoutDelegate == nil) {
-    node.layoutDelegate = self;
-  }
-  return node;
-}
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
   if (![_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)]) {

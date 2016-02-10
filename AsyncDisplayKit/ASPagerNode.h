@@ -10,15 +10,44 @@
 
 @class ASPagerNode;
 @protocol ASPagerNodeDataSource <NSObject>
-// This method replaces -collectionView:numberOfItemsInSection:
-- (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode;
 
-// This method replaces -collectionView:nodeForItemAtIndexPath:
-- (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index;
+/**
+ * This method replaces -collectionView:numberOfItemsInSection:
+ *
+ * @param pagerNode The sender.
+ *
+ *
+ * @returns The total number of pages that can display in the pagerNode.
+ */
+- (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode;
 
 @optional
 
-// This method replaces -collectionView:nodeBlockForItemAtIndexPath:
+/**
+ * This method replaces -collectionView:nodeForItemAtIndexPath:
+ *
+ * @param pagerNode The sender.
+ *
+ * @param index The index of the requested node.
+ *
+ * @returns a node for display at this index. This will be called on the main thread and should
+ *   not implement reuse (it will be called once per row).  Unlike UICollectionView's version,
+ *   this method is not called when the row is about to display.
+ */
+- (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index;
+
+/**
+ * This method replaces -collectionView:nodeBlockForItemAtIndexPath:
+ * This method takes precedence over pagerNode:nodeAtIndex: if implemented.
+ *
+ * @param pagerNode The sender.
+ *
+ * @param index The index of the requested node.
+ *
+ * @returns a block that creates the node for display at this index.
+ *   Must be thread-safe (can be called on the main thread or a background
+ *   queue) and should not implement reuse (it will be called once per row).
+ */
 - (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index;
 
 @end

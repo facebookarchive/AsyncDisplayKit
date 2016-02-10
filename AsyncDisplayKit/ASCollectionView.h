@@ -340,6 +340,8 @@ NS_ASSUME_NONNULL_BEGIN
 #define ASCollectionViewDataSource ASCollectionDataSource
 @protocol ASCollectionDataSource <ASCommonCollectionViewDataSource, NSObject>
 
+@optional
+
 /**
  * Similar to -collectionView:cellForItemAtIndexPath:.
  *
@@ -353,16 +355,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
-
-@optional
-
 /**
+ * Similar to -collectionView:nodeForItemAtIndexPath:
+ * This method takes precedence over collectionView:nodeForItemAtIndexPath: if implemented.
  *
  * @param collectionView The sender.
  *
  * @param indexPath The index path of the requested node.
  *
- * @returns a block that creates the node for display at this indexpath.  
+ * @returns a block that creates the node for display at this indexpath.
  *   Must be thread-safe (can be called on the main thread or a background
  *   queue) and should not implement reuse (it will be called once per row).
  */
