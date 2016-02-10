@@ -188,11 +188,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         dispatch_semaphore_signal(sema);
       });
       dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-      [self layoutLoadedNodes:allocatedNodes ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
+      [self layoutLoadedNodes:[allocatedNodes subarrayWithRange:NSMakeRange(j, batchCount)] ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
     } else {
       allocationBlock();
       [_mainSerialQueue performBlockOnMainThread:^{
-        [self layoutLoadedNodes:allocatedNodes ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
+        [self layoutLoadedNodes:[allocatedNodes subarrayWithRange:NSMakeRange(j, batchCount)] ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
       }];
     }
 
