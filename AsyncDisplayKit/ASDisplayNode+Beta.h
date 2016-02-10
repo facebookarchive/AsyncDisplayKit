@@ -34,28 +34,26 @@
 
 /**
  * @abstract allow modification of a context after the node's content is drawn
- *
- * @discussion
  */
 @property (nonatomic, strong) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
 
 /** @name Layout Transitioning */
 
 /**
- @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
+ * @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
  */
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context;
 
 /**
- @discussion A place to clean up your nodes after the transition
+ * @discussion A place to clean up your nodes after the transition
  */
 - (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context;
 
 /**
- @abstract Invalidates the current layout and begins a relayout of the node to the new layout returned in `calculateLayoutThatFits:`.
- 
- @discussion Animation is optional, but will still proceed through the `transitionLayout` methods with `isAnimated == NO`.
+ * @abstract Invalidates the current layout and begins a relayout of the node to the new layout returned in `calculateLayoutThatFits:`.
+ *
+ * @discussion Animation is optional, but will still proceed through the `transitionLayout` methods with `isAnimated == NO`.
  */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated;
+- (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated;
 
 @end

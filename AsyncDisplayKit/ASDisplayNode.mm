@@ -636,7 +636,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _flags.layerBacked;
 }
 
-#pragma mark -
+#pragma mark - Layout measurement calculation
 
 - (CGSize)measure:(CGSize)constrainedSize
 {
@@ -645,61 +645,80 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  return [self measureWithSizeRange:constrainedSize animated:NO];
+  return [self measureWithSizeRange:constrainedSize completion:^{
+    if ([[self class] usesImplicitHierarchyManagement]) {
+      [self __implicitlyInsertSubnodes];
+      [self __implicitlyRemoveSubnodes];
+    }
+    [self __applyPendingLayout];
+  }];
 }
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize completion:(void(^)())completion
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
-  ASLayout *newLayout;
-
   if (![self __shouldSize])
-    return newLayout;
+    return nil;
   
   // only calculate the size if
   //  - we haven't already
   //  - the constrained size range is different
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
-    newLayout = [self calculateLayoutThatFits:constrainedSize];
+    _pendingLayout = [self calculateLayoutThatFits:constrainedSize];
+    _pendingConstrainedSize = constrainedSize;
+    [self __calculateSubnodeOperations];
 
-    if (_layout) {
-      NSIndexSet *insertions, *deletions;
-      [_layout.immediateSublayouts asdk_diffWithArray:newLayout.immediateSublayouts
-                                             insertions:&insertions
-                                              deletions:&deletions
-                                           compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
-        return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
-      }];
-      _insertedSubnodes = [self _nodesInLayout:newLayout atIndexes:insertions];
-      _deletedSubnodes = [self _nodesInLayout:_layout atIndexes:deletions filterNodes:_insertedSubnodes];
-    } else {
-      NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.immediateSublayouts count])];
-      _insertedSubnodes = [self _nodesInLayout:newLayout atIndexes:indexes];
-      _deletedSubnodes = nil;
-    }
-    
-    if (animated) {
-      [self __transitionToLayout:newLayout constrainedSize:constrainedSize animated:animated];
-    } else {
-      if ([[self class] usesImplicitHierarchyManagement]) {
-        [self __implicitlyInsertSubnodes];
-        [self __implicitlyRemoveSubnodes];
-      }
-      [self __updateLayout:newLayout constrainedSize:constrainedSize];
-    }
+    completion();
   }
-  return newLayout;
+
+  return _pendingLayout;
 }
 
-- (void)__updateLayout:(ASLayout *)layout constrainedSize:(ASSizeRange)constrainedSize
+- (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
 {
-  ASDisplayNodeAssertTrue(layout.layoutableObject == self);
-  ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
-  ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
+  [self invalidateCalculatedLayout];
+  return [self measureWithSizeRange:constrainedSize completion:^{
+    _transitionContext = [[_ASTransitionContext alloc] initWithLayout:_pendingLayout
+                                                      constrainedSize:constrainedSize
+                                                             animated:animated
+                                                             delegate:self];
+    [self __implicitlyInsertSubnodes];
+    [self animateLayoutTransition:_transitionContext];
+  }];
+}
 
-  _layout = layout;
-  _constrainedSize = constrainedSize;
+- (void)__calculateSubnodeOperations
+{
+  if (_layout) {
+    NSIndexSet *insertions, *deletions;
+    [_layout.immediateSublayouts asdk_diffWithArray:_pendingLayout.immediateSublayouts
+                                         insertions:&insertions
+                                          deletions:&deletions
+                                       compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
+                                         return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
+                                       }];
+    _insertedSubnodes = [self _nodesInLayout:_pendingLayout atIndexes:insertions];
+    _deletedSubnodes = [self _nodesInLayout:_layout atIndexes:deletions filterNodes:_insertedSubnodes];
+  } else {
+    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_pendingLayout.immediateSublayouts count])];
+    _insertedSubnodes = [self _nodesInLayout:_pendingLayout atIndexes:indexes];
+    _deletedSubnodes = nil;
+  }
+}
+
+- (void)__applyPendingLayout
+{
+  ASDisplayNodeAssertTrue(_pendingLayout.layoutableObject == self);
+  ASDisplayNodeAssertTrue(_pendingLayout.size.width >= 0.0);
+  ASDisplayNodeAssertTrue(_pendingLayout.size.height >= 0.0);
+
+  _layout = _pendingLayout;
+  _pendingLayout = nil;
+
+  _constrainedSize = _pendingConstrainedSize;
+  _pendingConstrainedSize = ASSizeRangeMake(CGSizeZero, CGSizeZero);
+
   _flags.isMeasured = YES;
   [self calculatedLayoutDidChange];
 
@@ -759,6 +778,53 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   // subclass override
 }
+
+#pragma mark - Layout Transition
+
+- (void)animateLayoutTransition:(id<ASContextTransitioning>)context
+{
+  [self __layoutSublayouts];
+  [context completeTransition:YES];
+}
+
+- (void)didCompleteTransitionLayout:(id<ASContextTransitioning>)context
+{
+  [self __implicitlyRemoveSubnodes];
+  [self __applyPendingLayout];
+}
+
+#pragma mark - Implicit node hierarchy managagment
+
+- (void)__implicitlyInsertSubnodes
+{
+  for (_ASDisplayNodePosition *position in _insertedSubnodes) {
+    [self insertSubnode:position.node atIndex:position.index];
+  }
+  _insertedSubnodes = nil;
+}
+
+- (void)__implicitlyRemoveSubnodes
+{
+  for (_ASDisplayNodePosition *position in _deletedSubnodes) {
+    [position.node removeFromSupernode];
+  }
+  _deletedSubnodes = nil;
+}
+
+#pragma mark - _ASTransitionContextDelegate
+
+- (NSArray<ASDisplayNode *> *)currentSubnodesWithTransitionContext:(_ASTransitionContext *)context
+{
+  return _subnodes;
+}
+
+- (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete
+{
+  [self didCompleteTransitionLayout:context];
+  _transitionContext = nil;
+}
+
+#pragma mark - Asynchronous display
 
 - (BOOL)displaysAsynchronously
 {
@@ -1045,61 +1111,6 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 
   // Apply to rect
   return CGRectApplyAffineTransform(rect, flattenedTransform);
-}
-
-#pragma mark - Layout Transition
-
-- (void)__transitionToLayout:(ASLayout *)layout constrainedSize:(ASSizeRange)constrainedSize animated:(BOOL)animated
-{
-  _transitionContext = [[_ASTransitionContext alloc] initWithLayout:layout
-                                                    constrainedSize:constrainedSize
-                                                           animated:animated
-                                                           delegate:self];
-  [self __implicitlyInsertSubnodes];
-  [self animateLayoutTransition:_transitionContext];
-}
-
-- (void)animateLayoutTransition:(id<ASContextTransitioning>)context
-{
-  [self __layoutSublayouts];
-  [context completeTransition:YES];
-}
-
-- (void)didCompleteTransitionLayout:(id<ASContextTransitioning>)context
-{
-  [self __implicitlyRemoveSubnodes];
-  [self __updateLayout:context.layout constrainedSize:context.constrainedSize];
-}
-
-#pragma mark - Implicit node hierarchy managagment
-
-- (void)__implicitlyInsertSubnodes
-{
-  for (_ASDisplayNodePosition *position in _insertedSubnodes) {
-    [self insertSubnode:position.node atIndex:position.index];
-  }
-  _insertedSubnodes = nil;
-}
-
-- (void)__implicitlyRemoveSubnodes
-{
-  for (_ASDisplayNodePosition *position in _deletedSubnodes) {
-    [position.node removeFromSupernode];
-  }
-  _deletedSubnodes = nil;
-}
-
-#pragma mark - _ASTransitionContextDelegate
-
-- (NSArray<ASDisplayNode *> *)currentSubnodesWithTransitionContext:(_ASTransitionContext *)context
-{
-  return _subnodes;
-}
-
-- (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete
-{
-  [self didCompleteTransitionLayout:context];
-  _transitionContext = nil;
 }
 
 #pragma mark - _ASDisplayLayerDelegate
