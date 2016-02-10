@@ -54,6 +54,12 @@
         @[@0, @2],
         @[@1, @2, @3, @4],
       ],
+      @[
+        @[@"bob", @"alice", @"dave", @"judy"],
+        @[@"judy", @"dave", @"alice", @"bob"],
+        @[@1, @2, @3],
+        @[@0, @1, @2],
+      ],
   ];
   
   for (NSArray *test in tests) {

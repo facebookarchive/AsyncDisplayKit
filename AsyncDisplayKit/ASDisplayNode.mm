@@ -32,36 +32,6 @@ NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
 NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
 
-@interface _ASDisplayNodePosition : NSObject
-
-@property (nonatomic, assign) NSUInteger index;
-@property (nonatomic, strong) ASDisplayNode *node;
-
-+ (instancetype)positionWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index;
-
-- (instancetype)initWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index;
-
-@end
-
-@implementation _ASDisplayNodePosition
-
-+ (instancetype)positionWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index
-{
-  return [[self alloc] initWithNode:node atIndex:index];
-}
-
-- (instancetype)initWithNode:(ASDisplayNode *)node atIndex:(NSUInteger)index
-{
-  self = [super init];
-  if (self) {
-    _node = node;
-    _index = index;
-  }
-  return self;
-}
-
-@end
-
 @interface ASDisplayNode () <UIGestureRecognizerDelegate>
 
 /**
@@ -84,7 +54,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 #define TIME_SCOPED(outVar)
 #endif
 
-@interface ASDisplayNode () <_ASDisplayLayerDelegate>
+@interface ASDisplayNode () <_ASDisplayLayerDelegate, _ASTransitionContextDelegate>
 
 @property (assign, nonatomic) BOOL implicitNodeHierarchyManagement;
 
@@ -631,7 +601,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _flags.layerBacked;
 }
 
-#pragma mark -
+#pragma mark - Layout measurement calculation
 
 - (CGSize)measure:(CGSize)constrainedSize
 {
@@ -640,45 +610,97 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  return [self measureWithSizeRange:constrainedSize completion:^{
+    if ([[self class] usesImplicitHierarchyManagement]) {
+      [self __implicitlyInsertSubnodes];
+      [self __implicitlyRemoveSubnodes];
+    }
+    [self __completeLayoutCalculation];
+  }];
+}
+
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize completion:(void(^)())completion
+{
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
-
   if (![self __shouldSize])
     return nil;
-
+  
   // only calculate the size if
   //  - we haven't already
   //  - the constrained size range is different
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
-    ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
+    _previousLayout = _layout;
+    _layout = [self calculateLayoutThatFits:constrainedSize];
 
-    if ([[self class] usesImplicitHierarchyManagement]) {
-      if (_layout) {
-        NSIndexSet *insertions, *deletions;
-        [_layout.sublayouts asdk_diffWithArray:newLayout.sublayouts insertions:&insertions deletions:&deletions compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
-          return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
-        }];
-        _insertedSubnodes = [self _filterNodesInLayouts:newLayout.sublayouts withIndexes:insertions];
-        _deletedSubnodes = [self _filterNodesInLayouts:_layout.sublayouts withIndexes:deletions];
-      } else {
-        NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [newLayout.sublayouts count])];
-        _insertedSubnodes = [self _filterNodesInLayouts:newLayout.sublayouts withIndexes:indexes];
-        _deletedSubnodes = @[];
-      }
-    }
-
-    _layout = newLayout;
+    ASDisplayNodeAssertTrue(_layout.layoutableObject == self);
+    ASDisplayNodeAssertTrue(_layout.size.width >= 0.0);
+    ASDisplayNodeAssertTrue(_layout.size.height >= 0.0);
+    
+    _previousConstrainedSize = _constrainedSize;
     _constrainedSize = constrainedSize;
+    
+    [self __calculateSubnodeOperationsWithLayout:_layout previousLayout:_previousLayout];
     _flags.isMeasured = YES;
-    [self calculatedLayoutDidChange];
+
+    completion();
   }
 
-  ASDisplayNodeAssertTrue(_layout.layoutableObject == self);
-  ASDisplayNodeAssertTrue(_layout.size.width >= 0.0);
-  ASDisplayNodeAssertTrue(_layout.size.height >= 0.0);
+  return _layout;
+}
+
+- (ASLayout *)transitionLayoutWithAnimation:(BOOL)animated
+{
+  [self invalidateCalculatedLayout];
+  return [self transitionLayoutWithSizeRange:_constrainedSize animated:animated];
+}
+
+- (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
+{
+  return [self measureWithSizeRange:constrainedSize completion:^{
+    _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated delegate:self];
+    [self __implicitlyInsertSubnodes];
+    [self animateLayoutTransition:_transitionContext];
+  }];
+}
+
+- (void)__calculateSubnodeOperationsWithLayout:(ASLayout *)layout previousLayout:(ASLayout *)previousLayout
+{
+  if (previousLayout) {
+    NSIndexSet *insertions, *deletions;
+    [previousLayout.immediateSublayouts asdk_diffWithArray:layout.immediateSublayouts
+                                         insertions:&insertions
+                                          deletions:&deletions
+                                       compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
+                                         return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
+                                       }];
+    filterNodesInLayoutAtIndexes(layout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
+    filterNodesInLayoutAtIndexesWithIntersectingNodes(previousLayout,
+                                                      deletions,
+                                                      _insertedSubnodes,
+                                                      &_removedSubnodes,
+                                                      &_removedSubnodePositions);
+  } else {
+    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [layout.immediateSublayouts count])];
+    filterNodesInLayoutAtIndexes(layout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
+    _removedSubnodes = nil;
+  }
+}
+
+- (void)__completeLayoutCalculation
+{
+  _insertedSubnodes = nil;
+  _removedSubnodes = nil;
+  _previousLayout = nil;
+  [self calculatedLayoutDidChange];
 
   // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed
   // to have a placeholder ready to go. Also, if a node has no size it should not have a placeholder
+  [self __initPlaceholder];
+}
+
+- (void)__initPlaceholder
+{
   if (self.placeholderEnabled && [self _displaysAsynchronously] &&
       _layout.size.width > 0.0 && _layout.size.height > 0.0) {
     if (!_placeholderImage) {
@@ -689,25 +711,137 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       [self _setupPlaceholderLayerContents];
     }
   }
-
-  return _layout;
 }
 
-- (NSArray<_ASDisplayNodePosition *> *)_filterNodesInLayouts:(NSArray<ASLayout *> *)layouts withIndexes:(NSIndexSet *)indexes
+/**
+ * @abstract Stores the nodes at the given indexes in the `storedNodes` array, storing indexes in a `storedPositions` c++ vector.
+ */
+static inline void filterNodesInLayoutAtIndexes(
+                                                ASLayout *layout,
+                                                NSIndexSet *indexes,
+                                                NSArray<ASDisplayNode *> * __strong *storedNodes,
+                                                std::vector<NSInteger> *storedPositions
+                                                )
 {
-  NSMutableArray<_ASDisplayNodePosition *> *result = [NSMutableArray array];
-  [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-    ASDisplayNode *node = (ASDisplayNode *)layouts[idx].layoutableObject;
-    ASDisplayNodeAssertNotNil(node, @"A flattened layout must consist exclusively of node sublayouts");
-    [result addObject:[_ASDisplayNodePosition positionWithNode:node atIndex:idx]];
-  }];
-  return result;
+  filterNodesInLayoutAtIndexesWithIntersectingNodes(layout, indexes, nil, storedNodes, storedPositions);
+}
+
+/**
+ * @abstract Stores the nodes at the given indexes in the `storedNodes` array, storing indexes in a `storedPositions` c++ vector.
+ * @discussion If the node exists in the `intersectingNodes` array, the node is not added to `storedNodes`.
+ */
+static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
+                                                                     ASLayout *layout,
+                                                                     NSIndexSet *indexes,
+                                                                     NSArray<ASDisplayNode *> *intersectingNodes,
+                                                                     NSArray<ASDisplayNode *> * __strong *storedNodes,
+                                                                     std::vector<NSInteger> *storedPositions
+                                                                     )
+{
+  NSMutableArray<ASDisplayNode *> *nodes = [NSMutableArray array];
+  std::vector<NSInteger> positions = std::vector<NSInteger>();
+  NSInteger idx = [indexes firstIndex];
+  while (idx != NSNotFound) {
+    BOOL skip = NO;
+    ASDisplayNode *node = (ASDisplayNode *)layout.immediateSublayouts[idx].layoutableObject;
+    ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
+    for (ASDisplayNode *i in intersectingNodes) {
+      if (node == i) {
+        skip = YES;
+        break;
+      }
+    }
+    if (!skip) {
+      [nodes addObject:node];
+      positions.push_back(idx);
+    }
+    idx = [indexes indexGreaterThanIndex:idx];
+  }
+  *storedNodes = nodes;
+  *storedPositions = positions;
 }
 
 - (void)calculatedLayoutDidChange
 {
   // subclass override
 }
+
+#pragma mark - Layout Transition
+
+- (void)animateLayoutTransition:(id<ASContextTransitioning>)context
+{
+  [self __layoutSublayouts];
+  [context completeTransition:YES];
+}
+
+- (void)didCompleteTransitionLayout:(id<ASContextTransitioning>)context
+{
+  [self __implicitlyRemoveSubnodes];
+  [self __completeLayoutCalculation];
+}
+
+#pragma mark - Implicit node hierarchy managagment
+
+- (void)__implicitlyInsertSubnodes
+{
+  for (NSInteger i = 0; i < [_insertedSubnodes count]; i++) {
+    NSInteger p = _insertedSubnodePositions[i];
+    [self insertSubnode:_insertedSubnodes[i] atIndex:p];
+  }
+}
+
+- (void)__implicitlyRemoveSubnodes
+{
+  for (NSInteger i = 0; i < [_removedSubnodes count]; i++) {
+    [_removedSubnodes[i] removeFromSupernode];
+  }
+}
+
+#pragma mark - _ASTransitionContextDelegate
+
+- (NSArray<ASDisplayNode *> *)currentSubnodesWithTransitionContext:(_ASTransitionContext *)context
+{
+  return _subnodes;
+}
+
+- (NSArray<ASDisplayNode *> *)insertedSubnodesWithTransitionContext:(_ASTransitionContext *)context
+{
+  return _insertedSubnodes;
+}
+
+- (NSArray<ASDisplayNode *> *)removedSubnodesWithTransitionContext:(_ASTransitionContext *)context
+{
+  return _removedSubnodes;
+}
+
+- (ASLayout *)transitionContext:(_ASTransitionContext *)context layoutForKey:(NSString *)key
+{
+  if ([key isEqualToString:ASTransitionContextFromLayoutKey]) {
+    return _previousLayout;
+  } else if ([key isEqualToString:ASTransitionContextToLayoutKey]) {
+    return _layout;
+  } else {
+    return nil;
+  }
+}
+- (ASSizeRange)transitionContext:(_ASTransitionContext *)context constrainedSizeForKey:(NSString *)key
+{
+  if ([key isEqualToString:ASTransitionContextFromLayoutKey]) {
+    return _previousConstrainedSize;
+  } else if ([key isEqualToString:ASTransitionContextToLayoutKey]) {
+    return _constrainedSize;
+  } else {
+    return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+  }
+}
+
+- (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete
+{
+  [self didCompleteTransitionLayout:context];
+  _transitionContext = nil;
+}
+
+#pragma mark - Asynchronous display
 
 - (BOOL)displaysAsynchronously
 {
@@ -2053,78 +2187,15 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (!_flags.isMeasured) {
     return;
   }
-
-  // Assume that _layout was flattened and is 1-level deep.
-  ASDisplayNode *subnode = nil;
-  CGRect subnodeFrame = CGRectZero;
-  for (ASLayout *subnodeLayout in _layout.sublayouts) {
-    if (![[self class] usesImplicitHierarchyManagement]) {
-      ASDisplayNodeAssert([_subnodes containsObject:subnodeLayout.layoutableObject], @"Sublayouts must only contain subnodes' layout.  self = %@, subnodes = %@", self, _subnodes);
-    }
-    CGPoint adjustedOrigin = subnodeLayout.position;
-    if (isfinite(adjustedOrigin.x) == NO) {
-      ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
-      adjustedOrigin.x = 0;
-    }
-    if (isfinite(adjustedOrigin.y) == NO) {
-      ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
-      adjustedOrigin.y = 0;
-    }
-    subnodeFrame.origin = adjustedOrigin;
-    
-    CGSize adjustedSize = subnodeLayout.size;
-    if (isfinite(adjustedSize.width) == NO) {
-      ASDisplayNodeAssert(0, @"subnodeLayout has an invalid size");
-      adjustedSize.width = 0;
-    }
-    if (isfinite(adjustedSize.height) == NO) {
-      ASDisplayNodeAssert(0, @"subnodeLayout has an invalid position");
-      adjustedSize.height = 0;
-    }
-    subnodeFrame.size = adjustedSize;
-    
-    subnode = ((ASDisplayNode *)subnodeLayout.layoutableObject);
-    [subnode setFrame:subnodeFrame];
-  }
   
-  if ([[self class] usesImplicitHierarchyManagement]) {
-    for (_ASDisplayNodePosition *position in _deletedSubnodes) {
-      [self _implicitlyRemoveSubnode:position.node atIndex:position.index];
-    }
-    
-    for (_ASDisplayNodePosition *position in _insertedSubnodes) {
-      [self _implicitlyInsertSubnode:position.node atIndex:position.index];
-    }
-  }
+  [self __layoutSublayouts];
 }
 
-- (void)_implicitlyInsertSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
+- (void)__layoutSublayouts
 {
-  ASDisplayNodeAssertThreadAffinity(self);
-
-  if (!_managedSubnodes) {
-    _managedSubnodes = [NSMutableArray array];
+  for (ASLayout *subnodeLayout in _layout.immediateSublayouts) {
+    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
   }
-
-  ASDisplayNodeAssert(idx <= [_managedSubnodes count], @"index needs to be in range of the current managed subnodes");
-  if (idx == [_managedSubnodes count]) {
-    [_managedSubnodes addObject:node];
-  } else {
-    [_managedSubnodes insertObject:node atIndex:idx];
-  }
-  [self addSubnode:node];
-}
-
-- (void)_implicitlyRemoveSubnode:(ASDisplayNode *)node atIndex:(NSUInteger)idx
-{
-  ASDisplayNodeAssertThreadAffinity(self);
-
-  if (!_managedSubnodes) {
-    _managedSubnodes = [NSMutableArray array];
-  }
-
-  [_managedSubnodes removeObjectAtIndex:idx];
-  [node removeFromSupernode];
 }
 
 - (void)displayWillStart

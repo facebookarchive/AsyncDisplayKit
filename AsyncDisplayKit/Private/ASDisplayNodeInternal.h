@@ -17,6 +17,9 @@
 #import "ASSentinel.h"
 #import "ASThread.h"
 #import "ASLayoutOptions.h"
+#import "_ASTransitionContext.h"
+
+#include <vector>
 
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
@@ -59,16 +62,21 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
 
+  ASLayout *_previousLayout;
   ASLayout *_layout;
+
+  ASSizeRange _previousConstrainedSize;
   ASSizeRange _constrainedSize;
+
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
-
-  // Subnodes implicitly managed by layout changes
-  NSMutableArray<ASDisplayNode *> *_managedSubnodes;
   
-  NSArray<_ASDisplayNodePosition *> *_insertedSubnodes;
-  NSArray<_ASDisplayNodePosition *> *_deletedSubnodes;
+  _ASTransitionContext *_transitionContext;
+
+  NSArray<ASDisplayNode *> *_insertedSubnodes;
+  NSArray<ASDisplayNode *> *_removedSubnodes;
+  std::vector<NSInteger> _insertedSubnodePositions;
+  std::vector<NSInteger> _removedSubnodePositions;
 
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;

@@ -86,7 +86,6 @@
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack1, stack2, node5]];
   };
   [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
-  [node layout]; // Layout immediately
   XCTAssertEqual(node.subnodes[0], node5);
   XCTAssertEqual(node.subnodes[1], node1);
   XCTAssertEqual(node.subnodes[2], node2);
@@ -112,14 +111,12 @@
   };
   
   [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
-  [node layout]; // Layout immediately
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
   
   node.layoutState = @2;
-  [node invalidateCalculatedLayout]; // TODO(levi): Look into a way where measureWithSizeRange resizes when a new hierarchy is introduced but the size has not changed
+  [node invalidateCalculatedLayout];
   [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
-  [node layout]; // Layout immediately
 
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node3);

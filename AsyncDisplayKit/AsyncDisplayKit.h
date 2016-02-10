@@ -54,6 +54,7 @@
 #import <AsyncDisplayKit/_ASAsyncTransactionGroup.h>
 #import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutController.h>
+#import <AsyncDisplayKit/ASContextTransitioning.h>
 #import <AsyncDisplayKit/ASControlNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtraIvars.h>
