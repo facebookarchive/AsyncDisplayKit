@@ -51,14 +51,6 @@
     [_changeSet markCompleted];
     
     [super beginUpdates];
-  
-    for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadSections:change.indexSet withAnimationOptions:change.animationOptions];
-    }
-    
-    for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
-    }
     
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
       [super deleteRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
@@ -74,6 +66,14 @@
     
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
       [super insertRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+    }
+    
+    for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
+      [super reloadSections:change.indexSet withAnimationOptions:change.animationOptions];
+    }
+    
+    for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
+      [super reloadRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
     
     [super endUpdatesAnimated:animated completion:completion];
