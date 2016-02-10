@@ -61,11 +61,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   CGFloat _contentsScaleForDisplay;
 
   ASLayout *_layout;
-  ASLayout *_pendingLayout;
-
   ASSizeRange _constrainedSize;
-  ASSizeRange _pendingConstrainedSize;
-
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
   

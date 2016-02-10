@@ -645,46 +645,46 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  return [self measureWithSizeRange:constrainedSize completion:^{
+  return [self measureWithSizeRange:constrainedSize completion:^(ASLayout *pendingLayout, ASSizeRange constrainedSize) {
     if ([[self class] usesImplicitHierarchyManagement]) {
       [self __implicitlyInsertSubnodes];
       [self __implicitlyRemoveSubnodes];
     }
-    [self __applyPendingLayout];
+    [self __applyLayout:pendingLayout constrainedSize:constrainedSize];
   }];
 }
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize completion:(void(^)())completion
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize completion:(void(^)(ASLayout *, ASSizeRange))completion
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
   if (![self __shouldSize])
     return nil;
   
+  ASLayout *pendingLayout;
+
   // only calculate the size if
   //  - we haven't already
   //  - the constrained size range is different
   if (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize)) {
-    _pendingLayout = [self calculateLayoutThatFits:constrainedSize];
-    _pendingConstrainedSize = constrainedSize;
-    [self __calculateSubnodeOperations];
-
-    completion();
+    pendingLayout = [self calculateLayoutThatFits:constrainedSize];
+    [self __calculateSubnodeOperationsWithPendingLayout:pendingLayout currentLayout:_layout];
+    completion(pendingLayout, constrainedSize);
   }
 
-  return _pendingLayout;
+  return pendingLayout;
 }
 
 - (ASLayout *)transitionLayoutWithAnimation:(BOOL)animated
 {
   [self invalidateCalculatedLayout];
-  [self transitionLayoutWithSizeRange:_constrainedSize animated:animated];
+  return [self transitionLayoutWithSizeRange:_constrainedSize animated:animated];
 }
 
 - (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
 {
-  return [self measureWithSizeRange:constrainedSize completion:^{
-    _transitionContext = [[_ASTransitionContext alloc] initWithLayout:_pendingLayout
+  return [self measureWithSizeRange:constrainedSize completion:^(ASLayout *pendingLayout, ASSizeRange constrainedSize) {
+    _transitionContext = [[_ASTransitionContext alloc] initWithLayout:pendingLayout
                                                       constrainedSize:constrainedSize
                                                              animated:animated
                                                              delegate:self];
@@ -693,47 +693,43 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }];
 }
 
-- (void)__calculateSubnodeOperations
+- (void)__calculateSubnodeOperationsWithPendingLayout:(ASLayout *)pendingLayout currentLayout:(ASLayout *)currentLayout
 {
   if (_layout) {
     NSIndexSet *insertions, *deletions;
-    [_layout.immediateSublayouts asdk_diffWithArray:_pendingLayout.immediateSublayouts
+    [currentLayout.immediateSublayouts asdk_diffWithArray:pendingLayout.immediateSublayouts
                                          insertions:&insertions
                                           deletions:&deletions
                                        compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
                                          return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
                                        }];
-    _insertedSubnodes = [self _nodesInLayout:_pendingLayout atIndexes:insertions];
-    _deletedSubnodes = [self _nodesInLayout:_layout atIndexes:deletions filterNodes:_insertedSubnodes];
+    _insertedSubnodes = [self _nodesInLayout:pendingLayout atIndexes:insertions];
+    _deletedSubnodes = [self _nodesInLayout:currentLayout atIndexes:deletions filterNodes:_insertedSubnodes];
   } else {
-    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_pendingLayout.immediateSublayouts count])];
-    _insertedSubnodes = [self _nodesInLayout:_pendingLayout atIndexes:indexes];
+    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [pendingLayout.immediateSublayouts count])];
+    _insertedSubnodes = [self _nodesInLayout:pendingLayout atIndexes:indexes];
     _deletedSubnodes = nil;
   }
 }
 
-- (void)__applyPendingLayout
+- (void)__applyLayout:(ASLayout *)layout constrainedSize:(ASSizeRange)constrainedSize
 {
-  ASDisplayNodeAssertTrue(_pendingLayout.layoutableObject == self);
-  ASDisplayNodeAssertTrue(_pendingLayout.size.width >= 0.0);
-  ASDisplayNodeAssertTrue(_pendingLayout.size.height >= 0.0);
+  ASDisplayNodeAssertTrue(layout.layoutableObject == self);
+  ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
+  ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
 
-  _layout = _pendingLayout;
-  _pendingLayout = nil;
-
-  _constrainedSize = _pendingConstrainedSize;
-  _pendingConstrainedSize = ASSizeRangeMake(CGSizeZero, CGSizeZero);
-
+  _layout = layout;
+  _constrainedSize = constrainedSize;
   _flags.isMeasured = YES;
   [self calculatedLayoutDidChange];
 
-  [self __primePlaceholder];
-}
-
-- (void)__primePlaceholder
-{
   // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed
   // to have a placeholder ready to go. Also, if a node has no size it should not have a placeholder
+  [self __initPlaceholder];
+}
+
+- (void)__initPlaceholder
+{
   if (self.placeholderEnabled && [self _displaysAsynchronously] &&
       _layout.size.width > 0.0 && _layout.size.height > 0.0) {
     if (!_placeholderImage) {
@@ -795,7 +791,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)didCompleteTransitionLayout:(id<ASContextTransitioning>)context
 {
   [self __implicitlyRemoveSubnodes];
-  [self __applyPendingLayout];
+  [self __applyLayout:context.layout constrainedSize:context.constrainedSize];
 }
 
 #pragma mark - Implicit node hierarchy managagment
