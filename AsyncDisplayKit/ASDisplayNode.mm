@@ -2193,7 +2193,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)__layoutSublayouts
 {
-  for (ASLayout *subnodeLayout in _layout.sublayouts) {
+  for (ASLayout *subnodeLayout in _layout.immediateSublayouts) {
     ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
   }
 }
