@@ -577,8 +577,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (BOOL)isNodeLoaded
 {
-  ASDN::MutexLocker l(_propertyLock);
-  return (_view != nil || (_flags.layerBacked && _layer != nil));
+  if (ASDisplayNodeThreadIsMain()) {
+    // Because the view and layer can only be created and destroyed on Main, that is also the only thread
+    // where the state of this property can change. As an optimization, we can avoid locking.
+    return (_view != nil || (_layer != nil && _flags.layerBacked));
+  } else {
+    ASDN::MutexLocker l(_propertyLock);
+    return (_view != nil || (_layer != nil && _flags.layerBacked));
+  }
 }
 
 - (NSString *)name
