@@ -72,6 +72,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   NSMutableArray *_subnodes;
   
   _ASTransitionContext *_transitionContext;
+  BOOL _usesImplicitHierarchyManagement;
 
   NSArray<ASDisplayNode *> *_insertedSubnodes;
   NSArray<ASDisplayNode *> *_removedSubnodes;
