@@ -50,6 +50,17 @@
  */
 - (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index;
 
+/**
+ * Provides the constrained size range for measuring the node at the index path.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the node.
+ *
+ * @returns A constrained size range for layout the node at this index path.
+ */
+- (ASSizeRange)pagerNode:(ASPagerNode *)pagerNode constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+
 @end
 
 @interface ASPagerNode : ASCollectionNode

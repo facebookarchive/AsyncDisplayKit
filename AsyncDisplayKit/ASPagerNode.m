@@ -17,6 +17,7 @@
   ASPagerNodeProxy *_proxy;
   __weak id <ASPagerNodeDataSource> _pagerDataSource;
   BOOL _pagerDataSourceImplementsNodeBlockAtIndex;
+  BOOL _pagerDataSourceImplementsConstrainedSizeForNode;
 }
 
 @end
@@ -101,7 +102,10 @@
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return ASSizeRangeMake(CGSizeZero, self.view.bounds.size);
+  if (_pagerDataSourceImplementsConstrainedSizeForNode) {
+    return [_pagerDataSource pagerNode:self constrainedSizeForNodeAtIndexPath:indexPath];
+  }
+  return ASSizeRangeMake(CGSizeZero, self.bounds.size);
 }
 
 #pragma mark - Data Source Proxy
@@ -115,9 +119,13 @@
 {
   if (pagerDataSource != _pagerDataSource) {
     _pagerDataSource = pagerDataSource;
+    
     _pagerDataSourceImplementsNodeBlockAtIndex = [_pagerDataSource respondsToSelector:@selector(pagerNode:nodeBlockAtIndex:)];
     // Data source must implement pagerNode:nodeBlockAtIndex: or pagerNode:nodeAtIndex:
     ASDisplayNodeAssertTrue(_pagerDataSourceImplementsNodeBlockAtIndex || [_pagerDataSource respondsToSelector:@selector(pagerNode:nodeAtIndex:)]);
+    
+    _pagerDataSourceImplementsConstrainedSizeForNode = [_pagerDataSource respondsToSelector:@selector(pagerNode:constrainedSizeForNodeAtIndexPath:)];
+    
     _proxy = pagerDataSource ? [[ASPagerNodeProxy alloc] initWithTarget:pagerDataSource interceptor:self] : nil;
     
     super.dataSource = (id <ASCollectionDataSource>)_proxy;
