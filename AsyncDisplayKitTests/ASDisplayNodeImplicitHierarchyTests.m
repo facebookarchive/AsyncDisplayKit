@@ -63,6 +63,15 @@
 - (void)testFeatureFlag
 {
   XCTAssert([ASDisplayNode usesImplicitHierarchyManagement]);
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  XCTAssert(node.usesImplicitHierarchyManagement);
+
+  [ASDisplayNode setUsesImplicitHierarchyManagement:NO];
+  XCTAssertFalse([ASDisplayNode usesImplicitHierarchyManagement]);
+  XCTAssertFalse(node.usesImplicitHierarchyManagement);
+
+  node.usesImplicitHierarchyManagement = YES;
+  XCTAssert(node.usesImplicitHierarchyManagement);
 }
 
 - (void)testInitialNodeInsertionWithOrdering

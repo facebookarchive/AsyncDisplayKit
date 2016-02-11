@@ -32,7 +32,7 @@ NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
 NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
 
-@interface ASDisplayNode () <UIGestureRecognizerDelegate>
+@interface ASDisplayNode () <UIGestureRecognizerDelegate, _ASDisplayLayerDelegate, _ASTransitionContextDelegate>
 
 /**
  *
@@ -53,12 +53,6 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 #else
 #define TIME_SCOPED(outVar)
 #endif
-
-@interface ASDisplayNode () <_ASDisplayLayerDelegate, _ASTransitionContextDelegate>
-
-@property (assign, nonatomic) BOOL implicitNodeHierarchyManagement;
-
-@end
 
 @implementation ASDisplayNode
 
@@ -611,7 +605,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   return [self measureWithSizeRange:constrainedSize completion:^{
-    if ([[self class] usesImplicitHierarchyManagement]) {
+    if (self.usesImplicitHierarchyManagement) {
       [self __implicitlyInsertSubnodes];
       [self __implicitlyRemoveSubnodes];
     }
@@ -640,7 +634,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _previousConstrainedSize = _constrainedSize;
     _constrainedSize = constrainedSize;
     
-    [self __calculateSubnodeOperationsWithLayout:_layout previousLayout:_previousLayout];
+    if (self.usesImplicitHierarchyManagement) {
+      [self __calculateSubnodeOperations];
+    }
     _flags.isMeasured = YES;
 
     completion();
@@ -657,32 +653,34 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
 {
+  _usesImplicitHierarchyManagement = YES; // Temporary flag for 1.9.x
   return [self measureWithSizeRange:constrainedSize completion:^{
+    _usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
     _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated delegate:self];
     [self __implicitlyInsertSubnodes];
     [self animateLayoutTransition:_transitionContext];
   }];
 }
 
-- (void)__calculateSubnodeOperationsWithLayout:(ASLayout *)layout previousLayout:(ASLayout *)previousLayout
+- (void)__calculateSubnodeOperations
 {
-  if (previousLayout) {
+  if (_previousLayout) {
     NSIndexSet *insertions, *deletions;
-    [previousLayout.immediateSublayouts asdk_diffWithArray:layout.immediateSublayouts
+    [_previousLayout.immediateSublayouts asdk_diffWithArray:_layout.immediateSublayouts
                                          insertions:&insertions
                                           deletions:&deletions
                                        compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
                                          return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
                                        }];
-    filterNodesInLayoutAtIndexes(layout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
-    filterNodesInLayoutAtIndexesWithIntersectingNodes(previousLayout,
+    filterNodesInLayoutAtIndexes(_layout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
+    filterNodesInLayoutAtIndexesWithIntersectingNodes(_previousLayout,
                                                       deletions,
                                                       _insertedSubnodes,
                                                       &_removedSubnodes,
                                                       &_removedSubnodePositions);
   } else {
-    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [layout.immediateSublayouts count])];
-    filterNodesInLayoutAtIndexes(layout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
+    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_layout.immediateSublayouts count])];
+    filterNodesInLayoutAtIndexes(_layout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
     _removedSubnodes = nil;
   }
 }
@@ -767,6 +765,16 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 }
 
 #pragma mark - Layout Transition
+
+- (BOOL)usesImplicitHierarchyManagement
+{
+  return _usesImplicitHierarchyManagement ?: [[self class] usesImplicitHierarchyManagement];
+}
+
+- (void)setUsesImplicitHierarchyManagement:(BOOL)value
+{
+  _usesImplicitHierarchyManagement = value;
+}
 
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
@@ -1820,7 +1828,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
-      if ([[self class] usesImplicitHierarchyManagement]) {
+      if (self.usesImplicitHierarchyManagement) {
         return ASObjectIsEqual(layout, evaluatedLayout) == NO && [evaluatedLayout.layoutableObject isKindOfClass:[ASDisplayNode class]];
       } else {
         return [_subnodes containsObject:evaluatedLayout.layoutableObject];

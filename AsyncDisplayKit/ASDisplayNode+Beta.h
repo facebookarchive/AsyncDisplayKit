@@ -39,6 +39,8 @@
 
 /** @name Layout Transitioning */
 
+@property (nonatomic) BOOL usesImplicitHierarchyManagement;
+
 /**
  * @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
  */
