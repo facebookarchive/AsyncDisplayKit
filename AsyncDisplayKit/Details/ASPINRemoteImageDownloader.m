@@ -67,13 +67,13 @@
   ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
   
   if (progressBlock) {
-    [[PINRemoteImageManager sharedImageManager] setProgressCallback:^(PINRemoteImageManagerResult * _Nonnull result) {
+    [[PINRemoteImageManager sharedImageManager] setProgressImageCallback:^(PINRemoteImageManagerResult * _Nonnull result) {
       dispatch_async(callbackQueue, ^{
         progressBlock(result.image, result.UUID);
       });
     } ofTaskWithUUID:downloadIdentifier];
   } else {
-    [[PINRemoteImageManager sharedImageManager] setProgressCallback:nil ofTaskWithUUID:downloadIdentifier];
+    [[PINRemoteImageManager sharedImageManager] setProgressImageCallback:nil ofTaskWithUUID:downloadIdentifier];
   }
 }
 
