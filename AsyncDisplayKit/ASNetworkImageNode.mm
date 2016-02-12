@@ -35,10 +35,15 @@
 
   BOOL _imageLoaded;
   
+  BOOL _delegateSupportsDidStartLoading;
+  BOOL _delegateSupportsDidFailWithError;
+  BOOL _delegateSupportsImageNodeDidFinishDecoding;
+  
   //set on init only
   BOOL _downloaderSupportsNewProtocol;
   BOOL _downloaderImplementsSetProgress;
   BOOL _downloaderImplementsSetPriority;
+  
   BOOL _cacheSupportsNewProtocol;
   BOOL _cacheSupportsClearing;
 }
@@ -144,6 +149,10 @@
 {
   ASDN::MutexLocker l(_lock);
   _delegate = delegate;
+  
+  _delegateSupportsDidStartLoading = [delegate respondsToSelector:@selector(imageNodeDidStartLoading:)];
+  _delegateSupportsDidFailWithError = [delegate respondsToSelector:@selector(imageNode:didFailWithError:)];
+  _delegateSupportsImageNodeDidFinishDecoding = [delegate respondsToSelector:@selector(imageNodeDidFinishDecoding:)];
 }
 
 - (id<ASNetworkImageNodeDelegate>)delegate
@@ -278,6 +287,13 @@
 - (void)_lazilyLoadImageIfNecessary
 {
   if (!_imageLoaded && _URL != nil && _downloadIdentifier == nil) {
+    {
+      ASDN::MutexLocker l(_lock);
+      if (_delegateSupportsDidStartLoading) {
+        [_delegate imageNodeDidStartLoading:self];
+      }
+    }
+    
     if (_URL.isFileURL) {
       {
         ASDN::MutexLocker l(_lock);
@@ -329,11 +345,14 @@
           strongSelf->_cacheUUID = nil;
         }
 
-        if (responseImage != NULL) {
-          [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
-        }
-        else if (error && [strongSelf->_delegate respondsToSelector:@selector(imageNode:didFailWithError:)]) {
-          [strongSelf->_delegate imageNode:strongSelf didFailWithError:error];
+        {
+          ASDN::MutexLocker l(strongSelf->_lock);
+          if (responseImage != NULL) {
+            [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
+          }
+          else if (error && _delegateSupportsDidFailWithError) {
+            [strongSelf->_delegate imageNode:strongSelf didFailWithError:error];
+          }
         }
       };
 
@@ -377,7 +396,8 @@
 - (void)asyncdisplaykit_asyncTransactionContainerStateDidChange
 {
   if (self.asyncdisplaykit_asyncTransactionContainerState == ASAsyncTransactionContainerStateNoTransactions) {
-    if (self.layer.contents != nil && [self.delegate respondsToSelector:@selector(imageNodeDidFinishDecoding:)]) {
+    ASDN::MutexLocker l(_lock);
+    if (self.layer.contents != nil && _delegateSupportsImageNodeDidFinishDecoding) {
       [self.delegate imageNodeDidFinishDecoding:self];
     }
   }
