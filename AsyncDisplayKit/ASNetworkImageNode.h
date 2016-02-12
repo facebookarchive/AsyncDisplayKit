@@ -102,7 +102,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion Called on a background queue.
  */
-- (void)imageNodeDidStartLoading:(ASNetworkImageNode *)imageNode;
+- (void)imageNodeDidStartFetchingData:(ASNetworkImageNode *)imageNode;
 
 /**
  * Notification that the image node failed to download the image.

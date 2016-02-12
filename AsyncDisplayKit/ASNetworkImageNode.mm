@@ -35,7 +35,7 @@
 
   BOOL _imageLoaded;
   
-  BOOL _delegateSupportsDidStartLoading;
+  BOOL _delegateSupportsDidStartFetchingData;
   BOOL _delegateSupportsDidFailWithError;
   BOOL _delegateSupportsImageNodeDidFinishDecoding;
   
@@ -150,7 +150,7 @@
   ASDN::MutexLocker l(_lock);
   _delegate = delegate;
   
-  _delegateSupportsDidStartLoading = [delegate respondsToSelector:@selector(imageNodeDidStartLoading:)];
+  _delegateSupportsDidStartFetchingData = [delegate respondsToSelector:@selector(imageNodeDidStartFetchingData:)];
   _delegateSupportsDidFailWithError = [delegate respondsToSelector:@selector(imageNode:didFailWithError:)];
   _delegateSupportsImageNodeDidFinishDecoding = [delegate respondsToSelector:@selector(imageNodeDidFinishDecoding:)];
 }
@@ -289,8 +289,8 @@
   if (!_imageLoaded && _URL != nil && _downloadIdentifier == nil) {
     {
       ASDN::MutexLocker l(_lock);
-      if (_delegateSupportsDidStartLoading) {
-        [_delegate imageNodeDidStartLoading:self];
+      if (_delegateSupportsDidStartFetchingData) {
+        [_delegate imageNodeDidStartFetchingData:self];
       }
     }
     
