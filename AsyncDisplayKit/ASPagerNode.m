@@ -9,11 +9,12 @@
 #import "ASPagerNode.h"
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASPagerFlowLayout.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
-  UICollectionViewFlowLayout *_flowLayout;
+  ASPagerFlowLayout *_flowLayout;
   ASPagerNodeProxy *_proxy;
   __weak id <ASPagerNodeDataSource> _pagerDataSource;
   BOOL _pagerDataSourceImplementsNodeBlockAtIndex;
@@ -27,7 +28,7 @@
 
 - (instancetype)init
 {
-  UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+  ASPagerFlowLayout *flowLayout = [[ASPagerFlowLayout alloc] init];
   flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
   flowLayout.minimumInteritemSpacing = 0;
   flowLayout.minimumLineSpacing = 0;
@@ -35,9 +36,9 @@
   return [self initWithCollectionViewLayout:flowLayout];
 }
 
-- (instancetype)initWithCollectionViewLayout:(UICollectionViewFlowLayout *)flowLayout;
+- (instancetype)initWithCollectionViewLayout:(ASPagerFlowLayout *)flowLayout;
 {
-  ASDisplayNodeAssert([flowLayout asdk_isFlowLayout], @"ASPagerNode requires a flow layout.");
+  ASDisplayNodeAssert([flowLayout isKindOfClass:[ASPagerFlowLayout class]], @"ASPagerNode requires a flow layout.");
   self = [super initWithCollectionViewLayout:flowLayout];
   if (self != nil) {
     _flowLayout = flowLayout;

@@ -471,6 +471,10 @@
 		DBC452DC1C5BF64600B16017 /* NSArray+Diffing.m in Sources */ = {isa = PBXBuildFile; fileRef = DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */; };
 		DBC452DE1C5C6A6A00B16017 /* ArrayDiffingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DBC452DD1C5C6A6A00B16017 /* ArrayDiffingTests.m */; };
 		DBC453221C5FD97200B16017 /* ASDisplayNodeImplicitHierarchyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DBC453211C5FD97200B16017 /* ASDisplayNodeImplicitHierarchyTests.m */; };
+		DBDB83941C6E879900D0098C /* ASPagerFlowLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = DBDB83921C6E879900D0098C /* ASPagerFlowLayout.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DBDB83951C6E879900D0098C /* ASPagerFlowLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = DBDB83921C6E879900D0098C /* ASPagerFlowLayout.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DBDB83961C6E879900D0098C /* ASPagerFlowLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = DBDB83931C6E879900D0098C /* ASPagerFlowLayout.m */; };
+		DBDB83971C6E879900D0098C /* ASPagerFlowLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = DBDB83931C6E879900D0098C /* ASPagerFlowLayout.m */; };
 		DE040EF91C2B40AC004692FF /* ASCollectionViewFlowLayoutInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DE0702FC1C3671E900D7DE62 /* libAsyncDisplayKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AC195D04C000B7D73C /* libAsyncDisplayKit.a */; };
 		DE6EA3221C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */; };
@@ -794,6 +798,8 @@
 		DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Diffing.m"; sourceTree = "<group>"; };
 		DBC452DD1C5C6A6A00B16017 /* ArrayDiffingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ArrayDiffingTests.m; sourceTree = "<group>"; };
 		DBC453211C5FD97200B16017 /* ASDisplayNodeImplicitHierarchyTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDisplayNodeImplicitHierarchyTests.m; sourceTree = "<group>"; };
+		DBDB83921C6E879900D0098C /* ASPagerFlowLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPagerFlowLayout.h; sourceTree = "<group>"; };
+		DBDB83931C6E879900D0098C /* ASPagerFlowLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPagerFlowLayout.m; sourceTree = "<group>"; };
 		DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASDisplayNode+FrameworkPrivate.h"; sourceTree = "<group>"; };
 		DE8BEABF1C2DF3FC00D57C12 /* ASDelegateProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDelegateProxy.h; sourceTree = "<group>"; };
 		DE8BEAC01C2DF3FC00D57C12 /* ASDelegateProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDelegateProxy.m; sourceTree = "<group>"; };
@@ -918,6 +924,8 @@
 		058D09B1195D04C000B7D73C /* AsyncDisplayKit */ = {
 			isa = PBXGroup;
 			children = (
+				DBDB83921C6E879900D0098C /* ASPagerFlowLayout.h */,
+				DBDB83931C6E879900D0098C /* ASPagerFlowLayout.m */,
 				92DD2FE11BF4B97E0074C9DD /* ASMapNode.h */,
 				92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */,
 				AEEC47DF1C20C2DD00EC1693 /* ASVideoNode.h */,
@@ -1360,6 +1368,7 @@
 				257754AF1BEE44CD00737CA5 /* ASTextKitRenderer+TextChecking.h in Headers */,
 				058D0A57195D05DC00B7D73C /* ASHighlightOverlayLayer.h in Headers */,
 				058D0A7C195D05F900B7D73C /* ASImageNode+CGExtras.h in Headers */,
+				DBDB83941C6E879900D0098C /* ASPagerFlowLayout.h in Headers */,
 				058D0A4F195D05CB00B7D73C /* ASImageNode.h in Headers */,
 				05F20AA41A15733C00DCA68A /* ASImageProtocols.h in Headers */,
 				430E7C8F1B4C23F100697A4C /* ASIndexPath.h in Headers */,
@@ -1495,6 +1504,7 @@
 				34EFC75D1B701BE900AD841F /* ASInternalHelpers.h in Headers */,
 				34EFC7671B701CD900AD841F /* ASLayout.h in Headers */,
 				DEC146B71C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */,
+				DBDB83951C6E879900D0098C /* ASPagerFlowLayout.h in Headers */,
 				34EFC7691B701CE100AD841F /* ASLayoutable.h in Headers */,
 				9CDC18CD1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */,
 				B35062201B010EFD0018CF92 /* ASLayoutController.h in Headers */,
@@ -1747,6 +1757,7 @@
 				058D0A22195D050800B7D73C /* _ASAsyncTransaction.mm in Sources */,
 				058D0A23195D050800B7D73C /* _ASAsyncTransactionContainer.m in Sources */,
 				058D0A24195D050800B7D73C /* _ASAsyncTransactionGroup.m in Sources */,
+				DBDB83961C6E879900D0098C /* ASPagerFlowLayout.m in Sources */,
 				058D0A26195D050800B7D73C /* _ASCoreAnimationExtras.mm in Sources */,
 				257754B41BEE44CD00737CA5 /* ASTextKitTailTruncater.mm in Sources */,
 				AC026B711BD57DBF00BBC17E /* _ASHierarchyChangeSet.m in Sources */,
@@ -1898,6 +1909,7 @@
 				B350624C1B010EFD0018CF92 /* _ASPendingState.m in Sources */,
 				509E68621B3AEDA5009B9150 /* ASAbstractLayoutController.mm in Sources */,
 				254C6B861BF94F8A003EC431 /* ASTextKitContext.mm in Sources */,
+				DBDB83971C6E879900D0098C /* ASPagerFlowLayout.m in Sources */,
 				34EFC7621B701CA400AD841F /* ASBackgroundLayoutSpec.mm in Sources */,
 				DE8BEAC41C2DF3FC00D57C12 /* ASDelegateProxy.m in Sources */,
 				B35062141B010EFD0018CF92 /* ASBasicImageDownloader.mm in Sources */,
