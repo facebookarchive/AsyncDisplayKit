@@ -9,6 +9,8 @@
 #import <AsyncDisplayKit/ASCollectionNode.h>
 
 @class ASPagerNode;
+@class ASPagerFlowLayout;
+
 @protocol ASPagerNodeDataSource <NSObject>
 
 /**
@@ -69,7 +71,7 @@
 - (instancetype)init;
 
 // Initializer with custom-configured flow layout properties.
-- (instancetype)initWithCollectionViewLayout:(UICollectionViewFlowLayout *)flowLayout;
+- (instancetype)initWithCollectionViewLayout:(ASPagerFlowLayout *)flowLayout;
 
 // Data Source is required, and uses a different protocol from ASCollectionNode.
 - (void)setDataSource:(id <ASPagerNodeDataSource>)dataSource;
