@@ -55,6 +55,8 @@
 
 @property (nonatomic, assign, readwrite) CGSize constrainedSize;
 
+@property (nonatomic, assign, readonly) CGFloat currentScaleFactor;
+
 #pragma mark - Drawing
 /*
  Draw the renderer's text content into the bounds provided.

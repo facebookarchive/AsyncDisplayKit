@@ -10,9 +10,9 @@
 @interface ASTextNode ()
 
 /**
- @abstract The minimum scale that the textnode can apply to fit long words.
- @default 0 (No scaling)
+ @abstract An array of descending scale factors that will be applied to this text node to try to make it fit within its constrained size
+ @default nil (no scaling)
  */
-@property (nonatomic, assign) CGFloat minimumScaleFactor;
+@property (nonatomic, copy) NSArray *pointSizeScaleFactors;
 
 @end

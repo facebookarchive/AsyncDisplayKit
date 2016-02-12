@@ -18,6 +18,7 @@
 
 #import "ASTextKitCoreTextAdditions.h"
 #import "ASTextKitHelpers.h"
+#import "ASTextKitFontSizeAdjuster.h"
 #import "ASTextKitRenderer.h"
 #import "ASTextKitRenderer+Positioning.h"
 #import "ASTextKitShadower.h"
@@ -78,6 +79,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   CGSize _constrainedSize;
 
   ASTextKitRenderer *_renderer;
+  CGFloat _currentScaleFactor;
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
 }
@@ -242,7 +244,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .lineBreakMode = _truncationMode,
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
-    .minimumScaleFactor = _minimumScaleFactor,
+    .pointSizeScaleFactors = _pointSizeScaleFactors,
+    .currentScaleFactor = _currentScaleFactor,
   };
 }
 
@@ -256,6 +259,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // actually dealloc.
     __block ASTextKitRenderer *renderer = _renderer;
     ASPerformBlockOnBackgroundThread(^{
+      // before we remove the renderer, take its scale factor so we set it when a new renderer is created
+      _currentScaleFactor = renderer.currentScaleFactor;
       renderer = nil;
     });
     _renderer = nil;
@@ -1059,16 +1064,15 @@ static NSAttributedString *DefaultTruncationAttributedString()
   return visibleRange.length < _attributedString.length;
 }
 
-- (void)setMinimumScaleFactor:(CGFloat)minimumScaleFactor
+- (void)setPointSizeScaleFactors:(NSArray *)pointSizeScaleFactors
 {
-  if (_minimumScaleFactor != minimumScaleFactor) {
-    _minimumScaleFactor = minimumScaleFactor;
+  if ([_pointSizeScaleFactors isEqualToArray:pointSizeScaleFactors] == NO) {
+    _pointSizeScaleFactors = pointSizeScaleFactors;
     [self _invalidateRenderer];
     ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
       [self setNeedsDisplay];
     });
-  }
-}
+  }}
 
 - (void)setMaximumNumberOfLines:(NSUInteger)maximumNumberOfLines
 {
