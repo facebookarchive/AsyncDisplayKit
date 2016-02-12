@@ -425,12 +425,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
 - (void)checkSimpleBridgePropertiesSetPropagate:(BOOL)isLayerBacked
 {
-  /// The first node we instantiate must be created on the main thread
-  /// in order to read ASScreenScale() safely. We create this throwaway
-  /// node so that running this test first in the suite
-  /// doesn't cause a deadlock.
-  [ASDisplayNode new];
-
   __block ASDisplayNode *node = nil;
 
   [self executeOffThread:^{
@@ -490,7 +484,13 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
   [self checkValuesMatchSetValues:node isLayerBacked:isLayerBacked];
 
-  // TODO: Handle backwards propagation i.e. from view/layer to node.
+  // As a final sanity check, change a value on the realized view and ensure it is fetched through the node.
+  if (isLayerBacked) {
+    node.layer.hidden = NO;
+  } else {
+    node.view.hidden = NO;
+  }
+  XCTAssertEqual(NO, node.hidden, @"After the view is realized, the node should delegate properties to the view.");
 }
 
 // Set each of the simple bridged UIView properties to a non-default value off-thread, then
