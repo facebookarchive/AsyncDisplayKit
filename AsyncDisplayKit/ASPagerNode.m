@@ -105,7 +105,7 @@
   if (_pagerDataSourceImplementsConstrainedSizeForNode) {
     return [_pagerDataSource pagerNode:self constrainedSizeForNodeAtIndexPath:indexPath];
   }
-  return ASSizeRangeMake(CGSizeZero, self.bounds.size);
+  return ASSizeRangeMake(CGSizeZero, self.view.bounds.size);
 }
 
 #pragma mark - Data Source Proxy
