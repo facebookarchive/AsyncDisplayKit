@@ -106,8 +106,15 @@
     return NSNotFound;
   }
 
-  NSInteger indexAfterDeletes = oldSection - [_deletedSections countOfIndexesInRange:NSMakeRange(0, oldSection)];
-  return indexAfterDeletes + [_insertedSections countOfIndexesInRange:NSMakeRange(0, indexAfterDeletes)];
+  __block NSInteger newIndex = oldSection - [_deletedSections countOfIndexesInRange:NSMakeRange(0, oldSection)];
+  [_insertedSections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+    if (idx <= newIndex) {
+      newIndex += 1;
+    } else {
+      *stop = YES;
+    }
+  }];
+  return newIndex;
 }
 
 - (void)deleteItems:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options
@@ -213,20 +220,32 @@
       // - delete/reload indexPaths that are passed in should all be their current indexPaths
       // - insert indexPaths that are passed in should all be their future indexPaths after deletions
       for (NSIndexPath *indexPath in change.indexPaths) {
-        NSUInteger section = indexPath.section;
-        NSUInteger row = indexPath.row;
+        __block NSUInteger section = indexPath.section;
+        __block NSUInteger row = indexPath.row;
         
         
         // Update section number based on section insertions/deletions that are above the current section
-        section -= [_deletedSections countOfIndexesInRange:NSMakeRange(0, section + 1)];
-        section += [_insertedSections countOfIndexesInRange:NSMakeRange(0, section + 1)];
+        section -= [_deletedSections countOfIndexesInRange:NSMakeRange(0, section)];
+        [_insertedSections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+          if (idx <= section) {
+            section += 1;
+          } else {
+            *stop = YES;
+          }
+        }];
         
         // Update row number based on deletions that are above the current row in the current section
         NSIndexSet *indicesDeletedInSection = deletedIndexPathsMap[@(indexPath.section)];
-        row -= [indicesDeletedInSection countOfIndexesInRange:NSMakeRange(0, row + 1)];
+        row -= [indicesDeletedInSection countOfIndexesInRange:NSMakeRange(0, row)];
         // Update row number based on insertions that are above the current row in the future section
         NSIndexSet *indicesInsertedInSection = insertedIndexPathsMap[@(section)];
-        row += [indicesInsertedInSection countOfIndexesInRange:NSMakeRange(0, row + 1)];
+        [indicesInsertedInSection enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+          if (idx <= row) {
+            row += 1;
+          } else {
+            *stop = YES;
+          }
+        }];
 
         //TODO: reuse the old indexPath object if section and row aren't changed
         NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:row inSection:section];
@@ -348,7 +367,7 @@
   for (_ASHierarchyItemChange *change in changes) {
     NSAssert(change.changeType == changeType, @"The map we created must all be of the same changeType as of now");
     for (NSIndexPath *indexPath in change.indexPaths) {
-      NSString *sectionKey = @(indexPath.section);
+      NSNumber *sectionKey = @(indexPath.section);
       NSMutableIndexSet *indexSet = sectionToIndexSetMap[sectionKey];
       if (indexSet) {
         [indexSet addIndex:indexPath.row];
