@@ -333,10 +333,14 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
 
 - (void)setOpaque:(BOOL)newOpaque
 {
-  _bridge_prologue_write;
-  _setToViewOrLayer(opaque, newOpaque, opaque, newOpaque);
+  BOOL prevOpaque = self.opaque;
 
-  // TODO: Mark as needs display if value changed?
+  _bridge_prologue_write;
+  _setToLayer(opaque, newOpaque);
+
+  if (prevOpaque != newOpaque) {
+    [self setNeedsDisplay];
+  }
 }
 
 - (BOOL)isUserInteractionEnabled
