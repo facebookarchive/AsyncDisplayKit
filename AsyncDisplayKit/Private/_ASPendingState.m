@@ -891,6 +891,16 @@ static UIColor *defaultTintColor = nil;
   _flags = (ASPendingStateFlags){ 0 };
 }
 
+- (BOOL)hasSetNeedsLayout
+{
+  return _flags.needsLayout;
+}
+
+- (BOOL)hasSetNeedsDisplay
+{
+  return _flags.needsDisplay;
+}
+
 - (BOOL)hasChanges
 {
   ASPendingStateFlags flags = _flags;

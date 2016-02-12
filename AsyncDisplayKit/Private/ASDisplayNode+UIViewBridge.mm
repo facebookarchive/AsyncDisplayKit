@@ -76,9 +76,10 @@ if (shouldApply) { _view.viewAndPendingViewStateProperty = (viewAndPendingViewSt
 
 #define _getFromLayer(layerProperty) __loaded ? _layer.layerProperty : self.pendingViewState.layerProperty
 
-#define _setToLayer(layerProperty, layerValueExpr) __loaded ? _layer.layerProperty = (layerValueExpr) : self.pendingViewState.layerProperty = (layerValueExpr)
+#define _setToLayer(layerProperty, layerValueExpr) BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self); \
+if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingViewState.layerProperty = (layerValueExpr); }
 
-#define _messageToViewOrLayer(viewAndLayerSelector) __loaded ? (_view ? [_view viewAndLayerSelector] : [_layer viewAndLayerSelector]) : [self.pendingViewState viewAndLayerSelector]
+#define _messageToViewOrLayer(viewAndLayerSelector) (_view ? [_view viewAndLayerSelector] : [_layer viewAndLayerSelector])
 
 #define _messageToLayer(layerSelector) __loaded ? [_layer layerSelector] : [self.pendingViewState layerSelector]
 
@@ -281,7 +282,6 @@ if (shouldApply) { _view.viewAndPendingViewStateProperty = (viewAndPendingViewSt
 - (void)setNeedsDisplay
 {
   _bridge_prologue_write;
-
   if (_hierarchyState & ASHierarchyStateRasterized) {
     ASPerformBlockOnMainThread(^{
       // The below operation must be performed on the main thread to ensure against an extremely rare deadlock, where a parent node
@@ -299,19 +299,14 @@ if (shouldApply) { _view.viewAndPendingViewStateProperty = (viewAndPendingViewSt
       [rasterizedContainerNode setNeedsDisplay];
     });
   } else {
-    // If not rasterized (and therefore we certainly have a view or layer),
-    // Send the message to the view/layer first, as scheduleNodeForDisplay may call -displayIfNeeded.
-    // Wrapped / synchronous nodes created with initWithView/LayerBlock: do not need scheduleNodeForDisplay,
-    // as they don't need to display in the working range at all - since at all times onscreen, one
-    // -setNeedsDisplay to the CALayer will result in a synchronous display in the next frame.
-
-    _messageToViewOrLayer(setNeedsDisplay);
-
-    BOOL nowDisplay = ASInterfaceStateIncludesDisplay(_interfaceState);
-    // FIXME: This should not need to recursively display, so create a non-recursive variant.
-    // The semantics of setNeedsDisplay (as defined by CALayer behavior) are not recursive.
-    if (_layer && !_flags.synchronous && nowDisplay && [self __implementsDisplay]) {
-      [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
+    BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
+    if (shouldApply) {
+      _messageToViewOrLayer(setNeedsDisplay);
+      [self __setNeedsDisplay];
+    } else {
+      /// We will call `__setNeedsDisplay` just after the pending state
+      /// gets applied.
+      [_pendingViewState setNeedsDisplay];
     }
   }
 }
@@ -319,9 +314,15 @@ if (shouldApply) { _view.viewAndPendingViewStateProperty = (viewAndPendingViewSt
 - (void)setNeedsLayout
 {
   _bridge_prologue_write;
-  // FIXME: This method currently asserts on the node's thread affinity.
-  [self __setNeedsLayout];
-  _messageToViewOrLayer(setNeedsLayout);
+  BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
+  if (shouldApply) {
+    [self __setNeedsLayout];
+    _messageToViewOrLayer(setNeedsLayout);
+  } else {
+    /// We will call `__setNeedsLayout` just before the pending state
+    /// gets applied.
+    [_pendingViewState setNeedsLayout];
+  }
 }
 
 - (BOOL)isOpaque

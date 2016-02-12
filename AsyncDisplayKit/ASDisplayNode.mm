@@ -986,10 +986,19 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 {
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
+
+  if (_pendingViewState.hasSetNeedsLayout) {
+    [self __setNeedsLayout];
+  }
+
   if (self.layerBacked) {
     [_pendingViewState applyToLayer:self.layer];
   } else {
     [_pendingViewState applyToView:self.view];
+  }
+
+  if (_pendingViewState.hasSetNeedsDisplay) {
+    [self __setNeedsDisplay];
   }
   [_pendingViewState clearChanges];
 }
@@ -1046,6 +1055,21 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
       CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
       self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
     }
+  }
+}
+
+// If not rasterized (and therefore we certainly have a view or layer),
+// Send the message to the view/layer first, as scheduleNodeForDisplay may call -displayIfNeeded.
+// Wrapped / synchronous nodes created with initWithView/LayerBlock: do not need scheduleNodeForDisplay,
+// as they don't need to display in the working range at all - since at all times onscreen, one
+// -setNeedsDisplay to the CALayer will result in a synchronous display in the next frame.
+- (void)__setNeedsDisplay
+{
+  BOOL nowDisplay = ASInterfaceStateIncludesDisplay(_interfaceState);
+  // FIXME: This should not need to recursively display, so create a non-recursive variant.
+  // The semantics of setNeedsDisplay (as defined by CALayer behavior) are not recursive.
+  if (_layer && !_flags.synchronous && nowDisplay && [self __implementsDisplay]) {
+    [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
   }
 }
 

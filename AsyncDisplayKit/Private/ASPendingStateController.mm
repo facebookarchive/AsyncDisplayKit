@@ -76,7 +76,9 @@
   }
 
   _flags.pendingFlush = YES;
-  [self performSelectorOnMainThread:@selector(flushNow) withObject:nil waitUntilDone:NO modes:@[ NSRunLoopCommonModes ]];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [self flushNow];
+  });
 }
 
 /**

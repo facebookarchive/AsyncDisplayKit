@@ -12,27 +12,42 @@
 #import "ASThread.h"
 #import "ASDisplayNodeInternal.h"
 #import "_ASPendingState.h"
+#import "ASCellNode.h"
 
 @interface ASPendingStateController (Testing)
 - (BOOL)test_isFlushScheduled;
 @end
 
-@interface ASBridgedPropertiesTests : XCTestCase
+@interface ASBridgedPropertiesTestView : UIView
+@property (nonatomic, readonly) BOOL receivedSetNeedsLayout;
+@end
 
+@implementation ASBridgedPropertiesTestView
+
+- (void)setNeedsLayout
+{
+  _receivedSetNeedsLayout = YES;
+  [super setNeedsLayout];
+}
+
+@end
+
+@interface ASBridgedPropertiesTests : XCTestCase
 @end
 
 /// Dispatches the given block synchronously onto a different thread.
 /// This is useful for testing non-main-thread behavior because `dispatch_sync`
 /// will often use the current thread.
 static inline void ASDispatchSyncOnOtherThread(dispatch_block_t block) {
-  dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+  dispatch_group_t group = dispatch_group_create();
   dispatch_queue_t q = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+  dispatch_group_enter(group);
   dispatch_async(q, ^{
     ASDisplayNodeCAssertNotMainThread();
     block();
-    dispatch_semaphore_signal(sem);
+    dispatch_group_leave(group);
   });
-  dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+  dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 }
 
 @implementation ASBridgedPropertiesTests
@@ -42,7 +57,26 @@ static inline void ASDispatchSyncOnOtherThread(dispatch_block_t block) {
   XCTAssertNotNil([ASPendingStateController sharedInstance]);
 }
 
-- (void)testThatSettingABridgedPropertyInBackgroundGetsFlushedOnNextRunLoop
+- (void)testThatDirtyNodesAreNotRetained
+{
+  ASPendingStateController *ctrl = [ASPendingStateController sharedInstance];
+  __weak ASDisplayNode *weakNode = nil;
+  @autoreleasepool {
+    ASDisplayNode *node = [ASDisplayNode new];
+    weakNode = node;
+    [node view];
+    XCTAssertEqual(node.alpha, 1);
+    ASDispatchSyncOnOtherThread(^{
+      node.alpha = 0;
+    });
+    XCTAssertEqual(node.alpha, 1);
+    XCTAssert(ctrl.test_isFlushScheduled);
+    XCTAssertNotNil(weakNode);
+  }
+  XCTAssertNil(weakNode);
+}
+
+- (void)testThatSettingABridgedViewPropertyInBackgroundGetsFlushedOnNextRunLoop
 {
   ASDisplayNode *node = [ASDisplayNode new];
   [node view];
@@ -50,16 +84,39 @@ static inline void ASDispatchSyncOnOtherThread(dispatch_block_t block) {
   ASDispatchSyncOnOtherThread(^{
     node.alpha = 0;
   });
-  [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+  XCTAssertEqual(node.alpha, 1);
+  [self waitForMainDispatchQueueToFlush];
   XCTAssertEqual(node.alpha, 0);
 }
 
-- (void)testThatReadingABridgedPropertyInBackgroundThrowsAnException
+- (void)testThatSettingABridgedLayerPropertyInBackgroundGetsFlushedOnNextRunLoop
+{
+  ASDisplayNode *node = [ASDisplayNode new];
+  [node view];
+  XCTAssertEqual(node.shadowOpacity, 0);
+  ASDispatchSyncOnOtherThread(^{
+    node.shadowOpacity = 1;
+  });
+  XCTAssertEqual(node.shadowOpacity, 0);
+  [self waitForMainDispatchQueueToFlush];
+  XCTAssertEqual(node.shadowOpacity, 1);
+}
+
+- (void)testThatReadingABridgedViewPropertyInBackgroundThrowsAnException
 {
   ASDisplayNode *node = [ASDisplayNode new];
   [node view];
   ASDispatchSyncOnOtherThread(^{
     XCTAssertThrows(node.alpha);
+  });
+}
+
+- (void)testThatReadingABridgedLayerPropertyInBackgroundThrowsAnException
+{
+  ASDisplayNode *node = [ASDisplayNode new];
+  [node view];
+  ASDispatchSyncOnOtherThread(^{
+    XCTAssertThrows(node.contentsScale);
   });
 }
 
@@ -102,6 +159,55 @@ static inline void ASDispatchSyncOnOtherThread(dispatch_block_t block) {
   XCTAssertEqual(node.alpha, 0);
   XCTAssertFalse(node.pendingViewState.hasChanges);
   XCTAssertFalse(ctrl.test_isFlushScheduled);
+}
+
+- (void)testThatCallingSetNeedsLayoutFromBackgroundCausesItToHappenLater
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] initWithViewClass:ASBridgedPropertiesTestView.class];
+  ASBridgedPropertiesTestView *view = (ASBridgedPropertiesTestView *)node.view;
+  XCTAssertFalse(view.receivedSetNeedsLayout);
+  ASDispatchSyncOnOtherThread(^{
+    XCTAssertNoThrow([node setNeedsLayout]);
+  });
+  XCTAssertFalse(view.receivedSetNeedsLayout);
+  [self waitForMainDispatchQueueToFlush];
+  XCTAssertTrue(view.receivedSetNeedsLayout);
+}
+
+- (void)testThatCallingSetNeedsLayoutOnACellNodeFromBackgroundIsSafe
+{
+  ASCellNode *node = [ASCellNode new];
+  [node view];
+  ASDispatchSyncOnOtherThread(^{
+    XCTAssertNoThrow([node setNeedsLayout]);
+  });
+}
+
+- (void)testThatCallingSetNeedsDisplayFromBackgroundCausesItToHappenLater
+{
+  ASDisplayNode *node = [ASDisplayNode new];
+  [node.layer displayIfNeeded];
+  XCTAssertFalse(node.layer.needsDisplay);
+  ASDispatchSyncOnOtherThread(^{
+    XCTAssertNoThrow([node setNeedsDisplay]);
+  });
+  XCTAssertFalse(node.layer.needsDisplay);
+  [self waitForMainDispatchQueueToFlush];
+  XCTAssertTrue(node.layer.needsDisplay);
+}
+
+/// [XCTExpectation expectationWithPredicate:] should handle this
+/// but under Xcode 7.2.1 its polling interval is 1 second
+/// which makes the tests really slow and I'm impatient.
+- (void)waitForMainDispatchQueueToFlush
+{
+  __block BOOL done = NO;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    done = YES;
+  });
+  while (!done) {
+    [NSRunLoop.mainRunLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+  }
 }
 
 @end

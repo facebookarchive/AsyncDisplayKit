@@ -152,9 +152,14 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (BOOL)__shouldSize;
 
 /**
- Invoked by a call to setNeedsLayout to the underlying view
+ Invoked before a call to setNeedsLayout to the underlying view
  */
 - (void)__setNeedsLayout;
+
+/**
+ Invoked after a call to setNeedsDisplay to the underlying view
+ */
+- (void)__setNeedsDisplay;
 
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
