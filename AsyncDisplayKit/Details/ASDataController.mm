@@ -788,6 +788,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  [self reloadRowsAtIndexPaths:indexPaths withIndexPathsAfterUpdates:indexPaths withAnimationOptions:animationOptions];
+}
+
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withIndexPathsAfterUpdates:(NSArray *)indexPathAfterUpdates withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
     LOG(@"Edit Command - reloadRows: %@", indexPaths);
@@ -796,20 +801,20 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     // Reloading requires re-fetching the data.  Load it on the current calling thread, locking the data source.
     [self accessDataSourceWithBlock:^{
-      NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+      NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPathAfterUpdates.count];
       
       // FIXME: This doesn't currently do anything
       // FIXME: Shouldn't deletes be sorted in descending order?
       [indexPaths sortedArrayUsingSelector:@selector(compare:)];
       
-      for (NSIndexPath *indexPath in indexPaths) {
+      for (NSIndexPath *indexPath in indexPathAfterUpdates) {
         [nodes addObject:[_dataSource dataController:self nodeBlockAtIndexPath:indexPath]];
       }
 
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
         [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-        [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+        [self _batchLayoutNodes:nodes atIndexPaths:indexPathAfterUpdates withAnimationOptions:animationOptions];
       }];
     }];
   }];

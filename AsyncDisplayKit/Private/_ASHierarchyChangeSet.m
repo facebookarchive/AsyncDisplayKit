@@ -198,9 +198,8 @@
 
     // Ignore item inserts in reloaded(new)/inserted sections.
     [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:insertedOrReloaded];
-    
 
-    // reload itemsChanges need to be adjusted so that we access the correct indexPaths in the datasource
+    // reload items changes need to be adjusted so that we access the correct indexPaths in the datasource
     NSDictionary *insertedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_insertItemChanges ofType:_ASHierarchyChangeTypeInsert];
     NSDictionary *deletedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_deleteItemChanges ofType:_ASHierarchyChangeTypeDelete];
 
@@ -210,23 +209,30 @@
       
       // Every indexPaths in the change need to update its section and/or row
       // depending on all the deletions and insertions
+      // For reference, when batching reloads/deletes/inserts:
+      // - delete/reload indexPaths that are passed in should all be their current indexPaths
+      // - insert indexPaths that are passed in should all be their future indexPaths after deletions
       for (NSIndexPath *indexPath in change.indexPaths) {
         NSUInteger section = indexPath.section;
         NSUInteger row = indexPath.row;
         
-        section -= [_deletedSections countOfIndexesInRange:NSMakeRange(0, section)];
-        section += [_insertedSections countOfIndexesInRange:NSMakeRange(0, section)];
         
-        NSIndexSet *indicesInsertedInSection = insertedIndexPathsMap[@(section).stringValue];
-        row += [indicesInsertedInSection countOfIndexesInRange:NSMakeRange(0, row)];
-        NSIndexSet *indicesDeletedInSection = deletedIndexPathsMap[@(section).stringValue];
-        row += [indicesDeletedInSection countOfIndexesInRange:NSMakeRange(0, row)];
+        // Update section number based on section insertions/deletions that are above the current section
+        section -= [_deletedSections countOfIndexesInRange:NSMakeRange(0, section + 1)];
+        section += [_insertedSections countOfIndexesInRange:NSMakeRange(0, section + 1)];
         
+        // Update row number based on deletions that are above the current row in the current section
+        NSIndexSet *indicesDeletedInSection = deletedIndexPathsMap[@(indexPath.section)];
+        row -= [indicesDeletedInSection countOfIndexesInRange:NSMakeRange(0, row + 1)];
+        // Update row number based on insertions that are above the current row in the future section
+        NSIndexSet *indicesInsertedInSection = insertedIndexPathsMap[@(section)];
+        row += [indicesInsertedInSection countOfIndexesInRange:NSMakeRange(0, row + 1)];
+
         //TODO: reuse the old indexPath object if section and row aren't changed
         NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:row inSection:section];
         [newIndexPaths addObject:newIndexPath];
       }
-      change.indexPaths = newIndexPaths;
+      change.indexPathsAfterUpdates = newIndexPaths;
     }
   }
 }
@@ -342,7 +348,7 @@
   for (_ASHierarchyItemChange *change in changes) {
     NSAssert(change.changeType == changeType, @"The map we created must all be of the same changeType as of now");
     for (NSIndexPath *indexPath in change.indexPaths) {
-      NSString *sectionKey = @(indexPath.section).stringValue;
+      NSString *sectionKey = @(indexPath.section);
       NSMutableIndexSet *indexSet = sectionToIndexSetMap[sectionKey];
       if (indexSet) {
         [indexSet addIndex:indexPath.row];
