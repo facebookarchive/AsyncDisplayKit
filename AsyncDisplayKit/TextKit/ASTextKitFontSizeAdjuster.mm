@@ -95,10 +95,8 @@
   textContainer.exclusionPaths = _attributes.exclusionPaths;
   [layoutManager addTextContainer:textContainer];
   
-  NSRange lineRange = { 0, 0 };
-  while (NSMaxRange(lineRange) < [layoutManager numberOfGlyphs]/* && lineCount <= _attributes.maximumNumberOfLines*/) {
+  for (NSRange lineRange = { 0, 0 }; NSMaxRange(lineRange) < [layoutManager numberOfGlyphs] && lineCount <= _attributes.maximumNumberOfLines; lineCount++) {
     [layoutManager lineFragmentRectForGlyphAtIndex:NSMaxRange(lineRange) effectiveRange:&lineRange];
-    lineCount++;
   }
 
   return lineCount;
