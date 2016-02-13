@@ -168,7 +168,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   for (NSUInteger j = 0; j < nodes.count && j < indexPaths.count; j += kASDataControllerSizingCountPerProcessor) {
     NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j);
 
-
     dispatch_block_t allocationBlock = ^{
       for (NSUInteger k = j; k < j + batchCount; k++) {
         ASCellNodeBlock cellBlock = nodes[k];

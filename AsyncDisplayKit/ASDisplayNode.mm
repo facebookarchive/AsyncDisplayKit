@@ -219,29 +219,41 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 + (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node
 {
-  ASDisplayNodeAssertMainThread();
-  static NSMutableSet *nodesToDisplay = nil;
-  static BOOL displayScheduled = NO;
-  static ASDN::RecursiveMutex displaySchedulerLock;
+  static ASDN::RecursiveMutex __displaySchedulerLock;
+  static NSMutableArray *__nodesToDisplay = nil;
+  static BOOL __displayScheduled = NO;
   
+  BOOL scheduleDisplayPassNow = NO;
   {
-    ASDN::MutexLocker l(displaySchedulerLock);
-    if (!nodesToDisplay) {
-      nodesToDisplay = [[NSMutableSet alloc] init];
+    ASDN::MutexLocker l(__displaySchedulerLock);
+    
+    if (!__nodesToDisplay) {
+      __nodesToDisplay = [NSMutableArray array];
     }
-    [nodesToDisplay addObject:node];
+    
+    if ([__nodesToDisplay indexOfObjectIdenticalTo:node] == NSNotFound) {
+      [__nodesToDisplay addObject:node];
+    }
+    
+    if (!__displayScheduled) {
+      scheduleDisplayPassNow = YES;
+      __displayScheduled = YES;
+    }
   }
   
-  if (!displayScheduled) {
-    displayScheduled = YES;
+  if (scheduleDisplayPassNow) {
     // It's essenital that any layout pass that is scheduled during the current
     // runloop has a chance to be applied / scheduled, so always perform this after the current runloop.
     dispatch_async(dispatch_get_main_queue(), ^{
-      ASDN::MutexLocker l(displaySchedulerLock);
-      displayScheduled = NO;
-      NSSet *displayingNodes = [nodesToDisplay copy];
+      NSArray *displayingNodes = nil;
+      // Create a lock scope.  Snatch the waiting nodes, let the next batch create a new container.
+      {
+        ASDN::MutexLocker l(__displaySchedulerLock);
+        displayingNodes    = [__nodesToDisplay copy];
+        __nodesToDisplay   = nil;
+        __displayScheduled = NO;
+      }
       CFAbsoluteTime timestamp = CFAbsoluteTimeGetCurrent();
-      nodesToDisplay = nil;
       for (ASDisplayNode *node in displayingNodes) {
         [node __recursivelyTriggerDisplayAndBlock:NO];
       }
