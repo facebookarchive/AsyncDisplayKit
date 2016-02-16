@@ -50,14 +50,6 @@
  */
 - (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
-#pragma mark - Row Editing (Internal API)
-
-/**
- * reload a set of IndexPaths requires deleting the cells at their current indexPaths 
- * and then inserting new ones at their future indexPaths, and these two sets of indexPath will be different in many cases
- */
-- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withIndexPathsAfterUpdates:(NSArray *)indexPathAfterUpdates withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
 #pragma mark - Node & Section Insertion/Deletion API
 
 /**

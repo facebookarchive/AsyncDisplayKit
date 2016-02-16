@@ -67,7 +67,7 @@
     }
 
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadRowsAtIndexPaths:change.indexPaths withIndexPathsAfterUpdates:change.indexPathsAfterUpdates withAnimationOptions:change.animationOptions];
+      [super reloadRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
 
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
