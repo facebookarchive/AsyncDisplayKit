@@ -192,24 +192,23 @@
     NSMutableIndexSet *insertedOrReloaded = [_insertedSections mutableCopy];
 
     // Get the new section that each reloaded section index corresponds to.
+    // Coalesce reload sections' indexes into deletes and inserts
     [_reloadedSections enumerateIndexesUsingBlock:^(NSUInteger oldIndex, __unused BOOL * stop) {
       NSUInteger newIndex = [self newSectionForOldSection:oldIndex];
       if (newIndex != NSNotFound) {
         [insertedOrReloaded addIndex:newIndex];
       }
+      [deletedOrReloaded addIndex:oldIndex];
     }];
 
-    // Ignore item reloads/deletes in reloaded/deleted sections.
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:deletedOrReloaded];
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_reloadItemChanges ignoringChangesInSections:deletedOrReloaded];
-
-    // Ignore item inserts in reloaded(new)/inserted sections.
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:insertedOrReloaded];
+    _deletedSections = deletedOrReloaded;
+    _insertedSections = insertedOrReloaded;
+    _reloadedSections = nil;
 
     // reload items changes need to be adjusted so that we access the correct indexPaths in the datasource
     NSDictionary *insertedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_insertItemChanges ofType:_ASHierarchyChangeTypeInsert];
     NSDictionary *deletedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_deleteItemChanges ofType:_ASHierarchyChangeTypeDelete];
-
+    
     for (_ASHierarchyItemChange *change in _reloadItemChanges) {
       NSAssert(change.changeType == _ASHierarchyChangeTypeReload, @"It must be a reload change to be in here");
       NSMutableArray *newIndexPaths = [NSMutableArray array];
@@ -246,13 +245,27 @@
             *stop = YES;
           }
         }];
-
+        
         //TODO: reuse the old indexPath object if section and row aren't changed
         NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:row inSection:section];
         [newIndexPaths addObject:newIndexPath];
       }
-      change.indexPathsAfterUpdates = newIndexPaths;
+      
+      // All reload changes are coalesced into deletes and inserts
+      // We delete the items that needs reload together with other deleted items, at their original index
+      _ASHierarchyItemChange *deleteItemChangeFromReloadChange = [[_ASHierarchyItemChange alloc] initWithChangeType:_ASHierarchyChangeTypeDelete indexPaths:change.indexPaths animationOptions:change.animationOptions presorted:NO];
+      [_deleteItemChanges addObject:deleteItemChangeFromReloadChange];
+      // We insert the items that needs reload together with other inserted items, at their future index
+      _ASHierarchyItemChange *insertItemChangeFromReloadChange = [[_ASHierarchyItemChange alloc] initWithChangeType:_ASHierarchyChangeTypeInsert indexPaths:newIndexPaths animationOptions:change.animationOptions presorted:NO];
+      [_insertItemChanges addObject:insertItemChangeFromReloadChange];
     }
+    [_reloadItemChanges removeAllObjects];
+    
+    // Ignore item deletes in reloaded/deleted sections.
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:deletedOrReloaded];
+
+    // Ignore item inserts in reloaded(new)/inserted sections.
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:insertedOrReloaded];
   }
 }
 
