@@ -21,7 +21,6 @@
 #import "ASTextKitRenderer.h"
 #import "ASTextKitRenderer+Positioning.h"
 #import "ASTextKitShadower.h"
-#import "ASTextNodeWordKerner.h"
 
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
@@ -81,10 +80,6 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   ASTextKitRenderer *_renderer;
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
-  
-  ASDN::Mutex _wordKernerLock;
-  ASTextNodeWordKerner *_wordKerner;
-  
 }
 @dynamic placeholderEnabled;
 
@@ -248,7 +243,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
     .minimumScaleFactor = _minimumScaleFactor,
-    .layoutManagerDelegate = [self _wordKerner],
   };
 }
 
@@ -282,15 +276,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
     [self _invalidateRenderer];
   }
-}
-
-- (ASTextNodeWordKerner *)_wordKerner
-{
-    ASDN::MutexLocker l(_wordKernerLock);
-    if (_wordKerner == nil) {
-        _wordKerner = [[ASTextNodeWordKerner alloc] init];
-    }
-    return _wordKerner;
 }
 
 #pragma mark - Layout and Sizing
