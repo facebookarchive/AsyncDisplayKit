@@ -70,6 +70,17 @@
   [self scheduleRangeUpdate];
 }
 
+- (void)cellNode:(ASCellNode *)cellNode viewDidMoveToWindow:(UIWindow *)window
+{
+  const ASInterfaceState oldInterfaceState = cellNode.interfaceState;
+  ASInterfaceState interfaceState = oldInterfaceState;
+  interfaceState |= ASInterfaceStateFetchData;
+  interfaceState |= ASInterfaceStateDisplay;
+  if (interfaceState != oldInterfaceState) {
+    [cellNode recursivelySetInterfaceState:interfaceState];
+  }
+}
+
 - (void)scheduleRangeUpdate
 {
   if (_queuedRangeUpdate) {

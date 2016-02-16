@@ -34,6 +34,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 @protocol _ASTableViewCellDelegate <NSObject>
 - (void)didLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell;
+- (void)tableViewCell:(_ASTableViewCell *)tableViewCell didMoveToWindow:(nullable UIWindow *)window;
 @end
 
 @interface _ASTableViewCell : UITableViewCell
@@ -43,6 +44,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 @implementation _ASTableViewCell
 // TODO add assertions to prevent use of view-backed UITableViewCell properties (eg .textLabel)
+
+- (void)didMoveToWindow
+{
+  [super didMoveToWindow];
+  [_delegate tableViewCell:self didMoveToWindow:self.window];
+}
 
 - (void)layoutSubviews
 {
@@ -964,6 +971,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
     node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
     [self endUpdates];
+  }
+}
+
+- (void)tableViewCell:(_ASTableViewCell *)tableViewCell didMoveToWindow:(UIWindow *)window
+{
+  if (window != nil) {
+    ASCellNode *node = tableViewCell.node;
+    ASDisplayNodeAssertNotNil(node, @"Expected table view cell to contain a node when moved into a window.");
+    [_rangeController cellNode:node viewDidMoveToWindow:window];
   }
 }
 

@@ -29,11 +29,22 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 @class _ASCollectionViewCell;
 
+@protocol _ASCollectionViewCellDelegate <NSObject>
+- (void)collectionViewCell:(_ASCollectionViewCell *)collectionViewCell didMoveToWindow:(nullable UIWindow *)window;
+@end
+
 @interface _ASCollectionViewCell : UICollectionViewCell
+@property (nonatomic, weak) id<_ASCollectionViewCellDelegate> delegate;
 @property (nonatomic, weak) ASCellNode *node;
 @end
 
 @implementation _ASCollectionViewCell
+
+- (void)didMoveToWindow
+{
+  [super didMoveToWindow];
+  [_delegate collectionViewCell:self didMoveToWindow:self.window];
+}
 
 - (void)setNode:(ASCellNode *)node
 {
@@ -59,7 +70,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASCollectionViewCellDelegate, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
@@ -484,7 +495,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
-  
+  cell.delegate = self;
+
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
   cell.node = node;
   [_rangeController configureContentView:cell.contentView forCellNode:node];
@@ -981,7 +993,18 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-#pragma mark - ASCellNodeDelegate
+#pragma mark - _ASCollectionViewCellDelegate
+
+- (void)collectionViewCell:(_ASCollectionViewCell *)collectionViewCell didMoveToWindow:(UIWindow *)window
+{
+  if (window != nil) {
+    ASCellNode *node = collectionViewCell.node;
+    ASDisplayNodeAssertNotNil(node, @"Expected collection view cell to contain a node when moved into a window.");
+    [_rangeController cellNode:node viewDidMoveToWindow:window];
+  }
+}
+
+#pragma mark - ASCellNodeLayoutDelegate
 
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
