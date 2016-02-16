@@ -45,14 +45,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection;
 
 /**
- * Notify the range controller that the given cell's view has moved into a window.
+ * Notify the range controller that the given cell's view has moved into a window (or out of a window).
  * This is called to give the range controller a chance to update the cell node's ranges immediately after it's cell enters the hierarchy.
  * Rationale: Typically the range controller throttles its updating by dispatching
  * asynchronously onto the main queue. But in cases such as `neverShowPlaceholders` it can
  * be valuable to add the cell node into the Fetch and Display ranges synchronously.
  *
  * @param cellNode The cell node whose view has moved into the window.
- * @param window The window that the cell node's view moved into. Note this is nonnull.
+ * @param window The window that the cell node's view moved into, or nil if it moved out of a window.
  */
 - (void)cellNode:(ASCellNode *)cellNode viewDidMoveToWindow:(nullable UIWindow *)window;
 
