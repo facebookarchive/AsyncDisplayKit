@@ -768,11 +768,13 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 
 - (BOOL)usesImplicitHierarchyManagement
 {
+  ASDN::MutexLocker l(_propertyLock);
   return _usesImplicitHierarchyManagement ?: [[self class] usesImplicitHierarchyManagement];
 }
 
 - (void)setUsesImplicitHierarchyManagement:(BOOL)value
 {
+  ASDN::MutexLocker l(_propertyLock);
   _usesImplicitHierarchyManagement = value;
 }
 
@@ -1706,7 +1708,7 @@ static NSInteger incrementIfFound(NSInteger i) {
         [self _tearDownPlaceholderLayer];
       };
 
-      if (_placeholderFadeDuration > 0.0) {
+      if (_placeholderFadeDuration > 0.0 && ASInterfaceStateIncludesVisible(self.interfaceState)) {
         [CATransaction begin];
         [CATransaction setCompletionBlock:cleanupBlock];
         [CATransaction setAnimationDuration:_placeholderFadeDuration];
