@@ -145,7 +145,7 @@
   self.placeholderEnabled = placeholderColor != nil;
 }
 
-- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
+- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
   return [[_ASImageNodeDrawParameters alloc] initWithBounds:self.bounds
                                                      opaque:self.opaque
