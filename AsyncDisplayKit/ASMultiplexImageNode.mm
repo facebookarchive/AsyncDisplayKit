@@ -78,7 +78,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   __weak NSOperation *_phImageRequestOperation;
   
   // Networking.
-  ASDN::Mutex _downloadIdentifierLock;
+  ASDN::RecursiveMutex _downloadIdentifierLock;
   id _downloadIdentifier;
   
   //set on init only
