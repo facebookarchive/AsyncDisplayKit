@@ -58,7 +58,7 @@ Pod::Spec.new do |spec|
   spec.subspec 'PINRemoteImage+WebP' do |pin|
     pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
     pin.dependency 'PINRemoteImage/WebP', '>= 2'
-    pin.dependency 'AsyncDisplayKit/ASDealloc2MainObject'
+    pin.dependency 'AsyncDisplayKit'
   end
   
   # Include optional FLAnimatedImage module
