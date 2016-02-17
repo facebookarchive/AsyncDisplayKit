@@ -20,8 +20,7 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
 /**
  @abstract Attempts to fetch an image with the given URL from the cache.
  @param URL The URL of the image to retrieve from the cache.
- @param callbackQueue The queue to call `completion` on. If this value is nil, @{ref completion} will be invoked on the
- main-queue.
+ @param callbackQueue The queue to call `completion` on.
  @param completion The block to be called when the cache has either hit or missed.
  @param imageFromCache The image that was retrieved from the cache, if the image could be retrieved; nil otherwise.
  @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image. This method should not block
