@@ -540,15 +540,10 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
 
 - (void)setBackgroundColor:(UIColor *)newBackgroundColor
 {
-  UIColor *prevBackgroundColor = self.backgroundColor;
-
   _bridge_prologue_write;
   _setToLayer(backgroundColor, newBackgroundColor.CGColor);
-
-  // Note: This check assumes that the colors are within the same color space.
-  if (!ASObjectIsEqual(prevBackgroundColor, newBackgroundColor)) {
-    [self setNeedsDisplay];
-  }
+  // FIXME: Would like to setNeedsDisplay if background color changed, but
+  // not safe to read old color in background.
 }
 
 - (UIColor *)tintColor
