@@ -131,7 +131,7 @@
     [_changeSet deleteSections:[NSIndexSet indexSetWithIndex:section] animationOptions:animationOptions];
     [_changeSet insertSections:[NSIndexSet indexSetWithIndex:newSection] animationOptions:animationOptions];
   } else {
-    [super moveSection:section toSection:newSection withAnimationOptions:animationOptions];
+    [super moveSection:section toSection:newSection];
   }
 }
 
@@ -174,7 +174,7 @@
     [_changeSet deleteItems:@[indexPath] animationOptions:animationOptions];
     [_changeSet insertItems:@[newIndexPath] animationOptions:animationOptions];
   } else {
-    [super moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:animationOptions];
+    [super moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
   }
 }
 

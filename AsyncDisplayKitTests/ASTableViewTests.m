@@ -15,7 +15,7 @@
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
-#define NumberOfReloadIterations 50
+#define NumberOfReloadIterations 500
 
 @interface ASTestDataController : ASChangeSetDataController
 @property (atomic) int numberOfAllNodesRelayouts;
