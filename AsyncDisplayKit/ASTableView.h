@@ -106,7 +106,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * The number of screens left to scroll before the delegate -tableView:beginBatchFetchingWithContext: is called.
  *
- * Defaults to one screenful.
+ * Defaults to two screenfuls.
  */
 @property (nonatomic, assign) CGFloat leadingScreensForBatching;
 

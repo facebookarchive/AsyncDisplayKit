@@ -180,7 +180,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   _batchContext = [[ASBatchContext alloc] init];
   
-  _leadingScreensForBatching = 1.0;
+  _leadingScreensForBatching = 2.0;
   
   _asyncDataFetchingEnabled = NO;
   _asyncDataSourceLocked = NO;

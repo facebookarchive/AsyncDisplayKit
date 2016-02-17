@@ -162,7 +162,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _asyncDataFetchingEnabled = NO;
   _asyncDataSourceLocked = NO;
 
-  _leadingScreensForBatching = 1.0;
+  _leadingScreensForBatching = 2.0;
   _batchContext = [[ASBatchContext alloc] init];
 
   _automaticallyAdjustsContentOffset = NO;
