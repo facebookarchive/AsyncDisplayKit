@@ -258,9 +258,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // expensive, and can take some time, so we dispatch onto a bg queue to
     // actually dealloc.
     __block ASTextKitRenderer *renderer = _renderer;
+    // before we remove the renderer, take its scale factor so we set it when a new renderer is created
+    _currentScaleFactor = renderer.currentScaleFactor;
+    
     ASPerformBlockOnBackgroundThread(^{
-      // before we remove the renderer, take its scale factor so we set it when a new renderer is created
-      _currentScaleFactor = renderer.currentScaleFactor;
       renderer = nil;
     });
     _renderer = nil;
