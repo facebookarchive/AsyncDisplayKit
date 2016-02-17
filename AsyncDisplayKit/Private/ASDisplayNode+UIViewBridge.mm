@@ -333,14 +333,11 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
 
 - (void)setOpaque:(BOOL)newOpaque
 {
-  BOOL prevOpaque = self.opaque;
-
   _bridge_prologue_write;
   _setToLayer(opaque, newOpaque);
 
-  if (prevOpaque != newOpaque) {
-    [self setNeedsDisplay];
-  }
+  // FIXME: Would like to setNeedsDisplay if opaqueness changed, but
+  // not safe to read old value in background.
 }
 
 - (BOOL)isUserInteractionEnabled
