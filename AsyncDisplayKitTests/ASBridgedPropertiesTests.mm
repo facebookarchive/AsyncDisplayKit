@@ -62,7 +62,7 @@ static inline void ASDispatchSyncOnOtherThread(dispatch_block_t block) {
   ASPendingStateController *ctrl = [ASPendingStateController sharedInstance];
   __weak ASDisplayNode *weakNode = nil;
   @autoreleasepool {
-    ASDisplayNode *node = [ASDisplayNode new];
+    __attribute__((objc_precise_lifetime)) ASDisplayNode *node = [ASDisplayNode new];
     weakNode = node;
     [node view];
     XCTAssertEqual(node.alpha, 1);

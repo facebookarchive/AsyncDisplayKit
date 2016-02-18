@@ -288,14 +288,18 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
       [rasterizedContainerNode setNeedsDisplay];
     });
   } else {
-    BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
-    if (shouldApply) {
-      _messageToViewOrLayer(setNeedsDisplay);
-      [self __setNeedsDisplay];
+    if (self.nodeLoaded) {
+      if (ASDisplayNodeThreadIsMain()) {
+        _messageToViewOrLayer(setNeedsDisplay);
+      } else {
+        if (!_pendingViewState.hasChanges) {
+          [ASPendingStateController.sharedInstance registerNode:self];
+        }
+        [self __setNeedsDisplay];
+        [_pendingViewState setNeedsDisplay];
+      }
     } else {
-      /// We will call `__setNeedsDisplay` just after the pending state
-      /// gets applied.
-      [_pendingViewState setNeedsDisplay];
+      [self __setNeedsDisplay];
     }
   }
 }
@@ -303,14 +307,20 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
 - (void)setNeedsLayout
 {
   _bridge_prologue_write;
-  BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
-  if (shouldApply) {
-    [self __setNeedsLayout];
-    _messageToViewOrLayer(setNeedsLayout);
+  if (self.nodeLoaded) {
+    if (ASDisplayNodeThreadIsMain()) {
+        _messageToViewOrLayer(setNeedsLayout);
+    } else {
+      if (!_pendingViewState.hasChanges) {
+        [ASPendingStateController.sharedInstance registerNode:self];
+      }
+      // NOTE: We will call [self __setNeedsLayout] just before we apply
+      // the pending state. We need to call it on main if the node is loaded
+      // to support implicit hierarchy management.
+      [_pendingViewState setNeedsLayout];
+    }
   } else {
-    /// We will call `__setNeedsLayout` just before the pending state
-    /// gets applied.
-    [_pendingViewState setNeedsLayout];
+    [self __setNeedsLayout];
   }
 }
 

@@ -986,6 +986,9 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
 
+  // FIXME: Ideally we'd call this as soon as the node receives -setNeedsLayout
+  // but implicit hierarchy management would require us to modify the node tree
+  // in the background on a loaded node, which isn't currently supported.
   if (_pendingViewState.hasSetNeedsLayout) {
     [self __setNeedsLayout];
   }
@@ -997,9 +1000,6 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
     [_pendingViewState applyToView:self.view setFrameDirectly:setFrameDirectly];
   }
 
-  if (_pendingViewState.hasSetNeedsDisplay) {
-    [self __setNeedsDisplay];
-  }
   [_pendingViewState clearChanges];
 }
 
