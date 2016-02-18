@@ -481,14 +481,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 #pragma mark -
 #pragma mark Intercepted selectors.
 
-- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
-  
-  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  cell.node = node;
-  [_rangeController configureContentView:cell.contentView forCellNode:node];
-  return cell;
+  _superIsPendingDataLoad = NO;
+  return [_dataController numberOfSections];
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+  return [_dataController numberOfRowsInSection:section];
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -505,16 +506,58 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return view;
 }
 
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  _superIsPendingDataLoad = NO;
-  return [_dataController numberOfSections];
+  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
+  
+  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+  cell.node = node;
+  [_rangeController configureContentView:cell.contentView forCellNode:node];
+  
+  if (ASRunningOnOS7()) {
+    // Even though UICV was introduced in iOS 6, and UITableView has always had the equivalent method,
+    // -willDisplayCell: was not introduced until iOS 8 for UICV.  didEndDisplayingCell, however, is available.
+    [self collectionView:collectionView willDisplayCell:cell forItemAtIndexPath:indexPath];
+  }
+  
+  return cell;
 }
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [_dataController numberOfRowsInSection:section];
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:[self scrollDirection]];
+  
+  if ([_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)]) {
+    [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
+  }
+  
+  ASCellNode *cellNode = [self nodeForItemAtIndexPath:indexPath];
+  if (cellNode.neverShowPlaceholders) {
+    [cellNode recursivelyEnsureDisplaySynchronously:YES];
+  }
 }
+
+- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+
+  if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNode:forItemAtIndexPath:)]) {
+    ASCellNode *node = ((_ASCollectionViewCell *)cell).node;
+    ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
+    [_asyncDelegate collectionView:self didEndDisplayingNode:node forItemAtIndexPath:indexPath];
+  }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
+    [_asyncDelegate collectionView:self didEndDisplayingNodeForItemAtIndexPath:indexPath];
+  }
+#pragma clang diagnostic pop
+}
+
+#pragma mark -
+#pragma mark Scroll Direction.
 
 - (ASScrollDirection)scrollDirection
 {
@@ -575,37 +618,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     scrollableDirection |= ASScrollDirectionVerticalDirections;
   }
   return scrollableDirection;
-}
-
-- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:[self scrollDirection]];
-  
-  if ([_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)]) {
-    [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
-  }
-  
-  ASCellNode *cellNode = [self nodeForItemAtIndexPath:indexPath];
-  if (cellNode.neverShowPlaceholders) {
-    [cellNode recursivelyEnsureDisplaySynchronously:YES];
-  }
-}
-
-- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
-
-  if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNode:forItemAtIndexPath:)]) {
-    ASCellNode *node = ((_ASCollectionViewCell *)cell).node;
-    ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
-    [_asyncDelegate collectionView:self didEndDisplayingNode:node forItemAtIndexPath:indexPath];
-  }
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
-    [_asyncDelegate collectionView:self didEndDisplayingNodeForItemAtIndexPath:indexPath];
-  }
-#pragma clang diagnostic pop
 }
 
 - (void)layoutSubviews
