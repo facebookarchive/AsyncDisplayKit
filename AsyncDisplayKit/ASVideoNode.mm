@@ -46,11 +46,7 @@
   if (!(self = [super init])) {
     return nil;
   }
-  
-#if DEBUG
-  NSLog(@"*** Warning: ASVideoNode is a new component - the 1.9.6 version may cause performance hiccups.");
-#endif
-  
+    
   _previewQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
   
   self.playButton = [[ASDefaultPlayButton alloc] init];
