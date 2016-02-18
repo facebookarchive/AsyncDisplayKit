@@ -11,6 +11,8 @@
 #import "_ASCoreAnimationExtras.h"
 #import "_ASAsyncTransactionContainer.h"
 #import "ASAssert.h"
+#import "ASInternalHelpers.h"
+#import "ASDisplayNodeInternal.h"
 
 typedef struct {
   // Properties
@@ -567,14 +569,8 @@ static UIColor *defaultTintColor = nil;
   if (flags.setAnchorPoint)
     layer.anchorPoint = anchorPoint;
 
-  if (flags.setPosition)
-    layer.position = position;
-
   if (flags.setZPosition)
     layer.zPosition = zPosition;
-
-  if (flags.setBounds)
-    layer.bounds = bounds;
 
   if (flags.setContentsScale)
     layer.contentsScale = contentsScale;
@@ -644,12 +640,22 @@ static UIColor *defaultTintColor = nil;
 
   if (flags.setOpaque)
     ASDisplayNodeAssert(layer.opaque == opaque, @"Didn't set opaque as desired");
-  
-  if (flags.setFrame)
-    ASDisplayNodeAssert(NO, @"Frame property should only be used for synchronously wrapped nodes.  See setFrame: in ASDisplayNode+UIViewBridge");
+
+  if (flags.setFrame) {
+    CGRect _bounds;
+    CGPoint _position;
+    ASBoundsAndPositionForFrame(self.frame, layer.bounds.origin, layer.anchorPoint, &_bounds, &_position);
+    layer.bounds = _bounds;
+    layer.position = _position;
+  } else {
+    if (flags.setBounds)
+      layer.bounds = bounds;
+    if (flags.setPosition)
+      layer.position = position;
+  }
 }
 
-- (void)applyToView:(UIView *)view
+- (void)applyToView:(UIView *)view setFrameDirectly:(BOOL)setFrameDirectly
 {
   /*
    Use our convenience setters blah here instead of layer.blah
@@ -803,6 +809,30 @@ static UIColor *defaultTintColor = nil;
 
   if (flags.setAccessibilityIdentifier)
     view.accessibilityIdentifier = accessibilityIdentifier;
+
+  if (flags.setFrame) {
+    if (setFrameDirectly) {
+      // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
+
+      // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
+#if DEBUG
+      // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
+      ASDisplayNodeAssert(CATransform3DIsIdentity(layer.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
+#endif
+      view.frame = frame;
+    } else {
+      CGRect _bounds;
+      CGPoint _position;
+      ASBoundsAndPositionForFrame(self.frame, layer.bounds.origin, layer.anchorPoint, &_bounds, &_position);
+      layer.bounds = _bounds;
+      layer.position = _position;
+    }
+  } else {
+    if (flags.setBounds)
+      layer.bounds = bounds;
+    if (flags.setPosition)
+      layer.position = position;
+  }
 }
 
 // FIXME: Make this more efficient by tracking which properties are set rather than reading everything.

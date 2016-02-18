@@ -235,8 +235,10 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
 - (void)setFrame:(CGRect)rect
 {
   _bridge_prologue_write;
-
-  if (_flags.synchronous && !_flags.layerBacked) {
+  BOOL setFrameDirectly = _flags.synchronous && !_flags.layerBacked;
+  BOOL isMainThread = ASDisplayNodeThreadIsMain();
+  BOOL nodeLoaded = self.nodeLoaded;
+  if (nodeLoaded && isMainThread && setFrameDirectly) {
     // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
     
     // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
@@ -244,38 +246,25 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
     // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
     ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
 #endif
-    _setToViewOnly(frame, rect);
-  } else {
-    // This is by far the common case / hot path.
-    [self __setSafeFrame:rect];
-  }
-}
+    _view.frame = rect;
+  } else if (!nodeLoaded || (isMainThread && !setFrameDirectly)) {
+    /**
+     * Sets a new frame to this node by changing its bounds and position. This method can be safely called even if
+     * the transform is a non-identity transform, because bounds and position can be set instead of frame.
+     * This is NOT called for synchronous nodes (wrapping regular views), which may rely on a [UIView setFrame:] call.
+     * A notable example of the latter is UITableView, which won't resize its internal container if only layer bounds are set.
+     */
+    CGRect bounds;
+    CGPoint position;
+    ASBoundsAndPositionForFrame(rect, self.bounds.origin, self.anchorPoint, &bounds, &position);
 
-/**
- * Sets a new frame to this node by changing its bounds and position. This method can be safely called even if
- * the transform is a non-identity transform, because bounds and position can be set instead of frame.
- * This is NOT called for synchronous nodes (wrapping regular views), which may rely on a [UIView setFrame:] call.
- * A notable example of the latter is UITableView, which won't resize its internal container if only layer bounds are set.
- */
-- (void)__setSafeFrame:(CGRect)rect
-{
-  _bridge_prologue_write;
-
-  BOOL useLayer = (_layer && ASDisplayNodeThreadIsMain());
-  
-  CGPoint origin      = (useLayer ? _layer.bounds.origin : self.bounds.origin);
-  CGPoint anchorPoint = (useLayer ? _layer.anchorPoint   : self.anchorPoint);
-  
-  CGRect  bounds      = (CGRect){ origin, rect.size };
-  CGPoint position    = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
-                                    rect.origin.y + rect.size.height * anchorPoint.y);
-  
-  if (useLayer) {
-    _layer.bounds = bounds;
-    _layer.position = position;
-  } else {
     self.bounds = bounds;
     self.position = position;
+  } else if (nodeLoaded && !isMainThread) {
+    if (!_pendingViewState.hasChanges) {
+      [ASPendingStateController.sharedInstance registerNode:self];
+    }
+    _pendingViewState.frame = rect;
   }
 }
 

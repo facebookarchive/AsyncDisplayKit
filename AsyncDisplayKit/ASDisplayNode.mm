@@ -993,7 +993,8 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
   if (self.layerBacked) {
     [_pendingViewState applyToLayer:self.layer];
   } else {
-    [_pendingViewState applyToView:self.view];
+    BOOL setFrameDirectly = (_flags.synchronous && !_flags.layerBacked);
+    [_pendingViewState applyToView:self.view setFrameDirectly:setFrameDirectly];
   }
 
   if (_pendingViewState.hasSetNeedsDisplay) {
