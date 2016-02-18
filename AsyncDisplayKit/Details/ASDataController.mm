@@ -162,24 +162,37 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }
 
   NSUInteger nodeCount = nodes.count;
-  NSMutableArray<ASCellNode *> *allocatedNodes = [NSMutableArray arrayWithCapacity:nodeCount];
+  NSMutableArray<ASCellNode *> *allocatedNodes = [NSMutableArray<ASCellNode *> arrayWithCapacity:nodeCount];
   dispatch_group_t layoutGroup = dispatch_group_create();
   ASSizeRange *nodeBoundSizes = (ASSizeRange *)malloc(sizeof(ASSizeRange) * nodeCount);
+
   for (NSUInteger j = 0; j < nodes.count && j < indexPaths.count; j += kASDataControllerSizingCountPerProcessor) {
     NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j);
 
+    __block NSArray *subarray;
+    // Allocate nodes concurrently.
     dispatch_block_t allocationBlock = ^{
-      for (NSUInteger k = j; k < j + batchCount; k++) {
+      __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(batchCount, sizeof(ASCellNode *));
+      dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+      dispatch_apply(batchCount, queue, ^(size_t i) {
+        unsigned long k = j + i;
         ASCellNodeBlock cellBlock = nodes[k];
         ASCellNode *node = cellBlock();
         ASDisplayNodeAssertNotNil(node, @"Node block created nil node");
-        [allocatedNodes addObject:node];
+        allocatedNodeBuffer[i] = node;
         if (!node.isNodeLoaded) {
           nodeBoundSizes[k] = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPaths[k]];
         }
+      });
+      subarray = [[NSArray alloc] initWithObjects:allocatedNodeBuffer count:batchCount];
+
+      // Nil out buffer indexes to allow arc to free the stored cells.
+      for (int i = 0; i < batchCount; i++) {
+        allocatedNodeBuffer[i] = nil;
       }
+      free(allocatedNodeBuffer);
     };
-    
+
     if (ASDisplayNodeThreadIsMain()) {
       dispatch_semaphore_t sema = dispatch_semaphore_create(0);
       dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -187,13 +200,15 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         dispatch_semaphore_signal(sema);
       });
       dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-      [self layoutLoadedNodes:[allocatedNodes subarrayWithRange:NSMakeRange(j, batchCount)] ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
+      [self layoutLoadedNodes:subarray ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
     } else {
       allocationBlock();
       [_mainSerialQueue performBlockOnMainThread:^{
-        [self layoutLoadedNodes:[allocatedNodes subarrayWithRange:NSMakeRange(j, batchCount)] ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
+        [self layoutLoadedNodes:subarray ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
       }];
     }
+
+    [allocatedNodes addObjectsFromArray:subarray];
 
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       for (NSUInteger k = j; k < j + batchCount; k++) {

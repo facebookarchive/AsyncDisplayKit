@@ -637,8 +637,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     scrollView.contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
     scrollView.contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
   );
-  
-  [self handleBatchFetchScrollingToOffset:*targetContentOffset];
+
+  if (targetContentOffset != NULL) {
+    [self handleBatchFetchScrollingToOffset:*targetContentOffset];
+  }
 
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
     [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
