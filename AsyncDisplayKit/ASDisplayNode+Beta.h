@@ -8,6 +8,11 @@
 
 #import "ASContextTransitioning.h"
 
+ASDISPLAYNODE_EXTERN_C_BEGIN
+void ASPerformBlockOnMainThread(void (^block)());
+void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
+ASDISPLAYNODE_EXTERN_C_END
+
 @interface ASDisplayNode (Beta)
 
 + (BOOL)usesImplicitHierarchyManagement;
