@@ -557,6 +557,13 @@ static UIColor *defaultTintColor = nil;
 - (void)applyToLayer:(CALayer *)layer
 {
   ASPendingStateFlags flags = _flags;
+
+  if (flags.needsDisplay
+      || (flags.setOpaque && opaque != layer.opaque)
+      || (flags.setBackgroundColor && !CGColorEqualToColor(backgroundColor, layer.backgroundColor))) {
+    [layer setNeedsDisplay];
+  }
+
   if (flags.setAnchorPoint)
     layer.anchorPoint = anchorPoint;
 
@@ -629,9 +636,6 @@ static UIColor *defaultTintColor = nil;
   if (flags.setEdgeAntialiasingMask)
     layer.edgeAntialiasingMask = edgeAntialiasingMask;
 
-  if (flags.needsDisplay)
-    [layer setNeedsDisplay];
-
   if (flags.needsLayout)
     [layer setNeedsLayout];
 
@@ -658,6 +662,12 @@ static UIColor *defaultTintColor = nil;
   CALayer *layer = view.layer;
 
   ASPendingStateFlags flags = _flags;
+  if (flags.needsDisplay
+      || (flags.setOpaque && opaque != view.opaque)
+      || (flags.setBackgroundColor && !CGColorEqualToColor(backgroundColor, layer.backgroundColor))) {
+    [view setNeedsDisplay];
+  }
+
   if (flags.setAnchorPoint)
     layer.anchorPoint = anchorPoint;
 
@@ -751,9 +761,6 @@ static UIColor *defaultTintColor = nil;
 
   if (flags.setEdgeAntialiasingMask)
     layer.edgeAntialiasingMask = edgeAntialiasingMask;
-
-  if (flags.needsDisplay)
-    [view setNeedsDisplay];
 
   if (flags.needsLayout)
     [view setNeedsLayout];

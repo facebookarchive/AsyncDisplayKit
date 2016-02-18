@@ -9,56 +9,87 @@
 import UIKit
 import AsyncDisplayKit
 
-final class ViewController: ASViewController, ASTableDelegate, ASTableDataSource {
+final class ViewController: ASViewController, ASCollectionDelegate, ASCollectionDataSource {
+	let itemCount = 1000
 
-	var tableNode: ASTableNode {
-		return node as! ASTableNode
+	let itemSize: CGSize
+	let padding: CGFloat
+	var collectionNode: ASCollectionNode {
+		return node as! ASCollectionNode
 	}
 
 	init() {
-		super.init(node: ASTableNode(style: .Plain))
-		navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Update", style: .Plain, target: self, action: "didTapUpdateButton")
-		tableNode.delegate = self
-		tableNode.dataSource = self
-		title = "Background Node Updating Demo"
+		let layout = UICollectionViewFlowLayout()
+		(padding, itemSize) = ViewController.computeLayoutSizesForMainScreen()
+		layout.minimumInteritemSpacing = padding
+		layout.minimumLineSpacing = padding
+		super.init(node: ASCollectionNode(collectionViewLayout: layout))
+		navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Color", style: .Plain, target: self, action: "didTapColorsButton")
+		navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Layout", style: .Plain, target: self, action: "didTapLayoutButton")
+		collectionNode.delegate = self
+		collectionNode.dataSource = self
+		title = "Background Updating"
 	}
 
 	required init?(coder aDecoder: NSCoder) {
 	    fatalError("init(coder:) has not been implemented")
 	}
-	let rowCount = 20
 
-	func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		return rowCount
+	// MARK: ASCollectionDataSource
+
+	func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+		return itemCount
 	}
 
-	func tableView(tableView: ASTableView, nodeBlockForRowAtIndexPath indexPath: NSIndexPath) -> ASCellNodeBlock {
+	func collectionView(collectionView: ASCollectionView, nodeBlockForItemAtIndexPath indexPath: NSIndexPath) -> ASCellNodeBlock {
 		return {
-			let node = ASCellNode()
-			node.backgroundColor = getRandomColor()
+			let node = DemoCellNode()
+			node.backgroundColor = UIColor.random()
+			node.childA.backgroundColor = UIColor.random()
+			node.childB.backgroundColor = UIColor.random()
 			return node
 		}
 	}
 
-	@objc private func didTapUpdateButton() {
-		let currentlyVisibleNodes = tableNode.view.visibleNodes()
+	func collectionView(collectionView: ASCollectionView, constrainedSizeForNodeAtIndexPath indexPath: NSIndexPath) -> ASSizeRange {
+		return ASSizeRangeMake(itemSize, itemSize)
+	}
+
+	// MARK: Action Handling
+
+	@objc private func didTapColorsButton() {
+		let currentlyVisibleNodes = collectionNode.view.visibleNodes()
 		let queue = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0)
 		dispatch_async(queue) {
-			for case let node as ASCellNode in currentlyVisibleNodes {
-				node.backgroundColor = getRandomColor()
+			for case let node as DemoCellNode in currentlyVisibleNodes {
+				node.backgroundColor = UIColor.random()
 			}
 		}
 	}
-}
 
-func getRandomColor() -> UIColor{
+	@objc private func didTapLayoutButton() {
+		let currentlyVisibleNodes = collectionNode.view.visibleNodes()
+		let queue = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0)
+		dispatch_async(queue) {
+			for case let node as DemoCellNode in currentlyVisibleNodes {
+				node.state.advance()
+				node.setNeedsLayout()
+			}
+		}
+	}
 
-	let randomRed:CGFloat = CGFloat(drand48())
+	// MARK: Static
 
-	let randomGreen:CGFloat = CGFloat(drand48())
-
-	let randomBlue:CGFloat = CGFloat(drand48())
-
-	return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: 1.0)
-
+	static func computeLayoutSizesForMainScreen() -> (padding: CGFloat, itemSize: CGSize) {
+		let numberOfColumns = 4
+		let screen = UIScreen.mainScreen()
+		let scale = screen.scale
+		let screenWidth = Int(screen.bounds.width * screen.scale)
+		let itemWidthPx = (screenWidth - (numberOfColumns - 1)) / numberOfColumns
+		let leftover = screenWidth - itemWidthPx * numberOfColumns
+		let paddingPx = leftover / (numberOfColumns - 1)
+		let itemDimension = CGFloat(itemWidthPx) / scale
+		let padding = CGFloat(paddingPx) / scale
+		return (padding: padding, itemSize: CGSize(width: itemDimension, height: itemDimension))
+	}
 }

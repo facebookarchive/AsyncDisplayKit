@@ -335,9 +335,9 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
 {
   _bridge_prologue_write;
   _setToLayer(opaque, newOpaque);
-
-  // FIXME: Would like to setNeedsDisplay if opaqueness changed, but
-  // not safe to read old value in background.
+  // NOTE: If we're in the background, then when the pending state
+  // is applied to the view on main, we will call `setNeedsDisplay` if
+  // the new opaque value doesn't match the one on the layer.
 }
 
 - (BOOL)isUserInteractionEnabled
@@ -539,8 +539,9 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
 {
   _bridge_prologue_write;
   _setToLayer(backgroundColor, newBackgroundColor.CGColor);
-  // FIXME: Would like to setNeedsDisplay if background color changed, but
-  // not safe to read old color in background.
+  // NOTE: If we're in the background, then when the pending state
+  // is applied to the view on main, we will call `setNeedsDisplay` if
+  // the new background color doesn't match the one on the layer.
 }
 
 - (UIColor *)tintColor
