@@ -445,7 +445,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   _batchUpdateCounter--;
 
-  if (_batchUpdateCounter == 0 && _pendingEditCommandBlocks.count > 0) {
+  if (_batchUpdateCounter == 0) {
     LOG(@"endUpdatesWithCompletion - beginning");
 
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];

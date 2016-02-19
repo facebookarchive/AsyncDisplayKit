@@ -897,7 +897,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)rangeController:(ASRangeController *)rangeController didMoveSection:(NSInteger)fromIndex toSection:(NSInteger)toIndex
 {
   ASDisplayNodeAssertMainThread();
-  LOG(@"UITableView moveSection:%@", indexSet);
+  LOG(@"UITableView moveSection:%@", fromIndex);
 
 
   if (!self.asyncDataSource) {
