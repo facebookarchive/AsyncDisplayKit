@@ -445,8 +445,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   _batchUpdateCounter--;
 
-  if (_batchUpdateCounter == 0) {
+  if (_batchUpdateCounter == 0 && _pendingEditCommandBlocks.count > 0) {
     LOG(@"endUpdatesWithCompletion - beginning");
+
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
     [_mainSerialQueue performBlockOnMainThread:^{
       [_delegate dataControllerBeginUpdates:self];
@@ -461,8 +463,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     }];
     [_pendingEditCommandBlocks removeAllObjects];
 
-    [_mainSerialQueue performBlockOnMainThread:^{
-      [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
+    [_editingTransactionQueue addOperationWithBlock:^{
+      [_mainSerialQueue performBlockOnMainThread:^{
+        [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
+      }];
     }];
   }
 }
