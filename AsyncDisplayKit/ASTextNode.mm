@@ -257,8 +257,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // expensive, and can take some time, so we dispatch onto a bg queue to
     // actually dealloc.
     __block ASTextKitRenderer *renderer = _renderer;
-    // before we remove the renderer, take its scale factor so we set it when a new renderer is created
-    _currentScaleFactor = renderer.currentScaleFactor;
     
     ASPerformBlockOnBackgroundThread(^{
       renderer = nil;
@@ -340,7 +338,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     [self setNeedsDisplay];
   });
   
-  return [[self _renderer] size];
+  CGSize size = [[self _renderer] size];
+  // the renderer computes the current scale factor during sizing, so let's grab it here
+  _currentScaleFactor = _renderer.currentScaleFactor;
+  return size;
 }
 
 #pragma mark - Modifying User Text
@@ -381,6 +382,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     }
   });
   
+  // reset the scale factor if we get a new string.
+  _currentScaleFactor = 0;
   if (attributedString.length > 0) {
     CGFloat screenScale = ASScreenScale();
     self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
