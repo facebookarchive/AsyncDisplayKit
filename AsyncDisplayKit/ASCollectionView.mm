@@ -249,7 +249,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _superIsPendingDataLoad = YES;
     [super reloadData];
   });
-  [_dataController reloadDataWithCompletion:completion];
+  [_dataController reloadDataWithAnimationOptions:kASCollectionViewAnimationNone completion:completion];
 }
 
 - (void)reloadData
@@ -261,7 +261,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   ASDisplayNodeAssertMainThread();
   _superIsPendingDataLoad = YES;
-  [_dataController reloadDataImmediately];
+  [_dataController reloadDataImmediatelyWithAnimationOptions:kASCollectionViewAnimationNone];
   [super reloadData];
 }
 
@@ -446,7 +446,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveSection:section toSection:newSection];
+  [_dataController moveSection:section toSection:newSection withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
@@ -470,7 +470,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
+  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (NSString *)__reuseIdentifierForKind:(NSString *)kind
@@ -951,46 +951,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didReloadNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-    ASDisplayNodeAssertMainThread();
-    if (!self.asyncDataSource || _superIsPendingDataLoad) {
-        return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-    }
-
-    if (_performingBatchUpdates) {
-        [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:YES];
-        [_batchUpdateBlocks addObject:^{
-            [super reloadItemsAtIndexPaths:indexPaths];
-        }];
-    } else {
-        [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
-        [UIView performWithoutAnimation:^{
-            [super reloadItemsAtIndexPaths:indexPaths];
-        }];
-    }
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didMoveNodeAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
-  ASDisplayNodeAssertMainThread();
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[fromIndexPath] batched:YES];
-    [_batchUpdateBlocks addObject:^{
-      [super moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
-    }];
-  } else {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[fromIndexPath] batched:NO];
-    [UIView performWithoutAnimation:^{
-      [super moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
-    }];
-  }
-}
-
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
@@ -1011,26 +971,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didReloadSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-    ASDisplayNodeAssertMainThread();
-    if (!self.asyncDataSource || _superIsPendingDataLoad) {
-        return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-    }
-
-    if (_performingBatchUpdates) {
-        [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:YES];
-        [_batchUpdateBlocks addObject:^{
-            [super reloadSections:indexSet];
-        }];
-    } else {
-        [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
-        [UIView performWithoutAnimation:^{
-            [super reloadSections:indexSet];
-        }];
-    }
-}
-
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
@@ -1047,43 +987,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
       [super deleteSections:indexSet];
-    }];
-  }
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didMoveSection:(NSInteger)fromIndex toSection:(NSInteger)toIndex
-{
-  ASDisplayNodeAssertMainThread();
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:[NSIndexSet indexSetWithIndex:fromIndex] batched:YES];
-    [_batchUpdateBlocks addObject:^{
-      [super moveSection:fromIndex toSection:toIndex];
-    }];
-  } else {
-    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:[NSIndexSet indexSetWithIndex:fromIndex] batched:NO];
-    [UIView performWithoutAnimation:^{
-      [super moveSection:fromIndex toSection:toIndex];
-    }];
-  }
-}
-
-- (void)rangeControllerDidReloadData:(ASRangeController *)rangeController{
-  ASDisplayNodeAssertMainThread();
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  if (_performingBatchUpdates) {
-    [_batchUpdateBlocks addObject:^{
-      [super reloadData];
-    }];
-  } else {
-    [UIView performWithoutAnimation:^{
-      [super reloadData];
     }];
   }
 }
