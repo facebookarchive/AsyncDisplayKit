@@ -92,14 +92,39 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 - (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
+ Called for reload of elements.
+ */
+- (void)dataController:(ASDataController *)dataController didReloadNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+/**
+ Called for movement of elements.
+ */
+- (void)dataController:(ASDataController *)dataController didMoveNodeAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath;
+
+/**
  Called for insertion of sections.
  */
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray<NSArray<ASCellNode *> *> *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for deletion of sections.
  */
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+/**
+ Called for reload of sections.
+ */
+- (void)dataController:(ASDataController *)dataController didReloadSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+/**
+ Called for movement of sections.
+ */
+- (void)dataController:(ASDataController *)dataController didMoveSection:(NSInteger)fromIndex toSection:(NSInteger)toIndex;
+
+/**
+ Called for reload data.
+ */
+- (void)dataControllerDidReloadData:(ASDataController *)dataController;
 
 @end
 
@@ -137,14 +162,6 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  */
 - (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled;
 
-/** @name Initial loading
- *
- * @discussion This method allows choosing an animation style for the first load of content.  It is typically used just once,
- * for example in viewWillAppear:, to specify an animation option for the information already present in the asyncDataSource.
- */
-
-- (void)initialDataLoadingWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
 /** @name Data Updating */
 
 - (void)beginUpdates;
@@ -159,7 +176,7 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
 - (void)reloadSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 - (void)insertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
@@ -175,11 +192,11 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  */
 - (void)relayoutAllNodes;
 
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
-- (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
+- (void)reloadDataWithCompletion:(void (^)())completion;
 
-- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)reloadDataImmediately;
 
 /** @name Data Querying */
 

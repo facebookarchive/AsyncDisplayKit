@@ -18,6 +18,7 @@
 
 #import "ASTextKitCoreTextAdditions.h"
 #import "ASTextKitHelpers.h"
+#import "ASTextKitFontSizeAdjuster.h"
 #import "ASTextKitRenderer.h"
 #import "ASTextKitRenderer+Positioning.h"
 #import "ASTextKitShadower.h"
@@ -242,7 +243,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .lineBreakMode = _truncationMode,
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
-    .minimumScaleFactor = _minimumScaleFactor,
+    .pointSizeScaleFactors = _pointSizeScaleFactors,
+    .currentScaleFactor = self.currentScaleFactor,
   };
 }
 
@@ -255,6 +257,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // expensive, and can take some time, so we dispatch onto a bg queue to
     // actually dealloc.
     __block ASTextKitRenderer *renderer = _renderer;
+    
     ASPerformBlockOnBackgroundThread(^{
       renderer = nil;
     });
@@ -335,7 +338,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     [self setNeedsDisplay];
   });
   
-  return [[self _renderer] size];
+  CGSize size = [[self _renderer] size];
+  // the renderer computes the current scale factor during sizing, so let's grab it here
+  _currentScaleFactor = _renderer.currentScaleFactor;
+  return size;
 }
 
 #pragma mark - Modifying User Text
@@ -376,6 +382,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     }
   });
   
+  // reset the scale factor if we get a new string.
+  _currentScaleFactor = 0;
   if (attributedString.length > 0) {
     CGFloat screenScale = ASScreenScale();
     self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
@@ -1059,16 +1067,15 @@ static NSAttributedString *DefaultTruncationAttributedString()
   return visibleRange.length < _attributedString.length;
 }
 
-- (void)setMinimumScaleFactor:(CGFloat)minimumScaleFactor
+- (void)setPointSizeScaleFactors:(NSArray *)pointSizeScaleFactors
 {
-  if (_minimumScaleFactor != minimumScaleFactor) {
-    _minimumScaleFactor = minimumScaleFactor;
+  if ([_pointSizeScaleFactors isEqualToArray:pointSizeScaleFactors] == NO) {
+    _pointSizeScaleFactors = pointSizeScaleFactors;
     [self _invalidateRenderer];
     ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
       [self setNeedsDisplay];
     });
-  }
-}
+  }}
 
 - (void)setMaximumNumberOfLines:(NSUInteger)maximumNumberOfLines
 {

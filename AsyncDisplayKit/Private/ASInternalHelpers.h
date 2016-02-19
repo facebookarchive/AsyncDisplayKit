@@ -28,6 +28,8 @@ CGFloat ASCeilPixelValue(CGFloat f);
 
 CGFloat ASRoundPixelValue(CGFloat f);
 
+BOOL ASRunningOnOS7();
+
 ASDISPLAYNODE_EXTERN_C_END
 
 /**

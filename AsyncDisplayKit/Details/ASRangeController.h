@@ -164,6 +164,30 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
+ * Called for nodes reload.
+ *
+ * @param rangeController Sender.
+ *
+ * @param nodes Inserted nodes.
+ *
+ * @param indexPaths Index path of reloaded nodes.
+ *
+ * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
+ */
+- (void)rangeController:(ASRangeController *)rangeController didReloadNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+/**
+ * Called for movement of node.
+ *
+ * @param rangeController Sender.
+ *
+ * @param fromIndexPath Index path of moved node before the movement.
+ *
+ * @param toIndexPath Index path of moved node after the movement.
+ */
+- (void)rangeController:(ASRangeController *)rangeController didMoveNodeAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath;
+
+/**
  * Called for section insertion.
  *
  * @param rangeController Sender.
@@ -175,6 +199,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
+ * Called for section reload.
+ *
+ * @param rangeController Sender.
+ *
+ * @param indexSet Index set of reloaded sections.
+ *
+ * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
+ */
+- (void)rangeController:(ASRangeController *)rangeController didReloadSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+/**
  * Called for section deletion.
  *
  * @param rangeController Sender.
@@ -184,6 +219,24 @@ NS_ASSUME_NONNULL_BEGIN
  * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
  */
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+/**
+ * Called for movement of section.
+ *
+ * @param rangeController Sender.
+ *
+ * @param fromIndex Index of moved section before the movement.
+ *
+ * @param toIndex Index of moved section after the movement.
+ */
+- (void)rangeController:(ASRangeController *)rangeController didMoveSection:(NSInteger)fromIndex toSection:(NSInteger)toIndex;
+
+/**
+ * Called for reload data.
+ *
+ * @param rangeController Sender.
+ */
+- (void)rangeControllerDidReloadData:(ASRangeController *)rangeController;
 
 @end
 

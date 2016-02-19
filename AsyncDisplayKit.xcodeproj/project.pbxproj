@@ -286,12 +286,13 @@
 		9C8221961BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */; };
 		9C8221971BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */; };
 		9C8221981BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */; };
+		9C8898BB1C738B9800D6B02E /* ASTextKitFontSizeAdjuster.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C8898BA1C738B9800D6B02E /* ASTextKitFontSizeAdjuster.mm */; };
+		9C8898BC1C738BA800D6B02E /* ASTextKitFontSizeAdjuster.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C8898BA1C738B9800D6B02E /* ASTextKitFontSizeAdjuster.mm */; };
+		9C8898BD1C738BB800D6B02E /* ASTextKitFontSizeAdjuster.h in Headers */ = {isa = PBXBuildFile; fileRef = A32FEDD31C501B6A004F642A /* ASTextKitFontSizeAdjuster.h */; };
 		9CDC18CC1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9CDC18CD1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.m */; };
-		A32FEDD51C501B6A004F642A /* ASTextKitFontSizeAdjuster.h in Headers */ = {isa = PBXBuildFile; fileRef = A32FEDD31C501B6A004F642A /* ASTextKitFontSizeAdjuster.h */; };
-		A32FEDD61C501B6A004F642A /* ASTextKitFontSizeAdjuster.m in Sources */ = {isa = PBXBuildFile; fileRef = A32FEDD41C501B6A004F642A /* ASTextKitFontSizeAdjuster.m */; };
-		A32FEDD71C5042C1004F642A /* ASTextKitFontSizeAdjuster.m in Sources */ = {isa = PBXBuildFile; fileRef = A32FEDD41C501B6A004F642A /* ASTextKitFontSizeAdjuster.m */; };
+		A32FEDD51C501B6A004F642A /* ASTextKitFontSizeAdjuster.h in Headers */ = {isa = PBXBuildFile; fileRef = A32FEDD31C501B6A004F642A /* ASTextKitFontSizeAdjuster.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A373200F1C571B730011FC94 /* ASTextNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = A373200E1C571B050011FC94 /* ASTextNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A37320101C571B740011FC94 /* ASTextNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = A373200E1C571B050011FC94 /* ASTextNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC026B581BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AC026B571BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m */; };
@@ -646,7 +647,7 @@
 		205F0E1F1B376416007741D0 /* CGRect+ASConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CGRect+ASConvenience.h"; sourceTree = "<group>"; };
 		205F0E201B376416007741D0 /* CGRect+ASConvenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CGRect+ASConvenience.m"; sourceTree = "<group>"; };
 		242995D21B29743C00090100 /* ASBasicImageDownloaderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBasicImageDownloaderTests.m; sourceTree = "<group>"; };
-		251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ASCollectionDataController.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ASCollectionDataController.h; sourceTree = "<group>"; };
 		251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = ASCollectionDataController.mm; sourceTree = "<group>"; };
 		251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionViewFlowLayoutInspector.h; sourceTree = "<group>"; };
 		251B8EF51BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionViewFlowLayoutInspector.m; sourceTree = "<group>"; };
@@ -715,10 +716,10 @@
 		9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStaticLayoutable.h; path = AsyncDisplayKit/Layout/ASStaticLayoutable.h; sourceTree = "<group>"; };
 		9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASStackBaselinePositionedLayout.h; sourceTree = "<group>"; };
 		9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASStackBaselinePositionedLayout.mm; sourceTree = "<group>"; };
+		9C8898BA1C738B9800D6B02E /* ASTextKitFontSizeAdjuster.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASTextKitFontSizeAdjuster.mm; path = TextKit/ASTextKitFontSizeAdjuster.mm; sourceTree = "<group>"; };
 		9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutablePrivate.h; path = AsyncDisplayKit/Layout/ASLayoutablePrivate.h; sourceTree = "<group>"; };
 		9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = ASCollectionViewTests.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		A32FEDD31C501B6A004F642A /* ASTextKitFontSizeAdjuster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASTextKitFontSizeAdjuster.h; path = TextKit/ASTextKitFontSizeAdjuster.h; sourceTree = "<group>"; };
-		A32FEDD41C501B6A004F642A /* ASTextKitFontSizeAdjuster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASTextKitFontSizeAdjuster.m; path = TextKit/ASTextKitFontSizeAdjuster.m; sourceTree = "<group>"; };
 		A373200E1C571B050011FC94 /* ASTextNode+Beta.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ASTextNode+Beta.h"; sourceTree = "<group>"; };
 		AC026B571BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASStaticLayoutSpecSnapshotTests.m; sourceTree = "<group>"; };
 		AC026B671BD57D6F00BBC17E /* ASChangeSetDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASChangeSetDataController.h; sourceTree = "<group>"; };
@@ -1206,7 +1207,7 @@
 				257754A11BEE44CD00737CA5 /* ASTextKitTailTruncater.h */,
 				257754A21BEE44CD00737CA5 /* ASTextKitTailTruncater.mm */,
 				A32FEDD31C501B6A004F642A /* ASTextKitFontSizeAdjuster.h */,
-				A32FEDD41C501B6A004F642A /* ASTextKitFontSizeAdjuster.m */,
+				9C8898BA1C738B9800D6B02E /* ASTextKitFontSizeAdjuster.mm */,
 				257754A31BEE44CD00737CA5 /* ASTextKitTruncating.h */,
 				257754A41BEE44CD00737CA5 /* ASEqualityHashHelpers.h */,
 				2577548F1BED289A00737CA5 /* ASEqualityHashHelpers.mm */,
@@ -1470,6 +1471,7 @@
 				B35061F31B010EFD0018CF92 /* ASCellNode.h in Headers */,
 				34EFC7631B701CBF00AD841F /* ASCenterLayoutSpec.h in Headers */,
 				18C2ED7F1B9B7DE800F627B3 /* ASCollectionNode.h in Headers */,
+				9C8898BD1C738BB800D6B02E /* ASTextKitFontSizeAdjuster.h in Headers */,
 				B35061F51B010EFD0018CF92 /* ASCollectionView.h in Headers */,
 				254C6B791BF94DF4003EC431 /* ASTextKitEntityAttribute.h in Headers */,
 				509E68631B3AEDB4009B9150 /* ASCollectionViewLayoutController.h in Headers */,
@@ -1810,7 +1812,6 @@
 				257754B01BEE44CD00737CA5 /* ASTextKitRenderer+TextChecking.mm in Sources */,
 				0516FA411A1563D200B4EBED /* ASMultiplexImageNode.mm in Sources */,
 				DECBD6E91BE56E1900CF4905 /* ASButtonNode.mm in Sources */,
-				A32FEDD61C501B6A004F642A /* ASTextKitFontSizeAdjuster.m in Sources */,
 				058D0A1B195D050800B7D73C /* ASMutableAttributedStringBuilder.m in Sources */,
 				055B9FA91A1C154B00035D6D /* ASNetworkImageNode.mm in Sources */,
 				AEB7B01B1C5962EA00662EF4 /* ASDefaultPlayButton.m in Sources */,
@@ -1824,6 +1825,7 @@
 				ACF6ED2E1B17843500DA7C62 /* ASRatioLayoutSpec.mm in Sources */,
 				AC47D9461B3BB41900AAEE9D /* ASRelativeSize.mm in Sources */,
 				205F0E121B371BD7007741D0 /* ASScrollDirection.m in Sources */,
+				9C8898BB1C738B9800D6B02E /* ASTextKitFontSizeAdjuster.mm in Sources */,
 				D785F6631A74327E00291744 /* ASScrollNode.m in Sources */,
 				058D0A2C195D050800B7D73C /* ASSentinel.m in Sources */,
 				9C8221971BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */,
@@ -1910,6 +1912,7 @@
 				509E68621B3AEDA5009B9150 /* ASAbstractLayoutController.mm in Sources */,
 				254C6B861BF94F8A003EC431 /* ASTextKitContext.mm in Sources */,
 				DBDB83971C6E879900D0098C /* ASPagerFlowLayout.m in Sources */,
+				9C8898BC1C738BA800D6B02E /* ASTextKitFontSizeAdjuster.mm in Sources */,
 				34EFC7621B701CA400AD841F /* ASBackgroundLayoutSpec.mm in Sources */,
 				DE8BEAC41C2DF3FC00D57C12 /* ASDelegateProxy.m in Sources */,
 				B35062141B010EFD0018CF92 /* ASBasicImageDownloader.mm in Sources */,
@@ -1945,7 +1948,6 @@
 				9C5FA3541B8F6ADF00A62714 /* ASLayoutOptions.mm in Sources */,
 				9C5FA3601B90C9A500A62714 /* ASLayoutOptionsPrivate.mm in Sources */,
 				DECBD6EA1BE56E1900CF4905 /* ASButtonNode.mm in Sources */,
-				A32FEDD71C5042C1004F642A /* ASTextKitFontSizeAdjuster.m in Sources */,
 				254C6B841BF94F8A003EC431 /* ASTextNodeWordKerner.m in Sources */,
 				34EFC76B1B701CEB00AD841F /* ASLayoutSpec.mm in Sources */,
 				254C6B8C1BF94F8A003EC431 /* ASTextKitTailTruncater.mm in Sources */,
