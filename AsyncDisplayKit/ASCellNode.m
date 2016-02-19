@@ -134,6 +134,12 @@
   [(_ASDisplayView *)self.view __forwardTouchesCancelled:touches withEvent:event];
 }
 
+- (void)updateScrollSituationWithScrollVIew:(UIScrollView *)scrollView
+{
+    // TODO(Max): Fix the cellFrame here
+    [self.layoutDelegate scrollViewDidScroll:scrollView cellFrameInScrollView:CGRectZero];
+}
+
 @end
 
 

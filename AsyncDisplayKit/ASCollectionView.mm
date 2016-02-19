@@ -67,7 +67,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
   ASCollectionViewFlowLayoutInspector *_flowLayoutInspector;
-    
+  NSMutableArray *_cellsForVisibilityUpdates;
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
   BOOL _performingBatchUpdates;
@@ -212,6 +212,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   _registeredSupplementaryKinds = [NSMutableSet set];
   
+  _cellsForVisibilityUpdates = [[NSMutableArray alloc] init];
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
@@ -589,6 +590,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
+  [_cellsForVisibilityUpdates addObject:cell];
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
@@ -600,6 +602,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
     [_asyncDelegate collectionView:self didEndDisplayingNode:node forItemAtIndexPath:indexPath];
   }
+  [_cellsForVisibilityUpdates removeObject:cell];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
@@ -648,6 +651,17 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
     [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
   }
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    for (ASCellNode *node in _cellsForVisibilityUpdates) {
+        if (node.shouldObserveVisibility) {
+            [node updateScrollSituationWithScrollVIew:scrollView];
+        }
+    }
+    if ([_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)]) {
+        [_asyncDelegate scrollViewDidScroll:scrollView];
+    }
 }
 
 - (BOOL)shouldBatchFetch

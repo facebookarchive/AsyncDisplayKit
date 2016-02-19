@@ -16,6 +16,7 @@ typedef NSUInteger ASCellNodeAnimation;
 
 @protocol ASCellNodeLayoutDelegate <NSObject>
 
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView cellFrameInScrollView:(CGRect)cellFrame;
 /**
  * Notifies the delegate that the specified cell node has done a relayout.
  * The notification is done on main thread.
@@ -24,6 +25,8 @@ typedef NSUInteger ASCellNodeAnimation;
  * @param sizeChanged `YES` if the node's `calculatedSize` changed during the relayout, `NO` otherwise.
  */
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
+
+
 @end
 
 /**
@@ -75,6 +78,7 @@ typedef NSUInteger ASCellNodeAnimation;
  */
 @property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
 
+@property (nonatomic, assign) BOOL shouldObserveVisibility;
 /*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.
@@ -107,6 +111,7 @@ typedef NSUInteger ASCellNodeAnimation;
  */
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
 
+- (void)updateScrollSituationWithScrollVIew:(UIScrollView *)scrollView;
 @end
 
 

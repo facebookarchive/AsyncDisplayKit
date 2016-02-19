@@ -56,6 +56,9 @@
           // used for batch fetching API
           selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:) ||
           
+          // used for ASCellNode visibility
+          selector == @selector(scrollViewDidScroll:) ||
+          
           // intercepted due to not being supported by ASCollectionView (prevent bugs caused by usage)
           selector == @selector(collectionView:canMoveItemAtIndexPath:) ||
           selector == @selector(collectionView:moveItemAtIndexPath:toIndexPath:) ||
