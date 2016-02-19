@@ -219,7 +219,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   [self _setDownloadIdentifier:nil];
   
-  if (_cacheSupportsClearing) {
+  if (_cacheSupportsClearing && self.loadedImageIdentifier != nil) {
     [_cache clearFetchedImageFromCacheWithURL:[_dataSource multiplexImageNode:self URLForImageIdentifier:self.loadedImageIdentifier]];
   }
 
