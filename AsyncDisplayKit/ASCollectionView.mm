@@ -673,9 +673,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-  for (ASCellNode *node in _cellsForVisibilityUpdates) {
-    if (node.shouldObserveVisibility) {
-      [node _visibleNodeDidScroll:scrollView withCellFrame:node.frame];
+  for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
+    ASCellNode *node = [collectionCell node];
+    if (node.shouldMonitorScrollViewDidScroll) {
+        NSLog(@"Calling _visibleNodeDidScroll");
+      [node _visibleNodeDidScroll:scrollView withCellFrame: node.frame];
     }
   }
   if (_asyncDelegateImplementsScrollviewDidScroll) {

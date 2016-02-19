@@ -38,7 +38,7 @@
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
   if ([self.layoutDelegate respondsToSelector:@selector(visibleNodeDidScroll:inScrollView:withCellFrame:)]) {
-     self.shouldObserveVisibility= YES;
+     self.shouldMonitorScrollViewDidScroll = YES;
   }
   return self;
 }
@@ -61,7 +61,7 @@
   }
   
   if ([self.layoutDelegate respondsToSelector:@selector(visibleNodeDidScroll:inScrollView:withCellFrame:)]) {
-    self.shouldObserveVisibility = YES;
+    self.shouldMonitorScrollViewDidScroll = YES;
   }
   return self;
 }
@@ -142,7 +142,7 @@
 
 - (void)_visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame
 {
-  if (self.shouldObserveVisibility) {
+  if (self.shouldMonitorScrollViewDidScroll) {
     [self.layoutDelegate visibleNodeDidScroll:self inScrollView:scrollView withCellFrame:cellFrame];
   }
 }

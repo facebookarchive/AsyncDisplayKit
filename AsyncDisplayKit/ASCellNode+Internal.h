@@ -10,6 +10,6 @@
 
 @interface ASCellNode (Internal)
 
-@property (nonatomic, assign) BOOL shouldObserveVisibility;
+@property (nonatomic, assign) BOOL shouldMonitorScrollViewDidScroll;
 
 @end
