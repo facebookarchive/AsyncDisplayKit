@@ -68,11 +68,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
   ASCollectionViewFlowLayoutInspector *_flowLayoutInspector;
-<<<<<<< HEAD
-  NSMutableArray *_cellsForVisibilityUpdates;
-=======
   NSMutableSet *_cellsForVisibilityUpdates;
->>>>>>> 4b8216f... Adding scroll visibility
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
   BOOL _performingBatchUpdates;
@@ -218,11 +214,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   _registeredSupplementaryKinds = [NSMutableSet set];
   
-<<<<<<< HEAD
-  _cellsForVisibilityUpdates = [[NSMutableArray alloc] init];
-=======
   _cellsForVisibilityUpdates = [NSMutableSet set];
->>>>>>> 4b8216f... Adding scroll visibility
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
@@ -665,17 +657,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-<<<<<<< HEAD
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
-    for (ASCellNode *node in _cellsForVisibilityUpdates) {
-        if (node.shouldObserveVisibility) {
-            [node updateScrollSituationWithScrollVIew:scrollView];
-        }
-    }
-    if ([_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)]) {
-        [_asyncDelegate scrollViewDidScroll:scrollView];
-    }
-=======
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
   for (ASCellNode *node in _cellsForVisibilityUpdates) {
@@ -686,7 +667,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_asyncDelegateImplementsScrollviewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
   }
->>>>>>> 4b8216f... Adding scroll visibility
 }
 
 - (BOOL)shouldBatchFetch

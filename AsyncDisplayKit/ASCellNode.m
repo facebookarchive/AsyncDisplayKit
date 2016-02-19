@@ -140,18 +140,11 @@
   [(_ASDisplayView *)self.view __forwardTouchesCancelled:touches withEvent:event];
 }
 
-<<<<<<< HEAD
-- (void)updateScrollSituationWithScrollVIew:(UIScrollView *)scrollView
-{
-    // TODO(Max): Fix the cellFrame here
-    [self.layoutDelegate scrollViewDidScroll:scrollView cellFrameInScrollView:CGRectZero];
-=======
 - (void)_visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame
 {
-  if (layoutDelegateImplementsVisibleNodeDidScroll) {
+  if (self.shouldObserveVisibility) {
     [self.layoutDelegate visibleNodeDidScroll:self inScrollView:scrollView withCellFrame:cellFrame];
   }
->>>>>>> 4b8216f... Adding scroll visibility
 }
 
 @end
