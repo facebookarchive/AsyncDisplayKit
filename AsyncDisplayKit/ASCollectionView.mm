@@ -758,19 +758,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_asyncDelegateImplementsInsetSection) {
     sectionInset = [(id<ASCollectionViewDelegateFlowLayout>)_asyncDelegate collectionView:self layout:self.collectionViewLayout insetForSectionAtIndex:indexPath.section];
   }
-  
-  if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
-    constrainedSize.min.width = MAX(0, constrainedSize.min.width - sectionInset.left - sectionInset.right);
-    //ignore insets for FLT_MAX so FLT_MAX can be compared against
-    if (constrainedSize.max.width - FLT_EPSILON < FLT_MAX) {
-      constrainedSize.max.width = MAX(0, constrainedSize.max.width - sectionInset.left - sectionInset.right);
-    }
-  } else {
-    constrainedSize.min.height = MAX(0, constrainedSize.min.height - sectionInset.top - sectionInset.bottom);
-    //ignore insets for FLT_MAX so FLT_MAX can be compared against
-    if (constrainedSize.max.height - FLT_EPSILON < FLT_MAX) {
-      constrainedSize.max.height = MAX(0, constrainedSize.max.height - sectionInset.top - sectionInset.bottom);
-    }
+
+  constrainedSize.min.height = MAX(0, constrainedSize.min.height - sectionInset.top - sectionInset.bottom);
+  constrainedSize.min.width = MAX(0, constrainedSize.min.width - sectionInset.left - sectionInset.right);
+  //ignore insets for FLT_MAX so FLT_MAX can be compared against
+  if (constrainedSize.max.width - FLT_EPSILON < FLT_MAX) {
+    constrainedSize.max.width = MAX(0, constrainedSize.max.width - sectionInset.left - sectionInset.right);
+  }
+  if (constrainedSize.max.height - FLT_EPSILON < FLT_MAX) {
+    constrainedSize.max.height = MAX(0, constrainedSize.max.height - sectionInset.top - sectionInset.bottom);
   }
   
   return constrainedSize;
