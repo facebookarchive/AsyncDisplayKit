@@ -32,6 +32,18 @@
 
 @end
 
+@interface ASBridgedPropertiesTestNode : ASDisplayNode
+@property (nullable, nonatomic, copy) dispatch_block_t onDealloc;
+@end
+
+@implementation ASBridgedPropertiesTestNode
+
+- (void)dealloc {
+  _onDealloc();
+}
+
+@end
+
 @interface ASBridgedPropertiesTests : XCTestCase
 @end
 
@@ -60,10 +72,12 @@ static inline void ASDispatchSyncOnOtherThread(dispatch_block_t block) {
 - (void)testThatDirtyNodesAreNotRetained
 {
   ASPendingStateController *ctrl = [ASPendingStateController sharedInstance];
-  __weak ASDisplayNode *weakNode = nil;
+  __block BOOL didDealloc = NO;
   @autoreleasepool {
-    __attribute__((objc_precise_lifetime)) ASDisplayNode *node = [ASDisplayNode new];
-    weakNode = node;
+    __attribute__((objc_precise_lifetime)) ASBridgedPropertiesTestNode *node = [ASBridgedPropertiesTestNode new];
+    node.onDealloc = ^{
+      didDealloc = YES;
+    };
     [node view];
     XCTAssertEqual(node.alpha, 1);
     ASDispatchSyncOnOtherThread(^{
@@ -71,9 +85,8 @@ static inline void ASDispatchSyncOnOtherThread(dispatch_block_t block) {
     });
     XCTAssertEqual(node.alpha, 1);
     XCTAssert(ctrl.test_isFlushScheduled);
-    XCTAssertNotNil(weakNode);
   }
-  XCTAssertNil(weakNode);
+  XCTAssertTrue(didDealloc);
 }
 
 - (void)testThatSettingABridgedViewPropertyInBackgroundGetsFlushedOnNextRunLoop
