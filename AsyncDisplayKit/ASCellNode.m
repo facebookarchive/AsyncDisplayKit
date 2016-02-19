@@ -6,9 +6,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASCellNode.h"
+#import "ASCellNode+Internal.h"
 
 #import "ASInternalHelpers.h"
+#import "ASCollectionView.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASTextNode.h>
@@ -36,7 +37,9 @@
   // Use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
-
+  if ([self.layoutDelegate respondsToSelector:@selector(visibleNodeDidScroll:inScrollView:withCellFrame:)]) {
+     self.shouldObserveVisibility= YES;
+  }
   return self;
 }
 
@@ -57,6 +60,9 @@
     [self addSubnode:_viewControllerNode];
   }
   
+  if ([self.layoutDelegate respondsToSelector:@selector(visibleNodeDidScroll:inScrollView:withCellFrame:)]) {
+    self.shouldObserveVisibility = YES;
+  }
   return self;
 }
 
@@ -132,6 +138,20 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesCancelled:touches withEvent:event];
+}
+
+<<<<<<< HEAD
+- (void)updateScrollSituationWithScrollVIew:(UIScrollView *)scrollView
+{
+    // TODO(Max): Fix the cellFrame here
+    [self.layoutDelegate scrollViewDidScroll:scrollView cellFrameInScrollView:CGRectZero];
+=======
+- (void)_visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame
+{
+  if (layoutDelegateImplementsVisibleNodeDidScroll) {
+    [self.layoutDelegate visibleNodeDidScroll:self inScrollView:scrollView withCellFrame:cellFrame];
+  }
+>>>>>>> 4b8216f... Adding scroll visibility
 }
 
 @end

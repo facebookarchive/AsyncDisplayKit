@@ -9,6 +9,7 @@
 #import "ASAssert.h"
 #import "ASBatchFetching.h"
 #import "ASDelegateProxy.h"
+#import "ASCellNode+Internal.h"
 #import "ASCollectionNode.h"
 #import "ASCollectionDataController.h"
 #import "ASCollectionViewLayoutController.h"
@@ -67,7 +68,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
   ASCollectionViewFlowLayoutInspector *_flowLayoutInspector;
-    
+<<<<<<< HEAD
+  NSMutableArray *_cellsForVisibilityUpdates;
+=======
+  NSMutableSet *_cellsForVisibilityUpdates;
+>>>>>>> 4b8216f... Adding scroll visibility
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
   BOOL _performingBatchUpdates;
@@ -75,6 +80,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   BOOL _asyncDataFetchingEnabled;
   BOOL _asyncDelegateImplementsInsetSection;
+  BOOL _asyncDelegateImplementsScrollviewDidScroll;
   BOOL _collectionViewLayoutImplementsInsetSection;
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
   BOOL _asyncDataSourceImplementsNodeBlockForItemAtIndexPath;
@@ -212,6 +218,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   _registeredSupplementaryKinds = [NSMutableSet set];
   
+<<<<<<< HEAD
+  _cellsForVisibilityUpdates = [[NSMutableArray alloc] init];
+=======
+  _cellsForVisibilityUpdates = [NSMutableSet set];
+>>>>>>> 4b8216f... Adding scroll visibility
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
@@ -328,12 +339,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDelegate = nil;
     _proxyDelegate = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
     _asyncDelegateImplementsInsetSection = NO;
+    _asyncDelegateImplementsScrollviewDidScroll = NO;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
+    _asyncDelegateImplementsScrollviewDidScroll = ([_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)] ? 1 : 0);
   }
-    
+
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
   [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
@@ -589,6 +602,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
+  [_cellsForVisibilityUpdates addObject:cell];
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
@@ -600,6 +614,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
     [_asyncDelegate collectionView:self didEndDisplayingNode:node forItemAtIndexPath:indexPath];
   }
+  [_cellsForVisibilityUpdates removeObject:cell];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
@@ -648,6 +663,30 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
     [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
   }
+}
+
+<<<<<<< HEAD
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    for (ASCellNode *node in _cellsForVisibilityUpdates) {
+        if (node.shouldObserveVisibility) {
+            [node updateScrollSituationWithScrollVIew:scrollView];
+        }
+    }
+    if ([_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)]) {
+        [_asyncDelegate scrollViewDidScroll:scrollView];
+    }
+=======
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+  for (ASCellNode *node in _cellsForVisibilityUpdates) {
+    if (node.shouldObserveVisibility) {
+      [node _visibleNodeDidScroll:scrollView withCellFrame:node.frame];
+    }
+  }
+  if (_asyncDelegateImplementsScrollviewDidScroll) {
+    [_asyncDelegate scrollViewDidScroll:scrollView];
+  }
+>>>>>>> 4b8216f... Adding scroll visibility
 }
 
 - (BOOL)shouldBatchFetch
