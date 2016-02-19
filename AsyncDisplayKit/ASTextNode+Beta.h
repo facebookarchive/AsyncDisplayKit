@@ -15,4 +15,9 @@
  */
 @property (nonatomic, copy) NSArray *pointSizeScaleFactors;
 
+/**
+ @abstract The currently applied scale factor, or 0 if the text node is not being scaled.
+ */
+@property (nonatomic, assign, readonly) CGFloat currentScaleFactor;
+
 @end

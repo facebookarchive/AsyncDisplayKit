@@ -79,7 +79,6 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   CGSize _constrainedSize;
 
   ASTextKitRenderer *_renderer;
-  CGFloat _currentScaleFactor;
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
 }
@@ -245,7 +244,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
     .pointSizeScaleFactors = _pointSizeScaleFactors,
-    .currentScaleFactor = _currentScaleFactor,
+    .currentScaleFactor = self.currentScaleFactor,
   };
 }
 
