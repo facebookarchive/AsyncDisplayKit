@@ -85,7 +85,6 @@ typedef NSUInteger ASCellNodeAnimation;
  */
 @property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
 
-@property (nonatomic, assign) BOOL shouldObserveVisibility;
 /*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.
