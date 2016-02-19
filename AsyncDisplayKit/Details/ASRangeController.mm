@@ -361,28 +361,13 @@
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didReloadNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions{
-  ASDisplayNodeAssert(nodes.count == indexPaths.count, @"Invalid index path");
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    [_delegate rangeController:self didReloadNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
-  });
-}
-
-- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  ASDisplayNodeAssert(sections.count == indexSet.count, @"Invalid sections");
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   });
-}
-
-- (void)dataController:(ASDataController *)dataController didReloadSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-    ASPerformBlockOnMainThread(^{
-      _rangeIsValid = NO;
-      [_delegate rangeController:self didReloadSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-    });
 }
 
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
@@ -390,13 +375,6 @@
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-  });
-}
-
-- (void)dataControllerDidReloadData:(ASDataController *)dataController{
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    [_delegate rangeControllerDidReloadData:self];
   });
 }
 
