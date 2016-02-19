@@ -9,7 +9,6 @@
 #import "ASAssert.h"
 #import "ASBatchFetching.h"
 #import "ASDelegateProxy.h"
-#import "ASCellNode+Internal.h"
 #import "ASCollectionNode.h"
 #import "ASCollectionDataController.h"
 #import "ASCollectionViewLayoutController.h"
@@ -676,7 +675,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
     ASCellNode *node = [collectionCell node];
     if (node.shouldMonitorScrollViewDidScroll) {
-        NSLog(@"Calling _visibleNodeDidScroll");
       [node _visibleNodeDidScroll:scrollView withCellFrame: node.frame];
     }
   }

@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASCellNode+Internal.h"
+#import "ASCellNode.h"
 
 #import "ASInternalHelpers.h"
 #import "ASCollectionView.h"
@@ -24,6 +24,7 @@
   UIViewController *_viewController;
   ASDisplayNode *_viewControllerNode;
 }
+@property (nonatomic, assign, readwrite) BOOL shouldMonitorScrollViewDidScroll;
 
 @end
 
