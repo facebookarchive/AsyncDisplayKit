@@ -530,7 +530,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return cell;
 }
 
-- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
+- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:[self scrollDirection]];
   
@@ -538,7 +538,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
   }
   
-  ASCellNode *cellNode = [self nodeForItemAtIndexPath:indexPath];
+  ASCellNode *cellNode = [cell node];
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
@@ -681,7 +681,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
     ASCellNode *node = [collectionCell node];
     // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
-    [node _visibleNodeDidScroll:scrollView withCellFrame:collectionCell.frame];
+    [node visibleNodeDidScroll:scrollView withCellFrame:collectionCell.frame];
   }
   if (_asyncDelegateImplementsScrollviewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];

@@ -112,6 +112,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL _queuedNodeHeightUpdate;
   BOOL _isDeallocating;
   BOOL _dataSourceImplementsNodeBlockForRowAtIndexPath;
+  BOOL _asyncDelegateImplementsScrollviewDidScroll;
+  NSMutableSet *_cellsForVisibilityUpdates;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -197,7 +199,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (!(self = [super initWithFrame:frame style:style])) {
     return nil;
   }
-  
+  _cellsForVisibilityUpdates = [NSMutableSet set];
   if (!dataControllerClass) {
     dataControllerClass = [[self class] dataControllerClass];
   }
@@ -585,7 +587,18 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return direction;
 }
 
-- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+  for (_ASTableViewCell *tableCell in _cellsForVisibilityUpdates) {
+    ASCellNode *node = [tableCell node];
+    [node visibleNodeDidScroll:scrollView withCellFrame:tableCell.frame];
+  }
+  if (_asyncDelegateImplementsScrollviewDidScroll) {
+    [_asyncDelegate scrollViewDidScroll:scrollView];
+  }
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
   _pendingVisibleIndexPath = indexPath;
 
@@ -595,13 +608,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_asyncDelegate tableView:self willDisplayNodeForRowAtIndexPath:indexPath];
   }
 
-  ASCellNode *cellNode = [self nodeForRowAtIndexPath:indexPath];
+  ASCellNode *cellNode = [cell node];
+
+  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(visibleNodeDidScroll:withCellFrame:))) {
+    [_cellsForVisibilityUpdates addObject:cell];
+  }
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
 }
 
-- (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath
+- (void)tableView:(UITableView *)tableView didEndDisplayingCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath
 {
   if ([_pendingVisibleIndexPath isEqual:indexPath]) {
     _pendingVisibleIndexPath = nil;
@@ -613,6 +630,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     ASCellNode *node = ((_ASTableViewCell *)cell).node;
     ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
     [_asyncDelegate tableView:self didEndDisplayingNode:node forRowAtIndexPath:indexPath];
+  }
+
+  if ([_cellsForVisibilityUpdates containsObject:cell]) {
+    [_cellsForVisibilityUpdates removeObject:cell];
   }
 
 #pragma clang diagnostic push

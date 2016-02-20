@@ -76,8 +76,6 @@ typedef NSUInteger ASCellNodeAnimation;
  */
 @property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
 
-@property (nonatomic, assign, readonly) BOOL shouldMonitorScrollViewDidScroll;
-
 /*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.
@@ -110,7 +108,8 @@ typedef NSUInteger ASCellNodeAnimation;
  */
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
 
-- (void)_visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
+- (void)visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
+
 @end
 
 
