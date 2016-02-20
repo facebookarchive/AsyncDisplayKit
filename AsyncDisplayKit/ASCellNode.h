@@ -14,19 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef NSUInteger ASCellNodeAnimation;
 
-@protocol ASCellNodeLayoutDelegate <NSObject>
-
-/**
- * Notifies the delegate that the specified cell node has done a relayout.
- * The notification is done on main thread.
- *
- * @param node A node informing the delegate about the relayout.
- * @param sizeChanged `YES` if the node's `calculatedSize` changed during the relayout, `NO` otherwise.
- */
-- (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
-
-@end
-
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
  */
@@ -70,11 +57,6 @@ typedef NSUInteger ASCellNodeAnimation;
  * A Boolean value that indicates whether the node is highlighted.
  */
 @property (nonatomic, assign) BOOL highlighted;
-
-/*
- * A delegate to be notified (on main thread) after a relayout.
- */
-@property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
 
 /*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding

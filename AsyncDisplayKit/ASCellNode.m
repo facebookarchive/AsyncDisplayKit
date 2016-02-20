@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASCellNode.h"
+#import "ASCellNode+Internal.h"
 
 #import "ASInternalHelpers.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
@@ -27,6 +27,7 @@
 @end
 
 @implementation ASCellNode
+@synthesize layoutDelegate = _layoutDelegate;
 
 - (instancetype)init
 {
@@ -97,7 +98,7 @@
   CGSize oldSize = self.calculatedSize;
   [super setNeedsLayout];
 
-  if (_layoutDelegate != nil) {
+  if (_layoutDelegate != nil && self.isNodeLoaded) {
     BOOL sizeChanged = !CGSizeEqualToSize(oldSize, self.calculatedSize);
     ASPerformBlockOnMainThread(^{
       [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];

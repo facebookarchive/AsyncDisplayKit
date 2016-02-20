@@ -10,6 +10,7 @@
 
 #import "ASAssert.h"
 #import "ASBatchFetching.h"
+#import "ASCellNode+Internal.h"
 #import "ASChangeSetDataController.h"
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Beta.h"
