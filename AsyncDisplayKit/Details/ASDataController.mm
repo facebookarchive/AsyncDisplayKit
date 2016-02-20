@@ -448,10 +448,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   if (_batchUpdateCounter == 0) {
     LOG(@"endUpdatesWithCompletion - beginning");
 
-    [_editingTransactionQueue addOperationWithBlock:^{
-      [_mainSerialQueue performBlockOnMainThread:^{
-        [_delegate dataControllerBeginUpdates:self];
-      }];
+    [_mainSerialQueue performBlockOnMainThread:^{
+      [_delegate dataControllerBeginUpdates:self];
     }];
 
     // Running these commands may result in blocking on an _editingTransactionQueue operation that started even before -beginUpdates.
@@ -463,12 +461,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     }];
     [_pendingEditCommandBlocks removeAllObjects];
 
-    [_editingTransactionQueue addOperationWithBlock:^{
-      // scheduling this block on _editingTransactionQueue is crucial.
-      // we must wait for all edit command blocks that happened before this one to schedule their main thread blocks first.
-      [_mainSerialQueue performBlockOnMainThread:^{
-        [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
-      }];
+    [_mainSerialQueue performBlockOnMainThread:^{
+      [_delegate dataController:self endUpdatesAnimated:animated completion:completion];
     }];
   }
 }

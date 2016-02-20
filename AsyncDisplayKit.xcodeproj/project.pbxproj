@@ -694,7 +694,7 @@
 		3C9C128419E616EF00E942A0 /* ASTableViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = ASTableViewTests.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		430E7C8D1B4C23F100697A4C /* ASIndexPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIndexPath.h; sourceTree = "<group>"; };
 		430E7C8E1B4C23F100697A4C /* ASIndexPath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIndexPath.m; sourceTree = "<group>"; };
-		464052191A3F83C40061C0BA /* ASDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ASDataController.h; sourceTree = "<group>"; };
+		464052191A3F83C40061C0BA /* ASDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ASDataController.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		4640521A1A3F83C40061C0BA /* ASDataController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = ASDataController.mm; sourceTree = "<group>"; };
 		4640521B1A3F83C40061C0BA /* ASFlowLayoutController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASFlowLayoutController.h; sourceTree = "<group>"; };
 		4640521C1A3F83C40061C0BA /* ASFlowLayoutController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASFlowLayoutController.mm; sourceTree = "<group>"; };
