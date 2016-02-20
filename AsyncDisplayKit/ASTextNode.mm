@@ -366,22 +366,20 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   // We need an entirely new renderer
   [self _invalidateRenderer];
 
-  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-    // Tell the display node superclasses that the cached layout is incorrect now
-    [self invalidateCalculatedLayout];
+  // Tell the display node superclasses that the cached layout is incorrect now
+  [self invalidateCalculatedLayout];
 
-    [self setNeedsDisplay];
+  [self setNeedsDisplay];
 
-    self.accessibilityLabel = _attributedString.string;
+  self.accessibilityLabel = _attributedString.string;
 
-    if (_attributedString.length == 0) {
-      // We're not an accessibility element by default if there is no string.
-      self.isAccessibilityElement = NO;
-    } else {
-      self.isAccessibilityElement = YES;
-    }
-  });
-  
+  if (_attributedString.length == 0) {
+    // We're not an accessibility element by default if there is no string.
+    self.isAccessibilityElement = NO;
+  } else {
+    self.isAccessibilityElement = YES;
+  }
+
   // reset the scale factor if we get a new string.
   _currentScaleFactor = 0;
   if (attributedString.length > 0) {
