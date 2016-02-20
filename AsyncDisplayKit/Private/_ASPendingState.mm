@@ -810,6 +810,9 @@ static UIColor *defaultTintColor = nil;
   if (flags.setAccessibilityIdentifier)
     view.accessibilityIdentifier = accessibilityIdentifier;
 
+  // FIXME: How should we reconcile order-of-operations between setting frame, bounds, position?
+  // Note we can't read bounds and position in the background, so we have to keep the frame
+  // value intact until application time (now).
   if (flags.setFrame) {
     if (setFrameDirectly) {
       // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
