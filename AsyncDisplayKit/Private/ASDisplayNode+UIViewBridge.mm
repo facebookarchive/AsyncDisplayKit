@@ -309,6 +309,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
   _bridge_prologue_write;
   if (self.nodeLoaded) {
     if (ASDisplayNodeThreadIsMain()) {
+       [self __setNeedsLayout];
         _messageToViewOrLayer(setNeedsLayout);
     } else {
       if (!_pendingViewState.hasChanges) {
