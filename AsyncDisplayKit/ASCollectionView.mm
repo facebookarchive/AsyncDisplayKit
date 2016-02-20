@@ -542,7 +542,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
-  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(_visibleNodeDidScroll:withCellFrame:))) {
+  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(visibleNodeDidScroll:withCellFrame:))) {
     [_cellsForVisibilityUpdates addObject:cell];
   }
 }

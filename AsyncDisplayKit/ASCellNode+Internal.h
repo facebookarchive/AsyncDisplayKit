@@ -10,6 +10,4 @@
 
 @interface ASCellNode (Internal)
 
-- (void)_visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
-
 @end
