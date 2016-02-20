@@ -24,6 +24,9 @@
           selector == @selector(numberOfSectionsInTableView:) ||
           selector == @selector(tableView:numberOfRowsInSection:) ||
           
+          // used for ASCellNode visibility
+          selector == @selector(scrollViewDidScroll:) ||
+          
           // used for ASRangeController visibility updates
           selector == @selector(tableView:willDisplayCell:forRowAtIndexPath:) ||
           selector == @selector(tableView:didEndDisplayingCell:forRowAtIndexPath:) ||
@@ -55,6 +58,9 @@
           
           // used for batch fetching API
           selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:) ||
+          
+          // used for ASCellNode visibility
+          selector == @selector(scrollViewDidScroll:) ||
           
           // intercepted due to not being supported by ASCollectionView (prevent bugs caused by usage)
           selector == @selector(collectionView:canMoveItemAtIndexPath:) ||

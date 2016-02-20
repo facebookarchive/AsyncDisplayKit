@@ -9,6 +9,7 @@
 #import "ASAssert.h"
 #import "ASBatchFetching.h"
 #import "ASDelegateProxy.h"
+#import "ASCellNode+Internal.h"
 #import "ASCollectionNode.h"
 #import "ASCollectionDataController.h"
 #import "ASCollectionViewLayoutController.h"
@@ -67,7 +68,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
   ASCollectionViewFlowLayoutInspector *_flowLayoutInspector;
-    
+  NSMutableSet *_cellsForVisibilityUpdates;
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
   BOOL _performingBatchUpdates;
@@ -75,6 +76,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   BOOL _asyncDataFetchingEnabled;
   BOOL _asyncDelegateImplementsInsetSection;
+  BOOL _asyncDelegateImplementsScrollviewDidScroll;
   BOOL _collectionViewLayoutImplementsInsetSection;
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
   BOOL _asyncDataSourceImplementsNodeBlockForItemAtIndexPath;
@@ -212,6 +214,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   _registeredSupplementaryKinds = [NSMutableSet set];
   
+  _cellsForVisibilityUpdates = [NSMutableSet set];
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
@@ -328,12 +331,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDelegate = nil;
     _proxyDelegate = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
     _asyncDelegateImplementsInsetSection = NO;
+    _asyncDelegateImplementsScrollviewDidScroll = NO;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
+    _asyncDelegateImplementsScrollviewDidScroll = ([_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)] ? 1 : 0);
   }
-    
+
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
   [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
@@ -525,7 +530,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return cell;
 }
 
-- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
+- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:[self scrollDirection]];
   
@@ -533,9 +538,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
   }
   
-  ASCellNode *cellNode = [self nodeForItemAtIndexPath:indexPath];
+  ASCellNode *cellNode = [cell node];
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
+  }
+  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(visibleNodeDidScroll:withCellFrame:))) {
+    [_cellsForVisibilityUpdates addObject:cell];
   }
 }
 
@@ -548,6 +556,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
     [_asyncDelegate collectionView:self didEndDisplayingNode:node forItemAtIndexPath:indexPath];
   }
+  [_cellsForVisibilityUpdates removeObject:cell];
+
+  
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
@@ -661,6 +672,18 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
     [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
+  }
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+  for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
+    ASCellNode *node = [collectionCell node];
+    // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
+    [node visibleNodeDidScroll:scrollView withCellFrame:collectionCell.frame];
+  }
+  if (_asyncDelegateImplementsScrollviewDidScroll) {
+    [_asyncDelegate scrollViewDidScroll:scrollView];
   }
 }
 

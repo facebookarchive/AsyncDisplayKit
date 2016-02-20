@@ -36,7 +36,6 @@
   // Use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
-
   return self;
 }
 
@@ -56,7 +55,7 @@
     
     [self addSubnode:_viewControllerNode];
   }
-  
+
   return self;
 }
 
@@ -132,6 +131,11 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesCancelled:touches withEvent:event];
+}
+
+- (void)visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame
+{
+    // To be overriden by subclasses
 }
 
 @end

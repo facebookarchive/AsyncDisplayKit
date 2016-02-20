@@ -24,6 +24,7 @@ typedef NSUInteger ASCellNodeAnimation;
  * @param sizeChanged `YES` if the node's `calculatedSize` changed during the relayout, `NO` otherwise.
  */
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
+
 @end
 
 /**
@@ -106,6 +107,8 @@ typedef NSUInteger ASCellNodeAnimation;
  *
  */
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
+
+- (void)visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
 
 @end
 
