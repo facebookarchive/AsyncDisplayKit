@@ -632,9 +632,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_asyncDelegate tableView:self didEndDisplayingNode:node forRowAtIndexPath:indexPath];
   }
 
-  if ([_cellsForVisibilityUpdates containsObject:cell]) {
-    [_cellsForVisibilityUpdates removeObject:cell];
-  }
+  [_cellsForVisibilityUpdates removeObject:cell];
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"

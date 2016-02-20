@@ -556,9 +556,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
     [_asyncDelegate collectionView:self didEndDisplayingNode:node forItemAtIndexPath:indexPath];
   }
-  if ([_cellsForVisibilityUpdates containsObject:cell]) {
-    [_cellsForVisibilityUpdates removeObject:cell];
-  }
+  [_cellsForVisibilityUpdates removeObject:cell];
+
   
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
