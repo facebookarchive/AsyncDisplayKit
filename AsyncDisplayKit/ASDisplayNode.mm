@@ -905,7 +905,6 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 
 - (BOOL)shouldRasterizeDescendants
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
   ASDisplayNodeAssert(!((_hierarchyState & ASHierarchyStateRasterized) && _flags.shouldRasterizeDescendants),
                       @"Subnode of a rasterized node should not have redundant shouldRasterizeDescendants enabled");
