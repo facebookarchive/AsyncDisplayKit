@@ -12,6 +12,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
+#import "ASDisplayNode+Beta.h"
 
 @interface ASButtonNode ()
 {
@@ -42,33 +43,51 @@
 @synthesize contentVerticalAlignment = _contentVerticalAlignment;
 @synthesize contentHorizontalAlignment = _contentHorizontalAlignment;
 @synthesize contentEdgeInsets = _contentEdgeInsets;
+@synthesize titleNode = _titleNode;
+@synthesize imageNode = _imageNode;
+@synthesize backgroundImageNode = _backgroundImageNode;
 
 - (instancetype)init
 {
-  if (self = [super init]) {    
+  if (self = [super init]) {
+    self.usesImplicitHierarchyManagement = YES;
+    
     _contentSpacing = 8.0;
     _laysOutHorizontally = YES;
-
-    _titleNode = [[ASTextNode alloc] init];
-    _imageNode = [[ASImageNode alloc] init];
-    _backgroundImageNode = [[ASImageNode alloc] init];
-    [_backgroundImageNode setContentMode:UIViewContentModeScaleToFill];
-    
-    [_titleNode setLayerBacked:YES];
-    [_imageNode setLayerBacked:YES];
-    [_backgroundImageNode setLayerBacked:YES];
-    
-    [_titleNode setFlexShrink:YES];
-      
     _contentHorizontalAlignment = ASAlignmentMiddle;
     _contentVerticalAlignment = ASAlignmentCenter;
     _contentEdgeInsets = UIEdgeInsetsZero;
-    
-    [self addSubnode:_backgroundImageNode];
-    [self addSubnode:_titleNode];
-    [self addSubnode:_imageNode];
   }
   return self;
+}
+
+- (ASTextNode *)titleNode
+{
+  if (!_titleNode) {
+    _titleNode = [[ASTextNode alloc] init];
+    [_titleNode setLayerBacked:YES];
+  }
+  return _titleNode;
+}
+
+- (ASImageNode *)imageNode
+{
+  if (!_imageNode) {
+    _imageNode = [[ASImageNode alloc] init];
+    [_imageNode setLayerBacked:YES];
+    [_titleNode setFlexShrink:YES];
+  }
+  return _imageNode;
+}
+
+- (ASImageNode *)backgroundImageNode
+{
+  if (!_backgroundImageNode) {
+    _backgroundImageNode = [[ASImageNode alloc] init];
+    [_backgroundImageNode setLayerBacked:YES];
+    [_backgroundImageNode setContentMode:UIViewContentModeScaleToFill];
+  }
+  return _backgroundImageNode;
 }
 
 - (void)setLayerBacked:(BOOL)layerBacked
@@ -105,6 +124,7 @@
 - (void)setDisplaysAsynchronously:(BOOL)displaysAsynchronously
 {
   [super setDisplaysAsynchronously:displaysAsynchronously];
+  [self.backgroundImageNode setDisplaysAsynchronously:displaysAsynchronously];
   [self.imageNode setDisplaysAsynchronously:displaysAsynchronously];
   [self.titleNode setDisplaysAsynchronously:displaysAsynchronously];
 }
@@ -124,8 +144,8 @@
     newImage = _normalImage;
   }
   
-  if (newImage != self.imageNode.image) {
-    self.imageNode.image = newImage;
+  if ((_imageNode != nil || newImage != nil) && newImage != self.imageNode.image) {
+    _imageNode.image = newImage;
     [self setNeedsLayout];
   }
 }
@@ -144,8 +164,8 @@
     newTitle = _normalAttributedTitle;
   }
   
-  if (newTitle != self.titleNode.attributedString) {
-    self.titleNode.attributedString = newTitle;
+  if ((_titleNode != nil || newTitle.length > 0) && newTitle != self.titleNode.attributedString) {
+    _titleNode.attributedString = newTitle;
     [self setNeedsLayout];
   }
 }
@@ -165,8 +185,8 @@
     newImage = _normalBackgroundImage;
   }
   
-  if (newImage != self.backgroundImageNode.image) {
-    self.backgroundImageNode.image = newImage;
+  if ((_backgroundImageNode != nil || newImage != nil) && newImage != self.backgroundImageNode.image) {
+    _backgroundImageNode.image = newImage;
     [self setNeedsLayout];
   }
 }
@@ -409,12 +429,12 @@
   }
   
   NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:2];
-  if (self.imageNode.image) {
-    [children addObject:self.imageNode];
+  if (_imageNode.image) {
+    [children addObject:_imageNode];
   }
   
-  if (self.titleNode.attributedString.length > 0) {
-    [children addObject:self.titleNode];
+  if (_titleNode.attributedString.length > 0) {
+    [children addObject:_titleNode];
   }
   
   stack.children = children;
@@ -425,9 +445,9 @@
     spec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentEdgeInsets child:spec];
   }
   
-  if (self.backgroundImageNode.image) {
+  if (_backgroundImageNode.image) {
     spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec
-                                                      background:self.backgroundImageNode];
+                                                      background:_backgroundImageNode];
   }
   
   return spec;
@@ -436,9 +456,9 @@
 - (void)layout
 {
   [super layout];
-  self.backgroundImageNode.hidden = self.backgroundImageNode.image == nil;
-  self.imageNode.hidden = self.imageNode.image == nil;
-  self.titleNode.hidden = self.titleNode.attributedString.length > 0 == NO;
+  _backgroundImageNode.hidden = (_backgroundImageNode.image == nil);
+  _imageNode.hidden = (_imageNode.image == nil);
+  _titleNode.hidden = (_titleNode.attributedString.length == 0);
 }
 
 @end
