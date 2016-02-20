@@ -303,10 +303,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  ASPerformBlockOnMainThread(^{
-    [super reloadData];
-  });
-  [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
+  [_dataController reloadDataWithCompletion:completion];
 }
 
 - (void)reloadData
@@ -317,8 +314,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController reloadDataImmediatelyWithAnimationOptions:UITableViewRowAnimationNone];
-  [super reloadData];
+  [_dataController reloadDataImmediately];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
@@ -433,7 +429,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveSection:section toSection:newSection withAnimationOptions:UITableViewRowAnimationNone];
+  [_dataController moveSection:section toSection:newSection];
 }
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
@@ -457,7 +453,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:UITableViewRowAnimationNone];
+  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
 }
 
 #pragma mark -
@@ -836,6 +832,36 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
+- (void)rangeController:(ASRangeController *)rangeController didReloadNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView reloadRows:%ld rows", indexPaths.count);
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
+  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    [super reloadRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
+  });
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
+  }
+}
+
+- (void)rangeController:(ASRangeController *)rangeController didMoveNodeAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
+{
+  ASDisplayNodeAssertMainThread();
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
+  [self moveRowAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+}
+
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
@@ -852,6 +878,36 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   });
 }
 
+- (void)rangeController:(ASRangeController *)rangeController didReloadSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+    ASDisplayNodeAssertMainThread();
+    LOG(@"UITableView reloadSections:%@", indexSet);
+
+
+    if (!self.asyncDataSource) {
+        return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+    }
+
+    BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
+    ASPerformBlockWithoutAnimation(preventAnimation, ^{
+        [super reloadSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
+    });
+}
+
+- (void)rangeController:(ASRangeController *)rangeController didMoveSection:(NSInteger)fromIndex toSection:(NSInteger)toIndex
+{
+  ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView moveSection:%ld", (long)fromIndex);
+
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
+  [super moveSection:fromIndex toSection:toIndex];
+}
+
+
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
@@ -865,6 +921,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
+}
+
+- (void)rangeControllerDidReloadData:(ASRangeController *)rangeController{
+  ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView reloadData");
+
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+
+  [super reloadData];
 }
 
 #pragma mark - ASDataControllerDelegate
