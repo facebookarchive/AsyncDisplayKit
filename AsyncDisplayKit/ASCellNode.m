@@ -9,7 +9,6 @@
 #import "ASCellNode.h"
 
 #import "ASInternalHelpers.h"
-#import "ASCollectionView.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASTextNode.h>
@@ -24,7 +23,6 @@
   UIViewController *_viewController;
   ASDisplayNode *_viewControllerNode;
 }
-@property (nonatomic, assign, readwrite) BOOL shouldMonitorScrollViewDidScroll;
 
 @end
 
@@ -38,9 +36,6 @@
   // Use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
-  if ([self.layoutDelegate respondsToSelector:@selector(visibleNodeDidScroll:inScrollView:withCellFrame:)]) {
-     self.shouldMonitorScrollViewDidScroll = YES;
-  }
   return self;
 }
 
@@ -60,10 +55,7 @@
     
     [self addSubnode:_viewControllerNode];
   }
-  
-  if ([self.layoutDelegate respondsToSelector:@selector(visibleNodeDidScroll:inScrollView:withCellFrame:)]) {
-    self.shouldMonitorScrollViewDidScroll = YES;
-  }
+
   return self;
 }
 
@@ -143,9 +135,7 @@
 
 - (void)_visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame
 {
-  if (self.shouldMonitorScrollViewDidScroll) {
-    [self.layoutDelegate visibleNodeDidScroll:self inScrollView:scrollView withCellFrame:cellFrame];
-  }
+    // To be overriden by subclasses
 }
 
 @end

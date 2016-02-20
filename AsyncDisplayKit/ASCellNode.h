@@ -25,15 +25,6 @@ typedef NSUInteger ASCellNodeAnimation;
  */
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
 
-@optional
-/**
- * Notifies the delegate that the specified cell node has scrolled
- *
- * @param node: A node informing the delegate about the scroll
- * @param cellFrame: The frame of the cell that has just scrolled
- */
-- (void)visibleNodeDidScroll:(ASCellNode *)node inScrollView:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
-
 @end
 
 /**
@@ -120,7 +111,6 @@ typedef NSUInteger ASCellNodeAnimation;
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
 
 - (void)_visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
-
 @end
 
 

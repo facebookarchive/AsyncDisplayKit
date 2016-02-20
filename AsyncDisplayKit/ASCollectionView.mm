@@ -9,6 +9,7 @@
 #import "ASAssert.h"
 #import "ASBatchFetching.h"
 #import "ASDelegateProxy.h"
+#import "ASCellNode+Internal.h"
 #import "ASCollectionNode.h"
 #import "ASCollectionDataController.h"
 #import "ASCollectionViewLayoutController.h"
@@ -541,7 +542,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
-  [_cellsForVisibilityUpdates addObject:cell];
+  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(_visibleNodeDidScroll:withCellFrame:))) {
+    [_cellsForVisibilityUpdates addObject:cell];
+  }
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
@@ -553,7 +556,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
     [_asyncDelegate collectionView:self didEndDisplayingNode:node forItemAtIndexPath:indexPath];
   }
-  [_cellsForVisibilityUpdates removeObject:cell];
+  if ([_cellsForVisibilityUpdates containsObject:cell]) {
+    [_cellsForVisibilityUpdates removeObject:cell];
+  }
+  
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
@@ -674,9 +680,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
     ASCellNode *node = [collectionCell node];
-    if (node.shouldMonitorScrollViewDidScroll) {
-      [node _visibleNodeDidScroll:scrollView withCellFrame: node.frame];
-    }
+    // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
+    [node _visibleNodeDidScroll:scrollView withCellFrame:collectionCell.frame];
   }
   if (_asyncDelegateImplementsScrollviewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
