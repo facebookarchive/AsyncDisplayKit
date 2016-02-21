@@ -252,8 +252,8 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
      * This is NOT called for synchronous nodes (wrapping regular views), which may rely on a [UIView setFrame:] call.
      * A notable example of the latter is UITableView, which won't resize its internal container if only layer bounds are set.
      */
-    CGRect bounds;
-    CGPoint position;
+    CGRect bounds = CGRectZero;
+    CGPoint position = CGPointZero;
     ASBoundsAndPositionForFrame(rect, self.bounds.origin, self.anchorPoint, &bounds, &position);
 
     self.bounds = bounds;
