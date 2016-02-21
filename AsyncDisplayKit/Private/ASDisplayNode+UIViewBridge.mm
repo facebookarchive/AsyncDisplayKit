@@ -37,7 +37,7 @@
 
 #define DISPLAYNODE_USE_LOCKS 1
 
-#define __loaded (_layer != nil)
+#define __loaded (_view != nil || (_layer != nil && _flags.layerBacked))
 
 #if DISPLAYNODE_USE_LOCKS
 #define _bridge_prologue_read ASDN::MutexLocker l(_propertyLock); ASDisplayNodeAssertThreadAffinity(self)
@@ -53,10 +53,10 @@
 /// This function must be called with the node's lock already held (after _bridge_prologue_write).
 ASDISPLAYNODE_INLINE BOOL ASDisplayNodeShouldApplyBridgedWriteToView(ASDisplayNode *node) {
   if (ASDisplayNodeThreadIsMain()) {
-    return node.nodeLoaded;
+    return (node->_view != nil || (node->_layer != nil && node->_flags.layerBacked));
   } else {
     if (node.nodeLoaded && !node->_pendingViewState.hasChanges) {
-      [ASPendingStateController.sharedInstance registerNode:node];
+      [[ASPendingStateController sharedInstance] registerNode:node];
     }
     return NO;
   }
@@ -235,7 +235,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   _bridge_prologue_write;
   BOOL setFrameDirectly = _flags.synchronous && !_flags.layerBacked;
   BOOL isMainThread = ASDisplayNodeThreadIsMain();
-  BOOL nodeLoaded = self.nodeLoaded;
+  BOOL nodeLoaded = __loaded;
   if (nodeLoaded && isMainThread && setFrameDirectly) {
     // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
     
