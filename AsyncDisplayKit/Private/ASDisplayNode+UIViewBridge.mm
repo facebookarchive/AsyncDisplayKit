@@ -37,7 +37,7 @@
 
 #define DISPLAYNODE_USE_LOCKS 1
 
-#define __loaded (_view != nil || (_layer != nil && _flags.layerBacked))
+#define __loaded(node) (node->_view != nil || (node->_layer != nil && node->_flags.layerBacked))
 
 #if DISPLAYNODE_USE_LOCKS
 #define _bridge_prologue_read ASDN::MutexLocker l(_propertyLock); ASDisplayNodeAssertThreadAffinity(self)
@@ -52,17 +52,18 @@
 /// the property cannot be immediately applied and the node does not already have pending changes.
 /// This function must be called with the node's lock already held (after _bridge_prologue_write).
 ASDISPLAYNODE_INLINE BOOL ASDisplayNodeShouldApplyBridgedWriteToView(ASDisplayNode *node) {
+  BOOL loaded = __loaded(node);
   if (ASDisplayNodeThreadIsMain()) {
-    return (node->_view != nil || (node->_layer != nil && node->_flags.layerBacked));
+    return loaded;
   } else {
-    if (node.nodeLoaded && !node->_pendingViewState.hasChanges) {
+    if (loaded && !node->_pendingViewState.hasChanges) {
       [[ASPendingStateController sharedInstance] registerNode:node];
     }
     return NO;
   }
 };
 
-#define _getFromViewOrLayer(layerProperty, viewAndPendingViewStateProperty) __loaded ? \
+#define _getFromViewOrLayer(layerProperty, viewAndPendingViewStateProperty) __loaded(self) ? \
   (_view ? _view.viewAndPendingViewStateProperty : _layer.layerProperty )\
  : ASDisplayNodeGetPendingState(self).viewAndPendingViewStateProperty
 
@@ -72,9 +73,9 @@ ASDISPLAYNODE_INLINE BOOL ASDisplayNodeShouldApplyBridgedWriteToView(ASDisplayNo
 #define _setToViewOnly(viewAndPendingViewStateProperty, viewAndPendingViewStateExpr) BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self); \
 if (shouldApply) { _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); } else { ASDisplayNodeGetPendingState(self).viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); }
 
-#define _getFromViewOnly(viewAndPendingViewStateProperty) __loaded ? _view.viewAndPendingViewStateProperty : ASDisplayNodeGetPendingState(self).viewAndPendingViewStateProperty
+#define _getFromViewOnly(viewAndPendingViewStateProperty) __loaded(self) ? _view.viewAndPendingViewStateProperty : ASDisplayNodeGetPendingState(self).viewAndPendingViewStateProperty
 
-#define _getFromLayer(layerProperty) __loaded ? _layer.layerProperty : ASDisplayNodeGetPendingState(self).layerProperty
+#define _getFromLayer(layerProperty) __loaded(self) ? _layer.layerProperty : ASDisplayNodeGetPendingState(self).layerProperty
 
 #define _setToLayer(layerProperty, layerValueExpr) BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self); \
 if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNodeGetPendingState(self).layerProperty = (layerValueExpr); }
@@ -238,7 +239,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   struct ASDisplayNodeFlags flags = _flags;
   BOOL setFrameDirectly = flags.synchronous && !flags.layerBacked;
 
-  BOOL nodeLoaded = __loaded;
+  BOOL nodeLoaded = __loaded(self);
   BOOL isMainThread = ASDisplayNodeThreadIsMain();
   if (!setFrameDirectly) {
     BOOL canReadProperties = isMainThread || !nodeLoaded;
@@ -313,41 +314,37 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
       [rasterizedContainerNode setNeedsDisplay];
     });
   } else {
-    if (self.nodeLoaded) {
-      if (ASDisplayNodeThreadIsMain()) {
-        _messageToViewOrLayer(setNeedsDisplay);
-      } else {
-        _ASPendingState *pendingState = ASDisplayNodeGetPendingState(self);
-        if (!pendingState.hasChanges) {
-          [[ASPendingStateController sharedInstance] registerNode:self];
-        }
-        [self __setNeedsDisplay];
-        [pendingState setNeedsDisplay];
-      }
+    BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
+    if (shouldApply) {
+      // If not rasterized, and the node is loaded (meaning we certainly have a view or layer), send a
+      // message to the view/layer first. This is because __setNeedsDisplay calls as scheduleNodeForDisplay,
+      // which may call -displayIfNeeded. We want to ensure the needsDisplay flag is set now, and then cleared.
+      _messageToViewOrLayer(setNeedsDisplay);
     } else {
-      [self __setNeedsDisplay];
+      [ASDisplayNodeGetPendingState(self) setNeedsDisplay];
     }
+    [self __setNeedsDisplay];
   }
 }
 
 - (void)setNeedsLayout
 {
   _bridge_prologue_write;
-  if (self.nodeLoaded) {
-    if (ASDisplayNodeThreadIsMain()) {
-       [self __setNeedsLayout];
-        _messageToViewOrLayer(setNeedsLayout);
-    } else {
-      _ASPendingState *pendingState = ASDisplayNodeGetPendingState(self);
-      if (!pendingState.hasChanges) {
-        [[ASPendingStateController sharedInstance] registerNode:self];
-      }
-      // NOTE: We will call [self __setNeedsLayout] just before we apply
-      // the pending state. We need to call it on main if the node is loaded
-      // to support implicit hierarchy management.
-      [pendingState setNeedsLayout];
-    }
+  BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
+  if (shouldApply) {
+    // The node is loaded and we're on main.
+    // Quite the opposite of setNeedsDisplay, we must call __setNeedsLayout before messaging
+    // the view or layer to ensure that measurement and implicitly added subnodes have been handled.
+    [self __setNeedsLayout];
+    _messageToViewOrLayer(setNeedsLayout);
+  } else if (__loaded(self)) {
+    // The node is loaded but we're not on main.
+    // We will call [self __setNeedsLayout] when we apply
+    // the pending state. We need to call it on main if the node is loaded
+    // to support implicit hierarchy management.
+    [ASDisplayNodeGetPendingState(self) setNeedsLayout];
   } else {
+    // The node is not loaded and we're not on main.
     [self __setNeedsLayout];
   }
 }
@@ -531,7 +528,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 - (UIViewContentMode)contentMode
 {
   _bridge_prologue_read;
-  if (__loaded) {
+  if (__loaded(self)) {
     if (_flags.layerBacked) {
       return ASDisplayNodeUIContentModeFromCAContentsGravity(_layer.contentsGravity);
     } else {
