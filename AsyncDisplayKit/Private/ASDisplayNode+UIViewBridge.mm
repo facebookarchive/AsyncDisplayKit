@@ -233,37 +233,53 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 - (void)setFrame:(CGRect)rect
 {
   _bridge_prologue_write;
-  BOOL setFrameDirectly = _flags.synchronous && !_flags.layerBacked;
-  BOOL isMainThread = ASDisplayNodeThreadIsMain();
-  BOOL nodeLoaded = __loaded;
-  if (nodeLoaded && isMainThread && setFrameDirectly) {
-    // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
-    
-    // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
-#if DEBUG
-    // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
-    ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
-#endif
-    _view.frame = rect;
-  } else if (!nodeLoaded || (isMainThread && !setFrameDirectly)) {
-    /**
-     * Sets a new frame to this node by changing its bounds and position. This method can be safely called even if
-     * the transform is a non-identity transform, because bounds and position can be set instead of frame.
-     * This is NOT called for synchronous nodes (wrapping regular views), which may rely on a [UIView setFrame:] call.
-     * A notable example of the latter is UITableView, which won't resize its internal container if only layer bounds are set.
-     */
-    CGRect bounds = CGRectZero;
-    CGPoint position = CGPointZero;
-    ASBoundsAndPositionForFrame(rect, self.bounds.origin, self.anchorPoint, &bounds, &position);
 
-    self.bounds = bounds;
-    self.position = position;
-  } else if (nodeLoaded && !isMainThread) {
-    _ASPendingState *pendingState = ASDisplayNodeGetPendingState(self);
-    if (!pendingState.hasChanges) {
-      [[ASPendingStateController sharedInstance] registerNode:self];
+  // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
+  struct ASDisplayNodeFlags flags = _flags;
+  BOOL setFrameDirectly = flags.synchronous && !flags.layerBacked;
+
+  BOOL nodeLoaded = __loaded;
+  BOOL isMainThread = ASDisplayNodeThreadIsMain();
+  if (!setFrameDirectly) {
+    BOOL canReadProperties = isMainThread || !nodeLoaded;
+    if (canReadProperties) {
+      // We don't have to set frame directly, and we can read current properties.
+      // Compute a new bounds and position and set them on self.
+      CGRect bounds = CGRectZero;
+      CGPoint position = CGPointZero;
+      ASBoundsAndPositionForFrame(rect, self.bounds.origin, self.anchorPoint, &bounds, &position);
+
+      self.bounds = bounds;
+      self.position = position;
+    } else {
+      // We don't have to set frame directly, but we can't read properties.
+      // Store the frame in our pending state, and it'll get decomposed into
+      // bounds and position when the pending state is applied.
+      _ASPendingState *pendingState = ASDisplayNodeGetPendingState(self);
+      if (nodeLoaded && !pendingState.hasChanges) {
+        [[ASPendingStateController sharedInstance] registerNode:self];
+      }
+      pendingState.frame = rect;
     }
-    pendingState.frame = rect;
+  } else {
+    if (nodeLoaded && isMainThread) {
+      // We do have to set frame directly, and we're on main thread with a loaded node.
+      // Just set the frame on the view.
+      // NOTE: Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform.
+#if DEBUG
+      // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
+      ASDisplayNodeAssert(CATransform3DIsIdentity(self.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
+#endif
+      _view.frame = rect;
+    } else {
+      // We do have to set frame directly, but either the node isn't loaded or we're on a non-main thread.
+      // Set the frame on the pending state, and it'll call setFrame: when applied.
+      _ASPendingState *pendingState = ASDisplayNodeGetPendingState(self);
+      if (nodeLoaded && !pendingState.hasChanges) {
+        [[ASPendingStateController sharedInstance] registerNode:self];
+      }
+      pendingState.frame = rect;
+    }
   }
 }
 
