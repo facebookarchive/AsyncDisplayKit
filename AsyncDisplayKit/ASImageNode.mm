@@ -123,11 +123,8 @@
   if (!ASObjectIsEqual(_image, image)) {
     _image = image;
 
-    ASDN::MutexUnlocker u(_imageLock);
-    ASPerformBlockOnMainThread(^{
-      [self invalidateCalculatedLayout];
-      [self setNeedsDisplay];
-    });
+    [self invalidateCalculatedLayout];
+    [self setNeedsDisplay];
   }
 }
 

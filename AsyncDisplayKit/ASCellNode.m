@@ -94,13 +94,12 @@
 
 - (void)setNeedsLayout
 {
-  ASDisplayNodeAssertThreadAffinity(self);  
   CGSize oldSize = self.calculatedSize;
   [super setNeedsLayout];
 
   if (_layoutDelegate != nil && self.isNodeLoaded) {
-    BOOL sizeChanged = !CGSizeEqualToSize(oldSize, self.calculatedSize);
     ASPerformBlockOnMainThread(^{
+      BOOL sizeChanged = !CGSizeEqualToSize(oldSize, self.calculatedSize);
       [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }

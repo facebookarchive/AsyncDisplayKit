@@ -25,7 +25,6 @@
 @class _ASDisplayLayer;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
-void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)());
 
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 {
@@ -50,6 +49,9 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 @interface ASDisplayNode ()
 {
+@package
+  _ASPendingState *_pendingViewState;
+
 @protected
   // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.
   ASDN::RecursiveMutex _propertyLock;
@@ -92,8 +94,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
   // keeps track of nodes/subnodes that have not finished display, used with placeholders
   NSMutableSet *_pendingDisplayNodes;
-
-  _ASPendingState *_pendingViewState;
   
   struct ASDisplayNodeFlags {
     // public properties
@@ -151,9 +151,14 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (BOOL)__shouldSize;
 
 /**
- Invoked by a call to setNeedsLayout to the underlying view
+ Invoked before a call to setNeedsLayout to the underlying view
  */
 - (void)__setNeedsLayout;
+
+/**
+ Invoked after a call to setNeedsDisplay to the underlying view
+ */
+- (void)__setNeedsDisplay;
 
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
@@ -177,6 +182,8 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (id)initWithLayerClass:(Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
+
+- (void)applyPendingViewState;
 
 /**
  * // TODO: NOT YET IMPLEMENTED

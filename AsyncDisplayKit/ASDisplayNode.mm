@@ -79,26 +79,6 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
   return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
 }
 
-void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)())
-{
-  ASDisplayNodeCAssertNotNil(block, @"block is required");
-  if (!block) {
-    return;
-  }
-
-  {
-    // Hold the lock to avoid a race where the node gets loaded while the block is in-flight.
-    ASDN::MutexLocker l(node->_propertyLock);
-    if (node.nodeLoaded) {
-      ASPerformBlockOnMainThread(^{
-        block();
-      });
-    } else {
-      block();
-    }
-  }
-}
-
 /**
  *  Returns ASDisplayNodeFlags for the givern class/instance. instance MAY BE NIL.
  *
@@ -277,6 +257,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
+  _pendingViewState = [_ASPendingState new];
 }
 
 - (id)init
@@ -627,7 +608,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize completion:(void(^)())completion
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
   if (![self __shouldSize])
     return nil;
@@ -905,7 +885,6 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 
 - (BOOL)shouldRasterizeDescendants
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
   ASDisplayNodeAssert(!((_hierarchyState & ASHierarchyStateRasterized) && _flags.shouldRasterizeDescendants),
                       @"Subnode of a rasterized node should not have redundant shouldRasterizeDescendants enabled");
@@ -981,6 +960,28 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
   _contentsScaleForDisplay = contentsScaleForDisplay;
 }
 
+- (void)applyPendingViewState
+{
+  ASDisplayNodeAssertMainThread();
+  ASDN::MutexLocker l(_propertyLock);
+
+  // FIXME: Ideally we'd call this as soon as the node receives -setNeedsLayout
+  // but implicit hierarchy management would require us to modify the node tree
+  // in the background on a loaded node, which isn't currently supported.
+  if (_pendingViewState.hasSetNeedsLayout) {
+    [self __setNeedsLayout];
+  }
+
+  if (self.layerBacked) {
+    [_pendingViewState applyToLayer:self.layer];
+  } else {
+    BOOL setFrameDirectly = (_flags.synchronous && !_flags.layerBacked);
+    [_pendingViewState applyToView:self.view setFrameDirectly:setFrameDirectly];
+  }
+
+  [_pendingViewState clearChanges];
+}
+
 - (void)displayImmediately
 {
   ASDisplayNodeAssertMainThread();
@@ -1033,6 +1034,21 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
       CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
       self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
     }
+  }
+}
+
+// If not rasterized (and therefore we certainly have a view or layer),
+// Send the message to the view/layer first, as scheduleNodeForDisplay may call -displayIfNeeded.
+// Wrapped / synchronous nodes created with initWithView/LayerBlock: do not need scheduleNodeForDisplay,
+// as they don't need to display in the working range at all - since at all times onscreen, one
+// -setNeedsDisplay to the CALayer will result in a synchronous display in the next frame.
+- (void)__setNeedsDisplay
+{
+  BOOL nowDisplay = ASInterfaceStateIncludesDisplay(_interfaceState);
+  // FIXME: This should not need to recursively display, so create a non-recursive variant.
+  // The semantics of setNeedsDisplay (as defined by CALayer behavior) are not recursive.
+  if (_layer && !_flags.synchronous && nowDisplay && [self __implementsDisplay]) {
+    [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
   }
 }
 
@@ -1831,7 +1847,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
     layoutSpec.isMutable = NO;
@@ -1858,25 +1874,25 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
   return _preferredFrameSize;
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
   return nil;
 }
 
 - (ASLayout *)calculatedLayout
 {
-  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
   return _layout;
 }
 
 - (CGSize)calculatedSize
 {
-  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
   return _layout.size;
 }
 
@@ -1907,7 +1923,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)invalidateCalculatedLayout
 {
-  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
   // This will cause -measureWithSizeRange: to actually compute the size instead of returning the previously cached size
   _flags.isMeasured = NO;
 }
@@ -2347,15 +2363,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 
 #pragma mark - Pending View State
-- (_ASPendingState *)pendingViewState
-{
-  if (!_pendingViewState) {
-    _pendingViewState = [[_ASPendingState alloc] init];
-    ASDisplayNodeAssertNotNil(_pendingViewState, @"should have created a pendingViewState");
-  }
-
-  return _pendingViewState;
-}
 
 - (void)_applyPendingStateToViewOrLayer
 {
@@ -2366,13 +2373,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // for the view/layer are still valid.
   ASDN::MutexLocker l(_propertyLock);
 
-  if (_flags.layerBacked) {
-    [_pendingViewState applyToLayer:_layer];
-  } else {
-    [_pendingViewState applyToView:_view];
-  }
-
-  _pendingViewState = nil;
+  [self applyPendingViewState];
 
   // TODO: move this into real pending state
   if (_flags.displaySuspended) {
