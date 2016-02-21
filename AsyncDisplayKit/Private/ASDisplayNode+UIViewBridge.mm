@@ -245,12 +245,22 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
     if (canReadProperties) {
       // We don't have to set frame directly, and we can read current properties.
       // Compute a new bounds and position and set them on self.
-      CGRect bounds = CGRectZero;
-      CGPoint position = CGPointZero;
-      ASBoundsAndPositionForFrame(rect, self.bounds.origin, self.anchorPoint, &bounds, &position);
+      CALayer *layer = _layer;
+      BOOL useLayer = (layer != nil);
+      CGPoint origin = (useLayer ? layer.bounds.origin : self.bounds.origin);
+      CGPoint anchorPoint = (useLayer ? layer.anchorPoint : self.anchorPoint);
 
-      self.bounds = bounds;
-      self.position = position;
+      CGRect newBounds = CGRectZero;
+      CGPoint newPosition = CGPointZero;
+      ASBoundsAndPositionForFrame(rect, origin, anchorPoint, &newBounds, &newPosition);
+
+      if (useLayer) {
+        layer.bounds = newBounds;
+        layer.position = newPosition;
+      } else {
+        self.bounds = newBounds;
+        self.position = newPosition;
+      }
     } else {
       // We don't have to set frame directly, but we can't read properties.
       // Store the frame in our pending state, and it'll get decomposed into
