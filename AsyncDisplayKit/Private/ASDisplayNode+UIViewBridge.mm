@@ -64,24 +64,22 @@ ASDISPLAYNODE_INLINE BOOL ASDisplayNodeShouldApplyBridgedWriteToView(ASDisplayNo
 
 #define _getFromViewOrLayer(layerProperty, viewAndPendingViewStateProperty) __loaded ? \
   (_view ? _view.viewAndPendingViewStateProperty : _layer.layerProperty )\
- : self.pendingViewState.viewAndPendingViewStateProperty
+ : ASDisplayNodeGetPendingState(self).viewAndPendingViewStateProperty
 
 #define _setToViewOrLayer(layerProperty, layerValueExpr, viewAndPendingViewStateProperty, viewAndPendingViewStateExpr) BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self); \
-  if (shouldApply) { (_view ? _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr) : _layer.layerProperty = (layerValueExpr)); } else { _pendingViewState.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); }
+  if (shouldApply) { (_view ? _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr) : _layer.layerProperty = (layerValueExpr)); } else { ASDisplayNodeGetPendingState(self).viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); }
 
 #define _setToViewOnly(viewAndPendingViewStateProperty, viewAndPendingViewStateExpr) BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self); \
-if (shouldApply) { _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); } else { _pendingViewState.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); }
+if (shouldApply) { _view.viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); } else { ASDisplayNodeGetPendingState(self).viewAndPendingViewStateProperty = (viewAndPendingViewStateExpr); }
 
-#define _getFromViewOnly(viewAndPendingViewStateProperty) __loaded ? _view.viewAndPendingViewStateProperty : self.pendingViewState.viewAndPendingViewStateProperty
+#define _getFromViewOnly(viewAndPendingViewStateProperty) __loaded ? _view.viewAndPendingViewStateProperty : ASDisplayNodeGetPendingState(self).viewAndPendingViewStateProperty
 
-#define _getFromLayer(layerProperty) __loaded ? _layer.layerProperty : self.pendingViewState.layerProperty
+#define _getFromLayer(layerProperty) __loaded ? _layer.layerProperty : ASDisplayNodeGetPendingState(self).layerProperty
 
 #define _setToLayer(layerProperty, layerValueExpr) BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self); \
-if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingViewState.layerProperty = (layerValueExpr); }
+if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNodeGetPendingState(self).layerProperty = (layerValueExpr); }
 
 #define _messageToViewOrLayer(viewAndLayerSelector) (_view ? [_view viewAndLayerSelector] : [_layer viewAndLayerSelector])
-
-#define _messageToLayer(layerSelector) __loaded ? [_layer layerSelector] : [self.pendingViewState layerSelector]
 
 /**
  * This category implements certain frequently-used properties and methods of UIView and CALayer so that ASDisplayNode clients can just call the view/layer methods on the node,
@@ -261,10 +259,11 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
     self.bounds = bounds;
     self.position = position;
   } else if (nodeLoaded && !isMainThread) {
-    if (!_pendingViewState.hasChanges) {
-      [ASPendingStateController.sharedInstance registerNode:self];
+    _ASPendingState *pendingState = ASDisplayNodeGetPendingState(self);
+    if (!pendingState.hasChanges) {
+      [[ASPendingStateController sharedInstance] registerNode:self];
     }
-    _pendingViewState.frame = rect;
+    pendingState.frame = rect;
   }
 }
 
@@ -292,11 +291,12 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
       if (ASDisplayNodeThreadIsMain()) {
         _messageToViewOrLayer(setNeedsDisplay);
       } else {
-        if (!_pendingViewState.hasChanges) {
-          [ASPendingStateController.sharedInstance registerNode:self];
+        _ASPendingState *pendingState = ASDisplayNodeGetPendingState(self);
+        if (!pendingState.hasChanges) {
+          [[ASPendingStateController sharedInstance] registerNode:self];
         }
         [self __setNeedsDisplay];
-        [_pendingViewState setNeedsDisplay];
+        [pendingState setNeedsDisplay];
       }
     } else {
       [self __setNeedsDisplay];
@@ -312,13 +312,14 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
        [self __setNeedsLayout];
         _messageToViewOrLayer(setNeedsLayout);
     } else {
-      if (!_pendingViewState.hasChanges) {
-        [ASPendingStateController.sharedInstance registerNode:self];
+      _ASPendingState *pendingState = ASDisplayNodeGetPendingState(self);
+      if (!pendingState.hasChanges) {
+        [[ASPendingStateController sharedInstance] registerNode:self];
       }
       // NOTE: We will call [self __setNeedsLayout] just before we apply
       // the pending state. We need to call it on main if the node is loaded
       // to support implicit hierarchy management.
-      [_pendingViewState setNeedsLayout];
+      [pendingState setNeedsLayout];
     }
   } else {
     [self __setNeedsLayout];
@@ -511,21 +512,22 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { _pendingVie
       return _view.contentMode;
     }
   } else {
-    return self.pendingViewState.contentMode;
+    return ASDisplayNodeGetPendingState(self).contentMode;
   }
 }
 
 - (void)setContentMode:(UIViewContentMode)contentMode
 {
   _bridge_prologue_write;
-  if (__loaded) {
+  BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
+  if (shouldApply) {
     if (_flags.layerBacked) {
       _layer.contentsGravity = ASDisplayNodeCAContentsGravityFromUIContentMode(contentMode);
     } else {
       _view.contentMode = contentMode;
     }
   } else {
-    self.pendingViewState.contentMode = contentMode;
+    ASDisplayNodeGetPendingState(self).contentMode = contentMode;
   }
 }
 

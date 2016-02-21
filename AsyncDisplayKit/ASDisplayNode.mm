@@ -79,6 +79,17 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
   return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
 }
 
+_ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node)
+{
+  ASDN::MutexLocker l(node->_propertyLock);
+  _ASPendingState *result = node->_pendingViewState;
+  if (result == nil) {
+    result = [[_ASPendingState alloc] init];
+    node->_pendingViewState = result;
+  }
+  return result;
+}
+
 /**
  *  Returns ASDisplayNodeFlags for the givern class/instance. instance MAY BE NIL.
  *
@@ -257,7 +268,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
-  _pendingViewState = [_ASPendingState new];
 }
 
 - (id)init

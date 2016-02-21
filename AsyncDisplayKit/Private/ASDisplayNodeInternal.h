@@ -23,8 +23,12 @@
 
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
+@class _ASPendingState;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
+
+/// Get the pending view state for the node, creating one if needed.
+_ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node);
 
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 {
@@ -36,7 +40,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   ASDisplayNodeMethodOverrideLayoutSpecThatFits = 1 << 4
 };
 
-@class _ASPendingState;
 @class _ASDisplayNodePosition;
 
 FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification;
@@ -138,9 +141,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 // The _ASDisplayLayer backing the node, if any.
 @property (nonatomic, readonly, retain) _ASDisplayLayer *asyncLayer;
-
-// Creates a pendingViewState if one doesn't exist. Allows setting view properties on a bg thread before there is a view.
-@property (atomic, retain, readonly) _ASPendingState *pendingViewState;
 
 // Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
