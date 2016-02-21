@@ -44,7 +44,7 @@ extern ASRelativeSize ASRelativeSizeMake(ASRelativeDimension width, ASRelativeDi
 extern ASRelativeSize ASRelativeSizeMakeWithCGSize(CGSize size);
 
 /** Resolve this relative size relative to a parent size. */
-extern CGSize ASRelativeSizeResolve(ASRelativeSize relativeSize, CGSize parentSize);
+extern CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize);
 
 extern BOOL ASRelativeSizeEqualToRelativeSize(ASRelativeSize lhs, ASRelativeSize rhs);
 
