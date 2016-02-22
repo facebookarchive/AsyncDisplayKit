@@ -245,6 +245,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .exclusionPaths = _exclusionPaths,
     .pointSizeScaleFactors = _pointSizeScaleFactors,
     .currentScaleFactor = self.currentScaleFactor,
+    .layoutManagerCreationBlock = self.layoutManagerCreationBlock,
+    .textStorageCreationBlock = self.textStorageCreationBlock,
   };
 }
 

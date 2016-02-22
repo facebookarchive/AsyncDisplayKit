@@ -104,8 +104,9 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
                                              maximumNumberOfLines:attributes.maximumNumberOfLines
                                                    exclusionPaths:attributes.exclusionPaths
                                                   constrainedSize:shadowConstrainedSize
-                                             layoutManagerFactory:attributes.layoutManagerFactory
-                                            layoutManagerDelegate:attributes.layoutManagerDelegate];
+                                       layoutManagerCreationBlock:attributes.layoutManagerCreationBlock
+                                            layoutManagerDelegate:attributes.layoutManagerDelegate
+                                         textStorageCreationBlock:attributes.textStorageCreationBlock];
   }
   return _context;
 }
