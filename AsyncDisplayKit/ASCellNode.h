@@ -79,16 +79,16 @@ typedef NSUInteger ASCellNodeAnimation;
 - (void)setNeedsLayout;
 
 /**
- * @abstract Initializes a cell with a given viewControllerBlock.
+ * @abstract Initializes a cell with a given view controller block.
  *
- * @param viewBlock The block that will be used to create the backing view.
- * @param didLoadBlock The block that will be called after the view created by the viewBlock is loaded
+ * @param viewControllerBlock The block that will be used to create the backing view controller.
+ * @param didLoadBlock The block that will be called after the view controller's view is loaded.
  *
  * @return An ASCellNode created using the root view of the view controller provided by the viewControllerBlock.
  * The view controller's root view is resized to match the calcuated size produced during layout.
  *
  */
-- (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
+- (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
 - (void)visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
 
