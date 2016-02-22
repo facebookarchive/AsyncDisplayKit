@@ -296,7 +296,7 @@
   void (^displayCompletionBlock)(BOOL canceled) = _displayCompletionBlock;
   UIImage *image = _image;
   
-  ASDN::MutexLocker u(_imageLock);
+  ASDN::MutexUnlocker u(_imageLock);
   
   // If we've got a block to perform after displaying, do it.
   if (image && displayCompletionBlock) {
@@ -305,7 +305,7 @@
     
     ASDN::MutexLocker l(_imageLock);
     _displayCompletionBlock = nil;
-    ASDN::MutexLocker u(_imageLock);
+    ASDN::MutexUnlocker u(_imageLock);
   }
 }
 
