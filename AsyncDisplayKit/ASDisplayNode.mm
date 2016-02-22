@@ -1908,6 +1908,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (ASSizeRange)constrainedSizeForCalculatedLayout
 {
+  ASDN::MutexLocker l(_propertyLock);
   return _constrainedSize;
 }
 
