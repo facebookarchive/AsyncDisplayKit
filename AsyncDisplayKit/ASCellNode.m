@@ -20,7 +20,6 @@
 
 @interface ASCellNode ()
 {
-  UIViewController *_viewController;
   ASDisplayNode *_viewControllerNode;
 }
 
