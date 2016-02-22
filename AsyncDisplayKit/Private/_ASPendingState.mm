@@ -122,8 +122,8 @@ typedef struct {
 ASDISPLAYNODE_INLINE void ASPendingStateApplyMetricsToLayer(_ASPendingState *state, CALayer *layer) {
   ASPendingStateFlags flags = state->_flags;
   if (flags.setFrame) {
-    CGRect _bounds;
-    CGPoint _position;
+    CGRect _bounds = CGRectZero;
+    CGPoint _position = CGPointZero;
     ASBoundsAndPositionForFrame(state->frame, layer.bounds.origin, layer.anchorPoint, &_bounds, &_position);
     layer.bounds = _bounds;
     layer.position = _position;
