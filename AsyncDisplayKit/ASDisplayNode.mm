@@ -1047,11 +1047,6 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
   }
 }
 
-// If not rasterized (and therefore we certainly have a view or layer),
-// Send the message to the view/layer first, as scheduleNodeForDisplay may call -displayIfNeeded.
-// Wrapped / synchronous nodes created with initWithView/LayerBlock: do not need scheduleNodeForDisplay,
-// as they don't need to display in the working range at all - since at all times onscreen, one
-// -setNeedsDisplay to the CALayer will result in a synchronous display in the next frame.
 - (void)__setNeedsDisplay
 {
   BOOL nowDisplay = ASInterfaceStateIncludesDisplay(_interfaceState);
