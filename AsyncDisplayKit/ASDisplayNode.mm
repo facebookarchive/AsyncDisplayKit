@@ -1238,13 +1238,9 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
     // Otherwise there is no way for the subnode's view or layer to enter the hierarchy, except recursing down all
     // subnodes on the main thread after the node tree has been created but before the first display (which
     // could introduce performance problems).
-    if (ASDisplayNodeThreadIsMain()) {
+    ASPerformBlockOnMainThread(^{
       [self _addSubnodeSubviewOrSublayer:subnode];
-    } else {
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [self _addSubnodeSubviewOrSublayer:subnode];
-      });
-    }
+    });
   }
 
   ASDisplayNodeAssert(isMovingEquivalentParents == disableNotificationsForMovingBetweenParents(oldParent, self), @"Invariant violated");
