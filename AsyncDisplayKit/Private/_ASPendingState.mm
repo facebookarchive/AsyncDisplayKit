@@ -14,6 +14,10 @@
 #import "ASInternalHelpers.h"
 #import "ASDisplayNodeInternal.h"
 
+#define __shouldSetNeedsDisplay(layer) (flags.needsDisplay \
+  || (flags.setOpaque && opaque != (layer).opaque)\
+  || (flags.setBackgroundColor && !CGColorEqualToColor(backgroundColor, (layer).backgroundColor)))
+
 typedef struct {
   // Properties
   int needsDisplay:1;
@@ -106,6 +110,30 @@ typedef struct {
   ASPendingStateFlags _flags;
 }
 
+/**
+ * Apply the state's frame, bounds, and position to layer. This will not
+ * be called on synchronous view-backed nodes which require we directly
+ * call [view setFrame:].
+ *
+ * FIXME: How should we reconcile order-of-operations between setting frame, bounds, position?
+ * Note we can't read bounds and position in the background, so we have to keep the frame
+ * value intact until application time (now).
+ */
+ASDISPLAYNODE_INLINE void ASPendingStateApplyMetricsToLayer(_ASPendingState *state, CALayer *layer) {
+  ASPendingStateFlags flags = state->_flags;
+  if (flags.setFrame) {
+    CGRect _bounds;
+    CGPoint _position;
+    ASBoundsAndPositionForFrame(state->frame, layer.bounds.origin, layer.anchorPoint, &_bounds, &_position);
+    layer.bounds = _bounds;
+    layer.position = _position;
+  } else {
+    if (flags.setBounds)
+      layer.bounds = state->bounds;
+    if (flags.setPosition)
+      layer.position = state->position;
+  }
+}
 
 @synthesize clipsToBounds=clipsToBounds;
 @synthesize opaque=opaque;
@@ -560,9 +588,7 @@ static UIColor *defaultTintColor = nil;
 {
   ASPendingStateFlags flags = _flags;
 
-  if (flags.needsDisplay
-      || (flags.setOpaque && opaque != layer.opaque)
-      || (flags.setBackgroundColor && !CGColorEqualToColor(backgroundColor, layer.backgroundColor))) {
+  if (__shouldSetNeedsDisplay(layer)) {
     [layer setNeedsDisplay];
   }
 
@@ -641,18 +667,7 @@ static UIColor *defaultTintColor = nil;
   if (flags.setOpaque)
     ASDisplayNodeAssert(layer.opaque == opaque, @"Didn't set opaque as desired");
 
-  if (flags.setFrame) {
-    CGRect _bounds;
-    CGPoint _position;
-    ASBoundsAndPositionForFrame(self.frame, layer.bounds.origin, layer.anchorPoint, &_bounds, &_position);
-    layer.bounds = _bounds;
-    layer.position = _position;
-  } else {
-    if (flags.setBounds)
-      layer.bounds = bounds;
-    if (flags.setPosition)
-      layer.position = position;
-  }
+  ASPendingStateApplyMetricsToLayer(self, layer);
 }
 
 - (void)applyToView:(UIView *)view setFrameDirectly:(BOOL)setFrameDirectly
@@ -668,9 +683,7 @@ static UIColor *defaultTintColor = nil;
   CALayer *layer = view.layer;
 
   ASPendingStateFlags flags = _flags;
-  if (flags.needsDisplay
-      || (flags.setOpaque && opaque != view.opaque)
-      || (flags.setBackgroundColor && !CGColorEqualToColor(backgroundColor, layer.backgroundColor))) {
+  if (__shouldSetNeedsDisplay(layer)) {
     [view setNeedsDisplay];
   }
 
@@ -683,11 +696,6 @@ static UIColor *defaultTintColor = nil;
   if (flags.setZPosition)
     layer.zPosition = zPosition;
 
-  // This should only be used for synchronous views wrapped by nodes.
-  if (flags.setFrame && !(flags.setBounds && flags.setPosition)) {
-    view.frame = frame;
-  }
-  
   if (flags.setBounds)
     view.bounds = bounds;
 
@@ -810,31 +818,16 @@ static UIColor *defaultTintColor = nil;
   if (flags.setAccessibilityIdentifier)
     view.accessibilityIdentifier = accessibilityIdentifier;
 
-  // FIXME: How should we reconcile order-of-operations between setting frame, bounds, position?
-  // Note we can't read bounds and position in the background, so we have to keep the frame
-  // value intact until application time (now).
-  if (flags.setFrame) {
-    if (setFrameDirectly) {
-      // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
-
-      // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
+  // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
+  if (flags.setFrame && setFrameDirectly) {
+    // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
 #if DEBUG
-      // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
-      ASDisplayNodeAssert(CATransform3DIsIdentity(layer.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
+    // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
+    ASDisplayNodeAssert(CATransform3DIsIdentity(layer.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
 #endif
-      view.frame = frame;
-    } else {
-      CGRect _bounds;
-      CGPoint _position;
-      ASBoundsAndPositionForFrame(self.frame, layer.bounds.origin, layer.anchorPoint, &_bounds, &_position);
-      layer.bounds = _bounds;
-      layer.position = _position;
-    }
+    view.frame = frame;
   } else {
-    if (flags.setBounds)
-      layer.bounds = bounds;
-    if (flags.setPosition)
-      layer.position = position;
+    ASPendingStateApplyMetricsToLayer(self, layer);
   }
 }
 
