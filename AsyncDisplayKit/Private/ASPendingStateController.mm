@@ -32,7 +32,7 @@
 {
   self = [super init];
   if (self) {
-    _dirtyNodes = [ASWeakSet new];
+    _dirtyNodes = [[ASWeakSet alloc] init];
   }
   return self;
 }
@@ -40,20 +40,14 @@
 + (ASPendingStateController *)sharedInstance
 {
   static dispatch_once_t onceToken;
-  static ASPendingStateController *controller;
+  static ASPendingStateController *controller = nil;
   dispatch_once(&onceToken, ^{
-    controller = [ASPendingStateController new];
+    controller = [[ASPendingStateController alloc] init];
   });
   return controller;
 }
 
 #pragma mark External API
-
-- (void)flush
-{
-  ASDisplayNodeAssertMainThread();
-  [self flushNow];
-}
 
 - (void)registerNode:(ASDisplayNode *)node
 {
@@ -63,6 +57,25 @@
 
   [self scheduleFlushIfNeeded];
 }
+
+/**
+ * NOTE: There is a small re-entrancy hazard here.
+ * If the user gives us a subclass of UIView/CALayer that
+ * adds side-effects to property sets, and one side effect
+ * waits on a background thread that sets a view/layer property
+ * on a loaded node, then we've got a deadlock.
+ */
+- (void)flush
+{
+  ASDisplayNodeAssertMainThread();
+  ASDN::MutexLocker l(_lock);
+  for (ASDisplayNode *node in _dirtyNodes) {
+    [node applyPendingViewState];
+  }
+  [_dirtyNodes removeAllObjects];
+  _flags.pendingFlush = NO;
+}
+
 
 #pragma mark Private Methods
 
@@ -77,25 +90,8 @@
 
   _flags.pendingFlush = YES;
   dispatch_async(dispatch_get_main_queue(), ^{
-    [self flushNow];
+    [self flush];
   });
-}
-
-/**
- * NOTE: There is a small re-entrancy hazard here.
- * If the user gives us a subclass of UIView/CALayer that
- * adds side-effects to property sets, and one side effect
- * waits on a background thread that sets a view/layer property
- * on a loaded node, then we've got a deadlock.
- */
-- (void)flushNow
-{
-  ASDN::MutexLocker l(_lock);
-  for (ASDisplayNode *node in _dirtyNodes) {
-    [node applyPendingViewState];
-  }
-  [_dirtyNodes removeAllObjects];
-  _flags.pendingFlush = NO;
 }
 
 @end

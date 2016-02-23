@@ -123,6 +123,7 @@
   if (!ASObjectIsEqual(_image, image)) {
     _image = image;
 
+    ASDN::MutexUnlocker u(_imageLock);
     [self invalidateCalculatedLayout];
     [self setNeedsDisplay];
   }

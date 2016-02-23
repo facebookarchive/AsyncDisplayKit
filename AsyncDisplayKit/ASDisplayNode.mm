@@ -79,6 +79,17 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
   return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
 }
 
+_ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node)
+{
+  ASDN::MutexLocker l(node->_propertyLock);
+  _ASPendingState *result = node->_pendingViewState;
+  if (result == nil) {
+    result = [[_ASPendingState alloc] init];
+    node->_pendingViewState = result;
+  }
+  return result;
+}
+
 /**
  *  Returns ASDisplayNodeFlags for the givern class/instance. instance MAY BE NIL.
  *
@@ -257,7 +268,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
-  _pendingViewState = [_ASPendingState new];
 }
 
 - (id)init
@@ -1037,11 +1047,6 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
   }
 }
 
-// If not rasterized (and therefore we certainly have a view or layer),
-// Send the message to the view/layer first, as scheduleNodeForDisplay may call -displayIfNeeded.
-// Wrapped / synchronous nodes created with initWithView/LayerBlock: do not need scheduleNodeForDisplay,
-// as they don't need to display in the working range at all - since at all times onscreen, one
-// -setNeedsDisplay to the CALayer will result in a synchronous display in the next frame.
 - (void)__setNeedsDisplay
 {
   BOOL nowDisplay = ASInterfaceStateIncludesDisplay(_interfaceState);
@@ -1894,6 +1899,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (ASSizeRange)constrainedSizeForCalculatedLayout
 {
+  ASDN::MutexLocker l(_propertyLock);
   return _constrainedSize;
 }
 

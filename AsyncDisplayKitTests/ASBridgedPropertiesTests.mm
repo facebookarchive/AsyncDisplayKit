@@ -168,13 +168,13 @@ static inline void ASDispatchSyncOnOtherThread(dispatch_block_t block) {
 {
   ASPendingStateController *ctrl = [ASPendingStateController sharedInstance];
   ASDisplayNode *node = [ASDisplayNode new];
-  XCTAssertFalse(node.pendingViewState.hasChanges);
+  XCTAssertFalse(ASDisplayNodeGetPendingState(node).hasChanges);
   [node view];
   XCTAssertEqual(node.alpha, 1);
   node.alpha = 0;
   XCTAssertEqual(node.view.alpha, 0);
   XCTAssertEqual(node.alpha, 0);
-  XCTAssertFalse(node.pendingViewState.hasChanges);
+  XCTAssertFalse(ASDisplayNodeGetPendingState(node).hasChanges);
   XCTAssertFalse(ctrl.test_isFlushScheduled);
 }
 
