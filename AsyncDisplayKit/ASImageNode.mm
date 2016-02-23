@@ -124,10 +124,8 @@
     _image = image;
 
     ASDN::MutexUnlocker u(_imageLock);
-    ASPerformBlockOnMainThread(^{
-      [self invalidateCalculatedLayout];
-      [self setNeedsDisplay];
-    });
+    [self invalidateCalculatedLayout];
+    [self setNeedsDisplay];
   }
 }
 
@@ -294,21 +292,19 @@
 {
   [super displayDidFinish];
 
-  ASDN::MutexLocker l(_imageLock);
-
-  void (^displayCompletionBlock)(BOOL canceled) = _displayCompletionBlock;
-  UIImage *image = _image;
-  
-  ASDN::MutexLocker u(_imageLock);
+  _imageLock.lock();
+    void (^displayCompletionBlock)(BOOL canceled) = _displayCompletionBlock;
+    UIImage *image = _image;
+  _imageLock.unlock();
   
   // If we've got a block to perform after displaying, do it.
   if (image && displayCompletionBlock) {
 
     displayCompletionBlock(NO);
-    
-    ASDN::MutexLocker l(_imageLock);
-    _displayCompletionBlock = nil;
-    ASDN::MutexLocker u(_imageLock);
+
+    _imageLock.lock();
+      _displayCompletionBlock = nil;
+    _imageLock.unlock();
   }
 }
 

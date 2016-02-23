@@ -10,6 +10,7 @@
 
 #import "ASAssert.h"
 #import "ASBatchFetching.h"
+#import "ASCellNode+Internal.h"
 #import "ASChangeSetDataController.h"
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Beta.h"
@@ -112,6 +113,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL _queuedNodeHeightUpdate;
   BOOL _isDeallocating;
   BOOL _dataSourceImplementsNodeBlockForRowAtIndexPath;
+  BOOL _asyncDelegateImplementsScrollviewDidScroll;
+  NSMutableSet *_cellsForVisibilityUpdates;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -197,7 +200,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (!(self = [super initWithFrame:frame style:style])) {
     return nil;
   }
-  
+  _cellsForVisibilityUpdates = [NSMutableSet set];
   if (!dataControllerClass) {
     dataControllerClass = [[self class] dataControllerClass];
   }
@@ -303,7 +306,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  [_dataController reloadDataWithCompletion:completion];
+  ASPerformBlockOnMainThread(^{
+    [super reloadData];
+  });
+  [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
 }
 
 - (void)reloadData
@@ -314,7 +320,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController reloadDataImmediately];
+  [_dataController reloadDataImmediatelyWithAnimationOptions:UITableViewRowAnimationNone];
+  [super reloadData];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
@@ -429,7 +436,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveSection:section toSection:newSection];
+  [_dataController moveSection:section toSection:newSection withAnimationOptions:UITableViewRowAnimationNone];
 }
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
@@ -453,7 +460,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
+  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:UITableViewRowAnimationNone];
 }
 
 #pragma mark -
@@ -585,7 +592,18 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return direction;
 }
 
-- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+  for (_ASTableViewCell *tableCell in _cellsForVisibilityUpdates) {
+    ASCellNode *node = [tableCell node];
+    [node visibleNodeDidScroll:scrollView withCellFrame:tableCell.frame];
+  }
+  if (_asyncDelegateImplementsScrollviewDidScroll) {
+    [_asyncDelegate scrollViewDidScroll:scrollView];
+  }
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
   _pendingVisibleIndexPath = indexPath;
 
@@ -595,13 +613,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_asyncDelegate tableView:self willDisplayNodeForRowAtIndexPath:indexPath];
   }
 
-  ASCellNode *cellNode = [self nodeForRowAtIndexPath:indexPath];
+  ASCellNode *cellNode = [cell node];
+
+  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(visibleNodeDidScroll:withCellFrame:))) {
+    [_cellsForVisibilityUpdates addObject:cell];
+  }
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
 }
 
-- (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath
+- (void)tableView:(UITableView *)tableView didEndDisplayingCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath
 {
   if ([_pendingVisibleIndexPath isEqual:indexPath]) {
     _pendingVisibleIndexPath = nil;
@@ -614,6 +636,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
     [_asyncDelegate tableView:self didEndDisplayingNode:node forRowAtIndexPath:indexPath];
   }
+
+  [_cellsForVisibilityUpdates removeObject:cell];
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -832,36 +856,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didReloadNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  LOG(@"UITableView reloadRows:%ld rows", indexPaths.count);
-
-  if (!self.asyncDataSource) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-  ASPerformBlockWithoutAnimation(preventAnimation, ^{
-    [super reloadRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
-  });
-
-  if (_automaticallyAdjustsContentOffset) {
-    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
-  }
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didMoveNodeAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
-  ASDisplayNodeAssertMainThread();
-
-  if (!self.asyncDataSource) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  [self moveRowAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
-}
-
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
@@ -878,36 +872,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   });
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didReloadSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-    ASDisplayNodeAssertMainThread();
-    LOG(@"UITableView reloadSections:%@", indexSet);
-
-
-    if (!self.asyncDataSource) {
-        return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-    }
-
-    BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-    ASPerformBlockWithoutAnimation(preventAnimation, ^{
-        [super reloadSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
-    });
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didMoveSection:(NSInteger)fromIndex toSection:(NSInteger)toIndex
-{
-  ASDisplayNodeAssertMainThread();
-  LOG(@"UITableView moveSection:%@", indexSet);
-
-
-  if (!self.asyncDataSource) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  [super moveSection:fromIndex toSection:toIndex];
-}
-
-
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
@@ -921,17 +885,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
   });
-}
-
-- (void)rangeControllerDidReloadData:(ASRangeController *)rangeController{
-  ASDisplayNodeAssertMainThread();
-  LOG(@"UITableView reloadData");
-
-  if (!self.asyncDataSource) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  [super reloadData];
 }
 
 #pragma mark - ASDataControllerDelegate

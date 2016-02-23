@@ -81,8 +81,8 @@
   static std::mutex __static_mutex;
   std::lock_guard<std::mutex> l(__static_mutex);
   
-  NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:attributedString];
-  NSLayoutManager *layoutManager = _attributes.layoutManagerFactory ? _attributes.layoutManagerFactory() : [[ASLayoutManager alloc] init];
+  NSTextStorage *textStorage = _attributes.textStorageCreationBlock ? _attributes.textStorageCreationBlock(attributedString) : [[NSTextStorage alloc] initWithAttributedString:attributedString];
+  NSLayoutManager *layoutManager = _attributes.layoutManagerCreationBlock ? _attributes.layoutManagerCreationBlock() : [[ASLayoutManager alloc] init];
   layoutManager.usesFontLeading = NO;
   [textStorage addLayoutManager:layoutManager];
   NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:_constrainedSize];

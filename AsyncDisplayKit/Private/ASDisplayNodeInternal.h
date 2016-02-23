@@ -23,9 +23,12 @@
 
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
+@class _ASPendingState;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
-void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)());
+
+/// Get the pending view state for the node, creating one if needed.
+_ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node);
 
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 {
@@ -37,7 +40,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   ASDisplayNodeMethodOverrideLayoutSpecThatFits = 1 << 4
 };
 
-@class _ASPendingState;
 @class _ASDisplayNodePosition;
 
 FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification;
@@ -50,10 +52,40 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 @interface ASDisplayNode ()
 {
-@protected
+@package
+  _ASPendingState *_pendingViewState;
+
   // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.
   ASDN::RecursiveMutex _propertyLock;
+  UIView *_view;
+  CALayer *_layer;
 
+  struct ASDisplayNodeFlags {
+    // public properties
+    unsigned synchronous:1;
+    unsigned layerBacked:1;
+    unsigned displaysAsynchronously:1;
+    unsigned shouldRasterizeDescendants:1;
+    unsigned shouldBypassEnsureDisplay:1;
+    unsigned displaySuspended:1;
+    unsigned hasCustomDrawingPriority:1;
+
+    // whether custom drawing is enabled
+    unsigned implementsInstanceDrawRect:1;
+    unsigned implementsDrawRect:1;
+    unsigned implementsInstanceImageDisplay:1;
+    unsigned implementsImageDisplay:1;
+    unsigned implementsDrawParameters:1;
+
+    // internal state
+    unsigned isMeasured:1;
+    unsigned isEnteringHierarchy:1;
+    unsigned isExitingHierarchy:1;
+    unsigned isInHierarchy:1;
+    unsigned visibilityNotificationsDisabled:VISIBILITY_NOTIFICATIONS_DISABLED_BITS;
+  } _flags;
+  
+@protected
   ASDisplayNode * __weak _supernode;
 
   ASSentinel *_displaySentinel;
@@ -84,41 +116,12 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
   Class _viewClass;
   Class _layerClass;
-  UIView *_view;
-  CALayer *_layer;
 
   UIImage *_placeholderImage;
   CALayer *_placeholderLayer;
 
   // keeps track of nodes/subnodes that have not finished display, used with placeholders
   NSMutableSet *_pendingDisplayNodes;
-
-  _ASPendingState *_pendingViewState;
-  
-  struct ASDisplayNodeFlags {
-    // public properties
-    unsigned synchronous:1;
-    unsigned layerBacked:1;
-    unsigned displaysAsynchronously:1;
-    unsigned shouldRasterizeDescendants:1;
-    unsigned shouldBypassEnsureDisplay:1;
-    unsigned displaySuspended:1;
-    unsigned hasCustomDrawingPriority:1;
-
-    // whether custom drawing is enabled
-    unsigned implementsInstanceDrawRect:1;
-    unsigned implementsDrawRect:1;
-    unsigned implementsInstanceImageDisplay:1;
-    unsigned implementsImageDisplay:1;
-    unsigned implementsDrawParameters:1;
-
-    // internal state
-    unsigned isMeasured:1;
-    unsigned isEnteringHierarchy:1;
-    unsigned isExitingHierarchy:1;
-    unsigned isInHierarchy:1;
-    unsigned visibilityNotificationsDisabled:VISIBILITY_NOTIFICATIONS_DISABLED_BITS;
-  } _flags;
 
   ASDisplayNodeExtraIvars _extra;
   
@@ -139,9 +142,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 // The _ASDisplayLayer backing the node, if any.
 @property (nonatomic, readonly, retain) _ASDisplayLayer *asyncLayer;
 
-// Creates a pendingViewState if one doesn't exist. Allows setting view properties on a bg thread before there is a view.
-@property (atomic, retain, readonly) _ASPendingState *pendingViewState;
-
 // Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
 
@@ -151,9 +151,14 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (BOOL)__shouldSize;
 
 /**
- Invoked by a call to setNeedsLayout to the underlying view
+ Invoked before a call to setNeedsLayout to the underlying view
  */
 - (void)__setNeedsLayout;
+
+/**
+ Invoked after a call to setNeedsDisplay to the underlying view
+ */
+- (void)__setNeedsDisplay;
 
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
@@ -177,6 +182,8 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (id)initWithLayerClass:(Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
+
+- (void)applyPendingViewState;
 
 /**
  * // TODO: NOT YET IMPLEMENTED

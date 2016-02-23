@@ -13,6 +13,7 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEqualityHelpers.h"
 #import "ASThread.h"
+#import "ASInternalHelpers.h"
 
 #if PIN_REMOTE_IMAGE
 #import "ASPINRemoteImageDownloader.h"
@@ -63,7 +64,7 @@
   
   _downloaderSupportsNewProtocol = [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)];
   
-  ASDisplayNodeAssert([cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] || [cache respondsToSelector:@selector(fetchCachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion: or fetchCachedImageWithURL:callbackQueue:completion:");
+  ASDisplayNodeAssert(cache == nil || [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] || [cache respondsToSelector:@selector(fetchCachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion: or fetchCachedImageWithURL:callbackQueue:completion:");
   
   _downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)];
   _downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)];
@@ -263,25 +264,28 @@
 
 - (void)_downloadImageWithCompletion:(void (^)(UIImage *image, NSError*, id downloadIdentifier))finished
 {
-  if (_downloaderSupportsNewProtocol) {
-    _downloadIdentifier = [_downloader downloadImageWithURL:_URL
-                                              callbackQueue:dispatch_get_main_queue()
-                                           downloadProgress:NULL
-                                                 completion:^(UIImage * _Nullable image, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
-                                                   if (finished != NULL) {
-                                                     finished(image, error, downloadIdentifier);
-                                                   }
-                                                 }];
-  } else {
-    _downloadIdentifier = [_downloader downloadImageWithURL:_URL
-                                              callbackQueue:dispatch_get_main_queue()
-                                      downloadProgressBlock:NULL
-                                                 completion:^(CGImageRef responseImage, NSError *error) {
-                                                   if (finished != NULL) {
-                                                     finished([UIImage imageWithCGImage:responseImage], error, nil);
-                                                   }
-                                                 }];
-  }
+  ASPerformBlockOnBackgroundThread(^{
+    ASDN::MutexLocker l(_lock);
+    if (_downloaderSupportsNewProtocol) {
+      _downloadIdentifier = [_downloader downloadImageWithURL:_URL
+                                                callbackQueue:dispatch_get_main_queue()
+                                             downloadProgress:NULL
+                                                   completion:^(UIImage * _Nullable image, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
+                                                     if (finished != NULL) {
+                                                       finished(image, error, downloadIdentifier);
+                                                     }
+                                                   }];
+    } else {
+      _downloadIdentifier = [_downloader downloadImageWithURL:_URL
+                                                callbackQueue:dispatch_get_main_queue()
+                                        downloadProgressBlock:NULL
+                                                   completion:^(CGImageRef responseImage, NSError *error) {
+                                                     if (finished != NULL) {
+                                                       finished([UIImage imageWithCGImage:responseImage], error, nil);
+                                                     }
+                                                   }];
+    }
+  });
 }
 
 - (void)_lazilyLoadImageIfNecessary

@@ -29,16 +29,22 @@
                     maximumNumberOfLines:(NSUInteger)maximumNumberOfLines
                           exclusionPaths:(NSArray *)exclusionPaths
                          constrainedSize:(CGSize)constrainedSize
-                    layoutManagerFactory:(NSLayoutManager*(*)(void))layoutManagerFactory
+              layoutManagerCreationBlock:(NSLayoutManager * (^)(void))layoutCreationBlock
                    layoutManagerDelegate:(id<NSLayoutManagerDelegate>)layoutManagerDelegate
+                textStorageCreationBlock:(NSTextStorage * (^)(NSAttributedString *attributedString))textStorageCreationBlock
+
 {
   if (self = [super init]) {
     // Concurrently initialising TextKit components crashes (rdar://18448377) so we use a global lock.
     static std::mutex __static_mutex;
     std::lock_guard<std::mutex> l(__static_mutex);
     // Create the TextKit component stack with our default configuration.
-    _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
-    _layoutManager = layoutManagerFactory ? layoutManagerFactory() : [[ASLayoutManager alloc] init];
+    if (textStorageCreationBlock) {
+      _textStorage = textStorageCreationBlock(attributedString);
+    } else {
+      _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
+    }
+    _layoutManager = layoutCreationBlock ? layoutCreationBlock() : [[ASLayoutManager alloc] init];
     _layoutManager.usesFontLeading = NO;
     _layoutManager.delegate = layoutManagerDelegate;
     [_textStorage addLayoutManager:_layoutManager];

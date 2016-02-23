@@ -21,6 +21,7 @@
 #import "ASLog.h"
 #import "ASPhotosFrameworkImageRequest.h"
 #import "ASEqualityHelpers.h"
+#import "ASInternalHelpers.h"
 
 #if !AS_IOS8_SDK_OR_LATER
 #error ASMultiplexImageNode can be used on iOS 7, but must be linked against the iOS 8 SDK.
@@ -751,46 +752,48 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   }
 
   // Download!
-  if (_downloaderSupportsNewProtocol) {
-    [self _setDownloadIdentifier:[_downloader downloadImageWithURL:imageURL
-                                                     callbackQueue:dispatch_get_main_queue()
-                                                  downloadProgress:downloadProgressBlock
-                                                        completion:^(UIImage *downloadedImage, NSError *error, id downloadIdentifier) {
-                                                          // We dereference iVars directly, so we can't have weakSelf going nil on us.
-                                                          __typeof__(self) strongSelf = weakSelf;
-                                                          if (!strongSelf)
-                                                            return;
-                                                          
-                                                          ASDN::MutexLocker l(_downloadIdentifierLock);
-                                                          //Getting a result back for a different download identifier, download must not have been successfully canceled
-                                                          if (ASObjectIsEqual(_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
-                                                            return;
-                                                          }
-                                                          
-                                                          completionBlock(downloadedImage, error);
-                                                          
-                                                          // Delegateify.
-                                                          if (strongSelf->_delegateFlags.downloadFinish)
-                                                            [strongSelf->_delegate multiplexImageNode:weakSelf didFinishDownloadingImageWithIdentifier:imageIdentifier error:error];
-                                                        }]];
-  } else {
-    [self _setDownloadIdentifier:[_downloader downloadImageWithURL:imageURL
-                                                     callbackQueue:dispatch_get_main_queue()
-                                             downloadProgressBlock:downloadProgressBlock
-                                                        completion:^(CGImageRef coreGraphicsImage, NSError *error) {
-                                                          // We dereference iVars directly, so we can't have weakSelf going nil on us.
-                                                          __typeof__(self) strongSelf = weakSelf;
-                                                          if (!strongSelf)
-                                                            return;
-                                                          
-                                                          UIImage *downloadedImage = (coreGraphicsImage ? [UIImage imageWithCGImage:coreGraphicsImage] : nil);
-                                                          completionBlock(downloadedImage, error);
-                                                          
-                                                          // Delegateify.
-                                                          if (strongSelf->_delegateFlags.downloadFinish)
-                                                            [strongSelf->_delegate multiplexImageNode:weakSelf didFinishDownloadingImageWithIdentifier:imageIdentifier error:error];
-                                                        }]];
-  }
+  ASPerformBlockOnBackgroundThread(^{
+    if (_downloaderSupportsNewProtocol) {
+      [self _setDownloadIdentifier:[_downloader downloadImageWithURL:imageURL
+                                                       callbackQueue:dispatch_get_main_queue()
+                                                    downloadProgress:downloadProgressBlock
+                                                          completion:^(UIImage *downloadedImage, NSError *error, id downloadIdentifier) {
+                                                            // We dereference iVars directly, so we can't have weakSelf going nil on us.
+                                                            __typeof__(self) strongSelf = weakSelf;
+                                                            if (!strongSelf)
+                                                              return;
+                                                            
+                                                            ASDN::MutexLocker l(_downloadIdentifierLock);
+                                                            //Getting a result back for a different download identifier, download must not have been successfully canceled
+                                                            if (ASObjectIsEqual(_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+                                                              return;
+                                                            }
+                                                            
+                                                            completionBlock(downloadedImage, error);
+                                                            
+                                                            // Delegateify.
+                                                            if (strongSelf->_delegateFlags.downloadFinish)
+                                                              [strongSelf->_delegate multiplexImageNode:weakSelf didFinishDownloadingImageWithIdentifier:imageIdentifier error:error];
+                                                          }]];
+    } else {
+      [self _setDownloadIdentifier:[_downloader downloadImageWithURL:imageURL
+                                                       callbackQueue:dispatch_get_main_queue()
+                                               downloadProgressBlock:downloadProgressBlock
+                                                          completion:^(CGImageRef coreGraphicsImage, NSError *error) {
+                                                            // We dereference iVars directly, so we can't have weakSelf going nil on us.
+                                                            __typeof__(self) strongSelf = weakSelf;
+                                                            if (!strongSelf)
+                                                              return;
+                                                            
+                                                            UIImage *downloadedImage = (coreGraphicsImage ? [UIImage imageWithCGImage:coreGraphicsImage] : nil);
+                                                            completionBlock(downloadedImage, error);
+                                                            
+                                                            // Delegateify.
+                                                            if (strongSelf->_delegateFlags.downloadFinish)
+                                                              [strongSelf->_delegate multiplexImageNode:weakSelf didFinishDownloadingImageWithIdentifier:imageIdentifier error:error];
+                                                          }]];
+    }
+  });
 }
 
 #pragma mark -
