@@ -51,8 +51,11 @@
 #import <AsyncDisplayKit/ASStackLayoutSpec.h>
 
 #import <AsyncDisplayKit/_ASAsyncTransaction.h>
-#import <AsyncDisplayKit/_ASAsyncTransactionContainer+Private.h>
 #import <AsyncDisplayKit/_ASAsyncTransactionGroup.h>
+#import <AsyncDisplayKit/_ASDisplayView.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASTextNode+Beta.h>
+#import <AsyncDisplayKit/ASTextNodeTypes.h>
 #import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutController.h>
 #import <AsyncDisplayKit/ASContextTransitioning.h>

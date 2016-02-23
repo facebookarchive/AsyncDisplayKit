@@ -422,7 +422,7 @@
 		B350623B1B010EFD0018CF92 /* NSMutableAttributedString+TextKitAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D09F6195D050800B7D73C /* NSMutableAttributedString+TextKitAdditions.m */; };
 		B350623C1B010EFD0018CF92 /* _ASAsyncTransaction.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D09F8195D050800B7D73C /* _ASAsyncTransaction.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B350623D1B010EFD0018CF92 /* _ASAsyncTransaction.mm in Sources */ = {isa = PBXBuildFile; fileRef = 058D09F9195D050800B7D73C /* _ASAsyncTransaction.mm */; };
-		B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D09FA195D050800B7D73C /* _ASAsyncTransactionContainer+Private.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D09FA195D050800B7D73C /* _ASAsyncTransactionContainer+Private.h */; };
 		B350623F1B010EFD0018CF92 /* _ASAsyncTransactionContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D09FB195D050800B7D73C /* _ASAsyncTransactionContainer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B35062401B010EFD0018CF92 /* _ASAsyncTransactionContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D09FC195D050800B7D73C /* _ASAsyncTransactionContainer.m */; };
 		B35062411B010EFD0018CF92 /* _ASAsyncTransactionGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = 058D09FD195D050800B7D73C /* _ASAsyncTransactionGroup.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1465,7 +1465,6 @@
 				AC026B6A1BD57D6F00BBC17E /* ASChangeSetDataController.h in Headers */,
 				B35062481B010EFD0018CF92 /* _AS-objc-internal.h in Headers */,
 				B350623C1B010EFD0018CF92 /* _ASAsyncTransaction.h in Headers */,
-				B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */,
 				B350623F1B010EFD0018CF92 /* _ASAsyncTransactionContainer.h in Headers */,
 				B13CA1011C52004900E031AB /* ASCollectionNode+Beta.h in Headers */,
 				254C6B7E1BF94DF4003EC431 /* ASTextKitTailTruncater.h in Headers */,
@@ -1545,6 +1544,7 @@
 				CC3B208A1C3F7A5400798563 /* ASWeakSet.h in Headers */,
 				DE8BEAC21C2DF3FC00D57C12 /* ASDelegateProxy.h in Headers */,
 				B35062041B010EFD0018CF92 /* ASMultiplexImageNode.h in Headers */,
+				B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */,
 				DECBD6E81BE56E1900CF4905 /* ASButtonNode.h in Headers */,
 				B35062241B010EFD0018CF92 /* ASMutableAttributedStringBuilder.h in Headers */,
 				B13CA0F81C519EBA00E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h in Headers */,
