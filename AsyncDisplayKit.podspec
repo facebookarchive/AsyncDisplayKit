@@ -49,14 +49,14 @@ Pod::Spec.new do |spec|
     ]
   end
   
-  spec.subspec 'PINRemoteImage' do |pin|
-      pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
-      pin.dependency 'PINRemoteImage/iOS', '>= 2'
-      pin.dependency 'AsyncDisplayKit/ASDealloc2MainObject'
-  end
+  # spec.subspec 'PINRemoteImage' do |pin|
+  #     pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
+  #     pin.dependency 'PINRemoteImage/iOS', '>= 2'
+  #     pin.dependency 'AsyncDisplayKit/ASDealloc2MainObject'
+  # end
   
   # Include optional FLAnimatedImage module
-  spec.default_subspec = 'PINRemoteImage'
+  //spec.default_subspec = 'PINRemoteImage'
 
   spec.social_media_url = 'https://twitter.com/fbOpenSource'
   spec.library = 'c++'
