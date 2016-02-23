@@ -424,5 +424,16 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)endTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)touchEvent
 {
 }
+#if TARGET_OS_TV
+#pragma mark - tvOS
+- (BOOL)canBecomeFocused
+{
+  return YES;
+}
 
+- (BOOL)shouldUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context
+{
+  return YES;
+}
+#endif
 @end
