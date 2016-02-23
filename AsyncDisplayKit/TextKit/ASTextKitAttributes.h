@@ -91,14 +91,19 @@ struct ASTextKitAttributes {
    */
   CGFloat currentScaleFactor;
   /**
-   A pointer to a function that that returns a custom layout manager subclass. If nil, defaults to NSLayoutManager.
+   An optional block that returns a custom layout manager subclass. If nil, defaults to NSLayoutManager.
    */
-  NSLayoutManager *(*layoutManagerFactory)(void);
+  NSLayoutManager * (^layoutManagerCreationBlock)(void);
   
   /**
    An optional delegate for the NSLayoutManager
    */
   id<NSLayoutManagerDelegate> layoutManagerDelegate;
+
+  /**
+   An optional block that returns a custom NSTextStorage for the layout manager. 
+   */
+  NSTextStorage * (^textStorageCreationBlock)(NSAttributedString *attributedString);
 
   /**
    We provide an explicit copy function so we can use aggregate initializer syntax while providing copy semantics for
@@ -119,8 +124,9 @@ struct ASTextKitAttributes {
       shadowRadius,
       pointSizeScaleFactors,
       currentScaleFactor,
-      layoutManagerFactory,
+      layoutManagerCreationBlock,
       layoutManagerDelegate,
+      textStorageCreationBlock,
     };
   };
 
@@ -133,7 +139,8 @@ struct ASTextKitAttributes {
     && shadowRadius == other.shadowRadius
     && [pointSizeScaleFactors isEqualToArray:other.pointSizeScaleFactors]
     && currentScaleFactor == currentScaleFactor
-    && layoutManagerFactory == other.layoutManagerFactory
+    && layoutManagerCreationBlock == other.layoutManagerCreationBlock
+    && textStorageCreationBlock == other.textStorageCreationBlock
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)
     && _objectsEqual(exclusionPaths, other.exclusionPaths)
     && _objectsEqual(avoidTailTruncationSet, other.avoidTailTruncationSet)
