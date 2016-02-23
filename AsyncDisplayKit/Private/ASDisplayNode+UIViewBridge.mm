@@ -104,7 +104,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 // Focus Engine
 - (BOOL)canBecomeFocused
 {
-  return YES;
+  return NO;
 }
 
 - (void)setNeedsFocusUpdate
@@ -121,7 +121,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 
 - (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
 {
-  return YES;
+  return NO;
 }
 
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
