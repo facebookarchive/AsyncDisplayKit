@@ -56,7 +56,7 @@ Pod::Spec.new do |spec|
   # end
   
   # Include optional FLAnimatedImage module
-  //spec.default_subspec = 'PINRemoteImage'
+  # spec.default_subspec = 'PINRemoteImage'
 
   spec.social_media_url = 'https://twitter.com/fbOpenSource'
   spec.library = 'c++'
