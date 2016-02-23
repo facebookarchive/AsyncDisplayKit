@@ -645,7 +645,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     if (_ignoreMaxSizeChange) {
       _ignoreMaxSizeChange = NO;
     } else {
-      [self performBatchAnimated:NO updates:^{
+      [self performBatchAnimated:YES updates:^{
         [_dataController relayoutAllNodes];
       } completion:nil];
     }
