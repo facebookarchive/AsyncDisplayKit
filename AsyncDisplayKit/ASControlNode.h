@@ -30,6 +30,9 @@ typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent)
   ASControlNodeEventTouchUpOutside    = 1 << 5,
   /** A system event canceling the current touches for the control node. */
   ASControlNodeEventTouchCancel       = 1 << 6,
+  /** A system event when the Play/Pause button on the Apple TV remote is pressed. */
+  ASControlNodeEventPrimaryActionTriggered = 1 << 13,
+    
   /** All events, including system events. */
   ASControlNodeEventAllEvents         = 0xFFFFFFFF
 };

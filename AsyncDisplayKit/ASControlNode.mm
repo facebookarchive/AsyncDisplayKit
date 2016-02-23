@@ -27,11 +27,11 @@
   // Control Attributes
   BOOL _enabled;
   BOOL _highlighted;
-
+  
   // Tracking
   BOOL _tracking;
   BOOL _touchInside;
-
+  
   // Target Messages.
   /*
      The table structure is as follows:
@@ -77,15 +77,24 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
   if (!(self = [super init]))
     return nil;
-
+  
   _enabled = YES;
-
+  
   // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
   self.userInteractionEnabled = NO;
-#if TARGET_OS_TV
-    [self addTarget:self action:@selector(updateUI) forControlEvents:ASControlNodeEventAllEvents];
-#endif
+  
   return self;
+}
+
+- (void)didLoad
+{
+#if TARGET_OS_TV
+  // [self addTarget:self action:@selector(updateUI) forControlEvents:ASControlNodeEventPrimaryActionTriggered];
+  self.userInteractionEnabled = YES;
+  UITapGestureRecognizer *tapGestureRec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pressDown)];
+  tapGestureRec.allowedPressTypes = @[@(UIPressTypeSelect)];
+  [self.view addGestureRecognizer:tapGestureRec];
+#endif
 }
 
 #pragma mark - ASDisplayNode Overrides
@@ -94,9 +103,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // If we're not interested in touches, we have nothing to do.
   if (!self.enabled)
     return;
-
+  
   ASControlNodeEvent controlEventMask = 0;
-
+  
   // If we get more than one touch down on us, cancel.
   // Additionally, if we're already tracking a touch, a second touch beginning is cause for cancellation.
   if ([touches count] > 1 || self.tracking)
@@ -110,18 +119,18 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   {
     // Otherwise, begin tracking.
     self.tracking = YES;
-
+    
     // No need to check bounds on touchesBegan as we wouldn't get the call if it wasn't in our bounds.
     self.touchInside = YES;
     self.highlighted = YES;
-
+    
     UITouch *theTouch = [touches anyObject];
     [self beginTrackingWithTouch:theTouch withEvent:event];
-
+    
     // Send the appropriate touch-down control event depending on how many times we've been tapped.
     controlEventMask |= (theTouch.tapCount == 1) ? ASControlNodeEventTouchDown : ASControlNodeEventTouchDownRepeat;
   }
-
+  
   [self sendActionsForControlEvents:controlEventMask withEvent:event];
 }
 
@@ -130,41 +139,42 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // If we're not interested in touches, we have nothing to do.
   if (!self.enabled)
     return;
-
+  
   NSParameterAssert([touches count] == 1);
   UITouch *theTouch = [touches anyObject];
   CGPoint touchLocation = [theTouch locationInView:self.view];
-
+  
   // Update our touchInside state.
   BOOL dragIsInsideBounds = [self pointInside:touchLocation withEvent:nil];
-
+  
   // Update our highlighted state.
   CGRect expandedBounds = CGRectInset(self.view.bounds, kASControlNodeExpandedInset, kASControlNodeExpandedInset);
   BOOL dragIsInsideExpandedBounds = CGRectContainsPoint(expandedBounds, touchLocation);
   self.touchInside = dragIsInsideExpandedBounds;
   self.highlighted = dragIsInsideExpandedBounds;
-
+  
   // Note we are continuing to track the touch.
   [self continueTrackingWithTouch:theTouch withEvent:event];
-
+  
   [self sendActionsForControlEvents:(dragIsInsideBounds ? ASControlNodeEventTouchDragInside : ASControlNodeEventTouchDragOutside)
                           withEvent:event];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
+  NSLog(@"Touches Cancelled");
   // If we're not interested in touches, we have nothing to do.
   if (!self.enabled)
     return;
-
+  
   // We're no longer tracking and there is no touch to be inside.
   self.tracking = NO;
   self.touchInside = NO;
   self.highlighted = NO;
-
+  
   // Note that we've cancelled tracking.
   [self cancelTrackingWithEvent:event];
-
+  
   // Send the cancel event.
   [self sendActionsForControlEvents:ASControlNodeEventTouchCancel
                           withEvent:event];
@@ -175,7 +185,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // If we're not interested in touches, we have nothing to do.
   if (!self.enabled)
     return;
-
+  
   // On iPhone 6s, iOS 9.2 (and maybe other versions) sometimes calls -touchesEnded:withEvent:
   // twice on the view for one call to -touchesBegan:withEvent:. On ASControlNode, it used to
   // trigger an action twice unintentionally. Now, we ignore that event if we're not in a tracking
@@ -183,23 +193,23 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // It might be related to that issue: http://www.openradar.me/22910171
   if (!self.tracking)
     return;
-
+  
   NSParameterAssert([touches count] == 1);
   UITouch *theTouch = [touches anyObject];
   CGPoint touchLocation = [theTouch locationInView:self.view];
-
+  
   // Update state.
   self.tracking = NO;
   self.touchInside = NO;
   self.highlighted = NO;
-
+  
   // Note that we've ended tracking.
   [self endTrackingWithTouch:theTouch withEvent:event];
-
+  
   // Send the appropriate touch-up control event.
   CGRect expandedBounds = CGRectInset(self.view.bounds, kASControlNodeExpandedInset, kASControlNodeExpandedInset);
   BOOL touchUpIsInsideExpandedBounds = CGRectContainsPoint(expandedBounds, touchLocation);
-
+  
   [self sendActionsForControlEvents:(touchUpIsInsideExpandedBounds ? ASControlNodeEventTouchUpInside : ASControlNodeEventTouchUpOutside)
                           withEvent:event];
 }
@@ -212,7 +222,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     // Allow double-tap gestures
     return tapRecognizer.numberOfTapsRequired != 1;
   }
-
+  
   // Otherwise, go ahead. :]
   return YES;
 }
@@ -228,11 +238,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // Convert nil to [NSNull null] so that it can be used as a key for NSMapTable.
   if (!target)
     target = [NSNull null];
-
+  
   if (!_controlEventDispatchTable) {
     _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
   }
-
+  
   // Enumerate the events in the mask, adding the target-action pair for each control event included in controlEventMask
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEventMask, ^
     (ASControlNodeEvent controlEvent)
@@ -269,14 +279,14 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
   NSParameterAssert(target);
   NSParameterAssert(controlEvent != 0 && controlEvent != ASControlNodeEventAllEvents);
-
+  
   ASDN::MutexLocker l(_controlLock);
   
   // Grab the event dispatch table for this event.
   NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)];
   if (!eventDispatchTable)
     return nil;
-
+  
   // Return the actions for this target.
   return [eventDispatchTable objectForKey:target];
 }
@@ -286,7 +296,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   ASDN::MutexLocker l(_controlLock);
   
   NSMutableSet *targets = [[NSMutableSet alloc] init];
-
+  
   // Look at each event...
   for (NSMapTable *eventDispatchTable in [_controlEventDispatchTable allValues])
   {
@@ -294,7 +304,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     for (id target in eventDispatchTable)
       [targets addObject:target];
   }
-
+  
   return targets;
 }
 
@@ -303,7 +313,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSParameterAssert(controlEventMask != 0);
   
   ASDN::MutexLocker l(_controlLock);
-
+  
   // Enumerate the events in the mask, removing the target-action pair for each control event included in controlEventMask.
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEventMask, ^
     (ASControlNodeEvent controlEvent)
@@ -357,7 +367,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSParameterAssert(controlEvents != 0);
   
   ASDN::MutexLocker l(_controlLock);
-
+  
   // Enumerate the events in the mask, invoking the target-action pairs for each.
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEvents, ^
     (ASControlNodeEvent controlEvent)
@@ -429,9 +439,17 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 }
 #if TARGET_OS_TV
 #pragma mark - tvOS
-- (void)updateUI
+- (void)pressDown
 {
-    NSLog(@"Update UI");
+  [UIView animateWithDuration:0.1 delay:0 options:UIViewAnimationCurveLinear animations:^{
+    [self setPressedState];
+  } completion:^(BOOL finished) {
+    if (finished) {
+      [UIView animateWithDuration:0.1 delay:0 options:UIViewAnimationCurveLinear animations:^{
+        [self setFocusedState];
+      } completion:nil];
+    }
+  }];
 }
 
 - (BOOL)canBecomeFocused
@@ -446,33 +464,47 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
-  NSLog(@"Focused");
-    if (context.nextFocusedView && context.nextFocusedView == self.view) {
-        //Focused
-        [coordinator addCoordinatedAnimations:^{
-            self.layer.shadowOffset = CGSizeMake(2, 10);
-            self.layer.shadowColor = [UIColor blackColor].CGColor;
-            self.layer.shadowRadius = 12.0;
-            self.layer.shadowOpacity = 0.45;
-            self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
-            self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1.1, 1.1);
-        } completion:^{
-            
-        }];
-    } else{
-        //Not focused
-        [coordinator addCoordinatedAnimations:^{
-            self.layer.shadowOffset = CGSizeZero;
-            self.layer.shadowColor = [UIColor blackColor].CGColor;
-            self.layer.shadowRadius = 0;
-            self.layer.shadowOpacity = 0;
-            self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
-            self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, 1);
-        } completion:^{
-            
-        }];
+  if (context.nextFocusedView && context.nextFocusedView == self.view) {
+    //Focused
+    [coordinator addCoordinatedAnimations:^{
+      [self setFocusedState];
+    } completion:nil];
+  } else{
+    //Not focused
+    [coordinator addCoordinatedAnimations:^{
+      [self setDefaultState];
+    } completion:nil];
+  }
+}
 
-    }
+- (void)setFocusedState
+{
+  self.layer.shadowOffset = CGSizeMake(2, 10);
+  self.layer.shadowColor = [UIColor blackColor].CGColor;
+  self.layer.shadowRadius = 12.0;
+  self.layer.shadowOpacity = 0.45;
+  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+  self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1.1, 1.1);
+}
+
+- (void)setPressedState
+{
+  self.layer.shadowOffset = CGSizeMake(2, 2);
+  self.layer.shadowColor = [UIColor blackColor].CGColor;
+  self.layer.shadowRadius = 12.0;
+  self.layer.shadowOpacity = 0.45;
+  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+  self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, 1);
+}
+
+- (void)setDefaultState
+{
+  self.layer.shadowOffset = CGSizeZero;
+  self.layer.shadowColor = [UIColor blackColor].CGColor;
+  self.layer.shadowRadius = 0;
+  self.layer.shadowOpacity = 0;
+  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+  self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, 1);
 }
 #endif
 @end
