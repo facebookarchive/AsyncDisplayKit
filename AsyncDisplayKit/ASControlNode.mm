@@ -82,6 +82,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
   // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
   self.userInteractionEnabled = NO;
+#if TARGET_OS_TV
+    [self addTarget:self action:@selector(updateUI) forControlEvents:ASControlNodeEventAllEvents];
+#endif
   return self;
 }
 
@@ -426,6 +429,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 }
 #if TARGET_OS_TV
 #pragma mark - tvOS
+- (void)updateUI
+{
+    NSLog(@"Update UI");
+}
+
 - (BOOL)canBecomeFocused
 {
   return YES;
@@ -434,6 +442,37 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (BOOL)shouldUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context
 {
   return YES;
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+  NSLog(@"Focused");
+    if (context.nextFocusedView && context.nextFocusedView == self.view) {
+        //Focused
+        [coordinator addCoordinatedAnimations:^{
+            self.layer.shadowOffset = CGSizeMake(2, 10);
+            self.layer.shadowColor = [UIColor blackColor].CGColor;
+            self.layer.shadowRadius = 12.0;
+            self.layer.shadowOpacity = 0.45;
+            self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+            self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1.1, 1.1);
+        } completion:^{
+            
+        }];
+    } else{
+        //Not focused
+        [coordinator addCoordinatedAnimations:^{
+            self.layer.shadowOffset = CGSizeZero;
+            self.layer.shadowColor = [UIColor blackColor].CGColor;
+            self.layer.shadowRadius = 0;
+            self.layer.shadowOpacity = 0;
+            self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+            self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, 1);
+        } completion:^{
+            
+        }];
+
+    }
 }
 #endif
 @end
