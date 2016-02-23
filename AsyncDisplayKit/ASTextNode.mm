@@ -18,10 +18,10 @@
 
 #import "ASTextKitCoreTextAdditions.h"
 #import "ASTextKitHelpers.h"
+#import "ASTextKitFontSizeAdjuster.h"
 #import "ASTextKitRenderer.h"
 #import "ASTextKitRenderer+Positioning.h"
 #import "ASTextKitShadower.h"
-#import "ASTextNodeWordKerner.h"
 
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
@@ -81,10 +81,6 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
   ASTextKitRenderer *_renderer;
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
-  
-  ASDN::Mutex _wordKernerLock;
-  ASTextNodeWordKerner *_wordKerner;
-  
 }
 @dynamic placeholderEnabled;
 
@@ -247,8 +243,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .lineBreakMode = _truncationMode,
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
-    .minimumScaleFactor = _minimumScaleFactor,
-    .layoutManagerDelegate = [self _wordKerner],
+    .pointSizeScaleFactors = _pointSizeScaleFactors,
+    .currentScaleFactor = self.currentScaleFactor,
+    .layoutManagerCreationBlock = self.layoutManagerCreationBlock,
+    .textStorageCreationBlock = self.textStorageCreationBlock,
   };
 }
 
@@ -261,6 +259,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // expensive, and can take some time, so we dispatch onto a bg queue to
     // actually dealloc.
     __block ASTextKitRenderer *renderer = _renderer;
+    
     ASPerformBlockOnBackgroundThread(^{
       renderer = nil;
     });
@@ -282,15 +281,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
     [self _invalidateRenderer];
   }
-}
-
-- (ASTextNodeWordKerner *)_wordKerner
-{
-    ASDN::MutexLocker l(_wordKernerLock);
-    if (_wordKerner == nil) {
-        _wordKerner = [[ASTextNodeWordKerner alloc] init];
-    }
-    return _wordKerner;
 }
 
 #pragma mark - Layout and Sizing
@@ -345,12 +335,13 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   // Instead of invalidating the renderer, in case this is a new call with a different constrained size,
   // just update the size of the NSTextContainer that is owned by the renderer's internal context object.
   [self _renderer].constrainedSize = _constrainedSize;
+
+  [self setNeedsDisplay];
   
-  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-    [self setNeedsDisplay];
-  });
-  
-  return [[self _renderer] size];
+  CGSize size = [[self _renderer] size];
+  // the renderer computes the current scale factor during sizing, so let's grab it here
+  _currentScaleFactor = _renderer.currentScaleFactor;
+  return size;
 }
 
 #pragma mark - Modifying User Text
@@ -375,22 +366,22 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   // We need an entirely new renderer
   [self _invalidateRenderer];
 
-  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-    // Tell the display node superclasses that the cached layout is incorrect now
-    [self invalidateCalculatedLayout];
+  // Tell the display node superclasses that the cached layout is incorrect now
+  [self invalidateCalculatedLayout];
 
-    [self setNeedsDisplay];
+  [self setNeedsDisplay];
 
-    self.accessibilityLabel = _attributedString.string;
+  self.accessibilityLabel = _attributedString.string;
 
-    if (_attributedString.length == 0) {
-      // We're not an accessibility element by default if there is no string.
-      self.isAccessibilityElement = NO;
-    } else {
-      self.isAccessibilityElement = YES;
-    }
-  });
-  
+  if (_attributedString.length == 0) {
+    // We're not an accessibility element by default if there is no string.
+    self.isAccessibilityElement = NO;
+  } else {
+    self.isAccessibilityElement = YES;
+  }
+
+  // reset the scale factor if we get a new string.
+  _currentScaleFactor = 0;
   if (attributedString.length > 0) {
     CGFloat screenScale = ASScreenScale();
     self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
@@ -409,9 +400,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   _exclusionPaths = [exclusionPaths copy];
   [self _invalidateRenderer];
   [self invalidateCalculatedLayout];
-  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-    [self setNeedsDisplay];
-  });
+  [self setNeedsDisplay];
 }
 
 - (NSArray *)exclusionPaths
@@ -960,9 +949,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     }
     _shadowColor = shadowColor;
     [self _invalidateRenderer];
-    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-      [self setNeedsDisplay];
-    });
+    [self setNeedsDisplay];
   }
 }
 
@@ -976,9 +963,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   if (!CGSizeEqualToSize(_shadowOffset, shadowOffset)) {
     _shadowOffset = shadowOffset;
     [self _invalidateRenderer];
-    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-      [self setNeedsDisplay];
-    });
+    [self setNeedsDisplay];
   }
 }
 
@@ -992,9 +977,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   if (_shadowOpacity != shadowOpacity) {
     _shadowOpacity = shadowOpacity;
     [self _invalidateRenderer];
-    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-      [self setNeedsDisplay];
-    });
+    [self setNeedsDisplay];
   }
 }
 
@@ -1008,9 +991,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   if (_shadowRadius != shadowRadius) {
     _shadowRadius = shadowRadius;
     [self _invalidateRenderer];
-    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-      [self setNeedsDisplay];
-    });
+    [self setNeedsDisplay];
   }
 }
 
@@ -1062,9 +1043,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
   if (_truncationMode != truncationMode) {
     _truncationMode = truncationMode;
     [self _invalidateRenderer];
-    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-      [self setNeedsDisplay];
-    });
+    [self setNeedsDisplay];
   }
 }
 
@@ -1074,25 +1053,20 @@ static NSAttributedString *DefaultTruncationAttributedString()
   return visibleRange.length < _attributedString.length;
 }
 
-- (void)setMinimumScaleFactor:(CGFloat)minimumScaleFactor
+- (void)setPointSizeScaleFactors:(NSArray *)pointSizeScaleFactors
 {
-  if (_minimumScaleFactor != minimumScaleFactor) {
-    _minimumScaleFactor = minimumScaleFactor;
+  if ([_pointSizeScaleFactors isEqualToArray:pointSizeScaleFactors] == NO) {
+    _pointSizeScaleFactors = pointSizeScaleFactors;
     [self _invalidateRenderer];
-    ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-      [self setNeedsDisplay];
-    });
-  }
-}
+    [self setNeedsDisplay];
+  }}
 
 - (void)setMaximumNumberOfLines:(NSUInteger)maximumNumberOfLines
 {
     if (_maximumNumberOfLines != maximumNumberOfLines) {
         _maximumNumberOfLines = maximumNumberOfLines;
       [self _invalidateRenderer];
-      ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-        [self setNeedsDisplay];
-      });
+      [self setNeedsDisplay];
     }
 }
 
@@ -1112,9 +1086,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
 {
   [self _updateComposedTruncationString];
   [self _invalidateRenderer];
-  ASDisplayNodeRespectThreadAffinityOfNode(self, ^{
-    [self setNeedsDisplay];
-  });
+  [self setNeedsDisplay];
 }
 
 /**

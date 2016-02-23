@@ -21,21 +21,17 @@ typedef struct {
   CGFloat trailingBufferScreenfuls;
 } ASRangeTuningParameters;
 
+FOUNDATION_EXPORT ASRangeTuningParameters const ASRangeTuningParametersZero;
+
+FOUNDATION_EXPORT BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningParameters lhs, ASRangeTuningParameters rhs);
+
 @protocol ASLayoutController <NSObject>
 
-/**
- * Tuning parameters for the range.
- *
- * Defaults to a trailing buffer of one screenful and a leading buffer of two screenfuls.
- */
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
-// FIXME: This method can be removed once ASRangeControllerBeta becomes the main version.
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray<NSIndexPath *> *)indexPaths rangeType:(ASLayoutRangeType)rangeType;
-
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType;
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 @optional
 

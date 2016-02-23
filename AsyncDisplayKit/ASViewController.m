@@ -10,6 +10,7 @@
 #import "ASAssert.h"
 #import "ASDimension.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Beta.h"
 
 @implementation ASViewController
 {

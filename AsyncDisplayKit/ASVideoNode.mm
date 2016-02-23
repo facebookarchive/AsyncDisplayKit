@@ -10,7 +10,7 @@
 #import "ASDefaultPlayButton.h"
 @interface ASVideoNode ()
 {
-  ASDN::RecursiveMutex _lock;
+  ASDN::RecursiveMutex _videoLock;
   
   __weak id<ASVideoNodeDelegate> _delegate;
 
@@ -18,6 +18,8 @@
   
   BOOL _shouldAutorepeat;
   BOOL _shouldAutoplay;
+  
+  BOOL _muted;
 
   AVAsset *_asset;
   
@@ -30,6 +32,7 @@
   ASDisplayNode *_playerNode;
   ASDisplayNode *_spinner;
   NSString *_gravity;
+  
   dispatch_queue_t _previewQueue;
 }
 
@@ -42,11 +45,7 @@
   if (!(self = [super init])) {
     return nil;
   }
-  
-#if DEBUG
-  NSLog(@"*** Warning: ASVideoNode is a new component - the 1.9.6 version may cause performance hiccups.");
-#endif
-  
+    
   _previewQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
   
   self.playButton = [[ASDefaultPlayButton alloc] init];
@@ -136,6 +135,7 @@
       AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
       if (!_player) {
         _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+        _player.muted = _muted;
       }
       playerLayer.player = _player;
       playerLayer.videoGravity = [self gravity];
@@ -175,10 +175,14 @@
 
 - (void)tapped
 {
-  if (_shouldBePlaying) {
-    [self pause];
+  if (self.delegate && [self.delegate respondsToSelector:@selector(videoNodeWasTapped:)]) {
+    [self.delegate videoNodeWasTapped:self];
   } else {
-    [self play];
+    if (_shouldBePlaying) {
+      [self pause];
+    } else {
+      [self play];
+    }
   }
 }
 
@@ -200,7 +204,7 @@
   }
 
   {
-    ASDN::MutexLocker l(_lock);
+    ASDN::MutexLocker l(_videoLock);
     _currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
     [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
 
@@ -208,17 +212,17 @@
       [_player replaceCurrentItemWithPlayerItem:_currentItem];
     } else {
       _player = [[AVPlayer alloc] initWithPlayerItem:_currentItem];
+      _player.muted = _muted;
     }
   }
 }
-
 
 - (void)clearFetchedData
 {
   [super clearFetchedData];
   
   {
-    ASDN::MutexLocker l(_lock);
+    ASDN::MutexLocker l(_videoLock);
     ((AVPlayerLayer *)_playerNode.layer).player = nil;
     _player = nil;
   }
@@ -226,15 +230,18 @@
 
 - (void)visibilityDidChange:(BOOL)isVisible
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   
   if (_shouldAutoplay && _playerNode.isNodeLoaded) {
     [self play];
+  } else if (_shouldAutoplay) {
+    _shouldBePlaying = YES;
   }
   if (isVisible) {
     if (_playerNode.isNodeLoaded) {
       if (!_player) {
         _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+        _player.muted = _muted;
       }
       ((AVPlayerLayer *)_playerNode.layer).player = _player;
     }
@@ -249,25 +256,25 @@
 
 - (void)setPlayButton:(ASButtonNode *)playButton
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   
   _playButton = playButton;
   
   [self addSubnode:playButton];
   
-  [_playButton addTarget:self action:@selector(play) forControlEvents:ASControlNodeEventTouchUpInside];
+  [_playButton addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
 }
 
 - (ASButtonNode *)playButton
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   
   return _playButton;
 }
 
 - (void)setAsset:(AVAsset *)asset
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   
   if (ASObjectIsEqual(((AVURLAsset *)asset).URL, ((AVURLAsset *)_asset).URL)) {
     return;
@@ -283,19 +290,19 @@
 
 - (AVAsset *)asset
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   return _asset;
 }
 
 - (AVPlayer *)player
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   return _player;
 }
 
 - (void)setGravity:(NSString *)gravity
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   if (_playerNode.isNodeLoaded) {
     ((AVPlayerLayer *)_playerNode.layer).videoGravity = gravity;
   }
@@ -304,16 +311,30 @@
 
 - (NSString *)gravity
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   
   return _gravity;
+}
+
+- (BOOL)muted
+{
+  ASDN::MutexLocker l(_videoLock);
+
+  return _muted;
+}
+
+- (void)setMuted:(BOOL)muted
+{
+  ASDN::MutexLocker l(_videoLock);
+
+  _muted = muted;
 }
 
 #pragma mark - Video Playback
 
 - (void)play
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   
   if (!_spinner) {
     _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
@@ -329,6 +350,7 @@
       AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
       if (!_player) {
         _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+        _player.muted = _muted;
       }
       playerLayer.player = _player;
       playerLayer.videoGravity = [self gravity];
@@ -362,7 +384,7 @@
 
 - (void)pause
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   
   [_player pause];
   [((UIActivityIndicatorView *)_spinner.view) stopAnimating];
@@ -374,7 +396,7 @@
 
 - (BOOL)isPlaying
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   
   return (_player.rate > 0 && !_player.error);
 }
@@ -383,31 +405,31 @@
 
 - (ASDisplayNode *)spinner
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   return _spinner;
 }
 
 - (AVPlayerItem *)curentItem
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   return _currentItem;
 }
 
 - (void)setCurrentItem:(AVPlayerItem *)currentItem
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   _currentItem = currentItem;
 }
 
 - (ASDisplayNode *)playerNode
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   return _playerNode;
 }
 
 - (BOOL)shouldBePlaying
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_videoLock);
   return _shouldBePlaying;
 }
 

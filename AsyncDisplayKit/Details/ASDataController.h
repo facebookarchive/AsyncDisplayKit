@@ -20,18 +20,25 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASDataController;
 
 typedef NSUInteger ASDataControllerAnimationOptions;
+
+/**
+ * ASCellNode creation block. Used to lazily create the ASCellNode instance for a specified indexPath.
+ */
+typedef ASCellNode * _Nonnull(^ASCellNodeBlock)();
+
 FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
 /**
  Data source for data controller
  It will be invoked in the same thread as the api call of ASDataController.
  */
+
 @protocol ASDataControllerSource <NSObject>
 
 /**
- Fetch the ASCellNode for specific index path.
+ Fetch the ASCellNode block for specific index path. This block should return the ASCellNode for the specified index path.
  */
-- (ASCellNode *)dataController:(ASDataController *)dataController nodeAtIndexPath:(NSIndexPath *)indexPath;
+- (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  The constrained size range for layout.

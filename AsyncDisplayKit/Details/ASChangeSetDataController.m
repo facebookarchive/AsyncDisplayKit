@@ -11,6 +11,8 @@
 #import "_ASHierarchyChangeSet.h"
 #import "ASAssert.h"
 
+#import "ASDataController+Subclasses.h"
+
 @interface ASChangeSetDataController ()
 
 @property (nonatomic, assign) NSUInteger batchUpdateCounter;
@@ -51,15 +53,7 @@
     [_changeSet markCompleted];
     
     [super beginUpdates];
-  
-    for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadSections:change.indexSet withAnimationOptions:change.animationOptions];
-    }
-    
-    for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
-    }
-    
+
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
       [super deleteRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
@@ -67,7 +61,15 @@
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
       [super deleteSections:change.indexSet withAnimationOptions:change.animationOptions];
     }
-    
+
+    for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
+      [super reloadSections:change.indexSet withAnimationOptions:change.animationOptions];
+    }
+
+    for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
+      [super reloadRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+    }
+
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
       [super insertSections:change.indexSet withAnimationOptions:change.animationOptions];
     }
@@ -75,7 +77,7 @@
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
       [super insertRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
-    
+
     [super endUpdatesAnimated:animated completion:completion];
     
     _changeSet = nil;

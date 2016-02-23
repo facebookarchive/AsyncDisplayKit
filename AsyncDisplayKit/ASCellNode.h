@@ -14,18 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef NSUInteger ASCellNodeAnimation;
 
-@protocol ASCellNodeLayoutDelegate <NSObject>
-
-/**
- * Notifies the delegate that the specified cell node has done a relayout.
- * The notification is done on main thread.
- *
- * @param node A node informing the delegate about the relayout.
- * @param sizeChanged `YES` if the node's `calculatedSize` changed during the relayout, `NO` otherwise.
- */
-- (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
-@end
-
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
  */
@@ -71,11 +59,6 @@ typedef NSUInteger ASCellNodeAnimation;
 @property (nonatomic, assign) BOOL highlighted;
 
 /*
- * A delegate to be notified (on main thread) after a relayout.
- */
-@property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
-
-/*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.
  */
@@ -96,16 +79,18 @@ typedef NSUInteger ASCellNodeAnimation;
 - (void)setNeedsLayout;
 
 /**
- * @abstract Initializes a cell with a given viewControllerBlock.
+ * @abstract Initializes a cell with a given view controller block.
  *
- * @param viewBlock The block that will be used to create the backing view.
- * @param didLoadBlock The block that will be called after the view created by the viewBlock is loaded
+ * @param viewControllerBlock The block that will be used to create the backing view controller.
+ * @param didLoadBlock The block that will be called after the view controller's view is loaded.
  *
  * @return An ASCellNode created using the root view of the view controller provided by the viewControllerBlock.
  * The view controller's root view is resized to match the calcuated size produced during layout.
  *
  */
-- (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
+- (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
+
+- (void)visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
 
 @end
 

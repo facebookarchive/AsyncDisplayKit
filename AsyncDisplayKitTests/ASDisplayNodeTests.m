@@ -166,6 +166,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 }
 
 - (BOOL)resignFirstResponder {
+  [super resignFirstResponder];
   if (self.isFirstResponder) {
     self.isFirstResponder = NO;
     return YES;

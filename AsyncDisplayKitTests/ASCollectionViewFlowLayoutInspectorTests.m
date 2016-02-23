@@ -25,6 +25,11 @@
   return [[ASCellNode alloc] init];
 }
 
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  return ^{ return [[ASCellNode alloc] init]; };
+}
+
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
   return 0;

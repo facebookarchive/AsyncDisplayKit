@@ -15,8 +15,6 @@
 #include <vector>
 #include <cassert>
 
-static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
-
 @interface ASFlowLayoutController()
 {
   ASIndexPathRange _visibleRange;
@@ -39,32 +37,6 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
 
 #pragma mark - Visible Indices
 
-// FIXME: This method can be removed once ASRangeControllerBeta becomes the main version.
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths rangeType:(ASLayoutRangeType)rangeType
-{
-  if (!indexPaths.count || rangeType >= _rangesByType.size()) {
-    return NO;
-  }
-
-  ASIndexPathRange existingRange = _rangesByType[rangeType];
-  ASIndexPathRange newRange = [self indexPathRangeForIndexPaths:indexPaths];
-  
-  ASIndexPath maximumStart = ASIndexPathMaximum(existingRange.start, newRange.start);
-  ASIndexPath minimumEnd = ASIndexPathMinimum(existingRange.end, newRange.end);
-  
-  if (ASIndexPathEqualToIndexPath(maximumStart, existingRange.start) || ASIndexPathEqualToIndexPath(minimumEnd, existingRange.end)) {
-    return YES;
-  }
-
-  NSInteger newStartDelta       = [self flowLayoutDistanceForRange:ASIndexPathRangeMake(_visibleRange.start, newRange.start)];
-  NSInteger existingStartDelta  = [self flowLayoutDistanceForRange:ASIndexPathRangeMake(_visibleRange.start, existingRange.start)] * kASFlowLayoutControllerRefreshingThreshold;
-  
-  NSInteger newEndDelta         = [self flowLayoutDistanceForRange:ASIndexPathRangeMake(_visibleRange.end, newRange.end)];
-  NSInteger existingEndDelta    = [self flowLayoutDistanceForRange:ASIndexPathRangeMake(_visibleRange.end, existingRange.end)] * kASFlowLayoutControllerRefreshingThreshold;
-  
-  return (newStartDelta > existingStartDelta) || (newEndDelta > existingEndDelta);
-}
-
 - (void)setVisibleNodeIndexPaths:(NSArray *)indexPaths
 {
   _visibleRange = [self indexPathRangeForIndexPaths:indexPaths];
@@ -74,7 +46,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
  * IndexPath array for the element in the working range.
  */
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   CGFloat viewportScreenMetric;
   ASScrollDirection leadingDirection;
@@ -92,7 +64,7 @@ static const CGFloat kASFlowLayoutControllerRefreshingThreshold = 0.3;
     leadingDirection = ASScrollDirectionUp;
   }
 
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeType:rangeType];
+  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
   CGFloat backScreens = scrollDirection == leadingDirection ? tuningParameters.leadingBufferScreenfuls : tuningParameters.trailingBufferScreenfuls;
   CGFloat frontScreens = scrollDirection == leadingDirection ? tuningParameters.trailingBufferScreenfuls : tuningParameters.leadingBufferScreenfuls;
 

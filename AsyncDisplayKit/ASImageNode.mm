@@ -66,6 +66,7 @@
 
   // Cropping.
   BOOL _cropEnabled; // Defaults to YES.
+  BOOL _forceUpscaling; //Defaults to NO.
   CGRect _cropRect; // Defaults to CGRectMake(0.5, 0.5, 0, 0)
   CGRect _cropDisplayBounds;
 }
@@ -84,6 +85,7 @@
   self.opaque = NO;
 
   _cropEnabled = YES;
+  _forceUpscaling = NO;
   _cropRect = CGRectMake(0.5, 0.5, 0, 0);
   _cropDisplayBounds = CGRectNull;
   _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
@@ -122,10 +124,8 @@
     _image = image;
 
     ASDN::MutexUnlocker u(_imageLock);
-    ASPerformBlockOnMainThread(^{
-      [self invalidateCalculatedLayout];
-      [self setNeedsDisplay];
-    });
+    [self invalidateCalculatedLayout];
+    [self setNeedsDisplay];
   }
 }
 
@@ -143,7 +143,7 @@
   self.placeholderEnabled = placeholderColor != nil;
 }
 
-- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
+- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
   return [[_ASImageNodeDrawParameters alloc] initWithBounds:self.bounds
                                                      opaque:self.opaque
@@ -156,6 +156,7 @@
 {
   UIImage *image;
   BOOL cropEnabled;
+  BOOL forceUpscaling;
   CGFloat contentsScale;
   CGRect cropDisplayBounds;
   CGRect cropRect;
@@ -169,6 +170,7 @@
     }
     
     cropEnabled = _cropEnabled;
+    forceUpscaling = _forceUpscaling;
     contentsScale = _contentsScaleForDisplay;
     cropDisplayBounds = _cropDisplayBounds;
     cropRect = _cropRect;
@@ -223,6 +225,7 @@
                                                  boundsSizeInPixels,
                                                  contentMode,
                                                  cropRect,
+                                                 forceUpscaling,
                                                  &backingSize,
                                                  &imageDrawRect);
   }
@@ -238,15 +241,15 @@
   // will do its rounding on pixel instead of point boundaries
   UIGraphicsBeginImageContextWithOptions(backingSize, isOpaque, 1.0);
   
+  CGContextRef context = UIGraphicsGetCurrentContext();
+  if (context && preContextBlock) {
+    preContextBlock(context);
+  }
+  
   // if view is opaque, fill the context with background color
   if (isOpaque && backgroundColor) {
     [backgroundColor setFill];
     UIRectFill({ .size = backingSize });
-  }
-  
-  CGContextRef context = UIGraphicsGetCurrentContext();
-  if (context && preContextBlock) {
-    preContextBlock(context);
   }
   
   // iOS 9 appears to contain a thread safety regression when drawing the same CGImageRef on
@@ -289,21 +292,19 @@
 {
   [super displayDidFinish];
 
-  ASDN::MutexLocker l(_imageLock);
-
-  void (^displayCompletionBlock)(BOOL canceled) = _displayCompletionBlock;
-  UIImage *image = _image;
-  
-  ASDN::MutexLocker u(_imageLock);
+  _imageLock.lock();
+    void (^displayCompletionBlock)(BOOL canceled) = _displayCompletionBlock;
+    UIImage *image = _image;
+  _imageLock.unlock();
   
   // If we've got a block to perform after displaying, do it.
   if (image && displayCompletionBlock) {
 
     displayCompletionBlock(NO);
-    
-    ASDN::MutexLocker l(_imageLock);
-    _displayCompletionBlock = nil;
-    ASDN::MutexLocker u(_imageLock);
+
+    _imageLock.lock();
+      _displayCompletionBlock = nil;
+    _imageLock.unlock();
   }
 }
 
@@ -383,6 +384,18 @@
     if (self.nodeLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
       [self setNeedsDisplay];
   });
+}
+
+- (BOOL)forceUpscaling
+{
+  ASDN::MutexLocker l(_imageLock);
+  return _forceUpscaling;
+}
+
+- (void)setForceUpscaling:(BOOL)forceUpscaling
+{
+  ASDN::MutexLocker l(_imageLock);
+  _forceUpscaling = forceUpscaling;
 }
 
 - (asimagenode_modification_block_t)imageModificationBlock

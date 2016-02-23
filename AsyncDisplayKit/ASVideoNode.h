@@ -10,9 +10,9 @@
 #if TARGET_OS_IOS
 @protocol ASVideoNodeDelegate;
 
-// If you need ASVideoNode, please use AsyncDisplayKit master until this comment is removed.
-// As of 1.9.6, ASVideoNode accidentally triggers creating the AVPlayerLayer even before playing
-// the video.  Using a lot of them intended to show static frame placeholders will be slow.
+// This is a relatively new component of AsyncDisplayKit.  It has many useful features, but
+// there is room for further expansion and optimization.  Please report any issues or requests
+// in an issue on GitHub: https://github.com/facebook/AsyncDisplayKit/issues
 
 @interface ASVideoNode : ASControlNode
 @property (atomic, strong, readwrite) AVAsset *asset;
@@ -23,6 +23,8 @@
 // If it leaves the visible interfaceState it will pause but will resume once it has returned
 @property (nonatomic, assign, readwrite) BOOL shouldAutoplay;
 @property (nonatomic, assign, readwrite) BOOL shouldAutorepeat;
+
+@property (nonatomic, assign, readwrite) BOOL muted;
 
 @property (atomic) NSString *gravity;
 @property (atomic) ASButtonNode *playButton;
@@ -39,5 +41,6 @@
 @protocol ASVideoNodeDelegate <NSObject>
 @optional
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode;
+- (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
 @end
 #endif

@@ -58,6 +58,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 /**
  @abstract Determines how the text is truncated to fit within the receiver's maximum size.
  @discussion Defaults to NSLineBreakByWordWrapping.
+ @note Setting a truncationMode in attributedString will override the truncation mode set here.
  */
 @property (nonatomic, assign) NSLineBreakMode truncationMode;
 
@@ -212,6 +213,16 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @property (nonatomic, assign) BOOL passthroughNonlinkTouches;
 
+#pragma mark - ASTextKit Customization
+/**
+ A block to provide a hook to provide a custom NSLayoutManager to the ASTextKitRenderer
+ */
+@property (nonatomic, copy) NSLayoutManager * (^layoutManagerCreationBlock)(void);
+
+/**
+ A block to provide a hook to provide a NSTextStorage to the Text Kit's layout manager.
+ */
+@property (nonatomic, copy) NSTextStorage * (^textStorageCreationBlock)(NSAttributedString *attributedString);
 
 @end
 

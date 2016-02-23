@@ -8,6 +8,7 @@
 
 #import "ASControlNode.h"
 #import "ASControlNode+Subclasses.h"
+#import "ASThread.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
@@ -21,6 +22,8 @@
 @interface ASControlNode ()
 {
 @private
+  ASDN::RecursiveMutex _controlLock;
+  
   // Control Attributes
   BOOL _enabled;
   BOOL _highlighted;
@@ -217,10 +220,12 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSParameterAssert(action);
   NSParameterAssert(controlEventMask != 0);
   
+  ASDN::MutexLocker l(_controlLock);
+  
   // Convert nil to [NSNull null] so that it can be used as a key for NSMapTable.
   if (!target)
     target = [NSNull null];
-  
+
   if (!_controlEventDispatchTable) {
     _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
   }
@@ -262,6 +267,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSParameterAssert(target);
   NSParameterAssert(controlEvent != 0 && controlEvent != ASControlNodeEventAllEvents);
 
+  ASDN::MutexLocker l(_controlLock);
+  
   // Grab the event dispatch table for this event.
   NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)];
   if (!eventDispatchTable)
@@ -273,6 +280,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 - (NSSet *)allTargets
 {
+  ASDN::MutexLocker l(_controlLock);
+  
   NSMutableSet *targets = [[NSMutableSet alloc] init];
 
   // Look at each event...
@@ -289,6 +298,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)removeTarget:(id)target action:(SEL)action forControlEvents:(ASControlNodeEvent)controlEventMask
 {
   NSParameterAssert(controlEventMask != 0);
+  
+  ASDN::MutexLocker l(_controlLock);
 
   // Enumerate the events in the mask, removing the target-action pair for each control event included in controlEventMask.
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEventMask, ^
@@ -341,6 +352,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)sendActionsForControlEvents:(ASControlNodeEvent)controlEvents withEvent:(UIEvent *)event
 {
   NSParameterAssert(controlEvents != 0);
+  
+  ASDN::MutexLocker l(_controlLock);
 
   // Enumerate the events in the mask, invoking the target-action pairs for each.
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEvents, ^

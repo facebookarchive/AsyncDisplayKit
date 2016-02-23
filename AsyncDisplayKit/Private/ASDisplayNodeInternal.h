@@ -17,12 +17,18 @@
 #import "ASSentinel.h"
 #import "ASThread.h"
 #import "ASLayoutOptions.h"
+#import "_ASTransitionContext.h"
+
+#include <vector>
 
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
+@class _ASPendingState;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
-void ASDisplayNodeRespectThreadAffinityOfNode(ASDisplayNode *node, void (^block)());
+
+/// Get the pending view state for the node, creating one if needed.
+_ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node);
 
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 {
@@ -34,48 +40,26 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   ASDisplayNodeMethodOverrideLayoutSpecThatFits = 1 << 4
 };
 
-@class _ASPendingState;
+@class _ASDisplayNodePosition;
+
+FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification;
+FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp;
 
 // Allow 2^n increments of begin disabling hierarchy notifications
 #define VISIBILITY_NOTIFICATIONS_DISABLED_BITS 4
 
-#define TIME_DISPLAYNODE_OPS (DEBUG || PROFILE)
+#define TIME_DISPLAYNODE_OPS 0 // If you're using this information frequently, try: (DEBUG || PROFILE)
 
 @interface ASDisplayNode ()
 {
-@protected
+@package
+  _ASPendingState *_pendingViewState;
+
   // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.
   ASDN::RecursiveMutex _propertyLock;
-
-  ASDisplayNode * __weak _supernode;
-
-  ASSentinel *_displaySentinel;
-  ASSentinel *_replaceAsyncSentinel;
-
-  // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
-  CGFloat _contentsScaleForDisplay;
-
-  ASLayout *_layout;
-  ASSizeRange _constrainedSize;
-  UIEdgeInsets _hitTestSlop;
-  NSMutableArray *_subnodes;
-
-  ASDisplayNodeViewBlock _viewBlock;
-  ASDisplayNodeLayerBlock _layerBlock;
-  ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
-  Class _viewClass;
-  Class _layerClass;
   UIView *_view;
   CALayer *_layer;
 
-  UIImage *_placeholderImage;
-  CALayer *_placeholderLayer;
-
-  // keeps track of nodes/subnodes that have not finished display, used with placeholders
-  NSMutableSet *_pendingDisplayNodes;
-
-  _ASPendingState *_pendingViewState;
-  
   struct ASDisplayNodeFlags {
     // public properties
     unsigned synchronous:1;
@@ -100,6 +84,44 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
     unsigned isInHierarchy:1;
     unsigned visibilityNotificationsDisabled:VISIBILITY_NOTIFICATIONS_DISABLED_BITS;
   } _flags;
+  
+@protected
+  ASDisplayNode * __weak _supernode;
+
+  ASSentinel *_displaySentinel;
+  ASSentinel *_replaceAsyncSentinel;
+
+  // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
+  CGFloat _contentsScaleForDisplay;
+
+  ASLayout *_previousLayout;
+  ASLayout *_layout;
+
+  ASSizeRange _previousConstrainedSize;
+  ASSizeRange _constrainedSize;
+
+  UIEdgeInsets _hitTestSlop;
+  NSMutableArray *_subnodes;
+  
+  _ASTransitionContext *_transitionContext;
+  BOOL _usesImplicitHierarchyManagement;
+
+  NSArray<ASDisplayNode *> *_insertedSubnodes;
+  NSArray<ASDisplayNode *> *_removedSubnodes;
+  std::vector<NSInteger> _insertedSubnodePositions;
+  std::vector<NSInteger> _removedSubnodePositions;
+
+  ASDisplayNodeViewBlock _viewBlock;
+  ASDisplayNodeLayerBlock _layerBlock;
+  ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
+  Class _viewClass;
+  Class _layerClass;
+
+  UIImage *_placeholderImage;
+  CALayer *_placeholderLayer;
+
+  // keeps track of nodes/subnodes that have not finished display, used with placeholders
+  NSMutableSet *_pendingDisplayNodes;
 
   ASDisplayNodeExtraIvars _extra;
   
@@ -120,9 +142,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 // The _ASDisplayLayer backing the node, if any.
 @property (nonatomic, readonly, retain) _ASDisplayLayer *asyncLayer;
 
-// Creates a pendingViewState if one doesn't exist. Allows setting view properties on a bg thread before there is a view.
-@property (atomic, retain, readonly) _ASPendingState *pendingViewState;
-
 // Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
 
@@ -131,10 +150,16 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 - (BOOL)__shouldLoadViewOrLayer;
 - (BOOL)__shouldSize;
 
-// Core implementation of -measureWithSizeRange:. Must be called with _propertyLock held.
-- (ASLayout *)__measureWithSizeRange:(ASSizeRange)constrainedSize;
-
+/**
+ Invoked before a call to setNeedsLayout to the underlying view
+ */
 - (void)__setNeedsLayout;
+
+/**
+ Invoked after a call to setNeedsDisplay to the underlying view
+ */
+- (void)__setNeedsDisplay;
+
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 
@@ -157,6 +182,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 - (id)initWithLayerClass:(Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
+
+- (void)applyPendingViewState;
 
 /**
  * // TODO: NOT YET IMPLEMENTED
