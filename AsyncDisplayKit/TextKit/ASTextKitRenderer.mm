@@ -49,9 +49,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     _constrainedSize = constrainedSize;
     _attributes = attributes;
     _sizeIsCalculated = NO;
-    if ([attributes.pointSizeScaleFactors count] > 0) {
-      _currentScaleFactor = attributes.currentScaleFactor;
-    }
   }
   return self;
 }
@@ -141,7 +138,8 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 - (void)_calculateSize
 {
   [self truncater];
-  if ([_attributes.pointSizeScaleFactors count] > 0) {
+  // if we have no scale factors or an unconstrained width, there is no reason to try to adjust the font size
+  if ([_attributes.pointSizeScaleFactors count] > 0 && isinf(_constrainedSize.width) == NO) {
     _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
   }
 
@@ -174,6 +172,11 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   // We add an assertion so we can track the rare conditions where a graphics context is not present
   ASDisplayNodeAssertNotNil(context, @"This is no good without a context.");
+  
+  // This renderer may not be the one that did the sizing. If that is the case its _currentScaleFactor will not be set, so we should compute it now
+  if ([_attributes.pointSizeScaleFactors count] > 0 && isinf(_constrainedSize.width) == NO && _sizeIsCalculated == NO) {
+    _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
+  }
 
   CGRect shadowInsetBounds = [[self shadower] insetRectWithConstrainedRect:bounds];
 

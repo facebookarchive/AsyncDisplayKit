@@ -244,7 +244,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
     .pointSizeScaleFactors = _pointSizeScaleFactors,
-    .currentScaleFactor = self.currentScaleFactor,
     .layoutManagerCreationBlock = self.layoutManagerCreationBlock,
     .textStorageCreationBlock = self.textStorageCreationBlock,
   };
@@ -338,10 +337,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   [self setNeedsDisplay];
   
-  CGSize size = [[self _renderer] size];
-  // the renderer computes the current scale factor during sizing, so let's grab it here
-  _currentScaleFactor = _renderer.currentScaleFactor;
-  return size;
+  return [[self _renderer] size];
 }
 
 #pragma mark - Modifying User Text
@@ -380,8 +376,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     self.isAccessibilityElement = YES;
   }
 
-  // reset the scale factor if we get a new string.
-  _currentScaleFactor = 0;
   if (attributedString.length > 0) {
     CGFloat screenScale = ASScreenScale();
     self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
