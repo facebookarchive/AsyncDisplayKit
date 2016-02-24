@@ -31,7 +31,7 @@ extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *
   if (node) {
     block(node);
   }
-  if (!layer && [node isNodeLoaded]) {
+  if (!layer && [node isNodeLoaded] && ASDisplayNodeThreadIsMain()) {
     layer = node.layer;
   }
   

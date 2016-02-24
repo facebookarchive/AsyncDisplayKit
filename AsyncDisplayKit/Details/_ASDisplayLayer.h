@@ -94,6 +94,18 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
  */
 + (UIImage *)displayWithParameters:(id<NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock;
 
+/**
+ * @abstract instance version of drawRect class method
+ * @see drawRect:withParameters:isCancelled:isRasterizing class method
+ */
+- (void)drawRect:(CGRect)bounds withParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing;
+
+/**
+ * @abstract instance version of display class method
+ * @see displayWithParameters:isCancelled class method
+ */
+- (UIImage *)displayWithParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled;
+
 // Called on the main thread only
 
 /**

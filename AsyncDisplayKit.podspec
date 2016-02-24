@@ -13,12 +13,19 @@ Pod::Spec.new do |spec|
       'AsyncDisplayKit/*.h',
       'AsyncDisplayKit/Details/**/*.h',
       'AsyncDisplayKit/Layout/*.h',
-      'Base/*.h'
+      'Base/*.h',
+      'AsyncDisplayKit/TextKit/ASTextNodeTypes.h'
   ]
 
   spec.source_files = [
       'AsyncDisplayKit/**/*.{h,m,mm}',
-      'Base/*.{h,m}'
+      'Base/*.{h,m}',
+      
+      # Most TextKit components are not public because the C++ content
+      # in the headers will cause build errors when using
+      # `use_frameworks!` on 0.39.0 & Swift 2.1.
+      # See https://github.com/facebook/AsyncDisplayKit/issues/1153
+      'AsyncDisplayKit/TextKit/*.h',
   ]
 
   spec.frameworks = 'AssetsLibrary'
@@ -30,6 +37,9 @@ Pod::Spec.new do |spec|
     'AsyncDisplayKit/Details/ASDealloc2MainObject.h',
     'AsyncDisplayKit/Details/ASDealloc2MainObject.m',
   ]
+  
+  #Subspecs
+  
   spec.subspec 'ASDealloc2MainObject' do |mrr|
     mrr.requires_arc = false
     mrr.source_files = [
@@ -38,6 +48,15 @@ Pod::Spec.new do |spec|
       'AsyncDisplayKit/Details/ASDealloc2MainObject.m',
     ]
   end
+  
+  spec.subspec 'PINRemoteImage' do |pin|
+      pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
+      pin.dependency 'PINRemoteImage/iOS', '>= 2'
+      pin.dependency 'AsyncDisplayKit/ASDealloc2MainObject'
+  end
+  
+  # Include optional FLAnimatedImage module
+  spec.default_subspec = 'PINRemoteImage'
 
   spec.social_media_url = 'https://twitter.com/fbOpenSource'
   spec.library = 'c++'

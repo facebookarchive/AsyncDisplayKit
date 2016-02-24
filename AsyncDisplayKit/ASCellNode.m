@@ -6,13 +6,14 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASCellNode.h"
+#import "ASCellNode+Internal.h"
 
 #import "ASInternalHelpers.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 
+#import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 
 #pragma mark -
@@ -20,13 +21,15 @@
 
 @interface ASCellNode ()
 {
-  UIViewController *_viewController;
+  ASDisplayNodeViewControllerBlock _viewControllerBlock;
+  ASDisplayNodeDidLoadBlock _viewControllerDidLoadBlock;
   ASDisplayNode *_viewControllerNode;
 }
 
 @end
 
 @implementation ASCellNode
+@synthesize layoutDelegate = _layoutDelegate;
 
 - (instancetype)init
 {
@@ -36,7 +39,6 @@
   // Use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
-
   return self;
 }
 
@@ -46,18 +48,39 @@
     return nil;
   
   ASDisplayNodeAssertNotNil(viewControllerBlock, @"should initialize with a valid block that returns a UIViewController");
-  
-  if (viewControllerBlock) {
-    
-    _viewControllerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-      _viewController = viewControllerBlock();
-      return _viewController.view;
-    } didLoadBlock:didLoadBlock];
-    
-    [self addSubnode:_viewControllerNode];
-  }
-  
+  _viewControllerBlock = viewControllerBlock;
+  _viewControllerDidLoadBlock = didLoadBlock;
+
   return self;
+}
+
+- (void)didLoad
+{
+  [super didLoad];
+
+  if (_viewControllerBlock != nil) {
+
+    UIViewController *viewController = _viewControllerBlock();
+    _viewControllerBlock = nil;
+
+    if ([viewController isKindOfClass:[ASViewController class]]) {
+      ASViewController *asViewController = (ASViewController *)viewController;
+      _viewControllerNode = asViewController.node;
+    } else {
+      _viewControllerNode = [[ASDisplayNode alloc] initWithViewBlock:^{
+        return viewController.view;
+      }];
+    }
+    [self addSubnode:_viewControllerNode];
+
+    // Since we just loaded our node, and added _viewControllerNode as a subnode,
+    // _viewControllerNode must have just loaded its view, so now is an appropriate
+    // time to execute our didLoadBlock, if we were given one.
+    if (_viewControllerDidLoadBlock != nil) {
+      _viewControllerDidLoadBlock(self);
+      _viewControllerDidLoadBlock = nil;
+    }
+  }
 }
 
 - (void)layout
@@ -94,13 +117,12 @@
 
 - (void)setNeedsLayout
 {
-  ASDisplayNodeAssertThreadAffinity(self);  
   CGSize oldSize = self.calculatedSize;
   [super setNeedsLayout];
 
-  if (_layoutDelegate != nil) {
-    BOOL sizeChanged = !CGSizeEqualToSize(oldSize, self.calculatedSize);
+  if (_layoutDelegate != nil && self.isNodeLoaded) {
     ASPerformBlockOnMainThread(^{
+      BOOL sizeChanged = !CGSizeEqualToSize(oldSize, self.calculatedSize);
       [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }
@@ -132,6 +154,11 @@
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self.view isKindOfClass:_ASDisplayView.class], @"ASCellNode views must be of type _ASDisplayView");
   [(_ASDisplayView *)self.view __forwardTouchesCancelled:touches withEvent:event];
+}
+
+- (void)visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame
+{
+    // To be overriden by subclasses
 }
 
 @end

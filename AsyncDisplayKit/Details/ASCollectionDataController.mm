@@ -17,15 +17,17 @@
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
-@interface ASCollectionDataController ()
+@interface ASCollectionDataController () {
+  BOOL _dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath;
+}
 
 - (id<ASCollectionDataControllerSource>)collectionDataSource;
 
 @end
 
 @implementation ASCollectionDataController {
-  NSMutableDictionary *_pendingNodes;
-  NSMutableDictionary *_pendingIndexPaths;
+  NSMutableDictionary<NSString *, NSMutableArray<ASCellNode *> *> *_pendingNodes;
+  NSMutableDictionary<NSString *, NSMutableArray<NSIndexPath *> *> *_pendingIndexPaths;
 }
 
 - (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled
@@ -49,7 +51,7 @@
     _pendingIndexPaths[kind] = indexPaths;
     
     // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
   }
 }
 
@@ -91,7 +93,7 @@
     _pendingIndexPaths[kind] = indexPaths;
     
     // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
   }
 }
 
@@ -132,7 +134,7 @@
     _pendingIndexPaths[kind] = indexPaths;
     
     // Measure loaded nodes before leaving the main thread
-    [self layoutLoadedNodes:nodes ofKind:kind atIndexPaths:indexPaths];
+    [self batchLayoutNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
   }
 }
 
@@ -176,7 +178,14 @@
     for (NSUInteger j = 0; j < rowCount; j++) {
       NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:j];
       [indexPaths addObject:indexPath];
-      [nodes addObject:[self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath]];
+      ASCellNodeBlock supplementaryCellBlock;
+      if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
+        supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
+      } else {
+        ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
+        supplementaryCellBlock = ^{ return supplementaryNode; };
+      }
+      [nodes addObject:supplementaryCellBlock];
     }
   }
 }
@@ -189,8 +198,14 @@
     for (NSUInteger i = 0; i < rowNum; i++) {
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
       [indexPaths addObject:indexPath];
-      ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
-      [nodes addObject:supplementaryNode];
+      ASCellNodeBlock supplementaryCellBlock;
+      if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
+        supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
+      } else {
+        ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
+        supplementaryCellBlock = ^{ return supplementaryNode; };
+      }
+      [nodes addObject:supplementaryCellBlock];
     }
   }];
 }
@@ -234,6 +249,14 @@
 - (id<ASCollectionDataControllerSource>)collectionDataSource
 {
   return (id<ASCollectionDataControllerSource>)self.dataSource;
+}
+
+- (void)setDataSource:(id<ASDataControllerSource>)dataSource
+{
+  [super setDataSource:dataSource];
+  _dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath = [self.collectionDataSource respondsToSelector:@selector(dataController:supplementaryNodeBlockOfKind:atIndexPath:)];
+
+  ASDisplayNodeAssertTrue(_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath || [self.collectionDataSource respondsToSelector:@selector(dataController:supplementaryNodeOfKind:atIndexPath:)]);
 }
 
 @end

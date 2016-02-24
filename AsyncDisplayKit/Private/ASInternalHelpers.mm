@@ -13,6 +13,7 @@
 #import <functional>
 #import <objc/runtime.h>
 
+#import "ASThread.h"
 #import "ASLayout.h"
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector)
@@ -35,7 +36,7 @@ BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL sele
 
 static void ASDispatchOnceOnMainThread(dispatch_once_t *predicate, dispatch_block_t block)
 {
-  if ([NSThread isMainThread]) {
+  if (ASDisplayNodeThreadIsMain()) {
     dispatch_once(predicate, block);
   } else {
     if (DISPATCH_EXPECT(*predicate == 0L, NO)) {
@@ -48,26 +49,21 @@ static void ASDispatchOnceOnMainThread(dispatch_once_t *predicate, dispatch_bloc
 
 void ASPerformBlockOnMainThread(void (^block)())
 {
-  if ([NSThread isMainThread]) {
+  if (ASDisplayNodeThreadIsMain()) {
     block();
   } else {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      block();
-    });
+    dispatch_async(dispatch_get_main_queue(), block);
   }
 }
 
 void ASPerformBlockOnBackgroundThread(void (^block)())
 {
-  if ([NSThread isMainThread]) {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      block();
-    });
+  if (ASDisplayNodeThreadIsMain()) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), block);
   } else {
     block();
   }
 }
-
 
 CGFloat ASScreenScale()
 {
@@ -92,6 +88,16 @@ CGFloat ASCeilPixelValue(CGFloat f)
 CGFloat ASRoundPixelValue(CGFloat f)
 {
   return roundf(f * ASScreenScale()) / ASScreenScale();
+}
+
+BOOL ASRunningOnOS7()
+{
+  static BOOL isOS7 = NO;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    isOS7 = ([[UIDevice currentDevice].systemVersion floatValue] < 8.0);
+  });
+  return isOS7;
 }
 
 @implementation NSIndexPath (ASInverseComparison)

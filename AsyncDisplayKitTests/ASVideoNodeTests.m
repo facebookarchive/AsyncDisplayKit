@@ -73,8 +73,6 @@
   XCTAssertEqualObjects(item, secondItem);
 }
 
-//Touch Handling
-
 - (void)testSpinnerDefaultsToNil
 {
   XCTAssertNil(_videoNode.spinner);
@@ -127,14 +125,27 @@
   XCTAssertNotNil(_videoNode.player);
 }
 
-- (void)testPlayerLayerNodeIsAddedOnDidLoad
+- (void)testPlayerLayerNodeIsAddedOnDidLoadIfVisibleAndAutoPlaying
 {
   _videoNode.asset = _firstAsset;
 
+  [_videoNode setInterfaceState:ASInterfaceStateNone];
   [_videoNode didLoad];
   
-  XCTAssert([_videoNode.subnodes containsObject:_videoNode.playerNode]);
+  XCTAssert(![_videoNode.subnodes containsObject:_videoNode.playerNode]);
 }
+
+- (void)testPlayerLayerNodeIsNotAddedIfVisibleButShouldNotBePlaying
+{
+  _videoNode.asset = _firstAsset;
+
+  [_videoNode pause];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible];
+  [_videoNode didLoad];
+  
+  XCTAssert(![_videoNode.subnodes containsObject:_videoNode.playerNode]);
+}
+
 
 - (void)testVideoStartsPlayingOnDidDidBecomeVisibleWhenShouldAutoplay
 {

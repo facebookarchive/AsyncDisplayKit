@@ -13,6 +13,7 @@
 #import "_ASDisplayLayer.h"
 #import "_ASDisplayView.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNodeTestsHelper.h"
 #import "UIView+ASConvenience.h"
 #import "ASCellNode.h"
@@ -165,6 +166,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 }
 
 - (BOOL)resignFirstResponder {
+  [super resignFirstResponder];
   if (self.isFirstResponder) {
     self.isFirstResponder = NO;
     return YES;
@@ -1715,22 +1717,49 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 // the fetch data interface state.
 - (void)testInterfaceStateForCellNode
 {
-    ASCellNode *cellNode = [ASCellNode new];
-    ASTestDisplayNode *node = [ASTestDisplayNode new];
-    XCTAssert(node.interfaceState == ASInterfaceStateNone);
-    XCTAssert(!node.hasFetchedData);
+  ASCellNode *cellNode = [ASCellNode new];
+  ASTestDisplayNode *node = [ASTestDisplayNode new];
+  XCTAssert(node.interfaceState == ASInterfaceStateNone);
+  XCTAssert(!node.hasFetchedData);
 
-    // Simulate range handler updating cell node.
-    [cellNode addSubnode:node];
-    [cellNode enterInterfaceState:ASInterfaceStateFetchData];
-    XCTAssert(node.hasFetchedData);
-    XCTAssert(node.interfaceState == ASInterfaceStateFetchData);
+  // Simulate range handler updating cell node.
+  [cellNode addSubnode:node];
+  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.interfaceState == ASInterfaceStateFetchData);
 
-    // If the node goes into a view it should not adopt the `InHierarchy` state.
-    ASTestWindow *window = [ASTestWindow new];
-    [window addSubview:cellNode.view];
-    XCTAssert(node.hasFetchedData);
-    XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
+  // If the node goes into a view it should not adopt the `InHierarchy` state.
+  ASTestWindow *window = [ASTestWindow new];
+  [window addSubview:cellNode.view];
+  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
+}
+
+- (void)testSetNeedsDataFetchImmediateState
+{
+  ASCellNode *cellNode = [ASCellNode new];
+  ASTestDisplayNode *node = [ASTestDisplayNode new];
+  [cellNode addSubnode:node];
+  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+  node.hasFetchedData = NO;
+  [cellNode setNeedsDataFetch];
+  XCTAssert(node.hasFetchedData);
+}
+
+- (void)testFetchDataExitingAndEnteringRange
+{
+  ASCellNode *cellNode = [ASCellNode new];
+  ASTestDisplayNode *node = [ASTestDisplayNode new];
+  [cellNode addSubnode:node];
+  [cellNode setHierarchyState:ASHierarchyStateRangeManaged];
+  
+  // Simulate enter range, fetch data, exit range
+  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+  [cellNode exitInterfaceState:ASInterfaceStateFetchData];
+  node.hasFetchedData = NO;
+  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+
+  XCTAssert(node.hasFetchedData);
 }
 
 - (void)testInitWithViewClass

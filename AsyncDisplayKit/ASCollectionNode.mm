@@ -187,16 +187,36 @@
   [self.view clearFetchedData];
 }
 
+- (void)beginUpdates
+{
+  [self.view.dataController beginUpdates];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated
+{
+  [self.view.dataController endUpdatesAnimated:animated completion:nil];
+}
+
 #pragma mark - ASCollectionView Forwards
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [self.view.rangeController tuningParametersForRangeType:rangeType];
+  return [self.view.rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  return [self.view.rangeController setTuningParameters:tuningParameters forRangeType:rangeType];
+  [self.view.rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+}
+
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.view.rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.view.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
 - (void)reloadDataWithCompletion:(void (^)())completion

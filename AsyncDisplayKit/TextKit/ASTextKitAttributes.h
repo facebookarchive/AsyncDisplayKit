@@ -58,6 +58,7 @@ struct ASTextKitAttributes {
   NSLineBreakMode lineBreakMode;
   /**
    The maximum number of lines to draw in the drawable region.  Leave blank or set to 0 to define no maximum.
+   This is required to apply scale factors to shrink text to fit within a number of lines
    */
   NSUInteger maximumNumberOfLines;
   /**
@@ -82,9 +83,27 @@ struct ASTextKitAttributes {
    */
   CGFloat shadowRadius;
   /**
-   A pointer to a function that that returns a custom layout manager subclass. If nil, defaults to NSLayoutManager.
+   An array of scale factors in descending order to apply to the text to try to make it fit into a constrained size.
    */
-  NSLayoutManager *(*layoutManagerFactory)(void);
+  NSArray *pointSizeScaleFactors;
+  /**
+   The currently applied scale factor. Only valid if pointSizeScaleFactors are provided. Defaults to 0 (no scaling)
+   */
+  CGFloat currentScaleFactor;
+  /**
+   An optional block that returns a custom layout manager subclass. If nil, defaults to NSLayoutManager.
+   */
+  NSLayoutManager * (^layoutManagerCreationBlock)(void);
+  
+  /**
+   An optional delegate for the NSLayoutManager
+   */
+  id<NSLayoutManagerDelegate> layoutManagerDelegate;
+
+  /**
+   An optional block that returns a custom NSTextStorage for the layout manager. 
+   */
+  NSTextStorage * (^textStorageCreationBlock)(NSAttributedString *attributedString);
 
   /**
    We provide an explicit copy function so we can use aggregate initializer syntax while providing copy semantics for
@@ -103,7 +122,11 @@ struct ASTextKitAttributes {
       [shadowColor copy],
       shadowOpacity,
       shadowRadius,
-      layoutManagerFactory
+      pointSizeScaleFactors,
+      currentScaleFactor,
+      layoutManagerCreationBlock,
+      layoutManagerDelegate,
+      textStorageCreationBlock,
     };
   };
 
@@ -114,7 +137,10 @@ struct ASTextKitAttributes {
     && maximumNumberOfLines == other.maximumNumberOfLines
     && shadowOpacity == other.shadowOpacity
     && shadowRadius == other.shadowRadius
-    && layoutManagerFactory == other.layoutManagerFactory
+    && [pointSizeScaleFactors isEqualToArray:other.pointSizeScaleFactors]
+    && currentScaleFactor == currentScaleFactor
+    && layoutManagerCreationBlock == other.layoutManagerCreationBlock
+    && textStorageCreationBlock == other.textStorageCreationBlock
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)
     && _objectsEqual(exclusionPaths, other.exclusionPaths)
     && _objectsEqual(avoidTailTruncationSet, other.avoidTailTruncationSet)

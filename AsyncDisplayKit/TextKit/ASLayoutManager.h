@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
+/* Copyright (c) 2016-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -6,14 +6,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-#import <AsyncDisplayKit/ASRangeHandler.h>
-
-NS_ASSUME_NONNULL_BEGIN
-
-@interface ASRangeHandlerRender : NSObject <ASRangeHandler>
+@interface ASLayoutManager : NSLayoutManager
 
 @end
-
-NS_ASSUME_NONNULL_END

@@ -14,6 +14,7 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 
 #import "ASImageNode+CGExtras.h"
 
@@ -22,42 +23,34 @@
 
 @interface _ASImageNodeDrawParameters : NSObject
 
-@property (nonatomic, assign, readonly) BOOL cropEnabled;
 @property (nonatomic, assign) BOOL opaque;
-@property (nonatomic, retain) UIImage *image;
 @property (nonatomic, assign) CGRect bounds;
 @property (nonatomic, assign) CGFloat contentsScale;
 @property (nonatomic, retain) UIColor *backgroundColor;
 @property (nonatomic, assign) UIViewContentMode contentMode;
-@property (nonatomic, assign) CGRect cropRect;
-@property (nonatomic, copy) asimagenode_modification_block_t imageModificationBlock;
 
 @end
 
 // TODO: eliminate explicit parameters with a set of keys copied from the node
 @implementation _ASImageNodeDrawParameters
 
-- (id)initWithCrop:(BOOL)cropEnabled opaque:(BOOL)opaque image:(UIImage *)image bounds:(CGRect)bounds contentsScale:(CGFloat)contentsScale backgroundColor:(UIColor *)backgroundColor contentMode:(UIViewContentMode)contentMode cropRect:(CGRect)cropRect imageModificationBlock:(asimagenode_modification_block_t)imageModificationBlock
+- (id)initWithBounds:(CGRect)bounds opaque:(BOOL)opaque contentsScale:(CGFloat)contentsScale backgroundColor:(UIColor *)backgroundColor contentMode:(UIViewContentMode)contentMode
 {
   self = [self init];
   if (!self) return nil;
 
-  _cropEnabled = cropEnabled;
   _opaque = opaque;
-  _image = image;
   _bounds = bounds;
   _contentsScale = contentsScale;
   _backgroundColor = backgroundColor;
   _contentMode = contentMode;
-  _cropRect = cropRect;
-  _imageModificationBlock = [imageModificationBlock copy];
 
   return self;
 }
 
 - (NSString *)description
 {
-  return [NSString stringWithFormat:@"<%@ : %p image:%@ cropEnabled:%@ opaque:%@ bounds:%@ contentsScale:%.2f backgroundColor:%@ contentMode:%@ cropRect:%@>", [self class], self, self.image, @(self.cropEnabled), @(self.opaque), NSStringFromCGRect(self.bounds), self.contentsScale, self.backgroundColor, ASDisplayNodeNSStringFromUIContentMode(self.contentMode), NSStringFromCGRect(self.cropRect)];
+  return [NSString stringWithFormat:@"<%@ : %p opaque:%@ bounds:%@ contentsScale:%.2f backgroundColor:%@ contentMode:%@>", [self class], self, @(self.opaque), NSStringFromCGRect(self.bounds), self.contentsScale, self.backgroundColor, ASDisplayNodeNSStringFromUIContentMode(self.contentMode)];
 }
 
 @end
@@ -73,11 +66,13 @@
 
   // Cropping.
   BOOL _cropEnabled; // Defaults to YES.
+  BOOL _forceUpscaling; //Defaults to NO.
   CGRect _cropRect; // Defaults to CGRectMake(0.5, 0.5, 0, 0)
   CGRect _cropDisplayBounds;
 }
 
 @synthesize image = _image;
+@synthesize imageModificationBlock = _imageModificationBlock;
 
 - (id)init
 {
@@ -90,6 +85,7 @@
   self.opaque = NO;
 
   _cropEnabled = YES;
+  _forceUpscaling = NO;
   _cropRect = CGRectMake(0.5, 0.5, 0, 0);
   _cropDisplayBounds = CGRectNull;
   _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
@@ -128,10 +124,8 @@
     _image = image;
 
     ASDN::MutexUnlocker u(_imageLock);
-    ASPerformBlockOnMainThread(^{
-      [self invalidateCalculatedLayout];
-      [self setNeedsDisplay];
-    });
+    [self invalidateCalculatedLayout];
+    [self setNeedsDisplay];
   }
 }
 
@@ -149,92 +143,115 @@
   self.placeholderEnabled = placeholderColor != nil;
 }
 
-- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer;
+- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
-  BOOL hasValidCropBounds = _cropEnabled && !CGRectIsNull(_cropDisplayBounds) && !CGRectIsEmpty(_cropDisplayBounds);
-
-  return [[_ASImageNodeDrawParameters alloc] initWithCrop:_cropEnabled
-                                                   opaque:self.opaque
-                                                    image:self.image
-                                                   bounds:(hasValidCropBounds ? _cropDisplayBounds : self.bounds)
-                                            contentsScale:self.contentsScaleForDisplay
-                                          backgroundColor:self.backgroundColor
-                                              contentMode:self.contentMode
-                                                 cropRect:self.cropRect
-                                   imageModificationBlock:self.imageModificationBlock];
+  return [[_ASImageNodeDrawParameters alloc] initWithBounds:self.bounds
+                                                     opaque:self.opaque
+                                              contentsScale:self.contentsScaleForDisplay
+                                            backgroundColor:self.backgroundColor
+                                                contentMode:self.contentMode];
 }
 
-+ (UIImage *)displayWithParameters:(_ASImageNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
+- (UIImage *)displayWithParameters:(_ASImageNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
 {
-  UIImage *image = parameters.image;
-
-  if (!image) {
-    return nil;
+  UIImage *image;
+  BOOL cropEnabled;
+  BOOL forceUpscaling;
+  CGFloat contentsScale;
+  CGRect cropDisplayBounds;
+  CGRect cropRect;
+  asimagenode_modification_block_t imageModificationBlock;
+  
+  {
+    ASDN::MutexLocker l(_imageLock);
+    image = _image;
+    if (!image) {
+      return nil;
+    }
+    
+    cropEnabled = _cropEnabled;
+    forceUpscaling = _forceUpscaling;
+    contentsScale = _contentsScaleForDisplay;
+    cropDisplayBounds = _cropDisplayBounds;
+    cropRect = _cropRect;
+    imageModificationBlock = _imageModificationBlock;
   }
-
-  ASDisplayNodeAssert(parameters.contentsScale > 0, @"invalid contentsScale at display time");
-
+  
+  ASDisplayNodeContextModifier preContextBlock = self.willDisplayNodeContentWithRenderingContext;
+  ASDisplayNodeContextModifier postContextBlock = self.didDisplayNodeContentWithRenderingContext;
+  
+  BOOL hasValidCropBounds = cropEnabled && !CGRectIsNull(cropDisplayBounds) && !CGRectIsEmpty(cropDisplayBounds);
+  
+  CGRect bounds = (hasValidCropBounds ? cropDisplayBounds : parameters.bounds);
+  BOOL isOpaque = parameters.opaque;
+  UIColor *backgroundColor = parameters.backgroundColor;
+  UIViewContentMode contentMode = parameters.contentMode;
+  
+  ASDisplayNodeAssert(contentsScale > 0, @"invalid contentsScale at display time");
+  
   // if the image is resizable, bail early since the image has likely already been configured
   BOOL stretchable = !UIEdgeInsetsEqualToEdgeInsets(image.capInsets, UIEdgeInsetsZero);
   if (stretchable) {
-    if (parameters.imageModificationBlock != NULL) {
-      image = parameters.imageModificationBlock(image);
+    if (imageModificationBlock != NULL) {
+      image = imageModificationBlock(image);
     }
     return image;
   }
-
-  CGRect bounds = parameters.bounds;
-
-  CGFloat contentsScale = parameters.contentsScale;
-  UIViewContentMode contentMode = parameters.contentMode;
+  
   CGSize imageSize = image.size;
   CGSize imageSizeInPixels = CGSizeMake(imageSize.width * image.scale, imageSize.height * image.scale);
   CGSize boundsSizeInPixels = CGSizeMake(floorf(bounds.size.width * contentsScale), floorf(bounds.size.height * contentsScale));
-
+  
   BOOL contentModeSupported =    contentMode == UIViewContentModeScaleAspectFill
-                              || contentMode == UIViewContentModeScaleAspectFit
-                              || contentMode == UIViewContentModeCenter;
-
+  || contentMode == UIViewContentModeScaleAspectFit
+  || contentMode == UIViewContentModeCenter;
+  
   CGSize backingSize;
   CGRect imageDrawRect;
-
+  
   if (boundsSizeInPixels.width * contentsScale < 1.0f ||
       boundsSizeInPixels.height * contentsScale < 1.0f ||
       imageSizeInPixels.width < 1.0f ||
       imageSizeInPixels.height < 1.0f) {
     return nil;
   }
-
+  
   // If we're not supposed to do any cropping, just decode image at original size
-  if (!parameters.cropEnabled || !contentModeSupported || stretchable) {
+  if (!cropEnabled || !contentModeSupported || stretchable) {
     backingSize = imageSizeInPixels;
     imageDrawRect = (CGRect){.size = backingSize};
   } else {
     ASCroppedImageBackingSizeAndDrawRectInBounds(imageSizeInPixels,
                                                  boundsSizeInPixels,
                                                  contentMode,
-                                                 parameters.cropRect,
+                                                 cropRect,
+                                                 forceUpscaling,
                                                  &backingSize,
                                                  &imageDrawRect);
   }
-
+  
   if (backingSize.width <= 0.0f ||
       backingSize.height <= 0.0f ||
       imageDrawRect.size.width <= 0.0f ||
       imageDrawRect.size.height <= 0.0f) {
     return nil;
   }
-
+  
   // Use contentsScale of 1.0 and do the contentsScale handling in boundsSizeInPixels so ASCroppedImageBackingSizeAndDrawRectInBounds
   // will do its rounding on pixel instead of point boundaries
-  UIGraphicsBeginImageContextWithOptions(backingSize, parameters.opaque, 1.0);
+  UIGraphicsBeginImageContextWithOptions(backingSize, isOpaque, 1.0);
+  
+  CGContextRef context = UIGraphicsGetCurrentContext();
+  if (context && preContextBlock) {
+    preContextBlock(context);
+  }
   
   // if view is opaque, fill the context with background color
-  if (parameters.opaque && parameters.backgroundColor) {
-    [parameters.backgroundColor setFill];
+  if (isOpaque && backgroundColor) {
+    [backgroundColor setFill];
     UIRectFill({ .size = backingSize });
   }
-
+  
   // iOS 9 appears to contain a thread safety regression when drawing the same CGImageRef on
   // multiple threads concurrently.  In fact, instead of crashing, it appears to deadlock.
   // The issue is present in Mac OS X El Capitan and has been seen hanging Pro apps like Adobe Premier,
@@ -250,20 +267,24 @@
   @synchronized(image) {
     [image drawInRect:imageDrawRect];
   }
-
+  
+  if (context && postContextBlock) {
+    postContextBlock(context);
+  }
+  
   if (isCancelled()) {
     UIGraphicsEndImageContext();
     return nil;
   }
-
+  
   UIImage *result = UIGraphicsGetImageFromCurrentImageContext();
-
+  
   UIGraphicsEndImageContext();
-
-  if (parameters.imageModificationBlock != NULL) {
-    result = parameters.imageModificationBlock(result);
+  
+  if (imageModificationBlock != NULL) {
+    result = imageModificationBlock(result);
   }
-
+  
   return result;
 }
 
@@ -271,12 +292,19 @@
 {
   [super displayDidFinish];
 
+  _imageLock.lock();
+    void (^displayCompletionBlock)(BOOL canceled) = _displayCompletionBlock;
+    UIImage *image = _image;
+  _imageLock.unlock();
+  
   // If we've got a block to perform after displaying, do it.
-  if (self.image && _displayCompletionBlock) {
+  if (image && displayCompletionBlock) {
 
-    // FIXME: _displayCompletionBlock is not protected by lock
-    _displayCompletionBlock(NO);
-    _displayCompletionBlock = nil;
+    displayCompletionBlock(NO);
+
+    _imageLock.lock();
+      _displayCompletionBlock = nil;
+    _imageLock.unlock();
   }
 }
 
@@ -290,7 +318,7 @@
   }
 
   // Stash the block and call-site queue. We'll invoke it in -displayDidFinish.
-  // FIXME: _displayCompletionBlock not protected by lock
+  ASDN::MutexLocker l(_imageLock);
   if (_displayCompletionBlock != displayCompletionBlock) {
     _displayCompletionBlock = [displayCompletionBlock copy];
   }
@@ -301,6 +329,7 @@
 #pragma mark - Cropping
 - (BOOL)isCropEnabled
 {
+  ASDN::MutexLocker l(_imageLock);
   return _cropEnabled;
 }
 
@@ -311,6 +340,7 @@
 
 - (void)setCropEnabled:(BOOL)cropEnabled recropImmediately:(BOOL)recropImmediately inBounds:(CGRect)cropBounds
 {
+  ASDN::MutexLocker l(_imageLock);
   if (_cropEnabled == cropEnabled)
     return;
 
@@ -331,11 +361,13 @@
 
 - (CGRect)cropRect
 {
+  ASDN::MutexLocker l(_imageLock);
   return _cropRect;
 }
 
 - (void)setCropRect:(CGRect)cropRect
 {
+  ASDN::MutexLocker l(_imageLock);
   if (CGRectEqualToRect(_cropRect, cropRect))
     return;
 
@@ -352,6 +384,30 @@
     if (self.nodeLoaded && self.contentMode == UIViewContentModeScaleAspectFill && isCroppingImage)
       [self setNeedsDisplay];
   });
+}
+
+- (BOOL)forceUpscaling
+{
+  ASDN::MutexLocker l(_imageLock);
+  return _forceUpscaling;
+}
+
+- (void)setForceUpscaling:(BOOL)forceUpscaling
+{
+  ASDN::MutexLocker l(_imageLock);
+  _forceUpscaling = forceUpscaling;
+}
+
+- (asimagenode_modification_block_t)imageModificationBlock
+{
+  ASDN::MutexLocker l(_imageLock);
+  return _imageModificationBlock;
+}
+
+- (void)setImageModificationBlock:(asimagenode_modification_block_t)imageModificationBlock
+{
+  ASDN::MutexLocker l(_imageLock);
+  _imageModificationBlock = imageModificationBlock;
 }
 
 @end

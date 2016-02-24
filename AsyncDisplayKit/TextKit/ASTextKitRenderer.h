@@ -16,6 +16,7 @@
 
 @class ASTextKitContext;
 @class ASTextKitShadower;
+@class ASTextKitFontSizeAdjuster;
 @protocol ASTextKitTruncating;
 
 /**
@@ -46,11 +47,15 @@
 
 @property (nonatomic, strong, readonly) id<ASTextKitTruncating> truncater;
 
+@property (nonatomic, strong, readonly) ASTextKitFontSizeAdjuster *fontSizeAdjuster;
+
 @property (nonatomic, strong, readonly) ASTextKitShadower *shadower;
 
 @property (nonatomic, assign, readonly) ASTextKitAttributes attributes;
 
 @property (nonatomic, assign, readwrite) CGSize constrainedSize;
+
+@property (nonatomic, assign, readonly) CGFloat currentScaleFactor;
 
 #pragma mark - Drawing
 /*
