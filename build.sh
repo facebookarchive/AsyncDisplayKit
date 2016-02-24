@@ -35,13 +35,31 @@ if [ "$MODE" = "examples" ]; then
 
     for example in examples/*/; do
         echo "Building $example."
-        pod install --project-directory=$example
-        xctool \
-            -workspace "${example}Sample.xcworkspace" \
-            -scheme Sample \
-            -sdk "$SDK" \
-            -destination "$PLATFORM" \
-            build
+
+        if [ -f "${example}/Podfile" ]; then
+          echo "Using CocoaPods"
+          pod install --project-directory=$example
+          
+          xctool \
+              -workspace "${example}Sample.xcworkspace" \
+              -scheme Sample \
+              -sdk "$SDK" \
+              -destination "$PLATFORM" \
+              build
+        elif [ -f "${example}/Cartfile" ]; then
+          echo "Using Carthage"
+          cd $example
+          carthage update --platform iOS
+          
+          xctool \
+              -project "Sample.xcodeproj" \
+              -scheme Sample \
+              -sdk "$SDK" \
+              -destination "$PLATFORM" \
+              build
+          
+          cd ../..
+        fi
     done
     trap - EXIT
     exit 0
