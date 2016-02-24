@@ -37,7 +37,7 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
 NS_ASSUME_NONNULL_BEGIN
 
 /** Lays out a single layoutable child and position it so that it is centered into the layout bounds. */
-@interface ASCenterLayoutSpec : ASRelativeLayoutSpec
+@interface ASCenterLayoutSpec : ASLayoutSpec
 
 @property (nonatomic, assign) ASCenterLayoutSpecCenteringOptions centeringOptions;
 @property (nonatomic, assign) ASCenterLayoutSpecSizingOptions sizingOptions;

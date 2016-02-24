@@ -17,20 +17,24 @@
 {
   ASCenterLayoutSpecCenteringOptions _centeringOptions;
   ASCenterLayoutSpecSizingOptions _sizingOptions;
+  ASRelativeLayoutSpec *_internalLayoutSpec;
 }
 
 - (instancetype)initWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
                            sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
                                    child:(id<ASLayoutable>)child;
 {
-  ASRelativeLayoutSpecPosition verticalPosition = [self verticalPositionFromCenteringOptions:centeringOptions];
-  ASRelativeLayoutSpecPosition horizontalPosition = [self horizontalPositionFromCenteringOptions:centeringOptions];
-  
-  if (!(self = [super initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOptions child:child])) {
+  if (!(self = [super init])) {
     return nil;
   }
   _centeringOptions = centeringOptions;
   _sizingOptions = sizingOptions;
+  
+  ASRelativeLayoutSpecPosition verticalPosition = [self verticalPositionFromCenteringOptions:centeringOptions];
+  ASRelativeLayoutSpecPosition horizontalPosition = [self horizontalPositionFromCenteringOptions:centeringOptions];
+  
+  _internalLayoutSpec = [ASRelativeLayoutSpec relativePositionLayoutSpecWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOptions child:child];
+  
   return self;
 }
 
@@ -46,8 +50,8 @@
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   _centeringOptions = centeringOptions;
   
-  [self setHorizontalPosition:[self horizontalPositionFromCenteringOptions:centeringOptions]];
-  [self setVerticalPosition:[self verticalPositionFromCenteringOptions:centeringOptions]];
+  [_internalLayoutSpec setHorizontalPosition:[self horizontalPositionFromCenteringOptions:centeringOptions]];
+  [_internalLayoutSpec setVerticalPosition:[self verticalPositionFromCenteringOptions:centeringOptions]];
 }
 
 - (void)setSizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
@@ -55,7 +59,22 @@
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   _sizingOptions = sizingOptions;
 
-  [self setSizingOption:sizingOptions];
+  [_internalLayoutSpec setSizingOption:sizingOptions];
+}
+
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+  return [_internalLayoutSpec measureWithSizeRange:constrainedSize];
+}
+
+- (void)setChildren:(NSArray *)children
+{
+  [_internalLayoutSpec setChildren:children];
+}
+
+- (NSArray *)children
+{
+  return [_internalLayoutSpec children];
 }
 
 - (ASRelativeLayoutSpecPosition)horizontalPositionFromCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions {
