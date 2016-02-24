@@ -287,8 +287,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (asyncDelegate == nil) {
     _asyncDelegate = nil;
     _proxyDelegate = _isDeallocating ? nil : [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
+    _asyncDelegateImplementsScrollviewDidScroll = NO;
   } else {
     _asyncDelegate = asyncDelegate;
+    _asyncDelegateImplementsScrollviewDidScroll = [_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)];
     _proxyDelegate = [[ASTableViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
   }
   
