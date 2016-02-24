@@ -139,7 +139,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   [self truncater];
   // if we have no scale factors or an unconstrained width, there is no reason to try to adjust the font size
-  if ([_attributes.pointSizeScaleFactors count] > 0 && isinf(_constrainedSize.width) == NO) {
+  if (isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
     _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
   }
 
@@ -174,7 +174,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   ASDisplayNodeAssertNotNil(context, @"This is no good without a context.");
   
   // This renderer may not be the one that did the sizing. If that is the case its _currentScaleFactor will not be set, so we should compute it now
-  if ([_attributes.pointSizeScaleFactors count] > 0 && isinf(_constrainedSize.width) == NO && _sizeIsCalculated == NO) {
+  if (_sizeIsCalculated == NO && isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
     _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
   }
 
