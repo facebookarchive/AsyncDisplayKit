@@ -6,7 +6,7 @@
 //
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASLayoutSpec.h>
 
 /** How the child is positioned within the spec. */
 typedef NS_OPTIONS(NSUInteger, ASRelativeLayoutSpecPosition) {
@@ -51,6 +51,16 @@ NS_ASSUME_NONNULL_BEGIN
                                                    verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition
                                                        sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
                                                               child:(id<ASLayoutable>)child;
+
+/*!
+ * @discussion convenience initializer for a ASRelativeLayoutSpec
+ * @param horizontalPosition how to position the item on the horizontal (x) axis
+ * @param verticalPosition how to position the item on the vertical (y) axis
+ * @param sizingOption how much size to take up
+ * @param child the child to layout
+ * @return a configured ASRelativeLayoutSpec
+ */
+- (instancetype) initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child;
 
 @end
 
