@@ -64,6 +64,11 @@
   void (^_displayCompletionBlock)(BOOL canceled);
   ASDN::RecursiveMutex _imageLock;
 
+#if TARGET_OS_TV
+  //tvOS
+  BOOL isDefaultState;
+#endif
+  
   // Cropping.
   BOOL _cropEnabled; // Defaults to YES.
   BOOL _forceUpscaling; //Defaults to NO.
@@ -409,6 +414,148 @@
   ASDN::MutexLocker l(_imageLock);
   _imageModificationBlock = imageModificationBlock;
 }
+
+
+#if TARGET_OS_TV
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  [super touchesBegan:touches withEvent:event];
+  isDefaultState = NO;
+  CGSize targetShadowOffset = CGSizeMake(0.0, self.bounds.size.height/8);
+  [self.layer removeAllAnimations];
+  [CATransaction begin];
+  [CATransaction setCompletionBlock:^{
+    self.layer.shadowOffset = targetShadowOffset;
+  }];
+  
+  CABasicAnimation *shadowOffsetAnimation = [CABasicAnimation animationWithKeyPath:@"shadowOffset"];
+  shadowOffsetAnimation.toValue = [NSValue valueWithCGSize:targetShadowOffset];
+  shadowOffsetAnimation.duration = 0.4;
+  shadowOffsetAnimation.removedOnCompletion = NO;
+  shadowOffsetAnimation.fillMode = kCAFillModeForwards;
+  shadowOffsetAnimation.timingFunction = [CAMediaTimingFunction functionWithName:@"easeOut"];
+  [self.layer addAnimation:shadowOffsetAnimation forKey:@"shadowOffset"];
+  [CATransaction commit];
+  
+  CABasicAnimation *shadowOpacityAnimation = [CABasicAnimation animationWithKeyPath:@"shadowOpacity"];
+  shadowOpacityAnimation.toValue = [NSNumber numberWithFloat:0.45];
+  shadowOpacityAnimation.duration = 0.4;
+  shadowOpacityAnimation.removedOnCompletion = false;
+  shadowOpacityAnimation.fillMode = kCAFillModeForwards;
+  shadowOpacityAnimation.timingFunction = [CAMediaTimingFunction functionWithName:@"easeOut"];
+  [self.layer addAnimation:shadowOpacityAnimation forKey:@"shadowOpacityAnimation"];
+  
+  self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1.25, 1.25);
+  
+  [CATransaction commit];
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+  if (!isDefaultState) {
+    UITouch *touch = [touches anyObject];
+    // Get the specific point that was touched
+    CGPoint point = [touch locationInView:self.view];
+    float tilt = 0;
+    float yaw = 0;
+    BOOL topHalf = NO;
+    if (point.y > CGRectGetHeight(self.view.frame)) {
+      tilt = 15;
+    } else if (point.y < -CGRectGetHeight(self.view.frame)) {
+      tilt = -15;
+    } else {
+      tilt = (point.y/CGRectGetHeight(self.view.frame))*15;
+    }
+    if (tilt < 0) {
+      topHalf = YES;
+    }
+    
+    if (point.x > CGRectGetWidth(self.view.frame)) {
+      yaw = 10;
+    } else if (point.x < -CGRectGetWidth(self.view.frame)) {
+      yaw = -10;
+    } else {
+      yaw = (point.x/CGRectGetWidth(self.view.frame))*10;
+    }
+    if (!topHalf) {
+      if (yaw > 0) {
+        yaw = -yaw;
+      } else {
+        yaw = fabsf(yaw);
+      }
+    }
+
+    CATransform3D tiltTransform = CATransform3DMakeRotation([self degressToRadians:tilt],1.0,0.0,0.0);
+    CATransform3D yawTransform = CATransform3DMakeRotation([self degressToRadians:yaw],0.0,1.0,0.0);
+    CATransform3D transform = CATransform3DConcat(tiltTransform, yawTransform);
+    CATransform3D scaleAndTransform = CATransform3DConcat(transform, CATransform3DMakeAffineTransform(CGAffineTransformScale(CGAffineTransformIdentity, 1.25, 1.25)));
+    
+    [UIView animateWithDuration:0.5 animations:^{
+      self.view.layer.transform = scaleAndTransform;
+    }];
+  } else {
+    [self setDefaultState];
+  }
+}
+
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  [self finishTouches];
+}
+
+- (void)finishTouches
+{
+  if (!isDefaultState) {
+    CGSize targetShadowOffset = CGSizeMake(0.0, self.bounds.size.height/8);
+    CATransform3D targetScaleTransform = CATransform3DMakeScale(1.2, 1.2, 1.2);
+    [CATransaction begin];
+    [CATransaction setCompletionBlock:^{
+      self.layer.shadowOffset = targetShadowOffset;
+    }];
+    [CATransaction commit];
+    
+    [UIView animateWithDuration:0.4 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+      self.view.layer.transform = targetScaleTransform;
+    } completion:^(BOOL finished) {
+      if (finished) {
+        [self.layer removeAnimationForKey:@"shadowOffset"];
+        [self.layer removeAnimationForKey:@"shadowOpacity"];
+      }
+    }];
+  } else {
+    [self setDefaultState];
+  }
+}
+
+- (void)setFocusedState
+{
+    self.layer.shadowOffset = CGSizeMake(2, 10);
+    self.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.layer.shadowRadius = 12.0;
+    self.layer.shadowOpacity = 0.45;
+    self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+    self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1.25, 1.25);
+}
+
+- (void)setDefaultState
+{
+  self.view.transform = CGAffineTransformIdentity;
+  self.layer.shadowOpacity = 0;
+  self.layer.shadowOffset = CGSizeZero;
+  self.layer.shadowRadius = 0;
+  self.layer.shadowPath = nil;
+  [self.layer removeAnimationForKey:@"shadowOffset"];
+  [self.layer removeAnimationForKey:@"shadowOpacity"];
+  isDefaultState = YES;
+}
+
+
+- (float)degressToRadians:(float)value
+{
+  return value * M_PI / 180;
+}
+
+#endif
 
 @end
 
