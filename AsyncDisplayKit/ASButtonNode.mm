@@ -66,6 +66,7 @@
   if (!_titleNode) {
     _titleNode = [[ASTextNode alloc] init];
     [_titleNode setLayerBacked:YES];
+    [_titleNode setFlexShrink:YES];
   }
   return _titleNode;
 }
@@ -75,7 +76,6 @@
   if (!_imageNode) {
     _imageNode = [[ASImageNode alloc] init];
     [_imageNode setLayerBacked:YES];
-    [_titleNode setFlexShrink:YES];
   }
   return _imageNode;
 }
