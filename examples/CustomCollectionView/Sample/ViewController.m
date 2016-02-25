@@ -13,7 +13,6 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "MosaicCollectionViewLayout.h"
-#import "SupplementaryNode.h"
 #import "ImageCellNode.h"
 
 static NSUInteger kNumberOfImages = 14;
@@ -107,8 +106,14 @@ static NSUInteger kNumberOfImages = 14;
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  NSString *text = [NSString stringWithFormat:@"Section %zd", indexPath.section + 1];
-  return [[SupplementaryNode alloc] initWithText:text];
+  NSDictionary *textAttributes = @{
+      NSFontAttributeName: [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline],
+      NSForegroundColorAttributeName: [UIColor grayColor]
+  };
+  UIEdgeInsets textInsets = UIEdgeInsetsMake(11.0, 0, 11.0, 0);
+  ASTextCellNode *textCellNode = [[ASTextCellNode alloc] initWithAttributes:textAttributes insets:textInsets];
+  textCellNode.text = [NSString stringWithFormat:@"Section %zd", indexPath.section + 1];
+  return textCellNode;
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView

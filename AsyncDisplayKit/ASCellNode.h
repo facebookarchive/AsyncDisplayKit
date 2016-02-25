@@ -101,9 +101,24 @@ typedef NSUInteger ASCellNodeAnimation;
 @interface ASTextCellNode : ASCellNode
 
 /**
+ * Initializes a text cell with given text attributes and text insets
+ */
+- (instancetype)initWithAttributes:(NSDictionary *)textAttributes insets:(UIEdgeInsets)textInsets;
+
+/**
  * Text to display.
  */
 @property (nonatomic, copy) NSString *text;
+
+/**
+ * A dictionary containing key-value pairs for text attributes. You can specify the font, text color, text shadow color, and text shadow offset using the keys listed in NSString UIKit Additions Reference.
+ */
+@property (nonatomic, copy) NSDictionary *textAttributes;
+
+/**
+ * The text inset or outset for each edge. The default value is 15.0 horizontal and 11.0 vertical padding.
+ */
+@property (nonatomic, assign) UIEdgeInsets textInsets;
 
 @end
 
