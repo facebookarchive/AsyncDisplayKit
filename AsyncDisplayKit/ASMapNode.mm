@@ -43,6 +43,7 @@
   _needsMapReloadOnBoundsChange = YES;
   _liveMap = NO;
   _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
+  _annotations = @[];
   return self;
 }
 
@@ -251,10 +252,18 @@
   _mapView = nil;
 }
 
-- (void)setAnnotations:(NSArray *)annotations
+- (NSArray *)annotations
 {
   ASDN::MutexLocker l(_propertyLock);
-  _annotations = [annotations copy];
+  return _annotations;
+}
+
+- (void)setAnnotations:(NSArray *)annotations
+{
+  annotations = [annotations copy] ?: @[];
+
+  ASDN::MutexLocker l(_propertyLock);
+  _annotations = annotations;
   if (self.isLiveMap) {
     [_mapView removeAnnotations:_mapView.annotations];
     [_mapView addAnnotations:annotations];
