@@ -90,16 +90,17 @@ static NSUInteger kNumberOfImages = 14;
 #pragma mark -
 #pragma mark ASCollectionView data source.
 
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASCellNode *node = [[ASCellNode alloc] initWithViewControllerBlock:^UIViewController *{
-    return [[ImageViewController alloc] initWithImage:_sections[indexPath.section][indexPath.item]];
-  } didLoadBlock:nil];
-  
-  node.layer.borderWidth = 1.0;
-  node.layer.borderColor = [UIColor blackColor].CGColor;
-  
-  return node;
+  UIImage *image = _sections[indexPath.section][indexPath.item];
+  return ^{
+    return [[ASCellNode alloc] initWithViewControllerBlock:^UIViewController *{
+      return [[ImageViewController alloc] initWithImage:image];
+    } didLoadBlock:^(ASDisplayNode * _Nonnull node) {
+      node.layer.borderWidth = 1.0;
+      node.layer.borderColor = [UIColor blackColor].CGColor;
+    }];
+  };
 }
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
