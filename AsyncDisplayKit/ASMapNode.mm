@@ -13,6 +13,7 @@
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 #import <AsyncDisplayKit/ASCenterLayoutSpec.h>
 #import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 @interface ASMapNode()
 {
@@ -63,19 +64,23 @@
 - (void)fetchData
 {
   [super fetchData];
-  if (self.isLiveMap) {
-    [self addLiveMap];
-  } else {
-    [self takeSnapshot];
-  }
+  ASPerformBlockOnMainThread(^{
+    if (self.isLiveMap) {
+      [self addLiveMap];
+    } else {
+      [self takeSnapshot];
+    }
+  });
 }
 
-- (void)clearContents
+- (void)clearFetchedData
 {
-  [super clearContents];
-  if (self.isLiveMap) {
-    [self removeLiveMap];
-  }
+  [super clearFetchedData];
+  ASPerformBlockOnMainThread(^{
+    if (self.isLiveMap) {
+      [self removeLiveMap];
+    }
+  });
 }
 
 #pragma mark - Settings
