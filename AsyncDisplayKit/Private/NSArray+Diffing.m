@@ -19,6 +19,7 @@
 
 - (void)asdk_diffWithArray:(NSArray *)array insertions:(NSIndexSet **)insertions deletions:(NSIndexSet **)deletions compareBlock:(BOOL (^)(id lhs, id rhs))comparison
 {
+  NSAssert(comparison != nil, @"Comparison block is required");
   NSIndexSet *commonIndexes = [self _asdk_commonIndexesWithArray:array compareBlock:comparison];
   
   if (insertions) {
@@ -48,6 +49,7 @@
 
 - (NSIndexSet *)_asdk_commonIndexesWithArray:(NSArray *)array compareBlock:(BOOL (^)(id lhs, id rhs))comparison
 {
+  NSAssert(comparison != nil, @"Comparison block is required");
   NSInteger lengths[self.count+1][array.count+1];
   for (NSInteger i = self.count; i >= 0; i--) {
     for (NSInteger j = array.count; j >= 0; j--) {
