@@ -53,7 +53,7 @@
     for (NSInteger j = array.count; j >= 0; j--) {
       if (i == self.count || j == array.count) {
         lengths[i][j] = 0;
-      } else if ([self[i] isEqual:array[j]]) {
+      } else if (comparison(self[i], array[j])) {
         lengths[i][j] = 1 + lengths[i+1][j+1];
       } else {
         lengths[i][j] = MAX(lengths[i+1][j], lengths[i][j+1]);
