@@ -89,7 +89,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)didLoad
 {
 #if TARGET_OS_TV
-  // [self addTarget:self action:@selector(updateUI) forControlEvents:ASControlNodeEventPrimaryActionTriggered];
+  //On tvOS all control views, such as buttons, interact with the focus system even if they don't have a target set on them. Here we add our own internal tap gesture to handle this behaviour.
   self.userInteractionEnabled = YES;
   UITapGestureRecognizer *tapGestureRec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pressDown)];
   tapGestureRec.allowedPressTypes = @[@(UIPressTypeSelect)];
@@ -162,7 +162,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  NSLog(@"Touches Cancelled");
   // If we're not interested in touches, we have nothing to do.
   if (!self.enabled)
     return;
@@ -464,6 +463,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
+  //FIXME: This is never valid inside an ASCellNode
   if (context.nextFocusedView && context.nextFocusedView == self.view) {
     //Focused
     [coordinator addCoordinatedAnimations:^{

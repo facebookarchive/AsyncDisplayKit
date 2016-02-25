@@ -223,6 +223,43 @@
   [self setNeedsLayout];
 }
 
+- (ASVerticalAlignment)contentVerticalAlignment
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _contentVerticalAlignment;
+}
+
+- (void)setContentVerticalAlignment:(ASVerticalAlignment)contentVerticalAlignment
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _contentVerticalAlignment = contentVerticalAlignment;
+}
+
+- (ASHorizontalAlignment)contentHorizontalAlignment
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _contentHorizontalAlignment;
+}
+
+- (void)setContentHorizontalAlignment:(ASHorizontalAlignment)contentHorizontalAlignment
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _contentHorizontalAlignment = contentHorizontalAlignment;
+}
+
+- (UIEdgeInsets)contentEdgeInsets
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _contentEdgeInsets;
+}
+
+- (void)setContentEdgeInsets:(UIEdgeInsets)contentEdgeInsets
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _contentEdgeInsets = contentEdgeInsets;
+}
+
+
 #if TARGET_OS_IOS
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
 {
