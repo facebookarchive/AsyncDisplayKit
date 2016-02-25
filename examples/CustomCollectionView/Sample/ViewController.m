@@ -65,6 +65,12 @@ static NSUInteger kNumberOfImages = 14;
   return self;
 }
 
+- (void)dealloc
+{
+  _collectionView.asyncDataSource = nil;
+  _collectionView.asyncDelegate = nil;
+}
+
 - (void)viewDidLoad
 {
   [super viewDidLoad];
