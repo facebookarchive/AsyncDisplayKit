@@ -786,7 +786,7 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
   [context completeTransition:YES];
 }
 
-- (void)didCompleteTransitionLayout:(id<ASContextTransitioning>)context
+- (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context
 {
   [self __implicitlyRemoveSubnodes];
   [self __completeLayoutCalculation];
@@ -849,7 +849,7 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 
 - (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete
 {
-  [self didCompleteTransitionLayout:context];
+  [self didCompleteLayoutTransition:context];
   _transitionContext = nil;
 }
 
