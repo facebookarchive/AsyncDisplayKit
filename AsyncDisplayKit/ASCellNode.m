@@ -11,10 +11,12 @@
 #import "ASInternalHelpers.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASLayout.h>
 
 #pragma mark -
 #pragma mark ASCellNode
@@ -119,10 +121,30 @@
 {
   CGSize oldSize = self.calculatedSize;
   [super setNeedsLayout];
+  [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
+}
 
+- (ASLayout *)transitionLayoutWithAnimation:(BOOL)animated
+{
+  CGSize oldSize = self.calculatedSize;
+  ASLayout *layout = [super transitionLayoutWithAnimation:animated];
+  [self didRelayoutFromOldSize:oldSize toNewSize:layout.size];
+  return layout;
+}
+
+- (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
+{
+  CGSize oldSize = self.calculatedSize;
+  ASLayout *layout = [super transitionLayoutWithSizeRange:constrainedSize animated:animated];
+  [self didRelayoutFromOldSize:oldSize toNewSize:layout.size];
+  return layout;
+}
+
+- (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize
+{
   if (_layoutDelegate != nil && self.isNodeLoaded) {
     ASPerformBlockOnMainThread(^{
-      BOOL sizeChanged = !CGSizeEqualToSize(oldSize, self.calculatedSize);
+      BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
       [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }
