@@ -160,37 +160,43 @@
     [self setUpSnapshotter];
   }
   [_snapshotter cancel];
-  [_snapshotter startWithCompletionHandler:^(MKMapSnapshot *snapshot, NSError *error) {
-    if (!error) {
-      UIImage *image = snapshot.image;
-      CGRect finalImageRect = CGRectMake(0, 0, image.size.width, image.size.height);
-      
-      UIGraphicsBeginImageContextWithOptions(image.size, YES, image.scale);
-      [image drawAtPoint:CGPointMake(0, 0)];
-      
-      if (_annotations.count > 0 ) {
-        // Get a standard annotation view pin. Future implementations should use a custom annotation image property.
-        MKAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
-        UIImage *pinImage = pin.image;
-        for (id<MKAnnotation>annotation in _annotations)
-        {
-          CGPoint point = [snapshot pointForCoordinate:annotation.coordinate];
-          if (CGRectContainsPoint(finalImageRect, point))
-          {
-            CGPoint pinCenterOffset = pin.centerOffset;
-            point.x -= pin.bounds.size.width / 2.0;
-            point.y -= pin.bounds.size.height / 2.0;
-            point.x += pinCenterOffset.x;
-            point.y += pinCenterOffset.y;
-            [pinImage drawAtPoint:point];
-          }
-        }
-      }
-      
-      UIImage *finalImage = UIGraphicsGetImageFromCurrentImageContext();
-      UIGraphicsEndImageContext();
-      self.image = finalImage;
-    }
+  [_snapshotter startWithQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+             completionHandler:^(MKMapSnapshot *snapshot, NSError *error) {
+                if (!error) {
+                  UIImage *image = snapshot.image;
+                  
+                  if (_annotations.count > 0) {
+                    // Only create a graphics context if we have annotations to draw.
+                    // The MKMapSnapshotter is currently not capable of rendering annotations automatically.
+                    
+                    CGRect finalImageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+                    
+                    UIGraphicsBeginImageContextWithOptions(image.size, YES, image.scale);
+                    [image drawAtPoint:CGPointZero];
+                    
+                    // Get a standard annotation view pin. Future implementations should use a custom annotation image property.
+                    MKAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+                    UIImage *pinImage = pin.image;
+                    CGSize pinSize = pin.bounds.size;
+                    
+                    for (id<MKAnnotation> annotation in _annotations) {
+                      CGPoint point = [snapshot pointForCoordinate:annotation.coordinate];
+                      if (CGRectContainsPoint(finalImageRect, point)) {
+                        CGPoint pinCenterOffset = pin.centerOffset;
+                        point.x -= pinSize.width / 2.0;
+                        point.y -= pinSize.height / 2.0;
+                        point.x += pinCenterOffset.x;
+                        point.y += pinCenterOffset.y;
+                        [pinImage drawAtPoint:point];
+                      }
+                    }
+                    
+                    image = UIGraphicsGetImageFromCurrentImageContext();
+                    UIGraphicsEndImageContext();
+                  }
+                  
+                  self.image = image;
+                }
   }];
 }
 
