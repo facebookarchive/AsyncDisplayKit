@@ -260,12 +260,10 @@
 
 - (void)setAnnotations:(NSArray *)annotations
 {
-  if (annotations == nil) {
-    annotations = @[];
-  }
+  annotations = [annotations copy] ?: @[];
 
   ASDN::MutexLocker l(_propertyLock);
-  _annotations = [annotations copy];
+  _annotations = annotations;
   if (self.isLiveMap) {
     [_mapView removeAnnotations:_mapView.annotations];
     [_mapView addAnnotations:annotations];
