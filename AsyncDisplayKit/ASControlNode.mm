@@ -479,31 +479,36 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 - (void)setFocusedState
 {
-  self.layer.shadowOffset = CGSizeMake(2, 10);
-  self.layer.shadowColor = [UIColor blackColor].CGColor;
-  self.layer.shadowRadius = 12.0;
-  self.layer.shadowOpacity = 0.45;
-  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+  CALayer *layer = self.layer;
+  layer.shadowOffset = CGSizeMake(2, 10);
+  [self applyDefaultShadowProperties: layer];
   self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1.1, 1.1);
 }
 
 - (void)setPressedState
 {
-  self.layer.shadowOffset = CGSizeMake(2, 2);
-  self.layer.shadowColor = [UIColor blackColor].CGColor;
-  self.layer.shadowRadius = 12.0;
-  self.layer.shadowOpacity = 0.45;
-  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+  CALayer *layer = self.layer;
+  layer.shadowOffset = CGSizeMake(2, 2);
+  [self applyDefaultShadowProperties: layer];
   self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, 1);
+}
+
+- (void)applyDefaultShadowProperties:(CALayer *)layer
+{
+  layer.shadowColor = [UIColor blackColor].CGColor;
+  layer.shadowRadius = 12.0;
+  layer.shadowOpacity = 0.45;
+  layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
 }
 
 - (void)setDefaultState
 {
-  self.layer.shadowOffset = CGSizeZero;
-  self.layer.shadowColor = [UIColor blackColor].CGColor;
-  self.layer.shadowRadius = 0;
-  self.layer.shadowOpacity = 0;
-  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+  CALayer *layer = self.layer;
+  layer.shadowOffset = CGSizeZero;
+  layer.shadowColor = [UIColor blackColor].CGColor;
+  layer.shadowRadius = 0;
+  layer.shadowOpacity = 0;
+  layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
   self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, 1);
 }
 #endif
