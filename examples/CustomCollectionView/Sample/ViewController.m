@@ -65,6 +65,12 @@ static NSUInteger kNumberOfImages = 14;
   return self;
 }
 
+- (void)dealloc
+{
+  _collectionView.asyncDataSource = nil;
+  _collectionView.asyncDelegate = nil;
+}
+
 - (void)viewDidLoad
 {
   [super viewDidLoad];
@@ -90,14 +96,18 @@ static NSUInteger kNumberOfImages = 14;
 #pragma mark -
 #pragma mark ASCollectionView data source.
 
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[ImageCellNode alloc] initWithImage:_sections[indexPath.section][indexPath.item]];
+  UIImage *image = _sections[indexPath.section][indexPath.item];
+  return ^{
+    return [[ImageCellNode alloc] initWithImage:image];
+  };
 }
+
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  NSString *text = [NSString stringWithFormat:@"Section %d", (int)indexPath.section + 1];
+  NSString *text = [NSString stringWithFormat:@"Section %zd", indexPath.section + 1];
   return [[SupplementaryNode alloc] initWithText:text];
 }
 

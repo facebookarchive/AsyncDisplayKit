@@ -13,12 +13,12 @@
 
 @interface Post : NSObject
 
-@property (nonatomic, strong) NSString *username;
-@property (nonatomic, strong) NSString *name;
-@property (nonatomic, strong) NSString *photo;
-@property (nonatomic, strong) NSString *post;
-@property (nonatomic, strong) NSString *time;
-@property (nonatomic, strong) NSString *media;
+@property (nonatomic, copy) NSString *username;
+@property (nonatomic, copy) NSString *name;
+@property (nonatomic, copy) NSString *photo;
+@property (nonatomic, copy) NSString *post;
+@property (nonatomic, copy) NSString *time;
+@property (nonatomic, copy) NSString *media;
 @property (nonatomic, assign) NSInteger via;
 
 @property (nonatomic, assign) NSInteger likes;

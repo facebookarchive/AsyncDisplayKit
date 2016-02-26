@@ -18,6 +18,7 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+  
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Push Details" style:UIBarButtonItemStylePlain target:self action:@selector(pushNewViewController)];
 }
 

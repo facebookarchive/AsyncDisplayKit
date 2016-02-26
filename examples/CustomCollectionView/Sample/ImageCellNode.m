@@ -31,6 +31,8 @@
 
 - (void)layout
 {
+  [super layout];
+  
   _imageNode.frame = CGRectMake(0, 0, _imageNode.calculatedSize.width, _imageNode.calculatedSize.height);
 }
 
