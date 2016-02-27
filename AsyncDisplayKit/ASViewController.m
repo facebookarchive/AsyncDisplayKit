@@ -11,6 +11,7 @@
 #import "ASDimension.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASRangeController.h"
 
 @implementation ASViewController
 {
@@ -38,6 +39,8 @@
   ASDisplayNodeAssertNotNil(node, @"Node must not be nil");
   ASDisplayNodeAssertTrue(!node.layerBacked);
   _node = node;
+
+  _automaticallyAdjustRangeModeBasedOnViewEvents = NO;
   
   return self;
 }
@@ -68,6 +71,26 @@
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
   [_node recursivelyFetchData];
+    
+  [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeFull];
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+  [super viewDidDisappear:animated];
+  
+  [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeMinimum];
+}
+
+// MARK: - Update Range Mode
+
+- (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
+{
+  if (!self.automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
+  if (![_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]) { return; }
+
+  id<ASRangeControllerUpdateRangeProtocol> updateRangeNode = (id<ASRangeControllerUpdateRangeProtocol>)_node;
+  [updateRangeNode updateCurrentRangeWithMode:rangeMode];
 }
 
 // MARK: - Layout Helpers
