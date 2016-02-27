@@ -67,6 +67,14 @@
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
 {
   _scrollDirection = scrollDirection;
+
+  [self scheduleRangeUpdate];
+}
+
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
+{
+  _currentRangeMode = rangeMode;
+  
   [self scheduleRangeUpdate];
 }
 
@@ -130,8 +138,7 @@
   NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
-  ASLayoutRangeMode rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState
-                                                                 currentRangeMode:_currentRangeMode];
+  ASLayoutRangeMode rangeMode = (_currentRangeMode == ASLayoutRangeModeInvalid) ? ASLayoutRangeModeMinimum : _currentRangeMode;
 
   ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
                                                                                       rangeType:ASLayoutRangeTypeFetchData];
@@ -168,7 +175,9 @@
   NSSet<NSIndexPath *> *allCurrentIndexPaths = [[allIndexPaths set] copy];
   [allIndexPaths unionSet:_allPreviousIndexPaths];
   _allPreviousIndexPaths = allCurrentIndexPaths;
-  _currentRangeMode = rangeMode;
+  
+  // Update the current range mode based on interface state
+  _currentRangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
   
   if (!_rangeIsValid) {
     [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];

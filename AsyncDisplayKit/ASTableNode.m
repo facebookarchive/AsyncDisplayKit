@@ -77,6 +77,11 @@
   }
 }
 
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
+{
+    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+}
+
 - (_ASTablePendingState *)pendingState
 {
   if (!_pendingState && ![self isNodeLoaded]) {

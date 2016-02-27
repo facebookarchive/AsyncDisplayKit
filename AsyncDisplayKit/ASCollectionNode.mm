@@ -219,6 +219,11 @@
   return [self.view.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
+{
+  [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+}
+
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   [self.view reloadDataWithCompletion:completion];
