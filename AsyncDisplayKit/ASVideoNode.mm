@@ -277,7 +277,10 @@
 {
   ASDN::MutexLocker l(_videoLock);
   
-  if (ASObjectIsEqual(((AVURLAsset *)asset).URL, ((AVURLAsset *)_asset).URL)) {
+  if (ASObjectIsEqual(asset, _asset)
+    || ([asset isKindOfClass:[AVURLAsset class]]
+      && [_asset isKindOfClass:[AVURLAsset class]]
+      && ASObjectIsEqual(((AVURLAsset *)asset).URL, ((AVURLAsset *)_asset).URL))) {
     return;
   }
   
