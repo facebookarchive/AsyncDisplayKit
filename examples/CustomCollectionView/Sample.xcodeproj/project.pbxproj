@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		25A1FA851C02F7AC00193875 /* MosaicCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 25A1FA841C02F7AC00193875 /* MosaicCollectionViewLayout.m */; };
 		25A1FA881C02FCB000193875 /* ImageCellNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 25A1FA871C02FCB000193875 /* ImageCellNode.m */; };
-		9B92C8811BC17D3000EE46B2 /* SupplementaryNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B92C8801BC17D3000EE46B2 /* SupplementaryNode.m */; };
 		9BA2CEA11BB2579C00D18414 /* Launchboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9BA2CEA01BB2579C00D18414 /* Launchboard.storyboard */; };
 		AC3C4A641A11F47200143C57 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AC3C4A631A11F47200143C57 /* main.m */; };
 		AC3C4A671A11F47200143C57 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AC3C4A661A11F47200143C57 /* AppDelegate.m */; };
@@ -24,8 +23,6 @@
 		25A1FA861C02FCB000193875 /* ImageCellNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageCellNode.h; sourceTree = "<group>"; };
 		25A1FA871C02FCB000193875 /* ImageCellNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageCellNode.m; sourceTree = "<group>"; };
 		2DBAEE96397BB913350C4530 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
-		9B92C87F1BC17D3000EE46B2 /* SupplementaryNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SupplementaryNode.h; sourceTree = "<group>"; };
-		9B92C8801BC17D3000EE46B2 /* SupplementaryNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SupplementaryNode.m; sourceTree = "<group>"; };
 		9BA2CEA01BB2579C00D18414 /* Launchboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Launchboard.storyboard; sourceTree = "<group>"; };
 		AC3C4A5E1A11F47200143C57 /* Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3C4A621A11F47200143C57 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -91,8 +88,6 @@
 				25A1FA871C02FCB000193875 /* ImageCellNode.m */,
 				AC3C4A8D1A11F80C00143C57 /* Images.xcassets */,
 				AC3C4A611A11F47200143C57 /* Supporting Files */,
-				9B92C87F1BC17D3000EE46B2 /* SupplementaryNode.h */,
-				9B92C8801BC17D3000EE46B2 /* SupplementaryNode.m */,
 			);
 			indentWidth = 2;
 			path = Sample;
@@ -224,7 +219,6 @@
 			files = (
 				25A1FA851C02F7AC00193875 /* MosaicCollectionViewLayout.m in Sources */,
 				AC3C4A6A1A11F47200143C57 /* ViewController.m in Sources */,
-				9B92C8811BC17D3000EE46B2 /* SupplementaryNode.m in Sources */,
 				AC3C4A671A11F47200143C57 /* AppDelegate.m in Sources */,
 				AC3C4A641A11F47200143C57 /* main.m in Sources */,
 				25A1FA881C02FCB000193875 /* ImageCellNode.m in Sources */,

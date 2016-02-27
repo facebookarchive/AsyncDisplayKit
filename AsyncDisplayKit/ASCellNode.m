@@ -9,6 +9,7 @@
 #import "ASCellNode+Internal.h"
 
 #import "ASInternalHelpers.h"
+#import "ASEqualityHelpers.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
@@ -190,46 +191,83 @@
 #pragma mark ASTextCellNode
 
 @interface ASTextCellNode ()
-{
-  NSString *_text;
-  ASTextNode *_textNode;
-}
+
+@property (nonatomic, strong) ASTextNode *textNode;
 
 @end
 
 
 @implementation ASTextCellNode
 
-static const CGFloat kFontSize = 18.0f;
+static const CGFloat kASTextCellNodeDefaultFontSize = 18.0f;
+static const CGFloat kASTextCellNodeDefaultHorizontalPadding = 15.0f;
+static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
 
 - (instancetype)init
 {
-  if (!(self = [super init]))
-    return nil;
-  
-  _text = @"";
-  _textNode = [[ASTextNode alloc] init];
-  [self addSubnode:_textNode];
+  return [self initWithAttributes:[self defaultTextAttributes] insets:[self defaultTextInsets]];
+}
 
+- (instancetype)initWithAttributes:(NSDictionary *)textAttributes insets:(UIEdgeInsets)textInsets
+{
+  self = [super init];
+  if (self) {
+    _textInsets = textInsets;
+    _textAttributes = [textAttributes copy];
+    _textNode = [[ASTextNode alloc] init];
+    [self addSubnode:_textNode];
+  }
   return self;
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  static const CGFloat kHorizontalPadding = 15.0f;
-  static const CGFloat kVerticalPadding = 11.0f;
-  UIEdgeInsets insets = UIEdgeInsetsMake(kVerticalPadding, kHorizontalPadding, kVerticalPadding, kHorizontalPadding);
-  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_textNode];
+  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:self.textInsets child:self.textNode];
+}
+
+- (NSDictionary *)defaultTextAttributes
+{
+  return @{NSFontAttributeName : [UIFont systemFontOfSize:kASTextCellNodeDefaultFontSize]};
+}
+
+- (UIEdgeInsets)defaultTextInsets
+{
+    return UIEdgeInsetsMake(kASTextCellNodeDefaultVerticalPadding, kASTextCellNodeDefaultHorizontalPadding, kASTextCellNodeDefaultVerticalPadding, kASTextCellNodeDefaultHorizontalPadding);
+}
+
+- (void)setTextAttributes:(NSDictionary *)textAttributes
+{
+  ASDisplayNodeAssertNotNil(textAttributes, @"Invalid text attributes");
+  
+  _textAttributes = [textAttributes copy];
+  
+  [self updateAttributedString];
+}
+
+- (void)setTextInsets:(UIEdgeInsets)textInsets
+{
+  _textInsets = textInsets;
+
+  [self updateAttributedString];
 }
 
 - (void)setText:(NSString *)text
 {
-  if (_text == text)
-    return;
+  if (ASObjectIsEqual(_text, text)) return;
 
   _text = [text copy];
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:_text
-                                                               attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:kFontSize]}];
+  
+  [self updateAttributedString];
+}
+
+- (void)updateAttributedString
+{
+  if (_text == nil) {
+    _textNode.attributedString = nil;
+    return;
+  }
+  
+  _textNode.attributedString = [[NSAttributedString alloc] initWithString:self.text attributes:self.textAttributes];
   [self setNeedsLayout];
 }
 
