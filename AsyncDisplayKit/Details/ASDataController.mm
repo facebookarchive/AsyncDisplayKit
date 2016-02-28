@@ -123,16 +123,19 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }
 }
 
-- (void)layoutLoadedNodes:(NSArray<ASCellNode *> *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths {
+- (void)layoutLoadedNodes:(NSArray<ASCellNode *> *)nodes ofKind:(NSString *)kind forRange:(NSRange)range withConstrainedSizes:(ASSizeRange *)constrainedSizes
+{
   NSAssert(NSThread.isMainThread, @"Main thread layout must be on the main thread.");
   
-  [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, __unused BOOL * stop) {
-    ASCellNode *node = nodes[idx];
+  for (NSUInteger k = range.location; k < range.location + range.length; k++) {
+    // Nodes is a subarray, but constrainedSizes is a global array for this batch.
+    NSUInteger zeroBasedIdx = k - range.location;
+    ASCellNode *node = nodes[zeroBasedIdx];
     if (node.isNodeLoaded) {
-      ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+      ASSizeRange constrainedSize = constrainedSizes[k];
       [self _layoutNode:node withConstrainedSize:constrainedSize];
     }
-  }];
+  };
 }
 
 /**
@@ -169,6 +172,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   for (NSUInteger j = 0; j < nodes.count && j < indexPaths.count; j += kASDataControllerSizingCountPerProcessor) {
     NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j);
 
+    for (NSUInteger k = j; k < j + batchCount; k++) {
+      // First collect all constrained sizes from the delegate.  This API expects to be called in the background, but on one thread.
+      nodeBoundSizes[k] = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPaths[k]];
+    }
+    
     __block NSArray *subarray;
     // Allocate nodes concurrently.
     dispatch_block_t allocationBlock = ^{
@@ -180,9 +188,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         ASCellNode *node = cellBlock();
         ASDisplayNodeAssertNotNil(node, @"Node block created nil node");
         allocatedNodeBuffer[i] = node;
-        if (!node.isNodeLoaded) {
-          nodeBoundSizes[k] = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPaths[k]];
-        }
       });
       subarray = [[NSArray alloc] initWithObjects:allocatedNodeBuffer count:batchCount];
 
@@ -200,11 +205,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         dispatch_semaphore_signal(sema);
       });
       dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-      [self layoutLoadedNodes:subarray ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
+      [self layoutLoadedNodes:subarray ofKind:kind forRange:NSMakeRange(j, batchCount) withConstrainedSizes:nodeBoundSizes];
     } else {
       allocationBlock();
       [_mainSerialQueue performBlockOnMainThread:^{
-        [self layoutLoadedNodes:subarray ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
+        [self layoutLoadedNodes:subarray ofKind:kind forRange:NSMakeRange(j, batchCount) withConstrainedSizes:nodeBoundSizes];
       }];
     }
 
