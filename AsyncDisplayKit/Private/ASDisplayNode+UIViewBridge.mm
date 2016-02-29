@@ -321,7 +321,12 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
       // which may call -displayIfNeeded. We want to ensure the needsDisplay flag is set now, and then cleared.
       _messageToViewOrLayer(setNeedsDisplay);
     } else {
-      [ASDisplayNodeGetPendingState(self) setNeedsDisplay];
+      if (__loaded(self)) {
+        // In this case, the node is loaded but we are on a background thread.  Apply setNeedsDisplay so it is communicated
+        // to the backing view / layer in the next main thread flush.  If the view / layer are not loaded, then
+        // Core Animation automatically considers them as "needsDisplay" if applicable when they are added to the hierarchy.
+        [ASDisplayNodeGetPendingState(self) setNeedsDisplay];
+      }
     }
     [self __setNeedsDisplay];
   }
