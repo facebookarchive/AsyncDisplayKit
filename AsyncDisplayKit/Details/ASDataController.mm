@@ -248,7 +248,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   _editingNodes[kind] = editingNodes;
   
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
-  NSMutableArray *completedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(editingNodes);
+  NSMutableArray *completedNodes = ASTwoDimensionalArrayDeepMutableCopy(editingNodes);
   
   [_mainSerialQueue performBlockOnMainThread:^{
     _completedNodes[kind] = completedNodes;
@@ -290,7 +290,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   [_editingNodes[kind] insertObjects:sections atIndexes:indexSet];
   
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
-  NSArray *sectionsForCompleted = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(sections);
+  NSArray *sectionsForCompleted = ASTwoDimensionalArrayDeepMutableCopy(sections);
   
   [_mainSerialQueue performBlockOnMainThread:^{
     [_completedNodes[kind] insertObjects:sectionsForCompleted atIndexes:indexSet];
@@ -552,7 +552,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [_mainSerialQueue performBlockOnMainThread:^{
         // Deep copy _completedNodes to _externalCompletedNodes.
         // Any external queries from now on will be done on _externalCompletedNodes, to guarantee data consistency with the delegate.
-        _externalCompletedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(_completedNodes[ASDataControllerRowNodeKind]);
+        _externalCompletedNodes = ASTwoDimensionalArrayDeepMutableCopy(_completedNodes[ASDataControllerRowNodeKind]);
 
         LOG(@"endUpdatesWithCompletion - begin updates call to delegate");
         [_delegate dataControllerBeginUpdates:self];
