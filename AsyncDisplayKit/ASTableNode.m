@@ -79,6 +79,10 @@
 
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
 {
+    if (!self.isNodeLoaded) {
+        return;
+    }
+    
     [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
 }
 
