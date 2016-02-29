@@ -178,9 +178,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
       dispatch_apply(batchCount, queue, ^(size_t i) {
         unsigned long k = j + i;
-        ASIndexedNodeContext *context = contexts[k];
-        ASCellNodeBlock nodeBlock = context.nodeBlock;
-        ASCellNode *node = nodeBlock();
+        ASCellNode *node = [contexts[k] allocateNode];
         ASDisplayNodeAssertNotNil(node, @"Node block created nil node");
         allocatedNodeBuffer[i] = node;
       });
@@ -227,9 +225,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   
   if (completionBlock) {
     NSMutableArray *indexPaths = [NSMutableArray arrayWithCapacity:nodeCount];
-    [contexts enumerateObjectsUsingBlock:^(ASIndexedNodeContext * _Nonnull context, NSUInteger idx, BOOL * _Nonnull stop) {
+    for (ASIndexedNodeContext *context in contexts) {
       [indexPaths addObject:context.indexPath];
-    }];
+    }
 
     completionBlock(allocatedNodes, indexPaths);
   }
@@ -422,8 +420,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
     [self accessDataSourceSynchronously:synchronously withBlock:^{
       NSUInteger sectionCount = [_dataSource numberOfSectionsInDataController:self];
-      NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
-      [self _populateFromEntireDataSourceWithMutableContexts:contexts];
+      NSIndexSet *sectionIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
+      NSArray<ASIndexedNodeContext *> *contexts = [self _populateFromDataSourceWithSectionIndexSet:sectionIndexSet];
 
       // Allow subclasses to perform setup before going into the edit transaction
       [self prepareForReloadData];
@@ -441,13 +439,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         
         [self willReloadData];
         
-        // Insert each section
+        // Insert empty sections
         NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
         for (int i = 0; i < sectionCount; i++) {
           [sections addObject:[[NSMutableArray alloc] init]];
         }
-        
-        [self _insertSections:sections atIndexSet:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)] withAnimationOptions:animationOptions];
+        [self _insertSections:sections atIndexSet:sectionIndexSet withAnimationOptions:animationOptions];
 
         [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
 
@@ -494,11 +491,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 /**
  * Fetches row contexts for the provided sections from the data source.
- *
- * @discussion Results are stored in the passed mutable arrays.
  */
-- (void)_populateFromDataSourceWithSectionIndexSet:(NSIndexSet *)indexSet mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
+- (NSArray<ASIndexedNodeContext *> *)_populateFromDataSourceWithSectionIndexSet:(NSIndexSet *)indexSet
 {
+  NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
     NSUInteger rowNum = [_dataSource dataController:self rowsInSection:idx];
     NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
@@ -511,30 +507,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
                                                           constrainedSize:constrainedSize]];
     }
   }];
+  return contexts;
 }
-
-/**
- * Fetches row contexts for all sections from the data source.
- *
- * @discussion Results are stored in the passed mutable arrays.
- */
-- (void)_populateFromEntireDataSourceWithMutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
-{
-  NSUInteger sectionNum = [_dataSource numberOfSectionsInDataController:self];
-  for (NSUInteger i = 0; i < sectionNum; i++) {
-    NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:i];
-    NSUInteger rowNum = [_dataSource dataController:self rowsInSection:i];
-    for (NSUInteger j = 0; j < rowNum; j++) {
-      NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:j];
-      ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
-      ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-      [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
-                                                                indexPath:indexPath
-                                                          constrainedSize:constrainedSize]];
-    }
-  }
-}
-
 
 #pragma mark - Batching (External API)
 
@@ -617,8 +591,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     [self accessDataSourceWithBlock:^{
-      NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
-      [self _populateFromDataSourceWithSectionIndexSet:sections mutableContexts:contexts];
+      NSArray<ASIndexedNodeContext *> *contexts = [self _populateFromDataSourceWithSectionIndexSet:sections];
 
       [self prepareForInsertSections:sections];
       
@@ -668,8 +641,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
     [self accessDataSourceWithBlock:^{
-      NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
-      [self _populateFromDataSourceWithSectionIndexSet:sections mutableContexts:contexts];
+      NSArray<ASIndexedNodeContext *> *contexts= [self _populateFromDataSourceWithSectionIndexSet:sections];
 
       [self prepareForReloadSections:sections];
       
@@ -773,14 +745,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     LOG(@"Edit Command - insertRows: %@", indexPaths);
     
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
+
+    // sort indexPath to avoid messing up the index when inserting in several batches
+    NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
+    NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+
     [self accessDataSourceWithBlock:^{
-      // sort indexPath to avoid messing up the index when inserting in several batches
-      NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
-      NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-      
-      for (NSUInteger i = 0; i < sortedIndexPaths.count; i++) {
-        NSIndexPath *indexPath = sortedIndexPaths[i];
+      for (NSIndexPath *indexPath in sortedIndexPaths) {
         ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
         ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
         [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
