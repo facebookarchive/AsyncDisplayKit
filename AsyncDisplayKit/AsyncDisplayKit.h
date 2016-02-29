@@ -34,6 +34,7 @@
 #import <AsyncDisplayKit/ASPagerNode.h>
 
 #import <AsyncDisplayKit/ASViewController.h>
+#import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
 
 #import <AsyncDisplayKit/ASChangeSetDataController.h>
 

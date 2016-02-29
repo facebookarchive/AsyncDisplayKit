@@ -30,9 +30,6 @@ NS_ASSUME_NONNULL_BEGIN
 // Refer to examples/SynchronousConcurrency, AsyncViewController.m
 @property (nonatomic, assign) BOOL neverShowPlaceholders;
 
-/// Automatically adjust the range mode based on view evenets if the containing node confirms to the ASRangeControllerUpdateRangeProtocol
-@property (nonatomic, assign) BOOL automaticallyAdjustRangeModeBasedOnViewEvents;
-
 
 /**
  * The constrained size used to measure the backing node.

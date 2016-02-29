@@ -9,7 +9,7 @@
 #import "ASFlowLayoutController.h"
 #import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASRangeController.h"
+#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
 @interface _ASTablePendingState : NSObject
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;

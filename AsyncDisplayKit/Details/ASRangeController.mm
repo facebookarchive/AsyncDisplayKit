@@ -138,7 +138,10 @@
   NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
-  ASLayoutRangeMode rangeMode = (_currentRangeMode == ASLayoutRangeModeInvalid) ? ASLayoutRangeModeMinimum : _currentRangeMode;
+  ASLayoutRangeMode rangeMode = _currentRangeMode;
+  if (rangeMode == ASLayoutRangeModeInvalid) {
+    rangeMode = ASLayoutRangeModeMinimum;
+  }
 
   ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
                                                                                       rangeType:ASLayoutRangeTypeFetchData];

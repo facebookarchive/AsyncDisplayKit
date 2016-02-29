@@ -11,12 +11,14 @@
 #import "ASDimension.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
-#import "ASRangeController.h"
+#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
 @implementation ASViewController
 {
   BOOL _ensureDisplayed;
 }
+
+@synthesize automaticallyAdjustsScrollViewInsets = _automaticallyAdjustRangeModeBasedOnViewEvents;
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -82,7 +84,7 @@
   [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeMinimum];
 }
 
-// MARK: - Update Range Mode
+#pragma mark - Automatic range mode
 
 - (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
 {
@@ -93,7 +95,7 @@
   [updateRangeNode updateCurrentRangeWithMode:rangeMode];
 }
 
-// MARK: - Layout Helpers
+#pragma mark - Layout Helpers
 
 - (ASSizeRange)nodeConstrainedSize
 {

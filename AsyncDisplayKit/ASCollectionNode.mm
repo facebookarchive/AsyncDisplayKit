@@ -10,7 +10,7 @@
 #import "ASCollectionInternal.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASRangeController.h"
+#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #include <vector>
 
 @interface _ASCollectionPendingState : NSObject

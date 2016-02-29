@@ -8,13 +8,11 @@
 
 #import <AsyncDisplayKit/ASTableView.h>
 
-@protocol ASRangeControllerUpdateRangeProtocol;
-
 /**
  * ASTableNode is a node based class that wraps an ASTableView. It can be used
  * as a subnode of another node, and provide room for many (great) features and improvements later on.
  */
-@interface ASTableNode : ASDisplayNode <ASRangeControllerUpdateRangeProtocol>
+@interface ASTableNode : ASDisplayNode
 
 - (instancetype)init; // UITableViewStylePlain
 - (instancetype)initWithStyle:(UITableViewStyle)style;

@@ -45,10 +45,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection;
 
-
-/// This is a way for a one way update of range with a given mode.
-- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
-
 /**
  * Add the sized node for `indexPath` as a subview of `contentView`.
  *
@@ -82,14 +78,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@protocol ASRangeControllerUpdateRangeProtocol <NSObject>
-
-/**
- * Updates the current range mode of the range controller for at least the next range update.
- */
-- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
-
-@end
 
 /**
  * Data source for ASRangeController.
