@@ -12,7 +12,7 @@
 @interface ASIndexedNodeContext : NSObject
 
 @property (nonatomic, readonly, strong) ASCellNodeBlock nodeBlock;
-@property (nonatomic, readonly, assign) NSIndexPath *indexPath;
+@property (nonatomic, readonly, strong) NSIndexPath *indexPath;
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSize;
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
