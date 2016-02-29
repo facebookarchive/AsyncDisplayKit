@@ -11,6 +11,7 @@
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASLayoutController.h>
+#import <AsyncDisplayKit/ASLayoutRangeType.h>
 
 #define RangeControllerLoggingEnabled 0
 
@@ -76,6 +77,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<ASRangeControllerDelegate> delegate;
 
 @end
+
 
 /**
  * Data source for ASRangeController.

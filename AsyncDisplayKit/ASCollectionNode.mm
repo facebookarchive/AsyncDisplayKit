@@ -10,7 +10,7 @@
 #import "ASCollectionInternal.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASRangeController.h"
+#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #include <vector>
 
 @interface _ASCollectionPendingState : NSObject
@@ -217,6 +217,11 @@
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   return [self.view.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+}
+
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
+{
+  [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
 }
 
 - (void)reloadDataWithCompletion:(void (^)())completion

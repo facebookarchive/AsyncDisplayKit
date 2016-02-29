@@ -23,6 +23,7 @@
   ASScrollDirection _scrollDirection;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
   ASLayoutRangeMode _currentRangeMode;
+  BOOL _didUpdateCurrentRange;
   BOOL _didRegisterForNotifications;
   CFAbsoluteTime _pendingDisplayNodesTimestamp;
 }
@@ -39,6 +40,7 @@
   
   _rangeIsValid = YES;
   _currentRangeMode = ASLayoutRangeModeInvalid;
+  _didUpdateCurrentRange = NO;
   
   return self;
 }
@@ -67,6 +69,15 @@
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
 {
   _scrollDirection = scrollDirection;
+
+  [self scheduleRangeUpdate];
+}
+
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
+{
+  _currentRangeMode = rangeMode;
+  _didUpdateCurrentRange = YES;
+  
   [self scheduleRangeUpdate];
 }
 
@@ -130,8 +141,10 @@
   NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
-  ASLayoutRangeMode rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState
-                                                                 currentRangeMode:_currentRangeMode];
+  ASLayoutRangeMode rangeMode = _currentRangeMode;
+  if (!_didUpdateCurrentRange) {
+    rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
+  }
 
   ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
                                                                                       rangeType:ASLayoutRangeTypeFetchData];
@@ -168,7 +181,9 @@
   NSSet<NSIndexPath *> *allCurrentIndexPaths = [[allIndexPaths set] copy];
   [allIndexPaths unionSet:_allPreviousIndexPaths];
   _allPreviousIndexPaths = allCurrentIndexPaths;
+  
   _currentRangeMode = rangeMode;
+  _didUpdateCurrentRange = NO;
   
   if (!_rangeIsValid) {
     [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];
