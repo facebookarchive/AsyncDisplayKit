@@ -227,9 +227,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   
   if (completionBlock) {
     NSMutableArray *indexPaths = [NSMutableArray arrayWithCapacity:nodeCount];
-    [contexts enumerateObjectsUsingBlock:^(ASIndexedNodeContext * _Nonnull context, NSUInteger idx, BOOL * _Nonnull stop) {
+    for (ASIndexedNodeContext *context in contexts) {
       [indexPaths addObject:context.indexPath];
-    }];
+    }
 
     completionBlock(allocatedNodes, indexPaths);
   }
@@ -773,14 +773,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     LOG(@"Edit Command - insertRows: %@", indexPaths);
     
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
+
+    // sort indexPath to avoid messing up the index when inserting in several batches
+    NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
+    NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+
     [self accessDataSourceWithBlock:^{
-      // sort indexPath to avoid messing up the index when inserting in several batches
-      NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
-      NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-      
-      for (NSUInteger i = 0; i < sortedIndexPaths.count; i++) {
-        NSIndexPath *indexPath = sortedIndexPaths[i];
+      for (NSIndexPath *indexPath in sortedIndexPaths) {
         ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
         ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
         [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
