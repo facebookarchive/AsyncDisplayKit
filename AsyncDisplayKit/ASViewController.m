@@ -16,9 +16,8 @@
 @implementation ASViewController
 {
   BOOL _ensureDisplayed;
+  BOOL _automaticallyAdjustRangeModeBasedOnViewEvents;
 }
-
-@synthesize automaticallyAdjustsScrollViewInsets = _automaticallyAdjustRangeModeBasedOnViewEvents;
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -86,9 +85,19 @@
 
 #pragma mark - Automatic range mode
 
+- (BOOL)automaticallyAdjustRangeModeBasedOnViewEvents
+{
+  return _automaticallyAdjustRangeModeBasedOnViewEvents;
+}
+
+- (void)setAutomaticallyAdjustRangeModeBasedOnViewEvents:(BOOL)automaticallyAdjustRangeModeBasedOnViewEvents
+{
+  _automaticallyAdjustRangeModeBasedOnViewEvents = automaticallyAdjustRangeModeBasedOnViewEvents;
+}
+
 - (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
 {
-  if (!self.automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
+  if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
   if (![_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]) { return; }
 
   id<ASRangeControllerUpdateRangeProtocol> updateRangeNode = (id<ASRangeControllerUpdateRangeProtocol>)_node;
