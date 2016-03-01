@@ -320,6 +320,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 {
   ASLayout *layout = self.calculatedLayout;
   if (layout != nil) {
+    _constrainedSize = layout.size;
     _renderer.constrainedSize = layout.size;
   }
 }
