@@ -14,6 +14,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef NSUInteger ASCellNodeAnimation;
 
+typedef enum : NSUInteger {
+  // Indicates a cell has just became visible
+  ASCellNodeVisibilityEventVisible,
+  // Indicates a visible cell has a different visible rect. Its position, percent visible or both have changed.
+  ASCellNodeVisibilityEventVisibleRectChanged,
+  // Indicates a cell is no longer visible
+  ASCellNodeVisibilityEventInvisible,
+} ASCellNodeVisibilityEvent;
+
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
  */
@@ -90,7 +99,7 @@ typedef NSUInteger ASCellNodeAnimation;
  */
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
-- (void)visibleNodeDidScroll:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
+- (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event inScrollView:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
 
 @end
 
