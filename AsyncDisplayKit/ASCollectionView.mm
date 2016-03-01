@@ -622,10 +622,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (ASScrollDirection)nonFlowLayoutScrollableDirections
 {
   ASScrollDirection scrollableDirection = ASScrollDirectionNone;
-  if (self.contentSize.width + self.contentInset.left > self.bounds.size.width) { // Can scroll horizontally.
+  if (self.contentSize.width + self.contentInset.left + self.contentInset.right > self.bounds.size.width) { // Can scroll horizontally.
     scrollableDirection |= ASScrollDirectionHorizontalDirections;
   }
-  if (self.contentSize.height + self.contentInset.top > self.bounds.size.height) { // Can scroll vertically.
+  if (self.contentSize.height + self.contentInset.top + self.contentInset.bottom > self.bounds.size.height) { // Can scroll vertically.
     scrollableDirection |= ASScrollDirectionVerticalDirections;
   }
   return scrollableDirection;
