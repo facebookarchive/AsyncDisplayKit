@@ -15,11 +15,20 @@ NS_ASSUME_NONNULL_BEGIN
 typedef NSUInteger ASCellNodeAnimation;
 
 typedef enum : NSUInteger {
-  // Indicates a cell has just became visible
+  /** 
+   * Indicates a cell has just became visible 
+   */
   ASCellNodeVisibilityEventVisible,
-  // Indicates a visible cell has a different visible rect. Its position, percent visible or both have changed.
+  /**
+   * Its position (determined by scrollView.contentOffset) has changed while at least 1px remains visible.
+   * It is possible that 100% of the cell is visible both before and after and only its position has changed,
+   * or that the position change has resulted in more or less of the cell being visible.
+   * Use CGRectIntersect between cellFrame and scrollView.bounds to get this rectangle
+   */
   ASCellNodeVisibilityEventVisibleRectChanged,
-  // Indicates a cell is no longer visible
+  /** 
+   * Indicates a cell is no longer visible 
+   */
   ASCellNodeVisibilityEventInvisible,
 } ASCellNodeVisibilityEvent;
 
