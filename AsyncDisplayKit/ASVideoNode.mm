@@ -14,14 +14,14 @@
   ASDN::RecursiveMutex _videoLock;
   
   __weak id<ASVideoNodeDelegate> _delegate;
-
+  
   BOOL _shouldBePlaying;
   
   BOOL _shouldAutorepeat;
   BOOL _shouldAutoplay;
   
   BOOL _muted;
-
+  
   AVAsset *_asset;
   
   AVPlayerItem *_currentItem;
@@ -41,12 +41,15 @@
 
 @implementation ASVideoNode
 
+
+#pragma mark - Construction and Layout
+
 - (instancetype)init
 {
   if (!(self = [super init])) {
     return nil;
   }
-    
+  
   _previewQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
   
   self.playButton = [[ASDefaultPlayButton alloc] init];
@@ -54,8 +57,87 @@
   self.gravity = AVLayerVideoGravityResizeAspect;
   
   [self addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
-    
+  
   return self;
+}
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
+}
+
+- (ASDisplayNode*) constructPlayerNode {
+  ASDisplayNode* playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
+    AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
+    if (!_player) {
+      _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+      _player.muted = _muted;
+    }
+    playerLayer.player = _player;
+    playerLayer.videoGravity = [self gravity];
+    return playerLayer;
+  }];
+  
+  return playerNode;
+}
+
+- (void)didLoad
+{
+  [super didLoad];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+  
+  if (_shouldBePlaying) {
+    _playerNode = [self constructPlayerNode];
+    [self insertSubnode:_playerNode atIndex:0];
+  } else {
+    dispatch_async(_previewQueue, ^{
+      AVAssetImageGenerator *imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:_asset];
+      imageGenerator.appliesPreferredTrackTransform = YES;
+      [imageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:CMTimeMake(0, 1)]] completionHandler:^(CMTime requestedTime, CGImageRef  _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
+        UIImage *theImage = [UIImage imageWithCGImage:image];
+        
+        _placeholderImageNode = [[ASImageNode alloc] init];
+        _placeholderImageNode.layerBacked = YES;
+        _placeholderImageNode.image = theImage;
+        
+        if ([_gravity isEqualToString:AVLayerVideoGravityResize]) {
+          _placeholderImageNode.contentMode = UIViewContentModeRedraw;
+        }
+        if ([_gravity isEqualToString:AVLayerVideoGravityResizeAspect]) {
+          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFit;
+        }
+        if ([_gravity isEqual:AVLayerVideoGravityResizeAspectFill]) {
+          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFill;
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+          _placeholderImageNode.frame = self.bounds;
+          [self insertSubnode:_placeholderImageNode atIndex:0];
+        });
+      }];
+    });
+  }
+}
+
+- (void)layout
+{
+  [super layout];
+  
+  CGRect bounds = self.bounds;
+  
+  _placeholderImageNode.frame = bounds;
+  _playerNode.frame = bounds;
+  _playerNode.layer.frame = bounds;
+  
+  _playButton.frame = bounds;
+  
+  CGFloat horizontalDiff = (bounds.size.width - _playButton.bounds.size.width)/2;
+  CGFloat verticalDiff = (bounds.size.height - _playButton.bounds.size.height)/2;
+  _playButton.hitTestSlop = UIEdgeInsetsMake(-verticalDiff, -horizontalDiff, -verticalDiff, -horizontalDiff);
+  
+  _spinner.bounds = CGRectMake(0, 0, 44, 44);
+  _spinner.position = CGPointMake(bounds.size.width/2, bounds.size.height/2);
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
@@ -106,74 +188,6 @@
   }
 }
 
-- (void)layout
-{
-  [super layout];
-  
-  CGRect bounds = self.bounds;
-  
-  _placeholderImageNode.frame = bounds;
-  _playerNode.frame = bounds;
-  _playerNode.layer.frame = bounds;
-  
-  _playButton.frame = bounds;
-  
-  CGFloat horizontalDiff = (bounds.size.width - _playButton.bounds.size.width)/2;
-  CGFloat verticalDiff = (bounds.size.height - _playButton.bounds.size.height)/2;
-  _playButton.hitTestSlop = UIEdgeInsetsMake(-verticalDiff, -horizontalDiff, -verticalDiff, -horizontalDiff);
-  
-  _spinner.bounds = CGRectMake(0, 0, 44, 44);
-  _spinner.position = CGPointMake(bounds.size.width/2, bounds.size.height/2);
-}
-
-- (void)didLoad
-{
-  [super didLoad];
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
-
-  if (_shouldBePlaying) {
-    _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
-      AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
-      if (!_player) {
-        _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
-        _player.muted = _muted;
-      }
-      playerLayer.player = _player;
-      playerLayer.videoGravity = [self gravity];
-      return playerLayer;
-    }];
-    
-    [self insertSubnode:_playerNode atIndex:0];
-  } else {
-    dispatch_async(_previewQueue, ^{
-      AVAssetImageGenerator *imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:_asset];
-      imageGenerator.appliesPreferredTrackTransform = YES;
-      [imageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:CMTimeMake(0, 1)]] completionHandler:^(CMTime requestedTime, CGImageRef  _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
-        UIImage *theImage = [UIImage imageWithCGImage:image];
-        
-        _placeholderImageNode = [[ASImageNode alloc] init];
-        _placeholderImageNode.layerBacked = YES;
-        _placeholderImageNode.image = theImage;
-        
-        if ([_gravity isEqualToString:AVLayerVideoGravityResize]) {
-          _placeholderImageNode.contentMode = UIViewContentModeRedraw;
-        }
-        if ([_gravity isEqualToString:AVLayerVideoGravityResizeAspect]) {
-          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFit;
-        }
-        if ([_gravity isEqual:AVLayerVideoGravityResizeAspectFill]) {
-          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFill;
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-          _placeholderImageNode.frame = self.bounds;
-          [self insertSubnode:_placeholderImageNode atIndex:0];
-        });
-      }];
-    });
-  }
-}
-
 - (void)tapped
 {
   if (self.delegate && [self.delegate respondsToSelector:@selector(videoNodeWasTapped:)]) {
@@ -187,28 +201,22 @@
   }
 }
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  ASDisplayNodeAssertNotSupported();
-  return nil;
-}
-
 - (void)fetchData
 {
   [super fetchData];
-
+  
   @try {
     [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
   }
   @catch (NSException * __unused exception) {
     NSLog(@"unnecessary removal in fetch data");
   }
-
+  
   {
     ASDN::MutexLocker l(_videoLock);
     _currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
     [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
-
+    
     if (_player) {
       [_player replaceCurrentItemWithPlayerItem:_currentItem];
     } else {
@@ -246,12 +254,13 @@
       }
       ((AVPlayerLayer *)_playerNode.layer).player = _player;
     }
-  
+    
     if (_shouldBePlaying) {
       [self play];
     }
   }
 }
+
 
 #pragma mark - Video Properties
 
@@ -278,11 +287,11 @@
   ASDN::MutexLocker l(_videoLock);
   
   if (ASObjectIsEqual(asset, _asset)
-    || ([asset isKindOfClass:[AVURLAsset class]]
-      && [_asset isKindOfClass:[AVURLAsset class]]
-      && ASObjectIsEqual(((AVURLAsset *)asset).URL, ((AVURLAsset *)_asset).URL))) {
-    return;
-  }
+      || ([asset isKindOfClass:[AVURLAsset class]]
+          && [_asset isKindOfClass:[AVURLAsset class]]
+          && ASObjectIsEqual(((AVURLAsset *)asset).URL, ((AVURLAsset *)_asset).URL))) {
+        return;
+      }
   
   _asset = asset;
   
@@ -323,14 +332,14 @@
 - (BOOL)muted
 {
   ASDN::MutexLocker l(_videoLock);
-
+  
   return _muted;
 }
 
 - (void)setMuted:(BOOL)muted
 {
   ASDN::MutexLocker l(_videoLock);
-
+  
   _muted = muted;
 }
 
@@ -350,16 +359,7 @@
   }
   
   if (!_playerNode) {
-    _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
-      AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
-      if (!_player) {
-        _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
-        _player.muted = _muted;
-      }
-      playerLayer.player = _player;
-      playerLayer.videoGravity = [self gravity];
-      return playerLayer;
-    }];
+    _playerNode = [self constructPlayerNode];
     
     if ([self.subnodes containsObject:_playButton]) {
       [self insertSubnode:_playerNode belowSubnode:_playButton];
