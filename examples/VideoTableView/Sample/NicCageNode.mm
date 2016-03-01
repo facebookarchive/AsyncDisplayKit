@@ -80,16 +80,36 @@ static const CGFloat kInnerPadding = 10.0f;
     return nil;
 
   _kittenSize = size;
-
-  _videoNode = [[ASVideoNode alloc] init];
+  
+  u_int32_t videoInitMethod = arc4random_uniform(3);
+  NSArray* methodArray = @[@"AVAsset", @"File URL", @"HLS URL"];
+  
+  switch (videoInitMethod) {
+    case 0:
+      // Construct an AVAsset from a URL
+      _videoNode = [[ASVideoNode alloc] initWithAsset:
+                    [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]]];
+      break;
+      
+    case 1:
+      // Construct the video node directly from the .mp4 URL
+      _videoNode = [[ASVideoNode alloc] initWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
+      break;
+      
+    case 2:
+      // Construct the video node from an HTTP Live Streaming URL
+      // URL from https://developer.apple.com/library/ios/documentation/AudioVideo/Conceptual/AVFoundationPG/Articles/02_Playback.html
+      _videoNode = [[ASVideoNode alloc] initWithURL:[NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8"]];
+      break;
+  }
+  
 //  _videoNode.shouldAutoplay = YES;
   _videoNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
-  _videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
 
   [self addSubnode:_videoNode];
 
   _textNode = [[ASTextNode alloc] init];
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:[self kittyIpsum]
+  _textNode.attributedString = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ %@", methodArray[videoInitMethod], [self kittyIpsum]]
                                                                attributes:[self textStyle]];
   [self addSubnode:_textNode];
 

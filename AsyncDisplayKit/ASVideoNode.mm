@@ -23,6 +23,7 @@
   BOOL _muted;
   
   AVAsset *_asset;
+  NSURL *_url;
   
   AVPlayerItem *_currentItem;
   AVPlayer *_player;
@@ -41,24 +42,49 @@
 
 @implementation ASVideoNode
 
+//TODO: Have a bash at getting the preview images sorted for the URL types - might need to observe until it's loaded
+
+//TODO: Have a bash at supplying a preview image node so that we're deferring the construction of the video as it eats memory at the moment
+// [[[[playerItem tracks] objectAtIndex:0] assetTrack] asset]
 
 #pragma mark - Construction and Layout
 
-- (instancetype)init
+- (instancetype)initWithURL:(NSURL*)url
 {
+  ASDisplayNodeAssertNotNil(url, @"URL must be supplied in initWithURL:");
   if (!(self = [super init])) {
     return nil;
   }
   
+  _url = url;
+  return [self commonInit];
+}
+
+- (instancetype)initWithAsset:(AVAsset*)asset
+{
+  ASDisplayNodeAssertNotNil(asset, @"Asset must be supplied in initWithAsset:");
+  if (!(self = [super init])) {
+    return nil;
+  }
+  _asset = asset;
+  return [self commonInit];
+}
+
+- (instancetype)commonInit
+{
   _previewQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
   
   self.playButton = [[ASDefaultPlayButton alloc] init];
-  
   self.gravity = AVLayerVideoGravityResizeAspect;
-  
   [self addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
   
   return self;
+}
+
+- (instancetype)init
+{
+  ASDisplayNodeAssertNotSupported();
+  return nil;
 }
 
 - (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
@@ -71,7 +97,7 @@
   ASDisplayNode* playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
     AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
     if (!_player) {
-      _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+        _player = [AVPlayer playerWithPlayerItem:[self constructPlayerItemFromInitData]];
       _player.muted = _muted;
     }
     playerLayer.player = _player;
@@ -82,6 +108,18 @@
   return playerNode;
 }
 
+- (AVPlayerItem*) constructPlayerItemFromInitData {
+  ASDisplayNodeAssert(_asset || _url, @"Must be initialised with an AVAsset or URL");
+  
+  if (_asset) {
+    return [[AVPlayerItem alloc] initWithAsset:_asset];
+  } else if (_url) {
+    return [[AVPlayerItem alloc] initWithURL:_url];
+  }
+
+  return nil;
+}
+
 - (void)didLoad
 {
   [super didLoad];
@@ -90,7 +128,7 @@
   if (_shouldBePlaying) {
     _playerNode = [self constructPlayerNode];
     [self insertSubnode:_playerNode atIndex:0];
-  } else {
+  } else if (_asset) {
     dispatch_async(_previewQueue, ^{
       AVAssetImageGenerator *imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:_asset];
       imageGenerator.appliesPreferredTrackTransform = YES;
@@ -214,7 +252,7 @@
   
   {
     ASDN::MutexLocker l(_videoLock);
-    _currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
+    _currentItem = [self constructPlayerItemFromInitData];
     [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
     
     if (_player) {
@@ -249,7 +287,7 @@
   if (isVisible) {
     if (_playerNode.isNodeLoaded) {
       if (!_player) {
-        _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
+        _player = [AVPlayer playerWithPlayerItem:[self constructPlayerItemFromInitData]];
         _player.muted = _muted;
       }
       ((AVPlayerLayer *)_playerNode.layer).player = _player;
