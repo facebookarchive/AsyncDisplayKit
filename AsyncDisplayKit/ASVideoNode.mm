@@ -47,6 +47,8 @@
 //TODO: Have a bash at supplying a preview image node so that we're deferring the construction of the video as it eats memory at the moment
 // [[[[playerItem tracks] objectAtIndex:0] assetTrack] asset]
 
+//TODO: URL file videos don't seem to repeat
+
 #pragma mark - Construction and Layout
 
 - (instancetype)initWithURL:(NSURL*)url
