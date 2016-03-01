@@ -46,9 +46,6 @@
     NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind withMutableContexts:contexts];
     _pendingContexts[kind] = contexts;
-    
-    // Measure loaded nodes before leaving the main thread
-    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:nil];
   }
 }
 
@@ -85,9 +82,6 @@
     NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableContexts:contexts];
     _pendingContexts[kind] = contexts;
-    
-    // Measure loaded nodes before leaving the main thread
-    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:nil];
   }
 }
 
@@ -123,9 +117,6 @@
     NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableContexts:contexts];
     _pendingContexts[kind] = contexts;
-    
-    // Measure loaded nodes before leaving the main thread
-    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:nil];
   }
 }
 
