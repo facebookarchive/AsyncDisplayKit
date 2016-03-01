@@ -532,7 +532,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:[self scrollDirection]];
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
   
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)]) {
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
@@ -1081,6 +1081,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (!visible && node.inHierarchy) {
     [node __exitHierarchy];
   }
+    
+  // Trigger updating interfaceState for cells in case ASCollectionView becomes visible or invisible
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 }
 
 #pragma mark - UICollectionView dead-end intercepts

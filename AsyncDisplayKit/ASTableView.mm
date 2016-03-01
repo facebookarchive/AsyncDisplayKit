@@ -1056,6 +1056,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (!visible && node.inHierarchy) {
     [node __exitHierarchy];
   }
+  
+  // Trigger updating interfaceState for cells in case ASTableView becomes visible or invisible
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 }
 
 @end
