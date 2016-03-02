@@ -1790,7 +1790,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // (even a runloop observer at a late call order will not stop the next frame from compositing, showing placeholders).
   
   ASDisplayNode *node = [layer asyncdisplaykit_node];
-  if (!layer.contents && [node __implementsDisplay]) {
+  if ([node __implementsDisplay]) {
     // For layers that do get displayed here, this immediately kicks off the work on the concurrent -[_ASDisplayLayer displayQueue].
     // At the same time, it creates an associated _ASAsyncTransaction, which we can use to block on display completion.  See ASDisplayNode+AsyncDisplay.mm.
     [layer displayIfNeeded];
