@@ -2083,7 +2083,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
         [self setDisplaySuspended:NO];
       } else {
         [self setDisplaySuspended:YES];
-        [self clearContents];
+        //schedule clear contents on next runloop
+        dispatch_async(dispatch_get_main_queue(), ^{
+          ASDN::MutexLocker l(_propertyLock);
+          if (ASInterfaceStateIncludesDisplay(_interfaceState) == NO) {
+            [self clearContents];
+          }
+        });
       }
     } else {
       // NOTE: This case isn't currently supported as setInterfaceState: isn't exposed externally, and all
@@ -2095,7 +2101,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
             [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
           } else {
             [[self asyncLayer] cancelAsyncDisplay];
-            [self clearContents];
+            //schedule clear contents on next runloop
+            dispatch_async(dispatch_get_main_queue(), ^{
+              ASDN::MutexLocker l(_propertyLock);
+              if (ASInterfaceStateIncludesDisplay(_interfaceState) == NO) {
+                [self clearContents];
+              }
+            });
           }
         }
       }
