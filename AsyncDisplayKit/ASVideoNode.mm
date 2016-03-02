@@ -43,7 +43,6 @@
 @implementation ASVideoNode
 
 //TODO: Have a bash at supplying a preview image node so that we're deferring the construction of the video as it eats memory at the moment
-// [[[[playerItem tracks] objectAtIndex:0] assetTrack] asset]
 
 //TODO: URL file videos don't seem to repeat
 
@@ -186,7 +185,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
           _placeholderImageNode.frame = self.bounds;
           [self insertSubnode:_placeholderImageNode atIndex:0];
-          [self setNeedsLayout];
+          // [self setNeedsLayout];
         });
       }
     }];
