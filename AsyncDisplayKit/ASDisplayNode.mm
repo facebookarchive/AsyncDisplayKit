@@ -1227,7 +1227,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   if (isMovingEquivalentParents) {
     [subnode __incrementVisibilityNotificationsDisabled];
   }
-  [subnode removeFromSupernodeMovingBetweenNodes:YES];
+  [subnode removeFromSupernode];
 
   if (!_subnodes)
     _subnodes = [[NSMutableArray alloc] init];
@@ -1498,11 +1498,6 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (void)removeFromSupernode
 {
-  [self removeFromSupernodeMovingBetweenNodes:NO];
-}
-
-- (void)removeFromSupernodeMovingBetweenNodes:(BOOL)movingBetweenNodes
-{
   ASDisplayNodeAssertThreadAffinity(self);
   BOOL shouldRemoveFromSuperviewOrSuperlayer = NO;
   
@@ -1510,7 +1505,7 @@ static NSInteger incrementIfFound(NSInteger i) {
     ASDN::MutexLocker l(_propertyLock);
     if (!_supernode)
       return;
-    
+
     // Check to ensure that our view or layer is actually inside of our supernode; otherwise, don't remove it.
     // Though _ASDisplayView decouples the supernode if it is inserted inside another view hierarchy, this is
     // more difficult to guarantee with _ASDisplayLayer because CoreAnimation doesn't have a -didMoveToSuperlayer.
@@ -1527,21 +1522,14 @@ static NSInteger incrementIfFound(NSInteger i) {
   // Do this before removing the view from the hierarchy, as the node will clear its supernode pointer when its view is removed from the hierarchy.
   // This call may result in the object being destroyed.
   [_supernode _removeSubnode:self];
-  
+
   if (shouldRemoveFromSuperviewOrSuperlayer) {
     ASPerformBlockOnMainThread(^{
       ASDN::MutexLocker l(_propertyLock);
-      
-      if (movingBetweenNodes) {
-        _flags.isMovingBetweenNodes = YES;
-      }
       if (_flags.layerBacked) {
         [_layer removeFromSuperlayer];
       } else {
         [_view removeFromSuperview];
-      }
-      if (movingBetweenNodes) {
-        _flags.isMovingBetweenNodes = NO;
       }
     });
   }
@@ -1982,14 +1970,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)clearContents
 {
   // No-op if these haven't been created yet, as that guarantees they don't have contents that needs to be released.
-  {
-    ASDN::MutexLocker l(_propertyLock);
-    //Do not clear contents if we're mearly moving between nodes
-    if (_flags.isMovingBetweenNodes) {
-      return;
-    }
-  }
-  
   _layer.contents = nil;
   _placeholderLayer.contents = nil;
   _placeholderImage = nil;
