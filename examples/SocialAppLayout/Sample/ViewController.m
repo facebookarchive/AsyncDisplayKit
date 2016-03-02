@@ -57,11 +57,6 @@
     [self.view addSubview:self.tableView];
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-    return YES;
-}
-
 - (void)createSocialAppDataSource {
     
     _socialAppDataSource = [[NSMutableArray alloc] init];

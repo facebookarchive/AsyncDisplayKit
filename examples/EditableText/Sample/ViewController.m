@@ -63,11 +63,6 @@
   _textNode.frame = CGRectMake(0, 20, self.view.bounds.size.width, (self.view.bounds.size.height / 2) - 40);
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 - (void)tap:(UITapGestureRecognizer *)sender
 {
   // dismiss the keyboard when we tap outside the text field

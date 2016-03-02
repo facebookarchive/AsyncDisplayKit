@@ -82,11 +82,6 @@ static NSUInteger kNumberOfImages = 14;
   _collectionView.frame = self.view.bounds;
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 - (void)reloadTapped
 {
   [_collectionView reloadData];

@@ -84,11 +84,6 @@
 #endif
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 - (void)reloadTapped
 {
   [self.collectionView reloadData];
