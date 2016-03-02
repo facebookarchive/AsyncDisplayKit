@@ -10,10 +10,13 @@
 #import "ASAssert.h"
 #import "ASDimension.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Beta.h"
+#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
 @implementation ASViewController
 {
   BOOL _ensureDisplayed;
+  BOOL _automaticallyAdjustRangeModeBasedOnViewEvents;
 }
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -37,6 +40,8 @@
   ASDisplayNodeAssertNotNil(node, @"Node must not be nil");
   ASDisplayNodeAssertTrue(!node.layerBacked);
   _node = node;
+
+  _automaticallyAdjustRangeModeBasedOnViewEvents = NO;
   
   return self;
 }
@@ -67,9 +72,39 @@
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
   [_node recursivelyFetchData];
+    
+  [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeFull];
 }
 
-// MARK: - Layout Helpers
+- (void)viewDidDisappear:(BOOL)animated
+{
+  [super viewDidDisappear:animated];
+  
+  [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeMinimum];
+}
+
+#pragma mark - Automatic range mode
+
+- (BOOL)automaticallyAdjustRangeModeBasedOnViewEvents
+{
+  return _automaticallyAdjustRangeModeBasedOnViewEvents;
+}
+
+- (void)setAutomaticallyAdjustRangeModeBasedOnViewEvents:(BOOL)automaticallyAdjustRangeModeBasedOnViewEvents
+{
+  _automaticallyAdjustRangeModeBasedOnViewEvents = automaticallyAdjustRangeModeBasedOnViewEvents;
+}
+
+- (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
+{
+  if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
+  if (![_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]) { return; }
+
+  id<ASRangeControllerUpdateRangeProtocol> updateRangeNode = (id<ASRangeControllerUpdateRangeProtocol>)_node;
+  [updateRangeNode updateCurrentRangeWithMode:rangeMode];
+}
+
+#pragma mark - Layout Helpers
 
 - (ASSizeRange)nodeConstrainedSize
 {

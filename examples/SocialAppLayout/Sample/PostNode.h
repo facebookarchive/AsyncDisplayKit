@@ -10,28 +10,10 @@
  */
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
-#import "Post.h"
 
-@class LikesNode;
-@class CommentsNode;
+@class Post;
 
-@interface PostNode : ASCellNode <ASTextNodeDelegate> {
-    
-    Post *_post;
-    
-    ASDisplayNode *_divider;
-    ASTextNode *_nameNode;
-    ASTextNode *_usernameNode;
-    ASTextNode *_timeNode;
-    ASTextNode *_postNode;
-    ASImageNode *_viaNode;
-    ASNetworkImageNode *_avatarNode;
-    ASNetworkImageNode *_mediaNode;
-    LikesNode *_likesNode;
-    CommentsNode *_commentsNode;
-    ASImageNode *_optionsNode;
-    
-}
+@interface PostNode : ASCellNode
 
 - (instancetype)initWithPost:(Post *)post;
 

@@ -35,6 +35,15 @@
   return textCellNode;
 }
 
+
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath {
+  return ^{
+    ASTextCellNode *textCellNode = [ASTextCellNode new];
+    textCellNode.text = indexPath.description;
+    return textCellNode;
+  };
+}
+
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
   return self.numberOfSections;
 }
@@ -110,7 +119,7 @@
   XCTAssertEqualObjects([collectionView supplementaryNodeKindsInDataController:nil], @[UICollectionElementKindSectionHeader]);
 }
 
-- (void)DISABLED_testCollectionViewController
+- (void)testCollectionViewController
 {
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
 

@@ -11,6 +11,8 @@
 #import "ASThread.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASBackgroundLayoutSpec.h"
+#import "ASInsetLayoutSpec.h"
+#import "ASDisplayNode+Beta.h"
 
 @interface ASButtonNode ()
 {
@@ -38,30 +40,54 @@
 
 @synthesize contentSpacing = _contentSpacing;
 @synthesize laysOutHorizontally = _laysOutHorizontally;
+@synthesize contentVerticalAlignment = _contentVerticalAlignment;
+@synthesize contentHorizontalAlignment = _contentHorizontalAlignment;
+@synthesize contentEdgeInsets = _contentEdgeInsets;
+@synthesize titleNode = _titleNode;
+@synthesize imageNode = _imageNode;
+@synthesize backgroundImageNode = _backgroundImageNode;
 
 - (instancetype)init
 {
-  if (self = [super init]) {    
+  if (self = [super init]) {
+    self.usesImplicitHierarchyManagement = YES;
+    
     _contentSpacing = 8.0;
     _laysOutHorizontally = YES;
-
-    _titleNode = [[ASTextNode alloc] init];
-    _imageNode = [[ASImageNode alloc] init];
-    _backgroundImageNode = [[ASImageNode alloc] init];
-    [_backgroundImageNode setContentMode:UIViewContentModeScaleToFill];
-    
-    [_titleNode setLayerBacked:YES];
-    [_imageNode setLayerBacked:YES];
-    [_backgroundImageNode setLayerBacked:YES];
-      
     _contentHorizontalAlignment = ASAlignmentMiddle;
     _contentVerticalAlignment = ASAlignmentCenter;
-    
-    [self addSubnode:_backgroundImageNode];
-    [self addSubnode:_titleNode];
-    [self addSubnode:_imageNode];
+    _contentEdgeInsets = UIEdgeInsetsZero;
   }
   return self;
+}
+
+- (ASTextNode *)titleNode
+{
+  if (!_titleNode) {
+    _titleNode = [[ASTextNode alloc] init];
+    [_titleNode setLayerBacked:YES];
+    [_titleNode setFlexShrink:YES];
+  }
+  return _titleNode;
+}
+
+- (ASImageNode *)imageNode
+{
+  if (!_imageNode) {
+    _imageNode = [[ASImageNode alloc] init];
+    [_imageNode setLayerBacked:YES];
+  }
+  return _imageNode;
+}
+
+- (ASImageNode *)backgroundImageNode
+{
+  if (!_backgroundImageNode) {
+    _backgroundImageNode = [[ASImageNode alloc] init];
+    [_backgroundImageNode setLayerBacked:YES];
+    [_backgroundImageNode setContentMode:UIViewContentModeScaleToFill];
+  }
+  return _backgroundImageNode;
 }
 
 - (void)setLayerBacked:(BOOL)layerBacked
@@ -98,6 +124,7 @@
 - (void)setDisplaysAsynchronously:(BOOL)displaysAsynchronously
 {
   [super setDisplaysAsynchronously:displaysAsynchronously];
+  [self.backgroundImageNode setDisplaysAsynchronously:displaysAsynchronously];
   [self.imageNode setDisplaysAsynchronously:displaysAsynchronously];
   [self.titleNode setDisplaysAsynchronously:displaysAsynchronously];
 }
@@ -117,8 +144,8 @@
     newImage = _normalImage;
   }
   
-  if (newImage != self.imageNode.image) {
-    self.imageNode.image = newImage;
+  if ((_imageNode != nil || newImage != nil) && newImage != self.imageNode.image) {
+    _imageNode.image = newImage;
     [self setNeedsLayout];
   }
 }
@@ -137,8 +164,8 @@
     newTitle = _normalAttributedTitle;
   }
   
-  if (newTitle != self.titleNode.attributedString) {
-    self.titleNode.attributedString = newTitle;
+  if ((_titleNode != nil || newTitle.length > 0) && newTitle != self.titleNode.attributedString) {
+    _titleNode.attributedString = newTitle;
     [self setNeedsLayout];
   }
 }
@@ -158,8 +185,8 @@
     newImage = _normalBackgroundImage;
   }
   
-  if (newImage != self.backgroundImageNode.image) {
-    self.backgroundImageNode.image = newImage;
+  if ((_backgroundImageNode != nil || newImage != nil) && newImage != self.backgroundImageNode.image) {
+    _backgroundImageNode.image = newImage;
     [self setNeedsLayout];
   }
 }
@@ -194,6 +221,42 @@
   
   _laysOutHorizontally = laysOutHorizontally;
   [self setNeedsLayout];
+}
+
+- (ASVerticalAlignment)contentVerticalAlignment
+{
+    ASDN::MutexLocker l(_propertyLock);
+    return _contentVerticalAlignment;
+}
+
+- (void)setContentVerticalAlignment:(ASVerticalAlignment)contentVerticalAlignment
+{
+    ASDN::MutexLocker l(_propertyLock);
+    _contentVerticalAlignment = contentVerticalAlignment;
+}
+
+- (ASHorizontalAlignment)contentHorizontalAlignment
+{
+    ASDN::MutexLocker l(_propertyLock);
+    return _contentHorizontalAlignment;
+}
+
+- (void)setContentHorizontalAlignment:(ASHorizontalAlignment)contentHorizontalAlignment
+{
+    ASDN::MutexLocker l(_propertyLock);
+    _contentHorizontalAlignment = contentHorizontalAlignment;
+}
+
+- (UIEdgeInsets)contentEdgeInsets
+{
+    ASDN::MutexLocker l(_propertyLock);
+    return _contentEdgeInsets;
+}
+
+- (void)setContentEdgeInsets:(UIEdgeInsets)contentEdgeInsets
+{
+    ASDN::MutexLocker l(_propertyLock);
+    _contentEdgeInsets = contentEdgeInsets;
 }
 
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
@@ -352,37 +415,50 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
+  UIEdgeInsets contentEdgeInsets;
+  ASLayoutSpec *spec;
   ASStackLayoutSpec *stack = [[ASStackLayoutSpec alloc] init];
-  stack.direction = self.laysOutHorizontally ? ASStackLayoutDirectionHorizontal : ASStackLayoutDirectionVertical;
-  stack.spacing = self.contentSpacing;
-  stack.horizontalAlignment = _contentHorizontalAlignment;
-  stack.verticalAlignment = _contentVerticalAlignment;
-  
-  NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:2];
-  if (self.imageNode.image) {
-    [children addObject:self.imageNode];
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    stack.direction = _laysOutHorizontally ? ASStackLayoutDirectionHorizontal : ASStackLayoutDirectionVertical;
+    stack.spacing = _contentSpacing;
+    stack.horizontalAlignment = _contentHorizontalAlignment;
+    stack.verticalAlignment = _contentVerticalAlignment;
+    
+    contentEdgeInsets = _contentEdgeInsets;
   }
   
-  if (self.titleNode.attributedString.length > 0) {
-    [children addObject:self.titleNode];
+  NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:2];
+  if (_imageNode.image) {
+    [children addObject:_imageNode];
+  }
+  
+  if (_titleNode.attributedString.length > 0) {
+    [children addObject:_titleNode];
   }
   
   stack.children = children;
   
-  if (self.backgroundImageNode.image) {
-      return [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:stack
-                                                        background:self.backgroundImageNode];
-  } else {
-      return stack;
+  spec = stack;
+  
+  if (UIEdgeInsetsEqualToEdgeInsets(UIEdgeInsetsZero, contentEdgeInsets) == NO) {
+    spec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentEdgeInsets child:spec];
   }
+  
+  if (_backgroundImageNode.image) {
+    spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec
+                                                      background:_backgroundImageNode];
+  }
+  
+  return spec;
 }
 
 - (void)layout
 {
   [super layout];
-  self.backgroundImageNode.hidden = self.backgroundImageNode.image == nil;
-  self.imageNode.hidden = self.imageNode.image == nil;
-  self.titleNode.hidden = self.titleNode.attributedString.length > 0 == NO;
+  _backgroundImageNode.hidden = (_backgroundImageNode.image == nil);
+  _imageNode.hidden = (_imageNode.image == nil);
+  _titleNode.hidden = (_titleNode.attributedString.length == 0);
 }
 
 @end

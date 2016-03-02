@@ -19,12 +19,14 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
  @param boundsSize The bounds in which the image will be displayed.
  @param contentMode The mode that defines how image will be scaled and cropped to fit. Supported values are UIViewContentModeScaleToAspectFill and UIViewContentModeScaleToAspectFit.
  @param cropRect A rectangle that is to be featured by the cropped image. The rectangle is specified as a "unit rectangle," using percentages of the source image's width and height, e.g. CGRectMake(0.5, 0, 0.5, 1.0) will feature the full right half a photo. If the cropRect is empty, the contentMode will be used to determine the drawRect's size, and only the cropRect's origin will be used for positioning.
+ @param forceUpscaling A boolean that indicates you would *not* like the backing size to be downscaled if the image is smaller than the destination size. Setting this to YES will result in higher memory usage when images are smaller than their destination.
  @discussion If the image is smaller than the size and UIViewContentModeScaleToAspectFill is specified, we suggest the input size so it will be efficiently upscaled on the GPU by the displaying layer at composite time.
  */
 extern void ASCroppedImageBackingSizeAndDrawRectInBounds(CGSize sourceImageSize,
                                                          CGSize boundsSize,
                                                          UIViewContentMode contentMode,
                                                          CGRect cropRect,
+                                                         BOOL forceUpscaling,
                                                          CGSize *outBackingSize,
                                                          CGRect *outDrawRect
                                                          );

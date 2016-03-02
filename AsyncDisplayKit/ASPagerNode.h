@@ -9,12 +9,60 @@
 #import <AsyncDisplayKit/ASCollectionNode.h>
 
 @class ASPagerNode;
+@class ASPagerFlowLayout;
+
 @protocol ASPagerNodeDataSource <NSObject>
-// This method replaces -collectionView:numberOfItemsInSection:
+
+/**
+ * This method replaces -collectionView:numberOfItemsInSection:
+ *
+ * @param pagerNode The sender.
+ *
+ *
+ * @returns The total number of pages that can display in the pagerNode.
+ */
 - (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode;
 
-// This method replaces -collectionView:nodeForItemAtIndexPath:
+@optional
+
+/**
+ * This method replaces -collectionView:nodeForItemAtIndexPath:
+ *
+ * @param pagerNode The sender.
+ *
+ * @param index The index of the requested node.
+ *
+ * @returns a node for display at this index. This will be called on the main thread and should
+ *   not implement reuse (it will be called once per row).  Unlike UICollectionView's version,
+ *   this method is not called when the row is about to display.
+ */
 - (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index;
+
+/**
+ * This method replaces -collectionView:nodeBlockForItemAtIndexPath:
+ * This method takes precedence over pagerNode:nodeAtIndex: if implemented.
+ *
+ * @param pagerNode The sender.
+ *
+ * @param index The index of the requested node.
+ *
+ * @returns a block that creates the node for display at this index.
+ *   Must be thread-safe (can be called on the main thread or a background
+ *   queue) and should not implement reuse (it will be called once per row).
+ */
+- (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index;
+
+/**
+ * Provides the constrained size range for measuring the node at the index path.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the node.
+ *
+ * @returns A constrained size range for layout the node at this index path.
+ */
+- (ASSizeRange)pagerNode:(ASPagerNode *)pagerNode constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+
 @end
 
 @interface ASPagerNode : ASCollectionNode
@@ -23,7 +71,7 @@
 - (instancetype)init;
 
 // Initializer with custom-configured flow layout properties.
-- (instancetype)initWithCollectionViewLayout:(UICollectionViewFlowLayout *)flowLayout;
+- (instancetype)initWithCollectionViewLayout:(ASPagerFlowLayout *)flowLayout;
 
 // Data Source is required, and uses a different protocol from ASCollectionNode.
 - (void)setDataSource:(id <ASPagerNodeDataSource>)dataSource;

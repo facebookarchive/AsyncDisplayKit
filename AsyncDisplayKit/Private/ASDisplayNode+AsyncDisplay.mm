@@ -12,6 +12,7 @@
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Beta.h"
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
 @end
@@ -224,25 +225,32 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
       return image;
     };
-  } else if (_flags.implementsImageDisplay) {
+  } else if (_flags.implementsInstanceImageDisplay || _flags.implementsImageDisplay) {
     // Capture drawParameters from delegate on main thread
     id drawParameters = [self drawParameters];
-
+    
     displayBlock = ^id{
       __ASDisplayLayerIncrementConcurrentDisplayCount(asynchronous, rasterizing);
       if (isCancelledBlock()) {
         __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
         return nil;
       }
-
+      
       ASDN_DELAY_FOR_DISPLAY();
-
-      UIImage *result = [[self class] displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      
+      UIImage *result = nil;
+      //We can't call _willDisplayNodeContentWithRenderingContext or _didDisplayNodeContentWithRenderingContext because we don't
+      //have a context. We rely on implementors of displayWithParameters:isCancelled: to call
+      if (_flags.implementsInstanceImageDisplay) {
+        result = [self displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      } else {
+        result = [[self class] displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      }
       __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
       return result;
     };
-
-  } else if (_flags.implementsDrawRect) {
+    
+  } else if (_flags.implementsInstanceDrawRect || _flags.implementsDrawRect) {
 
     CGRect bounds = self.bounds;
     if (CGRectIsEmpty(bounds)) {
@@ -267,7 +275,20 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
         UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, contentsScaleForDisplay);
       }
 
-      [[self class] drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      CGContextRef currentContext = UIGraphicsGetCurrentContext();
+      if (currentContext && _willDisplayNodeContentWithRenderingContext) {
+        _willDisplayNodeContentWithRenderingContext(currentContext);
+      }
+      
+      if (_flags.implementsInstanceDrawRect) {
+        [self drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      } else {
+        [[self class] drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      }
+      
+      if (currentContext && _didDisplayNodeContentWithRenderingContext) {
+        _didDisplayNodeContentWithRenderingContext(currentContext);
+      }
 
       if (isCancelledBlock()) {
         if (!rasterizing) {
@@ -358,7 +379,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     
     // Adding this displayBlock operation to the transaction will start it IMMEDIATELY.
     // The only function of the transaction commit is to gate the calling of the completionBlock.
-    [transaction addOperationWithBlock:displayBlock queue:[_ASDisplayLayer displayQueue] completion:completionBlock];
+    [transaction addOperationWithBlock:displayBlock priority:self.drawingPriority queue:[_ASDisplayLayer displayQueue] completion:completionBlock];
   } else {
     UIImage *contents = (UIImage *)displayBlock();
     completionBlock(contents, NO);
@@ -368,6 +389,30 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 - (void)cancelDisplayAsyncLayer:(_ASDisplayLayer *)asyncLayer
 {
   [_displaySentinel increment];
+}
+
+- (ASDisplayNodeContextModifier)willDisplayNodeContentWithRenderingContext
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _willDisplayNodeContentWithRenderingContext;
+}
+
+- (ASDisplayNodeContextModifier)didDisplayNodeContentWithRenderingContext
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _didDisplayNodeContentWithRenderingContext;
+}
+
+- (void)setWillDisplayNodeContentWithRenderingContext:(ASDisplayNodeContextModifier)contextModifier
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _willDisplayNodeContentWithRenderingContext = contextModifier;
+}
+
+- (void)setDidDisplayNodeContentWithRenderingContext:(ASDisplayNodeContextModifier)contextModifier;
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _didDisplayNodeContentWithRenderingContext = contextModifier;
 }
 
 @end

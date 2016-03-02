@@ -18,6 +18,13 @@
 #define NumberOfRowsPerSection 20
 #define NumberOfReloadIterations 50
 
+typedef enum : NSUInteger {
+  ReloadData,
+  ReloadRows,
+  ReloadSections,
+  ReloadTypeMax
+} ReloadType;
+
 @interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
 {
   ASTableView *_tableView;
@@ -108,7 +115,7 @@
     UITableViewRowAnimation rowAnimation = (arc4random_uniform(1) == 0 ? UITableViewRowAnimationMiddle : UITableViewRowAnimationNone);
 
     BOOL animatedScroll               = (arc4random_uniform(2) == 0 ? YES : NO);
-    BOOL reloadRowsInsteadOfSections  = (arc4random_uniform(2) == 0 ? YES : NO);
+    ReloadType reloadType             = (arc4random_uniform(ReloadTypeMax));
     BOOL letRunloopProceed            = (arc4random_uniform(2) == 0 ? YES : NO);
     BOOL useBeginEndUpdates           = (arc4random_uniform(3) == 0 ? YES : NO);
     
@@ -120,10 +127,21 @@
       [_tableView beginUpdates];
     }
     
-    if (reloadRowsInsteadOfSections) {
-      [_tableView reloadRowsAtIndexPaths:[self randomIndexPathsExisting:YES] withRowAnimation:rowAnimation];
-    } else {
-      [_tableView reloadSections:[self randomIndexSet] withRowAnimation:rowAnimation];
+    switch (reloadType) {
+      case ReloadData:
+        [_tableView reloadData];
+        break;
+        
+      case ReloadRows:
+        [_tableView reloadRowsAtIndexPaths:[self randomIndexPathsExisting:YES] withRowAnimation:rowAnimation];
+        break;
+        
+      case ReloadSections:
+        [_tableView reloadSections:[self randomIndexSet] withRowAnimation:rowAnimation];
+        break;
+        
+      default:
+        break;
     }
     
     if (addIndexPaths && !indexPathsAddedAndRemoved) {

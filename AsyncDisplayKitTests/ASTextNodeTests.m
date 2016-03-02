@@ -101,6 +101,13 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   XCTAssertTrue([_textNode.truncationAttributedString isEqualToAttributedString:truncation], @"Failed to set truncation message");
 }
 
+- (void)testSettingAdditionalTruncationMessage
+{
+  NSAttributedString *additionalTruncationMessage = [[NSAttributedString alloc] initWithString:@"read more" attributes:nil];
+  _textNode.additionalTruncationMessage = additionalTruncationMessage;
+  XCTAssertTrue([_textNode.additionalTruncationMessage isEqualToAttributedString:additionalTruncationMessage], @"Failed to set additionalTruncationMessage message");
+}
+
 - (void)testCalculatedSizeIsGreaterThanOrEqualToConstrainedSize
 {
   for (NSInteger i = 10; i < 500; i += 50) {

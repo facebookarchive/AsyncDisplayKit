@@ -81,7 +81,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion Subclasses override this method to layout all subnodes or subviews.
  */
-- (void)layout;
+- (void)layout ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Called on the main thread by the view's -layoutSubviews, after -layout.

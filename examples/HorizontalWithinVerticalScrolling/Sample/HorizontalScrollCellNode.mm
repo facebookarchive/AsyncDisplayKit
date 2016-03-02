@@ -67,11 +67,13 @@ static const CGFloat kInnerPadding = 10.0f;
   return 5;
 }
 
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
-  elementNode.preferredFrameSize = _elementSize;
-  return elementNode;
+  return ^{
+    RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
+    elementNode.preferredFrameSize = _elementSize;
+    return elementNode;
+  };
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize

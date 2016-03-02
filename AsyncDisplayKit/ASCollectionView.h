@@ -52,29 +52,57 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<ASCollectionDataSource> asyncDataSource;
 
 /**
- * Tuning parameters for a range type.
+ * Tuning parameters for a range type in full mode.
  *
  * @param rangeType The range type to get the tuning parameters for.
  *
- * @returns A tuning parameter value for the given range type.
+ * @returns A tuning parameter value for the given range type in full mode.
  *
- * Defaults to the render range having one sceenful both leading and trailing and the preload range having two
- * screenfuls in both directions.
+ * @see ASLayoutRangeMode
+ * @see ASLayoutRangeType
  */
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
 
 /**
- * Set the tuning parameters for a range type.
+ * Set the tuning parameters for a range type in full mode.
  *
  * @param tuningParameters The tuning parameters to store for a range type.
  * @param rangeType The range type to set the tuning parameters for.
+ *
+ * @see ASLayoutRangeMode
+ * @see ASLayoutRangeType
  */
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
 
 /**
+ * Tuning parameters for a range type in the specified mode.
+ *
+ * @param rangeMode The range mode to get the runing parameters for.
+ * @param rangeType The range type to get the tuning parameters for.
+ *
+ * @returns A tuning parameter value for the given range type in the given mode.
+ *
+ * @see ASLayoutRangeMode
+ * @see ASLayoutRangeType
+ */
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+
+/**
+ * Set the tuning parameters for a range type in the specigied mode.
+ *
+ * @param tuningParameters The tuning parameters to store for a range type.
+ * @param rangeMode The range mode to set the runing parameters for.
+ * @param rangeType The range type to set the tuning parameters for.
+ *
+ * @see ASLayoutRangeMode
+ * @see ASLayoutRangeType
+ */
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+
+/**
  * The number of screens left to scroll before the delegate -collectionView:beginBatchFetchingWithContext: is called.
  *
- * Defaults to one screenful.
+ * Defaults to two screenfuls.
  */
 @property (nonatomic, assign) CGFloat leadingScreensForBatching;
 
@@ -312,6 +340,8 @@ NS_ASSUME_NONNULL_BEGIN
 #define ASCollectionViewDataSource ASCollectionDataSource
 @protocol ASCollectionDataSource <ASCommonCollectionViewDataSource, NSObject>
 
+@optional
+
 /**
  * Similar to -collectionView:cellForItemAtIndexPath:.
  *
@@ -319,13 +349,25 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param indexPath The index path of the requested node.
  *
- * @returns a node for display at this indexpath.  Must be thread-safe (can be called on the main thread or a background
- * queue) and should not implement reuse (it will be called once per row).  Unlike UICollectionView's version, this method
- * is not called when the row is about to display.
+ * @returns a node for display at this indexpath. This will be called on the main thread and should
+ *   not implement reuse (it will be called once per row).  Unlike UICollectionView's version,
+ *   this method is not called when the row is about to display.
  */
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
-@optional
+/**
+ * Similar to -collectionView:nodeForItemAtIndexPath:
+ * This method takes precedence over collectionView:nodeForItemAtIndexPath: if implemented.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the requested node.
+ *
+ * @returns a block that creates the node for display at this indexpath.
+ *   Must be thread-safe (can be called on the main thread or a background
+ *   queue) and should not implement reuse (it will be called once per row).
+ */
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Asks the collection view to provide a supplementary node to display in the collection view.

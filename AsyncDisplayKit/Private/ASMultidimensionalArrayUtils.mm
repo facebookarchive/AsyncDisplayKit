@@ -54,7 +54,7 @@ static void ASRecursivelyFindIndexPathsForMultidimensionalArray(NSObject *obj, N
 NSObject<NSCopying> *ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> *obj) {
   if ([obj isKindOfClass:[NSArray class]]) {
     NSArray *arr = (NSArray *)obj;
-    NSMutableArray * mutableArr = [NSMutableArray array];
+    NSMutableArray * mutableArr = [NSMutableArray arrayWithCapacity:arr.count];
     for (NSObject<NSCopying> *elem in arr) {
       [mutableArr addObject:ASMultidimensionalArrayDeepMutableCopy(elem)];
     }
@@ -62,6 +62,14 @@ NSObject<NSCopying> *ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> 
   }
 
   return obj;
+}
+
+NSMutableArray<NSMutableArray *> *ASTwoDimensionalArrayDeepMutableCopy(NSArray<NSArray *> *array) {
+  NSMutableArray *newArray = [NSMutableArray arrayWithCapacity:array.count];
+  for (NSArray *subarray in array) {
+    [newArray addObject:[subarray mutableCopy]];
+  }
+  return newArray;
 }
 
 void ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths, NSArray *elements) {

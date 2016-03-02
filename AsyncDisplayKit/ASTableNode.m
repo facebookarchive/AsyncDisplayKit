@@ -9,7 +9,7 @@
 #import "ASFlowLayoutController.h"
 #import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASRangeController.h"
+#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
 @interface _ASTablePendingState : NSObject
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
@@ -75,6 +75,15 @@
     view.asyncDelegate   = pendingState.delegate;
     view.asyncDataSource = pendingState.dataSource;
   }
+}
+
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
+{
+    if (!self.isNodeLoaded) {
+        return;
+    }
+    
+    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
 }
 
 - (_ASTablePendingState *)pendingState
