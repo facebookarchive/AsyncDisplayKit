@@ -19,6 +19,8 @@
 #import "ASPINRemoteImageDownloader.h"
 #endif
 
+static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
+
 @interface ASNetworkImageNode ()
 {
   ASDN::RecursiveMutex _lock;
@@ -228,8 +230,7 @@
     ASDN::MutexLocker l(_lock);
 
     [self _cancelImageDownload];
-    self.image = _defaultImage;
-    _imageLoaded = NO;
+    [self _clearImage];
     if (_cacheSupportsClearing) {
       [_cache clearFetchedImageFromCacheWithURL:_URL];
     }
@@ -247,6 +248,25 @@
 }
 
 #pragma mark - Private methods -- only call with lock.
+
+- (void)_clearImage
+{
+  // Destruction of bigger images on the main thread can be expensive
+  // and can take some time, so we dispatch onto a bg queue to
+  // actually dealloc.
+  UIImage *image = self.image;
+  CGSize imageSize = image.size;
+  BOOL shouldReleaseImageOnBackgroundThread = imageSize.width > kMinReleaseImageOnBackgroundSize.width ||
+                                              imageSize.height > kMinReleaseImageOnBackgroundSize.height;
+  if (shouldReleaseImageOnBackgroundThread) {
+    __block UIImage *blockImage = image;
+    ASPerformBlockOnBackgroundThread(^{
+      blockImage = nil;
+    });
+  }
+  self.image = _defaultImage;
+  _imageLoaded = NO;
+}
 
 - (void)_cancelImageDownload
 {
