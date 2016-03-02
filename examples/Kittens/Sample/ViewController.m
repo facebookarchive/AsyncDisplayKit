@@ -101,11 +101,6 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
   _tableView.frame = self.view.bounds;
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 - (void)toggleEditingMode
 {
   [_tableView setEditing:!_tableView.editing animated:YES];
