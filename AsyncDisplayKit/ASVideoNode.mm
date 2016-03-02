@@ -42,12 +42,14 @@
 
 @implementation ASVideoNode
 
-//TODO: Have a bash at getting the preview images sorted for the URL types - might need to observe until it's loaded
-
 //TODO: Have a bash at supplying a preview image node so that we're deferring the construction of the video as it eats memory at the moment
 // [[[[playerItem tracks] objectAtIndex:0] assetTrack] asset]
 
 //TODO: URL file videos don't seem to repeat
+
+//TODO: Have a look at any unit tests
+
+//TODO: The preview image doesn't seem to scale with the video layout when you click on the item
 
 #pragma mark - Construction and Layout
 
@@ -99,7 +101,8 @@
   ASDisplayNode* playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
     AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
     if (!_player) {
-        _player = [AVPlayer playerWithPlayerItem:[self constructPlayerItemFromInitData]];
+      _currentItem = [self constructPlayerItemFromInitData];
+        _player = [AVPlayer playerWithPlayerItem:_currentItem];
       _player.muted = _muted;
     }
     playerLayer.player = _player;
@@ -131,32 +134,7 @@
     _playerNode = [self constructPlayerNode];
     [self insertSubnode:_playerNode atIndex:0];
   } else if (_asset) {
-    dispatch_async(_previewQueue, ^{
-      AVAssetImageGenerator *imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:_asset];
-      imageGenerator.appliesPreferredTrackTransform = YES;
-      [imageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:CMTimeMake(0, 1)]] completionHandler:^(CMTime requestedTime, CGImageRef  _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
-        UIImage *theImage = [UIImage imageWithCGImage:image];
-        
-        _placeholderImageNode = [[ASImageNode alloc] init];
-        _placeholderImageNode.layerBacked = YES;
-        _placeholderImageNode.image = theImage;
-        
-        if ([_gravity isEqualToString:AVLayerVideoGravityResize]) {
-          _placeholderImageNode.contentMode = UIViewContentModeRedraw;
-        }
-        if ([_gravity isEqualToString:AVLayerVideoGravityResizeAspect]) {
-          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFit;
-        }
-        if ([_gravity isEqual:AVLayerVideoGravityResizeAspectFill]) {
-          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFill;
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-          _placeholderImageNode.frame = self.bounds;
-          [self insertSubnode:_placeholderImageNode atIndex:0];
-        });
-      }];
-    });
+    [self setPlaceholderImagefromAsset:_asset];
   }
 }
 
@@ -178,6 +156,41 @@
   
   _spinner.bounds = CGRectMake(0, 0, 44, 44);
   _spinner.position = CGPointMake(bounds.size.width/2, bounds.size.height/2);
+}
+
+- (void)setPlaceholderImagefromAsset:(AVAsset*)asset {
+  dispatch_async(_previewQueue, ^{
+    AVAssetImageGenerator *imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:_asset];
+    imageGenerator.appliesPreferredTrackTransform = YES;
+    [imageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:CMTimeMake(0, 1)]] completionHandler:^(CMTime requestedTime, CGImageRef  _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
+      
+      // Unfortunately it's not possible to generate a preview image for an HTTP live stream asset, so we'll give up here
+      // http://stackoverflow.com/questions/32112205/m3u8-file-avassetimagegenerator-error
+      if (image) {
+        UIImage *theImage = [UIImage imageWithCGImage:image];
+        
+        _placeholderImageNode = [[ASImageNode alloc] init];
+        _placeholderImageNode.layerBacked = YES;
+        _placeholderImageNode.image = theImage;
+        
+        if ([_gravity isEqualToString:AVLayerVideoGravityResize]) {
+          _placeholderImageNode.contentMode = UIViewContentModeRedraw;
+        }
+        if ([_gravity isEqualToString:AVLayerVideoGravityResizeAspect]) {
+          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFit;
+        }
+        if ([_gravity isEqual:AVLayerVideoGravityResizeAspectFill]) {
+          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFill;
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+          _placeholderImageNode.frame = self.bounds;
+          [self insertSubnode:_placeholderImageNode atIndex:0];
+          [self setNeedsLayout];
+        });
+      }
+    }];
+  });
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
@@ -204,6 +217,17 @@
     if ([self.subnodes containsObject:_spinner]) {
       [_spinner removeFromSupernode];
       _spinner = nil;
+    }
+    
+    // If we don't yet have a placeholder image update it now that we should have data available for it
+    if (!_placeholderImageNode) {
+      if (_currentItem &&
+          _currentItem.tracks.count > 0 &&
+          _currentItem.tracks[0].assetTrack &&
+          _currentItem.tracks[0].assetTrack.asset) {
+        _asset = _currentItem.tracks[0].assetTrack.asset;
+        [self setPlaceholderImagefromAsset:_asset];
+      }
     }
   }
   
@@ -289,7 +313,8 @@
   if (isVisible) {
     if (_playerNode.isNodeLoaded) {
       if (!_player) {
-        _player = [AVPlayer playerWithPlayerItem:[self constructPlayerItemFromInitData]];
+        _currentItem = [self constructPlayerItemFromInitData];
+        _player = [AVPlayer playerWithPlayerItem:_currentItem];
         _player.muted = _muted;
       }
       ((AVPlayerLayer *)_playerNode.layer).player = _player;
