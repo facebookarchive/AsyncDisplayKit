@@ -211,6 +211,10 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 {
   _bridge_prologue_write;
   _setToViewOrLayer(bounds, newBounds, bounds, newBounds);
+  // If _ASDisplayView is available, it already sets the new bounds to threadSafeBounds.
+  if (! (__loaded(self) && _usesDisplayView)) {
+    self.threadSafeBounds = newBounds;
+  }
 }
 
 - (CGRect)frame

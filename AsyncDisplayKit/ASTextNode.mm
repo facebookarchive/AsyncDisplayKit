@@ -218,10 +218,9 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Renderer Management
 
-//only safe to call on the main thread because self.bounds is only safe to call on the main thread one our node is loaded
 - (ASTextKitRenderer *)_renderer
 {
-  return [self _rendererWithBounds:self.bounds];
+  return [self _rendererWithBounds:self.threadSafeBounds];
 }
 
 - (ASTextKitRenderer *)_rendererWithBounds:(CGRect)bounds
@@ -268,7 +267,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)_invalidateRendererIfNeeded
 {
-  [self _invalidateRendererIfNeededForBoundsSize:self.bounds.size];
+  [self _invalidateRendererIfNeededForBoundsSize:self.threadSafeBounds.size];
 }
 
 - (void)_invalidateRendererIfNeededForBoundsSize:(CGSize)boundsSize
@@ -438,7 +437,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
-  return [[ASTextNodeDrawParameters alloc] initWithBounds:self.bounds backgroundColor:self.backgroundColor];
+  return [[ASTextNodeDrawParameters alloc] initWithBounds:self.threadSafeBounds backgroundColor:self.backgroundColor];
 }
 
 #pragma mark - Attributes
@@ -990,7 +989,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
-//only safe to call on main thread, because [self _renderer] is only safe to call on the main thread
 - (UIEdgeInsets)shadowPadding
 {
   return [self shadowPaddingWithRenderer:[self _renderer]];

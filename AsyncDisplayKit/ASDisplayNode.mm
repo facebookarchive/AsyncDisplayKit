@@ -61,6 +61,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize name = _name;
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
+@synthesize threadSafeBounds = _threadSafeBounds;
 
 static BOOL usesImplicitHierarchyManagement = FALSE;
 
@@ -428,11 +429,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     ASDisplayNodeAssert(![view isKindOfClass:[_ASDisplayView class]], @"View block should return a synchronously displayed view");
     _viewBlock = nil;
     _viewClass = [view class];
+    _usesDisplayView = [_viewClass isKindOfClass:[_ASDisplayView class]];
   } else {
     if (!_viewClass) {
       _viewClass = [self.class viewClass];
     }
     view = [[_viewClass alloc] init];
+    _usesDisplayView = [_viewClass isKindOfClass:[_ASDisplayView class]];
   }
 
   return view;
@@ -1916,6 +1919,18 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(_propertyLock);
   return _preferredFrameSize;
+}
+
+- (CGRect)threadSafeBounds
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _threadSafeBounds;
+}
+
+- (void)setThreadSafeBounds:(CGRect)newBounds
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _threadSafeBounds = newBounds;
 }
 
 - (UIImage *)placeholderImage

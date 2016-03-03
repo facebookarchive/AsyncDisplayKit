@@ -201,6 +201,12 @@
   self.layer.contentsGravity = (contentMode != UIViewContentModeRedraw) ? ASDisplayNodeCAContentsGravityFromUIContentMode(contentMode) : kCAGravityResize;
 }
 
+- (void)setBounds:(CGRect)bounds
+{
+  [super setBounds:bounds];
+  _node.threadSafeBounds = bounds;
+}
+
 #pragma mark - Event Handling + UIResponder Overrides
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
