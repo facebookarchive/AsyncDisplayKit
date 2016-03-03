@@ -429,7 +429,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     ASDisplayNodeAssert(![view isKindOfClass:[_ASDisplayView class]], @"View block should return a synchronously displayed view");
     _viewBlock = nil;
     _viewClass = [view class];
-    _usesDisplayView = [_viewClass isKindOfClass:[_ASDisplayView class]];
+    _usesDisplayView = NO;
   } else {
     if (!_viewClass) {
       _viewClass = [self.class viewClass];
@@ -610,12 +610,20 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  return [self measureWithSizeRange:constrainedSize completion:^{
+  void (^manageSubnodesBlock)() = ^void() {
     if (self.usesImplicitHierarchyManagement) {
       [self __implicitlyInsertSubnodes];
       [self __implicitlyRemoveSubnodes];
     }
     [self __completeLayoutCalculation];
+  };
+  
+  return [self measureWithSizeRange:constrainedSize completion:^{
+    if (!self.isNodeLoaded) {
+      manageSubnodesBlock();
+    } else {
+      ASPerformBlockOnMainThread(manageSubnodesBlock);
+    }
   }];
 }
 
@@ -696,18 +704,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)__completeLayoutCalculation
 {
+  ASDN::MutexLocker l(_propertyLock);
   _insertedSubnodes = nil;
   _removedSubnodes = nil;
   _previousLayout = nil;
+  
   [self calculatedLayoutDidChange];
 
   // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed
   // to have a placeholder ready to go. Also, if a node has no size it should not have a placeholder
-  [self __initPlaceholder];
-}
-
-- (void)__initPlaceholder
-{
   if (self.placeholderEnabled && [self _displaysAsynchronously] &&
       _layout.size.width > 0.0 && _layout.size.height > 0.0) {
     if (!_placeholderImage) {
@@ -803,6 +808,7 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 
 - (void)__implicitlyInsertSubnodes
 {
+  ASDN::MutexLocker l(_propertyLock);
   for (NSInteger i = 0; i < [_insertedSubnodes count]; i++) {
     NSInteger p = _insertedSubnodePositions[i];
     [self insertSubnode:_insertedSubnodes[i] atIndex:p];
@@ -811,6 +817,7 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 
 - (void)__implicitlyRemoveSubnodes
 {
+  ASDN::MutexLocker l(_propertyLock);
   for (NSInteger i = 0; i < [_removedSubnodes count]; i++) {
     [_removedSubnodes[i] removeFromSupernode];
   }
