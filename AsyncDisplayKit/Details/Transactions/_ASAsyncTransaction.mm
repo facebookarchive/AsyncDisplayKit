@@ -151,13 +151,15 @@ ASAsyncTransactionQueue::Group* ASAsyncTransactionQueue::createGroup()
 
 void ASAsyncTransactionQueue::GroupImpl::release()
 {
-  ASDN::MutexLocker locker(_queue._mutex);
+  _queue._mutex.lock();
   
   if (_pendingOperations == 0)  {
     delete this;
   } else {
     _releaseCalled = true;
   }
+  
+  _queue._mutex.unlock();
 }
 
 ASAsyncTransactionQueue::Operation ASAsyncTransactionQueue::DispatchEntry::popNextOperation(bool respectPriority)
@@ -200,7 +202,7 @@ void ASAsyncTransactionQueue::DispatchEntry::pushOperation(ASAsyncTransactionQue
 void ASAsyncTransactionQueue::GroupImpl::schedule(NSInteger priority, dispatch_queue_t queue, dispatch_block_t block)
 {
   ASAsyncTransactionQueue &q = _queue;
-  ASDN::MutexLocker locker(q._mutex);
+  q._mutex.lock();
   
   DispatchEntry &entry = q._entries[queue];
   
@@ -225,18 +227,19 @@ void ASAsyncTransactionQueue::GroupImpl::schedule(NSInteger priority, dispatch_q
     ++entry._threadCount;
     
     dispatch_async(queue, ^{
-      ASDN::MutexLocker lock(q._mutex);
+      q._mutex.lock();
       
       // go until there are no more pending operations
       while (!entry._operationQueue.empty()) {
         Operation operation = entry.popNextOperation(respectPriority);
         {
-          ASDN::MutexUnlocker unlock(q._mutex);
+          q._mutex.unlock();
           if (operation._block) {
             operation._block();
           }
           operation._group->leave();
           operation._block = 0; // the block must be freed while mutex is unlocked
+          q._mutex.lock();
         }
       }
       --entry._threadCount;
@@ -245,13 +248,16 @@ void ASAsyncTransactionQueue::GroupImpl::schedule(NSInteger priority, dispatch_q
         NSCAssert(entry._operationQueue.empty() || entry._operationPriorityMap.empty(), @"No working threads but operations are still scheduled"); // this shouldn't happen
         q._entries.erase(queue);
       }
+      
+      q._mutex.unlock();
     });
   }
+  q._mutex.unlock();
 }
 
 void ASAsyncTransactionQueue::GroupImpl::notify(dispatch_queue_t queue, dispatch_block_t block)
 {
-  ASDN::MutexLocker locker(_queue._mutex);
+  _queue._mutex.lock();
   
   if (_pendingOperations == 0) {
     dispatch_async(queue, block);
@@ -261,17 +267,21 @@ void ASAsyncTransactionQueue::GroupImpl::notify(dispatch_queue_t queue, dispatch
     notify._queue = queue;
     _notifyList.push_back(notify);
   }
+  
+  _queue._mutex.unlock();
 }
 
 void ASAsyncTransactionQueue::GroupImpl::enter()
 {
-  ASDN::MutexLocker locker(_queue._mutex);
+  _queue._mutex.lock();
   ++_pendingOperations;
+  _queue._mutex.unlock();
 }
 
 void ASAsyncTransactionQueue::GroupImpl::leave()
 {
-  ASDN::MutexLocker locker(_queue._mutex);
+  _queue._mutex.lock();
+  
   --_pendingOperations;
   
   if (_pendingOperations == 0) {
@@ -290,14 +300,17 @@ void ASAsyncTransactionQueue::GroupImpl::leave()
       delete this;
     }
   }
+  
+  _queue._mutex.unlock();
 }
 
 void ASAsyncTransactionQueue::GroupImpl::wait()
 {
-  ASDN::MutexLocker locker(_queue._mutex);
+  _queue._mutex.lock();
   while (_pendingOperations > 0) {
     _condition.wait(_queue._mutex);
   }
+  _queue._mutex.unlock();
 }
 
 ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
