@@ -43,8 +43,7 @@
 @implementation ASVideoNode
 
 //TODO: Have a bash at supplying a preview image node so that we're deferring the construction of the video as it eats memory at the moment
-
-//TODO: Have a look at any unit tests
+// - or could keep the API the same and try to avoid starting up the video player until we need to
 
 //TODO: URL-based streams show a black square when paused, the AVAsset ones pause fine
 
@@ -232,6 +231,7 @@
           _currentPlayerItem.tracks[0].assetTrack.asset) {
         _asset = _currentPlayerItem.tracks[0].assetTrack.asset;
         [self setPlaceholderImagefromAsset:_asset];
+        [self setNeedsLayout];
       }
     }
   }
