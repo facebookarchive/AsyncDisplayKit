@@ -573,7 +573,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   if (([self _pendingLinkTap] || [self _pendingTruncationTap])
       && [gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]
-      && CGRectContainsPoint(self.view.bounds, [gestureRecognizer locationInView:self.view])) {
+      && CGRectContainsPoint(self.threadSafeBounds, [gestureRecognizer locationInView:self.view])) {
     return NO;
   }
 
