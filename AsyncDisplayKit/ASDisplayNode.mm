@@ -429,7 +429,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     ASDisplayNodeAssert(![view isKindOfClass:[_ASDisplayView class]], @"View block should return a synchronously displayed view");
     _viewBlock = nil;
     _viewClass = [view class];
-    _usesDisplayView = [_viewClass isKindOfClass:[_ASDisplayView class]];
+    _usesDisplayView = NO;
   } else {
     if (!_viewClass) {
       _viewClass = [self.class viewClass];
@@ -710,7 +710,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _previousLayout = nil;
   
   [self calculatedLayoutDidChange];
-  
+
   // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed
   // to have a placeholder ready to go. Also, if a node has no size it should not have a placeholder
   if (self.placeholderEnabled && [self _displaysAsynchronously] &&
