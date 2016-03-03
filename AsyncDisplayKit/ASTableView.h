@@ -164,6 +164,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL completed))completion;
 
 /**
+ *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
+ */
+- (void)waitUntilAllUpdatesAreCommitted;
+
+/**
  * Inserts one or more sections, with an option to animate the insertion.
  *
  * @param sections An index set that specifies the sections to insert.

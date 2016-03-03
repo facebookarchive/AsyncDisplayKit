@@ -462,6 +462,23 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(_batchUpdateCounter == 0, @"Should not be called between beginUpdate or endUpdate");
+  
+  // This should never be called in a batch update, return immediately therefore
+  if (_batchUpdateCounter > 0) { return; }
+  
+  [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+  
+  // Schedule block in main serial queue to wait until all operations are finished that are
+  // where scheduled while waiting for the _editingTransactionQueue to finish
+  [_mainSerialQueue performBlockOnMainThread:^{
+    ASDisplayNodeAssert(_editingTransactionQueue.operationCount == 0, @"No operation should be in the _editingTransactionQueue anymore");
+  }];
+}
+
 #pragma mark - Data Source Access (Calling _dataSource)
 
 /**

@@ -394,6 +394,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_dataController endUpdatesAnimated:animated completion:completion];
 }
 
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  ASDisplayNodeAssertMainThread();
+  [_dataController waitUntilAllUpdatesAreCommitted];
+}
+
 - (void)layoutSubviews
 {
   if (_nodesConstrainedWidth != self.bounds.size.width) {
