@@ -25,7 +25,7 @@
   AVAsset *_asset;
   NSURL *_url;
   
-  AVPlayerItem *_currentItem;
+  AVPlayerItem *_currentPlayerItem;
   AVPlayer *_player;
   
   ASImageNode *_placeholderImageNode;
@@ -44,9 +44,9 @@
 
 //TODO: Have a bash at supplying a preview image node so that we're deferring the construction of the video as it eats memory at the moment
 
-//TODO: URL file videos don't seem to repeat
-
 //TODO: Have a look at any unit tests
+
+//TODO: URL-based streams show a black square when paused, the AVAsset ones pause fine
 
 
 #pragma mark - Construction and Layout
@@ -99,8 +99,8 @@
   ASDisplayNode* playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
     AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
     if (!_player) {
-      _currentItem = [self constructPlayerItemFromInitData];
-        _player = [AVPlayer playerWithPlayerItem:_currentItem];
+      [self constructCurrentPlayerItemFromInitData];
+      _player = [AVPlayer playerWithPlayerItem:_currentPlayerItem];
       _player.muted = _muted;
     }
     playerLayer.player = _player;
@@ -111,22 +111,24 @@
   return playerNode;
 }
 
-- (AVPlayerItem*) constructPlayerItemFromInitData {
+- (void) constructCurrentPlayerItemFromInitData {
   ASDisplayNodeAssert(_asset || _url, @"Must be initialised with an AVAsset or URL");
+  if (_currentPlayerItem)
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
   
   if (_asset) {
-    return [[AVPlayerItem alloc] initWithAsset:_asset];
+    _currentPlayerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
   } else if (_url) {
-    return [[AVPlayerItem alloc] initWithURL:_url];
+    _currentPlayerItem = [[AVPlayerItem alloc] initWithURL:_url];
   }
 
-  return nil;
+  if (_currentPlayerItem)
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:_currentPlayerItem];
 }
 
 - (void)didLoad
 {
   [super didLoad];
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
   
   if (_shouldBePlaying) {
     _playerNode = [self constructPlayerNode];
@@ -224,11 +226,11 @@
     
     // If we don't yet have a placeholder image update it now that we should have data available for it
     if (!_placeholderImageNode) {
-      if (_currentItem &&
-          _currentItem.tracks.count > 0 &&
-          _currentItem.tracks[0].assetTrack &&
-          _currentItem.tracks[0].assetTrack.asset) {
-        _asset = _currentItem.tracks[0].assetTrack.asset;
+      if (_currentPlayerItem &&
+          _currentPlayerItem.tracks.count > 0 &&
+          _currentPlayerItem.tracks[0].assetTrack &&
+          _currentPlayerItem.tracks[0].assetTrack.asset) {
+        _asset = _currentPlayerItem.tracks[0].assetTrack.asset;
         [self setPlaceholderImagefromAsset:_asset];
       }
     }
@@ -241,17 +243,15 @@
 
 - (void)didPlayToEnd:(NSNotification *)notification
 {
-  if (ASObjectIsEqual([[notification object] asset], _asset)) {
-    if ([_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)]) {
-      [_delegate videoPlaybackDidFinish:self];
-    }
-    [_player seekToTime:CMTimeMakeWithSeconds(0, 1)];
-    
-    if (_shouldAutorepeat) {
-      [self play];
-    } else {
-      [self pause];
-    }
+  if ([_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)]) {
+    [_delegate videoPlaybackDidFinish:self];
+  }
+  [_player seekToTime:CMTimeMakeWithSeconds(0, 1)];
+  
+  if (_shouldAutorepeat) {
+    [self play];
+  } else {
+    [self pause];
   }
 }
 
@@ -273,7 +273,7 @@
   [super fetchData];
   
   @try {
-    [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
+    [_currentPlayerItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
   }
   @catch (NSException * __unused exception) {
     NSLog(@"unnecessary removal in fetch data");
@@ -281,13 +281,13 @@
   
   {
     ASDN::MutexLocker l(_videoLock);
-    _currentItem = [self constructPlayerItemFromInitData];
-    [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
+    [self constructCurrentPlayerItemFromInitData];
+    [_currentPlayerItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
     
     if (_player) {
-      [_player replaceCurrentItemWithPlayerItem:_currentItem];
+      [_player replaceCurrentItemWithPlayerItem:_currentPlayerItem];
     } else {
-      _player = [[AVPlayer alloc] initWithPlayerItem:_currentItem];
+      _player = [[AVPlayer alloc] initWithPlayerItem:_currentPlayerItem];
       _player.muted = _muted;
     }
   }
@@ -316,8 +316,8 @@
   if (isVisible) {
     if (_playerNode.isNodeLoaded) {
       if (!_player) {
-        _currentItem = [self constructPlayerItemFromInitData];
-        _player = [AVPlayer playerWithPlayerItem:_currentItem];
+        [self constructCurrentPlayerItemFromInitData];
+        _player = [AVPlayer playerWithPlayerItem:_currentPlayerItem];
         _player.muted = _muted;
       }
       ((AVPlayerLayer *)_playerNode.layer).player = _player;
@@ -451,7 +451,7 @@
 
 - (BOOL)ready
 {
-  return _currentItem.status == AVPlayerItemStatusReadyToPlay;
+  return _currentPlayerItem.status == AVPlayerItemStatusReadyToPlay;
 }
 
 - (void)pause
@@ -484,13 +484,13 @@
 - (AVPlayerItem *)curentItem
 {
   ASDN::MutexLocker l(_videoLock);
-  return _currentItem;
+  return _currentPlayerItem;
 }
 
 - (void)setCurrentItem:(AVPlayerItem *)currentItem
 {
   ASDN::MutexLocker l(_videoLock);
-  _currentItem = currentItem;
+  _currentPlayerItem = currentItem;
 }
 
 - (ASDisplayNode *)playerNode
@@ -509,9 +509,11 @@
 
 - (void)dealloc
 {
-  [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+  if (_currentPlayerItem)
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+  
   @try {
-    [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
+    [_currentPlayerItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
   }
   @catch (NSException * __unused exception) {
     NSLog(@"unnecessary removal in dealloc");
