@@ -63,7 +63,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 @synthesize threadSafeBounds = _threadSafeBounds;
 
-static BOOL usesImplicitHierarchyManagement = FALSE;
+static BOOL usesImplicitHierarchyManagement = NO;
 
 + (BOOL)usesImplicitHierarchyManagement
 {
@@ -666,10 +666,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
 {
+  BOOL disableImplicitHierarchyManagement = self.usesImplicitHierarchyManagement == NO;
   self.usesImplicitHierarchyManagement = YES; // Temporary flag for 1.9.x
   
   return [self measureWithSizeRange:constrainedSize completion:^{
-    self.usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
+    if (disableImplicitHierarchyManagement) {
+      self.usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
+    }
 
     ASPerformBlockOnMainThread(^{
       _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated delegate:self];
