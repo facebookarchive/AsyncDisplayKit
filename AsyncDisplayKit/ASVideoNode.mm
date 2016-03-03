@@ -42,10 +42,7 @@
 
 @implementation ASVideoNode
 
-//TODO: Have a bash at supplying a preview image node so that we're deferring the construction of the video as it eats memory at the moment
-// - or could keep the API the same and try to avoid starting up the video player until we need to
-
-//TODO: URL-based streams show a black square when paused, the AVAsset ones pause fine
+//TODO: Have a bash at supplying a preview image node for use with HLS videos as we can't have a priview with those
 
 
 #pragma mark - Construction and Layout
@@ -112,8 +109,7 @@
 
 - (void) constructCurrentPlayerItemFromInitData {
   ASDisplayNodeAssert(_asset || _url, @"Must be initialised with an AVAsset or URL");
-  if (_currentPlayerItem)
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+  [self removePlayerItemObservers];
   
   if (_asset) {
     _currentPlayerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
@@ -121,8 +117,20 @@
     _currentPlayerItem = [[AVPlayerItem alloc] initWithURL:_url];
   }
 
-  if (_currentPlayerItem)
+  if (_currentPlayerItem) {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:_currentPlayerItem];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemFailedToPlayToEndTimeNotification object:_currentPlayerItem];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemNewErrorLogEntryNotification object:_currentPlayerItem];
+  }
+}
+
+- (void) removePlayerItemObservers
+{
+  if (_currentPlayerItem) {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemFailedToPlayToEndTimeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemNewErrorLogEntryNotification object:nil];
+  }
 }
 
 - (void)didLoad
@@ -238,20 +246,6 @@
   
   if ([[change objectForKey:@"new"] integerValue] == AVPlayerItemStatusFailed) {
     
-  }
-}
-
-- (void)didPlayToEnd:(NSNotification *)notification
-{
-  if ([_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)]) {
-    [_delegate videoPlaybackDidFinish:self];
-  }
-  [_player seekToTime:CMTimeMakeWithSeconds(0, 1)];
-  
-  if (_shouldAutorepeat) {
-    [self play];
-  } else {
-    [self pause];
   }
 }
 
@@ -473,6 +467,41 @@
   return (_player.rate > 0 && !_player.error);
 }
 
+
+#pragma mark - Playback observers
+
+- (void)didPlayToEnd:(NSNotification *)notification
+{
+  if ([_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)]) {
+    [_delegate videoPlaybackDidFinish:self];
+  }
+  [_player seekToTime:CMTimeMakeWithSeconds(0, 1)];
+  
+  if (_shouldAutorepeat) {
+    [self play];
+  } else {
+    [self pause];
+  }
+}
+
+- (void)errorWhilePlaying:(NSNotification *)notification
+{
+  if ([notification.name isEqualToString:AVPlayerItemFailedToPlayToEndTimeNotification]) {
+    NSLog(@"Failed to play video");
+  }
+  else if ([notification.name isEqualToString:AVPlayerItemNewErrorLogEntryNotification]) {
+    AVPlayerItem* item = (AVPlayerItem*)notification.object;
+    AVPlayerItemErrorLogEvent* logEvent = item.errorLog.events.lastObject;
+    NSLog(@"AVPlayerItem error log entry added for video with error %@ status %@", item.error,
+          (item.status == AVPlayerItemStatusFailed ? @"FAILED" : [NSString stringWithFormat:@"%ld", (long)item.status]));
+    NSLog(@"Item is %@", item);
+    
+    if (logEvent)
+      NSLog(@"Log code %ld domain %@ comment %@", logEvent.errorStatusCode, logEvent.errorDomain, logEvent.errorComment);
+  }
+}
+
+
 #pragma mark - Property Accessors for Tests
 
 - (ASDisplayNode *)spinner
@@ -509,8 +538,7 @@
 
 - (void)dealloc
 {
-  if (_currentPlayerItem)
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+  [self removePlayerItemObservers];
   
   @try {
     [_currentPlayerItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
