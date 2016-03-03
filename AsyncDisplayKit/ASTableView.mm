@@ -597,8 +597,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
   for (_ASTableViewCell *tableCell in _cellsForVisibilityUpdates) {
-    ASCellNode *node = [tableCell node];
-    [node visibleNodeDidScroll:scrollView withCellFrame:tableCell.frame];
+    [[tableCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
+                                 inScrollView:scrollView
+                                withCellFrame:tableCell.frame];
   }
   if (_asyncDelegateImplementsScrollviewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
@@ -617,8 +618,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   ASCellNode *cellNode = [cell node];
 
-  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(visibleNodeDidScroll:withCellFrame:))) {
+  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
     [_cellsForVisibilityUpdates addObject:cell];
+    [cellNode cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisible
+                         inScrollView:tableView
+                        withCellFrame:cell.frame];
   }
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
@@ -639,7 +643,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_asyncDelegate tableView:self didEndDisplayingNode:node forRowAtIndexPath:indexPath];
   }
 
-  [_cellsForVisibilityUpdates removeObject:cell];
+  if ([_cellsForVisibilityUpdates containsObject:cell]) {
+    [_cellsForVisibilityUpdates removeObject:cell];
+    ASCellNode *node = ((_ASTableViewCell *)cell).node;
+    [node cellNodeVisibilityEvent:ASCellNodeVisibilityEventInvisible
+                     inScrollView:tableView
+                    withCellFrame:cell.frame];
+  }
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
