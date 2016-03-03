@@ -181,6 +181,8 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
 - (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
+- (void)waitUntilAllUpdatesAreCommitted;
+
 /** @name Data Querying */
 
 - (NSUInteger)numberOfSections;

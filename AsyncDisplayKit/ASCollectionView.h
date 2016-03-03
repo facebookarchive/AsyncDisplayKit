@@ -166,6 +166,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reloadDataImmediately;
 
 /**
+ *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
+ */
+- (void)waitUntilAllUpdatesAreCommitted;
+
+/**
  * Registers the given kind of supplementary node for use in creating node-backed supplementary views.
  *
  * @param kind The kind of supplementary node that will be requested through the data source.
