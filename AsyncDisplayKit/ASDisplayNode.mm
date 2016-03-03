@@ -611,6 +611,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   void (^manageSubnodesBlock)() = ^void() {
+    ASDN::MutexLocker l(_propertyLock);
     if (self.usesImplicitHierarchyManagement) {
       [self __implicitlyInsertSubnodes];
       [self __implicitlyRemoveSubnodes];
@@ -675,6 +676,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
 
     ASPerformBlockOnMainThread(^{
+      ASDN::MutexLocker l(_propertyLock);
       _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated delegate:self];
       [self __implicitlyInsertSubnodes];
       [self animateLayoutTransition:_transitionContext];
@@ -684,6 +686,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)__calculateSubnodeOperations
 {
+  ASDN::MutexLocker l(_propertyLock);
   if (_previousLayout) {
     NSIndexSet *insertions, *deletions;
     [_previousLayout.immediateSublayouts asdk_diffWithArray:_layout.immediateSublayouts
