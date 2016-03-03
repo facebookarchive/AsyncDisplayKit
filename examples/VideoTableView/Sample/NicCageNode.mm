@@ -82,7 +82,9 @@ static const CGFloat kInnerPadding = 10.0f;
   _kittenSize = size;
   
   u_int32_t videoInitMethod = arc4random_uniform(3);
+  u_int32_t autoPlay = arc4random_uniform(2);
   NSArray* methodArray = @[@"AVAsset", @"File URL", @"HLS URL"];
+  NSArray* autoPlayArray = @[@"paused", @"auto play"];
   
   switch (videoInitMethod) {
     case 0:
@@ -103,13 +105,16 @@ static const CGFloat kInnerPadding = 10.0f;
       break;
   }
   
-//  _videoNode.shouldAutoplay = YES;
+  if (autoPlay == 1)
+    _videoNode.shouldAutoplay = YES;
+  
+  _videoNode.shouldAutorepeat = YES;
   _videoNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
 
   [self addSubnode:_videoNode];
 
   _textNode = [[ASTextNode alloc] init];
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ %@", methodArray[videoInitMethod], [self kittyIpsum]]
+  _textNode.attributedString = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ %@ %@", methodArray[videoInitMethod], autoPlayArray[autoPlay], [self kittyIpsum]]
                                                                attributes:[self textStyle]];
   [self addSubnode:_textNode];
 
