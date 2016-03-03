@@ -48,7 +48,6 @@
 
 //TODO: Have a look at any unit tests
 
-//TODO: The preview image doesn't seem to scale with the video layout when you click on the item
 
 #pragma mark - Construction and Layout
 
@@ -157,7 +156,12 @@
   _spinner.position = CGPointMake(bounds.size.width/2, bounds.size.height/2);
 }
 
-- (void)setPlaceholderImagefromAsset:(AVAsset*)asset {
+- (void)setPlaceholderImagefromAsset:(AVAsset*)asset
+{
+  // Construct the preview image early on to avoid multiple threads trying to set it
+  if (!_placeholderImageNode)
+    _placeholderImageNode = [[ASImageNode alloc] init];
+  
   dispatch_async(_previewQueue, ^{
     AVAssetImageGenerator *imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:_asset];
     imageGenerator.appliesPreferredTrackTransform = YES;
