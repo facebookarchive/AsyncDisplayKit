@@ -103,6 +103,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
   
+  // Main thread only
   _ASTransitionContext *_transitionContext;
   BOOL _usesImplicitHierarchyManagement;
 

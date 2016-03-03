@@ -658,12 +658,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
 {
-  _usesImplicitHierarchyManagement = YES; // Temporary flag for 1.9.x
+  self.usesImplicitHierarchyManagement = YES; // Temporary flag for 1.9.x
+  
   return [self measureWithSizeRange:constrainedSize completion:^{
-    _usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
-    _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated delegate:self];
-    [self __implicitlyInsertSubnodes];
-    [self animateLayoutTransition:_transitionContext];
+    self.usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
+
+    ASPerformBlockOnMainThread(^{
+      _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated delegate:self];
+      [self __implicitlyInsertSubnodes];
+      [self animateLayoutTransition:_transitionContext];
+    });
   }];
 }
 
