@@ -178,7 +178,7 @@
       
       // Unfortunately it's not possible to generate a preview image for an HTTP live stream asset, so we'll give up here
       // http://stackoverflow.com/questions/32112205/m3u8-file-avassetimagegenerator-error
-      if (image) {
+      if (image && _placeholderImageNode.image == nil) {
         UIImage *theImage = [UIImage imageWithCGImage:image];
         
         _placeholderImageNode = [[ASImageNode alloc] init];
