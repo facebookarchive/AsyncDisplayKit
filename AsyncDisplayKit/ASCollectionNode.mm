@@ -91,7 +91,7 @@
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    return [[ASCollectionView alloc] _initWithFrame:CGRectZero collectionViewLayout:layout layoutFacilitator:layoutFacilitator ownedByNode:YES];
+    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator ownedByNode:YES];
   };
   
   if (self = [super initWithViewBlock:collectionViewBlock]) {
