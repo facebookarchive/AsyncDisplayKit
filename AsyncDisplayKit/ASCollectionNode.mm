@@ -194,7 +194,12 @@
 
 - (void)endUpdatesAnimated:(BOOL)animated
 {
-  [self.view.dataController endUpdatesAnimated:animated completion:nil];
+  [self endUpdatesAnimated:animated completion:nil];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+{
+  [self.view.dataController endUpdatesAnimated:animated completion:completion];
 }
 
 #pragma mark - ASCollectionView Forwards
