@@ -27,11 +27,11 @@
   // Control Attributes
   BOOL _enabled;
   BOOL _highlighted;
-  
+
   // Tracking
   BOOL _tracking;
   BOOL _touchInside;
-  
+
   // Target Messages.
   /*
      The table structure is as follows:
@@ -77,25 +77,25 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
   if (!(self = [super init]))
     return nil;
-  
+
   _enabled = YES;
-  
+
   // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
   self.userInteractionEnabled = NO;
   
   return self;
 }
 
+#if TARGET_OS_TV
 - (void)didLoad
 {
-#if TARGET_OS_TV
   //On tvOS all control views, such as buttons, interact with the focus system even if they don't have a target set on them. Here we add our own internal tap gesture to handle this behaviour.
   self.userInteractionEnabled = YES;
   UITapGestureRecognizer *tapGestureRec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pressDown)];
   tapGestureRec.allowedPressTypes = @[@(UIPressTypeSelect)];
   [self.view addGestureRecognizer:tapGestureRec];
-#endif
 }
+#endif
 
 #pragma mark - ASDisplayNode Overrides
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -103,9 +103,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // If we're not interested in touches, we have nothing to do.
   if (!self.enabled)
     return;
-  
+
   ASControlNodeEvent controlEventMask = 0;
-  
+
   // If we get more than one touch down on us, cancel.
   // Additionally, if we're already tracking a touch, a second touch beginning is cause for cancellation.
   if ([touches count] > 1 || self.tracking)
@@ -119,18 +119,18 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   {
     // Otherwise, begin tracking.
     self.tracking = YES;
-    
+
     // No need to check bounds on touchesBegan as we wouldn't get the call if it wasn't in our bounds.
     self.touchInside = YES;
     self.highlighted = YES;
-    
+
     UITouch *theTouch = [touches anyObject];
     [self beginTrackingWithTouch:theTouch withEvent:event];
-    
+
     // Send the appropriate touch-down control event depending on how many times we've been tapped.
     controlEventMask |= (theTouch.tapCount == 1) ? ASControlNodeEventTouchDown : ASControlNodeEventTouchDownRepeat;
   }
-  
+
   [self sendActionsForControlEvents:controlEventMask withEvent:event];
 }
 
@@ -139,23 +139,23 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // If we're not interested in touches, we have nothing to do.
   if (!self.enabled)
     return;
-  
+
   NSParameterAssert([touches count] == 1);
   UITouch *theTouch = [touches anyObject];
   CGPoint touchLocation = [theTouch locationInView:self.view];
-  
+
   // Update our touchInside state.
   BOOL dragIsInsideBounds = [self pointInside:touchLocation withEvent:nil];
-  
+
   // Update our highlighted state.
   CGRect expandedBounds = CGRectInset(self.view.bounds, kASControlNodeExpandedInset, kASControlNodeExpandedInset);
   BOOL dragIsInsideExpandedBounds = CGRectContainsPoint(expandedBounds, touchLocation);
   self.touchInside = dragIsInsideExpandedBounds;
   self.highlighted = dragIsInsideExpandedBounds;
-  
+
   // Note we are continuing to track the touch.
   [self continueTrackingWithTouch:theTouch withEvent:event];
-  
+
   [self sendActionsForControlEvents:(dragIsInsideBounds ? ASControlNodeEventTouchDragInside : ASControlNodeEventTouchDragOutside)
                           withEvent:event];
 }
@@ -165,15 +165,15 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // If we're not interested in touches, we have nothing to do.
   if (!self.enabled)
     return;
-  
+
   // We're no longer tracking and there is no touch to be inside.
   self.tracking = NO;
   self.touchInside = NO;
   self.highlighted = NO;
-  
+
   // Note that we've cancelled tracking.
   [self cancelTrackingWithEvent:event];
-  
+
   // Send the cancel event.
   [self sendActionsForControlEvents:ASControlNodeEventTouchCancel
                           withEvent:event];
@@ -184,7 +184,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // If we're not interested in touches, we have nothing to do.
   if (!self.enabled)
     return;
-  
+
   // On iPhone 6s, iOS 9.2 (and maybe other versions) sometimes calls -touchesEnded:withEvent:
   // twice on the view for one call to -touchesBegan:withEvent:. On ASControlNode, it used to
   // trigger an action twice unintentionally. Now, we ignore that event if we're not in a tracking
@@ -192,23 +192,23 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // It might be related to that issue: http://www.openradar.me/22910171
   if (!self.tracking)
     return;
-  
+
   NSParameterAssert([touches count] == 1);
   UITouch *theTouch = [touches anyObject];
   CGPoint touchLocation = [theTouch locationInView:self.view];
-  
+
   // Update state.
   self.tracking = NO;
   self.touchInside = NO;
   self.highlighted = NO;
-  
+
   // Note that we've ended tracking.
   [self endTrackingWithTouch:theTouch withEvent:event];
-  
+
   // Send the appropriate touch-up control event.
   CGRect expandedBounds = CGRectInset(self.view.bounds, kASControlNodeExpandedInset, kASControlNodeExpandedInset);
   BOOL touchUpIsInsideExpandedBounds = CGRectContainsPoint(expandedBounds, touchLocation);
-  
+
   [self sendActionsForControlEvents:(touchUpIsInsideExpandedBounds ? ASControlNodeEventTouchUpInside : ASControlNodeEventTouchUpOutside)
                           withEvent:event];
 }
@@ -221,7 +221,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     // Allow double-tap gestures
     return tapRecognizer.numberOfTapsRequired != 1;
   }
-  
+
   // Otherwise, go ahead. :]
   return YES;
 }
@@ -237,11 +237,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   // Convert nil to [NSNull null] so that it can be used as a key for NSMapTable.
   if (!target)
     target = [NSNull null];
-  
+
   if (!_controlEventDispatchTable) {
     _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
   }
-  
+
   // Enumerate the events in the mask, adding the target-action pair for each control event included in controlEventMask
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEventMask, ^
     (ASControlNodeEvent controlEvent)
@@ -278,14 +278,14 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
   NSParameterAssert(target);
   NSParameterAssert(controlEvent != 0 && controlEvent != ASControlNodeEventAllEvents);
-  
+
   ASDN::MutexLocker l(_controlLock);
   
   // Grab the event dispatch table for this event.
   NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)];
   if (!eventDispatchTable)
     return nil;
-  
+
   // Return the actions for this target.
   return [eventDispatchTable objectForKey:target];
 }
@@ -295,7 +295,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   ASDN::MutexLocker l(_controlLock);
   
   NSMutableSet *targets = [[NSMutableSet alloc] init];
-  
+
   // Look at each event...
   for (NSMapTable *eventDispatchTable in [_controlEventDispatchTable allValues])
   {
@@ -303,7 +303,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     for (id target in eventDispatchTable)
       [targets addObject:target];
   }
-  
+
   return targets;
 }
 
@@ -312,7 +312,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSParameterAssert(controlEventMask != 0);
   
   ASDN::MutexLocker l(_controlLock);
-  
+
   // Enumerate the events in the mask, removing the target-action pair for each control event included in controlEventMask.
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEventMask, ^
     (ASControlNodeEvent controlEvent)
@@ -366,7 +366,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSParameterAssert(controlEvents != 0);
   
   ASDN::MutexLocker l(_controlLock);
-  
+
   // Enumerate the events in the mask, invoking the target-action pairs for each.
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEvents, ^
     (ASControlNodeEvent controlEvent)
@@ -436,6 +436,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)endTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)touchEvent
 {
 }
+
 #if TARGET_OS_TV
 #pragma mark - tvOS
 - (void)pressDown
@@ -511,5 +512,5 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
   self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, 1);
 }
-#endif
+#endif //TARGET_OS_TV
 @end
