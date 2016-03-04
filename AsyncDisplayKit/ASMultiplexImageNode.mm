@@ -37,6 +37,8 @@ NSString *const ASMultiplexImageNodeErrorDomain = @"ASMultiplexImageNodeErrorDom
 
 static NSString *const kAssetsLibraryURLScheme = @"assets-library";
 
+static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
+
 /**
   @abstract Signature for the block to be performed after an image has loaded.
   @param image The image that was loaded, or nil if no image was loaded.
@@ -470,6 +472,23 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   return nil;
 }
 
+#pragma mark -
+- (void)_clearImage
+{
+  // Destruction of bigger images on the main thread can be expensive
+  // and can take some time, so we dispatch onto a bg queue to
+  // actually dealloc.
+  __block UIImage *image = self.image;
+  CGSize imageSize = image.size;
+  BOOL shouldReleaseImageOnBackgroundThread = imageSize.width > kMinReleaseImageOnBackgroundSize.width ||
+  imageSize.height > kMinReleaseImageOnBackgroundSize.height;
+  if (shouldReleaseImageOnBackgroundThread) {
+    ASPerformBlockOnBackgroundThread(^{
+      image = nil;
+    });
+  }
+  self.image = nil;
+}
 
 #pragma mark -
 - (id)_nextImageIdentifierToDownload

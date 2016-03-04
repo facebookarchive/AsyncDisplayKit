@@ -103,6 +103,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
   
+  // Main thread only
   _ASTransitionContext *_transitionContext;
   BOOL _usesImplicitHierarchyManagement;
 
@@ -116,7 +117,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
   Class _viewClass;
   Class _layerClass;
-
+  
   UIImage *_placeholderImage;
   CALayer *_placeholderLayer;
 
@@ -144,6 +145,8 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 // Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
+
+@property (nonatomic, assign) CGRect threadSafeBounds;
 
 
 // Swizzle to extend the builtin functionality with custom logic

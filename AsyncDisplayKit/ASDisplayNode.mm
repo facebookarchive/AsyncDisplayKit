@@ -61,8 +61,9 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize name = _name;
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
+@synthesize threadSafeBounds = _threadSafeBounds;
 
-static BOOL usesImplicitHierarchyManagement = FALSE;
+static BOOL usesImplicitHierarchyManagement = NO;
 
 + (BOOL)usesImplicitHierarchyManagement
 {
@@ -607,12 +608,21 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  return [self measureWithSizeRange:constrainedSize completion:^{
+  void (^manageSubnodesBlock)() = ^void() {
+    ASDN::MutexLocker l(_propertyLock);
     if (self.usesImplicitHierarchyManagement) {
       [self __implicitlyInsertSubnodes];
       [self __implicitlyRemoveSubnodes];
     }
     [self __completeLayoutCalculation];
+  };
+  
+  return [self measureWithSizeRange:constrainedSize completion:^{
+    if (!self.isNodeLoaded) {
+      manageSubnodesBlock();
+    } else {
+      ASPerformBlockOnMainThread(manageSubnodesBlock);
+    }
   }];
 }
 
@@ -655,17 +665,26 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
 {
-  _usesImplicitHierarchyManagement = YES; // Temporary flag for 1.9.x
+  BOOL disableImplicitHierarchyManagement = self.usesImplicitHierarchyManagement == NO;
+  self.usesImplicitHierarchyManagement = YES; // Temporary flag for 1.9.x
+  
   return [self measureWithSizeRange:constrainedSize completion:^{
-    _usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
-    _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated delegate:self];
-    [self __implicitlyInsertSubnodes];
-    [self animateLayoutTransition:_transitionContext];
+    if (disableImplicitHierarchyManagement) {
+      self.usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
+    }
+
+    ASPerformBlockOnMainThread(^{
+      ASDN::MutexLocker l(_propertyLock);
+      _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated delegate:self];
+      [self __implicitlyInsertSubnodes];
+      [self animateLayoutTransition:_transitionContext];
+    });
   }];
 }
 
 - (void)__calculateSubnodeOperations
 {
+  ASDN::MutexLocker l(_propertyLock);
   if (_previousLayout) {
     NSIndexSet *insertions, *deletions;
     [_previousLayout.immediateSublayouts asdk_diffWithArray:_layout.immediateSublayouts
@@ -689,18 +708,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)__completeLayoutCalculation
 {
+  ASDN::MutexLocker l(_propertyLock);
   _insertedSubnodes = nil;
   _removedSubnodes = nil;
   _previousLayout = nil;
+  
   [self calculatedLayoutDidChange];
 
   // we generate placeholders at measureWithSizeRange: time so that a node is guaranteed
   // to have a placeholder ready to go. Also, if a node has no size it should not have a placeholder
-  [self __initPlaceholder];
-}
-
-- (void)__initPlaceholder
-{
   if (self.placeholderEnabled && [self _displaysAsynchronously] &&
       _layout.size.width > 0.0 && _layout.size.height > 0.0) {
     if (!_placeholderImage) {
@@ -796,6 +812,7 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 
 - (void)__implicitlyInsertSubnodes
 {
+  ASDN::MutexLocker l(_propertyLock);
   for (NSInteger i = 0; i < [_insertedSubnodes count]; i++) {
     NSInteger p = _insertedSubnodePositions[i];
     [self insertSubnode:_insertedSubnodes[i] atIndex:p];
@@ -804,6 +821,7 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
 
 - (void)__implicitlyRemoveSubnodes
 {
+  ASDN::MutexLocker l(_propertyLock);
   for (NSInteger i = 0; i < [_removedSubnodes count]; i++) {
     [_removedSubnodes[i] removeFromSupernode];
   }
@@ -1916,6 +1934,18 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(_propertyLock);
   return _preferredFrameSize;
+}
+
+- (CGRect)threadSafeBounds
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _threadSafeBounds;
+}
+
+- (void)setThreadSafeBounds:(CGRect)newBounds
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _threadSafeBounds = newBounds;
 }
 
 - (UIImage *)placeholderImage

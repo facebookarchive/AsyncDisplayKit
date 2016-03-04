@@ -268,6 +268,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   [super reloadData];
 }
 
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  ASDisplayNodeAssertMainThread();
+  [_dataController waitUntilAllUpdatesAreCommitted];
+}
+
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
 {
   // UIKit can internally generate a call to this method upon changing the asyncDataSource; only assert for non-nil.
@@ -542,8 +548,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
-  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(visibleNodeDidScroll:withCellFrame:))) {
+  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
     [_cellsForVisibilityUpdates addObject:cell];
+    [cellNode cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisible
+                         inScrollView:collectionView
+                        withCellFrame:cell.frame];
   }
 }
 
@@ -556,8 +565,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
     [_asyncDelegate collectionView:self didEndDisplayingNode:node forItemAtIndexPath:indexPath];
   }
-  [_cellsForVisibilityUpdates removeObject:cell];
-
+  
+  if ([_cellsForVisibilityUpdates containsObject:cell]) {
+    ASCellNode *node = ((_ASCollectionViewCell *)cell).node;
+    [node cellNodeVisibilityEvent:ASCellNodeVisibilityEventInvisible
+                     inScrollView:collectionView
+                    withCellFrame:cell.frame];
+    [_cellsForVisibilityUpdates removeObject:cell];
+  }
   
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -681,9 +696,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
   for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
-    ASCellNode *node = [collectionCell node];
     // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
-    [node visibleNodeDidScroll:scrollView withCellFrame:collectionCell.frame];
+    [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
+                                      inScrollView:scrollView
+                                     withCellFrame:collectionCell.frame];
   }
   if (_asyncDelegateImplementsScrollviewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
