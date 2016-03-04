@@ -18,6 +18,7 @@
 #import "ASEqualityHelpers.h"
 #import "ASPendingStateController.h"
 #import "ASThread.h"
+#import "ASTextNode.h"
 
 /**
  * The following macros are conveniences to help in the common tasks related to the bridging that ASDisplayNode does to UIView and CALayer.
@@ -211,10 +212,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 {
   _bridge_prologue_write;
   _setToViewOrLayer(bounds, newBounds, bounds, newBounds);
-  // If _ASDisplayView is available, it already sets the new bounds to threadSafeBounds.
-  if (! (__loaded(self) && _usesDisplayView)) {
-    self.threadSafeBounds = newBounds;
-  }
+  self.threadSafeBounds = newBounds;
 }
 
 - (CGRect)frame

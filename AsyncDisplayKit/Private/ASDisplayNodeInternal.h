@@ -117,7 +117,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
   Class _viewClass;
   Class _layerClass;
-  BOOL _usesDisplayView;
   
   UIImage *_placeholderImage;
   CALayer *_placeholderLayer;
