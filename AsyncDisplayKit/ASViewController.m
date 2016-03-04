@@ -49,7 +49,21 @@
 - (void)loadView
 {
   ASDisplayNodeAssertTrue(!_node.layerBacked);
-  self.view = _node.view;
+  
+  // Apple applies a frame and autoresizing masks we need.  Allocating a view is not
+  // nearly as expensive as adding and removing it from a hierarchy, and fortunately
+  // we can avoid that here.  Enabling layerBacking on a single node in the hierarchy
+  // will have a greater performance benefit than the impact of this transient view.
+  [super loadView];
+  UIView *view = self.view;
+  CGRect frame = view.frame;
+  UIViewAutoresizing autoresizingMask = view.autoresizingMask;
+  
+  // We have what we need, so now create and assign the view we actually want.
+  view = _node.view;
+  self.view = view;
+  _node.frame = frame;
+  _node.autoresizingMask = autoresizingMask;
 }
 
 - (void)viewWillLayoutSubviews
