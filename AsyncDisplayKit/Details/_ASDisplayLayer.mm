@@ -78,6 +78,12 @@
   }
 }
 
+- (void)setBounds:(CGRect)bounds
+{
+  [super setBounds:bounds];
+  self.asyncdisplaykit_node.threadSafeBounds = bounds;
+}
+
 #if DEBUG // These override is strictly to help detect application-level threading errors.  Avoid method overhead in release.
 - (void)setContents:(id)contents
 {
