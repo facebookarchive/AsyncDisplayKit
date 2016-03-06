@@ -20,6 +20,8 @@
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
 #import "_ASDisplayLayer.h"
+#import "ASTextNode.h"
+#import "AsyncDisplayKit+Debug.h"
 
 #import <CoreFoundation/CoreFoundation.h>
 
@@ -115,6 +117,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL _dataSourceImplementsNodeBlockForRowAtIndexPath;
   BOOL _asyncDelegateImplementsScrollviewDidScroll;
   NSMutableSet *_cellsForVisibilityUpdates;
+  
+  ASRangeHierarchyCountInfo *_debugHierarchyCountInfo;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -214,6 +218,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     // logic to ASTableNode (required to have a shared superclass with ASCollection*).
     ASTableNode *tableNode = nil; //[[ASTableNode alloc] _initWithTableView:self];
     self.strongTableNode = tableNode;
+  }
+  
+  if ([ASRangeController shouldShowHierarchyDebugCountsOverlay]) {
+    _debugHierarchyCountInfo = [[ASRangeHierarchyCountInfo alloc] init];
+    [self addSubnode:_debugHierarchyCountInfo.textNode];
   }
   
   return self;
@@ -610,6 +619,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (_asyncDelegateImplementsScrollviewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
   }
+  if ([ASRangeController shouldShowHierarchyDebugCountsOverlay]) {
+    [self layoutDebugCountsTextNode];
+  }
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
@@ -633,6 +645,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
+  if (_debugHierarchyCountInfo.textNode) {
+    [ASRangeController debugCountsForAllSubnodes:cellNode increment:YES rangeHierarchyCountInfo:_debugHierarchyCountInfo];
+    [ASRangeController updateRangeHierarchyCountInfo:_debugHierarchyCountInfo];
+    [self layoutDebugCountsTextNode];
+  }
 }
 
 - (void)tableView:(UITableView *)tableView didEndDisplayingCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath
@@ -643,16 +660,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
+  ASCellNode *cellNode = [cell node];
   if ([_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNode:forRowAtIndexPath:)]) {
-    ASCellNode *node = ((_ASTableViewCell *)cell).node;
-    ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
-    [_asyncDelegate tableView:self didEndDisplayingNode:node forRowAtIndexPath:indexPath];
+    ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
+    [_asyncDelegate tableView:self didEndDisplayingNode:cellNode forRowAtIndexPath:indexPath];
   }
 
   if ([_cellsForVisibilityUpdates containsObject:cell]) {
     [_cellsForVisibilityUpdates removeObject:cell];
-    ASCellNode *node = ((_ASTableViewCell *)cell).node;
-    [node cellNodeVisibilityEvent:ASCellNodeVisibilityEventInvisible
+    [cellNode cellNodeVisibilityEvent:ASCellNodeVisibilityEventInvisible
                      inScrollView:tableView
                     withCellFrame:cell.frame];
   }
@@ -663,8 +679,22 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_asyncDelegate tableView:self didEndDisplayingNodeForRowAtIndexPath:indexPath];
   }
 #pragma clang diagnostic pop
+  if (_debugHierarchyCountInfo.textNode) {
+    [ASRangeController debugCountsForAllSubnodes:cellNode increment:NO rangeHierarchyCountInfo:_debugHierarchyCountInfo];
+    [ASRangeController updateRangeHierarchyCountInfo:_debugHierarchyCountInfo];
+    [self layoutDebugCountsTextNode];
+  }
 }
 
+#pragma mark Debug
+- (void)layoutDebugCountsTextNode
+{
+  CGSize textNodeSize = [_debugHierarchyCountInfo.textNode measure:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+  _debugHierarchyCountInfo.textNode.frame = CGRectMake(self.frame.size.width - textNodeSize.width - 10 + self.contentOffset.x,
+                                                       90 + self.contentOffset.y,
+                                                       textNodeSize.width,
+                                                       textNodeSize.height);
+}
 
 #pragma mark - 
 #pragma mark Batch Fetching
