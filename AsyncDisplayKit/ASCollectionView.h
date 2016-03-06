@@ -336,6 +336,14 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) BOOL zeroContentInsets;
 
+/**
+ * Class method to enable a visualization overlay of the number of cells and views in the ASCollectionView.
+ * For app debugging purposes only.
+ *
+ * @param enabled Specify YES to make this debug feature enabled when messaging the ASControlNode class.
+ */
++ (void)setEnableDebugCounts:(BOOL)enable;
+
 @end
 
 
