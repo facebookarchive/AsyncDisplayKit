@@ -20,7 +20,6 @@
 #import "ASInternalHelpers.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "_ASDisplayLayer.h"
-#import "ASTextNode.h"
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
@@ -124,15 +123,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (instancetype)_initWithCollectionView:(ASCollectionView *)collectionView;
 @end
 
-static BOOL _enableGlobalDebugCounts = NO;
-
 @implementation ASCollectionView
-{
-  ASTextNode *_debugCountsTextNode;
-  NSUInteger _globalDebugNodeCount;
-  NSUInteger _globalDebugViewCount;
-  NSUInteger _globalDebugLayerCount;
-}
 
 // Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASCollectionNode.
 + (Class)layerClass
@@ -227,12 +218,6 @@ static BOOL _enableGlobalDebugCounts = NO;
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
-  
-  if (_enableGlobalDebugCounts) {
-    _debugCountsTextNode = [[ASTextNode alloc] init];
-    _debugCountsTextNode.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.5];
-    [self addSubnode:_debugCountsTextNode];
-  }
   
   return self;
 }
@@ -504,63 +489,6 @@ static BOOL _enableGlobalDebugCounts = NO;
   return [@"_ASCollectionSupplementaryView_" stringByAppendingString:kind];
 }
 
-#pragma mark Debug
-+ (void)setEnableDebugCounts:(BOOL)enable;
-{
-  _enableGlobalDebugCounts = enable;
-}
-
-- (void)layoutDebugCountsTextNode
-{
-  NSString *debugString = [NSString stringWithFormat:@"%lu N %lu L",_globalDebugNodeCount, _globalDebugLayerCount];
-  // only show # of views if different from # of nodes
-  if (_globalDebugNodeCount != _globalDebugViewCount) {
-    debugString = [debugString stringByAppendingString:[NSString stringWithFormat:@" %lu V", _globalDebugViewCount]];
-  }
-
-  _debugCountsTextNode.attributedString = [[NSAttributedString alloc] initWithString:debugString];
-  CGSize textNodeSize = [_debugCountsTextNode measure:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-  _debugCountsTextNode.frame = CGRectMake(self.frame.size.width - textNodeSize.width - 10 + self.contentOffset.x,
-                                          50 + self.contentOffset.y,
-                                          textNodeSize.width,
-                                          textNodeSize.height);
-}
-
-// debug recursive method that adds or subtracts to the _globalDebug<Node,View,Layer>Count instance variables.
-- (void)debugCountsForAllSubnodes:(ASCellNode *)node increment:(BOOL)increment
-{
-  if ([node subnodes]) {
-    for (ASCellNode *subnode in [node subnodes]) {
-      [self debugCountsForAllSubnodes:subnode increment:increment];
-    }
-  } else {
-    [self debugCountsForNode:node increment:increment];
-  }
-}
-
-- (void)debugCountsForNode:(ASCellNode *)node increment:(BOOL)increment
-{
-  if (increment) {
-    // add to counts - used in willDisplayCell:foritemAtIndexPath:
-    _globalDebugNodeCount++;
-    if (node.isLayerBacked) {
-      _globalDebugLayerCount++;
-    } else {
-      _globalDebugViewCount++;
-      _globalDebugLayerCount++;
-    }
-  } else {
-    // decrement counts - used in didEndDisplayingCell:forItemAtIndexPath:
-    _globalDebugNodeCount--;
-    if (node.isLayerBacked) {
-      _globalDebugLayerCount--;
-    } else {
-      _globalDebugViewCount--;
-      _globalDebugLayerCount--;
-    }
-  }
-}
-
 #pragma mark -
 #pragma mark Intercepted selectors.
 
@@ -626,24 +554,21 @@ static BOOL _enableGlobalDebugCounts = NO;
                          inScrollView:collectionView
                         withCellFrame:cell.frame];
   }
-  if (_debugCountsTextNode) {
-    [self debugCountsForAllSubnodes:cellNode increment:YES];
-    [self layoutDebugCountsTextNode];
-  }
 }
 
-- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
+- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
-  ASCellNode *cellNode = [cell node];
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNode:forItemAtIndexPath:)]) {
-    ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
-    [_asyncDelegate collectionView:self didEndDisplayingNode:cellNode forItemAtIndexPath:indexPath];
+    ASCellNode *node = ((_ASCollectionViewCell *)cell).node;
+    ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
+    [_asyncDelegate collectionView:self didEndDisplayingNode:node forItemAtIndexPath:indexPath];
   }
   
   if ([_cellsForVisibilityUpdates containsObject:cell]) {
-    [cellNode cellNodeVisibilityEvent:ASCellNodeVisibilityEventInvisible
+    ASCellNode *node = ((_ASCollectionViewCell *)cell).node;
+    [node cellNodeVisibilityEvent:ASCellNodeVisibilityEventInvisible
                      inScrollView:collectionView
                     withCellFrame:cell.frame];
     [_cellsForVisibilityUpdates removeObject:cell];
@@ -655,10 +580,6 @@ static BOOL _enableGlobalDebugCounts = NO;
     [_asyncDelegate collectionView:self didEndDisplayingNodeForItemAtIndexPath:indexPath];
   }
 #pragma clang diagnostic pop
-  if (_debugCountsTextNode) {
-    [self debugCountsForAllSubnodes:[cell node] increment:NO];
-    [self layoutDebugCountsTextNode];
-  }
 }
 
 #pragma mark -
@@ -782,9 +703,6 @@ static BOOL _enableGlobalDebugCounts = NO;
   }
   if (_asyncDelegateImplementsScrollviewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
-  }
-  if (_debugCountsTextNode) {
-    [self layoutDebugCountsTextNode];
   }
 }
 
