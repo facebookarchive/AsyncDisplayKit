@@ -75,9 +75,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSMutableArray *_batchUpdateBlocks;
   
   BOOL _asyncDataFetchingEnabled;
-  BOOL _asyncDelegateImplementsInsetSection;
   BOOL _asyncDelegateImplementsScrollviewDidScroll;
-  BOOL _collectionViewLayoutImplementsInsetSection;
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
   BOOL _asyncDataSourceImplementsNodeBlockForItemAtIndexPath;
   BOOL _queuedNodeSizeUpdate;
@@ -191,8 +189,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _batchUpdateBlocks = [NSMutableArray array];
   
   _superIsPendingDataLoad = YES;
-  
-  _collectionViewLayoutImplementsInsetSection = [layout respondsToSelector:@selector(sectionInset)];
   
   _maxSizeForNodesConstrainedSize = self.bounds.size;
   // If the initial size is 0, expect a size change very soon which is part of the initial configuration
@@ -336,12 +332,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (asyncDelegate == nil) {
     _asyncDelegate = nil;
     _proxyDelegate = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
-    _asyncDelegateImplementsInsetSection = NO;
     _asyncDelegateImplementsScrollviewDidScroll = NO;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
-    _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
     _asyncDelegateImplementsScrollviewDidScroll = ([_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)] ? 1 : 0);
   }
 
@@ -790,15 +784,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
       maxSize.height = FLT_MAX;
     }
     constrainedSize = ASSizeRangeMake(CGSizeZero, maxSize);
-  }
-  
-  UIEdgeInsets sectionInset = UIEdgeInsetsZero;
-  if (_collectionViewLayoutImplementsInsetSection) {
-    sectionInset = [(UICollectionViewFlowLayout *)self.collectionViewLayout sectionInset];
-  }
-  
-  if (_asyncDelegateImplementsInsetSection) {
-    sectionInset = [(id<ASCollectionViewDelegateFlowLayout>)_asyncDelegate collectionView:self layout:self.collectionViewLayout insetForSectionAtIndex:indexPath.section];
   }
   
   return constrainedSize;
