@@ -12,6 +12,7 @@
 #import "ASLayoutOptionsPrivate.h"
 
 #import <objc/runtime.h>
+#import <deque>
 
 #import "_ASAsyncTransaction.h"
 #import "_ASAsyncTransactionContainer+Private.h"
@@ -211,48 +212,74 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 + (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node
 {
+
   static ASDN::RecursiveMutex __displaySchedulerLock;
-  static NSMutableArray *__nodesToDisplay = nil;
-  static BOOL __displayScheduled = NO;
-  
-  BOOL scheduleDisplayPassNow = NO;
+  static std::deque<ASDisplayNode *> __renderQueue = std::deque<ASDisplayNode *>();
+  static CFRunLoopObserverRef __mainRunLoopObserver = NULL;
+  static NSUInteger __renderBatchSize = 1;
   {
     ASDN::MutexLocker l(__displaySchedulerLock);
-    
-    if (!__nodesToDisplay) {
-      __nodesToDisplay = [NSMutableArray array];
-    }
-    
-    if ([__nodesToDisplay indexOfObjectIdenticalTo:node] == NSNotFound) {
-      [__nodesToDisplay addObject:node];
-    }
-    
-    if (!__displayScheduled) {
-      scheduleDisplayPassNow = YES;
-      __displayScheduled = YES;
-    }
-  }
-  
-  if (scheduleDisplayPassNow) {
-    // It's essenital that any layout pass that is scheduled during the current
-    // runloop has a chance to be applied / scheduled, so always perform this after the current runloop.
-    dispatch_async(dispatch_get_main_queue(), ^{
-      NSArray *displayingNodes = nil;
-      // Create a lock scope.  Snatch the waiting nodes, let the next batch create a new container.
-      {
-        ASDN::MutexLocker l(__displaySchedulerLock);
-        displayingNodes    = [__nodesToDisplay copy];
-        __nodesToDisplay   = nil;
-        __displayScheduled = NO;
+
+    // Check if the node exists.
+    BOOL foundNode = NO;
+    for (ASDisplayNode *currentNode : __renderQueue) {
+      if (currentNode == node) {
+        foundNode = YES;
+        break;
       }
-      CFAbsoluteTime timestamp = CFAbsoluteTimeGetCurrent();
-      for (ASDisplayNode *node in displayingNodes) {
-        [node __recursivelyTriggerDisplayAndBlock:NO];
-      }
-      [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
-                                                          object:displayingNodes
-                                                        userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: [NSNumber numberWithDouble:timestamp]}];
-    });
+    }
+
+    if (!foundNode) {
+      __renderQueue.push_back(node);
+    }
+
+    if (!__mainRunLoopObserver) {
+      
+      void (^handlerBlock) (CFRunLoopObserverRef observer, CFRunLoopActivity activity) = ^(CFRunLoopObserverRef observer, CFRunLoopActivity activity) {
+        std::deque<ASDisplayNode *> displayingNodes = std::deque<ASDisplayNode *>();
+        BOOL isQueueDrained = NO;
+        CFAbsoluteTime timestamp = 0;
+
+        // Create a lock scope.
+        {
+          ASDN::MutexLocker l(__displaySchedulerLock);
+
+          // Early-exit if we don't have any nodes to render.
+          if (__renderQueue.empty()) {
+            return;
+          }
+
+          // Snatch the next batch of nodes.
+          NSUInteger totalNodeCount = __renderQueue.size();
+          for (int i = 0; i < MIN(__renderBatchSize, totalNodeCount); i++) {
+            ASDisplayNode *node = __renderQueue[0];
+            __renderQueue.pop_front();
+            displayingNodes.push_back(node);
+          }
+
+          if (__renderQueue.empty()) {
+            isQueueDrained = YES;
+            timestamp = CFAbsoluteTimeGetCurrent();
+          }
+        }
+
+        for (ASDisplayNode *node : displayingNodes) {
+          [node __recursivelyTriggerDisplayAndBlock:NO];
+        }
+
+        if (isQueueDrained) {
+          [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
+                                                              object:nil
+                                                            userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: [NSNumber numberWithDouble:timestamp]}];
+        }
+      };
+
+      // Scheduling in kCFRunLoopBeforeWaiting to allow timers and other sources to process first.
+      __mainRunLoopObserver = CFRunLoopObserverCreateWithHandler(NULL, kCFRunLoopBeforeWaiting, true, 0, handlerBlock);
+      CFRunLoopAddObserver(CFRunLoopGetMain(),
+                           __mainRunLoopObserver,
+                           kCFRunLoopCommonModes);
+    }
   }
 }
 
