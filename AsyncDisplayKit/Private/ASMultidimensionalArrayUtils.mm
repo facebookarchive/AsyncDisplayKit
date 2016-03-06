@@ -16,7 +16,8 @@ static void ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(NSMutableArray 
                                                                  NSUInteger &curIdx,
                                                                  NSIndexPath *curIndexPath,
                                                                  const NSUInteger dimension,
-                                                                 void (^updateBlock)(NSMutableArray *arr, NSIndexSet *indexSet, NSUInteger idx)) {
+                                                                 void (^updateBlock)(NSMutableArray *arr, NSIndexSet *indexSet, NSUInteger idx))
+{
   if (curIdx == indexPaths.count) {
     return;
   }
@@ -38,7 +39,8 @@ static void ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(NSMutableArray 
   }
 }
 
-static void ASRecursivelyFindIndexPathsForMultidimensionalArray(NSObject *obj, NSIndexPath *curIndexPath, NSMutableArray *res) {
+static void ASRecursivelyFindIndexPathsForMultidimensionalArray(NSObject *obj, NSIndexPath *curIndexPath, NSMutableArray *res)
+{
   if (![obj isKindOfClass:[NSArray class]]) {
     [res addObject:curIndexPath];
   } else {
@@ -51,7 +53,8 @@ static void ASRecursivelyFindIndexPathsForMultidimensionalArray(NSObject *obj, N
 
 #pragma mark - Public Methods
 
-NSObject<NSCopying> *ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> *obj) {
+NSObject<NSCopying> *ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> *obj)
+{
   if ([obj isKindOfClass:[NSArray class]]) {
     NSArray *arr = (NSArray *)obj;
     NSMutableArray * mutableArr = [NSMutableArray arrayWithCapacity:arr.count];
@@ -64,15 +67,18 @@ NSObject<NSCopying> *ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> 
   return obj;
 }
 
-NSMutableArray<NSMutableArray *> *ASTwoDimensionalArrayDeepMutableCopy(NSArray<NSArray *> *array) {
+NSMutableArray<NSMutableArray *> *ASTwoDimensionalArrayDeepMutableCopy(NSArray<NSArray *> *array)
+{
   NSMutableArray *newArray = [NSMutableArray arrayWithCapacity:array.count];
   for (NSArray *subarray in array) {
+    ASDisplayNodeCAssert([subarray isKindOfClass:[NSArray class]], @"This function expects NSArray<NSArray *> *");
     [newArray addObject:[subarray mutableCopy]];
   }
   return newArray;
 }
 
-void ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths, NSArray *elements) {
+void ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths, NSArray *elements)
+{
   ASDisplayNodeCAssert(indexPaths.count == elements.count, @"Inconsistent indexPaths and elements");
 
   if (!indexPaths.count) {
@@ -89,7 +95,8 @@ void ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(NSMutableArray *mutab
   ASDisplayNodeCAssert(curIdx == indexPaths.count, @"Indexpath is out of range !");
 }
 
-void ASDeleteElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths) {
+void ASDeleteElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths)
+{
   if (!indexPaths.count) {
     return;
   }
@@ -104,7 +111,8 @@ void ASDeleteElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutable
   ASDisplayNodeCAssert(curIdx == indexPaths.count, @"Indexpath is out of range !");
 }
 
-NSArray *ASFindElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths) {
+NSArray *ASFindElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths)
+{
   NSUInteger curIdx = 0;
   NSIndexPath *indexPath = [[NSIndexPath alloc] init];
   NSMutableArray *deletedElements = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
@@ -122,8 +130,9 @@ NSArray *ASFindElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutab
   return deletedElements;
 }
 
-NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensionalArray, NSIndexSet *indexSet) {
-  NSMutableArray *res = [[NSMutableArray alloc] initWithCapacity:multidimensionalArray.count];
+NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensionalArray, NSIndexSet *indexSet)
+{
+  NSMutableArray *res = [NSMutableArray array];
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
     ASRecursivelyFindIndexPathsForMultidimensionalArray(multidimensionalArray[idx], [NSIndexPath indexPathWithIndex:idx], res);
   }];
@@ -131,9 +140,24 @@ NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensiona
   return res;
 }
 
-NSArray *ASIndexPathsForMultidimensionalArray(NSArray *multidimensionalArray) {
-  NSMutableArray *res = [NSMutableArray arrayWithCapacity:multidimensionalArray.count];
+NSArray *ASIndexPathsForTwoDimensionalArray(NSArray <NSArray *>* twoDimensionalArray)
+{
+  NSMutableArray *result = [NSMutableArray array];
+  NSUInteger section = 0;
+  for (NSArray *subarray in twoDimensionalArray) {
+    ASDisplayNodeCAssert([subarray isKindOfClass:[NSArray class]], @"This function expects NSArray<NSArray *> *");
+    NSUInteger itemCount = subarray.count;
+    for (int item = 0; item < itemCount; item++) {
+      [result addObject:[NSIndexPath indexPathForItem:item inSection:section]];
+    }
+    section++;
+  }
+  return result;
+}
+  
+NSArray *ASIndexPathsForMultidimensionalArray(NSArray *multidimensionalArray)
+{
+  NSMutableArray *res = [NSMutableArray array];
   ASRecursivelyFindIndexPathsForMultidimensionalArray(multidimensionalArray, [[NSIndexPath alloc] init], res);
   return res;
 }
-
