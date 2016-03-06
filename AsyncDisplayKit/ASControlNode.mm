@@ -9,6 +9,7 @@
 #import "ASControlNode.h"
 #import "ASControlNode+Subclasses.h"
 #import "ASThread.h"
+#import "AsyncDisplayKit+Debug.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
@@ -68,8 +69,6 @@ id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEv
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent));
 
 @end
-
-static BOOL _enableHitTestDebug = NO;
 
 @implementation ASControlNode
 {
@@ -236,7 +235,7 @@ static BOOL _enableHitTestDebug = NO;
     _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
     
     // only show tap-able areas for views with 1 or more addTarget:action: pairs
-    if (_enableHitTestDebug) {
+    if ([ASControlNode shouldShowHitTestDebugOverlay]) {
       
       // add a highlight overlay node with area of ASControlNode + UIEdgeInsets
       self.clipsToBounds = NO;
@@ -444,7 +443,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 }
 
 #pragma mark - Debug
-// Layout method required when _enableHitTestDebug is enabled.
+// Layout method required when [ASControlNode shouldShowHitTestDebugOverlay] is enabled.
 - (void)layout
 {
   [super layout];
@@ -458,11 +457,5 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
                                               controlNodeRect.size.height - insets.top - insets.bottom);
   }
 }
-
-+ (void)setEnableHitTestDebug:(BOOL)enable
-{
-  _enableHitTestDebug = enable;
-}
-
 
 @end
