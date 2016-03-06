@@ -65,4 +65,9 @@
   }
 }
 
+- (NSString *)description
+{
+  return [[super description] stringByAppendingFormat:@" Blocks: %@", _blocks];
+}
+
 @end
