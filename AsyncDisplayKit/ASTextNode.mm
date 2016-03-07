@@ -891,6 +891,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 {
   [super touchesMoved:touches withEvent:event];
 
+  // on 3D Touch enabled phones, this gets fired with changes in force, and usually will get fired immediately after touchesBegan:withEvent:
+  if (CGPointEqualToPoint([[touches anyObject] previousLocationInView:self.view], [[touches anyObject] locationInView:self.view]))
+    return;
+  
   // If touch has moved out of the current highlight range, clear the highlight.
   if (_highlightRange.length > 0) {
     NSRange range = NSMakeRange(0, 0);
