@@ -253,8 +253,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
           NSUInteger totalNodeCount = __renderQueue.size();
           for (int i = 0; i < MIN(__renderBatchSize, totalNodeCount); i++) {
             ASDisplayNode *node = __renderQueue[0];
-            __renderQueue.pop_front();
             displayingNodes.push_back(node);
+            __renderQueue.pop_front();
           }
 
           if (__renderQueue.empty()) {
