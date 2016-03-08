@@ -497,7 +497,7 @@
     NSLog(@"Item is %@", item);
     
     if (logEvent)
-      NSLog(@"Log code %ld domain %@ comment %@", logEvent.errorStatusCode, logEvent.errorDomain, logEvent.errorComment);
+      NSLog(@"Log code %ld domain %@ comment %@", (long)logEvent.errorStatusCode, logEvent.errorDomain, logEvent.errorComment);
   }
 }
 
