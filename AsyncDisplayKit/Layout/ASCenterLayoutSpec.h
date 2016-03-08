@@ -8,7 +8,7 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutSpec.h>
+#import <AsyncDisplayKit/ASRelativeLayoutSpec.h>
 
 /** How the child is centered within the spec. */
 typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecCenteringOptions) {
@@ -25,13 +25,13 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecCenteringOptions) {
 /** How much space the spec will take up. */
 typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
   /** The spec will take up the maximum size possible */
-  ASCenterLayoutSpecSizingOptionDefault,
+  ASCenterLayoutSpecSizingOptionDefault = ASRelativeLayoutSpecSizingOptionDefault,
   /** The spec will take up the minimum size possible along the X axis */
-  ASCenterLayoutSpecSizingOptionMinimumX = 1 << 0,
+  ASCenterLayoutSpecSizingOptionMinimumX = ASRelativeLayoutSpecSizingOptionMinimumWidth,
   /** The spec will take up the minimum size possible along the Y axis */
-  ASCenterLayoutSpecSizingOptionMinimumY = 1 << 1,
+  ASCenterLayoutSpecSizingOptionMinimumY = ASRelativeLayoutSpecSizingOptionMinimumHeight,
   /** Convenience option to take up the minimum size along both the X and Y axis */
-  ASCenterLayoutSpecSizingOptionMinimumXY = ASCenterLayoutSpecSizingOptionMinimumX | ASCenterLayoutSpecSizingOptionMinimumY,
+  ASCenterLayoutSpecSizingOptionMinimumXY = ASRelativeLayoutSpecSizingOptionMinimumSize
 };
 
 NS_ASSUME_NONNULL_BEGIN

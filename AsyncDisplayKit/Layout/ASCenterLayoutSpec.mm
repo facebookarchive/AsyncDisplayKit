@@ -17,6 +17,7 @@
 {
   ASCenterLayoutSpecCenteringOptions _centeringOptions;
   ASCenterLayoutSpecSizingOptions _sizingOptions;
+  ASRelativeLayoutSpec *_internalLayoutSpec;
 }
 
 - (instancetype)initWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
@@ -26,10 +27,14 @@
   if (!(self = [super init])) {
     return nil;
   }
-  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
   _centeringOptions = centeringOptions;
   _sizingOptions = sizingOptions;
-  [self setChild:child];
+  
+  ASRelativeLayoutSpecPosition verticalPosition = [self verticalPositionFromCenteringOptions:centeringOptions];
+  ASRelativeLayoutSpecPosition horizontalPosition = [self horizontalPositionFromCenteringOptions:centeringOptions];
+  
+  _internalLayoutSpec = [ASRelativeLayoutSpec relativePositionLayoutSpecWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOptions child:child];
+  
   return self;
 }
 
@@ -44,61 +49,52 @@
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   _centeringOptions = centeringOptions;
+  
+  [_internalLayoutSpec setHorizontalPosition:[self horizontalPositionFromCenteringOptions:centeringOptions]];
+  [_internalLayoutSpec setVerticalPosition:[self verticalPositionFromCenteringOptions:centeringOptions]];
 }
 
 - (void)setSizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   _sizingOptions = sizingOptions;
+
+  [_internalLayoutSpec setSizingOption:sizingOptions];
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  CGSize size = {
-    constrainedSize.max.width,
-    constrainedSize.max.height
-  };
-
-  // Layout the child
-  const CGSize minChildSize = {
-    (_centeringOptions & ASCenterLayoutSpecCenteringX) != 0 ? 0 : constrainedSize.min.width,
-    (_centeringOptions & ASCenterLayoutSpecCenteringY) != 0 ? 0 : constrainedSize.min.height,
-  };
-  ASLayout *sublayout = [self.child measureWithSizeRange:ASSizeRangeMake(minChildSize, constrainedSize.max)];
-
-  // If we have an undetermined height or width, use the child size to define the layout
-  // size
-  size = ASSizeRangeClamp(constrainedSize, {
-    isnan(size.width) ? sublayout.size.width : size.width,
-    isnan(size.height) ? sublayout.size.height : size.height
-  });
-
-  // If minimum size options are set, attempt to shrink the size to the size of the child
-  size = ASSizeRangeClamp(constrainedSize, {
-    MIN(size.width, (_sizingOptions & ASCenterLayoutSpecSizingOptionMinimumX) != 0 ? sublayout.size.width : size.width),
-    MIN(size.height, (_sizingOptions & ASCenterLayoutSpecSizingOptionMinimumY) != 0 ? sublayout.size.height : size.height)
-  });
-
-  // Compute the centered postion for the child
-  BOOL shouldCenterAlongX = (_centeringOptions & ASCenterLayoutSpecCenteringX);
-  BOOL shouldCenterAlongY = (_centeringOptions & ASCenterLayoutSpecCenteringY);
-  sublayout.position = {
-    ASRoundPixelValue(shouldCenterAlongX ? (size.width - sublayout.size.width) * 0.5f : 0),
-    ASRoundPixelValue(shouldCenterAlongY ? (size.height - sublayout.size.height) * 0.5f : 0)
-  };
-
-  return [ASLayout layoutWithLayoutableObject:self size:size sublayouts:@[sublayout]];
+  return [_internalLayoutSpec measureWithSizeRange:constrainedSize];
 }
 
 - (void)setChildren:(NSArray *)children
 {
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
+  [_internalLayoutSpec setChildren:children];
 }
 
 - (NSArray *)children
 {
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-  return nil;
+  return [_internalLayoutSpec children];
 }
+
+- (ASRelativeLayoutSpecPosition)horizontalPositionFromCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions {
+  BOOL centerX =  (centeringOptions & ASCenterLayoutSpecCenteringX) != 0;
+  if (centerX) {
+    return ASRelativeLayoutSpecPositionCenter;
+  } else {
+    return ASRelativeLayoutSpecPositionStart;
+  }
+}
+
+- (ASRelativeLayoutSpecPosition)verticalPositionFromCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions {
+  BOOL centerY =  (centeringOptions & ASCenterLayoutSpecCenteringY) != 0;
+  if (centerY) {
+    return ASRelativeLayoutSpecPositionCenter;
+  } else {
+    return ASRelativeLayoutSpecPositionStart;
+  }
+}
+
+
 
 @end
