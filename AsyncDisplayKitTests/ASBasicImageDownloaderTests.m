@@ -22,7 +22,10 @@
     ASBasicImageDownloader *downloader = [ASBasicImageDownloader sharedImageDownloader];
     
     NSURL *URL = [NSURL URLWithString:@"http://wrongPath/wrongResource.png"];
-  
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
     __block BOOL firstDone = NO;
     
     [downloader downloadImageWithURL:URL
@@ -40,7 +43,9 @@
                           completion:^(CGImageRef image, NSError *error) {
                               secondDone = YES;
                           }];
-  
+
+#pragma clang diagnostic pop
+
     sleep(3);
     XCTAssert(firstDone && secondDone, @"Not all ASBasicImageDownloader completion handlers have been called after 3 seconds");
 }

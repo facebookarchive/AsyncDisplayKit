@@ -737,10 +737,13 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
         completionBlock(imageFromCache);
       }];
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       [_cache fetchCachedImageWithURL:imageURL callbackQueue:dispatch_get_main_queue() completion:^(CGImageRef coreGraphicsImageFromCache) {
         UIImage *imageFromCache = (coreGraphicsImageFromCache ? [UIImage imageWithCGImage:coreGraphicsImageFromCache] : nil);
         completionBlock(imageFromCache);
       }];
+#pragma clang diagnostic pop
     }
   }
   // If we don't have a cache, just fail immediately.
@@ -795,6 +798,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
                                                               [strongSelf->_delegate multiplexImageNode:weakSelf didFinishDownloadingImageWithIdentifier:imageIdentifier error:error];
                                                           }]];
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       [self _setDownloadIdentifier:[_downloader downloadImageWithURL:imageURL
                                                        callbackQueue:dispatch_get_main_queue()
                                                downloadProgressBlock:downloadProgressBlock
@@ -811,6 +816,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
                                                             if (strongSelf->_delegateFlags.downloadFinish)
                                                               [strongSelf->_delegate multiplexImageNode:weakSelf didFinishDownloadingImageWithIdentifier:imageIdentifier error:error];
                                                           }]];
+#pragma clang diagnostic pop
     }
   });
 }

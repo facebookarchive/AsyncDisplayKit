@@ -295,6 +295,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
                                                      }
                                                    }];
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       _downloadIdentifier = [_downloader downloadImageWithURL:_URL
                                                 callbackQueue:dispatch_get_main_queue()
                                         downloadProgressBlock:NULL
@@ -303,6 +305,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
                                                        finished([UIImage imageWithCGImage:responseImage], error, nil);
                                                      }
                                                    }];
+#pragma clang diagnostic pop
     }
   });
 }
@@ -401,11 +404,14 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
                        callbackQueue:dispatch_get_main_queue()
                           completion:cacheCompletion];
         } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
           [_cache fetchCachedImageWithURL:_URL
                             callbackQueue:dispatch_get_main_queue()
                                completion:^(CGImageRef image) {
                                  cacheCompletion([UIImage imageWithCGImage:image]);
                                }];
+#pragma clang diagnostic pop
         }
       } else {
         [self _downloadImageWithCompletion:finished];

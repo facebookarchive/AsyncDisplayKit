@@ -7,7 +7,7 @@
  */
 
 #import <UIKit/UIKit.h>
-#import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -115,7 +115,7 @@ withDownloadIdentifier:(id)downloadIdentifier;
 - (nullable id)downloadImageWithURL:(NSURL *)URL
                       callbackQueue:(nullable dispatch_queue_t)callbackQueue
               downloadProgressBlock:(void (^ _Nullable)(CGFloat progress))downloadProgressBlock
-                         completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion;
+                         completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion ASDISPLAYNODE_DEPRECATED;
 
 @end
 
@@ -127,7 +127,7 @@ withDownloadIdentifier:(id)downloadIdentifier;
  */
 - (void)fetchCachedImageWithURL:(nullable NSURL *)URL
                   callbackQueue:(nullable dispatch_queue_t)callbackQueue
-                     completion:(void (^)(CGImageRef _Nullable imageFromCache))completion;
+                     completion:(void (^)(CGImageRef _Nullable imageFromCache))completion ASDISPLAYNODE_DEPRECATED;
 
 @end
 
