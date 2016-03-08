@@ -261,6 +261,8 @@
 		69F10C861C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 69F10C851C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		69F10C871C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 69F10C851C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		81EE384F1C8E94F000456208 /* ASRunLoopQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */; };
+		81EE38501C8E94F000456208 /* ASRunLoopQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */; };
 		92DD2FE31BF4B97E0074C9DD /* ASMapNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 92DD2FE11BF4B97E0074C9DD /* ASMapNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		92DD2FE41BF4B97E0074C9DD /* ASMapNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */; };
 		92DD2FE61BF4D05E0074C9DD /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92DD2FE51BF4D05E0074C9DD /* MapKit.framework */; };
@@ -722,6 +724,8 @@
 		68EE0DBC1C1B4ED300BA1B99 /* ASMainSerialQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMainSerialQueue.mm; sourceTree = "<group>"; };
 		69F10C851C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASRangeControllerUpdateRangeProtocol+Beta.h"; sourceTree = "<group>"; };
 		6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; path = AsyncDisplayKit.h; sourceTree = "<group>"; };
+		81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRunLoopQueue.h; sourceTree = "<group>"; };
+		81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRunLoopQueue.mm; sourceTree = "<group>"; };
 		92DD2FE11BF4B97E0074C9DD /* ASMapNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMapNode.h; sourceTree = "<group>"; };
 		92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMapNode.mm; sourceTree = "<group>"; };
 		92DD2FE51BF4D05E0074C9DD /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -1003,6 +1007,8 @@
 				058D09E0195D050800B7D73C /* ASTextNode.mm */,
 				ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */,
 				ACC945AA1BA9E7C1005E1FB8 /* ASViewController.m */,
+				81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */,
+				81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */,
 				6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */,
 				DB55C2651C641AE4004EDCF5 /* ASContextTransitioning.h */,
 				058D09E1195D050800B7D73C /* Details */,
@@ -1460,6 +1466,7 @@
 				257754C11BEE458E00737CA5 /* ASTextKitHelpers.h in Headers */,
 				B30BF6521C5964B0004FCD53 /* ASLayoutManager.h in Headers */,
 				0574D5E219C110940097DC25 /* ASTableViewProtocols.h in Headers */,
+				81EE384F1C8E94F000456208 /* ASRunLoopQueue.h in Headers */,
 				CC3B20831C3F76D600798563 /* ASPendingStateController.h in Headers */,
 				058D0A51195D05CB00B7D73C /* ASTextNode.h in Headers */,
 				058D0A81195D05F900B7D73C /* ASThread.h in Headers */,
@@ -1883,6 +1890,7 @@
 				ACF6ED501B17847A00DA7C62 /* ASStackPositionedLayout.mm in Sources */,
 				ACF6ED521B17847A00DA7C62 /* ASStackUnpositionedLayout.mm in Sources */,
 				257754A61BEE44CD00737CA5 /* ASTextKitAttributes.mm in Sources */,
+				81EE38501C8E94F000456208 /* ASRunLoopQueue.mm in Sources */,
 				ACF6ED321B17843500DA7C62 /* ASStaticLayoutSpec.mm in Sources */,
 				AC026B6B1BD57D6F00BBC17E /* ASChangeSetDataController.m in Sources */,
 				055F1A3519ABD3E3004DAFF1 /* ASTableView.mm in Sources */,
