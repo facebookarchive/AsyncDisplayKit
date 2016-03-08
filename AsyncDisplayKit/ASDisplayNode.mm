@@ -22,6 +22,7 @@
 #import "_ASCoreAnimationExtras.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
+#import "ASRunLoopQueue.h"
 #import "NSArray+Diffing.h"
 
 #import "ASInternalHelpers.h"
@@ -212,75 +213,22 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 + (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node
 {
-
-  static ASDN::RecursiveMutex __displaySchedulerLock;
-  static std::deque<ASDisplayNode *> __renderQueue = std::deque<ASDisplayNode *>();
-  static CFRunLoopObserverRef __mainRunLoopObserver = NULL;
-  static NSUInteger __renderBatchSize = 1;
-  {
-    ASDN::MutexLocker l(__displaySchedulerLock);
-
-    // Check if the node exists.
-    BOOL foundNode = NO;
-    for (ASDisplayNode *currentNode : __renderQueue) {
-      if (currentNode == node) {
-        foundNode = YES;
-        break;
+  static dispatch_once_t onceToken;
+  static ASRunLoopQueue<ASDisplayNode *> *renderQueue;
+  dispatch_once(&onceToken, ^{
+    renderQueue = [[ASRunLoopQueue<ASDisplayNode *> alloc] initWithRunLoop:CFRunLoopGetMain()
+                                                                andHandler:^(ASDisplayNode * _Nonnull dequeuedItem, BOOL isQueueDrained) {
+      CFAbsoluteTime timestamp = isQueueDrained ?  CFAbsoluteTimeGetCurrent() : 0;
+      [dequeuedItem __recursivelyTriggerDisplayAndBlock:NO];
+      if (isQueueDrained) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
+                                                            object:nil
+                                                          userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: [NSNumber numberWithDouble:timestamp]}];
       }
-    }
+    }];
+  });
 
-    if (!foundNode) {
-      __renderQueue.push_back(node);
-    }
-
-    if (!__mainRunLoopObserver) {
-      
-      void (^handlerBlock) (CFRunLoopObserverRef observer, CFRunLoopActivity activity) = ^(CFRunLoopObserverRef observer, CFRunLoopActivity activity) {
-        std::deque<ASDisplayNode *> displayingNodes = std::deque<ASDisplayNode *>();
-        BOOL isQueueDrained = NO;
-        CFAbsoluteTime timestamp = 0;
-
-        // Create a lock scope.
-        {
-          ASDN::MutexLocker l(__displaySchedulerLock);
-
-          // Early-exit if we don't have any nodes to render.
-          if (__renderQueue.empty()) {
-            return;
-          }
-
-          // Snatch the next batch of nodes.
-          NSUInteger totalNodeCount = __renderQueue.size();
-          for (int i = 0; i < MIN(__renderBatchSize, totalNodeCount); i++) {
-            ASDisplayNode *node = __renderQueue[0];
-            displayingNodes.push_back(node);
-            __renderQueue.pop_front();
-          }
-
-          if (__renderQueue.empty()) {
-            isQueueDrained = YES;
-            timestamp = CFAbsoluteTimeGetCurrent();
-          }
-        }
-
-        for (ASDisplayNode *node : displayingNodes) {
-          [node __recursivelyTriggerDisplayAndBlock:NO];
-        }
-
-        if (isQueueDrained) {
-          [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
-                                                              object:nil
-                                                            userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: [NSNumber numberWithDouble:timestamp]}];
-        }
-      };
-
-      // Scheduling in kCFRunLoopBeforeWaiting to allow timers and other sources to process first.
-      __mainRunLoopObserver = CFRunLoopObserverCreateWithHandler(NULL, kCFRunLoopBeforeWaiting, true, 0, handlerBlock);
-      CFRunLoopAddObserver(CFRunLoopGetMain(),
-                           __mainRunLoopObserver,
-                           kCFRunLoopCommonModes);
-    }
-  }
+  [renderQueue enqueue:node];
 }
 
 #pragma mark - Lifecycle
