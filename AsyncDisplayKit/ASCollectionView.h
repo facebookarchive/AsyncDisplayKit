@@ -173,7 +173,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Registers the given kind of supplementary node for use in creating node-backed supplementary views.
  *
- * @param kind The kind of supplementary node that will be requested through the data source.
+ * @param elementKind The kind of supplementary node that will be requested through the data source.
  *
  * @discussion Use this method to register support for the use of supplementary nodes in place of the default
  * `registerClass:forSupplementaryViewOfKind:withReuseIdentifier:` and `registerNib:forSupplementaryViewOfKind:withReuseIdentifier:`

@@ -63,7 +63,7 @@ id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEv
   @abstract Enumerates the ASControlNode events included mask, invoking the block for each event.
   @param mask An ASControlNodeEvent mask.
   @param block The block to be invoked for each ASControlNodeEvent included in mask.
-  @param anEvent An even that is included in mask.
+    @param anEvent An even that is included in mask.
  */
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent));
 
