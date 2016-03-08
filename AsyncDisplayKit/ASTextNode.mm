@@ -337,7 +337,18 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   [self setNeedsDisplay];
   
-  return [[self _renderer] size];
+  CGSize size = [[self _renderer] size];
+  if (self.attributedString.length > 0) {
+    CGFloat screenScale = ASScreenScale();
+    self.ascender = round([[_attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
+    self.descender = round([[_attributedString attribute:NSFontAttributeName atIndex:_attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+    if (_renderer.currentScaleFactor > 0 && _renderer.currentScaleFactor < 1.0) {
+      // while not perfect, this is a good estimate of what the ascender of the scaled font will be.
+      self.ascender *= _renderer.currentScaleFactor;
+      self.descender *= _renderer.currentScaleFactor;
+    }
+  }
+  return size;
 }
 
 #pragma mark - Modifying User Text
@@ -374,12 +385,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     self.isAccessibilityElement = NO;
   } else {
     self.isAccessibilityElement = YES;
-  }
-
-  if (attributedString.length > 0) {
-    CGFloat screenScale = ASScreenScale();
-    self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
-    self.descender = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
   }
 }
 
