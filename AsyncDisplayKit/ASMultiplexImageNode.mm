@@ -124,7 +124,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   @param imageIdentifier The identifier for the image to be fetched. May not be nil.
   @param imageURL The URL of the image to fetch. May not be nil.
   @param completionBlock The block to be performed when the image has been fetched from the cache, if possible. May not be nil.
-    @param image The image fetched from the cache, if any.
+  @param image The image fetched from the cache, if any.
   @discussion This method queries both the session's in-memory and on-disk caches (with preference for the in-memory cache).
  */
 - (void)_fetchImageWithIdentifierFromCache:(id)imageIdentifier URL:(NSURL *)imageURL completion:(void (^)(UIImage *image))completionBlock;
@@ -135,8 +135,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   @param imageIdentifier The identifier for the image to be loaded. May not be nil.
   @param assetURL The assets-library URL (e.g., "assets-library://identifier") of the image to load, from ALAsset. May not be nil.
   @param completionBlock The block to be performed when the image has been loaded, if possible. May not be nil.
-    @param image The image that was loaded. May be nil if no image could be downloaded.
-    @param error An error describing why the load failed, if it failed; nil otherwise.
+  @param image The image that was loaded. May be nil if no image could be downloaded.
+  @param error An error describing why the load failed, if it failed; nil otherwise.
  */
 - (void)_loadALAssetWithIdentifier:(id)imageIdentifier URL:(NSURL *)assetURL completion:(void (^)(UIImage *image, NSError *error))completionBlock;
 
@@ -145,8 +145,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   @param imageIdentifier The identifier for the image to be loaded. May not be nil.
   @param request The photos image request to load. May not be nil.
   @param completionBlock The block to be performed when the image has been loaded, if possible. May not be nil.
-    @param image The image that was loaded. May be nil if no image could be downloaded.
-    @param error An error describing why the load failed, if it failed; nil otherwise.
+  @param image The image that was loaded. May be nil if no image could be downloaded.
+  @param error An error describing why the load failed, if it failed; nil otherwise.
  */
 - (void)_loadPHAssetWithRequest:(ASPhotosFrameworkImageRequest *)request identifier:(id)imageIdentifier completion:(void (^)(UIImage *image, NSError *error))completionBlock;
 #endif
@@ -155,8 +155,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
  @param imageIdentifier The identifier for the image to be downloaded. May not be nil.
  @param imageURL The URL of the image to downloaded. May not be nil.
  @param completionBlock The block to be performed when the image has been downloaded, if possible. May not be nil.
-   @param image The image that was downloaded. May be nil if no image could be downloaded.
-   @param error An error describing why the download failed, if it failed; nil otherwise.
+ @param image The image that was downloaded. May be nil if no image could be downloaded.
+ @param error An error describing why the download failed, if it failed; nil otherwise.
  */
 - (void)_downloadImageWithIdentifier:(id)imageIdentifier URL:(NSURL *)imageURL completion:(void (^)(UIImage *image, NSError *error))completionBlock;
 
@@ -737,10 +737,13 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
         completionBlock(imageFromCache);
       }];
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       [_cache fetchCachedImageWithURL:imageURL callbackQueue:dispatch_get_main_queue() completion:^(CGImageRef coreGraphicsImageFromCache) {
         UIImage *imageFromCache = (coreGraphicsImageFromCache ? [UIImage imageWithCGImage:coreGraphicsImageFromCache] : nil);
         completionBlock(imageFromCache);
       }];
+#pragma clang diagnostic pop
     }
   }
   // If we don't have a cache, just fail immediately.
@@ -795,6 +798,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
                                                               [strongSelf->_delegate multiplexImageNode:weakSelf didFinishDownloadingImageWithIdentifier:imageIdentifier error:error];
                                                           }]];
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       [self _setDownloadIdentifier:[_downloader downloadImageWithURL:imageURL
                                                        callbackQueue:dispatch_get_main_queue()
                                                downloadProgressBlock:downloadProgressBlock
@@ -811,6 +816,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
                                                             if (strongSelf->_delegateFlags.downloadFinish)
                                                               [strongSelf->_delegate multiplexImageNode:weakSelf didFinishDownloadingImageWithIdentifier:imageIdentifier error:error];
                                                           }]];
+#pragma clang diagnostic pop
     }
   });
 }

@@ -131,7 +131,7 @@ asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat
  * @abstract Image modification block that applies a tint color à la UIImage configured with
  * renderingMode set to UIImageRenderingModeAlwaysTemplate.
  *
- * @param tintColor The color to tint the image.
+ * @param color The color to tint the image.
  *
  * @see <imageModificationBlock>
  *
