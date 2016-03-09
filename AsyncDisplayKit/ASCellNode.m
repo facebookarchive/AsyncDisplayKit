@@ -127,20 +127,38 @@
   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
 }
 
-- (ASLayout *)transitionLayoutWithAnimation:(BOOL)animated
+- (void)transitionLayoutWithAnimation:(BOOL)animated
+                         shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                      measurementCompletion:(void(^)())completion
 {
   CGSize oldSize = self.calculatedSize;
-  ASLayout *layout = [super transitionLayoutWithAnimation:animated];
-  [self didRelayoutFromOldSize:oldSize toNewSize:layout.size];
-  return layout;
+  [super transitionLayoutWithAnimation:animated
+                    shouldMeasureAsync:shouldMeasureAsync
+                 measurementCompletion:^{
+                   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
+                   if (completion) {
+                     completion();
+                   }
+                 }
+   ];
 }
 
-- (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
+- (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
+                             animated:(BOOL)animated
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(void(^)())completion
 {
   CGSize oldSize = self.calculatedSize;
-  ASLayout *layout = [super transitionLayoutWithSizeRange:constrainedSize animated:animated];
-  [self didRelayoutFromOldSize:oldSize toNewSize:layout.size];
-  return layout;
+  [super transitionLayoutWithSizeRange:constrainedSize
+                              animated:animated
+                    shouldMeasureAsync:shouldMeasureAsync
+                 measurementCompletion:^{
+                   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
+                   if (completion) {
+                     completion();
+                   }
+                 }
+   ];
 }
 
 - (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize

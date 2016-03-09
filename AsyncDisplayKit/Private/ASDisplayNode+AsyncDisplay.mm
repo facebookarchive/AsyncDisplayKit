@@ -331,7 +331,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   // FIXME: what about the degenerate case where we are calling setNeedsDisplay faster than the jobs are dequeuing
   // from the displayQueue?  Need to not cancel early fails from displaySentinel changes.
   ASSentinel *displaySentinel = (asynchronously ? _displaySentinel : nil);
-  int64_t displaySentinelValue = [displaySentinel increment];
+  int32_t displaySentinelValue = [displaySentinel increment];
 
   asdisplaynode_iscancelled_block_t isCancelledBlock = ^{
     return BOOL(displaySentinelValue != displaySentinel.value);
