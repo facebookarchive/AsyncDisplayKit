@@ -14,7 +14,7 @@ extern NSString * const ASTransitionContextToLayoutKey;
 @protocol ASContextTransitioning <NSObject>
 
 /**
- @abstreact Defines if the given transition is animated
+ @abstract Defines if the given transition is animated
  */
 - (BOOL)isAnimated;
 

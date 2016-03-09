@@ -155,9 +155,9 @@ extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNo
   });
 }
 
-static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possibleAncestor, ASDisplayNode *possibleDescendent)
+static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possibleAncestor, ASDisplayNode *possibleDescendant)
 {
-  ASDisplayNode *supernode = possibleDescendent;
+  ASDisplayNode *supernode = possibleDescendant;
   while (supernode) {
     if (supernode == possibleAncestor) {
       return YES;

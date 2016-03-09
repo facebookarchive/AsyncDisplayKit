@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASBatchContext : NSObject
 
 /**
- * Retreive the state of the current batch process.
+ * Retrieve the state of the current batch process.
  *
  * @returns A boolean reflecting if the owner of the context object is fetching another batch.
  */
@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)batchFetchingWasCancelled;
 
 /**
- * Notify the context object that something has interupted the batch fetching process.
+ * Notify the context object that something has interrupted the batch fetching process.
  *
  * @discussion Call this method only when something has corrupted the batch fetching process. Calling this method should
  * be left to the owner of the batch process unless there is a specific purpose.

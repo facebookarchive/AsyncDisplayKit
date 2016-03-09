@@ -656,8 +656,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
       _ignoreMaxSizeChange = NO;
     } else {
       // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
-      // data controller's prevent animation block that would interupt an interupted relayout happening in an animation block
-      // ie. ASCollectionView bounds change on rotation or mutl-tasking split view resize.
+      // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
+      // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
       [self performBatchAnimated:YES updates:^{
         [_dataController relayoutAllNodes];
       } completion:nil];

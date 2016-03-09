@@ -95,7 +95,7 @@ _ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node)
 }
 
 /**
- *  Returns ASDisplayNodeFlags for the givern class/instance. instance MAY BE NIL.
+ *  Returns ASDisplayNodeFlags for the given class/instance. instance MAY BE NIL.
  *
  *  @param c        the class, required
  *  @param instance the instance, which may be nil. (If so, the class is inspected instead)
@@ -131,7 +131,7 @@ static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *i
 /**
  *  Returns ASDisplayNodeMethodOverrides for the given class
  *
- *  @param c the class, requireed.
+ *  @param c the class, required.
  *
  *  @return ASDisplayNodeMethodOverrides.
  */
@@ -1528,7 +1528,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"Should not cause recursive __enterHierarchy");
   
-  // Profiling has shown that locking this method is benificial, so each of the property accesses don't have to lock and unlock.
+  // Profiling has shown that locking this method is beneficial, so each of the property accesses don't have to lock and unlock.
   ASDN::MutexLocker l(_propertyLock);
   
   if (!self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
@@ -1554,7 +1554,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"Should not cause recursive __exitHierarchy");
   
-  // Profiling has shown that locking this method is benificial, so each of the property accesses don't have to lock and unlock.
+  // Profiling has shown that locking this method is beneficial, so each of the property accesses don't have to lock and unlock.
   ASDN::MutexLocker l(_propertyLock);
   
   if (self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
