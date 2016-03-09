@@ -9,6 +9,7 @@
 #import "ASRangeController.h"
 
 #import "ASAssert.h"
+#import "ASWeakSet.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASMultiDimensionalArrayUtils.h"
@@ -32,6 +33,29 @@
 
 @implementation ASRangeController
 
+#pragma mark - NSObject
+
++ (void)load {
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    [self registerLowMemoryNotification];
+  });
+}
+
+#pragma mark - Class
+
++ (ASWeakSet *)rangeControllers
+{
+  static ASWeakSet<ASRangeController *> *rangeController;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    rangeController = [[ASWeakSet alloc] init];
+  });
+  return rangeController;
+}
+
+#pragma mark - Lifecycle
+
 - (instancetype)init
 {
   if (!(self = [super init])) {
@@ -42,6 +66,8 @@
   _currentRangeMode = ASLayoutRangeModeInvalid;
   _didUpdateCurrentRange = NO;
   
+  [[self.class rangeControllers] addObject:self];
+  
   return self;
 }
 
@@ -51,6 +77,33 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];
   }
 }
+
+#pragma mark - Low Memory Handling
+
++ (void)registerLowMemoryNotification
+{
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(lowMemoryWarning) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+}
+
++ (void)lowMemoryWarning
+{
+#if ASRangeControllerAutomaticLowMemoryHandling
+  ASWeakSet *rangeControllers = [self rangeControllers];
+  for (ASRangeController *rangeController in rangeControllers) {
+    if (rangeController.dataSource == nil) {
+      continue;
+    }
+    
+    ASInterfaceState interfaceState = [rangeController.dataSource interfaceStateForRangeController:rangeController];
+    if (ASInterfaceStateIncludesDisplay(interfaceState)) {
+      continue;
+    }
+    
+    [rangeController updateCurrentRangeWithMode:ASLayoutRangeModeLowMemory];
+  }
+#endif
+}
+
 
 #pragma mark - Core visible node range managment API
 
@@ -158,7 +211,9 @@
 
   ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeMode:rangeMode
                                                                                     rangeType:ASLayoutRangeTypeDisplay];
-  if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, ASRangeTuningParametersZero)) {
+  if (rangeMode == ASLayoutRangeModeLowMemory) {
+    displayIndexPaths = [NSSet set];
+  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, ASRangeTuningParametersZero)) {
     displayIndexPaths = visibleIndexPaths;
   } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, parametersFetchData)) {
     displayIndexPaths = fetchDataIndexPaths;
@@ -193,8 +248,8 @@
   // This can be done once there is an API to observe to (or be notified upon) interface state changes or pipeline enterings
   [self registerForNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
   
-#if RangeControllerLoggingEnabled
-  NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (RangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
+#if ASRangeControllerLoggingEnabled
+  NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (ASRangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
 #endif
   
   for (NSIndexPath *indexPath in allIndexPaths) {
@@ -216,14 +271,20 @@
       // If selfInterfaceState isn't visible, then visibleIndexPaths represents what /will/ be immediately visible at the
       // instant we come onscreen.  So, fetch data and display all of those things, but don't waste resources preloading yet.
       // We handle this as a separate case to minimize set operations for offscreen preloading, including containsObject:.
-
-      // Set Layout, Fetch Data, Display.  DO NOT set Visible: even though these elements are in the visible range / "viewport",
-      // our overall container object is itself not visible yet.  The moment it becomes visible, we will run the condition above.
+      
       if ([allCurrentIndexPaths containsObject:indexPath]) {
-        // We might be looking at an indexPath that was previously in-range, but now we need to clear it.
-        // In that case we'll just set it back to MeasureLayout.  Only set Display | FetchData if in allCurrentIndexPaths.
-        interfaceState |= ASInterfaceStateDisplay;
+        // DO NOT set Visible: even though these elements are in the visible range / "viewport",
+        // our overall container object is itself not visible yet.  The moment it becomes visible, we will run the condition above
+        
+        // Set Layout, Fetch Data
         interfaceState |= ASInterfaceStateFetchData;
+        
+        if (rangeMode != ASLayoutRangeModeLowMemory) {
+          // Add Display.
+          // We might be looking at an indexPath that was previously in-range, but now we need to clear it.
+          // In that case we'll just set it back to MeasureLayout.  Only set Display | FetchData if in allCurrentIndexPaths.
+          interfaceState |= ASInterfaceStateDisplay;
+        }
       }
     }
     
@@ -245,7 +306,7 @@
         ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
         // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
         if (node.interfaceState != interfaceState) {
-#if RangeControllerLoggingEnabled
+#if ASRangeControllerLoggingEnabled
           [modifiedIndexPaths addObject:indexPath];
 #endif
           [node recursivelySetInterfaceState:interfaceState];
@@ -261,7 +322,7 @@
   _rangeIsValid = YES;
   _queuedRangeUpdate = NO;
   
-#if RangeControllerLoggingEnabled
+#if ASRangeControllerLoggingEnabled
   NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
   BOOL setsAreEqual = [visibleIndexPaths isEqualToSet:visibleNodePathsSet];
   NSLog(@"visible sets are equal: %d", setsAreEqual);
