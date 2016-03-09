@@ -77,7 +77,7 @@ ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)
   ASSizeRange sizeRange; sizeRange.min = min; sizeRange.max = max; return sizeRange;
 }
 
-ASSizeRange ASSizeRangeMakeWithExactCGSize(CGSize size)
+ASSizeRange ASSizeRangeMakeExactSize(CGSize size)
 {
   return ASSizeRangeMake(size, size);
 }
