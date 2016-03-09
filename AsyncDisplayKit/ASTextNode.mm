@@ -1120,6 +1120,10 @@ static NSAttributedString *DefaultTruncationAttributedString()
  */
 - (NSAttributedString *)_composedTruncationString
 {
+  //If we have neither return the default
+  if (!_additionalTruncationMessage && !_truncationAttributedString) {
+    return _composedTruncationString;
+  }
   // Short circuit if we only have one or the other.
   if (!_additionalTruncationMessage) {
     return _truncationAttributedString;
