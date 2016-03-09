@@ -72,7 +72,7 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
      baseline will be larger so we will keep that as the max baseline.
    
      However, if were to align from the last baseline we'd find the max baseline by taking the height of node and adding
-     the font's descender (its negative). In the case of the first node, which is only 1 line, this should be the same value as the ascender.
+     the font's descender (it's negative). In the case of the first node, which is only 1 line, this should be the same value as the ascender.
      The second node, however, has a larger height and there will have a larger baseline offset.
    */
   const auto baselineIt = std::max_element(positionedLayout.sublayouts.begin(), positionedLayout.sublayouts.end(), [&](const ASLayout *a, const ASLayout *b){
