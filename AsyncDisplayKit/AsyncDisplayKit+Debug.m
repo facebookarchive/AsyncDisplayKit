@@ -8,20 +8,19 @@
 
 #import "AsyncDisplayKit+Debug.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASTextNode.h"
 
-static BOOL __enableImageSizeOverlay = NO;
+static BOOL __shouldShowImageScalingOverlay = NO;
 
-@implementation ASImageNode (Debug)
+@implementation ASImageNode (Debugging)
 
-+ (void)setImageDebugEnabled:(BOOL)enable;
++ (void)setShouldShowImageScalingOverlay:(BOOL)show;
 {
-  __enableImageSizeOverlay = enable;
+  __shouldShowImageScalingOverlay = show;
 }
 
-+ (BOOL)shouldShowImageDebugOverlay
++ (BOOL)shouldShowImageScalingOverlay
 {
-  return __enableImageSizeOverlay;
+  return __shouldShowImageScalingOverlay;
 }
 
 @end

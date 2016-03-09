@@ -57,10 +57,6 @@
 
 @end
 
-@interface ASImageNode ()
-@property (nonatomic, strong) ASTextNode *debugLabelNode;
-@end
-
 @implementation ASImageNode
 {
 @private
@@ -74,6 +70,8 @@
   BOOL _forceUpscaling; //Defaults to NO.
   CGRect _cropRect; // Defaults to CGRectMake(0.5, 0.5, 0, 0)
   CGRect _cropDisplayBounds;
+  
+  ASTextNode *_debugLabelNode;
 }
 
 @synthesize image = _image;
@@ -95,7 +93,7 @@
   _cropDisplayBounds = CGRectNull;
   _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
   
-  if ([ASImageNode shouldShowImageDebugOverlay]) {
+  if ([ASImageNode shouldShowImageScalingOverlay]) {
     _debugLabelNode = [[ASTextNode alloc] init];
     _debugLabelNode.layerBacked = YES;
     [self addSubnode:_debugLabelNode];
@@ -120,7 +118,6 @@
 {
   ASDN::MutexLocker l(_imageLock);
   // if a preferredFrameSize is set, call the superclass to return that instead of using the image size.
-  [_debugLabelNode measure:constrainedSize];
   if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO)
     return [super calculateSizeThatFits:constrainedSize];
   else if (_image)
@@ -221,7 +218,6 @@
   CGSize boundsSizeInPixels = CGSizeMake(floorf(bounds.size.width * contentsScale), floorf(bounds.size.height * contentsScale));
   
   if (_debugLabelNode) {
-  //  NSLog(@"widthScale = %f, heightScale = %f", imageSizeInPixels.width / boundsSizeInPixels.width, imageSizeInPixels.height / boundsSizeInPixels.height);
     CGFloat pixelCountRatio            = (imageSizeInPixels.width * imageSizeInPixels.height) / (boundsSizeInPixels.width * boundsSizeInPixels.height);
     if (pixelCountRatio != 1.0) {
       NSString *scaleString            = [NSString stringWithFormat:@"%.2fx", pixelCountRatio];
