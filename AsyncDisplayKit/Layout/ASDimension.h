@@ -59,7 +59,7 @@ extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat
 extern ASSizeRange ASSizeRangeMake(CGSize min, CGSize max);
 
 /** Creates an ASSizeRange with the provided size as both min and max */
-extern ASSizeRange ASSizeRangeMakeWithExactCGSize(CGSize size);
+extern ASSizeRange ASSizeRangeMakeExactSize(CGSize size);
 
 /** Clamps the provided CGSize between the [min, max] bounds of this ASSizeRange. */
 extern CGSize ASSizeRangeClamp(ASSizeRange sizeRange, CGSize size);
