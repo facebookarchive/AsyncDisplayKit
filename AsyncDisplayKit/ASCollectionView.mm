@@ -780,12 +780,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_asyncDataSourceImplementsConstrainedSizeForNode) {
     constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
   } else {
-      if (! CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, self.bounds.size)) {
-        _maxSizeForNodesConstrainedSize = self.bounds.size;
-        _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
-      }
-
-    CGSize maxSize = _maxSizeForNodesConstrainedSize;
+    CGSize maxSize = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero) ? self.bounds.size : _maxSizeForNodesConstrainedSize;
     if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
       maxSize.width = FLT_MAX;
     } else {
