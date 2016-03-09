@@ -390,26 +390,26 @@
 
 - (UIImage *)backgroundImageForState:(ASControlState)state
 {
-    ASDN::MutexLocker l(_propertyLock);
-    switch (state) {
-      case ASControlStateNormal:
-        return _normalBackgroundImage;
-            
-      case ASControlStateHighlighted:
-        return _highlightedBackgroundImage;
-            
-      case ASControlStateSelected:
-        return _selectedBackgroundImage;
-            
-      case ASControlStateSelected | ASControlStateHighlighted:
-        return _selectedHighlightedBackgroundImage;
-      
-      case ASControlStateDisabled:
-        return _disabledBackgroundImage;
-            
-      default:
-        return _normalBackgroundImage;
-    }
+  ASDN::MutexLocker l(_propertyLock);
+  switch (state) {
+    case ASControlStateNormal:
+      return _normalBackgroundImage;
+    
+    case ASControlStateHighlighted:
+      return _highlightedBackgroundImage;
+    
+    case ASControlStateSelected:
+      return _selectedBackgroundImage;
+    
+    case ASControlStateSelected | ASControlStateHighlighted:
+      return _selectedHighlightedBackgroundImage;
+    
+    case ASControlStateDisabled:
+      return _disabledBackgroundImage;
+    
+    default:
+      return _normalBackgroundImage;
+  }
 }
 
 - (void)setBackgroundImage:(UIImage *)image forState:(ASControlState)state
