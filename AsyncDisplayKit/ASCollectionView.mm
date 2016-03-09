@@ -598,16 +598,16 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASScrollDirection scrollableDirections = [self scrollableDirections];
   
   if (ASScrollDirectionContainsHorizontalDirection(scrollableDirections)) { // Can scroll horizontally.
-    if (scrollVelocity.x > 0) {
+    if (scrollVelocity.x < 0.0) {
       direction |= ASScrollDirectionRight;
-    } else if (scrollVelocity.x < 0) {
+    } else if (scrollVelocity.x > 0.0) {
       direction |= ASScrollDirectionLeft;
     }
   }
   if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) { // Can scroll vertically.
-    if (scrollVelocity.y > 0) {
+    if (scrollVelocity.y < 0.0) {
       direction |= ASScrollDirectionDown;
-    } else if (scrollVelocity.y < 0) {
+    } else if (scrollVelocity.y > 0.0) {
       direction |= ASScrollDirectionUp;
     }
   }
@@ -780,6 +780,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_asyncDataSourceImplementsConstrainedSizeForNode) {
     constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
   } else {
+      if (! CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, self.bounds.size)) {
+        _maxSizeForNodesConstrainedSize = self.bounds.size;
+        _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
+      }
+
     CGSize maxSize = _maxSizeForNodesConstrainedSize;
     if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
       maxSize.width = FLT_MAX;

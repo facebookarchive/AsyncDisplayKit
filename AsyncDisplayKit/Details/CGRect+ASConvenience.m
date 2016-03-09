@@ -10,12 +10,6 @@
 #import "ASScrollDirection.h"
 #import "ASLayoutController.h"
 
-struct ASDirectionalScreenfulBuffer {
-  CGFloat positiveDirection; // Positive relative to iOS Core Animation layer coordinate space.
-  CGFloat negativeDirection;
-};
-typedef struct ASDirectionalScreenfulBuffer ASDirectionalScreenfulBuffer;
-
 ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferHorizontal(ASScrollDirection scrollDirection,
                                                                     ASRangeTuningParameters rangeTuningParameters)
 {
