@@ -82,10 +82,10 @@
 
 + (void)registerLowMemoryNotification
 {
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(lowMemoryWarning) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didReceiveMemoryWarning:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 }
 
-+ (void)lowMemoryWarning
++ (void)didReceiveMemoryWarning:(NSNotification *)notification
 {
 #if ASRangeControllerAutomaticLowMemoryHandling
   ASWeakSet *rangeControllers = [self rangeControllers];
