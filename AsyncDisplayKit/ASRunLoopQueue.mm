@@ -88,6 +88,10 @@
 
 - (void)enqueue:(id)object
 {
+  if (!object) {
+    return;
+  }
+  
   ASDN::MutexLocker l(_internalQueueLock);
 
   // Check if the object exists.
