@@ -20,6 +20,8 @@
   __weak ASTextKitContext *_context;
   ASTextKitAttributes _attributes;
   std::mutex _textKitMutex;
+  BOOL _measured;
+  CGFloat _scaleFactor;
 }
 
 - (instancetype)initWithContext:(ASTextKitContext *)context
@@ -85,7 +87,7 @@
   NSLayoutManager *layoutManager = _attributes.layoutManagerCreationBlock ? _attributes.layoutManagerCreationBlock() : [[ASLayoutManager alloc] init];
   layoutManager.usesFontLeading = NO;
   [textStorage addLayoutManager:layoutManager];
-  NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:_constrainedSize];
+  NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(_constrainedSize.width, FLT_MAX)];
   
   textContainer.lineFragmentPadding = 0;
   textContainer.lineBreakMode = _attributes.lineBreakMode;
@@ -104,8 +106,14 @@
 
 - (CGFloat)scaleFactor
 {
+  if (_measured) {
+    return _scaleFactor;
+  }
+  
   if ([_attributes.pointSizeScaleFactors count] == 0 || isinf(_constrainedSize.width)) {
-    return 1.0;
+    _measured = YES;
+    _scaleFactor = 1.0;
+    return _scaleFactor;
   }
   
   __block CGFloat adjustedScale = 1.0;
@@ -177,7 +185,9 @@
     }
     
   }];
-  return adjustedScale;
+  _measured = YES;
+  _scaleFactor = adjustedScale;
+  return _scaleFactor;
 }
 
 @end
