@@ -33,25 +33,17 @@
 
 @implementation ASRangeController
 
-#pragma mark - NSObject
-
-+ (void)load {
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    [self registerLowMemoryNotification];
-  });
-}
-
 #pragma mark - Class
 
-+ (ASWeakSet *)rangeControllers
++ (ASWeakSet *)allRangeControllersWeakSet
 {
-  static ASWeakSet<ASRangeController *> *rangeController;
+  static ASWeakSet<ASRangeController *> *__allRangeControllersWeakSet;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    rangeController = [[ASWeakSet alloc] init];
+    __allRangeControllersWeakSet = [[ASWeakSet alloc] init];
+    [self registerLowMemoryNotification];
   });
-  return rangeController;
+  return __allRangeControllersWeakSet;
 }
 
 #pragma mark - Lifecycle
@@ -66,7 +58,7 @@
   _currentRangeMode = ASLayoutRangeModeInvalid;
   _didUpdateCurrentRange = NO;
   
-  [[self.class rangeControllers] addObject:self];
+  [[self.class allRangeControllersWeakSet] addObject:self];
   
   return self;
 }
@@ -88,7 +80,7 @@
 + (void)didReceiveMemoryWarning:(NSNotification *)notification
 {
 #if ASRangeControllerAutomaticLowMemoryHandling
-  ASWeakSet *rangeControllers = [self rangeControllers];
+  ASWeakSet *rangeControllers = [self allRangeControllersWeakSet];
   for (ASRangeController *rangeController in rangeControllers) {
     if (rangeController.dataSource == nil) {
       continue;
