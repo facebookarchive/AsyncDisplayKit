@@ -29,9 +29,18 @@ typedef NS_ENUM(NSUInteger, ASLayoutRangeMode) {
   ASLayoutRangeModeFull,
   
   /**
-   * Low Memory mode is used when a range controller should limit the amount of work it performs to 0.
-   * Thus, it discards most of the views/layers that are created and it is trying to save as much system
-   * resources as possible.
+   * Visible Only mode is used when a range controller should set its display and fetch data regions to only the size of their bounds.
+   * This causes all additional backing stores & fetched data to be released, while ensuring a user revisiting the view will
+   * still be able to see the expected content.  This mode is automatically set on all ASRangeControllers when the app suspends,
+   * allowing the operating system to keep the app alive longer and increase the chance it is still warm when the user returns.
+   */
+  ASLayoutRangeModeVisibleOnly,
+  
+  /**
+   * Low Memory mode is used when a range controller should discard ALL graphics buffers, including for the area that would be visible
+   * the next time the user views it (bounds).  The only range it preserves is Fetch Data, which is limited to the bounds, allowing
+   * the content to be restored relatively quickly by re-decoding images (the compressed images are ~10% the size of the decoded ones,
+   * and text is a tiny fraction of its rendered size).
    */
   ASLayoutRangeModeLowMemory,
   ASLayoutRangeModeCount

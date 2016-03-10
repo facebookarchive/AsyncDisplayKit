@@ -73,6 +73,19 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   return ASLayoutRangeModeFull;
 }
 
+- (ASInterfaceState)interfaceState
+{
+  ASInterfaceState selfInterfaceState = ASInterfaceStateNone;
+  if (_dataSource) {
+    selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
+  }
+  if (__ApplicationState == UIApplicationStateBackground) {
+    // If the app is background, pretend to be invisible so that we inform each cell it is no longer being viewed by the user
+    selfInterfaceState &= ~(ASInterfaceStateVisible);
+  }
+  return selfInterfaceState;
+}
+
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
 {
   _scrollDirection = scrollDirection;
@@ -95,7 +108,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (_queuedRangeUpdate) {
     return;
   }
-
+  
   // coalesce these events -- handling them multiple times per runloop is noisy and expensive
   _queuedRangeUpdate = YES;
   
@@ -116,26 +129,37 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 {
   _layoutController = layoutController;
   _layoutControllerImplementsSetVisibleIndexPaths = [_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
+  if (_layoutController && _queuedRangeUpdate) {
+    [self performRangeUpdate];
+  }
+}
+
+- (void)setDataSource:(id<ASRangeControllerDataSource>)dataSource
+{
+  _dataSource = dataSource;
+  if (_dataSource && _queuedRangeUpdate) {
+    [self performRangeUpdate];
+  }
 }
 
 - (void)_updateVisibleNodeIndexPaths
 {
   ASDisplayNodeAssert(_layoutController, @"An ASLayoutController is required by ASRangeController");
-  if (!_queuedRangeUpdate || !_layoutController) {
+  if (!_queuedRangeUpdate || !_layoutController || !_dataSource) {
     return;
   }
-
+  
   // TODO: Consider if we need to use this codepath, or can rely on something more similar to the data & display ranges
   // Example: ... = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
   NSArray<NSIndexPath *> *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
-
+  
   if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
     _queuedRangeUpdate = NO;
     return; // don't do anything for this update, but leave _rangeIsValid == NO to make sure we update it later
   }
-
+  
   [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
-
+  
   // the layout controller needs to know what the current visible indices are to calculate range offsets
   if (_layoutControllerImplementsSetVisibleIndexPaths) {
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
@@ -157,12 +181,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   // the network or display queues before preloading (offscreen) nodes are enqueued.
   NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
-  ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
-  if (__ApplicationState == UIApplicationStateBackground) {
-    // If the app is background, proceed as if all range controllers are invisible so that we inform each cell it is no longer being viewed by the user
-    selfInterfaceState &= ~(ASInterfaceStateVisible);
-  }
-  
+  ASInterfaceState selfInterfaceState = [self interfaceState];
   ASLayoutRangeMode rangeMode = _currentRangeMode;
   if (!_didUpdateCurrentRange) {
     rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
@@ -177,7 +196,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
                                                           rangeMode:rangeMode
                                                           rangeType:ASLayoutRangeTypeFetchData];
   }
-
+  
   ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeMode:rangeMode
                                                                                     rangeType:ASLayoutRangeTypeDisplay];
   if (rangeMode == ASLayoutRangeModeLowMemory) {
@@ -212,7 +231,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (!_rangeIsValid) {
     [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];
   }
-
+  
   // TODO Don't register for notifications if this range update doesn't cause any node to enter rendering pipeline.
   // This can be done once there is an API to observe to (or be notified upon) interface state changes or pipeline enterings
   [self registerForNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
@@ -283,33 +302,24 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
       }
     }
   }
-
+  
   if (_didRegisterForNotifications) {
     _pendingDisplayNodesTimestamp = CFAbsoluteTimeGetCurrent();
   }
-
+  
   _rangeIsValid = YES;
   _queuedRangeUpdate = NO;
   
 #if ASRangeControllerLoggingEnabled
-  NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
-  BOOL setsAreEqual = [visibleIndexPaths isEqualToSet:visibleNodePathsSet];
-  NSLog(@"visible sets are equal: %d", setsAreEqual);
-  if (!setsAreEqual) {
-    NSLog(@"standard: %@", visibleIndexPaths);
-    NSLog(@"custom: %@", visibleNodePathsSet);
-  }
-  
+//  NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
+//  BOOL setsAreEqual = [visibleIndexPaths isEqualToSet:visibleNodePathsSet];
+//  NSLog(@"visible sets are equal: %d", setsAreEqual);
+//  if (!setsAreEqual) {
+//    NSLog(@"standard: %@", visibleIndexPaths);
+//    NSLog(@"custom: %@", visibleNodePathsSet);
+//  }
   [modifiedIndexPaths sortUsingSelector:@selector(compare:)];
-  
-  for (NSIndexPath *indexPath in modifiedIndexPaths) {
-    ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
-    ASInterfaceState interfaceState = node.interfaceState;
-    BOOL inVisible = ASInterfaceStateIncludesVisible(interfaceState);
-    BOOL inDisplay = ASInterfaceStateIncludesDisplay(interfaceState);
-    BOOL inFetchData = ASInterfaceStateIncludesFetchData(interfaceState);
-    NSLog(@"indexPath %@, Visible: %d, Display: %d, FetchData: %d", indexPath, inVisible, inDisplay, inFetchData);
-  }
+  NSLog(@"Range update complete; modifiedIndexPaths: %@", [self descriptionWithIndexPaths:modifiedIndexPaths]);
 #endif
 }
 
@@ -319,7 +329,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 {
   if (!_didRegisterForNotifications) {
     ASLayoutRangeMode nextRangeMode = [ASRangeController rangeModeForInterfaceState:interfaceState
-                                                                       currentRangeMode:_currentRangeMode];
+                                                                   currentRangeMode:_currentRangeMode];
     if (_currentRangeMode != nextRangeMode) {
       [[NSNotificationCenter defaultCenter] addObserver:self
                                                selector:@selector(scheduledNodesDidDisplay:)
@@ -423,6 +433,31 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   });
 }
 
+#pragma mark - Memory Management
+
+// Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
+- (void)clearContents
+{
+  for (NSArray *section in [_dataSource completedNodes]) {
+    for (ASDisplayNode *node in section) {
+      if (ASInterfaceStateIncludesDisplay(node.interfaceState)) {
+        [node exitInterfaceState:ASInterfaceStateDisplay];
+      }
+    }
+  }
+}
+
+- (void)clearFetchedData
+{
+  for (NSArray *section in [_dataSource completedNodes]) {
+    for (ASDisplayNode *node in section) {
+      if (ASInterfaceStateIncludesFetchData(node.interfaceState)) {
+        [node exitInterfaceState:ASInterfaceStateFetchData];
+      }
+    }
+  }
+}
+
 #pragma mark - Class Methods (Application Notification Handlers)
 
 + (ASWeakSet *)allRangeControllersWeakSet
@@ -446,36 +481,80 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [center addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
 }
 
+static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisibleOnly;
++ (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode
+{
+  ASDisplayNodeAssert(rangeMode == ASLayoutRangeModeVisibleOnly || rangeMode == ASLayoutRangeModeLowMemory, @"It is highly inadvisable to engage a larger range mode when a memory warning occurs, as this will almost certainly cause app eviction");
+  __rangeModeForMemoryWarnings = rangeMode;
+}
+
 + (void)didReceiveMemoryWarning:(NSNotification *)notification
 {
+#if ASRangeControllerLoggingEnabled
+  NSLog(@"+[ASRangeController didReceiveMemoryWarning] with controllers: %@", [self allRangeControllersWeakSet]);
+#endif
   for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
-    if (rangeController.dataSource == nil) {
-      continue;
-    }
-    
-    ASInterfaceState interfaceState = [rangeController.dataSource interfaceStateForRangeController:rangeController];
-    if (ASInterfaceStateIncludesDisplay(interfaceState)) {
-      continue;
-    }
-    
-    [rangeController updateCurrentRangeWithMode:ASLayoutRangeModeLowMemory];
+    BOOL isDisplay = ASInterfaceStateIncludesDisplay([rangeController interfaceState]);
+    [rangeController updateCurrentRangeWithMode:isDisplay ? ASLayoutRangeModeMinimum : __rangeModeForMemoryWarnings];
+    [rangeController performRangeUpdate];
   }
 }
 
 + (void)didEnterBackground:(NSNotification *)notification
 {
+  for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
+    // We do not want to fully collapse the Display ranges of any visible range controllers so that flashes can be avoided when
+    // the app is resumed.  Non-visible controllers can be more aggressively culled to the LowMemory state (see definitions for documentation)
+    BOOL isVisible = ASInterfaceStateIncludesVisible([rangeController interfaceState]);
+    [rangeController updateCurrentRangeWithMode:isVisible ? ASLayoutRangeModeVisibleOnly : ASLayoutRangeModeLowMemory];
+  }
+  
+  // Because -interfaceState checks __ApplicationState and always clears the "visible" bit if Backgrounded, we must set this after updating the range mode.
   __ApplicationState = UIApplicationStateBackground;
   for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
+    // Trigger a range update immediately, as we may not be allowed by the system to run the update block scheduled by changing range mode.
     [rangeController performRangeUpdate];
   }
+  
+#if ASRangeControllerLoggingEnabled
+  NSLog(@"+[ASRangeController didEnterBackground] with controllers, after backgrounding: %@", [self allRangeControllersWeakSet]);
+#endif
 }
 
 + (void)willEnterForeground:(NSNotification *)notification
 {
   __ApplicationState = UIApplicationStateActive;
   for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
+    BOOL isVisible = ASInterfaceStateIncludesVisible([rangeController interfaceState]);
+    [rangeController updateCurrentRangeWithMode:isVisible ? ASLayoutRangeModeMinimum : ASLayoutRangeModeVisibleOnly];
     [rangeController performRangeUpdate];
   }
+  
+#if ASRangeControllerLoggingEnabled
+  NSLog(@"+[ASRangeController willEnterForeground] with controllers, after foregrounding: %@", [self allRangeControllersWeakSet]);
+#endif
+}
+
+#pragma mark - Debugging
+
+- (NSString *)descriptionWithIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  NSMutableString *description = [NSMutableString stringWithFormat:@"%@ %@", [super description], @" allPreviousIndexPaths:\n"];
+  for (NSIndexPath *indexPath in indexPaths) {
+    ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
+    ASInterfaceState interfaceState = node.interfaceState;
+    BOOL inVisible = ASInterfaceStateIncludesVisible(interfaceState);
+    BOOL inDisplay = ASInterfaceStateIncludesDisplay(interfaceState);
+    BOOL inFetchData = ASInterfaceStateIncludesFetchData(interfaceState);
+    [description appendFormat:@"indexPath %@, Visible: %d, Display: %d, FetchData: %d\n", indexPath, inVisible, inDisplay, inFetchData];
+  }
+  return description;
+}
+
+- (NSString *)description
+{
+  NSArray<NSIndexPath *> *indexPaths = [[_allPreviousIndexPaths allObjects] sortedArrayUsingSelector:@selector(compare:)];
+  return [self descriptionWithIndexPaths:indexPaths];
 }
 
 @end
