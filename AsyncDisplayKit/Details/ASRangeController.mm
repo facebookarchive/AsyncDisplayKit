@@ -31,20 +31,9 @@
 
 @end
 
+static UIApplicationState __ApplicationState = UIApplicationStateActive;
+
 @implementation ASRangeController
-
-#pragma mark - Class
-
-+ (ASWeakSet *)allRangeControllersWeakSet
-{
-  static ASWeakSet<ASRangeController *> *__allRangeControllersWeakSet;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    __allRangeControllersWeakSet = [[ASWeakSet alloc] init];
-    [self registerLowMemoryNotification];
-  });
-  return __allRangeControllersWeakSet;
-}
 
 #pragma mark - Lifecycle
 
@@ -70,33 +59,6 @@
   }
 }
 
-#pragma mark - Low Memory Handling
-
-+ (void)registerLowMemoryNotification
-{
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didReceiveMemoryWarning:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
-}
-
-+ (void)didReceiveMemoryWarning:(NSNotification *)notification
-{
-#if ASRangeControllerAutomaticLowMemoryHandling
-  ASWeakSet *rangeControllers = [self allRangeControllersWeakSet];
-  for (ASRangeController *rangeController in rangeControllers) {
-    if (rangeController.dataSource == nil) {
-      continue;
-    }
-    
-    ASInterfaceState interfaceState = [rangeController.dataSource interfaceStateForRangeController:rangeController];
-    if (ASInterfaceStateIncludesDisplay(interfaceState)) {
-      continue;
-    }
-    
-    [rangeController updateCurrentRangeWithMode:ASLayoutRangeModeLowMemory];
-  }
-#endif
-}
-
-
 #pragma mark - Core visible node range managment API
 
 + (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
@@ -120,10 +82,12 @@
 
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
 {
-  _currentRangeMode = rangeMode;
-  _didUpdateCurrentRange = YES;
-  
-  [self scheduleRangeUpdate];
+  if (_currentRangeMode != rangeMode) {
+    _currentRangeMode = rangeMode;
+    _didUpdateCurrentRange = YES;
+    
+    [self scheduleRangeUpdate];
+  }
 }
 
 - (void)scheduleRangeUpdate
@@ -136,8 +100,16 @@
   _queuedRangeUpdate = YES;
   
   dispatch_async(dispatch_get_main_queue(), ^{
-    [self _updateVisibleNodeIndexPaths];
+    [self performRangeUpdate];
   });
+}
+
+- (void)performRangeUpdate
+{
+  // Call this version if you want the update to occur immediately, such as on app suspend, as another runloop may not occur.
+  ASDisplayNodeAssertMainThread();
+  _queuedRangeUpdate = YES; // For now, set this flag as _update... expects it and clears it.
+  [self _updateVisibleNodeIndexPaths];
 }
 
 - (void)setLayoutController:(id<ASLayoutController>)layoutController
@@ -186,6 +158,11 @@
   NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   ASInterfaceState selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
+  if (__ApplicationState == UIApplicationStateBackground) {
+    // If the app is background, proceed as if all range controllers are invisible so that we inform each cell it is no longer being viewed by the user
+    selfInterfaceState &= ~(ASInterfaceStateVisible);
+  }
+  
   ASLayoutRangeMode rangeMode = _currentRangeMode;
   if (!_didUpdateCurrentRange) {
     rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
@@ -444,6 +421,61 @@
     _rangeIsValid = NO;
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   });
+}
+
+#pragma mark - Class Methods (Application Notification Handlers)
+
++ (ASWeakSet *)allRangeControllersWeakSet
+{
+  static ASWeakSet<ASRangeController *> *__allRangeControllersWeakSet;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    __allRangeControllersWeakSet = [[ASWeakSet alloc] init];
+    [self registerSharedApplicationNotifications];
+  });
+  return __allRangeControllersWeakSet;
+}
+
++ (void)registerSharedApplicationNotifications
+{
+  NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+#if ASRangeControllerAutomaticLowMemoryHandling
+  [center addObserver:self selector:@selector(didReceiveMemoryWarning:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+#endif
+  [center addObserver:self selector:@selector(didEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+  [center addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
+}
+
++ (void)didReceiveMemoryWarning:(NSNotification *)notification
+{
+  for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
+    if (rangeController.dataSource == nil) {
+      continue;
+    }
+    
+    ASInterfaceState interfaceState = [rangeController.dataSource interfaceStateForRangeController:rangeController];
+    if (ASInterfaceStateIncludesDisplay(interfaceState)) {
+      continue;
+    }
+    
+    [rangeController updateCurrentRangeWithMode:ASLayoutRangeModeLowMemory];
+  }
+}
+
++ (void)didEnterBackground:(NSNotification *)notification
+{
+  __ApplicationState = UIApplicationStateBackground;
+  for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
+    [rangeController performRangeUpdate];
+  }
+}
+
++ (void)willEnterForeground:(NSNotification *)notification
+{
+  __ApplicationState = UIApplicationStateActive;
+  for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
+    [rangeController performRangeUpdate];
+  }
 }
 
 @end

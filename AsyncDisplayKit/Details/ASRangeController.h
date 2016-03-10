@@ -13,7 +13,7 @@
 #import <AsyncDisplayKit/ASLayoutController.h>
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 
-#define ASRangeControllerLoggingEnabled 0
+#define ASRangeControllerLoggingEnabled 1
 #define ASRangeControllerAutomaticLowMemoryHandling 1
 
 NS_ASSUME_NONNULL_BEGIN
