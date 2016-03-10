@@ -413,7 +413,7 @@
   return _spinner;
 }
 
-- (AVPlayerItem *)curentItem
+- (AVPlayerItem *)currentItem
 {
   ASDN::MutexLocker l(_videoLock);
   return _currentItem;
