@@ -1040,20 +1040,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)clearContents
 {
-  for (NSArray *section in [_dataController completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      [node exitInterfaceState:ASInterfaceStateDisplay];
-    }
-  }
+  [_rangeController clearContents];
 }
 
 - (void)clearFetchedData
 {
-  for (NSArray *section in [_dataController completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      [node exitInterfaceState:ASInterfaceStateFetchData];
-    }
-  }
+  [_rangeController clearFetchedData];
 }
 
 #pragma mark - _ASDisplayView behavior substitutions

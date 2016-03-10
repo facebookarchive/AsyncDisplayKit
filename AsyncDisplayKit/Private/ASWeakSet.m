@@ -73,4 +73,9 @@
   return [_mapTable countByEnumeratingWithState:state objects:buffer count:len];
 }
 
+- (NSString *)description
+{
+  return [[super description] stringByAppendingFormat:@" count: %lu, contents: %@", self.count, _mapTable];
+}
+
 @end

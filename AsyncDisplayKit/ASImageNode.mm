@@ -128,13 +128,15 @@
 
 - (void)setImage:(UIImage *)image
 {
-  ASDN::MutexLocker l(_imageLock);
+  _imageLock.lock();
   if (!ASObjectIsEqual(_image, image)) {
     _image = image;
 
-    ASDN::MutexUnlocker u(_imageLock);
+    _imageLock.unlock();
     [self invalidateCalculatedLayout];
     [self setNeedsDisplay];
+  } else {
+    _imageLock.unlock(); // We avoid using MutexUnlocker as it needlessly re-locks at the end of the scope.
   }
 }
 
