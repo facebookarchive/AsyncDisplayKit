@@ -75,9 +75,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSMutableArray *_batchUpdateBlocks;
   
   BOOL _asyncDataFetchingEnabled;
-  BOOL _asyncDelegateImplementsInsetSection;
   BOOL _asyncDelegateImplementsScrollviewDidScroll;
-  BOOL _collectionViewLayoutImplementsInsetSection;
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
   BOOL _asyncDataSourceImplementsNodeBlockForItemAtIndexPath;
   BOOL _queuedNodeSizeUpdate;
@@ -191,8 +189,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _batchUpdateBlocks = [NSMutableArray array];
   
   _superIsPendingDataLoad = YES;
-  
-  _collectionViewLayoutImplementsInsetSection = [layout respondsToSelector:@selector(sectionInset)];
   
   _maxSizeForNodesConstrainedSize = self.bounds.size;
   // If the initial size is 0, expect a size change very soon which is part of the initial configuration
@@ -336,12 +332,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (asyncDelegate == nil) {
     _asyncDelegate = nil;
     _proxyDelegate = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
-    _asyncDelegateImplementsInsetSection = NO;
     _asyncDelegateImplementsScrollviewDidScroll = NO;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
-    _asyncDelegateImplementsInsetSection = ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? 1 : 0);
     _asyncDelegateImplementsScrollviewDidScroll = ([_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)] ? 1 : 0);
   }
 
@@ -604,16 +598,16 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASScrollDirection scrollableDirections = [self scrollableDirections];
   
   if (ASScrollDirectionContainsHorizontalDirection(scrollableDirections)) { // Can scroll horizontally.
-    if (scrollVelocity.x > 0) {
+    if (scrollVelocity.x < 0.0) {
       direction |= ASScrollDirectionRight;
-    } else if (scrollVelocity.x < 0) {
+    } else if (scrollVelocity.x > 0.0) {
       direction |= ASScrollDirectionLeft;
     }
   }
   if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) { // Can scroll vertically.
-    if (scrollVelocity.y > 0) {
+    if (scrollVelocity.y < 0.0) {
       direction |= ASScrollDirectionDown;
-    } else if (scrollVelocity.y < 0) {
+    } else if (scrollVelocity.y > 0.0) {
       direction |= ASScrollDirectionUp;
     }
   }
@@ -637,10 +631,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (ASScrollDirection)nonFlowLayoutScrollableDirections
 {
   ASScrollDirection scrollableDirection = ASScrollDirectionNone;
-  if (self.contentSize.width + self.contentInset.left + self.contentInset.right > self.bounds.size.width) { // Can scroll horizontally.
+  CGFloat totalContentWidth = self.contentSize.width + self.contentInset.left + self.contentInset.right;
+  CGFloat totalContentHeight = self.contentSize.height + self.contentInset.top + self.contentInset.bottom;
+  
+  if (self.alwaysBounceHorizontal || totalContentWidth > self.bounds.size.width) { // Can scroll horizontally.
     scrollableDirection |= ASScrollDirectionHorizontalDirections;
   }
-  if (self.contentSize.height + self.contentInset.top + self.contentInset.bottom > self.bounds.size.height) { // Can scroll vertically.
+  if (self.alwaysBounceVertical || totalContentHeight > self.bounds.size.height) { // Can scroll vertically.
     scrollableDirection |= ASScrollDirectionVerticalDirections;
   }
   return scrollableDirection;
@@ -783,32 +780,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_asyncDataSourceImplementsConstrainedSizeForNode) {
     constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
   } else {
-    CGSize maxSize = _maxSizeForNodesConstrainedSize;
+    CGSize maxSize = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero) ? self.bounds.size : _maxSizeForNodesConstrainedSize;
     if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
       maxSize.width = FLT_MAX;
     } else {
       maxSize.height = FLT_MAX;
     }
     constrainedSize = ASSizeRangeMake(CGSizeZero, maxSize);
-  }
-  
-  UIEdgeInsets sectionInset = UIEdgeInsetsZero;
-  if (_collectionViewLayoutImplementsInsetSection) {
-    sectionInset = [(UICollectionViewFlowLayout *)self.collectionViewLayout sectionInset];
-  }
-  
-  if (_asyncDelegateImplementsInsetSection) {
-    sectionInset = [(id<ASCollectionViewDelegateFlowLayout>)_asyncDelegate collectionView:self layout:self.collectionViewLayout insetForSectionAtIndex:indexPath.section];
-  }
-
-  constrainedSize.min.height = MAX(0, constrainedSize.min.height - sectionInset.top - sectionInset.bottom);
-  constrainedSize.min.width = MAX(0, constrainedSize.min.width - sectionInset.left - sectionInset.right);
-  //ignore insets for FLT_MAX so FLT_MAX can be compared against
-  if (constrainedSize.max.width - FLT_EPSILON < FLT_MAX) {
-    constrainedSize.max.width = MAX(0, constrainedSize.max.width - sectionInset.left - sectionInset.right);
-  }
-  if (constrainedSize.max.height - FLT_EPSILON < FLT_MAX) {
-    constrainedSize.max.height = MAX(0, constrainedSize.max.height - sectionInset.top - sectionInset.bottom);
   }
   
   return constrainedSize;
@@ -1062,20 +1040,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)clearContents
 {
-  for (NSArray *section in [_dataController completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      [node exitInterfaceState:ASInterfaceStateDisplay];
-    }
-  }
+  [_rangeController clearContents];
 }
 
 - (void)clearFetchedData
 {
-  for (NSArray *section in [_dataController completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      [node exitInterfaceState:ASInterfaceStateFetchData];
-    }
-  }
+  [_rangeController clearFetchedData];
 }
 
 #pragma mark - _ASDisplayView behavior substitutions

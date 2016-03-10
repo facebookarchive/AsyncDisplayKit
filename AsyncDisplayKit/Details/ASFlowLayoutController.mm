@@ -10,6 +10,7 @@
 #import "ASAssert.h"
 #import "ASDisplayNode.h"
 #import "ASIndexPath.h"
+#import "CGRect+ASConvenience.h"
 
 #include <map>
 #include <vector>
@@ -48,29 +49,33 @@
 
 - (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  CGFloat viewportScreenMetric;
-  ASScrollDirection leadingDirection;
   CGSize viewportSize = [self viewportSize];
 
+  CGFloat viewportDirectionalSize = 0.0;
+  ASDirectionalScreenfulBuffer directionalBuffer = { 0, 0 };
+  ASRangeTuningParameters      tuningParameters  = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+
   if (_layoutDirection == ASFlowLayoutDirectionHorizontal) {
-    ASDisplayNodeAssert(scrollDirection == ASScrollDirectionNone || scrollDirection == ASScrollDirectionLeft || scrollDirection == ASScrollDirectionRight, @"Invalid scroll direction");
+    ASDisplayNodeAssert(scrollDirection == ASScrollDirectionNone ||
+                        scrollDirection == ASScrollDirectionLeft ||
+                        scrollDirection == ASScrollDirectionRight, @"Invalid scroll direction");
 
-    viewportScreenMetric = viewportSize.width;
-    leadingDirection = ASScrollDirectionLeft;
+    viewportDirectionalSize = viewportSize.width;
+    directionalBuffer = ASDirectionalScreenfulBufferHorizontal(scrollDirection, tuningParameters);
   } else {
-    ASDisplayNodeAssert(scrollDirection == ASScrollDirectionNone || scrollDirection == ASScrollDirectionUp || scrollDirection == ASScrollDirectionDown, @"Invalid scroll direction");
+    ASDisplayNodeAssert(scrollDirection == ASScrollDirectionNone ||
+                        scrollDirection == ASScrollDirectionUp   ||
+                        scrollDirection == ASScrollDirectionDown, @"Invalid scroll direction");
 
-    viewportScreenMetric = viewportSize.height;
-    leadingDirection = ASScrollDirectionUp;
+    viewportDirectionalSize = viewportSize.height;
+    directionalBuffer = ASDirectionalScreenfulBufferVertical(scrollDirection, tuningParameters);
   }
-
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
-  CGFloat backScreens = scrollDirection == leadingDirection ? tuningParameters.leadingBufferScreenfuls : tuningParameters.trailingBufferScreenfuls;
-  CGFloat frontScreens = scrollDirection == leadingDirection ? tuningParameters.trailingBufferScreenfuls : tuningParameters.leadingBufferScreenfuls;
-
   
-  ASIndexPath startPath = [self findIndexPathAtDistance:(-backScreens * viewportScreenMetric) fromIndexPath:_visibleRange.start];
-  ASIndexPath endPath = [self findIndexPathAtDistance:(frontScreens * viewportScreenMetric) fromIndexPath:_visibleRange.end];
+  ASIndexPath startPath = [self findIndexPathAtDistance:(-directionalBuffer.negativeDirection * viewportDirectionalSize)
+                                          fromIndexPath:_visibleRange.start];
+  
+  ASIndexPath endPath   = [self findIndexPathAtDistance:(directionalBuffer.positiveDirection * viewportDirectionalSize)
+                                          fromIndexPath:_visibleRange.end];
 
   ASDisplayNodeAssert(startPath.section <= endPath.section, @"startPath should never begin at a further position than endPath");
   

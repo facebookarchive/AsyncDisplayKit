@@ -12,6 +12,7 @@
 #import "ASLayoutOptionsPrivate.h"
 
 #import <objc/runtime.h>
+#import <deque>
 
 #import "_ASAsyncTransaction.h"
 #import "_ASAsyncTransactionContainer+Private.h"
@@ -21,6 +22,7 @@
 #import "_ASCoreAnimationExtras.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
+#import "ASRunLoopQueue.h"
 #import "NSArray+Diffing.h"
 
 #import "ASInternalHelpers.h"
@@ -211,49 +213,22 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 + (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node
 {
-  static ASDN::RecursiveMutex __displaySchedulerLock;
-  static NSMutableArray *__nodesToDisplay = nil;
-  static BOOL __displayScheduled = NO;
-  
-  BOOL scheduleDisplayPassNow = NO;
-  {
-    ASDN::MutexLocker l(__displaySchedulerLock);
-    
-    if (!__nodesToDisplay) {
-      __nodesToDisplay = [NSMutableArray array];
-    }
-    
-    if ([__nodesToDisplay indexOfObjectIdenticalTo:node] == NSNotFound) {
-      [__nodesToDisplay addObject:node];
-    }
-    
-    if (!__displayScheduled) {
-      scheduleDisplayPassNow = YES;
-      __displayScheduled = YES;
-    }
-  }
-  
-  if (scheduleDisplayPassNow) {
-    // It's essenital that any layout pass that is scheduled during the current
-    // runloop has a chance to be applied / scheduled, so always perform this after the current runloop.
-    dispatch_async(dispatch_get_main_queue(), ^{
-      NSArray *displayingNodes = nil;
-      // Create a lock scope.  Snatch the waiting nodes, let the next batch create a new container.
-      {
-        ASDN::MutexLocker l(__displaySchedulerLock);
-        displayingNodes    = [__nodesToDisplay copy];
-        __nodesToDisplay   = nil;
-        __displayScheduled = NO;
+  static dispatch_once_t onceToken;
+  static ASRunLoopQueue<ASDisplayNode *> *renderQueue;
+  dispatch_once(&onceToken, ^{
+    renderQueue = [[ASRunLoopQueue<ASDisplayNode *> alloc] initWithRunLoop:CFRunLoopGetMain()
+                                                                andHandler:^(ASDisplayNode * _Nonnull dequeuedItem, BOOL isQueueDrained) {
+      CFAbsoluteTime timestamp = isQueueDrained ?  CFAbsoluteTimeGetCurrent() : 0;
+      [dequeuedItem __recursivelyTriggerDisplayAndBlock:NO];
+      if (isQueueDrained) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
+                                                            object:nil
+                                                          userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: [NSNumber numberWithDouble:timestamp]}];
       }
-      CFAbsoluteTime timestamp = CFAbsoluteTimeGetCurrent();
-      for (ASDisplayNode *node in displayingNodes) {
-        [node __recursivelyTriggerDisplayAndBlock:NO];
-      }
-      [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
-                                                          object:displayingNodes
-                                                        userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: [NSNumber numberWithDouble:timestamp]}];
-    });
-  }
+    }];
+  });
+
+  [renderQueue enqueue:node];
 }
 
 #pragma mark - Lifecycle

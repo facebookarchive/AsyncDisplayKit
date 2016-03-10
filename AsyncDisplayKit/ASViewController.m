@@ -85,6 +85,7 @@
 {
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
+  [_node measureWithSizeRange:[self nodeConstrainedSize]];
   [_node recursivelyFetchData];
     
   [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeFull];

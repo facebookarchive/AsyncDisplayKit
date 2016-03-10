@@ -592,9 +592,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (ASScrollDirection)_scrollDirectionForVelocity:(CGPoint)velocity
 {
   ASScrollDirection direction = ASScrollDirectionNone;
-  if (velocity.y > 0) {
+  if (velocity.y < 0.0) {
     direction = ASScrollDirectionDown;
-  } else if (velocity.y < 0) {
+  } else if (velocity.y > 0.0) {
     direction = ASScrollDirectionUp;
   }
   return direction;
@@ -1064,20 +1064,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)clearContents
 {
-  for (NSArray *section in [_dataController completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      [node recursivelyClearContents];
-    }
-  }
+  [_rangeController clearContents];
 }
 
 - (void)clearFetchedData
 {
-  for (NSArray *section in [_dataController completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      [node recursivelyClearFetchedData];
-    }
-  }
+  [_rangeController clearFetchedData];
 }
 
 #pragma mark - _ASDisplayView behavior substitutions

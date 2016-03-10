@@ -142,28 +142,44 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   if (isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
     _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
   }
-
+  
   // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
   // -usedRectForTextContainer:).
+  __block NSTextStorage *scaledTextStorage = nil;
+  BOOL isScaled = [self isScaled];
   [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
+    if (isScaled) {
+      NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
+      [ASTextKitFontSizeAdjuster adjustFontSizeForAttributeString:scaledString withScaleFactor:_currentScaleFactor];
+      scaledTextStorage = [[NSTextStorage alloc] initWithAttributedString:scaledString];
+      
+      [textStorage removeLayoutManager:layoutManager];
+      [scaledTextStorage addLayoutManager:layoutManager];
+    }
     [layoutManager ensureLayoutForTextContainer:textContainer];
   }];
-
+  
   CGRect constrainedRect = {CGPointZero, _constrainedSize};
   __block CGRect boundingRect;
   [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     boundingRect = [layoutManager usedRectForTextContainer:textContainer];
+    if (isScaled) {
+      // put the non-scaled version back
+      [scaledTextStorage removeLayoutManager:layoutManager];
+      [textStorage addLayoutManager:layoutManager];
+    }
   }];
-
+  
   // TextKit often returns incorrect glyph bounding rects in the horizontal direction, so we clip to our bounding rect
   // to make sure our width calculations aren't being offset by glyphs going beyond the constrained rect.
   boundingRect = CGRectIntersection(boundingRect, {.size = constrainedRect.size});
   CGSize boundingSize = [_shadower outsetSizeWithInsetSize:boundingRect.size];
   _calculatedSize = CGSizeMake(boundingSize.width, boundingSize.height);
-  
-  if (_currentScaleFactor > 0.0 && _currentScaleFactor < 1.0) {
-    _calculatedSize.height = ceilf(_calculatedSize.height * _currentScaleFactor);
-  }
+}
+
+- (BOOL)isScaled
+{
+  return (self.currentScaleFactor > 0 && self.currentScaleFactor < 1.0);
 }
 
 #pragma mark - Drawing
@@ -189,7 +205,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     
     NSTextStorage *scaledTextStorage = nil;
-    BOOL isScaled = (self.currentScaleFactor > 0 && self.currentScaleFactor < 1.0);
+    BOOL isScaled = [self isScaled];
 
     if (isScaled) {
       // if we are going to scale the text, swap out the non-scaled text for the scaled version.

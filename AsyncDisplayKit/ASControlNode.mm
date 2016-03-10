@@ -69,8 +69,12 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 @end
 
-#pragma mark -
+static BOOL _enableHitTestDebug = NO;
+
 @implementation ASControlNode
+{
+  ASDisplayNode *_debugHighlightOverlay;
+}
 
 #pragma mark - Lifecycle
 - (id)init
@@ -84,6 +88,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   self.userInteractionEnabled = NO;
   return self;
 }
+
+
 
 #pragma mark - ASDisplayNode Overrides
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -228,6 +234,18 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
   if (!_controlEventDispatchTable) {
     _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
+    
+    // only show tap-able areas for views with 1 or more addTarget:action: pairs
+    if (_enableHitTestDebug) {
+      
+      // add a highlight overlay node with area of ASControlNode + UIEdgeInsets
+      self.clipsToBounds = NO;
+      _debugHighlightOverlay = [[ASDisplayNode alloc] init];
+      _debugHighlightOverlay.layerBacked = YES;
+      _debugHighlightOverlay.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.5];
+      
+      [self addSubnode:_debugHighlightOverlay];
+    }
   }
 
   // Enumerate the events in the mask, adding the target-action pair for each control event included in controlEventMask
@@ -424,5 +442,27 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (void)endTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)touchEvent
 {
 }
+
+#pragma mark - Debug
+// Layout method required when _enableHitTestDebug is enabled.
+- (void)layout
+{
+  [super layout];
+  
+  if (_debugHighlightOverlay) {
+    UIEdgeInsets insets = [self hitTestSlop];
+    CGRect controlNodeRect = self.bounds;
+    _debugHighlightOverlay.frame = CGRectMake(controlNodeRect.origin.x + insets.left,
+                                              controlNodeRect.origin.y + insets.top,
+                                              controlNodeRect.size.width - insets.left - insets.right,
+                                              controlNodeRect.size.height - insets.top - insets.bottom);
+  }
+}
+
++ (void)setEnableHitTestDebug:(BOOL)enable
+{
+  _enableHitTestDebug = enable;
+}
+
 
 @end
