@@ -1037,20 +1037,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)clearContents
 {
-  for (NSArray *section in [_dataController completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      [node recursivelyClearContents];
-    }
-  }
+  [_rangeController clearContents];
 }
 
 - (void)clearFetchedData
 {
-  for (NSArray *section in [_dataController completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      [node recursivelyClearFetchedData];
-    }
-  }
+  [_rangeController clearFetchedData];
 }
 
 #pragma mark - _ASDisplayView behavior substitutions

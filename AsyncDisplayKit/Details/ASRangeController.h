@@ -13,8 +13,7 @@
 #import <AsyncDisplayKit/ASLayoutController.h>
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 
-#define ASRangeControllerLoggingEnabled 1
-#define ASRangeControllerAutomaticLowMemoryHandling 1
+#define ASRangeControllerLoggingEnabled 0
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -58,6 +57,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+
+// These methods call the corresponding method on each node, visiting each one that
+// the range controller has set a non-default interface state on.
+- (void)clearContents;
+- (void)clearFetchedData;
 
 /**
  * An object that describes the layout behavior of the ranged component (table view, collection view, etc.)
