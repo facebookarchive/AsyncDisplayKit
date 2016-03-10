@@ -20,12 +20,20 @@ typedef NS_ENUM(NSUInteger, ASLayoutRangeMode) {
    * Range controller can automatically switch to full mode when conditions change.
    */
   ASLayoutRangeModeMinimum = 0,
+    
   /**
    * Normal/Full mode that a range controller uses to provide the best experience for end users.
    * This mode is usually used for an active scroll view.
    * A range controller under this requires more resources compare to minimum mode.
    */
   ASLayoutRangeModeFull,
+  
+  /**
+   * Low Memory mode is used when a range controller should limit the amount of work it performs to 0.
+   * Thus, it discards most of the views/layers that are created and it is trying to save as much system
+   * resources as possible.
+   */
+  ASLayoutRangeModeLowMemory,
   ASLayoutRangeModeCount
 };
 

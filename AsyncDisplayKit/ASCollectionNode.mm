@@ -167,7 +167,7 @@
   return (ASCollectionView *)[super view];
 }
 
-#if RangeControllerLoggingEnabled
+#if ASRangeControllerLoggingEnabled
 - (void)visibilityDidChange:(BOOL)isVisible
 {
   [super visibilityDidChange:isVisible];

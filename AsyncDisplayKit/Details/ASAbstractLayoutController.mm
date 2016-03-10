@@ -51,6 +51,15 @@ extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningPar
     .trailingBufferScreenfuls = 2
   };
   
+  _tuningParameters[ASLayoutRangeModeLowMemory][ASLayoutRangeTypeDisplay] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  _tuningParameters[ASLayoutRangeModeLowMemory][ASLayoutRangeTypeFetchData] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  
   return self;
 }
 
