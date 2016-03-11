@@ -79,11 +79,20 @@
 
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
 {
-    if (!self.isNodeLoaded) {
-        return;
-    }
-    
-    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+  if (!self.isNodeLoaded) {
+    return;
+  }
+  
+  [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+}
+
+- (void)clearCurrentRangeModeUpdate
+{
+  if (!self.isNodeLoaded) {
+    return;
+  }
+
+  [self.view.rangeController clearCurrentRangeModeUpdate];
 }
 
 - (_ASTablePendingState *)pendingState

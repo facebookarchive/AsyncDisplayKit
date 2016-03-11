@@ -229,6 +229,11 @@
   [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
 }
 
+- (void)clearCurrentRangeModeUpdate
+{
+  [self.view.rangeController clearCurrentRangeModeUpdate];
+}
+
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   [self.view reloadDataWithCompletion:completion];

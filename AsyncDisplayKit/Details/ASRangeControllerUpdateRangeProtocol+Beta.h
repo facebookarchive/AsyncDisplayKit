@@ -16,9 +16,14 @@
 @protocol ASRangeControllerUpdateRangeProtocol <NSObject>
 
 /**
- * Updates the current range mode of the range controller for at least the next range update.
+ * Updates the current range mode of the range controller until updated again or cleared
  */
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
+
+/**
+ * Clear the updates made to the current range mode of the range controller and resume to the appropriate default range mode
+ */
+- (void)clearCurrentRangeModeUpdate;
 
 /**
  * Only ASLayoutRangeModeVisibleOnly or ASLayoutRangeModeLowMemory are recommended.  Default is ASLayoutRangeModeVisibleOnly,
