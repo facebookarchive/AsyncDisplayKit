@@ -219,7 +219,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     renderQueue = [[ASRunLoopQueue<ASDisplayNode *> alloc] initWithRunLoop:CFRunLoopGetMain()
                                                                 andHandler:^(ASDisplayNode * _Nonnull dequeuedItem, BOOL isQueueDrained) {
       CFAbsoluteTime timestamp = isQueueDrained ?  CFAbsoluteTimeGetCurrent() : 0;
-      [dequeuedItem __recursivelyTriggerDisplayAndBlock:NO];
+      [dequeuedItem _recursivelyTriggerDisplayAndBlock:NO];
       if (isQueueDrained) {
         [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
                                                             object:nil
@@ -1808,7 +1808,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   }
 }
 
-- (void)__recursivelyTriggerDisplayAndBlock:(BOOL)shouldBlock
+- (void)_recursivelyTriggerDisplayAndBlock:(BOOL)shouldBlock
 {
   ASDisplayNodeAssertMainThread();
   
@@ -1824,7 +1824,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelyEnsureDisplaySynchronously:(BOOL)synchronously
 {
-  [self __recursivelyTriggerDisplayAndBlock:synchronously];
+  [self _recursivelyTriggerDisplayAndBlock:synchronously];
 }
 
 - (void)setShouldBypassEnsureDisplay:(BOOL)shouldBypassEnsureDisplay
