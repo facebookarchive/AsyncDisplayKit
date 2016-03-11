@@ -225,9 +225,9 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion Subclasses may use this to monitor when they become visible, should free cached data, and much more.
  * @see ASInterfaceState
  */
-- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState;
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState ASDISPLAYNODE_REQUIRES_SUPER;
 
-- (void)visibilityDidChange:(BOOL)isVisible;
+- (void)visibilityDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * Called just before the view is added to a window.
@@ -340,7 +340,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Tells the node when touches moved in its view.
@@ -348,7 +348,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Tells the node when touches ended in its view.
@@ -356,7 +356,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Tells the node when touches was cancelled in its view.
@@ -364,7 +364,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param touches A set of UITouch instances.
  * @param event A UIEvent associated with the touch.
  */
-- (void)touchesCancelled:(nullable NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event;
+- (void)touchesCancelled:(nullable NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
 
 /** @name Managing Gesture Recognizers */

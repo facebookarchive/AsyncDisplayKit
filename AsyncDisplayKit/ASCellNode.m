@@ -181,11 +181,9 @@
   [(_ASDisplayView *)self.view __forwardTouchesCancelled:touches withEvent:event];
 }
 
-- (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event
-                   inScrollView:(UIScrollView *)scrollView
-                  withCellFrame:(CGRect)cellFrame
+- (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event inScrollView:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame
 {
-    // To be overriden by subclasses
+  // To be overriden by subclasses
 }
 
 - (void)visibilityDidChange:(BOOL)isVisible
