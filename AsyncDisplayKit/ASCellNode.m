@@ -188,6 +188,20 @@
     // To be overriden by subclasses
 }
 
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+  [super visibilityDidChange:isVisible];
+  
+  CGRect cellFrame = CGRectZero;
+  if (_scrollView) {
+    // It is not safe to message nil with a structure return value, so ensure our _scrollView has not died.
+    cellFrame = [self.view convertRect:self.bounds toView:_scrollView];
+  }
+  [self cellNodeVisibilityEvent:isVisible ? ASCellNodeVisibilityEventVisible : ASCellNodeVisibilityEventInvisible
+                   inScrollView:_scrollView
+                  withCellFrame:cellFrame];
+}
+
 @end
 
 

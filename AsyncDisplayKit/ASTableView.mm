@@ -615,23 +615,22 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)tableView:(UITableView *)tableView willDisplayCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
   _pendingVisibleIndexPath = indexPath;
-
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  
+  ASCellNode *cellNode = [cell node];
+  cellNode.scrollView = tableView;
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)]) {
     [_asyncDelegate tableView:self willDisplayNodeForRowAtIndexPath:indexPath];
   }
+  
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
-  ASCellNode *cellNode = [cell node];
-
-  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
-    [_cellsForVisibilityUpdates addObject:cell];
-    [cellNode cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisible
-                         inScrollView:tableView
-                        withCellFrame:cell.frame];
-  }
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
+  }
+  
+  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
+    [_cellsForVisibilityUpdates addObject:cell];
   }
 }
 
@@ -640,21 +639,18 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if ([_pendingVisibleIndexPath isEqual:indexPath]) {
     _pendingVisibleIndexPath = nil;
   }
+  
+  ASCellNode *cellNode = [cell node];
 
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNode:forRowAtIndexPath:)]) {
-    ASCellNode *node = ((_ASTableViewCell *)cell).node;
-    ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
-    [_asyncDelegate tableView:self didEndDisplayingNode:node forRowAtIndexPath:indexPath];
+    ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
+    [_asyncDelegate tableView:self didEndDisplayingNode:cellNode forRowAtIndexPath:indexPath];
   }
 
   if ([_cellsForVisibilityUpdates containsObject:cell]) {
     [_cellsForVisibilityUpdates removeObject:cell];
-    ASCellNode *node = ((_ASTableViewCell *)cell).node;
-    [node cellNodeVisibilityEvent:ASCellNodeVisibilityEventInvisible
-                     inScrollView:tableView
-                    withCellFrame:cell.frame];
   }
 
 #pragma clang diagnostic push
@@ -663,6 +659,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_asyncDelegate tableView:self didEndDisplayingNodeForRowAtIndexPath:indexPath];
   }
 #pragma clang diagnostic pop
+  
+  cellNode.scrollView = nil;
 }
 
 

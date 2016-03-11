@@ -90,7 +90,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 {
   _scrollDirection = scrollDirection;
 
-  [self scheduleRangeUpdate];
+  // Perform update immediately, so that cells receive a visibilityDidChange: call before their first pixel is visible.
+  [self performRangeUpdate];
 }
 
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
