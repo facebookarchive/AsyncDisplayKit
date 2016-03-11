@@ -718,6 +718,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   ASDisplayNodeAssertMainThread();
   
+  // Calling indexPathsForVisibleRows will trigger UIKit to call reloadData if it never has, which can result
+  // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
+  if (CGRectEqualToRect(self.bounds, CGRectZero)) {
+    return @[];
+  }
+  
   NSArray *visibleIndexPaths = self.indexPathsForVisibleRows;
   
   if (_pendingVisibleIndexPath) {
