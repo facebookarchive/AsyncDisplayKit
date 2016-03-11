@@ -149,6 +149,17 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     return;
   }
   
+  // allNodes is a 2D array: it contains arrays for each section, each containing nodes.
+  NSArray<NSArray *> *allNodes = [_dataSource completedNodes];
+  NSUInteger numberOfSections = [allNodes count];
+  
+  if (_allPreviousIndexPaths.count == 0 && allNodes.count == 0) {
+    // In certain cases, such as on app suspend, an update may be triggered before we've loaded anything.
+    // For example, an ASCollectionNode inside another scrollable area will not load content until it has entered
+    // the display range, but the object may have been allocated by a cell and added to the set of active range controllers.
+    return;
+  }
+  
   // TODO: Consider if we need to use this codepath, or can rely on something more similar to the data & display ranges
   // Example: ... = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
   NSArray<NSIndexPath *> *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
@@ -164,10 +175,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (_layoutControllerImplementsSetVisibleIndexPaths) {
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
-  
-  // allNodes is a 2D array: it contains arrays for each section, each containing nodes.
-  NSArray<NSArray *> *allNodes = [_dataSource completedNodes];
-  NSUInteger numberOfSections = [allNodes count];
   
   NSArray<ASDisplayNode *> *currentSectionNodes = nil;
   NSInteger currentSectionIndex = -1; // Set to -1 so we don't match any indexPath.section on the first iteration.
