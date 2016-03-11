@@ -26,7 +26,7 @@
 
 - (void)addObject:(id)object
 {
-  [_mapTable setObject:kCFNull forKey:object];
+  [_mapTable setObject:(NSNull *)kCFNull forKey:object];
 }
 
 - (void)removeObject:(id)object
