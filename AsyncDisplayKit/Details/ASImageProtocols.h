@@ -18,6 +18,19 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
 @optional
 
 /**
+ @abstract Attempts to fetch an image with the given URL from a memory cache.
+ @param URL The URL of the image to retrieve from the cache.
+ @discussion This method exists to support synchronous rendering of nodes. Before the layer is drawn, this method
+ is called to attempt to get the image out of the cache synchronously. This allows drawing to occur on the main thread
+ if displaysAsynchronously is set to NO or recursivelyEnsureDisplaySynchronously: has been called.
+ 
+ If `URL` is nil, `completion` will be invoked immediately with a nil image. This method *should* block
+ the calling thread to fetch the image from a fast memory cache. It is OK to return nil from this method and instead
+ support only cachedImageWithURL:callbackQueue:completion: however, synchronous rendering will not be possible.
+ */
+- (_Nullable UIImage *)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
+
+/**
  @abstract Attempts to fetch an image with the given URL from the cache.
  @param URL The URL of the image to retrieve from the cache.
  @param callbackQueue The queue to call `completion` on.
