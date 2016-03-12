@@ -1023,6 +1023,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   _queuedNodeSizeUpdate = YES;
+  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[[self indexPathForNode:node]] batched:NO];
   [self performSelector:@selector(requeryNodeSizes)
              withObject:nil
              afterDelay:0
