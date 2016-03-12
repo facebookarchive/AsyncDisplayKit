@@ -690,6 +690,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+  [_rangeController scrollViewDidScroll:scrollView];
+  
   for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
     // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
     [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged

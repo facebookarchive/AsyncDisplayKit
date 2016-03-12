@@ -61,11 +61,16 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 #pragma mark - Core visible node range managment API
 
++ (BOOL)isFirstRangeUpdateForRangeMode:(ASLayoutRangeMode)rangeMode
+{
+    return (rangeMode == ASLayoutRangeModeInvalid);
+}
+
 + (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
                                currentRangeMode:(ASLayoutRangeMode)currentRangeMode
 {
   BOOL isVisible = (ASInterfaceStateIncludesVisible(interfaceState));
-  BOOL isFirstRangeUpdate = (currentRangeMode == ASLayoutRangeModeInvalid);
+  BOOL isFirstRangeUpdate = [self isFirstRangeUpdateForRangeMode:currentRangeMode];
   if (!isVisible || isFirstRangeUpdate) {
     return ASLayoutRangeModeMinimum;
   }
@@ -92,6 +97,15 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
   // Perform update immediately, so that cells receive a visibilityDidChange: call before their first pixel is visible.
   [self scheduleRangeUpdate];
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+  // If a scroll happenes the current range mode needs to go to full
+  BOOL isFirstRangeUpdate = [[self class] isFirstRangeUpdateForRangeMode:_currentRangeMode];
+  if (!isFirstRangeUpdate && _currentRangeMode != ASLayoutRangeModeFull) {
+    [self scheduleRangeUpdate];
+  }
 }
 
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode

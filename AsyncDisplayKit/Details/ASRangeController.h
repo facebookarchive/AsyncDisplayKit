@@ -46,6 +46,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection;
 
 /**
+ * Notify the range controller that a scroll view did scroll.
+ */
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView;
+
+/**
  * Add the sized node for `indexPath` as a subview of `contentView`.
  *
  * @param contentView UIView to add a (sized) node's view to.
