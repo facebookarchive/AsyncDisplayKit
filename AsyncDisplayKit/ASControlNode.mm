@@ -89,7 +89,8 @@ static BOOL _enableHitTestDebug = NO;
   return self;
 }
 
-
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 
 #pragma mark - ASDisplayNode Overrides
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -206,6 +207,8 @@ static BOOL _enableHitTestDebug = NO;
   [self sendActionsForControlEvents:(touchUpIsInsideExpandedBounds ? ASControlNodeEventTouchUpInside : ASControlNodeEventTouchUpOutside)
                           withEvent:event];
 }
+
+#pragma clang diagnostic pop
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {

@@ -60,6 +60,8 @@
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
 {
+  [super interfaceStateDidChange:newState fromState:oldState];
+  
   if (!(newState & ASInterfaceStateVisible)) {
     if (oldState & ASInterfaceStateVisible) {
       if (_shouldBePlaying) {
@@ -231,6 +233,8 @@
 
 - (void)visibilityDidChange:(BOOL)isVisible
 {
+  [super visibilityDidChange:isVisible];
+  
   ASDN::MutexLocker l(_videoLock);
   
   if (_shouldAutoplay && _playerNode.isNodeLoaded) {

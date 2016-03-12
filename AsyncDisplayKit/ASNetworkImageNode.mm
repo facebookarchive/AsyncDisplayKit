@@ -184,6 +184,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
  in ASMultiplexImageNode as well. */
 - (void)visibilityDidChange:(BOOL)isVisible
 {
+  [super visibilityDidChange:isVisible];
+  
   if (_downloaderImplementsSetPriority) {
     ASDN::MutexLocker l(_lock);
     if (_downloadIdentifier != nil) {

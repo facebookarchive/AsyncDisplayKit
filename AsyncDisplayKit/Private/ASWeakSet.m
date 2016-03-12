@@ -92,7 +92,7 @@
 
 - (NSString *)description
 {
-  return [[super description] stringByAppendingFormat:@" count: %lu, contents: %@", self.count, _mapTable];
+  return [[super description] stringByAppendingFormat:@" count: %lu, contents: %@", (unsigned long)self.count, _mapTable];
 }
 
 @end
