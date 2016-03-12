@@ -28,7 +28,7 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
  the calling thread to fetch the image from a fast memory cache. It is OK to return nil from this method and instead
  support only cachedImageWithURL:callbackQueue:completion: however, synchronous rendering will not be possible.
  */
-- (_Nullable UIImage *)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
+- (nullable UIImage *)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
 
 /**
  @abstract Attempts to fetch an image with the given URL from the cache.
