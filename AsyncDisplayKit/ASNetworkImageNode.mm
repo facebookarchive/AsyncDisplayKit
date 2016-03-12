@@ -173,14 +173,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   [super displayWillStart];
   
   if (_cacheSupportsSynchronousFetch) {
-    {
-      ASDN::MutexLocker l(_lock);
-      if (_URL && _downloadIdentifier == nil) {
-        UIImage *result = [_cache synchronouslyFetchedCachedImageWithURL:_URL];
-        if (result) {
-          self.image = result;
-          _imageLoaded = YES;
-        }
+    ASDN::MutexLocker l(_lock);
+    if (_imageLoaded == NO && _URL && _downloadIdentifier == nil) {
+      UIImage *result = [_cache synchronouslyFetchedCachedImageWithURL:_URL];
+      if (result) {
+        self.image = result;
+        _imageLoaded = YES;
       }
     }
   }
