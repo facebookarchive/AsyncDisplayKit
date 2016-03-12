@@ -49,6 +49,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   
   BOOL _cacheSupportsNewProtocol;
   BOOL _cacheSupportsClearing;
+  BOOL _cacheSupportsSynchronousFetch;
 }
 @end
 
@@ -73,6 +74,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   
   _cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
   _cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
+  _cacheSupportsSynchronousFetch = [cache respondsToSelector:@selector(synchronouslyFetchedCachedImageWithURL:)];
   
   _shouldCacheImage = YES;
   self.shouldBypassEnsureDisplay = YES;
@@ -169,6 +171,17 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)displayWillStart
 {
   [super displayWillStart];
+  
+  if (_cacheSupportsSynchronousFetch) {
+    ASDN::MutexLocker l(_lock);
+    if (_imageLoaded == NO && _URL && _downloadIdentifier == nil) {
+      UIImage *result = [_cache synchronouslyFetchedCachedImageWithURL:_URL];
+      if (result) {
+        self.image = result;
+        _imageLoaded = YES;
+      }
+    }
+  }
 
   [self fetchData];
   
