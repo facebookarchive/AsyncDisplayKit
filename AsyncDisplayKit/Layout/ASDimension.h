@@ -30,6 +30,7 @@ typedef struct {
 typedef struct {
   CGSize min;
   CGSize max;
+  int32_t transitionID;
 } ASSizeRange;
 
 extern ASRelativeDimension const ASRelativeDimensionUnconstrained;

@@ -45,8 +45,16 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
   ASHierarchyStateRangeManaged            = 1 << 1,
   /** Down-propogated version of _flags.visibilityNotificationsDisabled.  This flag is very rarely set, but by having it
       locally available to nodes, they do not have to walk up supernodes at the critical points it is checked. */
-  ASHierarchyStateTransitioningSupernodes = 1 << 2
+  ASHierarchyStateTransitioningSupernodes = 1 << 2,
+  /** One of the supernodes of this node is performing a transition.
+      Any layout calculated during this state should not be applied immediately, but pending until later. */
+  ASHierarchyStateLayoutPending           = 1 << 3
 };
+
+inline BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyState)
+{
+  return ((hierarchyState & ASHierarchyStateLayoutPending) == ASHierarchyStateLayoutPending);
+}
 
 @interface ASDisplayNode ()
 {
