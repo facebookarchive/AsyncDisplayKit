@@ -99,16 +99,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [self scheduleRangeUpdate];
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
-  // If a scroll happenes the current range mode needs to go to full
-  BOOL isFirstRangeUpdate = [[self class] isFirstRangeUpdateForRangeMode:_currentRangeMode];
-  ASLayoutRangeMode newRangeMode = [[self class] rangeModeForInterfaceState:[self interfaceState] currentRangeMode:_currentRangeMode];
-  if (!isFirstRangeUpdate && _currentRangeMode != newRangeMode && _currentRangeMode != ASLayoutRangeModeFull) {
-    [self scheduleRangeUpdate];
-  }
-}
-
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
 {
   if (_currentRangeMode != rangeMode) {
