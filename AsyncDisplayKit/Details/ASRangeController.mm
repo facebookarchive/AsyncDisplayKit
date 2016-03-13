@@ -238,6 +238,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [self registerForNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
   
 #if ASRangeControllerLoggingEnabled
+  ASDisplayNodeAssertTrue([visibleIndexPaths isSubsetOfSet:displayIndexPaths]);
   NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (ASRangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
 #endif
   
@@ -247,14 +248,15 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     ASInterfaceState interfaceState = ASInterfaceStateMeasureLayout;
     
     if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
-      if ([fetchDataIndexPaths containsObject:indexPath]) {
-        interfaceState |= ASInterfaceStateFetchData;
-      }
-      if ([displayIndexPaths containsObject:indexPath]) {
-        interfaceState |= ASInterfaceStateDisplay;
-      }
       if ([visibleIndexPaths containsObject:indexPath]) {
-        interfaceState |= ASInterfaceStateVisible;
+        interfaceState |= (ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData);
+      } else {
+        if ([fetchDataIndexPaths containsObject:indexPath]) {
+          interfaceState |= ASInterfaceStateFetchData;
+        }
+        if ([displayIndexPaths containsObject:indexPath]) {
+          interfaceState |= ASInterfaceStateDisplay;
+        }
       }
     } else {
       // If selfInterfaceState isn't visible, then visibleIndexPaths represents what /will/ be immediately visible at the
