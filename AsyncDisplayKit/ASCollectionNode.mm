@@ -91,7 +91,7 @@
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    return [[ASCollectionView alloc] _initWithFrame:CGRectZero collectionViewLayout:layout layoutFacilitator:layoutFacilitator ownedByNode:YES];
+    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator ownedByNode:YES];
   };
   
   if (self = [super initWithViewBlock:collectionViewBlock]) {
@@ -167,7 +167,7 @@
   return (ASCollectionView *)[super view];
 }
 
-#if RangeControllerLoggingEnabled
+#if ASRangeControllerLoggingEnabled
 - (void)visibilityDidChange:(BOOL)isVisible
 {
   [super visibilityDidChange:isVisible];
@@ -194,7 +194,12 @@
 
 - (void)endUpdatesAnimated:(BOOL)animated
 {
-  [self.view.dataController endUpdatesAnimated:animated completion:nil];
+  [self endUpdatesAnimated:animated completion:nil];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+{
+  [self.view.dataController endUpdatesAnimated:animated completion:completion];
 }
 
 #pragma mark - ASCollectionView Forwards

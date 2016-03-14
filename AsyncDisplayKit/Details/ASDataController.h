@@ -137,14 +137,6 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  */
 - (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled;
 
-/** @name Initial loading
- *
- * @discussion This method allows choosing an animation style for the first load of content.  It is typically used just once,
- * for example in viewWillAppear:, to specify an animation option for the information already present in the asyncDataSource.
- */
-
-- (void)initialDataLoadingWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
 /** @name Data Updating */
 
 - (void)beginUpdates;
@@ -180,6 +172,8 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 - (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
 
 - (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+- (void)waitUntilAllUpdatesAreCommitted;
 
 /** @name Data Querying */
 

@@ -19,6 +19,8 @@
 #import "ASPINRemoteImageDownloader.h"
 #endif
 
+static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
+
 @interface ASNetworkImageNode ()
 {
   ASDN::RecursiveMutex _lock;
@@ -47,6 +49,7 @@
   
   BOOL _cacheSupportsNewProtocol;
   BOOL _cacheSupportsClearing;
+  BOOL _cacheSupportsSynchronousFetch;
 }
 @end
 
@@ -71,6 +74,7 @@
   
   _cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
   _cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
+  _cacheSupportsSynchronousFetch = [cache respondsToSelector:@selector(synchronouslyFetchedCachedImageWithURL:)];
   
   _shouldCacheImage = YES;
   self.shouldBypassEnsureDisplay = YES;
@@ -167,6 +171,17 @@
 - (void)displayWillStart
 {
   [super displayWillStart];
+  
+  if (_cacheSupportsSynchronousFetch) {
+    ASDN::MutexLocker l(_lock);
+    if (_imageLoaded == NO && _URL && _downloadIdentifier == nil) {
+      UIImage *result = [_cache synchronouslyFetchedCachedImageWithURL:_URL];
+      if (result) {
+        self.image = result;
+        _imageLoaded = YES;
+      }
+    }
+  }
 
   [self fetchData];
   
@@ -182,6 +197,8 @@
  in ASMultiplexImageNode as well. */
 - (void)visibilityDidChange:(BOOL)isVisible
 {
+  [super visibilityDidChange:isVisible];
+  
   if (_downloaderImplementsSetPriority) {
     ASDN::MutexLocker l(_lock);
     if (_downloadIdentifier != nil) {
@@ -228,8 +245,7 @@
     ASDN::MutexLocker l(_lock);
 
     [self _cancelImageDownload];
-    self.image = _defaultImage;
-    _imageLoaded = NO;
+    [self _clearImage];
     if (_cacheSupportsClearing) {
       [_cache clearFetchedImageFromCacheWithURL:_URL];
     }
@@ -247,6 +263,24 @@
 }
 
 #pragma mark - Private methods -- only call with lock.
+
+- (void)_clearImage
+{
+  // Destruction of bigger images on the main thread can be expensive
+  // and can take some time, so we dispatch onto a bg queue to
+  // actually dealloc.
+  __block UIImage *image = self.image;
+  CGSize imageSize = image.size;
+  BOOL shouldReleaseImageOnBackgroundThread = imageSize.width > kMinReleaseImageOnBackgroundSize.width ||
+                                              imageSize.height > kMinReleaseImageOnBackgroundSize.height;
+  if (shouldReleaseImageOnBackgroundThread) {
+    ASPerformBlockOnBackgroundThread(^{
+      image = nil;
+    });
+  }
+  self.image = _defaultImage;
+  _imageLoaded = NO;
+}
 
 - (void)_cancelImageDownload
 {
@@ -276,6 +310,8 @@
                                                      }
                                                    }];
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       _downloadIdentifier = [_downloader downloadImageWithURL:_URL
                                                 callbackQueue:dispatch_get_main_queue()
                                         downloadProgressBlock:NULL
@@ -284,6 +320,7 @@
                                                        finished([UIImage imageWithCGImage:responseImage], error, nil);
                                                      }
                                                    }];
+#pragma clang diagnostic pop
     }
   });
 }
@@ -382,11 +419,14 @@
                        callbackQueue:dispatch_get_main_queue()
                           completion:cacheCompletion];
         } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
           [_cache fetchCachedImageWithURL:_URL
                             callbackQueue:dispatch_get_main_queue()
                                completion:^(CGImageRef image) {
                                  cacheCompletion([UIImage imageWithCGImage:image]);
                                }];
+#pragma clang diagnostic pop
         }
       } else {
         [self _downloadImageWithCompletion:finished];

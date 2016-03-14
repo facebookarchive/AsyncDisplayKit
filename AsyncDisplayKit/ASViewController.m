@@ -16,9 +16,8 @@
 @implementation ASViewController
 {
   BOOL _ensureDisplayed;
+  BOOL _automaticallyAdjustRangeModeBasedOnViewEvents;
 }
-
-@synthesize automaticallyAdjustsScrollViewInsets = _automaticallyAdjustRangeModeBasedOnViewEvents;
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -50,7 +49,21 @@
 - (void)loadView
 {
   ASDisplayNodeAssertTrue(!_node.layerBacked);
-  self.view = _node.view;
+  
+  // Apple applies a frame and autoresizing masks we need.  Allocating a view is not
+  // nearly as expensive as adding and removing it from a hierarchy, and fortunately
+  // we can avoid that here.  Enabling layerBacking on a single node in the hierarchy
+  // will have a greater performance benefit than the impact of this transient view.
+  [super loadView];
+  UIView *view = self.view;
+  CGRect frame = view.frame;
+  UIViewAutoresizing autoresizingMask = view.autoresizingMask;
+  
+  // We have what we need, so now create and assign the view we actually want.
+  view = _node.view;
+  _node.frame = frame;
+  _node.autoresizingMask = autoresizingMask;
+  self.view = view;
 }
 
 - (void)viewWillLayoutSubviews
@@ -72,6 +85,7 @@
 {
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
+  [_node measureWithSizeRange:[self nodeConstrainedSize]];
   [_node recursivelyFetchData];
     
   [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeFull];
@@ -86,9 +100,19 @@
 
 #pragma mark - Automatic range mode
 
+- (BOOL)automaticallyAdjustRangeModeBasedOnViewEvents
+{
+  return _automaticallyAdjustRangeModeBasedOnViewEvents;
+}
+
+- (void)setAutomaticallyAdjustRangeModeBasedOnViewEvents:(BOOL)automaticallyAdjustRangeModeBasedOnViewEvents
+{
+  _automaticallyAdjustRangeModeBasedOnViewEvents = automaticallyAdjustRangeModeBasedOnViewEvents;
+}
+
 - (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
 {
-  if (!self.automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
+  if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
   if (![_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]) { return; }
 
   id<ASRangeControllerUpdateRangeProtocol> updateRangeNode = (id<ASRangeControllerUpdateRangeProtocol>)_node;

@@ -394,6 +394,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_dataController endUpdatesAnimated:animated completion:completion];
 }
 
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  ASDisplayNodeAssertMainThread();
+  [_dataController waitUntilAllUpdatesAreCommitted];
+}
+
 - (void)layoutSubviews
 {
   if (_nodesConstrainedWidth != self.bounds.size.width) {
@@ -586,9 +592,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (ASScrollDirection)_scrollDirectionForVelocity:(CGPoint)velocity
 {
   ASScrollDirection direction = ASScrollDirectionNone;
-  if (velocity.y > 0) {
+  if (velocity.y < 0.0) {
     direction = ASScrollDirectionDown;
-  } else if (velocity.y < 0) {
+  } else if (velocity.y > 0.0) {
     direction = ASScrollDirectionUp;
   }
   return direction;
@@ -597,8 +603,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
   for (_ASTableViewCell *tableCell in _cellsForVisibilityUpdates) {
-    ASCellNode *node = [tableCell node];
-    [node visibleNodeDidScroll:scrollView withCellFrame:tableCell.frame];
+    [[tableCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
+                                 inScrollView:scrollView
+                                withCellFrame:tableCell.frame];
   }
   if (_asyncDelegateImplementsScrollviewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
@@ -608,20 +615,22 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)tableView:(UITableView *)tableView willDisplayCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
   _pendingVisibleIndexPath = indexPath;
-
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  
+  ASCellNode *cellNode = [cell node];
+  cellNode.scrollView = tableView;
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)]) {
     [_asyncDelegate tableView:self willDisplayNodeForRowAtIndexPath:indexPath];
   }
+  
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
-  ASCellNode *cellNode = [cell node];
-
-  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(visibleNodeDidScroll:withCellFrame:))) {
-    [_cellsForVisibilityUpdates addObject:cell];
-  }
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
+  }
+  
+  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
+    [_cellsForVisibilityUpdates addObject:cell];
   }
 }
 
@@ -630,16 +639,19 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if ([_pendingVisibleIndexPath isEqual:indexPath]) {
     _pendingVisibleIndexPath = nil;
   }
+  
+  ASCellNode *cellNode = [cell node];
 
   [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNode:forRowAtIndexPath:)]) {
-    ASCellNode *node = ((_ASTableViewCell *)cell).node;
-    ASDisplayNodeAssertNotNil(node, @"Expected node associated with removed cell not to be nil.");
-    [_asyncDelegate tableView:self didEndDisplayingNode:node forRowAtIndexPath:indexPath];
+    ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
+    [_asyncDelegate tableView:self didEndDisplayingNode:cellNode forRowAtIndexPath:indexPath];
   }
 
-  [_cellsForVisibilityUpdates removeObject:cell];
+  if ([_cellsForVisibilityUpdates containsObject:cell]) {
+    [_cellsForVisibilityUpdates removeObject:cell];
+  }
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -647,6 +659,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_asyncDelegate tableView:self didEndDisplayingNodeForRowAtIndexPath:indexPath];
   }
 #pragma clang diagnostic pop
+  
+  cellNode.scrollView = nil;
 }
 
 
@@ -701,6 +715,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
+  
+  // Calling indexPathsForVisibleRows will trigger UIKit to call reloadData if it never has, which can result
+  // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
+  if (CGRectEqualToRect(self.bounds, CGRectZero)) {
+    return @[];
+  }
   
   NSArray *visibleIndexPaths = self.indexPathsForVisibleRows;
   
@@ -1021,20 +1041,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)clearContents
 {
-  for (NSArray *section in [_dataController completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      [node recursivelyClearContents];
-    }
-  }
+  [_rangeController clearContents];
 }
 
 - (void)clearFetchedData
 {
-  for (NSArray *section in [_dataController completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      [node recursivelyClearFetchedData];
-    }
-  }
+  [_rangeController clearFetchedData];
 }
 
 #pragma mark - _ASDisplayView behavior substitutions

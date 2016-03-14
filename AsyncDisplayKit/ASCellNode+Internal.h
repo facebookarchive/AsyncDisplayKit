@@ -32,4 +32,9 @@
  */
 @property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
 
+/*
+ * Back-pointer to the containing scrollView instance, set only for visible cells.  Used for Cell Visibility Event callbacks.
+ */
+@property (nonatomic, weak) UIScrollView *scrollView;
+
 @end

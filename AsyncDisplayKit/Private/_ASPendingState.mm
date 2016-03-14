@@ -291,6 +291,11 @@ static UIColor *defaultTintColor = nil;
 
 - (void)setBounds:(CGRect)newBounds
 {
+  ASDisplayNodeAssert(!isnan(newBounds.size.width) && !isnan(newBounds.size.height), @"Invalid bounds %@ provided to %@", NSStringFromCGRect(newBounds), self);
+  if (isnan(newBounds.size.width))
+    newBounds.size.width = 0.0;
+  if (isnan(newBounds.size.height))
+    newBounds.size.height = 0.0;
   bounds = newBounds;
   _flags.setBounds = YES;
 }
@@ -359,6 +364,11 @@ static UIColor *defaultTintColor = nil;
 
 - (void)setPosition:(CGPoint)newPosition
 {
+  ASDisplayNodeAssert(!isnan(newPosition.x) && !isnan(newPosition.y), @"Invalid position %@ provided to %@", NSStringFromCGPoint(newPosition), self);
+  if (isnan(newPosition.x))
+    newPosition.x = 0.0;
+  if (isnan(newPosition.y))
+    newPosition.y = 0.0;
   position = newPosition;
   _flags.setPosition = YES;
 }

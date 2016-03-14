@@ -55,7 +55,7 @@
 /**
  * Provides the constrained size range for measuring the node at the index path.
  *
- * @param collectionView The sender.
+ * @param pagerNode The sender.
  *
  * @param indexPath The index path of the node.
  *

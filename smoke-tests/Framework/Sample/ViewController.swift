@@ -41,10 +41,6 @@ class ViewController: UIViewController, ASTableViewDataSource, ASTableViewDelega
     self.tableView.frame = self.view.bounds
   }
 
-  override func prefersStatusBarHidden() -> Bool {
-    return true
-  }
-
 
   // MARK: ASTableView data source and delegate.
 

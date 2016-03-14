@@ -18,12 +18,14 @@
 #import "ASThread.h"
 #import "ASLayoutOptions.h"
 #import "_ASTransitionContext.h"
+#import "ASDisplayNodeLayoutContext.h"
 
 #include <vector>
 
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
 @class _ASPendingState;
+@class ASSentinel;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 
@@ -89,34 +91,31 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASDisplayNode * __weak _supernode;
 
   ASSentinel *_displaySentinel;
-  ASSentinel *_replaceAsyncSentinel;
+  ASSentinel *_transitionSentinel;
 
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
 
-  ASLayout *_previousLayout;
   ASLayout *_layout;
 
-  ASSizeRange _previousConstrainedSize;
   ASSizeRange _constrainedSize;
 
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
   
+  // Main thread only
   _ASTransitionContext *_transitionContext;
   BOOL _usesImplicitHierarchyManagement;
 
-  NSArray<ASDisplayNode *> *_insertedSubnodes;
-  NSArray<ASDisplayNode *> *_removedSubnodes;
-  std::vector<NSInteger> _insertedSubnodePositions;
-  std::vector<NSInteger> _removedSubnodePositions;
-
+  int32_t _pendingTransitionID;
+  ASDisplayNodeLayoutContext *_pendingLayoutContext;
+  
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
   ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
   Class _viewClass;
   Class _layerClass;
-
+  
   UIImage *_placeholderImage;
   CALayer *_placeholderLayer;
 
@@ -144,6 +143,8 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 // Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
+
+@property (nonatomic, assign) CGRect threadSafeBounds;
 
 
 // Swizzle to extend the builtin functionality with custom logic

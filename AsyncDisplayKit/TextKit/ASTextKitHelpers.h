@@ -42,7 +42,6 @@ ASDISPLAYNODE_INLINE CGSize ceilSizeValue(CGSize s)
 
 /**
  @abstract Returns the bounding size for the text view's text.
- @param components The TextKit components to calculate the constrained size of the text for.
  @param constrainedWidth The constraining width to be used during text-sizing. Usually, this value should be the receiver's calculated size.
  @result A CGSize representing the bounding size for the receiver's text.
  */

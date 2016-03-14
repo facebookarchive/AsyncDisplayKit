@@ -60,11 +60,13 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 {
   NSArray *layoutAttributes = [_collectionViewLayout layoutAttributesForElementsInRect:rangeBounds];
   NSMutableSet *indexPathSet = [NSMutableSet setWithCapacity:layoutAttributes.count];
+  
   for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
     //ASDisplayNodeAssert(![indexPathSet containsObject:la.indexPath], @"Shouldn't already contain indexPath");
     ASDisplayNodeAssert(la.representedElementCategory != UICollectionElementCategoryDecorationView, @"UICollectionView decoration views are not supported by ASCollectionView");
     [indexPathSet addObject:la.indexPath];
   }
+
   return indexPathSet;
 }
 

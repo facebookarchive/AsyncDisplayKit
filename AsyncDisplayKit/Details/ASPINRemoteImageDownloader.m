@@ -29,6 +29,13 @@
 
 #pragma mark ASImageProtocols
 
+- (UIImage *)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL
+{
+  NSString *key = [[PINRemoteImageManager sharedImageManager] cacheKeyForURL:URL processorKey:nil];
+  PINRemoteImageManagerResult *result = [[PINRemoteImageManager sharedImageManager] synchronousImageFromCacheWithCacheKey:key options:PINRemoteImageManagerDownloadOptionsSkipDecode];
+  return result.image;
+}
+
 - (void)fetchCachedImageWithURL:(NSURL *)URL
                   callbackQueue:(dispatch_queue_t)callbackQueue
                      completion:(void (^)(CGImageRef imageFromCache))completion

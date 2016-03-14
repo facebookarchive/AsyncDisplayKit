@@ -158,7 +158,6 @@ extern NSInteger const ASDefaultTransactionPriority;
 /**
  @summary Adds a block to run on the completion of the async transaction.
 
- @param queue The dispatch queue on which to execute the block.
  @param completion The completion block that will be executed with the output of the execution block when all of the
  operations in the transaction are completed. Executed and released on callbackQueue.
  */

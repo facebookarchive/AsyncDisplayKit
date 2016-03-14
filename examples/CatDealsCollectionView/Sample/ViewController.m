@@ -146,11 +146,6 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
   [_collectionView.collectionViewLayout invalidateLayout];
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 - (void)reloadTapped
 {
   [_collectionView reloadData];
