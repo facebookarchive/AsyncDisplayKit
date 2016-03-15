@@ -1,1 +1,1 @@
-github "facebook/AsyncDisplayKit" "master"
+git "file:///build.sh/will/put/local/absolute/path/here" "master"

@@ -48,7 +48,10 @@ if [ "$MODE" = "examples" ]; then
               build
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
+          local_repo=`pwd`
           cd $example
+          
+          echo "git \"file://${local_repo}\" \"master\"" > "Cartfile"
           carthage update --platform iOS
           
           xctool \
