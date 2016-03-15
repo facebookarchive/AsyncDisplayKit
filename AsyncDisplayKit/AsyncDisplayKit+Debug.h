@@ -8,13 +8,14 @@
 
 #import "ASControlNode.h"
 #import "ASImageNode.h"
+#import "ASRangeController.h"
 
 @interface ASControlNode (Debugging)
 
 /**
- Class method to enable a visualization overlay of the tapable area on the ASControlNode. For app debugging purposes only.
- @param enable Specify YES to make this debug feature enabled when messaging the ASControlNode class.
- */
+* Class method to enable a visualization overlay of the tapable area on the ASControlNode. For app debugging purposes only.
+* @param enable Specify YES to make this debug feature enabled when messaging the ASControlNode class.
+**/
 + (void)setEnableHitTestDebug:(BOOL)enable;
 
 @end
@@ -31,3 +32,29 @@
 + (BOOL)shouldShowImageScalingOverlay;
 
 @end
+
+@interface ASRangeController (Debugging)
+
+/**
+* Class method to enable a visualization overlay of the all ASRangeController's tuning parameters. For app debugging purposes only.
+* @param enable Specify YES to make this debug feature enabled when messaging the ASRangeController class.
+**/
++ (void)setShouldShowRangeDebugOverlay:(BOOL)show;
++ (BOOL)shouldShowRangeDebugOverlay;
+
+// FIXME: comment
+- (void)addRangeControllerToRangeDebugOverlay;  // FIXME: can this be private method?
+
+// FIXME: comment
+// FIXME: better name? organize arguments?
+- (void)updateRangeController:(ASRangeController *)controller
+         scrollableDirections:(ASScrollDirection)scrollableDirections
+              scrollDirection:(ASScrollDirection)direction
+                    rangeMode:(ASLayoutRangeMode)mode
+             tuningParameters:(ASRangeTuningParameters)parameters
+    tuningParametersFetchData:(ASRangeTuningParameters)parametersFetchData
+               interfaceState:(ASInterfaceState)interfaceState;
+
+@end
+
+
