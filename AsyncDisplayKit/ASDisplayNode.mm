@@ -1938,13 +1938,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   _placeholderImage = nil;
 }
 
-// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or exitInterfaceState:
 - (void)recursivelyClearContents
 {
-  for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyClearContents];
-  }
-  [self clearContents];
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+    [node clearContents];
+  });
 }
 
 - (void)fetchData
@@ -1959,13 +1957,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   }
 }
 
-// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or enterInterfaceState:
 - (void)recursivelyFetchData
 {
-  for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyFetchData];
-  }
-  [self fetchData];
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+    [node fetchData];
+  });
 }
 
 - (void)clearFetchedData
@@ -1973,13 +1969,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // subclass override
 }
 
-// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or exitInterfaceState:
 - (void)recursivelyClearFetchedData
 {
-  for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyClearFetchedData];
-  }
-  [self clearFetchedData];
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+    [node clearFetchedData];
+  });
 }
 
 - (void)visibilityDidChange:(BOOL)isVisible
