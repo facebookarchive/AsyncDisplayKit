@@ -231,6 +231,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState ASDISPLAYNODE_REQUIRES_SUPER;
 
+/**
+ * @abstract Called whenever the visiblity of the node changed.
+ *
+ * @discussion Subclasses may use this to monitor when they become visible.
+ */
 - (void)visibilityDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
