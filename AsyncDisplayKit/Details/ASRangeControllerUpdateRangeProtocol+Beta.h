@@ -12,6 +12,18 @@
 #import "ASCollectionNode.h"
 #import "ASTableNode.h"
 
+/**
+ * Update the range mode for a range controller to a specific range mode until the node that contains the range
+ * controller becomes visible again
+ *
+ * Logic for the automatic range mode:
+ * 1. If there are no visible node paths available nothing is to be done and no range update is done
+ * 2. The initial range update always will be ASLayoutRangeModeCount (ASLayoutRangeModeMinimum) as it's the initial fetch
+ * 3. If the range mode is explicitly set via updateCurrentRangeWithMode: it will last in that mode until the range controller becomes visible and a new range update was triggered or a new range mode via updateCurrentRangeWithMode: is set
+ * 4. If range mode is not explicitly set the range mode is variying based if the range controller is visible or not
+ */
+
+
 
 @protocol ASRangeControllerUpdateRangeProtocol <NSObject>
 

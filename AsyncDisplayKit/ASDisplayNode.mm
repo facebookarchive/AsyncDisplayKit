@@ -1980,13 +1980,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     // subclass override
 }
 
-/**
- * We currently only set interface state on nodes in table/collection views. For other nodes, if they are
- * in the hierarchy we enable all ASInterfaceState types with `ASInterfaceStateInHierarchy`, otherwise `None`.
- */
 - (BOOL)supportsRangeManagedInterfaceState
 {
-  return (_hierarchyState & ASHierarchyStateRangeManaged);
+  return ASHierarchyStateIncludesRangeManaged(_hierarchyState);
 }
 
 - (ASInterfaceState)interfaceState

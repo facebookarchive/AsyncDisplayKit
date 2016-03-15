@@ -189,7 +189,9 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   ASInterfaceState selfInterfaceState = [self interfaceState];
   ASLayoutRangeMode rangeMode = _currentRangeMode;
-  if (!_didUpdateCurrentRange) {
+  // If the range mode is explicitly set via updateCurrentRangeWithMode: it will last in that mode until the
+  // range controller becomes visible again or explicitly changes the range mode again
+  if (!_didUpdateCurrentRange || ASInterfaceStateIncludesVisible(selfInterfaceState)) {
     rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
   }
 
@@ -232,7 +234,10 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _allPreviousIndexPaths = allCurrentIndexPaths;
   
   _currentRangeMode = rangeMode;
-  _didUpdateCurrentRange = NO;
+  // Reset the current range mode only if the range controller comes visible
+  if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
+      _didUpdateCurrentRange = NO;
+  }
   
   if (!_rangeIsValid) {
     [allIndexPaths addObjectsFromArray:ASIndexPathsForTwoDimensionalArray(allNodes)];

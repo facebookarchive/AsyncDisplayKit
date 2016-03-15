@@ -795,14 +795,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
 {
   ASTableNode *tableNode = self.tableNode;
-  if (tableNode) {
+  if (tableNode && [tableNode supportsRangeManagedInterfaceState]) {
+    // Only use the interfaceStatate of nodes that are range managed
     return self.tableNode.interfaceState;
-  } else {
-    // Until we can always create an associated ASTableNode without a retain cycle,
-    // we might be on our own to try to guess if we're visible.  The node normally
-    // handles this even if it is the root / directly added to the view hierarchy.
-    return (self.window != nil ? ASInterfaceStateVisible : ASInterfaceStateNone);
   }
+
+  // For not range managed nodes or until we can always create an associated ASTableNode
+  // without a retain cycle, we might be on our own to try to guess if we're visible.  The node normally
+  // handles this even if it is the root / directly added to the view hierarchy.
+  return (self.window != nil ? ASInterfaceStateVisible : ASInterfaceStateNone);
 }
 
 #pragma mark - ASRangeControllerDelegate
@@ -1076,9 +1077,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (!visible && node.inHierarchy) {
     [node __exitHierarchy];
   }
-  
-  // Trigger updating interfaceState for cells in case ASTableView becomes visible or invisible
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+
+  // Updating the visible node index paths only for range managed nodes. Not range managed nodes will get their
+  // their update in the layout pass
+  if (![node supportsRangeManagedInterfaceState]) {
+    [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  }
 }
 
 @end
