@@ -206,6 +206,8 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion Subclasses may override this method to be notified when display (asynchronous or synchronous) is
  * about to begin.
+ *
+ * @note Called on the main thread only
  */
 - (void)displayWillStart ASDISPLAYNODE_REQUIRES_SUPER;
 
@@ -214,6 +216,8 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion Subclasses may override this method to be notified when display (asynchronous or synchronous) has
  * completed.
+ *
+ * @note Called on the main thread only
  */
 - (void)displayDidFinish ASDISPLAYNODE_REQUIRES_SUPER;
 
