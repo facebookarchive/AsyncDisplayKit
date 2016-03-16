@@ -16,7 +16,5 @@
  */
 ASDISPLAYNODE_INLINE BOOL ASObjectIsEqual(id<NSObject> obj, id<NSObject> otherObj)
 {
-  if (obj == otherObj)
-    return YES;
-  return [obj isEqual:otherObj];
+  return obj == otherObj || [obj isEqual:otherObj];
 }

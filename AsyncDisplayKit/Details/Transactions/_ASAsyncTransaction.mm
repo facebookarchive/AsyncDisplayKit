@@ -18,7 +18,7 @@ NSInteger const ASDefaultTransactionPriority = 0;
 @interface ASDisplayNodeAsyncTransactionOperation : NSObject
 - (id)initWithOperationCompletionBlock:(asyncdisplaykit_async_transaction_operation_completion_block_t)operationCompletionBlock;
 @property (nonatomic, copy) asyncdisplaykit_async_transaction_operation_completion_block_t operationCompletionBlock;
-@property (atomic, retain) id<NSObject> value; // set on bg queue by the operation block
+@property (atomic, strong) id<NSObject> value; // set on bg queue by the operation block
 @end
 
 @implementation ASDisplayNodeAsyncTransactionOperation
@@ -236,7 +236,7 @@ void ASAsyncTransactionQueue::GroupImpl::schedule(NSInteger priority, dispatch_q
             operation._block();
           }
           operation._group->leave();
-          operation._block = 0; // the block must be freed while mutex is unlocked
+          operation._block = nil; // the block must be freed while mutex is unlocked
         }
       }
       --entry._threadCount;

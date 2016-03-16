@@ -24,7 +24,7 @@ extern NSString *const ASTextKitEntityAttributeName;
 
 static inline BOOL _objectsEqual(id<NSObject> obj1, id<NSObject> obj2)
 {
-  return obj1 == obj2 ? YES : [obj1 isEqual:obj2];
+  return obj1 == obj2 || [obj1 isEqual:obj2];
 }
 
 /**

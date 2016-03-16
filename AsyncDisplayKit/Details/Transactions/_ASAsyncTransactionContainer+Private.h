@@ -10,8 +10,8 @@
 
 
 @interface CALayer (ASAsyncTransactionContainerTransactions)
-@property (nonatomic, retain, setter=asyncdisplaykit_setAsyncLayerTransactions:) NSHashTable *asyncdisplaykit_asyncLayerTransactions;
-@property (nonatomic, retain, setter=asyncdisplaykit_setCurrentAsyncLayerTransaction:) _ASAsyncTransaction *asyncdisplaykit_currentAsyncLayerTransaction;
+@property (nonatomic, strong, setter=asyncdisplaykit_setAsyncLayerTransactions:) NSHashTable *asyncdisplaykit_asyncLayerTransactions;
+@property (nonatomic, strong, setter=asyncdisplaykit_setCurrentAsyncLayerTransaction:) _ASAsyncTransaction *asyncdisplaykit_currentAsyncLayerTransaction;
 
 - (void)asyncdisplaykit_asyncTransactionContainerWillBeginTransaction:(_ASAsyncTransaction *)transaction;
 - (void)asyncdisplaykit_asyncTransactionContainerDidCompleteTransaction:(_ASAsyncTransaction *)transaction;
