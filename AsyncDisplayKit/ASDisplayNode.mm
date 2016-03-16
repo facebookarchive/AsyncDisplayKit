@@ -1986,7 +1986,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
  */
 - (BOOL)supportsRangeManagedInterfaceState
 {
-  return (_hierarchyState & ASHierarchyStateRangeManaged);
+  return ASHierarchyStateIncludesRangeManaged(_hierarchyState);
 }
 
 - (ASInterfaceState)interfaceState
