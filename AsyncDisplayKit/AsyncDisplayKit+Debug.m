@@ -11,11 +11,12 @@
 #import <AsyncDisplayKit/ASWeakSet.h>
 #import <AsyncDisplayKit/CGRect+ASConvenience.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASTextNode.h>
 
 static BOOL __shouldShowImageScalingOverlay = NO;
 static BOOL __shouldShowRangeDebugOverlay = NO;
 
-@class _ASRangeDebuggingControllerView;
+@class _ASRangeDebugBarView;
 
 #pragma mark - ASImageNode
 @implementation ASImageNode (Debugging)
@@ -33,7 +34,8 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 @end
 
 #pragma mark - ASRangeController
-@interface _ASRangeDebuggingOverlayView : UIView
+@interface _ASRangeDebugOverlayView : UIView
+
 + (instancetype)sharedInstance;
 
 - (void)addRangeController:(ASRangeController *)rangeController;
@@ -42,10 +44,9 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 
 @end
 
-@interface _ASRangeDebuggingControllerView : UIView
+@interface _ASRangeDebugBarView : UIView
 
 @property (nonatomic, weak) ASRangeController *rangeController;
-@property (nonatomic, assign) BOOL isVerticalElement;
 
 + (UIImage *)resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
                                              scale:(CGFloat)scale
@@ -55,10 +56,15 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 
 - (instancetype)initWithRangeController:(ASRangeController *)rangeController;
 
-- (void)updateWithVisibleRatio:(CGFloat)visibleRatio displayRatio:(CGFloat)displayRatio
-                fetchDataRatio:(CGFloat)fetchDataRatio direction:(ASScrollDirection)direction
-           leadingDisplayRatio:(CGFloat)leadingDisplayRatio leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio
-                    onscreen:(BOOL)onscreen;
+- (void)updateWithVisibleRatio:(CGFloat)visibleRatio
+                  displayRatio:(CGFloat)displayRatio
+           leadingDisplayRatio:(CGFloat)leadingDisplayRatio
+                fetchDataRatio:(CGFloat)fetchDataRatio
+         leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio
+                     direction:(ASScrollDirection)direction
+                      onscreen:(BOOL)onscreen;
+
+- (void)adjustFrameWithYOffset:(CGFloat)offset;
 
 @end
 
@@ -76,31 +82,32 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 
 - (void)addRangeControllerToRangeDebugOverlay
 {
-  [[_ASRangeDebuggingOverlayView sharedInstance] addRangeController:self];
+  [[_ASRangeDebugOverlayView sharedInstance] addRangeController:self];
 }
 
 - (void)updateRangeController:(ASRangeController *)controller scrollableDirections:(ASScrollDirection)scrollableDirections scrollDirection:(ASScrollDirection)direction rangeMode:(ASLayoutRangeMode)mode tuningParameters:(ASRangeTuningParameters)parameters tuningParametersFetchData:(ASRangeTuningParameters)parametersFetchData interfaceState:(ASInterfaceState)interfaceState
 {
-  [[_ASRangeDebuggingOverlayView sharedInstance] updateRangeController:controller scrollableDirections:scrollableDirections scrollDirection:direction rangeMode:mode tuningParameters:parameters tuningParametersFetchData:parametersFetchData interfaceState:interfaceState];
+  [[_ASRangeDebugOverlayView sharedInstance] updateRangeController:controller scrollableDirections:scrollableDirections scrollDirection:direction rangeMode:mode tuningParameters:parameters tuningParametersFetchData:parametersFetchData interfaceState:interfaceState];
 }
 
-
 @end
 
 
-#pragma mark - _ASRangeDebuggingOverlayView
+#pragma mark - _ASRangeDebugOverlayView
 
-@interface _ASRangeDebuggingOverlayView () <UIGestureRecognizerDelegate>
+@interface _ASRangeDebugOverlayView () <UIGestureRecognizerDelegate>
 @end
 
-@implementation _ASRangeDebuggingOverlayView
+@implementation _ASRangeDebugOverlayView
 {
   NSMutableArray *_rangeControllerViews;
+  NSInteger      _newControllerCount;
+  NSInteger      _removeControllerCount;
 }
 
 + (instancetype)sharedInstance
 {
-  static _ASRangeDebuggingOverlayView *__rangeDebugOverlay = nil;
+  static _ASRangeDebugOverlayView *__rangeDebugOverlay = nil;
   
   if (!__rangeDebugOverlay) {
     __rangeDebugOverlay = [[self alloc] initWithFrame:CGRectZero];
@@ -110,72 +117,111 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   return __rangeDebugOverlay;
 }
 
-#define OVERLAY_VIEW_INSET 20
+#define OVERLAY_INSET 20
+#define OVERLAY_SCALE 3
 - (instancetype)initWithFrame:(CGRect)frame
 {
   self = [super initWithFrame:frame];
   
   if (self) {
-
-    self.backgroundColor        = [[UIColor blackColor] colorWithAlphaComponent:0.4];
-    self.layer.zPosition        = 1000;
+    _rangeControllerViews = [[NSMutableArray alloc] init];
+    self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.4];
+    self.layer.zPosition = 1000;
+    self.clipsToBounds = YES;
     
-    _rangeControllerViews       = [[NSMutableArray alloc] init];
-    
-    CGSize windowSize    = [[[UIApplication sharedApplication] keyWindow] bounds].size;
-    CGFloat overlayScale = 3.0;
-    self.frame           = CGRectMake(windowSize.width - windowSize.width / overlayScale - OVERLAY_VIEW_INSET,
-                                     windowSize.height - windowSize.height / overlayScale - OVERLAY_VIEW_INSET,
-                                     windowSize.width / overlayScale,
-                                     windowSize.height / overlayScale);
+    CGSize windowSize = [[[UIApplication sharedApplication] keyWindow] bounds].size;
+    self.frame  = CGRectMake(windowSize.width - windowSize.width / OVERLAY_SCALE - OVERLAY_INSET,
+                            windowSize.height - windowSize.height / OVERLAY_SCALE - OVERLAY_INSET,
+                            windowSize.width / OVERLAY_SCALE,
+                            windowSize.height / OVERLAY_SCALE);
     
     UIPanGestureRecognizer *panGR = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(rangeDebugOverlayWasPanned:)];
     [self addGestureRecognizer:panGR];
     
-    UIPinchGestureRecognizer *pinchGR = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(rangeDebugOverlayWasPinched:)];
-    [self addGestureRecognizer:pinchGR];
+//    UIPinchGestureRecognizer *pinchGR = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(rangeDebugOverlayWasPinched:)];
+//    [self addGestureRecognizer:pinchGR];
   }
   
   return self;
 }
 
-#define RANGE_VIEW_THICKNESS 20
-#define RANGE_VIEW_BUFFER    0
+#define BAR_THICKNESS 20
+#define BARS_INSET    5
 - (void)layoutSubviews
 {
   [super layoutSubviews];
 
+//  CGRect boundsRect = self.bounds;
+//  CGSize boundsSize = boundsRect.size;
+//  CGRect rect = CGRectMake(0, boundsSize.height - BARS_INSET - BAR_THICKNESS, boundsSize.width, BAR_THICKNESS);
+//  CGFloat totalHeight = BARS_INSET;
+//  
+//  // position top one at negative y (only if new)
+////  - addRange instance variable +++
+////  set to zero below totalHeight
+////  work top down
+////  method add frame with y offset
+////  then in animation offset, change back lower (multiple of ++)
+//  // deal with subtraction?
+//  
+//  for (_ASRangeDebugBarView *rangeView in _rangeControllerViews) {
+//    if (!rangeView.hidden) {
+//      rangeView.frame  = rect;
+//      rect.origin.y   -= rect.size.height;
+//      totalHeight     += rect.size.height;
+//    }
+//  }
+//  
+//  
+//  [UIView animateWithDuration:0.2 animations:^{
+//    self.frame = CGRectMake(self.frame.origin.x,
+//                            self.frame.origin.y + (boundsSize.height - totalHeight),
+//                            boundsSize.width,
+//                            totalHeight); }];
+
   CGRect boundsRect = self.bounds;
   CGSize boundsSize = boundsRect.size;
-  CGRect rect       = CGRectMake(0, boundsSize.height - RANGE_VIEW_THICKNESS, boundsSize.width, RANGE_VIEW_THICKNESS);
+  CGRect rect = CGRectMake(0, 0, boundsSize.width, BAR_THICKNESS);
+  CGFloat totalHeight = BARS_INSET;
   
-  CGFloat totalHeight = 0.0;
-  
-  for (_ASRangeDebuggingControllerView *rangeView in _rangeControllerViews) {
+  _ASRangeDebugBarView *rangeView;
+  NSInteger numViews = [_rangeControllerViews count] - 1;
+  for (NSInteger i = numViews; i > -1; i--) {
+    rangeView = [_rangeControllerViews objectAtIndex:i];
     if (!rangeView.hidden) {
       rangeView.frame  = rect;
-      rect.origin.y   -= (rect.size.height + RANGE_VIEW_BUFFER);
-      totalHeight     += (rect.size.height + RANGE_VIEW_BUFFER);
+      rect.origin.y   += BAR_THICKNESS;
+      totalHeight     += BAR_THICKNESS;
     }
   }
   
-  totalHeight     -= RANGE_VIEW_BUFFER;
-  rect.origin.y   += (rect.size.height + RANGE_VIEW_BUFFER);
+  rect.origin.y += BARS_INSET;
+  totalHeight   += BARS_INSET;
+
   [UIView animateWithDuration:0.2 animations:^{
     self.frame = CGRectMake(self.frame.origin.x,
-                             self.frame.origin.y + (boundsSize.height - totalHeight),
+                             self.frame.origin.y - _newControllerCount * BAR_THICKNESS,
                              boundsSize.width,
                              totalHeight);
+    
+    for (_ASRangeDebugBarView *rangeView in _rangeControllerViews) {
+      if (!rangeView.hidden) {
+        CGFloat finalYOffsetAdjustment = _newControllerCount * BAR_THICKNESS;
+        [rangeView adjustFrameWithYOffset:finalYOffsetAdjustment];
+      }
+    }
   }];
+  
+  _newControllerCount = 0;
+  _removeControllerCount = 0;
 }
 
 - (void)addRangeController:(ASRangeController *)rangeController
 {
-  _ASRangeDebuggingControllerView *rangeView = [[_ASRangeDebuggingControllerView alloc] initWithRangeController:rangeController];
+  _ASRangeDebugBarView *rangeView = [[_ASRangeDebugBarView alloc] initWithRangeController:rangeController];
   [_rangeControllerViews addObject:rangeView];
   [self addSubview:rangeView];
-  
-//  NSLog(@"%@",  NSStringFromClass([yourObject class])
+  _newControllerCount++;
 }
 
 - (void)updateRangeController:(ASRangeController *)controller scrollableDirections:(ASScrollDirection)scrollableDirections
@@ -185,18 +231,19 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     tuningParametersFetchData:(ASRangeTuningParameters)parametersFetchData
                interfaceState:(ASInterfaceState)interfaceState;
 {
-  _ASRangeDebuggingControllerView *viewToUpdate = nil;
+  _ASRangeDebugBarView *viewToUpdate = nil;
   
   // reverse object enumerator so that I can delete things
   NSInteger numViews = [_rangeControllerViews count] - 1;
   for (NSInteger i = numViews; i > -1; i--) {
     
-    _ASRangeDebuggingControllerView *rangeView = [_rangeControllerViews objectAtIndex:i];
+    _ASRangeDebugBarView *rangeView = [_rangeControllerViews objectAtIndex:i];
     
     // rangeController has been deleted
     if (!rangeView.rangeController) {
       [[_rangeControllerViews objectAtIndex:i] removeFromSuperview];
       [_rangeControllerViews removeObjectAtIndex:i];
+      _removeControllerCount++;
     }
     
     if ([rangeView.rangeController isEqual:controller]) {
@@ -262,22 +309,16 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     }
   }
 
-  BOOL onScreen;
-  if (interfaceState & ASInterfaceStateVisible) {
-    onScreen = YES;
-  }
-  
-  NSLog(@"%lu", (long)interfaceState);
-//  
-//  // FIXME: hack to remove mysterious all green bars
-//  //  if (visibleRatio == 1) {
-//  if (direction == ASScrollDirectionNone) {
-//    viewToUpdate.hidden = YES;
-//  }
+  BOOL onScreen = (interfaceState & ASInterfaceStateVisible) ? YES : NO;
 
-  [viewToUpdate updateWithVisibleRatio:visibleRatio displayRatio:displayRatio
-                        fetchDataRatio:fetchDataRatio direction:direction leadingDisplayRatio:leadingDisplayTuningRatio leadingFetchDataRatio:leadingFetchDataTuningRatio onscreen:YES];
-//
+  [viewToUpdate updateWithVisibleRatio:visibleRatio
+                          displayRatio:displayRatio
+                   leadingDisplayRatio:leadingDisplayTuningRatio
+                        fetchDataRatio:fetchDataRatio
+                 leadingFetchDataRatio:leadingFetchDataTuningRatio
+                             direction:direction
+                              onscreen:onScreen];
+
   [self setNeedsLayout];
 }
 
@@ -311,82 +352,73 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   [recognizer setTranslation:CGPointMake(0, 0) inView:recognizer.view];
 }
 
-- (void)rangeDebugOverlayWasPinched:(UIPinchGestureRecognizer *)recognizer
-{
-  recognizer.view.transform = CGAffineTransformScale(recognizer.view.transform, recognizer.scale, recognizer.scale);
-  recognizer.scale = 1;
-}
+//- (void)rangeDebugOverlayWasPinched:(UIPinchGestureRecognizer *)recognizer
+//{
+//  recognizer.view.transform = CGAffineTransformScale(recognizer.view.transform, recognizer.scale, recognizer.scale);
+//  recognizer.scale = 1;
+//}
 
 @end
 
-#pragma mark - _ASRangeDebuggingControllerView
+#pragma mark - _ASRangeDebugBarView
 
 
-@implementation _ASRangeDebuggingControllerView
+@implementation _ASRangeDebugBarView
 {
-  UIImageView       *_visibleRect;      // FIXME: should we make these ASImageNodes / ASTextNodes?
-  UIImageView       *_displayRect;
-  UIImageView       *_fetchDataRect;
-  UILabel           *_debugLabel;
-  UILabel           *_leftDebugLabel;
-  UILabel           *_rightDebugLabel;
+  ASImageNode       *_visibleRect;
+  ASImageNode       *_displayRect;
+  ASImageNode       *_fetchDataRect;
+  ASTextNode        *_debugText;
+  ASTextNode        *_leftDebugText;
+  ASTextNode        *_rightDebugText;
   CGFloat           _visibleRatio;
   CGFloat           _displayRatio;
   CGFloat           _fetchDataRatio;
   CGFloat           _leadingDisplayRatio;
   CGFloat           _leadingFetchDataRatio;
-  BOOL              _onScreen;
   ASScrollDirection _direction;
+  BOOL              _onScreen;
+  BOOL              _firstLayoutOfRects;
 }
-
 
 - (instancetype)initWithRangeController:(ASRangeController *)rangeController
 {
   self = [super initWithFrame:CGRectZero];
  
-  if (self) {
-    
-    _rangeController = rangeController;
-    _debugLabel      = [self createDebugLabel];
-    _leftDebugLabel  = [self createDebugLabel];
-    _rightDebugLabel = [self createDebugLabel];
-    [self addSubview:_debugLabel];
-    [self addSubview:_leftDebugLabel];
-    [self addSubview:_rightDebugLabel];
+  if
+    (self) {
+    _firstLayoutOfRects = YES;
+    _rangeController    = rangeController;
+    _debugText          = [self createDebugTextNode];
+    _leftDebugText      = [self createDebugTextNode];
+    _rightDebugText     = [self createDebugTextNode];
   
-    _fetchDataRect = [[UIImageView alloc] init];
-    _fetchDataRect.image = [_ASRangeDebuggingControllerView resizableRoundedImageWithCornerRadius:3
-                                                                                            scale:[[UIScreen mainScreen] scale]
-                                                                                  backgroundColor:nil
-                                                                                        fillColor:[[UIColor orangeColor] colorWithAlphaComponent:0.5]
-                                                                                      borderColor:[[UIColor blackColor] colorWithAlphaComponent:0.9]];
-    [self addSubview:_fetchDataRect];
+    _fetchDataRect = [[ASImageNode alloc] init];
+    _fetchDataRect.image = [_ASRangeDebugBarView resizableRoundedImageWithCornerRadius:3
+                                                                                 scale:[[UIScreen mainScreen] scale]
+                                                                       backgroundColor:nil
+                                                                             fillColor:[[UIColor orangeColor] colorWithAlphaComponent:0.5]
+                                                                           borderColor:[[UIColor blackColor] colorWithAlphaComponent:0.9]];
+    [self addSubview:_fetchDataRect.view];
     
-    _visibleRect = [[UIImageView alloc] init];
-    _visibleRect.image = [_ASRangeDebuggingControllerView resizableRoundedImageWithCornerRadius:3
-                                                                                          scale:[[UIScreen mainScreen] scale]
-                                                                                backgroundColor:nil
-                                                                                      fillColor:[[UIColor greenColor] colorWithAlphaComponent:0.5]
-                                                                                    borderColor:[[UIColor blackColor] colorWithAlphaComponent:0.9]];
-    [self addSubview:_visibleRect];
+    _visibleRect = [[ASImageNode alloc] init];
+    _visibleRect.image = [_ASRangeDebugBarView resizableRoundedImageWithCornerRadius:3
+                                                                               scale:[[UIScreen mainScreen] scale]
+                                                                     backgroundColor:nil
+                                                                           fillColor:[[UIColor greenColor] colorWithAlphaComponent:0.5]
+                                                                         borderColor:[[UIColor blackColor] colorWithAlphaComponent:0.9]];
+    [self addSubview:_visibleRect.view];
     
-    _displayRect = [[UIImageView alloc] init];
-    _displayRect.image = [_ASRangeDebuggingControllerView resizableRoundedImageWithCornerRadius:3
-                                                                                          scale:[[UIScreen mainScreen] scale]
-                                                                                backgroundColor:nil
-                                                                                      fillColor:[[UIColor yellowColor] colorWithAlphaComponent:0.5]
-                                                                                    borderColor:[[UIColor blackColor] colorWithAlphaComponent:0.9]];
-  [self addSubview:_displayRect];
-  }
+    _displayRect = [[ASImageNode alloc] init];
+    _displayRect.image = [_ASRangeDebugBarView resizableRoundedImageWithCornerRadius:3
+                                                                               scale:[[UIScreen mainScreen] scale]
+                                                                     backgroundColor:nil
+                                                                           fillColor:[[UIColor yellowColor] colorWithAlphaComponent:0.5]
+                                                                         borderColor:[[UIColor blackColor] colorWithAlphaComponent:0.9]];
+    [self addSubview:_displayRect.view];
+    }
   
   return self;
-}
-
-- (UILabel *)createDebugLabel
-{
-  UILabel *label = [[UILabel alloc] init];
-  label.textColor = [UIColor whiteColor];
-  return label;
 }
 
 #define HORIZONTAL_INSET 10
@@ -394,42 +426,37 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 {
   [super layoutSubviews];
   
-  _debugLabel.text = _onScreen ? @"onScreen" : @"";
-  
-  CGSize boundsSize = self.bounds.size;
-  [_debugLabel sizeToFit];
-  CGRect rect       = CGRectIntegral(CGRectMake(0, 0, boundsSize.width, boundsSize.height / 2.0));
-  rect.size         = _debugLabel.frame.size;
-  rect.origin.x     = (boundsSize.width - _debugLabel.frame.size.width) / 2.0;
-  _debugLabel.frame = rect;
-  _debugLabel.font  = [UIFont systemFontOfSize:floorf(boundsSize.height / 2.0)-1];
+  CGSize boundsSize     = self.bounds.size;
+  CGFloat subCellHeight = floorf(boundsSize.height / 2.0)-1;
+  [self setBarDebugLabelsWithSize:subCellHeight];
+  [self setBarSubviewOrder];
+  [self setBarAlpha];
+
+  CGRect rect       = CGRectIntegral(CGRectMake(0, 0, boundsSize.width, floorf(boundsSize.height / 2.0)));
+  rect.size         = [_debugText measure:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+  rect.origin.x     = (boundsSize.width - rect.size.width) / 2.0;
+  _debugText.frame  = rect;
   rect.origin.y    += rect.size.height;
   
   rect.origin.x          = 0;
   rect.size              = CGSizeMake(HORIZONTAL_INSET, boundsSize.height / 2.0);
-  _leftDebugLabel.frame  = rect;
-  _leftDebugLabel.font   = [UIFont systemFontOfSize:floorf(boundsSize.height / 2.0)-1];
+  _leftDebugText.frame   = rect;
 
   rect.origin.x          = boundsSize.width - HORIZONTAL_INSET;
-  _rightDebugLabel.frame = rect;
-  _rightDebugLabel.font  = [UIFont systemFontOfSize:floorf(boundsSize.height / 2.0)-1];
-
+  _rightDebugText.frame  = rect;
 
   CGFloat visibleDimension   = (boundsSize.width - 2 * HORIZONTAL_INSET) * _visibleRatio;
   CGFloat displayDimension   = (boundsSize.width - 2 * HORIZONTAL_INSET) * _displayRatio;
   CGFloat fetchDataDimension = (boundsSize.width - 2 * HORIZONTAL_INSET) * _fetchDataRatio;
-  CGFloat visiblePoint = 0;
-  CGFloat displayPoint = 0;
-  CGFloat fetchDataPoint = 0;
+  CGFloat visiblePoint       = 0;
+  CGFloat displayPoint       = 0;
+  CGFloat fetchDataPoint     = 0;
   
-  [self setScrollDirectionDebugLabels];
-  [self setFetchDataDisplaySubviewOrder];
-  [self setAlphaForRatios];
+  BOOL displayLargerThanFetchData = (_displayRatio == 1.0) ? YES : NO;
   
   if (ASScrollDirectionContainsLeft(_direction) || ASScrollDirectionContainsUp(_direction)) {
     
-    if (_displayRatio == 1.0) {
-      [[self superview] insertSubview:_displayRect belowSubview:_fetchDataRect];
+    if (displayLargerThanFetchData) {
       visiblePoint        = (displayDimension - visibleDimension) * _leadingDisplayRatio;
       fetchDataPoint      = visiblePoint - (fetchDataDimension - visibleDimension) * _leadingFetchDataRatio;
     } else {
@@ -438,7 +465,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     }
   } else if (ASScrollDirectionContainsRight(_direction) || ASScrollDirectionContainsDown(_direction)) {
     
-    if (_displayRatio == 1.0) {
+    if (displayLargerThanFetchData) {
       
       visiblePoint        = (displayDimension - visibleDimension) * (1 - _leadingDisplayRatio);
       fetchDataPoint      = visiblePoint - (fetchDataDimension - visibleDimension) * (1 - _leadingFetchDataRatio);
@@ -448,13 +475,12 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     }
   }
   
-  BOOL animate = !CGRectEqualToRect(CGRectMake(0, 0, 10, 0), _visibleRect.frame);
-  
-  [UIView animateWithDuration:animate ? 0.3 : 0.0 animations:^{
-    _visibleRect.frame    = CGRectMake(HORIZONTAL_INSET + visiblePoint,    rect.origin.y, visibleDimension,    10);
-    _displayRect.frame    = CGRectMake(HORIZONTAL_INSET + displayPoint,    rect.origin.y, displayDimension,    10);
-    _fetchDataRect.frame  = CGRectMake(HORIZONTAL_INSET + fetchDataPoint,  rect.origin.y, fetchDataDimension,  10);
-  }];
+  BOOL animate = !_firstLayoutOfRects;
+  [UIView animateWithDuration:animate ? 0.3 : 0.0 delay:0.0 options:UIViewAnimationOptionLayoutSubviews animations:^{
+    _visibleRect.frame    = CGRectMake(HORIZONTAL_INSET + visiblePoint,    rect.origin.y, visibleDimension,    subCellHeight);
+    _displayRect.frame    = CGRectMake(HORIZONTAL_INSET + displayPoint,    rect.origin.y, displayDimension,    subCellHeight);
+    _fetchDataRect.frame  = CGRectMake(HORIZONTAL_INSET + fetchDataPoint,  rect.origin.y, fetchDataDimension,  subCellHeight);
+  } completion:^(BOOL finished) {}];
   
   if (!animate) {
     _visibleRect.alpha = _displayRect.alpha = _fetchDataRect.alpha = 0;
@@ -462,73 +488,101 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
       _visibleRect.alpha = _displayRect.alpha = _fetchDataRect.alpha = 1;
     }];
   }
+  
+  _firstLayoutOfRects = NO;
 }
 
-- (void)setAlphaForRatios
+- (void)updateWithVisibleRatio:(CGFloat)visibleRatio
+                  displayRatio:(CGFloat)displayRatio
+           leadingDisplayRatio:(CGFloat)leadingDisplayRatio
+                fetchDataRatio:(CGFloat)fetchDataRatio
+         leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio
+                     direction:(ASScrollDirection)direction
+                      onscreen:(BOOL)onscreen
 {
-  if ((_fetchDataRatio == _displayRatio) && (_visibleRatio == _displayRatio)) {
-    self.alpha = 0.5;
-  } else {
-    self.alpha = 1;
-  }
+  _visibleRatio = visibleRatio;
+  _displayRatio = displayRatio;
+  _leadingDisplayRatio = leadingDisplayRatio;
+  _fetchDataRatio = fetchDataRatio;
+  _leadingFetchDataRatio = leadingFetchDataRatio;
+  _direction = direction;
+  _onScreen = YES;
+  
+  [self setNeedsLayout];
+}
+      
+- (void)adjustFrameWithYOffset:(CGFloat)offset
+{
+  CGRect newFrame = self.frame;
+  newFrame.origin = CGPointMake(newFrame.origin.x, newFrame.origin.y + offset);
+  self.frame = newFrame;
 }
 
-- (void)setFetchDataDisplaySubviewOrder
+- (ASTextNode *)createDebugTextNode
+{
+  ASTextNode *label = [[ASTextNode alloc] init];
+  [self addSubnode:label];
+  return label;
+}
+
+- (void)setBarAlpha
+{
+  self.alpha = ((_fetchDataRatio == _displayRatio) && (_visibleRatio == _displayRatio)) ? 0.5 : 1;
+}
+
+- (void)setBarSubviewOrder
 {
   if (_fetchDataRatio == 1.0) {
-    [self sendSubviewToBack:_fetchDataRect];
+    [self sendSubviewToBack:_fetchDataRect.view];
   } else {
-    [self sendSubviewToBack:_displayRect];
+    [self sendSubviewToBack:_displayRect.view];
   }
-  [self bringSubviewToFront:_visibleRect];
+  
+  [self bringSubviewToFront:_visibleRect.view];
 }
 
-- (void)setScrollDirectionDebugLabels
+- (void)setBarDebugLabelsWithSize:(CGFloat)size
 {
+  if (_onScreen) {
+    NSString *dataSourceClassString = NSStringFromClass([[[self rangeController] dataSource] class]);
+    _debugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:dataSourceClassString withSize:size];
+  }
+  
   switch (_direction) {
     case ASScrollDirectionLeft:
-      _leftDebugLabel.hidden  = NO;
-      _leftDebugLabel.text    = @"◀︎";
-      _rightDebugLabel.hidden = YES;
+      _leftDebugText.hidden = NO;
+      _leftDebugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:@"◀︎" withSize:size];
+      _rightDebugText.hidden = YES;
       break;
     case ASScrollDirectionRight:
-      _leftDebugLabel.hidden  = YES;
-      _rightDebugLabel.hidden = NO;
-      _rightDebugLabel.text    = @"▶︎";
+      _leftDebugText.hidden = YES;
+      _rightDebugText.hidden = NO;
+      _rightDebugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:@"▶︎" withSize:size];
       break;
     case ASScrollDirectionUp:
-      _leftDebugLabel.hidden  = NO;
-      _leftDebugLabel.text    = @"▲";
-      _rightDebugLabel.hidden = YES;
+      _leftDebugText.hidden = NO;
+      _leftDebugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:@"▲" withSize:size];
+      _rightDebugText.hidden = YES;
       break;
     case ASScrollDirectionDown:
-      _leftDebugLabel.hidden  = YES;
-      _rightDebugLabel.hidden = NO;
-      _rightDebugLabel.text    = @"▼";
+      _leftDebugText.hidden = YES;
+      _rightDebugText.hidden = NO;
+      _rightDebugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:@"▼" withSize:size];
       break;
     case ASScrollDirectionNone:
-      _leftDebugLabel.hidden  = YES;
-      _rightDebugLabel.hidden = YES;
+      _leftDebugText.hidden = YES;
+      _rightDebugText.hidden = YES;
       break;
     default:
       break;
   }
 }
 
-- (void)updateWithVisibleRatio:(CGFloat)visibleRatio displayRatio:(CGFloat)displayRatio
-                fetchDataRatio:(CGFloat)fetchDataRatio direction:(ASScrollDirection)direction
-           leadingDisplayRatio:(CGFloat)leadingDisplayRatio leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio onscreen:(BOOL)onscreen
++ (NSAttributedString *)whiteAttributedStringFromString:(NSString *)string withSize:(CGFloat)size
 {
-  _direction = direction;
-  _visibleRatio = visibleRatio;
-  _displayRatio = displayRatio;
-  _fetchDataRatio = fetchDataRatio;
-  _leadingFetchDataRatio = leadingFetchDataRatio;
-  _leadingDisplayRatio = leadingDisplayRatio;
-  _onScreen = YES;
-  self.isVerticalElement = ASScrollDirectionContainsVerticalDirection(direction);
-  
-  [self setNeedsLayout];
+  NSDictionary *attributes = @{NSForegroundColorAttributeName : [UIColor whiteColor],
+                               NSFontAttributeName : [UIFont systemFontOfSize:size]};
+  return [[NSAttributedString alloc] initWithString:string attributes:attributes];
 }
 
 + (UIImage *)resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
