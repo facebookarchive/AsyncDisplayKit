@@ -1658,7 +1658,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 // The node sending the message should usually be passed as the parameter, similar to the delegation pattern.
 - (void)_pendingNodeWillDisplay:(ASDisplayNode *)node
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDisplayNodeAssertMainThread();
 
   if (!_pendingDisplayNodes) {
     _pendingDisplayNodes = [[NSMutableSet alloc] init];
@@ -1671,27 +1671,25 @@ static NSInteger incrementIfFound(NSInteger i) {
 // The node sending the message should usually be passed as the parameter, similar to the delegation pattern.
 - (void)_pendingNodeDidDisplay:(ASDisplayNode *)node
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDisplayNodeAssertMainThread();
 
   [_pendingDisplayNodes removeObject:node];
 
   // only trampoline if there is a placeholder and nodes are done displaying
   if ([self _pendingDisplayNodesHaveFinished] && _placeholderLayer.superlayer) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      void (^cleanupBlock)() = ^{
-        [self _tearDownPlaceholderLayer];
-      };
+    void (^cleanupBlock)() = ^{
+      [self _tearDownPlaceholderLayer];
+    };
 
-      if (_placeholderFadeDuration > 0.0 && ASInterfaceStateIncludesVisible(self.interfaceState)) {
-        [CATransaction begin];
-        [CATransaction setCompletionBlock:cleanupBlock];
-        [CATransaction setAnimationDuration:_placeholderFadeDuration];
-        _placeholderLayer.opacity = 0.0;
-        [CATransaction commit];
-      } else {
-        cleanupBlock();
-      }
-    });
+    if (_placeholderFadeDuration > 0.0 && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+      [CATransaction begin];
+      [CATransaction setCompletionBlock:cleanupBlock];
+      [CATransaction setAnimationDuration:_placeholderFadeDuration];
+      _placeholderLayer.opacity = 0.0;
+      [CATransaction commit];
+    } else {
+      cleanupBlock();
+    }
   }
 }
 
@@ -1985,6 +1983,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)visibilityDidChange:(BOOL)isVisible
 {
+    // subclass override
 }
 
 /**
@@ -2261,6 +2260,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)displayWillStart
 {
+  ASDisplayNodeAssertMainThread();
+
   // in case current node takes longer to display than it's subnodes, treat it as a dependent node
   [self _pendingNodeWillDisplay:self];
 
@@ -2289,6 +2290,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)displayDidFinish
 {
+  ASDisplayNodeAssertMainThread();
+  
   [self _pendingNodeDidDisplay:self];
 
   [_supernode subnodeDisplayDidFinish:self];
@@ -2495,11 +2498,14 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   self.asyncLayer.displaySuspended = flag;
 
   if ([self __implementsDisplay]) {
-    if (flag) {
-      [_supernode subnodeDisplayDidFinish:self];
-    } else {
-      [_supernode subnodeDisplayWillStart:self];
-    }
+    // Display start and finish methods needs to happen on the main thread
+    ASPerformBlockOnMainThread(^{
+      if (flag) {
+        [_supernode subnodeDisplayDidFinish:self];
+      } else {
+        [_supernode subnodeDisplayWillStart:self];
+      }
+    });
   }
 }
 
