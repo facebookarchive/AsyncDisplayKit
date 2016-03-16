@@ -140,7 +140,7 @@
   _videoNode.asset = _firstAsset;
 
   [_videoNode pause];
-  [_videoNode setInterfaceState:ASInterfaceStateVisible];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay];
   [_videoNode didLoad];
   
   XCTAssert(![_videoNode.subnodes containsObject:_videoNode.playerNode]);
