@@ -1069,7 +1069,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [node __exitHierarchy];
   }
 
-  // Updating the visible node index paths only for range managed nodes. Not range managed nodes will get their
+  // Updating the visible node index paths only for not range managed nodes. Range managed nodes will get their
   // their update in the layout pass
   if (![node supportsRangeManagedInterfaceState]) {
     [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];

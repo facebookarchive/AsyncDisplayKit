@@ -12,8 +12,11 @@
 
 extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window)
 {
+    ASDisplayNodeCAssert(![displayNode isLayerBacked], @"displayNode must not be layer backed as it may have a nil window");
     if (displayNode && [displayNode supportsRangeManagedInterfaceState]) {
-        // Only use the interfaceState of nodes that are range managed
+        // Directly clear the visible bit if we are not in a window. This means that the interface state is,
+        // if not already, about to be set to invisible as it is not possible for an element to be visible
+        // while outside of a window.
         ASInterfaceState interfaceState = displayNode.interfaceState;
         return (window == nil ? (interfaceState &= (~ASInterfaceStateVisible)) : interfaceState);
     } else {
