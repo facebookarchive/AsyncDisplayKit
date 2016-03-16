@@ -61,11 +61,16 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 #pragma mark - Core visible node range managment API
 
++ (BOOL)isFirstRangeUpdateForRangeMode:(ASLayoutRangeMode)rangeMode
+{
+    return (rangeMode == ASLayoutRangeModeInvalid);
+}
+
 + (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
                                currentRangeMode:(ASLayoutRangeMode)currentRangeMode
 {
   BOOL isVisible = (ASInterfaceStateIncludesVisible(interfaceState));
-  BOOL isFirstRangeUpdate = (currentRangeMode == ASLayoutRangeModeInvalid);
+  BOOL isFirstRangeUpdate = [self isFirstRangeUpdateForRangeMode:currentRangeMode];
   if (!isVisible || isFirstRangeUpdate) {
     return ASLayoutRangeModeMinimum;
   }
