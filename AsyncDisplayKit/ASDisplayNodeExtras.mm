@@ -10,6 +10,18 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
+extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window)
+{
+    if (displayNode && [displayNode supportsRangeManagedInterfaceState]) {
+        // Only use the interfaceState of nodes that are range managed
+        ASInterfaceState interfaceState = displayNode.interfaceState;
+        return (window == nil ? (interfaceState &= (~ASInterfaceStateVisible)) : interfaceState);
+    } else {
+        // For not range managed nodes we might be on our own to try to guess if we're visible.
+        return (window == nil ? ASInterfaceStateNone : (ASInterfaceStateVisible | ASInterfaceStateDisplay));
+    }
+}
+
 extern ASDisplayNode *ASLayerToDisplayNode(CALayer *layer)
 {
   return layer.asyncdisplaykit_node;
