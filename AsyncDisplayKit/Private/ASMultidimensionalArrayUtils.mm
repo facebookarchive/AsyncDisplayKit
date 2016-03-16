@@ -44,10 +44,12 @@ static void ASRecursivelyFindIndexPathsForMultidimensionalArray(NSObject *obj, N
   if (![obj isKindOfClass:[NSArray class]]) {
     [res addObject:curIndexPath];
   } else {
-    NSArray *arr = (NSArray *)obj;
-    [arr enumerateObjectsUsingBlock:^(NSObject *subObj, NSUInteger idx, BOOL *stop) {
-      ASRecursivelyFindIndexPathsForMultidimensionalArray(subObj, [curIndexPath indexPathByAddingIndex:idx], res);
-    }];
+    NSArray *array = (NSArray *)obj;
+    NSUInteger idx = 0;
+    for (NSArray *subarray in array) {
+      ASRecursivelyFindIndexPathsForMultidimensionalArray(subarray, [curIndexPath indexPathByAddingIndex:idx], res);
+      idx++;
+    }
   }
 }
 
