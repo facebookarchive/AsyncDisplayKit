@@ -47,7 +47,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _currentRangeMode = ASLayoutRangeModeInvalid;
   _didUpdateCurrentRange = NO;
   
-  [[self.class allRangeControllersWeakSet] addObject:self];
+  [[[self class] allRangeControllersWeakSet] addObject:self];
   
   return self;
 }
@@ -191,7 +191,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   ASLayoutRangeMode rangeMode = _currentRangeMode;
   // If the range mode is explicitly set via updateCurrentRangeWithMode: it will last in that mode until the
   // range controller becomes visible again or explicitly changes the range mode again
-  if (!_didUpdateCurrentRange && ASInterfaceStateIncludesVisible(selfInterfaceState)) {
+  if ((!_didUpdateCurrentRange && ASInterfaceStateIncludesVisible(selfInterfaceState)) || [[self class] isFirstRangeUpdateForRangeMode:rangeMode]) {
     rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
   }
 
