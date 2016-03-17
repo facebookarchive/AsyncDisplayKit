@@ -20,6 +20,10 @@
   __weak ASTextKitContext *_context;
   ASTextKitAttributes _attributes;
   std::mutex _textKitMutex;
+  BOOL _measured;
+  CGFloat _scaleFactor;
+  NSLayoutManager *_sizingLayoutManager;
+  NSTextContainer *_sizingTextContainer;
 }
 
 - (instancetype)initWithContext:(ASTextKitContext *)context
@@ -76,36 +80,50 @@
 
 - (NSUInteger)lineCountForString:(NSAttributedString *)attributedString
 {
-  NSUInteger lineCount = 0;
-  
-  static std::mutex __static_mutex;
-  std::lock_guard<std::mutex> l(__static_mutex);
-  
-  NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:attributedString];
-  NSLayoutManager *layoutManager = _attributes.layoutManagerFactory ? _attributes.layoutManagerFactory() : [[ASLayoutManager alloc] init];
-  layoutManager.usesFontLeading = NO;
-  [textStorage addLayoutManager:layoutManager];
-  NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:_constrainedSize];
-  
-  textContainer.lineFragmentPadding = 0;
-  textContainer.lineBreakMode = _attributes.lineBreakMode;
-  
-  // use 0 regardless of what is in the attributes so that we get an accurate line count
-  textContainer.maximumNumberOfLines = 0;
-  textContainer.exclusionPaths = _attributes.exclusionPaths;
-  [layoutManager addTextContainer:textContainer];
-  
-  for (NSRange lineRange = { 0, 0 }; NSMaxRange(lineRange) < [layoutManager numberOfGlyphs] && lineCount <= _attributes.maximumNumberOfLines; lineCount++) {
-    [layoutManager lineFragmentRectForGlyphAtIndex:NSMaxRange(lineRange) effectiveRange:&lineRange];
-  }
-
-  return lineCount;
+    NSUInteger lineCount = 0;
+    
+    static std::mutex __static_mutex;
+    std::lock_guard<std::mutex> l(__static_mutex);
+    
+    NSTextStorage *textStorage = _attributes.textStorageCreationBlock ? _attributes.textStorageCreationBlock(attributedString) : [[NSTextStorage alloc] initWithAttributedString:attributedString];
+    if (_sizingLayoutManager == nil) {
+        _sizingLayoutManager = _attributes.layoutManagerCreationBlock ? _attributes.layoutManagerCreationBlock() : [[ASLayoutManager alloc] init];
+        _sizingLayoutManager.usesFontLeading = NO;
+    }
+    [textStorage addLayoutManager:_sizingLayoutManager];
+    if (_sizingTextContainer == nil) {
+        // make this text container unbounded in height so that the layout manager will compute the total
+        // number of lines and not stop counting when height runs out.
+        _sizingTextContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(_constrainedSize.width, FLT_MAX)];
+        _sizingTextContainer.lineFragmentPadding = 0;
+        
+        // use 0 regardless of what is in the attributes so that we get an accurate line count
+        _sizingTextContainer.maximumNumberOfLines = 0;
+        [_sizingLayoutManager addTextContainer:_sizingTextContainer];
+    }
+    
+    _sizingTextContainer.lineBreakMode = _attributes.lineBreakMode;
+    _sizingTextContainer.exclusionPaths = _attributes.exclusionPaths;
+    
+    
+    for (NSRange lineRange = { 0, 0 }; NSMaxRange(lineRange) < [_sizingLayoutManager numberOfGlyphs] && lineCount <= _attributes.maximumNumberOfLines; lineCount++) {
+        [_sizingLayoutManager lineFragmentRectForGlyphAtIndex:NSMaxRange(lineRange) effectiveRange:&lineRange];
+    }
+    
+    [textStorage removeLayoutManager:_sizingLayoutManager];
+    return lineCount;
 }
 
 - (CGFloat)scaleFactor
 {
+  if (_measured) {
+    return _scaleFactor;
+  }
+  
   if ([_attributes.pointSizeScaleFactors count] == 0 || isinf(_constrainedSize.width)) {
-    return 1.0;
+    _measured = YES;
+    _scaleFactor = 1.0;
+    return _scaleFactor;
   }
   
   __block CGFloat adjustedScale = 1.0;
@@ -177,7 +195,9 @@
     }
     
   }];
-  return adjustedScale;
+  _measured = YES;
+  _scaleFactor = adjustedScale;
+  return _scaleFactor;
 }
 
 @end

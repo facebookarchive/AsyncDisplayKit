@@ -62,7 +62,7 @@
   
   // We assume LTR so long as the writing direction is not
   BOOL rtlWritingDirection = paragraphStyle ? paragraphStyle.baseWritingDirection == NSWritingDirectionRightToLeft : NO;
-  // We only want to treat the trunction rect as left-aligned in the case that we are right-aligned and our writing
+  // We only want to treat the truncation rect as left-aligned in the case that we are right-aligned and our writing
   // direction is RTL.
   BOOL leftAligned = CGRectGetMinX(lastLineRect) == CGRectGetMinX(lastLineUsedRect) || !rtlWritingDirection;
 
@@ -72,8 +72,9 @@
                                                                       maximumNumberOfLines:1
                                                                             exclusionPaths:nil
                                                                            constrainedSize:constrainedRect.size
-                                                                      layoutManagerFactory:nil
-                                                                     layoutManagerDelegate:nil];
+                                                                      layoutManagerCreationBlock:nil
+                                                                     layoutManagerDelegate:nil
+                                                                  textStorageCreationBlock:nil];
   __block CGRect truncationUsedRect;
 
   [truncationContext performBlockWithLockedTextKitComponents:^(NSLayoutManager *truncationLayoutManager, NSTextStorage *truncationTextStorage, NSTextContainer *truncationTextContainer) {

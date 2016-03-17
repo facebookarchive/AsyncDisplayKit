@@ -15,7 +15,7 @@
 
 @interface ASChangeSetDataController ()
 
-@property (nonatomic, assign) NSUInteger batchUpdateCounter;
+@property (nonatomic, assign) NSUInteger changeSetBatchUpdateCounter;
 @property (nonatomic, strong) _ASHierarchyChangeSet *changeSet;
 
 @end
@@ -28,7 +28,7 @@
     return nil;
   }
   
-  _batchUpdateCounter = 0;
+  _changeSetBatchUpdateCounter = 0;
   
   return self;
 }
@@ -38,18 +38,18 @@
 - (void)beginUpdates
 {
   ASDisplayNodeAssertMainThread();
-  if (_batchUpdateCounter == 0) {
+  if (_changeSetBatchUpdateCounter == 0) {
     _changeSet = [_ASHierarchyChangeSet new];
   }
-  _batchUpdateCounter++;
+  _changeSetBatchUpdateCounter++;
 }
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
-  _batchUpdateCounter--;
+  _changeSetBatchUpdateCounter--;
   
-  if (_batchUpdateCounter == 0) {
+  if (_changeSetBatchUpdateCounter == 0) {
     [_changeSet markCompleted];
     
     [super beginUpdates];
@@ -86,7 +86,7 @@
 
 - (BOOL)batchUpdating
 {
-  BOOL batchUpdating = (_batchUpdateCounter != 0);
+  BOOL batchUpdating = (_changeSetBatchUpdateCounter != 0);
   // _changeSet must be available during batch update
   ASDisplayNodeAssertTrue(batchUpdating == (_changeSet != nil));
   return batchUpdating;
@@ -131,7 +131,7 @@
     [_changeSet deleteSections:[NSIndexSet indexSetWithIndex:section] animationOptions:animationOptions];
     [_changeSet insertSections:[NSIndexSet indexSetWithIndex:newSection] animationOptions:animationOptions];
   } else {
-    [super moveSection:section toSection:newSection];
+    [super moveSection:section toSection:newSection withAnimationOptions:animationOptions];
   }
 }
 
@@ -174,7 +174,7 @@
     [_changeSet deleteItems:@[indexPath] animationOptions:animationOptions];
     [_changeSet insertItems:@[newIndexPath] animationOptions:animationOptions];
   } else {
-    [super moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
+    [super moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:animationOptions];
   }
 }
 

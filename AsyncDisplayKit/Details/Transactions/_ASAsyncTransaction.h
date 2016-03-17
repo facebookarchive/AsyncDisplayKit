@@ -158,7 +158,6 @@ extern NSInteger const ASDefaultTransactionPriority;
 /**
  @summary Adds a block to run on the completion of the async transaction.
 
- @param queue The dispatch queue on which to execute the block.
  @param completion The completion block that will be executed with the output of the execution block when all of the
  operations in the transaction are completed. Executed and released on callbackQueue.
  */
@@ -168,7 +167,7 @@ extern NSInteger const ASDefaultTransactionPriority;
 /**
  @summary Cancels all operations in the transaction.
 
- @desc You can only cancel a commmitted transaction.
+ @desc You can only cancel a committed transaction.
 
  All completion blocks are always called, regardless of cancelation. Execution blocks may be skipped if canceled.
  */

@@ -49,6 +49,13 @@ ASDISPLAYNODE_INLINE void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, 
   }
 }
 
+ASDISPLAYNODE_INLINE void ASBoundsAndPositionForFrame(CGRect rect, CGPoint origin, CGPoint anchorPoint, CGRect *bounds, CGPoint *position)
+{
+  *bounds   = (CGRect){ origin, rect.size };
+  *position = CGPointMake(rect.origin.x + rect.size.width * anchorPoint.x,
+                          rect.origin.y + rect.size.height * anchorPoint.y);
+}
+
 @interface NSIndexPath (ASInverseComparison)
 - (NSComparisonResult)asdk_inverseCompare:(NSIndexPath *)otherIndexPath;
 @end

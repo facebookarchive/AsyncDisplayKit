@@ -213,7 +213,6 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @property (nonatomic, assign) BOOL passthroughNonlinkTouches;
 
-
 @end
 
 /**

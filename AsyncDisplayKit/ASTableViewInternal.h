@@ -12,8 +12,9 @@
 
 @interface ASTableView (Internal)
 
-@property (nonatomic, retain, readonly) ASDataController *dataController;
+@property (nonatomic, strong, readonly) ASDataController *dataController;
 @property (nonatomic, weak, readwrite) ASTableNode *tableNode;
+@property (nonatomic, strong, readonly) ASRangeController *rangeController;
 
 /**
  * Initializer.
@@ -25,7 +26,7 @@
  *
  * @param dataControllerClass A controller class injected to and used to create a data controller for the table view.
  *
- * @param asyncDataFetchingEnabled This option is reserved for future use, and currently a no-op.
+ * @param ownedByNode Indicates whether the tableView is owned by an ASTableNode.
  */
 - (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass ownedByNode:(BOOL)ownedByNode;
 

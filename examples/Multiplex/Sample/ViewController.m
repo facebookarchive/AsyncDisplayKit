@@ -39,9 +39,4 @@
   [super viewWillAppear:animated];
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 @end

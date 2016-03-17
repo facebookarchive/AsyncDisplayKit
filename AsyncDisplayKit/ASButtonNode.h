@@ -38,9 +38,7 @@
 @property (nonatomic, assign) ASVerticalAlignment contentVerticalAlignment;
 
 /**
- * @discussion insets the title and the image node
- * 
- * @param contentEdgeInsets The insets used around the title and image node
+ * @discussion The insets used around the title and image node
  */
 @property (nonatomic, assign) UIEdgeInsets contentEdgeInsets;
 

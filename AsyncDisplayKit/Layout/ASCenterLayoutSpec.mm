@@ -79,7 +79,7 @@
     MIN(size.height, (_sizingOptions & ASCenterLayoutSpecSizingOptionMinimumY) != 0 ? sublayout.size.height : size.height)
   });
 
-  // Compute the centered postion for the child
+  // Compute the centered position for the child
   BOOL shouldCenterAlongX = (_centeringOptions & ASCenterLayoutSpecCenteringX);
   BOOL shouldCenterAlongY = (_centeringOptions & ASCenterLayoutSpecCenteringY);
   sublayout.position = {

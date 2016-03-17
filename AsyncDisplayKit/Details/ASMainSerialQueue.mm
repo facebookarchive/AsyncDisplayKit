@@ -45,7 +45,7 @@
       ASDN::MutexLocker l(_serialQueueLock);
       dispatch_block_t block;
       if (_blocks.count > 0) {
-        block = [_blocks objectAtIndex:0];
+        block = _blocks[0];
         [_blocks removeObjectAtIndex:0];
       } else {
         break;
@@ -62,6 +62,11 @@
       mainThread();
     });
   }
+}
+
+- (NSString *)description
+{
+  return [[super description] stringByAppendingFormat:@" Blocks: %@", _blocks];
 }
 
 @end

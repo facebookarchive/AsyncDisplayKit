@@ -17,9 +17,11 @@
 
 static CGFloat kInsets = 15.0;
 
-@implementation SupplementaryNode {
-  ASTextNode *_textNode;
-}
+@interface SupplementaryNode ()
+@property (nonatomic, strong) ASTextNode *textNode;
+@end
+
+@implementation SupplementaryNode
 
 - (instancetype)initWithText:(NSString *)text
 {
@@ -37,7 +39,7 @@ static CGFloat kInsets = 15.0;
 {
   ASCenterLayoutSpec *center = [[ASCenterLayoutSpec alloc] init];
   center.centeringOptions = ASCenterLayoutSpecCenteringXY;
-  center.child = _textNode;
+  center.child = self.textNode;
   UIEdgeInsets insets = UIEdgeInsetsMake(kInsets, kInsets, kInsets, kInsets);
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:center];
 }
@@ -47,9 +49,9 @@ static CGFloat kInsets = 15.0;
 - (NSDictionary *)textAttributes
 {
   return @{
-           NSFontAttributeName: [UIFont systemFontOfSize:18.0],
-           NSForegroundColorAttributeName: [UIColor whiteColor],
-           };
+    NSFontAttributeName: [UIFont systemFontOfSize:18.0],
+    NSForegroundColorAttributeName: [UIColor whiteColor],
+  };
 }
 
 @end

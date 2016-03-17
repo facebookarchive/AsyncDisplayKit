@@ -11,14 +11,7 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface CommentsNode : ASControlNode {
-    
-    ASImageNode *_iconNode;
-    ASTextNode *_countNode;
-    
-    NSInteger _comentsCount;
-    
-}
+@interface CommentsNode : ASControlNode
 
 - (instancetype)initWithCommentsCount:(NSInteger)comentsCount;
 

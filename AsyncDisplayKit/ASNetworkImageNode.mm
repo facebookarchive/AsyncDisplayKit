@@ -13,10 +13,13 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEqualityHelpers.h"
 #import "ASThread.h"
+#import "ASInternalHelpers.h"
 
 #if PIN_REMOTE_IMAGE
 #import "ASPINRemoteImageDownloader.h"
 #endif
+
+static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 @interface ASNetworkImageNode ()
 {
@@ -46,6 +49,7 @@
   
   BOOL _cacheSupportsNewProtocol;
   BOOL _cacheSupportsClearing;
+  BOOL _cacheSupportsSynchronousFetch;
 }
 @end
 
@@ -63,13 +67,14 @@
   
   _downloaderSupportsNewProtocol = [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)];
   
-  ASDisplayNodeAssert([cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] || [cache respondsToSelector:@selector(fetchCachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion: or fetchCachedImageWithURL:callbackQueue:completion:");
+  ASDisplayNodeAssert(cache == nil || [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] || [cache respondsToSelector:@selector(fetchCachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion: or fetchCachedImageWithURL:callbackQueue:completion:");
   
   _downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)];
   _downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)];
   
   _cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
   _cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
+  _cacheSupportsSynchronousFetch = [cache respondsToSelector:@selector(synchronouslyFetchedCachedImageWithURL:)];
   
   _shouldCacheImage = YES;
   self.shouldBypassEnsureDisplay = YES;
@@ -127,15 +132,22 @@
 
 - (void)setDefaultImage:(UIImage *)defaultImage
 {
-  ASDN::MutexLocker l(_lock);
+  _lock.lock();
 
   if (ASObjectIsEqual(defaultImage, _defaultImage)) {
+    _lock.unlock();
     return;
   }
   _defaultImage = defaultImage;
 
   if (!_imageLoaded) {
-    self.image = _defaultImage;
+    _lock.unlock();
+    // Locking: it is important to release _lock before entering setImage:, as it needs to release the lock before -invalidateCalculatedLayout.
+    // If we continue to hold the lock here, it will still be locked until the next unlock() call, causing a possible deadlock with
+    // -[ASNetworkImageNode displayWillStart] (which is called on a different thread / main, at an unpredictable time due to ASMainRunloopQueue).
+    self.image = defaultImage;
+  } else {
+    _lock.unlock();
   }
 }
 
@@ -166,6 +178,17 @@
 - (void)displayWillStart
 {
   [super displayWillStart];
+  
+  if (_cacheSupportsSynchronousFetch) {
+    ASDN::MutexLocker l(_lock);
+    if (_imageLoaded == NO && _URL && _downloadIdentifier == nil) {
+      UIImage *result = [_cache synchronouslyFetchedCachedImageWithURL:_URL];
+      if (result) {
+        self.image = result;
+        _imageLoaded = YES;
+      }
+    }
+  }
 
   [self fetchData];
   
@@ -181,6 +204,8 @@
  in ASMultiplexImageNode as well. */
 - (void)visibilityDidChange:(BOOL)isVisible
 {
+  [super visibilityDidChange:isVisible];
+  
   if (_downloaderImplementsSetPriority) {
     ASDN::MutexLocker l(_lock);
     if (_downloadIdentifier != nil) {
@@ -227,8 +252,7 @@
     ASDN::MutexLocker l(_lock);
 
     [self _cancelImageDownload];
-    self.image = _defaultImage;
-    _imageLoaded = NO;
+    [self _clearImage];
     if (_cacheSupportsClearing) {
       [_cache clearFetchedImageFromCacheWithURL:_URL];
     }
@@ -247,6 +271,24 @@
 
 #pragma mark - Private methods -- only call with lock.
 
+- (void)_clearImage
+{
+  // Destruction of bigger images on the main thread can be expensive
+  // and can take some time, so we dispatch onto a bg queue to
+  // actually dealloc.
+  __block UIImage *image = self.image;
+  CGSize imageSize = image.size;
+  BOOL shouldReleaseImageOnBackgroundThread = imageSize.width > kMinReleaseImageOnBackgroundSize.width ||
+                                              imageSize.height > kMinReleaseImageOnBackgroundSize.height;
+  if (shouldReleaseImageOnBackgroundThread) {
+    ASPerformBlockOnBackgroundThread(^{
+      image = nil;
+    });
+  }
+  self.image = _defaultImage;
+  _imageLoaded = NO;
+}
+
 - (void)_cancelImageDownload
 {
   if (!_downloadIdentifier) {
@@ -263,25 +305,31 @@
 
 - (void)_downloadImageWithCompletion:(void (^)(UIImage *image, NSError*, id downloadIdentifier))finished
 {
-  if (_downloaderSupportsNewProtocol) {
-    _downloadIdentifier = [_downloader downloadImageWithURL:_URL
-                                              callbackQueue:dispatch_get_main_queue()
-                                           downloadProgress:NULL
-                                                 completion:^(UIImage * _Nullable image, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
-                                                   if (finished != NULL) {
-                                                     finished(image, error, downloadIdentifier);
-                                                   }
-                                                 }];
-  } else {
-    _downloadIdentifier = [_downloader downloadImageWithURL:_URL
-                                              callbackQueue:dispatch_get_main_queue()
-                                      downloadProgressBlock:NULL
-                                                 completion:^(CGImageRef responseImage, NSError *error) {
-                                                   if (finished != NULL) {
-                                                     finished([UIImage imageWithCGImage:responseImage], error, nil);
-                                                   }
-                                                 }];
-  }
+  ASPerformBlockOnBackgroundThread(^{
+    ASDN::MutexLocker l(_lock);
+    if (_downloaderSupportsNewProtocol) {
+      _downloadIdentifier = [_downloader downloadImageWithURL:_URL
+                                                callbackQueue:dispatch_get_main_queue()
+                                             downloadProgress:NULL
+                                                   completion:^(UIImage * _Nullable image, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
+                                                     if (finished != NULL) {
+                                                       finished(image, error, downloadIdentifier);
+                                                     }
+                                                   }];
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+      _downloadIdentifier = [_downloader downloadImageWithURL:_URL
+                                                callbackQueue:dispatch_get_main_queue()
+                                        downloadProgressBlock:NULL
+                                                   completion:^(CGImageRef responseImage, NSError *error) {
+                                                     if (finished != NULL) {
+                                                       finished([UIImage imageWithCGImage:responseImage], error, nil);
+                                                     }
+                                                   }];
+#pragma clang diagnostic pop
+    }
+  });
 }
 
 - (void)_lazilyLoadImageIfNecessary
@@ -378,11 +426,14 @@
                        callbackQueue:dispatch_get_main_queue()
                           completion:cacheCompletion];
         } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
           [_cache fetchCachedImageWithURL:_URL
                             callbackQueue:dispatch_get_main_queue()
                                completion:^(CGImageRef image) {
                                  cacheCompletion([UIImage imageWithCGImage:image]);
                                }];
+#pragma clang diagnostic pop
         }
       } else {
         [self _downloadImageWithCompletion:finished];

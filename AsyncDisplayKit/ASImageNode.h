@@ -33,7 +33,7 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
  * the layer's contentsCenter property.  Non-stretchable images work too, of
  * course.
  */
-@property (nullable, atomic, retain) UIImage *image;
+@property (nullable, atomic, strong) UIImage *image;
 
 /**
  @abstract The placeholder color.
@@ -94,7 +94,7 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
  * @discussion Can be used to add image effects (such as rounding, adding
  * borders, or other pattern overlays) without extraneous display calls.
  */
-@property (nonatomic, readwrite, copy) asimagenode_modification_block_t imageModificationBlock;
+@property (nullable, nonatomic, readwrite, copy) asimagenode_modification_block_t imageModificationBlock;
 
 /**
  * @abstract Marks the receiver as needing display and performs a block after
@@ -131,7 +131,7 @@ asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat
  * @abstract Image modification block that applies a tint color à la UIImage configured with
  * renderingMode set to UIImageRenderingModeAlwaysTemplate.
  *
- * @param tintColor The color to tint the image.
+ * @param color The color to tint the image.
  *
  * @see <imageModificationBlock>
  *

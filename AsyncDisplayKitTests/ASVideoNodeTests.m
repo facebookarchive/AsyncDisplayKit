@@ -13,7 +13,7 @@
 @interface ASVideoNodeTests : XCTestCase
 {
   ASVideoNode *_videoNode;
-  AVAsset *_firstAsset;
+  AVURLAsset *_firstAsset;
   AVAsset *_secondAsset;
 }
 @end
@@ -43,7 +43,7 @@
 - (void)setUp
 {
   _videoNode = [[ASVideoNode alloc] init];
-  _firstAsset = [AVAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
+  _firstAsset = [AVURLAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
   _secondAsset = [AVAsset assetWithURL:[NSURL URLWithString:@"secondURL"]];
 }
 
@@ -67,7 +67,7 @@
   _videoNode.asset = _firstAsset;
   AVPlayerItem *item = [_videoNode currentItem];
   
-  _videoNode.asset = _firstAsset;
+  _videoNode.asset = [AVAsset assetWithURL:_firstAsset.URL];
   AVPlayerItem *secondItem = [_videoNode currentItem];
   
   XCTAssertEqualObjects(item, secondItem);
@@ -140,7 +140,7 @@
   _videoNode.asset = _firstAsset;
 
   [_videoNode pause];
-  [_videoNode setInterfaceState:ASInterfaceStateVisible];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay];
   [_videoNode didLoad];
   
   XCTAssert(![_videoNode.subnodes containsObject:_videoNode.playerNode]);

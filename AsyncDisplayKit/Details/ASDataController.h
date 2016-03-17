@@ -92,39 +92,14 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 - (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
- Called for reload of elements.
- */
-- (void)dataController:(ASDataController *)dataController didReloadNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for movement of elements.
- */
-- (void)dataController:(ASDataController *)dataController didMoveNodeAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath;
-
-/**
  Called for insertion of sections.
  */
-- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray<NSArray<ASCellNode *> *> *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for deletion of sections.
  */
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for reload of sections.
- */
-- (void)dataController:(ASDataController *)dataController didReloadSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for movement of sections.
- */
-- (void)dataController:(ASDataController *)dataController didMoveSection:(NSInteger)fromIndex toSection:(NSInteger)toIndex;
-
-/**
- Called for reload data.
- */
-- (void)dataControllerDidReloadData:(ASDataController *)dataController;
 
 @end
 
@@ -156,7 +131,7 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  * @discussion If enabled, we will fetch data through `dataController:nodeAtIndexPath:` and `dataController:rowsInSection:` in background thread.
  * Otherwise, the methods will be invoked synchronically in calling thread. Enabling data fetching in async mode could avoid blocking main thread
  * while allocating cell on main thread, which is frequently reported issue for handling large scale data. On another hand, the application code
- * will take the responsibility to avoid data inconsistence. Specifically, we will lock the data source through `dataControllerLockDataSource`,
+ * will take the responsibility to avoid data inconsistency. Specifically, we will lock the data source through `dataControllerLockDataSource`,
  * and unlock it by `dataControllerUnlockDataSource` after the data fetching. The application should not update the data source while
  * the data source is locked.
  */
@@ -176,7 +151,7 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
 - (void)reloadSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 - (void)insertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
@@ -192,11 +167,13 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  */
 - (void)relayoutAllNodes;
 
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
-- (void)reloadDataWithCompletion:(void (^)())completion;
+- (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
 
-- (void)reloadDataImmediately;
+- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+- (void)waitUntilAllUpdatesAreCommitted;
 
 /** @name Data Querying */
 

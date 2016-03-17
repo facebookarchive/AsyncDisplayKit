@@ -12,6 +12,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
+#import "ASDisplayNode+Beta.h"
 
 @interface ASButtonNode ()
 {
@@ -20,16 +21,19 @@
   NSAttributedString *_normalAttributedTitle;
   NSAttributedString *_highlightedAttributedTitle;
   NSAttributedString *_selectedAttributedTitle;
+  NSAttributedString *_selectedHighlightedAttributedTitle;
   NSAttributedString *_disabledAttributedTitle;
   
   UIImage *_normalImage;
   UIImage *_highlightedImage;
   UIImage *_selectedImage;
+  UIImage *_selectedHighlightedImage;
   UIImage *_disabledImage;
 
   UIImage *_normalBackgroundImage;
   UIImage *_highlightedBackgroundImage;
   UIImage *_selectedBackgroundImage;
+  UIImage *_selectedHighlightedBackgroundImage;
   UIImage *_disabledBackgroundImage;
 }
 
@@ -42,33 +46,51 @@
 @synthesize contentVerticalAlignment = _contentVerticalAlignment;
 @synthesize contentHorizontalAlignment = _contentHorizontalAlignment;
 @synthesize contentEdgeInsets = _contentEdgeInsets;
+@synthesize titleNode = _titleNode;
+@synthesize imageNode = _imageNode;
+@synthesize backgroundImageNode = _backgroundImageNode;
 
 - (instancetype)init
 {
-  if (self = [super init]) {    
+  if (self = [super init]) {
+    self.usesImplicitHierarchyManagement = YES;
+    
     _contentSpacing = 8.0;
     _laysOutHorizontally = YES;
-
-    _titleNode = [[ASTextNode alloc] init];
-    _imageNode = [[ASImageNode alloc] init];
-    _backgroundImageNode = [[ASImageNode alloc] init];
-    [_backgroundImageNode setContentMode:UIViewContentModeScaleToFill];
-    
-    [_titleNode setLayerBacked:YES];
-    [_imageNode setLayerBacked:YES];
-    [_backgroundImageNode setLayerBacked:YES];
-    
-    [_titleNode setFlexShrink:YES];
-      
     _contentHorizontalAlignment = ASAlignmentMiddle;
     _contentVerticalAlignment = ASAlignmentCenter;
     _contentEdgeInsets = UIEdgeInsetsZero;
-    
-    [self addSubnode:_backgroundImageNode];
-    [self addSubnode:_titleNode];
-    [self addSubnode:_imageNode];
   }
   return self;
+}
+
+- (ASTextNode *)titleNode
+{
+  if (!_titleNode) {
+    _titleNode = [[ASTextNode alloc] init];
+    [_titleNode setLayerBacked:YES];
+    [_titleNode setFlexShrink:YES];
+  }
+  return _titleNode;
+}
+
+- (ASImageNode *)imageNode
+{
+  if (!_imageNode) {
+    _imageNode = [[ASImageNode alloc] init];
+    [_imageNode setLayerBacked:YES];
+  }
+  return _imageNode;
+}
+
+- (ASImageNode *)backgroundImageNode
+{
+  if (!_backgroundImageNode) {
+    _backgroundImageNode = [[ASImageNode alloc] init];
+    [_backgroundImageNode setLayerBacked:YES];
+    [_backgroundImageNode setContentMode:UIViewContentModeScaleToFill];
+  }
+  return _backgroundImageNode;
 }
 
 - (void)setLayerBacked:(BOOL)layerBacked
@@ -105,6 +127,7 @@
 - (void)setDisplaysAsynchronously:(BOOL)displaysAsynchronously
 {
   [super setDisplaysAsynchronously:displaysAsynchronously];
+  [self.backgroundImageNode setDisplaysAsynchronously:displaysAsynchronously];
   [self.imageNode setDisplaysAsynchronously:displaysAsynchronously];
   [self.titleNode setDisplaysAsynchronously:displaysAsynchronously];
 }
@@ -116,6 +139,8 @@
   UIImage *newImage;
   if (self.enabled == NO && _disabledImage) {
     newImage = _disabledImage;
+  } else if (self.highlighted && self.selected && _selectedHighlightedImage) {
+    newImage = _selectedHighlightedImage;
   } else if (self.highlighted && _highlightedImage) {
     newImage = _highlightedImage;
   } else if (self.selected && _selectedImage) {
@@ -124,8 +149,8 @@
     newImage = _normalImage;
   }
   
-  if (newImage != self.imageNode.image) {
-    self.imageNode.image = newImage;
+  if ((_imageNode != nil || newImage != nil) && newImage != self.imageNode.image) {
+    _imageNode.image = newImage;
     [self setNeedsLayout];
   }
 }
@@ -136,6 +161,8 @@
   NSAttributedString *newTitle;
   if (self.enabled == NO && _disabledAttributedTitle) {
     newTitle = _disabledAttributedTitle;
+  } else if (self.highlighted && self.selected && _selectedHighlightedAttributedTitle) {
+    newTitle = _selectedHighlightedAttributedTitle;
   } else if (self.highlighted && _highlightedAttributedTitle) {
     newTitle = _highlightedAttributedTitle;
   } else if (self.selected && _selectedAttributedTitle) {
@@ -144,8 +171,8 @@
     newTitle = _normalAttributedTitle;
   }
   
-  if (newTitle != self.titleNode.attributedString) {
-    self.titleNode.attributedString = newTitle;
+  if ((_titleNode != nil || newTitle.length > 0) && newTitle != self.titleNode.attributedString) {
+    _titleNode.attributedString = newTitle;
     [self setNeedsLayout];
   }
 }
@@ -157,6 +184,8 @@
   UIImage *newImage;
   if (self.enabled == NO && _disabledBackgroundImage) {
     newImage = _disabledBackgroundImage;
+  } else if (self.highlighted && self.selected && _selectedHighlightedBackgroundImage) {
+    newImage = _selectedHighlightedBackgroundImage;
   } else if (self.highlighted && _highlightedBackgroundImage) {
     newImage = _highlightedBackgroundImage;
   } else if (self.selected && _selectedBackgroundImage) {
@@ -165,8 +194,8 @@
     newImage = _normalBackgroundImage;
   }
   
-  if (newImage != self.backgroundImageNode.image) {
-    self.backgroundImageNode.image = newImage;
+  if ((_backgroundImageNode != nil || newImage != nil) && newImage != self.backgroundImageNode.image) {
+    _backgroundImageNode.image = newImage;
     [self setNeedsLayout];
   }
 }
@@ -242,8 +271,8 @@
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
 {
   NSDictionary *attributes = @{
-                               NSFontAttributeName: font ? font :[UIFont systemFontOfSize:[UIFont buttonFontSize]],
-                               NSForegroundColorAttributeName : color ? color : [UIColor blackColor]
+                               NSFontAttributeName: font ?: [UIFont systemFontOfSize:[UIFont buttonFontSize]],
+                               NSForegroundColorAttributeName : color ?: [UIColor blackColor]
                                };
     
   NSAttributedString *string = [[NSAttributedString alloc] initWithString:title
@@ -263,6 +292,9 @@
       
     case ASControlStateSelected:
       return _selectedAttributedTitle;
+        
+    case ASControlStateSelected | ASControlStateHighlighted:
+      return _selectedHighlightedAttributedTitle;
       
     case ASControlStateDisabled:
       return _disabledAttributedTitle;
@@ -286,6 +318,10 @@
       
     case ASControlStateSelected:
       _selectedAttributedTitle = [title copy];
+      break;
+          
+    case ASControlStateSelected | ASControlStateHighlighted:
+      _selectedHighlightedAttributedTitle = [title copy];
       break;
       
     case ASControlStateDisabled:
@@ -311,6 +347,9 @@
     case ASControlStateSelected:
       return _selectedImage;
       
+    case ASControlStateSelected | ASControlStateHighlighted:
+      return _selectedHighlightedImage;
+          
     case ASControlStateDisabled:
       return _disabledImage;
       
@@ -334,7 +373,11 @@
     case ASControlStateSelected:
       _selectedImage = image;
       break;
-      
+    
+    case ASControlStateSelected | ASControlStateHighlighted:
+      _selectedHighlightedImage = image;
+      break;
+          
     case ASControlStateDisabled:
       _disabledImage = image;
       break;
@@ -343,6 +386,30 @@
       break;
   }
   [self updateImage];
+}
+
+- (UIImage *)backgroundImageForState:(ASControlState)state
+{
+  ASDN::MutexLocker l(_propertyLock);
+  switch (state) {
+    case ASControlStateNormal:
+      return _normalBackgroundImage;
+    
+    case ASControlStateHighlighted:
+      return _highlightedBackgroundImage;
+    
+    case ASControlStateSelected:
+      return _selectedBackgroundImage;
+    
+    case ASControlStateSelected | ASControlStateHighlighted:
+      return _selectedHighlightedBackgroundImage;
+    
+    case ASControlStateDisabled:
+      return _disabledBackgroundImage;
+    
+    default:
+      return _normalBackgroundImage;
+  }
 }
 
 - (void)setBackgroundImage:(UIImage *)image forState:(ASControlState)state
@@ -360,6 +427,10 @@
     case ASControlStateSelected:
       _selectedBackgroundImage = image;
       break;
+          
+    case ASControlStateSelected | ASControlStateHighlighted:
+      _selectedHighlightedBackgroundImage = image;
+      break;
       
     case ASControlStateDisabled:
       _disabledBackgroundImage = image;
@@ -369,28 +440,6 @@
       break;
   }
   [self updateBackgroundImage];
-}
-
-- (UIImage *)backgroundImageForState:(ASControlState)state
-{
-  ASDN::MutexLocker l(_propertyLock);
-  switch (state) {
-    case ASControlStateNormal:
-      return _normalBackgroundImage;
-      
-    case ASControlStateHighlighted:
-      return _highlightedBackgroundImage;
-      
-    case ASControlStateSelected:
-      return _selectedBackgroundImage;
-      
-    case ASControlStateDisabled:
-      return _disabledBackgroundImage;
-      
-    default:
-      return _normalBackgroundImage;
-  }
-
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
@@ -409,12 +458,12 @@
   }
   
   NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:2];
-  if (self.imageNode.image) {
-    [children addObject:self.imageNode];
+  if (_imageNode.image) {
+    [children addObject:_imageNode];
   }
   
-  if (self.titleNode.attributedString.length > 0) {
-    [children addObject:self.titleNode];
+  if (_titleNode.attributedString.length > 0) {
+    [children addObject:_titleNode];
   }
   
   stack.children = children;
@@ -425,9 +474,9 @@
     spec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentEdgeInsets child:spec];
   }
   
-  if (self.backgroundImageNode.image) {
+  if (_backgroundImageNode.image) {
     spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec
-                                                      background:self.backgroundImageNode];
+                                                      background:_backgroundImageNode];
   }
   
   return spec;
@@ -436,9 +485,9 @@
 - (void)layout
 {
   [super layout];
-  self.backgroundImageNode.hidden = self.backgroundImageNode.image == nil;
-  self.imageNode.hidden = self.imageNode.image == nil;
-  self.titleNode.hidden = self.titleNode.attributedString.length > 0 == NO;
+  _backgroundImageNode.hidden = (_backgroundImageNode.image == nil);
+  _imageNode.hidden = (_imageNode.image == nil);
+  _titleNode.hidden = (_titleNode.attributedString.length == 0);
 }
 
 @end

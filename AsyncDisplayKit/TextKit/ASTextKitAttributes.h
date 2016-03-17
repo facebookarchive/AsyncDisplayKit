@@ -24,7 +24,7 @@ extern NSString *const ASTextKitEntityAttributeName;
 
 static inline BOOL _objectsEqual(id<NSObject> obj1, id<NSObject> obj2)
 {
-  return obj1 == obj2 ? YES : [obj1 isEqual:obj2];
+  return obj1 == obj2 || [obj1 isEqual:obj2];
 }
 
 /**
@@ -87,18 +87,19 @@ struct ASTextKitAttributes {
    */
   NSArray *pointSizeScaleFactors;
   /**
-   The currently applied scale factor. Only valid if pointSizeScaleFactors are provided. Defaults to 0 (no scaling)
+   An optional block that returns a custom layout manager subclass. If nil, defaults to NSLayoutManager.
    */
-  CGFloat currentScaleFactor;
-  /**
-   A pointer to a function that that returns a custom layout manager subclass. If nil, defaults to NSLayoutManager.
-   */
-  NSLayoutManager *(*layoutManagerFactory)(void);
+  NSLayoutManager * (^layoutManagerCreationBlock)(void);
   
   /**
    An optional delegate for the NSLayoutManager
    */
   id<NSLayoutManagerDelegate> layoutManagerDelegate;
+
+  /**
+   An optional block that returns a custom NSTextStorage for the layout manager. 
+   */
+  NSTextStorage * (^textStorageCreationBlock)(NSAttributedString *attributedString);
 
   /**
    We provide an explicit copy function so we can use aggregate initializer syntax while providing copy semantics for
@@ -118,9 +119,9 @@ struct ASTextKitAttributes {
       shadowOpacity,
       shadowRadius,
       pointSizeScaleFactors,
-      currentScaleFactor,
-      layoutManagerFactory,
+      layoutManagerCreationBlock,
       layoutManagerDelegate,
+      textStorageCreationBlock,
     };
   };
 
@@ -132,8 +133,8 @@ struct ASTextKitAttributes {
     && shadowOpacity == other.shadowOpacity
     && shadowRadius == other.shadowRadius
     && [pointSizeScaleFactors isEqualToArray:other.pointSizeScaleFactors]
-    && currentScaleFactor == currentScaleFactor
-    && layoutManagerFactory == other.layoutManagerFactory
+    && layoutManagerCreationBlock == other.layoutManagerCreationBlock
+    && textStorageCreationBlock == other.textStorageCreationBlock
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)
     && _objectsEqual(exclusionPaths, other.exclusionPaths)
     && _objectsEqual(avoidTailTruncationSet, other.avoidTailTruncationSet)

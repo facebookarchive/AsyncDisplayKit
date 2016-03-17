@@ -9,12 +9,23 @@
 #ifndef ASDataControllerSubclasses_Included
 #define ASDataControllerSubclasses_Included
 
-//#import "ASDataController.h"
+@class ASIndexedNodeContext;
+
+typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths);
 
 @interface ASDataController (Subclasses)
 
 #pragma mark - Internal editing & completed store querying
-@property (nonatomic, strong, readonly) NSMutableDictionary *editingNode;
+
+/**
+ * Provides a collection of index paths for nodes of the given kind that are currently in the editing store
+ */
+- (NSArray *)indexPathsForEditingNodesOfKind:(NSString *)kind;
+
+/**
+ * Read-only access to the underlying editing nodes of the given kind
+ */
+- (NSMutableArray *)editingNodesOfKind:(NSString *)kind;
 
 /**
  * Read only access to the underlying completed nodes of the given kind
@@ -26,7 +37,7 @@
 /**
  * Measure and layout the given nodes in optimized batches, constraining each to a given size in `constrainedSizeForNodeOfKind:atIndexPath:`.
  */
-- (void)layoutAndInsertFromNodeBlocks:(NSArray<ASCellNodeBlock> *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths completion:(void (^)(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths))completionBlock;
+- (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind completion:(ASDataControllerCompletionBlock)completionBlock;
 
 /*
  * Perform measurement and layout of loaded nodes on the main thread, skipping unloaded nodes.
@@ -34,7 +45,7 @@
  * @discussion Once nodes have loaded their views, we can't layout in the background so this is a chance
  * to do so immediately on the main thread.
  */
-- (void)layoutLoadedNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths;
+- (void)layoutLoadedNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind;
 
 /**
  * Provides the size range for a specific node during the layout process.
@@ -44,34 +55,24 @@
 #pragma mark - Node & Section Insertion/Deletion API
 
 /**
- * Inserts the given nodes of the specified kind into the backing store.
+ * Inserts the given nodes of the specified kind into the backing store, calling completion on the main thread when the write finishes.
  */
-- (void)insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths;
+- (void)insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(ASDataControllerCompletionBlock)completionBlock;
 
 /**
- * Deletes the given nodes of the specified kind in the backing store.
+ * Deletes the given nodes of the specified kind in the backing store, calling completion on the main thread when the deletion finishes.
  */
-- (NSArray *)deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths;
+- (void)deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(ASDataControllerCompletionBlock)completionBlock;
 
 /**
- * Inserts the given sections of the specified kind in the backing store.
+ * Inserts the given sections of the specified kind in the backing store, calling completion on the main thread when finished.
  */
-- (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet;
+- (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSArray *sections, NSIndexSet *indexSet))completionBlock;
 
 /**
- * Deletes the given sections of the specified kind in the backing store.
+ * Deletes the given sections of the specified kind in the backing store, calling completion on the main thread when finished.
  */
-- (void)deleteSectionsOfKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet;
-
-/**
- * Moves the given section of the specified kind in the backing store.
- */
-- (void)moveSection:(NSInteger)section ofKind:(NSString *)kind toSection:(NSInteger)newSection;
-
-/**
- * Commit the change for insert/delete node or sections to the backing store, calling completion on the main thread when finished.
- */
-- (void)commitChangesToNodesOfKind:(NSString *)kind withCompletion:(void (^)())completionBlock;
+- (void)deleteSectionsOfKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSIndexSet *indexSet))completionBlock;
 
 #pragma mark - Data Manipulation Hooks
 

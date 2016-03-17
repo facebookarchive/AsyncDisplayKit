@@ -57,12 +57,6 @@
   _asyncDelegate = asyncDelegate;
 }
 
-- (void)setContents:(id)contents
-{
-  ASDisplayNodeAssertMainThread();
-  [super setContents:contents];
-}
-
 - (BOOL)isDisplaySuspended
 {
   ASDN::MutexLocker l(_displaySuspendedLock);
@@ -84,6 +78,26 @@
   }
 }
 
+- (void)setBounds:(CGRect)bounds
+{
+  [super setBounds:bounds];
+  self.asyncdisplaykit_node.threadSafeBounds = bounds;
+}
+
+#if DEBUG // These override is strictly to help detect application-level threading errors.  Avoid method overhead in release.
+- (void)setContents:(id)contents
+{
+  ASDisplayNodeAssertMainThread();
+  [super setContents:contents];
+}
+
+- (void)setNeedsLayout
+{
+  ASDisplayNodeAssertMainThread();
+  [super setNeedsLayout];
+}
+#endif
+
 - (void)layoutSublayers
 { 
   [super layoutSublayers];
@@ -99,17 +113,12 @@
   }
 }
 
-- (void)setNeedsLayout
-{
-  ASDisplayNodeAssertMainThread();
-  [super setNeedsLayout];
-}
-
 - (void)setNeedsDisplay
 {
   ASDisplayNodeAssertMainThread();
 
-  ASDN::MutexLocker l(_displaySuspendedLock);
+  _displaySuspendedLock.lock();
+  
   // FIXME: Reconsider whether we should cancel a display in progress.
   // We should definitely cancel a display that is scheduled, but unstarted display.
   [self cancelAsyncDisplay];
@@ -118,6 +127,7 @@
   if (!_displaySuspended) {
     [super setNeedsDisplay];
   }
+  _displaySuspendedLock.unlock();
 }
 
 #pragma mark -
@@ -178,18 +188,29 @@
 
 - (void)display:(BOOL)asynchronously
 {
-  [self _performBlockWithAsyncDelegate:^(id<_ASDisplayLayerDelegate> asyncDelegate) {
-    [asyncDelegate displayAsyncLayer:self asynchronously:asynchronously];
-  }];
+  id<_ASDisplayLayerDelegate> __attribute__((objc_precise_lifetime)) strongAsyncDelegate;
+  {
+    _asyncDelegateLock.lock();
+    strongAsyncDelegate = _asyncDelegate;
+    _asyncDelegateLock.unlock();
+  }
+  
+  [strongAsyncDelegate displayAsyncLayer:self asynchronously:asynchronously];
 }
 
 - (void)cancelAsyncDisplay
 {
   ASDisplayNodeAssertMainThread();
   [_displaySentinel increment];
-  [self _performBlockWithAsyncDelegate:^(id<_ASDisplayLayerDelegate> asyncDelegate) {
-    [asyncDelegate cancelDisplayAsyncLayer:self];
-  }];
+
+  id<_ASDisplayLayerDelegate> __attribute__((objc_precise_lifetime)) strongAsyncDelegate;
+  {
+    _asyncDelegateLock.lock();
+    strongAsyncDelegate = _asyncDelegate;
+    _asyncDelegateLock.unlock();
+  }
+
+  [strongAsyncDelegate cancelDisplayAsyncLayer:self];
 }
 
 - (NSString *)description
@@ -197,19 +218,6 @@
   // The standard UIView description is useless for debugging because all ASDisplayNode subclasses have _ASDisplayView-type views.
   // This allows us to at least see the name of the node subclass and get its pointer directly from [[UIWindow keyWindow] recursiveDescription].
   return [NSString stringWithFormat:@"<%@, layer = %@>", self.asyncdisplaykit_node, [super description]];
-}
-
-#pragma mark -
-#pragma mark Helper Methods
-
-- (void)_performBlockWithAsyncDelegate:(void(^)(id<_ASDisplayLayerDelegate> asyncDelegate))block
-{
-  id<_ASDisplayLayerDelegate> __attribute__((objc_precise_lifetime)) strongAsyncDelegate;
-  {
-    ASDN::MutexLocker l(_asyncDelegateLock);
-    strongAsyncDelegate = _asyncDelegate;
-  }
-  block(strongAsyncDelegate);
 }
 
 @end

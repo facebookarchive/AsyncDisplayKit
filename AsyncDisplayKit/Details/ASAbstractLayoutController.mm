@@ -51,6 +51,27 @@ extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningPar
     .trailingBufferScreenfuls = 2
   };
   
+  _tuningParameters[ASLayoutRangeModeVisibleOnly][ASLayoutRangeTypeDisplay] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  _tuningParameters[ASLayoutRangeModeVisibleOnly][ASLayoutRangeTypeFetchData] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  
+  // The Low Memory range mode has special handling. Because a zero range still includes the visible area / bounds,
+  // in order to implement the behavior of releasing all graphics memory (backing stores), ASRangeController must check
+  // for this range mode and use an empty set for displayIndexPaths rather than querying the ASLayoutController for the indexPaths.
+  _tuningParameters[ASLayoutRangeModeLowMemory][ASLayoutRangeTypeDisplay] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  _tuningParameters[ASLayoutRangeModeLowMemory][ASLayoutRangeTypeFetchData] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  
   return self;
 }
 

@@ -1,11 +1,11 @@
 Pod::Spec.new do |spec|
   spec.name         = 'AsyncDisplayKit'
-  spec.version      = '1.9.6'
+  spec.version      = '1.9.7'
   spec.license      =  { :type => 'BSD' }
   spec.homepage     = 'http://asyncdisplaykit.org'
   spec.authors      = { 'Scott Goodson' => 'scottgoodson@gmail.com', 'Ryan Nystrom' => 'rnystrom@fb.com' }
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
-  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.9.6' }
+  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.9.7' }
 
   spec.documentation_url = 'http://asyncdisplaykit.org/appledoc/'
 
@@ -51,7 +51,7 @@ Pod::Spec.new do |spec|
   
   spec.subspec 'PINRemoteImage' do |pin|
       pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
-      pin.dependency 'PINRemoteImage/iOS', '>= 2'
+      pin.dependency 'PINRemoteImage/iOS', '>= 2.1'
       pin.dependency 'AsyncDisplayKit/ASDealloc2MainObject'
   end
   
