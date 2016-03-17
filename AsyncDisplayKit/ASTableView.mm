@@ -503,7 +503,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   CGFloat dir = (inserting) ? +1 : -1;
   CGFloat adjustment = 0;
-  NSIndexPath *top = _contentOffsetAdjustmentTopVisibleRow ?: self.indexPathsForVisibleRows.firstObject;
+  NSIndexPath *top = _contentOffsetAdjustmentTopVisibleRow ? : self.indexPathsForVisibleRows.firstObject;
 
   for (int index = 0; index < indexPaths.count; index++) {
     NSIndexPath *indexPath = indexPaths[index];
