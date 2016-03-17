@@ -49,9 +49,10 @@ if [ "$MODE" = "examples" ]; then
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
           local_repo=`pwd`
+          current_branch=`git rev-parse --abbrev-ref HEAD`
           cd $example
           
-          echo "git \"file://${local_repo}\" \"master\"" > "Cartfile"
+          echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
           carthage update --platform iOS
           
           xctool \
