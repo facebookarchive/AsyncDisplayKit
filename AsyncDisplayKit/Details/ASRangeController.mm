@@ -109,6 +109,12 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   }
 }
 
+- (void)clearCurrentRangeModeUpdate
+{
+  _didUpdateCurrentRange = NO;
+  [self scheduleRangeUpdate];
+}
+
 - (void)scheduleRangeUpdate
 {
   if (_queuedRangeUpdate) {
@@ -234,7 +240,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _allPreviousIndexPaths = allCurrentIndexPaths;
   
   _currentRangeMode = rangeMode;
-  _didUpdateCurrentRange = NO;
   
   if (!_rangeIsValid) {
     [allIndexPaths addObjectsFromArray:ASIndexPathsForTwoDimensionalArray(allNodes)];
