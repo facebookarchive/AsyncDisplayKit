@@ -15,9 +15,16 @@
  */
 @property (nonatomic, copy) NSArray *pointSizeScaleFactors;
 
+#pragma mark - ASTextKit Customization
 /**
- @abstract The currently applied scale factor, or 0 if the text node is not being scaled.
+ A block to provide a hook to provide a custom NSLayoutManager to the ASTextKitRenderer
  */
-@property (nonatomic, assign, readonly) CGFloat currentScaleFactor;
+@property (nonatomic, copy) NSLayoutManager * (^layoutManagerCreationBlock)(void);
+
+/**
+ A block to provide a hook to provide a NSTextStorage to the Text Kit's layout manager.
+ */
+@property (nonatomic, copy) NSTextStorage * (^textStorageCreationBlock)(NSAttributedString *attributedString);
+
 
 @end

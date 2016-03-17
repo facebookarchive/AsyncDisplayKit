@@ -23,7 +23,7 @@
 
 // Keep the node alive while its view is active.  If you create a view, add its layer to a layer hierarchy, then release
 // the view, the layer retains the view to prevent a crash.  This replicates this behaviour for the node abstraction.
-@property (nonatomic, retain, readwrite) ASDisplayNode *keepalive_node;
+@property (nonatomic, strong, readwrite) ASDisplayNode *keepalive_node;
 @end
 
 @implementation _ASDisplayView
@@ -199,6 +199,12 @@
 
   // Do our own mapping so as not to call super and muck up needsDisplayOnBoundsChange. If we're in a production build, fall back to resize if we see redraw
   self.layer.contentsGravity = (contentMode != UIViewContentModeRedraw) ? ASDisplayNodeCAContentsGravityFromUIContentMode(contentMode) : kCAGravityResize;
+}
+
+- (void)setBounds:(CGRect)bounds
+{
+  [super setBounds:bounds];
+  _node.threadSafeBounds = bounds;
 }
 
 #pragma mark - Event Handling + UIResponder Overrides

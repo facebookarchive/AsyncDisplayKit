@@ -218,10 +218,9 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Renderer Management
 
-//only safe to call on the main thread because self.bounds is only safe to call on the main thread one our node is loaded
 - (ASTextKitRenderer *)_renderer
 {
-  return [self _rendererWithBounds:self.bounds];
+  return [self _rendererWithBounds:self.threadSafeBounds];
 }
 
 - (ASTextKitRenderer *)_rendererWithBounds:(CGRect)bounds
@@ -244,7 +243,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
     .pointSizeScaleFactors = _pointSizeScaleFactors,
-    .currentScaleFactor = self.currentScaleFactor,
     .layoutManagerCreationBlock = self.layoutManagerCreationBlock,
     .textStorageCreationBlock = self.textStorageCreationBlock,
   };
@@ -269,7 +267,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)_invalidateRendererIfNeeded
 {
-  [self _invalidateRendererIfNeededForBoundsSize:self.bounds.size];
+  [self _invalidateRendererIfNeededForBoundsSize:self.threadSafeBounds.size];
 }
 
 - (void)_invalidateRendererIfNeededForBoundsSize:(CGSize)boundsSize
@@ -321,6 +319,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 {
   ASLayout *layout = self.calculatedLayout;
   if (layout != nil) {
+    _constrainedSize = layout.size;
     _renderer.constrainedSize = layout.size;
   }
 }
@@ -339,8 +338,16 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   [self setNeedsDisplay];
   
   CGSize size = [[self _renderer] size];
-  // the renderer computes the current scale factor during sizing, so let's grab it here
-  _currentScaleFactor = _renderer.currentScaleFactor;
+  if (self.attributedString.length > 0) {
+    CGFloat screenScale = ASScreenScale();
+    self.ascender = round([[_attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
+    self.descender = round([[_attributedString attribute:NSFontAttributeName atIndex:_attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+    if (_renderer.currentScaleFactor > 0 && _renderer.currentScaleFactor < 1.0) {
+      // while not perfect, this is a good estimate of what the ascender of the scaled font will be.
+      self.ascender *= _renderer.currentScaleFactor;
+      self.descender *= _renderer.currentScaleFactor;
+    }
+  }
   return size;
 }
 
@@ -378,14 +385,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     self.isAccessibilityElement = NO;
   } else {
     self.isAccessibilityElement = YES;
-  }
-
-  // reset the scale factor if we get a new string.
-  _currentScaleFactor = 0;
-  if (attributedString.length > 0) {
-    CGFloat screenScale = ASScreenScale();
-    self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
-    self.descender = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
   }
 }
 
@@ -443,7 +442,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
-  return [[ASTextNodeDrawParameters alloc] initWithBounds:self.bounds backgroundColor:self.backgroundColor];
+  return [[ASTextNodeDrawParameters alloc] initWithBounds:self.threadSafeBounds backgroundColor:self.backgroundColor];
 }
 
 #pragma mark - Attributes
@@ -476,7 +475,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   // Final output vars
   __block id linkAttributeValue = nil;
-  __block NSString *linkAttributeName = nil;
   __block BOOL inTruncationMessage = NO;
 
   [renderer enumerateTextIndexesAtPosition:point usingBlock:^(NSUInteger characterIndex, CGRect glyphBoundingRect, BOOL *stop) {
@@ -545,7 +543,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
         // Set the values for the next iteration
         linkAttributeValue = value;
-        linkAttributeName = name;
 
         break;
       }
@@ -579,7 +576,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   if (([self _pendingLinkTap] || [self _pendingTruncationTap])
       && [gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]
-      && CGRectContainsPoint(self.view.bounds, [gestureRecognizer locationInView:self.view])) {
+      && CGRectContainsPoint(self.threadSafeBounds, [gestureRecognizer locationInView:self.view])) {
     return NO;
   }
 
@@ -897,11 +894,16 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 {
   [super touchesMoved:touches withEvent:event];
 
+  UITouch *touch = [touches anyObject];
+  CGPoint locationInView = [touch locationInView:self.view];
+  // on 3D Touch enabled phones, this gets fired with changes in force, and usually will get fired immediately after touchesBegan:withEvent:
+  if (CGPointEqualToPoint([touch previousLocationInView:self.view], locationInView))
+    return;
+  
   // If touch has moved out of the current highlight range, clear the highlight.
   if (_highlightRange.length > 0) {
     NSRange range = NSMakeRange(0, 0);
-    CGPoint point = [[touches anyObject] locationInView:self.view];
-    [self _linkAttributeValueAtPoint:point
+    [self _linkAttributeValueAtPoint:locationInView
                        attributeName:NULL
                                range:&range
        inAdditionalTruncationMessage:NULL
@@ -995,7 +997,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
-//only safe to call on main thread, because [self _renderer] is only safe to call on the main thread
 - (UIEdgeInsets)shadowPadding
 {
   return [self shadowPaddingWithRenderer:[self _renderer]];
@@ -1117,6 +1118,10 @@ static NSAttributedString *DefaultTruncationAttributedString()
  */
 - (NSAttributedString *)_composedTruncationString
 {
+  //If we have neither return the default
+  if (!_additionalTruncationMessage && !_truncationAttributedString) {
+    return _composedTruncationString;
+  }
   // Short circuit if we only have one or the other.
   if (!_additionalTruncationMessage) {
     return _truncationAttributedString;

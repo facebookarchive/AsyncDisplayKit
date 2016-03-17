@@ -131,19 +131,11 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  * @discussion If enabled, we will fetch data through `dataController:nodeAtIndexPath:` and `dataController:rowsInSection:` in background thread.
  * Otherwise, the methods will be invoked synchronically in calling thread. Enabling data fetching in async mode could avoid blocking main thread
  * while allocating cell on main thread, which is frequently reported issue for handling large scale data. On another hand, the application code
- * will take the responsibility to avoid data inconsistence. Specifically, we will lock the data source through `dataControllerLockDataSource`,
+ * will take the responsibility to avoid data inconsistency. Specifically, we will lock the data source through `dataControllerLockDataSource`,
  * and unlock it by `dataControllerUnlockDataSource` after the data fetching. The application should not update the data source while
  * the data source is locked.
  */
 - (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled;
-
-/** @name Initial loading
- *
- * @discussion This method allows choosing an animation style for the first load of content.  It is typically used just once,
- * for example in viewWillAppear:, to specify an animation option for the information already present in the asyncDataSource.
- */
-
-- (void)initialDataLoadingWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /** @name Data Updating */
 
@@ -180,6 +172,8 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 - (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
 
 - (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+- (void)waitUntilAllUpdatesAreCommitted;
 
 /** @name Data Querying */
 

@@ -31,7 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param child A child to be added.
  *
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
- * reponsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
+ * responsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
  * only require a single child.
  *
  * For layout specs that require a known number of children (ASBackgroundLayoutSpec, for example)
@@ -50,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param identifier An identifier associated with the child.
  *
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
- * reponsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
+ * responsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
  * only require a single child.
  *
  * For layout specs that require a known number of children (ASBackgroundLayoutSpec, for example)

@@ -34,34 +34,21 @@ static NSUInteger kNumberOfImages = 14;
 
 - (instancetype)init
 {
-  if (!(self = [super init]))
-    return nil;
-  
-  _sections = [NSMutableArray array];
-  [_sections addObject:[NSMutableArray array]];
-  for (NSUInteger idx = 0, section = 0; idx < kNumberOfImages; idx++) {
-    NSString *name = [NSString stringWithFormat:@"image_%lu.jpg", (unsigned long)idx];
-    [_sections[section] addObject:[UIImage imageNamed:name]];
-    if ((idx + 1) % 5 == 0 && idx < kNumberOfImages - 1) {
-      section++;
-      [_sections addObject:[NSMutableArray array]];
+  self = [super init];
+  if (self) {
+    
+    _sections = [NSMutableArray array];
+    [_sections addObject:[NSMutableArray array]];
+    for (NSUInteger idx = 0, section = 0; idx < kNumberOfImages; idx++) {
+      NSString *name = [NSString stringWithFormat:@"image_%lu.jpg", (unsigned long)idx];
+      [_sections[section] addObject:[UIImage imageNamed:name]];
+      if ((idx + 1) % 5 == 0 && idx < kNumberOfImages - 1) {
+        section++;
+        [_sections addObject:[NSMutableArray array]];
+      }
     }
+    
   }
-  
-  MosaicCollectionViewLayout *layout = [[MosaicCollectionViewLayout alloc] init];
-  layout.numberOfColumns = 2;
-  layout.headerHeight = 44.0;
-  
-  _layoutInspector = [[MosaicCollectionViewLayoutInspector alloc] init];
-  
-  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:YES];
-  _collectionView.asyncDataSource = self;
-  _collectionView.asyncDelegate = self;
-  _collectionView.layoutInspector = _layoutInspector;
-  _collectionView.backgroundColor = [UIColor whiteColor];
-  
-  [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  
   return self;
 }
 
@@ -69,17 +56,27 @@ static NSUInteger kNumberOfImages = 14;
 {
   [super viewDidLoad];
   
+  MosaicCollectionViewLayout *layout = [[MosaicCollectionViewLayout alloc] init];
+  layout.numberOfColumns = 2;
+  layout.headerHeight = 44.0;
+  
+  _layoutInspector = [[MosaicCollectionViewLayoutInspector alloc] init];
+  
+  _collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
+  _collectionView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+  _collectionView.asyncDataSource = self;
+  _collectionView.asyncDelegate = self;
+  _collectionView.layoutInspector = _layoutInspector;
+  _collectionView.backgroundColor = [UIColor whiteColor];
+  
+  [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   [self.view addSubview:_collectionView];
 }
 
-- (void)viewWillLayoutSubviews
+- (void)dealloc
 {
-  _collectionView.frame = self.view.bounds;
-}
-
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
+  _collectionView.asyncDataSource = nil;
+  _collectionView.asyncDelegate = nil;
 }
 
 - (void)reloadTapped
@@ -90,16 +87,17 @@ static NSUInteger kNumberOfImages = 14;
 #pragma mark -
 #pragma mark ASCollectionView data source.
 
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASCellNode *node = [[ASCellNode alloc] initWithViewControllerBlock:^UIViewController *{
-    return [[ImageViewController alloc] initWithImage:_sections[indexPath.section][indexPath.item]];
-  } didLoadBlock:nil];
-  
-  node.layer.borderWidth = 1.0;
-  node.layer.borderColor = [UIColor blackColor].CGColor;
-  
-  return node;
+  UIImage *image = _sections[indexPath.section][indexPath.item];
+  return ^{
+    return [[ASCellNode alloc] initWithViewControllerBlock:^UIViewController *{
+      return [[ImageViewController alloc] initWithImage:image];
+    } didLoadBlock:^(ASDisplayNode * _Nonnull node) {
+      node.layer.borderWidth = 1.0;
+      node.layer.borderColor = [UIColor blackColor].CGColor;
+    }];
+  };
 }
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -108,11 +106,13 @@ static NSUInteger kNumberOfImages = 14;
   return [[SupplementaryNode alloc] initWithText:text];
 }
 
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
   return _sections.count;
 }
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
   return [_sections[section] count];
 }
 

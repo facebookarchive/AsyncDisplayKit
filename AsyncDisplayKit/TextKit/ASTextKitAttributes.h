@@ -24,7 +24,7 @@ extern NSString *const ASTextKitEntityAttributeName;
 
 static inline BOOL _objectsEqual(id<NSObject> obj1, id<NSObject> obj2)
 {
-  return obj1 == obj2 ? YES : [obj1 isEqual:obj2];
+  return obj1 == obj2 || [obj1 isEqual:obj2];
 }
 
 /**
@@ -87,10 +87,6 @@ struct ASTextKitAttributes {
    */
   NSArray *pointSizeScaleFactors;
   /**
-   The currently applied scale factor. Only valid if pointSizeScaleFactors are provided. Defaults to 0 (no scaling)
-   */
-  CGFloat currentScaleFactor;
-  /**
    An optional block that returns a custom layout manager subclass. If nil, defaults to NSLayoutManager.
    */
   NSLayoutManager * (^layoutManagerCreationBlock)(void);
@@ -123,7 +119,6 @@ struct ASTextKitAttributes {
       shadowOpacity,
       shadowRadius,
       pointSizeScaleFactors,
-      currentScaleFactor,
       layoutManagerCreationBlock,
       layoutManagerDelegate,
       textStorageCreationBlock,
@@ -138,7 +133,6 @@ struct ASTextKitAttributes {
     && shadowOpacity == other.shadowOpacity
     && shadowRadius == other.shadowRadius
     && [pointSizeScaleFactors isEqualToArray:other.pointSizeScaleFactors]
-    && currentScaleFactor == currentScaleFactor
     && layoutManagerCreationBlock == other.layoutManagerCreationBlock
     && textStorageCreationBlock == other.textStorageCreationBlock
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)

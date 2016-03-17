@@ -9,10 +9,14 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import "ASDisplayNode.h"
 
-@interface SupplementaryNode : ASCellNode
+@class ASCollectionNode;
 
-- (instancetype)initWithText:(NSString *)text;
+@interface DetailRootNode : ASDisplayNode
+
+@property (nonatomic, strong, readonly) ASCollectionNode *collectionNode;
+
+- (instancetype)initWithImageCategory:(NSString *)imageCategory;
 
 @end

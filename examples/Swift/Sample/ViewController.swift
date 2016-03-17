@@ -41,10 +41,6 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
     fatalError("storyboards are incompatible with truth and beauty")
   }
 
-  override func prefersStatusBarHidden() -> Bool {
-    return true
-  }
-
   // MARK: ASTableView data source and delegate.
 
   func tableView(tableView: ASTableView, nodeForRowAtIndexPath indexPath: NSIndexPath) -> ASCellNode {

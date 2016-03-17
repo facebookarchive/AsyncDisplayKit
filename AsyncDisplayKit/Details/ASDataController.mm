@@ -19,6 +19,8 @@
 #import "ASMainSerialQueue.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASThread.h"
+#import "ASIndexedNodeContext.h"
+#import "ASDataController+Subclasses.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -32,7 +34,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 @interface ASDataController () {
   NSMutableArray *_externalCompletedNodes;    // Main thread only.  External data access can immediately query this if available.
   NSMutableDictionary *_completedNodes;       // Main thread only.  External data access can immediately query this if _externalCompletedNodes is unavailable.
-  NSMutableDictionary *_editingNodes;         // Modified on _editingTransactionQueue only.  Updates propogated to _completedNodes.
+  NSMutableDictionary *_editingNodes;         // Modified on _editingTransactionQueue only.  Updates propagated to _completedNodes.
   
   ASMainSerialQueue *_mainSerialQueue;
   
@@ -40,6 +42,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   NSOperationQueue *_editingTransactionQueue; // Serial background queue.  Dispatches concurrent layout and manages _editingNodes.
   
   BOOL _asyncDataFetchingEnabled;
+  
+  BOOL _initialReloadDataHasBeenCalled;
 
   BOOL _delegateDidInsertNodes;
   BOOL _delegateDidDeleteNodes;
@@ -110,27 +114,28 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Cell Layout
 
-- (void)batchLayoutNodes:(NSArray<ASCellNodeBlock> *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths completion:(void (^)(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths))completionBlock
+- (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind completion:(ASDataControllerCompletionBlock)completionBlock
 {
   NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
+  NSUInteger count = contexts.count;
   
   // Processing in batches
-  for (NSUInteger i = 0; i < indexPaths.count; i += blockSize) {
-    NSRange batchedRange = NSMakeRange(i, MIN(indexPaths.count - i, blockSize));
-    NSArray *batchedIndexPaths = [indexPaths subarrayWithRange:batchedRange];
-    NSArray *batchedNodes = [nodes subarrayWithRange:batchedRange];
-    [self _layoutNodes:batchedNodes ofKind:kind atIndexPaths:batchedIndexPaths completion:completionBlock];
+  for (NSUInteger i = 0; i < count; i += blockSize) {
+    NSRange batchedRange = NSMakeRange(i, MIN(count - i, blockSize));
+    NSArray<ASIndexedNodeContext *> *batchedContexts = [contexts subarrayWithRange:batchedRange];
+    [self _layoutNodesFromContexts:batchedContexts ofKind:kind completion:completionBlock];
   }
 }
 
-- (void)layoutLoadedNodes:(NSArray<ASCellNode *> *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths {
+- (void)layoutLoadedNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind
+{
   NSAssert(NSThread.isMainThread, @"Main thread layout must be on the main thread.");
+  ASDisplayNodeAssertTrue(nodes.count == contexts.count);
   
-  [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, __unused BOOL * stop) {
+  [contexts enumerateObjectsUsingBlock:^(ASIndexedNodeContext *context, NSUInteger idx, __unused BOOL * stop) {
     ASCellNode *node = nodes[idx];
     if (node.isNodeLoaded) {
-      ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
-      [self _layoutNode:node withConstrainedSize:constrainedSize];
+      [self _layoutNode:node withConstrainedSize:context.constrainedSize];
     }
   }];
 }
@@ -147,27 +152,26 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 /**
  * Measures and defines the layout for each node in optimized batches on an editing queue, inserting the results into the backing store.
  */
-- (void)_batchLayoutNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)_batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  [self batchLayoutNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
+  [self batchLayoutNodesFromContexts:contexts ofKind:ASDataControllerRowNodeKind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
     // Insert finished nodes into data storage
     [self _insertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   }];
 }
 
-- (void)_layoutNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
+- (void)_layoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind completion:(ASDataControllerCompletionBlock)completionBlock
 {
-  if (!nodes.count) {
+  if (!contexts.count) {
     return;
   }
 
-  NSUInteger nodeCount = nodes.count;
+  NSUInteger nodeCount = contexts.count;
   NSMutableArray<ASCellNode *> *allocatedNodes = [NSMutableArray<ASCellNode *> arrayWithCapacity:nodeCount];
   dispatch_group_t layoutGroup = dispatch_group_create();
-  ASSizeRange *nodeBoundSizes = (ASSizeRange *)malloc(sizeof(ASSizeRange) * nodeCount);
 
-  for (NSUInteger j = 0; j < nodes.count && j < indexPaths.count; j += kASDataControllerSizingCountPerProcessor) {
-    NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, indexPaths.count - j);
+  for (NSUInteger j = 0; j < nodeCount; j += kASDataControllerSizingCountPerProcessor) {
+    NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, nodeCount - j);
 
     __block NSArray *subarray;
     // Allocate nodes concurrently.
@@ -176,13 +180,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
       dispatch_apply(batchCount, queue, ^(size_t i) {
         unsigned long k = j + i;
-        ASCellNodeBlock cellBlock = nodes[k];
-        ASCellNode *node = cellBlock();
+        ASCellNode *node = [contexts[k] allocateNode];
         ASDisplayNodeAssertNotNil(node, @"Node block created nil node");
         allocatedNodeBuffer[i] = node;
-        if (!node.isNodeLoaded) {
-          nodeBoundSizes[k] = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPaths[k]];
-        }
       });
       subarray = [[NSArray alloc] initWithObjects:allocatedNodeBuffer count:batchCount];
 
@@ -200,11 +200,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         dispatch_semaphore_signal(sema);
       });
       dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-      [self layoutLoadedNodes:subarray ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
+      [self layoutLoadedNodes:subarray fromContexts:[contexts subarrayWithRange:NSMakeRange(j, batchCount)] ofKind:kind];
     } else {
       allocationBlock();
       [_mainSerialQueue performBlockOnMainThread:^{
-        [self layoutLoadedNodes:subarray ofKind:kind atIndexPaths:[indexPaths subarrayWithRange:NSMakeRange(j, batchCount)]];
+        [self layoutLoadedNodes:subarray fromContexts:[contexts subarrayWithRange:NSMakeRange(j, batchCount)] ofKind:kind];
       }];
     }
 
@@ -216,7 +216,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         // Only measure nodes whose views aren't loaded, since we're in the background.
         // We should already have measured loaded nodes before we left the main thread, using layoutLoadedNodes:ofKind:atIndexPaths:
         if (!node.isNodeLoaded) {
-          [self _layoutNode:node withConstrainedSize:nodeBoundSizes[k]];
+          [self _layoutNode:node withConstrainedSize:contexts[k].constrainedSize];
         }
       }
     });
@@ -224,9 +224,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
   // Block the _editingTransactionQueue from executing a new edit transaction until layout is done & _editingNodes array is updated.
   dispatch_group_wait(layoutGroup, DISPATCH_TIME_FOREVER);
-  free(nodeBoundSizes);
-
+  
   if (completionBlock) {
+    NSMutableArray *indexPaths = [NSMutableArray arrayWithCapacity:nodeCount];
+    for (ASIndexedNodeContext *context in contexts) {
+      [indexPaths addObject:context.indexPath];
+    }
+
     completionBlock(allocatedNodes, indexPaths);
   }
 }
@@ -238,17 +242,18 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - External Data Querying + Editing
 
-- (void)insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
+- (void)insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(ASDataControllerCompletionBlock)completionBlock
 {
-  if (indexPaths.count == 0)
+  if (indexPaths.count == 0) {
     return;
+  }
 
   NSMutableArray *editingNodes = _editingNodes[kind];
   ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(editingNodes, indexPaths, nodes);
   _editingNodes[kind] = editingNodes;
   
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
-  NSMutableArray *completedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(editingNodes);
+  NSMutableArray *completedNodes = ASTwoDimensionalArrayDeepMutableCopy(editingNodes);
   
   [_mainSerialQueue performBlockOnMainThread:^{
     _completedNodes[kind] = completedNodes;
@@ -258,13 +263,13 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }];
 }
 
-- (void)deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock
+- (void)deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(ASDataControllerCompletionBlock)completionBlock
 {
   if (indexPaths.count == 0) {
     return;
   }
 
-  LOG(@"_deleteNodesAtIndexPaths:%@ ofKind:%@, full index paths in _editingNodes = %@", indexPaths, kind, ASIndexPathsForMultidimensionalArray(_editingNodes[kind]));
+  LOG(@"_deleteNodesAtIndexPaths:%@ ofKind:%@, full index paths in _editingNodes = %@", indexPaths, kind, ASIndexPathsForTwoDimensionalArray(_editingNodes[kind]));
   NSMutableArray *editingNodes = _editingNodes[kind];
   ASDeleteElementsInMultidimensionalArrayAtIndexPaths(editingNodes, indexPaths);
   _editingNodes[kind] = editingNodes;
@@ -290,7 +295,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   [_editingNodes[kind] insertObjects:sections atIndexes:indexSet];
   
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
-  NSArray *sectionsForCompleted = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(sections);
+  NSArray *sectionsForCompleted = ASTwoDimensionalArrayDeepMutableCopy(sections);
   
   [_mainSerialQueue performBlockOnMainThread:^{
     [_completedNodes[kind] insertObjects:sectionsForCompleted atIndexes:indexSet];
@@ -323,6 +328,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_insertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  if (indexPaths.count == 0) {
+    return;
+  }
   [self insertNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
     if (_delegateDidInsertNodes)
       [_delegate dataController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
@@ -337,6 +345,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_deleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  if (indexPaths.count == 0) {
+    return;
+  }
   [self deleteNodesOfKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
     if (_delegateDidDeleteNodes)
       [_delegate dataController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
@@ -344,7 +355,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 }
 
 /**
- * Inserts sections, represented as arrays, into the backing store at the given indicies and notifies the delegate.
+ * Inserts sections, represented as arrays, into the backing store at the given indices and notifies the delegate.
  *
  * @discussion The section arrays are inserted into the editing store, then a deep copy of the sections are inserted
  * in the completed store on the main thread. The delegate is invoked on the main thread.
@@ -358,7 +369,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 }
 
 /**
- * Removes sections at the given indicies from the backing store and notifies the delegate.
+ * Removes sections at the given indices from the backing store and notifies the delegate.
  *
  * @discussion Section array are first removed from the editing store, then the associated section in the completed
  * store is removed on the main thread. The delegate is invoked on the main thread.
@@ -373,32 +384,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 #pragma mark - Initial Load & Full Reload (External API)
 
-- (void)initialDataLoadingWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  [self performEditCommandWithBlock:^{
-    ASDisplayNodeAssertMainThread();
-    [self accessDataSourceWithBlock:^{
-      NSMutableArray *indexPaths = [NSMutableArray array];
-      NSUInteger sectionNum = [_dataSource numberOfSectionsInDataController:self];
-
-      // insert sections
-      [self insertSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionNum)] withAnimationOptions:0];
-
-      for (NSUInteger i = 0; i < sectionNum; i++) {
-        NSIndexPath *indexPath = [[NSIndexPath alloc] initWithIndex:i];
-
-        NSUInteger rowNum = [_dataSource dataController:self rowsInSection:i];
-        for (NSUInteger j = 0; j < rowNum; j++) {
-          [indexPaths addObject:[indexPath indexPathByAddingIndex:j]];
-        }
-      }
-
-      // insert elements
-      [self insertRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-    }];
-  }];
-}
-
 - (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^)())completion
 {
   [self _reloadDataWithAnimationOptions:animationOptions synchronously:NO completion:completion];
@@ -411,15 +396,15 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)_reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions synchronously:(BOOL)synchronously completion:(void (^)())completion
 {
+  _initialReloadDataHasBeenCalled = YES;
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
     [self accessDataSourceSynchronously:synchronously withBlock:^{
       NSUInteger sectionCount = [_dataSource numberOfSectionsInDataController:self];
-      NSMutableArray *updatedNodes = [NSMutableArray array];
-      NSMutableArray *updatedIndexPaths = [NSMutableArray array];
-      [self _populateFromEntireDataSourceWithMutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
+      NSIndexSet *sectionIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
+      NSArray<ASIndexedNodeContext *> *contexts = [self _populateFromDataSourceWithSectionIndexSet:sectionIndexSet];
 
       // Allow subclasses to perform setup before going into the edit transaction
       [self prepareForReloadData];
@@ -428,24 +413,25 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         LOG(@"Edit Transaction - reloadData");
         
         // Remove everything that existed before the reload, now that we're ready to insert replacements
-        NSArray *indexPaths = ASIndexPathsForMultidimensionalArray(_editingNodes[ASDataControllerRowNodeKind]);
-        [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-        
         NSMutableArray *editingNodes = _editingNodes[ASDataControllerRowNodeKind];
-        NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodes.count)];
-        [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
+        NSUInteger editingNodesSectionCount = editingNodes.count;
+        
+        if (editingNodesSectionCount) {
+          NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodesSectionCount)];
+          [self _deleteNodesAtIndexPaths:ASIndexPathsForTwoDimensionalArray(editingNodes) withAnimationOptions:animationOptions];
+          [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
+        }
         
         [self willReloadData];
         
-        // Insert each section
+        // Insert empty sections
         NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
         for (int i = 0; i < sectionCount; i++) {
           [sections addObject:[[NSMutableArray alloc] init]];
         }
-        
-        [self _insertSections:sections atIndexSet:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)] withAnimationOptions:animationOptions];
+        [self _insertSections:sections atIndexSet:sectionIndexSet withAnimationOptions:animationOptions];
 
-        [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
+        [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
 
         if (completion) {
           dispatch_async(dispatch_get_main_queue(), completion);
@@ -458,6 +444,23 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         [_editingTransactionQueue addOperationWithBlock:transactionBlock];
       }
     }];
+  }];
+}
+
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(_batchUpdateCounter == 0, @"Should not be called between beginUpdate or endUpdate");
+  
+  // This should never be called in a batch update, return immediately therefore
+  if (_batchUpdateCounter > 0) { return; }
+  
+  [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+  
+  // Schedule block in main serial queue to wait until all operations are finished that are
+  // where scheduled while waiting for the _editingTransactionQueue to finish
+  [_mainSerialQueue performBlockOnMainThread:^{
+    ASDisplayNodeAssert(_editingTransactionQueue.operationCount == 0, @"No operation should be in the _editingTransactionQueue anymore");
   }];
 }
 
@@ -489,42 +492,25 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 }
 
 /**
- * Fetches row nodes and their specified index paths for the provided sections from the data source.
- *
- * @discussion Results are stored in the passed mutable arrays.
+ * Fetches row contexts for the provided sections from the data source.
  */
-- (void)_populateFromDataSourceWithSectionIndexSet:(NSIndexSet *)indexSet mutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
+- (NSArray<ASIndexedNodeContext *> *)_populateFromDataSourceWithSectionIndexSet:(NSIndexSet *)indexSet
 {
+  NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
     NSUInteger rowNum = [_dataSource dataController:self rowsInSection:idx];
     NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
     for (NSUInteger i = 0; i < rowNum; i++) {
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
-      [indexPaths addObject:indexPath];
-      [nodes addObject:[_dataSource dataController:self nodeBlockAtIndexPath:indexPath]];
+      ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
+      ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
+      [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
+                                                                indexPath:indexPath
+                                                          constrainedSize:constrainedSize]];
     }
   }];
+  return contexts;
 }
-
-/**
- * Fetches row nodes and their specified index paths for all sections from the data source.
- *
- * @discussion Results are stored in the passed mutable arrays.
- */
-- (void)_populateFromEntireDataSourceWithMutableNodes:(NSMutableArray *)nodes mutableIndexPaths:(NSMutableArray *)indexPaths
-{
-  NSUInteger sectionNum = [_dataSource numberOfSectionsInDataController:self];
-  for (NSUInteger i = 0; i < sectionNum; i++) {
-    NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:i];
-    NSUInteger rowNum = [_dataSource dataController:self rowsInSection:i];
-    for (NSUInteger j = 0; j < rowNum; j++) {
-      NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:j];
-      [indexPaths addObject:indexPath];
-      [nodes addObject:[_dataSource dataController:self nodeBlockAtIndexPath:indexPath]];
-    }
-  }
-}
-
 
 #pragma mark - Batching (External API)
 
@@ -552,7 +538,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [_mainSerialQueue performBlockOnMainThread:^{
         // Deep copy _completedNodes to _externalCompletedNodes.
         // Any external queries from now on will be done on _externalCompletedNodes, to guarantee data consistency with the delegate.
-        _externalCompletedNodes = (NSMutableArray *)ASMultidimensionalArrayDeepMutableCopy(_completedNodes[ASDataControllerRowNodeKind]);
+        _externalCompletedNodes = ASTwoDimensionalArrayDeepMutableCopy(_completedNodes[ASDataControllerRowNodeKind]);
 
         LOG(@"endUpdatesWithCompletion - begin updates call to delegate");
         [_delegate dataControllerBeginUpdates:self];
@@ -590,6 +576,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 {
   // This method needs to block the thread and synchronously perform the operation if we are not
   // queuing commands for begin/endUpdates.  If we are queuing, it needs to return immediately.
+  if (!_initialReloadDataHasBeenCalled) {
+    return;
+  }
+  
+  // If we have never performed a reload, there is no value in executing edit operations as the initial
+  // reload will directly re-query the latest state of the datasource - so completely skip the block in this case.
   if (_batchUpdateCounter == 0) {
     block();
   } else {
@@ -607,9 +599,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     [self accessDataSourceWithBlock:^{
-      NSMutableArray *updatedNodes = [NSMutableArray array];
-      NSMutableArray *updatedIndexPaths = [NSMutableArray array];
-      [self _populateFromDataSourceWithSectionIndexSet:sections mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
+      NSArray<ASIndexedNodeContext *> *contexts = [self _populateFromDataSourceWithSectionIndexSet:sections];
 
       [self prepareForInsertSections:sections];
       
@@ -623,7 +613,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         }
 
         [self _insertSections:sectionArray atIndexSet:sections withAnimationOptions:animationOptions];
-        [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
+        
+        [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
       }];
     }];
   }];
@@ -658,9 +649,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
     [self accessDataSourceWithBlock:^{
-      NSMutableArray *updatedNodes = [NSMutableArray array];
-      NSMutableArray *updatedIndexPaths = [NSMutableArray array];
-      [self _populateFromDataSourceWithSectionIndexSet:sections mutableNodes:updatedNodes mutableIndexPaths:updatedIndexPaths];
+      NSArray<ASIndexedNodeContext *> *contexts= [self _populateFromDataSourceWithSectionIndexSet:sections];
 
       [self prepareForReloadSections:sections];
       
@@ -669,12 +658,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
         NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes[ASDataControllerRowNodeKind], sections);
         
-        LOG(@"Edit Transaction - reloadSections: updatedIndexPaths: %@, indexPaths: %@, _editingNodes: %@", updatedIndexPaths, indexPaths, ASIndexPathsForMultidimensionalArray(_editingNodes[ASDataControllerRowNodeKind]));
+        LOG(@"Edit Transaction - reloadSections: updatedIndexPaths: %@, indexPaths: %@, _editingNodes: %@", updatedIndexPaths, indexPaths, ASIndexPathsForTwoDimensionalArray(_editingNodes[ASDataControllerRowNodeKind]));
         
         [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
 
         // reinsert the elements
-        [self _batchLayoutNodes:updatedNodes atIndexPaths:updatedIndexPaths withAnimationOptions:animationOptions];
+        [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
       }];
     }];
   }];
@@ -764,18 +753,23 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     LOG(@"Edit Command - insertRows: %@", indexPaths);
     
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
-    
+
+    // sort indexPath to avoid messing up the index when inserting in several batches
+    NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
+    NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+
     [self accessDataSourceWithBlock:^{
-      // sort indexPath to avoid messing up the index when inserting in several batches
-      NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
-      NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-      for (NSUInteger i = 0; i < sortedIndexPaths.count; i++) {
-        [nodes addObject:[_dataSource dataController:self nodeBlockAtIndexPath:sortedIndexPaths[i]]];
+      for (NSIndexPath *indexPath in sortedIndexPaths) {
+        ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
+        ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
+        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
+                                                                  indexPath:indexPath
+                                                            constrainedSize:constrainedSize]];
       }
 
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - insertRows: %@", indexPaths);
-        [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+        [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
       }];
     }];
   }];
@@ -810,20 +804,24 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     // Reloading requires re-fetching the data.  Load it on the current calling thread, locking the data source.
     [self accessDataSourceWithBlock:^{
-      NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+      NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
       
       // FIXME: This doesn't currently do anything
       // FIXME: Shouldn't deletes be sorted in descending order?
       [indexPaths sortedArrayUsingSelector:@selector(compare:)];
       
       for (NSIndexPath *indexPath in indexPaths) {
-        [nodes addObject:[_dataSource dataController:self nodeBlockAtIndexPath:indexPath]];
+        ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
+        ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
+        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
+                                                                  indexPath:indexPath
+                                                            constrainedSize:constrainedSize]];
       }
 
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
         [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-        [self _batchLayoutNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+        [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
       }];
     }];
   }];
@@ -878,12 +876,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     [_editingTransactionQueue addOperationWithBlock:^{
       LOG(@"Edit Transaction - moveRow: %@ > %@", indexPath, newIndexPath);
-      NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes[ASDataControllerRowNodeKind], [NSArray arrayWithObject:indexPath]);
-      NSArray *indexPaths = [NSArray arrayWithObject:indexPath];
+      NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes[ASDataControllerRowNodeKind], @[indexPath]);
+      NSArray *indexPaths = @[indexPath];
       [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
 
       // Don't re-calculate size for moving
-      NSArray *newIndexPaths = [NSArray arrayWithObject:newIndexPath];
+      NSArray *newIndexPaths = @[newIndexPath];
       [self _insertNodes:nodes atIndexPaths:newIndexPaths withAnimationOptions:animationOptions];
     }];
   }];
@@ -893,7 +891,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (NSArray *)indexPathsForEditingNodesOfKind:(NSString *)kind
 {
-  return _editingNodes[kind] != nil ? ASIndexPathsForMultidimensionalArray(_editingNodes[kind]) : nil;
+  return _editingNodes[kind] != nil ? ASIndexPathsForTwoDimensionalArray(_editingNodes[kind]) : nil;
 }
 
 - (NSMutableArray *)editingNodesOfKind:(NSString *)kind
@@ -969,7 +967,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSArray *)completedNodes
 {
   ASDisplayNodeAssertMainThread();
-  return _externalCompletedNodes != nil ? _externalCompletedNodes : _completedNodes[ASDataControllerRowNodeKind];
+  return _externalCompletedNodes ?: _completedNodes[ASDataControllerRowNodeKind];
 }
 
 #pragma mark - Dealloc

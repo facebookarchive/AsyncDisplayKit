@@ -68,11 +68,6 @@
   _tableView.frame = self.view.bounds;
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 #pragma mark -
 #pragma mark ASTableView.
 

@@ -34,6 +34,7 @@
 #import <AsyncDisplayKit/ASPagerNode.h>
 
 #import <AsyncDisplayKit/ASViewController.h>
+#import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
 
 #import <AsyncDisplayKit/ASChangeSetDataController.h>
 
@@ -73,3 +74,6 @@
 #import <AsyncDisplayKit/NSMutableAttributedString+TextKitAdditions.h>
 #import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 #import <AsyncDisplayKit/UIView+ASConvenience.h>
+#import <AsyncDisplayKit/ASRunLoopQueue.h>
+
+#import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>

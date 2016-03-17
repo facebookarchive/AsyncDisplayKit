@@ -15,8 +15,10 @@
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASTextNode.h>
 
 #import "ASImageNode+CGExtras.h"
+#import "AsyncDisplayKit+Debug.h"
 
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
@@ -26,7 +28,7 @@
 @property (nonatomic, assign) BOOL opaque;
 @property (nonatomic, assign) CGRect bounds;
 @property (nonatomic, assign) CGFloat contentsScale;
-@property (nonatomic, retain) UIColor *backgroundColor;
+@property (nonatomic, strong) UIColor *backgroundColor;
 @property (nonatomic, assign) UIViewContentMode contentMode;
 
 @end
@@ -55,7 +57,6 @@
 
 @end
 
-
 @implementation ASImageNode
 {
 @private
@@ -69,6 +70,8 @@
   BOOL _forceUpscaling; //Defaults to NO.
   CGRect _cropRect; // Defaults to CGRectMake(0.5, 0.5, 0, 0)
   CGRect _cropDisplayBounds;
+  
+  ASTextNode *_debugLabelNode;
 }
 
 @synthesize image = _image;
@@ -89,6 +92,12 @@
   _cropRect = CGRectMake(0.5, 0.5, 0, 0);
   _cropDisplayBounds = CGRectNull;
   _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
+  
+  if ([ASImageNode shouldShowImageScalingOverlay]) {
+    _debugLabelNode = [[ASTextNode alloc] init];
+    _debugLabelNode.layerBacked = YES;
+    [self addSubnode:_debugLabelNode];
+  }
 
   return self;
 }
@@ -119,13 +128,15 @@
 
 - (void)setImage:(UIImage *)image
 {
-  ASDN::MutexLocker l(_imageLock);
+  _imageLock.lock();
   if (!ASObjectIsEqual(_image, image)) {
     _image = image;
 
-    ASDN::MutexUnlocker u(_imageLock);
+    _imageLock.unlock();
     [self invalidateCalculatedLayout];
     [self setNeedsDisplay];
+  } else {
+    _imageLock.unlock(); // We avoid using MutexUnlocker as it needlessly re-locks at the end of the scope.
   }
 }
 
@@ -150,6 +161,12 @@
                                               contentsScale:self.contentsScaleForDisplay
                                             backgroundColor:self.backgroundColor
                                                 contentMode:self.contentMode];
+}
+
+- (NSDictionary *)debugLabelAttributes
+{
+  return @{ NSFontAttributeName: [UIFont systemFontOfSize:15.0],
+            NSForegroundColorAttributeName: [UIColor redColor] };
 }
 
 - (UIImage *)displayWithParameters:(_ASImageNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
@@ -201,6 +218,19 @@
   CGSize imageSize = image.size;
   CGSize imageSizeInPixels = CGSizeMake(imageSize.width * image.scale, imageSize.height * image.scale);
   CGSize boundsSizeInPixels = CGSizeMake(floorf(bounds.size.width * contentsScale), floorf(bounds.size.height * contentsScale));
+  
+  if (_debugLabelNode) {
+    CGFloat pixelCountRatio            = (imageSizeInPixels.width * imageSizeInPixels.height) / (boundsSizeInPixels.width * boundsSizeInPixels.height);
+    if (pixelCountRatio != 1.0) {
+      NSString *scaleString            = [NSString stringWithFormat:@"%.2fx", pixelCountRatio];
+      _debugLabelNode.attributedString = [[NSAttributedString alloc] initWithString:scaleString attributes:[self debugLabelAttributes]];
+      _debugLabelNode.hidden           = NO;
+      [self setNeedsLayout];
+    } else {
+      _debugLabelNode.hidden           = YES;
+      _debugLabelNode.attributedString = nil;
+    }
+  }
   
   BOOL contentModeSupported =    contentMode == UIViewContentModeScaleAspectFill
   || contentMode == UIViewContentModeScaleAspectFit
@@ -410,8 +440,20 @@
   _imageModificationBlock = imageModificationBlock;
 }
 
+#pragma mark - Debug
+- (void)layout
+{
+  [super layout];
+  
+  if (_debugLabelNode) {
+    CGSize boundsSize        = self.bounds.size;
+    CGSize debugLabelSize    = [_debugLabelNode measure:boundsSize];
+    CGPoint debugLabelOrigin = CGPointMake(boundsSize.width - debugLabelSize.width,
+                                           boundsSize.height - debugLabelSize.height);
+    _debugLabelNode.frame    = (CGRect) {debugLabelOrigin, debugLabelSize};
+  }
+}
 @end
-
 
 #pragma mark - Extras
 extern asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat borderWidth, UIColor *borderColor)
@@ -460,4 +502,3 @@ extern asimagenode_modification_block_t ASImageNodeTintColorModificationBlock(UI
     return modifiedImage;
   };
 }
-

@@ -129,7 +129,7 @@ NS_ASSUME_NONNULL_BEGIN
   @abstract Indicates to the delegate that the text node's selection has changed.
   @param editableTextNode An editable text node.
   @param fromSelectedRange The previously selected range.
-  @param toSelectedRange The current selected range. Equvialent to the <selectedRange> property.
+  @param toSelectedRange The current selected range. Equivalent to the <selectedRange> property.
   @param dueToEditing YES if the selection change was due to editing; NO otherwise.
   @discussion You can access the selection of the receiver via <selectedRange>.
  */

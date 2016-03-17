@@ -98,11 +98,6 @@ static const NSInteger kMaxCageSize = 100;        // max number of Cage cells al
   _tableView.frame = self.view.bounds;
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 - (void)toggleEditingMode
 {
   [_tableView setEditing:!_tableView.editing animated:YES];

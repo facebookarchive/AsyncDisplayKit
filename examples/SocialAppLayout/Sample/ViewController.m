@@ -15,51 +15,46 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import <AsyncDisplayKit/ASAssert.h>
+
 #include <stdlib.h>
 
 @interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
-{
-    ASTableView *_tableView;
-    
-    NSMutableArray *_socialAppDataSource;
 
-}
+@property (nonatomic, strong) ASTableView *tableView;
+@property (nonatomic, strong) NSMutableArray *socialAppDataSource;
 
 @end
+
 
 @implementation ViewController
 
 - (instancetype)init
 {
-    if (!(self = [super init]))
-        return nil;
-    
-    _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain asyncDataFetching:YES];
-    _tableView.separatorStyle = UITableViewCellSeparatorStyleNone; // SocialAppNode has its own separator
-    _tableView.asyncDataSource = self;
-    _tableView.asyncDelegate = self;
-    
-    [self createSocialAppDataSource];
-    
-    self.title = @"Timeline";
-    
+    self = [super init];
+    if (self) {
+        self.title = @"Timeline";
+        [self createSocialAppDataSource];
+    }
     return self;
+}
+
+
+- (void)dealloc
+{
+    _tableView.asyncDataSource = nil;
+    _tableView.asyncDelegate = nil;
 }
 
 - (void)viewDidLoad {
     
     [super viewDidLoad];
-    [self.view addSubview:_tableView];
-}
-
-- (void)viewWillLayoutSubviews
-{
-    _tableView.frame = self.view.bounds;
-}
-
-- (BOOL)prefersStatusBarHidden
-{
-    return YES;
+    
+    self.tableView = [[ASTableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain asyncDataFetching:YES];
+    self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone; // SocialAppNode has its own separator
+    self.tableView.asyncDataSource = self;
+    self.tableView.asyncDelegate = self;
+    [self.view addSubview:self.tableView];
 }
 
 - (void)createSocialAppDataSource {
@@ -76,7 +71,6 @@
     newPost.via = 0;
     newPost.likes = arc4random_uniform(74);
     newPost.comments = arc4random_uniform(40);
-    
     [_socialAppDataSource addObject:newPost];
     
     newPost = [[Post alloc] init];
@@ -89,7 +83,6 @@
     newPost.via = 1;
     newPost.likes = arc4random_uniform(74);
     newPost.comments = arc4random_uniform(40);
-    
     [_socialAppDataSource addObject:newPost];
     
     newPost = [[Post alloc] init];
@@ -102,7 +95,6 @@
     newPost.via = 2;
     newPost.likes = arc4random_uniform(74);
     newPost.comments = arc4random_uniform(40);
-    
     [_socialAppDataSource addObject:newPost];
     
     newPost = [[Post alloc] init];
@@ -115,29 +107,28 @@
     newPost.via = 1;
     newPost.likes = arc4random_uniform(74);
     newPost.comments = arc4random_uniform(40);
-    
     [_socialAppDataSource addObject:newPost];
 }
 
-#pragma mark -
-#pragma mark ASTableView.
+#pragma mark - ASTableView
 
-- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-    Post *post = _socialAppDataSource[indexPath.row];
-    PostNode *node = [[PostNode alloc] initWithPost:post];
-    return node;
+    Post *post = self.socialAppDataSource[indexPath.row];
+    return ^{
+        return [[PostNode alloc] initWithPost:post];
+    };
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return _socialAppDataSource.count;
+    return self.socialAppDataSource.count;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     PostNode *postNode = (PostNode *)[_tableView nodeForRowAtIndexPath:indexPath];
-    Post *post = _socialAppDataSource[indexPath.row];
+    Post *post = self.socialAppDataSource[indexPath.row];
   
     BOOL shouldRasterize = postNode.shouldRasterizeDescendants;
     shouldRasterize = !shouldRasterize;

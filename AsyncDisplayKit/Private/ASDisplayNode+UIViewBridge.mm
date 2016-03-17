@@ -18,6 +18,7 @@
 #import "ASEqualityHelpers.h"
 #import "ASPendingStateController.h"
 #import "ASThread.h"
+#import "ASTextNode.h"
 
 /**
  * The following macros are conveniences to help in the common tasks related to the bridging that ASDisplayNode does to UIView and CALayer.
@@ -211,6 +212,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 {
   _bridge_prologue_write;
   _setToViewOrLayer(bounds, newBounds, bounds, newBounds);
+  self.threadSafeBounds = newBounds;
 }
 
 - (CGRect)frame
@@ -300,7 +302,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   if (_hierarchyState & ASHierarchyStateRasterized) {
     ASPerformBlockOnMainThread(^{
       // The below operation must be performed on the main thread to ensure against an extremely rare deadlock, where a parent node
-      // begins materializing the view / layer heirarchy (locking itself or a descendant) while this node walks up
+      // begins materializing the view / layer hierarchy (locking itself or a descendant) while this node walks up
       // the tree and requires locking that node to access .shouldRasterizeDescendants.
       // For this reason, this method should be avoided when possible.  Use _hierarchyState & ASHierarchyStateRasterized.
       ASDisplayNodeAssertMainThread();
@@ -358,10 +360,21 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 - (void)setOpaque:(BOOL)newOpaque
 {
   _bridge_prologue_write;
-  _setToLayer(opaque, newOpaque);
-  // NOTE: If we're in the background, then when the pending state
-  // is applied to the view on main, we will call `setNeedsDisplay` if
-  // the new opaque value doesn't match the one on the layer.
+  
+  BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
+  
+  if (shouldApply) {
+    BOOL oldOpaque = _layer.opaque;
+    _layer.opaque = newOpaque;
+    if (oldOpaque != newOpaque) {
+      [self setNeedsDisplay];
+    }
+  } else {
+    // NOTE: If we're in the background, we cannot read the current value of self.opaque (if loaded).
+    // When the pending state is applied to the view on main, we will call `setNeedsDisplay` if
+    // the new opaque value doesn't match the one on the layer.
+    ASDisplayNodeGetPendingState(self).opaque = newOpaque;
+  }
 }
 
 - (BOOL)isUserInteractionEnabled
@@ -563,10 +576,22 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 - (void)setBackgroundColor:(UIColor *)newBackgroundColor
 {
   _bridge_prologue_write;
-  _setToLayer(backgroundColor, newBackgroundColor.CGColor);
-  // NOTE: If we're in the background, then when the pending state
-  // is applied to the view on main, we will call `setNeedsDisplay` if
-  // the new background color doesn't match the one on the layer.
+  
+  CGColorRef newBackgroundCGColor = [newBackgroundColor CGColor];
+  BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
+  
+  if (shouldApply) {
+    CGColorRef oldBackgroundCGColor = _layer.backgroundColor;
+    _layer.backgroundColor = newBackgroundCGColor;
+    if (!CGColorEqualToColor(oldBackgroundCGColor, newBackgroundCGColor)) {
+      [self setNeedsDisplay];
+    }
+  } else {
+    // NOTE: If we're in the background, we cannot read the current value of bgcolor (if loaded).
+    // When the pending state is applied to the view on main, we will call `setNeedsDisplay` if
+    // the new background color doesn't match the one on the layer.
+    ASDisplayNodeGetPendingState(self).backgroundColor = newBackgroundCGColor;
+  }
 }
 
 - (UIColor *)tintColor

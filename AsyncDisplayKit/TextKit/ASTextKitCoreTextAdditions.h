@@ -76,7 +76,7 @@ ASDISPLAYNODE_EXTERN_C_END
         - kCTParagraphStyleSpecifierMinimumLineSpacing
         - kCTParagraphStyleSpecifierLineSpacingAdjustment
         - kCTParagraphStyleSpecifierLineBoundsOptions
-  @result An NSParagraphStyle initializd with as many of the paragraph specifiers from `coreTextParagraphStyle` as possible.
+  @result An NSParagraphStyle initialized with as many of the paragraph specifiers from `coreTextParagraphStyle` as possible.
 
  */
 + (instancetype)paragraphStyleWithCTParagraphStyle:(CTParagraphStyleRef)coreTextParagraphStyle;

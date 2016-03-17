@@ -21,16 +21,19 @@
   NSAttributedString *_normalAttributedTitle;
   NSAttributedString *_highlightedAttributedTitle;
   NSAttributedString *_selectedAttributedTitle;
+  NSAttributedString *_selectedHighlightedAttributedTitle;
   NSAttributedString *_disabledAttributedTitle;
   
   UIImage *_normalImage;
   UIImage *_highlightedImage;
   UIImage *_selectedImage;
+  UIImage *_selectedHighlightedImage;
   UIImage *_disabledImage;
 
   UIImage *_normalBackgroundImage;
   UIImage *_highlightedBackgroundImage;
   UIImage *_selectedBackgroundImage;
+  UIImage *_selectedHighlightedBackgroundImage;
   UIImage *_disabledBackgroundImage;
 }
 
@@ -66,6 +69,7 @@
   if (!_titleNode) {
     _titleNode = [[ASTextNode alloc] init];
     [_titleNode setLayerBacked:YES];
+    [_titleNode setFlexShrink:YES];
   }
   return _titleNode;
 }
@@ -75,7 +79,6 @@
   if (!_imageNode) {
     _imageNode = [[ASImageNode alloc] init];
     [_imageNode setLayerBacked:YES];
-    [_titleNode setFlexShrink:YES];
   }
   return _imageNode;
 }
@@ -136,6 +139,8 @@
   UIImage *newImage;
   if (self.enabled == NO && _disabledImage) {
     newImage = _disabledImage;
+  } else if (self.highlighted && self.selected && _selectedHighlightedImage) {
+    newImage = _selectedHighlightedImage;
   } else if (self.highlighted && _highlightedImage) {
     newImage = _highlightedImage;
   } else if (self.selected && _selectedImage) {
@@ -156,6 +161,8 @@
   NSAttributedString *newTitle;
   if (self.enabled == NO && _disabledAttributedTitle) {
     newTitle = _disabledAttributedTitle;
+  } else if (self.highlighted && self.selected && _selectedHighlightedAttributedTitle) {
+    newTitle = _selectedHighlightedAttributedTitle;
   } else if (self.highlighted && _highlightedAttributedTitle) {
     newTitle = _highlightedAttributedTitle;
   } else if (self.selected && _selectedAttributedTitle) {
@@ -177,6 +184,8 @@
   UIImage *newImage;
   if (self.enabled == NO && _disabledBackgroundImage) {
     newImage = _disabledBackgroundImage;
+  } else if (self.highlighted && self.selected && _selectedHighlightedBackgroundImage) {
+    newImage = _selectedHighlightedBackgroundImage;
   } else if (self.highlighted && _highlightedBackgroundImage) {
     newImage = _highlightedBackgroundImage;
   } else if (self.selected && _selectedBackgroundImage) {
@@ -262,8 +271,8 @@
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
 {
   NSDictionary *attributes = @{
-                               NSFontAttributeName: font ? font :[UIFont systemFontOfSize:[UIFont buttonFontSize]],
-                               NSForegroundColorAttributeName : color ? color : [UIColor blackColor]
+                               NSFontAttributeName: font ?: [UIFont systemFontOfSize:[UIFont buttonFontSize]],
+                               NSForegroundColorAttributeName : color ?: [UIColor blackColor]
                                };
     
   NSAttributedString *string = [[NSAttributedString alloc] initWithString:title
@@ -283,6 +292,9 @@
       
     case ASControlStateSelected:
       return _selectedAttributedTitle;
+        
+    case ASControlStateSelected | ASControlStateHighlighted:
+      return _selectedHighlightedAttributedTitle;
       
     case ASControlStateDisabled:
       return _disabledAttributedTitle;
@@ -306,6 +318,10 @@
       
     case ASControlStateSelected:
       _selectedAttributedTitle = [title copy];
+      break;
+          
+    case ASControlStateSelected | ASControlStateHighlighted:
+      _selectedHighlightedAttributedTitle = [title copy];
       break;
       
     case ASControlStateDisabled:
@@ -331,6 +347,9 @@
     case ASControlStateSelected:
       return _selectedImage;
       
+    case ASControlStateSelected | ASControlStateHighlighted:
+      return _selectedHighlightedImage;
+          
     case ASControlStateDisabled:
       return _disabledImage;
       
@@ -354,7 +373,11 @@
     case ASControlStateSelected:
       _selectedImage = image;
       break;
-      
+    
+    case ASControlStateSelected | ASControlStateHighlighted:
+      _selectedHighlightedImage = image;
+      break;
+          
     case ASControlStateDisabled:
       _disabledImage = image;
       break;
@@ -363,6 +386,30 @@
       break;
   }
   [self updateImage];
+}
+
+- (UIImage *)backgroundImageForState:(ASControlState)state
+{
+  ASDN::MutexLocker l(_propertyLock);
+  switch (state) {
+    case ASControlStateNormal:
+      return _normalBackgroundImage;
+    
+    case ASControlStateHighlighted:
+      return _highlightedBackgroundImage;
+    
+    case ASControlStateSelected:
+      return _selectedBackgroundImage;
+    
+    case ASControlStateSelected | ASControlStateHighlighted:
+      return _selectedHighlightedBackgroundImage;
+    
+    case ASControlStateDisabled:
+      return _disabledBackgroundImage;
+    
+    default:
+      return _normalBackgroundImage;
+  }
 }
 
 - (void)setBackgroundImage:(UIImage *)image forState:(ASControlState)state
@@ -380,6 +427,10 @@
     case ASControlStateSelected:
       _selectedBackgroundImage = image;
       break;
+          
+    case ASControlStateSelected | ASControlStateHighlighted:
+      _selectedHighlightedBackgroundImage = image;
+      break;
       
     case ASControlStateDisabled:
       _disabledBackgroundImage = image;
@@ -389,28 +440,6 @@
       break;
   }
   [self updateBackgroundImage];
-}
-
-- (UIImage *)backgroundImageForState:(ASControlState)state
-{
-  ASDN::MutexLocker l(_propertyLock);
-  switch (state) {
-    case ASControlStateNormal:
-      return _normalBackgroundImage;
-      
-    case ASControlStateHighlighted:
-      return _highlightedBackgroundImage;
-      
-    case ASControlStateSelected:
-      return _selectedBackgroundImage;
-      
-    case ASControlStateDisabled:
-      return _disabledBackgroundImage;
-      
-    default:
-      return _normalBackgroundImage;
-  }
-
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize

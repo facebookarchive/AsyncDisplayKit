@@ -186,6 +186,7 @@
 {
   ASDisplayNodeAssertMainThread();
 
+  [super layout];
   [self _layoutTextView];
 }
 
