@@ -967,7 +967,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSArray *)completedNodes
 {
   ASDisplayNodeAssertMainThread();
-  return _externalCompletedNodes ?: _completedNodes[ASDataControllerRowNodeKind];
+  return _externalCompletedNodes ? : _completedNodes[ASDataControllerRowNodeKind];
 }
 
 #pragma mark - Dealloc

@@ -110,7 +110,7 @@ extern BOOL CGPointIsNull(CGPoint point)
       
       for (ASLayout *sublayout in context.layout.sublayouts) {
         // Mark layout trees that have already been flattened for future identification of immediate sublayouts
-        BOOL flattened = context.flattened ?: context.layout.flattened;
+        BOOL flattened = context.flattened ? : context.layout.flattened;
         queue.push({sublayout, context.absolutePosition + sublayout.position, NO, flattened});
       }
     }

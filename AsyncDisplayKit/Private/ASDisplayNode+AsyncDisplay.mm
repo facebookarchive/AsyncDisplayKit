@@ -370,7 +370,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     // while synchronizing the final application of the results to the layer's contents property (completionBlock).
     
     // First, look to see if we are expected to join a parent's transaction container.
-    CALayer *containerLayer = _layer.asyncdisplaykit_parentTransactionContainer ?: _layer;
+    CALayer *containerLayer = _layer.asyncdisplaykit_parentTransactionContainer ? : _layer;
     
     // In the case that a transaction does not yet exist (such as for an individual node outside of a container),
     // this call will allocate the transaction and add it to _ASAsyncTransactionGroup.

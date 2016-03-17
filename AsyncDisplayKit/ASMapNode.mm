@@ -260,7 +260,7 @@
 
 - (void)setAnnotations:(NSArray *)annotations
 {
-  annotations = [annotations copy] ?: @[];
+  annotations = [annotations copy] ? : @[];
 
   ASDN::MutexLocker l(_propertyLock);
   _annotations = annotations;
