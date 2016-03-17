@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  A store for all of the options defined by ASLayoutSpec subclasses. All implementors of ASLayoutable own a
  *  ASLayoutOptions. When certain layoutSpecs need option values, they are read from this class.
  *
- *  Unless you wish to create a custom layout spec, ASLayoutOptions can largerly be ignored. Instead you can access
+ *  Unless you wish to create a custom layout spec, ASLayoutOptions can largely be ignored. Instead you can access
  *  the layout option properties exposed in ASLayoutable directly, which will set the values in ASLayoutOptions
  *  behind the scenes.
  */

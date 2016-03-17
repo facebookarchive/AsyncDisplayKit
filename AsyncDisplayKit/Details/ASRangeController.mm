@@ -59,7 +59,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   }
 }
 
-#pragma mark - Core visible node range managment API
+#pragma mark - Core visible node range management API
 
 + (BOOL)isFirstRangeUpdateForRangeMode:(ASLayoutRangeMode)rangeMode
 {

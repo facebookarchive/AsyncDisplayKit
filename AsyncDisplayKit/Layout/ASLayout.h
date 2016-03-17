@@ -60,7 +60,7 @@ extern BOOL CGPointIsNull(CGPoint point);
  *
  * @param size The size of this layout.
  *
- * @param position The posiion of this layout within its parent (if available).
+ * @param position The position of this layout within its parent (if available).
  *
  * @param sublayouts Sublayouts belong to the new layout.
  */

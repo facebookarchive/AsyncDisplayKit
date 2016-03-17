@@ -495,7 +495,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 }
 
 - (void)adjustContentOffsetWithNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths inserting:(BOOL)inserting {
-  // Maintain the users visible window when inserting or deleteing cells by adjusting the content offset for nodes
+  // Maintain the users visible window when inserting or deleting cells by adjusting the content offset for nodes
   // before the visible area. If in a begin/end updates block this will update _contentOffsetAdjustment, otherwise it will
   // update self.contentOffset directly.
 

@@ -167,7 +167,7 @@ extern NSInteger const ASDefaultTransactionPriority;
 /**
  @summary Cancels all operations in the transaction.
 
- @desc You can only cancel a commmitted transaction.
+ @desc You can only cancel a committed transaction.
 
  All completion blocks are always called, regardless of cancelation. Execution blocks may be skipped if canceled.
  */
