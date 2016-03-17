@@ -53,7 +53,6 @@
 {
   std::deque<id> itemsToProcess = std::deque<id>();
   BOOL isQueueDrained = NO;
-  CFAbsoluteTime timestamp = 0;
   {
     ASDN::MutexLocker l(_internalQueueLock);
 
@@ -72,7 +71,6 @@
 
     if (_internalQueue.empty()) {
       isQueueDrained = YES;
-      timestamp = CFAbsoluteTimeGetCurrent();
     }
   }
 

@@ -33,7 +33,7 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
  * the layer's contentsCenter property.  Non-stretchable images work too, of
  * course.
  */
-@property (nullable, atomic, retain) UIImage *image;
+@property (nullable, atomic, strong) UIImage *image;
 
 /**
  @abstract The placeholder color.

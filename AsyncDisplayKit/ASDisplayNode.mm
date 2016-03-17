@@ -225,7 +225,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       if (isQueueDrained) {
         [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
                                                             object:nil
-                                                          userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: [NSNumber numberWithDouble:timestamp]}];
+                                                          userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: @(timestamp)}];
       }
     }];
   });
@@ -1062,7 +1062,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
+  node = node ?: ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(node, self);
@@ -1077,7 +1077,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
+  node = node ?: ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(self, node);
@@ -1092,7 +1092,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
+  node = node ?: ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(node, self);
@@ -1107,7 +1107,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
+  node = node ?: ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(self, node);
@@ -2079,11 +2079,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   BOOL wasVisible = ASInterfaceStateIncludesVisible(oldState);
 
   if (nowVisible != wasVisible) {
-    if (nowVisible) {
-      [self visibilityDidChange:YES];
-    } else {
-      [self visibilityDidChange:NO];
-    }
+    [self visibilityDidChange:nowVisible];
   }
   
   [self interfaceStateDidChange:newState fromState:oldState];
@@ -2528,7 +2524,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
     objc_setAssociatedObject(self, ASDisplayNodeDrawingPriorityKey, nil, OBJC_ASSOCIATION_ASSIGN);
   } else {
     _flags.hasCustomDrawingPriority = YES;
-    objc_setAssociatedObject(self, ASDisplayNodeDrawingPriorityKey, [NSNumber numberWithInteger:drawingPriority], OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, ASDisplayNodeDrawingPriorityKey, @(drawingPriority), OBJC_ASSOCIATION_RETAIN);
   }
 }
 

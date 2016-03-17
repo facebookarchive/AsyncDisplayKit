@@ -876,12 +876,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     [_editingTransactionQueue addOperationWithBlock:^{
       LOG(@"Edit Transaction - moveRow: %@ > %@", indexPath, newIndexPath);
-      NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes[ASDataControllerRowNodeKind], [NSArray arrayWithObject:indexPath]);
-      NSArray *indexPaths = [NSArray arrayWithObject:indexPath];
+      NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes[ASDataControllerRowNodeKind], @[indexPath]);
+      NSArray *indexPaths = @[indexPath];
       [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
 
       // Don't re-calculate size for moving
-      NSArray *newIndexPaths = [NSArray arrayWithObject:newIndexPath];
+      NSArray *newIndexPaths = @[newIndexPath];
       [self _insertNodes:nodes atIndexPaths:newIndexPaths withAnimationOptions:animationOptions];
     }];
   }];
@@ -967,7 +967,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSArray *)completedNodes
 {
   ASDisplayNodeAssertMainThread();
-  return _externalCompletedNodes != nil ? _externalCompletedNodes : _completedNodes[ASDataControllerRowNodeKind];
+  return _externalCompletedNodes ?: _completedNodes[ASDataControllerRowNodeKind];
 }
 
 #pragma mark - Dealloc

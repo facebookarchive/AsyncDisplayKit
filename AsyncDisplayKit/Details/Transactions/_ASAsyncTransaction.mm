@@ -18,7 +18,7 @@ NSInteger const ASDefaultTransactionPriority = 0;
 @interface ASDisplayNodeAsyncTransactionOperation : NSObject
 - (id)initWithOperationCompletionBlock:(asyncdisplaykit_async_transaction_operation_completion_block_t)operationCompletionBlock;
 @property (nonatomic, copy) asyncdisplaykit_async_transaction_operation_completion_block_t operationCompletionBlock;
-@property (atomic, retain) id<NSObject> value; // set on bg queue by the operation block
+@property (atomic, strong) id<NSObject> value; // set on bg queue by the operation block
 @end
 
 @implementation ASDisplayNodeAsyncTransactionOperation

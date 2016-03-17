@@ -475,7 +475,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   // Final output vars
   __block id linkAttributeValue = nil;
-  __block NSString *linkAttributeName = nil;
   __block BOOL inTruncationMessage = NO;
 
   [renderer enumerateTextIndexesAtPosition:point usingBlock:^(NSUInteger characterIndex, CGRect glyphBoundingRect, BOOL *stop) {
@@ -544,7 +543,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
         // Set the values for the next iteration
         linkAttributeValue = value;
-        linkAttributeName = name;
 
         break;
       }

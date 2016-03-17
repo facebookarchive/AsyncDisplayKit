@@ -80,14 +80,14 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  if ([[change objectForKey:@"new"] integerValue] == AVPlayerItemStatusReadyToPlay) {
+  if ([change[@"new"] integerValue] == AVPlayerItemStatusReadyToPlay) {
     if ([self.subnodes containsObject:_spinner]) {
       [_spinner removeFromSupernode];
       _spinner = nil;
     }
   }
   
-  if ([[change objectForKey:@"new"] integerValue] == AVPlayerItemStatusFailed) {
+  if ([change[@"new"] integerValue] == AVPlayerItemStatusFailed) {
     
   }
 }
