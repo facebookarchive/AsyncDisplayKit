@@ -40,13 +40,21 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 
 - (void)addRangeController:(ASRangeController *)rangeController;
 
-- (void)updateRangeController:(ASRangeController *)controller scrollableDirections:(ASScrollDirection)scrollableDirections scrollDirection:(ASScrollDirection)direction rangeMode:(ASLayoutRangeMode)mode tuningParameters:(ASRangeTuningParameters)parameters tuningParametersFetchData:(ASRangeTuningParameters)parametersFetchData interfaceState:(ASInterfaceState)interfaceState;
+- (void)updateRangeController:(ASRangeController *)controller
+     withScrollableDirections:(ASScrollDirection)scrollableDirections
+              scrollDirection:(ASScrollDirection)direction
+                    rangeMode:(ASLayoutRangeMode)mode
+      displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
+    fetchDataTuningParameters:(ASRangeTuningParameters)fetchDataTuningParameters
+               interfaceState:(ASInterfaceState)interfaceState;
 
 @end
 
 @interface _ASRangeDebugBarView : UIView
 
 @property (nonatomic, weak) ASRangeController *rangeController;
+@property (nonatomic, assign) ASInterfaceState interfaceState;
+@property (nonatomic, strong) NSString *debugString;
 
 + (UIImage *)resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
                                              scale:(CGFloat)scale
@@ -63,8 +71,6 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
          leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio
                      direction:(ASScrollDirection)direction
                       onscreen:(BOOL)onscreen;
-
-- (void)adjustFrameWithYOffset:(CGFloat)offset;
 
 @end
 
@@ -85,9 +91,21 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   [[_ASRangeDebugOverlayView sharedInstance] addRangeController:self];
 }
 
-- (void)updateRangeController:(ASRangeController *)controller scrollableDirections:(ASScrollDirection)scrollableDirections scrollDirection:(ASScrollDirection)direction rangeMode:(ASLayoutRangeMode)mode tuningParameters:(ASRangeTuningParameters)parameters tuningParametersFetchData:(ASRangeTuningParameters)parametersFetchData interfaceState:(ASInterfaceState)interfaceState
+- (void)updateRangeController:(ASRangeController *)controller
+     withScrollableDirections:(ASScrollDirection)scrollableDirections
+              scrollDirection:(ASScrollDirection)direction
+                    rangeMode:(ASLayoutRangeMode)mode
+      displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
+    fetchDataTuningParameters:(ASRangeTuningParameters)fetchDataTuningParameters
+               interfaceState:(ASInterfaceState)interfaceState
 {
-  [[_ASRangeDebugOverlayView sharedInstance] updateRangeController:controller scrollableDirections:scrollableDirections scrollDirection:direction rangeMode:mode tuningParameters:parameters tuningParametersFetchData:parametersFetchData interfaceState:interfaceState];
+  [[_ASRangeDebugOverlayView sharedInstance] updateRangeController:controller
+                                          withScrollableDirections:scrollableDirections
+                                                   scrollDirection:direction
+                                                         rangeMode:mode
+                                           displayTuningParameters:displayTuningParameters
+                                         fetchDataTuningParameters:fetchDataTuningParameters
+                                                    interfaceState:interfaceState];
 }
 
 @end
@@ -111,7 +129,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   
   if (!__rangeDebugOverlay) {
     __rangeDebugOverlay = [[self alloc] initWithFrame:CGRectZero];
-    [[[UIApplication sharedApplication] keyWindow] addSubview:__rangeDebugOverlay];
+    [[[NSClassFromString(@"UIApplication") sharedApplication] keyWindow] addSubview:__rangeDebugOverlay];
   }
   
   return __rangeDebugOverlay;
@@ -129,11 +147,10 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     self.layer.zPosition = 1000;
     self.clipsToBounds = YES;
     
-    CGSize windowSize = [[[UIApplication sharedApplication] keyWindow] bounds].size;
+    CGSize windowSize = [[[NSClassFromString(@"UIApplication") sharedApplication] keyWindow] bounds].size;
     self.frame  = CGRectMake(windowSize.width - windowSize.width / OVERLAY_SCALE - OVERLAY_INSET,
                             windowSize.height - windowSize.height / OVERLAY_SCALE - OVERLAY_INSET,
-                            windowSize.width / OVERLAY_SCALE,
-                            windowSize.height / OVERLAY_SCALE);
+                            windowSize.width / OVERLAY_SCALE, 0.0);
     
     UIPanGestureRecognizer *panGR = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(rangeDebugOverlayWasPanned:)];
     [self addGestureRecognizer:panGR];
@@ -147,115 +164,86 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 
 #define BAR_THICKNESS 20
 #define BARS_INSET    5
+
 - (void)layoutSubviews
 {
   [super layoutSubviews];
+}
 
-//  CGRect boundsRect = self.bounds;
-//  CGSize boundsSize = boundsRect.size;
-//  CGRect rect = CGRectMake(0, boundsSize.height - BARS_INSET - BAR_THICKNESS, boundsSize.width, BAR_THICKNESS);
-//  CGFloat totalHeight = BARS_INSET;
-//  
-//  // position top one at negative y (only if new)
-////  - addRange instance variable +++
-////  set to zero below totalHeight
-////  work top down
-////  method add frame with y offset
-////  then in animation offset, change back lower (multiple of ++)
-//  // deal with subtraction?
-//  
-//  for (_ASRangeDebugBarView *rangeView in _rangeControllerViews) {
-//    if (!rangeView.hidden) {
-//      rangeView.frame  = rect;
-//      rect.origin.y   -= rect.size.height;
-//      totalHeight     += rect.size.height;
-//    }
-//  }
-//  
-//  
-//  [UIView animateWithDuration:0.2 animations:^{
-//    self.frame = CGRectMake(self.frame.origin.x,
-//                            self.frame.origin.y + (boundsSize.height - totalHeight),
-//                            boundsSize.width,
-//                            totalHeight); }];
-
-  CGRect boundsRect = self.bounds;
-  CGSize boundsSize = boundsRect.size;
-  CGRect rect = CGRectMake(0, 0, boundsSize.width, BAR_THICKNESS);
-  CGFloat totalHeight = BARS_INSET;
+- (void)layoutAllBarsWithSelfResize
+{
+  CGSize boundsSize = self.bounds.size;
+  CGFloat totalHeight = 0.0;
   
-  _ASRangeDebugBarView *rangeView;
-  NSInteger numViews = [_rangeControllerViews count] - 1;
-  for (NSInteger i = numViews; i > -1; i--) {
-    rangeView = [_rangeControllerViews objectAtIndex:i];
-    if (!rangeView.hidden) {
-      rangeView.frame  = rect;
-      rect.origin.y   += BAR_THICKNESS;
-      totalHeight     += BAR_THICKNESS;
+  CGRect barRect = CGRectMake(0, boundsSize.height - BAR_THICKNESS, self.bounds.size.width, BAR_THICKNESS);
+  
+  for (_ASRangeDebugBarView *barView in [_rangeControllerViews reverseObjectEnumerator]) {
+    barView.frame = barRect;
+    if (!(barView.interfaceState & (ASInterfaceStateVisible | ASInterfaceStateDisplay))) {
+      barView.alpha = 0.0;
+    } else {
+      barView.alpha = 1.0;
+      totalHeight += BAR_THICKNESS;
+      barRect.origin.y -= BAR_THICKNESS;
     }
   }
   
-  rect.origin.y += BARS_INSET;
-  totalHeight   += BARS_INSET;
+  CGRect overlayFrame = self.frame;
+  overlayFrame.origin.y = (overlayFrame.size.height - totalHeight);
+  overlayFrame.size.height = totalHeight;
+  self.frame = overlayFrame;
+}
 
-  [UIView animateWithDuration:0.2 animations:^{
-    self.frame = CGRectMake(self.frame.origin.x,
-                             self.frame.origin.y - _newControllerCount * BAR_THICKNESS,
-                             boundsSize.width,
-                             totalHeight);
-    
-    for (_ASRangeDebugBarView *rangeView in _rangeControllerViews) {
-      if (!rangeView.hidden) {
-        CGFloat finalYOffsetAdjustment = _newControllerCount * BAR_THICKNESS;
-        [rangeView adjustFrameWithYOffset:finalYOffsetAdjustment];
-      }
-    }
-  }];
-  
-  _newControllerCount = 0;
-  _removeControllerCount = 0;
+- (void)setOrigin:(CGPoint)origin forView:(UIView *)view
+{
+  CGRect newFrame = view.frame;
+  newFrame.origin = origin;
+  view.frame      = newFrame;
+}
+
+- (void)offsetYOrigin:(CGFloat)offset forView:(UIView *)view
+{
+  CGRect newFrame = view.frame;
+  newFrame.origin = CGPointMake(newFrame.origin.x, newFrame.origin.y + offset);
+  view.frame      = newFrame;
 }
 
 - (void)addRangeController:(ASRangeController *)rangeController
 {
+  for (_ASRangeDebugBarView *rangeView in _rangeControllerViews) {
+    if (rangeView.rangeController == rangeController) {
+      return;
+    }
+  }
   _ASRangeDebugBarView *rangeView = [[_ASRangeDebugBarView alloc] initWithRangeController:rangeController];
   [_rangeControllerViews addObject:rangeView];
   [self addSubview:rangeView];
-  _newControllerCount++;
+  
+  CGRect barRect = CGRectMake(0, -BAR_THICKNESS, self.bounds.size.width, BAR_THICKNESS);
+  rangeView.frame = barRect;
+  
+  [UIView animateWithDuration:0.2 animations:^{
+    [self layoutAllBarsWithSelfResize];
+  }];
+  
+//  _newControllerCount++;
 }
 
-- (void)updateRangeController:(ASRangeController *)controller scrollableDirections:(ASScrollDirection)scrollableDirections
-              scrollDirection:(ASScrollDirection)direction
-                    rangeMode:(ASLayoutRangeMode)mode
-             tuningParameters:(ASRangeTuningParameters)parameters
-    tuningParametersFetchData:(ASRangeTuningParameters)parametersFetchData
+- (void)updateRangeController:(ASRangeController *)controller
+     withScrollableDirections:(ASScrollDirection)scrollableDirections
+              scrollDirection:(ASScrollDirection)scrollDirection
+                    rangeMode:(ASLayoutRangeMode)rangeMode
+      displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
+    fetchDataTuningParameters:(ASRangeTuningParameters)fetchDataTuningParameters
                interfaceState:(ASInterfaceState)interfaceState;
 {
-  _ASRangeDebugBarView *viewToUpdate = nil;
+  _ASRangeDebugBarView *viewToUpdate = [self barViewForRangeController:controller];
+  viewToUpdate.interfaceState = interfaceState;
   
-  // reverse object enumerator so that I can delete things
-  NSInteger numViews = [_rangeControllerViews count] - 1;
-  for (NSInteger i = numViews; i > -1; i--) {
-    
-    _ASRangeDebugBarView *rangeView = [_rangeControllerViews objectAtIndex:i];
-    
-    // rangeController has been deleted
-    if (!rangeView.rangeController) {
-      [[_rangeControllerViews objectAtIndex:i] removeFromSuperview];
-      [_rangeControllerViews removeObjectAtIndex:i];
-      _removeControllerCount++;
-    }
-    
-    if ([rangeView.rangeController isEqual:controller]) {
-      viewToUpdate = rangeView;
-    }
-  }
-  
-  // assume fetch data is largest = self.bounds
   CGRect boundsRect = self.bounds;
-  CGRect visibleRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, ASRangeTuningParametersZero, scrollableDirections, direction);
-  CGRect displayRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, parameters, scrollableDirections, direction);
-  CGRect fetchDataRect = CGRectExpandToRangeWithScrollableDirections(boundsRect, parametersFetchData, scrollableDirections, direction);
+  CGRect visibleRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, ASRangeTuningParametersZero, scrollableDirections, scrollDirection);
+  CGRect displayRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, displayTuningParameters,     scrollableDirections, scrollDirection);
+  CGRect fetchDataRect = CGRectExpandToRangeWithScrollableDirections(boundsRect, fetchDataTuningParameters,   scrollableDirections, scrollDirection);
   
   // figure out which is biggest and assume that is full bounds
   BOOL displayRangeLargerThanFetch    = NO;
@@ -265,14 +253,14 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   CGFloat leadingDisplayTuningRatio   = 0;
   CGFloat leadingFetchDataTuningRatio = 0;
 
-  if (!((parameters.leadingBufferScreenfuls + parameters.trailingBufferScreenfuls) == 0)) {
-    leadingDisplayTuningRatio = parameters.leadingBufferScreenfuls / (parameters.leadingBufferScreenfuls + parameters.trailingBufferScreenfuls);
+  if (!((displayTuningParameters.leadingBufferScreenfuls + displayTuningParameters.trailingBufferScreenfuls) == 0)) {
+    leadingDisplayTuningRatio = displayTuningParameters.leadingBufferScreenfuls / (displayTuningParameters.leadingBufferScreenfuls + displayTuningParameters.trailingBufferScreenfuls);
   }
-  if (!((parametersFetchData.leadingBufferScreenfuls + parametersFetchData.trailingBufferScreenfuls) == 0)) {
-    leadingFetchDataTuningRatio = parametersFetchData.leadingBufferScreenfuls / (parametersFetchData.leadingBufferScreenfuls + parametersFetchData.trailingBufferScreenfuls);
+  if (!((fetchDataTuningParameters.leadingBufferScreenfuls + fetchDataTuningParameters.trailingBufferScreenfuls) == 0)) {
+    leadingFetchDataTuningRatio = fetchDataTuningParameters.leadingBufferScreenfuls / (fetchDataTuningParameters.leadingBufferScreenfuls + fetchDataTuningParameters.trailingBufferScreenfuls);
   }
   
-  if (ASScrollDirectionContainsVerticalDirection(direction)) {
+  if (ASScrollDirectionContainsVerticalDirection(scrollDirection)) {
     
     if (displayRect.size.height >= fetchDataRect.size.height) {
       displayRangeLargerThanFetch = YES;
@@ -316,10 +304,27 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
                    leadingDisplayRatio:leadingDisplayTuningRatio
                         fetchDataRatio:fetchDataRatio
                  leadingFetchDataRatio:leadingFetchDataTuningRatio
-                             direction:direction
+                             direction:scrollDirection
                               onscreen:onScreen];
 
   [self setNeedsLayout];
+}
+
+- (_ASRangeDebugBarView *)barViewForRangeController:(ASRangeController *)controller
+{
+  _ASRangeDebugBarView *rangeControllerBarView = nil;
+  
+  for (_ASRangeDebugBarView *rangeView in [[_rangeControllerViews reverseObjectEnumerator] allObjects]) {
+    // remove barView if it's rangeController has been deleted
+    if (!rangeView.rangeController) {
+      [_rangeControllerViews removeObject:rangeView];
+    }
+    if ([rangeView.rangeController isEqual:controller]) {
+      rangeControllerBarView = rangeView;
+    }
+  }
+  
+  return rangeControllerBarView;
 }
 
 #define MIN_VISIBLE_INSET 40
@@ -376,7 +381,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   CGFloat           _fetchDataRatio;
   CGFloat           _leadingDisplayRatio;
   CGFloat           _leadingFetchDataRatio;
-  ASScrollDirection _direction;
+  ASScrollDirection _scrollDirection;
   BOOL              _onScreen;
   BOOL              _firstLayoutOfRects;
 }
@@ -385,8 +390,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 {
   self = [super initWithFrame:CGRectZero];
  
-  if
-    (self) {
+  if (self) {
     _firstLayoutOfRects = YES;
     _rangeController    = rangeController;
     _debugText          = [self createDebugTextNode];
@@ -454,7 +458,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   
   BOOL displayLargerThanFetchData = (_displayRatio == 1.0) ? YES : NO;
   
-  if (ASScrollDirectionContainsLeft(_direction) || ASScrollDirectionContainsUp(_direction)) {
+  if (ASScrollDirectionContainsLeft(_scrollDirection) || ASScrollDirectionContainsUp(_scrollDirection)) {
     
     if (displayLargerThanFetchData) {
       visiblePoint        = (displayDimension - visibleDimension) * _leadingDisplayRatio;
@@ -463,10 +467,9 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
       visiblePoint        = (fetchDataDimension - visibleDimension) * _leadingFetchDataRatio;
       displayPoint        = visiblePoint - (displayDimension - visibleDimension) * _leadingDisplayRatio;
     }
-  } else if (ASScrollDirectionContainsRight(_direction) || ASScrollDirectionContainsDown(_direction)) {
+  } else if (ASScrollDirectionContainsRight(_scrollDirection) || ASScrollDirectionContainsDown(_scrollDirection)) {
     
     if (displayLargerThanFetchData) {
-      
       visiblePoint        = (displayDimension - visibleDimension) * (1 - _leadingDisplayRatio);
       fetchDataPoint      = visiblePoint - (fetchDataDimension - visibleDimension) * (1 - _leadingFetchDataRatio);
     } else {
@@ -497,7 +500,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
            leadingDisplayRatio:(CGFloat)leadingDisplayRatio
                 fetchDataRatio:(CGFloat)fetchDataRatio
          leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio
-                     direction:(ASScrollDirection)direction
+                     direction:(ASScrollDirection)scrollDirection
                       onscreen:(BOOL)onscreen
 {
   _visibleRatio = visibleRatio;
@@ -505,17 +508,10 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   _leadingDisplayRatio = leadingDisplayRatio;
   _fetchDataRatio = fetchDataRatio;
   _leadingFetchDataRatio = leadingFetchDataRatio;
-  _direction = direction;
+  _scrollDirection = scrollDirection;
   _onScreen = YES;
   
   [self setNeedsLayout];
-}
-      
-- (void)adjustFrameWithYOffset:(CGFloat)offset
-{
-  CGRect newFrame = self.frame;
-  newFrame.origin = CGPointMake(newFrame.origin.x, newFrame.origin.y + offset);
-  self.frame = newFrame;
 }
 
 - (ASTextNode *)createDebugTextNode
@@ -543,12 +539,14 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 
 - (void)setBarDebugLabelsWithSize:(CGFloat)size
 {
-  if (_onScreen) {
-    NSString *dataSourceClassString = NSStringFromClass([[[self rangeController] dataSource] class]);
-    _debugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:dataSourceClassString withSize:size];
+  if (!_debugString) {
+    _debugString = NSStringFromClass([[_rangeController dataSource] class]);
+  }
+  if (_debugString) {
+    _debugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:_debugString withSize:size];
   }
   
-  switch (_direction) {
+  switch (_scrollDirection) {
     case ASScrollDirectionLeft:
       _leftDebugText.hidden = NO;
       _leftDebugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:@"◀︎" withSize:size];

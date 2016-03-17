@@ -48,11 +48,11 @@
 // FIXME: comment
 // FIXME: better name? organize arguments?
 - (void)updateRangeController:(ASRangeController *)controller
-         scrollableDirections:(ASScrollDirection)scrollableDirections
+     withScrollableDirections:(ASScrollDirection)scrollableDirections
               scrollDirection:(ASScrollDirection)direction
                     rangeMode:(ASLayoutRangeMode)mode
-             tuningParameters:(ASRangeTuningParameters)parameters
-    tuningParametersFetchData:(ASRangeTuningParameters)parametersFetchData
+      displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
+    fetchDataTuningParameters:(ASRangeTuningParameters)fetchDataTuningParameters
                interfaceState:(ASInterfaceState)interfaceState;
 
 @end
