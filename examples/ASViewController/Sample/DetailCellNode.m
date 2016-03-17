@@ -21,31 +21,32 @@
     self = [super init];
     if (self == nil) { return self; }
     
-    _imageNode = [ASNetworkImageNode new];
+    _imageNode = [[ASNetworkImageNode alloc] init];
     _imageNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
     [self addSubnode:_imageNode];
     
     return self;
 }
 
-
 #pragma mark - ASDisplayNode
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    ASStaticLayoutSpec *staticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.imageNode]];
     self.imageNode.position = CGPointZero;
     self.imageNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
-    return staticSpec;
+    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.imageNode]];
 }
 
-- (void)fetchData
+- (void)layoutDidFinish
 {
-    [super fetchData];
+    [super layoutDidFinish];
     
-    [self loadImage];
+    // In general set URL of ASNetworkImageNode as soon as possible. Ideally in init or a
+    // view model setter method.
+    // In this case as we need to know the size of the node the url is set in layoutDidFinish so
+    // we have the calculatedSize available
+    self.imageNode.URL = [self imageURL];
 }
-
 
 #pragma mark  - Image
 
@@ -54,11 +55,6 @@
     CGSize imageSize = self.calculatedSize;
     NSString *imageURLString = [NSString stringWithFormat:@"http://lorempixel.com/%ld/%ld/%@/%ld", (NSInteger)imageSize.width, (NSInteger)imageSize.height, self.imageCategory, self.row];
     return [NSURL URLWithString:imageURLString];
-}
-
-- (void)loadImage
-{
-    self.imageNode.URL = self.imageURL;
 }
 
 @end
