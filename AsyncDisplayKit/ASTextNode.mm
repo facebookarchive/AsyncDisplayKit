@@ -380,12 +380,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   self.accessibilityLabel = _attributedString.string;
 
-  if (_attributedString.length == 0) {
-    // We're not an accessibility element by default if there is no string.
-    self.isAccessibilityElement = NO;
-  } else {
-    self.isAccessibilityElement = YES;
-  }
+  // We're an accessibility element by default if there is a string.
+  self.isAccessibilityElement = _attributedString.length != 0;
 }
 
 #pragma mark - Text Layout
