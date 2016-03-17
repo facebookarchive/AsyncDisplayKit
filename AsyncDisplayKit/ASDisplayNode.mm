@@ -114,6 +114,7 @@ static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *i
 
   flags.isInHierarchy = NO;
   flags.displaysAsynchronously = YES;
+  flags.shouldAnimateSizeChanges = YES;
   flags.implementsDrawRect = ([c respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
   flags.implementsImageDisplay = ([c respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
   if (instance) {
@@ -1657,7 +1658,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 // The node sending the message should usually be passed as the parameter, similar to the delegation pattern.
 - (void)_pendingNodeWillDisplay:(ASDisplayNode *)node
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDisplayNodeAssertMainThread();
 
   if (!_pendingDisplayNodes) {
     _pendingDisplayNodes = [[NSMutableSet alloc] init];
@@ -1670,27 +1671,25 @@ static NSInteger incrementIfFound(NSInteger i) {
 // The node sending the message should usually be passed as the parameter, similar to the delegation pattern.
 - (void)_pendingNodeDidDisplay:(ASDisplayNode *)node
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDisplayNodeAssertMainThread();
 
   [_pendingDisplayNodes removeObject:node];
 
   // only trampoline if there is a placeholder and nodes are done displaying
   if ([self _pendingDisplayNodesHaveFinished] && _placeholderLayer.superlayer) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      void (^cleanupBlock)() = ^{
-        [self _tearDownPlaceholderLayer];
-      };
+    void (^cleanupBlock)() = ^{
+      [self _tearDownPlaceholderLayer];
+    };
 
-      if (_placeholderFadeDuration > 0.0 && ASInterfaceStateIncludesVisible(self.interfaceState)) {
-        [CATransaction begin];
-        [CATransaction setCompletionBlock:cleanupBlock];
-        [CATransaction setAnimationDuration:_placeholderFadeDuration];
-        _placeholderLayer.opacity = 0.0;
-        [CATransaction commit];
-      } else {
-        cleanupBlock();
-      }
-    });
+    if (_placeholderFadeDuration > 0.0 && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+      [CATransaction begin];
+      [CATransaction setCompletionBlock:cleanupBlock];
+      [CATransaction setAnimationDuration:_placeholderFadeDuration];
+      _placeholderLayer.opacity = 0.0;
+      [CATransaction commit];
+    } else {
+      cleanupBlock();
+    }
   }
 }
 
@@ -1938,13 +1937,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   _placeholderImage = nil;
 }
 
-// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or exitInterfaceState:
 - (void)recursivelyClearContents
 {
-  for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyClearContents];
-  }
-  [self clearContents];
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+    [node clearContents];
+  });
 }
 
 - (void)fetchData
@@ -1959,13 +1956,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   }
 }
 
-// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or enterInterfaceState:
 - (void)recursivelyFetchData
 {
-  for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyFetchData];
-  }
-  [self fetchData];
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+    [node fetchData];
+  });
 }
 
 - (void)clearFetchedData
@@ -1973,17 +1968,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // subclass override
 }
 
-// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or exitInterfaceState:
 - (void)recursivelyClearFetchedData
 {
-  for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyClearFetchedData];
-  }
-  [self clearFetchedData];
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+    [node clearFetchedData];
+  });
 }
 
 - (void)visibilityDidChange:(BOOL)isVisible
 {
+    // subclass override
 }
 
 /**
@@ -1992,7 +1986,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
  */
 - (BOOL)supportsRangeManagedInterfaceState
 {
-  return (_hierarchyState & ASHierarchyStateRangeManaged);
+  return ASHierarchyStateIncludesRangeManaged(_hierarchyState);
 }
 
 - (ASInterfaceState)interfaceState
@@ -2260,6 +2254,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)displayWillStart
 {
+  ASDisplayNodeAssertMainThread();
+
   // in case current node takes longer to display than it's subnodes, treat it as a dependent node
   [self _pendingNodeWillDisplay:self];
 
@@ -2288,6 +2284,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)displayDidFinish
 {
+  ASDisplayNodeAssertMainThread();
+  
   [self _pendingNodeDidDisplay:self];
 
   [_supernode subnodeDisplayDidFinish:self];
@@ -2494,12 +2492,29 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   self.asyncLayer.displaySuspended = flag;
 
   if ([self __implementsDisplay]) {
-    if (flag) {
-      [_supernode subnodeDisplayDidFinish:self];
-    } else {
-      [_supernode subnodeDisplayWillStart:self];
-    }
+    // Display start and finish methods needs to happen on the main thread
+    ASPerformBlockOnMainThread(^{
+      if (flag) {
+        [_supernode subnodeDisplayDidFinish:self];
+      } else {
+        [_supernode subnodeDisplayWillStart:self];
+      }
+    });
   }
+}
+
+- (BOOL)shouldAnimateSizeChanges
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
+  return _flags.shouldAnimateSizeChanges;
+}
+
+-(void)setShouldAnimateSizeChanges:(BOOL)shouldAnimateSizeChanges
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
+  _flags.shouldAnimateSizeChanges = shouldAnimateSizeChanges;
 }
 
 static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";

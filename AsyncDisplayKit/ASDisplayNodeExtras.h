@@ -60,6 +60,11 @@ NS_ASSUME_NONNULL_BEGIN
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
 /**
+ Returns the appropriate interface state for a given ASDisplayNode and window
+ */
+extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window);
+
+/**
  Given a layer, returns the associated display node, if any.
  */
 extern ASDisplayNode * _Nullable ASLayerToDisplayNode(CALayer * _Nullable layer);
@@ -91,12 +96,12 @@ extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^b
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.
  */
-extern id _Nullable ASDisplayNodeFind(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
+extern id _Nullable ASDisplayNodeFindFirstSupernode(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node of kind class.
  */
-extern id _Nullable ASDisplayNodeFindClass(ASDisplayNode *start, Class c);
+extern id _Nullable ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c);
 
 /**
  * Given two nodes, finds their most immediate common parent.  Used for geometry conversion methods.
@@ -124,7 +129,12 @@ extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodes(ASDisplayNode *sta
 extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c);
 
 /**
- Given a display node, traverses down the node hierarchy, returning the depth-first display node that pass the block.
+ Given a display node, traverses down the node hierarchy, returning the depth-first display node, including the start node that pass the block.
+ */
+extern __kindof ASDisplayNode * ASDisplayNodeFindFirstNode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+
+/**
+ Given a display node, traverses down the node hierarchy, returning the depth-first display node, excluding the start node, that pass the block
  */
 extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
 

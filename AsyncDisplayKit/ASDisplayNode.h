@@ -428,6 +428,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL displaySuspended;
 
+/**
+ * @abstract Whether size changes should be animated. Default to YES.
+ */
+@property (nonatomic, assign) BOOL shouldAnimateSizeChanges;
+
 /** 
  * @abstract Prevent the node and its descendants' layer from displaying.
  *

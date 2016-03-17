@@ -70,6 +70,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
     unsigned shouldRasterizeDescendants:1;
     unsigned shouldBypassEnsureDisplay:1;
     unsigned displaySuspended:1;
+    unsigned shouldAnimateSizeChanges:1;
     unsigned hasCustomDrawingPriority:1;
 
     // whether custom drawing is enabled

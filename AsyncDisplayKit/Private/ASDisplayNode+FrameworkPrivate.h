@@ -56,6 +56,11 @@ inline BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyStat
   return ((hierarchyState & ASHierarchyStateLayoutPending) == ASHierarchyStateLayoutPending);
 }
 
+inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState)
+{
+    return ((hierarchyState & ASHierarchyStateRangeManaged) == ASHierarchyStateRangeManaged);
+}
+
 @interface ASDisplayNode ()
 {
 @protected
@@ -90,6 +95,14 @@ inline BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyStat
  * @see ASInterfaceState
  */
 @property (nonatomic, readwrite) ASHierarchyState hierarchyState;
+
+/**
+ * @abstract Return if the node is range managed or not
+ *
+ * @discussion Currently only set interface state on nodes in table and collection views. For other nodes, if they are
+ * in the hierarchy we enable all ASInterfaceState types with `ASInterfaceStateInHierarchy`, otherwise `None`.
+ */
+- (BOOL)supportsRangeManagedInterfaceState;
 
 // The two methods below will eventually be exposed, but their names are subject to change.
 /**
