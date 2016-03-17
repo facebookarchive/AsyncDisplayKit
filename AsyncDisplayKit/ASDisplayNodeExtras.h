@@ -60,6 +60,11 @@ NS_ASSUME_NONNULL_BEGIN
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
 /**
+ Returns the appropriate interface state for a given ASDisplayNode and window
+ */
+extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window);
+
+/**
  Given a layer, returns the associated display node, if any.
  */
 extern ASDisplayNode * _Nullable ASLayerToDisplayNode(CALayer * _Nullable layer);

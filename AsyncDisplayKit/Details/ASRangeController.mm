@@ -49,7 +49,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _currentRangeMode = ASLayoutRangeModeInvalid;
   _didUpdateCurrentRange = NO;
   
-  [[self.class allRangeControllersWeakSet] addObject:self];
+  [[[self class] allRangeControllersWeakSet] addObject:self];
   
   if ([ASRangeController shouldShowRangeDebugOverlay]) {
     [self addRangeControllerToRangeDebugOverlay];
@@ -67,11 +67,16 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 #pragma mark - Core visible node range managment API
 
++ (BOOL)isFirstRangeUpdateForRangeMode:(ASLayoutRangeMode)rangeMode
+{
+  return (rangeMode == ASLayoutRangeModeInvalid);
+}
+
 + (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
                                currentRangeMode:(ASLayoutRangeMode)currentRangeMode
 {
   BOOL isVisible = (ASInterfaceStateIncludesVisible(interfaceState));
-  BOOL isFirstRangeUpdate = (currentRangeMode == ASLayoutRangeModeInvalid);
+  BOOL isFirstRangeUpdate = [self isFirstRangeUpdateForRangeMode:currentRangeMode];
   if (!isVisible || isFirstRangeUpdate) {
     return ASLayoutRangeModeMinimum;
   }
@@ -196,7 +201,9 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   ASInterfaceState selfInterfaceState = [self interfaceState];
   ASLayoutRangeMode rangeMode = _currentRangeMode;
-  if (!_didUpdateCurrentRange) {
+  // If the range mode is explicitly set via updateCurrentRangeWithMode: it will last in that mode until the
+  // range controller becomes visible again or explicitly changes the range mode again
+  if ((!_didUpdateCurrentRange && ASInterfaceStateIncludesVisible(selfInterfaceState)) || [[self class] isFirstRangeUpdateForRangeMode:rangeMode]) {
     rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
   }
 
@@ -257,7 +264,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _didUpdateCurrentRange = NO;
   
   if (!_rangeIsValid) {
-    [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];
+    [allIndexPaths addObjectsFromArray:ASIndexPathsForTwoDimensionalArray(allNodes)];
   }
   
   // TODO Don't register for notifications if this range update doesn't cause any node to enter rendering pipeline.
