@@ -1676,7 +1676,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   [_pendingDisplayNodes removeObject:node];
 
   // only trampoline if there is a placeholder and nodes are done displaying
-  if ([self _pendingDisplayNodesHaveFinished] && _placeholderLayer.superlayer) {
+  if (self.layer.contents && [self _pendingDisplayNodesHaveFinished] && _placeholderLayer.superlayer) {
     void (^cleanupBlock)() = ^{
       [self _tearDownPlaceholderLayer];
     };
