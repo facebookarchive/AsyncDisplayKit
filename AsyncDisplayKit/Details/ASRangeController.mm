@@ -16,6 +16,7 @@
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "AsyncDisplayKit+Debug.h"
+#import "ASCollectionView.h"
 
 
 @interface ASRangeController ()
