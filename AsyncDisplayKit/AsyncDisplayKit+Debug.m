@@ -12,6 +12,7 @@
 #import <AsyncDisplayKit/CGRect+ASConvenience.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASRangeController.h>
 
 static BOOL __shouldShowImageScalingOverlay = NO;
 static BOOL __shouldShowRangeDebugOverlay = NO;
@@ -53,7 +54,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 @interface _ASRangeDebugBarView : UIView
 
 @property (nonatomic, weak) ASRangeController *rangeController;
-@property (nonatomic, assign) ASInterfaceState interfaceState;
+@property (nonatomic, assign) BOOL destroyOnLayout;
 @property (nonatomic, strong) NSString *debugString;
 
 + (UIImage *)resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
@@ -69,8 +70,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
            leadingDisplayRatio:(CGFloat)leadingDisplayRatio
                 fetchDataRatio:(CGFloat)fetchDataRatio
          leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio
-                     direction:(ASScrollDirection)direction
-                      onscreen:(BOOL)onscreen;
+                     direction:(ASScrollDirection)direction;
 
 @end
 
@@ -84,6 +84,11 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 + (BOOL)shouldShowRangeDebugOverlay
 {
   return __shouldShowRangeDebugOverlay;
+}
+
++ (void)layoutDebugOverlayIfNeeded
+{
+  [[_ASRangeDebugOverlayView sharedInstance] setNeedsLayout];
 }
 
 - (void)addRangeControllerToRangeDebugOverlay
@@ -121,13 +126,14 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   NSMutableArray *_rangeControllerViews;
   NSInteger      _newControllerCount;
   NSInteger      _removeControllerCount;
+  BOOL           _animating;
 }
 
 + (instancetype)sharedInstance
 {
   static _ASRangeDebugOverlayView *__rangeDebugOverlay = nil;
   
-  if (!__rangeDebugOverlay) {
+  if (!__rangeDebugOverlay && [ASRangeController shouldShowRangeDebugOverlay]) {
     __rangeDebugOverlay = [[self alloc] initWithFrame:CGRectZero];
     [[[NSClassFromString(@"UIApplication") sharedApplication] keyWindow] addSubview:__rangeDebugOverlay];
   }
@@ -135,7 +141,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   return __rangeDebugOverlay;
 }
 
-#define OVERLAY_INSET 20
+#define OVERLAY_INSET 10
 #define OVERLAY_SCALE 3
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -148,9 +154,8 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     self.clipsToBounds = YES;
     
     CGSize windowSize = [[[NSClassFromString(@"UIApplication") sharedApplication] keyWindow] bounds].size;
-    self.frame  = CGRectMake(windowSize.width - windowSize.width / OVERLAY_SCALE - OVERLAY_INSET,
-                            windowSize.height - windowSize.height / OVERLAY_SCALE - OVERLAY_INSET,
-                            windowSize.width / OVERLAY_SCALE, 0.0);
+    self.frame  = CGRectMake(windowSize.width - (windowSize.width / OVERLAY_SCALE) - OVERLAY_INSET, windowSize.height - OVERLAY_INSET,
+                                                 windowSize.width / OVERLAY_SCALE, 0.0);
     
     UIPanGestureRecognizer *panGR = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(rangeDebugOverlayWasPanned:)];
     [self addGestureRecognizer:panGR];
@@ -162,36 +167,71 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   return self;
 }
 
-#define BAR_THICKNESS 20
-#define BARS_INSET    5
+#define BAR_THICKNESS 24
 
 - (void)layoutSubviews
 {
   [super layoutSubviews];
+  [UIView animateWithDuration:0.2 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+    [self layoutToFitAllBarsExcept:0];
+  } completion:^(BOOL finished) {
+    
+  }];
 }
 
-- (void)layoutAllBarsWithSelfResize
+- (void)layoutToFitAllBarsExcept:(NSInteger)barsToClip
 {
   CGSize boundsSize = self.bounds.size;
   CGFloat totalHeight = 0.0;
   
   CGRect barRect = CGRectMake(0, boundsSize.height - BAR_THICKNESS, self.bounds.size.width, BAR_THICKNESS);
+  NSMutableArray *displayedBars = [NSMutableArray array];
   
-  for (_ASRangeDebugBarView *barView in [_rangeControllerViews reverseObjectEnumerator]) {
+  for (_ASRangeDebugBarView *barView in [_rangeControllerViews copy]) {
     barView.frame = barRect;
-    if (!(barView.interfaceState & (ASInterfaceStateVisible | ASInterfaceStateDisplay))) {
-      barView.alpha = 0.0;
+    
+    ASInterfaceState interfaceState = [barView.rangeController.dataSource interfaceStateForRangeController:barView.rangeController];
+    
+#if ASRangeControllerLoggingEnabled
+    NSLog(@"barView %p, visible = %d, display = %d, fetch = %d, destroy = %d, alpha = %f, %@", barView,
+          (interfaceState & ASInterfaceStateVisible) == ASInterfaceStateVisible,
+          (interfaceState & ASInterfaceStateDisplay) == ASInterfaceStateDisplay,
+          (interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData,
+          barView.destroyOnLayout, barView.alpha, barView.debugString);
+#endif
+    
+    if (!(interfaceState & (ASInterfaceStateVisible))) {
+      if (barView.destroyOnLayout && barView.alpha == 0.0) {
+        [_rangeControllerViews removeObjectIdenticalTo:barView];
+        [barView removeFromSuperview];
+      } else {
+        barView.alpha = 0.0;
+      }
     } else {
+      assert(!barView.destroyOnLayout); // In this case we should not have a visible interfaceState
       barView.alpha = 1.0;
       totalHeight += BAR_THICKNESS;
       barRect.origin.y -= BAR_THICKNESS;
+      [displayedBars addObject:barView];
     }
   }
   
-  CGRect overlayFrame = self.frame;
-  overlayFrame.origin.y = (overlayFrame.size.height - totalHeight);
-  overlayFrame.size.height = totalHeight;
-  self.frame = overlayFrame;
+  if (totalHeight > 0) {
+    totalHeight -= (BAR_THICKNESS * barsToClip);
+  }
+  
+  if (barsToClip == 0) {
+    CGRect overlayFrame = self.frame;
+    CGFloat heightChange = (overlayFrame.size.height - totalHeight);
+    
+    overlayFrame.origin.y += heightChange;
+    overlayFrame.size.height = totalHeight;
+    self.frame = overlayFrame;
+    
+    for (_ASRangeDebugBarView *barView in displayedBars) {
+      [self offsetYOrigin:-heightChange forView:barView];
+    }
+  }
 }
 
 - (void)setOrigin:(CGPoint)origin forView:(UIView *)view
@@ -219,14 +259,16 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   [_rangeControllerViews addObject:rangeView];
   [self addSubview:rangeView];
   
-  CGRect barRect = CGRectMake(0, -BAR_THICKNESS, self.bounds.size.width, BAR_THICKNESS);
-  rangeView.frame = barRect;
+  if (!_animating) {
+    [self layoutToFitAllBarsExcept:1];
+  }
   
-  [UIView animateWithDuration:0.2 animations:^{
-    [self layoutAllBarsWithSelfResize];
+  [UIView animateWithDuration:0.2 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+    _animating = YES;
+    [self layoutToFitAllBarsExcept:0];
+  } completion:^(BOOL finished) {
+    _animating = NO;
   }];
-  
-//  _newControllerCount++;
 }
 
 - (void)updateRangeController:(ASRangeController *)controller
@@ -238,12 +280,12 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
                interfaceState:(ASInterfaceState)interfaceState;
 {
   _ASRangeDebugBarView *viewToUpdate = [self barViewForRangeController:controller];
-  viewToUpdate.interfaceState = interfaceState;
   
   CGRect boundsRect = self.bounds;
   CGRect visibleRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, ASRangeTuningParametersZero, scrollableDirections, scrollDirection);
   CGRect displayRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, displayTuningParameters,     scrollableDirections, scrollDirection);
   CGRect fetchDataRect = CGRectExpandToRangeWithScrollableDirections(boundsRect, fetchDataTuningParameters,   scrollableDirections, scrollDirection);
+  
   
   // figure out which is biggest and assume that is full bounds
   BOOL displayRangeLargerThanFetch    = NO;
@@ -297,15 +339,12 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     }
   }
 
-  BOOL onScreen = (interfaceState & ASInterfaceStateVisible) ? YES : NO;
-
   [viewToUpdate updateWithVisibleRatio:visibleRatio
                           displayRatio:displayRatio
                    leadingDisplayRatio:leadingDisplayTuningRatio
                         fetchDataRatio:fetchDataRatio
                  leadingFetchDataRatio:leadingFetchDataTuningRatio
-                             direction:scrollDirection
-                              onscreen:onScreen];
+                             direction:scrollDirection];
 
   [self setNeedsLayout];
 }
@@ -317,8 +356,14 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   for (_ASRangeDebugBarView *rangeView in [[_rangeControllerViews reverseObjectEnumerator] allObjects]) {
     // remove barView if it's rangeController has been deleted
     if (!rangeView.rangeController) {
-      [_rangeControllerViews removeObject:rangeView];
+      rangeView.destroyOnLayout = YES;
+      [self setNeedsLayout];
     }
+    ASInterfaceState interfaceState = [rangeView.rangeController.dataSource interfaceStateForRangeController:rangeView.rangeController];
+    if (!(interfaceState & (ASInterfaceStateVisible | ASInterfaceStateDisplay))) {
+      [self setNeedsLayout];
+    }
+    
     if ([rangeView.rangeController isEqual:controller]) {
       rangeControllerBarView = rangeView;
     }
@@ -382,7 +427,6 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   CGFloat           _leadingDisplayRatio;
   CGFloat           _leadingFetchDataRatio;
   ASScrollDirection _scrollDirection;
-  BOOL              _onScreen;
   BOOL              _firstLayoutOfRects;
 }
 
@@ -431,10 +475,9 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   [super layoutSubviews];
   
   CGSize boundsSize     = self.bounds.size;
-  CGFloat subCellHeight = floorf(boundsSize.height / 2.0)-1;
+  CGFloat subCellHeight = 9.0;
   [self setBarDebugLabelsWithSize:subCellHeight];
   [self setBarSubviewOrder];
-  [self setBarAlpha];
 
   CGRect rect       = CGRectIntegral(CGRectMake(0, 0, boundsSize.width, floorf(boundsSize.height / 2.0)));
   rect.size         = [_debugText measure:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
@@ -501,7 +544,6 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
                 fetchDataRatio:(CGFloat)fetchDataRatio
          leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio
                      direction:(ASScrollDirection)scrollDirection
-                      onscreen:(BOOL)onscreen
 {
   _visibleRatio = visibleRatio;
   _displayRatio = displayRatio;
@@ -509,7 +551,6 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   _fetchDataRatio = fetchDataRatio;
   _leadingFetchDataRatio = leadingFetchDataRatio;
   _scrollDirection = scrollDirection;
-  _onScreen = YES;
   
   [self setNeedsLayout];
 }
@@ -519,11 +560,6 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   ASTextNode *label = [[ASTextNode alloc] init];
   [self addSubnode:label];
   return label;
-}
-
-- (void)setBarAlpha
-{
-  self.alpha = ((_fetchDataRatio == _displayRatio) && (_visibleRatio == _displayRatio)) ? 0.5 : 1;
 }
 
 - (void)setBarSubviewOrder

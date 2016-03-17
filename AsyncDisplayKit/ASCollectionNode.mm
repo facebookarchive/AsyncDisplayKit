@@ -10,6 +10,7 @@
 #import "ASCollectionInternal.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "AsyncDisplayKit+Debug.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #include <vector>
 
@@ -165,6 +166,12 @@
 - (ASCollectionView *)view
 {
   return (ASCollectionView *)[super view];
+}
+
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
+{
+  [super interfaceStateDidChange:newState fromState:oldState];
+  [ASRangeController layoutDebugOverlayIfNeeded];
 }
 
 #if ASRangeControllerLoggingEnabled

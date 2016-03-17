@@ -42,6 +42,8 @@
 + (void)setShouldShowRangeDebugOverlay:(BOOL)show;
 + (BOOL)shouldShowRangeDebugOverlay;
 
++ (void)layoutDebugOverlayIfNeeded;
+
 // FIXME: comment
 - (void)addRangeControllerToRangeDebugOverlay;  // FIXME: can this be private method?
 

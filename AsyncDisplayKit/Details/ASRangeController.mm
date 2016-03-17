@@ -230,21 +230,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
                                                         rangeMode:rangeMode
                                                         rangeType:ASLayoutRangeTypeDisplay];
   }
-
-  if ([ASRangeController shouldShowRangeDebugOverlay]) {
-    ASScrollDirection scrollableDirections = ASScrollDirectionUp | ASScrollDirectionDown;
-    if ([_dataSource isKindOfClass:NSClassFromString(@"ASCollectionView")]) {
-      scrollableDirections = (ASScrollDirection)[_dataSource performSelector:@selector(scrollableDirections)];
-    }
-
-    [self updateRangeController:self
-       withScrollableDirections:scrollableDirections
-                scrollDirection:_scrollDirection
-                      rangeMode:rangeMode
-        displayTuningParameters:parametersDisplay
-      fetchDataTuningParameters:parametersFetchData
-                 interfaceState:selfInterfaceState];
-  }
   
   // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
   // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
@@ -342,6 +327,21 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   if (_didRegisterForNotifications) {
     _pendingDisplayNodesTimestamp = CFAbsoluteTimeGetCurrent();
+  }
+  
+  if ([ASRangeController shouldShowRangeDebugOverlay]) {
+    ASScrollDirection scrollableDirections = ASScrollDirectionUp | ASScrollDirectionDown;
+    if ([_dataSource isKindOfClass:NSClassFromString(@"ASCollectionView")]) {
+      scrollableDirections = (ASScrollDirection)[_dataSource performSelector:@selector(scrollableDirections)];
+    }
+    
+    [self updateRangeController:self
+       withScrollableDirections:scrollableDirections
+                scrollDirection:_scrollDirection
+                      rangeMode:rangeMode
+        displayTuningParameters:parametersDisplay
+      fetchDataTuningParameters:parametersFetchData
+                 interfaceState:selfInterfaceState];
   }
   
   _rangeIsValid = YES;
