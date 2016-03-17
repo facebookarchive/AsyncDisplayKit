@@ -140,7 +140,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 + (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node;
 
 // The _ASDisplayLayer backing the node, if any.
-@property (nonatomic, readonly, retain) _ASDisplayLayer *asyncLayer;
+@property (nonatomic, readonly, strong) _ASDisplayLayer *asyncLayer;
 
 // Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;

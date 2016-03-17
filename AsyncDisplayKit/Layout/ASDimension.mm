@@ -100,7 +100,7 @@ struct _Range {
   {
   CGFloat newMin = MAX(min, other.min);
   CGFloat newMax = MIN(max, other.max);
-  if (!(newMin > newMax)) {
+  if (newMin <= newMax) {
     return {newMin, newMax};
   } else {
     // No intersection. If we're before the other range, return our max; otherwise our min.
