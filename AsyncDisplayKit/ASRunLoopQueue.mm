@@ -9,6 +9,7 @@
 #import "ASRunLoopQueue.h"
 #import "ASThread.h"
 
+#import <cstdlib>
 #import <deque>
 
 static void runLoopSourceCallback(void *info) {
@@ -44,9 +45,11 @@ static void runLoopSourceCallback(void *info) {
     
     // It is not guaranteed that the runloop will turn if it has no scheduled work, and this causes processing of
     // the queue to stop. Attaching a custom loop source to the run loop and signal it if new work needs to be done
-    CFRunLoopSourceContext runLoopSourceContext = {0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &runLoopSourceCallback};
-    _runLoopSource = CFRunLoopSourceCreate(NULL, 0, &runLoopSourceContext);
+    CFRunLoopSourceContext *runLoopSourceContext = (CFRunLoopSourceContext *)calloc(1, sizeof(CFRunLoopSourceContext));
+    runLoopSourceContext->perform = runLoopSourceCallback;
+    _runLoopSource = CFRunLoopSourceCreate(NULL, 0, runLoopSourceContext);
     CFRunLoopAddSource(runloop, _runLoopSource, kCFRunLoopCommonModes);
+    free(runLoopSourceContext);
   }
   return self;
 }
