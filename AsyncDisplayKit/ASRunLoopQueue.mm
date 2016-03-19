@@ -9,11 +9,17 @@
 #import "ASRunLoopQueue.h"
 #import "ASThread.h"
 
+#import <cstdlib>
 #import <deque>
+
+static void runLoopSourceCallback(void *info) {
+  // No-op
+}
 
 @interface ASRunLoopQueue () {
   CFRunLoopRef _runLoop;
   CFRunLoopObserverRef _runLoopObserver;
+  CFRunLoopSourceRef _runLoopSource;
   std::deque<id> _internalQueue;
   ASDN::RecursiveMutex _internalQueueLock;
 }
@@ -36,12 +42,26 @@
     };
     _runLoopObserver = CFRunLoopObserverCreateWithHandler(NULL, kCFRunLoopBeforeWaiting, true, 0, handlerBlock);
     CFRunLoopAddObserver(_runLoop, _runLoopObserver,  kCFRunLoopCommonModes);
+    
+    // It is not guaranteed that the runloop will turn if it has no scheduled work, and this causes processing of
+    // the queue to stop. Attaching a custom loop source to the run loop and signal it if new work needs to be done
+    CFRunLoopSourceContext *runLoopSourceContext = (CFRunLoopSourceContext *)calloc(1, sizeof(CFRunLoopSourceContext));
+    runLoopSourceContext->perform = runLoopSourceCallback;
+    _runLoopSource = CFRunLoopSourceCreate(NULL, 0, runLoopSourceContext);
+    CFRunLoopAddSource(runloop, _runLoopSource, kCFRunLoopCommonModes);
+    free(runLoopSourceContext);
   }
   return self;
 }
 
 - (void)dealloc
 {
+  if (CFRunLoopContainsSource(_runLoop, _runLoopSource, kCFRunLoopCommonModes)) {
+    CFRunLoopRemoveSource(_runLoop, _runLoopSource, kCFRunLoopCommonModes);
+  }
+  CFRelease(_runLoopSource);
+  _runLoopSource = nil;
+  
   if (CFRunLoopObserverIsValid(_runLoopObserver)) {
     CFRunLoopObserverInvalidate(_runLoopObserver);
   }
@@ -103,6 +123,9 @@
 
   if (!foundObject) {
     _internalQueue.push_back(object);
+    
+    CFRunLoopSourceSignal(_runLoopSource);
+    CFRunLoopWakeUp(_runLoop);
   }
 }
 

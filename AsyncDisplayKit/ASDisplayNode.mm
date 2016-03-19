@@ -768,7 +768,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (BOOL)usesImplicitHierarchyManagement
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _usesImplicitHierarchyManagement ?: [[self class] usesImplicitHierarchyManagement];
+  return _usesImplicitHierarchyManagement ? : [[self class] usesImplicitHierarchyManagement];
 }
 
 - (void)setUsesImplicitHierarchyManagement:(BOOL)value
@@ -813,11 +813,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (BOOL)_displaysAsynchronously
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  if (self.isSynchronous) {
-    return NO;
-  } else {
-    return _flags.displaysAsynchronously;
-  }
+  return self.isSynchronous == NO && _flags.displaysAsynchronously;
 }
 
 - (void)setDisplaysAsynchronously:(BOOL)displaysAsynchronously
@@ -1062,7 +1058,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ?: ASDisplayNodeUltimateParentOfNode(self);
+  node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(node, self);
@@ -1077,7 +1073,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ?: ASDisplayNodeUltimateParentOfNode(self);
+  node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(self, node);
@@ -1092,7 +1088,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ?: ASDisplayNodeUltimateParentOfNode(self);
+  node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(node, self);
@@ -1107,7 +1103,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ?: ASDisplayNodeUltimateParentOfNode(self);
+  node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(self, node);
@@ -1703,7 +1699,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 // Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay
 {
-  return _flags.implementsDrawRect == YES || _flags.implementsImageDisplay == YES || self.shouldRasterizeDescendants || _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
+  return _flags.implementsDrawRect || _flags.implementsImageDisplay || self.shouldRasterizeDescendants || _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
 }
 
 - (void)_setupPlaceholderLayer

@@ -380,12 +380,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   self.accessibilityLabel = _attributedString.string;
 
-  if (_attributedString.length == 0) {
-    // We're not an accessibility element by default if there is no string.
-    self.isAccessibilityElement = NO;
-  } else {
-    self.isAccessibilityElement = YES;
-  }
+  // We're an accessibility element by default if there is a string.
+  self.isAccessibilityElement = _attributedString.length != 0;
 }
 
 #pragma mark - Text Layout
@@ -631,7 +627,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
         
         CABasicAnimation *fadeOut = [CABasicAnimation animationWithKeyPath:@"opacity"];
         fadeOut.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-        fadeOut.fromValue = possibleFadeIn.toValue ?: @(((CALayer *)weakHighlightLayer.presentationLayer).opacity);
+        fadeOut.fromValue = possibleFadeIn.toValue ? : @(((CALayer *)weakHighlightLayer.presentationLayer).opacity);
         fadeOut.toValue = @0.0;
         fadeOut.fillMode = kCAFillModeBoth;
         fadeOut.duration = ASTextNodeHighlightFadeOutDuration;
