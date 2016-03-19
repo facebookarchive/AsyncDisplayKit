@@ -10,7 +10,6 @@
 
 #import "ASLayoutOptionsPrivate.h"
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h>
-#import "ASThread.h"
 
 
 /**
@@ -21,7 +20,7 @@
  *  create a define that allows us to easily implement the forwards in one place.
  *
  *  If you create a custom layout spec, we recommend this stragety if you decide to extend
- *  ASDisplayNode and ASLAyoutSpec to provide convenience properties for any options that your 
+ *  ASDisplayNode and ASLayoutSpec to provide convenience properties for any options that your
  *  layoutSpec may require.
  */
 #define ASLayoutOptionsForwarding \

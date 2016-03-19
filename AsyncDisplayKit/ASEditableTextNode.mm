@@ -309,7 +309,7 @@
   if (ASObjectIsEqual(_placeholderTextKitComponents.textStorage, attributedPlaceholderText))
     return;
 
-  [_placeholderTextKitComponents.textStorage setAttributedString:attributedPlaceholderText ?: [[NSAttributedString alloc] initWithString:@""]];
+  [_placeholderTextKitComponents.textStorage setAttributedString:attributedPlaceholderText ? : [[NSAttributedString alloc] initWithString:@""]];
   _textKitComponents.textView.accessibilityHint = attributedPlaceholderText.string;
 }
 
@@ -332,7 +332,7 @@
 
   // If we (_cmd) are called while the text view itself is updating (-textViewDidUpdate:), you cannot update the text storage and expect perfect propagation to the text view.
   // Thus, we always update the textview directly if it's been created already.
-  if (ASObjectIsEqual((_textKitComponents.textView.attributedText ?: _textKitComponents.textStorage), attributedText))
+  if (ASObjectIsEqual((_textKitComponents.textView.attributedText ? : _textKitComponents.textStorage), attributedText))
     return;
 
   // If the cursor isn't at the end of the text, we need to preserve the selected range to avoid moving the cursor.

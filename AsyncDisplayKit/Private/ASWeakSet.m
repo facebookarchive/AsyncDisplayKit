@@ -46,7 +46,7 @@
   // mutable collection is still not safe while enumerating that way - which is one of the main uses for this method.
   // A helper function called NSAllMapTableKeys() might do exactly what we want and should be more efficient, but unfortunately
   // is throwing a strange compiler error and may not be available in practice on the latest iOS version.
-  // Lastly, even -dictionaryRepresentation and then -allKeys won't work, because it attemps to copy the values of each key,
+  // Lastly, even -dictionaryRepresentation and then -allKeys won't work, because it attempts to copy the values of each key,
   // which may not support copying (such as ASRangeControllers).
   NSMutableArray *allObjects = [NSMutableArray array];
   for (id object in _mapTable) {

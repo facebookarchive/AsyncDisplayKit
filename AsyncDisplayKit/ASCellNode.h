@@ -51,7 +51,7 @@ typedef enum : NSUInteger {
  *
  * With this property set to YES, the main thread will be blocked until display is complete for
  * the cell.  This is more similar to UIKit, and in fact makes AsyncDisplayKit scrolling visually
- * indistinguishible from UIKit's, except being faster.
+ * indistinguishable from UIKit's, except being faster.
  *
  * Using this option does not eliminate all of the performance advantages of AsyncDisplayKit.
  * Normally, a cell has been preloading and is almost done when it reaches the screen, so the
@@ -103,7 +103,7 @@ typedef enum : NSUInteger {
  * @param didLoadBlock The block that will be called after the view controller's view is loaded.
  *
  * @return An ASCellNode created using the root view of the view controller provided by the viewControllerBlock.
- * The view controller's root view is resized to match the calcuated size produced during layout.
+ * The view controller's root view is resized to match the calculated size produced during layout.
  *
  */
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;

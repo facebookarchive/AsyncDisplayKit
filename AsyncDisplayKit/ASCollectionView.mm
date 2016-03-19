@@ -15,10 +15,12 @@
 #import "ASCollectionViewLayoutController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
+#import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASInternalHelpers.h"
 #import "UICollectionViewLayout+ASConvenience.h"
+#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "_ASDisplayLayer.h"
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
@@ -58,6 +60,36 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 @end
 
 #pragma mark -
+#pragma mark _ASCollectionViewNodeSizeUpdateContext
+
+/** 
+ * This class contains all the nodes that have a new size and UICollectionView should requery them all at once.
+ * It is intended to be used strictly on main thread and is not thread safe.
+ */
+@interface _ASCollectionViewNodeSizeInvalidationContext : NSObject
+/**
+ * It's possible that a node triggered multiple size changes before main thread has a chance to execute `requeryNodeSizes`. 
+ * Therefore, a set is preferred here, to avoid asking ASDataController to search for index path of the same node multiple times.
+ */
+@property (nonatomic, strong) NSMutableSet<ASCellNode *> *invalidatedNodes;
+@property (nonatomic, assign) BOOL shouldAnimate;
+@end
+
+@implementation _ASCollectionViewNodeSizeInvalidationContext
+
+- (instancetype)init
+{
+  self = [super init];
+  if (self) {
+    _invalidatedNodes = [NSMutableSet set];
+    _shouldAnimate = YES;
+  }
+  return self;
+}
+
+@end
+
+#pragma mark -
 #pragma mark ASCollectionView.
 
 @interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor> {
@@ -78,7 +110,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   BOOL _asyncDelegateImplementsScrollviewDidScroll;
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
   BOOL _asyncDataSourceImplementsNodeBlockForItemAtIndexPath;
-  BOOL _queuedNodeSizeUpdate;
+  _ASCollectionViewNodeSizeInvalidationContext *_queuedNodeSizeInvalidationContext; // Main thread only
   BOOL _isDeallocating;
   
   ASBatchContext *_batchContext;
@@ -657,8 +689,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
       _ignoreMaxSizeChange = NO;
     } else {
       // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
-      // data controller's prevent animation block that would interupt an interupted relayout happening in an animation block
-      // ie. ASCollectionView bounds change on rotation or mutl-tasking split view resize.
+      // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
+      // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
       [self performBatchAnimated:YES updates:^{
         [_dataController relayoutAllNodes];
       } completion:nil];
@@ -719,6 +751,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+  // If a scroll happenes the current range mode needs to go to full
+  ASInterfaceState interfaceState = [self interfaceStateForRangeController:_rangeController];
+  if (ASInterfaceStateIncludesVisible(interfaceState)) {
+    [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
+  }
+  
   for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
     // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
     [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
@@ -912,15 +950,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
 {
-  ASCollectionNode *collectionNode = self.collectionNode;
-  if (collectionNode) {
-    return collectionNode.interfaceState;
-  } else {
-    // Until we can always create an associated ASCollectionNode without a retain cycle,
-    // we might be on our own to try to guess if we're visible.  The node normally
-    // handles this even if it is the root / directly added to the view hierarchy.
-    return (self.window != nil ? ASInterfaceStateVisible : ASInterfaceStateNone);
-  }
+  return ASInterfaceStateForDisplayNode(self.collectionNode, self.window);
 }
 
 - (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
@@ -1051,24 +1081,61 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   ASDisplayNodeAssertMainThread();
   
-  if (!sizeChanged || _queuedNodeSizeUpdate) {
+  if (!sizeChanged) {
     return;
   }
   
-  _queuedNodeSizeUpdate = YES;
-  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[[self indexPathForNode:node]] batched:NO];
-  [self performSelector:@selector(requeryNodeSizes)
-             withObject:nil
-             afterDelay:0
-                inModes:@[ NSRunLoopCommonModes ]];
+  BOOL queued = (_queuedNodeSizeInvalidationContext != nil);
+  if (!queued) {
+    _queuedNodeSizeInvalidationContext = [[_ASCollectionViewNodeSizeInvalidationContext alloc] init];
+    
+    __weak __typeof__(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      __typeof__(self) strongSelf = weakSelf;
+      if (strongSelf) {
+        [strongSelf requeryNodeSizes];
+      }
+    });
+  }
+  
+  [_queuedNodeSizeInvalidationContext.invalidatedNodes addObject:node];
+
+  // Check if this node or one of its subnodes can be animated.
+  // If the context is already non-animated, don't bother checking this node.
+  if (_queuedNodeSizeInvalidationContext.shouldAnimate) {
+    BOOL (^shouldNotAnimateBlock)(ASDisplayNode *) = ^BOOL(ASDisplayNode * _Nonnull node) {
+      return node.shouldAnimateSizeChanges == NO;
+    };
+    if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
+      // One single non-animated cell node causes the whole context to be non-animated
+      _queuedNodeSizeInvalidationContext.shouldAnimate = NO;
+    }
+  }
 }
 
 // Cause UICollectionView to requery for the new size of all nodes
 - (void)requeryNodeSizes
 {
-  _queuedNodeSizeUpdate = NO;
+  ASDisplayNodeAssertMainThread();
+  NSSet<ASCellNode *> *nodes = _queuedNodeSizeInvalidationContext.invalidatedNodes;
+  NSMutableArray<NSIndexPath *> *indexPaths = [NSMutableArray arrayWithCapacity:nodes.count];
+  for (ASCellNode *node in nodes) {
+    NSIndexPath *indexPath = [self indexPathForNode:node];
+    if (indexPath != nil) {
+      [indexPaths addObject:indexPath];
+    }
+  }
   
-  [super performBatchUpdates:^{} completion:nil];
+  if (indexPaths.count > 0) {
+    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
+    
+    ASPerformBlockWithoutAnimation(!_queuedNodeSizeInvalidationContext.shouldAnimate, ^{
+      // Perform an empty update transaction here to trigger UICollectionView to requery row sizes and layout its subviews again
+      [super performBatchUpdates:^{} completion:nil];
+    });
+  }
+  
+  _queuedNodeSizeInvalidationContext = nil;
 }
 
 #pragma mark - Memory Management
@@ -1102,9 +1169,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (!visible && node.inHierarchy) {
     [node __exitHierarchy];
   }
-    
-  // Trigger updating interfaceState for cells in case ASCollectionView becomes visible or invisible
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+
+  // Updating the visible node index paths only for not range managed nodes. Range managed nodes will get their
+  // their update in the layout pass
+  if (![node supportsRangeManagedInterfaceState]) {
+    [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  }
 }
 
 #pragma mark - UICollectionView dead-end intercepts

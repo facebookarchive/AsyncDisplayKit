@@ -34,7 +34,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 @interface ASDataController () {
   NSMutableArray *_externalCompletedNodes;    // Main thread only.  External data access can immediately query this if available.
   NSMutableDictionary *_completedNodes;       // Main thread only.  External data access can immediately query this if _externalCompletedNodes is unavailable.
-  NSMutableDictionary *_editingNodes;         // Modified on _editingTransactionQueue only.  Updates propogated to _completedNodes.
+  NSMutableDictionary *_editingNodes;         // Modified on _editingTransactionQueue only.  Updates propagated to _completedNodes.
   
   ASMainSerialQueue *_mainSerialQueue;
   
@@ -355,7 +355,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 }
 
 /**
- * Inserts sections, represented as arrays, into the backing store at the given indicies and notifies the delegate.
+ * Inserts sections, represented as arrays, into the backing store at the given indices and notifies the delegate.
  *
  * @discussion The section arrays are inserted into the editing store, then a deep copy of the sections are inserted
  * in the completed store on the main thread. The delegate is invoked on the main thread.
@@ -369,7 +369,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 }
 
 /**
- * Removes sections at the given indicies from the backing store and notifies the delegate.
+ * Removes sections at the given indices from the backing store and notifies the delegate.
  *
  * @discussion Section array are first removed from the editing store, then the associated section in the completed
  * store is removed on the main thread. The delegate is invoked on the main thread.
@@ -876,12 +876,12 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     [_editingTransactionQueue addOperationWithBlock:^{
       LOG(@"Edit Transaction - moveRow: %@ > %@", indexPath, newIndexPath);
-      NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes[ASDataControllerRowNodeKind], [NSArray arrayWithObject:indexPath]);
-      NSArray *indexPaths = [NSArray arrayWithObject:indexPath];
+      NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes[ASDataControllerRowNodeKind], @[indexPath]);
+      NSArray *indexPaths = @[indexPath];
       [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
 
       // Don't re-calculate size for moving
-      NSArray *newIndexPaths = [NSArray arrayWithObject:newIndexPath];
+      NSArray *newIndexPaths = @[newIndexPath];
       [self _insertNodes:nodes atIndexPaths:newIndexPaths withAnimationOptions:animationOptions];
     }];
   }];
@@ -967,7 +967,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSArray *)completedNodes
 {
   ASDisplayNodeAssertMainThread();
-  return _externalCompletedNodes != nil ? _externalCompletedNodes : _completedNodes[ASDataControllerRowNodeKind];
+  return _externalCompletedNodes ? : _completedNodes[ASDataControllerRowNodeKind];
 }
 
 #pragma mark - Dealloc

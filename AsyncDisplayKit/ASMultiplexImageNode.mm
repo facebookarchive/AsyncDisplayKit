@@ -700,7 +700,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       options.synchronous = YES;
     }
     
-    PHImageManager *imageManager = strongSelf.imageManager ?: PHImageManager.defaultManager;
+    PHImageManager *imageManager = strongSelf.imageManager ? : PHImageManager.defaultManager;
     [imageManager requestImageForAsset:imageAsset targetSize:request.targetSize contentMode:request.contentMode options:options resultHandler:^(UIImage *image, NSDictionary *info) {
       NSError *error = info[PHImageErrorKey];
       

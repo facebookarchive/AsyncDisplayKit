@@ -177,7 +177,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @warning The first access to it must be on the main thread, and should only be used on the main thread thereafter as 
  * well.
  */
-@property (nonatomic, readonly, retain) UIView *view;
+@property (nonatomic, readonly, strong) UIView *view;
 
 /** 
  * @abstract Returns whether a node's backing view or layer is loaded.
@@ -202,7 +202,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @warning The first access to it must be on the main thread, and should only be used on the main thread thereafter as 
  * well.
  */
-@property (nonatomic, readonly, retain) CALayer * _Nonnull layer;
+@property (nonatomic, readonly, strong) CALayer * _Nonnull layer;
 
 /**
  * @abstract Returns the Interface State of the node.
@@ -351,7 +351,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** 
  * @abstract The receiver's immediate subnodes.
  */
-@property (nonatomic, readonly, retain) NSArray<ASDisplayNode *> *subnodes;
+@property (nonatomic, readonly, strong) NSArray<ASDisplayNode *> *subnodes;
 
 /** 
  * @abstract The receiver's supernode.
@@ -427,6 +427,11 @@ NS_ASSUME_NONNULL_BEGIN
  * layer will be automatically displayed.
  */
 @property (nonatomic, assign) BOOL displaySuspended;
+
+/**
+ * @abstract Whether size changes should be animated. Default to YES.
+ */
+@property (nonatomic, assign) BOOL shouldAnimateSizeChanges;
 
 /** 
  * @abstract Prevent the node and its descendants' layer from displaying.
@@ -617,7 +622,7 @@ NS_ASSUME_NONNULL_END
  */
 - (void)setNeedsLayout;
 
-@property (atomic, retain, nullable) id contents;                           // default=nil
+@property (atomic, strong, nullable) id contents;                           // default=nil
 @property (atomic, assign)           BOOL clipsToBounds;                    // default==NO
 @property (atomic, getter=isOpaque)  BOOL opaque;                           // default==YES
 
@@ -645,9 +650,9 @@ NS_ASSUME_NONNULL_END
  * @discussion In contrast to UIView, setting a transparent color will not set opaque = NO.
  * This only affects nodes that implement +drawRect like ASTextNode.
 */
-@property (atomic, retain, nullable) UIColor *backgroundColor;              // default=nil
+@property (atomic, strong, nullable) UIColor *backgroundColor;              // default=nil
 
-@property (atomic, retain, null_resettable)    UIColor *tintColor;          // default=Blue
+@property (atomic, strong, null_resettable)    UIColor *tintColor;          // default=Blue
 - (void)tintColorDidChange;     // Notifies the node when the tintColor has changed.
 
 /**
@@ -697,7 +702,7 @@ NS_ASSUME_NONNULL_END
 @property (nullable, atomic, copy)   NSString *accessibilityValue;
 @property (atomic, assign)           UIAccessibilityTraits accessibilityTraits;
 @property (atomic, assign)           CGRect accessibilityFrame;
-@property (nullable, atomic, retain) NSString *accessibilityLanguage;
+@property (nullable, atomic, strong) NSString *accessibilityLanguage;
 @property (atomic, assign)           BOOL accessibilityElementsHidden;
 @property (atomic, assign)           BOOL accessibilityViewIsModal;
 @property (atomic, assign)           BOOL shouldGroupAccessibilityChildren;

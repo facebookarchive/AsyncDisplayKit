@@ -31,38 +31,37 @@ static const NSInteger kImageHeight = 200;
     if (self == nil) { return self; }
     
     _imageCategory = imageCategory;
-    [self initNode];
-    
-    return self;
-}
 
-- (void)initNode
-{
     // Create ASCollectionView. We don't have to add it explicitly as subnode as we will set usesImplicitHierarchyManagement to YES
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
     _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
     _collectionNode.delegate = self;
     _collectionNode.dataSource = self;
-    _collectionNode.view.backgroundColor = [UIColor whiteColor];
+    _collectionNode.backgroundColor = [UIColor whiteColor];
     
     // Enable usesImplicitHierarchyManagement so the first time the layout pass of the node is happening all nodes that are referenced
     // in layouts within layoutSpecThatFits: will be added automatically
     self.usesImplicitHierarchyManagement = YES;
+    
+    return self;
 }
 
+- (void)dealloc
+{
+    _collectionNode.delegate = nil;
+    _collectionNode.dataSource = nil;
+}
 
-#pragma mark -
+#pragma mark - ASDisplayNode
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    ASStaticLayoutSpec *staticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.collectionNode]];
     self.collectionNode.position = CGPointZero;
     self.collectionNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
-    return staticSpec;
+    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.collectionNode]];
 }
 
-
-#pragma mark - 
+#pragma mark - ASCollectionDataSource
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
@@ -73,7 +72,7 @@ static const NSInteger kImageHeight = 200;
 {
     NSString *imageCategory = self.imageCategory;
     return ^{
-        DetailCellNode *node = [DetailCellNode new];
+        DetailCellNode *node = [[DetailCellNode alloc] init];
         node.row = indexPath.row;
         node.imageCategory = imageCategory;
         return node;

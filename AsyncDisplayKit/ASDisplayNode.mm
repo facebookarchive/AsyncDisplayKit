@@ -95,7 +95,7 @@ _ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node)
 }
 
 /**
- *  Returns ASDisplayNodeFlags for the givern class/instance. instance MAY BE NIL.
+ *  Returns ASDisplayNodeFlags for the given class/instance. instance MAY BE NIL.
  *
  *  @param c        the class, required
  *  @param instance the instance, which may be nil. (If so, the class is inspected instead)
@@ -114,6 +114,7 @@ static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *i
 
   flags.isInHierarchy = NO;
   flags.displaysAsynchronously = YES;
+  flags.shouldAnimateSizeChanges = YES;
   flags.implementsDrawRect = ([c respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
   flags.implementsImageDisplay = ([c respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
   if (instance) {
@@ -131,7 +132,7 @@ static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *i
 /**
  *  Returns ASDisplayNodeMethodOverrides for the given class
  *
- *  @param c the class, requireed.
+ *  @param c the class, required.
  *
  *  @return ASDisplayNodeMethodOverrides.
  */
@@ -224,7 +225,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       if (isQueueDrained) {
         [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
                                                             object:nil
-                                                          userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: [NSNumber numberWithDouble:timestamp]}];
+                                                          userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: @(timestamp)}];
       }
     }];
   });
@@ -767,7 +768,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (BOOL)usesImplicitHierarchyManagement
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _usesImplicitHierarchyManagement ?: [[self class] usesImplicitHierarchyManagement];
+  return _usesImplicitHierarchyManagement ? : [[self class] usesImplicitHierarchyManagement];
 }
 
 - (void)setUsesImplicitHierarchyManagement:(BOOL)value
@@ -812,11 +813,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (BOOL)_displaysAsynchronously
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  if (self.isSynchronous) {
-    return NO;
-  } else {
-    return _flags.displaysAsynchronously;
-  }
+  return self.isSynchronous == NO && _flags.displaysAsynchronously;
 }
 
 - (void)setDisplaysAsynchronously:(BOOL)displaysAsynchronously
@@ -1061,7 +1058,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
+  node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(node, self);
@@ -1076,7 +1073,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
+  node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(self, node);
@@ -1091,7 +1088,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
+  node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(node, self);
@@ -1106,7 +1103,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 {
   ASDisplayNodeAssertThreadAffinity(self);
   // Get root node of the accessible node hierarchy, if node not specified
-  node = node ? node : ASDisplayNodeUltimateParentOfNode(self);
+  node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
   // Calculate transform to map points between coordinate spaces
   CATransform3D nodeTransform = _calculateTransformFromReferenceToTarget(self, node);
@@ -1528,7 +1525,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"Should not cause recursive __enterHierarchy");
   
-  // Profiling has shown that locking this method is benificial, so each of the property accesses don't have to lock and unlock.
+  // Profiling has shown that locking this method is beneficial, so each of the property accesses don't have to lock and unlock.
   ASDN::MutexLocker l(_propertyLock);
   
   if (!self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
@@ -1554,7 +1551,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"Should not cause recursive __exitHierarchy");
   
-  // Profiling has shown that locking this method is benificial, so each of the property accesses don't have to lock and unlock.
+  // Profiling has shown that locking this method is beneficial, so each of the property accesses don't have to lock and unlock.
   ASDN::MutexLocker l(_propertyLock);
   
   if (self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
@@ -1657,7 +1654,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 // The node sending the message should usually be passed as the parameter, similar to the delegation pattern.
 - (void)_pendingNodeWillDisplay:(ASDisplayNode *)node
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDisplayNodeAssertMainThread();
 
   if (!_pendingDisplayNodes) {
     _pendingDisplayNodes = [[NSMutableSet alloc] init];
@@ -1670,27 +1667,25 @@ static NSInteger incrementIfFound(NSInteger i) {
 // The node sending the message should usually be passed as the parameter, similar to the delegation pattern.
 - (void)_pendingNodeDidDisplay:(ASDisplayNode *)node
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDisplayNodeAssertMainThread();
 
   [_pendingDisplayNodes removeObject:node];
 
   // only trampoline if there is a placeholder and nodes are done displaying
   if ([self _pendingDisplayNodesHaveFinished] && _placeholderLayer.superlayer) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      void (^cleanupBlock)() = ^{
-        [self _tearDownPlaceholderLayer];
-      };
+    void (^cleanupBlock)() = ^{
+      [self _tearDownPlaceholderLayer];
+    };
 
-      if (_placeholderFadeDuration > 0.0 && ASInterfaceStateIncludesVisible(self.interfaceState)) {
-        [CATransaction begin];
-        [CATransaction setCompletionBlock:cleanupBlock];
-        [CATransaction setAnimationDuration:_placeholderFadeDuration];
-        _placeholderLayer.opacity = 0.0;
-        [CATransaction commit];
-      } else {
-        cleanupBlock();
-      }
-    });
+    if (_placeholderFadeDuration > 0.0 && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+      [CATransaction begin];
+      [CATransaction setCompletionBlock:cleanupBlock];
+      [CATransaction setAnimationDuration:_placeholderFadeDuration];
+      _placeholderLayer.opacity = 0.0;
+      [CATransaction commit];
+    } else {
+      cleanupBlock();
+    }
   }
 }
 
@@ -1704,7 +1699,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 // Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay
 {
-  return _flags.implementsDrawRect == YES || _flags.implementsImageDisplay == YES || self.shouldRasterizeDescendants || _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
+  return _flags.implementsDrawRect || _flags.implementsImageDisplay || self.shouldRasterizeDescendants || _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
 }
 
 - (void)_setupPlaceholderLayer
@@ -1938,13 +1933,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   _placeholderImage = nil;
 }
 
-// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or exitInterfaceState:
 - (void)recursivelyClearContents
 {
-  for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyClearContents];
-  }
-  [self clearContents];
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+    [node clearContents];
+  });
 }
 
 - (void)fetchData
@@ -1959,13 +1952,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   }
 }
 
-// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or enterInterfaceState:
 - (void)recursivelyFetchData
 {
-  for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyFetchData];
-  }
-  [self fetchData];
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+    [node fetchData];
+  });
 }
 
 - (void)clearFetchedData
@@ -1973,17 +1964,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // subclass override
 }
 
-// TODO: Replace this with ASDisplayNodePerformBlockOnEveryNode or exitInterfaceState:
 - (void)recursivelyClearFetchedData
 {
-  for (ASDisplayNode *subnode in self.subnodes) {
-    [subnode recursivelyClearFetchedData];
-  }
-  [self clearFetchedData];
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+    [node clearFetchedData];
+  });
 }
 
 - (void)visibilityDidChange:(BOOL)isVisible
 {
+    // subclass override
 }
 
 /**
@@ -1992,7 +1982,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
  */
 - (BOOL)supportsRangeManagedInterfaceState
 {
-  return (_hierarchyState & ASHierarchyStateRangeManaged);
+  return ASHierarchyStateIncludesRangeManaged(_hierarchyState);
 }
 
 - (ASInterfaceState)interfaceState
@@ -2085,11 +2075,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   BOOL wasVisible = ASInterfaceStateIncludesVisible(oldState);
 
   if (nowVisible != wasVisible) {
-    if (nowVisible) {
-      [self visibilityDidChange:YES];
-    } else {
-      [self visibilityDidChange:NO];
-    }
+    [self visibilityDidChange:nowVisible];
   }
   
   [self interfaceStateDidChange:newState fromState:oldState];
@@ -2260,6 +2246,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)displayWillStart
 {
+  ASDisplayNodeAssertMainThread();
+
   // in case current node takes longer to display than it's subnodes, treat it as a dependent node
   [self _pendingNodeWillDisplay:self];
 
@@ -2288,6 +2276,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)displayDidFinish
 {
+  ASDisplayNodeAssertMainThread();
+  
   [self _pendingNodeDidDisplay:self];
 
   [_supernode subnodeDisplayDidFinish:self];
@@ -2494,12 +2484,29 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   self.asyncLayer.displaySuspended = flag;
 
   if ([self __implementsDisplay]) {
-    if (flag) {
-      [_supernode subnodeDisplayDidFinish:self];
-    } else {
-      [_supernode subnodeDisplayWillStart:self];
-    }
+    // Display start and finish methods needs to happen on the main thread
+    ASPerformBlockOnMainThread(^{
+      if (flag) {
+        [_supernode subnodeDisplayDidFinish:self];
+      } else {
+        [_supernode subnodeDisplayWillStart:self];
+      }
+    });
   }
+}
+
+- (BOOL)shouldAnimateSizeChanges
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
+  return _flags.shouldAnimateSizeChanges;
+}
+
+-(void)setShouldAnimateSizeChanges:(BOOL)shouldAnimateSizeChanges
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(_propertyLock);
+  _flags.shouldAnimateSizeChanges = shouldAnimateSizeChanges;
 }
 
 static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
@@ -2513,7 +2520,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
     objc_setAssociatedObject(self, ASDisplayNodeDrawingPriorityKey, nil, OBJC_ASSOCIATION_ASSIGN);
   } else {
     _flags.hasCustomDrawingPriority = YES;
-    objc_setAssociatedObject(self, ASDisplayNodeDrawingPriorityKey, [NSNumber numberWithInteger:drawingPriority], OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, ASDisplayNodeDrawingPriorityKey, @(drawingPriority), OBJC_ASSOCIATION_RETAIN);
   }
 }
 

@@ -28,7 +28,7 @@
 @property (nonatomic, assign) BOOL opaque;
 @property (nonatomic, assign) CGRect bounds;
 @property (nonatomic, assign) CGFloat contentsScale;
-@property (nonatomic, retain) UIColor *backgroundColor;
+@property (nonatomic, strong) UIColor *backgroundColor;
 @property (nonatomic, assign) UIViewContentMode contentMode;
 
 @end
