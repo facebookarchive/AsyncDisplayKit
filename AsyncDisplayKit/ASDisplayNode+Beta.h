@@ -91,4 +91,11 @@ ASDISPLAYNODE_EXTERN_C_END
                          shouldMeasureAsync:(BOOL)shouldMeasureAsync
                       measurementCompletion:(void(^)())completion;
 
+
+/**
+ * @abstract Currently used by ASNetworkImageNode and ASMultiplexImageNode to allow their placeholders to stay if they are loading an image from the network.
+ * Otherwise, a display pass is scheduled and completes, but does not actually draw anything - and ASDisplayNode considers the element finished.
+ */
+- (BOOL)placeholderShouldPersist;
+
 @end
