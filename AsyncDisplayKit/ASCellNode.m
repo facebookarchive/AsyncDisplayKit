@@ -209,6 +209,10 @@
   // To be overriden by subclasses
 }
 
+- (void)scrollView:(UIScrollView*)scrollView didStopScrolling:(BOOL)stoppedScrolling withCellFrame:(CGRect)cellFrame{
+  // To be overriden by subclasses
+}
+
 - (void)visibilityDidChange:(BOOL)isVisible
 {
   [super visibilityDidChange:isVisible];

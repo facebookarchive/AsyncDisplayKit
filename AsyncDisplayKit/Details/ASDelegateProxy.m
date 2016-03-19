@@ -61,6 +61,8 @@
           
           // used for ASCellNode visibility
           selector == @selector(scrollViewDidScroll:) ||
+          selector == @selector(scrollViewDidEndDragging:willDecelerate:) ||
+          selector == @selector(scrollViewDidEndDecelerating:) ||
           
           // intercepted due to not being supported by ASCollectionView (prevent bugs caused by usage)
           selector == @selector(collectionView:canMoveItemAtIndexPath:) ||

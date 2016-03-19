@@ -544,7 +544,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
   }
-  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
+  if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:)) ||
+      ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(scrollView:didStopScrolling:withCellFrame:))) {
     [_cellsForVisibilityUpdates addObject:cell];
   }
 }
@@ -688,6 +689,34 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+  for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
+    // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
+    [[collectionCell node] scrollView:scrollView
+                     didStopScrolling:YES
+                        withCellFrame:collectionCell.frame];
+  }
+  
+  if ([_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDecelerating:)]) {
+    [_asyncDelegate scrollViewDidEndDecelerating:scrollView];
+  }
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
+  if(!decelerate){
+    for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
+      // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
+      [[collectionCell node] scrollView:scrollView
+                       didStopScrolling:YES
+                          withCellFrame:collectionCell.frame];
+    }
+  }
+  if([_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)]){
+    [_asyncDelegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
+  }
+}
+
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
   for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
@@ -695,6 +724,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
                                       inScrollView:scrollView
                                      withCellFrame:collectionCell.frame];
+    
+    [[collectionCell node] scrollView:scrollView
+                     didStopScrolling:NO
+                        withCellFrame:collectionCell.frame];
   }
   if (_asyncDelegateImplementsScrollviewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];

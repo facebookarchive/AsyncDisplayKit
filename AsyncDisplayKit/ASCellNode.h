@@ -110,6 +110,8 @@ typedef enum : NSUInteger {
 
 - (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event inScrollView:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
 
+- (void)scrollView:(UIScrollView*)scrollView didStopScrolling:(BOOL)stoppedScrolling withCellFrame:(CGRect)cellFrame;
+
 @end
 
 
