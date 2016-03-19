@@ -8,6 +8,13 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
+typedef enum {
+  ASVideoNodePlayerStateUnknown,
+  ASVideoNodePlayerStatePlaying,
+  ASVideoNodePlayerStatePaused,
+  ASVideoNodePlayerStateFinished
+} ASVideoNodePlayerState;
+
 @protocol ASVideoNodeDelegate;
 
 // This is a relatively new component of AsyncDisplayKit.  It has many useful features, but
@@ -26,6 +33,8 @@
 
 @property (nonatomic, assign, readwrite) BOOL muted;
 
+@property (nonatomic, assign, readwrite) ASVideoNodePlayerState playerState;
+
 @property (atomic) NSString *gravity;
 @property (atomic) ASButtonNode *playButton;
 
@@ -42,5 +51,7 @@
 @optional
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode;
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate;
+- (BOOL)videoNode:(ASVideoNode*)videoNode shouldChangePlayerStateTo:(ASVideoNodePlayerState)state;
 @end
 

@@ -21,6 +21,8 @@
   BOOL _shouldAutoplay;
   
   BOOL _muted;
+  
+  ASVideoNodePlayerState _playerState;
 
   AVAsset *_asset;
   
@@ -52,6 +54,7 @@
   self.playButton = [[ASDefaultPlayButton alloc] init];
   
   self.gravity = AVLayerVideoGravityResizeAspect;
+  NSLog(@"%d",_playerState);
   
   [self addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
     
@@ -65,7 +68,7 @@
   if (!(newState & ASInterfaceStateVisible)) {
     if (oldState & ASInterfaceStateVisible) {
       if (_shouldBePlaying) {
-        [self pause];
+        self.playerState = ASVideoNodePlayerStatePaused;
         _shouldBePlaying = YES;
       }
       [(UIActivityIndicatorView *)_spinner.view stopAnimating];
@@ -73,7 +76,7 @@
     }
   } else {
     if (_shouldBePlaying) {
-      [self play];
+      self.playerState = ASVideoNodePlayerStatePlaying;
     }
   }
 }
@@ -101,9 +104,9 @@
     [_player seekToTime:CMTimeMakeWithSeconds(0, 1)];
     
     if (_shouldAutorepeat) {
-      [self play];
+      self.playerState = ASVideoNodePlayerStatePlaying;
     } else {
-      [self pause];
+      self.playerState = ASVideoNodePlayerStateFinished;
     }
   }
 }
@@ -182,9 +185,9 @@
     [self.delegate videoNodeWasTapped:self];
   } else {
     if (_shouldBePlaying) {
-      [self pause];
+      self.playerState = ASVideoNodePlayerStatePaused;
     } else {
-      [self play];
+      self.playerState = ASVideoNodePlayerStatePlaying;
     }
   }
 }
@@ -238,7 +241,7 @@
   ASDN::MutexLocker l(_videoLock);
   
   if (_shouldAutoplay && _playerNode.isNodeLoaded) {
-    [self play];
+    self.playerState = ASVideoNodePlayerStatePlaying;
   } else if (_shouldAutoplay) {
     _shouldBePlaying = YES;
   }
@@ -252,12 +255,40 @@
     }
   
     if (_shouldBePlaying) {
-      [self play];
+      self.playerState = ASVideoNodePlayerStatePlaying;
     }
   }
 }
 
 #pragma mark - Video Properties
+- (void)setPlayerState:(ASVideoNodePlayerState)playerState{
+  ASDN::MutexLocker l(_videoLock);
+  
+  if([_delegate respondsToSelector:@selector(videoNode:shouldChangePlayerStateTo:)]){
+    if(![_delegate videoNode:self shouldChangePlayerStateTo:playerState]){
+      return;
+    }
+  }
+  
+  ASVideoNodePlayerState oldState = _playerState;
+  
+  if ([_delegate respondsToSelector:@selector(videoNode:willChangePlayerState:toState:)]) {
+    [_delegate videoNode:self willChangePlayerState:oldState toState:playerState];
+  }
+  
+  _playerState = playerState;
+  switch (_playerState) {
+    case ASVideoNodePlayerStatePlaying:
+      [self play];
+      break;
+    case ASVideoNodePlayerStatePaused:
+    case ASVideoNodePlayerStateFinished:
+      [self pause];
+      break;
+    default:
+      break;
+  }
+}
 
 - (void)setPlayButton:(ASButtonNode *)playButton
 {
