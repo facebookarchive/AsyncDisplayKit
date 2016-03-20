@@ -9,6 +9,7 @@
 #import "ASMainSerialQueue.h"
 
 #import "ASThread.h"
+#import "ASInternalHelpers.h"
 
 @interface ASMainSerialQueue ()
 {
@@ -55,13 +56,7 @@
     } while (true);
   };
   
-  if ([NSThread isMainThread]) {
-    mainThread();
-  } else {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      mainThread();
-    });
-  }
+  ASPerformBlockOnMainThread(mainThread);
 }
 
 - (NSString *)description

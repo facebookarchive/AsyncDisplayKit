@@ -6,8 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#ifndef ASDataControllerSubclasses_Included
-#define ASDataControllerSubclasses_Included
+#pragma once
 
 @class ASIndexedNodeContext;
 
@@ -162,5 +161,3 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 @end
-
-#endif
