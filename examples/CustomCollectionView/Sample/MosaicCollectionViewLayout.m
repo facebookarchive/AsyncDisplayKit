@@ -119,7 +119,7 @@
 
 - (BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds
 {
-  if (!CGSizeEqualToSize(self.collectionView.bounds.size, newBounds.size)) {
+  if (!CGRectEqualToRect(self.collectionView.bounds, newBounds)) {
     return YES;
   }
   return NO;
