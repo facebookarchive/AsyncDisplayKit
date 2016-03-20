@@ -261,6 +261,7 @@
 		69F10C861C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 69F10C851C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		69F10C871C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 69F10C851C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6BDC61F61979037800E50D21 /* AsyncDisplayKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7630FFA81C9E267E007A7C0E /* ASVideoNode.h in Headers */ = {isa = PBXBuildFile; fileRef = AEEC47DF1C20C2DD00EC1693 /* ASVideoNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		764D83D51C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 764D83D21C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		764D83D61C8EA515009B4FB8 /* AsyncDisplayKit+Debug.m in Sources */ = {isa = PBXBuildFile; fileRef = 764D83D31C8EA515009B4FB8 /* AsyncDisplayKit+Debug.m */; };
 		767E7F8D1C9019130066C000 /* AsyncDisplayKit+Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 764D83D21C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -364,13 +365,13 @@
 		ACF6ED631B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED5B1B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm */; };
 		AEB7B01A1C5962EA00662EF4 /* ASDefaultPlayButton.h in Headers */ = {isa = PBXBuildFile; fileRef = AEB7B0181C5962EA00662EF4 /* ASDefaultPlayButton.h */; };
 		AEB7B01B1C5962EA00662EF4 /* ASDefaultPlayButton.m in Sources */ = {isa = PBXBuildFile; fileRef = AEB7B0191C5962EA00662EF4 /* ASDefaultPlayButton.m */; };
-		AEEC47E11C20C2DD00EC1693 /* ASVideoNode.h in Headers */ = {isa = PBXBuildFile; fileRef = AEEC47DF1C20C2DD00EC1693 /* ASVideoNode.h */; };
+		AEEC47E11C20C2DD00EC1693 /* ASVideoNode.h in Headers */ = {isa = PBXBuildFile; fileRef = AEEC47DF1C20C2DD00EC1693 /* ASVideoNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AEEC47E21C20C2DD00EC1693 /* ASVideoNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = AEEC47E01C20C2DD00EC1693 /* ASVideoNode.mm */; };
 		AEEC47E41C21D3D200EC1693 /* ASVideoNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AEEC47E31C21D3D200EC1693 /* ASVideoNodeTests.m */; };
 		B0F8805A1BEAEC7500D17647 /* ASTableNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B0F880581BEAEC7500D17647 /* ASTableNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B0F8805B1BEAEC7500D17647 /* ASTableNode.m in Sources */ = {isa = PBXBuildFile; fileRef = B0F880591BEAEC7500D17647 /* ASTableNode.m */; };
-		B13CA0F71C519E9400E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0F61C519E9400E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h */; };
-		B13CA0F81C519EBA00E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0F61C519E9400E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h */; };
+		B13CA0F71C519E9400E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0F61C519E9400E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B13CA0F81C519EBA00E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0F61C519E9400E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B13CA1001C52004900E031AB /* ASCollectionNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0FF1C52004900E031AB /* ASCollectionNode+Beta.h */; };
 		B13CA1011C52004900E031AB /* ASCollectionNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0FF1C52004900E031AB /* ASCollectionNode+Beta.h */; };
 		B30BF6521C5964B0004FCD53 /* ASLayoutManager.h in Headers */ = {isa = PBXBuildFile; fileRef = B30BF6501C5964B0004FCD53 /* ASLayoutManager.h */; };
@@ -1509,6 +1510,7 @@
 				B35062481B010EFD0018CF92 /* _AS-objc-internal.h in Headers */,
 				69F10C871C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h in Headers */,
 				B350623C1B010EFD0018CF92 /* _ASAsyncTransaction.h in Headers */,
+				7630FFA81C9E267E007A7C0E /* ASVideoNode.h in Headers */,
 				B350623F1B010EFD0018CF92 /* _ASAsyncTransactionContainer.h in Headers */,
 				B13CA1011C52004900E031AB /* ASCollectionNode+Beta.h in Headers */,
 				254C6B7E1BF94DF4003EC431 /* ASTextKitTailTruncater.h in Headers */,
