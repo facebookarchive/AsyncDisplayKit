@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
-#import "ASVideoNode.h"
+#import <AVFoundation/AVFoundation.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 @interface ASVideoNodeTests : XCTestCase
 {

@@ -10,6 +10,9 @@
 
 #import <AsyncDisplayKit/ASDimension.h>
 
+#ifndef ASCollectionViewLayoutInspecting_h
+#define ASCollectionViewLayoutInspecting_h
+
 @class ASCollectionView;
 @protocol ASCollectionDelegate;
 
@@ -53,3 +56,6 @@
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout;
 
 @end
+
+#endif /* ASCollectionViewLayoutInspecting_h */
+
