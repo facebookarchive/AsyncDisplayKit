@@ -40,8 +40,14 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
+  NSMutableArray *children = [[NSMutableArray alloc] init];
+  for (ASDisplayNode *node in _colorNodes) {
+    UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
+    ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:node];
+    [children addObject:insetSpec];
+  }
   ASStackLayoutSpec *innerStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  innerStack.children = _colorNodes;
+  innerStack.children = children;
   
   ASStackLayoutSpec *outerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
   outerStack.children = @[innerStack, _individualColorNode];

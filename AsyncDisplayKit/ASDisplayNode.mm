@@ -31,6 +31,8 @@
 #import "ASLayoutSpec.h"
 #import "ASCellNode.h"
 
+#import "ASStaticLayoutSpec.h" // FIXME: remove later
+
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
 NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
@@ -1789,8 +1791,23 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(_propertyLock);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
-    ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    ASStaticLayoutSpec *staticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[[self layoutSpecThatFits:constrainedSize]]];
+    
+    ASLayoutSpec *layoutSpec = staticSpec;
+    
+//    for (id <ASLayoutable> sublayoutable in layoutSpec.children) {
+//      BOOL isNode = [sublayoutable isKindOfClass:[ASDisplayNode class]];
+//      
+//      if (!isNode) {
+//        // create a magical type of node that can wrap the layoutSpec (for visualization debug)
+//        
+//      }
+//    }
+//    
+    
     layoutSpec.isMutable = NO;
+    
+    
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
     if (layout.layoutableObject != self) {
@@ -1798,11 +1815,15 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
+//      NSLog(@"%@, %@", evaluatedLayout, evaluatedLayout.layoutableObject);
+      NSLog(@"\n%@", [evaluatedLayout.layoutableObject asciiArtString]);
       if (self.usesImplicitHierarchyManagement) {
         return ASObjectIsEqual(layout, evaluatedLayout) == NO && [evaluatedLayout.layoutableObject isKindOfClass:[ASDisplayNode class]];
       } else {
         return [_subnodes containsObject:evaluatedLayout.layoutableObject];
       }
+      
+      
     }];
   } else {
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
@@ -2622,6 +2643,18 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   return self;
 }
 
+#pragma mark - ASLayoutableAsciiArtProtocol
+
+- (NSString *)asciiArtString
+{
+  return [ASLayoutSpec asciiArtStringForChildren:@[] parentName:[self asciiArtName]];
+}
+
+- (NSString *)asciiArtName
+{
+  return NSStringFromClass([self class]);
+}
+
 #if TARGET_OS_TV
 #pragma mark - UIFocusEnvironment Protocol (tvOS)
 
@@ -2712,18 +2745,6 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
     [subtree appendString:[n _recursiveDescriptionHelperWithIndent:[indent stringByAppendingString:@" | "]]];
   }
   return subtree;
-}
-
-#pragma mark - ASLayoutableAsciiArtProtocol
-
-- (NSString *)asciiArtString
-{
-    return [ASLayoutSpec asciiArtStringForChildren:@[] parentName:[self asciiArtName]];
-}
-
-- (NSString *)asciiArtName
-{
-    return NSStringFromClass([self class]);
 }
 
 @end

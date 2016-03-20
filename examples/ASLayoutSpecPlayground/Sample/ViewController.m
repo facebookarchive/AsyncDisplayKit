@@ -7,7 +7,8 @@
 //
 
 #import "ViewController.h"
-#import "PlaygroundNode.h"
+#import "PlaygroundContainerNode.h"
+#import "ASDisplayNode+Beta.h" // FIXME?
 
 @interface ViewController ()
 
@@ -21,14 +22,15 @@
 
 - (instancetype)init
 {
-  
-  self = [super initWithNode:[[PlaygroundNode alloc] init]];
-  
+  self = [super initWithNode:[[PlaygroundContainerNode alloc] init]];
   if (self) {
-    
   }
-  
   return self;
+}
+
+- (void)viewDidLoad
+{
+  [super viewDidLoad];
 }
 
 @end

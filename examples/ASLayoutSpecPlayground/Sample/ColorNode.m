@@ -25,7 +25,7 @@
     self.layer.borderWidth = 2;
     self.layer.borderColor = [[UIColor blackColor] CGColor];
     self.backgroundColor = [UIColor purpleColor];
-    
+    self.alignSelf = ASStackLayoutAlignSelfEnd;
   }
   
   return self;

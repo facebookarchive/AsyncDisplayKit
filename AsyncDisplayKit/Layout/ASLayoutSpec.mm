@@ -17,6 +17,10 @@
 #import "ASLayout.h"
 #import "ASLayoutOptions.h"
 #import "ASThread.h"
+#import "ASDisplayNode+Subclasses.h" // FIXME: remove this later
+#import "ASDisplayNode+Beta.h" // FIXME: remove this later
+#import "ASInsetLayoutSpec.h" // FIXME: remove this later
+#import "ASControlNode.h" // FIXME: remove this later
 
 #import <objc/runtime.h>
 
@@ -25,6 +29,43 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 @interface ASLayoutSpec()
 @property (nonatomic, strong) NSMutableDictionary *layoutChildren;
+@property (nonatomic, assign) BOOL neverMagicNode;
+@end
+
+@interface ASLayoutSpecMagicNode : ASControlNode
+
+@property (nonatomic, strong) ASLayoutSpec *layoutSpec;
+
+- (instancetype)initWithLayoutSpec:(ASLayoutSpec *)layoutSpec;
+
+@end
+
+@implementation ASLayoutSpecMagicNode
+
+- (instancetype)initWithLayoutSpec:(ASLayoutSpec *)layoutSpec
+{
+  self = [super init];
+  if (self) {
+    self.layoutSpec = layoutSpec;
+    self.usesImplicitHierarchyManagement = YES;
+    self.layer.borderColor = [[UIColor redColor] CGColor];
+    self.layer.borderWidth = 2;
+  }
+  return self;
+}
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
+  insetSpec.neverMagicNode = YES;
+  self.layoutSpec.neverMagicNode = YES;
+  UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
+  insetSpec.insets = insets;
+  insetSpec.child = self.layoutSpec;
+  return insetSpec;
+}
+
+
 @end
 
 @implementation ASLayoutSpec
@@ -52,7 +93,8 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 - (id<ASLayoutable>)finalLayoutable
 {
-  return self;
+  
+  return (self.neverMagicNode) ? self : [[ASLayoutSpecMagicNode alloc] initWithLayoutSpec:self];
 }
 
 - (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
