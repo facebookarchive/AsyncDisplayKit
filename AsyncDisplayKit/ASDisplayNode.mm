@@ -1672,7 +1672,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   [_pendingDisplayNodes removeObject:node];
 
   // only trampoline if there is a placeholder and nodes are done displaying
-  if ([self _pendingDisplayNodesHaveFinished] && _placeholderLayer.superlayer) {
+  if (self.layer.contents && [self _pendingDisplayNodesHaveFinished] && _placeholderLayer.superlayer) {
     void (^cleanupBlock)() = ^{
       [self _tearDownPlaceholderLayer];
     };
@@ -2252,14 +2252,23 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   [self _pendingNodeWillDisplay:self];
 
   [_supernode subnodeDisplayWillStart:self];
-
-  if (_placeholderImage && _placeholderLayer && self.layer.contents == nil) {
-    [CATransaction begin];
-    [CATransaction setDisableActions:YES];
-    [self _setupPlaceholderLayerContents];
-    _placeholderLayer.opacity = 1.0;
-    [CATransaction commit];
-    [self.layer addSublayer:_placeholderLayer];
+  
+  if (_placeholderEnabled && self.layer.contents == nil && [self __implementsDisplay]) {
+    if (!_placeholderImage) {
+      _placeholderImage = [self placeholderImage];
+    }
+    if (!_placeholderLayer) {
+      [self _setupPlaceholderLayerContents];
+    }
+    // from __completeLayoutCalculation
+    if (_placeholderImage && _placeholderLayer) {
+      [CATransaction begin];
+      [CATransaction setDisableActions:YES];
+      [self _setupPlaceholderLayerContents];
+      _placeholderLayer.opacity = 1.0;
+      [CATransaction commit];
+      [self.layer addSublayer:_placeholderLayer];
+    }
   }
 }
 
