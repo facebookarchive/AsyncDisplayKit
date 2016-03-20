@@ -250,7 +250,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
     // Delegateify
     if (_delegateFlags.displayFinish) {
-      if ([NSThread isMainThread])
+      if (ASDisplayNodeThreadIsMain())
         [_delegate multiplexImageNodeDidFinishDisplay:self];
       else {
         __weak __typeof__(self) weakSelf = self;
@@ -405,7 +405,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   // Delegateify.
   // Note that we're using the params here instead of self.image and _displayedImageIdentifier because those can change before the async block below executes.
   if (_delegateFlags.updatedImageDisplayFinish) {
-    if ([NSThread isMainThread])
+    if (ASDisplayNodeThreadIsMain())
       [_delegate multiplexImageNode:self didDisplayUpdatedImage:image withIdentifier:displayedImageIdentifier];
     else {
       __weak __typeof__(self) weakSelf = self;

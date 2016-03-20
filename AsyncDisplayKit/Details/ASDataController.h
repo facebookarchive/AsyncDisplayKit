@@ -6,8 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#ifndef ASDataController_Included
-#define ASDataController_Included
+#pragma once
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
@@ -195,5 +194,3 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 @end
 
 NS_ASSUME_NONNULL_END
-
-#endif

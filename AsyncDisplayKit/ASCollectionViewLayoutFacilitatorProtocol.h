@@ -6,8 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#ifndef ASCollectionViewLayoutFacilitatorProtocol_h
-#define ASCollectionViewLayoutFacilitatorProtocol_h
+#pragma once
 
 /**
  * This facilitator protocol is intended to help Layout to better
@@ -41,5 +40,3 @@
 - (void)collectionViewWillPerformBatchUpdates;
 
 @end
-
-#endif /* ASCollectionViewLayoutFacilitatorProtocol_h */

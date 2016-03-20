@@ -8,11 +8,10 @@
  *
  */
 
+#pragma once
+
 #import <UIKit/UIKit.h>
 #import "ASEqualityHelpers.h"
-
-#ifndef ComponentKit_ASTextKitAttributes_h
-#define ComponentKit_ASTextKitAttributes_h
 
 @protocol ASTextKitTruncating;
 
@@ -141,5 +140,3 @@ struct ASTextKitAttributes {
 
   size_t hash() const;
 };
-
-#endif
