@@ -21,7 +21,7 @@
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-    [self.node.collectionNode.view invalidateIntrinsicContentSize];
+    [self.node.collectionNode.view.collectionViewLayout invalidateLayout];
 }
 
 @end

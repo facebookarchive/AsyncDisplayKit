@@ -47,7 +47,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _currentRangeMode = ASLayoutRangeModeInvalid;
   _didUpdateCurrentRange = NO;
   
-  [[self.class allRangeControllersWeakSet] addObject:self];
+  [[[self class] allRangeControllersWeakSet] addObject:self];
   
   return self;
 }
@@ -59,13 +59,18 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   }
 }
 
-#pragma mark - Core visible node range managment API
+#pragma mark - Core visible node range management API
+
++ (BOOL)isFirstRangeUpdateForRangeMode:(ASLayoutRangeMode)rangeMode
+{
+  return (rangeMode == ASLayoutRangeModeInvalid);
+}
 
 + (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
                                currentRangeMode:(ASLayoutRangeMode)currentRangeMode
 {
   BOOL isVisible = (ASInterfaceStateIncludesVisible(interfaceState));
-  BOOL isFirstRangeUpdate = (currentRangeMode == ASLayoutRangeModeInvalid);
+  BOOL isFirstRangeUpdate = [self isFirstRangeUpdateForRangeMode:currentRangeMode];
   if (!isVisible || isFirstRangeUpdate) {
     return ASLayoutRangeModeMinimum;
   }
@@ -90,6 +95,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 {
   _scrollDirection = scrollDirection;
 
+  // Perform update immediately, so that cells receive a visibilityDidChange: call before their first pixel is visible.
   [self scheduleRangeUpdate];
 }
 
@@ -149,6 +155,10 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     return;
   }
   
+  // allNodes is a 2D array: it contains arrays for each section, each containing nodes.
+  NSArray<NSArray *> *allNodes = [_dataSource completedNodes];
+  NSUInteger numberOfSections = [allNodes count];
+
   // TODO: Consider if we need to use this codepath, or can rely on something more similar to the data & display ranges
   // Example: ... = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
   NSArray<NSIndexPath *> *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
@@ -165,10 +175,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
   
-  // allNodes is a 2D array: it contains arrays for each section, each containing nodes.
-  NSArray<NSArray *> *allNodes = [_dataSource completedNodes];
-  NSUInteger numberOfSections = [allNodes count];
-  
   NSArray<ASDisplayNode *> *currentSectionNodes = nil;
   NSInteger currentSectionIndex = -1; // Set to -1 so we don't match any indexPath.section on the first iteration.
   NSUInteger numberOfNodesInSection = 0;
@@ -183,7 +189,9 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   ASInterfaceState selfInterfaceState = [self interfaceState];
   ASLayoutRangeMode rangeMode = _currentRangeMode;
-  if (!_didUpdateCurrentRange) {
+  // If the range mode is explicitly set via updateCurrentRangeWithMode: it will last in that mode until the
+  // range controller becomes visible again or explicitly changes the range mode again
+  if ((!_didUpdateCurrentRange && ASInterfaceStateIncludesVisible(selfInterfaceState)) || [[self class] isFirstRangeUpdateForRangeMode:rangeMode]) {
     rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
   }
 
@@ -229,7 +237,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _didUpdateCurrentRange = NO;
   
   if (!_rangeIsValid) {
-    [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];
+    [allIndexPaths addObjectsFromArray:ASIndexPathsForTwoDimensionalArray(allNodes)];
   }
   
   // TODO Don't register for notifications if this range update doesn't cause any node to enter rendering pipeline.
@@ -237,6 +245,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [self registerForNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
   
 #if ASRangeControllerLoggingEnabled
+  ASDisplayNodeAssertTrue([visibleIndexPaths isSubsetOfSet:displayIndexPaths]);
   NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (ASRangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
 #endif
   
@@ -246,14 +255,15 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     ASInterfaceState interfaceState = ASInterfaceStateMeasureLayout;
     
     if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
-      if ([fetchDataIndexPaths containsObject:indexPath]) {
-        interfaceState |= ASInterfaceStateFetchData;
-      }
-      if ([displayIndexPaths containsObject:indexPath]) {
-        interfaceState |= ASInterfaceStateDisplay;
-      }
       if ([visibleIndexPaths containsObject:indexPath]) {
-        interfaceState |= ASInterfaceStateVisible;
+        interfaceState |= (ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData);
+      } else {
+        if ([fetchDataIndexPaths containsObject:indexPath]) {
+          interfaceState |= ASInterfaceStateFetchData;
+        }
+        if ([displayIndexPaths containsObject:indexPath]) {
+          interfaceState |= ASInterfaceStateDisplay;
+        }
       }
     } else {
       // If selfInterfaceState isn't visible, then visibleIndexPaths represents what /will/ be immediately visible at the
@@ -283,13 +293,13 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
       if (section != currentSectionIndex) {
         // Often we'll be dealing with indexPaths in the same section, but the set isn't sorted and we may even bounce
         // between the same ones.  Still, this saves dozens of method calls to access the inner array and count.
-        currentSectionNodes = [allNodes objectAtIndex:section];
+        currentSectionNodes = allNodes[section];
         numberOfNodesInSection = [currentSectionNodes count];
         currentSectionIndex = section;
       }
       
       if (row < numberOfNodesInSection) {
-        ASDisplayNode *node = [currentSectionNodes objectAtIndex:row];
+        ASDisplayNode *node = currentSectionNodes[row];
         
         ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
         // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
@@ -342,7 +352,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 - (void)scheduledNodesDidDisplay:(NSNotification *)notification
 {
-  CFAbsoluteTime notificationTimestamp = ((NSNumber *)[notification.userInfo objectForKey:ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp]).doubleValue;
+  CFAbsoluteTime notificationTimestamp = ((NSNumber *) notification.userInfo[ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp]).doubleValue;
   if (_pendingDisplayNodesTimestamp < notificationTimestamp) {
     // The rendering engine has processed all the nodes this range controller scheduled. Let's schedule a range update
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];
@@ -490,19 +500,22 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisible
 
 + (void)didReceiveMemoryWarning:(NSNotification *)notification
 {
-#if ASRangeControllerLoggingEnabled
-  NSLog(@"+[ASRangeController didReceiveMemoryWarning] with controllers: %@", [self allRangeControllersWeakSet]);
-#endif
-  for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
+  NSArray *allRangeControllers = [[self allRangeControllersWeakSet] allObjects];
+  for (ASRangeController *rangeController in allRangeControllers) {
     BOOL isDisplay = ASInterfaceStateIncludesDisplay([rangeController interfaceState]);
     [rangeController updateCurrentRangeWithMode:isDisplay ? ASLayoutRangeModeMinimum : __rangeModeForMemoryWarnings];
     [rangeController performRangeUpdate];
   }
+  
+#if ASRangeControllerLoggingEnabled
+  NSLog(@"+[ASRangeController didReceiveMemoryWarning] with controllers: %@", allRangeControllers);
+#endif
 }
 
 + (void)didEnterBackground:(NSNotification *)notification
 {
-  for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
+  NSArray *allRangeControllers = [[self allRangeControllersWeakSet] allObjects];
+  for (ASRangeController *rangeController in allRangeControllers) {
     // We do not want to fully collapse the Display ranges of any visible range controllers so that flashes can be avoided when
     // the app is resumed.  Non-visible controllers can be more aggressively culled to the LowMemory state (see definitions for documentation)
     BOOL isVisible = ASInterfaceStateIncludesVisible([rangeController interfaceState]);
@@ -511,27 +524,28 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisible
   
   // Because -interfaceState checks __ApplicationState and always clears the "visible" bit if Backgrounded, we must set this after updating the range mode.
   __ApplicationState = UIApplicationStateBackground;
-  for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
+  for (ASRangeController *rangeController in allRangeControllers) {
     // Trigger a range update immediately, as we may not be allowed by the system to run the update block scheduled by changing range mode.
     [rangeController performRangeUpdate];
   }
   
 #if ASRangeControllerLoggingEnabled
-  NSLog(@"+[ASRangeController didEnterBackground] with controllers, after backgrounding: %@", [self allRangeControllersWeakSet]);
+  NSLog(@"+[ASRangeController didEnterBackground] with controllers, after backgrounding: %@", allRangeControllers);
 #endif
 }
 
 + (void)willEnterForeground:(NSNotification *)notification
 {
+  NSArray *allRangeControllers = [[self allRangeControllersWeakSet] allObjects];
   __ApplicationState = UIApplicationStateActive;
-  for (ASRangeController *rangeController in [self allRangeControllersWeakSet]) {
+  for (ASRangeController *rangeController in allRangeControllers) {
     BOOL isVisible = ASInterfaceStateIncludesVisible([rangeController interfaceState]);
     [rangeController updateCurrentRangeWithMode:isVisible ? ASLayoutRangeModeMinimum : ASLayoutRangeModeVisibleOnly];
     [rangeController performRangeUpdate];
   }
   
 #if ASRangeControllerLoggingEnabled
-  NSLog(@"+[ASRangeController willEnterForeground] with controllers, after foregrounding: %@", [self allRangeControllersWeakSet]);
+  NSLog(@"+[ASRangeController willEnterForeground] with controllers, after foregrounding: %@", allRangeControllers);
 #endif
 }
 

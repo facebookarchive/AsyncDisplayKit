@@ -13,7 +13,7 @@
 @class ASLayout;
 @class _ASTransitionContext;
 
-@protocol _ASTransitionContextDelegate <NSObject>
+@protocol _ASTransitionContextLayoutDelegate <NSObject>
 
 - (NSArray<ASDisplayNode *> *)currentSubnodesWithTransitionContext:(_ASTransitionContext *)context;
 
@@ -23,6 +23,10 @@
 - (ASLayout *)transitionContext:(_ASTransitionContext *)context layoutForKey:(NSString *)key;
 - (ASSizeRange)transitionContext:(_ASTransitionContext *)context constrainedSizeForKey:(NSString *)key;
 
+@end
+
+@protocol _ASTransitionContextCompletionDelegate <NSObject>
+
 - (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete;
 
 @end
@@ -31,6 +35,8 @@
 
 @property (assign, readonly, nonatomic, getter=isAnimated) BOOL animated;
 
-- (instancetype)initWithAnimation:(BOOL)animated delegate:(id<_ASTransitionContextDelegate>)delegate;
+- (instancetype)initWithAnimation:(BOOL)animated
+                   layoutDelegate:(id<_ASTransitionContextLayoutDelegate>)layoutDelegate
+               completionDelegate:(id<_ASTransitionContextCompletionDelegate>)completionDelegate;
 
 @end

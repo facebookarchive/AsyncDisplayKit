@@ -69,7 +69,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setURL:(nullable NSURL *)URL resetToDefault:(BOOL)reset;
 
 /**
- * If <URL> is a local file, set this property to YES to take advantage of UIKit's image cacheing.  Defaults to YES.
+ * If <URL> is a local file, set this property to YES to take advantage of UIKit's image caching.  Defaults to YES.
  */
 @property (nonatomic, assign, readwrite) BOOL shouldCacheImage;
 
@@ -79,7 +79,7 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark -
 /**
  * The methods declared by the ASNetworkImageNodeDelegate protocol allow the adopting delegate to respond to
- * notifications such as fininished decoding and downloading an image.
+ * notifications such as finished decoding and downloading an image.
  */
 @protocol ASNetworkImageNodeDelegate <NSObject>
 

@@ -60,6 +60,8 @@
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
 {
+  [super interfaceStateDidChange:newState fromState:oldState];
+  
   if (!(newState & ASInterfaceStateVisible)) {
     if (oldState & ASInterfaceStateVisible) {
       if (_shouldBePlaying) {
@@ -78,14 +80,14 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  if ([[change objectForKey:@"new"] integerValue] == AVPlayerItemStatusReadyToPlay) {
+  if ([change[@"new"] integerValue] == AVPlayerItemStatusReadyToPlay) {
     if ([self.subnodes containsObject:_spinner]) {
       [_spinner removeFromSupernode];
       _spinner = nil;
     }
   }
   
-  if ([[change objectForKey:@"new"] integerValue] == AVPlayerItemStatusFailed) {
+  if ([change[@"new"] integerValue] == AVPlayerItemStatusFailed) {
     
   }
 }
@@ -231,6 +233,8 @@
 
 - (void)visibilityDidChange:(BOOL)isVisible
 {
+  [super visibilityDidChange:isVisible];
+  
   ASDN::MutexLocker l(_videoLock);
   
   if (_shouldAutoplay && _playerNode.isNodeLoaded) {

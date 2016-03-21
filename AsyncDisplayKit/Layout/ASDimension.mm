@@ -77,6 +77,11 @@ ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)
   ASSizeRange sizeRange; sizeRange.min = min; sizeRange.max = max; return sizeRange;
 }
 
+ASSizeRange ASSizeRangeMakeExactSize(CGSize size)
+{
+  return ASSizeRangeMake(size, size);
+}
+
 CGSize ASSizeRangeClamp(ASSizeRange sizeRange, CGSize size)
 {
   return CGSizeMake(MAX(sizeRange.min.width, MIN(sizeRange.max.width, size.width)),
@@ -95,7 +100,7 @@ struct _Range {
   {
   CGFloat newMin = MAX(min, other.min);
   CGFloat newMax = MIN(max, other.max);
-  if (!(newMin > newMax)) {
+  if (newMin <= newMax) {
     return {newMin, newMax};
   } else {
     // No intersection. If we're before the other range, return our max; otherwise our min.

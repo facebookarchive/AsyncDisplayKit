@@ -127,20 +127,38 @@
   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
 }
 
-- (ASLayout *)transitionLayoutWithAnimation:(BOOL)animated
+- (void)transitionLayoutWithAnimation:(BOOL)animated
+                         shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                      measurementCompletion:(void(^)())completion
 {
   CGSize oldSize = self.calculatedSize;
-  ASLayout *layout = [super transitionLayoutWithAnimation:animated];
-  [self didRelayoutFromOldSize:oldSize toNewSize:layout.size];
-  return layout;
+  [super transitionLayoutWithAnimation:animated
+                    shouldMeasureAsync:shouldMeasureAsync
+                 measurementCompletion:^{
+                   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
+                   if (completion) {
+                     completion();
+                   }
+                 }
+   ];
 }
 
-- (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated
+- (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
+                             animated:(BOOL)animated
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(void(^)())completion
 {
   CGSize oldSize = self.calculatedSize;
-  ASLayout *layout = [super transitionLayoutWithSizeRange:constrainedSize animated:animated];
-  [self didRelayoutFromOldSize:oldSize toNewSize:layout.size];
-  return layout;
+  [super transitionLayoutWithSizeRange:constrainedSize
+                              animated:animated
+                    shouldMeasureAsync:shouldMeasureAsync
+                 measurementCompletion:^{
+                   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
+                   if (completion) {
+                     completion();
+                   }
+                 }
+   ];
 }
 
 - (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize
@@ -152,6 +170,9 @@
     });
   }
 }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -181,11 +202,25 @@
   [(_ASDisplayView *)self.view __forwardTouchesCancelled:touches withEvent:event];
 }
 
-- (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event
-                   inScrollView:(UIScrollView *)scrollView
-                  withCellFrame:(CGRect)cellFrame
+#pragma clang diagnostic pop
+
+- (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event inScrollView:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame
 {
-    // To be overriden by subclasses
+  // To be overriden by subclasses
+}
+
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+  [super visibilityDidChange:isVisible];
+  
+  CGRect cellFrame = CGRectZero;
+  if (_scrollView) {
+    // It is not safe to message nil with a structure return value, so ensure our _scrollView has not died.
+    cellFrame = [self.view convertRect:self.bounds toView:_scrollView];
+  }
+  [self cellNodeVisibilityEvent:isVisible ? ASCellNodeVisibilityEventVisible : ASCellNodeVisibilityEventInvisible
+                   inScrollView:_scrollView
+                  withCellFrame:cellFrame];
 }
 
 @end

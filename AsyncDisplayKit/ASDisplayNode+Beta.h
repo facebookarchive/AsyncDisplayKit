@@ -57,18 +57,50 @@ ASDISPLAYNODE_EXTERN_C_END
 - (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context;
 
 /**
- * @abstract Transitions the current layout with a new constrained size.
+ * @abstract Transitions the current layout with a new constrained size. Must be called on main thread.
  *
- * @discussion Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
- * If the passed constrainedSize is the the same as the node's current constrained size, this method is noop.
+ * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
+ *
+ * @param shouldMeasureAsync Measure the layout asynchronously.
+ *
+ * @param measurementCompletion Optional completion block called only if a new layout is calculated.
+ * It is called on main, right after the measurement and before -animateLayoutTransition:.
+ *
+ * @discussion If the passed constrainedSize is the the same as the node's current constrained size, this method is noop.
+ *
+ * @see animateLayoutTransition:
  */
-- (ASLayout *)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize animated:(BOOL)animated;
+- (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
+                             animated:(BOOL)animated
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(void(^)())completion;
 
 /**
- * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`.
+ * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
  *
- * @discussion Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
+ * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
+ *
+ * @param shouldMeasureAsync Measure the layout asynchronously.
+ *
+ * @param measurementCompletion Optional completion block called only if a new layout is calculated.
+ * It is called right after the measurement and before -animateLayoutTransition:.
+ *
+ * @see animateLayoutTransition:
  */
-- (ASLayout *)transitionLayoutWithAnimation:(BOOL)animated;
+- (void)transitionLayoutWithAnimation:(BOOL)animated
+                         shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                      measurementCompletion:(void(^)())completion;
+
+
+/**
+ * @abstract Currently used by ASNetworkImageNode and ASMultiplexImageNode to allow their placeholders to stay if they are loading an image from the network.
+ * Otherwise, a display pass is scheduled and completes, but does not actually draw anything - and ASDisplayNode considers the element finished.
+ */
+- (BOOL)placeholderShouldPersist;
+
+/**
+ * @abstract Cancels all performing layout transitions. Can be called on any thread.
+ */
+- (void)cancelLayoutTransitionsInProgress;
 
 @end

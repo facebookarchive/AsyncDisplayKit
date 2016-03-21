@@ -77,6 +77,7 @@ static BOOL _enableHitTestDebug = NO;
 }
 
 #pragma mark - Lifecycle
+
 - (id)init
 {
   if (!(self = [super init]))
@@ -89,7 +90,15 @@ static BOOL _enableHitTestDebug = NO;
   return self;
 }
 
+- (void)setUserInteractionEnabled:(BOOL)userInteractionEnabled
+{
+  [super setUserInteractionEnabled:userInteractionEnabled];
+  self.isAccessibilityElement = userInteractionEnabled;
+}
 
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 
 #pragma mark - ASDisplayNode Overrides
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -207,6 +216,8 @@ static BOOL _enableHitTestDebug = NO;
                           withEvent:event];
 }
 
+#pragma clang diagnostic pop
+
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
   // If we're interested in touches, this is a tap (the only gesture we care about) and passed -hitTest for us, then no, you may not begin. Sir.
@@ -254,13 +265,13 @@ static BOOL _enableHitTestDebug = NO;
     {
       // Do we already have an event table for this control event?
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:eventKey];
+      NSMapTable *eventDispatchTable = _controlEventDispatchTable[eventKey];
       // Create it if necessary.
       if (!eventDispatchTable)
       {
         // Create the dispatch table for this event.
         eventDispatchTable = [NSMapTable weakToStrongObjectsMapTable];
-        [_controlEventDispatchTable setObject:eventDispatchTable forKey:eventKey];
+        _controlEventDispatchTable[eventKey] = eventDispatchTable;
       }
 
       // Have we seen this target before for this event?
@@ -288,7 +299,7 @@ static BOOL _enableHitTestDebug = NO;
   ASDN::MutexLocker l(_controlLock);
   
   // Grab the event dispatch table for this event.
-  NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)];
+  NSMapTable *eventDispatchTable = _controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)];
   if (!eventDispatchTable)
     return nil;
 
@@ -325,7 +336,7 @@ static BOOL _enableHitTestDebug = NO;
     {
       // Grab the dispatch table for this event (if we have it).
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:eventKey];
+      NSMapTable *eventDispatchTable = _controlEventDispatchTable[eventKey];
       if (!eventDispatchTable)
         return;
 
@@ -378,7 +389,7 @@ static BOOL _enableHitTestDebug = NO;
     (ASControlNodeEvent controlEvent)
     {
       // Use a copy to itereate, the action perform could call remove causing a mutation crash.
-      NSMapTable *eventDispatchTable = [[_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)] copy];
+      NSMapTable *eventDispatchTable = [_controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)] copy];
 
       // For each target interested in this event...
       for (id target in eventDispatchTable)
@@ -410,7 +421,7 @@ static BOOL _enableHitTestDebug = NO;
 
 id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEvent)
 {
-  return [NSNumber numberWithInteger:controlEvent];
+  return @(controlEvent);
 }
 
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent))

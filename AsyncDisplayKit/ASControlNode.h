@@ -38,7 +38,7 @@ typedef NS_OPTIONS(NSUInteger, ASControlState) {
     ASControlStateNormal       = 0,
     ASControlStateHighlighted  = 1 << 0,                  // used when ASControlNode isHighlighted is set
     ASControlStateDisabled     = 1 << 1,
-    ASControlStateSelected     = 1 << 2,                  // used when ASControlNode isSeleted is set
+    ASControlStateSelected     = 1 << 2,                  // used when ASControlNode isSelected is set
     ASControlStateReserved     = 0xFF000000               // flags reserved for internal framework use
 };
 
@@ -120,11 +120,6 @@ typedef NS_OPTIONS(NSUInteger, ASControlState) {
  */
 - (void)sendActionsForControlEvents:(ASControlNodeEvent)controlEvents withEvent:(nullable UIEvent *)event;
 
-/**
- Class method to enable a visualization overlay of the tapable area on the ASControlNode. For app debugging purposes only.
- @param enable Specify YES to make this debug feature enabled when messaging the ASControlNode class.
- */
-+ (void)setEnableHitTestDebug:(BOOL)enable;
 @end
 
 NS_ASSUME_NONNULL_END

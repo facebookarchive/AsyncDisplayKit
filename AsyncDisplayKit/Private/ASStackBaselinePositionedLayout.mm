@@ -87,7 +87,7 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
     for each node is our computed maxAscender - node.ascender. If the 16pt node had an ascender of 10 and the 14pt node
     had an ascender of 8, that means we will offset the 14pt node by 2 pts.
    
-    Note: if we are alinging to the last baseline, then we don't need this value in our computation. However, we do want
+    Note: if we are aligning to the last baseline, then we don't need this value in our computation. However, we do want
     our layoutSpec to have it so that it can be baseline aligned with another text node or baseline layout spec.
    */
   const auto ascenderIt = std::max_element(positionedLayout.sublayouts.begin(), positionedLayout.sublayouts.end(), [&](const ASLayout *a, const ASLayout *b){
@@ -144,7 +144,7 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
     font size of 40 (max ascender). Now, we have to move the node with multiple lines down to the other node's baseline. This node with multiple lines will
     extend below the first node farther than it did before aligning the baselines thus increasing the cross size.
    
-    After finding the new cross size, we need to clamp it so that it fits within the constrainted size.
+    After finding the new cross size, we need to clamp it so that it fits within the constrained size.
    
    */
   const auto it = std::max_element(stackedChildren.begin(), stackedChildren.end(),

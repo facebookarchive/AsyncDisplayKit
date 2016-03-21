@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
-#import "ASVideoNode.h"
+#import <AVFoundation/AVFoundation.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 @interface ASVideoNodeTests : XCTestCase
 {
@@ -140,7 +141,7 @@
   _videoNode.asset = _firstAsset;
 
   [_videoNode pause];
-  [_videoNode setInterfaceState:ASInterfaceStateVisible];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay];
   [_videoNode didLoad];
   
   XCTAssert(![_videoNode.subnodes containsObject:_videoNode.playerNode]);

@@ -302,7 +302,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   if (_hierarchyState & ASHierarchyStateRasterized) {
     ASPerformBlockOnMainThread(^{
       // The below operation must be performed on the main thread to ensure against an extremely rare deadlock, where a parent node
-      // begins materializing the view / layer heirarchy (locking itself or a descendant) while this node walks up
+      // begins materializing the view / layer hierarchy (locking itself or a descendant) while this node walks up
       // the tree and requires locking that node to access .shouldRasterizeDescendants.
       // For this reason, this method should be avoided when possible.  Use _hierarchyState & ASHierarchyStateRasterized.
       ASDisplayNodeAssertMainThread();

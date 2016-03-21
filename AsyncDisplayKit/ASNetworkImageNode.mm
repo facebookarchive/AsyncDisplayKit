@@ -49,6 +49,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   
   BOOL _cacheSupportsNewProtocol;
   BOOL _cacheSupportsClearing;
+  BOOL _cacheSupportsSynchronousFetch;
 }
 @end
 
@@ -73,6 +74,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   
   _cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
   _cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
+  _cacheSupportsSynchronousFetch = [cache respondsToSelector:@selector(synchronouslyFetchedCachedImageWithURL:)];
   
   _shouldCacheImage = YES;
   self.shouldBypassEnsureDisplay = YES;
@@ -130,15 +132,22 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)setDefaultImage:(UIImage *)defaultImage
 {
-  ASDN::MutexLocker l(_lock);
+  _lock.lock();
 
   if (ASObjectIsEqual(defaultImage, _defaultImage)) {
+    _lock.unlock();
     return;
   }
   _defaultImage = defaultImage;
 
   if (!_imageLoaded) {
-    self.image = _defaultImage;
+    _lock.unlock();
+    // Locking: it is important to release _lock before entering setImage:, as it needs to release the lock before -invalidateCalculatedLayout.
+    // If we continue to hold the lock here, it will still be locked until the next unlock() call, causing a possible deadlock with
+    // -[ASNetworkImageNode displayWillStart] (which is called on a different thread / main, at an unpredictable time due to ASMainRunloopQueue).
+    self.image = defaultImage;
+  } else {
+    _lock.unlock();
   }
 }
 
@@ -164,11 +173,28 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   return _delegate;
 }
 
+- (BOOL)placeholderShouldPersist
+{
+  ASDN::MutexLocker l(_lock);
+  return (self.image == nil && _URL != nil);
+}
+
 /* displayWillStart in ASMultiplexImageNode has a very similar implementation. Changes here are likely necessary
  in ASMultiplexImageNode as well. */
 - (void)displayWillStart
 {
   [super displayWillStart];
+  
+  if (_cacheSupportsSynchronousFetch) {
+    ASDN::MutexLocker l(_lock);
+    if (_imageLoaded == NO && _URL && _downloadIdentifier == nil) {
+      UIImage *result = [_cache synchronouslyFetchedCachedImageWithURL:_URL];
+      if (result) {
+        self.image = result;
+        _imageLoaded = YES;
+      }
+    }
+  }
 
   [self fetchData];
   
@@ -184,6 +210,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
  in ASMultiplexImageNode as well. */
 - (void)visibilityDidChange:(BOOL)isVisible
 {
+  [super visibilityDidChange:isVisible];
+  
   if (_downloaderImplementsSetPriority) {
     ASDN::MutexLocker l(_lock);
     if (_downloadIdentifier != nil) {
@@ -312,6 +340,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)_lazilyLoadImageIfNecessary
 {
+  // FIXME: We should revisit locking in this method (e.g. to access the instance variables at the top, and holding lock while calling delegate)
   if (!_imageLoaded && _URL != nil && _downloadIdentifier == nil) {
     {
       ASDN::MutexLocker l(_lock);

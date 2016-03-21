@@ -6,8 +6,18 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import "ASControlNode.h"
 #import "ASImageNode.h"
+
+@interface ASControlNode (Debugging)
+
+/**
+ Class method to enable a visualization overlay of the tapable area on the ASControlNode. For app debugging purposes only.
+ @param enable Specify YES to make this debug feature enabled when messaging the ASControlNode class.
+ */
++ (void)setEnableHitTestDebug:(BOOL)enable;
+
+@end
 
 @interface ASImageNode (Debugging)
 

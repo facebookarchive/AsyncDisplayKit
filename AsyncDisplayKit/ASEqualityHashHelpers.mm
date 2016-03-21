@@ -10,11 +10,6 @@
 
 #import "ASEqualityHashHelpers.h"
 
-#import <functional>
-#import <objc/runtime.h>
-#import <stdio.h>
-#import <string>
-
 NSUInteger ASIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count)
 {
   uint64_t result = subhashes[0];

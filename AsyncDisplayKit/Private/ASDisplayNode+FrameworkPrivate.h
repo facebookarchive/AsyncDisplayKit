@@ -22,7 +22,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- Hierarchy state is propogated from nodes to all of their children when certain behaviors are required from the subtree.
+ Hierarchy state is propagated from nodes to all of their children when certain behaviors are required from the subtree.
  Examples include rasterization and external driving of the .interfaceState property.
  By passing this information explicitly, performance is optimized by avoiding iteration up the supernode chain.
  Lastly, this avoidance of supernode traversal protects against the possibility of deadlocks when a supernode is
@@ -41,12 +41,25 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
   ASHierarchyStateRasterized              = 1 << 0,
   /** The node or one of its supernodes is managed by a class like ASRangeController.  Most commonly, these nodes are
       ASCellNode objects or a subnode of one, and are used in ASTableView or ASCollectionView.
-      These nodes also recieve regular updates to the .interfaceState property with more detailed status information. */
+      These nodes also receive regular updates to the .interfaceState property with more detailed status information. */
   ASHierarchyStateRangeManaged            = 1 << 1,
-  /** Down-propogated version of _flags.visibilityNotificationsDisabled.  This flag is very rarely set, but by having it
+  /** Down-propagated version of _flags.visibilityNotificationsDisabled.  This flag is very rarely set, but by having it
       locally available to nodes, they do not have to walk up supernodes at the critical points it is checked. */
-  ASHierarchyStateTransitioningSupernodes = 1 << 2
+  ASHierarchyStateTransitioningSupernodes = 1 << 2,
+  /** One of the supernodes of this node is performing a transition.
+      Any layout calculated during this state should not be applied immediately, but pending until later. */
+  ASHierarchyStateLayoutPending           = 1 << 3
 };
+
+inline BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyState)
+{
+  return ((hierarchyState & ASHierarchyStateLayoutPending) == ASHierarchyStateLayoutPending);
+}
+
+inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState)
+{
+    return ((hierarchyState & ASHierarchyStateRangeManaged) == ASHierarchyStateRangeManaged);
+}
 
 @interface ASDisplayNode ()
 {
@@ -83,11 +96,19 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
  */
 @property (nonatomic, readwrite) ASHierarchyState hierarchyState;
 
+/**
+ * @abstract Return if the node is range managed or not
+ *
+ * @discussion Currently only set interface state on nodes in table and collection views. For other nodes, if they are
+ * in the hierarchy we enable all ASInterfaceState types with `ASInterfaceStateInHierarchy`, otherwise `None`.
+ */
+- (BOOL)supportsRangeManagedInterfaceState;
+
 // The two methods below will eventually be exposed, but their names are subject to change.
 /**
- * @abstract Ensure that all rendering is complete for this node and its descendents.
+ * @abstract Ensure that all rendering is complete for this node and its descendants.
  *
- * @discussion Calling this method on the main thread after a node is added to the view heirarchy will ensure that
+ * @discussion Calling this method on the main thread after a node is added to the view hierarchy will ensure that
  * placeholder states are never visible to the user.  It is used by ASTableView, ASCollectionView, and ASViewController
  * to implement their respective ".neverShowPlaceholders" option.
  *
