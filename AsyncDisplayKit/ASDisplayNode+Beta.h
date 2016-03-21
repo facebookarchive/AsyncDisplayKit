@@ -98,4 +98,9 @@ ASDISPLAYNODE_EXTERN_C_END
  */
 - (BOOL)placeholderShouldPersist;
 
+/**
+ * @abstract Cancels all performing layout transitions. Can be called on any thread.
+ */
+- (void)cancelLayoutTransitionsInProgress;
+
 @end
