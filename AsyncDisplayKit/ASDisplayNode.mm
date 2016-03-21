@@ -593,14 +593,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return _layout;
   }
 
-  if ([self _hasTransitionsInProgress]) {
-    // Invalidate transition sentinel to cancel transitions in progress
-    [self _invalidateTransitionSentinel];
-    // Tell subnodes to exit layout pending state and clear related properties
-    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
-      node.hierarchyState &= (~ASHierarchyStateLayoutPending);
-    });
-  }
+  [self cancelLayoutTransitionsInProgress];
 
   ASLayout *previousLayout = _layout;
   ASSizeRange previousConstrainedSize = _constrainedSize;
@@ -698,12 +691,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
     
     ASPerformBlockOnMainThread(^{
+      // Grab _propertyLock here to make sure this transition isn't invalidated
+      // right after it passed the validation test and before it proceeds
+      ASDN::MutexLocker l(_propertyLock);
+
       if ([self _shouldAbortTransitionWithID:transitionID]) {
         return;
       }
       
-      ASDN::MutexLocker l(_propertyLock);
-
       ASLayout *previousLayout = _layout;
       ASSizeRange previousConstrainedSize = _constrainedSize;
       [self applyLayout:newLayout constrainedSize:constrainedSize layoutContext:nil];
@@ -767,6 +762,19 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)calculatedLayoutDidChange
 {
   // subclass override
+}
+
+- (void)cancelLayoutTransitionsInProgress
+{
+  ASDN::MutexLocker l(_propertyLock);
+  if ([self _hasTransitionsInProgress]) {
+    // Invalidate transition sentinel to cancel transitions in progress
+    [self _invalidateTransitionSentinel];
+    // Tell subnodes to exit layout pending state and clear related properties
+    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+      node.hierarchyState &= (~ASHierarchyStateLayoutPending);
+    });
+  }
 }
 
 #pragma mark - Layout Transition
