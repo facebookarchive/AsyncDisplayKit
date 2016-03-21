@@ -60,6 +60,7 @@
     _contentHorizontalAlignment = ASAlignmentMiddle;
     _contentVerticalAlignment = ASAlignmentCenter;
     _contentEdgeInsets = UIEdgeInsetsZero;
+    self.accessibilityTraits = UIAccessibilityTraitButton;
   }
   return self;
 }
@@ -102,6 +103,11 @@
 - (void)setEnabled:(BOOL)enabled
 {
   [super setEnabled:enabled];
+  if (enabled) {
+    self.accessibilityTraits = UIAccessibilityTraitButton;
+  } else {
+    self.accessibilityTraits = UIAccessibilityTraitButton | UIAccessibilityTraitNotEnabled;
+  }
   [self updateButtonContent];
 }
 
@@ -135,7 +141,7 @@
 - (void)updateImage
 {
   ASDN::MutexLocker l(_propertyLock);
-  
+
   UIImage *newImage;
   if (self.enabled == NO && _disabledImage) {
     newImage = _disabledImage;
@@ -170,9 +176,10 @@
   } else {
     newTitle = _normalAttributedTitle;
   }
-  
+
   if ((_titleNode != nil || newTitle.length > 0) && newTitle != self.titleNode.attributedString) {
     _titleNode.attributedString = newTitle;
+    self.accessibilityLabel = _titleNode.accessibilityLabel;
     [self setNeedsLayout];
   }
 }
@@ -331,6 +338,7 @@
     default:
       break;
   }
+
   [self updateTitle];
 }
 

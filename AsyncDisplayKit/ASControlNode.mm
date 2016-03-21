@@ -77,6 +77,7 @@ static BOOL _enableHitTestDebug = NO;
 }
 
 #pragma mark - Lifecycle
+
 - (id)init
 {
   if (!(self = [super init]))
@@ -88,6 +89,13 @@ static BOOL _enableHitTestDebug = NO;
   self.userInteractionEnabled = NO;
   return self;
 }
+
+- (void)setUserInteractionEnabled:(BOOL)userInteractionEnabled
+{
+  [super setUserInteractionEnabled:userInteractionEnabled];
+  self.isAccessibilityElement = userInteractionEnabled;
+}
+
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
