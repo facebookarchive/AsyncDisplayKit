@@ -610,7 +610,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
   }
   
-  for (_ASTableViewCell *tableCell in _cellsForVisibilityUpdates) {
+  for (_ASTableViewCell *tableCell in [_cellsForVisibilityUpdates copy]) {
     [[tableCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
                                  inScrollView:scrollView
                                 withCellFrame:tableCell.frame];
@@ -657,9 +657,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_asyncDelegate tableView:self didEndDisplayingNode:cellNode forRowAtIndexPath:indexPath];
   }
 
-  if ([_cellsForVisibilityUpdates containsObject:cell]) {
-    [_cellsForVisibilityUpdates removeObject:cell];
-  }
+  [_cellsForVisibilityUpdates removeObject:cell];
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"

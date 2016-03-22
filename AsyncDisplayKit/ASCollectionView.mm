@@ -590,11 +590,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
     [_asyncDelegate collectionView:self didEndDisplayingNode:cellNode forItemAtIndexPath:indexPath];
   }
-  
-  if ([_cellsForVisibilityUpdates containsObject:cell]) {
-    [_cellsForVisibilityUpdates removeObject:cell];
-  }
-  
+
+  [_cellsForVisibilityUpdates removeObject:cell];
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
@@ -727,7 +725,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
   }
   
-  for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
+  for (_ASCollectionViewCell *collectionCell in [_cellsForVisibilityUpdates copy]) {
     // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
     [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
                                       inScrollView:scrollView
