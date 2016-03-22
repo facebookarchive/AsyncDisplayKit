@@ -134,11 +134,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   dispatch_async(dispatch_get_main_queue(), ^{
     [self _updateVisibleNodeIndexPaths];
     
-    for (void (^completionBlock)(void) in _scheduledRangeUpdateCompletionBlocks) {
-      completionBlock();
-    }
-    [_scheduledRangeUpdateCompletionBlocks removeAllObjects];
-    
     dataSource = nil;
     delegate = nil;
   });
@@ -340,6 +335,11 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   _rangeIsValid = YES;
   _queuedRangeUpdate = NO;
+  
+  for (void (^completionBlock)(void) in _scheduledRangeUpdateCompletionBlocks) {
+    completionBlock();
+  }
+  [_scheduledRangeUpdateCompletionBlocks removeAllObjects];
   
 #if ASRangeControllerLoggingEnabled
 //  NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
