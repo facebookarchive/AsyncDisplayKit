@@ -16,7 +16,6 @@
 		76466F331C9DFFC4006C4D2D /* ColorNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 76466F2D1C9DFFC4006C4D2D /* ColorNode.m */; };
 		76466F341C9DFFC4006C4D2D /* PlaygroundNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 76466F2F1C9DFFC4006C4D2D /* PlaygroundNode.m */; };
 		76466F351C9DFFC4006C4D2D /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 76466F311C9DFFC4006C4D2D /* ViewController.m */; };
-		76F58D591C9E114B004512CC /* EditorNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 76F58D581C9E114B004512CC /* EditorNode.m */; };
 		76F58D5C1C9E15C1004512CC /* PlaygroundContainerNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 76F58D5B1C9E15C1004512CC /* PlaygroundContainerNode.m */; };
 /* End PBXBuildFile section */
 
@@ -37,8 +36,6 @@
 		76466F2F1C9DFFC4006C4D2D /* PlaygroundNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaygroundNode.m; sourceTree = "<group>"; };
 		76466F301C9DFFC4006C4D2D /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		76466F311C9DFFC4006C4D2D /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		76F58D571C9E114B004512CC /* EditorNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditorNode.h; sourceTree = "<group>"; };
-		76F58D581C9E114B004512CC /* EditorNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditorNode.m; sourceTree = "<group>"; };
 		76F58D5A1C9E15C1004512CC /* PlaygroundContainerNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlaygroundContainerNode.h; sourceTree = "<group>"; };
 		76F58D5B1C9E15C1004512CC /* PlaygroundContainerNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaygroundContainerNode.m; sourceTree = "<group>"; };
 		C068F1D3F0CC317E895FCDAB /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
@@ -90,8 +87,6 @@
 				76466F2F1C9DFFC4006C4D2D /* PlaygroundNode.m */,
 				76466F2C1C9DFFC4006C4D2D /* ColorNode.h */,
 				76466F2D1C9DFFC4006C4D2D /* ColorNode.m */,
-				76F58D571C9E114B004512CC /* EditorNode.h */,
-				76F58D581C9E114B004512CC /* EditorNode.m */,
 				05E2128419D4DB510098F589 /* Supporting Files */,
 			);
 			path = Sample;
@@ -155,7 +150,7 @@
 		05E2127919D4DB510098F589 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
 					05E2128019D4DB510098F589 = {
@@ -247,7 +242,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				76F58D591C9E114B004512CC /* EditorNode.m in Sources */,
 				76466F321C9DFFC4006C4D2D /* AppDelegate.m in Sources */,
 				05E2128719D4DB510098F589 /* main.m in Sources */,
 				76466F331C9DFFC4006C4D2D /* ColorNode.m in Sources */,
@@ -280,6 +274,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -344,6 +339,7 @@
 				INFOPLIST_FILE = Sample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.AsyncDisplayKit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -357,6 +353,7 @@
 				INFOPLIST_FILE = Sample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.AsyncDisplayKit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

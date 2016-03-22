@@ -12,6 +12,8 @@
 #import "ASAssert.h"
 #import "ASLayoutSpecUtilities.h"
 #import "ASInternalHelpers.h"
+#import "ASLayoutSpec.h"
+#import "ASLayoutSpec+Debug.h"
 #import <queue>
 
 CGPoint const CGPointNull = {NAN, NAN};

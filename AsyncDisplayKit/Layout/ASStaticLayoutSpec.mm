@@ -75,7 +75,7 @@
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
-  ASDisplayNodeAssert(NO, @"ASStaticLayoutSpec only supports setChildren");
+  [self setChildren:child ? @[child] : nil];
 }
 
 - (id<ASLayoutable>)childForIdentifier:(NSString *)identifier

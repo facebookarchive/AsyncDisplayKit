@@ -1,5 +1,5 @@
 //
-//  EditorNode.h
+//  ASLayoutableInspectorNode.h
 //  Sample
 //
 //  Created by Hannah Troisi on 3/19/16.
@@ -8,8 +8,10 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface EditorNode : ASDisplayNode
+@interface ASLayoutableInspectorNode : ASDisplayNode
 
 @property (nonatomic, strong) id<ASLayoutable> layoutableToEdit;
+
++ (instancetype)sharedInstance;
 
 @end

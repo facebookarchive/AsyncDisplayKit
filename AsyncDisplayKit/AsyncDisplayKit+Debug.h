@@ -9,6 +9,15 @@
 #import "ASControlNode.h"
 #import "ASImageNode.h"
 
+@interface ASDisplayNode (LayoutDebugging)
+
+/**
+ * FIXME:
+ */
+- (void)shouldVisualizeLayoutSpecs:(BOOL)visualize;
+
+@end
+
 @interface ASControlNode (Debugging)
 
 /**

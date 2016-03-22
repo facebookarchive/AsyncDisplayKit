@@ -23,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL isMutable;
 
+
 - (instancetype)init;
 
 /**
@@ -98,6 +99,10 @@ NS_ASSUME_NONNULL_BEGIN
 /** Returns all children added to this layout spec. */
 - (NSArray<id<ASLayoutable>> *)children;
 
+// FIXME:
+@property (nonatomic, assign) BOOL shouldVisualize;
+- (void)recursivelySetShouldVisualize:(BOOL)visualize;
+
 @end
 
 @interface ASLayoutSpec (Debugging) <ASLayoutableAsciiArtProtocol>
@@ -108,6 +113,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName;
 
 @end
+
+
 
 NS_ASSUME_NONNULL_END
 

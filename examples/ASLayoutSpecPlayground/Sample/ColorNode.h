@@ -8,6 +8,6 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface ColorNode : ASCellNode
+@interface ColorNode : ASControlNode
 
 @end

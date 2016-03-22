@@ -7,13 +7,15 @@
 //
 
 #import "ASLayoutSpec.h"
+#import "ASControlNode.h"
 
-@interface ASLayoutSpec (Debugging)
+@interface ASLayoutSpec (Debugging2)
+
 
 @end
 
 
-@interface ASLayoutSpecMagicNode : ASControlNode
+@interface ASLayoutSpecVisualizerNode : ASControlNode
 
 @property (nonatomic, strong) ASLayoutSpec *layoutSpec;
 
@@ -21,30 +23,3 @@
 
 @end
 
-@implementation ASLayoutSpecMagicNode
-
-- (instancetype)initWithLayoutSpec:(ASLayoutSpec *)layoutSpec
-{
-  self = [super init];
-  if (self) {
-    self.layoutSpec = layoutSpec;
-    self.usesImplicitHierarchyManagement = YES;
-    self.layer.borderColor = [[UIColor redColor] CGColor];
-    self.layer.borderWidth = 2;
-  }
-  return self;
-}
-
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
-{
-  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
-  insetSpec.neverMagicNode = YES;
-  self.layoutSpec.neverMagicNode = YES;
-  UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
-  insetSpec.insets = insets;
-  insetSpec.child = self.layoutSpec;
-  return insetSpec;
-}
-
-
-@end

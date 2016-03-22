@@ -7,6 +7,7 @@
 //
 
 #import "ColorNode.h"
+#import "ASLayoutableInspectorNode.h"
 
 @implementation ColorNode
 {
@@ -26,6 +27,7 @@
     self.layer.borderColor = [[UIColor blackColor] CGColor];
     self.backgroundColor = [UIColor purpleColor];
     self.alignSelf = ASStackLayoutAlignSelfEnd;
+    [self addTarget:self action:@selector(nodeWasTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
   }
   
   return self;
@@ -33,7 +35,12 @@
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  return CGSizeMake(100, 100);
+  return CGSizeMake(50, 50);
+}
+
+- (void)nodeWasTapped:(UIGestureRecognizer *)sender
+{
+  [ASLayoutableInspectorNode sharedInstance].layoutableToEdit = self;
 }
 
 @end

@@ -8,7 +8,7 @@
 
 #import "PlaygroundNode.h"
 #import "ColorNode.h"
-
+#import "AsyncDisplayKit+Debug.h"
 
 @implementation PlaygroundNode
 {
@@ -23,8 +23,8 @@
   
   if (self) {
   
-    self.backgroundColor = [UIColor lightGrayColor];
     self.usesImplicitHierarchyManagement = YES;
+//    self.clipsToBounds = YES;                   // make outside bounds semi-transparent
     
     ColorNode *node = [[ColorNode alloc] init];
     ColorNode *node2 = [[ColorNode alloc] init];
@@ -33,6 +33,8 @@
 
     _individualColorNode = [[ColorNode alloc] init];
     _individualColorNode.backgroundColor = [UIColor orangeColor];
+    
+    [self shouldVisualizeLayoutSpecs:YES];
   }
   
   return self;
@@ -43,16 +45,34 @@
   NSMutableArray *children = [[NSMutableArray alloc] init];
   for (ASDisplayNode *node in _colorNodes) {
     UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
+    node.flexGrow = YES;
     ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:node];
+    insetSpec.flexGrow = YES;
     [children addObject:insetSpec];
   }
   ASStackLayoutSpec *innerStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   innerStack.children = children;
-  
+  innerStack.flexGrow = YES;
+
   ASStackLayoutSpec *outerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  outerStack.flexGrow = YES;
   outerStack.children = @[innerStack, _individualColorNode];
   
   return outerStack;
 }
+
+//- (ASSizeRange)playgroundConstrainedSize
+//{
+//  if (ASRangeIsEmpty(_playgroundConstrainedSize)) {
+//    CGSize maxSize = CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX);
+//    _playgroundConstrainedSize = ASSizeRangeMake(maxSize, maxSize);
+//  }
+//  return _playgroundConstrainedSize;
+//}
+//
+//- (ASSizeRange)nodeConstrainedSize
+//{
+//  return self.playgroundConstrainedSize;
+//}
 
 @end

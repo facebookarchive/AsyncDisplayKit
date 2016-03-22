@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
  * extend the backing layout options class to accommodate any new layout options.
  */
-@protocol ASLayoutable <ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate, ASLayoutableAsciiArtProtocol>
+@protocol ASLayoutable <ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate>
 
 /**
  * @abstract Calculate a layout based on given size range.
@@ -51,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Layout options from the Layoutable Protocols
 
-#pragma mark - ASStackLayoutable
+#pragma mark - ASStackLayoutable 
 /**
  * @abstract Additional space to place before this object in the stacking direction.
  * Used when attached to a stack layout.

@@ -17,10 +17,12 @@
 #import "ASLayout.h"
 #import "ASLayoutOptions.h"
 #import "ASThread.h"
+
 #import "ASDisplayNode+Subclasses.h" // FIXME: remove this later
 #import "ASDisplayNode+Beta.h" // FIXME: remove this later
 #import "ASInsetLayoutSpec.h" // FIXME: remove this later
 #import "ASControlNode.h" // FIXME: remove this later
+#import "ASLayoutSpec+Debug.h"
 
 #import <objc/runtime.h>
 
@@ -29,43 +31,6 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 @interface ASLayoutSpec()
 @property (nonatomic, strong) NSMutableDictionary *layoutChildren;
-@property (nonatomic, assign) BOOL neverMagicNode;
-@end
-
-@interface ASLayoutSpecMagicNode : ASControlNode
-
-@property (nonatomic, strong) ASLayoutSpec *layoutSpec;
-
-- (instancetype)initWithLayoutSpec:(ASLayoutSpec *)layoutSpec;
-
-@end
-
-@implementation ASLayoutSpecMagicNode
-
-- (instancetype)initWithLayoutSpec:(ASLayoutSpec *)layoutSpec
-{
-  self = [super init];
-  if (self) {
-    self.layoutSpec = layoutSpec;
-    self.usesImplicitHierarchyManagement = YES;
-    self.layer.borderColor = [[UIColor redColor] CGColor];
-    self.layer.borderWidth = 2;
-  }
-  return self;
-}
-
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
-{
-  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
-  insetSpec.neverMagicNode = YES;
-  self.layoutSpec.neverMagicNode = YES;
-  UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
-  insetSpec.insets = insets;
-  insetSpec.child = self.layoutSpec;
-  return insetSpec;
-}
-
-
 @end
 
 @implementation ASLayoutSpec
@@ -93,9 +58,32 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 - (id<ASLayoutable>)finalLayoutable
 {
-  
-  return (self.neverMagicNode) ? self : [[ASLayoutSpecMagicNode alloc] initWithLayoutSpec:self];
+  return self;
 }
+
+- (void)recursivelySetShouldVisualize:(BOOL)visualize
+{
+  NSMutableArray *mutableChildren = [self.children mutableCopy];
+  
+  for (id<ASLayoutable>layoutableChild in self.children) {
+    if ([layoutableChild isKindOfClass:[ASLayoutSpec class]]) {
+      ASLayoutSpec *layoutSpec = (ASLayoutSpec *)layoutableChild;
+      
+      [mutableChildren replaceObjectAtIndex:[mutableChildren indexOfObjectIdenticalTo:layoutSpec]
+                                 withObject:[[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:layoutSpec]];
+      
+      [layoutSpec recursivelySetShouldVisualize:visualize];
+      layoutSpec.shouldVisualize = visualize;
+    }
+  }
+  
+  if ([mutableChildren count] == 1) {         // HACK for wrapper layoutSpecs (e.g. insetLayoutSpec)
+    self.child = mutableChildren[0];
+  } else if ([mutableChildren count] > 1) {
+    self.children = mutableChildren;
+  }
+}
+
 
 - (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
 {
@@ -137,18 +125,26 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   [self setChild:child forIdentifier:kDefaultChildKey];
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier                     // FIX
 {
+  if ([child isKindOfClass:[ASLayoutSpec class]]) {
+    [(ASLayoutSpec *)child setShouldVisualize:self.shouldVisualize];
+    NSLog(@"%@ %@ %d", self, child, self.shouldVisualize);
+  }
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  self.layoutChildren[identifier] = [self layoutableToAddFromLayoutable:child];;
+  self.layoutChildren[identifier] = [self layoutableToAddFromLayoutable:child];
 }
 
-- (void)setChildren:(NSArray *)children
+- (void)setChildren:(NSArray *)children                                                           // FIX
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
   NSMutableArray *finalChildren = [NSMutableArray arrayWithCapacity:children.count];
   for (id<ASLayoutable> child in children) {
+    if ([child isKindOfClass:[ASLayoutSpec class]]) {
+      [(ASLayoutSpec *)child setShouldVisualize:self.shouldVisualize];
+      NSLog(@"%@ %@ %d", self, child, self.shouldVisualize);
+    }
     [finalChildren addObject:[self layoutableToAddFromLayoutable:child]];
   }
   
