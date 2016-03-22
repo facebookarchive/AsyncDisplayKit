@@ -101,6 +101,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 // FIXME:
 @property (nonatomic, assign) BOOL shouldVisualize;
+@property (nonatomic, assign) BOOL neverShouldVisualize;
 - (void)recursivelySetShouldVisualize:(BOOL)visualize;
 
 @end

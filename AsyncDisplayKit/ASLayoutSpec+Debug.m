@@ -13,7 +13,16 @@
 
 @implementation ASLayoutSpec (Debugging2)
 
+static BOOL __shouldVisualizeLayoutSpecs = NO;
++ (BOOL)shouldVisualizeLayoutSpecs2
+{
+  return __shouldVisualizeLayoutSpecs;
+}
 
++ (void)setShouldVisualizeLayoutSpecs2:(BOOL)shouldVisualizeLayoutSpecs
+{
+  __shouldVisualizeLayoutSpecs = shouldVisualizeLayoutSpecs;
+}
 
 @end
 
@@ -36,8 +45,8 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
-  insetSpec.shouldVisualize = YES;
-  self.layoutSpec.shouldVisualize = YES;
+  insetSpec.neverShouldVisualize = YES;
+  self.layoutSpec.neverShouldVisualize = YES;
   UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
   insetSpec.insets = insets;
   insetSpec.child = self.layoutSpec;

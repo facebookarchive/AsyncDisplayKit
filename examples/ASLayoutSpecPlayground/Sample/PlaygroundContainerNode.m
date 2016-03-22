@@ -36,6 +36,9 @@
     lpgr.minimumPressDuration = 0.0;
     lpgr.allowableMovement = CGFLOAT_MAX;
     [_resizeHandle.view addGestureRecognizer:lpgr];
+    
+    [self shouldVisualizeLayoutSpecs:YES];
+
   }
   
   return self;

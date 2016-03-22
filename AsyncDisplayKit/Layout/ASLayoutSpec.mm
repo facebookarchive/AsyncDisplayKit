@@ -58,7 +58,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 - (id<ASLayoutable>)finalLayoutable
 {
-  return self;
+  return ((!self.neverShouldVisualize && [ASLayoutSpec shouldVisualizeLayoutSpecs2] ) ? [[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:self] : self);
 }
 
 - (void)recursivelySetShouldVisualize:(BOOL)visualize

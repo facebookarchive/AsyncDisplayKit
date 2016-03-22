@@ -11,6 +11,8 @@
 
 @interface ASLayoutSpec (Debugging2)
 
++ (BOOL)shouldVisualizeLayoutSpecs2;
++ (void)setShouldVisualizeLayoutSpecs2:(BOOL)shouldVisualizeLayoutSpecs;
 
 @end
 

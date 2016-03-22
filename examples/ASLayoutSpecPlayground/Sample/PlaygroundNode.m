@@ -34,7 +34,6 @@
     _individualColorNode = [[ColorNode alloc] init];
     _individualColorNode.backgroundColor = [UIColor orangeColor];
     
-    [self shouldVisualizeLayoutSpecs:YES];
   }
   
   return self;

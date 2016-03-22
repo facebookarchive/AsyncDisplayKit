@@ -31,7 +31,9 @@
 #import "ASLayoutSpec.h"
 #import "ASCellNode.h"
 
+#import "ASLayoutSpec+Debug.h" // FIXME: remove later
 #import "ASStaticLayoutSpec.h" // FIXME: remove later
+
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
@@ -1791,11 +1793,14 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(_propertyLock);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
-    ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
-    
     if (ASHierarchyStateIncludesVisualizeLayoutSpecs(_hierarchyState)) {
-      [layoutSpec recursivelySetShouldVisualize:YES];
+      //      [layoutSpec recursivelySetShouldVisualize:YES];
+      [ASLayoutSpec setShouldVisualizeLayoutSpecs2:YES];
     }
+    
+    ASStaticLayoutSpec *staticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[[self layoutSpecThatFits:constrainedSize]]];
+    
+    ASLayoutSpec *layoutSpec = staticSpec;
     
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
@@ -1804,6 +1809,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       layout.position = CGPointZero;
       layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
     }
+    
+    if (ASHierarchyStateIncludesVisualizeLayoutSpecs(_hierarchyState)) {
+      [ASLayoutSpec setShouldVisualizeLayoutSpecs2:NO];
+    }
+
+    
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
       if (self.usesImplicitHierarchyManagement) {
         return ASObjectIsEqual(layout, evaluatedLayout) == NO && [evaluatedLayout.layoutableObject isKindOfClass:[ASDisplayNode class]];
