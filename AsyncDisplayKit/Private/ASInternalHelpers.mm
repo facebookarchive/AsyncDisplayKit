@@ -34,19 +34,6 @@ BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL sele
   return (superclassIMP != subclassIMP);
 }
 
-static void ASDispatchOnceOnMainThread(dispatch_once_t *predicate, dispatch_block_t block)
-{
-  if (ASDisplayNodeThreadIsMain()) {
-    dispatch_once(predicate, block);
-  } else {
-    if (DISPATCH_EXPECT(*predicate == 0L, NO)) {
-      dispatch_sync(dispatch_get_main_queue(), ^{
-        dispatch_once(predicate, block);
-      });
-    }
-  }
-}
-
 void ASPerformBlockOnMainThread(void (^block)())
 {
   if (ASDisplayNodeThreadIsMain()) {
@@ -67,12 +54,13 @@ void ASPerformBlockOnBackgroundThread(void (^block)())
 
 CGFloat ASScreenScale()
 {
-  static CGFloat _scale;
+  static CGFloat __scale = 0.0;
   static dispatch_once_t onceToken;
-  ASDispatchOnceOnMainThread(&onceToken, ^{
-    _scale = [UIScreen mainScreen].scale;
+  dispatch_once(&onceToken, ^{
+    ASDisplayNodeCAssertMainThread();
+    __scale = [[UIScreen mainScreen] scale];
   });
-  return _scale;
+  return __scale;
 }
 
 CGFloat ASFloorPixelValue(CGFloat f)

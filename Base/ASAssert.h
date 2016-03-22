@@ -9,6 +9,7 @@
 #pragma once
 
 #import <Foundation/NSException.h>
+#import <pthread.h>
 
 #define ASDisplayNodeAssertWithSignalAndLogFunction(condition, description, logFunction, ...) NSAssert(condition, description, ##__VA_ARGS__);
 #define ASDisplayNodeCAssertWithSignalAndLogFunction(condition, description, logFunction, ...) NSCAssert(condition, description, ##__VA_ARGS__);
@@ -30,11 +31,11 @@
 #define ASDisplayNodeAssertNotInstantiable() ASDisplayNodeAssertWithSignal(NO, nil, @"This class is not instantiable.");
 #define ASDisplayNodeAssertNotSupported() ASDisplayNodeAssertWithSignal(NO, nil, @"This method is not supported by class %@", [self class]);
 
-#define ASDisplayNodeAssertMainThread() ASDisplayNodeAssertWithSignal([NSThread isMainThread], nil, @"This method must be called on the main thread")
-#define ASDisplayNodeCAssertMainThread() ASDisplayNodeCAssertWithSignal([NSThread isMainThread], nil, @"This function must be called on the main thread")
+#define ASDisplayNodeAssertMainThread() ASDisplayNodeAssertWithSignal(0 != pthread_main_np(), nil, @"This method must be called on the main thread")
+#define ASDisplayNodeCAssertMainThread() ASDisplayNodeCAssertWithSignal(0 != pthread_main_np(), nil, @"This function must be called on the main thread")
 
-#define ASDisplayNodeAssertNotMainThread() ASDisplayNodeAssertWithSignal(![NSThread isMainThread], nil, @"This method must be called off the main thread")
-#define ASDisplayNodeCAssertNotMainThread() ASDisplayNodeCAssertWithSignal(![NSThread isMainThread], nil, @"This function must be called off the main thread")
+#define ASDisplayNodeAssertNotMainThread() ASDisplayNodeAssertWithSignal(0 == pthread_main_np(), nil, @"This method must be called off the main thread")
+#define ASDisplayNodeCAssertNotMainThread() ASDisplayNodeCAssertWithSignal(0 == pthread_main_np(), nil, @"This function must be called off the main thread")
 
 #define ASDisplayNodeAssertFlag(X) ASDisplayNodeAssertWithSignal((1 == __builtin_popcount(X)), nil, nil)
 #define ASDisplayNodeCAssertFlag(X) ASDisplayNodeCAssertWithSignal((1 == __builtin_popcount(X)), nil, nil)

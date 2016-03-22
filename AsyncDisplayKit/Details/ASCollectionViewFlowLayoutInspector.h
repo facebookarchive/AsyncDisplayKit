@@ -6,12 +6,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#pragma once
+
 #import <Foundation/Foundation.h>
-
 #import <AsyncDisplayKit/ASDimension.h>
-
-#ifndef ASCollectionViewLayoutInspecting_h
-#define ASCollectionViewLayoutInspecting_h
 
 @class ASCollectionView;
 @protocol ASCollectionDelegate;
@@ -56,6 +54,3 @@
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout;
 
 @end
-
-#endif /* ASCollectionViewLayoutInspecting_h */
-

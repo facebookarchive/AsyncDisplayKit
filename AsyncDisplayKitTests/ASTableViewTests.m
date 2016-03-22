@@ -144,18 +144,6 @@
 
 @implementation ASTableViewTests
 
-- (void)setUp
-{
-  /// Load a display node before the first test.
-  /// Without this, running this suite specifically
-  /// (as opposed to all tests) will cause a deadlock
-  /// because of the dispatch_sync in `ASScreenScale()`.
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    [ASDisplayNode new];
-  });
-}
-
 // TODO: Convert this to ARC.
 - (void)DISABLED_testTableViewDoesNotRetainItselfAndDelegate
 {
