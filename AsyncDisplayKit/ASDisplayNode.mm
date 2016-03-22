@@ -337,6 +337,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)dealloc
 {
   ASDisplayNodeAssertMainThread();
+  
+  self.interfaceState &= ~ASInterfaceStateVisible;
 
   self.asyncLayer.asyncDelegate = nil;
   _view.asyncdisplaykit_node = nil;
@@ -2076,13 +2078,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
         [self setDisplaySuspended:NO];
       } else {
         [self setDisplaySuspended:YES];
-        //schedule clear contents on next runloop
-        dispatch_async(dispatch_get_main_queue(), ^{
-          ASDN::MutexLocker l(_propertyLock);
-          if (ASInterfaceStateIncludesDisplay(_interfaceState) == NO) {
-            [self clearContents];
-          }
-        });
+        [self clearContents];
       }
     } else {
       // NOTE: This case isn't currently supported as setInterfaceState: isn't exposed externally, and all
@@ -2094,13 +2090,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
             [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
           } else {
             [[self asyncLayer] cancelAsyncDisplay];
-            //schedule clear contents on next runloop
-            dispatch_async(dispatch_get_main_queue(), ^{
-              ASDN::MutexLocker l(_propertyLock);
-              if (ASInterfaceStateIncludesDisplay(_interfaceState) == NO) {
-                [self clearContents];
-              }
-            });
+            [self clearContents];
           }
         }
       }
