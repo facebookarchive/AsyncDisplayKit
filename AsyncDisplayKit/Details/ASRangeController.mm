@@ -27,6 +27,7 @@
   BOOL _didUpdateCurrentRange;
   BOOL _didRegisterForNotifications;
   CFAbsoluteTime _pendingDisplayNodesTimestamp;
+  NSMutableArray *_scheduledRangeUpdateCompletionBlocks;
 }
 
 @end
@@ -46,6 +47,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _rangeIsValid = YES;
   _currentRangeMode = ASLayoutRangeModeInvalid;
   _didUpdateCurrentRange = NO;
+  _scheduledRangeUpdateCompletionBlocks = [NSMutableArray array];
   
   [[[self class] allRangeControllersWeakSet] addObject:self];
   
@@ -111,6 +113,15 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 - (void)scheduleRangeUpdate
 {
+  [self scheduleRangeUpdateCompletion:nil];
+}
+
+- (void)scheduleRangeUpdateCompletion:(void (^)(void))completion
+{
+  if (completion) {
+    [_scheduledRangeUpdateCompletionBlocks addObject:completion];
+  }
+ 
   if (_queuedRangeUpdate) {
     return;
   }
@@ -118,8 +129,13 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   // coalesce these events -- handling them multiple times per runloop is noisy and expensive
   _queuedRangeUpdate = YES;
   
+  __block id<ASRangeControllerDataSource> dataSource = _dataSource;
+  __block id<ASRangeControllerDelegate> delegate = _delegate;
   dispatch_async(dispatch_get_main_queue(), ^{
-    [self performRangeUpdate];
+    [self _updateVisibleNodeIndexPaths];
+    
+    dataSource = nil;
+    delegate = nil;
   });
 }
 
@@ -319,6 +335,11 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   _rangeIsValid = YES;
   _queuedRangeUpdate = NO;
+  
+  for (void (^completionBlock)(void) in _scheduledRangeUpdateCompletionBlocks) {
+    completionBlock();
+  }
+  [_scheduledRangeUpdateCompletionBlocks removeAllObjects];
   
 #if ASRangeControllerLoggingEnabled
 //  NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];

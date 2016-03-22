@@ -49,6 +49,12 @@
  */
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
 
+/**
+ * Schedule a range update and call the completion block if finished. This drives updating the working
+ * ranges, and triggering their actions.
+ */
+- (void)scheduleRangeUpdateCompletion:(void (^)(void))completion;
+
 @end
 
 
@@ -64,7 +70,10 @@
 
 @interface ASViewController (ASRangeControllerUpdateRangeProtocol)
 
-/// Automatically adjust range mode based on view events if the containing node confirms to the ASRangeControllerUpdateRangeProtocol
+/**
+ * Automatically adjust range mode based on view events if the containing node confirms to the
+ * ASRangeControllerUpdateRangeProtocol
+ */
 @property (nonatomic, assign) BOOL automaticallyAdjustRangeModeBasedOnViewEvents;
 
 @end
