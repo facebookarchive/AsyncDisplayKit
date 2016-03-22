@@ -1139,7 +1139,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   // Updating the visible node index paths only for not range managed nodes. Range managed nodes will get their
   // their update in the layout pass
   if (![node supportsRangeManagedInterfaceState]) {
-    [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+    // Grab a strong reference for data source and delegate to be sure they are not going away while executing
+    // the range update. This can happen in range updates while going back in the view controller hierarchy
+    __block id<ASCollectionDataSource> asyncDataSource = _asyncDataSource;
+    __block id<ASCollectionDelegate> asyncDelegate = _asyncDelegate;
+    [_rangeController scheduleRangeUpdateCompletion:^{
+      asyncDataSource = nil;
+      asyncDelegate = nil;
+    }];
   }
 }
 
