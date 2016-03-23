@@ -337,6 +337,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)dealloc
 {
   ASDisplayNodeAssertMainThread();
+  
+  self.interfaceState &= ~ASInterfaceStateVisible;
 
   self.asyncLayer.asyncDelegate = nil;
   _view.asyncdisplaykit_node = nil;
