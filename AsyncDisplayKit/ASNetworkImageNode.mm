@@ -173,6 +173,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   return _delegate;
 }
 
+- (BOOL)placeholderShouldPersist
+{
+  ASDN::MutexLocker l(_lock);
+  return (self.image == nil && _URL != nil);
+}
+
 /* displayWillStart in ASMultiplexImageNode has a very similar implementation. Changes here are likely necessary
  in ASMultiplexImageNode as well. */
 - (void)displayWillStart
@@ -334,6 +340,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)_lazilyLoadImageIfNecessary
 {
+  // FIXME: We should revisit locking in this method (e.g. to access the instance variables at the top, and holding lock while calling delegate)
   if (!_imageLoaded && _URL != nil && _downloadIdentifier == nil) {
     {
       ASDN::MutexLocker l(_lock);
