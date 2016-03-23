@@ -24,6 +24,8 @@
 {
   self = [super initWithNode:[[PlaygroundContainerNode alloc] init]];
   if (self) {
+    self.navigationItem.title = @"ASLayoutSpec Playground";
+    [ASLayoutableInspectorNode sharedInstance].delegate = self;
   }
   return self;
 }
@@ -31,6 +33,14 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+}
+
+
+#pragma mark - UISplitViewControllerDelegate
+
+- (void)shouldShowMasterSplitViewController
+{
+  self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
 }
 
 @end

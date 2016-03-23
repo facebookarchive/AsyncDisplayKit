@@ -8,6 +8,8 @@
 
 #import "AppDelegate.h"
 #import "ViewController.h"
+#import "MasterViewController.h"
+#import "ASLayoutableInspectorNode.h"
 
 @interface AppDelegate ()
 
@@ -18,12 +20,39 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   
-  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+  self.window                 = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
   self.window.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
   
-  ViewController *vc = [[ViewController alloc] init];
-  self.window.rootViewController = vc;
+  // assign rootViewController
+  UIViewController *rootViewController = nil;
   
+  // determine if app is running on an iPhone or iPad
+  UIDevice *device = [UIDevice currentDevice];
+  
+  if (device.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+
+    // cannot get to supernode - need a delegate protocol //
+    MasterViewController *masterViewController = [[MasterViewController alloc] initWithNode:[ASLayoutableInspectorNode sharedInstance]];
+    masterViewController.view.backgroundColor  = [UIColor colorWithRed:40/255.0 green:43/255.0 blue:53/255.0 alpha:1.0];
+    UINavigationController *masterNav          = [[UINavigationController alloc] initWithRootViewController:masterViewController];
+
+    ViewController *detailViewController = [[ViewController alloc] init];
+    UINavigationController *detailNav = [[UINavigationController alloc] initWithRootViewController:detailViewController];
+    
+    UISplitViewController *splitViewController = [[UISplitViewController alloc] init];
+    splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
+    splitViewController.viewControllers = [NSArray arrayWithObjects:masterNav, detailNav, nil];
+    splitViewController.delegate = detailViewController;
+    
+    detailViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem;
+
+    rootViewController = splitViewController;
+    
+  } else {
+    NSAssert(YES, @"App optimized for iPad only.");
+  }
+  
+  [self.window setRootViewController:rootViewController];
   [self.window makeKeyAndVisible];
   
   return YES;

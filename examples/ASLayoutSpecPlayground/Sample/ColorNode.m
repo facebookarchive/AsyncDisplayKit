@@ -35,7 +35,11 @@
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  return CGSizeMake(50, 50);
+  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero)) {
+    return CGSizeMake(50, 50);
+  } else {
+    return self.preferredFrameSize;
+  }
 }
 
 - (void)nodeWasTapped:(UIGestureRecognizer *)sender

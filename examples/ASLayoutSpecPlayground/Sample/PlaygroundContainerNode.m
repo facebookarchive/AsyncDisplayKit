@@ -50,9 +50,12 @@
   [super layout];
   [self.view bringSubviewToFront:_resizeHandle.view];
   
-  CGSize playgroundSize = _playgroundNode.calculatedLayout.size;   // this might be a bug with implicit heirarchy - frame isn't set yet
+  CGSize playgroundSize = _playgroundNode.calculatedLayout.size;   // FIXME:this might be a bug with implicit heirarchy - frame isn't set yet
+//  _playgroundNode.frame = CGRectMake(300, 200, playgroundSize.width, playgroundSize.height);
+//  
+  
   CGRect rect = CGRectZero;
-  rect.size = CGSizeMake(RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE);
+  rect.size = CGSizeMake(RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE);   // FIXME: make this an overlay stack?
   rect.origin = CGPointMake(playgroundSize.width - rect.size.width, playgroundSize.height - rect.size.height);
   _resizeHandle.frame = rect;
 }
@@ -67,11 +70,10 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASStaticLayoutSpec *verticalStack = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_playgroundNode]];
-//  verticalStack.shouldVisualize = YES;
-//  verticalStack.flexGrow = YES;
+  UIEdgeInsets insets = UIEdgeInsetsMake(200, 100, 200, 100);
+  ASInsetLayoutSpec *insetLayoutSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_playgroundNode];
   
-  return verticalStack;  
+  return insetLayoutSpec;
 }
 
 - (void)resizePlayground:(UIGestureRecognizer *)sender

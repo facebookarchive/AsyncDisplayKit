@@ -44,19 +44,24 @@ static BOOL __shouldVisualizeLayoutSpecs = NO;
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
+  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];      // FIXME: need to auto pass properties to children
   insetSpec.neverShouldVisualize = YES;
   self.layoutSpec.neverShouldVisualize = YES;
   UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
+  
+  // propogate child's layoutSpec properties to the inset that we are adding
+  insetSpec.flexGrow = _layoutSpec.flexGrow;
+  insetSpec.flexShrink = _layoutSpec.flexShrink;
+  insetSpec.alignSelf = _layoutSpec.alignSelf;
+  
   insetSpec.insets = insets;
   insetSpec.child = self.layoutSpec;
-  return insetSpec;
+  return self.layoutSpec;
 }
 
 - (void)layoutMagicNodeTapped:(UIGestureRecognizer *)sender
 {
-  NSLog(@"SELECTED: %@", self);
-  [[ASLayoutableInspectorNode sharedInstance] setLayoutableToEdit:self];
+  [[ASLayoutableInspectorNode sharedInstance] setLayoutableToEdit:self.layoutSpec];
 }
 
 @end

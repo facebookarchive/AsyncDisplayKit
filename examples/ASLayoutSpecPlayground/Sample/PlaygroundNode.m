@@ -9,11 +9,13 @@
 #import "PlaygroundNode.h"
 #import "ColorNode.h"
 #import "AsyncDisplayKit+Debug.h"
+#import "ASLayoutableInspectorNode.h"
 
 @implementation PlaygroundNode
 {
   NSArray         *_colorNodes;
   ASDisplayNode   *_individualColorNode;
+  ASTextNode      *_textNode;
 }
 #pragma mark - Lifecycle
 
@@ -34,9 +36,20 @@
     _individualColorNode = [[ColorNode alloc] init];
     _individualColorNode.backgroundColor = [UIColor orangeColor];
     
+    // user interaction off by default
+    _textNode = [[ASTextNode alloc] init];
+    _textNode.attributedString = [[NSAttributedString alloc] initWithString:@"Hhhhhhhhhheeeeeeeeeelllllloooooooo"];
+    _textNode.backgroundColor = [UIColor greenColor];
+    _textNode.userInteractionEnabled = YES;
+    [_textNode addTarget:self action:@selector(textTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
   }
   
   return self;
+}
+
+- (void)textTapped:(UIGestureRecognizer *)sender
+{
+  [ASLayoutableInspectorNode sharedInstance].layoutableToEdit = _textNode;
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
@@ -49,13 +62,21 @@
     insetSpec.flexGrow = YES;
     [children addObject:insetSpec];
   }
+  
+  _textNode.flexShrink = YES;
+  _textNode.flexGrow = YES;
+  _textNode.alignSelf = ASStackLayoutAlignSelfStretch;
+  [children addObject:_textNode];
+  
   ASStackLayoutSpec *innerStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   innerStack.children = children;
   innerStack.flexGrow = YES;
 
+  _individualColorNode.preferredFrameSize = CGSizeMake(100, 600);
   ASStackLayoutSpec *outerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
   outerStack.flexGrow = YES;
   outerStack.children = @[innerStack, _individualColorNode];
+  outerStack.alignItems = ASStackLayoutAlignItemsStretch;
   
   return outerStack;
 }

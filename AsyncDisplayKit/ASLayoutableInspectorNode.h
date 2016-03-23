@@ -8,9 +8,17 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface ASLayoutableInspectorNode : ASDisplayNode
+@protocol ASLayoutableInspectorNodeDelegate <NSObject>
+
+- (void)shouldShowMasterSplitViewController;
+
+@end 
+
+
+@interface ASLayoutableInspectorNode : ASDisplayNode <UISplitViewControllerDelegate>
 
 @property (nonatomic, strong) id<ASLayoutable> layoutableToEdit;
+@property (nonatomic, strong) id<ASLayoutableInspectorNodeDelegate> delegate;
 
 + (instancetype)sharedInstance;
 

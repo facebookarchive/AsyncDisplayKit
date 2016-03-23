@@ -8,8 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import "AsyncDisplayKit.h"
+#import "ASLayoutableInspectorNode.h"
 
-@interface ViewController : ASViewController
+
+@interface ViewController : ASViewController  <UISplitViewControllerDelegate, ASLayoutableInspectorNodeDelegate>
+
 
 
 @end
