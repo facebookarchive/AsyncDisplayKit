@@ -70,8 +70,12 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  UIEdgeInsets insets = UIEdgeInsetsMake(200, 100, 200, 100);
+  UIEdgeInsets insets = UIEdgeInsetsZero;
   ASInsetLayoutSpec *insetLayoutSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_playgroundNode];
+  insetLayoutSpec.flexGrow = YES;
+  insetLayoutSpec.flexShrink = YES;
+  _playgroundNode.flexGrow = YES;
+  _playgroundNode.flexShrink = YES;
   
   return insetLayoutSpec;
 }

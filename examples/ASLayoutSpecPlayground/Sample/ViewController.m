@@ -25,6 +25,9 @@
   self = [super initWithNode:[[PlaygroundContainerNode alloc] init]];
   if (self) {
     self.navigationItem.title = @"ASLayoutSpec Playground";
+    
+    self.edgesForExtendedLayout = UIRectEdgeNone;
+    
     [ASLayoutableInspectorNode sharedInstance].delegate = self;
   }
   return self;

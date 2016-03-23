@@ -23,8 +23,8 @@
   
   if (self) {
   
-    self.layer.borderWidth = 2;
-    self.layer.borderColor = [[UIColor blackColor] CGColor];
+//    self.layer.borderWidth = 2;
+//    self.layer.borderColor = [[UIColor blackColor] CGColor];
     self.backgroundColor = [UIColor purpleColor];
     self.alignSelf = ASStackLayoutAlignSelfEnd;
     [self addTarget:self action:@selector(nodeWasTapped:) forControlEvents:ASControlNodeEventTouchUpInside];

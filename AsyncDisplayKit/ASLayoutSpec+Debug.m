@@ -47,7 +47,7 @@ static BOOL __shouldVisualizeLayoutSpecs = NO;
   ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];      // FIXME: need to auto pass properties to children
   insetSpec.neverShouldVisualize = YES;
   self.layoutSpec.neverShouldVisualize = YES;
-  UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
+  UIEdgeInsets insets = UIEdgeInsetsZero; //UIEdgeInsetsMake(10, 10, 10, 10);
   
   // propogate child's layoutSpec properties to the inset that we are adding
   insetSpec.flexGrow = _layoutSpec.flexGrow;

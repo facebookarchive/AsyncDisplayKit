@@ -15,7 +15,9 @@
 {
   NSArray         *_colorNodes;
   ASDisplayNode   *_individualColorNode;
-  ASTextNode      *_textNode;
+  ASTextNode      *_textNode1;
+  ASTextNode      *_textNode2;
+  ASTextNode      *_textNode3;
 }
 #pragma mark - Lifecycle
 
@@ -37,11 +39,23 @@
     _individualColorNode.backgroundColor = [UIColor orangeColor];
     
     // user interaction off by default
-    _textNode = [[ASTextNode alloc] init];
-    _textNode.attributedString = [[NSAttributedString alloc] initWithString:@"Hhhhhhhhhheeeeeeeeeelllllloooooooo"];
-    _textNode.backgroundColor = [UIColor greenColor];
-    _textNode.userInteractionEnabled = YES;
-    [_textNode addTarget:self action:@selector(textTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+    _textNode1 = [[ASTextNode alloc] init];
+    _textNode1.attributedString = [[NSAttributedString alloc] initWithString:@"test"];
+    _textNode1.backgroundColor = [UIColor greenColor];
+    _textNode1.userInteractionEnabled = YES;
+    [_textNode1 addTarget:self action:@selector(textTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+    
+    _textNode2 = [[ASTextNode alloc] init];
+    _textNode2.attributedString = [[NSAttributedString alloc] initWithString:@"Hhhhhhhhhheeeeeeeeeelllllloooooooo"];
+    _textNode2.backgroundColor = [UIColor greenColor];
+    _textNode2.userInteractionEnabled = YES;
+    [_textNode2 addTarget:self action:@selector(textTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+    
+    _textNode3 = [[ASTextNode alloc] init];
+    _textNode3.attributedString = [[NSAttributedString alloc] initWithString:@"another test text node"];
+    _textNode3.backgroundColor = [UIColor greenColor];
+    _textNode3.userInteractionEnabled = YES;
+    [_textNode3 addTarget:self action:@selector(textTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
   }
   
   return self;
@@ -49,7 +63,7 @@
 
 - (void)textTapped:(UIGestureRecognizer *)sender
 {
-  [ASLayoutableInspectorNode sharedInstance].layoutableToEdit = _textNode;
+  [ASLayoutableInspectorNode sharedInstance].layoutableToEdit = (ASTextNode *)sender;
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
@@ -63,18 +77,26 @@
     [children addObject:insetSpec];
   }
   
-  _textNode.flexShrink = YES;
-  _textNode.flexGrow = YES;
-  _textNode.alignSelf = ASStackLayoutAlignSelfStretch;
-  [children addObject:_textNode];
+  [children addObject:_textNode1];
+  [children addObject:_textNode2];
+  [children addObject:_textNode3];
   
+  _textNode1.flexShrink = YES;
+  _textNode2.flexShrink = YES;
+  _textNode3.flexShrink = YES;
+
   ASStackLayoutSpec *innerStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   innerStack.children = children;
   innerStack.flexGrow = YES;
+  innerStack.flexShrink = YES;
 
-  _individualColorNode.preferredFrameSize = CGSizeMake(100, 600);
+//  _individualColorNode.preferredFrameSize = CGSizeMake(100, 600);
+  _individualColorNode.flexGrow = YES;
+  _individualColorNode.flexShrink = YES;
+  
   ASStackLayoutSpec *outerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
   outerStack.flexGrow = YES;
+  outerStack.flexShrink = YES;
   outerStack.children = @[innerStack, _individualColorNode];
   outerStack.alignItems = ASStackLayoutAlignItemsStretch;
   

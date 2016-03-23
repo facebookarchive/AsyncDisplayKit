@@ -48,13 +48,10 @@
   
   // LayoutSpec properties
   ASTextNode *_layoutSpecPropertiesSectionTitle;
-  
-  
-  
 
 }
 
-
+#pragma mark - class methods
 + (instancetype)sharedInstance
 {
   static ASLayoutableInspectorNode *__inspector = nil;
@@ -67,6 +64,7 @@
   return __inspector;
 }
 
+#pragma mark - lifecycle
 - (instancetype)init
 {
   self = [super init];
@@ -74,12 +72,10 @@
     
     self.usesImplicitHierarchyManagement = YES;
     
-//    _tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStyleGrouped];
-//    _tableNode.dataSource = self;
-    
-    //    self.backgroundColor = [UIColor colorWithRed:40/255.0 green:43/255.0 blue:53/255.0 alpha:1.0];
-    
     _itemDescription = [[ASTextNode alloc] init];
+    
+    _itemPropertiesSectionTitle = [[ASTextNode alloc] init];
+    _itemPropertiesSectionTitle.attributedString = [self attributedStringFromString:@"item identification Properties"];
     _layoutablePropertiesSectionTitle = [[ASTextNode alloc] init];
     _layoutablePropertiesSectionTitle.attributedString = [self attributedStringFromString:@"<Layoutable> Properties"];
     _layoutSpecPropertiesSectionTitle = [[ASTextNode alloc] init];
@@ -105,103 +101,36 @@
     _itemBackgroundColorBtn = [self makeBtnNodeWithTitle:@"node color"];
     [_itemBackgroundColorBtn addTarget:self action:@selector(changeColor:) forControlEvents:ASControlNodeEventTouchUpInside];
     
-    _parentNodeNavBtn = [self makeBtnNodeWithTitle:@"parent node"];
-    _siblingNodeRightNavBtn = [self makeBtnNodeWithTitle:@"sibling node"];
-    _siblingNodeLefttNavBtn = [self makeBtnNodeWithTitle:@"sibling node"];
-    _childNodeNavBtn = [self makeBtnNodeWithTitle:@"child node"];
+    _parentNodeNavBtn = [self makeBtnNodeWithTitle:@"parent\nnode"];
+    _siblingNodeRightNavBtn = [self makeBtnNodeWithTitle:@"sibling\nnode"];
+    _siblingNodeLefttNavBtn = [self makeBtnNodeWithTitle:@"sibling\nnode"];
+    _childNodeNavBtn = [self makeBtnNodeWithTitle:@"child\nnode"];
     
     _slider = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull{
                 UISlider *slider = [[UISlider alloc] init];
                 return slider;
               }];
 
-    [self setUpInspectorForLayoutableType];
+    [self enableInspectorNodesForLayoutable];
   }
   return self;
 }
 
-- (void)layout
-{
-  [super layout];
-  
-//  _tableNode.frame = self.bounds;
-}
-
-- (ASButtonNode *)makeBtnNodeWithTitle:(NSString *)title
-{
-  UIColor *orangeColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
-  UIImage *orangeStretchBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:orangeColor
-                                                                                  borderColor:[UIColor whiteColor]
-                                                                                  borderWidth:3];
-  UIImage *greyStretchBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:[UIColor lightGrayColor]
-                                                                                borderColor:[UIColor whiteColor]
-                                                                                borderWidth:3];
-  UIImage *clearStretchBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:[UIColor clearColor]
-                                                                                borderColor:[UIColor whiteColor]
-                                                                                borderWidth:3];
-  ASButtonNode *btn = [[ASButtonNode alloc] init];
-  btn.contentEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
-  [btn setAttributedTitle:[self attributedStringFromString:title] forState:ASControlStateNormal];
-  [btn setBackgroundImage:clearStretchBtnImg forState:ASControlStateNormal];
-  [btn setBackgroundImage:orangeStretchBtnImg forState:ASControlStateSelected];
-  [btn setBackgroundImage:greyStretchBtnImg forState:ASControlStateDisabled];
-
-  return btn;
-}
-
 - (void)setLayoutableToEdit:(id<ASLayoutable>)layoutableToEdit
 {
-  // show master split view controller
-//  self.supernode.splitViewController.viewControllers[1]
-  
-  [self.delegate shouldShowMasterSplitViewController];
-  
   if (_layoutableToEdit != layoutableToEdit) {
     _layoutableToEdit = layoutableToEdit;
-    _itemDescription.attributedString = [self attributedStringFromLayoutable:_layoutableToEdit];
     
-    [self updateInspectorViewWithLayoutable];
-    [self setUpInspectorForLayoutableType];
-    
-//    UIWindow *keyWindow = [[NSClassFromString(@"UIApplication") sharedApplication] keyWindow];
-//    CGSize windowSize = keyWindow.bounds.size;
-
-    if (layoutableToEdit) {
-      
-      
-      
-//      _nodeDescription.attributedString = [self attributedStringFromLayoutable:_layoutableToEdit];
-//      
-//      // present inspectorView
-//      self.frame = CGRectMake(0, windowSize.height, windowSize.width, windowSize.height / 3.0);
-//      [self measureWithSizeRange:ASSizeRangeMakeExactSize(self.bounds.size)];
-//      [keyWindow addSubnode:self];
-//      [UIView animateWithDuration:0.2 animations:^{
-//        CGRect rect = self.frame;
-//        rect.origin.y -= rect.size.height;
-//        self.frame = rect;
-//      }];
-//      
-//    } else {
-//      
-//      // hide inspector
-//      CGRect finalRect = CGRectMake(0, windowSize.height, windowSize.width, windowSize.height / 3.0);
-//      [keyWindow addSubnode:self];
-//      [UIView animateWithDuration:0.2 animations:^{
-//        self.frame = finalRect;
-//      } completion:^(BOOL finished) {
-//        [self removeFromSupernode];
-//      }];
-    }
+    [self enableInspectorNodesForLayoutable];
+    [self updateInspectorWithLayoutable];
   }
+  [self.delegate shouldShowMasterSplitViewController];
 }
-
-
-
-// FIXME: way to manually disable on a sublayout tree
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
+  // navigate layout hierarchy
+  
   ASStackLayoutSpec *horizontalStackNav = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStackNav.flexGrow = YES;
   horizontalStackNav.children = @[_siblingNodeLefttNavBtn, _siblingNodeRightNavBtn];
@@ -210,23 +139,38 @@
   horizontalStack.flexGrow = YES;
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;
-  horizontalStack.children = @[_flexGrowBtn, spacer, _flexGrowValue];
+  horizontalStack.children = @[_flexGrowBtn, spacer];
   _flexGrowValue.alignSelf = ASStackLayoutAlignSelfEnd;       // FIXME: framework give a warning if you use ASAlignmentBottom!!!!!
   
   ASStackLayoutSpec *horizontalStack2 = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStack2.flexGrow = YES;
-  horizontalStack2.children = @[_flexShrinkBtn, spacer, _flexShrinkValue];
+  horizontalStack2.children = @[_flexShrinkBtn, spacer];
   _flexShrinkValue.alignSelf = ASStackLayoutAlignSelfEnd;
   
   ASStackLayoutSpec *horizontalStack3 = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStack3.flexGrow = YES;
   horizontalStack3.children = @[_flexBasisBtn, spacer, _flexBasisValue];
   _flexBasisValue.alignSelf = ASStackLayoutAlignSelfEnd;
+  
+  ASStackLayoutSpec *itemDescriptionStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  itemDescriptionStack.children = @[_itemDescription, _itemBackgroundColorBtn,];
+  itemDescriptionStack.spacing = 5;
+  itemDescriptionStack.flexGrow = YES;
+  
+  ASStackLayoutSpec *layoutableStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  layoutableStack.children = @[_layoutablePropertiesSectionTitle, horizontalStack, horizontalStack2, horizontalStack3, _alignSelfBtn];
+  layoutableStack.spacing = 5;
+  layoutableStack.flexGrow = YES;
+  
+  ASStackLayoutSpec *layoutSpecStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  layoutSpecStack.children = @[_layoutSpecPropertiesSectionTitle, _alignItemsBtn];
+  layoutSpecStack.spacing = 5;
+  layoutSpecStack.flexGrow = YES;
 
   ASStackLayoutSpec *verticalLayoutableStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalLayoutableStack.flexGrow = YES;
-  verticalLayoutableStack.spacing = 5;
-  verticalLayoutableStack.children = @[_slider, _parentNodeNavBtn, horizontalStackNav, _childNodeNavBtn, _itemDescription, _itemBackgroundColorBtn, _layoutablePropertiesSectionTitle, horizontalStack, horizontalStack2, horizontalStack3, _alignSelfBtn, _alignItemsBtn, _layoutSpecPropertiesSectionTitle];
+  verticalLayoutableStack.spacing = 20;
+  verticalLayoutableStack.children = @[_parentNodeNavBtn, horizontalStackNav, _childNodeNavBtn, itemDescriptionStack, layoutableStack, layoutSpecStack];
   verticalLayoutableStack.alignItems = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space
 
   ASLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(100, 10, 10, 10) child:verticalLayoutableStack];
@@ -234,22 +178,278 @@
   return insetSpec;
 }
 
+#pragma mark - configure Inspector node for layoutable
+- (void)updateInspectorWithLayoutable
+{
+  _itemDescription.attributedString = [self attributedStringFromLayoutable:_layoutableToEdit];
+
+  if ([self node]) {
+    UIColor *nodeBackgroundColor = [[self node] backgroundColor];
+    UIImage *colorBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:nodeBackgroundColor
+                                                                            borderColor:[UIColor whiteColor]
+                                                                            borderWidth:3];
+    [_itemBackgroundColorBtn setBackgroundImage:colorBtnImg forState:ASControlStateNormal];
+  } else {
+    _itemBackgroundColorBtn.enabled = NO;
+  }
+  
+  _flexGrowBtn.selected           = [self.layoutableToEdit flexGrow];
+  _flexGrowValue.attributedString = [self attributedStringFromString: (_flexGrowBtn.selected) ? @"YES" : @"NO"];
+  
+  _flexShrinkBtn.selected           = self.layoutableToEdit.flexShrink;
+  _flexShrinkValue.attributedString = [self attributedStringFromString: (_flexShrinkBtn.selected) ? @"YES" : @"NO"];
+  
+  //  _flexBasisBtn.selected           = self.layoutableToEdit.flexShrink;
+  //  _flexBasisValue.attributedString = [self attributedStringFromString: (_flexBasisBtn.selected) ? @"YES" : @"NO"];
+  
+  NSUInteger alignSelfValue = [self.layoutableToEdit alignSelf];
+  _alignSelfBtn.selected = alignSelfValue ? YES : NO;
+  NSString *newTitle = [@"alignSelf:" stringByAppendingString:[self alignSelfName:alignSelfValue]];
+  [_alignSelfBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:ASControlStateNormal];
+  
+//  _alignItemsBtn.selected = YES;
+//  if ([[self layoutSpec] isKindOfClass:[ASStackLayoutSpec class]]) {
+//    NSUInteger alignItemsValue = [(ASStackLayoutSpec *)[self layoutSpec] alignItems];
+//    newTitle = [@"alignItems:" stringByAppendingString:[self typeDisplayNameItems:alignItemsValue]];
+//    [_alignItemsBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:ASControlStateNormal];
+//  }
+//  
+//  if ([layoutable isKindOfClass:[ASLayoutSpec class]]) {
+//    return [self attributedStringFromString:[(ASLayoutSpec *)layoutable asciiArtString]];
+//  } else if ([layoutable isKindOfClass:[ASDisplayNode class]]) {
+//    return [self attributedStringFromString:[(ASControlNode *)layoutable asciiArtString]];
+//  }
+  
+
+  
+
+  
+  [self setNeedsLayout];
+}
+
+
+- (void)enableInspectorNodesForLayoutable
+{
+  if ([self layoutSpec]) {
+  
+    _itemBackgroundColorBtn.enabled = YES;
+    _flexGrowBtn.enabled        = YES;
+    _flexShrinkBtn.enabled      = YES;
+    _flexBasisBtn.enabled       = YES;
+    _alignSelfBtn.enabled       = YES;
+    _spacingBeforeBtn.enabled   = YES;
+    _spacingAfterBtn.enabled    = YES;
+    _alignItemsBtn.enabled      = YES;
+    
+  } else if ([self node]) {
+    
+    _itemBackgroundColorBtn.enabled = YES;
+    _flexGrowBtn.enabled        = YES;
+    _flexShrinkBtn.enabled      = YES;
+    _flexBasisBtn.enabled       = YES;
+    _alignSelfBtn.enabled       = YES;
+    _spacingBeforeBtn.enabled   = YES;
+    _spacingAfterBtn.enabled    = YES;
+    _alignItemsBtn.enabled      = NO;
+  
+  } else {
+    
+    _itemBackgroundColorBtn.enabled = NO;
+    _flexGrowBtn.enabled        = NO;
+    _flexShrinkBtn.enabled      = NO;
+    _flexBasisBtn.enabled       = NO;
+    _alignSelfBtn.enabled       = NO;
+    _spacingBeforeBtn.enabled   = NO;
+    _spacingAfterBtn.enabled    = NO;
+    _alignItemsBtn.enabled      = NO;
+  }
+}
+
++ (NSDictionary *)alignSelfTypeNames
+{
+  return @{@(ASStackLayoutAlignSelfAuto) : @"Auto",
+           @(ASStackLayoutAlignSelfStart) : @"Start",
+           @(ASStackLayoutAlignSelfEnd) : @"End",
+           @(ASStackLayoutAlignSelfCenter) : @"Center",
+           @(ASStackLayoutAlignSelfStretch) : @"Stretch"};
+}
+
+- (NSString *)alignSelfName:(NSUInteger)type
+{
+  return [[self class] alignSelfTypeNames][@(type)];
+}
+
++ (NSDictionary *)alignItemTypeNames
+{
+  return @{@(ASStackLayoutAlignItemsBaselineFirst) : @"BaselineFirst",
+           @(ASStackLayoutAlignItemsBaselineLast) : @"BaselineLast",
+           @(ASStackLayoutAlignItemsCenter) : @"Center",
+           @(ASStackLayoutAlignItemsEnd) : @"End",
+           @(ASStackLayoutAlignItemsStart) : @"Start",
+           @(ASStackLayoutAlignItemsStretch) : @"Stretch"};
+}
+
+- (NSString *)alignItemName:(NSUInteger)type
+{
+  return [[self class] alignItemTypeNames][@(type)];
+}
+
+#pragma mark - gesture handling
+- (void)changeColor:(ASButtonNode *)sender
+{
+  if ([self node]) {
+    NSArray *colorArray = @[[UIColor orangeColor],
+                            [UIColor redColor],
+                            [UIColor greenColor],
+                            [UIColor purpleColor]];
+    
+    UIColor *nodeBackgroundColor = [(ASDisplayNode *)self.layoutableToEdit backgroundColor];
+    
+    NSUInteger colorIndex = [colorArray indexOfObject:nodeBackgroundColor];
+    colorIndex = (colorIndex + 1 < [colorArray count]) ? colorIndex + 1 : 0;
+    
+    [[self node] setBackgroundColor: [colorArray objectAtIndex:colorIndex]];
+  }
+  
+  [self updateInspectorWithLayoutable];
+}
+
+- (void)setFlexGrowValue:(ASButtonNode *)sender
+{
+  [sender setSelected:!sender.isSelected];   // FIXME: fix ASControlNode documentation that this is automatic - unlike highlighted, it is up to the application to decide when a button should be selected or not. Selected is a more persistant thing and highlighted is for the moment, like as a user has a finger on it,
+  
+  if ([self layoutSpec]) {
+    [[self layoutSpec] setFlexGrow:sender.isSelected];
+  } else if ([self node]) {
+    [[self node] setFlexGrow:sender.isSelected];
+  }
+  
+  [self updateInspectorWithLayoutable];
+}
+
+- (void)setFlexShrinkValue:(ASButtonNode *)sender
+{
+  [sender setSelected:!sender.isSelected];   // FIXME: fix ASControlNode documentation that this is automatic - unlike highlighted, it is up to the application to decide when a button should be selected or not. Selected is a more persistant thing and highlighted is for the moment, like as a user has a finger on it,
+  
+  if ([self layoutSpec]) {
+    [[self layoutSpec] setFlexShrink:sender.isSelected];
+  } else if ([self node]) {
+    [[self node] setFlexShrink:sender.isSelected];
+  }
+  
+  [self updateInspectorWithLayoutable];
+}
+
+- (void)setAlignSelfValue:(ASButtonNode *)sender
+{
+  NSUInteger currentAlignSelfValue;
+  NSUInteger nextAlignSelfValue;
+  
+  if ([self layoutSpec]) {
+    currentAlignSelfValue = [[self layoutSpec] alignSelf];
+    nextAlignSelfValue = (currentAlignSelfValue + 1 <= ASStackLayoutAlignSelfStretch) ? currentAlignSelfValue + 1 : 0;
+    [[self layoutSpec] setAlignSelf:nextAlignSelfValue];
+    
+  } else if ([self node]) {
+    currentAlignSelfValue = [[self node] alignSelf];
+    nextAlignSelfValue = (currentAlignSelfValue + 1 <= ASStackLayoutAlignSelfStretch) ? currentAlignSelfValue + 1 : 0;
+    [[self node] setAlignSelf:nextAlignSelfValue];
+  }
+  
+  [self updateInspectorWithLayoutable];
+}
+
+- (void)setAlignItemsValue:(ASButtonNode *)sender
+{
+  NSUInteger currentAlignItemsValue;
+  NSUInteger nextAlignItemsValue;
+  
+  if ([self layoutSpec]) {
+    currentAlignItemsValue = [[self layoutSpec] alignSelf];
+    nextAlignItemsValue = (currentAlignItemsValue + 1 <= ASStackLayoutAlignSelfStretch) ? currentAlignItemsValue + 1 : 0;
+//    [[self layoutSpec] setAlignItems:nextAlignItemsValue];
+    
+  } else if ([self node]) {
+    currentAlignItemsValue = [[self node] alignSelf];
+    nextAlignItemsValue = (currentAlignItemsValue + 1 <= ASStackLayoutAlignSelfStretch) ? currentAlignItemsValue + 1 : 0;
+//    [[self node] setAlignItems:nextAlignItemsValue];
+  }
+  
+  [self updateInspectorWithLayoutable];
+}
+
+
+
+//
+//- (void)setFlexBasisValue:(ASButtonNode *)sender
+//{
+//  [sender setSelected:!sender.isSelected];   // FIXME: fix ASControlNode documentation that this is automatic - unlike highlighted, it is up to the application to decide when a button should be selected or not. Selected is a more persistant thing and highlighted is for the moment, like as a user has a finger on it,
+//
+//  // FIXME: finish
+//}
+
+#pragma mark - cast layoutableToEdit
+- (ASDisplayNode *)node
+{
+  if ([self.layoutableToEdit isKindOfClass:[ASDisplayNode class]]) {
+    return (ASDisplayNode *)self.layoutableToEdit;
+  }
+  return nil;
+}
+
+- (ASLayoutSpec *)layoutSpec
+{
+  if ([self.layoutableToEdit isKindOfClass:[ASLayoutSpec class]]) {
+    return (ASLayoutSpec *)self.layoutableToEdit;
+  }
+  return nil;
+}
+
+#pragma mark - helper methods
 - (NSAttributedString *)attributedStringFromLayoutable:(id<ASLayoutable>)layoutable
 {
-  if ([layoutable isKindOfClass:[ASLayoutSpec class]]) {
-    return [self attributedStringFromString:[(ASLayoutSpec *)layoutable description]];
-  } else if ([layoutable isKindOfClass:[ASDisplayNode class]]) {
-    return [self attributedStringFromString:[(ASControlNode *)layoutable description]];
+  if ([self layoutSpec]) {
+    return [self attributedStringFromString:[[self layoutSpec] description]];
+  } else if ([self node]) {
+    return [self attributedStringFromString:[[self node] description]];
   }
   return nil;
 }
 
 - (NSAttributedString *)attributedStringFromString:(NSString *)string
 {
-  NSDictionary *attributes = @{NSForegroundColorAttributeName : [UIColor whiteColor],
+  return [self attributedStringFromString:string withTextColor:[UIColor whiteColor]];
+}
+
+- (NSAttributedString *)attributedStringFromString:(NSString *)string withTextColor:(nullable UIColor *)color
+{
+  NSDictionary *attributes = @{NSForegroundColorAttributeName : color,
                                NSFontAttributeName : [UIFont fontWithName:@"Menlo-Regular" size:12]};
   
   return [[NSAttributedString alloc] initWithString:string attributes:attributes];
+}
+
+- (ASButtonNode *)makeBtnNodeWithTitle:(NSString *)title
+{
+  UIColor *orangeColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
+  UIImage *orangeStretchBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:orangeColor
+                                                                                  borderColor:[UIColor whiteColor]
+                                                                                  borderWidth:3];
+  UIImage *greyStretchBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:[UIColor darkGrayColor]
+                                                                                borderColor:[UIColor lightGrayColor]
+                                                                                borderWidth:3];
+  UIImage *clearStretchBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:[UIColor clearColor]
+                                                                                 borderColor:[UIColor whiteColor]
+                                                                                 borderWidth:3];
+  ASButtonNode *btn = [[ASButtonNode alloc] init];
+  btn.contentEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
+  [btn setAttributedTitle:[self attributedStringFromString:title] forState:ASControlStateNormal];
+  [btn setAttributedTitle:[self attributedStringFromString:title withTextColor:[UIColor lightGrayColor]] forState:ASControlStateDisabled];
+  [btn setBackgroundImage:clearStretchBtnImg forState:ASControlStateNormal];
+  [btn setBackgroundImage:orangeStretchBtnImg forState:ASControlStateSelected];
+  [btn setBackgroundImage:greyStretchBtnImg forState:ASControlStateDisabled];
+  
+  return btn;
 }
 
 #define CORNER_RADIUS 3
@@ -275,218 +475,5 @@
   
   return [btnImage stretchableImageWithLeftCapWidth:CORNER_RADIUS topCapHeight:CORNER_RADIUS];
 }
-
-- (void)updateInspectorViewWithLayoutable
-{
-  if ([self node]) {
-    UIColor *nodeBackgroundColor = [[self node] backgroundColor];
-    UIImage *colorBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:nodeBackgroundColor
-                                                                            borderColor:[UIColor whiteColor]
-                                                                            borderWidth:3];
-    [_itemBackgroundColorBtn setBackgroundImage:colorBtnImg forState:ASControlStateNormal];
-  }
-  
-  
-//  _alignSelfBtn.selected = YES;
-//  NSUInteger alignSelfValue = [(ASDisplayNode *)self.layoutableToEdit alignSelf];
-//  NSString *newTitle = [@"alignSelf:" stringByAppendingString:[self typeDisplayName:alignSelfValue]];
-//  [_alignSelfBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:ASControlStateNormal];
-
-  _alignSelfBtn.selected = YES;
-  NSUInteger alignSelfValue = [self.layoutableToEdit alignSelf];
-  NSString *newTitle = [@"alignSelf:" stringByAppendingString:[self typeDisplayName:alignSelfValue]];
-  [_alignSelfBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:ASControlStateNormal];
-  
-//  _alignItemsBtn.selected = YES;
-//  if ([[self layoutSpec] isKindOfClass:[ASStackLayoutSpec class]]) {
-//    NSUInteger alignItemsValue = [(ASStackLayoutSpec *)[self layoutSpec] alignItems];
-//    newTitle = [@"alignItems:" stringByAppendingString:[self typeDisplayNameItems:alignItemsValue]];
-//    [_alignItemsBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:ASControlStateNormal];
-//  }
-//  
-//  if ([layoutable isKindOfClass:[ASLayoutSpec class]]) {
-//    return [self attributedStringFromString:[(ASLayoutSpec *)layoutable asciiArtString]];
-//  } else if ([layoutable isKindOfClass:[ASDisplayNode class]]) {
-//    return [self attributedStringFromString:[(ASControlNode *)layoutable asciiArtString]];
-//  }
-  
-  _flexGrowBtn.selected           = [self.layoutableToEdit flexGrow];
-  _flexGrowValue.attributedString = [self attributedStringFromString: (_flexGrowBtn.selected) ? @"YES" : @"NO"];
-  
-  _flexShrinkBtn.selected           = self.layoutableToEdit.flexShrink;
-  _flexShrinkValue.attributedString = [self attributedStringFromString: (_flexShrinkBtn.selected) ? @"YES" : @"NO"];
-  
-//  _flexBasisBtn.selected           = self.layoutableToEdit.flexShrink;
-//  _flexBasisValue.attributedString = [self attributedStringFromString: (_flexBasisBtn.selected) ? @"YES" : @"NO"];
-  
-  [self setNeedsLayout];
-}
-
-- (void)setFlexGrowValue:(ASButtonNode *)sender
-{
-  [sender setSelected:!sender.isSelected];   // FIXME: fix ASControlNode documentation that this is automatic - unlike highlighted, it is up to the application to decide when a button should be selected or not. Selected is a more persistant thing and highlighted is for the moment, like as a user has a finger on it,
-  
-  if ([self.layoutableToEdit isKindOfClass:[ASLayoutSpec class]]) {
-    [(ASLayoutSpec *)self.layoutableToEdit setFlexGrow:sender.isSelected];
-    
-  } else if ([self.layoutableToEdit isKindOfClass:[ASDisplayNode class]]) {
-    [(ASDisplayNode *)self.layoutableToEdit setFlexGrow:sender.isSelected];
-  }
-  [self updateInspectorViewWithLayoutable];
-}
-
-- (void)setFlexShrinkValue:(ASButtonNode *)sender
-{
-  [sender setSelected:!sender.isSelected];   // FIXME: fix ASControlNode documentation that this is automatic - unlike highlighted, it is up to the application to decide when a button should be selected or not. Selected is a more persistant thing and highlighted is for the moment, like as a user has a finger on it,
-  
-  [(ASDisplayNode *)self.layoutableToEdit setFlexShrink:sender.isSelected];
-  
-  [self updateInspectorViewWithLayoutable];
-}
-
-+ (NSDictionary *)typeDisplayNames
-{
-  return @{@(ASStackLayoutAlignSelfAuto) : @"Auto",
-           @(ASStackLayoutAlignSelfStart) : @"Start",
-           @(ASStackLayoutAlignSelfEnd) : @"End",
-           @(ASStackLayoutAlignSelfCenter) : @"Center",
-           @(ASStackLayoutAlignSelfStretch) : @"Stretch"};
-}
-
-- (NSString *)typeDisplayName:(NSUInteger)type
-{
-  return [[self class] typeDisplayNames][@(type)];
-}
-
-- (void)setAlignSelfValue:(ASButtonNode *)sender
-{
-  NSUInteger nodeAlignSelfValue = [(ASDisplayNode *)self.layoutableToEdit alignSelf];
-
-  NSUInteger nextAlignSelfValue = (nodeAlignSelfValue + 1 <= ASStackLayoutAlignSelfStretch) ? nodeAlignSelfValue + 1 : 0;
-  
-  [(ASDisplayNode *)self.layoutableToEdit setAlignSelf:nextAlignSelfValue];
-  [(ASDisplayNode *)self.layoutableToEdit setNeedsLayout];
-  
-  [self updateInspectorViewWithLayoutable];
-}
-
-+ (NSDictionary *)typeDisplayNamesItems
-{
-  return @{@(ASStackLayoutAlignItemsBaselineFirst) : @"BaselineFirst",
-           @(ASStackLayoutAlignItemsBaselineLast) : @"BaselineLast",
-           @(ASStackLayoutAlignItemsCenter) : @"Center",
-           @(ASStackLayoutAlignItemsEnd) : @"End",
-           @(ASStackLayoutAlignItemsStart) : @"Start",
-           @(ASStackLayoutAlignItemsStretch) : @"Stretch"};
-}
-
-- (NSString *)typeDisplayNameItems:(NSUInteger)type
-{
-  return [[self class] typeDisplayNamesItems][@(type)];
-}
-
-- (void)setAlignItemsValue:(ASButtonNode *)sender
-{
-  NSUInteger alignItemsValue = [(ASStackLayoutSpec *)[(ASLayoutSpecVisualizerNode *)self.layoutableToEdit layoutSpec] alignItems];
-  
-  NSUInteger nextAlignItemsValue = (alignItemsValue + 1 <= ASStackLayoutAlignItemsBaselineLast) ? alignItemsValue + 1 : 0;
-  
-  [(ASStackLayoutSpec *)[(ASLayoutSpecVisualizerNode *)self.layoutableToEdit layoutSpec] setAlignItems:nextAlignItemsValue];
-  [(ASLayoutSpecVisualizerNode *)self.layoutableToEdit setNeedsLayout];
-
-  [self updateInspectorViewWithLayoutable];
-}
-
-- (void)changeColor:(ASButtonNode *)sender
-{
-  NSArray *colorArray = @[[UIColor orangeColor],
-                          [UIColor redColor],
-                          [UIColor greenColor],
-                          [UIColor purpleColor]];
-  
-  UIColor *nodeBackgroundColor = [(ASDisplayNode *)self.layoutableToEdit backgroundColor];
-  
-  NSUInteger colorIndex = [colorArray indexOfObject:nodeBackgroundColor];
-  colorIndex = (colorIndex + 1 < [colorArray count]) ? colorIndex + 1 : 0;
-  
-  [(ASDisplayNode *)self.layoutableToEdit setBackgroundColor: [colorArray objectAtIndex:colorIndex]];
-  
-  [self updateInspectorViewWithLayoutable];
-}
-
-//
-//- (void)setFlexBasisValue:(ASButtonNode *)sender
-//{
-//  [sender setSelected:!sender.isSelected];   // FIXME: fix ASControlNode documentation that this is automatic - unlike highlighted, it is up to the application to decide when a button should be selected or not. Selected is a more persistant thing and highlighted is for the moment, like as a user has a finger on it,
-//
-//  // FIXME: finish
-//}
-
-- (void)setUpInspectorForLayoutableType
-{
-  [self.layoutableToEdit respondsToSelector:@selector(flexGrow)];
-  
-  if (!self.layoutableToEdit) {
-  
-    _itemBackgroundColorBtn.enabled = NO;
-    _flexGrowBtn.enabled        = NO;
-    _flexShrinkBtn.enabled      = NO;
-    _flexBasisBtn.enabled       = NO;
-    _alignSelfBtn.enabled       = NO;
-    _spacingBeforeBtn.enabled   = NO;
-    _spacingAfterBtn.enabled    = NO;
-    _alignItemsBtn.enabled      = NO;
-    
-  } else if ([self layoutableIsASLayoutSpec]) {   // maybe make an enum type?
-  
-    _itemBackgroundColorBtn.enabled = YES;
-    _flexGrowBtn.enabled        = YES;
-    _flexShrinkBtn.enabled      = YES;
-    _flexBasisBtn.enabled       = YES;
-    _alignSelfBtn.enabled       = YES;
-    _spacingBeforeBtn.enabled   = YES;
-    _spacingAfterBtn.enabled    = YES;
-    _alignItemsBtn.enabled      = YES;
-    
-  } else if ([self layoutableIsASDisplayNode]) {
-    
-    _itemBackgroundColorBtn.enabled = YES;
-    _flexGrowBtn.enabled        = YES;
-    _flexShrinkBtn.enabled      = YES;
-    _flexBasisBtn.enabled       = YES;
-    _alignSelfBtn.enabled       = YES;
-    _spacingBeforeBtn.enabled   = YES;
-    _spacingAfterBtn.enabled    = YES;
-    _alignItemsBtn.enabled      = NO;
-  }
-  
-}
-
-- (ASDisplayNode *)node
-{
-  if ([self.layoutableToEdit isKindOfClass:[ASDisplayNode class]]) {
-    return (ASDisplayNode *)self.layoutableToEdit;
-  }
-  return nil;
-}
-
-- (ASLayoutSpec *)layoutSpec
-{
-  if ([self.layoutableToEdit isKindOfClass:[ASLayoutSpec class]]) {
-    return (ASLayoutSpec *)self.layoutableToEdit;
-  }
-  return nil;
-}
-
-- (BOOL)layoutableIsASLayoutSpec
-{
-  return [self.layoutableToEdit isKindOfClass:[ASLayoutSpec class]];
-}
-
-- (BOOL)layoutableIsASDisplayNode
-{
-  return [self.layoutableToEdit isKindOfClass:[ASDisplayNode class]];
-}
-
 
 @end
