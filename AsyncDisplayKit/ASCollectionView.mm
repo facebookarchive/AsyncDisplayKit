@@ -107,6 +107,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   BOOL _asyncDataFetchingEnabled;
   BOOL _asyncDelegateImplementsScrollviewDidScroll;
+  BOOL _asyncDelegateImplementsWillBeginDragging;
+  BOOL _asyncDelegateImplementsDidEndDragging;
   BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
   BOOL _asyncDataSourceImplementsNodeBlockForItemAtIndexPath;
   _ASCollectionViewNodeSizeInvalidationContext *_queuedNodeSizeInvalidationContext; // Main thread only
@@ -364,10 +366,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDelegate = nil;
     _proxyDelegate = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
     _asyncDelegateImplementsScrollviewDidScroll = NO;
+    _asyncDelegateImplementsWillBeginDragging = NO;
+    _asyncDelegateImplementsDidEndDragging = NO;
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     _asyncDelegateImplementsScrollviewDidScroll = ([_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)] ? 1 : 0);
+    _asyncDelegateImplementsWillBeginDragging = ([_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)] ? 1 : 0);
+    _asyncDelegateImplementsDidEndDragging = ([_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)] ? 1 : 0);
   }
 
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
@@ -736,6 +742,30 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_asyncDelegateImplementsScrollviewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
   }
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+  for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
+    [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventWillBeginDragging
+                                      inScrollView:scrollView
+                                     withCellFrame:collectionCell.frame];
+    }
+    if (_asyncDelegateImplementsWillBeginDragging) {
+      [_asyncDelegate scrollViewWillBeginDragging:scrollView];
+    }
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+  for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
+    [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventDidEndDragging
+                                      inScrollView:scrollView
+                                     withCellFrame:collectionCell.frame];
+    }
+    if (_asyncDelegateImplementsDidEndDragging) {
+        [_asyncDelegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
+    }
 }
 
 - (BOOL)shouldBatchFetch
