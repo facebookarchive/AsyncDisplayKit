@@ -10,30 +10,6 @@
 	<string>46</string>
 	<key>objects</key>
 	<dict>
-		<key>1C35DC632213BA3CFE7E9F9E</key>
-		<dict>
-			<key>buildActionMask</key>
-			<string>2147483647</string>
-			<key>files</key>
-			<array/>
-			<key>inputPaths</key>
-			<array/>
-			<key>isa</key>
-			<string>PBXShellScriptBuildPhase</string>
-			<key>name</key>
-			<string>Embed Pods Frameworks</string>
-			<key>outputPaths</key>
-			<array/>
-			<key>runOnlyForDeploymentPostprocessing</key>
-			<string>0</string>
-			<key>shellPath</key>
-			<string>/bin/sh</string>
-			<key>shellScript</key>
-			<string>"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh"
-</string>
-			<key>showEnvVarsInLog</key>
-			<string>0</string>
-		</dict>
 		<key>1DAE4C3A5DA2C2B081CD640F</key>
 		<dict>
 			<key>fileRef</key>
@@ -218,7 +194,7 @@
 				<string>3EEA4EE11BECC4A1008A7F35</string>
 				<string>3EEA4EE21BECC4A1008A7F35</string>
 				<string>21F2C1D9B53F9468EAF1653F</string>
-				<string>1C35DC632213BA3CFE7E9F9E</string>
+				<string>852437589F1D53B9483A75DF</string>
 			</array>
 			<key>buildRules</key>
 			<array/>
@@ -1245,6 +1221,30 @@
 			<string>Pods</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
+		</dict>
+		<key>852437589F1D53B9483A75DF</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>inputPaths</key>
+			<array/>
+			<key>isa</key>
+			<string>PBXShellScriptBuildPhase</string>
+			<key>name</key>
+			<string>Embed Pods Frameworks</string>
+			<key>outputPaths</key>
+			<array/>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+			<key>shellPath</key>
+			<string>/bin/sh</string>
+			<key>shellScript</key>
+			<string>"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh"
+</string>
+			<key>showEnvVarsInLog</key>
+			<string>0</string>
 		</dict>
 		<key>B5BD9E5609B2CB179EEE0CF4</key>
 		<dict>
