@@ -670,7 +670,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   int32_t transitionID = [self _newTransitionID];
   constrainedSize.transitionID = transitionID;
 
-  ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+  ASDisplayNodePerformBlockOnSubnodes(self, ^(ASDisplayNode * _Nonnull node) {
     ASDisplayNodeAssert([node _hasTransitionsInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
     node.hierarchyState |= ASHierarchyStateLayoutPending;
     node.pendingTransitionID = transitionID;
@@ -707,7 +707,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       
       [self _invalidateTransitionSentinel];
       
-      ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+      ASDisplayNodePerformBlockOnSubnodes(self, ^(ASDisplayNode * _Nonnull node) {
         [node applyPendingLayoutContext];
         [node _completeLayoutCalculation];
         node.hierarchyState &= (~ASHierarchyStateLayoutPending);
@@ -773,7 +773,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // Invalidate transition sentinel to cancel transitions in progress
     [self _invalidateTransitionSentinel];
     // Tell subnodes to exit layout pending state and clear related properties
-    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+    ASDisplayNodePerformBlockOnSubnodes(self, ^(ASDisplayNode * _Nonnull node) {
       node.hierarchyState &= (~ASHierarchyStateLayoutPending);
     });
   }
@@ -876,7 +876,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // while the newly materialized subtree finishes rendering.  Then destroy placeholderImage to save memory.
     [self recursivelyClearContents];
     
-    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode *node) {
+    ASDisplayNodePerformBlockOnSubnodes(self, ^(ASDisplayNode *node) {
       if (shouldRasterize) {
         [node enterHierarchyState:ASHierarchyStateRasterized];
         [node __unloadNode];
@@ -898,7 +898,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       [self recursivelyDisplayImmediately];
     }
   } else {
-    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode *node) {
+    ASDisplayNodePerformBlockOnSubnodes(self, ^(ASDisplayNode *node) {
       if (shouldRasterize) {
         [node enterHierarchyState:ASHierarchyStateRasterized];
       } else {
@@ -1192,7 +1192,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
 
   [_subnodes addObject:subnode];
   
-  // This call will apply our .hierarchyState to the new subnode.
+  // This call will apply our .hierarchyState to the new subnode and .subnodeState to the new supernode
   // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.
   [subnode __setSupernode:self];
 
@@ -1662,19 +1662,27 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
   
   if (supernodeDidChange) {
-    ASHierarchyState stateToEnterOrExit = (newSupernode ? newSupernode.hierarchyState
-                                                        : oldSupernode.hierarchyState);
+    // Handle hierarchyState
+    ASHierarchyState hierarchyStateToEnterOrExit = (newSupernode ? newSupernode.hierarchyState
+                                                                 : oldSupernode.hierarchyState);
     
-    BOOL parentWasOrIsRasterized        = (newSupernode ? newSupernode.shouldRasterizeDescendants
-                                                        : oldSupernode.shouldRasterizeDescendants);
+    BOOL parentWasOrIsRasterized = (newSupernode ? newSupernode.shouldRasterizeDescendants
+                                                 : oldSupernode.shouldRasterizeDescendants);
     if (parentWasOrIsRasterized) {
-      stateToEnterOrExit |= ASHierarchyStateRasterized;
+      hierarchyStateToEnterOrExit |= ASHierarchyStateRasterized;
     }
     if (newSupernode) {
-      [self enterHierarchyState:stateToEnterOrExit];
+      [self enterHierarchyState:hierarchyStateToEnterOrExit];
     } else {
-      [self exitHierarchyState:stateToEnterOrExit];
+      [self exitHierarchyState:hierarchyStateToEnterOrExit];
     }
+    
+    
+    // Handle subnodesState
+      
+    // Propagate new subnodes state to old and new supernode
+    [oldSupernode updateSubnodesStates];
+    [newSupernode updateSubnodesStates];
   }
 }
 
@@ -1975,7 +1983,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelyClearContents
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+  ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, self, ^(ASDisplayNode * _Nonnull node) {
     [node clearContents];
   });
 }
@@ -1994,7 +2002,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelyFetchData
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+  ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, self, ^(ASDisplayNode * _Nonnull node) {
     [node fetchData];
   });
 }
@@ -2006,7 +2014,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelyClearFetchedData
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+  ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, self, ^(ASDisplayNode * _Nonnull node) {
     [node clearFetchedData];
   });
 }
@@ -2130,7 +2138,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (interfaceState == ASInterfaceStateNone) {
     return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
   }
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState |= interfaceState;
   });
 }
@@ -2140,7 +2148,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (interfaceState == ASInterfaceStateNone) {
     return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
   }
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState &= (~interfaceState);
   });
 }
@@ -2149,7 +2157,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASInterfaceState oldState = self.interfaceState;
   ASInterfaceState newState = interfaceState;
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState = interfaceState;
   });
   
@@ -2220,7 +2228,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (hierarchyState == ASHierarchyStateNormal) {
     return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
   }
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, self, ^(ASDisplayNode *node) {
     node.hierarchyState |= hierarchyState;
   });
 }
@@ -2230,8 +2238,45 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (hierarchyState == ASHierarchyStateNormal) {
     return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
   }
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, self, ^(ASDisplayNode *node) {
     node.hierarchyState &= (~hierarchyState);
+  });
+}
+
+- (ASSubnodesState)subnodesState
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _subnodesState;
+}
+
+- (void)setSubnodesState:(ASSubnodesState)newState
+{
+  ASSubnodesState oldState = ASSubnodesStateNormal;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    if (_subnodesState == newState) {
+      return;
+    }
+    oldState = _subnodesState;
+    _subnodesState = newState;
+  }
+  
+  if (newState != oldState) {
+    LOG(@"setSubnodesState: oldState = %lu, newState = %lu", (unsigned long)oldState, (unsigned long)newState);
+  }
+}
+
+- (void)updateSubnodesStates
+{
+  ASDisplayNodePerformBlockOnNodeAndSupernodes(nil, self, ^(ASDisplayNode *node) {
+    ASSubnodesState subnodeState = ASSubnodesStateNormal;
+    for (ASDisplayNode *subnode in node.subnodes) {
+      if (subnode.shouldAnimateSizeChanges || ASSubnodesStateIncludesAnimateSizeChange(subnode.subnodesState)) {
+        subnodeState |= ASSubnodesStateAnimateSizeChange;
+        break;
+      }
+    }
+    node.subnodesState = subnodeState;
   });
 }
 
@@ -2324,7 +2369,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelySetNeedsDisplayAtScale:(CGFloat)contentsScale
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, self, ^(ASDisplayNode *node) {
     [node setNeedsDisplayAtScale:contentsScale];
   });
 }
@@ -2522,11 +2567,17 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   return _flags.shouldAnimateSizeChanges;
 }
 
--(void)setShouldAnimateSizeChanges:(BOOL)shouldAnimateSizeChanges
+- (void)setShouldAnimateSizeChanges:(BOOL)shouldAnimateSizeChanges
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
+  
+  if (_flags.shouldAnimateSizeChanges == shouldAnimateSizeChanges)
+    return;
+  
   _flags.shouldAnimateSizeChanges = shouldAnimateSizeChanges;
+
+  [self.supernode updateSubnodesStates];
 }
 
 static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
@@ -2544,7 +2595,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   }
 }
 
--(NSInteger)drawingPriority
+- (NSInteger)drawingPriority
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);

@@ -51,9 +51,9 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
   ASHierarchyStateLayoutPending           = 1 << 3
 };
 
-inline BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyState)
+inline BOOL ASHierarchyStateIncludesRasterized(ASHierarchyState hierarchyState)
 {
-  return ((hierarchyState & ASHierarchyStateLayoutPending) == ASHierarchyStateLayoutPending);
+  return ((hierarchyState & ASHierarchyStateRasterized) == ASHierarchyStateRasterized);
 }
 
 inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState)
@@ -61,20 +61,52 @@ inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState
     return ((hierarchyState & ASHierarchyStateRangeManaged) == ASHierarchyStateRangeManaged);
 }
 
+inline BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyState)
+{
+  return ((hierarchyState & ASHierarchyStateLayoutPending) == ASHierarchyStateLayoutPending);
+}
+
+/**
+ */
+typedef NS_OPTIONS(NSUInteger, ASSubnodesState)
+{
+  /** The node may or may not have a supernode, but no subnode has a special subnodesState-influencing option enabled.*/
+  ASSubnodesStateNormal                 = 0,
+  
+  /**  Up-propagated version of _flags.shouldAnimateSizeChanges. */
+  ASSubnodesStateAnimateSizeChange      = 1 << 0,
+};
+
+inline BOOL ASSubnodesStateIncludesAnimateSizeChange(ASSubnodesState subnodesState)
+{
+  return ((subnodesState & ASSubnodesStateAnimateSizeChange) == ASSubnodesStateAnimateSizeChange);
+}
+
 @interface ASDisplayNode ()
 {
 @protected
   ASInterfaceState _interfaceState;
   ASHierarchyState _hierarchyState;
+  ASHierarchyState _subnodesState;
 }
 
-// The view class to use when creating a new display node instance. Defaults to _ASDisplayView.
+/**
+ *  The view class to use when creating a new display node instance. Defaults to _ASDisplayView.
+ */
 + (Class)viewClass;
 
 // These methods are recursive, and either union or remove the provided interfaceState to all sub-elements.
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState;
 - (void)exitInterfaceState:(ASInterfaceState)interfaceState;
 - (void)recursivelySetInterfaceState:(ASInterfaceState)interfaceState;
+
+/**
+ * @abstract Return if the node is range managed or not
+ *
+ * @discussion Currently only set interface state on nodes in table and collection views. For other nodes, if they are
+ * in the hierarchy we enable all ASInterfaceState types with `ASInterfaceStateInHierarchy`, otherwise `None`.
+ */
+- (BOOL)supportsRangeManagedInterfaceState;
 
 // These methods are recursive, and either union or remove the provided hierarchyState to all sub-elements.
 - (void)enterHierarchyState:(ASHierarchyState)hierarchyState;
@@ -96,13 +128,21 @@ inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState
  */
 @property (nonatomic, readwrite) ASHierarchyState hierarchyState;
 
-/**
- * @abstract Return if the node is range managed or not
+/** 
+ * @abstract These method are recursive update the subnode state to all super-elements
  *
- * @discussion Currently only set interface state on nodes in table and collection views. For other nodes, if they are
- * in the hierarchy we enable all ASInterfaceState types with `ASInterfaceStateInHierarchy`, otherwise `None`.
+ * @see ASSubnodesState
  */
-- (BOOL)supportsRangeManagedInterfaceState;
+- (void)updateSubnodesStates;
+
+/**
+ * @abstract Returns the subnodes state of the node.
+ *
+ * @return The current ASSubnodesState of the node
+ *
+ * @see ASInterfaceState
+ */
+@property (nonatomic, readwrite) ASSubnodesState subnodesState;
 
 // The two methods below will eventually be exposed, but their names are subject to change.
 /**

@@ -1762,6 +1762,74 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssert(node.hasFetchedData);
 }
 
+- (void)testEnteringSubnodeStateForCellNode
+{
+  ASCellNode *cellNode = [ASCellNode new];
+  ASTestDisplayNode *node = [ASTestDisplayNode new];
+  
+  XCTAssertTrue(cellNode.shouldAnimateSizeChanges);
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateNormal);
+  
+  [cellNode addSubnode:node];
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateAnimateSizeChange);
+  
+  node.shouldAnimateSizeChanges = NO;
+  XCTAssertTrue(node.subnodesState == ASSubnodesStateNormal);
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateNormal);
+  
+  node.shouldAnimateSizeChanges = YES;
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateAnimateSizeChange);
+  
+  [node removeFromSupernode];
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateNormal);
+  
+}
+
+- (void)testEnteringSubnodeStateForCellMultipleNodes
+{
+  ASCellNode *cellNode = [ASCellNode new];
+  ASTestDisplayNode *node1 = [ASTestDisplayNode new];
+  ASTestDisplayNode *node2 = [ASTestDisplayNode new];
+  
+  node1.shouldAnimateSizeChanges = NO;
+  [cellNode addSubnode:node1];
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateNormal);
+  
+  [cellNode addSubnode:node2];
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateAnimateSizeChange);
+  
+  [node2 removeFromSupernode];
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateNormal);
+}
+
+- (void)testEnteringSubnodeStateForDeeperSubnodeHierarchy
+{
+  ASCellNode *cellNode = [ASCellNode new];
+  ASTestDisplayNode *node1 = [ASTestDisplayNode new];
+  ASTestDisplayNode *node2 = [ASTestDisplayNode new];
+  
+  XCTAssertTrue(node1.subnodesState == ASSubnodesStateNormal);
+  node1.shouldAnimateSizeChanges = NO;
+  [node1 addSubnode:node2];
+  XCTAssertTrue(node1.subnodesState == ASSubnodesStateAnimateSizeChange);
+  
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateNormal);
+  [cellNode addSubnode:node1];
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateAnimateSizeChange);
+  
+  [node2 removeFromSupernode];
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateNormal);
+  XCTAssertTrue(node1.subnodesState == ASSubnodesStateNormal);
+  
+  [node1 addSubnode:node2];
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateAnimateSizeChange);
+  XCTAssertTrue(node1.subnodesState == ASSubnodesStateAnimateSizeChange);
+  node1.shouldAnimateSizeChanges = YES;
+  node2.shouldAnimateSizeChanges = NO;
+  XCTAssertTrue(cellNode.subnodesState == ASSubnodesStateAnimateSizeChange);
+  XCTAssertTrue(node1.subnodesState == ASSubnodesStateNormal);
+}
+
 - (void)testInitWithViewClass
 {
   ASDisplayNode *scrollNode = [[ASDisplayNode alloc] initWithViewClass:[UIScrollView class]];
