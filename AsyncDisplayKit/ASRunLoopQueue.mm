@@ -130,6 +130,7 @@ static void runLoopSourceCallback(void *info) {
   // If the queue is not fully drained yet force another run loop to process next batch of items
   if (!isQueueDrained) {
     CFRunLoopSourceSignal(_runLoopSource);
+    CFRunLoopWakeUp(_runLoop);
    }
 }
 

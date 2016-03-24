@@ -25,8 +25,10 @@
 - (CGPoint)targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 {
   if (self.currentIndexPath) {
-    return [self _targetContentOffsetForItemAtIndexPath:self.currentIndexPath
-                                  proposedContentOffset:proposedContentOffset];
+    CGPoint contentOffset = [self _targetContentOffsetForItemAtIndexPath:self.currentIndexPath
+                                                   proposedContentOffset:proposedContentOffset];
+    self.currentIndexPath = nil;
+    return contentOffset;
   }
   
   return [super targetContentOffsetForProposedContentOffset:proposedContentOffset];
@@ -34,7 +36,7 @@
 
 - (CGPoint)_targetContentOffsetForItemAtIndexPath:(NSIndexPath *)indexPath proposedContentOffset:(CGPoint)proposedContentOffset
 {
-  UICollectionViewLayoutAttributes *attributes = [self layoutAttributesForItemAtIndexPath:self.currentIndexPath];
+  UICollectionViewLayoutAttributes *attributes = [self layoutAttributesForItemAtIndexPath:indexPath];
   CGFloat xOffset = (self.collectionView.bounds.size.width - attributes.frame.size.width) / 2;
   return CGPointMake(attributes.frame.origin.x - xOffset, proposedContentOffset.y);
 }
