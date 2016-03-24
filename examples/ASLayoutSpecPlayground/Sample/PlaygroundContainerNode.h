@@ -8,6 +8,15 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
+
+@protocol PlaygroundContainerNodeDelegate <NSObject>
+
+- (void)relayoutWithSize:(ASSizeRange)size;
+
+@end
+
 @interface PlaygroundContainerNode : ASDisplayNode
+
+@property (nonatomic, weak) id<PlaygroundContainerNodeDelegate> delegate;
 
 @end

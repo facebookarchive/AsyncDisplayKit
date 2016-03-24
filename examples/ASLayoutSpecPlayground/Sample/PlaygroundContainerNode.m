@@ -9,6 +9,7 @@
 #import "PlaygroundContainerNode.h"
 #import "PlaygroundNode.h"
 #import "ASLayoutableInspectorNode.h"  // FIXME: move to ASLayoutSpecDebug
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 @implementation PlaygroundContainerNode
 {
@@ -20,7 +21,6 @@
 {
   self = [super init];
   if (self) {
-    
     self.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
     self.usesImplicitHierarchyManagement = YES;
     
@@ -38,7 +38,6 @@
     [_resizeHandle.view addGestureRecognizer:lpgr];
     
     [self shouldVisualizeLayoutSpecs:YES];
-
   }
   
   return self;
@@ -50,9 +49,7 @@
   [super layout];
   [self.view bringSubviewToFront:_resizeHandle.view];
   
-  CGSize playgroundSize = _playgroundNode.calculatedLayout.size;   // FIXME:this might be a bug with implicit heirarchy - frame isn't set yet
-//  _playgroundNode.frame = CGRectMake(300, 200, playgroundSize.width, playgroundSize.height);
-//  
+  CGSize playgroundSize = _playgroundNode.calculatedLayout.size;
   
   CGRect rect = CGRectZero;
   rect.size = CGSizeMake(RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE);   // FIXME: make this an overlay stack?
@@ -60,24 +57,12 @@
   _resizeHandle.frame = rect;
 }
 
-//// use manual ASLayout
-//- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize  // this might be a bug: implicit adding doesn't appear to work
-//{
-//  ASLayout *playgroundSubLayout = [_playgroundNode measureWithSizeRange:constrainedSize];
-//  playgroundSubLayout.position = CGPointZero;
-//  return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.max position:CGPointZero sublayouts:@[playgroundSubLayout] flattened:NO];
-//}
-
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  UIEdgeInsets insets = UIEdgeInsetsZero;
-  ASInsetLayoutSpec *insetLayoutSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_playgroundNode];
-  insetLayoutSpec.flexGrow = YES;
-  insetLayoutSpec.flexShrink = YES;
   _playgroundNode.flexGrow = YES;
   _playgroundNode.flexShrink = YES;
   
-  return insetLayoutSpec;
+  return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_playgroundNode]];
 }
 
 - (void)resizePlayground:(UIGestureRecognizer *)sender
@@ -101,19 +86,12 @@
 
 - (void)changePlaygroundFrameWithTranslation:(CGPoint)translation
 {
-  CGRect newFrame = _playgroundNode.frame;
+  ASSizeRange constrainedSize = self.constrainedSizeForCalculatedLayout;
   
-  newFrame.size.width  += translation.x;
-  newFrame.size.height += translation.y;
+  constrainedSize.max.width  = MAX(0, constrainedSize.max.width  + translation.x);
+  constrainedSize.max.height = MAX(0, constrainedSize.max.height + translation.y);
   
-  NSLog(@"%@", NSStringFromCGRect(newFrame));
-  
-  [_playgroundNode setSizeRange:ASRelativeSizeRangeMakeWithExactCGSize(newFrame.size)];
-  [self setNeedsLayout];
+  [self.delegate relayoutWithSize:constrainedSize];
 }
-
-// use manual calculateLayoutThatFits
-
-// create constrainedSize with drag resizable box
 
 @end
