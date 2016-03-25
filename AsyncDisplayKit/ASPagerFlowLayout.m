@@ -26,7 +26,7 @@
 {
   if (self.currentIndexPath) {
     return [self _targetContentOffsetForItemAtIndexPath:self.currentIndexPath
-                                                   proposedContentOffset:proposedContentOffset];
+                                  proposedContentOffset:proposedContentOffset];
   }
   
   return [super targetContentOffsetForProposedContentOffset:proposedContentOffset];
@@ -58,14 +58,7 @@
 
 - (BOOL)_dataSourceIsEmpty
 {
-  if ([self.collectionView numberOfSections]) {
-    if ([self.collectionView numberOfItemsInSection:0] == 0) {
-      return YES;
-    }
-  } else {
-    return YES;
-  }
-  return NO;
+  return ([self.collectionView numberOfSections] > 0 && [self.collectionView numberOfItemsInSection:0] > 0);
 }
 
 - (CGRect)_visibleRect
