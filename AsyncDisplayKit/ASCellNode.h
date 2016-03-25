@@ -66,12 +66,12 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 //@property (atomic, retain) UIColor *backgroundColor;
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
-/*
+/**
  * A Boolean value that indicates whether the node is selected.
  */
 @property (nonatomic, assign) BOOL selected;
 
-/*
+/**
  * A Boolean value that indicates whether the node is highlighted.
  */
 @property (nonatomic, assign) BOOL highlighted;
