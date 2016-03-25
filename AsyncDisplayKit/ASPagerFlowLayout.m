@@ -34,6 +34,9 @@
 
 - (CGPoint)_targetContentOffsetForItemAtIndexPath:(NSIndexPath *)indexPath proposedContentOffset:(CGPoint)proposedContentOffset
 {
+  if ([self _dataSourceIsEmpty]) {
+    return proposedContentOffset;
+  }
   UICollectionViewLayoutAttributes *attributes = [self layoutAttributesForItemAtIndexPath:indexPath];
   CGFloat xOffset = (self.collectionView.bounds.size.width - attributes.frame.size.width) / 2;
   return CGPointMake(attributes.frame.origin.x - xOffset, proposedContentOffset.y);
@@ -41,10 +44,6 @@
 
 - (NSIndexPath *)_indexPathForVisiblyCenteredItem
 {
-  if ([self _dataSourceIsEmpty]) {
-    return nil;
-  }
-
   CGRect visibleRect = [self _visibleRect];
   CGFloat visibleXCenter = CGRectGetMidX(visibleRect);
   NSArray<UICollectionViewLayoutAttributes *> *layoutAttributes = [self layoutAttributesForElementsInRect:visibleRect];
@@ -58,7 +57,7 @@
 
 - (BOOL)_dataSourceIsEmpty
 {
-  return ([self.collectionView numberOfSections] > 0 && [self.collectionView numberOfItemsInSection:0] > 0);
+  return ([self.collectionView numberOfSections] == 0 || [self.collectionView numberOfItemsInSection:0] == 0);
 }
 
 - (CGRect)_visibleRect
