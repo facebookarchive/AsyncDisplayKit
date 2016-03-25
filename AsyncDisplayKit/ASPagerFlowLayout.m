@@ -25,10 +25,8 @@
 - (CGPoint)targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 {
   if (self.currentIndexPath) {
-    CGPoint contentOffset = [self _targetContentOffsetForItemAtIndexPath:self.currentIndexPath
-                                                   proposedContentOffset:proposedContentOffset];
-    self.currentIndexPath = nil;
-    return contentOffset;
+    return [self _targetContentOffsetForItemAtIndexPath:self.currentIndexPath
+                                  proposedContentOffset:proposedContentOffset];
   }
   
   return [super targetContentOffsetForProposedContentOffset:proposedContentOffset];
@@ -43,6 +41,10 @@
 
 - (NSIndexPath *)_indexPathForVisiblyCenteredItem
 {
+  if ([self _dataSourceIsEmpty]) {
+    return nil;
+  }
+
   CGRect visibleRect = [self _visibleRect];
   CGFloat visibleXCenter = CGRectGetMidX(visibleRect);
   NSArray<UICollectionViewLayoutAttributes *> *layoutAttributes = [self layoutAttributesForElementsInRect:visibleRect];
@@ -52,6 +54,11 @@
     }
   }
   return nil;
+}
+
+- (BOOL)_dataSourceIsEmpty
+{
+  return ([self.collectionView numberOfSections] > 0 && [self.collectionView numberOfItemsInSection:0] > 0);
 }
 
 - (CGRect)_visibleRect
