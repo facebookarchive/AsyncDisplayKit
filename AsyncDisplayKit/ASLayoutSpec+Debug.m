@@ -33,10 +33,11 @@ static BOOL __shouldVisualizeLayoutSpecs = NO;
 {
   self = [super init];
   if (self) {
+    self.layer.borderWidth = 2;
     self.layoutSpec = layoutSpec;
     self.usesImplicitHierarchyManagement = YES;
     self.layer.borderColor = [[UIColor redColor] CGColor];
-    self.layer.borderWidth = 2;
+    
     [self addTarget:self action:@selector(layoutMagicNodeTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
   }
   return self;
@@ -47,21 +48,45 @@ static BOOL __shouldVisualizeLayoutSpecs = NO;
   ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];      // FIXME: need to auto pass properties to children
   insetSpec.neverShouldVisualize = YES;
   self.layoutSpec.neverShouldVisualize = YES;
-  UIEdgeInsets insets = UIEdgeInsetsZero; //UIEdgeInsetsMake(10, 10, 10, 10);
+  CGFloat insetFloat = [ASLayoutableInspectorNode sharedInstance].vizNodeInsetSize;
+  UIEdgeInsets insets = UIEdgeInsetsMake(insetFloat, insetFloat, insetFloat, insetFloat);
+//  UIEdgeInsets insets = UIEdgeInsetsZero;
   
   // propogate child's layoutSpec properties to the inset that we are adding
-  insetSpec.flexGrow = _layoutSpec.flexGrow;
+  insetSpec.flexGrow   = _layoutSpec.flexGrow;              // FIXME:
   insetSpec.flexShrink = _layoutSpec.flexShrink;
-  insetSpec.alignSelf = _layoutSpec.alignSelf;
+  insetSpec.alignSelf  = _layoutSpec.alignSelf;
+  insetSpec.insets     = insets;
+  insetSpec.child      = self.layoutSpec;
   
-  insetSpec.insets = insets;
-  insetSpec.child = self.layoutSpec;
-  return self.layoutSpec;
+  return insetSpec; //self.layoutSpec;
+}
+
+- (void)setLayoutSpec:(ASLayoutSpec *)layoutSpec
+{
+  _layoutSpec = layoutSpec;
+  
+//  self.flexGrow   = _layoutSpec.flexGrow;
+//  self.flexShrink = _layoutSpec.flexShrink;
+//  self.alignSelf  = _layoutSpec.alignSelf;
+  
+  if ([layoutSpec isKindOfClass:[ASInsetLayoutSpec class]]) {
+    self.layer.borderColor = [[UIColor redColor] CGColor];
+    
+  } else if ([layoutSpec isKindOfClass:[ASStackLayoutSpec class]]) {
+    self.layer.borderColor = [[UIColor greenColor] CGColor];
+
+  }
 }
 
 - (void)layoutMagicNodeTapped:(UIGestureRecognizer *)sender
 {
   [[ASLayoutableInspectorNode sharedInstance] setLayoutableToEdit:self.layoutSpec];
+}
+
+- (NSString *)description
+{
+  return [self.layoutSpec description];         // FIXME: expand on layoutSpec description (e.g. have StackLayoutSpec return horz/vert)
 }
 
 @end

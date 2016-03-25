@@ -14,7 +14,7 @@
 @implementation PlaygroundContainerNode
 {
   PlaygroundNode *_playgroundNode;
-  ASDisplayNode  *_resizeHandle;
+  ASImageNode    *_resizeHandle;
 }
 
 - (instancetype)init
@@ -28,8 +28,9 @@
     
     _playgroundNode = [[PlaygroundNode alloc] init];
     
-    _resizeHandle = [[ASDisplayNode alloc] init];
-    _resizeHandle.backgroundColor = [UIColor greenColor];
+    _resizeHandle = [[ASImageNode alloc] init];
+    _resizeHandle.image = [UIImage imageNamed:@"resizeHandle"];
+    _resizeHandle.userInteractionEnabled = YES;
     [self.view addSubnode:_resizeHandle];
     
     UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(resizePlayground:)];
@@ -43,7 +44,7 @@
   return self;
 }
 
-#define RESIZE_HANDLE_SIZE 10
+#define RESIZE_HANDLE_SIZE 30
 - (void)layout
 {
   [super layout];
@@ -62,7 +63,8 @@
   _playgroundNode.flexGrow = YES;
   _playgroundNode.flexShrink = YES;
   
-  return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_playgroundNode]];
+  UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
+  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_playgroundNode];
 }
 
 - (void)resizePlayground:(UIGestureRecognizer *)sender

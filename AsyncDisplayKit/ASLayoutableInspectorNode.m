@@ -19,6 +19,8 @@
   // Navigate layout hierarchy
   ASButtonNode *_parentNodeNavBtn;
   ASButtonNode *_siblingNodeRightNavBtn;
+  ASButtonNode *_addNodeNavBtn;
+  ASButtonNode *_addLayoutSpecNavBtn;
   ASButtonNode *_siblingNodeLefttNavBtn;
   ASButtonNode *_childNodeNavBtn;
   
@@ -48,7 +50,12 @@
   
   // LayoutSpec properties
   ASTextNode *_layoutSpecPropertiesSectionTitle;
-
+  
+  // debug help
+  ASTextNode *_debugSectionTitle;
+  ASTextNode *_vizNodeInsetSizeTitle;
+  ASButtonNode *_vizNodeInsetSizeBtn;
+  ASButtonNode *_vizNodeBordersBtn;
 }
 
 #pragma mark - class methods
@@ -72,6 +79,8 @@
     
     self.usesImplicitHierarchyManagement = YES;
     
+    _vizNodeInsetSize = 0;
+    
     _itemDescription = [[ASTextNode alloc] init];
     
     _itemPropertiesSectionTitle = [[ASTextNode alloc] init];
@@ -80,6 +89,10 @@
     _layoutablePropertiesSectionTitle.attributedString = [self attributedStringFromString:@"<Layoutable> Properties"];
     _layoutSpecPropertiesSectionTitle = [[ASTextNode alloc] init];
     _layoutSpecPropertiesSectionTitle.attributedString = [self attributedStringFromString:@"<LayoutSpec> Properties"];
+    _debugSectionTitle = [[ASTextNode alloc] init];
+    _debugSectionTitle.attributedString = [self attributedStringFromString:@"debugging help"];
+    _vizNodeInsetSizeTitle = [[ASTextNode alloc] init];
+    _vizNodeInsetSizeTitle.attributedString = [self attributedStringFromString:@"inset ASLayoutSpecs"];
     
     _flexGrowBtn = [self makeBtnNodeWithTitle:@"flexGrow"];
     [_flexGrowBtn addTarget:self action:@selector(setFlexGrowValue:) forControlEvents:ASControlNodeEventTouchUpInside];
@@ -101,10 +114,27 @@
     _itemBackgroundColorBtn = [self makeBtnNodeWithTitle:@"node color"];
     [_itemBackgroundColorBtn addTarget:self action:@selector(changeColor:) forControlEvents:ASControlNodeEventTouchUpInside];
     
+    _vizNodeBordersBtn = [self makeBtnNodeWithTitle:@"visualize ASLayoutSpecs"];
+    [_vizNodeBordersBtn addTarget:self action:@selector(setVizNodeBorders:) forControlEvents:ASControlNodeEventTouchUpInside];
+    _vizNodeBordersBtn.selected = YES;
+    
+    _vizNodeInsetSizeBtn = [self makeBtnNodeWithTitle:@"overlap ASLayoutSpecs"];
+    [_vizNodeInsetSizeBtn addTarget:self action:@selector(setVizNodeInsets:) forControlEvents:ASControlNodeEventTouchUpInside];
+    _vizNodeInsetSizeBtn.selected = YES;
+    
     _parentNodeNavBtn = [self makeBtnNodeWithTitle:@"parent\nnode"];
     _siblingNodeRightNavBtn = [self makeBtnNodeWithTitle:@"sibling\nnode"];
+    _addNodeNavBtn = [self makeBtnNodeWithTitle:@"add\nnode"];
+    _addLayoutSpecNavBtn = [self makeBtnNodeWithTitle:@"add\nlayoutSpec"];
     _siblingNodeLefttNavBtn = [self makeBtnNodeWithTitle:@"sibling\nnode"];
     _childNodeNavBtn = [self makeBtnNodeWithTitle:@"child\nnode"];
+    
+//    _parentNodeNavBtn.selected = YES;
+//    _siblingNodeRightNavBtn.selected = YES;
+//    _addNodeNavBtn.selected = YES;
+//    _addLayoutSpecNavBtn.selected = YES;
+//    _siblingNodeLefttNavBtn.selected = YES;
+//    _childNodeNavBtn.selected = YES;
     
     _slider = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull{
                 UISlider *slider = [[UISlider alloc] init];
@@ -131,16 +161,21 @@
 {
   // navigate layout hierarchy
   
+  _parentNodeNavBtn.alignSelf = ASStackLayoutAlignSelfCenter;
+  _childNodeNavBtn.alignSelf = ASStackLayoutAlignSelfCenter;
+
   ASStackLayoutSpec *horizontalStackNav = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStackNav.flexGrow = YES;
+  horizontalStackNav.alignSelf = ASStackLayoutAlignSelfCenter;
   horizontalStackNav.children = @[_siblingNodeLefttNavBtn, _siblingNodeRightNavBtn];
   
   ASStackLayoutSpec *horizontalStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStack.flexGrow = YES;
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
+  
   spacer.flexGrow = YES;
   horizontalStack.children = @[_flexGrowBtn, spacer];
-  _flexGrowValue.alignSelf = ASStackLayoutAlignSelfEnd;       // FIXME: framework give a warning if you use ASAlignmentBottom!!!!!
+  _flexGrowValue.alignSelf = ASStackLayoutAlignSelfEnd;                     // FIXME: make framework give a warning if you use ASAlignmentBottom!!!!!
   
   ASStackLayoutSpec *horizontalStack2 = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStack2.flexGrow = YES;
@@ -153,7 +188,7 @@
   _flexBasisValue.alignSelf = ASStackLayoutAlignSelfEnd;
   
   ASStackLayoutSpec *itemDescriptionStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  itemDescriptionStack.children = @[_itemDescription, _itemBackgroundColorBtn,];
+  itemDescriptionStack.children = @[_itemDescription];
   itemDescriptionStack.spacing = 5;
   itemDescriptionStack.flexGrow = YES;
   
@@ -166,11 +201,16 @@
   layoutSpecStack.children = @[_layoutSpecPropertiesSectionTitle, _alignItemsBtn];
   layoutSpecStack.spacing = 5;
   layoutSpecStack.flexGrow = YES;
+  
+  ASStackLayoutSpec *debugHelpStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  debugHelpStack.children = @[_debugSectionTitle, _vizNodeInsetSizeBtn, _vizNodeBordersBtn];
+  debugHelpStack.spacing = 5;
+  debugHelpStack.flexGrow = YES;
 
   ASStackLayoutSpec *verticalLayoutableStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalLayoutableStack.flexGrow = YES;
   verticalLayoutableStack.spacing = 20;
-  verticalLayoutableStack.children = @[_parentNodeNavBtn, horizontalStackNav, _childNodeNavBtn, itemDescriptionStack, layoutableStack, layoutSpecStack];
+  verticalLayoutableStack.children = @[_parentNodeNavBtn, horizontalStackNav, _childNodeNavBtn, itemDescriptionStack, layoutableStack, layoutSpecStack, debugHelpStack];
   verticalLayoutableStack.alignItems = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space
 
   ASLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(100, 10, 10, 10) child:verticalLayoutableStack];
@@ -202,28 +242,18 @@
   //  _flexBasisBtn.selected           = self.layoutableToEdit.flexShrink;
   //  _flexBasisValue.attributedString = [self attributedStringFromString: (_flexBasisBtn.selected) ? @"YES" : @"NO"];
   
+  
   NSUInteger alignSelfValue = [self.layoutableToEdit alignSelf];
-  _alignSelfBtn.selected = alignSelfValue ? YES : NO;
   NSString *newTitle = [@"alignSelf:" stringByAppendingString:[self alignSelfName:alignSelfValue]];
   [_alignSelfBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:ASControlStateNormal];
   
-//  _alignItemsBtn.selected = YES;
-//  if ([[self layoutSpec] isKindOfClass:[ASStackLayoutSpec class]]) {
-//    NSUInteger alignItemsValue = [(ASStackLayoutSpec *)[self layoutSpec] alignItems];
-//    newTitle = [@"alignItems:" stringByAppendingString:[self typeDisplayNameItems:alignItemsValue]];
+  if ([self layoutSpec]) {
+    _alignItemsBtn.enabled = YES;
+//    NSUInteger alignItemsValue = [[self layoutSpec] alignItems];
+//    newTitle = [@"alignItems:" stringByAppendingString:[self alignSelfName:alignItemsValue]];
 //    [_alignItemsBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:ASControlStateNormal];
-//  }
-//  
-//  if ([layoutable isKindOfClass:[ASLayoutSpec class]]) {
-//    return [self attributedStringFromString:[(ASLayoutSpec *)layoutable asciiArtString]];
-//  } else if ([layoutable isKindOfClass:[ASDisplayNode class]]) {
-//    return [self attributedStringFromString:[(ASControlNode *)layoutable asciiArtString]];
-//  }
-  
+  }
 
-  
-
-  
   [self setNeedsLayout];
 }
 
@@ -261,7 +291,7 @@
     _alignSelfBtn.enabled       = NO;
     _spacingBeforeBtn.enabled   = NO;
     _spacingAfterBtn.enabled    = NO;
-    _alignItemsBtn.enabled      = NO;
+    _alignItemsBtn.enabled      = YES;
   }
 }
 
@@ -376,6 +406,34 @@
   }
   
   [self updateInspectorWithLayoutable];
+}
+
+- (void)setVizNodeInsets:(ASButtonNode *)sender
+{
+  BOOL newState = !sender.selected;
+  
+  if (newState == YES) {
+    self.vizNodeInsetSize = 0;
+    [self.delegate toggleVizualization:NO];   // FIXME
+    [self.delegate toggleVizualization:YES];   // FIXME
+    _vizNodeBordersBtn.selected = YES;
+    
+  } else {
+    self.vizNodeInsetSize = 10;
+    [self.delegate toggleVizualization:NO];   // FIXME
+    [self.delegate toggleVizualization:YES];   // FIXME
+  }
+  
+  sender.selected = newState;
+}
+
+- (void)setVizNodeBorders:(ASButtonNode *)sender
+{
+  BOOL newState = !sender.selected;
+  
+  [self.delegate toggleVizualization:newState];   // FIXME
+
+  sender.selected = newState;
 }
 
 

@@ -62,4 +62,11 @@
   [self.view setNeedsLayout];
 }
 
+- (void)toggleVizualization:(BOOL)toggle
+{
+  NSLog(@"shouldVisualizeLayoutSpecs:%d", toggle);
+  [self.node shouldVisualizeLayoutSpecs:toggle];
+  [self.view setNeedsLayout];
+}
+
 @end

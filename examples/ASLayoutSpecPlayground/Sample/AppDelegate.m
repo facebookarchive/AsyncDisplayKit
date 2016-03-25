@@ -43,6 +43,7 @@
     splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
     splitViewController.viewControllers = [NSArray arrayWithObjects:masterNav, detailNav, nil];
     splitViewController.delegate = detailViewController;
+    splitViewController.maximumPrimaryColumnWidth = 200;
     
     detailViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem;
 

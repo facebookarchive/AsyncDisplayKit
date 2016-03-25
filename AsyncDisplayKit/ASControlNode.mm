@@ -9,6 +9,9 @@
 #import "ASControlNode.h"
 #import "ASControlNode+Subclasses.h"
 #import "ASThread.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASLayoutSpec+Debug.h"
+#import "ASLayoutableInspectorNode.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
@@ -87,7 +90,24 @@ static BOOL _enableHitTestDebug = NO;
 
   // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
   self.userInteractionEnabled = NO;
+  
   return self;
+}
+
+- (void)inspectElement
+{
+  [ASLayoutableInspectorNode sharedInstance].layoutableToEdit = self;
+}
+
+- (void)setHierarchyState:(ASHierarchyState)hierarchyState
+{
+  [super setHierarchyState:hierarchyState];
+  
+  // FIXME: handle disabling hierarchy state on nodes that had previously enabled it (remove target)
+  if (ASHierarchyStateIncludesVisualizeLayoutSpecs(hierarchyState)) {
+    [self addTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
+//    NSLog(@"%@", self);
+  }
 }
 
 - (void)setUserInteractionEnabled:(BOOL)userInteractionEnabled
@@ -236,6 +256,7 @@ static BOOL _enableHitTestDebug = NO;
 {
   NSParameterAssert(action);
   NSParameterAssert(controlEventMask != 0);
+  ASDisplayNodeAssert(!self.isLayerBacked, @"ASControlNode is layer backed, will never be able to call target in target:action: pair.");
   
   ASDN::MutexLocker l(_controlLock);
   

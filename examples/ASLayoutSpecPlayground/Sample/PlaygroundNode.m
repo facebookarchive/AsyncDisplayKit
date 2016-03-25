@@ -10,15 +10,24 @@
 #import "ColorNode.h"
 #import "AsyncDisplayKit+Debug.h"
 #import "ASLayoutableInspectorNode.h"
+#import "Utilities.h"
+
+#define USER_IMAGE_HEIGHT       60
+#define HORIZONTAL_BUFFER       10
+#define VERTICAL_BUFFER         5
+#define FONT_SIZE               20
 
 @implementation PlaygroundNode
 {
-  NSArray         *_colorNodes;
-  ASDisplayNode   *_individualColorNode;
-  ASTextNode      *_textNode1;
-  ASTextNode      *_textNode2;
-  ASTextNode      *_textNode3;
+  ASNetworkImageNode  *_userAvatarImageView;
+  ASNetworkImageNode  *_photoImageView;
+  ASTextNode          *_userNameLabel;
+  ASTextNode          *_photoLocationLabel;
+  ASTextNode          *_photoTimeIntervalSincePostLabel;
+  ASTextNode          *_photoLikesLabel;
+  ASTextNode          *_photoDescriptionLabel;
 }
+
 #pragma mark - Lifecycle
 
 - (instancetype)init
@@ -26,95 +35,153 @@
   self = [super init];
   
   if (self) {
-  
+    
+    self.backgroundColor                 = [UIColor whiteColor];
     self.usesImplicitHierarchyManagement = YES;
-//    self.clipsToBounds = YES;                   // make outside bounds semi-transparent
     
-    ColorNode *node = [[ColorNode alloc] init];
-    ColorNode *node2 = [[ColorNode alloc] init];
-    ColorNode *node3 = [[ColorNode alloc] init];
-    _colorNodes = @[node, node2, node3];
-
-    _individualColorNode = [[ColorNode alloc] init];
-    _individualColorNode.backgroundColor = [UIColor orangeColor];
+    _userAvatarImageView     = [[ASNetworkImageNode alloc] init];
+    _userAvatarImageView.URL = [NSURL URLWithString:@"https://s-media-cache-ak0.pinimg.com/avatars/503h_1458880322_140.jpg"];
     
-    // user interaction off by default
-    _textNode1 = [[ASTextNode alloc] init];
-    _textNode1.attributedString = [[NSAttributedString alloc] initWithString:@"test"];
-    _textNode1.backgroundColor = [UIColor greenColor];
-    _textNode1.userInteractionEnabled = YES;
-    [_textNode1 addTarget:self action:@selector(textTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+    // FIXME: autocomplete for this line seems broken
+    [_userAvatarImageView setImageModificationBlock:^UIImage *(UIImage *image) {
+      CGSize profileImageSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+      return [image makeCircularImageWithSize:profileImageSize];
+    }];
     
-    _textNode2 = [[ASTextNode alloc] init];
-    _textNode2.attributedString = [[NSAttributedString alloc] initWithString:@"Hhhhhhhhhheeeeeeeeeelllllloooooooo"];
-    _textNode2.backgroundColor = [UIColor greenColor];
-    _textNode2.userInteractionEnabled = YES;
-    [_textNode2 addTarget:self action:@selector(textTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+    _userNameLabel                  = [[ASTextNode alloc] init];
+    _userNameLabel.attributedString = [self usernameAttributedStringWithFontSize:FONT_SIZE];
     
-    _textNode3 = [[ASTextNode alloc] init];
-    _textNode3.attributedString = [[NSAttributedString alloc] initWithString:@"another test text node"];
-    _textNode3.backgroundColor = [UIColor greenColor];
-    _textNode3.userInteractionEnabled = YES;
-    [_textNode3 addTarget:self action:@selector(textTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+    _photoLocationLabel                      = [[ASTextNode alloc] init];
+    _photoLocationLabel.maximumNumberOfLines = 1;
+    _photoLocationLabel.attributedString     = [self locationAttributedStringWithFontSize:FONT_SIZE];
+    
+    _photoTimeIntervalSincePostLabel                  = [[ASTextNode alloc] init];
+    _photoTimeIntervalSincePostLabel.attributedString = [self uploadDateAttributedStringWithFontSize:FONT_SIZE];
+    
+    _photoImageView     = [[ASNetworkImageNode alloc] init];
+    _photoImageView.URL = [NSURL URLWithString:@"https://s-media-cache-ak0.pinimg.com/564x/9f/5b/3a/9f5b3a35640bc7a5d484b66124c48c46.jpg"];
+    
+    _photoLikesLabel                  = [[ASTextNode alloc] init];
+    _photoLikesLabel.attributedString = [self likesAttributedStringWithFontSize:FONT_SIZE];
+    
+    _photoDescriptionLabel                      = [[ASTextNode alloc] init];
+    _photoDescriptionLabel.attributedString     = [self descriptionAttributedStringWithFontSize:FONT_SIZE];
+    _photoDescriptionLabel.maximumNumberOfLines = 3;
   }
   
   return self;
 }
 
-- (void)textTapped:(UIGestureRecognizer *)sender
-{
-  [ASLayoutableInspectorNode sharedInstance].layoutableToEdit = (ASTextNode *)sender;
-}
-
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  NSMutableArray *children = [[NSMutableArray alloc] init];
-  for (ASDisplayNode *node in _colorNodes) {
-    UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
-    node.flexGrow = YES;
-    ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:node];
-    insetSpec.flexGrow = YES;
-    [children addObject:insetSpec];
+  // username / photo location header vertical stack
+  
+  _userNameLabel.flexShrink         = YES;
+  _photoLocationLabel.flexShrink    = YES;
+
+  ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  headerSubStack.flexShrink         = YES;
+  
+  if (_photoLocationLabel.attributedString) {
+    [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
+  } else {
+    [headerSubStack setChildren:@[_userNameLabel]];
   }
   
-  [children addObject:_textNode1];
-  [children addObject:_textNode2];
-  [children addObject:_textNode3];
+  // header stack
   
-  _textNode1.flexShrink = YES;
-  _textNode2.flexShrink = YES;
-  _textNode3.flexShrink = YES;
-
-  ASStackLayoutSpec *innerStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  innerStack.children = children;
-  innerStack.flexGrow = YES;
-  innerStack.flexShrink = YES;
-
-//  _individualColorNode.preferredFrameSize = CGSizeMake(100, 600);
-  _individualColorNode.flexGrow = YES;
-  _individualColorNode.flexShrink = YES;
+  _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER; // hack to remove double spaces around spacer
   
-  ASStackLayoutSpec *outerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
-  outerStack.flexGrow = YES;
-  outerStack.flexShrink = YES;
-  outerStack.children = @[innerStack, _individualColorNode];
-  outerStack.alignItems = ASStackLayoutAlignItemsStretch;
+  UIEdgeInsets avatarInsets          = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
+  ASInsetLayoutSpec *avatarInset     = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
   
-  return outerStack;
+  ASLayoutSpec *spacer               = [[ASLayoutSpec alloc] init];
+  spacer.flexGrow                    = YES;
+  spacer.flexShrink                  = YES;
+  
+  ASStackLayoutSpec *headerStack     = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  headerStack.alignItems             = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack
+  headerStack.justifyContent         = ASStackLayoutJustifyContentStart;                  // justify content to the left side of the header stack
+  headerStack.flexShrink             = YES;
+  headerStack.flexGrow               = YES;
+  
+  [headerStack setChildren:@[avatarInset, headerSubStack, spacer, _photoTimeIntervalSincePostLabel]];
+  
+  // header inset stack
+  
+  UIEdgeInsets insets                = UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER);
+  ASInsetLayoutSpec *headerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:headerStack];
+  headerWithInset.flexShrink         = YES;
+  headerWithInset.flexGrow           = YES;
+  
+  // footer stack
+  
+  ASStackLayoutSpec *footerStack     = [ASStackLayoutSpec verticalStackLayoutSpec];
+  footerStack.spacing                = VERTICAL_BUFFER;
+  
+  [footerStack setChildren:@[_photoLikesLabel, _photoDescriptionLabel]];
+  
+  // footer inset stack
+  
+  UIEdgeInsets footerInsets          = UIEdgeInsetsMake(VERTICAL_BUFFER, HORIZONTAL_BUFFER, VERTICAL_BUFFER, HORIZONTAL_BUFFER);
+  ASInsetLayoutSpec *footerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:footerInsets child:footerStack];
+  
+  // vertical stack
+  
+  CGFloat cellWidth                  = constrainedSize.max.width;
+  _photoImageView.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);              // constrain photo frame size
+  
+  ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
+  verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;                // sretch headerStack to fill horizontal space
+  [verticalStack setChildren:@[headerWithInset, _photoImageView, footerWithInset]];
+  verticalStack.flexShrink           = YES;
+  
+  return verticalStack;
 }
 
-//- (ASSizeRange)playgroundConstrainedSize
-//{
-//  if (ASRangeIsEmpty(_playgroundConstrainedSize)) {
-//    CGSize maxSize = CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX);
-//    _playgroundConstrainedSize = ASSizeRangeMake(maxSize, maxSize);
-//  }
-//  return _playgroundConstrainedSize;
-//}
-//
-//- (ASSizeRange)nodeConstrainedSize
-//{
-//  return self.playgroundConstrainedSize;
-//}
+#pragma mark - helper methods
+
+- (NSAttributedString *)usernameAttributedStringWithFontSize:(CGFloat)size
+{
+  return [NSAttributedString attributedStringWithString:@"hannahmbanana"
+                                               fontSize:size
+                                                  color:[UIColor darkBlueColor]
+                                         firstWordColor:nil];
+}
+
+- (NSAttributedString *)locationAttributedStringWithFontSize:(CGFloat)size
+{
+  return [NSAttributedString attributedStringWithString:@"San Fransisco, CA"
+                                               fontSize:size
+                                                  color:[UIColor lightBlueColor]
+                                         firstWordColor:nil];
+}
+
+- (NSAttributedString *)uploadDateAttributedStringWithFontSize:(CGFloat)size
+{
+  return [NSAttributedString attributedStringWithString:@"30m"
+                                               fontSize:size
+                                                  color:[UIColor lightGrayColor]
+                                         firstWordColor:nil];
+}
+
+- (NSAttributedString *)likesAttributedStringWithFontSize:(CGFloat)size
+{
+  return [NSAttributedString attributedStringWithString:@"♥︎ 17 likes"
+                                               fontSize:size
+                                                  color:[UIColor darkBlueColor]
+                                         firstWordColor:nil];
+}
+
+- (NSAttributedString *)descriptionAttributedStringWithFontSize:(CGFloat)size
+{
+  NSString *string               = [NSString stringWithFormat:@"hannahtroisi check out this cool pic from the internet!"];
+  NSAttributedString *attrString = [NSAttributedString attributedStringWithString:string
+                                                                         fontSize:size
+                                                                            color:[UIColor darkGrayColor]
+                                                                   firstWordColor:[UIColor darkBlueColor]];
+  return attrString;
+}
 
 @end

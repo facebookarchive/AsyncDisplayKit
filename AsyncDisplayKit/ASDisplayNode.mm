@@ -1838,6 +1838,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       [ASLayoutSpec setShouldVisualizeLayoutSpecs2:YES];
     }
     
+    
     ASStaticLayoutSpec *staticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[[self layoutSpecThatFits:constrainedSize]]];
     
     ASLayoutSpec *layoutSpec = staticSpec;
