@@ -98,6 +98,7 @@
     return nil;
 
   _displayingPlaceholder = YES;
+  _scrollEnabled = YES;
 
   // Create the scaffolding for the text view.
   _textKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
