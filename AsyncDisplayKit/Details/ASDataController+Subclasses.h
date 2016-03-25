@@ -38,7 +38,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
  */
 - (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind completion:(ASDataControllerCompletionBlock)completionBlock;
 
-/*
+/**
  * Perform measurement and layout of loaded nodes on the main thread, skipping unloaded nodes.
  *
  * @discussion Once nodes have loaded their views, we can't layout in the background so this is a chance
