@@ -161,7 +161,7 @@
 
   // Create and configure our text view.
   _textKitComponents.textView = self.textView;
-  //_textKitComponents.textView = NO; // Unfortunately there's a bug here with iOS 7 DP5 that causes the text-view to only be one line high when scrollEnabled is NO. rdar://14729288
+  _textKitComponents.textView.scrollEnabled = _scrollEnabled;
   _textKitComponents.textView.delegate = self;
   #if TARGET_OS_IOS
   _textKitComponents.textView.editable = YES;
