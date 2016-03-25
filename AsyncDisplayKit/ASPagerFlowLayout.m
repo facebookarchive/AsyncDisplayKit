@@ -57,7 +57,7 @@
 
 - (BOOL)_dataSourceIsEmpty
 {
-  return ([self.collectionView numberOfSections] > 0 && [self.collectionView numberOfItemsInSection:0] > 0);
+  return ([self.collectionView numberOfSections] == 0 || [self.collectionView numberOfItemsInSection:0] == 0);
 }
 
 - (CGRect)_visibleRect
