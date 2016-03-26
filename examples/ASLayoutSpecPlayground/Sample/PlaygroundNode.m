@@ -7,9 +7,7 @@
 //
 
 #import "PlaygroundNode.h"
-#import "ColorNode.h"
 #import "AsyncDisplayKit+Debug.h"
-#import "ASLayoutableInspectorNode.h"
 #import "Utilities.h"
 
 #define USER_IMAGE_HEIGHT       60
@@ -42,8 +40,7 @@
     _userAvatarImageView     = [[ASNetworkImageNode alloc] init];
     _userAvatarImageView.URL = [NSURL URLWithString:@"https://s-media-cache-ak0.pinimg.com/avatars/503h_1458880322_140.jpg"];
     
-    // FIXME: autocomplete for this line seems broken
-    [_userAvatarImageView setImageModificationBlock:^UIImage *(UIImage *image) {
+    [_userAvatarImageView setImageModificationBlock:^UIImage *(UIImage *image) {   // FIXME: in framework autocomplete for setImageModificationBlock line seems broken
       CGSize profileImageSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
       return [image makeCircularImageWithSize:profileImageSize];
     }];
@@ -176,7 +173,7 @@
 
 - (NSAttributedString *)descriptionAttributedStringWithFontSize:(CGFloat)size
 {
-  NSString *string               = [NSString stringWithFormat:@"hannahtroisi check out this cool pic from the internet!"];
+  NSString *string               = [NSString stringWithFormat:@"hannahmbanana check out this cool pic from the internet!"];
   NSAttributedString *attrString = [NSAttributedString attributedStringWithString:string
                                                                          fontSize:size
                                                                             color:[UIColor darkGrayColor]

@@ -9,7 +9,8 @@
 #import "PlaygroundContainerNode.h"
 #import "PlaygroundNode.h"
 #import "ASLayoutableInspectorNode.h"  // FIXME: move to ASLayoutSpecDebug
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+
+#define RESIZE_HANDLE_SIZE 30
 
 @implementation PlaygroundContainerNode
 {
@@ -17,26 +18,30 @@
   ASImageNode    *_resizeHandle;
 }
 
+#pragma mark - Lifecycle
+
 - (instancetype)init
 {
   self = [super init];
+  
   if (self) {
     self.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
     self.usesImplicitHierarchyManagement = YES;
     
-    [ASLayoutableInspectorNode sharedInstance].flexBasis = ASRelativeDimensionMakeWithPercent(1.0);
-    
     _playgroundNode = [[PlaygroundNode alloc] init];
     
-    _resizeHandle = [[ASImageNode alloc] init];
-    _resizeHandle.image = [UIImage imageNamed:@"resizeHandle"];
+    _resizeHandle                        = [[ASImageNode alloc] init];
+    _resizeHandle.image                  = [UIImage imageNamed:@"resizeHandle"];
     _resizeHandle.userInteractionEnabled = YES;
     [self.view addSubnode:_resizeHandle];
     
-    UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(resizePlayground:)];
+    UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self
+                                                                                       action:@selector(resizePlayground:)];
     lpgr.minimumPressDuration = 0.0;
     lpgr.allowableMovement = CGFLOAT_MAX;
     [_resizeHandle.view addGestureRecognizer:lpgr];
+    
+    [ASLayoutableInspectorNode sharedInstance].flexBasis = ASRelativeDimensionMakeWithPercent(1.0);
     
     [self shouldVisualizeLayoutSpecs:YES];
   }
@@ -44,28 +49,29 @@
   return self;
 }
 
-#define RESIZE_HANDLE_SIZE 30
+// manually layout _resizeHandle              // FIXME: add this to an overlayStack in layoutSpecThatFits?
 - (void)layout
 {
   [super layout];
   [self.view bringSubviewToFront:_resizeHandle.view];
   
   CGSize playgroundSize = _playgroundNode.calculatedLayout.size;
-  
-  CGRect rect = CGRectZero;
-  rect.size = CGSizeMake(RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE);   // FIXME: make this an overlay stack?
-  rect.origin = CGPointMake(playgroundSize.width - rect.size.width, playgroundSize.height - rect.size.height);
-  _resizeHandle.frame = rect;
+  CGRect rect           = CGRectZero;
+  rect.size             = CGSizeMake(RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE);
+  rect.origin           = CGPointMake(playgroundSize.width - rect.size.width, playgroundSize.height - rect.size.height);
+  _resizeHandle.frame   = rect;
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   _playgroundNode.flexGrow = YES;
   _playgroundNode.flexShrink = YES;
-  
-  UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
-  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_playgroundNode];
+
+  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10)
+                                                child:_playgroundNode];
 }
+
+#pragma mark - Gesture Handling
 
 - (void)resizePlayground:(UIGestureRecognizer *)sender
 {

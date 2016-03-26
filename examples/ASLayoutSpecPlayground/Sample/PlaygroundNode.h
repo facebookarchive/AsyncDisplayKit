@@ -10,5 +10,4 @@
 
 @interface PlaygroundNode : ASDisplayNode
 
-@property (nonatomic, assign) ASSizeRange playgroundConstrainedSize;
 @end

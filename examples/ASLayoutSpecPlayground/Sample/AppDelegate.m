@@ -8,52 +8,41 @@
 
 #import "AppDelegate.h"
 #import "ViewController.h"
-#import "MasterViewController.h"
 #import "ASLayoutableInspectorNode.h"
-
-@interface AppDelegate ()
-
-@end
+#import "Utilities.h"
 
 @implementation AppDelegate
 
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   
-  self.window                 = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-  self.window.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
+  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
   
-  // assign rootViewController
-  UIViewController *rootViewController = nil;
+  UIViewController *rootVC = nil;
   
-  // determine if app is running on an iPhone or iPad
   UIDevice *device = [UIDevice currentDevice];
-  
   if (device.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
 
-    // cannot get to supernode - need a delegate protocol //
-    MasterViewController *masterViewController = [[MasterViewController alloc] initWithNode:[ASLayoutableInspectorNode sharedInstance]];
-    masterViewController.view.backgroundColor  = [UIColor colorWithRed:40/255.0 green:43/255.0 blue:53/255.0 alpha:1.0];
-    UINavigationController *masterNav          = [[UINavigationController alloc] initWithRootViewController:masterViewController];
+    ASViewController *masterVC        = [[ASViewController alloc] initWithNode:[ASLayoutableInspectorNode sharedInstance]];
+    masterVC.view.backgroundColor     = [UIColor customOrangeColor];
+    UINavigationController *masterNav = [[UINavigationController alloc] initWithRootViewController:masterVC];
 
-    ViewController *detailViewController = [[ViewController alloc] init];
-    UINavigationController *detailNav = [[UINavigationController alloc] initWithRootViewController:detailViewController];
+    ViewController *detailVC          = [[ViewController alloc] init];
+    UINavigationController *detailNav = [[UINavigationController alloc] initWithRootViewController:detailVC];
     
-    UISplitViewController *splitViewController = [[UISplitViewController alloc] init];
-    splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
-    splitViewController.viewControllers = [NSArray arrayWithObjects:masterNav, detailNav, nil];
-    splitViewController.delegate = detailViewController;
-    splitViewController.maximumPrimaryColumnWidth = 200;
+    UISplitViewController *splitVC    = [[UISplitViewController alloc] init];
+    splitVC.preferredDisplayMode      = UISplitViewControllerDisplayModeAllVisible;
+    splitVC.viewControllers           = [NSArray arrayWithObjects:masterNav, detailNav, nil];
+    splitVC.maximumPrimaryColumnWidth = 200;
     
-    detailViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem;
-
-    rootViewController = splitViewController;
+    rootVC = splitVC;
     
   } else {
+    
+    // FIXME: make this work for iPhones
     NSAssert(YES, @"App optimized for iPad only.");
   }
   
-  [self.window setRootViewController:rootViewController];
+  [self.window setRootViewController:rootVC];
   [self.window makeKeyAndVisible];
   
   return YES;

@@ -13,21 +13,14 @@
 
 + (UIColor *)darkBlueColor;
 + (UIColor *)lightBlueColor;
++ (UIColor *)duskColor;
++ (UIColor *)customOrangeColor;
 
 @end
 
 @interface UIImage (Additions)
 
-+ (UIImage *)followingButtonStretchableImageForCornerRadius:(CGFloat)cornerRadius following:(BOOL)followingEnabled;
-
 - (UIImage *)makeCircularImageWithSize:(CGSize)size;
-
-@end
-
-@interface NSString (Additions)
-
-// returns a user friendly elapsed time such as '50s', '6m' or '3w'
-+ (NSString *)elapsedTimeStringSinceDate:(NSString *)uploadDateString;
 
 @end
 

@@ -8,13 +8,10 @@
 
 #import "ViewController.h"
 #import "PlaygroundContainerNode.h"
-#import "ASDisplayNode+Beta.h" // FIXME?
+#import "ASLayoutableInspectorNode.h"
 
-@interface ViewController () <PlaygroundContainerNodeDelegate>
-
+@interface ViewController () <PlaygroundContainerNodeDelegate, ASLayoutableInspectorNodeDelegate>
 @end
-
-// Need ASPagerNode, ASCollectionView, ASViewController or ASTableView to implement (calls measure: for you)
 
 @implementation ViewController
 {
@@ -26,20 +23,20 @@
 - (instancetype)init
 {
   PlaygroundContainerNode *containerNode = [[PlaygroundContainerNode alloc] init];
-  
   self = [super initWithNode:containerNode];
+  
   if (self) {
-    self.navigationItem.title = @"ASLayoutSpec Playground";
-    
-    containerNode.delegate = self;
-    
+    self.navigationItem.title   = @"ASLayoutSpec Playground";
     self.edgesForExtendedLayout = UIRectEdgeNone;
-    
+    containerNode.delegate      = self;
     [ASLayoutableInspectorNode sharedInstance].delegate = self;
   }
+  
   return self;
 }
 
+// [ASViewController] Override this method to provide a custom size range to the backing node.
+// Neccessary to allow the user to stretch / shrink the size of playground container.
 - (ASSizeRange)nodeConstrainedSize
 {
   if (CGSizeEqualToSize(_sizeRange.max, CGSizeZero)) {
@@ -48,13 +45,7 @@
   return _sizeRange;
 }
 
-#pragma mark - UISplitViewControllerDelegate
-
-- (void)shouldShowMasterSplitViewController
-{
-  self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
-}
-
+#pragma mark - PlaygroundContainerNodeDelegate
 
 - (void)relayoutWithSize:(ASSizeRange)size
 {
@@ -62,7 +53,9 @@
   [self.view setNeedsLayout];
 }
 
-- (void)toggleVizualization:(BOOL)toggle
+#pragma mark - ASLayoutableInspectorNodeDelegate
+
+- (void)toggleVizualization:(BOOL)toggle            // FIXME: this doesn't work currently
 {
   NSLog(@"shouldVisualizeLayoutSpecs:%d", toggle);
   [self.node shouldVisualizeLayoutSpecs:toggle];
