@@ -17,7 +17,7 @@
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
 #import "ASTextKitCoreTextAdditions.h"
-#import "ASTextKitHelpers.h"
+#import "ASTextKitComponents.h"
 #import "ASTextKitFontSizeAdjuster.h"
 #import "ASTextKitRenderer.h"
 #import "ASTextKitRenderer+Positioning.h"

@@ -7,7 +7,7 @@
  */
 
 #import <UIKit/UIKit.h>
-#import "ASBaseDefines.h"
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

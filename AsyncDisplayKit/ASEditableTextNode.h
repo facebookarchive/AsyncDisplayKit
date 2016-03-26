@@ -7,7 +7,7 @@
  */
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
-#import <AsyncDisplayKit/ASTextKitHelpers.h>
+#import <AsyncDisplayKit/ASTextKitComponents.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
