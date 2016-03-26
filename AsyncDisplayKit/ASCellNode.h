@@ -14,9 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef NSUInteger ASCellNodeAnimation;
 
-typedef enum : NSUInteger {
-  /** 
-   * Indicates a cell has just became visible 
+typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
+  /**
+   * Indicates a cell has just became visible
    */
   ASCellNodeVisibilityEventVisible,
   /**
@@ -26,11 +26,11 @@ typedef enum : NSUInteger {
    * Use CGRectIntersect between cellFrame and scrollView.bounds to get this rectangle
    */
   ASCellNodeVisibilityEventVisibleRectChanged,
-  /** 
-   * Indicates a cell is no longer visible 
+  /**
+   * Indicates a cell is no longer visible
    */
   ASCellNodeVisibilityEventInvisible,
-} ASCellNodeVisibilityEvent;
+};
 
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
