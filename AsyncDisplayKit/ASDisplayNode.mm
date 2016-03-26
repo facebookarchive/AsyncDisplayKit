@@ -1797,7 +1797,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   }
   
   // Kick off the recursion first, so that all necessary display calls are sent and the displayQueue is full of parallelizable work.
-  for (CALayer *sublayer in layer.sublayers) {
+  // NOTE: The docs report that `sublayers` returns a copy but it actually doesn't.
+  for (CALayer *sublayer in [layer.sublayers copy]) {
     recursivelyTriggerDisplayForLayer(sublayer, shouldBlock);
   }
   
