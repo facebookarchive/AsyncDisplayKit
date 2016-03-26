@@ -90,24 +90,7 @@ static BOOL _enableHitTestDebug = NO;
 
   // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
   self.userInteractionEnabled = NO;
-  
   return self;
-}
-
-- (void)inspectElement
-{
-  [ASLayoutableInspectorNode sharedInstance].layoutableToEdit = self;
-}
-
-- (void)setHierarchyState:(ASHierarchyState)hierarchyState
-{
-  [super setHierarchyState:hierarchyState];
-  
-  // FIXME: handle disabling hierarchy state on nodes that had previously enabled it (remove target)
-  if (ASHierarchyStateIncludesVisualizeLayoutSpecs(hierarchyState)) {
-    [self addTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
-//    NSLog(@"%@", self);
-  }
 }
 
 - (void)setUserInteractionEnabled:(BOOL)userInteractionEnabled
@@ -476,7 +459,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 }
 
 #pragma mark - Debug
-// Layout method required when _enableHitTestDebug is enabled.
+// layout method required when _enableHitTestDebug is enabled.
 - (void)layout
 {
   [super layout];
@@ -496,5 +479,21 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   _enableHitTestDebug = enable;
 }
 
+// methods for visualizing ASLayoutSpecs
+- (void)setHierarchyState:(ASHierarchyState)hierarchyState
+{
+  [super setHierarchyState:hierarchyState];
+  
+  if (ASHierarchyStateIncludesVisualizeLayoutSpecs(hierarchyState)) {
+    [self addTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
+  } else {
+    [self removeTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
+  }
+}
+
+- (void)inspectElement
+{
+  [ASLayoutableInspectorNode sharedInstance].layoutableToEdit = self;
+}
 
 @end

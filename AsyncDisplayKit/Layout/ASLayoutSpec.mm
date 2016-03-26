@@ -19,9 +19,9 @@
 #import "ASThread.h"
 
 #import "ASDisplayNode+Subclasses.h" // FIXME: remove this later
-#import "ASDisplayNode+Beta.h" // FIXME: remove this later
-#import "ASInsetLayoutSpec.h" // FIXME: remove this later
-#import "ASControlNode.h" // FIXME: remove this later
+#import "ASDisplayNode+Beta.h"       // FIXME: remove this later
+#import "ASInsetLayoutSpec.h"        // FIXME: remove this later
+#import "ASControlNode.h"            // FIXME: remove this later
 #import "ASLayoutSpec+Debug.h"
 
 #import <objc/runtime.h>
@@ -129,7 +129,6 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 {
   if ([child isKindOfClass:[ASLayoutSpec class]]) {
     [(ASLayoutSpec *)child setShouldVisualize:self.shouldVisualize];
-//    NSLog(@"%@ %@ %d", self, child, self.shouldVisualize);
   }
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   self.layoutChildren[identifier] = [self layoutableToAddFromLayoutable:child];

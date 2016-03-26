@@ -1834,10 +1834,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(_propertyLock);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
     if (ASHierarchyStateIncludesVisualizeLayoutSpecs(_hierarchyState)) {
-      //      [layoutSpec recursivelySetShouldVisualize:YES];
       [ASLayoutSpec setShouldVisualizeLayoutSpecs2:YES];
     }
-    
     
     ASStaticLayoutSpec *staticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[[self layoutSpecThatFits:constrainedSize]]];
     
@@ -1854,7 +1852,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     if (ASHierarchyStateIncludesVisualizeLayoutSpecs(_hierarchyState)) {
       [ASLayoutSpec setShouldVisualizeLayoutSpecs2:NO];
     }
-
     
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
       if (self.usesImplicitHierarchyManagement) {
