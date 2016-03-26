@@ -7,6 +7,7 @@
  */
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASTextKitHelpers.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,6 +18,17 @@ NS_ASSUME_NONNULL_BEGIN
  @discussion Does not support layer backing.
  */
 @interface ASEditableTextNode : ASDisplayNode
+
+/**
+ * @abstract Initializes a editable text node with a provided TextKit stack.
+ *
+ * @param textKitComponents The TextKit stack used to render text.
+ * @param placeholderTextKitComponents The TextKit stack used to render placeholder text.
+ *
+ * @returns An initialized ASEditableTextNode.
+ */
+- (instancetype)initWithTextKitComponents:(ASTextKitComponents *)textKitComponents
+             placeholderTextKitComponents:(ASTextKitComponents *)placeholderTextKitComponents;
 
 //! @abstract The text node's delegate, which must conform to the <ASEditableTextNodeDelegate> protocol.
 @property (nonatomic, readwrite, weak) id <ASEditableTextNodeDelegate> delegate;

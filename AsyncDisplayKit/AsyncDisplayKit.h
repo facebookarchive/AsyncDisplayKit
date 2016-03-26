@@ -15,7 +15,6 @@
 #import <AsyncDisplayKit/ASButtonNode.h>
 #import <AsyncDisplayKit/ASMapNode.h>
 #import <AsyncDisplayKit/ASVideoNode.h>
-
 #import <AsyncDisplayKit/ASEditableTextNode.h>
 
 #import <AsyncDisplayKit/ASBasicImageDownloader.h>
@@ -77,5 +76,6 @@
 #import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 #import <AsyncDisplayKit/UIView+ASConvenience.h>
 #import <AsyncDisplayKit/ASRunLoopQueue.h>
+#import <AsyncDisplayKit/ASTextKitHelpers.h>
 
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
