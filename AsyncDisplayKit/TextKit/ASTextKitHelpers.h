@@ -37,8 +37,20 @@ ASDISPLAYNODE_INLINE CGSize ceilSizeValue(CGSize s)
  @return An `ASTextKitComponents` containing the created components. The text view component will be nil.
  @discussion The returned components will be hooked up together, so they are ready for use as a system upon return.
  */
-+ (ASTextKitComponents *)componentsWithAttributedSeedString:(nullable NSAttributedString *)attributedSeedString
-                                          textContainerSize:(CGSize)textContainerSize;
++ (instancetype)componentsWithAttributedSeedString:(nullable NSAttributedString *)attributedSeedString
+                                 textContainerSize:(CGSize)textContainerSize;
+
+/**
+ @abstract Creates the stack of TextKit components.
+ @param textStorage The NSTextStorage to use.
+ @param textContainerSize The size of the text-container. Typically, size specifies the constraining width of the layout, and FLT_MAX for height. Pass CGSizeZero if these components will be hooked up to a UITextView, which will manage the text container's size itself.
+ @param layoutManager The NSLayoutManager to use.
+ @return An `ASTextKitComponents` containing the created components. The text view component will be nil.
+ @discussion The returned components will be hooked up together, so they are ready for use as a system upon return.
+ */
++ (instancetype)componentsWithTextStorage:(NSTextStorage *)textStorage
+                        textContainerSize:(CGSize)textContainerSize
+                            layoutManager:(NSLayoutManager *)layoutManager;
 
 /**
  @abstract Returns the bounding size for the text view's text.

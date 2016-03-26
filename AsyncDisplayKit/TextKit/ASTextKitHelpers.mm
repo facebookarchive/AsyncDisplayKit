@@ -19,15 +19,25 @@
 
 @implementation ASTextKitComponents
 
-+ (ASTextKitComponents *)componentsWithAttributedSeedString:(NSAttributedString *)attributedSeedString
-                                          textContainerSize:(CGSize)textContainerSize
++ (instancetype)componentsWithAttributedSeedString:(NSAttributedString *)attributedSeedString
+                                 textContainerSize:(CGSize)textContainerSize
 {
-  ASTextKitComponents *components = [[ASTextKitComponents alloc] init];
+  NSTextStorage *textStorage = attributedSeedString ? [[NSTextStorage alloc] initWithAttributedString:attributedSeedString] : [[NSTextStorage alloc] init];
 
-  // Create the TextKit component stack with our default configuration.
-  components.textStorage = (attributedSeedString ? [[NSTextStorage alloc] initWithAttributedString:attributedSeedString] : [[NSTextStorage alloc] init]);
+  return [self componentsWithTextStorage:textStorage
+                       textContainerSize:textContainerSize
+                           layoutManager:[[NSLayoutManager alloc] init]];
+}
 
-  components.layoutManager = [[NSLayoutManager alloc] init];
++ (instancetype)componentsWithTextStorage:(NSTextStorage *)textStorage
+                        textContainerSize:(CGSize)textContainerSize
+                            layoutManager:(NSLayoutManager *)layoutManager
+{
+  ASTextKitComponents *components = [[self alloc] init];
+
+  components.textStorage = textStorage;
+
+  components.layoutManager = layoutManager;
   [components.textStorage addLayoutManager:components.layoutManager];
 
   components.textContainer = [[NSTextContainer alloc] initWithSize:textContainerSize];
