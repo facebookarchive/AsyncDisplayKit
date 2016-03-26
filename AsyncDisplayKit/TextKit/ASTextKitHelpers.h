@@ -6,9 +6,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <objc/message.h>
-
-#import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "ASBaseDefines.h"
 
