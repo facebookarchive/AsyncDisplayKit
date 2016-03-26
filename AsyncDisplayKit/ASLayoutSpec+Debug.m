@@ -26,7 +26,6 @@ static BOOL __shouldVisualizeLayoutSpecs = NO;
 
 @end
 
-
 @implementation ASLayoutSpecVisualizerNode
 
 - (instancetype)initWithLayoutSpec:(ASLayoutSpec *)layoutSpec
@@ -34,41 +33,35 @@ static BOOL __shouldVisualizeLayoutSpecs = NO;
   self = [super init];
   if (self) {
     self.layer.borderWidth = 2;
-    self.layoutSpec = layoutSpec;
-    self.usesImplicitHierarchyManagement = YES;
     self.layer.borderColor = [[UIColor redColor] CGColor];
-    
-    [self addTarget:self action:@selector(layoutMagicNodeTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+    self.layoutSpec = layoutSpec;
+    self.layoutSpec.neverShouldVisualize = YES;
+    self.usesImplicitHierarchyManagement = YES;
+    [self addTarget:self action:@selector(visualizerNodeTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
   }
   return self;
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];      // FIXME: need to auto pass properties to children
-  insetSpec.neverShouldVisualize = YES;
-  self.layoutSpec.neverShouldVisualize = YES;
-  CGFloat insetFloat = [ASLayoutableInspectorNode sharedInstance].vizNodeInsetSize;
-  UIEdgeInsets insets = UIEdgeInsetsMake(insetFloat, insetFloat, insetFloat, insetFloat);
-//  UIEdgeInsets insets = UIEdgeInsetsZero;
+  CGFloat insetFloat   = [ASLayoutableInspectorNode sharedInstance].vizNodeInsetSize;
+  UIEdgeInsets insets  = UIEdgeInsetsMake(insetFloat, insetFloat, insetFloat, insetFloat);
   
+  // FIXME in framework: auto pass properties to children
+  ASInsetLayoutSpec *insetSpec   = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:self.layoutSpec];
+  insetSpec.neverShouldVisualize = YES;
+
   // propogate child's layoutSpec properties to the inset that we are adding
-  insetSpec.flexGrow   = _layoutSpec.flexGrow;              // FIXME:
+  insetSpec.flexGrow   = _layoutSpec.flexGrow;
   insetSpec.flexShrink = _layoutSpec.flexShrink;
   insetSpec.alignSelf  = _layoutSpec.alignSelf;
-  insetSpec.insets     = insets;
-  insetSpec.child      = self.layoutSpec;
   
-  return insetSpec; //self.layoutSpec;
+  return insetSpec;
 }
 
-- (void)setLayoutSpec:(ASLayoutSpec *)layoutSpec
+- (void)setLayoutSpec:(ASLayoutSpec *)layoutSpec  // FIXME: this is duplicated in InspectorNode - make it a category on ASLayoutSpec?
 {
-  _layoutSpec = layoutSpec;
-  
-//  self.flexGrow   = _layoutSpec.flexGrow;
-//  self.flexShrink = _layoutSpec.flexShrink;
-//  self.alignSelf  = _layoutSpec.alignSelf;
+  _layoutSpec = layoutSpec;                       // FIXME: should copy layoutSpec properities to self?
   
   if ([layoutSpec isKindOfClass:[ASInsetLayoutSpec class]]) {
     self.layer.borderColor = [[UIColor redColor] CGColor];
@@ -79,14 +72,14 @@ static BOOL __shouldVisualizeLayoutSpecs = NO;
   }
 }
 
-- (void)layoutMagicNodeTapped:(UIGestureRecognizer *)sender
-{
-  [[ASLayoutableInspectorNode sharedInstance] setLayoutableToEdit:self.layoutSpec];
-}
-
 - (NSString *)description
 {
-  return [self.layoutSpec description];         // FIXME: expand on layoutSpec description (e.g. have StackLayoutSpec return horz/vert)
+  return [self.layoutSpec description];   // FIXME: expand on layoutSpec description (e.g. have StackLayoutSpec return horz/vert)
+}
+
+- (void)visualizerNodeTapped:(UIGestureRecognizer *)sender
+{
+  [[ASLayoutableInspectorNode sharedInstance] setLayoutableToEdit:self.layoutSpec];
 }
 
 @end

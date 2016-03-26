@@ -10,16 +10,15 @@
 
 @protocol ASLayoutableInspectorNodeDelegate <NSObject>
 
-- (void)shouldShowMasterSplitViewController;
 - (void)toggleVizualization:(BOOL)toggle;
+
 @end 
 
+@interface ASLayoutableInspectorNode : ASDisplayNode
 
-@interface ASLayoutableInspectorNode : ASDisplayNode <UISplitViewControllerDelegate>
-
-@property (nonatomic, strong) id<ASLayoutable> layoutableToEdit;
+@property (nonatomic, strong) id<ASLayoutable>                      layoutableToEdit;
 @property (nonatomic, strong) id<ASLayoutableInspectorNodeDelegate> delegate;
-@property (nonatomic, assign) CGFloat      vizNodeInsetSize;
+@property (nonatomic, assign) CGFloat                               vizNodeInsetSize;
 
 + (instancetype)sharedInstance;
 

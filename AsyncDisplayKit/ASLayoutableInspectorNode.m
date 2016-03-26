@@ -122,12 +122,12 @@
     [_vizNodeInsetSizeBtn addTarget:self action:@selector(setVizNodeInsets:) forControlEvents:ASControlNodeEventTouchUpInside];
     _vizNodeInsetSizeBtn.selected = YES;
     
-    _parentNodeNavBtn = [self makeBtnNodeWithTitle:@"parent\nnode"];
-    _siblingNodeRightNavBtn = [self makeBtnNodeWithTitle:@"sibling\nnode"];
-    _addNodeNavBtn = [self makeBtnNodeWithTitle:@"add\nnode"];
+    _parentNodeNavBtn = [self makeBtnNodeWithTitle:@"parent\nlayoutable"];
+    _siblingNodeRightNavBtn = [self makeBtnNodeWithTitle:@"sibling\nlayoutable"];
+    _addNodeNavBtn = [self makeBtnNodeWithTitle:@"add\nlayoutable"];
     _addLayoutSpecNavBtn = [self makeBtnNodeWithTitle:@"add\nlayoutSpec"];
-    _siblingNodeLefttNavBtn = [self makeBtnNodeWithTitle:@"sibling\nnode"];
-    _childNodeNavBtn = [self makeBtnNodeWithTitle:@"child\nnode"];
+    _siblingNodeLefttNavBtn = [self makeBtnNodeWithTitle:@"sibling\nlayoutable"];
+    _childNodeNavBtn = [self makeBtnNodeWithTitle:@"child\nlayoutable"];
     
 //    _parentNodeNavBtn.selected = YES;
 //    _siblingNodeRightNavBtn.selected = YES;
@@ -154,7 +154,6 @@
     [self enableInspectorNodesForLayoutable];
     [self updateInspectorWithLayoutable];
   }
-  [self.delegate shouldShowMasterSplitViewController];
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
@@ -175,7 +174,7 @@
   
   spacer.flexGrow = YES;
   horizontalStack.children = @[_flexGrowBtn, spacer];
-  _flexGrowValue.alignSelf = ASStackLayoutAlignSelfEnd;                     // FIXME: make framework give a warning if you use ASAlignmentBottom!!!!!
+  _flexGrowValue.alignSelf = ASStackLayoutAlignSelfEnd;      // FIXME: make framework give a warning if you use ASAlignmentBottom!!!!!
   
   ASStackLayoutSpec *horizontalStack2 = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStack2.flexGrow = YES;
@@ -447,7 +446,8 @@
 //}
 
 #pragma mark - cast layoutableToEdit
-- (ASDisplayNode *)node
+
+- (ASDisplayNode *)node                                                         // FIXME: move to ASLayoutSpec? or make a category?
 {
   if ([self.layoutableToEdit isKindOfClass:[ASDisplayNode class]]) {
     return (ASDisplayNode *)self.layoutableToEdit;
@@ -464,7 +464,8 @@
 }
 
 #pragma mark - helper methods
-- (NSAttributedString *)attributedStringFromLayoutable:(id<ASLayoutable>)layoutable
+
+- (NSAttributedString *)attributedStringFromLayoutable:(id<ASLayoutable>)layoutable   // FIXME: move to Utilities.h
 {
   if ([self layoutSpec]) {
     return [self attributedStringFromString:[[self layoutSpec] description]];
