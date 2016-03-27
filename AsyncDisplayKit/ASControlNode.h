@@ -8,6 +8,8 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+#pragma once
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**

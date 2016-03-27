@@ -6,8 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASControlNode.h"
-#import "ASImageNode.h"
+@class ASDisplayNode, ASControlNode, ASImageNode;
 
 @interface ASDisplayNode (LayoutDebugging)
 

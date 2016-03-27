@@ -6,6 +6,8 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
+#import "ASDisplayNode.h"
+#import "ASImageNode.h"
 #import "AsyncDisplayKit+Debug.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"

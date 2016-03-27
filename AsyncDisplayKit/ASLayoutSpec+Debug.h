@@ -6,6 +6,7 @@
 //
 //
 
+#pragma once
 #import "ASLayoutSpec.h"
 #import "ASControlNode.h"
 

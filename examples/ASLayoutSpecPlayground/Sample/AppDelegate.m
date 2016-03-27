@@ -30,8 +30,8 @@
     UINavigationController *detailNav = [[UINavigationController alloc] initWithRootViewController:detailVC];
     
     UISplitViewController *splitVC    = [[UISplitViewController alloc] init];
+    splitVC.viewControllers           = @[masterNav, detailNav];
     splitVC.preferredDisplayMode      = UISplitViewControllerDisplayModeAllVisible;
-    splitVC.viewControllers           = [NSArray arrayWithObjects:masterNav, detailNav, nil];
     splitVC.maximumPrimaryColumnWidth = 200;
     
     rootVC = splitVC;
