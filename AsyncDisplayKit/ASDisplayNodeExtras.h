@@ -85,13 +85,24 @@ extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node);
  In the event that a node's backing layer is not created yet, the function will only walk the direct subnodes instead
  of forcing the layer hierarchy to be created.
  */
-extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
+extern void ASDisplayNodePerformBlockOnNodeAndSubnodes(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
 
 /**
- Identical to ASDisplayNodePerformBlockOnEveryNode, except it does not run the block on the
+ Identical to ASDisplayNodePerformBlockOnNodeAndSubnodes, except it does not run the block on the
  node provided directly to the function call - only on all descendants.
  */
-extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^block)(ASDisplayNode *node));
+extern void ASDisplayNodePerformBlockOnSubnodes(ASDisplayNode *node, void(^block)(ASDisplayNode *node));
+
+/**
+ Similar to ASDisplayNodePerformBlockOnNodeAndSubnodes it just walks the ups the layer hierarchy.
+ */
+extern void ASDisplayNodePerformBlockOnNodeAndSupernodes(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
+
+/**
+ Identical to ASDisplayNodePerformBlockOnSupernodes, except it does not run the block on the
+ node provided directly to the function call - only on all descendants.
+ */
+extern void ASDisplayNodePerformBlockOnSupernodes(ASDisplayNode *node,void(^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.

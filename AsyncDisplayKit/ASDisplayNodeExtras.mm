@@ -35,7 +35,7 @@ extern ASDisplayNode *ASViewToDisplayNode(UIView *view)
   return view.asyncdisplaykit_node;
 }
 
-extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, void(^block)(ASDisplayNode *node))
+extern void ASDisplayNodePerformBlockOnNodeAndSubnodes(CALayer *layer, ASDisplayNode *node, void(^block)(ASDisplayNode *node))
 {
   if (!node) {
     ASDisplayNodeCAssertNotNil(layer, @"Cannot recursively perform with nil node and nil layer");
@@ -54,20 +54,53 @@ extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *
     /// NOTE: The docs say `sublayers` returns a copy, but it does not.
     /// See: http://stackoverflow.com/questions/14854480/collection-calayerarray-0x1ed8faa0-was-mutated-while-being-enumerated
     for (CALayer *sublayer in [[layer sublayers] copy]) {
-      ASDisplayNodePerformBlockOnEveryNode(sublayer, nil, block);
+      ASDisplayNodePerformBlockOnNodeAndSubnodes(sublayer, nil, block);
     }
   } else if (node) {
     for (ASDisplayNode *subnode in [node subnodes]) {
-      ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
+      ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, subnode, block);
     }
   }
 }
 
-extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^block)(ASDisplayNode *node))
+extern void ASDisplayNodePerformBlockOnSubnodes(ASDisplayNode *node, void(^block)(ASDisplayNode *node))
 {
   for (ASDisplayNode *subnode in node.subnodes) {
-    ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
+    ASDisplayNodePerformBlockOnNodeAndSubnodes(nil, subnode, block);
   }
+}
+
+
+extern void ASDisplayNodePerformBlockOnNodeAndSupernodes(CALayer *layer, ASDisplayNode *node, void(^block)(ASDisplayNode *node)) {
+  
+  // We are at the root node just return
+  if (!node && !layer) {
+    return;
+  }
+  
+  if (!node) {
+    ASDisplayNodeCAssertMainThread();
+    node = ASLayerToDisplayNode(layer);
+  }
+  
+  if (node) {
+    block(node);
+  }
+  if (!layer && [node isNodeLoaded] && ASDisplayNodeThreadIsMain()) {
+    layer = node.layer;
+  }
+  
+  if (layer) {
+    layer = layer.superlayer;
+    ASDisplayNodePerformBlockOnNodeAndSupernodes(layer, nil, block);
+  } else {
+    node = node.supernode;
+    ASDisplayNodePerformBlockOnNodeAndSupernodes(nil, node, block);
+  }
+}
+
+extern void ASDisplayNodePerformBlockOnSupernodes(ASDisplayNode *node,void(^block)(ASDisplayNode *node)) {
+  ASDisplayNodePerformBlockOnNodeAndSupernodes(nil, node.supernode, block);
 }
 
 id ASDisplayNodeFindFirstSupernode(ASDisplayNode *node, BOOL (^block)(ASDisplayNode *node))

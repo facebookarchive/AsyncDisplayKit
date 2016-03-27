@@ -1069,10 +1069,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   // Check if this node or one of its subnodes can be animated.
   // If the context is already non-animated, don't bother checking this node.
   if (_queuedNodeSizeInvalidationContext.shouldAnimate) {
-    BOOL (^shouldNotAnimateBlock)(ASDisplayNode *) = ^BOOL(ASDisplayNode * _Nonnull node) {
-      return node.shouldAnimateSizeChanges == NO;
-    };
-    if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
+    if (node.shouldAnimateSizeChanges == NO || !ASSubnodesStateIncludesAnimateSizeChange(node.subnodesState)) {
       // One single non-animated cell node causes the whole context to be non-animated
       _queuedNodeSizeInvalidationContext.shouldAnimate = NO;
     }
