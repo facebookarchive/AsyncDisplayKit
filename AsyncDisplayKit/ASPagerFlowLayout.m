@@ -25,10 +25,8 @@
 - (CGPoint)targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 {
   if (self.currentIndexPath) {
-    CGPoint contentOffset = [self _targetContentOffsetForItemAtIndexPath:self.currentIndexPath
-                                                   proposedContentOffset:proposedContentOffset];
-    self.currentIndexPath = nil;
-    return contentOffset;
+    return [self _targetContentOffsetForItemAtIndexPath:self.currentIndexPath
+                                  proposedContentOffset:proposedContentOffset];
   }
   
   return [super targetContentOffsetForProposedContentOffset:proposedContentOffset];
@@ -36,6 +34,9 @@
 
 - (CGPoint)_targetContentOffsetForItemAtIndexPath:(NSIndexPath *)indexPath proposedContentOffset:(CGPoint)proposedContentOffset
 {
+  if ([self _dataSourceIsEmpty]) {
+    return proposedContentOffset;
+  }
   UICollectionViewLayoutAttributes *attributes = [self layoutAttributesForItemAtIndexPath:indexPath];
   CGFloat xOffset = (self.collectionView.bounds.size.width - attributes.frame.size.width) / 2;
   return CGPointMake(attributes.frame.origin.x - xOffset, proposedContentOffset.y);
@@ -52,6 +53,11 @@
     }
   }
   return nil;
+}
+
+- (BOOL)_dataSourceIsEmpty
+{
+  return ([self.collectionView numberOfSections] == 0 || [self.collectionView numberOfItemsInSection:0] == 0);
 }
 
 - (CGRect)_visibleRect
