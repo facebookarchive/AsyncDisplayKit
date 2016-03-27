@@ -337,9 +337,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)dealloc
 {
   ASDisplayNodeAssertMainThread();
+  // Synchronous nodes may not be able to call the hierarchy notifications, so only enforce for regular nodes.
+  ASDisplayNodeAssert(_flags.synchronous || !ASInterfaceStateIncludesVisible(_interfaceState), @"Node should always be marked invisible before deallocating; interfaceState: %d, %@", _interfaceState, self);
   
-  self.interfaceState &= ~ASInterfaceStateVisible;
-
   self.asyncLayer.asyncDelegate = nil;
   _view.asyncdisplaykit_node = nil;
   _layer.asyncdisplaykit_node = nil;
@@ -829,7 +829,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (BOOL)_displaysAsynchronously
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  return self.isSynchronous == NO && _flags.displaysAsynchronously;
+  return _flags.synchronous == NO && _flags.displaysAsynchronously;
 }
 
 - (void)setDisplaysAsynchronously:(BOOL)displaysAsynchronously
@@ -1545,10 +1545,11 @@ static NSInteger incrementIfFound(NSInteger i) {
   // Profiling has shown that locking this method is beneficial, so each of the property accesses don't have to lock and unlock.
   ASDN::MutexLocker l(_propertyLock);
   
-  if (!self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
-    self.inHierarchy = YES;
+  if (!_flags.isInHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
     _flags.isEnteringHierarchy = YES;
-    if (self.shouldRasterizeDescendants) {
+    _flags.isInHierarchy = YES;
+    
+    if (_flags.shouldRasterizeDescendants) {
       // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
       [self _recursiveWillEnterHierarchy];
     } else {
@@ -1568,7 +1569,7 @@ static NSInteger incrementIfFound(NSInteger i) {
         [self _setupPlaceholderLayerIfNeeded];
         _placeholderLayer.opacity = 1.0;
         [CATransaction commit];
-        [self.layer addSublayer:_placeholderLayer];
+        [layer addSublayer:_placeholderLayer];
       }
     }
   }
@@ -1582,18 +1583,34 @@ static NSInteger incrementIfFound(NSInteger i) {
   // Profiling has shown that locking this method is beneficial, so each of the property accesses don't have to lock and unlock.
   ASDN::MutexLocker l(_propertyLock);
   
-  if (self.inHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
-    self.inHierarchy = NO;
+  if (_flags.isInHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
+    _flags.isExitingHierarchy = YES;
+    _flags.isInHierarchy = NO;
 
     [self.asyncLayer cancelAsyncDisplay];
 
-    _flags.isExitingHierarchy = YES;
-    if (self.shouldRasterizeDescendants) {
+    if (_flags.shouldRasterizeDescendants) {
       // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
       [self _recursiveDidExitHierarchy];
-    } else {
-      [self didExitHierarchy];
     }
+    
+    // This case is important when tearing down hierarchies.  We must deliver a visibilityDidChange:NO callback, as part our API guarantee that this method can be used for
+    // things like data analytics about user content viewing.  We cannot call the method in the dealloc as any incidental retain operations in client code would fail.
+    // Additionally, it may be that a Standard UIView which is containing us is moving between hierarchies, and we should not send the call if we will be re-added in the
+    // same runloop.  Strategy: strong reference (might be the last!), wait one runloop, and confirm we are still outside the hierarchy (both layer-backed and view-backed).
+    // TODO: This approach could be optimized by only performing the dispatch for root elements + recursively apply the interface state change. This would require a closer
+    // integration with _ASDisplayLayer to ensure that the superlayer pointer has been cleared by this stage (to check if we are root or not), or a different delegate call.
+    
+    if (ASInterfaceStateIncludesVisible(_interfaceState)) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        ASDN::MutexLocker l(_propertyLock);
+        if (!_flags.isInHierarchy && ASInterfaceStateIncludesVisible(_interfaceState)) {
+          self.interfaceState = (_interfaceState & ~ASInterfaceStateVisible);
+        }
+      });
+    }
+    
+    [self didExitHierarchy];
     _flags.isExitingHierarchy = NO;
   }
 }
@@ -1719,7 +1736,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 // Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay
 {
-  return _flags.implementsDrawRect || _flags.implementsImageDisplay || self.shouldRasterizeDescendants || _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
+  return _flags.implementsDrawRect || _flags.implementsImageDisplay || _flags.shouldRasterizeDescendants || _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
 }
 
 - (BOOL)placeholderShouldPersist
