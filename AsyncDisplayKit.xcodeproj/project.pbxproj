@@ -1737,6 +1737,7 @@
 		058D09A4195D04C000B7D73C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = AS;
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
