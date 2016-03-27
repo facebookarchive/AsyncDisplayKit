@@ -130,7 +130,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (void)layoutLoadedNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind
 {
   NSAssert(ASDisplayNodeThreadIsMain(), @"Layout of loaded nodes must happen on the main thread.");
-  [self _layoutNodes:nodes fromContexts:contexts ofKind:kind];
+  ASDisplayNodeAssertTrue(nodes.count == contexts.count);
+  
+  [self _layoutNodes:nodes fromContexts:contexts inIndexesOfRange:NSMakeRange(0, nodes.count) ofKind:kind];
 }
 
 /**
@@ -156,23 +158,22 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 /**
  * Perform measurement and layout of loaded or unloaded nodes based if they will be layed out on main thread or not
  */
-- (void)_layoutNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind
+- (void)_layoutNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts inIndexesOfRange:(NSRange)range ofKind:(NSString *)kind
 {
-  ASDisplayNodeAssertTrue(nodes.count == contexts.count);
-  
   if (_dataSource == nil) {
     return;
   }
   
+  // For any given layout pass that occurs, this method will be called at least twice, once on the main thread and
+  // the background, to result in complete coverage of both loaded and unloaded nodes
   BOOL isMainThread = ASDisplayNodeThreadIsMain();
-  NSInteger idx = 0;
-  for (ASIndexedNodeContext *context in contexts) {
-    ASCellNode *node = nodes[idx];
+  for (NSUInteger k = range.location; k < (range.location + range.length); k++) {
+    ASCellNode *node = nodes[k];
     // Only nodes that are loaded should be layout on the main thread
     if (node.isNodeLoaded == isMainThread) {
+      ASIndexedNodeContext *context = contexts[k];
       [self _layoutNode:node withConstrainedSize:context.constrainedSize];
     }
-    idx++;
   }
 }
 
@@ -218,13 +219,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
       
       [self _layoutNodes:subarray
-            fromContexts:[contexts subarrayWithRange:NSMakeRange(j, batchCount)]
+            fromContexts:contexts
+        inIndexesOfRange:NSMakeRange(0, subarray.count)
                   ofKind:kind];
+      
     } else {
       allocationBlock();
       [_mainSerialQueue performBlockOnMainThread:^{
         [self _layoutNodes:subarray
-              fromContexts:[contexts subarrayWithRange:NSMakeRange(j, batchCount)]
+              fromContexts:contexts
+          inIndexesOfRange:NSMakeRange(0, subarray.count)
                     ofKind:kind];
       }];
     }
@@ -233,9 +237,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       // We should already have measured loaded nodes before we left the main thread. Layout the remaining once on a background thread.
-      NSRange range = NSMakeRange(j, batchCount);
-      [self _layoutNodes:[allocatedNodes subarrayWithRange:range]
-            fromContexts:[contexts subarrayWithRange:range]
+      [self _layoutNodes:allocatedNodes
+            fromContexts:contexts
+        inIndexesOfRange:NSMakeRange(j, batchCount)
                   ofKind:kind];
     });
   }
