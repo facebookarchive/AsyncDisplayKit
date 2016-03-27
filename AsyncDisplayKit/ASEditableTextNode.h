@@ -20,7 +20,14 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASEditableTextNode : ASDisplayNode
 
 /**
- * @abstract Initializes a editable text node with a provided TextKit stack.
+ * @abstract Initializes an editable text node using default TextKit components.
+ *
+ * @returns An initialized ASEditableTextNode.
+ */
+- (instancetype)init;
+
+/**
+ * @abstract Initializes an editable text node using the provided TextKit components.
  *
  * @param textKitComponents The TextKit stack used to render text.
  * @param placeholderTextKitComponents The TextKit stack used to render placeholder text.
