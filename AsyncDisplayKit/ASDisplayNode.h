@@ -16,6 +16,7 @@
 #import <AsyncDisplayKit/ASLayoutable.h>
 
 @class ASDisplayNode;
+@protocol ASTraitCollection;
 
 /**
  * UIView creation block. Used to create the backing view of a new display node.
@@ -280,6 +281,11 @@ NS_ASSUME_NONNULL_BEGIN
  * @return The preferred frame size of this node
  */
 @property (atomic, assign, readwrite) CGSize preferredFrameSize;
+
+/**
+ * @abstract The node's current trait collection
+ */
+@property (nonatomic, strong) id<ASTraitCollection> traitCollection;
 
 /** @name Managing the nodes hierarchy */
 

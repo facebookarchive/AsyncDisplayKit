@@ -19,6 +19,7 @@
 #import "ASLayoutOptions.h"
 #import "_ASTransitionContext.h"
 #import "ASDisplayNodeLayoutContext.h"
+#import "ASDisplayTraitCollection.h"
 
 #include <vector>
 
@@ -103,6 +104,8 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
+  
+  ASTraits _internalTraits;
   
   // Main thread only
   _ASTransitionContext *_transitionContext;

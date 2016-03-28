@@ -239,6 +239,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)visibilityDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
+ * @abstract Called when the trait collection changes.
+ * @discussion The node's trait collection property reflects the new trait collection
+ */
+- (void)traitCollectionDidChange:(id<ASTraitCollection>)previousTraitCollection ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
  * Called just before the view is added to a window.
  */
 - (void)willEnterHierarchy ASDISPLAYNODE_REQUIRES_SUPER;

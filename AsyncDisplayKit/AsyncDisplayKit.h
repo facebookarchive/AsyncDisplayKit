@@ -53,6 +53,9 @@
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
 #import <AsyncDisplayKit/ASStackLayoutSpec.h>
 
+#import <AsyncDisplayKit/ASDisplayTraitCollection.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
+
 #import <AsyncDisplayKit/_ASAsyncTransaction.h>
 #import <AsyncDisplayKit/_ASAsyncTransactionGroup.h>
 #import <AsyncDisplayKit/_ASDisplayView.h>
