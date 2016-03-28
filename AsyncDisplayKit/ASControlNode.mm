@@ -76,7 +76,7 @@ static BOOL _enableHitTestDebug = NO;
 
 @implementation ASControlNode
 {
-  ASDisplayNode *_debugHighlightOverlay;
+  ASImageNode *_debugHighlightOverlay;
 }
 
 #pragma mark - Lifecycle
@@ -255,10 +255,10 @@ static BOOL _enableHitTestDebug = NO;
       
       // add a highlight overlay node with area of ASControlNode + UIEdgeInsets
       self.clipsToBounds = NO;
-      _debugHighlightOverlay = [[ASDisplayNode alloc] init];
+      _debugHighlightOverlay = [[ASImageNode alloc] init];
+      _debugHighlightOverlay.zPosition = 1000;  // CALayer doesn't have -moveSublayerToFront, but this will ensure we're over the top of any siblings.
       _debugHighlightOverlay.layerBacked = YES;
-      _debugHighlightOverlay.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.5];
-      
+      _debugHighlightOverlay.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.4];
       [self addSubnode:_debugHighlightOverlay];
     }
   }
@@ -465,12 +465,35 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   [super layout];
   
   if (_debugHighlightOverlay) {
-    UIEdgeInsets insets = [self hitTestSlop];
-    CGRect controlNodeRect = self.bounds;
-    _debugHighlightOverlay.frame = CGRectMake(controlNodeRect.origin.x + insets.left,
-                                              controlNodeRect.origin.y + insets.top,
-                                              controlNodeRect.size.width - insets.left - insets.right,
-                                              controlNodeRect.size.height - insets.top - insets.bottom);
+    
+    // Even if our parents don't have clipsToBounds set and would allow us to display the debug overlay, UIKit event delivery (hitTest:)
+    // will not search sub-hierarchies if one of our parents does not return YES for pointInside:.  In such a scenario, hitTestSlop
+    // may not be able to expand the tap target as much as desired without also setting some hitTestSlop on the limiting parents.
+    CGRect intersectRect = UIEdgeInsetsInsetRect(self.bounds, [self hitTestSlop]);
+    CALayer *layer = self.layer;
+    CALayer *intersectLayer = layer;
+    CALayer *intersectSuperlayer = layer.superlayer;
+    
+    // Stop climbing if we encounter a UIScrollView, as its offset bounds origin may make it seem like our events will be clipped when
+    // scrolling will actually reveal them (because this process will not re-run due to scrolling)
+    while (intersectSuperlayer && ![intersectSuperlayer.delegate respondsToSelector:@selector(contentOffset)]) {
+      // Get our parent's tappable bounds.  If the parent has an associated node, consider hitTestSlop, as it will extend its pointInside:.
+      CGRect parentHitRect = intersectSuperlayer.bounds;
+      ASDisplayNode *parentNode = ASLayerToDisplayNode(intersectSuperlayer);
+      if (parentNode) {
+        parentHitRect = UIEdgeInsetsInsetRect(parentHitRect, [parentNode hitTestSlop]);
+      }
+      
+      // Convert our current rectangle to parent coordinates, and intersect with the parent's hit rect.
+      CGRect intersectRectInParentCoordinates = [intersectSuperlayer convertRect:intersectRect fromLayer:intersectLayer];
+      intersectRect = CGRectIntersection(parentHitRect, intersectRectInParentCoordinates);
+
+      // Advance up the tree.
+      intersectLayer = intersectSuperlayer;
+      intersectSuperlayer = intersectLayer.superlayer;
+    }
+    
+    _debugHighlightOverlay.frame = [intersectLayer convertRect:intersectRect toLayer:layer];
   }
 }
 
