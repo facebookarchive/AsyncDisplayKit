@@ -6,6 +6,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#pragma once
+
 #import <UIKit/UIKit.h>
 
 #import <AsyncDisplayKit/_ASAsyncTransactionContainer.h>

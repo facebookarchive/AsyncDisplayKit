@@ -9,6 +9,7 @@
 #import "PlaygroundContainerNode.h"
 #import "PlaygroundNode.h"
 #import "ASLayoutableInspectorNode.h"  // FIXME: move to ASLayoutSpecDebug
+#import "AsyncDisplayKit+Debug.h"
 
 #define RESIZE_HANDLE_SIZE 30
 
@@ -43,7 +44,7 @@
     
     [ASLayoutableInspectorNode sharedInstance].flexBasis = ASRelativeDimensionMakeWithPercent(1.0);
     
-    [self shouldVisualizeLayoutSpecs:YES];
+    self.shouldVisualizeLayoutSpecs = YES;
   }
   
   return self;

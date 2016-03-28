@@ -7,6 +7,7 @@
 //
 
 #import "ASLayoutableInspectorCell.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 typedef NS_ENUM(NSInteger, CellDataType) {
   CellDataTypeBool,

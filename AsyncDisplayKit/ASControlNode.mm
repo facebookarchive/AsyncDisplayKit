@@ -484,7 +484,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
   [super setHierarchyState:hierarchyState];
   
-  if (ASHierarchyStateIncludesVisualizeLayoutSpecs(hierarchyState)) {
+  if (self.shouldVisualizeLayoutSpecs) {
     [self addTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
   } else {
     [self removeTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];

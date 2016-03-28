@@ -11,6 +11,7 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASLayoutOptionsPrivate.h"
+#import "AsyncDisplayKit+Debug.h"
 
 #import <objc/runtime.h>
 #import <deque>
@@ -31,7 +32,7 @@
 #import "ASLayoutSpec.h"
 #import "ASCellNode.h"
 
-#import "ASLayoutSpec+Debug.h" // FIXME: remove later
+//#import "ASLayoutSpec+Debug.h" // FIXME: remove later
 #import "ASStaticLayoutSpec.h" // FIXME: remove later
 
 
@@ -601,9 +602,33 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   [self cancelLayoutTransitionsInProgress];
 
+  BOOL contextExists = (_supernode != nil);
+  BOOL didOverrideContext = NO;
+  ASLayoutableContext context;
+  if (contextExists) {
+    context = ASLayoutableGetCurrentContext();
+    if (context.needsVisualizeNode != _shouldVisualizeLayoutSpecs) {
+      context.needsVisualizeNode = _shouldVisualizeLayoutSpecs;
+      ASLayoutableSetCurrentContext(context);
+      didOverrideContext = YES;
+    }
+  } else {
+    context = ASLayoutableContextMake(0, _shouldVisualizeLayoutSpecs);
+    ASLayoutableSetCurrentContext(context);
+  }
+  
   ASLayout *previousLayout = _layout;
   ASSizeRange previousConstrainedSize = _constrainedSize;
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
+  
+  if (contextExists) {
+    if (didOverrideContext) {
+      context.needsVisualizeNode = !context.needsVisualizeNode;
+      ASLayoutableSetCurrentContext(context);
+    }
+  } else {
+    ASLayoutableClearCurrentContext();
+  }
   
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
     _pendingLayoutContext = [[ASDisplayNodeLayoutContext alloc] initWithNode:self
@@ -683,9 +708,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   void (^transitionBlock)() = ^{
     ASLayout *newLayout;
     {
-      ASLayoutableSetCurrentContext(ASLayoutableContextMake(transitionID, NO));
-
       ASDN::MutexLocker l(_propertyLock);
+      
+      ASLayoutableSetCurrentContext(ASLayoutableContextMake(transitionID, _shouldVisualizeLayoutSpecs));
+      
       BOOL disableImplicitHierarchyManagement = self.usesImplicitHierarchyManagement == NO;
       self.usesImplicitHierarchyManagement = YES; // Temporary flag for 1.9.x
       newLayout = [self calculateLayoutThatFits:constrainedSize];
@@ -1854,12 +1880,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(_propertyLock);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
-    if (ASHierarchyStateIncludesVisualizeLayoutSpecs(_hierarchyState)) {
-      [ASLayoutSpec setShouldVisualizeLayoutSpecs2:YES];
-    }
-    
     ASLayoutSpec *layoutSpec;
-    if (ASHierarchyStateIncludesVisualizeLayoutSpecs(_hierarchyState)) {
+    if (ASLayoutableGetCurrentContext().needsVisualizeNode) {
       ASStaticLayoutSpec *staticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[[self layoutSpecThatFits:constrainedSize]]];
       layoutSpec = staticSpec;
     } else {
@@ -1872,10 +1894,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     if (layout.layoutableObject != self) {
       layout.position = CGPointZero;
       layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
-    }
-    
-    if (ASHierarchyStateIncludesVisualizeLayoutSpecs(_hierarchyState)) {
-      [ASLayoutSpec setShouldVisualizeLayoutSpecs2:NO];
     }
     
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
@@ -2875,6 +2893,23 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 - (void)recursivelyReclaimMemory
 {
   [self recursivelyClearContents];
+}
+
+#pragma mark - ASDisplayNode(LayoutDebugging)
+
+- (void)setShouldVisualizeLayoutSpecs:(BOOL)shouldVisualizeLayoutSpecs
+{
+  ASDN::MutexLocker l(_propertyLock);
+  if (_shouldVisualizeLayoutSpecs != shouldVisualizeLayoutSpecs) {
+    _shouldVisualizeLayoutSpecs = shouldVisualizeLayoutSpecs;
+    [self setNeedsLayout];
+  }
+}
+
+- (BOOL)shouldVisualizeLayoutSpecs
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _shouldVisualizeLayoutSpecs;
 }
 
 @end

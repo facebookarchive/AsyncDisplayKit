@@ -6,14 +6,19 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-@class ASDisplayNode, ASControlNode, ASImageNode;
+#import "ASDisplayNode.h"
+#import "ASControlNode.h"
+#import "ASImageNode.h"
 
-@interface ASDisplayNode (LayoutDebugging)
+//@class ASDisplayNode, ASControlNode, ASImageNode;
 
-/**
- * FIXME:
- */
-- (void)shouldVisualizeLayoutSpecs:(BOOL)visualize;
+@interface ASDisplayNode ()
+{
+@protected
+  BOOL _shouldVisualizeLayoutSpecs;
+}
+
+@property (nonatomic, assign) BOOL shouldVisualizeLayoutSpecs;
 
 @end
 

@@ -11,21 +11,6 @@
 #import "AsyncDisplayKit.h"
 #import "ASLayoutableInspectorNode.h"
 
-@implementation ASLayoutSpec (Debugging2)
-
-static BOOL __shouldVisualizeLayoutSpecs = NO;
-+ (BOOL)shouldVisualizeLayoutSpecs2
-{
-  return __shouldVisualizeLayoutSpecs;
-}
-
-+ (void)setShouldVisualizeLayoutSpecs2:(BOOL)shouldVisualizeLayoutSpecs
-{
-  __shouldVisualizeLayoutSpecs = shouldVisualizeLayoutSpecs;
-}
-
-@end
-
 @implementation ASLayoutSpecVisualizerNode
 
 - (instancetype)initWithLayoutSpec:(ASLayoutSpec *)layoutSpec

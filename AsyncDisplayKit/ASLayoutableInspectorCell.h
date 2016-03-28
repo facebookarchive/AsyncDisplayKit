@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASCellNode.h>
 
 typedef NS_ENUM(NSInteger, ASLayoutablePropertyType) {
   ASLayoutablePropertyFlexGrow = 0,

@@ -49,8 +49,6 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
   /** One of the supernodes of this node is performing a transition.
       Any layout calculated during this state should not be applied immediately, but pending until later. */
   ASHierarchyStateLayoutPending           = 1 << 3,
-  /** FIXME:  */
-  ASHierarchyStateVisualizeLayoutSpecs    = 1 << 4
 };
 
 inline BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyState)
@@ -61,11 +59,6 @@ inline BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyStat
 inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState)
 {
     return ((hierarchyState & ASHierarchyStateRangeManaged) == ASHierarchyStateRangeManaged);
-}
-
-inline BOOL ASHierarchyStateIncludesVisualizeLayoutSpecs(ASHierarchyState hierarchyState)
-{
-  return ((hierarchyState & ASHierarchyStateVisualizeLayoutSpecs) == ASHierarchyStateVisualizeLayoutSpecs);
 }
 
 @interface ASDisplayNode ()
