@@ -500,5 +500,4 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   _enableHitTestDebug = enable;
 }
 
-
 @end

@@ -2383,13 +2383,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return [superview gestureRecognizerShouldBegin:gestureRecognizer];
 }
 
-#if DEBUG
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
   ASDisplayNodeAssertMainThread();
   return [_view hitTest:point withEvent:event];
 }
-#endif
 
 - (void)setHitTestSlop:(UIEdgeInsets)hitTestSlop
 {
