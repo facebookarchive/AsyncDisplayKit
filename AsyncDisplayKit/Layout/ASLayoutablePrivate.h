@@ -14,6 +14,19 @@
 @class ASLayoutOptions;
 @protocol ASLayoutable;
 
+struct ASLayoutableContext {
+  int32_t transitionID;
+  BOOL needsVisualizeNode;
+};
+
+extern struct ASLayoutableContext ASLayoutableContextMake(int32_t transitionID, BOOL needsVisualizeNode);
+
+extern void ASLayoutableSetCurrentContext(struct ASLayoutableContext context);
+
+extern struct ASLayoutableContext ASLayoutableGetCurrentContext();
+
+extern void ASLayoutableClearCurrentContext();
+
 /**
  *  The base protocol for ASLayoutable. Generally the methods/properties in this class do not need to be
  *  called by the end user and are only called internally. However, there may be a case where the methods are useful.
