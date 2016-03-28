@@ -32,7 +32,7 @@
     UISplitViewController *splitVC    = [[UISplitViewController alloc] init];
     splitVC.viewControllers           = @[masterNav, detailNav];
     splitVC.preferredDisplayMode      = UISplitViewControllerDisplayModeAllVisible;
-    splitVC.maximumPrimaryColumnWidth = 200;
+    splitVC.maximumPrimaryColumnWidth = 250;
     
     rootVC = splitVC;
     

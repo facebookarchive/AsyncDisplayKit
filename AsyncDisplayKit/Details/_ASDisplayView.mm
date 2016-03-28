@@ -90,6 +90,9 @@
     self.keepalive_node = _node;
   }
   else if (currentSuperview && !newSuperview) {
+    if (_node.inHierarchy) {        //FIXME: remove or rebase
+      [_node __exitHierarchy];
+    }
     self.keepalive_node = nil;
   }
   

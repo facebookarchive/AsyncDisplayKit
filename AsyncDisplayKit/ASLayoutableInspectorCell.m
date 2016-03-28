@@ -14,6 +14,20 @@ typedef NS_ENUM(NSInteger, CellDataType) {
   CellDataTypeFloat,
 };
 
+__weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
+
+@protocol InspectorCellEditingBubbleProtocol <NSObject>
+- (void)valueChangedToIndex:(NSUInteger)index;
+@end
+
+@interface ASLayoutableInspectorCellEditingBubble : ASDisplayNode
+@property (nonatomic, strong, readwrite) id<InspectorCellEditingBubbleProtocol> delegate;
+- (instancetype)initWithOptions:(NSArray<NSString *> *)options;
+@end
+
+@interface ASLayoutableInspectorCell () <InspectorCellEditingBubbleProtocol>
+@end
+
 @implementation ASLayoutableInspectorCell
 {
   ASLayoutablePropertyType      _propertyType;
@@ -22,6 +36,9 @@ typedef NS_ENUM(NSInteger, CellDataType) {
   
   ASButtonNode                  *_buttonNode;
   ASTextNode                    *_textNode;
+  ASTextNode                    *_textNode2;
+  
+  ASLayoutableInspectorCellEditingBubble *_textBubble;
 }
 
 #pragma mark - Lifecycle
@@ -44,8 +61,36 @@ typedef NS_ENUM(NSInteger, CellDataType) {
     _textNode = [[ASTextNode alloc] init];
     _textNode.attributedString = [ASLayoutableInspectorCell propertyValueAttributedStringForProperty:property withLayoutable:layoutable];
     
+    _textNode2 = [[ASTextNode alloc] init];
+    _textNode2.attributedString = [ASLayoutableInspectorCell propertyValueDetailAttributedStringForProperty:property withLayoutable:layoutable];
+    
   }
   return self;
+}
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  ASStackLayoutSpec *horizontalSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  horizontalSpec.children           = @[_buttonNode, _textNode];
+  horizontalSpec.flexGrow           = YES;
+  horizontalSpec.alignItems         = ASStackLayoutAlignItemsCenter;
+  horizontalSpec.justifyContent     = ASStackLayoutJustifyContentSpaceBetween;
+  
+  ASLayoutSpec *childSpec;
+  if (_textBubble) {
+    ASStackLayoutSpec *verticalSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
+    verticalSpec.children           = @[horizontalSpec, _textBubble];
+    verticalSpec.spacing            = 8;
+    verticalSpec.flexGrow           = YES;
+    _textBubble.flexGrow            = YES;
+    childSpec = verticalSpec;
+  } else {
+    childSpec = horizontalSpec;
+  }
+  ASInsetLayoutSpec *insetSpec      = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(2, 4, 2, 4) child:childSpec];
+  insetSpec.flexGrow = YES;
+  
+  return insetSpec;
 }
 
 + (NSAttributedString *)propertyValueAttributedStringForProperty:(ASLayoutablePropertyType)property withLayoutable:(id<ASLayoutable>)layoutable
@@ -60,7 +105,15 @@ typedef NS_ENUM(NSInteger, CellDataType) {
       valueString = layoutable.flexShrink ? @"YES" : @"NO";
       break;
     case ASLayoutablePropertyAlignSelf:
-      valueString = [ASLayoutableInspectorCell alignSelfValueString:layoutable.alignSelf];
+      valueString = [ASLayoutableInspectorCell alignSelfEnumValueString:layoutable.alignSelf];
+      break;
+    case ASLayoutablePropertyFlexBasis:
+      if (layoutable.flexBasis.type && layoutable.flexBasis.value) {  // ENUM TYPE
+        valueString = [NSString stringWithFormat:@"%0.0f %@", layoutable.flexBasis.value,
+                       [ASLayoutableInspectorCell ASRelativeDimensionEnumString:layoutable.alignSelf]];
+      } else {
+        valueString = @"0 pts";
+      }
       break;
     case ASLayoutablePropertySpacingBefore:
       valueString = [NSString stringWithFormat:@"%0.0f", layoutable.spacingBefore];
@@ -81,62 +134,96 @@ typedef NS_ENUM(NSInteger, CellDataType) {
   return [ASLayoutableInspectorCell attributedStringFromString:valueString];
 }
 
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
++ (NSAttributedString *)propertyValueDetailAttributedStringForProperty:(ASLayoutablePropertyType)property withLayoutable:(id<ASLayoutable>)layoutable
 {
-  ASStackLayoutSpec *horizontalSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
-  horizontalSpec.children           = @[_buttonNode, _textNode];
-  horizontalSpec.flexGrow           = YES;
-  horizontalSpec.alignItems         = ASStackLayoutAlignItemsCenter;
-  horizontalSpec.justifyContent     = ASStackLayoutJustifyContentSpaceBetween;
+  NSString *valueString;
   
-  ASInsetLayoutSpec *insetSpec      = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(2, 4, 2, 4) child:horizontalSpec];
-  
-  return insetSpec;
+  switch (property) {
+    case ASLayoutablePropertyFlexGrow:
+    case ASLayoutablePropertyFlexShrink:
+    case ASLayoutablePropertyAlignSelf:
+    case ASLayoutablePropertyFlexBasis:
+    case ASLayoutablePropertySpacingBefore:
+    case ASLayoutablePropertySpacingAfter:
+    case ASLayoutablePropertyAscender:
+    case ASLayoutablePropertyDescender:
+    default:
+      return nil;
+  }
+  return [ASLayoutableInspectorCell attributedStringFromString:valueString];
+}
+
+- (void)endEditingValue
+{
+  _textBubble = nil;
+  __currentlyOpenedCell = nil;
+  [self setNeedsLayout];
+}
+
+- (void)beginEditingValueWithOptions:(NSArray<NSString *> *)optionStrings
+{
+  _textBubble = [[ASLayoutableInspectorCellEditingBubble alloc] initWithOptions:optionStrings];
+  _textBubble.delegate = self;
+  __currentlyOpenedCell = self;
+  [self setNeedsLayout];
+}
+
+- (void)valueChangedToIndex:(NSUInteger)index
+{
+  [_layoutableToEdit setDescender:(CGFloat)index];
+  _textNode.attributedString = [ASLayoutableInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutableToEdit.descender]];
+  [self setNeedsLayout];
 }
 
 #pragma mark - gesture handling
 
 - (void)buttonTapped:(ASButtonNode *)sender
 {
-  NSUInteger currentAlignSelfValue;
-  NSUInteger nextAlignSelfValue;
+  BOOL selfIsEditing = (self == __currentlyOpenedCell);
+  [__currentlyOpenedCell endEditingValue];
+  if (selfIsEditing) {
+    return;
+  }
+  
+//  NSUInteger currentAlignSelfValue;
+//  NSUInteger nextAlignSelfValue;
+  CGFloat    newValue;
   
   switch (_propertyType) {
       
     case ASLayoutablePropertyFlexGrow:
-      if ([self layoutSpec]) {
-        [[self layoutSpec] setFlexGrow:!sender.isSelected];
-      } else if ([self node]) {
-        [[self node] setFlexGrow:!sender.isSelected];
-      }
-      // update .selected & value
+      [_layoutableToEdit setFlexGrow:!sender.isSelected];
       sender.selected            = !sender.selected;
       _textNode.attributedString = [ASLayoutableInspectorCell attributedStringFromString:sender.selected ? @"YES" : @"NO"];
       break;
       
     case ASLayoutablePropertyFlexShrink:
-      if ([self layoutSpec]) {
-        [[self layoutSpec] setFlexShrink:!sender.isSelected];
-      } else if ([self node]) {
-        [[self node] setFlexGrow:!sender.isSelected];
-      }
-      // update .selected & value
+      [_layoutableToEdit setFlexShrink:!sender.isSelected];
       sender.selected            = !sender.selected;
       _textNode.attributedString = [ASLayoutableInspectorCell attributedStringFromString:sender.selected ? @"YES" : @"NO"];
       break;
       
     case ASLayoutablePropertyAlignSelf:
-      if ([self layoutSpec]) {
-        currentAlignSelfValue = [[self layoutSpec] alignSelf];
-        nextAlignSelfValue = (currentAlignSelfValue + 1 <= ASStackLayoutAlignSelfStretch) ? currentAlignSelfValue + 1 : 0;
-        [[self layoutSpec] setAlignSelf:nextAlignSelfValue];
-    
-      } else if ([self node]) {
-        currentAlignSelfValue = [[self node] alignSelf];
-        nextAlignSelfValue = (currentAlignSelfValue + 1 <= ASStackLayoutAlignSelfStretch) ? currentAlignSelfValue + 1 : 0;
-        [[self node] setAlignSelf:nextAlignSelfValue];
-      }
+      [self beginEditingValueWithOptions:[ASLayoutableInspectorCell alignSelfEnumStringArray]];  // FIXME: also set selected
+//      if ([self layoutSpec]) {
+//        currentAlignSelfValue = [[self layoutSpec] alignSelf];
+//        nextAlignSelfValue = (currentAlignSelfValue + 1 <= ASStackLayoutAlignSelfStretch) ? currentAlignSelfValue + 1 : 0;
+//        [[self layoutSpec] setAlignSelf:nextAlignSelfValue];
+//    
+//      } else if ([self node]) {
+//        currentAlignSelfValue = [[self node] alignSelf];
+//        nextAlignSelfValue = (currentAlignSelfValue + 1 <= ASStackLayoutAlignSelfStretch) ? currentAlignSelfValue + 1 : 0;
+//        [[self node] setAlignSelf:nextAlignSelfValue];
+//      }
+      break;
       
+    case ASLayoutablePropertyDescender:
+      [self beginEditingValueWithOptions:@[]];
+      newValue = 5;
+      [_layoutableToEdit setDescender:newValue];
+      // update .selected & value
+      sender.selected            = !sender.selected;
+      _textNode.attributedString = [ASLayoutableInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutableToEdit.descender]];
       break;
       
     default:
@@ -144,6 +231,8 @@ typedef NS_ENUM(NSInteger, CellDataType) {
   }
   [self setNeedsLayout];
 }
+
+
 
 #pragma mark - cast layoutableToEdit
 
@@ -198,6 +287,9 @@ typedef NS_ENUM(NSInteger, CellDataType) {
     case ASLayoutablePropertyAlignSelf:
       string = @"AlignSelf";
       break;
+    case ASLayoutablePropertyFlexBasis:
+      string = @"FlexBasis";
+      break;
     case ASLayoutablePropertySpacingBefore:
       string = @"SpacingBefore";
       break;
@@ -226,11 +318,30 @@ typedef NS_ENUM(NSInteger, CellDataType) {
            @(ASStackLayoutAlignSelfStretch) : @"Stretch"};
 }
 
-+ (NSString *)alignSelfValueString:(NSUInteger)type
++ (NSString *)alignSelfEnumValueString:(NSUInteger)type
 {
   return [[self class] alignSelfTypeNames][@(type)];
 }
 
++ (NSArray <NSString *> *)alignSelfEnumStringArray
+{
+  return @[@"ASStackLayoutAlignSelfAuto",
+           @"ASStackLayoutAlignSelfStart",
+           @"ASStackLayoutAlignSelfEnd",
+           @"ASStackLayoutAlignSelfCenter",
+           @"ASStackLayoutAlignSelfStretch"];
+}
+
++ (NSDictionary *)ASRelativeDimensionTypeNames
+{
+  return @{@(ASRelativeDimensionTypePoints) : @"pts",
+           @(ASRelativeDimensionTypePercent) : @"%"};
+}
+
++ (NSString *)ASRelativeDimensionEnumString:(NSUInteger)type
+{
+  return [[self class] ASRelativeDimensionTypeNames][@(type)];
+}
 
 #pragma mark - formatting helper methods
 
@@ -295,3 +406,59 @@ typedef NS_ENUM(NSInteger, CellDataType) {
 }
 
 @end
+
+
+
+
+
+@implementation ASLayoutableInspectorCellEditingBubble
+{
+  NSMutableArray<ASButtonNode *> *_textNodes;
+}
+
+- (instancetype)initWithOptions:(NSArray<NSString *> *)options
+{
+  self = [super init];
+  if (self) {
+    self.usesImplicitHierarchyManagement = YES;
+    self.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
+    
+    _textNodes = [[NSMutableArray alloc] init];
+    for (NSString *optionStr in options) {
+      ASButtonNode *btn = [[ASButtonNode alloc] init];
+      [btn setAttributedTitle:[ASLayoutableInspectorCell attributedStringFromString:optionStr] forState:ASControlStateNormal];
+      [btn setAttributedTitle:[ASLayoutableInspectorCell attributedStringFromString:optionStr withTextColor:[UIColor redColor]]
+                     forState:ASControlStateSelected];
+      [btn addTarget:self action:@selector(tapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+      [_textNodes addObject:btn];
+    }
+  }
+  return self;
+}
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  ASStackLayoutSpec *verticalStackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
+  verticalStackSpec.children = _textNodes;
+  verticalStackSpec.spacing = 2;
+  
+  ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(8, 8, 8, 8) child:verticalStackSpec];
+  
+  return insetSpec;
+}
+
+- (void)tapped:(ASButtonNode *)sender
+{
+  sender.selected = !sender.selected;
+  for (ASButtonNode *node in _textNodes) {
+    if (node != sender) {
+      node.selected = NO;
+    }
+  }
+  [self.delegate valueChangedToIndex:[_textNodes indexOfObject:sender]];
+  [self setNeedsLayout];
+}
+
+@end
+
+

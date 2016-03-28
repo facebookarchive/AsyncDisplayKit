@@ -12,6 +12,7 @@ typedef NS_ENUM(NSInteger, ASLayoutablePropertyType) {
   ASLayoutablePropertyFlexGrow = 0,
   ASLayoutablePropertyFlexShrink,
   ASLayoutablePropertyAlignSelf,
+  ASLayoutablePropertyFlexBasis,
   ASLayoutablePropertySpacingBefore,
   ASLayoutablePropertySpacingAfter,
   ASLayoutablePropertyAscender,
@@ -24,3 +25,4 @@ typedef NS_ENUM(NSInteger, ASLayoutablePropertyType) {
 - (instancetype)initWithProperty:(ASLayoutablePropertyType)property layoutableToEdit:(id<ASLayoutable>)layoutable NS_DESIGNATED_INITIALIZER;
 
 @end
+

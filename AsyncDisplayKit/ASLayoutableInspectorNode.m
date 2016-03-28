@@ -52,6 +52,7 @@
 {
   [super didLoad];
   _tableNode.view.backgroundColor = [UIColor colorWithRed:40/255.0 green:43/255.0 blue:53/255.0 alpha:1];
+  _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
   _tableNode.view.allowsSelection = NO;
 }
 
@@ -61,21 +62,22 @@
   _tableNode.frame = self.bounds;
 }
 
-//- (void)setLayoutableToEdit:(id<ASLayoutable>)layoutableToEdit
-//{
-//  if (_layoutableToEdit != layoutableToEdit) {
-//    _layoutableToEdit = layoutableToEdit;
-//    
-////    [self enableInspectorNodesForLayoutable];
-////    [self updateInspectorWithLayoutable];
-//  }
-//}
+- (void)setLayoutableToEdit:(id<ASLayoutable>)layoutableToEdit
+{
+  if (_layoutableToEdit != layoutableToEdit) {
+    _layoutableToEdit = layoutableToEdit;
+    
+//    [self enableInspectorNodesForLayoutable];
+//    [self updateInspectorWithLayoutable];
+  }
+  [_tableNode.view reloadData];
+}
 
 #pragma mark - ASTableDataSource
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[ASLayoutableInspectorCell alloc] initWithProperty:(ASLayoutablePropertyType)indexPath.row layoutableToEdit:self.layoutableToEdit];
+  return [[ASLayoutableInspectorCell alloc] initWithProperty:(ASLayoutablePropertyType)indexPath.row layoutableToEdit:_layoutableToEdit];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
