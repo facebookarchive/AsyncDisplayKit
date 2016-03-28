@@ -89,6 +89,7 @@
             _postNode.userInteractionEnabled = YES;
             _postNode.linkAttributeNames = @[ kLinkAttributeName ];
             _postNode.attributedString = attrString;
+            _postNode.passthroughNonlinkTouches = YES;   // passes touches through when they aren't on a link
             
         }
         
