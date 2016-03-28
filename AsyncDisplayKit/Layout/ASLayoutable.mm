@@ -20,21 +20,21 @@ ASLayoutableContext ASLayoutableContextMake(int32_t transitionID, BOOL needsVisu
 
 static std::map<mach_port_t, ASLayoutableContext> layoutableContextMap;
 
-static inline mach_port_t ASLayoutableGetLayoutableContextKey()
+static inline mach_port_t ASLayoutableGetCurrentContextKey()
 {
   return pthread_mach_thread_np(pthread_self());
 }
 
-void ASLayoutableSetLayoutableContext(struct ASLayoutableContext context)
+void ASLayoutableSetCurrentContext(struct ASLayoutableContext context)
 {
-  layoutableContextMap[ASLayoutableGetLayoutableContextKey()] = context;
+  layoutableContextMap[ASLayoutableGetCurrentContextKey()] = context;
 }
 
-struct ASLayoutableContext ASLayoutableGetLayoutableContext()
+struct ASLayoutableContext ASLayoutableGetCurrentContext()
 {
-  return layoutableContextMap[ASLayoutableGetLayoutableContextKey()];
+  return layoutableContextMap[ASLayoutableGetCurrentContextKey()];
 }
 
-void ASLayoutableResetLayoutableContext() {
-  layoutableContextMap.erase(ASLayoutableGetLayoutableContextKey());
+void ASLayoutableClearCurrentContext() {
+  layoutableContextMap.erase(ASLayoutableGetCurrentContextKey());
 }

@@ -21,11 +21,11 @@ struct ASLayoutableContext {
 
 extern struct ASLayoutableContext ASLayoutableContextMake(int32_t transitionID, BOOL needsVisualizeNode);
 
-extern void ASLayoutableSetLayoutableContext(struct ASLayoutableContext context);
+extern void ASLayoutableSetCurrentContext(struct ASLayoutableContext context);
 
-extern struct ASLayoutableContext ASLayoutableGetLayoutableContext();
+extern struct ASLayoutableContext ASLayoutableGetCurrentContext();
 
-extern void ASLayoutableResetLayoutableContext();
+extern void ASLayoutableClearCurrentContext();
 
 /**
  *  The base protocol for ASLayoutable. Generally the methods/properties in this class do not need to be
