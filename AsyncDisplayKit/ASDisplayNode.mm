@@ -1854,9 +1854,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       [ASLayoutSpec setShouldVisualizeLayoutSpecs2:YES];
     }
     
-    ASStaticLayoutSpec *staticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[[self layoutSpecThatFits:constrainedSize]]];
-    
-    ASLayoutSpec *layoutSpec = staticSpec;
+    ASLayoutSpec *layoutSpec;
+    if (ASHierarchyStateIncludesVisualizeLayoutSpecs(_hierarchyState)) {
+      ASStaticLayoutSpec *staticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[[self layoutSpecThatFits:constrainedSize]]];
+      layoutSpec = staticSpec;
+    } else {
+      layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    }
     
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];

@@ -51,8 +51,8 @@
 - (void)didLoad
 {
   [super didLoad];
-
-  _tableNode.view.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
+  _tableNode.view.backgroundColor = [UIColor colorWithRed:40/255.0 green:43/255.0 blue:53/255.0 alpha:1];
+  _tableNode.view.allowsSelection = NO;
 }
 
 - (void)layout
@@ -75,12 +75,12 @@
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[ASLayoutableInspectorCell alloc] init];
+  return [[ASLayoutableInspectorCell alloc] initWithProperty:(ASLayoutablePropertyType)indexPath.row layoutableToEdit:self.layoutableToEdit];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-  return 1;  // FIXME:
+  return ASLayoutablePropertyCount;  // FIXME:
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -226,7 +226,7 @@
 //    _alignItemsBtn.enabled      = YES;
 //  }
 //}
-//
+
 //+ (NSDictionary *)alignSelfTypeNames
 //{
 //  return @{@(ASStackLayoutAlignSelfAuto) : @"Auto",
@@ -380,21 +380,21 @@
 
 #pragma mark - cast layoutableToEdit
 
-- (ASDisplayNode *)node                                                         // FIXME: move to ASLayoutSpec? or make a category?
-{
-  if ([self.layoutableToEdit isKindOfClass:[ASDisplayNode class]]) {
-    return (ASDisplayNode *)self.layoutableToEdit;
-  }
-  return nil;
-}
-
-- (ASLayoutSpec *)layoutSpec
-{
-  if ([self.layoutableToEdit isKindOfClass:[ASLayoutSpec class]]) {
-    return (ASLayoutSpec *)self.layoutableToEdit;
-  }
-  return nil;
-}
+//- (ASDisplayNode *)node                                                         // FIXME: move to ASLayoutSpec? or make a category?
+//{
+//  if ([self.layoutableToEdit isKindOfClass:[ASDisplayNode class]]) {
+//    return (ASDisplayNode *)self.layoutableToEdit;
+//  }
+//  return nil;
+//}
+//
+//- (ASLayoutSpec *)layoutSpec
+//{
+//  if ([self.layoutableToEdit isKindOfClass:[ASLayoutSpec class]]) {
+//    return (ASLayoutSpec *)self.layoutableToEdit;
+//  }
+//  return nil;
+//}
 
 #pragma mark - helper methods
 

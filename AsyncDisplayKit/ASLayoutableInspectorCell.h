@@ -8,6 +8,19 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
+typedef NS_ENUM(NSInteger, ASLayoutablePropertyType) {
+  ASLayoutablePropertyFlexGrow = 0,
+  ASLayoutablePropertyFlexShrink,
+  ASLayoutablePropertyAlignSelf,
+  ASLayoutablePropertySpacingBefore,
+  ASLayoutablePropertySpacingAfter,
+  ASLayoutablePropertyAscender,
+  ASLayoutablePropertyDescender,
+  ASLayoutablePropertyCount
+};
+
 @interface ASLayoutableInspectorCell : ASCellNode
+
+- (instancetype)initWithProperty:(ASLayoutablePropertyType)property layoutableToEdit:(id<ASLayoutable>)layoutable NS_DESIGNATED_INITIALIZER;
 
 @end
