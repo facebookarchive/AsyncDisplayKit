@@ -630,7 +630,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return NO;
   }
   
-  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState) && constrainedSize.transitionID != _pendingTransitionID) {
+  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)
+      && _pendingTransitionID != ASLayoutableGetLayoutableContext().transitionID) {
     return NO;
   }
   
@@ -668,8 +669,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   int32_t transitionID = [self _newTransitionID];
-  constrainedSize.transitionID = transitionID;
-
+  
   ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
     ASDisplayNodeAssert([node _hasTransitionsInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
     node.hierarchyState |= ASHierarchyStateLayoutPending;
@@ -679,6 +679,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   void (^transitionBlock)() = ^{
     ASLayout *newLayout;
     {
+      ASLayoutableSetLayoutableContext(ASLayoutableContextMake(transitionID, NO));
+
       ASDN::MutexLocker l(_propertyLock);
       BOOL disableImplicitHierarchyManagement = self.usesImplicitHierarchyManagement == NO;
       self.usesImplicitHierarchyManagement = YES; // Temporary flag for 1.9.x
@@ -686,6 +688,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       if (disableImplicitHierarchyManagement) {
         self.usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
       }
+      
+      ASLayoutableResetLayoutableContext();
     }
     
     if ([self _shouldAbortTransitionWithID:transitionID]) {
