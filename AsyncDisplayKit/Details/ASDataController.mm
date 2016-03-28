@@ -167,7 +167,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   // For any given layout pass that occurs, this method will be called at least twice, once on the main thread and
   // the background, to result in complete coverage of both loaded and unloaded nodes
   BOOL isMainThread = ASDisplayNodeThreadIsMain();
-  for (NSUInteger k = range.location; k < (range.location + range.length); k++) {
+  for (NSUInteger k = range.location; k < NSMaxRange(range); k++) {
     ASCellNode *node = nodes[k];
     // Only nodes that are loaded should be layout on the main thread
     if (node.isNodeLoaded == isMainThread) {
@@ -220,7 +220,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       
       [self _layoutNodes:subarray
             fromContexts:contexts
-        inIndexesOfRange:NSMakeRange(0, subarray.count)
+        inIndexesOfRange:NSMakeRange(0, batchCount)
                   ofKind:kind];
       
     } else {
@@ -228,7 +228,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       [_mainSerialQueue performBlockOnMainThread:^{
         [self _layoutNodes:subarray
               fromContexts:contexts
-          inIndexesOfRange:NSMakeRange(0, subarray.count)
+          inIndexesOfRange:NSMakeRange(0, batchCount)
                     ofKind:kind];
       }];
     }
