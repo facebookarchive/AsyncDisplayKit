@@ -1,0 +1,17 @@
+//
+//  Flickrgram.pch
+//  Flickrgram
+//
+//  Created by Hannah Troisi on 2/26/16.
+//  Copyright © 2016 Hannah Troisi. All rights reserved.
+//
+
+#ifndef Flickrgram_pch
+#define Flickrgram_pch
+
+#import <UIKit/UIKit.h>
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#endif /* Flickrgram_pch */
