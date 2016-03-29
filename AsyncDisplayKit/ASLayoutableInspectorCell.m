@@ -22,8 +22,9 @@ __weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
 
 @interface ASLayoutableInspectorCellEditingBubble : ASDisplayNode
 @property (nonatomic, strong, readwrite) id<InspectorCellEditingBubbleProtocol> delegate;
-- (instancetype)initWithOptions:(NSArray<NSString *> *)options;
-@end
+- (instancetype)initWithEnumOptions:(BOOL)yes enumStrings:(NSArray<NSString *> *)options currentOptionIndex:(NSUInteger)currentOption;
+- (instancetype)initWithSliderMinValue:(CGFloat)min maxValue:(CGFloat)max currentValue:(CGFloat)current
+;@end
 
 @interface ASLayoutableInspectorCell () <InspectorCellEditingBubbleProtocol>
 @end
@@ -56,7 +57,6 @@ __weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
     
     _buttonNode = [self makeBtnNodeWithTitle:[ASLayoutableInspectorCell propertyStringForPropertyType:property]];
     [_buttonNode addTarget:self action:@selector(buttonTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
-//    _buttonNode.selected =   // FIXME:
     
     _textNode = [[ASTextNode alloc] init];
     _textNode.attributedString = [ASLayoutableInspectorCell propertyValueAttributedStringForProperty:property withLayoutable:layoutable];
@@ -160,9 +160,8 @@ __weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
   [self setNeedsLayout];
 }
 
-- (void)beginEditingValueWithOptions:(NSArray<NSString *> *)optionStrings
+- (void)beginEditingValue
 {
-  _textBubble = [[ASLayoutableInspectorCellEditingBubble alloc] initWithOptions:optionStrings];
   _textBubble.delegate = self;
   __currentlyOpenedCell = self;
   [self setNeedsLayout];
@@ -170,8 +169,22 @@ __weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
 
 - (void)valueChangedToIndex:(NSUInteger)index
 {
-  [_layoutableToEdit setDescender:(CGFloat)index];
-  _textNode.attributedString = [ASLayoutableInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutableToEdit.descender]];
+  switch (_propertyType) {
+      
+    case ASLayoutablePropertyAlignSelf:
+      [_layoutableToEdit setAlignSelf:index];
+      _textNode.attributedString = [ASLayoutableInspectorCell attributedStringFromString:[ASLayoutableInspectorCell alignSelfEnumValueString:index]];
+      break;
+      
+    case ASLayoutablePropertyDescender:
+      [_layoutableToEdit setDescender:(CGFloat)index];
+      _textNode.attributedString = [ASLayoutableInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutableToEdit.descender]];
+      break;
+      
+    default:
+      break;
+  }
+  
   [self setNeedsLayout];
 }
 
@@ -204,7 +217,11 @@ __weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
       break;
       
     case ASLayoutablePropertyAlignSelf:
-      [self beginEditingValueWithOptions:[ASLayoutableInspectorCell alignSelfEnumStringArray]];  // FIXME: also set selected
+      _textBubble = [[ASLayoutableInspectorCellEditingBubble alloc] initWithEnumOptions:YES
+                                                                            enumStrings:[ASLayoutableInspectorCell alignSelfEnumStringArray]
+                                                                     currentOptionIndex:[_layoutableToEdit alignSelf]];
+
+      [self beginEditingValue];
 //      if ([self layoutSpec]) {
 //        currentAlignSelfValue = [[self layoutSpec] alignSelf];
 //        nextAlignSelfValue = (currentAlignSelfValue + 1 <= ASStackLayoutAlignSelfStretch) ? currentAlignSelfValue + 1 : 0;
@@ -218,9 +235,8 @@ __weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
       break;
       
     case ASLayoutablePropertyDescender:
-      [self beginEditingValueWithOptions:@[]];
-      newValue = 5;
-      [_layoutableToEdit setDescender:newValue];
+      _textBubble = [[ASLayoutableInspectorCellEditingBubble alloc] initWithSliderMinValue:0 maxValue:100 currentValue:[_layoutableToEdit descender]];
+      [self beginEditingValue];
       // update .selected & value
       sender.selected            = !sender.selected;
       _textNode.attributedString = [ASLayoutableInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutableToEdit.descender]];
@@ -409,14 +425,13 @@ __weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
 
 
 
-
-
 @implementation ASLayoutableInspectorCellEditingBubble
 {
   NSMutableArray<ASButtonNode *> *_textNodes;
+  ASDisplayNode                  *_slider;
 }
 
-- (instancetype)initWithOptions:(NSArray<NSString *> *)options
+- (instancetype)initWithEnumOptions:(BOOL)yes enumStrings:(NSArray<NSString *> *)options currentOptionIndex:(NSUInteger)currentOption
 {
   self = [super init];
   if (self) {
@@ -424,30 +439,74 @@ __weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
     self.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
     
     _textNodes = [[NSMutableArray alloc] init];
+    int index = 0;
     for (NSString *optionStr in options) {
       ASButtonNode *btn = [[ASButtonNode alloc] init];
       [btn setAttributedTitle:[ASLayoutableInspectorCell attributedStringFromString:optionStr] forState:ASControlStateNormal];
       [btn setAttributedTitle:[ASLayoutableInspectorCell attributedStringFromString:optionStr withTextColor:[UIColor redColor]]
                      forState:ASControlStateSelected];
-      [btn addTarget:self action:@selector(tapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+      [btn addTarget:self action:@selector(enumOptionSelected:) forControlEvents:ASControlNodeEventTouchUpInside];
+      btn.selected = (index == currentOption) ? YES : NO;
       [_textNodes addObject:btn];
+      index++;
     }
+  }
+  return self;
+}
+
+- (instancetype)initWithSliderMinValue:(CGFloat)min maxValue:(CGFloat)max currentValue:(CGFloat)current
+{
+  self = [super init];
+  if (self) {
+    self.usesImplicitHierarchyManagement = YES;
+    self.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
+    
+    __weak id weakSelf = self;
+    _slider = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull{
+      UISlider *slider = [[UISlider alloc] init];
+      slider.minimumValue = min;
+      slider.maximumValue = max;
+      slider.value = current;
+      [slider addTarget:weakSelf action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
+      
+      return slider;
+    }];
+    _slider.userInteractionEnabled = YES;
+    self.userInteractionEnabled = YES;
+    [self addSubnode:_slider];
   }
   return self;
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
+  _slider.preferredFrameSize = CGSizeMake(constrainedSize.max.width, 25);
+  
+  NSMutableArray *children = [[NSMutableArray alloc] init];
+  if (_textNodes) {
+    ASStackLayoutSpec *textStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+    textStack.children = _textNodes;
+    textStack.spacing = 2;
+    [children addObject:textStack];
+  }
+  if (_slider) {
+    _slider.flexGrow = YES;
+    [children addObject:_slider];
+  }
+  
   ASStackLayoutSpec *verticalStackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStackSpec.children = _textNodes;
+  verticalStackSpec.children = children;
   verticalStackSpec.spacing = 2;
+  verticalStackSpec.flexGrow = YES;
+  verticalStackSpec.alignSelf = ASStackLayoutAlignSelfStretch;
   
   ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(8, 8, 8, 8) child:verticalStackSpec];
   
   return insetSpec;
 }
 
-- (void)tapped:(ASButtonNode *)sender
+#pragma mark - gesture handling
+- (void)enumOptionSelected:(ASButtonNode *)sender
 {
   sender.selected = !sender.selected;
   for (ASButtonNode *node in _textNodes) {
@@ -457,6 +516,11 @@ __weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
   }
   [self.delegate valueChangedToIndex:[_textNodes indexOfObject:sender]];
   [self setNeedsLayout];
+}
+
+- (void)sliderValueChanged:(UISlider *)sender
+{
+  [self.delegate valueChangedToIndex:roundf(sender.value)];
 }
 
 @end

@@ -54,6 +54,7 @@
   _tableNode.view.backgroundColor = [UIColor colorWithRed:40/255.0 green:43/255.0 blue:53/255.0 alpha:1];
   _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
   _tableNode.view.allowsSelection = NO;
+  _tableNode.view.sectionHeaderHeight = 40;
 }
 
 - (void)layout
@@ -62,13 +63,11 @@
   _tableNode.frame = self.bounds;
 }
 
+#pragma mark - intstance methods
 - (void)setLayoutableToEdit:(id<ASLayoutable>)layoutableToEdit
 {
   if (_layoutableToEdit != layoutableToEdit) {
     _layoutableToEdit = layoutableToEdit;
-    
-//    [self enableInspectorNodesForLayoutable];
-//    [self updateInspectorWithLayoutable];
   }
   [_tableNode.view reloadData];
 }
@@ -77,17 +76,50 @@
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[ASLayoutableInspectorCell alloc] initWithProperty:(ASLayoutablePropertyType)indexPath.row layoutableToEdit:_layoutableToEdit];
+  if (indexPath.section == 0) {
+    
+    NSDictionary *attributes = @{NSForegroundColorAttributeName : [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1],
+                                 NSFontAttributeName : [UIFont fontWithName:@"Menlo-Regular" size:12]};
+    ASTextCellNode *textCell = [[ASTextCellNode alloc] initWithAttributes:attributes insets:UIEdgeInsetsMake(0, 4, 0, 0)];
+    textCell.text = [_layoutableToEdit description];
+    return textCell;
+    
+  } else {
+    
+    return [[ASLayoutableInspectorCell alloc] initWithProperty:(ASLayoutablePropertyType)indexPath.row layoutableToEdit:_layoutableToEdit];
+  }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-  return ASLayoutablePropertyCount;  // FIXME:
+  if (section == 0) {
+    return 1;
+  } else {
+    return ASLayoutablePropertyCount;
+  }
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-  return 1; // FIXME:
+  return 2;
+}
+
+- (nullable UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+  UILabel *headerTitle = [[UILabel alloc] initWithFrame:CGRectZero];
+  
+  NSString *title;
+  if (section == 0) {
+    title = @"<Layoutable> Item";
+  } else {
+    title = @"<Layoutable> Properties";
+  }
+  
+  NSDictionary *attributes = @{NSForegroundColorAttributeName : [UIColor whiteColor],
+                               NSFontAttributeName : [UIFont fontWithName:@"Menlo-Bold" size:12]};
+  headerTitle.attributedText = [[NSAttributedString alloc] initWithString:title attributes:attributes];
+  
+  return headerTitle;
 }
 
 
@@ -410,19 +442,19 @@
 //  return nil;
 //}
 //
-//- (NSAttributedString *)attributedStringFromString:(NSString *)string
-//{
-//  return [self attributedStringFromString:string withTextColor:[UIColor whiteColor]];
-//}
-//
-//- (NSAttributedString *)attributedStringFromString:(NSString *)string withTextColor:(nullable UIColor *)color
-//{
-//  NSDictionary *attributes = @{NSForegroundColorAttributeName : color,
-//                               NSFontAttributeName : [UIFont fontWithName:@"Menlo-Regular" size:12]};
-//  
-//  return [[NSAttributedString alloc] initWithString:string attributes:attributes];
-//}
-//
+- (NSAttributedString *)attributedStringFromString:(NSString *)string
+{
+  return [self attributedStringFromString:string withTextColor:[UIColor whiteColor]];
+}
+
+- (NSAttributedString *)attributedStringFromString:(NSString *)string withTextColor:(nullable UIColor *)color
+{
+  NSDictionary *attributes = @{NSForegroundColorAttributeName : color,
+                               NSFontAttributeName : [UIFont fontWithName:@"Menlo-Regular" size:12]};
+  
+  return [[NSAttributedString alloc] initWithString:string attributes:attributes];
+}
+
 //- (ASButtonNode *)makeBtnNodeWithTitle:(NSString *)title
 //{
 //  UIColor *orangeColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
