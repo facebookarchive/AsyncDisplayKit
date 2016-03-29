@@ -198,6 +198,15 @@
 
 @end
 
+@implementation ASStackLayoutSpec (ASEnvironment)
+
+- (BOOL)supportsMultipleChildren
+{
+  return YES;
+}
+
+@end
+
 @implementation ASStackLayoutSpec (Debugging)
 
 #pragma mark - ASLayoutableAsciiArtProtocol

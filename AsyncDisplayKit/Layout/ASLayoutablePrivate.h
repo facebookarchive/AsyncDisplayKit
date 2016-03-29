@@ -11,7 +11,6 @@
 #import <Foundation/Foundation.h>
 
 @class ASLayoutSpec;
-@class ASLayoutOptions;
 @protocol ASLayoutable;
 
 struct ASLayoutableContext {
@@ -34,6 +33,8 @@ extern void ASLayoutableSetCurrentContext(struct ASLayoutableContext context);
 extern struct ASLayoutableContext ASLayoutableGetCurrentContext();
 
 extern void ASLayoutableClearCurrentContext();
+
+extern void ASLayoutableSetValuesForLayoutable(id<ASLayoutable> layoutable);
 
 /**
  *  The base protocol for ASLayoutable. Generally the methods/properties in this class do not need to be
@@ -60,9 +61,4 @@ extern void ASLayoutableClearCurrentContext();
  */
 @property (nonatomic, assign) BOOL isFinalLayoutable;
 
-
-/**
- *  The class that holds all of the layoutOptions set on an ASLayoutable.
- */
-@property (nonatomic, strong, readonly) ASLayoutOptions *layoutOptions;
 @end

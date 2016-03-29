@@ -8,29 +8,33 @@
  *
  */
 
-#import "ASLayoutOptionsPrivate.h"
+#import "ASLayoutSpec.h"
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
+#import "ASEnvironmentInternal.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-#import "ASLayoutOptions.h"
 #import "ASThread.h"
+
 
 #import <objc/runtime.h>
 
 static NSString * const kDefaultChildKey = @"kDefaultChildKey";
 static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
-@interface ASLayoutSpec()
+@interface ASLayoutSpec() {
+  ASEnvironmentCollection _environmentCollection;
+}
+@property (nonatomic, weak) id<ASLayoutable> parent;
 @property (nonatomic, strong) NSMutableDictionary *layoutChildren;
 @end
 
 @implementation ASLayoutSpec
 
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
-@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition;
 @synthesize layoutChildren = _layoutChildren;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
@@ -40,6 +44,9 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
     return nil;
   }
   _isMutable = YES;
+  _environmentCollection = ASEnvironmentCollectionCreate();
+  ASLayoutableSetValuesForLayoutable(self);
+  
   return self;
 }
 
@@ -75,7 +82,8 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
     if (finalLayoutable != child) {
-      [finalLayoutable.layoutOptions copyFromOptions:child.layoutOptions];
+      // Copy layout options
+      finalLayoutable.environmentCollection->layoutOptionsState = child.environmentCollection->layoutOptionsState;
       return finalLayoutable;
     }
   }
@@ -88,6 +96,15 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
     _layoutChildren = [NSMutableDictionary dictionary];
   }
   return _layoutChildren;
+}
+
+- (void)setParent:(id<ASLayoutable>)parent
+{
+  _parent = parent;
+  
+  if (![parent supportsMultipleChildren]) {
+    ASEnvironmentStatePropagateUp(parent, self.environmentCollection->layoutOptionsState);
+  }
 }
 
 - (void)setChild:(id<ASLayoutable>)child;
@@ -126,6 +143,19 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 - (NSArray *)children
 {
   return self.layoutChildren[kDefaultChildrenKey];
+}
+
+
+#pragma mark - ASEnvironment
+
+- (ASEnvironmentCollection *)environmentCollection
+{
+  return &_environmentCollection;
+}
+
+- (BOOL)supportsMultipleChildren
+{
+  return NO;
 }
 
 @end

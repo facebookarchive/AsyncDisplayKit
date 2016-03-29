@@ -10,7 +10,6 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
-#import "ASLayoutOptionsPrivate.h"
 
 #import <objc/runtime.h>
 #import <deque>
@@ -25,6 +24,7 @@
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
+#import "ASEnvironment.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -60,7 +60,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @implementation ASDisplayNode
 
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
-@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition;
 @synthesize name = _name;
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
@@ -252,6 +252,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
+  
+  _environmentCollection = ASEnvironmentCollectionCreate();
+  ASLayoutableSetValuesForLayoutable(self);
 }
 
 - (id)init
@@ -1855,6 +1858,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
     layoutSpec.isMutable = NO;
+    layoutSpec.parent = self;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
     if (layout.layoutableObject != self) {
@@ -2664,6 +2668,33 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 - (id<ASLayoutable>)finalLayoutable
 {
   return self;
+}
+
+#pragma mark - ASEnvironment
+
+- (ASEnvironmentCollection *)environmentCollection
+{
+  return &_environmentCollection;
+}
+
+- (ASDisplayNode *)parent
+{
+  return self.supernode;
+}
+
+- (void)setParent:(ASDisplayNode *)parent
+{
+  [self __setSupernode:parent];
+}
+
+- (NSArray<ASDisplayNode *> *)children
+{
+  return self.subnodes;
+}
+
+- (BOOL)supportsMultipleChildren
+{
+  return NO;
 }
 
 #if TARGET_OS_TV
