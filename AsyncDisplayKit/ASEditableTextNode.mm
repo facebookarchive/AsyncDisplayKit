@@ -45,6 +45,8 @@
 - (void)setScrollEnabled:(BOOL)scrollEnabled
 {
   _shouldBlockPanGesture = !scrollEnabled;
+  self.scrollsToTop = scrollEnabled;
+
   [super setScrollEnabled:YES];
 }
 
