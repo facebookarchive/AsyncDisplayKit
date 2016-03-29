@@ -88,12 +88,6 @@
     [self addSubview:_photoLikesLabel];
     [self addSubview:_photoDescriptionLabel];
     
-    UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(cellWasLongPressed:)];
-    [self addGestureRecognizer:lpgr];
-    
-    UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellWasTapped:)];
-    [self addGestureRecognizer:tgr];
-
 #if DEBUG_PHOTOCELL_LAYOUT
     _userAvatarImageView.backgroundColor              = [UIColor greenColor];
     _userNameLabel.backgroundColor                    = [UIColor greenColor];
@@ -264,86 +258,6 @@
 //      // FIXME: adjust content offset - iterate over cells above to get heights...
 //    }
 //  }];
-}
-
-
-#pragma mark - Gesture Handling
-
-- (void)cellWasLongPressed:(UIGestureRecognizer *)sender
-{
-  if (sender.state == UIGestureRecognizerStateBegan) {
-    
-    // determine which area of cell was tapped
-    CGPoint tapPoint = [sender locationInView:_photoImageView];
-    
-    if (tapPoint.y > 0) {
-    
-      // photo long pressed
-      NSLog(@"LONG PRESS");
-      
-      // need a 2nd method to be able to pass photo model
-      [self longPressRecognized];
-    }
-  }
-}
-
-- (void)longPressRecognized
-{
-  [self.delegate cellWasLongPressedWithPhoto:_photoModel];
-}
-
-- (void)cellWasTapped:(UIGestureRecognizer *)sender
-{
-  // determine which area of cell was tapped
-  CGPoint tapPoint = [sender locationInView:self];
-  
-  if (tapPoint.y > HEADER_HEIGHT && tapPoint.y < (HEADER_HEIGHT + self.bounds.size.width)) {
-    
-    // photo tapped
-    NSLog(@"TAP: photo");
-    
-  } else if (tapPoint.y > (HEADER_HEIGHT + self.bounds.size.width)) {
-    
-    [self.delegate photoLikesWasTouchedWithPhoto:_photoModel];
-    [_photoModel.commentFeed requestPageWithCompletionBlock:^(NSArray *newcomments) {}];   //FIXME: make comments likes :)
-    
-    // photo tapped
-    NSLog(@"TAP: photo likes");
-    
-  } else if (tapPoint.x <= CGRectGetMaxX(_userAvatarImageView.frame)) {
-    
-    // user avatar tapped
-    NSLog(@"TAP: Buddy Icon");
-    
-    [self.delegate userProfileWasTouchedWithUser:_photoModel.ownerUserProfile];
-    
-    // start downloading likes
-    [self startDownloadingLikesForPhoto:_photoModel];
-    
-  } else if (tapPoint.x < CGRectGetMinX(_photoTimeIntervalSincePostLabel.frame)) {
-    
-    // check if location exists
-    if (_photoLocationLabel.attributedText) {
-      
-      if (tapPoint.y > CGRectGetMinY(_photoLocationLabel.frame)) {
-        NSLog(@"TAP: Location Label");
-        [self.delegate photoLocationWasTouchedWithCoordinate:_photoModel.location.coordinates name:_photoLocationLabel.attributedText];
-        
-      } else {
-        
-        NSLog(@"Tap: Username Label");
-        
-        [self.delegate userProfileWasTouchedWithUser:_photoModel.ownerUserProfile];
-      }
-      
-    } else {
-      
-      // username tapped
-      NSLog(@"Tap: Username Label");
-      
-      [self.delegate userProfileWasTouchedWithUser:_photoModel.ownerUserProfile];
-    }
-  }
 }
 
 @end

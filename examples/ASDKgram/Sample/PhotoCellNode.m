@@ -73,8 +73,7 @@
       // make sure to use _photoModel instance variable as photo may change when cell is reused,
       // where as local variable will never change
       if (locationModel == _photoModel.location) {
-        _photoLocationLabel.attributedString = [[NSAttributedString alloc] initWithString:@"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"];
-//        _photoLocationLabel.attributedString = [photo locationAttributedStringWithFontSize:FONT_SIZE];
+        _photoLocationLabel.attributedString = [photo locationAttributedStringWithFontSize:FONT_SIZE];
         [self setNeedsLayout];
       }
     }];
@@ -97,20 +96,6 @@
     
     // instead of adding everything addSubnode:
     self.usesImplicitHierarchyManagement = YES;
-    
-//    UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(cellWasLongPressed:)];
-//    [self.view addGestureRecognizer:lpgr];
-//    
-//    // tap gesture recognizer
-//    UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellWasTapped:)];
-//    [self.view addGestureRecognizer:tgr];
-    
-    [_userAvatarImageView addTarget:self action:@selector(doNothing) forControlEvents:ASControlNodeEventTouchUpInside];
-    [_photoLikesLabel     addTarget:self action:@selector(doNothing) forControlEvents:ASControlNodeEventTouchUpInside];
-    [_userNameLabel       addTarget:self action:@selector(doNothing) forControlEvents:ASControlNodeEventTouchUpInside];
-    _userAvatarImageView.hitTestSlop = UIEdgeInsetsMake(-10, -10, -10, -20);
-    _photoLikesLabel.hitTestSlop     = UIEdgeInsetsMake(5, 5, 5, 5);
-
     
 #if DEBUG_PHOTOCELL_LAYOUT
     _userAvatarImageView.backgroundColor              = [UIColor greenColor];

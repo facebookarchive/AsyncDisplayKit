@@ -8,17 +8,12 @@
 
 #import "PhotoTableViewController.h"
 #import "PhotoTableViewCell.h"
-#import "UserProfileViewController.h"
-#import "LikersViewController.h"
-#import "LocationCollectionViewController.h"
 #import "PhotoFeedModel.h"
 #import "Utilities.h"
 
 
 #define AUTO_TAIL_LOADING_NUM_SCREENFULS  2.5
 
-@interface PhotoTableViewController () <PhotoTableViewCellProtocol>
-@end
 
 @implementation PhotoTableViewController
 {
@@ -35,7 +30,7 @@
   
   if (self) {
       
-    self.navigationItem.title      = @"500pixgram";
+    self.navigationItem.title      = @"UIKit";
     [self.navigationController setNavigationBarHidden:YES];
     
     self.refreshControl            = [[UIRefreshControl alloc] init];
@@ -196,7 +191,6 @@
 {
   PhotoTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"photoCell" forIndexPath:indexPath];
 
-  cell.delegate = self;
   [cell updateCellWithPhotoObject:[_photoFeed objectAtIndex:indexPath.row]];
   
   return cell;
@@ -206,68 +200,6 @@
 {
   PhotoModel *photo = [_photoFeed objectAtIndex:indexPath.row];
   return [PhotoTableViewCell heightForPhotoModel:photo withWidth:self.view.bounds.size.width];
-}
-
-
-#pragma mark - PhotoTableViewCellProtocol
-
-- (void)userProfileWasTouchedWithUser:(UserModel *)user;
-{
-  UserProfileViewController *userProfileView = [[UserProfileViewController alloc] initWithUser:user];
-  [self.navigationController pushViewController:userProfileView animated:YES];
-  
-  // force navigationController visible
-  [self.navigationController setNavigationBarHidden:NO];
-}
-
-- (void)photoLocationWasTouchedWithCoordinate:(CLLocationCoordinate2D)coordiantes name:(NSAttributedString *)name
-{
-  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  layout.minimumInteritemSpacing = 1;
-  layout.minimumLineSpacing  = 1;
-  
-  CGFloat boundsWidth = self.view.bounds.size.width;
-  layout.headerReferenceSize = CGSizeMake(boundsWidth, 200);
-  
-  CGFloat photoColumnCount = 3;
-  CGFloat photoSize = (boundsWidth - (photoColumnCount - 1)) / photoColumnCount;
-  layout.itemSize = CGSizeMake(photoSize, photoSize);
-  
-  LocationCollectionViewController *locationCVC = [[LocationCollectionViewController alloc] initWithCollectionViewLayout:layout coordinates:coordiantes];
-  locationCVC.navigationItem.title = name.string;
-  
-  [self.navigationController pushViewController:locationCVC animated:YES];
-}
-
-- (void)cellWasLongPressedWithPhoto:(PhotoModel *)photo
-{
-  UIAlertAction *savePhotoAction = [UIAlertAction actionWithTitle:@"Save Photo"
-                                                            style:UIAlertActionStyleDefault
-                                                          handler:^(UIAlertAction * _Nonnull action) {
-                                                            NSLog(@"hi");
-                                                          }];
-  
-  UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel"
-                                                         style:UIAlertActionStyleCancel
-                                                       handler:^(UIAlertAction * _Nonnull action) {
-                                                         
-                                                       }];
-  UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil
-                                                                 message:nil
-                                                          preferredStyle:UIAlertControllerStyleActionSheet];
-  
-  [alert addAction:savePhotoAction];
-  [alert addAction:cancelAction];
-  
-  [self presentViewController:alert animated:YES completion:^{}];
-}
-
-- (void)photoLikesWasTouchedWithPhoto:(PhotoModel *)photo
-{
-  LikersViewController *vc = [[LikersViewController alloc] initWithPhoto:photo];
-  [self.navigationController pushViewController:vc animated:YES];
-  
-  // force navigationController visible
 }
 
 @end

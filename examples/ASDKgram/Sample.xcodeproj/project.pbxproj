@@ -19,21 +19,16 @@
 		768843831CAA37EF00D8629E /* CommentsNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688436B1CAA37EF00D8629E /* CommentsNode.m */; };
 		768843841CAA37EF00D8629E /* CommentView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688436C1CAA37EF00D8629E /* CommentView.m */; };
 		768843851CAA37EF00D8629E /* ImageURLModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688436D1CAA37EF00D8629E /* ImageURLModel.m */; };
-		768843861CAA37EF00D8629E /* LikersViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688436E1CAA37EF00D8629E /* LikersViewController.m */; };
-		768843871CAA37EF00D8629E /* LocationCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688436F1CAA37EF00D8629E /* LocationCollectionViewController.m */; };
 		768843881CAA37EF00D8629E /* LocationModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843701CAA37EF00D8629E /* LocationModel.m */; };
 		768843891CAA37EF00D8629E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843711CAA37EF00D8629E /* main.m */; };
-		7688438A1CAA37EF00D8629E /* MoreInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843721CAA37EF00D8629E /* MoreInfoViewController.m */; };
 		7688438B1CAA37EF00D8629E /* PhotoCellNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843731CAA37EF00D8629E /* PhotoCellNode.m */; };
 		7688438C1CAA37EF00D8629E /* PhotoCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843741CAA37EF00D8629E /* PhotoCollectionViewCell.m */; };
 		7688438D1CAA37EF00D8629E /* PhotoFeedModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843751CAA37EF00D8629E /* PhotoFeedModel.m */; };
 		7688438E1CAA37EF00D8629E /* PhotoFeedNodeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843761CAA37EF00D8629E /* PhotoFeedNodeController.m */; };
-		7688438F1CAA37EF00D8629E /* PhotoMapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843771CAA37EF00D8629E /* PhotoMapViewController.m */; };
 		768843901CAA37EF00D8629E /* PhotoModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843781CAA37EF00D8629E /* PhotoModel.m */; };
 		768843911CAA37EF00D8629E /* PhotoTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843791CAA37EF00D8629E /* PhotoTableViewCell.m */; };
 		768843921CAA37EF00D8629E /* PhotoTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437A1CAA37EF00D8629E /* PhotoTableViewController.m */; };
 		768843931CAA37EF00D8629E /* UserModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437B1CAA37EF00D8629E /* UserModel.m */; };
-		768843941CAA37EF00D8629E /* UserProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437C1CAA37EF00D8629E /* UserProfileViewController.m */; };
 		768843951CAA37EF00D8629E /* UserRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437D1CAA37EF00D8629E /* UserRowView.m */; };
 		768843961CAA37EF00D8629E /* Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437E1CAA37EF00D8629E /* Utilities.m */; };
 /* End PBXBuildFile section */
@@ -53,20 +48,15 @@
 		768843541CAA37EF00D8629E /* CommentsNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommentsNode.h; sourceTree = "<group>"; };
 		768843551CAA37EF00D8629E /* CommentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommentView.h; sourceTree = "<group>"; };
 		768843561CAA37EF00D8629E /* ImageURLModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageURLModel.h; sourceTree = "<group>"; };
-		768843571CAA37EF00D8629E /* LikersViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LikersViewController.h; sourceTree = "<group>"; };
-		768843581CAA37EF00D8629E /* LocationCollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationCollectionViewController.h; sourceTree = "<group>"; };
 		768843591CAA37EF00D8629E /* LocationModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationModel.h; sourceTree = "<group>"; };
-		7688435A1CAA37EF00D8629E /* MoreInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MoreInfoViewController.h; sourceTree = "<group>"; };
 		7688435B1CAA37EF00D8629E /* PhotoCellNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoCellNode.h; sourceTree = "<group>"; };
 		7688435C1CAA37EF00D8629E /* PhotoCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoCollectionViewCell.h; sourceTree = "<group>"; };
 		7688435D1CAA37EF00D8629E /* PhotoFeedModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoFeedModel.h; sourceTree = "<group>"; };
 		7688435E1CAA37EF00D8629E /* PhotoFeedNodeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoFeedNodeController.h; sourceTree = "<group>"; };
-		7688435F1CAA37EF00D8629E /* PhotoMapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoMapViewController.h; sourceTree = "<group>"; };
 		768843601CAA37EF00D8629E /* PhotoModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoModel.h; sourceTree = "<group>"; };
 		768843611CAA37EF00D8629E /* PhotoTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoTableViewCell.h; sourceTree = "<group>"; };
 		768843621CAA37EF00D8629E /* PhotoTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoTableViewController.h; sourceTree = "<group>"; };
 		768843631CAA37EF00D8629E /* UserModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserModel.h; sourceTree = "<group>"; };
-		768843641CAA37EF00D8629E /* UserProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserProfileViewController.h; sourceTree = "<group>"; };
 		768843651CAA37EF00D8629E /* UserRowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserRowView.h; sourceTree = "<group>"; };
 		768843661CAA37EF00D8629E /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
 		768843671CAA37EF00D8629E /* Flickrgram.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Flickrgram.pch; sourceTree = "<group>"; };
@@ -76,21 +66,16 @@
 		7688436B1CAA37EF00D8629E /* CommentsNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommentsNode.m; sourceTree = "<group>"; };
 		7688436C1CAA37EF00D8629E /* CommentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommentView.m; sourceTree = "<group>"; };
 		7688436D1CAA37EF00D8629E /* ImageURLModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageURLModel.m; sourceTree = "<group>"; };
-		7688436E1CAA37EF00D8629E /* LikersViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LikersViewController.m; sourceTree = "<group>"; };
-		7688436F1CAA37EF00D8629E /* LocationCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationCollectionViewController.m; sourceTree = "<group>"; };
 		768843701CAA37EF00D8629E /* LocationModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationModel.m; sourceTree = "<group>"; };
 		768843711CAA37EF00D8629E /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		768843721CAA37EF00D8629E /* MoreInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MoreInfoViewController.m; sourceTree = "<group>"; };
 		768843731CAA37EF00D8629E /* PhotoCellNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoCellNode.m; sourceTree = "<group>"; };
 		768843741CAA37EF00D8629E /* PhotoCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoCollectionViewCell.m; sourceTree = "<group>"; };
 		768843751CAA37EF00D8629E /* PhotoFeedModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoFeedModel.m; sourceTree = "<group>"; };
 		768843761CAA37EF00D8629E /* PhotoFeedNodeController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoFeedNodeController.m; sourceTree = "<group>"; };
-		768843771CAA37EF00D8629E /* PhotoMapViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoMapViewController.m; sourceTree = "<group>"; };
 		768843781CAA37EF00D8629E /* PhotoModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoModel.m; sourceTree = "<group>"; };
 		768843791CAA37EF00D8629E /* PhotoTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoTableViewCell.m; sourceTree = "<group>"; };
 		7688437A1CAA37EF00D8629E /* PhotoTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoTableViewController.m; sourceTree = "<group>"; };
 		7688437B1CAA37EF00D8629E /* UserModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserModel.m; sourceTree = "<group>"; };
-		7688437C1CAA37EF00D8629E /* UserProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserProfileViewController.m; sourceTree = "<group>"; };
 		7688437D1CAA37EF00D8629E /* UserRowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserRowView.m; sourceTree = "<group>"; };
 		7688437E1CAA37EF00D8629E /* Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utilities.m; sourceTree = "<group>"; };
 		7688437F1CAA37EF00D8629E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -133,54 +118,11 @@
 		05E2128319D4DB510098F589 /* Sample */ = {
 			isa = PBXGroup;
 			children = (
-				767A5F121CAA3C66004CDA8D /* Assets.xcassets */,
 				768843511CAA37EF00D8629E /* AppDelegate.h */,
-				768843521CAA37EF00D8629E /* CommentFeedModel.h */,
-				768843531CAA37EF00D8629E /* CommentModel.h */,
-				768843541CAA37EF00D8629E /* CommentsNode.h */,
-				768843551CAA37EF00D8629E /* CommentView.h */,
-				768843561CAA37EF00D8629E /* ImageURLModel.h */,
-				768843571CAA37EF00D8629E /* LikersViewController.h */,
-				768843581CAA37EF00D8629E /* LocationCollectionViewController.h */,
-				768843591CAA37EF00D8629E /* LocationModel.h */,
-				7688435A1CAA37EF00D8629E /* MoreInfoViewController.h */,
-				7688435B1CAA37EF00D8629E /* PhotoCellNode.h */,
-				7688435C1CAA37EF00D8629E /* PhotoCollectionViewCell.h */,
-				7688435D1CAA37EF00D8629E /* PhotoFeedModel.h */,
-				7688435E1CAA37EF00D8629E /* PhotoFeedNodeController.h */,
-				7688435F1CAA37EF00D8629E /* PhotoMapViewController.h */,
-				768843601CAA37EF00D8629E /* PhotoModel.h */,
-				768843611CAA37EF00D8629E /* PhotoTableViewCell.h */,
-				768843621CAA37EF00D8629E /* PhotoTableViewController.h */,
-				768843631CAA37EF00D8629E /* UserModel.h */,
-				768843641CAA37EF00D8629E /* UserProfileViewController.h */,
-				768843651CAA37EF00D8629E /* UserRowView.h */,
-				768843661CAA37EF00D8629E /* Utilities.h */,
-				768843671CAA37EF00D8629E /* Flickrgram.pch */,
 				768843681CAA37EF00D8629E /* AppDelegate.m */,
-				768843691CAA37EF00D8629E /* CommentFeedModel.m */,
-				7688436A1CAA37EF00D8629E /* CommentModel.m */,
-				7688436B1CAA37EF00D8629E /* CommentsNode.m */,
-				7688436C1CAA37EF00D8629E /* CommentView.m */,
-				7688436D1CAA37EF00D8629E /* ImageURLModel.m */,
-				7688436E1CAA37EF00D8629E /* LikersViewController.m */,
-				7688436F1CAA37EF00D8629E /* LocationCollectionViewController.m */,
-				768843701CAA37EF00D8629E /* LocationModel.m */,
-				768843711CAA37EF00D8629E /* main.m */,
-				768843721CAA37EF00D8629E /* MoreInfoViewController.m */,
-				768843731CAA37EF00D8629E /* PhotoCellNode.m */,
-				768843741CAA37EF00D8629E /* PhotoCollectionViewCell.m */,
-				768843751CAA37EF00D8629E /* PhotoFeedModel.m */,
-				768843761CAA37EF00D8629E /* PhotoFeedNodeController.m */,
-				768843771CAA37EF00D8629E /* PhotoMapViewController.m */,
-				768843781CAA37EF00D8629E /* PhotoModel.m */,
-				768843791CAA37EF00D8629E /* PhotoTableViewCell.m */,
-				7688437A1CAA37EF00D8629E /* PhotoTableViewController.m */,
-				7688437B1CAA37EF00D8629E /* UserModel.m */,
-				7688437C1CAA37EF00D8629E /* UserProfileViewController.m */,
-				7688437D1CAA37EF00D8629E /* UserRowView.m */,
-				7688437E1CAA37EF00D8629E /* Utilities.m */,
-				7688437F1CAA37EF00D8629E /* Info.plist */,
+				767A5F141CAA3D8A004CDA8D /* Controller */,
+				767A5F181CAA3DB0004CDA8D /* View */,
+				767A5F171CAA3DA1004CDA8D /* Model */,
 				05E2128419D4DB510098F589 /* Supporting Files */,
 			);
 			path = Sample;
@@ -189,6 +131,10 @@
 		05E2128419D4DB510098F589 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				768843671CAA37EF00D8629E /* Flickrgram.pch */,
+				7688437F1CAA37EF00D8629E /* Info.plist */,
+				768843711CAA37EF00D8629E /* main.m */,
+				767A5F121CAA3C66004CDA8D /* Assets.xcassets */,
 				767A5F101CAA3BFE004CDA8D /* tabBarIcons */,
 				0585427F19D4DBE100606EA6 /* Default-568h@2x.png */,
 				6C2C82AA19EE274300767484 /* Default-667h@2x.png */,
@@ -212,6 +158,91 @@
 				088AA6578212BE9BFBB07B70 /* Pods.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		767A5F141CAA3D8A004CDA8D /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				767A5F161CAA3D96004CDA8D /* UIKit */,
+				767A5F151CAA3D90004CDA8D /* ASDK */,
+			);
+			name = Controller;
+			sourceTree = "<group>";
+		};
+		767A5F151CAA3D90004CDA8D /* ASDK */ = {
+			isa = PBXGroup;
+			children = (
+				7688435E1CAA37EF00D8629E /* PhotoFeedNodeController.h */,
+				768843761CAA37EF00D8629E /* PhotoFeedNodeController.m */,
+			);
+			name = ASDK;
+			sourceTree = "<group>";
+		};
+		767A5F161CAA3D96004CDA8D /* UIKit */ = {
+			isa = PBXGroup;
+			children = (
+				768843621CAA37EF00D8629E /* PhotoTableViewController.h */,
+				7688437A1CAA37EF00D8629E /* PhotoTableViewController.m */,
+			);
+			name = UIKit;
+			sourceTree = "<group>";
+		};
+		767A5F171CAA3DA1004CDA8D /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				7688435D1CAA37EF00D8629E /* PhotoFeedModel.h */,
+				768843751CAA37EF00D8629E /* PhotoFeedModel.m */,
+				768843601CAA37EF00D8629E /* PhotoModel.h */,
+				768843781CAA37EF00D8629E /* PhotoModel.m */,
+				768843561CAA37EF00D8629E /* ImageURLModel.h */,
+				7688436D1CAA37EF00D8629E /* ImageURLModel.m */,
+				768843521CAA37EF00D8629E /* CommentFeedModel.h */,
+				768843691CAA37EF00D8629E /* CommentFeedModel.m */,
+				768843531CAA37EF00D8629E /* CommentModel.h */,
+				7688436A1CAA37EF00D8629E /* CommentModel.m */,
+				768843631CAA37EF00D8629E /* UserModel.h */,
+				7688437B1CAA37EF00D8629E /* UserModel.m */,
+				768843591CAA37EF00D8629E /* LocationModel.h */,
+				768843701CAA37EF00D8629E /* LocationModel.m */,
+				768843661CAA37EF00D8629E /* Utilities.h */,
+				7688437E1CAA37EF00D8629E /* Utilities.m */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		767A5F181CAA3DB0004CDA8D /* View */ = {
+			isa = PBXGroup;
+			children = (
+				767A5F191CAA3DB9004CDA8D /* UIKit */,
+				767A5F1A1CAA3DBF004CDA8D /* ASDK */,
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
+		767A5F191CAA3DB9004CDA8D /* UIKit */ = {
+			isa = PBXGroup;
+			children = (
+				768843611CAA37EF00D8629E /* PhotoTableViewCell.h */,
+				768843791CAA37EF00D8629E /* PhotoTableViewCell.m */,
+				7688435C1CAA37EF00D8629E /* PhotoCollectionViewCell.h */,
+				768843741CAA37EF00D8629E /* PhotoCollectionViewCell.m */,
+				768843551CAA37EF00D8629E /* CommentView.h */,
+				7688436C1CAA37EF00D8629E /* CommentView.m */,
+				768843651CAA37EF00D8629E /* UserRowView.h */,
+				7688437D1CAA37EF00D8629E /* UserRowView.m */,
+			);
+			name = UIKit;
+			sourceTree = "<group>";
+		};
+		767A5F1A1CAA3DBF004CDA8D /* ASDK */ = {
+			isa = PBXGroup;
+			children = (
+				7688435B1CAA37EF00D8629E /* PhotoCellNode.h */,
+				768843731CAA37EF00D8629E /* PhotoCellNode.m */,
+				768843541CAA37EF00D8629E /* CommentsNode.h */,
+				7688436B1CAA37EF00D8629E /* CommentsNode.m */,
+			);
+			name = ASDK;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -341,11 +372,9 @@
 				768843891CAA37EF00D8629E /* main.m in Sources */,
 				7688438C1CAA37EF00D8629E /* PhotoCollectionViewCell.m in Sources */,
 				768843921CAA37EF00D8629E /* PhotoTableViewController.m in Sources */,
-				7688438A1CAA37EF00D8629E /* MoreInfoViewController.m in Sources */,
 				768843821CAA37EF00D8629E /* CommentModel.m in Sources */,
 				768843831CAA37EF00D8629E /* CommentsNode.m in Sources */,
 				768843961CAA37EF00D8629E /* Utilities.m in Sources */,
-				768843941CAA37EF00D8629E /* UserProfileViewController.m in Sources */,
 				768843931CAA37EF00D8629E /* UserModel.m in Sources */,
 				768843801CAA37EF00D8629E /* AppDelegate.m in Sources */,
 				768843811CAA37EF00D8629E /* CommentFeedModel.m in Sources */,
@@ -353,10 +382,7 @@
 				768843841CAA37EF00D8629E /* CommentView.m in Sources */,
 				768843951CAA37EF00D8629E /* UserRowView.m in Sources */,
 				768843881CAA37EF00D8629E /* LocationModel.m in Sources */,
-				7688438F1CAA37EF00D8629E /* PhotoMapViewController.m in Sources */,
-				768843871CAA37EF00D8629E /* LocationCollectionViewController.m in Sources */,
 				768843901CAA37EF00D8629E /* PhotoModel.m in Sources */,
-				768843861CAA37EF00D8629E /* LikersViewController.m in Sources */,
 				768843911CAA37EF00D8629E /* PhotoTableViewCell.m in Sources */,
 				7688438B1CAA37EF00D8629E /* PhotoCellNode.m in Sources */,
 				7688438D1CAA37EF00D8629E /* PhotoFeedModel.m in Sources */,
@@ -452,7 +478,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = Sample/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.facebook.AsyncDisplayKit.Sample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -469,7 +495,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = Sample/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.facebook.AsyncDisplayKit.Sample;
 				PRODUCT_NAME = "$(TARGET_NAME)";

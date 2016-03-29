@@ -10,15 +10,13 @@
 #import "PhotoModel.h"
 #import "PhotoCellNode.h"
 #import "PhotoTableViewCell.h"
-#import "UserProfileViewController.h"
-#import "LocationCollectionViewController.h"
 #import "PhotoFeedModel.h"
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "Utilities.h"
 
 #define AUTO_TAIL_LOADING_NUM_SCREENFULS  2.5
 
-@interface PhotoFeedNodeController () <ASTableDelegate, ASTableDataSource, PhotoTableViewCellProtocol>
+@interface PhotoFeedNodeController () <ASTableDelegate, ASTableDataSource>
 @end
 
 @implementation PhotoFeedNodeController
@@ -37,7 +35,7 @@
   
   if (self) {
     
-    self.navigationItem.title      = @"500pixgram";
+    self.navigationItem.title      = @"ASDK";
     [self.navigationController setNavigationBarHidden:YES];
     
 //    _tableView.refreshControl      = [[UIRefreshControl alloc] init];
@@ -214,60 +212,5 @@
   
   return cell;
 }
-
-#pragma mark - PhotoTableViewCellProtocol
-
-- (void)photoLikesWasTouchedWithPhoto:(PhotoModel *)photo
-{
-  
-}
-
-- (void)userProfileWasTouchedWithUser:(UserModel *)user
-{
-  UserProfileViewController *userProfileView = [[UserProfileViewController alloc] initWithUser:user];
-  
-  [self.navigationController pushViewController:userProfileView animated:YES];
-}
-
-- (void)photoLocationWasTouchedWithCoordinate:(CLLocationCoordinate2D)coordiantes name:(NSString *)name
-{
-  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  layout.minimumInteritemSpacing = 1;
-  layout.minimumLineSpacing = 1;
-  layout.headerReferenceSize = CGSizeMake(self.view.bounds.size.width, 200);
-  
-  CGFloat numItemsLine = 3;
-  layout.itemSize = CGSizeMake((self.view.bounds.size.width - (numItemsLine - 1)) / numItemsLine,
-                               (self.view.bounds.size.width - (numItemsLine - 1)) / numItemsLine);
-  
-  LocationCollectionViewController *locationCVC = [[LocationCollectionViewController alloc] initWithCollectionViewLayout:layout coordinates:coordiantes];
-  locationCVC.navigationItem.title = name;
-  
-  [self.navigationController pushViewController:locationCVC animated:YES];
-}
-
-- (void)cellWasLongPressedWithPhoto:(PhotoModel *)photo
-{
-  UIAlertAction *savePhotoAction = [UIAlertAction actionWithTitle:@"Save Photo"
-                                                            style:UIAlertActionStyleDefault
-                                                          handler:^(UIAlertAction * _Nonnull action) {
-                                                            NSLog(@"hi");
-                                                          }];
-  
-  UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel"
-                                                         style:UIAlertActionStyleCancel
-                                                       handler:^(UIAlertAction * _Nonnull action) {
-                                                         
-                                                       }];
-  UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil
-                                                                 message:nil
-                                                          preferredStyle:UIAlertControllerStyleActionSheet];
-  
-  [alert addAction:savePhotoAction];
-  [alert addAction:cancelAction];
-  
-  [self presentViewController:alert animated:YES completion:^{}];
-}
-
 
 @end

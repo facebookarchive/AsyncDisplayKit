@@ -9,9 +9,7 @@
 #import "AppDelegate.h"
 #import "PhotoTableViewController.h"
 #import "PhotoFeedNodeController.h"
-#import "MoreInfoViewController.h"
 #import "Utilities.h"
-//#import "KMCGeigerCounter.h"
 #import "AsyncDisplayKit+Debug.h"
 
 @implementation AppDelegate
@@ -45,13 +43,6 @@
   //http://stackoverflow.com/questions/19022210/preferredstatusbarstyle-isnt-called/19513714#19513714
   uikitHomeFeedNavCtrl.navigationBar.barStyle = UIBarStyleBlack;
   asdkHomeFeedNavCtrl.navigationBar.barStyle = UIBarStyleBlack;
-
-
-  // create Stats viewController & navController
-//  MoreInfoViewController *VC                 = [[MoreInfoViewController alloc] init];
-//  VC.view.backgroundColor                    = [UIColor whiteColor];
-//  UINavigationController *statsNavController = [[UINavigationController alloc] initWithRootViewController:VC];
-//  statsNavController.tabBarItem              = [[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemMore tag:0];
   
   // configure UITabBarController and add viewControllers
   tabBarController.viewControllers = @[uikitHomeFeedNavCtrl, asdkHomeFeedNavCtrl];
