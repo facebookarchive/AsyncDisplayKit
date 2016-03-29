@@ -22,7 +22,7 @@
 #define VERTICAL_BUFFER         5
 #define FONT_SIZE               14
 
-@interface PhotoCellNode () <UIActionSheetDelegate>
+@interface PhotoCellNode ()
 @end
 
 @implementation PhotoCellNode
@@ -37,7 +37,6 @@
   ASTextNode          *_photoLikesLabel;
   ASTextNode          *_photoDescriptionLabel;
 }
-
 
 #pragma mark - Lifecycle
 
@@ -110,24 +109,12 @@
   
   return self;
 }
-     
-- (void)doNothing
-{
- 
-}
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   // username / photo location header vertical stack
-
-  CGFloat cellWidth                      = constrainedSize.max.width;
-//  CGFloat locationWidth = HORIZONTAL_BUFFER * 3;
-  //cellWidth - HORIZONTAL_BUFFER - USER_IMAGE_HEIGHT - HORIZONTAL_BUFFER - HORIZONTAL_BUFFER - _photoTimeIntervalSincePostLabel.frame.size.width - HORIZONTAL_BUFFER;
-//  CGSize maxSize = CGSizeMake(locationWidth, CGFLOAT_MAX);
-//  CGSize minSize = CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX);
-//  _photoLocationLabel.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(minSize), ASRelativeSizeMakeWithCGSize(maxSize));
   _photoLocationLabel.flexShrink = YES;
-  _userNameLabel.flexShrink = YES;
+  _userNameLabel.flexShrink      = YES;
   
   ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   headerSubStack.flexShrink = YES;
@@ -143,7 +130,7 @@
   _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);     // constrain avatar image frame size
   _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER;                 // hack to remove double spaces around spacer
   
-  ASLayoutSpec *spacer      = [[ASLayoutSpec alloc] init]; // FIXME: long locations overflow post time - set max size?
+  ASLayoutSpec *spacer      = [[ASLayoutSpec alloc] init];    // FIXME: long locations overflow post time - set max size?
   spacer.flexGrow           = YES;
   spacer.flexShrink         = YES;
 
@@ -163,7 +150,6 @@
   UIEdgeInsets insets                = UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *headerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:headerStack];
   headerWithInset.flexShrink = YES;
-
   
   // footer stack
   
@@ -179,7 +165,7 @@
   
   // vertical stack
   
-  
+  CGFloat cellWidth                  = constrainedSize.max.width;
   _photoImageView.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);              // constrain photo frame size
   
   ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
@@ -189,6 +175,8 @@
 
   return verticalStack;
 }
+
+#pragma mark - Instance Methods
 
 - (void)loadCommentsForPhoto:(PhotoModel *)photo
 {

@@ -20,9 +20,6 @@
 #define VERTICAL_BUFFER         5
 #define FONT_SIZE               14
 
-@interface PhotoTableViewCell () <UIActionSheetDelegate>
-@end
-
 @implementation PhotoTableViewCell
 {
   PhotoModel   *_photoModel;
@@ -35,7 +32,6 @@
   UILabel      *_photoLikesLabel;
   UILabel      *_photoDescriptionLabel;
 }
-
 
 #pragma mark - Class Methods
 
@@ -56,7 +52,6 @@
   
   return HEADER_HEIGHT + photoHeight + likesHeight + descriptionHeight + commentViewHeight + (4 * VERTICAL_BUFFER);
 }
-
 
 #pragma mark - Lifecycle
 
@@ -144,7 +139,6 @@
   _photoImageView.frame = CGRectMake(0, HEADER_HEIGHT, boundsSize.width, boundsSize.width);
   
   // FIXME: Make PhotoCellFooterView
-  
   rect.size = _photoLikesLabel.bounds.size;
   rect.origin = CGPointMake(HORIZONTAL_BUFFER, CGRectGetMaxY(_photoImageView.frame) + VERTICAL_BUFFER);
   _photoLikesLabel.frame = rect;
@@ -176,7 +170,6 @@
   _photoLikesLabel.attributedText                 = nil;
   _photoDescriptionLabel.attributedText           = nil;
 }
-
 
 #pragma mark - Instance Methods
 
@@ -218,7 +211,6 @@
   }
 }
 
-
 #pragma mark - Helper Methods
 
 - (void)downloadAndProcessUserAvatarForPhoto:(PhotoModel *)photo
@@ -242,22 +234,6 @@
       [self setNeedsLayout];
     }
   }];
-}
-
-- (void)startDownloadingLikesForPhoto:_photoModel
-{
-//  [_photoModel.likesFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
-//    
-//    NSInteger rowNum         = [_photoFeed indexOfPhotoModel:photo];
-//    PhotoTableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:rowNum inSection:0]];
-//    
-//    if (cell) {
-//      [cell loadCommentsForPhoto:photo];
-//      [self.tableView beginUpdates];
-//      [self.tableView endUpdates];
-//      // FIXME: adjust content offset - iterate over cells above to get heights...
-//    }
-//  }];
 }
 
 @end

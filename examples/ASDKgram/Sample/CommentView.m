@@ -50,17 +50,14 @@
   return roundf(height);
 }
 
-
 #pragma mark - Lifecycle
 
 - (instancetype)init
 {
   self = [super init];
-  
   if (self) {
     _commentLabels = [[NSMutableArray alloc] init];
   }
-  
   return self;
 }
 
@@ -77,7 +74,6 @@
     commentsLabel.frame = rect;
   }
 }
-
 
 #pragma mark - Instance Methods
 
@@ -110,7 +106,6 @@
     [self setNeedsLayout];
   }
 }
-
 
 #pragma mark - Helper Methods
 

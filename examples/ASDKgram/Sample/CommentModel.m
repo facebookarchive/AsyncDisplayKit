@@ -22,16 +22,14 @@
   self = [super init];
   
   if (self) {
-    
-    _dictionaryRepresentation   = photoDictionary;
-    
-    _ID                = [[photoDictionary objectForKey:@"id"] integerValue];
-    _commenterID       = [[photoDictionary objectForKey:@"user_id"] integerValue];
-    _commenterUsername = [photoDictionary valueForKeyPath:@"user.username"];
-    _commenterAvatarURL= [photoDictionary valueForKeyPath:@"user.userpic_url"];
-    _body              = [photoDictionary objectForKey:@"body"];
-    _uploadDateRaw     = [photoDictionary valueForKeyPath:@"created_at"];
-    _uploadDateString  = [NSString elapsedTimeStringSinceDate:_uploadDateRaw];
+    _dictionaryRepresentation = photoDictionary;
+    _ID                       = [[photoDictionary objectForKey:@"id"] integerValue];
+    _commenterID              = [[photoDictionary objectForKey:@"user_id"] integerValue];
+    _commenterUsername        = [photoDictionary valueForKeyPath:@"user.username"];
+    _commenterAvatarURL       = [photoDictionary valueForKeyPath:@"user.userpic_url"];
+    _body                     = [photoDictionary objectForKey:@"body"];
+    _uploadDateRaw            = [photoDictionary valueForKeyPath:@"created_at"];
+    _uploadDateString         = [NSString elapsedTimeStringSinceDate:_uploadDateRaw];
   }
   
   return self;
@@ -47,10 +45,7 @@
 
 - (NSAttributedString *)uploadDateAttributedStringWithFontSize:(CGFloat)size;
 {
-  return [NSAttributedString attributedStringWithString:self.uploadDateString
-                                               fontSize:size
-                                                  color:[UIColor lightGrayColor]
-                                         firstWordColor:nil];
+  return [NSAttributedString attributedStringWithString:self.uploadDateString fontSize:size color:[UIColor lightGrayColor] firstWordColor:nil];
 }
 
 @end

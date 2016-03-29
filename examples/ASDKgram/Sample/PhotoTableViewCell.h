@@ -10,17 +10,7 @@
 #import <CoreLocation/CLLocation.h>
 #import "PhotoModel.h"
 
-@protocol PhotoTableViewCellProtocol <NSObject>
-- (void)userProfileWasTouchedWithUser:(UserModel *)user;
-- (void)photoLocationWasTouchedWithCoordinate:(CLLocationCoordinate2D)coordiantes name:(NSAttributedString *)name;
-- (void)cellWasLongPressedWithPhoto:(PhotoModel *)photo;
-- (void)photoLikesWasTouchedWithPhoto:(PhotoModel *)photo;
-@end
-
-
 @interface PhotoTableViewCell : UITableViewCell
-
-@property (nonatomic, strong, readwrite) id<PhotoTableViewCellProtocol> delegate;
 
 + (CGFloat)heightForPhotoModel:(PhotoModel *)photo withWidth:(CGFloat)width;
 

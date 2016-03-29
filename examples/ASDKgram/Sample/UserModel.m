@@ -24,50 +24,38 @@
   self = [super init];
   
   if (self) {
-    
     _fullUserInfoFetchRequested = NO;
     _fullUserInfoFetchDone = NO;
     
-    // parse user dictionary
     [self loadUserDataFromDictionary:dictionary];
   }
   
   return self;
 }
 
-
 #pragma mark - Instance Methods
 
 - (NSAttributedString *)usernameAttributedStringWithFontSize:(CGFloat)size
 {
-  return [NSAttributedString attributedStringWithString:self.username
-                                               fontSize:size
-                                                  color:[UIColor darkBlueColor]
-                                         firstWordColor:nil];
+  return [NSAttributedString attributedStringWithString:self.username fontSize:size color:[UIColor darkBlueColor] firstWordColor:nil];
 }
 
 - (NSAttributedString *)fullNameAttributedStringWithFontSize:(CGFloat)size
 {
-  return [NSAttributedString attributedStringWithString:self.fullName
-                                               fontSize:size
-                                                  color:[UIColor lightGrayColor]
-                                         firstWordColor:nil];
+  return [NSAttributedString attributedStringWithString:self.fullName fontSize:size color:[UIColor lightGrayColor] firstWordColor:nil];
 }
 
 - (void)fetchAvatarImageWithCompletionBlock:(void(^)(UserModel *, UIImage *))block
 {
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    
     NSData *data   = [NSData dataWithContentsOfURL:_userPicURL];
     UIImage *image = [UIImage imageWithData:data];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-      
       if (block) {
         block(self, image);
       }
     });
-    
   });
 }
 
@@ -75,20 +63,17 @@
 {
   if (_fullUserInfoFetchDone) {
     NSAssert(!_fullUserInfoCompletionBlock, @"Should not have a waiting block at this point");
-    
     // complete user info fetch complete - excute completion block
     if (block) {
       block(self);
     }
-  
+
   } else {
     NSAssert(!_fullUserInfoCompletionBlock, @"Should not have a waiting block at this point");
-
     // set completion block
     _fullUserInfoCompletionBlock = block;
     
     if (!_fullUserInfoFetchRequested) {
-      
       // if fetch not in progress, beging
       [self fetchCompleteUserData];
     }

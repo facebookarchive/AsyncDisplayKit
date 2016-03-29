@@ -15,7 +15,6 @@
   BOOL squareImageRequested = (size.width == size.height) ? YES : NO;
   
   NSUInteger imageParameterID;
-  
   if (squareImageRequested) {
     imageParameterID = [self imageParameterForSquareCroppedSize:size];
   }

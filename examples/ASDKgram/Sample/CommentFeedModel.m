@@ -30,14 +30,12 @@
   BOOL           _refreshFeedInProgress;
 }
 
-
 #pragma mark - Properties
 
 - (NSMutableArray *)comments
 {
   return _comments;
 }
-
 
 #pragma mark - Lifecycle
 
@@ -46,14 +44,12 @@
   self = [super init];
   
   if (self) {
-    
     _photoID     = photoID;
     _currentPage = 0;
     _totalPages  = 0;
     _totalItems  = 0;
     _comments    = [[NSMutableArray alloc] init];
-  
-    _urlString = [NSString stringWithFormat:@"https://api.500px.com/v1/photos/%@/comments?",photoID];
+    _urlString   = [NSString stringWithFormat:@"https://api.500px.com/v1/photos/%@/comments?",photoID];
   }
   
   return self;
@@ -93,15 +89,9 @@
 {
   // only one fetch at a time
   if (_fetchPageInProgress) {
-    
-//    NSLog(@"Request COMMENTS: FAIL - fetch page already in progress");
-    return;
-    
+      return;
   } else {
-    
     _fetchPageInProgress = YES;
-    
-//    NSLog(@"Request COMMENTS: SUCCESS");
     [self fetchPageWithCompletionBlock:block];
   }
 }
@@ -110,12 +100,8 @@
 {
   // only one fetch at a time
   if (_refreshFeedInProgress) {
-    
-//    NSLog(@"Request Refresh COMMENTS: FAIL - refresh feed already in progress");
     return;
-    
   } else {
-    
     _refreshFeedInProgress = YES;
     _currentPage = 0;
     
@@ -125,7 +111,6 @@
       if (block) {
         block(newPhotos);
       }
-      
       _refreshFeedInProgress = NO;
     } replaceData:YES];
   }
@@ -171,8 +156,6 @@
           
           NSArray *comments = [response valueForKeyPath:@"comments"];
           
-//          NSLog(@"Request Refresh COMMENTS: SUCCESS %@", comments);
-          
           if ([comments isKindOfClass:[NSArray class]]) {
             
             NSUInteger numComments = [comments count];
@@ -186,7 +169,6 @@
                 
                 CommentModel *comment = [[CommentModel alloc] initWithDictionary:commentDictionary];
                 
-                // addObject: will crash with nil (NSArray, NSSet, NSDictionary, URLWithString - most foundation things)
                 if (comment) {
                   [newComments addObject:comment];
                 }
@@ -196,7 +178,6 @@
         }
       }
     }
-    
     dispatch_async(dispatch_get_main_queue(), ^{
       
       if (replaceData) {
@@ -204,14 +185,11 @@
       } else {
         [_comments addObjectsFromArray:newComments];
       }
-      
       if (block) {
         block(newComments);
       }
     });
-    
     _fetchPageInProgress = NO;
-    
   });
 }
 

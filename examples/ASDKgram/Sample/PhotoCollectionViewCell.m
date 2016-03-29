@@ -15,7 +15,6 @@
   UIImageView  *_photoImageView;
 }
 
-
 #pragma mark - Lifecycle
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -27,10 +26,6 @@
     _photoImageView = [[UIImageView alloc] init];
     [_photoImageView setPin_updateWithProgress:YES];
     [self.contentView addSubview:_photoImageView];
-    
-    // tap gesture recognizer
-    UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellWasTapped:)];
-    [self addGestureRecognizer:tgr];
   }
   
   return self;
@@ -51,21 +46,12 @@
   _photoImageView.image = nil;
 }
 
-
 #pragma mark - Instance Methods
 
 - (void)updateCellWithPhotoObject:(PhotoModel *)photo
 {
   // async download of photo using PINRemoteImage
   [_photoImageView pin_setImageFromURL:photo.URL];
-}
-
-
-#pragma mark - Gesture Handling
-
-- (void)cellWasTapped:(UIGestureRecognizer *)sender
-{
-  NSLog(@"Photo was tapped");
 }
 
 @end

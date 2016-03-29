@@ -31,7 +31,6 @@
   self = [super init];
   
   if (self) {
-    
     // set coordiantes
     _coordinates = CLLocationCoordinate2DMake([latitude floatValue], [longitude floatValue]);
     
@@ -70,47 +69,11 @@
 
 #pragma mark - Helper Methods
 
-- (nullable NSString *)locationStringFromPhotoLocationDictionary:(NSDictionary *)photoLocationDictionary
-{
-  // early return if no location info
-  if (!photoLocationDictionary)
-  {
-    return nil;
-  }
-  
-  NSString *country       = [photoLocationDictionary valueForKeyPath:@"country._content"];
-  NSString *county        = [photoLocationDictionary valueForKeyPath:@"county._content"];
-  NSString *locality      = [photoLocationDictionary valueForKeyPath:@"locality._content"];
-  NSString *neighbourhood = [photoLocationDictionary valueForKeyPath:@"neighbourhood._content"];
-  NSString *region        = [photoLocationDictionary valueForKeyPath:@"region._content"];
-  
-  NSString *locationString;
-  
-  if (neighbourhood) {
-    locationString = [NSString stringWithFormat:@"%@", neighbourhood];
-  } else if (locality && county) {
-    locationString = [NSString stringWithFormat:@"%@, %@", locality, county];
-  } else if (region) {
-    locationString = [NSString stringWithFormat:@"%@, %@", region, country];
-  } else if (country) {
-    locationString = [NSString stringWithFormat:@"%@", country];
-  } else {
-    locationString = @"ERROR";
-  }
-  
-  //  NSLog(@"%@", photoLocationDictionary);
-  //  NSLog(@"%@, %@, %@, %@, %@", neighbourhood, locality, county, region, country);
-  //  NSLog(@"%@", locationString);
-  
-  return locationString;
-}
-
 - (void)beginReverseGeocodingLocationFromCoordinates
 {
   if (_placemarkFetchInProgress) {
     return;
   }
-  
   _placemarkFetchInProgress = YES;
 
   CLLocation *location = [[CLLocation alloc] initWithLatitude:_coordinates.latitude longitude:_coordinates.longitude];
@@ -157,11 +120,7 @@
   
   if (_placemark.inlandWater) {
     locationString = _placemark.inlandWater;
-  }
-//  else if (_placemark.name) {
-//    locationString = [NSString stringWithFormat:@"%@", _placemark.name];
-//  }
-  else if (_placemark.subLocality && _placemark.locality) {
+  } else if (_placemark.subLocality && _placemark.locality) {
     locationString = [NSString stringWithFormat:@"%@, %@", _placemark.subLocality, _placemark.locality];
   } else if (_placemark.administrativeArea && _placemark.subAdministrativeArea) {
     locationString = [NSString stringWithFormat:@"%@, %@", _placemark.subAdministrativeArea, _placemark.administrativeArea];

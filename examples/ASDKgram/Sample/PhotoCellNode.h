@@ -1,6 +1,6 @@
 //
 //  PhotoCellNode.h
-//  ASDKgram
+//  Flickrgram
 //
 //  Created by Hannah Troisi on 2/17/16.
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
@@ -14,8 +14,6 @@
 
 
 @interface PhotoCellNode : ASCellNode
-
-@property (nonatomic, strong, readwrite) id<PhotoTableViewCellProtocol> delegate;
 
 - (instancetype)initWithPhotoObject:(PhotoModel *)photo;
 - (void)loadCommentsForPhoto:(PhotoModel *)photo;

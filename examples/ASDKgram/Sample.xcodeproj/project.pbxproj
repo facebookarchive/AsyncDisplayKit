@@ -29,7 +29,6 @@
 		768843911CAA37EF00D8629E /* PhotoTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843791CAA37EF00D8629E /* PhotoTableViewCell.m */; };
 		768843921CAA37EF00D8629E /* PhotoFeedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437A1CAA37EF00D8629E /* PhotoFeedViewController.m */; };
 		768843931CAA37EF00D8629E /* UserModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437B1CAA37EF00D8629E /* UserModel.m */; };
-		768843951CAA37EF00D8629E /* UserRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437D1CAA37EF00D8629E /* UserRowView.m */; };
 		768843961CAA37EF00D8629E /* Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437E1CAA37EF00D8629E /* Utilities.m */; };
 /* End PBXBuildFile section */
 
@@ -57,7 +56,6 @@
 		768843611CAA37EF00D8629E /* PhotoTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = PhotoTableViewCell.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		768843621CAA37EF00D8629E /* PhotoFeedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = PhotoFeedViewController.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		768843631CAA37EF00D8629E /* UserModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = UserModel.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		768843651CAA37EF00D8629E /* UserRowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = UserRowView.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		768843661CAA37EF00D8629E /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Utilities.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		768843671CAA37EF00D8629E /* Flickrgram.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Flickrgram.pch; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		768843681CAA37EF00D8629E /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AppDelegate.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
@@ -76,7 +74,6 @@
 		768843791CAA37EF00D8629E /* PhotoTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = PhotoTableViewCell.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7688437A1CAA37EF00D8629E /* PhotoFeedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = PhotoFeedViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7688437B1CAA37EF00D8629E /* UserModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = UserModel.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		7688437D1CAA37EF00D8629E /* UserRowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = UserRowView.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7688437E1CAA37EF00D8629E /* Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Utilities.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7688437F1CAA37EF00D8629E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C068F1D3F0CC317E895FCDAB /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
@@ -228,8 +225,6 @@
 				768843741CAA37EF00D8629E /* PhotoCollectionViewCell.m */,
 				768843551CAA37EF00D8629E /* CommentView.h */,
 				7688436C1CAA37EF00D8629E /* CommentView.m */,
-				768843651CAA37EF00D8629E /* UserRowView.h */,
-				7688437D1CAA37EF00D8629E /* UserRowView.m */,
 			);
 			name = UIKit;
 			sourceTree = "<group>";
@@ -380,7 +375,6 @@
 				768843811CAA37EF00D8629E /* CommentFeedModel.m in Sources */,
 				7688438E1CAA37EF00D8629E /* PhotoFeedNodeController.m in Sources */,
 				768843841CAA37EF00D8629E /* CommentView.m in Sources */,
-				768843951CAA37EF00D8629E /* UserRowView.m in Sources */,
 				768843881CAA37EF00D8629E /* LocationModel.m in Sources */,
 				768843901CAA37EF00D8629E /* PhotoModel.m in Sources */,
 				768843911CAA37EF00D8629E /* PhotoTableViewCell.m in Sources */,

@@ -22,11 +22,9 @@
 - (instancetype)init
 {
   self = [super init];
-  
   if (self) {
     _commentNodes = [[NSMutableArray alloc] init];
   }
-  
   return self;
 }
 
