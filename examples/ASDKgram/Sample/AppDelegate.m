@@ -22,12 +22,14 @@
   PhotoFeedNodeController *asdkHomeFeedVC     = [[PhotoFeedNodeController alloc] init];
   UINavigationController *asdkHomeFeedNavCtrl = [[UINavigationController alloc] initWithRootViewController:asdkHomeFeedVC];
   asdkHomeFeedNavCtrl.tabBarItem              = [[UITabBarItem alloc] initWithTitle:@"ASDK" image:[UIImage imageNamed:@"home"] tag:0];
+  asdkHomeFeedNavCtrl.hidesBarsOnSwipe        = YES;
   
   // ASDK Home Feed viewController & navController
-  PhotoFeedViewController *uikitHomeFeedVC    = [[PhotoFeedViewController alloc] init];
+  PhotoFeedViewController *uikitHomeFeedVC     = [[PhotoFeedViewController alloc] init];
   UINavigationController *uikitHomeFeedNavCtrl = [[UINavigationController alloc] initWithRootViewController:uikitHomeFeedVC];
   uikitHomeFeedNavCtrl.tabBarItem              = [[UITabBarItem alloc] initWithTitle:@"UIKit" image:[UIImage imageNamed:@"home"] tag:0];
-  
+  uikitHomeFeedNavCtrl.hidesBarsOnSwipe        = YES;
+
   // UITabBarController
   UITabBarController *tabBarController    = [[UITabBarController alloc] init];
   tabBarController.viewControllers        = @[uikitHomeFeedNavCtrl, asdkHomeFeedNavCtrl];
@@ -44,8 +46,14 @@
   uikitHomeFeedNavCtrl.navigationBar.barStyle = UIBarStyleBlack;
   asdkHomeFeedNavCtrl.navigationBar.barStyle  = UIBarStyleBlack;
   
-  self.window.rootViewController        = tabBarController;
+  self.window.rootViewController = tabBarController;
   [self.window makeKeyAndVisible];
+  
+  // hack to make status bar opaque
+  UIView *statusBarOpaqueUnderlayView         = [[UIView alloc] init];
+  statusBarOpaqueUnderlayView.backgroundColor = [UIColor darkBlueColor];
+  statusBarOpaqueUnderlayView.frame           = [[UIApplication sharedApplication] statusBarFrame];
+  [[[UIApplication sharedApplication] keyWindow] addSubview:statusBarOpaqueUnderlayView];
   
   return YES;
 }

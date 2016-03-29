@@ -17,13 +17,10 @@
 #define DEBUG_PHOTOCELL_LAYOUT  0
 
 #define HEADER_HEIGHT           50
-#define USER_IMAGE_HEIGHT       50
+#define USER_IMAGE_HEIGHT       30
 #define HORIZONTAL_BUFFER       10
 #define VERTICAL_BUFFER         5
 #define FONT_SIZE               14
-
-@interface PhotoCellNode ()
-@end
 
 @implementation PhotoCellNode
 {

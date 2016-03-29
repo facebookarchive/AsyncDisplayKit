@@ -42,11 +42,6 @@
 
     _tableNode.dataSource = self;
     _tableNode.delegate = self;
-
-    // hack to make status bar opaque
-    _statusBarOpaqueUnderlayView                 = [[UIView alloc] init];
-    _statusBarOpaqueUnderlayView.backgroundColor = [UIColor darkBlueColor];
-    [[[UIApplication sharedApplication] keyWindow] addSubview:_statusBarOpaqueUnderlayView];
   }
   
   return self;
@@ -61,22 +56,6 @@
   _tableNode.view.allowsSelection = NO;
   _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
 
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-  [super viewWillAppear:animated];
-  
-  // auto-hide navigation bar
-  self.navigationController.hidesBarsOnSwipe = YES;
-}
-
-- (void)viewWillLayoutSubviews
-{
-  [super viewWillLayoutSubviews];
-  
-  // hack to make status bar opaque view float over scroll
-  _statusBarOpaqueUnderlayView.frame = [[UIApplication sharedApplication] statusBarFrame];
 }
 
 #pragma mark - helper methods
