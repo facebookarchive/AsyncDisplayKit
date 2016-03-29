@@ -1,14 +1,13 @@
 //
 //  PhotoFeedNodeController.h
-//  Flickrgram
+//  ASDKgram
 //
 //  Created by Hannah Troisi on 2/17/16.
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface PhotoFeedNodeController : UIViewController
-
+@interface PhotoFeedNodeController : ASViewController
 
 @end

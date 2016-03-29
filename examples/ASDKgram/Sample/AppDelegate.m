@@ -1,6 +1,6 @@
 //
 //  AppDelegate.m
-//  Flickrgram
+//  ASDKgram
 //
 //  Created by Hannah Troisi on 2/16/16.
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
@@ -10,45 +10,42 @@
 #import "PhotoTableViewController.h"
 #import "PhotoFeedNodeController.h"
 #import "Utilities.h"
-#import "AsyncDisplayKit+Debug.h"
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
+  
+  self.window                           = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+  self.window.backgroundColor           = [UIColor whiteColor];
+  
+  // UIKit Home Feed viewController & navController
+  PhotoFeedNodeController *asdkHomeFeedVC     = [[PhotoFeedNodeController alloc] init];
+  UINavigationController *asdkHomeFeedNavCtrl = [[UINavigationController alloc] initWithRootViewController:asdkHomeFeedVC];
+  asdkHomeFeedNavCtrl.tabBarItem              = [[UITabBarItem alloc] initWithTitle:@"ASDK" image:[UIImage imageNamed:@"home"] tag:0];
+  
+  // ASDK Home Feed viewController & navController
+  PhotoTableViewController *uikitHomeFeedVC    = [[PhotoTableViewController alloc] init];
+  UINavigationController *uikitHomeFeedNavCtrl = [[UINavigationController alloc] initWithRootViewController:uikitHomeFeedVC];
+  uikitHomeFeedNavCtrl.tabBarItem              = [[UITabBarItem alloc] initWithTitle:@"UIKit" image:[UIImage imageNamed:@"home"] tag:0];
+  
+  // UITabBarController
+  UITabBarController *tabBarController    = [[UITabBarController alloc] init];
+  tabBarController.viewControllers        = @[uikitHomeFeedNavCtrl, asdkHomeFeedNavCtrl];
+  tabBarController.selectedViewController = asdkHomeFeedNavCtrl;
+  
   // Nav Bar appearance
   [[UINavigationBar appearance] setBarTintColor:[UIColor darkBlueColor]];
   [[UINavigationBar appearance] setTranslucent:NO];
   NSDictionary *attributes = @{NSForegroundColorAttributeName:[UIColor whiteColor]};
   [[UINavigationBar appearance] setTitleTextAttributes:attributes];
-
-  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-  self.window.backgroundColor = [UIColor whiteColor];
-  UITabBarController *tabBarController    = [[UITabBarController alloc] init];
-  self.window.rootViewController          = tabBarController;
-  [self.window makeKeyAndVisible];
-  
-  // create UIKit-powered Home Feed viewController & navController
-  PhotoFeedNodeController *asdkPoweredHomeFeedVC = [[PhotoFeedNodeController alloc] init];
-  UINavigationController *asdkHomeFeedNavCtrl = [[UINavigationController alloc] initWithRootViewController:asdkPoweredHomeFeedVC];
-  asdkHomeFeedNavCtrl.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"ASDK" image:[UIImage imageNamed:@"home"] tag:0];
-  
-  // create ASDK-powered Home Feed viewController & navController
-  PhotoTableViewController *uikitPoweredHomeFeedVC = [[PhotoTableViewController alloc] init];
-  UINavigationController *uikitHomeFeedNavCtrl = [[UINavigationController alloc] initWithRootViewController:uikitPoweredHomeFeedVC];
-  uikitHomeFeedNavCtrl.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"UIKit" image:[UIImage imageNamed:@"home"] tag:0];
-  
+  // Hack to make the status bar have white text (changes after scrolling, but not on initial app startup)
   // UINavigationController does not forward on preferredStatusBarStyle calls to its child view controllers.
-  // Instead it manages its own state...
-  //http://stackoverflow.com/questions/19022210/preferredstatusbarstyle-isnt-called/19513714#19513714
+  // Instead it manages its own state...http://stackoverflow.com/questions/19022210/preferredstatusbarstyle-isnt-called/19513714#19513714
   uikitHomeFeedNavCtrl.navigationBar.barStyle = UIBarStyleBlack;
-  asdkHomeFeedNavCtrl.navigationBar.barStyle = UIBarStyleBlack;
+  asdkHomeFeedNavCtrl.navigationBar.barStyle  = UIBarStyleBlack;
   
-  // configure UITabBarController and add viewControllers
-  tabBarController.viewControllers = @[uikitHomeFeedNavCtrl, asdkHomeFeedNavCtrl];
-  tabBarController.selectedViewController = asdkHomeFeedNavCtrl;
-  
-//  [KMCGeigerCounter sharedGeigerCounter].enabled = YES;
+  self.window.rootViewController        = tabBarController;
+  [self.window makeKeyAndVisible];
   
   return YES;
 }

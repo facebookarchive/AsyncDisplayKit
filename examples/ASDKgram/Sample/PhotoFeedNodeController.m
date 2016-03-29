@@ -1,18 +1,17 @@
 //
 //  PhotoFeedNodeController.m
-//  Flickrgram
+//  ASDKgram
 //
 //  Created by Hannah Troisi on 2/17/16.
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
 //
 
 #import "PhotoFeedNodeController.h"
-#import "PhotoModel.h"
-#import "PhotoCellNode.h"
-#import "PhotoTableViewCell.h"
-#import "PhotoFeedModel.h"
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "Utilities.h"
+#import "PhotoModel.h"
+#import "PhotoCellNode.h"
+#import "PhotoFeedModel.h"
 
 #define AUTO_TAIL_LOADING_NUM_SCREENFULS  2.5
 
@@ -22,46 +21,122 @@
 @implementation PhotoFeedNodeController
 {
   PhotoFeedModel *_photoFeed;
-  ASTableView    *_tableView;
+  ASTableNode    *_tableNode;
   UIView         *_statusBarOpaqueUnderlayView;
 }
 
-
 #pragma mark - Lifecycle
 
-- (instancetype)initWithNibName:(nullable NSString *)nibNameOrNil bundle:(nullable NSBundle *)nibBundleOrNil
+- (instancetype)init
 {
-  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  _tableNode = [[ASTableNode alloc] init];
+  self = [super initWithNode:_tableNode];
   
   if (self) {
-    
-    self.navigationItem.title      = @"ASDK";
+    self.navigationItem.title = @"ASDK";
     [self.navigationController setNavigationBarHidden:YES];
     
-//    _tableView.refreshControl      = [[UIRefreshControl alloc] init];
-//    [self.refreshControl addTarget:self action:@selector(refreshFeed) forControlEvents:UIControlEventValueChanged];
-    
-    _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular imageSize:[self imageSizeForScreenWidth]];
+    _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular
+                                                          imageSize:[self imageSizeForScreenWidth]];
     [self refreshFeed];
-    
+
+    _tableNode.dataSource = self;
+    _tableNode.delegate = self;
+
+    // hack to make status bar opaque
     _statusBarOpaqueUnderlayView                 = [[UIView alloc] init];
     _statusBarOpaqueUnderlayView.backgroundColor = [UIColor darkBlueColor];
     [[[UIApplication sharedApplication] keyWindow] addSubview:_statusBarOpaqueUnderlayView];
-
-    
-    // ASTABLEVIEW
-    _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain asyncDataFetching:YES];
-    _tableView.asyncDataSource = self;
-    _tableView.asyncDelegate = self;
-    _tableView.allowsSelection = NO;
-    _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    
-    // enable tableView pull-to-refresh & add target-action pair
-//    self.refreshControl = [[UIRefreshControl alloc] init];
-//    [self.refreshControl addTarget:self action:@selector(refreshFeed) forControlEvents:UIControlEventValueChanged];
   }
   
   return self;
+}
+
+// do any ASDK view stuff in loadView
+- (void)loadView
+{
+  [super loadView];
+  
+  self.view.backgroundColor = [UIColor whiteColor];
+  _tableNode.view.allowsSelection = NO;
+  _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
+
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+  [super viewWillAppear:animated];
+  
+  // auto-hide navigation bar
+  self.navigationController.hidesBarsOnSwipe = YES;
+}
+
+- (void)viewWillLayoutSubviews
+{
+  [super viewWillLayoutSubviews];
+  
+  // hack to make status bar opaque view float over scroll
+  _statusBarOpaqueUnderlayView.frame = [[UIApplication sharedApplication] statusBarFrame];
+}
+
+#pragma mark - helper methods
+
+- (void)refreshFeed
+{
+  // small first batch
+  [_photoFeed refreshFeedWithCompletionBlock:^(NSArray *newPhotos){
+    
+    [self insertNewRowsInTableView:newPhotos];
+    [self requestCommentsForPhotos:newPhotos];
+    
+    // immediately start second larger fetch
+    [self loadPage];
+    
+  } numResultsToReturn:4];
+}
+
+- (void)loadPage
+{
+  [_photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
+    [self insertNewRowsInTableView:newPhotos];
+    [self requestCommentsForPhotos:newPhotos];
+  } numResultsToReturn:20];
+}
+
+- (void)requestCommentsForPhotos:(NSArray *)newPhotos
+{
+  for (PhotoModel *photo in newPhotos) {
+    [photo.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
+      
+      NSInteger rowNum = [_photoFeed indexOfPhotoModel:photo];
+      PhotoCellNode *cell = (PhotoCellNode *)[_tableNode.view nodeForRowAtIndexPath:[NSIndexPath indexPathForRow:rowNum inSection:0]];
+      
+      if (cell) {
+        [cell loadCommentsForPhoto:photo];
+        [_tableNode.view beginUpdates];
+        [_tableNode.view endUpdates];
+      }
+    }];
+  }
+}
+
+- (void)insertNewRowsInTableView:(NSArray *)newPhotos
+{
+  NSInteger section = 0;
+  NSMutableArray *indexPaths = [NSMutableArray array];
+  
+  NSUInteger newTotalNumberOfPhotos = [_photoFeed numberOfItemsInFeed];
+  for (NSUInteger row = newTotalNumberOfPhotos - newPhotos.count; row < newTotalNumberOfPhotos; row++) {
+    NSIndexPath *path = [NSIndexPath indexPathForRow:row inSection:section];
+    [indexPaths addObject:path];
+  }
+  
+  [_tableNode.view insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+  return UIStatusBarStyleLightContent;
 }
 
 - (CGSize)imageSizeForScreenWidth
@@ -71,135 +146,7 @@
   return CGSizeMake(screenRect.size.width * screenScale, screenRect.size.width * screenScale);
 }
 
-- (void)loadView
-{
-  [super loadView];
-  
-  [self.view addSubview:_tableView];  //FIXME: self use implicit heirarchy?
-  self.view.backgroundColor = [UIColor whiteColor]; //ditto
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-  [super viewWillAppear:animated];
-  
-  self.navigationController.hidesBarsOnSwipe = YES;
-}
-
-- (void)viewWillLayoutSubviews
-{
-  [super viewWillLayoutSubviews];
-  
-  _tableView.frame = self.view.bounds;
-  _statusBarOpaqueUnderlayView.frame = [[UIApplication sharedApplication] statusBarFrame];
-}
-
-#pragma mark - Gesture Handling
-
-- (void)refreshFeed
-{
-  // small first batch
-  [_photoFeed refreshFeedWithCompletionBlock:^(NSArray *newPhotos){
-    
-    [_tableView reloadData];        // overwrite tableView instead of inserting new rows
-//    [self.refreshControl endRefreshing];
-    [self requestCommentsForPhotos:newPhotos];
-    
-    // immediately start second larger fetch
-    [self loadPage];
-    
-  } numResultsToReturn:4];
-}
-
-- (UIStatusBarStyle)preferredStatusBarStyle   // FIXME - doesn't work?
-{
-  return UIStatusBarStyleLightContent;
-}
-
-- (void)loadPage
-{
-//  NSLog(@"_photoFeed number of items = %lu", [_photoFeed numberOfItemsInFeed]);
-  
-  [self logPhotoIDsInPhotoFeed];
-
-  [_photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
-    
-    [self insertNewRowsInTableView:newPhotos];
-    [self requestCommentsForPhotos:newPhotos];
-    [self logPhotoIDsInPhotoFeed];
-
-  } numResultsToReturn:20];
-}
-
-- (void)requestCommentsForPhotos:(NSArray *)newPhotos
-{
-  for (PhotoModel *photo in newPhotos) {
-    
-    [photo.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
-      
-      NSInteger rowNum = [_photoFeed indexOfPhotoModel:photo];
-      PhotoCellNode *cell = (PhotoCellNode *)[_tableView nodeForRowAtIndexPath:[NSIndexPath indexPathForRow:rowNum inSection:0]];
-      
-      if (cell) {
-        [cell loadCommentsForPhoto:photo];
-        [_tableView beginUpdates];
-        [_tableView endUpdates];
-      }
-    }];
-  }
-}
-
-- (void)logPhotoIDsInPhotoFeed
-{
-//  NSLog(@"_photoFeed number of items = %lu", [_photoFeed numberOfItemsInFeed]);
-  
-//  for (int i = 0; i < [_photoFeed numberOfItemsInFeed]; i++) {
-//    if (i % 4 == 0 && i > 0) {
-//      NSLog(@"\t-----");
-//    }
-  
-//    [_photoFeed return]
-//    NSString *duplicate =  ? @"(DUPLICATE)" : @"";
-//    NSLog(@"\t%@  %@", [[_photoFeed objectAtIndex:i] photoID], @"");
-//  }
-}
-
-- (void)insertNewRowsInTableView:(NSArray *)newPhotos
-{
-//  NSLog(@"_photoFeed number of items = %lu (%lu total)", (unsigned long)[_photoFeed numberOfItemsInFeed], (long)[_photoFeed totalNumberOfPhotos]);
-  
-  // instead of doing tableView reloadData, use table editing commands
-  NSMutableArray *indexPaths = [NSMutableArray array];
-  
-  NSInteger section = 0;
-  NSUInteger newTotalNumberOfPhotos = [_photoFeed numberOfItemsInFeed];
-  for (NSUInteger row = newTotalNumberOfPhotos - newPhotos.count; row < newTotalNumberOfPhotos; row++) {
-    
-    NSIndexPath *path = [NSIndexPath indexPathForRow:row inSection:section];
-    [indexPaths addObject:path];
-  }
-  
-  [_tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-}
-
-#pragma mark - ASTableDelegate protocol methods
--(void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
-  
-  CGFloat currentOffSetY = scrollView.contentOffset.y;
-  CGFloat contentHeight  = scrollView.contentSize.height;
-  CGFloat screenHeight   = [UIScreen mainScreen].bounds.size.height;
-  
-  // automatic tail loading
-  CGFloat screenfullsBeforeBottom = (contentHeight - currentOffSetY) / screenHeight;
-  if (screenfullsBeforeBottom < AUTO_TAIL_LOADING_NUM_SCREENFULS) {
-//    NSLog(@"AUTOMATIC TAIL LOADING BEGIN");
-    [self loadPage];
-  }
-}
-
-
-#pragma mark - ASTableDataSource protocol methods
+#pragma mark - ASTableDataSource methods
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -208,9 +155,24 @@
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath;
 {
-  PhotoCellNode *cell = [[PhotoCellNode alloc] initWithPhotoObject:[_photoFeed objectAtIndex:indexPath.row]];
+  PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhotoObject:[_photoFeed objectAtIndex:indexPath.row]];
   
-  return cell;
+  return cellNode;
+}
+
+#pragma mark - ASTableDelegate methods
+
+// table automatic tail loading
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+  CGFloat currentOffSetY = scrollView.contentOffset.y;
+  CGFloat contentHeight  = scrollView.contentSize.height;
+  CGFloat screenHeight   = [UIScreen mainScreen].bounds.size.height;
+  
+  CGFloat screenfullsBeforeBottom = (contentHeight - currentOffSetY) / screenHeight;
+  if (screenfullsBeforeBottom < AUTO_TAIL_LOADING_NUM_SCREENFULS) {
+    [self loadPage];
+  }
 }
 
 @end

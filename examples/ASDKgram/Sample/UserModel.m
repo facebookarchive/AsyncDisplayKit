@@ -1,6 +1,6 @@
 //
 //  UserModel.m
-//  Flickrgram
+//  ASDKgram
 //
 //  Created by Hannah Troisi on 2/26/16.
 //  Copyright © 2016 Hannah Troisi. All rights reserved.

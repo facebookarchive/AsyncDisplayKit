@@ -1,6 +1,6 @@
 //
 //  Utilities.m
-//  Flickrgram
+//  ASDKgram
 //
 //  Created by Hannah Troisi on 3/9/16.
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
@@ -171,15 +171,19 @@
 + (NSAttributedString *)attributedStringWithString:(NSString *)string fontSize:(CGFloat)size
                                              color:(nullable UIColor *)color firstWordColor:(nullable UIColor *)firstWordColor
 {
-  NSDictionary *attributes                    = @{NSForegroundColorAttributeName: color ? : [UIColor blackColor],
-                                                  NSFontAttributeName: [UIFont systemFontOfSize:size]};
-  NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:string];
-  [attributedString addAttributes:attributes range:NSMakeRange(0, string.length)];
+  NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] init];
   
-  if (firstWordColor) {
-    NSRange firstSpaceRange = [string rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSRange firstWordRange  = NSMakeRange(0, firstSpaceRange.location);
-    [attributedString addAttribute:NSForegroundColorAttributeName value:firstWordColor range:firstWordRange];
+  if (string) {
+    NSDictionary *attributes                    = @{NSForegroundColorAttributeName: color ? : [UIColor blackColor],
+                                                    NSFontAttributeName: [UIFont systemFontOfSize:size]};
+    attributedString = [[NSMutableAttributedString alloc] initWithString:string];
+    [attributedString addAttributes:attributes range:NSMakeRange(0, string.length)];
+    
+    if (firstWordColor) {
+      NSRange firstSpaceRange = [string rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
+      NSRange firstWordRange  = NSMakeRange(0, firstSpaceRange.location);
+      [attributedString addAttribute:NSForegroundColorAttributeName value:firstWordColor range:firstWordRange];
+    }
   }
   
   return attributedString;

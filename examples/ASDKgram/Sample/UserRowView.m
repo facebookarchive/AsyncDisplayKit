@@ -1,6 +1,6 @@
 //
 //  UserRowView.m
-//  Flickrgram
+//  ASDKgram
 //
 //  Created by Hannah Troisi on 3/13/16.
 //  Copyright © 2016 Hannah Troisi. All rights reserved.

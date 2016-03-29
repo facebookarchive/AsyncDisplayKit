@@ -1,6 +1,6 @@
 //
 //  Utilities.h
-//  Flickrgram
+//  ASDKgram
 //
 //  Created by Hannah Troisi on 3/9/16.
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
@@ -33,7 +33,9 @@
 
 @interface NSAttributedString (Additions)
 
-+ (NSAttributedString *)attributedStringWithString:(NSString *)string fontSize:(CGFloat)size
-                                             color:(UIColor *)color firstWordColor:(UIColor *)firstWordColor;
++ (NSAttributedString *)attributedStringWithString:(NSString *)string
+                                          fontSize:(CGFloat)size
+                                             color:(UIColor *)color
+                                    firstWordColor:(UIColor *)firstWordColor;
 
 @end
