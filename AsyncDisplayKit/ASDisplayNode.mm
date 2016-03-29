@@ -602,32 +602,32 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   [self cancelLayoutTransitionsInProgress];
 
-  BOOL contextExists = (_supernode != nil);
-  BOOL didOverrideContext = NO;
+  BOOL didCreateNewContext = NO;
+  BOOL didOverrideExistingContext = NO;
   ASLayoutableContext context;
-  if (contextExists) {
+  if (ASLayoutableContextIsNull(ASLayoutableGetCurrentContext())) {
+    context = ASLayoutableContextMake(ASLayoutableContextDefaultTransitionID,
+                                      _shouldVisualizeLayoutSpecs);
+    ASLayoutableSetCurrentContext(context);
+    didCreateNewContext = YES;
+  } else {
     context = ASLayoutableGetCurrentContext();
     if (context.needsVisualizeNode != _shouldVisualizeLayoutSpecs) {
       context.needsVisualizeNode = _shouldVisualizeLayoutSpecs;
       ASLayoutableSetCurrentContext(context);
-      didOverrideContext = YES;
+      didOverrideExistingContext = YES;
     }
-  } else {
-    context = ASLayoutableContextMake(0, _shouldVisualizeLayoutSpecs);
-    ASLayoutableSetCurrentContext(context);
   }
   
   ASLayout *previousLayout = _layout;
   ASSizeRange previousConstrainedSize = _constrainedSize;
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
   
-  if (contextExists) {
-    if (didOverrideContext) {
-      context.needsVisualizeNode = !context.needsVisualizeNode;
-      ASLayoutableSetCurrentContext(context);
-    }
-  } else {
+  if (didCreateNewContext) {
     ASLayoutableClearCurrentContext();
+  } else if (didOverrideExistingContext) {
+    context.needsVisualizeNode = !context.needsVisualizeNode;
+    ASLayoutableSetCurrentContext(context);
   }
   
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
