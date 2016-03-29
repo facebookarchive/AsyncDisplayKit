@@ -1,40 +1,44 @@
 //
-//  PhotoTableViewController.m
+//  PhotoFeedViewController.m
 //  ASDKgram
 //
 //  Created by Hannah Troisi on 2/17/16.
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
 //
 
-#import "PhotoTableViewController.h"
+#import "PhotoFeedViewController.h"
 #import "Utilities.h"
 #import "PhotoTableViewCell.h"
 #import "PhotoFeedModel.h"
 
 #define AUTO_TAIL_LOADING_NUM_SCREENFULS  2.5
 
-@implementation PhotoTableViewController
+@interface PhotoFeedViewController () <UITableViewDelegate, UITableViewDataSource>
+@end
+
+@implementation PhotoFeedViewController
 {
   PhotoFeedModel *_photoFeed;
+  UITableView    *_tableView;
   UIView         *_statusBarOpaqueUnderlayView;
 }
 
 #pragma mark - Lifecycle
 
-- (instancetype)initWithStyle:(UITableViewStyle)style
+- (instancetype)init
 {
-  self = [super initWithStyle:style];
+  self = [super initWithNibName:nil bundle:nil];
   
   if (self) {
-      
     self.navigationItem.title = @"UIKit";
     [self.navigationController setNavigationBarHidden:YES];
     
     _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular imageSize:[self imageSizeForScreenWidth]];
     [self refreshFeed];
     
-    self.refreshControl = [[UIRefreshControl alloc] init];
-    [self.refreshControl addTarget:self action:@selector(refreshFeed) forControlEvents:UIControlEventValueChanged];
+    _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
     
     // hack to make status bar opaque
     _statusBarOpaqueUnderlayView                 = [[UIView alloc] init];
@@ -50,9 +54,11 @@
 {
   [super viewDidLoad];
   
-  self.tableView.allowsSelection = NO;
-  self.tableView.separatorStyle  = UITableViewCellSeparatorStyleNone;
-  [self.tableView registerClass:[PhotoTableViewCell class] forCellReuseIdentifier:@"photoCell"];
+  [self.view addSubview:_tableView];
+  _tableView.frame = self.view.bounds;
+  _tableView.allowsSelection = NO;
+  _tableView.separatorStyle  = UITableViewCellSeparatorStyleNone;
+  [_tableView registerClass:[PhotoTableViewCell class] forCellReuseIdentifier:@"photoCell"];
   
 }
 
@@ -78,7 +84,6 @@
 {
   // small first batch
   [_photoFeed refreshFeedWithCompletionBlock:^(NSArray *newPhotos){
-    
     [self insertNewRowsInTableView:newPhotos];
     [self requestCommentsForPhotos:newPhotos];
     
@@ -102,12 +107,12 @@
     [photo.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
       
       NSInteger rowNum         = [_photoFeed indexOfPhotoModel:photo];
-      PhotoTableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:rowNum inSection:0]];
+      PhotoTableViewCell *cell = [_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:rowNum inSection:0]];
       
       if (cell) {
         [cell loadCommentsForPhoto:photo];
-        [self.tableView beginUpdates];
-        [self.tableView endUpdates];
+        [_tableView beginUpdates];
+        [_tableView endUpdates];
       }
     }];
   }
@@ -118,13 +123,13 @@
   NSInteger section = 0;
   NSMutableArray *indexPaths = [NSMutableArray array];
   
-  NSUInteger newTotalNumberOfPhotos = [_photoFeed numberOfItemsInFeed];
-  for (NSUInteger row = newTotalNumberOfPhotos - newPhotos.count; row < newTotalNumberOfPhotos; row++) {
+  NSInteger newTotalNumberOfPhotos = [_photoFeed numberOfItemsInFeed];
+  for (NSInteger row = newTotalNumberOfPhotos - newPhotos.count; row < newTotalNumberOfPhotos; row++) {
     NSIndexPath *path = [NSIndexPath indexPathForRow:row inSection:section];
     [indexPaths addObject:path];
   }
   
-  [self.tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
+  [_tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle

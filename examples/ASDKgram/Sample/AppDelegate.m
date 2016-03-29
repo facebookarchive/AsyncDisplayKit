@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import "PhotoTableViewController.h"
+#import "PhotoFeedViewController.h"
 #import "PhotoFeedNodeController.h"
 #import "Utilities.h"
 
@@ -24,7 +24,7 @@
   asdkHomeFeedNavCtrl.tabBarItem              = [[UITabBarItem alloc] initWithTitle:@"ASDK" image:[UIImage imageNamed:@"home"] tag:0];
   
   // ASDK Home Feed viewController & navController
-  PhotoTableViewController *uikitHomeFeedVC    = [[PhotoTableViewController alloc] init];
+  PhotoFeedViewController *uikitHomeFeedVC    = [[PhotoFeedViewController alloc] init];
   UINavigationController *uikitHomeFeedNavCtrl = [[UINavigationController alloc] initWithRootViewController:uikitHomeFeedVC];
   uikitHomeFeedNavCtrl.tabBarItem              = [[UITabBarItem alloc] initWithTitle:@"UIKit" image:[UIImage imageNamed:@"home"] tag:0];
   

@@ -1,5 +1,5 @@
 //
-//  PhotoTableViewController.h
+//  PhotoFeedViewController.h
 //  ASDKgram
 //
 //  Created by Hannah Troisi on 2/17/16.
@@ -8,8 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface PhotoTableViewController : UITableViewController
-
-- (void)refreshFeed;
+@interface PhotoFeedViewController : UIViewController
 
 @end
