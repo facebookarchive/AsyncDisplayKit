@@ -57,8 +57,8 @@
     
     _contentSpacing = 8.0;
     _laysOutHorizontally = YES;
-    _contentHorizontalAlignment = ASAlignmentMiddle;
-    _contentVerticalAlignment = ASAlignmentCenter;
+    _contentHorizontalAlignment = ASHorizontalAlignmentMiddle;
+    _contentVerticalAlignment = ASVerticalAlignmentCenter;
     _contentEdgeInsets = UIEdgeInsetsZero;
     self.accessibilityTraits = UIAccessibilityTraitButton;
   }

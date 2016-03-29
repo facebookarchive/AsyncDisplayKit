@@ -351,7 +351,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** 
  * @abstract The receiver's immediate subnodes.
  */
-@property (nonatomic, readonly, strong) NSArray<ASDisplayNode *> *subnodes;
+@property (nonatomic, readonly, copy) NSArray<ASDisplayNode *> *subnodes;
 
 /** 
  * @abstract The receiver's supernode.
