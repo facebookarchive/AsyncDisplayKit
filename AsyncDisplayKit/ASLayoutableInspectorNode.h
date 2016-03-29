@@ -10,7 +10,7 @@
 
 @protocol ASLayoutableInspectorNodeDelegate <NSObject>
 
-- (void)toggleVizualization:(BOOL)toggle;
+- (void)toggleVisualization:(BOOL)toggle;
 
 @end 
 

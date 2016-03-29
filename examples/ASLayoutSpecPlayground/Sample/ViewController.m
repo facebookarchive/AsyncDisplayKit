@@ -55,11 +55,10 @@
 
 #pragma mark - ASLayoutableInspectorNodeDelegate
 
-- (void)toggleVizualization:(BOOL)toggle            // FIXME: this doesn't work currently
+- (void)toggleVisualization:(BOOL)toggle
 {
   NSLog(@"shouldVisualizeLayoutSpecs:%d", toggle);
-  [self.node shouldVisualizeLayoutSpecs:toggle];
-  [self.view setNeedsLayout];
+  [self.node setShouldVisualizeLayoutSpecs:toggle];
 }
 
 @end

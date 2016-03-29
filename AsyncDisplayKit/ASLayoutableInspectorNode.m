@@ -348,14 +348,14 @@
 //  
 //  if (newState == YES) {
 //    self.vizNodeInsetSize = 0;
-//    [self.delegate toggleVizualization:NO];   // FIXME
-//    [self.delegate toggleVizualization:YES];   // FIXME
+//    [self.delegate toggleVisualization:NO];   // FIXME
+//    [self.delegate toggleVisualization:YES];   // FIXME
 //    _vizNodeBordersBtn.selected = YES;
 //    
 //  } else {
 //    self.vizNodeInsetSize = 10;
-//    [self.delegate toggleVizualization:NO];   // FIXME
-//    [self.delegate toggleVizualization:YES];   // FIXME
+//    [self.delegate toggleVisualization:NO];   // FIXME
+//    [self.delegate toggleVisualization:YES];   // FIXME
 //  }
 //  
 //  sender.selected = newState;
@@ -365,7 +365,7 @@
 //{
 //  BOOL newState = !sender.selected;
 //  
-//  [self.delegate toggleVizualization:newState];   // FIXME
+//  [self.delegate toggleVisualization:newState];   // FIXME
 //
 //  sender.selected = newState;
 //}
