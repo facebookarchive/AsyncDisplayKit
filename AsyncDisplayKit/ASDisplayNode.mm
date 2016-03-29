@@ -1596,6 +1596,8 @@ static NSInteger incrementIfFound(NSInteger i) {
     if (_flags.shouldRasterizeDescendants) {
       // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
       [self _recursiveDidExitHierarchy];
+    } else {
+      [self didExitHierarchy];
     }
     
     // This case is important when tearing down hierarchies.  We must deliver a visibilityDidChange:NO callback, as part our API guarantee that this method can be used for
@@ -1614,7 +1616,6 @@ static NSInteger incrementIfFound(NSInteger i) {
       });
     }
     
-    [self didExitHierarchy];
     _flags.isExitingHierarchy = NO;
   }
 }
