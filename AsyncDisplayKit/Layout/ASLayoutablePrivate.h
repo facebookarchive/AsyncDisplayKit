@@ -19,6 +19,14 @@ struct ASLayoutableContext {
   BOOL needsVisualizeNode;
 };
 
+extern int32_t const ASLayoutableContextInvalidTransitionID;
+
+extern int32_t const ASLayoutableContextDefaultTransitionID;
+
+extern struct ASLayoutableContext const ASLayoutableContextNull;
+
+extern BOOL ASLayoutableContextIsNull(struct ASLayoutableContext context);
+
 extern struct ASLayoutableContext ASLayoutableContextMake(int32_t transitionID, BOOL needsVisualizeNode);
 
 extern void ASLayoutableSetCurrentContext(struct ASLayoutableContext context);
