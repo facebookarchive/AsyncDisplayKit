@@ -20,9 +20,9 @@
 
 @implementation PhotoFeedNodeController
 {
-  PhotoFeedModel *_photoFeed;
-  ASTableNode    *_tableNode;
-  UIView         *_statusBarOpaqueUnderlayView;
+  PhotoFeedModel   *_photoFeed;
+  ASTableNode      *_tableNode;
+  UIView           *_statusBarOpaqueUnderlayView;
 }
 
 #pragma mark - Lifecycle
@@ -87,8 +87,9 @@
   for (PhotoModel *photo in newPhotos) {
     [photo.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
       
-      NSInteger rowNum = [_photoFeed indexOfPhotoModel:photo];
-      PhotoCellNode *cell = (PhotoCellNode *)[_tableNode.view nodeForRowAtIndexPath:[NSIndexPath indexPathForRow:rowNum inSection:0]];
+      NSInteger rowNum      = [_photoFeed indexOfPhotoModel:photo];
+      NSIndexPath *cellPath = [NSIndexPath indexPathForRow:rowNum inSection:0];
+      PhotoCellNode *cell   = (PhotoCellNode *)[_tableNode.view nodeForRowAtIndexPath:cellPath];
       
       if (cell) {
         [cell loadCommentsForPhoto:photo];

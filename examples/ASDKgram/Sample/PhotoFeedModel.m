@@ -13,7 +13,7 @@
 #define fiveHundredPX_ENDPOINT_POPULAR   @"photos?feature=popular&exclude=Nude,People,Fashion&sort=rating&image_size=3&include_store=store_download&include_states=voted"
 #define fiveHundredPX_ENDPOINT_SEARCH    @"photos/search?geo="    //latitude,longitude,radius<units>
 #define fiveHundredPX_ENDPOINT_USER      @"photos?user_id="
-#define fiveHundredPX_CONSUMER_KEY_PARAM @"&consumer_key=Fi13GVb8g53sGvHICzlram7QkKOlSDmAmp9s9aqC"
+#define fiveHundredPX_CONSUMER_KEY_PARAM @"&consumer_key=Fi13GVb8g53sGvHICzlram7QkKOlSDmAmp9s9aqC"   // PLEASE REQUEST YOUR OWN 500PX CONSUMER KEY
 
 @implementation PhotoFeedModel
 {
@@ -34,7 +34,6 @@
   NSUInteger    _locationRadius;
   NSUInteger    _userID;
 }
-
 
 #pragma mark - Properties
 

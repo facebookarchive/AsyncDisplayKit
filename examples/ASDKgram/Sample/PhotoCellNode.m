@@ -125,7 +125,7 @@
   // header stack
   
   _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);     // constrain avatar image frame size
-  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER;                 // hack to remove double spaces around spacer
+  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER;                 // to remove double spaces around spacer
   
   ASLayoutSpec *spacer      = [[ASLayoutSpec alloc] init];    // FIXME: long locations overflow post time - set max size?
   spacer.flexGrow           = YES;

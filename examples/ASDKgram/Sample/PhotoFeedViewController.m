@@ -10,6 +10,7 @@
 #import "Utilities.h"
 #import "PhotoTableViewCell.h"
 #import "PhotoFeedModel.h"
+#import "CommentView.h"
 
 #define AUTO_TAIL_LOADING_NUM_SCREENFULS  2.5
 
@@ -33,12 +34,12 @@
     self.navigationItem.title = @"UIKit";
     [self.navigationController setNavigationBarHidden:YES];
     
-    _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular imageSize:[self imageSizeForScreenWidth]];
-    [self refreshFeed];
-    
     _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
     _tableView.delegate = self;
     _tableView.dataSource = self;
+    
+    _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular imageSize:[self imageSizeForScreenWidth]];
+    [self refreshFeed];
   }
   
   return self;
@@ -85,12 +86,20 @@
     [photo.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
       
       NSInteger rowNum         = [_photoFeed indexOfPhotoModel:photo];
-      PhotoTableViewCell *cell = [_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:rowNum inSection:0]];
+      NSIndexPath *cellPath    = [NSIndexPath indexPathForRow:rowNum inSection:0];
+      PhotoTableViewCell *cell = [_tableView cellForRowAtIndexPath:cellPath];
       
       if (cell) {
         [cell loadCommentsForPhoto:photo];
         [_tableView beginUpdates];
         [_tableView endUpdates];
+        
+        // adjust scrollView contentOffset if inserting above visible cells
+        NSIndexPath *visibleCellPath = [_tableView indexPathForCell:_tableView.visibleCells.firstObject];
+        if (cellPath.row < visibleCellPath.row) {
+          CGFloat commentViewHeight = [CommentView heightForCommentFeedModel:photo.commentFeed withWidth:self.view.bounds.size.width];
+          _tableView.contentOffset = CGPointMake(_tableView.contentOffset.x, _tableView.contentOffset.y + commentViewHeight);
+        }
       }
     }];
   }
@@ -106,7 +115,6 @@
     NSIndexPath *path = [NSIndexPath indexPathForRow:row inSection:section];
     [indexPaths addObject:path];
   }
-  
   [_tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
 }
 
@@ -157,8 +165,5 @@
     [self loadPage];
   }
 }
-
-
-
 
 @end

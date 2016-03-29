@@ -40,7 +40,7 @@
   [[UINavigationBar appearance] setTranslucent:NO];
   NSDictionary *attributes = @{NSForegroundColorAttributeName:[UIColor whiteColor]};
   [[UINavigationBar appearance] setTitleTextAttributes:attributes];
-  // Hack to make the status bar have white text (changes after scrolling, but not on initial app startup)
+  // make the status bar have white text (changes after scrolling, but not on initial app startup)
   // UINavigationController does not forward on preferredStatusBarStyle calls to its child view controllers.
   // Instead it manages its own state...http://stackoverflow.com/questions/19022210/preferredstatusbarstyle-isnt-called/19513714#19513714
   uikitHomeFeedNavCtrl.navigationBar.barStyle = UIBarStyleBlack;
@@ -49,13 +49,29 @@
   self.window.rootViewController = tabBarController;
   [self.window makeKeyAndVisible];
   
-  // hack to make status bar opaque
-  UIView *statusBarOpaqueUnderlayView         = [[UIView alloc] init];
-  statusBarOpaqueUnderlayView.backgroundColor = [UIColor darkBlueColor];
-  statusBarOpaqueUnderlayView.frame           = [[UIApplication sharedApplication] statusBarFrame];
-  [[[UIApplication sharedApplication] keyWindow] addSubview:statusBarOpaqueUnderlayView];
-  
+  // opaque status bar background
+  self.statusBarOpaqueUnderlayView                 = [[UIView alloc] init];
+  self.statusBarOpaqueUnderlayView.backgroundColor = [UIColor darkBlueColor];
+  self.statusBarOpaqueUnderlayView.frame           = [[UIApplication sharedApplication] statusBarFrame];
+  if ( ![[UIApplication sharedApplication] isStatusBarHidden] ) {
+    [[[UIApplication sharedApplication] keyWindow] addSubview:self.statusBarOpaqueUnderlayView];
+  }
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(handleDidChangeStatusBarOrientationNotification:)
+                                               name:UIApplicationWillChangeStatusBarOrientationNotification
+                                             object:nil];
   return YES;
+}
+
+- (void)handleDidChangeStatusBarOrientationNotification:(NSNotification *)notification;
+{
+  NSNumber *newOrientation = [notification.userInfo objectForKey: UIApplicationStatusBarOrientationUserInfoKey];
+  NSInteger newOrientationInt = [newOrientation integerValue];
+  if (UIInterfaceOrientationIsLandscape(newOrientationInt)) {
+    [self.statusBarOpaqueUnderlayView removeFromSuperview];
+  } else {
+    [[[UIApplication sharedApplication] keyWindow] addSubview:self.statusBarOpaqueUnderlayView];
+  }
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
