@@ -14,6 +14,7 @@
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASImageNode+AnimatedImagePrivate.h"
 
 @interface ASWeakProxy : NSObject
 
