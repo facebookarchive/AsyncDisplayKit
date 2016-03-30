@@ -2081,7 +2081,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   };
   [self traitCollectionDidChange:previousTraitCollection];
 
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
     node.traitCollection = traitCollection;
   });
 }
