@@ -8,12 +8,15 @@
 
 #import "ASNetworkImageNode.h"
 
+#import "ASAnimatedImage.h"
 #import "ASBasicImageDownloader.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEqualityHelpers.h"
 #import "ASThread.h"
 #import "ASInternalHelpers.h"
+#import "ASImageContainerProtocolCategories.h"
+#import "ASImageNode+AnimatedImage.h"
 
 #if PIN_REMOTE_IMAGE
 #import "ASPINRemoteImageDownloader.h"
@@ -188,7 +191,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   if (_cacheSupportsSynchronousFetch) {
     ASDN::MutexLocker l(_lock);
     if (_imageLoaded == NO && _URL && _downloadIdentifier == nil) {
-      UIImage *result = [_cache synchronouslyFetchedCachedImageWithURL:_URL];
+      UIImage *result = [[_cache synchronouslyFetchedCachedImageWithURL:_URL] asdk_image];
       if (result) {
         self.image = result;
         _imageLoaded = YES;
@@ -309,7 +312,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   _cacheUUID = nil;
 }
 
-- (void)_downloadImageWithCompletion:(void (^)(UIImage *image, NSError*, id downloadIdentifier))finished
+- (void)_downloadImageWithCompletion:(void (^)(id <ASImageContainerProtocol> imageContainer, NSError*, id downloadIdentifier))finished
 {
   ASPerformBlockOnBackgroundThread(^{
     ASDN::MutexLocker l(_lock);
@@ -317,9 +320,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       _downloadIdentifier = [_downloader downloadImageWithURL:_URL
                                                 callbackQueue:dispatch_get_main_queue()
                                              downloadProgress:NULL
-                                                   completion:^(UIImage * _Nullable image, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
+                                                   completion:^(id <ASImageContainerProtocol> _Nullable imageContainer, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
                                                      if (finished != NULL) {
-                                                       finished(image, error, downloadIdentifier);
+                                                       finished(imageContainer, error, downloadIdentifier);
                                                      }
                                                    }];
     } else {
@@ -376,7 +379,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       }
     } else {
       __weak __typeof__(self) weakSelf = self;
-      void (^finished)(UIImage *, NSError *, id downloadIdentifier) = ^(UIImage *responseImage, NSError *error, id downloadIdentifier) {
+      void (^finished)(id <ASImageContainerProtocol>, NSError *, id downloadIdentifier) = ^(id <ASImageContainerProtocol>imageContainer, NSError *error, id downloadIdentifier) {
         __typeof__(self) strongSelf = weakSelf;
         if (strongSelf == nil) {
           return;
@@ -390,9 +393,13 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
               return;
           }
 
-          if (responseImage != NULL) {
+          if (imageContainer != nil) {
             strongSelf->_imageLoaded = YES;
-            strongSelf.image = responseImage;
+            if ([imageContainer asdk_animatedImageData]) {
+              strongSelf.animatedImage = [[ASAnimatedImage alloc] initWithAnimatedImageData:[imageContainer asdk_animatedImageData]];
+            } else {
+              strongSelf.image = [imageContainer asdk_image];
+            }
           }
 
           strongSelf->_downloadIdentifier = nil;
@@ -402,7 +409,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
         {
           ASDN::MutexLocker l(strongSelf->_lock);
-          if (responseImage != NULL) {
+          if (imageContainer != nil) {
             [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
           }
           else if (error && _delegateSupportsDidFailWithError) {
@@ -415,16 +422,16 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
         NSUUID *cacheUUID = [NSUUID UUID];
         _cacheUUID = cacheUUID;
 
-        void (^cacheCompletion)(UIImage *) = ^(UIImage *image) {
+        void (^cacheCompletion)(id <ASImageContainerProtocol>) = ^(id <ASImageContainerProtocol> imageContainer) {
           // If the cache UUID changed, that means this request was cancelled.
           if (![_cacheUUID isEqual:cacheUUID]) {
             return;
           }
           
-          if (image == NULL && _downloader != nil) {
+          if ([imageContainer asdk_image] == NULL && _downloader != nil) {
             [self _downloadImageWithCompletion:finished];
           } else {
-            finished(image, NULL, nil);
+            finished(imageContainer, NULL, nil);
           }
         };
         

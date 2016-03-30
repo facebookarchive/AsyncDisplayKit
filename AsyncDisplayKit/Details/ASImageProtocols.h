@@ -11,7 +11,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
+@protocol ASImageContainerProtocol <NSObject>
+
+- (UIImage *)asdk_image;
+- (NSData *)asdk_animatedImageData;
+
+@end
+
+typedef void(^ASImageCacherCompletion)(id <ASImageContainerProtocol> _Nullable imageFromCache);
 
 @protocol ASImageCacheProtocol <NSObject>
 
@@ -28,7 +35,7 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
  the calling thread to fetch the image from a fast memory cache. It is OK to return nil from this method and instead
  support only cachedImageWithURL:callbackQueue:completion: however, synchronous rendering will not be possible.
  */
-- (nullable UIImage *)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
+- (nullable id <ASImageContainerProtocol>)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
 
 /**
  @abstract Attempts to fetch an image with the given URL from the cache.
@@ -52,7 +59,7 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
 
 @end
 
-typedef void(^ASImageDownloaderCompletion)(UIImage  * _Nullable image, NSError * _Nullable error, id _Nullable downloadIdentifier);
+typedef void(^ASImageDownloaderCompletion)(id <ASImageContainerProtocol> _Nullable image, NSError * _Nullable error, id _Nullable downloadIdentifier);
 typedef void(^ASImageDownloaderProgress)(CGFloat progress);
 typedef void(^ASImageDownloaderProgressImage)(UIImage *progressImage, id _Nullable downloadIdentifier);
 

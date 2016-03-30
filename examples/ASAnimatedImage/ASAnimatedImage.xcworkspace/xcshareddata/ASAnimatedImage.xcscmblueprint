@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "F50970FDD9A73637F0802C23B728B6B5862D49A6",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "9B1DC435B89529078DE1FAE4D39ED8D2F4E74032" : 0,
+    "F50970FDD9A73637F0802C23B728B6B5862D49A6" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "E4DD3811-C87E-4EF5-A540-2040B2D011E3",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "9B1DC435B89529078DE1FAE4D39ED8D2F4E74032" : "PINRemoteImage\/",
+    "F50970FDD9A73637F0802C23B728B6B5862D49A6" : "AsyncDisplayKit\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "ASAnimatedImage",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "examples\/ASAnimatedImage\/ASAnimatedImage.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:pinterest\/PINRemoteImage.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "9B1DC435B89529078DE1FAE4D39ED8D2F4E74032"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "ssh:\/\/phabricator.pinadmin.com\/diffusion\/ASYNC\/asycdisplaykit.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "F50970FDD9A73637F0802C23B728B6B5862D49A6"
+    }
+  ]
+}
