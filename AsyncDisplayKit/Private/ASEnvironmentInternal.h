@@ -14,6 +14,19 @@
 
 enum ASEnvironmentStatePropagation { DOWN, UP };
 
+
+#pragma mark - Set and get extensible values for layout options
+
+void _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(id<ASEnvironment> object, int idx, BOOL value);
+BOOL _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(id<ASEnvironment> object, int idx);
+
+void _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(id<ASEnvironment> object, int idx, NSInteger value);
+NSInteger _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(id<ASEnvironment> object, int idx);
+
+void _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(id<ASEnvironment> object, int idx, UIEdgeInsets value);
+UIEdgeInsets _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(id<ASEnvironment> object, int idx);
+
+
 #pragma mark - Traversing an ASEnvironment Tree
 
 void ASEnvironmentPerformBlockOnObjectAndChildren(id<ASEnvironment> object, void(^block)(id<ASEnvironment> object));

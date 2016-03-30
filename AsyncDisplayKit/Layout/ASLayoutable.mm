@@ -114,6 +114,9 @@ void ASLayoutableSetValuesForLayoutable(id<ASLayoutable> layoutable)
   }
 }
 
+
+#pragma mark - ASLayoutOptionsForwarding
+
 /**
  *  Both an ASDisplayNode and an ASLayoutSpec conform to ASLayoutable. There are several properties
  *  in ASLayoutable that are used when a node or spec is used in a layout spec.
@@ -250,11 +253,11 @@ void ASLayoutableSetValuesForLayoutable(id<ASLayoutable> layoutable)
 }\
 
 
-@implementation ASDisplayNode(ASLayoutOptions)
+@implementation ASDisplayNode(ASLayoutOptionsForwarding)
 ASEnvironmentLayoutOptionsForwarding
 @end
 
-@implementation ASLayoutSpec(ASLayoutOptions)
+@implementation ASLayoutSpec(ASLayoutOptionsForwarding)
 ASEnvironmentLayoutOptionsForwarding
 @end
 

@@ -262,6 +262,8 @@
 		698548641CA9E025008A345F /* ASEnvironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 698548611CA9E025008A345F /* ASEnvironment.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		698548651CA9E025008A345F /* ASEnvironment.m in Sources */ = {isa = PBXBuildFile; fileRef = 698548621CA9E025008A345F /* ASEnvironment.m */; };
 		698548661CA9E025008A345F /* ASEnvironment.m in Sources */ = {isa = PBXBuildFile; fileRef = 698548621CA9E025008A345F /* ASEnvironment.m */; };
+		698C8B611CAB49FC0052DC3F /* ASLayoutableExtensibility.h in Headers */ = {isa = PBXBuildFile; fileRef = 698C8B601CAB49FC0052DC3F /* ASLayoutableExtensibility.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		698C8B621CAB49FC0052DC3F /* ASLayoutableExtensibility.h in Headers */ = {isa = PBXBuildFile; fileRef = 698C8B601CAB49FC0052DC3F /* ASLayoutableExtensibility.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		69E1006D1CA89CB600D88C1B /* ASEnvironmentInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 69E100691CA89CB600D88C1B /* ASEnvironmentInternal.h */; };
 		69E1006E1CA89CB600D88C1B /* ASEnvironmentInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 69E100691CA89CB600D88C1B /* ASEnvironmentInternal.h */; };
 		69E1006F1CA89CB600D88C1B /* ASEnvironmentInternal.mm in Sources */ = {isa = PBXBuildFile; fileRef = 69E1006A1CA89CB600D88C1B /* ASEnvironmentInternal.mm */; };
@@ -742,6 +744,7 @@
 		68EE0DBC1C1B4ED300BA1B99 /* ASMainSerialQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMainSerialQueue.mm; sourceTree = "<group>"; };
 		698548611CA9E025008A345F /* ASEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASEnvironment.h; sourceTree = "<group>"; };
 		698548621CA9E025008A345F /* ASEnvironment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASEnvironment.m; sourceTree = "<group>"; };
+		698C8B601CAB49FC0052DC3F /* ASLayoutableExtensibility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutableExtensibility.h; path = AsyncDisplayKit/Layout/ASLayoutableExtensibility.h; sourceTree = "<group>"; };
 		69E100691CA89CB600D88C1B /* ASEnvironmentInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASEnvironmentInternal.h; sourceTree = "<group>"; };
 		69E1006A1CA89CB600D88C1B /* ASEnvironmentInternal.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASEnvironmentInternal.mm; sourceTree = "<group>"; };
 		69F10C851C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASRangeControllerUpdateRangeProtocol+Beta.h"; sourceTree = "<group>"; };
@@ -1317,14 +1320,13 @@
 				ACF6ED041B17843500DA7C62 /* ASCenterLayoutSpec.mm */,
 				ACF6ED071B17843500DA7C62 /* ASDimension.h */,
 				ACF6ED081B17843500DA7C62 /* ASDimension.mm */,
-				AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */,
-				AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */,
 				ACF6ED091B17843500DA7C62 /* ASInsetLayoutSpec.h */,
 				ACF6ED0A1B17843500DA7C62 /* ASInsetLayoutSpec.mm */,
 				ACF6ED0B1B17843500DA7C62 /* ASLayout.h */,
 				ACF6ED0C1B17843500DA7C62 /* ASLayout.mm */,
 				ACF6ED111B17843500DA7C62 /* ASLayoutable.h */,
 				E55D86311CA8A14000A0C26F /* ASLayoutable.mm */,
+				698C8B601CAB49FC0052DC3F /* ASLayoutableExtensibility.h */,
 				9CDC18CB1B910E12004965E2 /* ASLayoutablePrivate.h */,
 				ACF6ED0D1B17843500DA7C62 /* ASLayoutSpec.h */,
 				ACF6ED0E1B17843500DA7C62 /* ASLayoutSpec.mm */,
@@ -1334,6 +1336,8 @@
 				ACF6ED151B17843500DA7C62 /* ASRatioLayoutSpec.mm */,
 				7A06A7391C35F08800FE8DAA /* ASRelativeLayoutSpec.h */,
 				7A06A7381C35F08800FE8DAA /* ASRelativeLayoutSpec.mm */,
+				AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */,
+				AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */,
 				9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */,
 				AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */,
 				ACF6ED161B17843500DA7C62 /* ASStackLayoutSpec.h */,
@@ -1379,6 +1383,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				698C8B611CAB49FC0052DC3F /* ASLayoutableExtensibility.h in Headers */,
 				698548631CA9E025008A345F /* ASEnvironment.h in Headers */,
 				E5711A2B1C840C81009619D4 /* ASIndexedNodeContext.h in Headers */,
 				257754C21BEE458E00737CA5 /* ASTextKitCoreTextAdditions.h in Headers */,
@@ -1522,6 +1527,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				698C8B621CAB49FC0052DC3F /* ASLayoutableExtensibility.h in Headers */,
 				698548641CA9E025008A345F /* ASEnvironment.h in Headers */,
 				AC026B6A1BD57D6F00BBC17E /* ASChangeSetDataController.h in Headers */,
 				B35062481B010EFD0018CF92 /* _AS-objc-internal.h in Headers */,

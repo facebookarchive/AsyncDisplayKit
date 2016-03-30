@@ -24,7 +24,7 @@
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
-#import "ASEnvironment.h"
+#import "ASEnvironmentInternal.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -2696,6 +2696,40 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 {
   return NO;
 }
+
+
+#pragma mark - ASLayoutableExtensibility
+
+- (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx
+{
+  _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(self, idx, value);
+}
+
+- (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx
+{
+  return _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(self, idx);
+}
+
+- (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx
+{
+  _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(self, idx, value);
+}
+
+- (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx
+{
+  return _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(self, idx);
+}
+
+- (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx
+{
+  _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(self, idx, value);
+}
+
+- (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx
+{
+  return _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(self, idx);
+}
+
 
 #if TARGET_OS_TV
 #pragma mark - UIFocusEnvironment Protocol (tvOS)

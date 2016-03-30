@@ -16,6 +16,7 @@
 
 #import <AsyncDisplayKit/ASLayoutablePrivate.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
+#import <AsyncDisplayKit/ASLayoutableExtensibility.h>
 
 @class ASLayout;
 @class ASLayoutSpec;
@@ -38,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
  * extend the backing layout options class to accommodate any new layout options.
  */
-@protocol ASLayoutable <ASEnvironment, ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate>
+@protocol ASLayoutable <ASEnvironment, ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate, ASLayoutableExtensibility>
 
 /**
  * @abstract Calculate a layout based on given size range.

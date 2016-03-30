@@ -9,6 +9,7 @@
  */
 
 #import "ASEnvironmentInternal.h"
+
 #import <queue>
 
 //#define LOG(...) NSLog(__VA_ARGS__)
@@ -42,6 +43,54 @@ void ASEnvironmentPerformBlockOnObjectAndParents(id<ASEnvironment> object, void(
     block(object);
     object = [object parent];
   }
+}
+
+
+#pragma mark - Set and get extensible values from state structs
+
+void _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(id<ASEnvironment> object, int idx, BOOL value)
+{
+  NSCAssert(idx < kMaxEnvironmentStateBoolExtensions, @"Setting index outside of max bool extensions space");
+  
+  ASEnvironmentStateExtensions extension = object.environmentCollection->layoutOptionsState._extensions;
+  extension.boolExtensions[idx] = value;
+  object.environmentCollection->layoutOptionsState._extensions = extension;
+}
+
+BOOL _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(id<ASEnvironment> object, int idx)
+{
+  NSCAssert(idx < kMaxEnvironmentStateBoolExtensions, @"Accessing index outside of max bool extensions space");
+  return object.environmentCollection->layoutOptionsState._extensions.boolExtensions[idx];
+}
+
+void _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(id<ASEnvironment> object, int idx, NSInteger value)
+{
+  NSCAssert(idx < kMaxEnvironmentStateIntegerExtensions, @"Setting index outside of max integer extensions space");
+  
+  ASEnvironmentStateExtensions extension = object.environmentCollection->layoutOptionsState._extensions;
+  extension.integerExtensions[idx] = value;
+  object.environmentCollection->layoutOptionsState._extensions = extension;
+}
+
+NSInteger _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(id<ASEnvironment> object, int idx)
+{
+  NSCAssert(idx < kMaxEnvironmentStateIntegerExtensions, @"Accessing index outside of max integer extensions space");
+  return object.environmentCollection->layoutOptionsState._extensions.integerExtensions[idx];
+}
+
+void _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(id<ASEnvironment> object, int idx, UIEdgeInsets value)
+{
+  NSCAssert(idx < kMaxEnvironmentStateEdgeInsetExtensions, @"Setting index outside of max edge insets extensions space");
+  
+  ASEnvironmentStateExtensions extension = object.environmentCollection->layoutOptionsState._extensions;
+  extension.edgeInsetsExtensions[idx] = value;
+  object.environmentCollection->layoutOptionsState._extensions = extension;
+}
+
+UIEdgeInsets _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(id<ASEnvironment> object, int idx)
+{
+  NSCAssert(idx < kMaxEnvironmentStateEdgeInsetExtensions, @"Accessing index outside of max edge insets extensions space");
+  return object.environmentCollection->layoutOptionsState._extensions.edgeInsetsExtensions[idx];
 }
 
 

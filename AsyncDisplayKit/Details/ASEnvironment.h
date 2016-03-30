@@ -18,8 +18,20 @@
 ASDISPLAYNODE_EXTERN_C_BEGIN
 NS_ASSUME_NONNULL_BEGIN
 
+static const int kMaxEnvironmentStateBoolExtensions = 1;
+static const int kMaxEnvironmentStateIntegerExtensions = 4;
+static const int kMaxEnvironmentStateEdgeInsetExtensions = 1;
 
-#pragma mark ASEnvironmentLayoutOptionsState
+#pragma mark -
+
+typedef struct ASEnvironmentStateExtensions {
+  // Values to store extensions
+  BOOL boolExtensions[kMaxEnvironmentStateBoolExtensions];
+  NSInteger integerExtensions[kMaxEnvironmentStateIntegerExtensions];
+  UIEdgeInsets edgeInsetsExtensions[kMaxEnvironmentStateEdgeInsetExtensions];
+} ASEnvironmentStateExtensions;
+
+#pragma mark - ASEnvironmentLayoutOptionsState
 
 typedef struct ASEnvironmentLayoutOptionsState {
   CGFloat spacingBefore;// = 0;
@@ -34,13 +46,12 @@ typedef struct ASEnvironmentLayoutOptionsState {
   ASRelativeSizeRange sizeRange;// = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero), ASRelativeSizeMakeWithCGSize(CGSizeZero));;
   CGPoint layoutPosition;// = CGPointZero;
   
-  // TODO: ASEnvironment: find a good way to expand the options state
-  // id otherOptions;
+  ASEnvironmentStateExtensions _extensions;
 } ASEnvironmentLayoutOptionsState;
 extern ASEnvironmentLayoutOptionsState ASEnvironmentLayoutOptionsStateCreate();
 
 
-#pragma mark ASEnvironmentHierarchyState
+#pragma mark - ASEnvironmentHierarchyState
 
 typedef struct ASEnvironmentHierarchyState {
   unsigned rasterized:1; // = NO
@@ -51,7 +62,7 @@ typedef struct ASEnvironmentHierarchyState {
 extern ASEnvironmentHierarchyState ASEnvironmentHierarchyStateCreate();
 
 
-#pragma mark ASEnvironmentCollection
+#pragma mark - ASEnvironmentCollection
 
 typedef struct ASEnvironmentCollection {
   struct ASEnvironmentHierarchyState hierarchyState;

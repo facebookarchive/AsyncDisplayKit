@@ -158,6 +158,39 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   return NO;
 }
 
+
+#pragma mark - ASLayoutableExtensibility
+
+- (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx
+{
+  _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(self, idx, value);
+}
+
+- (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx
+{
+  return _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(self, idx);
+}
+
+- (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx
+{
+  _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(self, idx, value);
+}
+
+- (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx
+{
+  return _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(self, idx);
+}
+
+- (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx
+{
+  _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(self, idx, value);
+}
+
+- (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx
+{
+  return _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(self, idx);
+}
+
 @end
 
 @implementation ASLayoutSpec (Debugging)
