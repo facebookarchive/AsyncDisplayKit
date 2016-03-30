@@ -630,9 +630,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return NO;
   }
   
-  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)
-      && _pendingTransitionID != ASLayoutableGetCurrentContext().transitionID) {
-    return NO;
+  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
+    ASLayoutableContext context =  ASLayoutableGetCurrentContext();
+    if (ASLayoutableContextIsNull(context) || _pendingTransitionID != context.transitionID) {
+      return NO;
+    }
   }
   
   // only calculate the size if
@@ -2226,7 +2228,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       // Leaving layout pending state, reset related properties
       {
         ASDN::MutexLocker l(_propertyLock);
-        _pendingTransitionID = 0;
+        _pendingTransitionID = ASLayoutableContextInvalidTransitionID;
         _pendingLayoutContext = nil;
       }
     }
