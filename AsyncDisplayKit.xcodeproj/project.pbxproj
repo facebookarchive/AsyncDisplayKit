@@ -377,8 +377,8 @@
 		B0F8805B1BEAEC7500D17647 /* ASTableNode.m in Sources */ = {isa = PBXBuildFile; fileRef = B0F880591BEAEC7500D17647 /* ASTableNode.m */; };
 		B13CA0F71C519E9400E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0F61C519E9400E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B13CA0F81C519EBA00E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0F61C519E9400E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		B13CA1001C52004900E031AB /* ASCollectionNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0FF1C52004900E031AB /* ASCollectionNode+Beta.h */; };
-		B13CA1011C52004900E031AB /* ASCollectionNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0FF1C52004900E031AB /* ASCollectionNode+Beta.h */; };
+		B13CA1001C52004900E031AB /* ASCollectionNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0FF1C52004900E031AB /* ASCollectionNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B13CA1011C52004900E031AB /* ASCollectionNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = B13CA0FF1C52004900E031AB /* ASCollectionNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B30BF6521C5964B0004FCD53 /* ASLayoutManager.h in Headers */ = {isa = PBXBuildFile; fileRef = B30BF6501C5964B0004FCD53 /* ASLayoutManager.h */; };
 		B30BF6531C5964B0004FCD53 /* ASLayoutManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B30BF6511C5964B0004FCD53 /* ASLayoutManager.m */; };
 		B30BF6541C59D889004FCD53 /* ASLayoutManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B30BF6511C5964B0004FCD53 /* ASLayoutManager.m */; };
