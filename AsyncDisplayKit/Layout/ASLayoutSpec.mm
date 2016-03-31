@@ -114,7 +114,14 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  self.layoutChildren[identifier] = [self layoutableToAddFromLayoutable:child];;
+  id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
+  BOOL needsToPropagateLayoutOptionsState = (child != finalLayoutable);
+  self.layoutChildren[identifier] = finalLayoutable;
+  if (needsToPropagateLayoutOptionsState) {
+    // We only need to propagate up layout options in setChild: as up propagation is currently only supported for
+    // layout specification has with one child
+    [self propagateUpLayoutOptionsState];
+  }
 }
 
 - (void)setChildren:(NSArray *)children
