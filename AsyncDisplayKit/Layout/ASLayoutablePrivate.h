@@ -231,30 +231,39 @@ extern void ASLayoutableClearCurrentContext();
 #define ASEnvironmentLayoutExtensibilityForwarding \
 - (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx\
 {\
+  _propertyLock.lock();\
   _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(self, idx, value);\
+  _propertyLock.unlock();\
 }\
 \
 - (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx\
 {\
+  ASDN::MutexLocker l(_propertyLock);\
   return _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(self, idx);\
 }\
 \
 - (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx\
 {\
+  _propertyLock.lock();\
   _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(self, idx, value);\
+  _propertyLock.unlock();\
 }\
 \
 - (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx\
 {\
+  ASDN::MutexLocker l(_propertyLock);\
   return _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(self, idx);\
 }\
 \
 - (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx\
 {\
+  _propertyLock.lock();\
   _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(self, idx, value);\
+  _propertyLock.unlock();\
 }\
 \
 - (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx\
 {\
+  ASDN::MutexLocker l(_propertyLock);\
   return _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(self, idx);\
 }\

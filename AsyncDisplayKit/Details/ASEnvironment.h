@@ -48,7 +48,6 @@ typedef struct ASEnvironmentLayoutOptionsState {
   
   ASEnvironmentStateExtensions _extensions;
 } ASEnvironmentLayoutOptionsState;
-extern ASEnvironmentLayoutOptionsState ASEnvironmentLayoutOptionsStateCreate();
 
 
 #pragma mark - ASEnvironmentHierarchyState
@@ -59,7 +58,6 @@ typedef struct ASEnvironmentHierarchyState {
   unsigned transitioningSupernodes:1; // = NO
   unsigned layoutPending:1; // = NO
 } ASEnvironmentHierarchyState;
-extern ASEnvironmentHierarchyState ASEnvironmentHierarchyStateCreate();
 
 
 #pragma mark - ASEnvironmentState
@@ -92,6 +90,7 @@ ASDISPLAYNODE_EXTERN_C_END
 /// Returns all children of an object which class conforms to the ASEnvironment protocol
 - (NSArray<id<ASEnvironment>> *)children;
 
+/// Classes should implement this method and return YES / NO dependent if upward propagation is enabled or not 
 - (BOOL)supportsUpwardPropagation;
 
 @end

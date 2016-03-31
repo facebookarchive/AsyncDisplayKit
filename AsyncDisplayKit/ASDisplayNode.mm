@@ -1704,7 +1704,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
     
   if ([newSupernode supportsUpwardPropagation]) {
-    ASEnvironmentStatePropagateUp(newSupernode, self.environmentState.layoutOptionsState);
+    ASEnvironmentStatePropagateUp(newSupernode, _environmentState.layoutOptionsState);
   }
 }
 

@@ -81,10 +81,8 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
     if (finalLayoutable != child) {
-      // Copy layout options
-      ASEnvironmentState environmentState = finalLayoutable.environmentState;
-      environmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
-      finalLayoutable.environmentState = environmentState;
+      // Layout options state of child needs to be copied to final layoutable
+      finalLayoutable.environmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
       return finalLayoutable;
     }
   }
@@ -159,6 +157,9 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
   _environmentState = environmentState;
 }
 
+// Subclasses can override this method to return NO, because upward propagation is not enabled if a layout
+// specification has more than one child. Currently ASStackLayoutSpec and ASStaticLayoutSpec are currently
+// the specifications that are known to have more than one.
 - (BOOL)supportsUpwardPropagation
 {
   return YES;

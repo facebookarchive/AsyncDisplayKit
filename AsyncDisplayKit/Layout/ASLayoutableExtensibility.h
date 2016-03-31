@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <UIKit/UIGeometry.h>
 
 @protocol ASLayoutableExtensibility <NSObject>
 

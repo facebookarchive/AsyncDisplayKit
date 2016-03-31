@@ -10,32 +10,24 @@
 
 #import "ASEnvironment.h"
 
-ASEnvironmentLayoutOptionsState ASEnvironmentLayoutOptionsStateCreate()
+ASEnvironmentLayoutOptionsState _ASEnvironmentLayoutOptionsStateCreate()
 {
   return (ASEnvironmentLayoutOptionsState) {
-    .spacingBefore = 0,
-    .flexBasis = ASRelativeDimensionUnconstrained,
-    .alignSelf = ASStackLayoutAlignSelfAuto,
-    
-    .sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero), ASRelativeSizeMakeWithCGSize(CGSizeZero)),
-    .layoutPosition = CGPointZero
+    // Default values can be defined in here
   };
 }
 
-ASEnvironmentHierarchyState ASEnvironmentHierarchyStateCreate()
+ASEnvironmentHierarchyState _ASEnvironmentHierarchyStateCreate()
 {
   return (ASEnvironmentHierarchyState) {
-    .rasterized = NO,
-    .rangeManaged = NO,
-    .transitioningSupernodes = NO,
-    .layoutPending = NO
+    // Default values can be defined in here
   };
 }
 
 ASEnvironmentState ASEnvironmentStateCreate()
 {
   return (ASEnvironmentState) {
-    .hierarchyState = ASEnvironmentHierarchyStateCreate(),
-    .layoutOptionsState = ASEnvironmentLayoutOptionsStateCreate()
+    .layoutOptionsState = _ASEnvironmentLayoutOptionsStateCreate(),
+    .hierarchyState = _ASEnvironmentHierarchyStateCreate()
   };
 }
