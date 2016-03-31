@@ -32,9 +32,9 @@ ASEnvironmentHierarchyState ASEnvironmentHierarchyStateCreate()
   };
 }
 
-ASEnvironmentCollection ASEnvironmentCollectionCreate()
+ASEnvironmentState ASEnvironmentStateCreate()
 {
-  return (ASEnvironmentCollection) {
+  return (ASEnvironmentState) {
     .hierarchyState = ASEnvironmentHierarchyStateCreate(),
     .layoutOptionsState = ASEnvironmentLayoutOptionsStateCreate()
   };

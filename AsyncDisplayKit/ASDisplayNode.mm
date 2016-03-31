@@ -253,8 +253,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
   
-  _environmentCollection = ASEnvironmentCollectionCreate();
-  ASLayoutableSetValuesForLayoutable(self);
+  _environmentState = ASEnvironmentStateCreate();
 }
 
 - (id)init
@@ -1703,6 +1702,10 @@ static NSInteger incrementIfFound(NSInteger i) {
       [self exitHierarchyState:stateToEnterOrExit];
     }
   }
+    
+  if ([newSupernode supportsUpwardPropagation]) {
+    ASEnvironmentStatePropagateUp(newSupernode, self.environmentState.layoutOptionsState);
+  }
 }
 
 // Track that a node will be displayed as part of the current node hierarchy.
@@ -1857,8 +1860,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(_propertyLock);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
-    layoutSpec.isMutable = NO;
     layoutSpec.parent = self;
+    layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
     if (layout.layoutableObject != self) {
@@ -1922,6 +1925,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(_propertyLock);
   if (! CGSizeEqualToSize(_preferredFrameSize, preferredFrameSize)) {
     _preferredFrameSize = preferredFrameSize;
+    self.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(_preferredFrameSize), ASRelativeSizeMakeWithCGSize(_preferredFrameSize));
     [self invalidateCalculatedLayout];
   }
 }
@@ -2672,9 +2676,14 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 #pragma mark - ASEnvironment
 
-- (ASEnvironmentCollection *)environmentCollection
+- (ASEnvironmentState)environmentState
 {
-  return &_environmentCollection;
+  return _environmentState;
+}
+
+- (void)setEnvironmentState:(ASEnvironmentState)environmentState
+{
+  _environmentState = environmentState;
 }
 
 - (ASDisplayNode *)parent
@@ -2682,53 +2691,18 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   return self.supernode;
 }
 
-- (void)setParent:(ASDisplayNode *)parent
-{
-  [self __setSupernode:parent];
-}
-
 - (NSArray<ASDisplayNode *> *)children
 {
   return self.subnodes;
 }
 
-- (BOOL)supportsMultipleChildren
+- (BOOL)supportsUpwardPropagation
 {
-  return NO;
+  return YES;
 }
 
-
-#pragma mark - ASLayoutableExtensibility
-
-- (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx
-{
-  _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(self, idx, value);
-}
-
-- (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx
-{
-  return _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(self, idx);
-}
-
-- (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx
-{
-  _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(self, idx, value);
-}
-
-- (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx
-{
-  return _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(self, idx);
-}
-
-- (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx
-{
-  _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(self, idx, value);
-}
-
-- (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx
-{
-  return _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(self, idx);
-}
+ASEnvironmentLayoutOptionsForwarding
+ASEnvironmentLayoutExtensibilityForwarding
 
 
 #if TARGET_OS_TV

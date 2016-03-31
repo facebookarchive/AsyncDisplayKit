@@ -87,9 +87,9 @@
 
 @implementation ASStaticLayoutSpec (ASEnvironment)
 
-- (BOOL)supportsMultipleChildren
+- (BOOL)supportsUpwardPropagation
 {
-  return YES;
+  return NO;
 }
 
 @end

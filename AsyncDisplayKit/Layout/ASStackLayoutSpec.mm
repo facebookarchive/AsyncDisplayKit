@@ -200,9 +200,9 @@
 
 @implementation ASStackLayoutSpec (ASEnvironment)
 
-- (BOOL)supportsMultipleChildren
+- (BOOL)supportsUpwardPropagation
 {
-  return YES;
+  return NO;
 }
 
 @end

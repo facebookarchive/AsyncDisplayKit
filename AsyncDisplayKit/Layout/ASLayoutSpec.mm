@@ -25,9 +25,9 @@ static NSString * const kDefaultChildKey = @"kDefaultChildKey";
 static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 @interface ASLayoutSpec() {
-  ASEnvironmentCollection _environmentCollection;
+  ASEnvironmentState _environmentState;
+  ASDN::RecursiveMutex _propertyLock;
 }
-@property (nonatomic, weak) id<ASLayoutable> parent;
 @property (nonatomic, strong) NSMutableDictionary *layoutChildren;
 @end
 
@@ -44,8 +44,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
     return nil;
   }
   _isMutable = YES;
-  _environmentCollection = ASEnvironmentCollectionCreate();
-  ASLayoutableSetValuesForLayoutable(self);
+  _environmentState = ASEnvironmentStateCreate();
   
   return self;
 }
@@ -83,7 +82,9 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
     if (finalLayoutable != child) {
       // Copy layout options
-      finalLayoutable.environmentCollection->layoutOptionsState = child.environmentCollection->layoutOptionsState;
+      ASEnvironmentState environmentState = finalLayoutable.environmentState;
+      environmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
+      finalLayoutable.environmentState = environmentState;
       return finalLayoutable;
     }
   }
@@ -102,8 +103,8 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 {
   _parent = parent;
   
-  if (![parent supportsMultipleChildren]) {
-    ASEnvironmentStatePropagateUp(parent, self.environmentCollection->layoutOptionsState);
+  if ([parent supportsUpwardPropagation]) {
+    ASEnvironmentStatePropagateUp(parent, _environmentState.layoutOptionsState);
   }
 }
 
@@ -148,48 +149,23 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 #pragma mark - ASEnvironment
 
-- (ASEnvironmentCollection *)environmentCollection
+- (ASEnvironmentState)environmentState
 {
-  return &_environmentCollection;
+  return _environmentState;
 }
 
-- (BOOL)supportsMultipleChildren
+- (void)setEnvironmentState:(ASEnvironmentState)environmentState
 {
-  return NO;
+  _environmentState = environmentState;
 }
 
-
-#pragma mark - ASLayoutableExtensibility
-
-- (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx
+- (BOOL)supportsUpwardPropagation
 {
-  _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(self, idx, value);
+  return YES;
 }
 
-- (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx
-{
-  return _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(self, idx);
-}
-
-- (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx
-{
-  _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(self, idx, value);
-}
-
-- (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx
-{
-  return _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(self, idx);
-}
-
-- (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx
-{
-  _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(self, idx, value);
-}
-
-- (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx
-{
-  return _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(self, idx);
-}
+ASEnvironmentLayoutOptionsForwarding
+ASEnvironmentLayoutExtensibilityForwarding
 
 @end
 

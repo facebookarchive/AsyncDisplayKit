@@ -52,65 +52,66 @@ void _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(id<ASEnvironment> object
 {
   NSCAssert(idx < kMaxEnvironmentStateBoolExtensions, @"Setting index outside of max bool extensions space");
   
-  ASEnvironmentStateExtensions extension = object.environmentCollection->layoutOptionsState._extensions;
+  ASEnvironmentStateExtensions extension = object.environmentState.layoutOptionsState._extensions;
   extension.boolExtensions[idx] = value;
-  object.environmentCollection->layoutOptionsState._extensions = extension;
+  object.environmentState.layoutOptionsState._extensions = extension;
 }
 
 BOOL _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(id<ASEnvironment> object, int idx)
 {
   NSCAssert(idx < kMaxEnvironmentStateBoolExtensions, @"Accessing index outside of max bool extensions space");
-  return object.environmentCollection->layoutOptionsState._extensions.boolExtensions[idx];
+  return object.environmentState.layoutOptionsState._extensions.boolExtensions[idx];
 }
 
 void _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(id<ASEnvironment> object, int idx, NSInteger value)
 {
   NSCAssert(idx < kMaxEnvironmentStateIntegerExtensions, @"Setting index outside of max integer extensions space");
   
-  ASEnvironmentStateExtensions extension = object.environmentCollection->layoutOptionsState._extensions;
+  ASEnvironmentStateExtensions extension = object.environmentState.layoutOptionsState._extensions;
   extension.integerExtensions[idx] = value;
-  object.environmentCollection->layoutOptionsState._extensions = extension;
+  object.environmentState.layoutOptionsState._extensions = extension;
 }
 
 NSInteger _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(id<ASEnvironment> object, int idx)
 {
   NSCAssert(idx < kMaxEnvironmentStateIntegerExtensions, @"Accessing index outside of max integer extensions space");
-  return object.environmentCollection->layoutOptionsState._extensions.integerExtensions[idx];
+  return object.environmentState.layoutOptionsState._extensions.integerExtensions[idx];
 }
 
 void _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(id<ASEnvironment> object, int idx, UIEdgeInsets value)
 {
   NSCAssert(idx < kMaxEnvironmentStateEdgeInsetExtensions, @"Setting index outside of max edge insets extensions space");
   
-  ASEnvironmentStateExtensions extension = object.environmentCollection->layoutOptionsState._extensions;
+  ASEnvironmentStateExtensions extension = object.environmentState.layoutOptionsState._extensions;
   extension.edgeInsetsExtensions[idx] = value;
-  object.environmentCollection->layoutOptionsState._extensions = extension;
+  object.environmentState.layoutOptionsState._extensions = extension;
 }
 
 UIEdgeInsets _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(id<ASEnvironment> object, int idx)
 {
   NSCAssert(idx < kMaxEnvironmentStateEdgeInsetExtensions, @"Accessing index outside of max edge insets extensions space");
-  return object.environmentCollection->layoutOptionsState._extensions.edgeInsetsExtensions[idx];
+  return object.environmentState.layoutOptionsState._extensions.edgeInsetsExtensions[idx];
 }
 
 
 #pragma mark - Merging functions for states
 
-void ASEnvironmentMergeObjectAndState(id<ASEnvironment> object, ASEnvironmentHierarchyState& state, ASEnvironmentStatePropagation propagation) {
+ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentHierarchyState state, ASEnvironmentStatePropagation propagation) {
     // Merge object and hierarchy state
   LOG(@"Merge object and state: %@ - ASEnvironmentHierarchyState", object);
+  return environmentState;
 }
 
-void ASEnvironmentMergeObjectAndState(id<ASEnvironment> object, ASEnvironmentLayoutOptionsState& state, ASEnvironmentStatePropagation propagation) {
+ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentLayoutOptionsState state, ASEnvironmentStatePropagation propagation) {
   // Merge object and layout options state
   LOG(@"Merge object and state: %@ - ASEnvironmentLayoutOptionsState", object);
   
   // Support propagate up
-  if (propagation == UP) {
+  if (propagation == ASEnvironmentStatePropagation::UP) {
 
    // Object is the parent and the state is the state of the child
     const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentDefaultLayoutOptionsState;
-    ASEnvironmentLayoutOptionsState parentState = object.environmentCollection->layoutOptionsState;
+    ASEnvironmentLayoutOptionsState parentState = environmentState.layoutOptionsState;
     
     // For every field check if the parent value is equal to the default than propegate up the child value to
     // the parent
@@ -143,7 +144,8 @@ void ASEnvironmentMergeObjectAndState(id<ASEnvironment> object, ASEnvironmentLay
       parentState.layoutPosition = defaultState.layoutPosition;
     }
     
-    object.environmentCollection->layoutOptionsState = parentState;
+    environmentState.layoutOptionsState = parentState;
   }
   
+  return environmentState;
 }

@@ -97,7 +97,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
 
-  ASEnvironmentCollection _environmentCollection;
+  ASEnvironmentState _environmentState;
   ASLayout *_layout;
 
   ASSizeRange _constrainedSize;

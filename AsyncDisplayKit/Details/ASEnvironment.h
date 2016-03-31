@@ -62,13 +62,13 @@ typedef struct ASEnvironmentHierarchyState {
 extern ASEnvironmentHierarchyState ASEnvironmentHierarchyStateCreate();
 
 
-#pragma mark - ASEnvironmentCollection
+#pragma mark - ASEnvironmentState
 
-typedef struct ASEnvironmentCollection {
+typedef struct ASEnvironmentState {
   struct ASEnvironmentHierarchyState hierarchyState;
   struct ASEnvironmentLayoutOptionsState layoutOptionsState;
-} ASEnvironmentCollection;
-extern ASEnvironmentCollection ASEnvironmentCollectionCreate();
+} ASEnvironmentState;
+extern ASEnvironmentState ASEnvironmentStateCreate();
 
 ASDISPLAYNODE_EXTERN_C_END
 
@@ -77,26 +77,22 @@ ASDISPLAYNODE_EXTERN_C_END
 
 /**
  * ASEnvironment allows objects that conform to the ASEnvironment protocol to be able to propagate specific States
- * defined in an ASEnvironmentCollection up and down the ASEnvironment tree. To be able to define how merges of
+ * defined in an ASEnvironmentState up and down the ASEnvironment tree. To be able to define how merges of
  * States should happen, specific merge functions can be provided
  */
 @protocol ASEnvironment <NSObject>
 
 /// The environment collection of an object which class conforms to the ASEnvironment protocol
-- (ASEnvironmentCollection *)environmentCollection;
+- (ASEnvironmentState)environmentState;
+- (void)setEnvironmentState:(ASEnvironmentState)environmentState;
 
 /// Returns the parent of an object which class conforms to the ASEnvironment protocol
-- (id<ASEnvironment>)parent;
-
-/// Set the parent of an object which class conforms to the ASEnvironment protocol
-- (void)setParent:(id<ASEnvironment>)parent;
+- (id<ASEnvironment> _Nullable)parent;
 
 /// Returns all children of an object which class conforms to the ASEnvironment protocol
 - (NSArray<id<ASEnvironment>> *)children;
 
-// TODO: ASEnvironment: Find a better name. As in ASDisplayNode this returns NO which in theory is wrong as as
-//                      it supports multiple subnodes
-- (BOOL)supportsMultipleChildren;
+- (BOOL)supportsUpwardPropagation;
 
 @end
 

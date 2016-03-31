@@ -12,7 +12,7 @@
 
 #pragma once
 
-enum ASEnvironmentStatePropagation { DOWN, UP };
+enum class ASEnvironmentStatePropagation { DOWN, UP };
 
 
 #pragma mark - Set and get extensible values for layout options
@@ -36,34 +36,34 @@ void ASEnvironmentPerformBlockOnObjectAndParents(id<ASEnvironment> object, void(
 #pragma mark - Merging
 
 static const struct ASEnvironmentLayoutOptionsState ASEnvironmentDefaultLayoutOptionsState = {};
-void ASEnvironmentMergeObjectAndState(id<ASEnvironment> object, ASEnvironmentLayoutOptionsState& state, ASEnvironmentStatePropagation propagation);
+ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentLayoutOptionsState state, ASEnvironmentStatePropagation propagation);
 
 
 static const struct ASEnvironmentHierarchyState ASEnvironmentDefaultHierarchyState = {};
-void ASEnvironmentMergeObjectAndState(id<ASEnvironment> object, ASEnvironmentHierarchyState& state, ASEnvironmentStatePropagation propagation);
+ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentHierarchyState state, ASEnvironmentStatePropagation propagation);
 
 
 #pragma mark - Propagation
 
 template <typename ASEnvironmentStateType>
-void ASEnvironmentStatePropagateDown(id<ASEnvironment> object, ASEnvironmentStateType& state) {
+void ASEnvironmentStatePropagateDown(id<ASEnvironment> object, ASEnvironmentStateType state) {
   ASEnvironmentPerformBlockOnObjectAndChildren(object, ^(id<ASEnvironment> node) {
-    ASEnvironmentMergeObjectAndState(object, state, DOWN);
+    object.environmentState = ASEnvironmentMergeObjectAndState(object.environmentState, state, ASEnvironmentStatePropagation::DOWN);
   });
 }
 
 template <typename ASEnvironmentStateType>
-void ASEnvironmentStatePropagateUp(id<ASEnvironment> object, ASEnvironmentStateType& state) {
+void ASEnvironmentStatePropagateUp(id<ASEnvironment> object, ASEnvironmentStateType state) {
   ASEnvironmentPerformBlockOnObjectAndParents(object, ^(id<ASEnvironment> node) {
-    ASEnvironmentMergeObjectAndState(object, state, UP);
+    object.environmentState = ASEnvironmentMergeObjectAndState(object.environmentState, state, ASEnvironmentStatePropagation::UP);
   });
 }
 
 template <typename ASEnvironmentStateType>
 void ASEnvironmentStateApply(id<ASEnvironment> object, ASEnvironmentStateType& state, ASEnvironmentStatePropagation propagate) {
-  if (propagate == DOWN) {
+  if (propagate == ASEnvironmentStatePropagation::DOWN) {
     ASEnvironmentStatePropagateUp(object, state);
-  } else if (propagate == UP) {
+  } else if (propagate == ASEnvironmentStatePropagation::UP) {
     ASEnvironmentStatePropagateDown(object, state);
   }
 }
