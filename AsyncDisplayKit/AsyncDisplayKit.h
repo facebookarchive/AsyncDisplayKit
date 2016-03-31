@@ -79,3 +79,5 @@
 #import <AsyncDisplayKit/ASRunLoopQueue.h>
 
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
+
+#import <AsyncDisplayKit/ASCollectionNode+Beta.h>
