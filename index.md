@@ -1,0 +1,88 @@
+---
+layout: default
+title: A React-inspired view framework for iOS 
+id: home
+---
+
+<div class="page-content">
+            <div class="wrapper">
+                <div class="post">
+<article class="post-content">
+    <p><img src="/static/logo.png" alt="logo"></p>
+
+<p>AsyncDisplayKit is an iOS framework that keeps even the most complex user
+interfaces smooth and responsive.  It was originally built to make Facebook&#39;s
+<a href="https://facebook.com/paper">Paper</a> possible, and goes hand-in-hand with
+<a href="https://github.com/facebook/pop">pop</a>&#39;s physics-based animations &mdash; but
+it&#39;s just as powerful with UIKit Dynamics and conventional app designs.</p>
+
+<p><br /></p>
+
+<h3>Quick start</h3>
+
+<p>ASDK is available on <a href="http://cocoapods.org">CocoaPods</a>.  Add the following to your Podfile:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">pod</span> <span class="s1">&#39;AsyncDisplayKit&#39;</span>
+</code></pre></div>
+<p>(ASDK can also be used as a regular static library:  Copy the project to your
+codebase manually, adding <code>AsyncDisplayKit.xcodeproj</code> to your workspace.  Add
+<code>libAsyncDisplayKit.a</code>, AssetsLibrary, and Photos to the &quot;Link Binary With
+Libraries&quot; build phase.  Include <code>-lc++ -ObjC</code> in your project linker flags.)</p>
+
+<p>Import the framework header, or create an <a href="https://developer.apple.com/library/ios/documentation/swift/conceptual/buildingcocoaapps/MixandMatch.html">Objective-C bridging
+header</a>
+if you&#39;re using Swift:</p>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="cp">#import &lt;AsyncDisplayKit/AsyncDisplayKit.h&gt;</span>
+</code></pre></div>
+<p>AsyncDisplayKit Nodes are a thread-safe abstraction layer over UIViews and
+CALayers:</p>
+
+<p><img src="/static/node-view-layer.png" alt="logo"></p>
+
+<p>You can construct entire node hierarchies in parallel, or instantiate and size
+a single node on a background thread &mdash; for example, you could do
+something like this in a UIViewController:</p>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="n">dispatch_async</span><span class="p">(</span><span class="n">_backgroundQueue</span><span class="p">,</span> <span class="o">^</span><span class="p">{</span>
+  <span class="n">ASTextNode</span> <span class="o">*</span><span class="n">node</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASTextNode</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+  <span class="n">node</span><span class="p">.</span><span class="n">attributedString</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">NSAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString</span><span class="p">:</span><span class="s">@&quot;hello!&quot;</span>
+                                                          <span class="nl">attributes</span><span class="p">:</span><span class="nb">nil</span><span class="p">];</span>
+  <span class="p">[</span><span class="n">node</span> <span class="nl">measure</span><span class="p">:</span><span class="n">CGSizeMake</span><span class="p">(</span><span class="n">screenWidth</span><span class="p">,</span> <span class="n">FLT_MAX</span><span class="p">)];</span>
+  <span class="n">node</span><span class="p">.</span><span class="n">frame</span> <span class="o">=</span> <span class="p">(</span><span class="bp">CGRect</span><span class="p">){</span> <span class="n">CGPointZero</span><span class="p">,</span> <span class="n">node</span><span class="p">.</span><span class="n">calculatedSize</span> <span class="p">};</span>
+
+  <span class="c1">// self.view isn&#39;t a node, so we can only use it on the main thread</span>
+  <span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_main_queue</span><span class="p">(),</span> <span class="o">^</span><span class="p">{</span>
+    <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">view</span> <span class="nl">addSubview</span><span class="p">:</span><span class="n">node</span><span class="p">.</span><span class="n">view</span><span class="p">];</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>AsyncDisplayKit at a glance:</p>
+
+<ul>
+<li><code>ASImageNode</code> and <code>ASTextNode</code> are drop-in replacements for UIImageView and
+UITextView.</li>
+<li><code>ASMultiplexImageNode</code> can load and display progressively higher-quality
+variants of an image over a slow cell network, letting you quickly show a
+low-resolution photo while the full size downloads.</li>
+<li><code>ASNetworkImageNode</code> is a simpler, single-image counterpart to the Multiplex
+node.</li>
+<li><code>ASTableView</code> and <code>ASCollectionView</code> are a node-aware UITableView and
+UICollectionView, respectively, that can asynchronously preload cell nodes
+&mdash; from loading network data to rendering &mdash; all without blocking
+the main thread.</li>
+</ul>
+
+<p>You can also easily <a href="https://github.com/facebook/AsyncDisplayKit/blob/master/AsyncDisplayKit/ASDisplayNode%2BSubclasses.h">create your own
+nodes</a>
+to implement node hierarchies or custom drawing.</p>
+
+<h3>Learn more</h3>
+
+<ul>
+<li>Read the <a href="/docs/getting-started.html">Getting Started guide</a></li>
+<li>Get the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">sample projects</a></li>
+<li>Browse the <a href="/appledoc">API reference</a></li>
+<li>Watch the <a href="http://vimeo.com/103589245">NSLondon talk</a> or the <a href="https://www.youtube.com/watch?v=RY_X7l1g79Q">NSSpain talk</a></li>
+</ul>
+
+    </article>
+
+</div>

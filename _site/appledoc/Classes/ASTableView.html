@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASTableView Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">AsyncDisplayKit </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Facebook</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/automaticallyAdjustsContentOffset">automaticallyAdjustsContentOffset</option>
+		
+		<option value="//api/name/leadingScreensForBatching">leadingScreensForBatching</option>
+		
+	</optgroup>
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/beginUpdates">- beginUpdates</option>
+		
+		<option value="//api/name/deleteRowsAtIndexPaths:withRowAnimation:">- deleteRowsAtIndexPaths:withRowAnimation:</option>
+		
+		<option value="//api/name/deleteSections:withRowAnimation:">- deleteSections:withRowAnimation:</option>
+		
+		<option value="//api/name/endUpdates">- endUpdates</option>
+		
+		<option value="//api/name/endUpdatesAnimated:completion:">- endUpdatesAnimated:completion:</option>
+		
+		<option value="//api/name/initWithFrame:style:asyncDataFetching:">- initWithFrame:style:asyncDataFetching:</option>
+		
+		<option value="//api/name/insertRowsAtIndexPaths:withRowAnimation:">- insertRowsAtIndexPaths:withRowAnimation:</option>
+		
+		<option value="//api/name/insertSections:withRowAnimation:">- insertSections:withRowAnimation:</option>
+		
+		<option value="//api/name/moveRowAtIndexPath:toIndexPath:">- moveRowAtIndexPath:toIndexPath:</option>
+		
+		<option value="//api/name/moveSection:toSection:">- moveSection:toSection:</option>
+		
+		<option value="//api/name/nodeForRowAtIndexPath:">- nodeForRowAtIndexPath:</option>
+		
+		<option value="//api/name/reloadData">- reloadData</option>
+		
+		<option value="//api/name/reloadDataWithCompletion:">- reloadDataWithCompletion:</option>
+		
+		<option value="//api/name/reloadRowsAtIndexPaths:withRowAnimation:">- reloadRowsAtIndexPaths:withRowAnimation:</option>
+		
+		<option value="//api/name/reloadSections:withRowAnimation:">- reloadSections:withRowAnimation:</option>
+		
+		<option value="//api/name/setTuningParameters:forRangeType:">- setTuningParameters:forRangeType:</option>
+		
+		<option value="//api/name/tuningParametersForRangeType:">- tuningParametersForRangeType:</option>
+		
+		<option value="//api/name/visibleNodes">- visibleNodes</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASTableView Class Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Inherits from</th>
+	<td>UITableView</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASTableView.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>Node-based table view.</p>
+
+<p>ASTableView is a version of UITableView that uses nodes &ndash; specifically, ASCellNode subclasses &ndash; with asynchronous
+pre-rendering instead of synchronously loading UITableViewCells.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/tuningParametersForRangeType:" title="tuningParametersForRangeType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tuningParametersForRangeType:">&ndash;&nbsp;tuningParametersForRangeType:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Tuning parameters for a range.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)<em>rangeType</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeType</code></th>
+						<td><p>The range to get the tuning parameters for.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A tuning parameter value for the given range.</p>
+
+<p>Defaults to the render range having one sceenful both leading and trailing and the preload range having two
+screenfuls in both directions.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/setTuningParameters:forRangeType:" title="setTuningParameters:forRangeType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setTuningParameters:forRangeType:">&ndash;&nbsp;setTuningParameters:forRangeType:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Set the tuning parameters for a range.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setTuningParameters:(ASRangeTuningParameters)<em>tuningParameters</em> forRangeType:(ASLayoutRangeType)<em>rangeType</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>tuningParameters</code></th>
+						<td><p>The tuning parameters to store for a range.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeType</code></th>
+						<td><p>The range to set the tuning parameters for.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/initWithFrame:style:asyncDataFetching:" title="initWithFrame:style:asyncDataFetching:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithFrame:style:asyncDataFetching:">&ndash;&nbsp;initWithFrame:style:asyncDataFetching:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initializer.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithFrame:(CGRect)<em>frame</em> style:(UITableViewStyle)<em>style</em> asyncDataFetching:(BOOL)<em>asyncDataFetchingEnabled</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>frame</code></th>
+						<td><p>A rectangle specifying the initial location and size of the table view in its superview’s coordinates.
+The frame of the table view changes as table cells are added and deleted.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>style</code></th>
+						<td><p>A constant that specifies the style of the table view. See UITableViewStyle for descriptions of valid constants.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>asyncDataFetchingEnabled</code></th>
+						<td><p>Enable the data fetching in async mode.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>If asyncDataFetching is enabled, the <code>ASTableView</code> will fetch data through <code>tableView:numberOfRowsInSection:</code> and
+<code>tableView:nodeForRowAtIndexPath:</code> in async mode from background thread. Otherwise, the methods will be invoked synchronically
+from calling thread.
+Enabling asyncDataFetching could avoid blocking main thread for <code>ASCellNode</code> allocation, which is frequently reported issue for
+large scale data. On another hand, the application code need take the responsibility to avoid data inconsistence. Specifically,
+we will lock the data source through <code>tableViewLockDataSource</code>, and unlock it by <code>tableViewUnlockDataSource</code> after the data fetching.
+The application should not update the data source while the data source is locked, to keep data consistence.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/leadingScreensForBatching" title="leadingScreensForBatching"></a>
+	<h3 class="method-title"><code><a href="#//api/name/leadingScreensForBatching">&nbsp;&nbsp;leadingScreensForBatching</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The number of screens left to scroll before the delegate -tableView:beginBatchFetchingWithContext: is called.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) CGFloat leadingScreensForBatching</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to one screenful.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/reloadDataWithCompletion:" title="reloadDataWithCompletion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/reloadDataWithCompletion:">&ndash;&nbsp;reloadDataWithCompletion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Reload everything from scratch, destroying the working range and all cached nodes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)reloadDataWithCompletion:(void ( ^ ) ( ))<em>completion</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>completion</code></th>
+						<td><p>block to run on completion of asynchronous loading or nil. If supplied, the block is run on
+the main thread.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> This method is substantially more expensive than UITableView&rsquo;s version.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/reloadData" title="reloadData"></a>
+	<h3 class="method-title"><code><a href="#//api/name/reloadData">&ndash;&nbsp;reloadData</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Reload everything from scratch, destroying the working range and all cached nodes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)reloadData</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> This method is substantially more expensive than UITableView&rsquo;s version.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/beginUpdates" title="beginUpdates"></a>
+	<h3 class="method-title"><code><a href="#//api/name/beginUpdates">&ndash;&nbsp;beginUpdates</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>begins a batch of insert, delete reload and move operations. This method must be called from the main thread.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)beginUpdates</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/endUpdates" title="endUpdates"></a>
+	<h3 class="method-title"><code><a href="#//api/name/endUpdates">&ndash;&nbsp;endUpdates</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
+You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations
+to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
+the operations simultaneously. This method is must be called from the main thread. It&rsquo;s important to remeber that the ASTableView will
+be processing the updates asynchronously after this call is completed.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)endUpdates</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/endUpdatesAnimated:completion:" title="endUpdatesAnimated:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/endUpdatesAnimated:completion:">&ndash;&nbsp;endUpdatesAnimated:completion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view.
+You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations
+to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
+the operations simultaneously. This method is must be called from the main thread. It&rsquo;s important to remeber that the ASTableView will
+be processing the updates asynchronously after this call and are not guaranteed to be reflected in the ASTableView until
+the completion block is executed.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)endUpdatesAnimated:(BOOL)<em>animated</em> completion:(void ( ^ ) ( BOOL completed ))<em>completion</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animated</code></th>
+						<td><p>NO to disable all animations.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>completion</code></th>
+						<td><p>A completion handler block to execute when all of the operations are finished. This block takes a single
+Boolean parameter that contains the value YES if all of the related animations completed successfully or
+NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/insertSections:withRowAnimation:" title="insertSections:withRowAnimation:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/insertSections:withRowAnimation:">&ndash;&nbsp;insertSections:withRowAnimation:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Inserts one or more sections, with an option to animate the insertion.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)insertSections:(NSIndexSet *)<em>sections</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>sections</code></th>
+						<td><p>An index set that specifies the sections to insert.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animation</code></th>
+						<td><p>A constant that indicates how the insertion is to be animated. See UITableViewRowAnimation.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+before this method is called.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/deleteSections:withRowAnimation:" title="deleteSections:withRowAnimation:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/deleteSections:withRowAnimation:">&ndash;&nbsp;deleteSections:withRowAnimation:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Deletes one or more sections, with an option to animate the deletion.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)deleteSections:(NSIndexSet *)<em>sections</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>sections</code></th>
+						<td><p>An index set that specifies the sections to delete.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animation</code></th>
+						<td><p>A constant that indicates how the deletion is to be animated. See UITableViewRowAnimation.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+before this method is called.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/reloadSections:withRowAnimation:" title="reloadSections:withRowAnimation:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/reloadSections:withRowAnimation:">&ndash;&nbsp;reloadSections:withRowAnimation:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Reloads the specified sections using a given animation effect.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)reloadSections:(NSIndexSet *)<em>sections</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>sections</code></th>
+						<td><p>An index set that specifies the sections to reload.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animation</code></th>
+						<td><p>A constant that indicates how the reloading is to be animated. See UITableViewRowAnimation.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+before this method is called.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/moveSection:toSection:" title="moveSection:toSection:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/moveSection:toSection:">&ndash;&nbsp;moveSection:toSection:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Moves a section to a new location.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)moveSection:(NSInteger)<em>section</em> toSection:(NSInteger)<em>newSection</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>section</code></th>
+						<td><p>The index of the section to move.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>newSection</code></th>
+						<td><p>The index that is the destination of the move for the section.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+before this method is called.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/insertRowsAtIndexPaths:withRowAnimation:" title="insertRowsAtIndexPaths:withRowAnimation:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/insertRowsAtIndexPaths:withRowAnimation:">&ndash;&nbsp;insertRowsAtIndexPaths:withRowAnimation:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Inserts rows at the locations identified by an array of index paths, with an option to animate the insertion.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)insertRowsAtIndexPaths:(NSArray *)<em>indexPaths</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPaths</code></th>
+						<td><p>An array of NSIndexPath objects, each representing a row index and section index that together identify a row.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animation</code></th>
+						<td><p>A constant that indicates how the insertion is to be animated. See UITableViewRowAnimation.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+before this method is called.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/deleteRowsAtIndexPaths:withRowAnimation:" title="deleteRowsAtIndexPaths:withRowAnimation:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/deleteRowsAtIndexPaths:withRowAnimation:">&ndash;&nbsp;deleteRowsAtIndexPaths:withRowAnimation:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Deletes the rows specified by an array of index paths, with an option to animate the deletion.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)deleteRowsAtIndexPaths:(NSArray *)<em>indexPaths</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPaths</code></th>
+						<td><p>An array of NSIndexPath objects identifying the rows to delete.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animation</code></th>
+						<td><p>A constant that indicates how the deletion is to be animated. See UITableViewRowAnimation.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+before this method is called.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/reloadRowsAtIndexPaths:withRowAnimation:" title="reloadRowsAtIndexPaths:withRowAnimation:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/reloadRowsAtIndexPaths:withRowAnimation:">&ndash;&nbsp;reloadRowsAtIndexPaths:withRowAnimation:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Reloads the specified rows using a given animation effect.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)reloadRowsAtIndexPaths:(NSArray *)<em>indexPaths</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPaths</code></th>
+						<td><p>An array of NSIndexPath objects identifying the rows to reload.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animation</code></th>
+						<td><p>A constant that indicates how the reloading is to be animated. See UITableViewRowAnimation.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+before this method is called.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/moveRowAtIndexPath:toIndexPath:" title="moveRowAtIndexPath:toIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/moveRowAtIndexPath:toIndexPath:">&ndash;&nbsp;moveRowAtIndexPath:toIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Moves the row at a specified location to a destination location.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)moveRowAtIndexPath:(NSIndexPath *)<em>indexPath</em> toIndexPath:(NSIndexPath *)<em>newIndexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path identifying the row to move.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>newIndexPath</code></th>
+						<td><p>The index path that is the destination of the move for the row.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+before this method is called.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/nodeForRowAtIndexPath:" title="nodeForRowAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/nodeForRowAtIndexPath:">&ndash;&nbsp;nodeForRowAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Similar to -cellForRowAtIndexPath:.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the requested node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>a node for display at this indexpath.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/visibleNodes" title="visibleNodes"></a>
+	<h3 class="method-title"><code><a href="#//api/name/visibleNodes">&ndash;&nbsp;visibleNodes</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Similar to -visibleCells.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (NSArray *)visibleNodes</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>an array containing the nodes being displayed on screen.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/automaticallyAdjustsContentOffset" title="automaticallyAdjustsContentOffset"></a>
+	<h3 class="method-title"><code><a href="#//api/name/automaticallyAdjustsContentOffset">&nbsp;&nbsp;automaticallyAdjustsContentOffset</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>YES to automatically adjust the contentOffset when cells are inserted or deleted &ldquo;before&rdquo;
+visible cells, maintaining the users' visible scroll position. Currently this feature tracks insertions, moves and deletions of
+cells, but section edits are ignored.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic) BOOL automaticallyAdjustsContentOffset</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>default is NO.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

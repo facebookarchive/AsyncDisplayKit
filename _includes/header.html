@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#">
+<head>
+    <meta charset='utf-8'>
+    <title>AsyncDisplayKit | {{ page.title }}</title>
+    <link rel='stylesheet' href='/static/componentkit.css' type='text/css'/>
+    <link rel="stylesheet" href='/static/pygments.css' type='text/css'/>
+    <link rel='shortcut icon' href='/static/favicon.png'>
+    <meta name='viewport' content='width=480'>
+    <meta property="og:title" content="{{ page.title }}" />
+    <meta property="og:site_name" content="AsyncDisplayKit">
+    <meta property='og:description' content='AsyncDisplayKit: A Library for Functional UI on iOS.'>
+    <meta property='og:image' content='http://asyncdisplaykit.org/static/asyncdisplaykit-og-image.png'>
+    <meta property='og:url' content="http://asyncdisplaykit.org{{ page.url }}">
+    <meta property='og:type' content='website'>
+    <script type="text/javascript" src="//use.typekit.net/vqa1hcx.js"></script>
+    <script type="text/javascript">{'try{Typekit.load();}catch(e){}'}</script>
+</head>
+<body>
+
+<header class='topbar'><nav class='width'>
+<a href='/'>
+  <img src="/static/asdk-logo.png" class="logo">
+</a>
+    <ul>
+      <li><a href="/docs/getting-started.html" {% if (page.layout == 'docs') %} class="active" {% endif %}>
+          docs
+      </a></li>
+      <li><a href="/appledoc">api</a></li>
+      <li><a href="/resources.html" {% if (page.layout == 'resources') %} class="active" {% endif %}>resources</a></li>
+      <li><a href="http://github.com/facebook/AsyncDisplayKit">github</a>
+    </ul>
+</nav></header>
