@@ -10,7 +10,6 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
-#import "ASLayoutOptionsPrivate.h"
 
 #import <objc/runtime.h>
 #import <deque>
@@ -25,6 +24,7 @@
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
+#import "ASEnvironmentInternal.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -60,7 +60,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @implementation ASDisplayNode
 
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
-@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition, layoutOptions;
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition;
 @synthesize name = _name;
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
@@ -252,6 +252,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
+  
+  _environmentState = ASEnvironmentStateMakeDefault();
 }
 
 - (id)init
@@ -1700,6 +1702,10 @@ static NSInteger incrementIfFound(NSInteger i) {
       [self exitHierarchyState:stateToEnterOrExit];
     }
   }
+    
+  if ([newSupernode supportsUpwardPropagation]) {
+    ASEnvironmentStatePropagateUp(newSupernode, _environmentState.layoutOptionsState);
+  }
 }
 
 // Track that a node will be displayed as part of the current node hierarchy.
@@ -1854,6 +1860,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(_propertyLock);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    layoutSpec.parent = self;
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
@@ -1918,6 +1925,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(_propertyLock);
   if (! CGSizeEqualToSize(_preferredFrameSize, preferredFrameSize)) {
     _preferredFrameSize = preferredFrameSize;
+    self.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(_preferredFrameSize), ASRelativeSizeMakeWithCGSize(_preferredFrameSize));
     [self invalidateCalculatedLayout];
   }
 }
@@ -2665,6 +2673,37 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 {
   return self;
 }
+
+#pragma mark - ASEnvironment
+
+- (ASEnvironmentState)environmentState
+{
+  return _environmentState;
+}
+
+- (void)setEnvironmentState:(ASEnvironmentState)environmentState
+{
+  _environmentState = environmentState;
+}
+
+- (ASDisplayNode *)parent
+{
+  return self.supernode;
+}
+
+- (NSArray<ASDisplayNode *> *)children
+{
+  return self.subnodes;
+}
+
+- (BOOL)supportsUpwardPropagation
+{
+  return YES;
+}
+
+ASEnvironmentLayoutOptionsForwarding
+ASEnvironmentLayoutExtensibilityForwarding
+
 
 #if TARGET_OS_TV
 #pragma mark - UIFocusEnvironment Protocol (tvOS)

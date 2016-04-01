@@ -15,7 +15,6 @@
 #import "ASBackgroundLayoutSpec.h"
 #import "ASRatioLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
-#import "ASLayoutOptions.h"
 
 @interface ASStackLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end

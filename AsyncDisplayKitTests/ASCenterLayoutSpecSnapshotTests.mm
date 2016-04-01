@@ -13,7 +13,6 @@
 #import "ASBackgroundLayoutSpec.h"
 #import "ASCenterLayoutSpec.h"
 #import "ASStackLayoutSpec.h"
-#import "ASLayoutOptions.h"
 
 static const ASSizeRange kSize = {{100, 120}, {320, 160}};
 
