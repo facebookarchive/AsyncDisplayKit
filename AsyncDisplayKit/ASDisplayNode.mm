@@ -30,6 +30,8 @@
 #import "ASLayout.h"
 #import "ASLayoutSpec.h"
 #import "ASCellNode.h"
+#import "ASTraitCollection.h"
+#import "ASDisplayTraitCollection.h"
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
@@ -65,6 +67,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 @synthesize threadSafeBounds = _threadSafeBounds;
+@synthesize traitCollection = _traitCollection;
 
 static BOOL usesImplicitHierarchyManagement = NO;
 
@@ -2047,6 +2050,67 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (BOOL)supportsRangeManagedInterfaceState
 {
   return ASHierarchyStateIncludesRangeManaged(_hierarchyState);
+}
+
+- (id<ASTraitCollection>)traitCollection
+{
+  ASDN::MutexLocker l(_propertyLock);
+  if (_traitCollection == nil) {
+    _traitCollection = [[ASDisplayTraitCollection alloc] initWithTraits:_internalTraits];
+  }
+  return _traitCollection;
+}
+
+- (void)setTraitCollection:(id<ASTraitCollection>)traitCollection
+{
+  ASDN::MutexLocker l(_propertyLock);
+  // A provided trait collection should always be complete
+  ASDisplayNodeAssertFalse(ASTraitCollectionIsPartial(traitCollection));
+  
+  if (ASTraitCollectionEqual(_traitCollection, traitCollection)) {
+    return;
+  }
+
+  id<ASTraitCollection> previousTraitCollection = _traitCollection;
+  _internalTraits = {
+    traitCollection.displayScale,
+    traitCollection.horizontalSizeClass,
+    traitCollection.userInterfaceIdiom,
+    traitCollection.verticalSizeClass,
+    traitCollection.forceTouchCapability,
+  };
+  [self traitCollectionDidChange:previousTraitCollection];
+
+  ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+    node.traitCollection = traitCollection;
+  });
+}
+
+static inline BOOL ASTraitCollectionIsPartial(id<ASTraitCollection> traitCollection)
+{
+  return (
+    traitCollection.displayScale == 0.0 ||
+    traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassUnspecified ||
+    traitCollection.verticalSizeClass == UIUserInterfaceSizeClassUnspecified ||
+    traitCollection.userInterfaceIdiom == UIUserInterfaceIdiomUnspecified ||
+    traitCollection.forceTouchCapability == UIForceTouchCapabilityUnknown
+  );
+}
+
+static inline BOOL ASTraitCollectionEqual(id<ASTraitCollection> lhs, id<ASTraitCollection> rhs)
+{
+  return (
+    lhs.displayScale == rhs.displayScale &&
+    lhs.horizontalSizeClass == rhs.horizontalSizeClass &&
+    lhs.verticalSizeClass == rhs.verticalSizeClass &&
+    lhs.userInterfaceIdiom == rhs.userInterfaceIdiom &&
+    lhs.forceTouchCapability == rhs.forceTouchCapability
+  );
+}
+
+- (void)traitCollectionDidChange:(id<ASTraitCollection>)previousTraitCollection
+{
+  // noop
 }
 
 - (ASInterfaceState)interfaceState
