@@ -10,24 +10,24 @@
 
 #import "ASEnvironment.h"
 
-ASEnvironmentLayoutOptionsState _ASEnvironmentLayoutOptionsStateCreate()
+ASEnvironmentLayoutOptionsState _ASEnvironmentLayoutOptionsStateMakeDefault()
 {
   return (ASEnvironmentLayoutOptionsState) {
     // Default values can be defined in here
   };
 }
 
-ASEnvironmentHierarchyState _ASEnvironmentHierarchyStateCreate()
+ASEnvironmentHierarchyState _ASEnvironmentHierarchyStateMakeDefault()
 {
   return (ASEnvironmentHierarchyState) {
     // Default values can be defined in here
   };
 }
 
-ASEnvironmentState ASEnvironmentStateCreate()
+ASEnvironmentState ASEnvironmentStateMakeDefault()
 {
   return (ASEnvironmentState) {
-    .layoutOptionsState = _ASEnvironmentLayoutOptionsStateCreate(),
-    .hierarchyState = _ASEnvironmentHierarchyStateCreate()
+    .layoutOptionsState = _ASEnvironmentLayoutOptionsStateMakeDefault(),
+    .hierarchyState = _ASEnvironmentHierarchyStateMakeDefault()
   };
 }

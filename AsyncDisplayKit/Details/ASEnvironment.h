@@ -66,7 +66,7 @@ typedef struct ASEnvironmentState {
   struct ASEnvironmentHierarchyState hierarchyState;
   struct ASEnvironmentLayoutOptionsState layoutOptionsState;
 } ASEnvironmentState;
-extern ASEnvironmentState ASEnvironmentStateCreate();
+extern ASEnvironmentState ASEnvironmentStateMakeDefault();
 
 ASDISPLAYNODE_EXTERN_C_END
 

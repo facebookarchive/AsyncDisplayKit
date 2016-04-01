@@ -253,7 +253,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
   
-  _environmentState = ASEnvironmentStateCreate();
+  _environmentState = ASEnvironmentStateMakeDefault();
 }
 
 - (id)init

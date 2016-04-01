@@ -44,7 +44,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
     return nil;
   }
   _isMutable = YES;
-  _environmentState = ASEnvironmentStateCreate();
+  _environmentState = ASEnvironmentStateMakeDefault();
   
   return self;
 }
