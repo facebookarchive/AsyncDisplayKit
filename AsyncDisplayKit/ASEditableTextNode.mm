@@ -12,7 +12,6 @@
 
 #import "ASDisplayNode+Subclasses.h"
 #import "ASEqualityHelpers.h"
-#import "ASTextKitHelpers.h"
 #import "ASTextNodeWordKerner.h"
 #import "ASThread.h"
 
@@ -45,6 +44,8 @@
 - (void)setScrollEnabled:(BOOL)scrollEnabled
 {
   _shouldBlockPanGesture = !scrollEnabled;
+  self.scrollsToTop = scrollEnabled;
+
   [super setScrollEnabled:YES];
 }
 
@@ -94,6 +95,13 @@
 #pragma mark - NSObject Overrides
 - (instancetype)init
 {
+  return [self initWithTextKitComponents:[ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero]
+            placeholderTextKitComponents:[ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero]];
+}
+
+- (instancetype)initWithTextKitComponents:(ASTextKitComponents *)textKitComponents
+             placeholderTextKitComponents:(ASTextKitComponents *)placeholderTextKitComponents
+{
   if (!(self = [super init]))
     return nil;
 
@@ -101,14 +109,14 @@
   _scrollEnabled = YES;
 
   // Create the scaffolding for the text view.
-  _textKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
+  _textKitComponents = textKitComponents;
   _textKitComponents.layoutManager.delegate = self;
   _wordKerner = [[ASTextNodeWordKerner alloc] init];
   _returnKeyType = UIReturnKeyDefault;
   _textContainerInset = UIEdgeInsetsZero;
   
   // Create the placeholder scaffolding.
-  _placeholderTextKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
+  _placeholderTextKitComponents = placeholderTextKitComponents;
   _placeholderTextKitComponents.layoutManager.delegate = self;
 
   return self;

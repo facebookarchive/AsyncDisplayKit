@@ -17,7 +17,7 @@
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
 #import "ASTextKitCoreTextAdditions.h"
-#import "ASTextKitHelpers.h"
+#import "ASTextKitComponents.h"
 #import "ASTextKitFontSizeAdjuster.h"
 #import "ASTextKitRenderer.h"
 #import "ASTextKitRenderer+Positioning.h"
@@ -364,6 +364,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 
   _attributedString = ASCleanseAttributedStringOfCoreTextAttributes(attributedString);
+    
+  if (_attributedString.length > 0) {
+    CGFloat screenScale = ASScreenScale();
+    self.ascender = round([[_attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
+    self.descender = round([[_attributedString attribute:NSFontAttributeName atIndex:_attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+  }
 
   // Sync the truncation string with attributes from the updated _attributedString
   // Without this, the size calculation of the text with truncation applied will
