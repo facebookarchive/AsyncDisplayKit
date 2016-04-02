@@ -34,8 +34,8 @@
 
 @implementation PostNode
 
-- (instancetype)initWithPost:(Post *)post {
-    
+- (instancetype)initWithPost:(Post *)post
+{
     self = [super init];
     if (self) {
         _post = post;
@@ -181,14 +181,19 @@
     [super didLoad];
 }
 
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize {
-    
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
     // Flexible spacer between username and time
     ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
     spacer.flexGrow = YES;
-    
+  
+    // NOTE: This inset is not actually required by the layout, but is an example of the upward propogation of layoutable
+    // properties.  Specifically, .flexGrow from the child is transferred to the inset spec so they can expand together.
+    // Without this capability, it would be required to set insetSpacer.flexGrow = YES;
+    ASInsetLayoutSpec *insetSpacer = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0, 0, 0, 0) child:spacer];
+  
     // Horizontal stack for name, username, via icon and time
-    NSMutableArray *layoutSpecChildren = [@[_nameNode, _usernameNode, spacer] mutableCopy];
+    NSMutableArray *layoutSpecChildren = [@[_nameNode, _usernameNode, insetSpacer] mutableCopy];
     if (_post.via != 0) {
         [layoutSpecChildren addObject:_viaNode];
     }

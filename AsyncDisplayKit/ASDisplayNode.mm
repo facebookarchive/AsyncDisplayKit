@@ -1702,10 +1702,6 @@ static NSInteger incrementIfFound(NSInteger i) {
       [self exitHierarchyState:stateToEnterOrExit];
     }
   }
-    
-  if ([newSupernode supportsUpwardPropagation]) {
-    ASEnvironmentStatePropagateUp(newSupernode, _environmentState.layoutOptionsState);
-  }
 }
 
 // Track that a node will be displayed as part of the current node hierarchy.
@@ -1860,7 +1856,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(_propertyLock);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
-    layoutSpec.parent = self;
+    layoutSpec.parent = self; // This causes upward propogation of any non-default layoutable values.
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.

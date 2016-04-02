@@ -115,33 +115,33 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
     
     // For every field check if the parent value is equal to the default than propegate up the child value to
     // the parent
-    if (parentState.spacingBefore != defaultState.spacingBefore) {
+    if (parentState.spacingBefore == defaultState.spacingBefore) {
       parentState.spacingBefore = state.spacingBefore;
     }
-    if (parentState.spacingAfter != defaultState.spacingAfter) {
+    if (parentState.spacingAfter == defaultState.spacingAfter) {
       parentState.spacingAfter = state.spacingAfter;
     }
-    if (parentState.alignSelf != defaultState.alignSelf) {
-      parentState.alignSelf = defaultState.alignSelf;
+    if (parentState.alignSelf == defaultState.alignSelf) {
+      parentState.alignSelf = state.alignSelf;
     }
-    if (parentState.flexGrow != defaultState.flexGrow) {
-      parentState.flexGrow = defaultState.flexGrow;
+    if (parentState.flexGrow == defaultState.flexGrow) {
+      parentState.flexGrow = state.flexGrow;
     }
-    if (!ASRelativeDimensionEqualToRelativeDimension(parentState.flexBasis, defaultState.flexBasis)) {
-      parentState.flexBasis = defaultState.flexBasis;
+    if (ASRelativeDimensionEqualToRelativeDimension(parentState.flexBasis, defaultState.flexBasis)) {
+      parentState.flexBasis = state.flexBasis;
     }
-    if (parentState.alignSelf != defaultState.alignSelf) {
-      parentState.alignSelf = defaultState.alignSelf;
+    if (parentState.alignSelf == defaultState.alignSelf) {
+      parentState.alignSelf = state.alignSelf;
     }
-    if (parentState.ascender != defaultState.ascender) {
-      parentState.ascender = defaultState.ascender;
+    if (parentState.ascender == defaultState.ascender) {
+      parentState.ascender = state.ascender;
     }
     
-    if (!ASRelativeSizeRangeEqualToRelativeSizeRange(parentState.sizeRange, defaultState.sizeRange)) {
-      parentState.sizeRange = defaultState.sizeRange;
+    if (ASRelativeSizeRangeEqualToRelativeSizeRange(parentState.sizeRange, defaultState.sizeRange)) {
+      parentState.sizeRange = state.sizeRange;
     }
     if (CGPointEqualToPoint(parentState.layoutPosition, defaultState.layoutPosition)) {
-      parentState.layoutPosition = defaultState.layoutPosition;
+      parentState.layoutPosition = state.layoutPosition;
     }
     
     environmentState.layoutOptionsState = parentState;

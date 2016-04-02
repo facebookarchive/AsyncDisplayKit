@@ -20,8 +20,8 @@
 
 @implementation CommentsNode
 
-- (instancetype)initWithCommentsCount:(NSInteger)comentsCount {
-    
+- (instancetype)initWithCommentsCount:(NSInteger)comentsCount
+{
     self = [super init];
     if (self) {
         _commentsCount = comentsCount;
@@ -44,8 +44,8 @@
     
 }
 
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize {
-    
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
     ASStackLayoutSpec *mainStack =  [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:6.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsCenter children:@[self.iconNode, self.countNode]];
     
     // set sizeRange to make width fixed to 60
@@ -54,6 +54,5 @@
     mainStack.sizeRange = ASRelativeSizeRangeMake(min,max);
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[mainStack]];
 }
-
 
 @end
