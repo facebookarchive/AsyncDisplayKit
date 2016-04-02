@@ -16,9 +16,9 @@
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
-#import "ASLayoutOptions.h"
 #import "_ASTransitionContext.h"
 #import "ASDisplayNodeLayoutContext.h"
+#import "ASEnvironment.h"
 
 #include <vector>
 
@@ -97,6 +97,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
 
+  ASEnvironmentState _environmentState;
   ASLayout *_layout;
 
   ASSizeRange _constrainedSize;

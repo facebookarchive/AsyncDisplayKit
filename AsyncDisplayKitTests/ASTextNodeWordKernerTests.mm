@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "ASTextKitHelpers.h"
+#import "ASTextKitComponents.h"
 #import "ASTextNodeTypes.h"
 #import "ASTextNodeWordKerner.h"
 

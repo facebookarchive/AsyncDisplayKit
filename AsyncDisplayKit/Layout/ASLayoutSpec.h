@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)init;
 
+@property (nullable, nonatomic, weak) id<ASLayoutable> parent;
+
 /**
  * Adds a child to this layout spec using a default identifier.
  *

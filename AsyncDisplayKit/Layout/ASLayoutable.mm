@@ -7,6 +7,12 @@
 //
 
 #import "ASLayoutablePrivate.h"
+#import "ASInternalHelpers.h"
+#import "ASEnvironmentInternal.h"
+#import "ASDisplayNodeInternal.h"
+#import "ASTextNode.h"
+#import "ASLayoutSpec.h"
+
 #import "pthread.h"
 #import <map>
 #import <iterator>
@@ -52,24 +58,26 @@ static inline mach_port_t ASLayoutableGetCurrentContextKey()
 
 void ASLayoutableSetCurrentContext(struct ASLayoutableContext context)
 {
-  mach_port_t key = ASLayoutableGetCurrentContextKey();
+  const mach_port_t key = ASLayoutableGetCurrentContextKey();
   ASDN::StaticMutexLocker l(_layoutableContextLock);
   layoutableContextMap[key] = context;
 }
 
 struct ASLayoutableContext ASLayoutableGetCurrentContext()
 {
-  mach_port_t key = ASLayoutableGetCurrentContextKey();
+  const mach_port_t key = ASLayoutableGetCurrentContextKey();
   ASDN::StaticMutexLocker l(_layoutableContextLock);
-  auto it = layoutableContextMap.find(key);
+  const auto it = layoutableContextMap.find(key);
   if (it != layoutableContextMap.end()) {
+    // Found an interator with above key. "it->first" is the key itself, "it->second" is the context value.
     return it->second;
   }
   return ASLayoutableContextNull;
 }
 
-void ASLayoutableClearCurrentContext() {
-  mach_port_t key = ASLayoutableGetCurrentContextKey();
+void ASLayoutableClearCurrentContext()
+{
+  const mach_port_t key = ASLayoutableGetCurrentContextKey();
   ASDN::StaticMutexLocker l(_layoutableContextLock);
   layoutableContextMap.erase(key);
 }

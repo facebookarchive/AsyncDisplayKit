@@ -15,7 +15,6 @@
 #import <AsyncDisplayKit/ASButtonNode.h>
 #import <AsyncDisplayKit/ASMapNode.h>
 #import <AsyncDisplayKit/ASVideoNode.h>
-
 #import <AsyncDisplayKit/ASEditableTextNode.h>
 
 #import <AsyncDisplayKit/ASBasicImageDownloader.h>
@@ -41,6 +40,7 @@
 
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASEnvironment.h>
 #import <AsyncDisplayKit/ASLayoutable.h>
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 #import <AsyncDisplayKit/ASBackgroundLayoutSpec.h>
@@ -68,7 +68,6 @@
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 #import <AsyncDisplayKit/ASIndexPath.h>
-#import <AsyncDisplayKit/ASLayoutOptions.h>
 #import <AsyncDisplayKit/ASLog.h>
 #import <AsyncDisplayKit/ASMutableAttributedStringBuilder.h>
 #import <AsyncDisplayKit/ASThread.h>
@@ -77,5 +76,8 @@
 #import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 #import <AsyncDisplayKit/UIView+ASConvenience.h>
 #import <AsyncDisplayKit/ASRunLoopQueue.h>
+#import <AsyncDisplayKit/ASTextKitComponents.h>
 
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
+
+#import <AsyncDisplayKit/ASCollectionNode+Beta.h>
