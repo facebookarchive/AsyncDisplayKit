@@ -3,10 +3,9 @@
   - getting-started
 - title: Core Concepts
   items:
-  - nodes
   - intelligent-preloading
   - subclassing
-  - automatic-layout
+  - layout-engine
 - title: Node Containers
   items:
   - asviewcontroller

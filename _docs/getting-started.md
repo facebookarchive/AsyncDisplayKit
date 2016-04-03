@@ -2,6 +2,7 @@
 title: Getting Started
 layout: docs
 permalink: /docs/getting-started.html
+next: intelligent-preloading.html
 ---
 
 AsyncDisplayKit's basic unit is the `node`.  ASDisplayNode is an abstraction
@@ -20,7 +21,7 @@ AsyncDisplayKit lets you move image decoding, text sizing and rendering, and
 other expensive UI operations off the main thread.  It has other tricks up its
 sleeve too... but we'll get to that later.  :]
 
-<h2>Nodes as view replacements</h2>
+<h2><a href = "/docs/display-node.html">Nodes</a></h2>
 
 If you're used to working with views, you already know how to use nodes.  Most methods have a node equivalent and most UIView and CALayer properties are available as well.  In any case where there is a naming discrepancy (such as .clipsToBounds vs .masksToBounds), nodes will default to the UIView name.  The only exception is that nodes use position instead of center.
 
@@ -37,11 +38,11 @@ Some of AsyncDisplayKit's core nodes include:
 rich text support.</li>
 </ul>
 
-<h2>Node Containers</h2>
+<h2><a href = "/docs/asviewcontroller.html">Node Containers</a></h2>
 
 When converting an app to use AsyncDisplayKit, a common mistake is to add nodes directly to an existing view hierarchy.  Doing this will virtually guarantee that your nodes will flash as they are rendered.  
 
-Instead, you should add any nodes as subnodes in one of the container classes.  These classes are in charge of telling contained nodes what state they're currently in so that data can be loaded and nodes can be rendered as efficiently as possible.
+Instead, you should add nodes as subnodes of one of the container classes.  These classes are in charge of telling contained nodes what state they're currently in so that data can be loaded and nodes can be rendered as efficiently as possible.  You should think of these classes as the integration point between UIKit and ASDK.
 
 The four node containers are:
 
@@ -52,7 +53,7 @@ The four node containers are:
 <li> <strong>ASPagerNode</strong>.  A specialized ASCollectionNode which can be used in the same way as a UIPageViewController.</li>
 </ul>
 
-<h2>Layout Engine</h2>
+<h2><a href = "/docs/layout-engine.html">Layout Engine</a></h2>
 
 AsyncDisplayKit's layout engine is both one of its most powerful and one of its most unique features.  Based on the CSS FlexBox model, it provides a declarative way of specifying a custom node's size and layout of its subnodes.  While all nodes are concurrently rendered by default, asynchronous measurement and layout are performed by providing an ASLayoutSpec for each node.
 

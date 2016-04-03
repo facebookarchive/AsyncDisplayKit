@@ -227,128 +227,6 @@
           
             
             
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-            <li>
-              <a href=/docs/nodes.html>
-                Nodes
-              </a>
-            </li>
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-        
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
             <li>
               <a href=/docs/intelligent-preloading.html>
                 Intelligent Preloading
@@ -600,7 +478,7 @@
             
             
             <li>
-              <a href=/docs/automatic-layout.html>
+              <a href=/docs/layout-engine.html>
                 Layout Engine
               </a>
             </li>
@@ -4614,7 +4492,7 @@ usually has less than ten milliseconds to run before it causes a frame drop.</p>
 other expensive UI operations off the main thread.  It has other tricks up its
 sleeve too... but we&#39;ll get to that later.  :]</p>
 
-<h2>Nodes as view replacements</h2>
+<h2><a href = "/docs/display-node.html">Nodes</a></h2>
 
 <p>If you&#39;re used to working with views, you already know how to use nodes.  Most methods have a node equivalent and most UIView and CALayer properties are available as well.  In any case where there is a naming discrepancy (such as .clipsToBounds vs .masksToBounds), nodes will default to the UIView name.  The only exception is that nodes use position instead of center.</p>
 
@@ -4631,11 +4509,11 @@ sleeve too... but we&#39;ll get to that later.  :]</p>
 rich text support.</li>
 </ul>
 
-<h2>Node Containers</h2>
+<h2><a href = "/docs/asviewcontroller.html">Node Containers</a></h2>
 
 <p>When converting an app to use AsyncDisplayKit, a common mistake is to add nodes directly to an existing view hierarchy.  Doing this will virtually guarantee that your nodes will flash as they are rendered.  </p>
 
-<p>Instead, you should add any nodes as subnodes in one of the container classes.  These classes are in charge of telling contained nodes what state they&#39;re currently in so that data can be loaded and nodes can be rendered as efficiently as possible.</p>
+<p>Instead, you should add nodes as subnodes of one of the container classes.  These classes are in charge of telling contained nodes what state they&#39;re currently in so that data can be loaded and nodes can be rendered as efficiently as possible.  You should think of these classes as the integration point between UIKit and ASDK.</p>
 
 <p>The four node containers are:</p>
 
@@ -4646,7 +4524,7 @@ rich text support.</li>
 <li> <strong>ASPagerNode</strong>.  A specialized ASCollectionNode which can be used in the same way as a UIPageViewController.</li>
 </ul>
 
-<h2>Layout Engine</h2>
+<h2><a href = "/docs/layout-engine.html">Layout Engine</a></h2>
 
 <p>AsyncDisplayKit&#39;s layout engine is both one of its most powerful and one of its most unique features.  Based on the CSS FlexBox model, it provides a declarative way of specifying a custom node&#39;s size and layout of its subnodes.  While all nodes are concurrently rendered by default, asynchronous measurement and layout are performed by providing an ASLayoutSpec for each node.</p>
 
@@ -4664,6 +4542,8 @@ rich text support.</li>
 
     <div class="docs-prevnext">
       
+      
+        <a class="right" href="/docs/intelligent-preloading.html">Next &rarr;</a>
       
     </div>
 
