@@ -21,8 +21,8 @@
 
 @implementation LikesNode
 
-- (instancetype)initWithLikesCount:(NSInteger)likesCount {
-    
+- (instancetype)initWithLikesCount:(NSInteger)likesCount
+{
     self = [super init];
     if (self) {
         _likesCount = likesCount;
@@ -49,7 +49,7 @@
     
 }
 
-+ (BOOL) getYesOrNo
++ (BOOL)getYesOrNo
 {
     int tmp = (arc4random() % 30)+1;
     if (tmp % 5 == 0) {
@@ -58,8 +58,8 @@
     return NO;
 }
 
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize {
-    
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
     ASStackLayoutSpec *mainStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:6.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsCenter children:@[_iconNode, _countNode]];
     
     // set sizeRange to make width fixed to 60
@@ -67,7 +67,6 @@
     ASRelativeSize max = ASRelativeSizeMake(ASRelativeDimensionMakeWithPoints(60.0), ASRelativeDimensionMakeWithPoints(40.0));
     mainStack.sizeRange = ASRelativeSizeRangeMake(min, max);
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[mainStack]];
-    
 }
 
 @end

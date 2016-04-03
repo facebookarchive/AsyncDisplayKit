@@ -81,8 +81,8 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
     if (finalLayoutable != child) {
-      // Layout options state of child needs to be copied to final layoutable
-      finalLayoutable.environmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
+      // Layout options state of child needs to be copied to final layoutable, but don't override customized values.
+      ASEnvironmentStatePropagateUp(finalLayoutable, child.environmentState.layoutOptionsState);
       return finalLayoutable;
     }
   }
@@ -99,10 +99,11 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
 - (void)setParent:(id<ASLayoutable>)parent
 {
+  // FIXME: Locking should be evaluated here.  _parent is not widely used yet, though.
   _parent = parent;
   
   if ([parent supportsUpwardPropagation]) {
-    ASEnvironmentStatePropagateUp(parent, _environmentState.layoutOptionsState);
+    ASEnvironmentStatePropagateUp(parent, self.environmentState.layoutOptionsState);
   }
 }
 
@@ -115,12 +116,11 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-  BOOL needsToPropagateLayoutOptionsState = (child != finalLayoutable);
   self.layoutChildren[identifier] = finalLayoutable;
-  if (needsToPropagateLayoutOptionsState) {
-    // We only need to propagate up layout options in setChild: as up propagation is currently only supported for
-    // layout specification has with one child
-    [self propagateUpLayoutOptionsState];
+  if ([finalLayoutable isKindOfClass:[ASLayoutSpec class]]) {
+    [(ASLayoutSpec *)finalLayoutable setParent:self]; // This will trigger upward propogation if needed.
+  } else if ([self supportsUpwardPropagation]) {
+    ASEnvironmentStatePropagateUp(self, finalLayoutable.environmentState.layoutOptionsState); // Probably an ASDisplayNode
   }
 }
 
