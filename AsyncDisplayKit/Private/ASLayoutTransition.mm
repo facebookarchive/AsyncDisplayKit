@@ -191,16 +191,9 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodesOffset(
   std::vector<NSInteger> positions = std::vector<NSInteger>();
   NSInteger idx = [indexes firstIndex];
   while (idx != NSNotFound) {
-    BOOL skip = NO;
     ASDisplayNode *node = (ASDisplayNode *)layout.immediateSublayouts[idx].layoutableObject;
     ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
-    for (ASDisplayNode *i in intersectingNodes) {
-      if (node == i) {
-        skip = YES;
-        break;
-      }
-    }
-    if (!skip) {
+    if ([intersectingNodes containsObject:node] == NO) {
       [nodes addObject:node];
       positions.push_back(idx + offset);
     }
