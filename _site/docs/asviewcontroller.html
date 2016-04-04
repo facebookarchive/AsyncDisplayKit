@@ -4476,12 +4476,36 @@
     </h1>
     <p></p>
 
-    
+    <p>ASViewController is a direct subclass of UIViewController.  For the most part, it can be used in place of any UIViewController relatively easily.  </p>
+
+<p>The main difference is that you construct and return the node you&#39;d like managed as opposed to the way UIViewController provides a view of its own.</p>
+
+<p>Consider the following ASViewController subclass that would like to use a custom table node as its managed node.</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">- (instancetype)initWithModel:(NSArray *)models
+{
+    ASTableNode *tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+
+    if (!(self = [super initWithNode:tableNode])) { return nil; }
+
+    self.models = models;
+
+    self.tableNode = tableNode;
+    self.tableNode.dataSource = self;
+
+    return self;
+}
+</code></pre></div>
+<p>The most important line is:</p>
+
+<p><code>if (!(self = [super initWithNode:tableNode])) { return nil; }</code></p>
+
+<p>As you can see, ASViewController&#39;s are initialized with a node of your choosing.   </p>
+
 
     <div class="docs-prevnext">
       
       
-        <a class="right" href="/docs/ascellnode.html">Next &rarr;</a>
+        <a class="right" href="/docs/aspagernode.html">Next &rarr;</a>
       
     </div>
 

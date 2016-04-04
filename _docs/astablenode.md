@@ -2,12 +2,34 @@
 title: ASTableNode
 layout: docs
 permalink: /docs/astablenode.html
+next: display-node.html
 ---
 
-ASRangeController manages working ranges, but doesn't actually display content. If your content is currently rendered in a UITableView, you can convert it to use ASTableNode and custom nodes — just subclass ASCellNode instead of ASDisplayNode. ASTableNode maintains a UITableView subclass that integrates node-based cells and a working range.
+ASTableNode is equivalent to UIKit's UITableView.  
 
-ASTableNode doesn't let cells onscreen until their underlying nodes have been sized, and as such can fully benefit from realistic placeholders. Its API is very similar to UITableView (see the Kittens sample project for an example), with some key changes:
+<div class = "note">
+If you've used previous versions of ASDK, you'll notice that ASTableView has been removed in favor of ASTableNode.   ASTableView (an actual UITableView subclass) is still in use as an internal property of ASTableNode but should no longer be used by itself.  
 
-Instead of implementing -tableView:cellForRowAtIndexPath:, your data source must implement -tableView:nodeForRowAtIndexPath:. This method must be thread-safe and should not implement reuse. Unlike the UITableView version, it won't be called when the row is about to display.
+That being said, you can still grab a reference to the underlying ASTableView if necessary by accessing the .view property of an ASTableNode.
+</div>
 
--tableView:heightForRowAtIndexPath: has been removed — ASTableView lets your cell nodes size themselves. This means you no longer have to manually duplicate or factor out layout and sizing logic for dynamically-sized UITableViewCells!
+ASTableNode can be used in place of any UITableView.  The only requirements are that you replace your 
+
+<code>-cellForRowAtIndexPath:</code> 
+
+method with a 
+
+<code>-nodeForRowAtIndexPath:</code> 
+
+or
+
+<code>-nodeBlockForRowAtIndexPath:</code>
+
+Otherwise, a table node has mostly the same delegate and dataSource methods that a table view would.
+
+An important thing to notice is that ASTableNode does not provide a method called:
+
+<code>-tableNode:HeightForRowAtIndexPath:</code>
+
+This is because in ASDK, nodes are responsible for determining their height themselves which means you no longer have to write code to determine this detail at the view controller level.
+
