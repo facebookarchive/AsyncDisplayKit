@@ -132,4 +132,75 @@
   XCTAssertEqual(node.subnodes[2], node2);
 }
 
+- (void)testNodeInsertionExample2
+{
+  ASDisplayNode *nodeA = [[ASDisplayNode alloc] init];
+  ASDisplayNode *nodeB = [[ASDisplayNode alloc] init];
+  ASDisplayNode *nodeC = [[ASDisplayNode alloc] init];
+
+  ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
+  ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
+  ASDisplayNode *node3 = [[ASDisplayNode alloc] init];
+  
+  ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  node.layoutSpecBlock = ^(ASSizeRange constrainedSize, NSNumber *layoutState) {
+    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[nodeA, nodeB, nodeC]];
+  };
+  
+  [node addSubnode:node1];
+  [node addSubnode:node2];
+  [node addSubnode:node3];
+
+  XCTAssertEqual(node.subnodes[0], node1);
+  XCTAssertEqual(node.subnodes[1], node2);
+  XCTAssertEqual(node.subnodes[2], node3);
+  
+  [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+
+  XCTAssertEqual(node.subnodes[0], node1);
+  XCTAssertEqual(node.subnodes[1], node2);
+  XCTAssertEqual(node.subnodes[2], node3);
+  XCTAssertEqual(node.subnodes[3], nodeA);
+  XCTAssertEqual(node.subnodes[4], nodeB);
+  XCTAssertEqual(node.subnodes[5], nodeC);
+}
+
+- (void)DISABLED_testNodeInsertionExample3
+{
+  ASDisplayNode *nodeA = [[ASDisplayNode alloc] init];
+  ASDisplayNode *nodeB = [[ASDisplayNode alloc] init];
+  ASDisplayNode *nodeC = [[ASDisplayNode alloc] init];
+  
+  ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
+  ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
+  ASDisplayNode *node3 = [[ASDisplayNode alloc] init];
+  
+  ASDisplayNode *nodeD = [[ASDisplayNode alloc] init];
+  
+  ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  node.layoutSpecBlock = ^(ASSizeRange constrainedSize, NSNumber *layoutState) {
+    NSArray *array;
+    if ([layoutState isEqualToNumber:@1]) {
+      array = @[nodeA, nodeB, nodeC];
+    } else {
+      array = @[node1, node2, node3];
+    }
+    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:array];
+  };
+  [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+  [node insertSubnode:nodeD atIndex:0];
+  
+  XCTAssertEqual(node.subnodes[0], nodeD);
+  XCTAssertEqual(node.subnodes[1], nodeA);
+  XCTAssertEqual(node.subnodes[2], nodeB);
+  XCTAssertEqual(node.subnodes[3], nodeC);
+  
+  node.layoutState = @2;
+  [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+  XCTAssertEqual(node.subnodes[0], nodeD);
+  XCTAssertEqual(node.subnodes[1], node1);
+  XCTAssertEqual(node.subnodes[2], node2);
+  XCTAssertEqual(node.subnodes[3], node3);
+}
+
 @end
