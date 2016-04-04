@@ -8,7 +8,7 @@
 
 #import "ASSnapshotTestCase.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Internal.h"
 
 @implementation ASSnapshotTestCase
 

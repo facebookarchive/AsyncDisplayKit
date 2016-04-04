@@ -172,7 +172,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract Returns a view.
  *
  * @discussion The view property is lazily initialized, similar to UIViewController. 
- * To go the other direction, use ASViewToDisplayNode() in ASDisplayNodeExtras.h.
+ * To go the other direction, use ASViewToDisplayNode() in ASDisplayNode+Extras.h.
  *
  * @warning The first access to it must be on the main thread, and should only be used on the main thread thereafter as 
  * well.
@@ -197,7 +197,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract Returns a layer.
  *
  * @discussion The layer property is lazily initialized, similar to the view property.
- * To go the other direction, use ASLayerToDisplayNode() in ASDisplayNodeExtras.h.
+ * To go the other direction, use ASLayerToDisplayNode() in ASDisplayNode+Extras.h.
  *
  * @warning The first access to it must be on the main thread, and should only be used on the main thread thereafter as 
  * well.

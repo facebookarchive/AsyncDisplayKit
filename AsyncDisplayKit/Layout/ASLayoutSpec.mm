@@ -12,7 +12,7 @@
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
-#import "ASEnvironmentInternal.h"
+#import "ASEnvironment+Internal.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"

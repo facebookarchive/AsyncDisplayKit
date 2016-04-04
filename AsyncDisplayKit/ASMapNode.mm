@@ -9,7 +9,7 @@
 #if TARGET_OS_IOS
 #import "ASMapNode.h"
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
-#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASDisplayNode+Extras.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 #import <AsyncDisplayKit/ASCenterLayoutSpec.h>
 #import <AsyncDisplayKit/ASThread.h>

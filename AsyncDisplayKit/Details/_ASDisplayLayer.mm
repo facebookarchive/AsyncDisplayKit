@@ -13,7 +13,7 @@
 #import "_ASAsyncTransactionContainer.h"
 #import "ASAssert.h"
 #import "ASDisplayNode.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Internal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
 @implementation _ASDisplayLayer

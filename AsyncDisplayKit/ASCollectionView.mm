@@ -14,7 +14,7 @@
 #import "ASCollectionDataController.h"
 #import "ASCollectionViewLayoutController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
-#import "ASDisplayNodeExtras.h"
+#import "ASDisplayNode+Extras.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASInternalHelpers.h"

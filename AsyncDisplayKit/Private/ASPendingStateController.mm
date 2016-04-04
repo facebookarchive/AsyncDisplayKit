@@ -10,7 +10,7 @@
 #import "ASThread.h"
 #import "ASWeakSet.h"
 #import "ASAssert.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Internal.h"
 
 @interface ASPendingStateController()
 {

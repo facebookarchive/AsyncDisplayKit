@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Internal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
@@ -21,10 +21,10 @@
 #import "_ASScopeTimer.h"
 #import "_ASCoreAnimationExtras.h"
 #import "ASDisplayNodeLayoutContext.h"
-#import "ASDisplayNodeExtras.h"
+#import "ASDisplayNode+Extras.h"
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
-#import "ASEnvironmentInternal.h"
+#import "ASEnvironment+Internal.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -39,7 +39,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 /**
  *
- * See ASDisplayNodeInternal.h for ivars
+ * See ASDisplayNode+Internal.h for ivars
  *
  */
 

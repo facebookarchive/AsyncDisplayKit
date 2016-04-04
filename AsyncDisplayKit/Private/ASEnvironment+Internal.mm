@@ -8,7 +8,7 @@
  *
  */
 
-#import "ASEnvironmentInternal.h"
+#import "ASEnvironment+Internal.h"
 
 #import <queue>
 

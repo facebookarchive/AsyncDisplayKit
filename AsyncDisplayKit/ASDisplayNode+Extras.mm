@@ -6,8 +6,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Extras.h"
+#import "ASDisplayNode+Internal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
 extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window)

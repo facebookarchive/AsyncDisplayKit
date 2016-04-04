@@ -14,7 +14,7 @@
 
 #import "_ASDisplayView.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeExtras.h"
+#import "ASDisplayNode+Extras.h"
 #import "UIView+ASConvenience.h"
 
 // helper functions
