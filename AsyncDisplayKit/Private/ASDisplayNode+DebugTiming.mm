@@ -7,7 +7,7 @@
  */
 
 #import "ASDisplayNode+DebugTiming.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Internal.h"
 
 @implementation ASDisplayNode (DebugTiming)
 

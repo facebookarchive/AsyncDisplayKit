@@ -11,7 +11,7 @@
 #import "ASAssert.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASCellNode.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Internal.h"
 #import "ASDataController+Subclasses.h"
 #import "ASIndexedNodeContext.h"
 

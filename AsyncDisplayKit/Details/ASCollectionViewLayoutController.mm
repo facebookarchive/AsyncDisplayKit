@@ -14,7 +14,7 @@
 #import "ASCollectionView.h"
 #import "CGRect+ASConvenience.h"
 #import "UICollectionViewLayout+ASConvenience.h"
-#import "ASDisplayNodeExtras.h"
+#import "ASDisplayNode+Extras.h"
 
 struct ASRangeGeometry {
   CGRect rangeBounds;

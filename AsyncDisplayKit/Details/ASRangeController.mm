@@ -10,8 +10,8 @@
 
 #import "ASAssert.h"
 #import "ASWeakSet.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Extras.h"
+#import "ASDisplayNode+Internal.h"
 #import "ASMultiDimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"

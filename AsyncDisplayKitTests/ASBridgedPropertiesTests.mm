@@ -10,7 +10,7 @@
 #import "ASPendingStateController.h"
 #import "ASDisplayNode.h"
 #import "ASThread.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Internal.h"
 #import "_ASPendingState.h"
 #import "ASCellNode.h"
 

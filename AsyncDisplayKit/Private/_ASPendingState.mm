@@ -12,7 +12,7 @@
 #import "_ASAsyncTransactionContainer.h"
 #import "ASAssert.h"
 #import "ASInternalHelpers.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Internal.h"
 
 #define __shouldSetNeedsDisplay(layer) (flags.needsDisplay \
   || (flags.setOpaque && opaque != (layer).opaque)\

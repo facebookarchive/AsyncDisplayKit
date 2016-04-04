@@ -13,8 +13,8 @@
 #import "_ASCoreAnimationExtras.h"
 #import "_ASAsyncTransactionContainer.h"
 #import "ASAssert.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Extras.h"
+#import "ASDisplayNode+Internal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Subclasses.h"
 

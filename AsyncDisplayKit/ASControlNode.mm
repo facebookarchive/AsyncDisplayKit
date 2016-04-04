@@ -9,7 +9,7 @@
 #import "ASControlNode.h"
 #import "ASControlNode+Subclasses.h"
 #import "ASThread.h"
-#import "ASDisplayNodeExtras.h"
+#import "ASDisplayNode+Extras.h"
 #import "ASImageNode.h"
 
 // UIControl allows dragging some distance outside of the control itself during

@@ -79,7 +79,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 - (id)initWithViewClass:(Class)viewClass;
 - (id)initWithLayerClass:(Class)layerClass;
 
-// FIXME: Importing ASDisplayNodeInternal.h causes a heap of problems.
+// FIXME: Importing ASDisplayNode+Internal.h causes a heap of problems.
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState;
 @end
 

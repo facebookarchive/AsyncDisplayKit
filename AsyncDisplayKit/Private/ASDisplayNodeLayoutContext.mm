@@ -9,7 +9,7 @@
 #import "ASDisplayNodeLayoutContext.h"
 
 #import "ASDisplayNode.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Internal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASLayout.h"
 

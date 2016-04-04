@@ -8,8 +8,8 @@
 
 #import "ASLayoutablePrivate.h"
 #import "ASInternalHelpers.h"
-#import "ASEnvironmentInternal.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Internal.h"
+#import "ASDisplayNode+Internal.h"
 #import "ASTextNode.h"
 #import "ASLayoutSpec.h"
 
