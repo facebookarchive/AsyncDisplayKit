@@ -20,7 +20,7 @@
 #import "_ASDisplayView.h"
 #import "_ASScopeTimer.h"
 #import "_ASCoreAnimationExtras.h"
-#import "ASDisplayNodeLayoutContext.h"
+#import "ASLayoutTransition.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
@@ -604,15 +604,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
   
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
-    _pendingLayoutContext = [[ASDisplayNodeLayoutContext alloc] initWithNode:self
+    _pendingLayoutContext = [[ASLayoutTransition alloc] initWithNode:self
                                                                pendingLayout:newLayout
                                                       pendingConstrainedSize:constrainedSize
                                                               previousLayout:previousLayout
                                                      previousConstrainedSize:previousConstrainedSize];
   } else {
-    ASDisplayNodeLayoutContext *layoutContext;
+    ASLayoutTransition *layoutContext;
     if (self.usesImplicitHierarchyManagement) {
-      layoutContext = [[ASDisplayNodeLayoutContext alloc] initWithNode:self
+      layoutContext = [[ASLayoutTransition alloc] initWithNode:self
                                                          pendingLayout:newLayout
                                                 pendingConstrainedSize:constrainedSize
                                                         previousLayout:previousLayout
@@ -725,7 +725,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         completion();
       }
       
-      _pendingLayoutContext = [[ASDisplayNodeLayoutContext alloc] initWithNode:self
+      _pendingLayoutContext = [[ASLayoutTransition alloc] initWithNode:self
                                                                  pendingLayout:newLayout
                                                         pendingConstrainedSize:constrainedSize
                                                                 previousLayout:previousLayout
@@ -2276,7 +2276,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)applyLayout:(ASLayout *)layout
     constrainedSize:(ASSizeRange)constrainedSize
-      layoutContext:(ASDisplayNodeLayoutContext *)layoutContext
+      layoutContext:(ASLayoutTransition *)layoutContext
 {
   ASDN::MutexLocker l(_propertyLock);
   _layout = layout;

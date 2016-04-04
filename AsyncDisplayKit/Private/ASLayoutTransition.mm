@@ -1,12 +1,12 @@
 //
-//  ASDisplayNodeLayoutContext.mm
+//  ASLayoutTransition.mm
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 3/8/16.
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASDisplayNodeLayoutContext.h"
+#import "ASLayoutTransition.h"
 
 #import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
@@ -18,7 +18,7 @@
 #import "NSArray+Diffing.h"
 #import "ASEqualityHelpers.h"
 
-@implementation ASDisplayNodeLayoutContext {
+@implementation ASLayoutTransition {
   ASDN::RecursiveMutex _propertyLock;
   BOOL _calculatedSubnodeOperations;
   NSArray<ASDisplayNode *> *_insertedSubnodes;

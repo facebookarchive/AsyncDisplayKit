@@ -17,7 +17,7 @@
 #import "ASSentinel.h"
 #import "ASThread.h"
 #import "_ASTransitionContext.h"
-#import "ASDisplayNodeLayoutContext.h"
+#import "ASLayoutTransition.h"
 #import "ASEnvironment.h"
 
 #include <vector>
@@ -110,7 +110,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   BOOL _usesImplicitHierarchyManagement;
 
   int32_t _pendingTransitionID;
-  ASDisplayNodeLayoutContext *_pendingLayoutContext;
+  ASLayoutTransition *_pendingLayoutContext;
   
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
