@@ -31,6 +31,7 @@
   __unsafe_unretained ASDisplayNode *_node;  // Though UIView has a .node property added via category, since we can add an ivar to a subclass, use that for performance.
   BOOL _inHitTest;
   BOOL _inPointInside;
+  NSMutableArray *_accessibleElements;
 }
 
 @synthesize asyncdisplaykit_node = _node;
@@ -374,4 +375,82 @@
   return [_node preferredFocusedView];
 }
 #endif
+@end
+
+
+#pragma mark - Accessibility
+
+static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
+
+@implementation UIAccessibilityElement (_ASDisplayView)
+
+- (void)setAsyncdisplaykit_node:(ASDisplayNode *)node
+{
+  objc_setAssociatedObject(self, ASDisplayNodeAssociatedNodeKey, node, OBJC_ASSOCIATION_ASSIGN); // Weak reference to avoid cycle, since the node retains the layer.
+  
+  // Update UIAccessibilityElement properties from node
+  self.accessibilityLabel = node.accessibilityLabel;
+  self.accessibilityHint = node.accessibilityHint;
+  self.accessibilityValue = node.accessibilityValue;
+  self.accessibilityTraits = node.accessibilityTraits;
+}
+
+- (ASDisplayNode *)asyncdisplaykit_node
+{
+  return objc_getAssociatedObject(self, ASDisplayNodeAssociatedNodeKey);
+}
+
+@end
+
+@implementation _ASDisplayView (UIAccessibilityContainer)
+
+#pragma mark - UIAccessibility
+
+- (NSArray *)accessibleElements
+{
+  ASDisplayNode *asyncDisplayKitNode = self.asyncdisplaykit_node;
+  if ( _accessibleElements != nil ) {
+    return _accessibleElements;
+  }
+  
+  _accessibleElements = [[NSMutableArray alloc] init];
+  
+  // Create UI accessiblity elements for each subnode that represent the subnode within the accessibility container
+  for (ASDisplayNode *subnode in asyncDisplayKitNode.subnodes) {
+    if (subnode.isAccessibilityElement || [subnode accessibilityElementCount] > 0) {
+      UIAccessibilityElement *accessibilityElement = [[UIAccessibilityElement alloc] initWithAccessibilityContainer:self];
+      accessibilityElement.asyncdisplaykit_node = subnode;
+      [_accessibleElements addObject:accessibilityElement];
+    }
+  }
+  
+  return _accessibleElements;
+}
+
+- (NSInteger)accessibilityElementCount
+{
+  return [self accessibleElements].count;
+}
+
+- (id)accessibilityElementAtIndex:(NSInteger)index
+{
+  UIAccessibilityElement *element = [self accessibleElements][index];
+  ASDisplayNode *subnode = element.asyncdisplaykit_node;
+  if (subnode == nil) {
+    return nil;
+  }
+  
+  // We have to update the accessiblity frame in accessibilityElementAtIndex: as the accessibility frame is in screen
+  // coordinates and between creating the accessibilityElement and returning it in accessibilityElementAtIndex:
+  // the frame can change
+  element.accessibilityFrame = UIAccessibilityConvertFrameToScreenCoordinates(subnode.frame, self);
+  
+  return element;
+}
+
+- (NSInteger)indexOfAccessibilityElement:(id)element
+{
+  return [self.accessibleElements indexOfObject:element];
+}
+
 @end

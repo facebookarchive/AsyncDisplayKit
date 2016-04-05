@@ -841,6 +841,12 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   _setToViewOnly(accessibilityIdentifier, accessibilityIdentifier);
 }
 
+- (NSInteger)accessibilityElementCount
+{
+    _bridge_prologue_read;
+    return _getFromViewOnly(accessibilityElementCount);
+}
+
 @end
 
 
