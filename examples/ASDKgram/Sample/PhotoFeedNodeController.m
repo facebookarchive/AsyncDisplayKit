@@ -55,6 +55,7 @@
   self.view.backgroundColor = [UIColor whiteColor];
   _tableNode.view.allowsSelection = NO;
   _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
+  _tableNode.view.leadingScreensForBatching = AUTO_TAIL_LOADING_NUM_SCREENFULS;  // overriding default of 2.0
 
 }
 
@@ -69,16 +70,19 @@
     [self requestCommentsForPhotos:newPhotos];
     
     // immediately start second larger fetch
-    [self loadPage];
+    [self loadPageWithContext:nil];
     
   } numResultsToReturn:4];
 }
 
-- (void)loadPage
+- (void)loadPageWithContext:(ASBatchContext *)context
 {
   [_photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
     [self insertNewRowsInTableView:newPhotos];
     [self requestCommentsForPhotos:newPhotos];
+    if (context) {
+      [context completeBatchFetching:YES];
+    }
   } numResultsToReturn:20];
 }
 
@@ -133,26 +137,24 @@
   return [_photoFeed numberOfItemsInFeed];
 }
 
-- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhotoObject:[_photoFeed objectAtIndex:indexPath.row]];
+  // this will be executed on a background thread - important to make sure it's thread safe
+  ASCellNode *(^ASCellNodeBlock)() = ^ASCellNode *() {
+    PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhotoObject:[_photoFeed objectAtIndex:indexPath.row]];
+    return cellNode;
+  };
   
-  return cellNode;
+  return ASCellNodeBlock;
 }
 
 #pragma mark - ASTableDelegate methods
 
-// table automatic tail loading
--(void)scrollViewDidScroll:(UIScrollView *)scrollView
+// Receive a message that the tableView is near the end of its data set and more data should be fetched if necessary.
+- (void)tableView:(ASTableView *)tableView willBeginBatchFetchWithContext:(ASBatchContext *)context
 {
-  CGFloat currentOffSetY = scrollView.contentOffset.y;
-  CGFloat contentHeight  = scrollView.contentSize.height;
-  CGFloat screenHeight   = [UIScreen mainScreen].bounds.size.height;
-  
-  CGFloat screenfullsBeforeBottom = (contentHeight - currentOffSetY) / screenHeight;
-  if (screenfullsBeforeBottom < AUTO_TAIL_LOADING_NUM_SCREENFULS) {
-    [self loadPage];
-  }
+  [context beginBatchFetching];
+  [self loadPageWithContext:context];
 }
 
 @end
