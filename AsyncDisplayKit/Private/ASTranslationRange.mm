@@ -1,19 +1,19 @@
 //
-//  ASIntersectRange.mm
+//  ASTranslationRange.mm
 //  AsyncDisplayKit
 //
 //  Created by Levi McCallum on 4/4/16.
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASIntersectRange.h"
+#import "ASTranslationRange.h"
 
 #import "ASAssert.h"
 #import "ASThread.h"
 #import <vector>
 #import <algorithm>
 
-@interface ASIntersectRange () {
+@interface ASTranslationRange () {
   NSUInteger _length;
   std::vector<NSRange> _ranges;
   ASDN::RecursiveMutex _propertyLock;
@@ -21,7 +21,7 @@
 
 @end
 
-@implementation ASIntersectRange
+@implementation ASTranslationRange
 
 - (instancetype)initWithLocation:(NSUInteger)location length:(NSUInteger)length
 {
@@ -56,7 +56,7 @@
   return _length;
 }
 
-- (void)insertIntersectionAtIndex:(NSUInteger)index
+- (void)insertOffsetAtIndex:(NSUInteger)index
 {
   ASDN::MutexLocker l(_propertyLock);
   // noop if out of the range
@@ -90,7 +90,7 @@
   }
 }
 
-- (void)removeIntersectionAtIndex:(NSUInteger)index
+- (void)removeOffsetAtIndex:(NSUInteger)index
 {
   NSInteger intersectingRange = -1;
   for (NSUInteger i = 0; i < _ranges.size(); i++) {
@@ -109,7 +109,7 @@
   // iterate through the remaining ranges, decrementing the location of the range
 }
 
-- (NSUInteger)indexForIndex:(NSUInteger)index
+- (NSUInteger)translatedIndex:(NSUInteger)index
 {
   NSUInteger translatedIndex = NSNotFound;
   for (NSUInteger i = 0; i < _ranges.size(); i++) {

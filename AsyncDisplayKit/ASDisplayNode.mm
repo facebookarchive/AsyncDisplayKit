@@ -25,7 +25,7 @@
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
 #import "ASEnvironmentInternal.h"
-#import "ASIntersectRange.h"
+#import "ASTranslationRange.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -252,7 +252,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self _staticInitialize];
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
-  _layoutRange = [[ASIntersectRange alloc] initWithLocation:0 length:0];
+  _layoutRange = [[ASTranslationRange alloc] initWithLocation:0 length:0];
   _preferredFrameSize = CGSizeZero;
 
   _environmentState = ASEnvironmentStateMakeDefault();
@@ -1255,6 +1255,13 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   if (!_subnodes)
     _subnodes = [[NSMutableArray alloc] init];
   [_subnodes insertObject:subnode atIndex:subnodeIndex];
+  
+  if (subnodeIndex <= _layoutRange.location) {
+    _layoutRange.location = _layoutRange.location + 1;
+  } else if (subnodeIndex > _layoutRange.location || subnodeIndex <= (_layoutRange.location + _layoutRange.length)) {
+    [_layoutRange insertOffsetAtIndex:subnodeIndex];
+  }
+  
   [subnode __setSupernode:self];
 
   // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.

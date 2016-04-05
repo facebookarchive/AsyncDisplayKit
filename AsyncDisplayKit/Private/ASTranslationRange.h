@@ -1,5 +1,5 @@
 //
-//  ASSplitRange.h
+//  ASTranslationRange.h
 //  AsyncDisplayKit
 //
 //  Created by Levi McCallum on 4/4/16.
@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ASIntersectRange : NSObject
+@interface ASTranslationRange : NSObject
 
 /**
  * The starting point of the range
@@ -26,18 +26,18 @@
 - (NSUInteger)length;
 
 /**
- * Inserts a new intersection point in the range at the given index
+ * Inserts a new offset point in the range at the given index
  */
-- (void)insertIntersectionAtIndex:(NSUInteger)index;
+- (void)insertOffsetAtIndex:(NSUInteger)index;
 
 /**
- * Removes an intersection in the range at the given index
+ * Removes an offset in the range at the given index
  */
-- (void)removeIntersectionAtIndex:(NSUInteger)index;
+- (void)removeOffsetAtIndex:(NSUInteger)index;
 
 /**
  * Returns an index offset via the current intersections in the range
  */
-- (NSUInteger)indexForIndex:(NSUInteger)index;
+- (NSUInteger)translatedIndex:(NSUInteger)index;
 
 @end
