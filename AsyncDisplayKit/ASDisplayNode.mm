@@ -1259,7 +1259,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   if (subnodeIndex <= _layoutRange.location) {
     _layoutRange.location = _layoutRange.location + 1;
   } else if (subnodeIndex > _layoutRange.location || subnodeIndex <= (_layoutRange.location + _layoutRange.length)) {
-    [_layoutRange insertOffsetAtIndex:subnodeIndex];
+    [_layoutRange insertOffsetAtLocation:subnodeIndex];
   }
   
   [subnode __setSupernode:self];

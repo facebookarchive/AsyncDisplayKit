@@ -8,6 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+/**
+ * A translation range simulates a contiguous range, but allows offsets to be inserted and removed to translate an index
+ * within the contiguous range to the actual index that
+ */
 @interface ASTranslationRange : NSObject
 
 /**
@@ -28,16 +32,16 @@
 /**
  * Inserts a new offset point in the range at the given index
  */
-- (void)insertOffsetAtIndex:(NSUInteger)index;
+- (void)insertOffsetAtLocation:(NSUInteger)location;
 
 /**
  * Removes an offset in the range at the given index
  */
-- (void)removeOffsetAtIndex:(NSUInteger)index;
+- (void)removeOffsetAtLocation:(NSUInteger)location;
 
 /**
  * Returns an index offset via the current intersections in the range
  */
-- (NSUInteger)translatedIndex:(NSUInteger)index;
+- (NSUInteger)translatedLocation:(NSUInteger)location;
 
 @end

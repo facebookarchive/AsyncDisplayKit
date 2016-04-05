@@ -23,6 +23,8 @@
 
 @implementation ASTranslationRange
 
+@synthesize location = _location;
+
 - (instancetype)initWithLocation:(NSUInteger)location length:(NSUInteger)length
 {
   ASDisplayNodeAssert(location >= 0, @"Location must be greater than or equal to 0");
@@ -56,11 +58,11 @@
   return _length;
 }
 
-- (void)insertOffsetAtIndex:(NSUInteger)index
+- (void)insertOffsetAtLocation:(NSUInteger)location
 {
   ASDN::MutexLocker l(_propertyLock);
   // noop if out of the range
-  if (index <= _location || index > _length - 1) {
+  if (location <= _location || location > _length - 1) {
     return;
   }
   
@@ -69,55 +71,79 @@
   for (offsetIndex = 0; offsetIndex < _ranges.size(); offsetIndex++) {
     NSRange range = _ranges[offsetIndex];
     // When the index intersects, queue the intersecting range to be split at the index
-    if (NSLocationInRange(index, range)) {
+    if (NSLocationInRange(location, range)) {
       splitRange = YES;
       break;
-    // When the index is between the previous and current range, queue all other range locations to be incremented
-    } else if (index < range.location) {
+    // When the location is between the previous and current range, queue all other range locations to be incremented
+    } else if (location < range.location) {
       break;
     }
   }
   
   if (splitRange) {
-    NSRange splitRange = _ranges[offsetIndex];
-    NSUInteger splitLength = index - splitRange.location;
-    _ranges[offsetIndex] = NSMakeRange(splitRange.location, splitLength);
-    _ranges.insert(_ranges.begin() + offsetIndex, NSMakeRange((splitLength + splitRange.location) + 1, splitRange.length - splitLength));
+    NSRange range = _ranges[offsetIndex];
+    NSUInteger newLength = location - range.location;
+    _ranges[offsetIndex] = NSMakeRange(range.location, newLength);
+    _ranges.insert(_ranges.begin() + offsetIndex, NSMakeRange((newLength + range.location) + 1, range.length - newLength));
   }
   
-  for (NSUInteger i = offsetIndex; i < _ranges.size(); i++) {
-    _ranges[i] = NSMakeRange(_ranges[i].location + 1, _ranges[i].length);
+  for (NSUInteger j = offsetIndex; j < _ranges.size(); j++) {
+    _ranges[j] = NSMakeRange(_ranges[j].location + 1, _ranges[j].length);
   }
 }
 
-- (void)removeOffsetAtIndex:(NSUInteger)index
+- (void)removeOffsetAtLocation:(NSUInteger)location
 {
-  NSInteger intersectingRange = -1;
+  NSInteger rightRangeIdx = NSNotFound;
   for (NSUInteger i = 0; i < _ranges.size(); i++) {
-    NSRange range = _ranges[index];
-    // No-op when trying to remove an offset that doesn't exist
-    if (NSLocationInRange(index, range)) {
-      return;
-    } else if (range.location < index) {
+    NSRange range = _ranges[location];
+    if (range.location < location) {
+      rightRangeIdx = i;
       break;
+    // No-op when trying to remove an offset that doesn't exist
+    } else if (NSLocationInRange(location, range)) {
+      return;
     }
   }
   
-  // if the previous range is only separated by one, remove the current one and increase the length of the previous
-  // one by the length of the current one
+  if (rightRangeIdx == NSNotFound) {
+    return;
+  }
+  
+  NSUInteger leftRangeIdx = rightRangeIdx - 1;
+
+  NSRange rightRange = _ranges[rightRangeIdx];
+  NSRange leftRange = _ranges[leftRangeIdx];
+  if (rightRange.location - (leftRange.location + leftRange.length) == 1) {
+    // Merge the left and right range
+    _ranges[leftRangeIdx] = NSMakeRange(leftRange.location, leftRange.length + rightRange.length);
+    // Remove the right range
+    _ranges.erase(_ranges.begin() + rightRangeIdx);
+  }
   
   // iterate through the remaining ranges, decrementing the location of the range
+  for (NSUInteger j = rightRangeIdx; j < _ranges.size(); j++) {
+    NSRange range = _ranges[j];
+    _ranges[j] = NSMakeRange(range.location - 1, range.length);
+  }
 }
 
-- (NSUInteger)translatedIndex:(NSUInteger)index
+- (NSUInteger)translatedLocation:(NSUInteger)location
 {
   NSUInteger translatedIndex = NSNotFound;
+  
+  if (location < _location) {
+    return translatedIndex;
+  }
+
+  NSUInteger indexOffset = 0;
   for (NSUInteger i = 0; i < _ranges.size(); i++) {
     NSRange range = _ranges[i];
-    translatedIndex = range.location;
-    if (NSLocationInRange(index, range)) {
-      translatedIndex += index - range.location;
+    if (location <= indexOffset + range.length) {
+      translatedIndex = range.location + (location - indexOffset);
+      break;
     }
+    indexOffset += range.length;
   }
   return translatedIndex;
 }
