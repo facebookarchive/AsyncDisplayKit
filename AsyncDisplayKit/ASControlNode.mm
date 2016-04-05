@@ -277,16 +277,17 @@ static BOOL _enableHitTestDebug = NO;
       }
 
       // Have we seen this target before for this event?
-      NSMutableArray *targetActions = [eventDispatchTable objectForKey:target];
+      NSMutableSet *targetActions = [eventDispatchTable objectForKey:target];
       if (!targetActions)
       {
-        // Nope. Create an actions array for it.
-        targetActions = [[NSMutableArray alloc] initWithCapacity:kASControlNodeActionDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
+        // Nope. Create an action set for it.
+        targetActions = [[NSMutableSet alloc] initWithCapacity:kASControlNodeActionDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
         [eventDispatchTable setObject:targetActions forKey:target];
       }
 
       // Add the action message.
-      // Note that bizarrely enough UIControl (at least according to the docs) supports duplicate target-action pairs for a particular control event, so we replicate that behavior.
+      // UIControl does not support duplicate target-action-events entries, so we replicate that behavior.
+      // See: https://github.com/facebook/AsyncDisplayKit/files/205466/DuplicateActionsTest.playground.zip
       [targetActions addObject:NSStringFromSelector(action)];
     });
 
@@ -371,7 +372,7 @@ static BOOL _enableHitTestDebug = NO;
       if (!target)
       {
         // Look at every target, removing target-pairs that have action (or all of its actions).
-        for (id aTarget in eventDispatchTable)
+        for (id aTarget in [eventDispatchTable copy])
           removeActionFromTarget(aTarget, action);
       }
       else
