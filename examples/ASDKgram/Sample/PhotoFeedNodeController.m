@@ -78,6 +78,7 @@
 - (void)loadPageWithContext:(ASBatchContext *)context
 {
   [_photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
+    
     [self insertNewRowsInTableView:newPhotos];
     [self requestCommentsForPhotos:newPhotos];
     if (context) {
@@ -139,9 +140,10 @@
 
 - (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+  PhotoModel *photoModel = [_photoFeed objectAtIndex:indexPath.row];
   // this will be executed on a background thread - important to make sure it's thread safe
   ASCellNode *(^ASCellNodeBlock)() = ^ASCellNode *() {
-    PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhotoObject:[_photoFeed objectAtIndex:indexPath.row]];
+    PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhotoObject:photoModel];
     return cellNode;
   };
   
@@ -155,6 +157,15 @@
 {
   [context beginBatchFetching];
   [self loadPageWithContext:context];
+}
+
+#pragma mark - PhotoFeedViewControllerProtocol
+
+- (void)resetAllData
+{
+  [_photoFeed clearFeed];
+  [_tableNode.view reloadData];
+  [self refreshFeed];
 }
 
 @end

@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AppDelegate.h"
 
-@interface PhotoFeedViewController : UIViewController
+@interface PhotoFeedViewController : UIViewController <PhotoFeedViewControllerProtocol>
 
 @end

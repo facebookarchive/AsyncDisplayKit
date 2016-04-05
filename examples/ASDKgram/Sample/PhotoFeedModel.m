@@ -184,46 +184,48 @@
       NSString *imageSizeParam = [ImageURLModel imageParameterForClosestImageSize:_imageSize];
       NSString *urlAdditions   = [NSString stringWithFormat:@"&page=%lu&rpp=%lu%@", (unsigned long)nextPage, (long)numPhotos, imageSizeParam];
       NSURL *url               = [NSURL URLWithString:[_urlString stringByAppendingString:urlAdditions]];
-      NSData *data             = [NSData dataWithContentsOfURL:url];
-      
-      if (data) {
-        NSDictionary *response = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-        
-        if ([response isKindOfClass:[NSDictionary class]]) {
-          _currentPage = [[response valueForKeyPath:@"current_page"] integerValue];
-          _totalPages  = [[response valueForKeyPath:@"total_pages"] integerValue];
-          _totalItems  = [[response valueForKeyPath:@"total_items"] integerValue];
+      NSURLSession *session    = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
+      NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        if (data) {
+          NSDictionary *response = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
           
-          NSArray *photos = [response valueForKeyPath:@"photos"];
-          if ([photos isKindOfClass:[NSArray class]]) {
-            for (NSDictionary *photoDictionary in photos) {
-              if ([response isKindOfClass:[NSDictionary class]]) {
-                PhotoModel *photo = [[PhotoModel alloc] initWith500pxPhoto:photoDictionary];
-                if (photo) {
-                  if (replaceData || ![_ids containsObject:photo.photoID]) {
-                    [newPhotos addObject:photo];
-                    [newIDs addObject:photo.photoID];
+          if ([response isKindOfClass:[NSDictionary class]]) {
+            _currentPage = [[response valueForKeyPath:@"current_page"] integerValue];
+            _totalPages  = [[response valueForKeyPath:@"total_pages"] integerValue];
+            _totalItems  = [[response valueForKeyPath:@"total_items"] integerValue];
+            
+            NSArray *photos = [response valueForKeyPath:@"photos"];
+            if ([photos isKindOfClass:[NSArray class]]) {
+              for (NSDictionary *photoDictionary in photos) {
+                if ([response isKindOfClass:[NSDictionary class]]) {
+                  PhotoModel *photo = [[PhotoModel alloc] initWith500pxPhoto:photoDictionary];
+                  if (photo) {
+                    if (replaceData || ![_ids containsObject:photo.photoID]) {
+                      [newPhotos addObject:photo];
+                      [newIDs addObject:photo.photoID];
+                    }
                   }
                 }
               }
             }
           }
         }
-      }
+        dispatch_async(dispatch_get_main_queue(), ^{
+          if (replaceData) {
+            _photos = [newPhotos mutableCopy];
+            _ids = [newIDs mutableCopy];
+          } else {
+            [_photos addObjectsFromArray:newPhotos];
+            [_ids addObjectsFromArray:newIDs];
+          }
+          if (block) {
+            block(newPhotos);
+          }
+          _fetchPageInProgress = NO;
+        });
+      }]; // end task
+      [task resume];
     }
-    dispatch_async(dispatch_get_main_queue(), ^{
-      if (replaceData) {
-        _photos = [newPhotos mutableCopy];
-        _ids = [newIDs mutableCopy];
-      } else {
-        [_photos addObjectsFromArray:newPhotos];
-        [_ids addObjectsFromArray:newIDs];
-      }
-      if (block) {
-        block(newPhotos);
-      }
-    });
-    _fetchPageInProgress = NO;
   });
 }
 

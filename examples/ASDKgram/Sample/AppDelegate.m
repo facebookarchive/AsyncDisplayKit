@@ -11,6 +11,9 @@
 #import "PhotoFeedNodeController.h"
 #import "Utilities.h"
 
+@interface AppDelegate () <UITabBarControllerDelegate>
+@end
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -34,6 +37,7 @@
   UITabBarController *tabBarController    = [[UITabBarController alloc] init];
   tabBarController.viewControllers        = @[uikitHomeFeedNavCtrl, asdkHomeFeedNavCtrl];
   tabBarController.selectedViewController = asdkHomeFeedNavCtrl;
+  tabBarController.delegate               = self;
   
   // Nav Bar appearance
   [[UINavigationBar appearance] setBarTintColor:[UIColor darkBlueColor]];
@@ -61,6 +65,18 @@
                                                name:UIApplicationWillChangeStatusBarOrientationNotification
                                              object:nil];
   return YES;
+}
+
+// UITabBarControllerDelegate
+- (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController;
+{
+  if ([viewController isKindOfClass:[UINavigationController class]]) { 
+    NSArray *viewControllers = [(UINavigationController *)viewController viewControllers];
+    UIViewController *rootViewController = viewControllers[0];
+    if ([rootViewController conformsToProtocol:@protocol(PhotoFeedViewControllerProtocol)]) {
+      [(id <PhotoFeedViewControllerProtocol>)rootViewController resetAllData];
+    }
+  }
 }
 
 - (void)handleDidChangeStatusBarOrientationNotification:(NSNotification *)notification;

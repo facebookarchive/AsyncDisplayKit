@@ -48,14 +48,20 @@
 - (void)fetchAvatarImageWithCompletionBlock:(void(^)(UserModel *, UIImage *))block
 {
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    NSData *data   = [NSData dataWithContentsOfURL:_userPicURL];
-    UIImage *image = [UIImage imageWithData:data];
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-      if (block) {
-        block(self, image);
+    NSURLSession *session      = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
+    NSURLSessionDataTask *task = [session dataTaskWithURL:_userPicURL completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+      if (data) {
+        UIImage *image = [UIImage imageWithData:data];
+    
+        dispatch_async(dispatch_get_main_queue(), ^{
+          if (block) {
+            block(self, image);
+          }
+        });
       }
-    });
+    }];
+    [task resume];
   });
 }
 
@@ -97,31 +103,31 @@
     NSString *urlString     = [NSString stringWithFormat:@"https://api.500px.com/v1/users/show?id=%lu&consumer_key=Fi13GVb8g53sGvHICzlram7QkKOlSDmAmp9s9aqC", (unsigned long)_userID];
     
     NSURL *url              = [NSURL URLWithString:urlString];
-    
-    NSAssert(![NSThread isMainThread], @"Absolutely never call NSData URL loader on main thread");   //FIXME:
-    NSData *data            = [NSData dataWithContentsOfURL:url];
-    
-    NSDictionary *response  = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-    
-    // parse JSON data
-    if ([response isKindOfClass:[NSDictionary class]]) {
-      [self loadUserDataFromDictionary:response];
-    }
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-      // execute completion block
-    
-      _fullUserInfoFetchDone = YES;
-
-      if (_fullUserInfoCompletionBlock) {
-        _fullUserInfoCompletionBlock(self);
+    NSURLSession *session   = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
+    NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+      if (data) {
+        NSDictionary *response  = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         
-        // IT IS ESSENTIAL to nil the block, as it retains a view controller BECAUSE it uses an instance variable which
-        // means that self is retained. It could continue to live on forever
-        // If we don't release this.
-        _fullUserInfoCompletionBlock = nil;
+        // parse JSON data
+        if ([response isKindOfClass:[NSDictionary class]]) {
+          [self loadUserDataFromDictionary:response];
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+          _fullUserInfoFetchDone = YES;
+          
+          if (_fullUserInfoCompletionBlock) {
+            _fullUserInfoCompletionBlock(self);
+            
+            // IT IS ESSENTIAL to nil the block, as it retains a view controller BECAUSE it uses an instance variable which
+            // means that self is retained. It could continue to live on forever
+            // If we don't release this.
+            _fullUserInfoCompletionBlock = nil;
+          }
+        });
       }
-    });
+    }];
+    [task resume];
   });
 }
 

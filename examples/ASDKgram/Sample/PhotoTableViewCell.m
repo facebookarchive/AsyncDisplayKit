@@ -65,7 +65,6 @@
 
     _userAvatarImageView                 = [[UIImageView alloc] init];
     _photoImageView                      = [[UIImageView alloc] init];
-    [_photoImageView setPin_updateWithProgress:YES];
 
     _userNameLabel                       = [[UILabel alloc] init];
     _photoLocationLabel                  = [[UILabel alloc] init];
@@ -190,7 +189,12 @@
   rect.size                    = [_photoDescriptionLabel sizeThatFits:CGSizeMake(availableWidth, CGFLOAT_MAX)];
   _photoDescriptionLabel.frame = rect;
 
-  [_photoImageView pin_setImageFromURL:photo.URL];
+  [[PINRemoteImageManager sharedImageManager] downloadImageWithURL:photo.URL
+                                                           options:PINRemoteImageManagerDownloadOptionsSkipDecode
+                                                        completion:^(PINRemoteImageManagerResult * _Nonnull result) {
+                                                          _photoImageView.image = result.image;
+                                                        }];
+  
   [self downloadAndProcessUserAvatarForPhoto:photo];
   [self loadCommentsForPhoto:photo];
   [self reverseGeocodeLocationForPhoto:photo];
@@ -215,10 +219,15 @@
 
 - (void)downloadAndProcessUserAvatarForPhoto:(PhotoModel *)photo
 {
-  [_userAvatarImageView pin_setImageFromURL:_photoModel.ownerUserProfile.userPicURL processorKey:@"custom" processor:^UIImage * _Nullable(PINRemoteImageManagerResult * _Nonnull result, NSUInteger * _Nonnull cost) {
-    CGSize profileImageSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
-    return [result.image makeCircularImageWithSize:profileImageSize];
-  }];
+  [[PINRemoteImageManager sharedImageManager] downloadImageWithURL:_photoModel.ownerUserProfile.userPicURL
+                                                           options:PINRemoteImageManagerDownloadOptionsSkipDecode
+                                                      processorKey:@"custom"
+                                                         processor:^UIImage * _Nullable(PINRemoteImageManagerResult * _Nonnull result, NSUInteger * _Nonnull cost) {
+                                                           CGSize profileImageSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+                                                           return [result.image makeCircularImageWithSize:profileImageSize];
+                                                         } completion:^(PINRemoteImageManagerResult * _Nonnull result) {
+                                                           _userAvatarImageView.image = result.image;
+                                                         }];
 }
 
 - (void)reverseGeocodeLocationForPhoto:(PhotoModel *)photo

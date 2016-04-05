@@ -135,14 +135,12 @@
     
     NSMutableArray *newComments = [NSMutableArray array];
     
-    @synchronized(self) {
-      
-      NSUInteger nextPage = _currentPage + 1;
-      
-      NSString *urlAdditions = [NSString stringWithFormat:@"page=%lu", (unsigned long)nextPage];
-      NSURL *url = [NSURL URLWithString:[_urlString stringByAppendingString:urlAdditions]];
-      
-      NSData *data = [NSData dataWithContentsOfURL:url];
+    NSUInteger nextPage = _currentPage + 1;
+    
+    NSString *urlAdditions = [NSString stringWithFormat:@"page=%lu", (unsigned long)nextPage];
+    NSURL *url = [NSURL URLWithString:[_urlString stringByAppendingString:urlAdditions]];
+    NSURLSession *session      = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
+    NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
       
       if (data) {
         
@@ -177,19 +175,19 @@
           }
         }
       }
-    }
-    dispatch_async(dispatch_get_main_queue(), ^{
-      
-      if (replaceData) {
-        _comments = [newComments mutableCopy];
-      } else {
-        [_comments addObjectsFromArray:newComments];
-      }
-      if (block) {
-        block(newComments);
-      }
-    });
-    _fetchPageInProgress = NO;
+      dispatch_async(dispatch_get_main_queue(), ^{
+        _fetchPageInProgress = NO;
+        if (replaceData) {
+          _comments = [newComments mutableCopy];
+        } else {
+          [_comments addObjectsFromArray:newComments];
+        }
+        if (block) {
+          block(newComments);
+        }
+      });
+    }];
+    [task resume];
   });
 }
 

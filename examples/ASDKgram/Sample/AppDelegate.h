@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol PhotoFeedViewControllerProtocol <NSObject>
+- (void)resetAllData;
+@end
+
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;

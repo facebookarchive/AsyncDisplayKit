@@ -166,4 +166,13 @@
   }
 }
 
+#pragma mark - PhotoFeedViewControllerProtocol
+
+- (void)resetAllData
+{
+  [_photoFeed clearFeed];
+  [_tableView reloadData];
+  [self refreshFeed];
+}
+
 @end
