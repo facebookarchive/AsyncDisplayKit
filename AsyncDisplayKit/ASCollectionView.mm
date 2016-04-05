@@ -703,6 +703,19 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 #pragma mark -
 #pragma mark Batch Fetching
 
+- (void)_checkForBatchFetching
+{
+  // Dragging will be handled in scrollViewWillEndDragging:withVelocity:targetContentOffset:
+  if ([self isDragging] || [self isTracking] || ![self _shouldBatchFetch]) {
+    return;
+  }
+  
+  // Check if we should batch fetch
+  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollableDirections], self.bounds, self.contentSize, self.contentOffset, _leadingScreensForBatching)) {
+    [self _beginBatchFetching];
+  }
+}
+
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
 {
   _deceleratingVelocity = CGPointMake(
@@ -711,7 +724,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   );
 
   if (targetContentOffset != NULL) {
-    [self handleBatchFetchScrollingToOffset:*targetContentOffset];
+    [self _handleBatchFetchScrollingToOffset:*targetContentOffset];
   }
   
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
@@ -738,7 +751,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (BOOL)shouldBatchFetch
+- (BOOL)_shouldBatchFetch
 {
   // if the delegate does not respond to this method, there is no point in starting to fetch
   BOOL canFetch = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)];
@@ -749,20 +762,25 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (void)handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
+- (void)_handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
 {
   ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
   
-  if (![self shouldBatchFetch]) {
+  if (![self _shouldBatchFetch]) {
     return;
   }
   
   if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
-    [_batchContext beginBatchFetching];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      [_asyncDelegate collectionView:self willBeginBatchFetchWithContext:_batchContext];
-    });
+    [self _beginBatchFetching];
   }
+}
+
+- (void)_beginBatchFetching
+{
+  [_batchContext beginBatchFetching];
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    [_asyncDelegate collectionView:self willBeginBatchFetchWithContext:_batchContext];
+  });
 }
 
 
@@ -975,9 +993,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     }];
   } else {
     [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
-    [UIView performWithoutAnimation:^{
+    ASPerformBlockWithoutAnimationCompletion(YES, ^{
       [super insertItemsAtIndexPaths:indexPaths];
-    }];
+    }, ^{
+      
+    });
   }
 }
 

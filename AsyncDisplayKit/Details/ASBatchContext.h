@@ -34,6 +34,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)completeBatchFetching:(BOOL)didComplete;
 
 /**
+ * Let the context object know that a batch fetch was completed.
+ *
+ * @discussion For instance, when a table has reached the end of its data, a batch fetch will be attempted unless the context
+ * object thinks that it is still fetching.
+ */
+- (void)completeBatchFetching;
+
+/**
  * Ask the context object if the batch fetching process was cancelled by the context owner.
  *
  * @discussion If an error occurs in the context owner, the batch fetching may become out of sync and need to be

@@ -20,7 +20,7 @@ BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
   }
 
   // only Down and Right scrolls are currently supported (tail loading)
-  if (scrollDirection != ASScrollDirectionDown && scrollDirection != ASScrollDirectionRight) {
+  if (!ASScrollDirectionContainsDown(scrollDirection) && !ASScrollDirectionContainsRight(scrollDirection)) {
     return NO;
   }
 
@@ -31,11 +31,11 @@ BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
 
   CGFloat viewLength, offset, contentLength;
 
-  if (scrollDirection == ASScrollDirectionDown) {
+  if (ASScrollDirectionContainsDown(scrollDirection)) {
     viewLength = bounds.size.height;
     offset = targetOffset.y;
     contentLength = contentSize.height;
-  } else { // horizontal
+  } else { // horizontal / right
     viewLength = bounds.size.width;
     offset = targetOffset.x;
     contentLength = contentSize.width;

@@ -587,18 +587,46 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   } else {
     scrollVelocity = _deceleratingVelocity;
   }
+  
   ASScrollDirection scrollDirection = [self _scrollDirectionForVelocity:scrollVelocity];
   return ASScrollDirectionApplyTransform(scrollDirection, self.transform);
 }
 
-- (ASScrollDirection)_scrollDirectionForVelocity:(CGPoint)velocity
+- (ASScrollDirection)scrollableDirections
+{
+  ASScrollDirection scrollableDirection = ASScrollDirectionNone;
+  CGFloat totalContentWidth = self.contentSize.width + self.contentInset.left + self.contentInset.right;
+  CGFloat totalContentHeight = self.contentSize.height + self.contentInset.top + self.contentInset.bottom;
+  
+  if (self.alwaysBounceHorizontal || totalContentWidth > self.bounds.size.width) { // Can scroll horizontally.
+    scrollableDirection |= ASScrollDirectionHorizontalDirections;
+  }
+  if (self.alwaysBounceVertical || totalContentHeight > self.bounds.size.height) { // Can scroll vertically.
+    scrollableDirection |= ASScrollDirectionVerticalDirections;
+  }
+  return scrollableDirection;
+}
+
+- (ASScrollDirection)_scrollDirectionForVelocity:(CGPoint)scrollVelocity
 {
   ASScrollDirection direction = ASScrollDirectionNone;
-  if (velocity.y < 0.0) {
-    direction = ASScrollDirectionDown;
-  } else if (velocity.y > 0.0) {
-    direction = ASScrollDirectionUp;
+  ASScrollDirection scrollableDirections = [self scrollableDirections];
+  
+  if (ASScrollDirectionContainsHorizontalDirection(scrollableDirections)) { // Can scroll horizontally.
+    if (scrollVelocity.x < 0.0) {
+      direction |= ASScrollDirectionRight;
+    } else if (scrollVelocity.x > 0.0) {
+      direction |= ASScrollDirectionLeft;
+    }
   }
+  if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) { // Can scroll vertically.
+    if (scrollVelocity.y < 0.0) {
+      direction |= ASScrollDirectionDown;
+    } else if (scrollVelocity.y > 0.0) {
+      direction |= ASScrollDirectionUp;
+    }
+  }
+  
   return direction;
 }
 
@@ -631,7 +659,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_asyncDelegate tableView:self willDisplayNodeForRowAtIndexPath:indexPath];
   }
   
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:[self scrollDirection]];
 
   if (cellNode.neverShowPlaceholders) {
     [cellNode recursivelyEnsureDisplaySynchronously:YES];
@@ -650,7 +678,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   
   ASCellNode *cellNode = [cell node];
 
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:[self scrollDirection]];
 
   if ([_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNode:forRowAtIndexPath:)]) {
     ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
@@ -675,6 +703,19 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 #pragma mark - 
 #pragma mark Batch Fetching
 
+- (void)_checkForBatchFetching
+{
+  // Dragging will be handled in scrollViewWillEndDragging:withVelocity:targetContentOffset:
+  if ([self isDragging] || [self isTracking] || ![self _shouldBatchFetch]) {
+    return;
+  }
+  
+  // Check if we should batch fetch
+  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollableDirections], self.bounds, self.contentSize, self.contentOffset, _leadingScreensForBatching)) {
+    [self _beginBatchFetching];
+  }
+}
+
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
 {
   _deceleratingVelocity = CGPointMake(
@@ -683,7 +724,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   );
 
   if (targetContentOffset != NULL) {
-    [self handleBatchFetchScrollingToOffset:*targetContentOffset];
+    [self _handleBatchFetchScrollingToOffset:*targetContentOffset];
   }
 
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
@@ -691,7 +732,20 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
-- (BOOL)shouldBatchFetch
+- (void)_handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
+{
+  ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
+
+  if (![self _shouldBatchFetch]) {
+    return;
+  }
+
+  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
+    [self _beginBatchFetching];
+  }
+}
+
+- (BOOL)_shouldBatchFetch
 {
   // if the delegate does not respond to this method, there is no point in starting to fetch
   BOOL canFetch = [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
@@ -702,20 +756,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
-- (void)handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
+- (void)_beginBatchFetching
 {
-  ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
-
-  if (![self shouldBatchFetch]) {
-    return;
-  }
-
-  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
-    [_batchContext beginBatchFetching];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      [_asyncDelegate tableView:self willBeginBatchFetchWithContext:_batchContext];
-    });
-  }
+  [_batchContext beginBatchFetching];
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    [_asyncDelegate tableView:self willBeginBatchFetchWithContext:_batchContext];
+  });
 }
 
 #pragma mark - ASRangeControllerDataSource
@@ -853,10 +899,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
-
+  
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-  ASPerformBlockWithoutAnimation(preventAnimation, ^{
+  ASPerformBlockWithoutAnimationCompletion(preventAnimation, ^{
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
+  }, ^{
+    // Push this to the next runloop to be sure the UITableView has the right content size
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [self _checkForBatchFetching];
+    });
   });
 
   if (_automaticallyAdjustsContentOffset) {
@@ -874,8 +925,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-  ASPerformBlockWithoutAnimation(preventAnimation, ^{
+  ASPerformBlockWithoutAnimationCompletion(preventAnimation, ^{
     [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
+  }, ^{
+    // Push this to the next runloop to be sure the UITableView has the right content size
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [self _checkForBatchFetching];
+    });
   });
 
   if (_automaticallyAdjustsContentOffset) {
@@ -1077,7 +1133,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   // Updating the visible node index paths only for not range managed nodes. Range managed nodes will get their
   // their update in the layout pass
   if (![node supportsRangeManagedInterfaceState]) {
-    [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+    [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:[self scrollDirection]];
   }
 }
 
