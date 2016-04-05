@@ -52,9 +52,9 @@ void _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(id<ASEnvironment> object
 {
   NSCAssert(idx < kMaxEnvironmentStateBoolExtensions, @"Setting index outside of max bool extensions space");
   
-  ASEnvironmentStateExtensions extension = object.environmentState.layoutOptionsState._extensions;
-  extension.boolExtensions[idx] = value;
-  object.environmentState.layoutOptionsState._extensions = extension;
+  ASEnvironmentState state = object.environmentState;
+  state.layoutOptionsState._extensions.boolExtensions[idx] = value;
+  object.environmentState = state;
 }
 
 BOOL _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(id<ASEnvironment> object, int idx)
@@ -67,9 +67,9 @@ void _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(id<ASEnvironment> obj
 {
   NSCAssert(idx < kMaxEnvironmentStateIntegerExtensions, @"Setting index outside of max integer extensions space");
   
-  ASEnvironmentStateExtensions extension = object.environmentState.layoutOptionsState._extensions;
-  extension.integerExtensions[idx] = value;
-  object.environmentState.layoutOptionsState._extensions = extension;
+  ASEnvironmentState state = object.environmentState;
+  state.layoutOptionsState._extensions.integerExtensions[idx] = value;
+  object.environmentState = state;
 }
 
 NSInteger _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(id<ASEnvironment> object, int idx)
@@ -82,9 +82,9 @@ void _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(id<ASEnvironment> 
 {
   NSCAssert(idx < kMaxEnvironmentStateEdgeInsetExtensions, @"Setting index outside of max edge insets extensions space");
   
-  ASEnvironmentStateExtensions extension = object.environmentState.layoutOptionsState._extensions;
-  extension.edgeInsetsExtensions[idx] = value;
-  object.environmentState.layoutOptionsState._extensions = extension;
+  ASEnvironmentState state = object.environmentState;
+  state.layoutOptionsState._extensions.edgeInsetsExtensions[idx] = value;
+  object.environmentState = state;
 }
 
 UIEdgeInsets _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(id<ASEnvironment> object, int idx)
@@ -96,13 +96,13 @@ UIEdgeInsets _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(id<ASEnvir
 
 #pragma mark - Merging functions for states
 
-ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentHierarchyState state, ASEnvironmentStatePropagation propagation) {
+ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentHierarchyState hierarchyState, ASEnvironmentStatePropagation propagation) {
     // Merge object and hierarchy state
   LOG(@"Merge object and state: %@ - ASEnvironmentHierarchyState", object);
   return environmentState;
 }
 
-ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentLayoutOptionsState state, ASEnvironmentStatePropagation propagation) {
+ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentLayoutOptionsState layoutOptionsState, ASEnvironmentStatePropagation propagation) {
   // Merge object and layout options state
   LOG(@"Merge object and state: %@ - ASEnvironmentLayoutOptionsState", object);
   
@@ -111,40 +111,65 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
 
    // Object is the parent and the state is the state of the child
     const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentDefaultLayoutOptionsState;
-    ASEnvironmentLayoutOptionsState parentState = environmentState.layoutOptionsState;
+    ASEnvironmentLayoutOptionsState parentLayoutOptionsState = environmentState.layoutOptionsState;
     
-    // For every field check if the parent value is equal to the default than propegate up the child value to
-    // the parent
-    if (parentState.spacingBefore == defaultState.spacingBefore) {
-      parentState.spacingBefore = state.spacingBefore;
+    // For every field check if the parent value is equal to the default and if so propegate up the value of the passed
+    // in layout options state
+    if (parentLayoutOptionsState.spacingBefore == defaultState.spacingBefore) {
+      parentLayoutOptionsState.spacingBefore = layoutOptionsState.spacingBefore;
     }
-    if (parentState.spacingAfter == defaultState.spacingAfter) {
-      parentState.spacingAfter = state.spacingAfter;
+    if (parentLayoutOptionsState.spacingAfter == defaultState.spacingAfter) {
+      parentLayoutOptionsState.spacingAfter = layoutOptionsState.spacingAfter;
     }
-    if (parentState.alignSelf == defaultState.alignSelf) {
-      parentState.alignSelf = state.alignSelf;
+    if (parentLayoutOptionsState.alignSelf == defaultState.alignSelf) {
+      parentLayoutOptionsState.alignSelf = layoutOptionsState.alignSelf;
     }
-    if (parentState.flexGrow == defaultState.flexGrow) {
-      parentState.flexGrow = state.flexGrow;
+    if (parentLayoutOptionsState.flexGrow == defaultState.flexGrow) {
+      parentLayoutOptionsState.flexGrow = layoutOptionsState.flexGrow;
     }
-    if (ASRelativeDimensionEqualToRelativeDimension(parentState.flexBasis, defaultState.flexBasis)) {
-      parentState.flexBasis = state.flexBasis;
+    if (ASRelativeDimensionEqualToRelativeDimension(parentLayoutOptionsState.flexBasis, defaultState.flexBasis)) {
+      parentLayoutOptionsState.flexBasis = layoutOptionsState.flexBasis;
     }
-    if (parentState.alignSelf == defaultState.alignSelf) {
-      parentState.alignSelf = state.alignSelf;
+    if (parentLayoutOptionsState.alignSelf == defaultState.alignSelf) {
+      parentLayoutOptionsState.alignSelf = layoutOptionsState.alignSelf;
     }
-    if (parentState.ascender == defaultState.ascender) {
-      parentState.ascender = state.ascender;
-    }
-    
-    if (ASRelativeSizeRangeEqualToRelativeSizeRange(parentState.sizeRange, defaultState.sizeRange)) {
-      parentState.sizeRange = state.sizeRange;
-    }
-    if (CGPointEqualToPoint(parentState.layoutPosition, defaultState.layoutPosition)) {
-      parentState.layoutPosition = state.layoutPosition;
+    if (parentLayoutOptionsState.ascender == defaultState.ascender) {
+      parentLayoutOptionsState.ascender = layoutOptionsState.ascender;
     }
     
-    environmentState.layoutOptionsState = parentState;
+    if (ASRelativeSizeRangeEqualToRelativeSizeRange(parentLayoutOptionsState.sizeRange, defaultState.sizeRange)) {
+      parentLayoutOptionsState.sizeRange = layoutOptionsState.sizeRange;
+    }
+    if (CGPointEqualToPoint(parentLayoutOptionsState.layoutPosition, defaultState.layoutPosition)) {
+      parentLayoutOptionsState.layoutPosition = layoutOptionsState.layoutPosition;
+    }
+    
+    // Merge extended values if necessary
+    const ASEnvironmentStateExtensions defaultExtensions = ASEnvironmentDefaultStateExtensions;
+    const ASEnvironmentStateExtensions layoutOptionsStateExtensions = layoutOptionsState._extensions;
+    ASEnvironmentStateExtensions parentLayoutOptionsExtensions = parentLayoutOptionsState._extensions;
+    
+    for (int i = 0; i < kMaxEnvironmentStateBoolExtensions; i++) {
+      if (parentLayoutOptionsExtensions.boolExtensions[i] == defaultExtensions.boolExtensions[i]) {
+        parentLayoutOptionsExtensions.boolExtensions[i] = layoutOptionsStateExtensions.boolExtensions[i];
+      }
+    }
+    
+    for (int i = 0; i < kMaxEnvironmentStateIntegerExtensions; i++) {
+      if (parentLayoutOptionsExtensions.integerExtensions[i] == defaultExtensions.integerExtensions[i]) {
+        parentLayoutOptionsExtensions.integerExtensions[i] = layoutOptionsStateExtensions.integerExtensions[i];
+      }
+    }
+    
+    for (int i = 0; i < kMaxEnvironmentStateEdgeInsetExtensions; i++) {
+      if (UIEdgeInsetsEqualToEdgeInsets(parentLayoutOptionsExtensions.edgeInsetsExtensions[i], defaultExtensions.edgeInsetsExtensions[i])) {
+        parentLayoutOptionsExtensions.edgeInsetsExtensions[i] = layoutOptionsStateExtensions.edgeInsetsExtensions[i];
+      }
+    }
+    parentLayoutOptionsState._extensions = parentLayoutOptionsExtensions;
+    
+    // Update layout options state
+    environmentState.layoutOptionsState = parentLayoutOptionsState;
   }
   
   return environmentState;
