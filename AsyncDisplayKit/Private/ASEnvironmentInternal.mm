@@ -52,9 +52,9 @@ void _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(id<ASEnvironment> object
 {
   NSCAssert(idx < kMaxEnvironmentStateBoolExtensions, @"Setting index outside of max bool extensions space");
   
-  ASEnvironmentStateExtensions extension = object.environmentState.layoutOptionsState._extensions;
-  extension.boolExtensions[idx] = value;
-  object.environmentState.layoutOptionsState._extensions = extension;
+  ASEnvironmentState state = object.environmentState;
+  state.layoutOptionsState._extensions.boolExtensions[idx] = value;
+  object.environmentState = state;
 }
 
 BOOL _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(id<ASEnvironment> object, int idx)
@@ -67,9 +67,9 @@ void _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(id<ASEnvironment> obj
 {
   NSCAssert(idx < kMaxEnvironmentStateIntegerExtensions, @"Setting index outside of max integer extensions space");
   
-  ASEnvironmentStateExtensions extension = object.environmentState.layoutOptionsState._extensions;
-  extension.integerExtensions[idx] = value;
-  object.environmentState.layoutOptionsState._extensions = extension;
+  ASEnvironmentState state = object.environmentState;
+  state.layoutOptionsState._extensions.integerExtensions[idx] = value;
+  object.environmentState = state;
 }
 
 NSInteger _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(id<ASEnvironment> object, int idx)
@@ -82,9 +82,9 @@ void _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(id<ASEnvironment> 
 {
   NSCAssert(idx < kMaxEnvironmentStateEdgeInsetExtensions, @"Setting index outside of max edge insets extensions space");
   
-  ASEnvironmentStateExtensions extension = object.environmentState.layoutOptionsState._extensions;
-  extension.edgeInsetsExtensions[idx] = value;
-  object.environmentState.layoutOptionsState._extensions = extension;
+  ASEnvironmentState state = object.environmentState;
+  state.layoutOptionsState._extensions.edgeInsetsExtensions[idx] = value;
+  object.environmentState = state;
 }
 
 UIEdgeInsets _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(id<ASEnvironment> object, int idx)

@@ -46,7 +46,7 @@ typedef struct ASEnvironmentLayoutOptionsState {
   ASRelativeSizeRange sizeRange;// = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero), ASRelativeSizeMakeWithCGSize(CGSizeZero));;
   CGPoint layoutPosition;// = CGPointZero;
   
-  ASEnvironmentStateExtensions _extensions;
+  struct ASEnvironmentStateExtensions _extensions;
 } ASEnvironmentLayoutOptionsState;
 
 
