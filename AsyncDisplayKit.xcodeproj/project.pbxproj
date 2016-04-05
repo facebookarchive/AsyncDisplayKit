@@ -489,6 +489,9 @@
 		CC7FD9E21BB603FF005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6621A74327E00291744 /* ASScrollNode.h in Headers */ = {isa = PBXBuildFile; fileRef = D785F6601A74327E00291744 /* ASScrollNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.m in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.m */; };
+		DB406B171CB31A1C00691F75 /* ASIntersectRange.h in Headers */ = {isa = PBXBuildFile; fileRef = DB406B151CB31A1C00691F75 /* ASIntersectRange.h */; };
+		DB406B181CB31A1C00691F75 /* ASIntersectRange.mm in Sources */ = {isa = PBXBuildFile; fileRef = DB406B161CB31A1C00691F75 /* ASIntersectRange.mm */; };
+		DB406B191CB3484B00691F75 /* ASIntersectRange.h in Headers */ = {isa = PBXBuildFile; fileRef = DB406B151CB31A1C00691F75 /* ASIntersectRange.h */; };
 		DB55C2611C6408D6004EDCF5 /* _ASTransitionContext.h in Headers */ = {isa = PBXBuildFile; fileRef = DB55C25F1C6408D6004EDCF5 /* _ASTransitionContext.h */; };
 		DB55C2631C6408D6004EDCF5 /* _ASTransitionContext.m in Sources */ = {isa = PBXBuildFile; fileRef = DB55C2601C6408D6004EDCF5 /* _ASTransitionContext.m */; };
 		DB55C2661C641AE4004EDCF5 /* ASContextTransitioning.h in Headers */ = {isa = PBXBuildFile; fileRef = DB55C2651C641AE4004EDCF5 /* ASContextTransitioning.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -847,6 +850,8 @@
 		D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.release.xcconfig"; sourceTree = "<group>"; };
 		D785F6601A74327E00291744 /* ASScrollNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASScrollNode.h; sourceTree = "<group>"; };
 		D785F6611A74327E00291744 /* ASScrollNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASScrollNode.m; sourceTree = "<group>"; };
+		DB406B151CB31A1C00691F75 /* ASIntersectRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIntersectRange.h; sourceTree = "<group>"; };
+		DB406B161CB31A1C00691F75 /* ASIntersectRange.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASIntersectRange.mm; sourceTree = "<group>"; };
 		DB55C25F1C6408D6004EDCF5 /* _ASTransitionContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = _ASTransitionContext.h; path = ../_ASTransitionContext.h; sourceTree = "<group>"; };
 		DB55C2601C6408D6004EDCF5 /* _ASTransitionContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = _ASTransitionContext.m; path = ../_ASTransitionContext.m; sourceTree = "<group>"; };
 		DB55C2651C641AE4004EDCF5 /* ASContextTransitioning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASContextTransitioning.h; sourceTree = "<group>"; };
@@ -1191,6 +1196,8 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				DB406B151CB31A1C00691F75 /* ASIntersectRange.h */,
+				DB406B161CB31A1C00691F75 /* ASIntersectRange.mm */,
 				058D0A02195D050800B7D73C /* _AS-objc-internal.h */,
 				058D0A03195D050800B7D73C /* _ASCoreAnimationExtras.h */,
 				058D0A04195D050800B7D73C /* _ASCoreAnimationExtras.mm */,
@@ -1414,6 +1421,7 @@
 				ACF6ED1A1B17843500DA7C62 /* ASBackgroundLayoutSpec.h in Headers */,
 				058D0A83195D060300B7D73C /* ASBaseDefines.h in Headers */,
 				054963491A1EA066000F8E56 /* ASBasicImageDownloader.h in Headers */,
+				DB406B171CB31A1C00691F75 /* ASIntersectRange.h in Headers */,
 				2967F9E21AB0A5190072E4AB /* ASBasicImageDownloaderInternal.h in Headers */,
 				25E327561C16819500A2170C /* ASPagerNode.h in Headers */,
 				299DA1A91A828D2900162D41 /* ASBatchContext.h in Headers */,
@@ -1603,6 +1611,7 @@
 				DEC146B71C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */,
 				DBDB83951C6E879900D0098C /* ASPagerFlowLayout.h in Headers */,
 				34EFC7691B701CE100AD841F /* ASLayoutable.h in Headers */,
+				DB406B191CB3484B00691F75 /* ASIntersectRange.h in Headers */,
 				9CDC18CD1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */,
 				B35062201B010EFD0018CF92 /* ASLayoutController.h in Headers */,
 				B35062211B010EFD0018CF92 /* ASLayoutRangeType.h in Headers */,
@@ -1920,6 +1929,7 @@
 				058D0A2B195D050800B7D73C /* ASImageNode+CGExtras.m in Sources */,
 				CC3B208B1C3F7A5400798563 /* ASWeakSet.m in Sources */,
 				058D0A16195D050800B7D73C /* ASImageNode.mm in Sources */,
+				DB406B181CB31A1C00691F75 /* ASIntersectRange.mm in Sources */,
 				430E7C911B4C23F100697A4C /* ASIndexPath.m in Sources */,
 				ACF6ED231B17843500DA7C62 /* ASInsetLayoutSpec.mm in Sources */,
 				ACF6ED4C1B17847A00DA7C62 /* ASInternalHelpers.mm in Sources */,

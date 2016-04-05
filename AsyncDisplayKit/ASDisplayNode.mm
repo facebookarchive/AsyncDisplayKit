@@ -25,6 +25,7 @@
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
 #import "ASEnvironmentInternal.h"
+#import "ASIntersectRange.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -251,8 +252,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self _staticInitialize];
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
+  _layoutRange = [[ASIntersectRange alloc] initWithLocation:0 length:0];
   _preferredFrameSize = CGSizeZero;
-  
+
   _environmentState = ASEnvironmentStateMakeDefault();
 }
 
@@ -1199,6 +1201,11 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
     _subnodes = [[NSMutableArray alloc] init];
 
   [_subnodes addObject:subnode];
+  
+  // Move the layout range when the layout hasn't been generated yet
+  if (_layoutRange.length == 0) {
+    _layoutRange.location = _layoutRange.location + 1;
+  }
   
   // This call will apply our .hierarchyState to the new subnode.
   // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.

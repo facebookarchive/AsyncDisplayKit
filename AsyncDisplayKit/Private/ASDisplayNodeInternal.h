@@ -19,6 +19,7 @@
 #import "_ASTransitionContext.h"
 #import "ASLayoutTransition.h"
 #import "ASEnvironment.h"
+#import "ASIntersectRange.h"
 
 #include <vector>
 
@@ -99,6 +100,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
   ASEnvironmentState _environmentState;
   ASLayout *_layout;
+  ASIntersectRange *_layoutRange;
 
   ASSizeRange _constrainedSize;
 

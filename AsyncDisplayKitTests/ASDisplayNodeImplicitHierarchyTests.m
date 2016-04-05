@@ -122,11 +122,11 @@
   [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
-  
+
   node.layoutState = @2;
   [node invalidateCalculatedLayout];
   [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
-
+  
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node3);
   XCTAssertEqual(node.subnodes[2], node2);
@@ -165,7 +165,7 @@
   XCTAssertEqual(node.subnodes[5], nodeC);
 }
 
-- (void)DISABLED_testNodeInsertionExample3
+- (void)testNodeInsertionExample3
 {
   ASDisplayNode *nodeA = [[ASDisplayNode alloc] init];
   ASDisplayNode *nodeB = [[ASDisplayNode alloc] init];
@@ -175,7 +175,7 @@
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node3 = [[ASDisplayNode alloc] init];
   
-  ASDisplayNode *nodeD = [[ASDisplayNode alloc] init];
+  ASDisplayNode *nodeZ = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
   node.layoutSpecBlock = ^(ASSizeRange constrainedSize, NSNumber *layoutState) {
@@ -188,16 +188,16 @@
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:array];
   };
   [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
-  [node insertSubnode:nodeD atIndex:0];
+  [node insertSubnode:nodeZ atIndex:0];
   
-  XCTAssertEqual(node.subnodes[0], nodeD);
+  XCTAssertEqual(node.subnodes[0], nodeZ);
   XCTAssertEqual(node.subnodes[1], nodeA);
   XCTAssertEqual(node.subnodes[2], nodeB);
   XCTAssertEqual(node.subnodes[3], nodeC);
   
   node.layoutState = @2;
   [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
-  XCTAssertEqual(node.subnodes[0], nodeD);
+  XCTAssertEqual(node.subnodes[0], nodeZ);
   XCTAssertEqual(node.subnodes[1], node1);
   XCTAssertEqual(node.subnodes[2], node2);
   XCTAssertEqual(node.subnodes[3], node3);
