@@ -7,6 +7,12 @@
 //
 
 #import "ASLayoutablePrivate.h"
+#import "ASInternalHelpers.h"
+#import "ASEnvironmentInternal.h"
+#import "ASDisplayNodeInternal.h"
+#import "ASTextNode.h"
+#import "ASLayoutSpec.h"
+
 #import "pthread.h"
 #import <map>
 #import <iterator>
