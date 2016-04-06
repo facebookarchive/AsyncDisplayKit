@@ -27,9 +27,6 @@
 
 - (instancetype)initWithLocation:(NSUInteger)location length:(NSUInteger)length
 {
-  ASDisplayNodeAssert(location >= 0, @"Location must be greater than or equal to 0");
-  ASDisplayNodeAssert(length >= 1, @"Length must be greater than 1");
-
   self = [super init];
   if (self != nil) {
     _location = location;
