@@ -1255,12 +1255,8 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   if (!_subnodes)
     _subnodes = [[NSMutableArray alloc] init];
   [_subnodes insertObject:subnode atIndex:subnodeIndex];
-  
-  if (subnodeIndex <= _layoutRange.location) {
-    _layoutRange.location = _layoutRange.location + 1;
-  } else if (subnodeIndex > _layoutRange.location || subnodeIndex <= (_layoutRange.location + _layoutRange.length)) {
-    [_layoutRange insertOffsetAtLocation:subnodeIndex];
-  }
+
+  [self _insertLayoutRangeOffsetAtIndex:subnodeIndex];
   
   [subnode __setSupernode:self];
 
@@ -1471,7 +1467,11 @@ static NSInteger incrementIfFound(NSInteger i) {
   if (!subnode || [subnode _deallocSafeSupernode] != self)
     return;
 
-  [_subnodes removeObjectIdenticalTo:subnode];
+  NSUInteger subnodeIndex = [_subnodes indexOfObjectIdenticalTo:subnode];
+  if (subnodeIndex != NSNotFound) {
+    [_subnodes removeObjectAtIndex:subnodeIndex];
+    [self _removeLayoutRangeOffsetAtIndex:subnodeIndex];
+  }
 
   [subnode __setSupernode:nil];
 }
@@ -1512,6 +1512,24 @@ static NSInteger incrementIfFound(NSInteger i) {
         [_view removeFromSuperview];
       }
     });
+  }
+}
+
+- (void)_insertLayoutRangeOffsetAtIndex:(NSUInteger)index
+{
+  if (index <= _layoutRange.location) {
+    _layoutRange.location = _layoutRange.location + 1;
+  } else if (index > _layoutRange.location || index <= (_layoutRange.location + _layoutRange.length)) {
+    [_layoutRange insertOffsetAtLocation:index];
+  }
+}
+
+- (void)_removeLayoutRangeOffsetAtIndex:(NSUInteger)index
+{
+  if (index <= _layoutRange.location) {
+    _layoutRange.location = _layoutRange.location - 1;
+  } else if (index > _layoutRange.location || index <= (_layoutRange.location + _layoutRange.length)) {
+    [_layoutRange removeOffsetAtLocation:index];
   }
 }
 
