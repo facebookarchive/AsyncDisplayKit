@@ -606,21 +606,21 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
   
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
-    _pendingLayoutContext = [[ASLayoutTransition alloc] initWithNode:self
-                                                               pendingLayout:newLayout
-                                                      pendingConstrainedSize:constrainedSize
-                                                              previousLayout:previousLayout
-                                                     previousConstrainedSize:previousConstrainedSize];
+    _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
+                                                          pendingLayout:newLayout
+                                                 pendingConstrainedSize:constrainedSize
+                                                         previousLayout:previousLayout
+                                                previousConstrainedSize:previousConstrainedSize];
   } else {
-    ASLayoutTransition *layoutContext;
+    ASLayoutTransition *layoutTransition;
     if (self.usesImplicitHierarchyManagement) {
-      layoutContext = [[ASLayoutTransition alloc] initWithNode:self
-                                                         pendingLayout:newLayout
-                                                pendingConstrainedSize:constrainedSize
-                                                        previousLayout:previousLayout
-                                               previousConstrainedSize:previousConstrainedSize];
+      layoutTransition = [[ASLayoutTransition alloc] initWithNode:self
+                                                    pendingLayout:newLayout
+                                           pendingConstrainedSize:constrainedSize
+                                                   previousLayout:previousLayout
+                                          previousConstrainedSize:previousConstrainedSize];
     }
-    [self applyLayout:newLayout constrainedSize:constrainedSize layoutContext:layoutContext];
+    [self applyLayout:newLayout constrainedSize:constrainedSize layoutTransition:layoutTransition];
     [self _completeLayoutCalculation];
   }
 
@@ -713,7 +713,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       
       ASLayout *previousLayout = _layout;
       ASSizeRange previousConstrainedSize = _constrainedSize;
-      [self applyLayout:newLayout constrainedSize:constrainedSize layoutContext:nil];
+      [self applyLayout:newLayout constrainedSize:constrainedSize layoutTransition:nil];
       
       [self _invalidateTransitionSentinel];
       
@@ -727,15 +727,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         completion();
       }
       
-      _pendingLayoutContext = [[ASLayoutTransition alloc] initWithNode:self
+      _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                                  pendingLayout:newLayout
                                                         pendingConstrainedSize:constrainedSize
                                                                 previousLayout:previousLayout
                                                        previousConstrainedSize:previousConstrainedSize];
-      [_pendingLayoutContext applySubnodeInsertions];
+      [_pendingLayoutTransition applySubnodeInsertions];
 
       _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
-                                                            layoutDelegate:_pendingLayoutContext
+                                                            layoutDelegate:_pendingLayoutTransition
                                                         completionDelegate:self];
       [self animateLayoutTransition:_transitionContext];
     });
@@ -811,9 +811,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context
 {
-  [_pendingLayoutContext applySubnodeRemovals];
+  [_pendingLayoutTransition applySubnodeRemovals];
   [self _completeLayoutCalculation];
-  _pendingLayoutContext = nil;
+  _pendingLayoutTransition = nil;
 }
 
 #pragma mark - _ASTransitionContextCompletionDelegate
@@ -2247,7 +2247,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       {
         ASDN::MutexLocker l(_propertyLock);
         _pendingTransitionID = ASLayoutableContextInvalidTransitionID;
-        _pendingLayoutContext = nil;
+        _pendingLayoutTransition = nil;
       }
     }
   }
@@ -2280,17 +2280,17 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)applyPendingLayoutContext
 {
   ASDN::MutexLocker l(_propertyLock);
-  if (_pendingLayoutContext) {
-    [self applyLayout:_pendingLayoutContext.pendingLayout
-      constrainedSize:_pendingLayoutContext.pendingConstrainedSize
-        layoutContext:_pendingLayoutContext];
-    _pendingLayoutContext = nil;
+  if (_pendingLayoutTransition) {
+    [self applyLayout:_pendingLayoutTransition.pendingLayout
+      constrainedSize:_pendingLayoutTransition.pendingConstrainedSize
+     layoutTransition:_pendingLayoutTransition];
+    _pendingLayoutTransition = nil;
   }
 }
 
 - (void)applyLayout:(ASLayout *)layout
     constrainedSize:(ASSizeRange)constrainedSize
-      layoutContext:(ASLayoutTransition *)layoutContext
+   layoutTransition:(ASLayoutTransition *)layoutTransition
 {
   ASDN::MutexLocker l(_propertyLock);
   _layout = layout;
@@ -2302,9 +2302,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   _constrainedSize = constrainedSize;
   _flags.isMeasured = YES;
   
-  if (self.usesImplicitHierarchyManagement && layoutContext != nil) {
-    [layoutContext applySubnodeInsertions];
-    [layoutContext applySubnodeRemovals];
+  if (self.usesImplicitHierarchyManagement && layoutTransition != nil) {
+    [layoutTransition applySubnodeInsertions];
+    [layoutTransition applySubnodeRemovals];
   }
 }
 
