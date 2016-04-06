@@ -8,8 +8,6 @@
 
 #import <AsyncDisplayKit/ASControlNode.h>
 
-@class ASAnimatedImage;
-
 NS_ASSUME_NONNULL_BEGIN
 
 /**

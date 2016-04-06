@@ -8,6 +8,8 @@
 
 #import "ASImageNode.h"
 
+#import "ASImageProtocols.h"
+
 @interface ASImageNode ()
 
 @property (atomic, assign) BOOL animatedImagePaused;
@@ -16,8 +18,6 @@
 
 @interface ASImageNode (AnimatedImage)
 
-@property (nullable, atomic, strong) ASAnimatedImage *animatedImage;
-
-- (void)coverImageCompleted:(UIImage *)coverImage;
+@property (nullable, atomic, strong) id <ASAnimatedImageProtocol> animatedImage;
 
 @end

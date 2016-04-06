@@ -8,7 +8,7 @@
 
 #import "ASNetworkImageNode.h"
 
-#import "ASAnimatedImage.h"
+#import "PINAnimatedImage.h"
 #import "ASBasicImageDownloader.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
@@ -49,6 +49,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   BOOL _downloaderSupportsNewProtocol;
   BOOL _downloaderImplementsSetProgress;
   BOOL _downloaderImplementsSetPriority;
+  BOOL _downloaderImplementsAnimatedImage;
   
   BOOL _cacheSupportsNewProtocol;
   BOOL _cacheSupportsClearing;
@@ -74,6 +75,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   
   _downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)];
   _downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)];
+  _downloaderImplementsAnimatedImage = [downloader respondsToSelector:@selector(animatedImageWithData:)];
   
   _cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
   _cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
@@ -395,8 +397,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
           if (imageContainer != nil) {
             strongSelf->_imageLoaded = YES;
-            if ([imageContainer asdk_animatedImageData]) {
-              strongSelf.animatedImage = [[ASAnimatedImage alloc] initWithAnimatedImageData:[imageContainer asdk_animatedImageData]];
+            if ([imageContainer asdk_animatedImageData] && _downloaderImplementsAnimatedImage) {
+              strongSelf.animatedImage = [_downloader animatedImageWithData:[imageContainer asdk_animatedImageData]];
             } else {
               strongSelf.image = [imageContainer asdk_image];
             }

@@ -9,7 +9,7 @@
 #import "ASImageNode+AnimatedImage.h"
 
 #import "ASAssert.h"
-#import "ASAnimatedImage.h"
+#import "ASImageProtocols.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
@@ -28,24 +28,26 @@
 
 #pragma mark - GIF support
 
-- (void)setAnimatedImage:(ASAnimatedImage *)animatedImage
+- (void)setAnimatedImage:(id <ASAnimatedImageProtocol>)animatedImage
 {
   ASDN::MutexLocker l(_animatedImageLock);
   if (!ASObjectIsEqual(_animatedImage, animatedImage)) {
     _animatedImage = animatedImage;
   }
   if (animatedImage != nil) {
-    animatedImage.infoCompletion = ^(UIImage *coverImage) {
-      [self coverImageCompleted:coverImage];
-    };
+    if ([animatedImage respondsToSelector:@selector(setCoverImageReadyCallback:)]) {
+      animatedImage.coverImageReadyCallback = ^(UIImage *coverImage) {
+        [self coverImageCompleted:coverImage];
+      };
+    }
     
-    animatedImage.fileReady = ^{
+    animatedImage.playbackReadyCallback = ^{
       [self animatedImageFileReady];
     };
   }
 }
 
-- (ASAnimatedImage *)animatedImage
+- (id <ASAnimatedImageProtocol>)animatedImage
 {
   ASDN::MutexLocker l(_animatedImageLock);
   return _animatedImage;
@@ -84,7 +86,7 @@
     return;
   }
   
-  if (self.animatedImage.status != ASAnimatedImageStatusProcessed && self.animatedImage.status != ASAnimatedImageStatusFirstFileProcessed) {
+  if (self.animatedImage.playbackReady == NO) {
     return;
   }
   
@@ -95,9 +97,7 @@
   if (_displayLink == nil) {
     _playHead = 0;
     _displayLink = [CADisplayLink displayLinkWithTarget:[ASWeakProxy weakProxyWithTarget:self] selector:@selector(displayLinkFired:)];
-    
-    //Credit to FLAnimatedImage (https://github.com/Flipboard/FLAnimatedImage) for display link interval calculations
-    _displayLink.frameInterval = MAX([self frameDelayGreatestCommonDivisor] * kASAnimatedImageDisplayRefreshRate, 1);
+    _displayLink.frameInterval = self.animatedImage.frameInterval;
     
     [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
   } else {
@@ -115,7 +115,7 @@
   _displayLink.paused = YES;
   self.lastDisplayLinkFire = 0;
   
-  [self.animatedImage clearMemoryCache];
+  [self.animatedImage clearAnimatedImageCache];
 }
 
 - (void)visibilityDidChange:(BOOL)isVisible
@@ -124,7 +124,7 @@
   
   ASDisplayNodeAssertMainThread();
   if (isVisible) {
-    if (self.animatedImage.status == ASAnimatedImageStatusInfoProcessed || self.animatedImage.status == ASAnimatedImageStatusFirstFileProcessed || self.animatedImage.status == ASAnimatedImageStatusProcessed) {
+    if (self.animatedImage.coverImageReady) {
       self.image = self.animatedImage.coverImage;
     }
     [self startAnimating];
@@ -143,43 +143,6 @@
 {
   [super __exitHierarchy];
   [self stopAnimating];
-}
-
-//Credit to FLAnimatedImage (https://github.com/Flipboard/FLAnimatedImage) for display link interval calculations
-- (NSTimeInterval)frameDelayGreatestCommonDivisor
-{
-  const NSTimeInterval kGreatestCommonDivisorPrecision = 2.0 / kASAnimatedImageMinimumDuration;
-  
-  // Scales the frame delays by `kGreatestCommonDivisorPrecision`
-  // then converts it to an UInteger for in order to calculate the GCD.
-  NSUInteger scaledGCD = lrint(self.animatedImage.durations[0] * kGreatestCommonDivisorPrecision);
-  for (NSUInteger durationIdx = 0; durationIdx < self.animatedImage.frameCount; durationIdx++) {
-    Float32 duration = self.animatedImage.durations[durationIdx];
-    scaledGCD = gcd(lrint(duration * kGreatestCommonDivisorPrecision), scaledGCD);
-  }
-  
-  // Reverse to scale to get the value back into seconds.
-  return scaledGCD / kGreatestCommonDivisorPrecision;
-}
-
-//Credit to FLAnimatedImage (https://github.com/Flipboard/FLAnimatedImage) for display link interval calculations
-static NSUInteger gcd(NSUInteger a, NSUInteger b)
-{
-  // http://en.wikipedia.org/wiki/Greatest_common_divisor
-  if (a < b) {
-    return gcd(b, a);
-  } else if (a == b) {
-    return b;
-  }
-  
-  while (true) {
-    NSUInteger remainder = a % b;
-    if (remainder == 0) {
-      return b;
-    }
-    a = b;
-    b = remainder;
-  }
 }
 
 - (void)displayLinkFired:(CADisplayLink *)displayLink
@@ -224,7 +187,7 @@ static NSUInteger gcd(NSUInteger a, NSUInteger b)
   ASDisplayNodeAssertMainThread();
   NSUInteger frameIndex = 0;
   for (NSUInteger durationIndex = 0; durationIndex < self.animatedImage.frameCount; durationIndex++) {
-    playHead -= self.animatedImage.durations[durationIndex];
+    playHead -= [self.animatedImage durationAtIndex:durationIndex];
     if (playHead < 0) {
       return frameIndex;
     }

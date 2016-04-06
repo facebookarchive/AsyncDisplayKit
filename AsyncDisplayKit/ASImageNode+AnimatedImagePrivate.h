@@ -10,7 +10,7 @@
 {
   ASDN::RecursiveMutex _animatedImageLock;
   ASDN::Mutex _displayLinkLock;
-  ASAnimatedImage *_animatedImage;
+  id <ASAnimatedImageProtocol> _animatedImage;
   CADisplayLink *_displayLink;
   
   //accessed on main thread only

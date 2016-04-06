@@ -11,6 +11,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol ASAnimatedImageProtocol;
+
 @protocol ASImageContainerProtocol <NSObject>
 
 - (UIImage *)asdk_image;
@@ -83,6 +85,12 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
 
 @optional
 
+/**
+ @abstract Return an object that conforms to ASAnimatedImageProtocol
+ @param animatedImageData Data that represents an animated image.
+ */
+- (nullable id <ASAnimatedImageProtocol>)animatedImageWithData:(NSData *)animatedImageData;
+
 //You must implement the following method OR the deprecated method at the bottom
 
 /**
@@ -123,6 +131,27 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
  */
 - (void)setPriority:(ASImageDownloaderPriority)priority
 withDownloadIdentifier:(id)downloadIdentifier;
+
+@end
+
+@protocol ASAnimatedImageProtocol <NSObject>
+
+@property (nonatomic, strong, readwrite) void (^coverImageReadyCallback)(UIImage *coverImage);
+
+@required
+
+@property (nonatomic, readonly) UIImage *coverImage;
+@property (nonatomic, readonly) BOOL coverImageReady;
+@property (nonatomic, readonly) CFTimeInterval totalDuration;
+@property (nonatomic, readonly) NSUInteger frameInterval;
+@property (nonatomic, readonly) size_t loopCount;
+@property (nonatomic, readonly) size_t frameCount;
+@property (nonatomic, readonly) BOOL playbackReady;
+@property (nonatomic, strong, readwrite) dispatch_block_t playbackReadyCallback;
+
+- (CGImageRef)imageAtIndex:(NSUInteger)index;
+- (CFTimeInterval)durationAtIndex:(NSUInteger)index;
+- (void)clearAnimatedImageCache;
 
 @end
 
