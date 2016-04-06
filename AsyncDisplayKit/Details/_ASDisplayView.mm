@@ -18,6 +18,8 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Subclasses.h"
 
+#import <queue>
+
 @interface _ASDisplayView ()
 @property (nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
 
@@ -380,6 +382,22 @@
 
 #pragma mark - Accessibility
 
+static BOOL ASNodeValidForAccessibility(ASDisplayNode *node)
+{
+  if (node.isAccessibilityElement) {
+    return YES;
+  }
+  
+  if (node.isLayerBacked) {
+    // Assume for now that all nodes that have an accessibility label or
+    return node.accessibilityLabel.length > 0 ||
+           node.accessibilityValue.length > 0 ||
+           ((node.accessibilityTraits & UIAccessibilityTraitNone) != UIAccessibilityTraitNone);
+  }
+  
+  return YES;
+}
+
 static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 @implementation UIAccessibilityElement (_ASDisplayView)
@@ -408,16 +426,50 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (NSArray *)accessibleElements
 {
-  ASDisplayNode *asyncDisplayKitNode = self.asyncdisplaykit_node;
   if ( _accessibleElements != nil ) {
     return _accessibleElements;
   }
   
   _accessibleElements = [[NSMutableArray alloc] init];
+ 
+  ASDisplayNode *selfNode = self.asyncdisplaykit_node;
   
-  // Create UI accessiblity elements for each subnode that represent the subnode within the accessibility container
-  for (ASDisplayNode *subnode in asyncDisplayKitNode.subnodes) {
-    if (subnode.isAccessibilityElement || [subnode accessibilityElementCount] > 0) {
+  // Handle rasterize case
+  if (selfNode.shouldRasterizeDescendants) {
+    // In this case we have to go through the whole subnodes tree in BFS fashion and create all
+    // accessibility elements ourselves as the view hierarchy is flattened
+    
+    // Queue used to keep track of subnodes while traversing this layout in a BFS fashion.
+    std::queue<ASDisplayNode *> queue;
+    queue.push(selfNode);
+    
+    while (!queue.empty()) {
+      ASDisplayNode *node = queue.front();
+      queue.pop();
+      
+      // Check if we have to add the node to the accessiblity nodes as it's an accessiblity element
+      if (node != selfNode && ASNodeValidForAccessibility(node)) {
+        UIAccessibilityElement *accessibilityElement = [[UIAccessibilityElement alloc] initWithAccessibilityContainer:self];
+        accessibilityElement.asyncdisplaykit_node = node;
+        [_accessibleElements addObject:accessibilityElement];
+      }
+
+      // Add all subnodes to process in next step
+      for (int i = 0; i < node.subnodes.count; i++)
+        queue.push(node.subnodes[i]);
+    }
+    return _accessibleElements;
+  }
+  
+  // Handle not rasterize case
+  // Create UI accessiblity elements for each subnode that represent an elment within the accessibility container
+  for (ASDisplayNode *subnode in selfNode.subnodes) {
+      // Check if this subnode is a UIAccessibilityContainer
+    if (!subnode.isAccessibilityElement && [subnode accessibilityElementCount] > 0) {
+      // We are good and the view is an UIAccessibilityContainer so add that
+      [_accessibleElements addObject:subnode.view];
+    } else if (ASNodeValidForAccessibility(subnode)) {
+      // Create a accessiblity element from the subnode
       UIAccessibilityElement *accessibilityElement = [[UIAccessibilityElement alloc] initWithAccessibilityContainer:self];
       accessibilityElement.asyncdisplaykit_node = subnode;
       [_accessibleElements addObject:accessibilityElement];
@@ -434,18 +486,28 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (id)accessibilityElementAtIndex:(NSInteger)index
 {
-  UIAccessibilityElement *element = [self accessibleElements][index];
-  ASDisplayNode *subnode = element.asyncdisplaykit_node;
-  if (subnode == nil) {
+  UIAccessibilityElement *accessibilityElement = [[self accessibleElements] objectAtIndex:index];
+  ASDisplayNode *accessibilityElementNode = accessibilityElement.asyncdisplaykit_node;
+  if (accessibilityElementNode == nil) {
     return nil;
   }
   
   // We have to update the accessiblity frame in accessibilityElementAtIndex: as the accessibility frame is in screen
   // coordinates and between creating the accessibilityElement and returning it in accessibilityElementAtIndex:
   // the frame can change
-  element.accessibilityFrame = UIAccessibilityConvertFrameToScreenCoordinates(subnode.frame, self);
   
-  return element;
+  // Handle if node is rasterized
+  ASDisplayNode *selfNode = self.asyncdisplaykit_node;
+  if (selfNode.shouldRasterizeDescendants) {
+    // We need to convert the accessibilityElementNode frame into the coordinate system of the selfNode
+    CGRect frame = [selfNode convertRect:accessibilityElementNode.bounds fromNode:accessibilityElementNode];
+    accessibilityElement.accessibilityFrame = UIAccessibilityConvertFrameToScreenCoordinates(frame, self);
+    return accessibilityElement;
+  }
+
+  // Handle non rasterized case
+  accessibilityElement.accessibilityFrame = UIAccessibilityConvertFrameToScreenCoordinates(accessibilityElementNode.frame, self);
+  return accessibilityElement;
 }
 
 - (NSInteger)indexOfAccessibilityElement:(id)element
