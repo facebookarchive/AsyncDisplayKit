@@ -139,6 +139,8 @@
   
   if (location < _location) {
     return translatedIndex;
+  } else if (location == _location) {
+    return location;
   }
 
   NSUInteger indexOffset = 0;
