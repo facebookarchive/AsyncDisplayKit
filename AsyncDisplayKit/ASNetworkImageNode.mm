@@ -8,7 +8,6 @@
 
 #import "ASNetworkImageNode.h"
 
-#import "PINAnimatedImage.h"
 #import "ASBasicImageDownloader.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
