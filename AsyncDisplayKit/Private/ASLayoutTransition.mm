@@ -11,6 +11,7 @@
 #import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASTranslationRange.h"
 #import "ASLayout.h"
 
 #import <vector>
@@ -69,6 +70,7 @@
   if (_calculatedSubnodeOperations) {
     return;
   }
+  ASTranslationRange *layoutRange = [_node layoutRange];
   if (_previousLayout) {
     NSIndexSet *insertions, *deletions;
     [_previousLayout.immediateSublayouts asdk_diffWithArray:_pendingLayout.immediateSublayouts
@@ -77,15 +79,24 @@
                                                compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
                                                  return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
                                                }];
-    filterNodesInLayoutAtIndexes(_pendingLayout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
-    filterNodesInLayoutAtIndexesWithIntersectingNodes(_previousLayout,
-                                                      deletions,
-                                                      _insertedSubnodes,
-                                                      &_removedSubnodes,
-                                                      &_removedSubnodePositions);
+    findNodesInLayoutAtIndexes(_pendingLayout,
+                               insertions,
+                               &_insertedSubnodes,
+                               &_insertedSubnodePositions,
+                               layoutRange);
+    findNodesInLayoutAtIndexesWithFilteredNodes(_previousLayout,
+                                                deletions,
+                                                _insertedSubnodes,
+                                                &_removedSubnodes,
+                                                &_removedSubnodePositions,
+                                                layoutRange);
   } else {
     NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_pendingLayout.immediateSublayouts count])];
-    filterNodesInLayoutAtIndexesOffset(_pendingLayout, indexes, &_insertedSubnodes, &_insertedSubnodePositions, _node.subnodes.count);
+    findNodesInLayoutAtIndexes(_pendingLayout,
+                               indexes,
+                               &_insertedSubnodes,
+                               &_insertedSubnodePositions,
+                               layoutRange);
     _removedSubnodes = nil;
   }
   _calculatedSubnodeOperations = YES;
@@ -142,50 +153,25 @@
 /**
  * @abstract Stores the nodes at the given indexes in the `storedNodes` array, storing indexes in a `storedPositions` c++ vector.
  */
-static inline void filterNodesInLayoutAtIndexes(
-                                                ASLayout *layout,
-                                                NSIndexSet *indexes,
-                                                NSArray<ASDisplayNode *> * __strong *storedNodes,
-                                                std::vector<NSInteger> *storedPositions
-                                                )
+static inline void findNodesInLayoutAtIndexes(ASLayout *layout,
+                                              NSIndexSet *indexes,
+                                              NSArray<ASDisplayNode *> * __strong *storedNodes,
+                                              std::vector<NSInteger> *storedPositions,
+                                              ASTranslationRange *translationRange)
 {
-  filterNodesInLayoutAtIndexesWithIntersectingNodes(layout, indexes, nil, storedNodes, storedPositions);
-}
-
-static inline void filterNodesInLayoutAtIndexesOffset(
-                                                ASLayout *layout,
-                                                NSIndexSet *indexes,
-                                                NSArray<ASDisplayNode *> * __strong *storedNodes,
-                                                std::vector<NSInteger> *storedPositions,
-                                                NSUInteger offset
-                                                )
-{
-  filterNodesInLayoutAtIndexesWithIntersectingNodesOffset(layout, indexes, nil, storedNodes, storedPositions, offset);
+  findNodesInLayoutAtIndexesWithFilteredNodes(layout, indexes, nil, storedNodes, storedPositions, translationRange);
 }
 
 /**
  * @abstract Stores the nodes at the given indexes in the `storedNodes` array, storing indexes in a `storedPositions` c++ vector.
  * @discussion If the node exists in the `intersectingNodes` array, the node is not added to `storedNodes`.
  */
-static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
-                                                                     ASLayout *layout,
-                                                                     NSIndexSet *indexes,
-                                                                     NSArray<ASDisplayNode *> *intersectingNodes,
-                                                                     NSArray<ASDisplayNode *> * __strong *storedNodes,
-                                                                     std::vector<NSInteger> *storedPositions
-                                                                     )
-{
-  filterNodesInLayoutAtIndexesWithIntersectingNodesOffset(layout, indexes, intersectingNodes, storedNodes, storedPositions, 0);
-}
-
-static inline void filterNodesInLayoutAtIndexesWithIntersectingNodesOffset(
-                                                                     ASLayout *layout,
-                                                                     NSIndexSet *indexes,
-                                                                     NSArray<ASDisplayNode *> *intersectingNodes,
-                                                                     NSArray<ASDisplayNode *> * __strong *storedNodes,
-                                                                     std::vector<NSInteger> *storedPositions,
-                                                                     NSUInteger offset
-                                                                     )
+static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
+                                                               NSIndexSet *indexes,
+                                                               NSArray<ASDisplayNode *> *intersectingNodes,
+                                                               NSArray<ASDisplayNode *> * __strong *storedNodes,
+                                                               std::vector<NSInteger> *storedPositions,
+                                                               ASTranslationRange *translationRange)
 {
   NSMutableArray<ASDisplayNode *> *nodes = [NSMutableArray array];
   std::vector<NSInteger> positions = std::vector<NSInteger>();
@@ -195,7 +181,9 @@ static inline void filterNodesInLayoutAtIndexesWithIntersectingNodesOffset(
     ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
     if ([intersectingNodes containsObject:node] == NO) {
       [nodes addObject:node];
-      positions.push_back(idx + offset);
+      NSUInteger translatedIndex = [translationRange translatedLocation:idx + translationRange.location];
+      ASDisplayNodeCAssert(translatedIndex != NSNotFound, @"The given position could not be found in the translation range");
+      positions.push_back(translatedIndex);
     }
     idx = [indexes indexGreaterThanIndex:idx];
   }
