@@ -45,8 +45,16 @@
 - (void)setLocation:(NSUInteger)location
 {
   ASDN::MutexLocker l(_propertyLock);
-  _location = location;
-  // TODO(levi): Increment/decrement the location of all ranges
+  if (location != _location) {
+    NSInteger delta = location - _location;
+    _location = location;
+    
+    // Shift the location of all the inner ranges by the delta
+    for (NSUInteger i = 0; i < _ranges.size(); i++) {
+      NSRange range = _ranges[i];
+      _ranges[i] = NSMakeRange(range.location + delta, range.length);
+    }
+  }
 }
 
 - (NSUInteger)length
