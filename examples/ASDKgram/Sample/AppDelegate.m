@@ -74,7 +74,8 @@
     NSArray *viewControllers = [(UINavigationController *)viewController viewControllers];
     UIViewController *rootViewController = viewControllers[0];
     if ([rootViewController conformsToProtocol:@protocol(PhotoFeedViewControllerProtocol)]) {
-      [(id <PhotoFeedViewControllerProtocol>)rootViewController resetAllData];
+      // FIXME: the dataModel does not currently handle clearing data during loading properly
+//      [(id <PhotoFeedViewControllerProtocol>)rootViewController resetAllData];
     }
   }
 }
