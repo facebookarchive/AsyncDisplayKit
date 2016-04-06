@@ -1,16 +1,18 @@
 //
 //  ASImageNode+AnimatedImagePrivate.h
-//  Pods
+//  AsyncDisplayKit
 //
 //  Created by Garrett Moon on 3/30/16.
-//
+//  Copyright © 2016 Facebook. All rights reserved.
 //
 
 @interface ASImageNode ()
 {
   ASDN::RecursiveMutex _animatedImageLock;
+  ASDN::RecursiveMutex _animatedImagePausedLock;
   ASDN::Mutex _displayLinkLock;
   id <ASAnimatedImageProtocol> _animatedImage;
+  BOOL _animatedImagePaused;
   CADisplayLink *_displayLink;
   
   //accessed on main thread only

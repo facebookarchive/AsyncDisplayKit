@@ -1,9 +1,9 @@
 //
 //  ASPINRemoteImageDownloader.m
-//  Pods
+//  AsyncDisplayKit
 //
 //  Created by Garrett Moon on 2/5/16.
-//
+//  Copyright © 2016 Facebook. All rights reserved.
 //
 
 #ifdef PIN_REMOTE_IMAGE

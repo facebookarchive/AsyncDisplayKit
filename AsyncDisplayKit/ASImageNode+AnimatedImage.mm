@@ -1,9 +1,9 @@
 //
 //  ASImageNode+AnimatedImage.m
-//  Pods
+//  AsyncDisplayKit
 //
 //  Created by Garrett Moon on 3/22/16.
-//
+//  Copyright © 2016 Facebook. All rights reserved.
 //
 
 #import "ASImageNode+AnimatedImage.h"
@@ -15,6 +15,7 @@
 #import "ASEqualityHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASImageNode+AnimatedImagePrivate.h"
+#import "ASInternalHelpers.h"
 
 @interface ASWeakProxy : NSObject
 
@@ -51,6 +52,25 @@
 {
   ASDN::MutexLocker l(_animatedImageLock);
   return _animatedImage;
+}
+
+- (void)setAnimatedImagePaused:(BOOL)animatedImagePaused
+{
+  ASDN::MutexLocker l(_animatedImagePausedLock);
+  _animatedImagePaused = animatedImagePaused;
+  ASPerformBlockOnMainThread(^{
+    if (animatedImagePaused) {
+      [self stopAnimating];
+    } else {
+      [self startAnimating];
+    }
+  });
+}
+
+- (BOOL)animatedImagePaused
+{
+  ASDN::MutexLocker l(_animatedImagePausedLock);
+  return _animatedImagePaused;
 }
 
 - (void)coverImageCompleted:(UIImage *)coverImage

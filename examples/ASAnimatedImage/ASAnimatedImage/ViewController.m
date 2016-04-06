@@ -22,7 +22,6 @@
   
   ASNetworkImageNode *imageNode = [[ASNetworkImageNode alloc] init];
   imageNode.URL = [NSURL URLWithString:@"https://s-media-cache-ak0.pinimg.com/originals/07/44/38/074438e7c75034df2dcf37ba1057803e.gif"];
-//  imageNode.URL = [NSURL fileURLWithPath:@"/Users/garrett/Downloads/new-transparent-gif-221.gif"];
   imageNode.frame = self.view.bounds;
   imageNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   imageNode.contentMode = UIViewContentModeScaleAspectFit;
