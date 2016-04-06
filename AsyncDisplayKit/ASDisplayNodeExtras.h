@@ -60,6 +60,11 @@ NS_ASSUME_NONNULL_BEGIN
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
 /**
+ Returns the appropriate interface state for a given ASDisplayNode and window
+ */
+extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window);
+
+/**
  Given a layer, returns the associated display node, if any.
  */
 extern ASDisplayNode * _Nullable ASLayerToDisplayNode(CALayer * _Nullable layer);
@@ -75,10 +80,10 @@ extern ASDisplayNode * _Nullable ASViewToDisplayNode(UIView * _Nullable view);
 extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node);
 
 /**
- This function will walk the layer heirarchy, spanning discontinuous sections of the node heirarchy (e.g. the layers
+ This function will walk the layer hierarchy, spanning discontinuous sections of the node hierarchy (e.g. the layers
  of UIKit intermediate views in UIViewControllers, UITableView, UICollectionView).
  In the event that a node's backing layer is not created yet, the function will only walk the direct subnodes instead
- of forcing the layer heirarchy to be created.
+ of forcing the layer hierarchy to be created.
  */
 extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
 
@@ -91,12 +96,12 @@ extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^b
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.
  */
-extern id _Nullable ASDisplayNodeFind(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
+extern id _Nullable ASDisplayNodeFindFirstSupernode(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node of kind class.
  */
-extern id _Nullable ASDisplayNodeFindClass(ASDisplayNode *start, Class c);
+extern id _Nullable ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c);
 
 /**
  * Given two nodes, finds their most immediate common parent.  Used for geometry conversion methods.
@@ -109,7 +114,7 @@ extern id _Nullable ASDisplayNodeFindClass(ASDisplayNode *start, Class c);
 extern ASDisplayNode * _Nullable ASDisplayNodeFindClosestCommonAncestor(ASDisplayNode *node1, ASDisplayNode *node2);
 
 /**
- Given a display node, collects all descendents. This is a specialization of ASCollectContainer() that walks the Core Animation layer tree as opposed to the display node tree, thus supporting non-continues display node hierarchies.
+ Given a display node, collects all descendants. This is a specialization of ASCollectContainer() that walks the Core Animation layer tree as opposed to the display node tree, thus supporting non-continues display node hierarchies.
  */
 extern NSArray<ASDisplayNode *> *ASCollectDisplayNodes(ASDisplayNode *node);
 
@@ -124,7 +129,12 @@ extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodes(ASDisplayNode *sta
 extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c);
 
 /**
- Given a display node, traverses down the node hierarchy, returning the depth-first display node that pass the block.
+ Given a display node, traverses down the node hierarchy, returning the depth-first display node, including the start node that pass the block.
+ */
+extern __kindof ASDisplayNode * ASDisplayNodeFindFirstNode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+
+/**
+ Given a display node, traverses down the node hierarchy, returning the depth-first display node, excluding the start node, that pass the block
  */
 extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
 

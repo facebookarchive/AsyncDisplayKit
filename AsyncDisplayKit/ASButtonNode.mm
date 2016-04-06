@@ -57,9 +57,10 @@
     
     _contentSpacing = 8.0;
     _laysOutHorizontally = YES;
-    _contentHorizontalAlignment = ASAlignmentMiddle;
-    _contentVerticalAlignment = ASAlignmentCenter;
+    _contentHorizontalAlignment = ASHorizontalAlignmentMiddle;
+    _contentVerticalAlignment = ASVerticalAlignmentCenter;
     _contentEdgeInsets = UIEdgeInsetsZero;
+    self.accessibilityTraits = UIAccessibilityTraitButton;
   }
   return self;
 }
@@ -102,6 +103,11 @@
 - (void)setEnabled:(BOOL)enabled
 {
   [super setEnabled:enabled];
+  if (enabled) {
+    self.accessibilityTraits = UIAccessibilityTraitButton;
+  } else {
+    self.accessibilityTraits = UIAccessibilityTraitButton | UIAccessibilityTraitNotEnabled;
+  }
   [self updateButtonContent];
 }
 
@@ -135,7 +141,7 @@
 - (void)updateImage
 {
   ASDN::MutexLocker l(_propertyLock);
-  
+
   UIImage *newImage;
   if (self.enabled == NO && _disabledImage) {
     newImage = _disabledImage;
@@ -170,9 +176,10 @@
   } else {
     newTitle = _normalAttributedTitle;
   }
-  
+
   if ((_titleNode != nil || newTitle.length > 0) && newTitle != self.titleNode.attributedString) {
     _titleNode.attributedString = newTitle;
+    self.accessibilityLabel = _titleNode.accessibilityLabel;
     [self setNeedsLayout];
   }
 }
@@ -271,8 +278,8 @@
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
 {
   NSDictionary *attributes = @{
-                               NSFontAttributeName: font ? font :[UIFont systemFontOfSize:[UIFont buttonFontSize]],
-                               NSForegroundColorAttributeName : color ? color : [UIColor blackColor]
+                               NSFontAttributeName: font ? : [UIFont systemFontOfSize:[UIFont buttonFontSize]],
+                               NSForegroundColorAttributeName : color ? : [UIColor blackColor]
                                };
     
   NSAttributedString *string = [[NSAttributedString alloc] initWithString:title
@@ -331,6 +338,7 @@
     default:
       break;
   }
+
   [self updateTitle];
 }
 

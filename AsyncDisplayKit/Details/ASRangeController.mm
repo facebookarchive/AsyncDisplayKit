@@ -47,7 +47,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _currentRangeMode = ASLayoutRangeModeInvalid;
   _didUpdateCurrentRange = NO;
   
-  [[self.class allRangeControllersWeakSet] addObject:self];
+  [[[self class] allRangeControllersWeakSet] addObject:self];
   
   return self;
 }
@@ -59,13 +59,18 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   }
 }
 
-#pragma mark - Core visible node range managment API
+#pragma mark - Core visible node range management API
+
++ (BOOL)isFirstRangeUpdateForRangeMode:(ASLayoutRangeMode)rangeMode
+{
+  return (rangeMode == ASLayoutRangeModeInvalid);
+}
 
 + (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
                                currentRangeMode:(ASLayoutRangeMode)currentRangeMode
 {
   BOOL isVisible = (ASInterfaceStateIncludesVisible(interfaceState));
-  BOOL isFirstRangeUpdate = (currentRangeMode == ASLayoutRangeModeInvalid);
+  BOOL isFirstRangeUpdate = [self isFirstRangeUpdateForRangeMode:currentRangeMode];
   if (!isVisible || isFirstRangeUpdate) {
     return ASLayoutRangeModeMinimum;
   }
@@ -184,7 +189,9 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   ASInterfaceState selfInterfaceState = [self interfaceState];
   ASLayoutRangeMode rangeMode = _currentRangeMode;
-  if (!_didUpdateCurrentRange) {
+  // If the range mode is explicitly set via updateCurrentRangeWithMode: it will last in that mode until the
+  // range controller becomes visible again or explicitly changes the range mode again
+  if ((!_didUpdateCurrentRange && ASInterfaceStateIncludesVisible(selfInterfaceState)) || [[self class] isFirstRangeUpdateForRangeMode:rangeMode]) {
     rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
   }
 
@@ -230,7 +237,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _didUpdateCurrentRange = NO;
   
   if (!_rangeIsValid) {
-    [allIndexPaths addObjectsFromArray:ASIndexPathsForMultidimensionalArray(allNodes)];
+    [allIndexPaths addObjectsFromArray:ASIndexPathsForTwoDimensionalArray(allNodes)];
   }
   
   // TODO Don't register for notifications if this range update doesn't cause any node to enter rendering pipeline.
@@ -286,13 +293,13 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
       if (section != currentSectionIndex) {
         // Often we'll be dealing with indexPaths in the same section, but the set isn't sorted and we may even bounce
         // between the same ones.  Still, this saves dozens of method calls to access the inner array and count.
-        currentSectionNodes = [allNodes objectAtIndex:section];
+        currentSectionNodes = allNodes[section];
         numberOfNodesInSection = [currentSectionNodes count];
         currentSectionIndex = section;
       }
       
       if (row < numberOfNodesInSection) {
-        ASDisplayNode *node = [currentSectionNodes objectAtIndex:row];
+        ASDisplayNode *node = currentSectionNodes[row];
         
         ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
         // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
@@ -345,7 +352,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 - (void)scheduledNodesDidDisplay:(NSNotification *)notification
 {
-  CFAbsoluteTime notificationTimestamp = ((NSNumber *)[notification.userInfo objectForKey:ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp]).doubleValue;
+  CFAbsoluteTime notificationTimestamp = ((NSNumber *) notification.userInfo[ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp]).doubleValue;
   if (_pendingDisplayNodesTimestamp < notificationTimestamp) {
     // The rendering engine has processed all the nodes this range controller scheduled. Let's schedule a range update
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];

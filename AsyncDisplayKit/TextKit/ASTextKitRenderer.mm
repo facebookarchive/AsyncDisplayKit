@@ -189,9 +189,10 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   // We add an assertion so we can track the rare conditions where a graphics context is not present
   ASDisplayNodeAssertNotNil(context, @"This is no good without a context.");
   
-  // This renderer may not be the one that did the sizing. If that is the case its _currentScaleFactor will not be set, so we should compute it now
-  if (_sizeIsCalculated == NO && isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
-    _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
+  // This renderer may not be the one that did the sizing. If that is the case its truncation and currentScaleFactor may not have been evaluated.
+  // If there's any possibility we need to truncate or scale (e.g. width is not infinite, perform the size calculation.
+  if (_sizeIsCalculated == NO && isinf(_constrainedSize.width) == NO) {
+    [self _calculateSize];
   }
 
   CGRect shadowInsetBounds = [[self shadower] insetRectWithConstrainedRect:bounds];

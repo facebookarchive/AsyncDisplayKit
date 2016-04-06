@@ -16,9 +16,9 @@
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
-#import "ASLayoutOptions.h"
 #import "_ASTransitionContext.h"
 #import "ASDisplayNodeLayoutContext.h"
+#import "ASEnvironment.h"
 
 #include <vector>
 
@@ -70,6 +70,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
     unsigned shouldRasterizeDescendants:1;
     unsigned shouldBypassEnsureDisplay:1;
     unsigned displaySuspended:1;
+    unsigned shouldAnimateSizeChanges:1;
     unsigned hasCustomDrawingPriority:1;
 
     // whether custom drawing is enabled
@@ -96,6 +97,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
 
+  ASEnvironmentState _environmentState;
   ASLayout *_layout;
 
   ASSizeRange _constrainedSize;
@@ -139,7 +141,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 + (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node;
 
 // The _ASDisplayLayer backing the node, if any.
-@property (nonatomic, readonly, retain) _ASDisplayLayer *asyncLayer;
+@property (nonatomic, readonly, strong) _ASDisplayLayer *asyncLayer;
 
 // Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;

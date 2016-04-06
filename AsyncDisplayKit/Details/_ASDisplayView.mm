@@ -23,7 +23,7 @@
 
 // Keep the node alive while its view is active.  If you create a view, add its layer to a layer hierarchy, then release
 // the view, the layer retains the view to prevent a crash.  This replicates this behaviour for the node abstraction.
-@property (nonatomic, retain, readwrite) ASDisplayNode *keepalive_node;
+@property (nonatomic, strong, readwrite) ASDisplayNode *keepalive_node;
 @end
 
 @implementation _ASDisplayView
@@ -90,6 +90,11 @@
     self.keepalive_node = _node;
   }
   else if (currentSuperview && !newSuperview) {
+    // Clearing keepalive_node may cause deallocation of the node.  In this case, __exitHierarchy may not have an opportunity (e.g. _node will be cleared
+    // by the time -didMoveToWindow occurs after this) to clear the Visible interfaceState, which we need to do before deallocation to meet an API guarantee.
+    if (_node.inHierarchy) {
+      [_node __exitHierarchy];
+    }
     self.keepalive_node = nil;
   }
   

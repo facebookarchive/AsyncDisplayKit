@@ -38,7 +38,7 @@ typedef NS_OPTIONS(NSUInteger, ASControlState) {
     ASControlStateNormal       = 0,
     ASControlStateHighlighted  = 1 << 0,                  // used when ASControlNode isHighlighted is set
     ASControlStateDisabled     = 1 << 1,
-    ASControlStateSelected     = 1 << 2,                  // used when ASControlNode isSeleted is set
+    ASControlStateSelected     = 1 << 2,                  // used when ASControlNode isSelected is set
     ASControlStateReserved     = 0xFF000000               // flags reserved for internal framework use
 };
 

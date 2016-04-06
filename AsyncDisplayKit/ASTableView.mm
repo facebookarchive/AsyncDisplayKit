@@ -13,12 +13,14 @@
 #import "ASCellNode+Internal.h"
 #import "ASChangeSetDataController.h"
 #import "ASDelegateProxy.h"
+#import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutController.h"
 #import "ASRangeController.h"
+#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "_ASDisplayLayer.h"
 
 #import <CoreFoundation/CoreFoundation.h>
@@ -118,13 +120,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
-@property (nonatomic, retain, readwrite) ASDataController *dataController;
+@property (nonatomic, strong, readwrite) ASDataController *dataController;
 
 // Used only when ASTableView is created directly rather than through ASTableNode.
 // We create a node so that logic related to appearance, memory management, etc can be located there
 // for both the node-based and view-based version of the table.
 // This also permits sharing logic with ASCollectionNode, as the superclass is not UIKit-controlled.
-@property (nonatomic, retain) ASTableNode *strongTableNode;
+@property (nonatomic, strong) ASTableNode *strongTableNode;
 
 // Always set, whether ASCollectionView is created directly or via ASCollectionNode.
 @property (nonatomic, weak)   ASTableNode *tableNode;
@@ -493,7 +495,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 }
 
 - (void)adjustContentOffsetWithNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths inserting:(BOOL)inserting {
-  // Maintain the users visible window when inserting or deleteing cells by adjusting the content offset for nodes
+  // Maintain the users visible window when inserting or deleting cells by adjusting the content offset for nodes
   // before the visible area. If in a begin/end updates block this will update _contentOffsetAdjustment, otherwise it will
   // update self.contentOffset directly.
 
@@ -501,7 +503,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   CGFloat dir = (inserting) ? +1 : -1;
   CGFloat adjustment = 0;
-  NSIndexPath *top = _contentOffsetAdjustmentTopVisibleRow ?: self.indexPathsForVisibleRows.firstObject;
+  NSIndexPath *top = _contentOffsetAdjustmentTopVisibleRow ? : self.indexPathsForVisibleRows.firstObject;
 
   for (int index = 0; index < indexPaths.count; index++) {
     NSIndexPath *indexPath = indexPaths[index];
@@ -602,6 +604,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+  // If a scroll happenes the current range mode needs to go to full
+  ASInterfaceState interfaceState = [self interfaceStateForRangeController:_rangeController];
+  if (ASInterfaceStateIncludesVisible(interfaceState)) {
+    [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
+  }
+  
   for (_ASTableViewCell *tableCell in _cellsForVisibilityUpdates) {
     [[tableCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
                                  inScrollView:scrollView
@@ -786,15 +794,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
 {
-  ASTableNode *tableNode = self.tableNode;
-  if (tableNode) {
-    return self.tableNode.interfaceState;
-  } else {
-    // Until we can always create an associated ASTableNode without a retain cycle,
-    // we might be on our own to try to guess if we're visible.  The node normally
-    // handles this even if it is the root / directly added to the view hierarchy.
-    return (self.window != nil ? ASInterfaceStateVisible : ASInterfaceStateNone);
-  }
+  return ASInterfaceStateForDisplayNode(self.tableNode, self.window);
 }
 
 #pragma mark - ASRangeControllerDelegate
@@ -1068,9 +1068,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (!visible && node.inHierarchy) {
     [node __exitHierarchy];
   }
-  
-  // Trigger updating interfaceState for cells in case ASTableView becomes visible or invisible
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+
+  // Updating the visible node index paths only for not range managed nodes. Range managed nodes will get their
+  // their update in the layout pass
+  if (![node supportsRangeManagedInterfaceState]) {
+    [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  }
 }
 
 @end

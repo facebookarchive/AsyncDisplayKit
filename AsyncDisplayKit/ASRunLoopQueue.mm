@@ -9,13 +9,28 @@
 #import "ASRunLoopQueue.h"
 #import "ASThread.h"
 
+#import <cstdlib>
 #import <deque>
+
+#define ASRunLoopQueueLoggingEnabled 0
+
+static void runLoopSourceCallback(void *info) {
+  // No-op
+#if ASRunLoopQueueLoggingEnabled
+  NSLog(@"<%@> - Called runLoopSourceCallback", info);
+#endif
+}
 
 @interface ASRunLoopQueue () {
   CFRunLoopRef _runLoop;
   CFRunLoopObserverRef _runLoopObserver;
+  CFRunLoopSourceRef _runLoopSource;
   std::deque<id> _internalQueue;
   ASDN::RecursiveMutex _internalQueueLock;
+  
+#if ASRunLoopQueueLoggingEnabled
+  NSTimer *_runloopQueueLoggingTimer;
+#endif
 }
 
 @property (nonatomic, copy) void (^queueConsumer)(id dequeuedItem, BOOL isQueueDrained);
@@ -36,12 +51,34 @@
     };
     _runLoopObserver = CFRunLoopObserverCreateWithHandler(NULL, kCFRunLoopBeforeWaiting, true, 0, handlerBlock);
     CFRunLoopAddObserver(_runLoop, _runLoopObserver,  kCFRunLoopCommonModes);
+    
+    // It is not guaranteed that the runloop will turn if it has no scheduled work, and this causes processing of
+    // the queue to stop. Attaching a custom loop source to the run loop and signal it if new work needs to be done
+    CFRunLoopSourceContext *runLoopSourceContext = (CFRunLoopSourceContext *)calloc(1, sizeof(CFRunLoopSourceContext));
+    runLoopSourceContext->perform = runLoopSourceCallback;
+#if ASRunLoopQueueLoggingEnabled
+    runLoopSourceContext->info = (__bridge void *)self;
+#endif
+    _runLoopSource = CFRunLoopSourceCreate(NULL, 0, runLoopSourceContext);
+    CFRunLoopAddSource(runloop, _runLoopSource, kCFRunLoopCommonModes);
+    free(runLoopSourceContext);
+
+#if ASRunLoopQueueLoggingEnabled
+    _runloopQueueLoggingTimer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(checkRunLoop) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:_runloopQueueLoggingTimer forMode:NSRunLoopCommonModes];
+#endif
   }
   return self;
 }
 
 - (void)dealloc
 {
+  if (CFRunLoopContainsSource(_runLoop, _runLoopSource, kCFRunLoopCommonModes)) {
+    CFRunLoopRemoveSource(_runLoop, _runLoopSource, kCFRunLoopCommonModes);
+  }
+  CFRelease(_runLoopSource);
+  _runLoopSource = nil;
+  
   if (CFRunLoopObserverIsValid(_runLoopObserver)) {
     CFRunLoopObserverInvalidate(_runLoopObserver);
   }
@@ -49,11 +86,17 @@
   _runLoopObserver = nil;
 }
 
+#if ASRunLoopQueueLoggingEnabled
+- (void)checkRunLoop
+{
+    NSLog(@"<%@> - Jobs: %ld", self, _internalQueue.size());
+}
+#endif
+
 - (void)processQueue
 {
   std::deque<id> itemsToProcess = std::deque<id>();
   BOOL isQueueDrained = NO;
-  CFAbsoluteTime timestamp = 0;
   {
     ASDN::MutexLocker l(_internalQueueLock);
 
@@ -72,7 +115,6 @@
 
     if (_internalQueue.empty()) {
       isQueueDrained = YES;
-      timestamp = CFAbsoluteTimeGetCurrent();
     }
   }
 
@@ -84,6 +126,12 @@
       self.queueConsumer(itemsToProcess[i], isQueueDrained);
     }
   }
+
+  // If the queue is not fully drained yet force another run loop to process next batch of items
+  if (!isQueueDrained) {
+    CFRunLoopSourceSignal(_runLoopSource);
+    CFRunLoopWakeUp(_runLoop);
+   }
 }
 
 - (void)enqueue:(id)object
@@ -105,6 +153,9 @@
 
   if (!foundObject) {
     _internalQueue.push_back(object);
+    
+    CFRunLoopSourceSignal(_runLoopSource);
+    CFRunLoopWakeUp(_runLoop);
   }
 }
 

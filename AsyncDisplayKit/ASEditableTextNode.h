@@ -7,6 +7,7 @@
  */
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASTextKitComponents.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -18,7 +19,25 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASEditableTextNode : ASDisplayNode
 
-// @abstract The text node's delegate, which must conform to the <ASEditableTextNodeDelegate> protocol.
+/**
+ * @abstract Initializes an editable text node using default TextKit components.
+ *
+ * @returns An initialized ASEditableTextNode.
+ */
+- (instancetype)init;
+
+/**
+ * @abstract Initializes an editable text node using the provided TextKit components.
+ *
+ * @param textKitComponents The TextKit stack used to render text.
+ * @param placeholderTextKitComponents The TextKit stack used to render placeholder text.
+ *
+ * @returns An initialized ASEditableTextNode.
+ */
+- (instancetype)initWithTextKitComponents:(ASTextKitComponents *)textKitComponents
+             placeholderTextKitComponents:(ASTextKitComponents *)placeholderTextKitComponents;
+
+//! @abstract The text node's delegate, which must conform to the <ASEditableTextNodeDelegate> protocol.
 @property (nonatomic, readwrite, weak) id <ASEditableTextNodeDelegate> delegate;
 
 #pragma mark - Configuration
@@ -66,12 +85,12 @@ NS_ASSUME_NONNULL_BEGIN
 //! @abstract The text input mode used by the receiver's keyboard, if it is visible. This value is undefined if the receiver is not the first responder.
 @property (nonatomic, readonly) UITextInputMode *textInputMode;
 
-/*
+/**
  @abstract The textContainerInset of both the placeholder and typed textView. This value defaults to UIEdgeInsetsZero.
  */
 @property (nonatomic, readwrite) UIEdgeInsets textContainerInset;
 
-/*
+/**
  @abstract The returnKeyType of the keyboard. This value defaults to UIReturnKeyDefault.
  */
 @property (nonatomic, readwrite) UIReturnKeyType returnKeyType;
@@ -129,7 +148,7 @@ NS_ASSUME_NONNULL_BEGIN
   @abstract Indicates to the delegate that the text node's selection has changed.
   @param editableTextNode An editable text node.
   @param fromSelectedRange The previously selected range.
-  @param toSelectedRange The current selected range. Equvialent to the <selectedRange> property.
+  @param toSelectedRange The current selected range. Equivalent to the <selectedRange> property.
   @param dueToEditing YES if the selection change was due to editing; NO otherwise.
   @discussion You can access the selection of the receiver via <selectedRange>.
  */

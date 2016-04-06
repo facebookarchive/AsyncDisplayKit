@@ -8,10 +8,10 @@
  *
  */
 
-#import <UIKit/UIKit.h>
+#pragma once
 
-#ifndef ComponentKit_ASTextKitAttributes_h
-#define ComponentKit_ASTextKitAttributes_h
+#import <UIKit/UIKit.h>
+#import "ASEqualityHelpers.h"
 
 @protocol ASTextKitTruncating;
 
@@ -21,11 +21,6 @@ extern NSString *const ASTextKitTruncationAttributeName;
  text.
  */
 extern NSString *const ASTextKitEntityAttributeName;
-
-static inline BOOL _objectsEqual(id<NSObject> obj1, id<NSObject> obj2)
-{
-  return obj1 == obj2 ? YES : [obj1 isEqual:obj2];
-}
 
 /**
  All NSObject values in this struct should be copied when passed into the TextComponent.
@@ -136,14 +131,12 @@ struct ASTextKitAttributes {
     && layoutManagerCreationBlock == other.layoutManagerCreationBlock
     && textStorageCreationBlock == other.textStorageCreationBlock
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)
-    && _objectsEqual(exclusionPaths, other.exclusionPaths)
-    && _objectsEqual(avoidTailTruncationSet, other.avoidTailTruncationSet)
-    && _objectsEqual(shadowColor, other.shadowColor)
-    && _objectsEqual(attributedString, other.attributedString)
-    && _objectsEqual(truncationAttributedString, other.truncationAttributedString);
+    && ASObjectIsEqual(exclusionPaths, other.exclusionPaths)
+    && ASObjectIsEqual(avoidTailTruncationSet, other.avoidTailTruncationSet)
+    && ASObjectIsEqual(shadowColor, other.shadowColor)
+    && ASObjectIsEqual(attributedString, other.attributedString)
+    && ASObjectIsEqual(truncationAttributedString, other.truncationAttributedString);
   }
 
   size_t hash() const;
 };
-
-#endif

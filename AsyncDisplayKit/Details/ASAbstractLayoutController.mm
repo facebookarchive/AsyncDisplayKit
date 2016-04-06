@@ -33,24 +33,24 @@ extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningPar
   
   _tuningParameters = std::vector<std::vector<ASRangeTuningParameters>> (ASLayoutRangeModeCount, std::vector<ASRangeTuningParameters> (ASLayoutRangeTypeCount));
   
+  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeDisplay] = {
+    .leadingBufferScreenfuls = 1.0,
+    .trailingBufferScreenfuls = 0.5
+  };
+  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeFetchData] = {
+    .leadingBufferScreenfuls = 2.5,
+    .trailingBufferScreenfuls = 1.5
+  };
+  
   _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypeDisplay] = {
     .leadingBufferScreenfuls = 0.25,
     .trailingBufferScreenfuls = 0.25
   };
   _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypeFetchData] = {
-    .leadingBufferScreenfuls = 1,
-    .trailingBufferScreenfuls = 1
+    .leadingBufferScreenfuls = 0.25,
+    .trailingBufferScreenfuls = 0.5
   };
 
-  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeDisplay] = {
-    .leadingBufferScreenfuls = 1.5,
-    .trailingBufferScreenfuls = 0.75
-  };
-  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeFetchData] = {
-    .leadingBufferScreenfuls = 3,
-    .trailingBufferScreenfuls = 2
-  };
-  
   _tuningParameters[ASLayoutRangeModeVisibleOnly][ASLayoutRangeTypeDisplay] = {
     .leadingBufferScreenfuls = 0,
     .trailingBufferScreenfuls = 0

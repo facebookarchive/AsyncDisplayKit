@@ -14,9 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef NSUInteger ASCellNodeAnimation;
 
-typedef enum : NSUInteger {
-  /** 
-   * Indicates a cell has just became visible 
+typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
+  /**
+   * Indicates a cell has just became visible
    */
   ASCellNodeVisibilityEventVisible,
   /**
@@ -26,11 +26,11 @@ typedef enum : NSUInteger {
    * Use CGRectIntersect between cellFrame and scrollView.bounds to get this rectangle
    */
   ASCellNodeVisibilityEventVisibleRectChanged,
-  /** 
-   * Indicates a cell is no longer visible 
+  /**
+   * Indicates a cell is no longer visible
    */
   ASCellNodeVisibilityEventInvisible,
-} ASCellNodeVisibilityEvent;
+};
 
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
@@ -51,7 +51,7 @@ typedef enum : NSUInteger {
  *
  * With this property set to YES, the main thread will be blocked until display is complete for
  * the cell.  This is more similar to UIKit, and in fact makes AsyncDisplayKit scrolling visually
- * indistinguishible from UIKit's, except being faster.
+ * indistinguishable from UIKit's, except being faster.
  *
  * Using this option does not eliminate all of the performance advantages of AsyncDisplayKit.
  * Normally, a cell has been preloading and is almost done when it reaches the screen, so the
@@ -66,12 +66,12 @@ typedef enum : NSUInteger {
 //@property (atomic, retain) UIColor *backgroundColor;
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
-/*
+/**
  * A Boolean value that indicates whether the node is selected.
  */
 @property (nonatomic, assign) BOOL selected;
 
-/*
+/**
  * A Boolean value that indicates whether the node is highlighted.
  */
 @property (nonatomic, assign) BOOL highlighted;
@@ -103,7 +103,7 @@ typedef enum : NSUInteger {
  * @param didLoadBlock The block that will be called after the view controller's view is loaded.
  *
  * @return An ASCellNode created using the root view of the view controller provided by the viewControllerBlock.
- * The view controller's root view is resized to match the calcuated size produced during layout.
+ * The view controller's root view is resized to match the calculated size produced during layout.
  *
  */
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
