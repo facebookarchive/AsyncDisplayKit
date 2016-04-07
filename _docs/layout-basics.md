@@ -1,5 +1,5 @@
 ---
-title: ASMapNode
+title: Layout Basics
 layout: docs
 permalink: /docs/layout-basics.html
 ---
