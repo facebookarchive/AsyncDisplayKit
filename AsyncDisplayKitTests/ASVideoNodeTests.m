@@ -50,7 +50,7 @@
 
 - (void)setUp
 {
-  // _videoNode = [[ASVideoNode alloc] init];
+  _videoNode = [[ASVideoNode alloc] init];
   _firstAsset = [AVURLAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
   _secondAsset = [AVAsset assetWithURL:[NSURL URLWithString:@"secondURL"]];
   _url = [NSURL URLWithString:@"testURL"];
@@ -65,20 +65,19 @@
 
 - (void)testOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnode
 {
-  _videoNode = [[ASVideoNode alloc] initWithAsset:_firstAsset];
+  _videoNode.asset = _firstAsset;
   [self doOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnodeWithUrl];
 }
 
 - (void)testOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnodeWithUrl
 {
-  _videoNode = [[ASVideoNode alloc] initWithURL:_url];
+  _videoNode.url = _url;
   [self doOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnodeWithUrl];
 }
 
 - (void)doOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnodeWithUrl
 {
   _videoNode.interfaceState = ASInterfaceStateFetchData;
-  
   [_videoNode play];
   
   XCTAssertNotNil(_videoNode.spinner);
@@ -87,13 +86,13 @@
 
 - (void)testOnPauseSpinnerIsPausedIfPresent
 {
-  _videoNode = [[ASVideoNode alloc] initWithAsset:_firstAsset];
+  _videoNode.asset = _firstAsset;
   [self doOnPauseSpinnerIsPausedIfPresentWithURL];
 }
 
 - (void)testOnPauseSpinnerIsPausedIfPresentWithURL
 {
-  _videoNode = [[ASVideoNode alloc] initWithURL:_url];
+  _videoNode.url = _url;
   [self doOnPauseSpinnerIsPausedIfPresentWithURL];
 }
 
@@ -110,13 +109,13 @@
 
 - (void)testOnVideoReadySpinnerIsStoppedAndRemoved
 {
-  _videoNode = [[ASVideoNode alloc] initWithAsset:_firstAsset];
+  _videoNode.asset = _firstAsset;
   [self doOnVideoReadySpinnerIsStoppedAndRemovedWithURL];
 }
 
 - (void)testOnVideoReadySpinnerIsStoppedAndRemovedWithURL
 {
-  _videoNode = [[ASVideoNode alloc] initWithURL:_url];
+  _videoNode.url = _url;
   [self doOnVideoReadySpinnerIsStoppedAndRemovedWithURL];
 }
 
@@ -133,19 +132,19 @@
 
 - (void)testPlayerDefaultsToNil
 {
-  _videoNode = [[ASVideoNode alloc] initWithAsset:_firstAsset];
+  _videoNode.asset = _firstAsset;
   XCTAssertNil(_videoNode.player);
 }
 
 - (void)testPlayerDefaultsToNilWithURL
 {
-  _videoNode = [[ASVideoNode alloc] initWithURL:_url];
+  _videoNode.url = _url;
   XCTAssertNil(_videoNode.player);
 }
 
 - (void)testPlayerIsCreatedInFetchData
 {
-  _videoNode = [[ASVideoNode alloc] initWithAsset:_firstAsset];
+  _videoNode.asset = _firstAsset;
   _videoNode.interfaceState = ASInterfaceStateFetchData;
   
   XCTAssertNotNil(_videoNode.player);
@@ -153,7 +152,7 @@
 
 - (void)testPlayerIsCreatedInFetchDataWithURL
 {
-  _videoNode = [[ASVideoNode alloc] initWithURL:_url];
+  _videoNode.url = _url;
   _videoNode.interfaceState = ASInterfaceStateFetchData;
   
   XCTAssertNotNil(_videoNode.player);
@@ -162,13 +161,13 @@
 
 - (void)testPlayerLayerNodeIsAddedOnDidLoadIfVisibleAndAutoPlaying
 {
-  _videoNode = [[ASVideoNode alloc] initWithAsset:_firstAsset];
+  _videoNode.asset = _firstAsset;
   [self doPlayerLayerNodeIsAddedOnDidLoadIfVisibleAndAutoPlayingWithURL];
 }
 
 - (void)testPlayerLayerNodeIsAddedOnDidLoadIfVisibleAndAutoPlayingWithURL
 {
-  _videoNode = [[ASVideoNode alloc] initWithURL:_url];
+  _videoNode.url = _url;
   [self doPlayerLayerNodeIsAddedOnDidLoadIfVisibleAndAutoPlayingWithURL];
 }
 
@@ -183,13 +182,13 @@
 
 - (void)testPlayerLayerNodeIsNotAddedIfVisibleButShouldNotBePlaying
 {
-  _videoNode = [[ASVideoNode alloc] initWithAsset:_firstAsset];
+  _videoNode.asset = _firstAsset;
   [self doPlayerLayerNodeIsNotAddedIfVisibleButShouldNotBePlaying];
 }
 
 - (void)testPlayerLayerNodeIsNotAddedIfVisibleButShouldNotBePlayingWithUrl
 {
-  _videoNode = [[ASVideoNode alloc] initWithURL:_url];
+  _videoNode.url = _url;
   [self doPlayerLayerNodeIsNotAddedIfVisibleButShouldNotBePlaying];
 }
 
@@ -205,13 +204,13 @@
 
 - (void)testVideoStartsPlayingOnDidDidBecomeVisibleWhenShouldAutoplay
 {
-  _videoNode = [[ASVideoNode alloc] initWithAsset:_firstAsset];
+  _videoNode.asset = _firstAsset;
   [self doVideoStartsPlayingOnDidDidBecomeVisibleWhenShouldAutoplay];
 }
 
 - (void)testVideoStartsPlayingOnDidDidBecomeVisibleWhenShouldAutoplayWithURL
 {
-  _videoNode = [[ASVideoNode alloc] initWithURL:_url];
+  _videoNode.url = _url;
   [self doVideoStartsPlayingOnDidDidBecomeVisibleWhenShouldAutoplay];
 }
 
@@ -232,13 +231,13 @@
 
 - (void)testVideoShouldPauseWhenItLeavesVisibleButShouldKnowPlayingShouldRestartLater
 {
-  _videoNode = [[ASVideoNode alloc] initWithAsset:_firstAsset];
+  _videoNode.asset = _firstAsset;
   [self doVideoShouldPauseWhenItLeavesVisibleButShouldKnowPlayingShouldRestartLater];
 }
 
 - (void)testVideoShouldPauseWhenItLeavesVisibleButShouldKnowPlayingShouldRestartLaterWithURL
 {
-  _videoNode = [[ASVideoNode alloc] initWithURL:_url];
+  _videoNode.url = _url;
   [self doVideoShouldPauseWhenItLeavesVisibleButShouldKnowPlayingShouldRestartLater];
 }
 
@@ -255,13 +254,13 @@
 
 - (void)testVideoThatIsPlayingWhenItLeavesVisibleRangeStartsAgainWhenItComesBack
 {
-  _videoNode = [[ASVideoNode alloc] initWithAsset:_firstAsset];
+  _videoNode.asset = _firstAsset;
   [self doVideoThatIsPlayingWhenItLeavesVisibleRangeStartsAgainWhenItComesBack];
 }
 
 - (void)testVideoThatIsPlayingWhenItLeavesVisibleRangeStartsAgainWhenItComesBackWithURL
 {
-  _videoNode = [[ASVideoNode alloc] initWithURL:_url];
+  _videoNode.url = _url;
   [self doVideoThatIsPlayingWhenItLeavesVisibleRangeStartsAgainWhenItComesBack];
 }
 

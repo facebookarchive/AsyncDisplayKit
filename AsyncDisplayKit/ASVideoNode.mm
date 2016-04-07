@@ -47,30 +47,9 @@
 
 #pragma mark - Construction and Layout
 
-- (instancetype)initWithURL:(NSURL*)url
+- (instancetype)init
 {
-  ASDisplayNodeAssertNotNil(url, @"URL must be supplied in initWithURL:");
-  if (!(self = [super init])) {
-    return nil;
-  }
-  
-  _url = url;
-  return [self commonInit];
-}
-
-- (instancetype)initWithAsset:(AVAsset*)asset
-{
-  ASDisplayNodeAssertNotNil(asset, @"Asset must be supplied in initWithAsset:");
-  if (!(self = [super init])) {
-    return nil;
-  }
-  _asset = asset;
-  return [self commonInit];
-}
-
-- (instancetype)commonInit
-{
-  _previewQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+	_previewQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
   
   self.playButton = [[ASDefaultPlayButton alloc] init];
   self.gravity = AVLayerVideoGravityResizeAspect;
@@ -79,19 +58,14 @@
   return self;
 }
 
-- (instancetype)init
-{
-  ASDisplayNodeAssertNotSupported();
-  return nil;
-}
-
 - (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
 }
 
-- (ASDisplayNode*) constructPlayerNode {
+- (ASDisplayNode*)constructPlayerNode
+{
   ASDisplayNode* playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
     AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
     if (!_player) {
@@ -107,8 +81,9 @@
   return playerNode;
 }
 
-- (void) constructCurrentPlayerItemFromInitData {
-  ASDisplayNodeAssert(_asset || _url, @"Must be initialised with an AVAsset or URL");
+- (void)constructCurrentPlayerItemFromInitData
+{
+  ASDisplayNodeAssert(_asset || _url, @"ASVideoNode must be initialised with either an AVAsset or URL");
   [self removePlayerItemObservers];
   
   if (_asset) {
@@ -124,7 +99,7 @@
   }
 }
 
-- (void) removePlayerItemObservers
+- (void)removePlayerItemObservers
 {
   if (_currentPlayerItem) {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
@@ -167,14 +142,16 @@
 
 - (void)setPlaceholderImagefromAsset:(AVAsset*)asset
 {
-  // Construct the preview image early on to avoid multiple threads trying to set it
+  ASDN::MutexLocker l(_videoLock);
   if (!_placeholderImageNode)
     _placeholderImageNode = [[ASImageNode alloc] init];
   
   dispatch_async(_previewQueue, ^{
     AVAssetImageGenerator *imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:_asset];
     imageGenerator.appliesPreferredTrackTransform = YES;
-    [imageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:CMTimeMake(0, 1)]] completionHandler:^(CMTime requestedTime, CGImageRef  _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
+    NSArray *times = @[[NSValue valueWithCMTime:CMTimeMake(0, 1)]];
+    
+    [imageGenerator generateCGImagesAsynchronouslyForTimes:times completionHandler:^(CMTime requestedTime, CGImageRef  _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
       
       // Unfortunately it's not possible to generate a preview image for an HTTP live stream asset, so we'll give up here
       // http://stackoverflow.com/questions/32112205/m3u8-file-avassetimagegenerator-error
@@ -198,7 +175,6 @@
         dispatch_async(dispatch_get_main_queue(), ^{
           _placeholderImageNode.frame = self.bounds;
           [self insertSubnode:_placeholderImageNode atIndex:0];
-          // [self setNeedsLayout];
         });
       }
     }];
@@ -208,9 +184,12 @@
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
 {
   [super interfaceStateDidChange:newState fromState:oldState];
+	
+	BOOL nowVisible = ASInterfaceStateIncludesVisible(newState);
+	BOOL wasVisible = ASInterfaceStateIncludesVisible(oldState);
 
-  if (!(newState & ASInterfaceStateVisible)) {
-    if (oldState & ASInterfaceStateVisible) {
+  if (!nowVisible) {
+    if (wasVisible) {
       if (_shouldBePlaying) {
         [self pause];
         _shouldBePlaying = YES;
@@ -227,27 +206,28 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  if ([[change objectForKey:@"new"] integerValue] == AVPlayerItemStatusReadyToPlay) {
-    if ([self.subnodes containsObject:_spinner]) {
-      [_spinner removeFromSupernode];
-      _spinner = nil;
-    }
-    
-    // If we don't yet have a placeholder image update it now that we should have data available for it
-    if (!_placeholderImageNode) {
-      if (_currentPlayerItem &&
-          _currentPlayerItem.tracks.count > 0 &&
-          _currentPlayerItem.tracks[0].assetTrack &&
-          _currentPlayerItem.tracks[0].assetTrack.asset) {
-        _asset = _currentPlayerItem.tracks[0].assetTrack.asset;
-        [self setPlaceholderImagefromAsset:_asset];
-        [self setNeedsLayout];
+  if (object == _currentPlayerItem && [keyPath isEqualToString:@"status"]) {
+    if (_currentPlayerItem.status == AVPlayerItemStatusReadyToPlay) {
+      if ([self.subnodes containsObject:_spinner]) {
+        [_spinner removeFromSupernode];
+        _spinner = nil;
       }
+      
+      // If we don't yet have a placeholder image update it now that we should have data available for it
+      if (!_placeholderImageNode) {
+        if (_currentPlayerItem &&
+            _currentPlayerItem.tracks.count > 0 &&
+            _currentPlayerItem.tracks[0].assetTrack &&
+            _currentPlayerItem.tracks[0].assetTrack.asset) {
+          _asset = _currentPlayerItem.tracks[0].assetTrack.asset;
+          [self setPlaceholderImagefromAsset:_asset];
+          [self setNeedsLayout];
+        }
+      }
+			
+    } else if (_currentPlayerItem.status == AVPlayerItemStatusFailed) {
+      
     }
-  }
-  
-  if ([[change objectForKey:@"new"] integerValue] == AVPlayerItemStatusFailed) {
-    
   }
 }
 
@@ -373,6 +353,27 @@
   return _asset;
 }
 
+- (void)setUrl:(NSURL *)url
+{
+	ASDN::MutexLocker l(_videoLock);
+	
+	if (ASObjectIsEqual(url, _url))
+		return;
+	
+	_url = url;
+	
+	// FIXME: Adopt -setNeedsFetchData when it is available
+	if (self.interfaceState & ASInterfaceStateFetchData) {
+		[self fetchData];
+	}
+}
+
+- (NSURL *)url
+{
+	ASDN::MutexLocker l(_videoLock);
+	return _url;
+}
+
 - (AVPlayer *)player
 {
   ASDN::MutexLocker l(_videoLock);
@@ -442,7 +443,7 @@
     _playButton.alpha = 0.0;
   }];
   
-  if (![self ready] && _shouldBePlaying && (self.interfaceState & ASInterfaceStateVisible)) {
+  if (![self ready] && _shouldBePlaying && ASInterfaceStateIncludesVisible(self.interfaceState)) {
     [self addSubnode:_spinner];
     [(UIActivityIndicatorView *)_spinner.view startAnimating];
   }

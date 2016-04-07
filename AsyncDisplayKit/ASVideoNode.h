@@ -18,7 +18,10 @@
 //    in an issue on GitHub: https://github.com/facebook/AsyncDisplayKit/issues
 
 @interface ASVideoNode : ASControlNode
-@property (atomic, strong, readonly) AVAsset *asset;
+
+@property (atomic, strong, readwrite) NSURL *url;
+@property (atomic, strong, readwrite) AVAsset *asset;
+
 @property (atomic, strong, readonly) AVPlayer *player;
 @property (atomic, strong, readonly) AVPlayerItem *currentItem;
 
@@ -34,9 +37,7 @@
 
 @property (atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
 
-// Mirror the construction of AVPlayerItem with the URL or AVAsset
-- (instancetype)initWithURL:(NSURL*)url;
-- (instancetype)initWithAsset:(AVAsset*)asset;
+- (instancetype)init;
 
 - (void)play;
 - (void)pause;

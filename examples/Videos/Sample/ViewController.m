@@ -34,7 +34,8 @@
 - (ASVideoNode *)guitarVideo;
 {
   AVAsset* asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-3045b261-7e93-4492-b7e5-5d6358376c9f-editedLiveAndDie.mov"]];
-  ASVideoNode *videoNode = [[ASVideoNode alloc] initWithAsset:asset];
+  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
+  videoNode.asset = asset;
   
   videoNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height/3);
   
@@ -48,7 +49,8 @@
 - (ASVideoNode *)nicCageVideo;
 {
   AVAsset* asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
-  ASVideoNode *nicCageVideo = [[ASVideoNode alloc] initWithAsset:asset];
+  ASVideoNode *nicCageVideo = [[ASVideoNode alloc] init];
+  nicCageVideo.asset = asset;
   
   nicCageVideo.delegate = self;
   
@@ -67,7 +69,8 @@
 - (ASVideoNode *)simonVideo;
 {
   NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"simon" ofType:@"mp4"]];
-  ASVideoNode *simonVideo = [[ASVideoNode alloc] initWithURL:url];
+  ASVideoNode *simonVideo = [[ASVideoNode alloc] init];
+  simonVideo.url = url;
   
   simonVideo.frame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - ([UIScreen mainScreen].bounds.size.height/3), [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
   
