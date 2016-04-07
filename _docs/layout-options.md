@@ -33,7 +33,7 @@ This layout method does not have a UIKit analog. It is implemented by calling
 ###Shortcomings
 - logic is not reusable, and is still manual
 
-## Automatic, Extensible Layout
+# Automatic, Extensible Layout
 
 This is the reccomended layout method. It does not have a UIKit analog and is implemented by calling
 `- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constraint`
