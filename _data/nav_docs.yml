@@ -41,6 +41,7 @@
   - static-layout-spec
 - title: Optimizations
   items:
+  - layout-options
   - layer-backing
   - synchronous-concurrency
   - subtree-rasterization
