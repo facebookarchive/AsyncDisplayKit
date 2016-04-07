@@ -27,7 +27,7 @@ ASDK's performance gains allow you to easily design an great experience for ever
 
 ##A Great Developer Experience
 
-ASDK also strives to make the developer experience great:
+ASDK also strives to make the developer experience great
 - platform compatability: iOS & tvOS
 - language compatability: Objective-C & Swift
 - requires fewer lines of code to build advanced apps (see <a href = "/docs/automatic-layout.html">`examples/ASDKgram`</a> for a direct comparison of UIKit-implemented app vs. ASDK-implemented app)
