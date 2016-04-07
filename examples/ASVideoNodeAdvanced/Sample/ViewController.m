@@ -23,6 +23,8 @@
     
     _videoNode = [[ASVideoNode alloc] init];
     _videoNode.delegate = self;
+    //_videoNode.shouldAutoplay = YES;
+    //_videoNode.shouldAutorepeat = YES;
     _videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
     _videoNode.frame = videoNodeRect;
     [self.view addSubnode:_videoNode];
@@ -38,9 +40,12 @@
     NSLog(@"videoPlaybackDidFinish");
 }
 
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second{
+    NSLog(@"%f",second);
+}
+
 - (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate{
-    NSLog(@"Current State : %d",state);
-    NSLog(@"Next State : %d",toSate);
+    NSLog(@"Current State : %d, Next State : %d",state,toSate);
 }
 
 - (BOOL)videoNode:(ASVideoNode *)videoNode shouldChangePlayerStateTo:(ASVideoNodePlayerState)state{

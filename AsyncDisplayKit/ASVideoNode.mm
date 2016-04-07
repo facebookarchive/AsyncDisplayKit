@@ -28,6 +28,7 @@
   
   AVPlayerItem *_currentItem;
   AVPlayer *_player;
+  id _timeObserver;
   
   ASImageNode *_placeholderImageNode;
   
@@ -54,7 +55,6 @@
   self.playButton = [[ASDefaultPlayButton alloc] init];
   
   self.gravity = AVLayerVideoGravityResizeAspect;
-  NSLog(@"%d",_playerState);
   
   [self addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
     
@@ -181,8 +181,8 @@
 
 - (void)tapped
 {
-  if (self.delegate && [self.delegate respondsToSelector:@selector(videoNodeWasTapped:)]) {
-    [self.delegate videoNodeWasTapped:self];
+  if (_delegate && [_delegate respondsToSelector:@selector(videoNodeWasTapped:)]) {
+    [_delegate videoNodeWasTapped:self];
   } else {
     if (_shouldBePlaying) {
       self.playerState = ASVideoNodePlayerStatePaused;
@@ -201,7 +201,7 @@
 - (void)fetchData
 {
   [super fetchData];
-
+  _timeObserver = nil;
   @try {
     [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
   }
@@ -220,6 +220,21 @@
       _player = [[AVPlayer alloc] initWithPlayerItem:_currentItem];
       _player.muted = _muted;
     }
+    __weak __typeof(self) weakSelf = self;
+    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMake(1, 1) queue:NULL usingBlock:^(CMTime time){
+      [weakSelf periodicTimeObserver:time];
+    }];
+  }
+}
+
+- (void)periodicTimeObserver:(CMTime)time {
+  NSTimeInterval timeInSeconds = CMTimeGetSeconds(time);
+  if (timeInSeconds <= 0) {
+    return;
+  }
+  
+  if(_delegate && [_delegate respondsToSelector:@selector(videoNode:didPlayToSecond:)]){
+    [_delegate videoNode:self didPlayToSecond:timeInSeconds];
   }
 }
 
@@ -477,6 +492,7 @@
 
 - (void)dealloc
 {
+  _timeObserver = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
   @try {
     [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];

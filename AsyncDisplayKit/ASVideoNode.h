@@ -8,7 +8,7 @@
 
 #import <AsyncDisplayKit/ASButtonNode.h>
 
-<<<<<<< HEAD
+
 typedef enum {
   ASVideoNodePlayerStateUnknown,
   ASVideoNodePlayerStatePlaying,
@@ -16,9 +16,8 @@ typedef enum {
   ASVideoNodePlayerStateFinished
 } ASVideoNodePlayerState;
 
-=======
 @class AVAsset, AVPlayer, AVPlayerItem;
->>>>>>> facebook/master
+
 @protocol ASVideoNodeDelegate;
 
 // IMPORTANT NOTES:
@@ -31,6 +30,7 @@ typedef enum {
 @property (atomic, strong, readwrite) AVAsset *asset;
 @property (atomic, strong, readonly) AVPlayer *player;
 @property (atomic, strong, readonly) AVPlayerItem *currentItem;
+@property (atomic, strong, readonly) id timeObserver;
 
 // When autoplay is set to true, a video node will play when it has both loaded and entered the "visible" interfaceState.
 // If it leaves the visible interfaceState it will pause but will resume once it has returned
@@ -59,5 +59,6 @@ typedef enum {
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
 - (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate;
 - (BOOL)videoNode:(ASVideoNode*)videoNode shouldChangePlayerStateTo:(ASVideoNodePlayerState)state;
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second;
 @end
 
