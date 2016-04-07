@@ -30,6 +30,7 @@
   - scroll-node
 - title: Layout Engine
   items:
+  - layout-options
   - layout-basics
   - layout-spec
   - stack-layout-spec
@@ -41,7 +42,6 @@
   - static-layout-spec
 - title: Optimizations
   items:
-  - layout-options
   - layer-backing
   - synchronous-concurrency
   - subtree-rasterization
