@@ -407,6 +407,7 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   objc_setAssociatedObject(self, ASDisplayNodeAssociatedNodeKey, node, OBJC_ASSOCIATION_ASSIGN); // Weak reference to avoid cycle, since the node retains the layer.
   
   // Update UIAccessibilityElement properties from node
+  self.accessibilityIdentifier = node.accessibilityIdentifier;
   self.accessibilityLabel = node.accessibilityLabel;
   self.accessibilityHint = node.accessibilityHint;
   self.accessibilityValue = node.accessibilityValue;
