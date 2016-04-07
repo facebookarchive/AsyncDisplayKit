@@ -1,6 +1,6 @@
 ---
 title: Automatic Layout Containers
 layout: docs
-permalink: /docs/layout-specs.html
+permalink: /docs/automatic-layout-containers.html
 ---
 
