@@ -865,6 +865,56 @@ nodeProperty = nodeValueExpr; _setToViewOnly(viewAndPendingViewStateProperty, vi
   _setAccessibilityToViewAndProperty(_accessibilityIdentifier, accessibilityIdentifier, accessibilityIdentifier, accessibilityIdentifier);
 }
 
+- (void)setAccessibilityNavigationStyle:(UIAccessibilityNavigationStyle)accessibilityNavigationStyle
+{
+  _bridge_prologue_write;
+  _setAccessibilityToViewAndProperty(_accessibilityNavigationStyle, accessibilityNavigationStyle, accessibilityNavigationStyle, accessibilityNavigationStyle);
+}
+
+- (UIAccessibilityNavigationStyle)accessibilityNavigationStyle
+{
+  _bridge_prologue_read;
+  return _getAccessibilityFromViewOrProperty(_accessibilityNavigationStyle, accessibilityNavigationStyle);
+}
+
+#if TARGET_OS_TV
+- (void)setAccessibilityHeaderElements:(NSArray *)accessibilityHeaderElements
+{
+  _bridge_prologue_write;
+  _setAccessibilityToViewAndProperty(_accessibilityHeaderElements, accessibilityHeaderElements, accessibilityHeaderElements, accessibilityHeaderElements);
+}
+
+- (NSArray *)accessibilityHeaderElements
+{
+  _bridge_prologue_read;
+  return _getAccessibilityFromViewOrProperty(_accessibilityHeaderElements, accessibilityHeaderElements);
+}
+#endif
+
+- (void)setAccessibilityActivationPoint:(CGPoint)accessibilityActivationPoint
+{
+  _bridge_prologue_write;
+  _setAccessibilityToViewAndProperty(_accessibilityActivationPoint, accessibilityActivationPoint, accessibilityActivationPoint, accessibilityActivationPoint);
+}
+
+- (CGPoint)accessibilityActivationPoint
+{
+  _bridge_prologue_read;
+  return _getAccessibilityFromViewOrProperty(_accessibilityActivationPoint, accessibilityActivationPoint);
+}
+
+- (void)setAccessibilityPath:(UIBezierPath *)accessibilityPath
+{
+  _bridge_prologue_write;
+  _setAccessibilityToViewAndProperty(_accessibilityPath, accessibilityPath, accessibilityPath, accessibilityPath);
+}
+
+- (UIBezierPath *)accessibilityPath
+{
+  _bridge_prologue_read;
+  return _getAccessibilityFromViewOrProperty(_accessibilityPath, accessibilityPath);
+}
+
 - (NSInteger)accessibilityElementCount
 {
   _bridge_prologue_read;

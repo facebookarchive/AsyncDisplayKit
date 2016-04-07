@@ -415,6 +415,10 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(YES, node.accessibilityElementsHidden, @"accessibilityElementsHidden broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.accessibilityViewIsModal, @"accessibilityViewIsModal broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.shouldGroupAccessibilityChildren, @"shouldGroupAccessibilityChildren broken %@", hasLoadedView);
+  XCTAssertEqual(UIAccessibilityNavigationStyleSeparate, node.accessibilityNavigationStyle, @"accessibilityNavigationStyle broken %@", hasLoadedView);
+  XCTAssertTrue(CGPointEqualToPoint(CGPointMake(1.0, 1.0), node.accessibilityActivationPoint), @"accessibilityActivationPoint broken %@", hasLoadedView);
+  XCTAssertNotNil(node.accessibilityPath, @"accessibilityPath broken %@", hasLoadedView);
+  
 
   if (!isLayerBacked) {
     XCTAssertEqual(UIViewAutoresizingFlexibleLeftMargin, node.autoresizingMask, @"autoresizingMask %@", hasLoadedView);
@@ -468,6 +472,9 @@ for (ASDisplayNode *n in @[ nodes ]) {\
     node.accessibilityElementsHidden = YES;
     node.accessibilityViewIsModal = YES;
     node.shouldGroupAccessibilityChildren = YES;
+    node.accessibilityNavigationStyle = UIAccessibilityNavigationStyleSeparate;
+    node.accessibilityActivationPoint = CGPointMake(1.0, 1.0);
+    node.accessibilityPath = [UIBezierPath bezierPath];
 
     if (!isLayerBacked) {
       node.exclusiveTouch = YES;

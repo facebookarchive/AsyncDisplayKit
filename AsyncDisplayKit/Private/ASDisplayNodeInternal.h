@@ -141,6 +141,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   BOOL _accessibilityViewIsModal;
   BOOL _shouldGroupAccessibilityChildren;
   NSString *_accessibilityIdentifier;
+  UIAccessibilityNavigationStyle _accessibilityNavigationStyle;
+  NSArray *_accessibilityHeaderElements;
+  CGPoint _accessibilityActivationPoint;
+  UIBezierPath *_accessibilityPath;
 
 #if TIME_DISPLAYNODE_OPS
 @public
