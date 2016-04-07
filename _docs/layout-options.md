@@ -4,13 +4,13 @@ layout: docs
 permalink: /docs/layout-options.html
 ---
 
-When using ASDK, you have three options for layout. Note that Autolayout is **not** supported by ASDK. 
-
+When using ASDK, you have three options for layout. Note that UIKit Autolayout is **not** supported by ASDK. 
 #Manual Sizing & Layout
 
 This original layout method shipped with ASDK 1.0 and is analogous to UIKit's layout methods. Use this method for for ASViewControllers (unless you subclass the node).
 
 `[ASDisplayNode calculateSizeThatFits:]` **vs.** `[UIView sizeThatFits:]`
+
 `[ASDisplayNode layout]` **vs.** `[UIView layoutSubviews]`
 
 ###Advantages (over UIKit)
@@ -30,12 +30,14 @@ This layout method does not have a UIKit analog. It is implemented by calling
 ###Advantages
 - zero duplication
 - still async, still cached
+
 ###Shortcomings
 - logic is not reusable, and is still manual
 
 # Automatic, Extensible Layout
 
 This is the reccomended layout method. It does not have a UIKit analog and is implemented by calling
+
 `- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constraint`
 ###Advantages
 - can reuse even complex, custom layouts
