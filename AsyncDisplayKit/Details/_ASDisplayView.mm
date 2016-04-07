@@ -395,7 +395,7 @@ static BOOL ASNodeValidForAccessibility(ASDisplayNode *node)
            ((node.accessibilityTraits & UIAccessibilityTraitNone) != UIAccessibilityTraitNone);
   }
   
-  return YES;
+  return NO;
 }
 
 static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
