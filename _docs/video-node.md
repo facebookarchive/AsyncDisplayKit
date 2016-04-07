@@ -14,6 +14,6 @@ Features:
 Gotchas:
 - Applications using ASVideoNode must link AVFoundation!
 
-Exmaples:
+Examples:
 - `examples/videoTableView`
 - `examples/videos`
