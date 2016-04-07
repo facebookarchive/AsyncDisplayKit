@@ -28,6 +28,7 @@
   - scroll-node
 - title: Layout Engine
   items:
+  - layout-basics
   - layout-spec
   - stack-layout-spec
   - inset-layout-spec
