@@ -382,22 +382,6 @@
 
 #pragma mark - Accessibility
 
-static BOOL ASNodeValidForAccessibility(ASDisplayNode *node)
-{
-  if (node.isAccessibilityElement) {
-    return YES;
-  }
-  
-  if (node.isLayerBacked) {
-    // Assume for now that all nodes that have an accessibility label or
-    return node.accessibilityLabel.length > 0 ||
-           node.accessibilityValue.length > 0 ||
-           ((node.accessibilityTraits & UIAccessibilityTraitNone) != UIAccessibilityTraitNone);
-  }
-  
-  return NO;
-}
-
 static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 @implementation UIAccessibilityElement (_ASDisplayView)
@@ -449,7 +433,7 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
       queue.pop();
       
       // Check if we have to add the node to the accessiblity nodes as it's an accessiblity element
-      if (node != selfNode && ASNodeValidForAccessibility(node)) {
+      if (node != selfNode && node.isAccessibilityElement) {
         UIAccessibilityElement *accessibilityElement = [[UIAccessibilityElement alloc] initWithAccessibilityContainer:self];
         accessibilityElement.asyncdisplaykit_node = node;
         [_accessibleElements addObject:accessibilityElement];
@@ -469,7 +453,7 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
     if (!subnode.isAccessibilityElement && [subnode accessibilityElementCount] > 0) {
       // We are good and the view is an UIAccessibilityContainer so add that
       [_accessibleElements addObject:subnode.view];
-    } else if (ASNodeValidForAccessibility(subnode)) {
+    } else if (subnode.isAccessibilityElement) {
       // Create a accessiblity element from the subnode
       UIAccessibilityElement *accessibilityElement = [[UIAccessibilityElement alloc] initWithAccessibilityContainer:self];
       accessibilityElement.asyncdisplaykit_node = subnode;
