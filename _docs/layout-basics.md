@@ -1,7 +1,7 @@
 ---
 title: ASMapNode
 layout: docs
-permalink: /docs/map-node.html
+permalink: /docs/layout-basics.html
 ---
 
 ##Box Model Layout
