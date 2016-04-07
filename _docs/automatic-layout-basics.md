@@ -1,7 +1,7 @@
 ---
-title: Layout Basics
+title: Automatic Layout Basics
 layout: docs
-permalink: /docs/layout-basics.html
+permalink: /docs/automatic-layout-basics.html
 ---
 
 ##Box Model Layout
