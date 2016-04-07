@@ -1,5 +1,5 @@
 ---
 title: Automatic Layout Debugging
 layout: docs
-permalink: /docs/stack-layout-spec.html
+permalink: /docs/automatic-layout-debugging.html
 ---
