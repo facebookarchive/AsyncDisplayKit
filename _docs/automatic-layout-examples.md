@@ -1,6 +1,6 @@
 ---
 title: Automatic Layout Examples
 layout: docs
-permalink: /docs/center-layout-spec.html
+permalink: /docs/automatic-layout-examples.html
 ---
 
