@@ -711,7 +711,7 @@ NS_ASSUME_NONNULL_END
 @property (atomic, assign)           BOOL accessibilityViewIsModal;
 @property (atomic, assign)           BOOL shouldGroupAccessibilityChildren;
 
-@property (nonatomic) UIAccessibilityNavigationStyle accessibilityNavigationStyle NS_AVAILABLE_IOS(8_0);
+@property (nonatomic) UIAccessibilityNavigationStyle accessibilityNavigationStyle;
 #if TARGET_OS_TV
 @property(nullable, nonatomic, copy) NSArray *accessibilityHeaderElements;
 #endif
