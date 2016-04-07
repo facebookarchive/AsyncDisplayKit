@@ -12,8 +12,13 @@
 #import <cstdlib>
 #import <deque>
 
+#define ASRunLoopQueueLoggingEnabled 0
+
 static void runLoopSourceCallback(void *info) {
   // No-op
+#if ASRunLoopQueueLoggingEnabled
+  NSLog(@"<%@> - Called runLoopSourceCallback", info);
+#endif
 }
 
 @interface ASRunLoopQueue () {
@@ -22,6 +27,10 @@ static void runLoopSourceCallback(void *info) {
   CFRunLoopSourceRef _runLoopSource;
   std::deque<id> _internalQueue;
   ASDN::RecursiveMutex _internalQueueLock;
+  
+#if ASRunLoopQueueLoggingEnabled
+  NSTimer *_runloopQueueLoggingTimer;
+#endif
 }
 
 @property (nonatomic, copy) void (^queueConsumer)(id dequeuedItem, BOOL isQueueDrained);
@@ -47,9 +56,17 @@ static void runLoopSourceCallback(void *info) {
     // the queue to stop. Attaching a custom loop source to the run loop and signal it if new work needs to be done
     CFRunLoopSourceContext *runLoopSourceContext = (CFRunLoopSourceContext *)calloc(1, sizeof(CFRunLoopSourceContext));
     runLoopSourceContext->perform = runLoopSourceCallback;
+#if ASRunLoopQueueLoggingEnabled
+    runLoopSourceContext->info = (__bridge void *)self;
+#endif
     _runLoopSource = CFRunLoopSourceCreate(NULL, 0, runLoopSourceContext);
     CFRunLoopAddSource(runloop, _runLoopSource, kCFRunLoopCommonModes);
     free(runLoopSourceContext);
+
+#if ASRunLoopQueueLoggingEnabled
+    _runloopQueueLoggingTimer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(checkRunLoop) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:_runloopQueueLoggingTimer forMode:NSRunLoopCommonModes];
+#endif
   }
   return self;
 }
@@ -68,6 +85,13 @@ static void runLoopSourceCallback(void *info) {
   CFRelease(_runLoopObserver);
   _runLoopObserver = nil;
 }
+
+#if ASRunLoopQueueLoggingEnabled
+- (void)checkRunLoop
+{
+    NSLog(@"<%@> - Jobs: %ld", self, _internalQueue.size());
+}
+#endif
 
 - (void)processQueue
 {
@@ -102,6 +126,12 @@ static void runLoopSourceCallback(void *info) {
       self.queueConsumer(itemsToProcess[i], isQueueDrained);
     }
   }
+
+  // If the queue is not fully drained yet force another run loop to process next batch of items
+  if (!isQueueDrained) {
+    CFRunLoopSourceSignal(_runLoopSource);
+    CFRunLoopWakeUp(_runLoop);
+   }
 }
 
 - (void)enqueue:(id)object

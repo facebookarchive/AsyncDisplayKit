@@ -25,6 +25,7 @@
 
 @interface _ASImageNodeDrawParameters : NSObject
 
+@property (nonatomic, retain) UIImage *image;
 @property (nonatomic, assign) BOOL opaque;
 @property (nonatomic, assign) CGRect bounds;
 @property (nonatomic, assign) CGFloat contentsScale;
@@ -36,11 +37,17 @@
 // TODO: eliminate explicit parameters with a set of keys copied from the node
 @implementation _ASImageNodeDrawParameters
 
-- (id)initWithBounds:(CGRect)bounds opaque:(BOOL)opaque contentsScale:(CGFloat)contentsScale backgroundColor:(UIColor *)backgroundColor contentMode:(UIViewContentMode)contentMode
+- (id)initWithImage:(UIImage *)image
+             bounds:(CGRect)bounds
+             opaque:(BOOL)opaque
+      contentsScale:(CGFloat)contentsScale
+    backgroundColor:(UIColor *)backgroundColor
+        contentMode:(UIViewContentMode)contentMode
 {
-  self = [self init];
-  if (!self) return nil;
+  if (!(self = [self init]))
+    return nil;
 
+  _image = image;
   _opaque = opaque;
   _bounds = bounds;
   _contentsScale = contentsScale;
@@ -93,12 +100,6 @@
   _cropDisplayBounds = CGRectNull;
   _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
   
-  if ([ASImageNode shouldShowImageScalingOverlay]) {
-    _debugLabelNode = [[ASTextNode alloc] init];
-    _debugLabelNode.layerBacked = YES;
-    [self addSubnode:_debugLabelNode];
-  }
-
   return self;
 }
 
@@ -133,8 +134,21 @@
     _image = image;
 
     _imageLock.unlock();
+    
     [self invalidateCalculatedLayout];
-    [self setNeedsDisplay];
+    if (image) {
+      [self setNeedsDisplay];
+      
+      if ([ASImageNode shouldShowImageScalingOverlay]) {
+        ASPerformBlockOnMainThread(^{
+          _debugLabelNode = [[ASTextNode alloc] init];
+          _debugLabelNode.layerBacked = YES;
+          [self addSubnode:_debugLabelNode];
+        });
+      }
+    } else {
+      self.contents = nil;
+    }
   } else {
     _imageLock.unlock(); // We avoid using MutexUnlocker as it needlessly re-locks at the end of the scope.
   }
@@ -156,11 +170,12 @@
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
-  return [[_ASImageNodeDrawParameters alloc] initWithBounds:self.bounds
-                                                     opaque:self.opaque
-                                              contentsScale:self.contentsScaleForDisplay
-                                            backgroundColor:self.backgroundColor
-                                                contentMode:self.contentMode];
+  return [[_ASImageNodeDrawParameters alloc] initWithImage:self.image
+                                                    bounds:self.bounds
+                                                    opaque:self.opaque
+                                             contentsScale:self.contentsScaleForDisplay
+                                           backgroundColor:self.backgroundColor
+                                               contentMode:self.contentMode];
 }
 
 - (NSDictionary *)debugLabelAttributes
@@ -171,21 +186,26 @@
 
 - (UIImage *)displayWithParameters:(_ASImageNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
 {
-  UIImage *image;
-  BOOL cropEnabled;
-  BOOL forceUpscaling;
-  CGFloat contentsScale;
-  CGRect cropDisplayBounds;
-  CGRect cropRect;
+  UIImage *image = parameters.image;
+  if (!image) {
+    return nil;
+  }
+  
+  BOOL forceUpscaling           = NO;
+  BOOL cropEnabled              = NO;
+  BOOL isOpaque                 = parameters.opaque;
+  UIColor *backgroundColor      = parameters.backgroundColor;
+  UIViewContentMode contentMode = parameters.contentMode;
+  CGFloat contentsScale         = 0.0;
+  CGRect cropDisplayBounds      = CGRectZero;
+  CGRect cropRect               = CGRectZero;
   asimagenode_modification_block_t imageModificationBlock;
   
   {
     ASDN::MutexLocker l(_imageLock);
-    image = _image;
-    if (!image) {
-      return nil;
-    }
     
+    // FIXME: There is a small risk of these values changing between the main thread creation of drawParameters, and the execution of this method.
+    // We should package these up into the draw parameters object.  Might be easiest to create a struct for the non-objects and make it one property.
     cropEnabled = _cropEnabled;
     forceUpscaling = _forceUpscaling;
     contentsScale = _contentsScaleForDisplay;
@@ -194,15 +214,11 @@
     imageModificationBlock = _imageModificationBlock;
   }
   
+  BOOL hasValidCropBounds = cropEnabled && !CGRectIsNull(cropDisplayBounds) && !CGRectIsEmpty(cropDisplayBounds);
+  CGRect bounds = (hasValidCropBounds ? cropDisplayBounds : parameters.bounds);
+  
   ASDisplayNodeContextModifier preContextBlock = self.willDisplayNodeContentWithRenderingContext;
   ASDisplayNodeContextModifier postContextBlock = self.didDisplayNodeContentWithRenderingContext;
-  
-  BOOL hasValidCropBounds = cropEnabled && !CGRectIsNull(cropDisplayBounds) && !CGRectIsEmpty(cropDisplayBounds);
-  
-  CGRect bounds = (hasValidCropBounds ? cropDisplayBounds : parameters.bounds);
-  BOOL isOpaque = parameters.opaque;
-  UIColor *backgroundColor = parameters.backgroundColor;
-  UIViewContentMode contentMode = parameters.contentMode;
   
   ASDisplayNodeAssert(contentsScale > 0, @"invalid contentsScale at display time");
   
@@ -232,17 +248,15 @@
     }
   }
   
-  BOOL contentModeSupported =    contentMode == UIViewContentModeScaleAspectFill
-  || contentMode == UIViewContentModeScaleAspectFit
-  || contentMode == UIViewContentModeCenter;
+  BOOL contentModeSupported = contentMode == UIViewContentModeScaleAspectFill ||
+                              contentMode == UIViewContentModeScaleAspectFit ||
+                              contentMode == UIViewContentModeCenter;
   
-  CGSize backingSize;
-  CGRect imageDrawRect;
+  CGSize backingSize   = CGSizeZero;
+  CGRect imageDrawRect = CGRectZero;
   
-  if (boundsSizeInPixels.width * contentsScale < 1.0f ||
-      boundsSizeInPixels.height * contentsScale < 1.0f ||
-      imageSizeInPixels.width < 1.0f ||
-      imageSizeInPixels.height < 1.0f) {
+  if (boundsSizeInPixels.width * contentsScale < 1.0f || boundsSizeInPixels.height * contentsScale < 1.0f ||
+      imageSizeInPixels.width < 1.0f                  || imageSizeInPixels.height < 1.0f) {
     return nil;
   }
   
@@ -260,10 +274,8 @@
                                                  &imageDrawRect);
   }
   
-  if (backingSize.width <= 0.0f ||
-      backingSize.height <= 0.0f ||
-      imageDrawRect.size.width <= 0.0f ||
-      imageDrawRect.size.height <= 0.0f) {
+  if (backingSize.width <= 0.0f        || backingSize.height <= 0.0f ||
+      imageDrawRect.size.width <= 0.0f || imageDrawRect.size.height <= 0.0f) {
     return nil;
   }
   

@@ -90,6 +90,11 @@
     self.keepalive_node = _node;
   }
   else if (currentSuperview && !newSuperview) {
+    // Clearing keepalive_node may cause deallocation of the node.  In this case, __exitHierarchy may not have an opportunity (e.g. _node will be cleared
+    // by the time -didMoveToWindow occurs after this) to clear the Visible interfaceState, which we need to do before deallocation to meet an API guarantee.
+    if (_node.inHierarchy) {
+      [_node __exitHierarchy];
+    }
     self.keepalive_node = nil;
   }
   

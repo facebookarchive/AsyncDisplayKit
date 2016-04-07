@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
-#import "ASVideoNode.h"
+#import <AVFoundation/AVFoundation.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 @interface ASVideoNodeTests : XCTestCase
 {
@@ -20,6 +21,7 @@
 
 @interface ASVideoNode () {
   ASDisplayNode *_playerNode;
+  AVPlayer *_player;
 }
 @property (atomic) ASInterfaceState interfaceState;
 @property (atomic) ASDisplayNode *spinner;
@@ -34,6 +36,11 @@
 - (void)setPlayerNode:(ASDisplayNode *)playerNode
 {
   _playerNode = playerNode;
+}
+
+- (void)setPlayer:(AVPlayer *)player
+{
+  _player = player;
 }
 
 @end
@@ -182,6 +189,25 @@
   [_videoNode interfaceStateDidChange:ASInterfaceStateNone fromState:ASInterfaceStateVisible];
   
   XCTAssertTrue(_videoNode.shouldBePlaying);
+}
+
+- (void)testMutingShouldMutePlayer
+{
+  [_videoNode setPlayer:[[AVPlayer alloc] init]];
+
+  _videoNode.muted = YES;
+
+  XCTAssertTrue(_videoNode.player.muted);
+}
+
+- (void)testUnMutingShouldUnMutePlayer
+{
+  [_videoNode setPlayer:[[AVPlayer alloc] init]];
+
+  _videoNode.muted = YES;
+  _videoNode.muted = NO;
+
+  XCTAssertFalse(_videoNode.player.muted);
 }
 
 @end

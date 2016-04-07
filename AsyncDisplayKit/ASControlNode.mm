@@ -9,6 +9,8 @@
 #import "ASControlNode.h"
 #import "ASControlNode+Subclasses.h"
 #import "ASThread.h"
+#import "ASDisplayNodeExtras.h"
+#import "ASImageNode.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
@@ -73,10 +75,11 @@ static BOOL _enableHitTestDebug = NO;
 
 @implementation ASControlNode
 {
-  ASDisplayNode *_debugHighlightOverlay;
+  ASImageNode *_debugHighlightOverlay;
 }
 
 #pragma mark - Lifecycle
+
 - (id)init
 {
   if (!(self = [super init]))
@@ -88,6 +91,13 @@ static BOOL _enableHitTestDebug = NO;
   self.userInteractionEnabled = NO;
   return self;
 }
+
+- (void)setUserInteractionEnabled:(BOOL)userInteractionEnabled
+{
+  [super setUserInteractionEnabled:userInteractionEnabled];
+  self.isAccessibilityElement = userInteractionEnabled;
+}
+
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
@@ -243,10 +253,10 @@ static BOOL _enableHitTestDebug = NO;
       
       // add a highlight overlay node with area of ASControlNode + UIEdgeInsets
       self.clipsToBounds = NO;
-      _debugHighlightOverlay = [[ASDisplayNode alloc] init];
+      _debugHighlightOverlay = [[ASImageNode alloc] init];
+      _debugHighlightOverlay.zPosition = 1000;  // CALayer doesn't have -moveSublayerToFront, but this will ensure we're over the top of any siblings.
       _debugHighlightOverlay.layerBacked = YES;
-      _debugHighlightOverlay.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.5];
-      
+      _debugHighlightOverlay.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.4];
       [self addSubnode:_debugHighlightOverlay];
     }
   }
@@ -267,16 +277,17 @@ static BOOL _enableHitTestDebug = NO;
       }
 
       // Have we seen this target before for this event?
-      NSMutableArray *targetActions = [eventDispatchTable objectForKey:target];
+      NSMutableSet *targetActions = [eventDispatchTable objectForKey:target];
       if (!targetActions)
       {
-        // Nope. Create an actions array for it.
-        targetActions = [[NSMutableArray alloc] initWithCapacity:kASControlNodeActionDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
+        // Nope. Create an action set for it.
+        targetActions = [[NSMutableSet alloc] initWithCapacity:kASControlNodeActionDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
         [eventDispatchTable setObject:targetActions forKey:target];
       }
 
       // Add the action message.
-      // Note that bizarrely enough UIControl (at least according to the docs) supports duplicate target-action pairs for a particular control event, so we replicate that behavior.
+      // UIControl does not support duplicate target-action-events entries, so we replicate that behavior.
+      // See: https://github.com/facebook/AsyncDisplayKit/files/205466/DuplicateActionsTest.playground.zip
       [targetActions addObject:NSStringFromSelector(action)];
     });
 
@@ -361,7 +372,7 @@ static BOOL _enableHitTestDebug = NO;
       if (!target)
       {
         // Look at every target, removing target-pairs that have action (or all of its actions).
-        for (id aTarget in eventDispatchTable)
+        for (id aTarget in [eventDispatchTable copy])
           removeActionFromTarget(aTarget, action);
       }
       else
@@ -453,12 +464,35 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   [super layout];
   
   if (_debugHighlightOverlay) {
-    UIEdgeInsets insets = [self hitTestSlop];
-    CGRect controlNodeRect = self.bounds;
-    _debugHighlightOverlay.frame = CGRectMake(controlNodeRect.origin.x + insets.left,
-                                              controlNodeRect.origin.y + insets.top,
-                                              controlNodeRect.size.width - insets.left - insets.right,
-                                              controlNodeRect.size.height - insets.top - insets.bottom);
+    
+    // Even if our parents don't have clipsToBounds set and would allow us to display the debug overlay, UIKit event delivery (hitTest:)
+    // will not search sub-hierarchies if one of our parents does not return YES for pointInside:.  In such a scenario, hitTestSlop
+    // may not be able to expand the tap target as much as desired without also setting some hitTestSlop on the limiting parents.
+    CGRect intersectRect = UIEdgeInsetsInsetRect(self.bounds, [self hitTestSlop]);
+    CALayer *layer = self.layer;
+    CALayer *intersectLayer = layer;
+    CALayer *intersectSuperlayer = layer.superlayer;
+    
+    // Stop climbing if we encounter a UIScrollView, as its offset bounds origin may make it seem like our events will be clipped when
+    // scrolling will actually reveal them (because this process will not re-run due to scrolling)
+    while (intersectSuperlayer && ![intersectSuperlayer.delegate respondsToSelector:@selector(contentOffset)]) {
+      // Get our parent's tappable bounds.  If the parent has an associated node, consider hitTestSlop, as it will extend its pointInside:.
+      CGRect parentHitRect = intersectSuperlayer.bounds;
+      ASDisplayNode *parentNode = ASLayerToDisplayNode(intersectSuperlayer);
+      if (parentNode) {
+        parentHitRect = UIEdgeInsetsInsetRect(parentHitRect, [parentNode hitTestSlop]);
+      }
+      
+      // Convert our current rectangle to parent coordinates, and intersect with the parent's hit rect.
+      CGRect intersectRectInParentCoordinates = [intersectSuperlayer convertRect:intersectRect fromLayer:intersectLayer];
+      intersectRect = CGRectIntersection(parentHitRect, intersectRectInParentCoordinates);
+
+      // Advance up the tree.
+      intersectLayer = intersectSuperlayer;
+      intersectSuperlayer = intersectLayer.superlayer;
+    }
+    
+    _debugHighlightOverlay.frame = [intersectLayer convertRect:intersectRect toLayer:layer];
   }
 }
 
@@ -466,6 +500,5 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
   _enableHitTestDebug = enable;
 }
-
 
 @end

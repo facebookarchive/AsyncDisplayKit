@@ -8,7 +8,7 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutSpec.h>
+#import <AsyncDisplayKit/ASRelativeLayoutSpec.h>
 
 /** How the child is centered within the spec. */
 typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecCenteringOptions) {
@@ -25,19 +25,22 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecCenteringOptions) {
 /** How much space the spec will take up. */
 typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
   /** The spec will take up the maximum size possible */
-  ASCenterLayoutSpecSizingOptionDefault,
+  ASCenterLayoutSpecSizingOptionDefault = ASRelativeLayoutSpecSizingOptionDefault,
   /** The spec will take up the minimum size possible along the X axis */
-  ASCenterLayoutSpecSizingOptionMinimumX = 1 << 0,
+  ASCenterLayoutSpecSizingOptionMinimumX = ASRelativeLayoutSpecSizingOptionMinimumWidth,
   /** The spec will take up the minimum size possible along the Y axis */
-  ASCenterLayoutSpecSizingOptionMinimumY = 1 << 1,
+  ASCenterLayoutSpecSizingOptionMinimumY = ASRelativeLayoutSpecSizingOptionMinimumHeight,
   /** Convenience option to take up the minimum size along both the X and Y axis */
-  ASCenterLayoutSpecSizingOptionMinimumXY = ASCenterLayoutSpecSizingOptionMinimumX | ASCenterLayoutSpecSizingOptionMinimumY,
+  ASCenterLayoutSpecSizingOptionMinimumXY = ASRelativeLayoutSpecSizingOptionMinimumSize
 };
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** Lays out a single layoutable child and position it so that it is centered into the layout bounds. */
-@interface ASCenterLayoutSpec : ASLayoutSpec
+/** Lays out a single layoutable child and position it so that it is centered into the layout bounds.
+  * NOTE: ASRelativeLayoutSpec offers all of the capabilities of Center, and more.
+  * Check it out if you would like to be able to position the child at any corner or the middle of an edge.
+ */
+@interface ASCenterLayoutSpec : ASRelativeLayoutSpec
 
 @property (nonatomic, assign) ASCenterLayoutSpecCenteringOptions centeringOptions;
 @property (nonatomic, assign) ASCenterLayoutSpecSizingOptions sizingOptions;
