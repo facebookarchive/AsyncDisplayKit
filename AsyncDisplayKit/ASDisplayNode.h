@@ -695,6 +695,10 @@ NS_ASSUME_NONNULL_END
 - (nullable UIView *)preferredFocusedView;
 #endif
 
+@end
+
+@interface ASDisplayNode (UIViewBridgeAccessibility)
+
 // Accessibility support
 @property (atomic, assign)           BOOL isAccessibilityElement;
 @property (nullable, atomic, copy)   NSString *accessibilityLabel;

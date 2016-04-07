@@ -129,6 +129,19 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASDisplayNodeContextModifier _willDisplayNodeContentWithRenderingContext;
   ASDisplayNodeContextModifier _didDisplayNodeContentWithRenderingContext;
 
+  // Accessibility support
+  BOOL _isAccessibilityElement;
+  NSString *_accessibilityLabel;
+  NSString *_accessibilityHint;
+  NSString *_accessibilityValue;
+  UIAccessibilityTraits _accessibilityTraits;
+  CGRect _accessibilityFrame;
+  NSString *_accessibilityLanguage;
+  BOOL _accessibilityElementsHidden;
+  BOOL _accessibilityViewIsModal;
+  BOOL _shouldGroupAccessibilityChildren;
+  NSString *_accessibilityIdentifier;
+
 #if TIME_DISPLAYNODE_OPS
 @public
   NSTimeInterval _debugTimeToCreateView;
