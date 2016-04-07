@@ -17,8 +17,9 @@
 #import "ASSentinel.h"
 #import "ASThread.h"
 #import "_ASTransitionContext.h"
-#import "ASDisplayNodeLayoutContext.h"
+#import "ASLayoutTransition.h"
 #import "ASEnvironment.h"
+#import "ASTranslationRange.h"
 
 #include <vector>
 
@@ -99,6 +100,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
   ASEnvironmentState _environmentState;
   ASLayout *_layout;
+  ASTranslationRange *_layoutRange;
 
   ASSizeRange _constrainedSize;
 
@@ -110,7 +112,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   BOOL _usesImplicitHierarchyManagement;
 
   int32_t _pendingTransitionID;
-  ASDisplayNodeLayoutContext *_pendingLayoutContext;
+  ASLayoutTransition *_pendingLayoutTransition;
   
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
@@ -148,6 +150,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 @property (nonatomic, assign) CGRect threadSafeBounds;
 
+@property (nonatomic, readonly) ASTranslationRange *layoutRange;
 
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;
