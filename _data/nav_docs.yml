@@ -1,5 +1,7 @@
 - title: Quick Start
   items:
+  - philosophy
+  - installation
   - getting-started
 - title: Core Concepts
   items:
@@ -28,15 +30,11 @@
   - scroll-node
 - title: Layout Engine
   items:
-  - layout-basics
-  - layout-spec
-  - stack-layout-spec
-  - inset-layout-spec
-  - background-layout-spec
-  - center-layout-spec
-  - overlay-layout-spec
-  - relative-layout-spec
-  - static-layout-spec
+  - layout-options
+  - automatic-layout-basics
+  - automatic-layout-containers
+  - automatic-layout-examples
+  - automatic-layout-debugging
 - title: Optimizations
   items:
   - layer-backing
