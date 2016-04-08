@@ -39,7 +39,7 @@ typedef enum {
 
 @property (nonatomic, assign, readwrite) BOOL muted;
 
-@property (nonatomic, assign, readwrite) ASVideoNodePlayerState playerState;
+@property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
 
 @property (atomic) NSString *gravity;
 @property (atomic) ASButtonNode *playButton;

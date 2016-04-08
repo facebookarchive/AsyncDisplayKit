@@ -68,7 +68,7 @@
   if (!(newState & ASInterfaceStateVisible)) {
     if (oldState & ASInterfaceStateVisible) {
       if (_shouldBePlaying) {
-        self.playerState = ASVideoNodePlayerStatePaused;
+        [self pause];
         _shouldBePlaying = YES;
       }
       [(UIActivityIndicatorView *)_spinner.view stopAnimating];
@@ -76,7 +76,7 @@
     }
   } else {
     if (_shouldBePlaying) {
-      self.playerState = ASVideoNodePlayerStatePlaying;
+      [self play];
     }
   }
 }
@@ -104,9 +104,9 @@
     [_player seekToTime:CMTimeMakeWithSeconds(0, 1)];
     
     if (_shouldAutorepeat) {
-      self.playerState = ASVideoNodePlayerStatePlaying;
+      [self play];
     } else {
-      self.playerState = ASVideoNodePlayerStateFinished;
+      [self pause];
     }
   }
 }
@@ -185,9 +185,9 @@
     [_delegate videoNodeWasTapped:self];
   } else {
     if (_shouldBePlaying) {
-      self.playerState = ASVideoNodePlayerStatePaused;
+      [self pause];
     } else {
-      self.playerState = ASVideoNodePlayerStatePlaying;
+      [self play];
     }
   }
 }
@@ -256,7 +256,7 @@
   ASDN::MutexLocker l(_videoLock);
   
   if (_shouldAutoplay && _playerNode.isNodeLoaded) {
-    self.playerState = ASVideoNodePlayerStatePlaying;
+    [self play];
   } else if (_shouldAutoplay) {
     _shouldBePlaying = YES;
   }
@@ -270,7 +270,7 @@
     }
   
     if (_shouldBePlaying) {
-      self.playerState = ASVideoNodePlayerStatePlaying;
+      [self play];
     }
   }
 }
@@ -279,30 +279,14 @@
 - (void)setPlayerState:(ASVideoNodePlayerState)playerState{
   ASDN::MutexLocker l(_videoLock);
   
-  if([_delegate respondsToSelector:@selector(videoNode:shouldChangePlayerStateTo:)]){
-    if(![_delegate videoNode:self shouldChangePlayerStateTo:playerState]){
-      return;
-    }
-  }
-  
   ASVideoNodePlayerState oldState = _playerState;
-  
+
   if ([_delegate respondsToSelector:@selector(videoNode:willChangePlayerState:toState:)]) {
     [_delegate videoNode:self willChangePlayerState:oldState toState:playerState];
   }
   
   _playerState = playerState;
-  switch (_playerState) {
-    case ASVideoNodePlayerStatePlaying:
-      [self play];
-      break;
-    case ASVideoNodePlayerStatePaused:
-    case ASVideoNodePlayerStateFinished:
-      [self pause];
-      break;
-    default:
-      break;
-  }
+  
 }
 
 - (void)setPlayButton:(ASButtonNode *)playButton
@@ -391,6 +375,10 @@
 {
   ASDN::MutexLocker l(_videoLock);
   
+  if(![self isStateChangeValid:ASVideoNodePlayerStatePlaying]){
+    return;
+  }
+  
   if (!_spinner) {
     _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
       UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
@@ -419,6 +407,7 @@
     }
   }
   
+  self.playerState = ASVideoNodePlayerStatePlaying;
   [_player play];
   _shouldBePlaying = YES;
   
@@ -440,7 +429,10 @@
 - (void)pause
 {
   ASDN::MutexLocker l(_videoLock);
-  
+  if(![self isStateChangeValid:ASVideoNodePlayerStatePaused]){
+    return;
+  }
+  self.playerState = ASVideoNodePlayerStatePaused;
   [_player pause];
   [((UIActivityIndicatorView *)_spinner.view) stopAnimating];
   _shouldBePlaying = NO;
@@ -454,6 +446,15 @@
   ASDN::MutexLocker l(_videoLock);
   
   return (_player.rate > 0 && !_player.error);
+}
+
+- (BOOL)isStateChangeValid:(ASVideoNodePlayerState)state{
+  if([_delegate respondsToSelector:@selector(videoNode:shouldChangePlayerStateTo:)]){
+    if(![_delegate videoNode:self shouldChangePlayerStateTo:state]){
+      return NO;
+    }
+  }
+  return YES;
 }
 
 #pragma mark - Property Accessors for Tests
