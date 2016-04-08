@@ -1,9 +1,10 @@
 ---
-title: Debug Tool: Visualize ASRangeController tuning parameters (PR #1390)
+title: Debug Tool: Visualize ASRangeController tuning parameters
 layout: docs
 permalink: /docs/debug-tool-ASRangeController.html
 ---
-### Description 
+##Visualize ASRangeController tuning parameters (PR #1390)
+###Description 
 This debug feature adds a semi-transparent subview in the bottom right hand corner of the sharedApplication keyWindow that visualizes the ASRangeTuningParameters per each ASLayoutRangeType for each visible (on-screen) instance of ASRangeController. 
 
 - The instances of ASRangeController are represented as bars
