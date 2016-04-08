@@ -46,8 +46,8 @@ typedef enum {
 
 @property (atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
 
-- (void)play ASDISPLAYNODE_DEPRECATED;
-- (void)pause ASDISPLAYNODE_DEPRECATED;
+- (void)play;
+- (void)pause;
 
 - (BOOL)isPlaying;
 
