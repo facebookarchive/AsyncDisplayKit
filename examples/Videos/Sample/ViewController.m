@@ -12,7 +12,6 @@
 #import "ViewController.h"
 
 @interface ViewController()<ASVideoNodeDelegate>
-@property (nonatomic) ASVideoNode *videoNode;
 @end
 
 @implementation ViewController
@@ -82,20 +81,6 @@
   simonVideo.shouldAutoplay = YES;
   
   return simonVideo;
-}
-
-- (ASButtonNode *)playButton;
-{
-  ASButtonNode *playButton = [[ASButtonNode alloc] init];
-  
-  UIImage *image = [UIImage imageNamed:@"playButton@2x.png"];
-  [playButton setImage:image forState:ASControlStateNormal];
-  [playButton measure:CGSizeMake(50, 50)];
-  playButton.bounds = CGRectMake(0, 0, playButton.calculatedSize.width, playButton.calculatedSize.height);
-  playButton.position = CGPointMake([UIScreen mainScreen].bounds.size.width/4, ([UIScreen mainScreen].bounds.size.height/3)/2);
-  [playButton setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:ASControlStateHighlighted];
-
-  return playButton;
 }
 
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode

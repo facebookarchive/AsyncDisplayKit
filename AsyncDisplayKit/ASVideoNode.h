@@ -11,6 +11,8 @@
 @class AVAsset, AVPlayer, AVPlayerItem;
 @protocol ASVideoNodeDelegate;
 
+NS_ASSUME_NONNULL_BEGIN
+
 // IMPORTANT NOTES:
 // 1. Applications using ASVideoNode must link AVFoundation! (this provides the AV* classes below)
 // 2. This is a relatively new component of AsyncDisplayKit.  It has many useful features, but
@@ -18,21 +20,25 @@
 //    in an issue on GitHub: https://github.com/facebook/AsyncDisplayKit/issues
 
 @interface ASVideoNode : ASControlNode
-@property (atomic, strong, readwrite) AVAsset *asset;
-@property (atomic, strong, readonly) AVPlayer *player;
-@property (atomic, strong, readonly) AVPlayerItem *currentItem;
+@property (nullable, atomic, strong) AVAsset *asset;
+@property (nullable, atomic, strong, readonly) AVPlayer *player;
+@property (nullable, atomic, strong, readonly) AVPlayerItem *currentItem;
 
-// When autoplay is set to true, a video node will play when it has both loaded and entered the "visible" interfaceState.
-// If it leaves the visible interfaceState it will pause but will resume once it has returned
-@property (nonatomic, assign, readwrite) BOOL shouldAutoplay;
-@property (nonatomic, assign, readwrite) BOOL shouldAutorepeat;
+/** 
+* When shouldAutoplay is set to true, a video node will play when it has both loaded and entered the "visible" interfaceState.
+* If it leaves the visible interfaceState it will pause but will resume once it has returned.
+*/
+@property (nonatomic) BOOL shouldAutoplay;
+@property (nonatomic) BOOL shouldAutorepeat;
+@property (nonatomic) BOOL muted;
 
-@property (nonatomic, assign, readwrite) BOOL muted;
+//! Defaults to AVLayerVideoGravityResizeAspect
+@property (atomic, strong) NSString *gravity;
 
-@property (atomic) NSString *gravity;
-@property (atomic) ASButtonNode *playButton;
+//! Defaults to an ASDefaultPlayButton instance.
+@property (nullable, atomic, strong) ASButtonNode *playButton;
 
-@property (atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
+@property (nullable, atomic, weak) id<ASVideoNodeDelegate> delegate;
 
 - (void)play;
 - (void)pause;
@@ -47,3 +53,4 @@
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
 @end
 
+NS_ASSUME_NONNULL_END
