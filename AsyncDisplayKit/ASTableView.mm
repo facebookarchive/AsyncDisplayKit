@@ -700,20 +700,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 }
 
 
-#pragma mark - 
-#pragma mark Batch Fetching
+#pragma mark - Batch Fetching
 
 - (void)_checkForBatchFetching
 {
   // Dragging will be handled in scrollViewWillEndDragging:withVelocity:targetContentOffset:
-  if ([self isDragging] || [self isTracking] || ![self _shouldBatchFetch]) {
+  if ([self isDragging] || [self isTracking]) {
     return;
   }
   
-  // Check if we should batch fetch
-  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollableDirections], self.bounds, self.contentSize, self.contentOffset, _leadingScreensForBatching)) {
-    [self _beginBatchFetching];
-  }
+  [self _beginBatchFetchingIfNeededForScrollDirection:[self scrollableDirections] contentOffset:self.contentOffset];
 }
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
@@ -724,7 +720,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   );
 
   if (targetContentOffset != NULL) {
-    [self _handleBatchFetchScrollingToOffset:*targetContentOffset];
+    ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
+    [self _beginBatchFetchingIfNeededForScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
   }
 
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
@@ -732,15 +729,14 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
-- (void)_handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
+- (void)_beginBatchFetchingIfNeededForScrollDirection:(ASScrollDirection)scrollDirection contentOffset:(CGPoint)contentOffset
 {
-  ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
-
   if (![self _shouldBatchFetch]) {
     return;
   }
-
-  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
+  
+  // Check if we should batch fetch
+  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollableDirections], self.bounds, self.contentSize, self.contentOffset, _leadingScreensForBatching)) {
     [self _beginBatchFetching];
   }
 }
