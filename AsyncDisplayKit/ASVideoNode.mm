@@ -28,13 +28,11 @@
   AVPlayer *_player;
   
   ASImageNode *_placeholderImageNode;
-  
   ASButtonNode *_playButton;
   ASDisplayNode *_playerNode;
   ASDisplayNode *_spinner;
+
   NSString *_gravity;
-  
-  dispatch_queue_t _previewQueue;
 }
 
 @end
@@ -46,8 +44,6 @@
   if (!(self = [super init])) {
     return nil;
   }
-    
-  _previewQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
   
   self.playButton = [[ASDefaultPlayButton alloc] init];
   
@@ -58,37 +54,17 @@
   return self;
 }
 
-- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
-  [super interfaceStateDidChange:newState fromState:oldState];
-  
-  if (!(newState & ASInterfaceStateVisible)) {
-    if (oldState & ASInterfaceStateVisible) {
-      if (_shouldBePlaying) {
-        [self pause];
-        _shouldBePlaying = YES;
-      }
-      [(UIActivityIndicatorView *)_spinner.view stopAnimating];
-      [_spinner removeFromSupernode];
-    }
-  } else {
-    if (_shouldBePlaying) {
-      [self play];
-    }
-  }
+  ASDisplayNodeAssertNotSupported();
+  return nil;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  if ([change[@"new"] integerValue] == AVPlayerItemStatusReadyToPlay) {
-    if ([self.subnodes containsObject:_spinner]) {
-      [_spinner removeFromSupernode];
-      _spinner = nil;
-    }
-  }
-  
-  if ([change[@"new"] integerValue] == AVPlayerItemStatusFailed) {
-    
+  if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
+    [_spinner removeFromSupernode];
+    _spinner = nil;
   }
 }
 
@@ -98,7 +74,7 @@
     if ([_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)]) {
       [_delegate videoPlaybackDidFinish:self];
     }
-    [_player seekToTime:CMTimeMakeWithSeconds(0, 1)];
+    [_player seekToTime:kCMTimeZero];
     
     if (_shouldAutorepeat) {
       [self play];
@@ -132,48 +108,6 @@
 {
   [super didLoad];
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
-
-  if (_shouldBePlaying) {
-    _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
-      AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
-      if (!_player) {
-        _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
-        _player.muted = _muted;
-      }
-      playerLayer.player = _player;
-      playerLayer.videoGravity = [self gravity];
-      return playerLayer;
-    }];
-    
-    [self insertSubnode:_playerNode atIndex:0];
-  } else {
-    dispatch_async(_previewQueue, ^{
-      AVAssetImageGenerator *imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:_asset];
-      imageGenerator.appliesPreferredTrackTransform = YES;
-      [imageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:CMTimeMake(0, 1)]] completionHandler:^(CMTime requestedTime, CGImageRef  _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
-        UIImage *theImage = [UIImage imageWithCGImage:image];
-        
-        _placeholderImageNode = [[ASImageNode alloc] init];
-        _placeholderImageNode.layerBacked = YES;
-        _placeholderImageNode.image = theImage;
-        
-        if ([_gravity isEqualToString:AVLayerVideoGravityResize]) {
-          _placeholderImageNode.contentMode = UIViewContentModeRedraw;
-        }
-        if ([_gravity isEqualToString:AVLayerVideoGravityResizeAspect]) {
-          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFit;
-        }
-        if ([_gravity isEqual:AVLayerVideoGravityResizeAspectFill]) {
-          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFill;
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-          _placeholderImageNode.frame = self.bounds;
-          [self insertSubnode:_placeholderImageNode atIndex:0];
-        });
-      }];
-    });
-  }
 }
 
 - (void)tapped
@@ -189,33 +123,27 @@
   }
 }
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  ASDisplayNodeAssertNotSupported();
-  return nil;
-}
-
 - (void)fetchData
 {
   [super fetchData];
 
-  @try {
-    [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
-  }
-  @catch (NSException * __unused exception) {
-    NSLog(@"unnecessary removal in fetch data");
-  }
-
   {
     ASDN::MutexLocker l(_videoLock);
-    _currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
-    [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
 
-    if (_player) {
+    if (_asset == nil) {
+        return;
+    }
+
+    self.currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
+
+    if (_player != nil) {
       [_player replaceCurrentItemWithPlayerItem:_currentItem];
     } else {
-      _player = [[AVPlayer alloc] initWithPlayerItem:_currentItem];
-      _player.muted = _muted;
+      self.player = [[AVPlayer alloc] initWithPlayerItem:_currentItem];
+    }
+
+    if (_placeholderImageNode.image == nil) {
+      [self generatePlaceholderImage];
     }
   }
 }
@@ -226,8 +154,10 @@
   
   {
     ASDN::MutexLocker l(_videoLock);
-    ((AVPlayerLayer *)_playerNode.layer).player = nil;
-    _player = nil;
+
+    self.player = nil;
+    self.currentItem = nil;
+    _placeholderImageNode.image = nil;
   }
 }
 
@@ -236,24 +166,14 @@
   [super visibilityDidChange:isVisible];
   
   ASDN::MutexLocker l(_videoLock);
-  
-  if (_shouldAutoplay && _playerNode.isNodeLoaded) {
-    [self play];
-  } else if (_shouldAutoplay) {
-    _shouldBePlaying = YES;
-  }
+
   if (isVisible) {
-    if (_playerNode.isNodeLoaded) {
-      if (!_player) {
-        _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
-        _player.muted = _muted;
-      }
-      ((AVPlayerLayer *)_playerNode.layer).player = _player;
-    }
-  
-    if (_shouldBePlaying) {
+    if (_shouldBePlaying || _shouldAutoplay) {
       [self play];
     }
+  } else if (_shouldBePlaying) {
+    [self pause];
+    _shouldBePlaying = YES;
   }
 }
 
@@ -263,6 +183,9 @@
 {
   ASDN::MutexLocker l(_videoLock);
   
+  [_playButton removeTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
+  [_playButton removeFromSupernode];
+
   _playButton = playButton;
   
   [self addSubnode:playButton];
@@ -287,12 +210,15 @@
       && ASObjectIsEqual(((AVURLAsset *)asset).URL, ((AVURLAsset *)_asset).URL))) {
     return;
   }
-  
+
+  [self clearFetchedData];
+
   _asset = asset;
-  
-  // FIXME: Adopt -setNeedsFetchData when it is available
-  if (self.interfaceState & ASInterfaceStateFetchData) {
-    [self fetchData];
+
+  [self setNeedsDataFetch];
+
+  if (_asset != nil && _shouldAutoplay) {
+      [self play];
   }
 }
 
@@ -300,6 +226,15 @@
 {
   ASDN::MutexLocker l(_videoLock);
   return _asset;
+}
+
+- (void)setPlayer:(AVPlayer *)player
+{
+  ASDN::MutexLocker l(_videoLock);
+
+  _player = player;
+  player.muted = _muted;
+  ((AVPlayerLayer *)_playerNode.layer).player = player;
 }
 
 - (AVPlayer *)player
@@ -311,10 +246,11 @@
 - (void)setGravity:(NSString *)gravity
 {
   ASDN::MutexLocker l(_videoLock);
-  if (_playerNode.isNodeLoaded) {
-    ((AVPlayerLayer *)_playerNode.layer).videoGravity = gravity;
-  }
+
   _gravity = gravity;
+
+  ((AVPlayerLayer *)_playerNode.layer).videoGravity = gravity;
+  _placeholderImageNode.contentMode = [self contentModeFromVideoGravity:gravity];
 }
 
 - (NSString *)gravity
@@ -344,35 +280,26 @@
 - (void)play
 {
   ASDN::MutexLocker l(_videoLock);
-  
-  if (!_spinner) {
-    _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-      UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
-      spinnnerView.color = [UIColor whiteColor];
-      
-      return spinnnerView;
-    }];
+
+  if (_player == nil) {
+    [self setNeedsDataFetch];
   }
-  
-  if (!_playerNode) {
+
+  if (_playerNode == nil) {
     _playerNode = [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
       AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
-      if (!_player) {
-        _player = [AVPlayer playerWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:_asset]];
-        _player.muted = _muted;
-      }
       playerLayer.player = _player;
-      playerLayer.videoGravity = [self gravity];
+      playerLayer.videoGravity = _gravity;
       return playerLayer;
     }];
-    
-    if ([self.subnodes containsObject:_playButton]) {
+
+    if (_playButton.supernode == self) {
       [self insertSubnode:_playerNode belowSubnode:_playButton];
     } else {
       [self addSubnode:_playerNode];
     }
   }
-  
+
   [_player play];
   _shouldBePlaying = YES;
   
@@ -380,8 +307,18 @@
     _playButton.alpha = 0.0;
   }];
   
-  if (![self ready] && _shouldBePlaying && (self.interfaceState & ASInterfaceStateVisible)) {
-    [self addSubnode:_spinner];
+  if (![self ready]) {
+    if (!_spinner) {
+      _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
+        UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
+        spinnnerView.color = [UIColor whiteColor];
+
+        return spinnnerView;
+      }];
+
+      [self addSubnode:_spinner];
+    }
+
     [(UIActivityIndicatorView *)_spinner.view startAnimating];
   }
 }
@@ -410,12 +347,18 @@
   return (_player.rate > 0 && !_player.error);
 }
 
-#pragma mark - Property Accessors for Tests
+#pragma mark - Internal Properties
 
 - (ASDisplayNode *)spinner
 {
   ASDN::MutexLocker l(_videoLock);
   return _spinner;
+}
+
+- (ASImageNode *)placeholderImageNode
+{
+  ASDN::MutexLocker l(_videoLock);
+  return _placeholderImageNode;
 }
 
 - (AVPlayerItem *)currentItem
@@ -427,7 +370,17 @@
 - (void)setCurrentItem:(AVPlayerItem *)currentItem
 {
   ASDN::MutexLocker l(_videoLock);
+
+  @try {
+    [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
+  }
+  @catch (NSException * __unused exception) {
+    NSLog(@"Unnecessary KVO observer removal in set current item");
+  }
+
   _currentItem = currentItem;
+
+  [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
 }
 
 - (ASDisplayNode *)playerNode
@@ -446,12 +399,72 @@
 
 - (void)dealloc
 {
+  [_playButton removeTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
   [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+
   @try {
     [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
   }
   @catch (NSException * __unused exception) {
-    NSLog(@"unnecessary removal in dealloc");
+    NSLog(@"Unnecessary KVO observer removal in dealloc");
+  }
+}
+
+#pragma mark - Placeholder Image Generation
+
+- (void)generatePlaceholderImage
+{
+  ASVideoNode *__weak weakSelf = self;
+
+  [self generatePlaceholderImage:_asset completion:^(AVAsset *asset, UIImage *image) {
+    ASPerformBlockOnMainThread(^{
+      if (weakSelf.asset == asset) {
+        [weakSelf setPlaceholderImage:image];
+      }
+    });
+  }];
+}
+
+// TODO: Provide a way to override placeholder image generation. Either by subclassing or delegation.
+- (void)generatePlaceholderImage:(AVAsset *)asset completion:(void(^)(AVAsset *asset, UIImage *image))completion
+{
+  ASPerformBlockOnBackgroundThread(^{
+    AVAssetImageGenerator *previewImageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
+    previewImageGenerator.appliesPreferredTrackTransform = YES;
+
+    [previewImageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:kCMTimeZero]] completionHandler:^(CMTime requestedTime, CGImageRef _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
+      if (error != nil && result != AVAssetImageGeneratorCancelled) {
+        ASMultiplexImageNodeLogError(@"Asset preview image generation failed with error: %@", error);
+      }
+      completion(asset, image ? [UIImage imageWithCGImage:image] : nil);
+    }];
+  });
+}
+
+- (void)setPlaceholderImage:(UIImage *)image
+{
+  ASDN::MutexLocker l(_videoLock);
+
+  if (_placeholderImageNode == nil) {
+    _placeholderImageNode = [[ASImageNode alloc] init];
+    _placeholderImageNode.layerBacked = YES;
+    _placeholderImageNode.contentMode = [self contentModeFromVideoGravity:_gravity];
+    _placeholderImageNode.frame = self.bounds;
+
+    [self insertSubnode:_placeholderImageNode atIndex:0];
+  }
+
+  _placeholderImageNode.image = image;
+}
+
+- (UIViewContentMode)contentModeFromVideoGravity:(NSString *)videoGravity
+{
+  if ([videoGravity isEqualToString:AVLayerVideoGravityResizeAspect]) {
+    return UIViewContentModeScaleAspectFit;
+  } else if ([videoGravity isEqual:AVLayerVideoGravityResizeAspectFill]) {
+    return UIViewContentModeScaleAspectFill;
+  } else {
+    return UIViewContentModeScaleToFill;
   }
 }
 
