@@ -1,5 +1,5 @@
 ---
-title: Debug Tool: Visualize ASRangeController tuning parameters
+title: Visualize ASRangeController tuning parameters (Debug Tool)
 layout: docs
 permalink: /docs/debug-tool-ASRangeController.html
 ---
