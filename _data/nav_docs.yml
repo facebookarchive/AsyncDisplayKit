@@ -44,6 +44,7 @@
   - drawing-priority
 - title: Conveniences
   items:
-  - debugging
-  - hit-test-slop
+  - debug-tool-pixel-scaling
+  - debug-tool-hit-test-slop
+  - debug-tool-ASRangeController
   - placeholder-fade-duration
