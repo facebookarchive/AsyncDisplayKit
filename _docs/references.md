@@ -1,3 +1,9 @@
+---
+title: References
+layout: docs
+permalink: /docs/references.html
+next: installation.html
+---
 
 ###Join our Slack!
 
