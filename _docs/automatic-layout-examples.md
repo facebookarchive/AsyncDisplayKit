@@ -1,5 +1,5 @@
 ---
-title: Automatic Layout Examples
+title: Layout Examples
 layout: docs
 permalink: /docs/automatic-layout-examples.html
 ---

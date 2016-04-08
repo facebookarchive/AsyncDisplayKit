@@ -1,8 +1,8 @@
 - title: Quick Start
   items:
+  - getting-started
   - philosophy
   - installation
-  - getting-started
   - references
 - title: Core Concepts
   items:
@@ -44,7 +44,11 @@
   - drawing-priority
 - title: Conveniences
   items:
+  - hit-test-slop
+  - image-modification-block
+  - placeholder-fade-duration
+- title: Debug Tools
+  items:
   - debug-tool-pixel-scaling
   - debug-tool-hit-test-slop
   - debug-tool-ASRangeController
-  - placeholder-fade-duration

@@ -1,5 +1,5 @@
 ---
-title: Automatic Layout Basics
+title: Layout Basics
 layout: docs
 permalink: /docs/automatic-layout-basics.html
 ---

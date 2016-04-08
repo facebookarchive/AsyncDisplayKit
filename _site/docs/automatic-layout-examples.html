@@ -2,16 +2,16 @@
 <html prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset='utf-8'>
-    <title>AsyncDisplayKit | ASScrollNode</title>
+    <title>AsyncDisplayKit | Layout Examples</title>
     <link rel='stylesheet' href='/static/main.css' type='text/css'/>
     <link rel="stylesheet" href='/static/pygments.css' type='text/css'/>
     <link rel='shortcut icon' href='/static/favicon.png'>
     <meta name='viewport' content='width=480'>
-    <meta property="og:title" content="ASScrollNode" />
+    <meta property="og:title" content="Layout Examples" />
     <meta property="og:site_name" content="AsyncDisplayKit">
     <meta property='og:description' content='AsyncDisplayKit: A Library for Functional UI on iOS.'>
     <meta property='og:image' content='http://asyncdisplaykit.org/static/asyncdisplaykit-og-image.png'>
-    <meta property='og:url' content="http://asyncdisplaykit.org/docs/scroll-node.html">
+    <meta property='og:url' content="http://asyncdisplaykit.org/docs/automatic-layout-examples.html">
     <meta property='og:type' content='website'>
     <script type="text/javascript" src="//use.typekit.net/vqa1hcx.js"></script>
     <script type="text/javascript">{'try{Typekit.load();}catch(e){}'}</script>
@@ -3390,7 +3390,7 @@
             
             
             <li>
-              <a href=/docs/scroll-node.html class="active">
+              <a href=/docs/scroll-node.html>
                 ASScrollNode
               </a>
             </li>
@@ -3888,7 +3888,7 @@
             
             
             <li>
-              <a href=/docs/automatic-layout-examples.html>
+              <a href=/docs/automatic-layout-examples.html class="active">
                 Layout Examples
               </a>
             </li>
@@ -5644,12 +5644,173 @@
 
 <article class='withtoc'>
     <h1>
-      ASScrollNode
-      <a class="edit-page-link" href="https://github.com/facebook/asyncdisplaykit/tree/gh-pages/_docs/scroll-node.md" target="_blank">Edit on GitHub</a>
+      Layout Examples
+      <a class="edit-page-link" href="https://github.com/facebook/asyncdisplaykit/tree/gh-pages/_docs/automatic-layout-examples.md" target="_blank">Edit on GitHub</a>
     </h1>
     <p></p>
 
-    
+    <p>Three examples in increasing order of complexity. </p>
+
+<h1>NSSpain Talk Example</h1>
+
+<p><img src="/static/layout-example-1.png"></p>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">layoutSpecThatFits:</span><span class="p">(</span><span class="n">ASSizeRange</span><span class="p">)</span><span class="nv">constraint</span>
+<span class="p">{</span>
+  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">vStack</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASStackLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+
+  <span class="p">[</span><span class="n">vStack</span> <span class="nl">setChildren</span><span class="p">:</span><span class="l">@[</span><span class="n">titleNode</span><span class="p">,</span> <span class="n">bodyNode</span><span class="l">]</span><span class="p">;</span>
+
+  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">hstack</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASStackLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+  <span class="n">hStack</span><span class="p">.</span><span class="n">direction</span>          <span class="o">=</span> <span class="n">ASStackLayoutDirectionHorizontal</span><span class="p">;</span>
+  <span class="n">hStack</span><span class="p">.</span><span class="n">spacing</span>            <span class="o">=</span> <span class="mf">5.0</span><span class="p">;</span>
+
+  <span class="p">[</span><span class="n">hStack</span> <span class="nl">setChildren</span><span class="p">:</span><span class="l">@[</span><span class="n">imageNode</span><span class="p">,</span> <span class="n">vStack</span><span class="l">]</span><span class="p">];</span>
+
+  <span class="n">ASInsetLayoutSpec</span> <span class="o">*</span><span class="n">insetSpec</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASInsetLayoutSpec</span> <span class="nl">insetLayoutSpecWithInsets</span><span class="p">:</span><span class="n">UIEdgeInsetsMake</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span> <span class="nl">child</span><span class="p">:</span><span class="n">hStack</span><span class="p">];</span>
+
+  <span class="k">return</span> <span class="n">insetSpec</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3>Discussion</h3>
+
+<h1>Social App Layout</h1>
+
+<p><img src="/static/layout-example-2.png"></p>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">layoutSpecThatFits:</span><span class="p">(</span><span class="n">ASSizeRange</span><span class="p">)</span><span class="nv">constrainedSize</span>
+<span class="p">{</span>
+  <span class="c1">// header stack</span>
+  <span class="n">_userAvatarImageView</span><span class="p">.</span><span class="n">preferredFrameSize</span> <span class="o">=</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="n">USER_IMAGE_HEIGHT</span><span class="p">,</span> <span class="n">USER_IMAGE_HEIGHT</span><span class="p">);</span>  <span class="c1">// constrain avatar image frame size</span>
+
+  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">spacer</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+  <span class="n">spacer</span><span class="p">.</span><span class="n">flexGrow</span>      <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+
+  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">headerStack</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="n">horizontalStackLayoutSpec</span><span class="p">];</span>
+  <span class="n">headerStack</span><span class="p">.</span><span class="n">alignItems</span>         <span class="o">=</span> <span class="n">ASStackLayoutAlignItemsCenter</span><span class="p">;</span>       <span class="c1">// center items vertically in horizontal stack</span>
+  <span class="n">headerStack</span><span class="p">.</span><span class="n">justifyContent</span>     <span class="o">=</span> <span class="n">ASStackLayoutJustifyContentStart</span><span class="p">;</span>    <span class="c1">// justify content to left side of header stack</span>
+  <span class="n">headerStack</span><span class="p">.</span><span class="n">spacing</span>            <span class="o">=</span> <span class="n">HORIZONTAL_BUFFER</span><span class="p">;</span>
+
+  <span class="p">[</span><span class="n">headerStack</span> <span class="nl">setChildren</span><span class="p">:</span><span class="l">@[</span><span class="n">_userAvatarImageView</span><span class="p">,</span> <span class="n">_userNameLabel</span><span class="p">,</span> <span class="n">spacer</span><span class="p">,</span> <span class="n">_photoTimeIntervalSincePostLabel</span><span class="l">]</span><span class="p">];</span>
+
+  <span class="c1">// header inset stack</span>
+
+  <span class="bp">UIEdgeInsets</span> <span class="n">insets</span>                <span class="o">=</span> <span class="n">UIEdgeInsetsMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">HORIZONTAL_BUFFER</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">HORIZONTAL_BUFFER</span><span class="p">);</span>
+  <span class="n">ASInsetLayoutSpec</span> <span class="o">*</span><span class="n">headerWithInset</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASInsetLayoutSpec</span> <span class="nl">insetLayoutSpecWithInsets</span><span class="p">:</span><span class="n">insets</span> <span class="nl">child</span><span class="p">:</span><span class="n">headerStack</span><span class="p">];</span>
+  <span class="n">headerWithInset</span><span class="p">.</span><span class="n">flexShrink</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+
+  <span class="c1">// vertical stack</span>
+
+  <span class="n">CGFloat</span> <span class="n">cellWidth</span>                  <span class="o">=</span> <span class="n">constrainedSize</span><span class="p">.</span><span class="n">max</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
+  <span class="n">_photoImageView</span><span class="p">.</span><span class="n">preferredFrameSize</span> <span class="o">=</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="n">cellWidth</span><span class="p">,</span> <span class="n">cellWidth</span><span class="p">);</span>  <span class="c1">// constrain photo frame size</span>
+
+  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">verticalStack</span>   <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="n">verticalStackLayoutSpec</span><span class="p">];</span>
+  <span class="n">verticalStack</span><span class="p">.</span><span class="n">alignItems</span>           <span class="o">=</span> <span class="n">ASStackLayoutAlignItemsStretch</span><span class="p">;</span>    <span class="c1">// stretch headerStack to fill horizontal space</span>
+
+  <span class="p">[</span><span class="n">verticalStack</span> <span class="nl">setChildren</span><span class="p">:</span><span class="l">@[</span><span class="n">headerWithInset</span><span class="p">,</span> <span class="n">_photoImageView</span><span class="p">,</span> <span class="n">footerWithInset</span><span class="l">]</span><span class="p">];</span>
+
+  <span class="k">return</span> <span class="n">verticalStack</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3>Discussion</h3>
+
+<p>Get the full ASDK project at examples/ASDKgram.</p>
+
+<h1>Social App Layout 2</h1>
+
+<p><img src="/static/layout-example-3.png"></p>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">layoutSpecThatFits:</span><span class="p">(</span><span class="n">ASSizeRange</span><span class="p">)</span><span class="nv">constrainedSize</span> <span class="p">{</span>
+
+  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">textSpec</span>  <span class="o">=</span> <span class="p">[</span><span class="nb">self</span> <span class="n">textSpec</span><span class="p">];</span>
+  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">imageSpec</span> <span class="o">=</span> <span class="p">[</span><span class="nb">self</span> <span class="nl">imageSpecWithSize</span><span class="p">:</span><span class="n">constrainedSize</span><span class="p">];</span>
+  <span class="n">ASOverlayLayoutSpec</span> <span class="o">*</span><span class="n">soldOutOverImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASOverlayLayoutSpec</span> <span class="nl">overlayLayoutSpecWithChild</span><span class="p">:</span><span class="n">imageSpec</span> 
+                                                                                  <span class="nl">overlay</span><span class="p">:[</span><span class="nb">self</span> <span class="n">soldOutLabelSpec</span><span class="p">]];</span>
+
+  <span class="bp">NSArray</span> <span class="o">*</span><span class="n">stackChildren</span> <span class="o">=</span> <span class="l">@[</span><span class="n">soldOutOverImage</span><span class="p">,</span> <span class="n">textSpec</span><span class="l">]</span><span class="p">;</span>
+
+  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">mainStack</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="nl">stackLayoutSpecWithDirection</span><span class="p">:</span><span class="n">ASStackLayoutDirectionVertical</span> 
+                                                                         <span class="nl">spacing</span><span class="p">:</span><span class="mf">0.0</span>
+                                                                  <span class="nl">justifyContent</span><span class="p">:</span><span class="n">ASStackLayoutJustifyContentStart</span>
+                                                                      <span class="nl">alignItems</span><span class="p">:</span><span class="n">ASStackLayoutAlignItemsStretch</span>          
+                                                                        <span class="nl">children</span><span class="p">:</span><span class="n">stackChildren</span><span class="p">];</span>
+
+  <span class="n">ASOverlayLayoutSpec</span> <span class="o">*</span><span class="n">soldOutOverlay</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASOverlayLayoutSpec</span> <span class="nl">overlayLayoutSpecWithChild</span><span class="p">:</span><span class="n">mainStack</span> 
+                                                                                <span class="nl">overlay</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">soldOutOverlay</span><span class="p">];</span>
+
+  <span class="k">return</span> <span class="n">soldOutOverlay</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">textSpec</span> <span class="p">{</span>
+  <span class="n">CGFloat</span> <span class="n">kInsetHorizontal</span>        <span class="o">=</span> <span class="mf">16.0</span><span class="p">;</span>
+  <span class="n">CGFloat</span> <span class="n">kInsetTop</span>               <span class="o">=</span> <span class="mf">6.0</span><span class="p">;</span>
+  <span class="n">CGFloat</span> <span class="n">kInsetBottom</span>            <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
+  <span class="bp">UIEdgeInsets</span> <span class="n">textInsets</span>         <span class="o">=</span> <span class="n">UIEdgeInsetsMake</span><span class="p">(</span><span class="n">kInsetTop</span><span class="p">,</span> <span class="n">kInsetHorizontal</span><span class="p">,</span> <span class="n">kInsetBottom</span><span class="p">,</span> <span class="n">kInsetHorizontal</span><span class="p">);</span>
+
+  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">verticalSpacer</span>    <span class="o">=</span> <span class="p">[[</span><span class="n">ASLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+  <span class="n">verticalSpacer</span><span class="p">.</span><span class="n">flexGrow</span>         <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+
+  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">horizontalSpacer1</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+  <span class="n">horizontalSpacer1</span><span class="p">.</span><span class="n">flexGrow</span>      <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+
+  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">horizontalSpacer2</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+  <span class="n">horizontalSpacer2</span><span class="p">.</span><span class="n">flexGrow</span>      <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+
+  <span class="bp">NSArray</span> <span class="o">*</span><span class="n">info1Children</span> <span class="o">=</span> <span class="l">@[</span><span class="nb">self</span><span class="p">.</span><span class="n">firstInfoLabel</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">distanceLabel</span><span class="p">,</span> <span class="n">horizontalSpacer1</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">originalPriceLabel</span><span class="l">]</span><span class="p">;</span>
+  <span class="bp">NSArray</span> <span class="o">*</span><span class="n">info2Children</span> <span class="o">=</span> <span class="l">@[</span><span class="nb">self</span><span class="p">.</span><span class="n">secondInfoLabel</span><span class="p">,</span> <span class="n">horizontalSpacer2</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">finalPriceLabel</span><span class="l">]</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">([</span><span class="n">ItemNode</span> <span class="n">isRTL</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">info1Children</span> <span class="o">=</span> <span class="p">[[</span><span class="n">info1Children</span> <span class="n">reverseObjectEnumerator</span><span class="p">]</span> <span class="n">allObjects</span><span class="p">];</span>
+    <span class="n">info2Children</span> <span class="o">=</span> <span class="p">[[</span><span class="n">info2Children</span> <span class="n">reverseObjectEnumerator</span><span class="p">]</span> <span class="n">allObjects</span><span class="p">];</span>
+  <span class="p">}</span>
+
+  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">info1Stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="nl">stackLayoutSpecWithDirection</span><span class="p">:</span><span class="n">ASStackLayoutDirectionHorizontal</span> 
+                                                                          <span class="nl">spacing</span><span class="p">:</span><span class="mf">1.0</span>
+                                                                   <span class="nl">justifyContent</span><span class="p">:</span><span class="n">ASStackLayoutJustifyContentStart</span> 
+                                                                       <span class="nl">alignItems</span><span class="p">:</span><span class="n">ASStackLayoutAlignItemsBaselineLast</span> <span class="nl">children</span><span class="p">:</span><span class="n">info1Children</span><span class="p">];</span>
+
+  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">info2Stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="nl">stackLayoutSpecWithDirection</span><span class="p">:</span><span class="n">ASStackLayoutDirectionHorizontal</span> 
+                                                                          <span class="nl">spacing</span><span class="p">:</span><span class="mf">0.0</span>
+                                                                   <span class="nl">justifyContent</span><span class="p">:</span><span class="n">ASStackLayoutJustifyContentCenter</span> 
+                                                                       <span class="nl">alignItems</span><span class="p">:</span><span class="n">ASStackLayoutAlignItemsBaselineLast</span> <span class="nl">children</span><span class="p">:</span><span class="n">info2Children</span><span class="p">];</span>
+
+  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">textStack</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="nl">stackLayoutSpecWithDirection</span><span class="p">:</span><span class="n">ASStackLayoutDirectionVertical</span> 
+                                                                         <span class="nl">spacing</span><span class="p">:</span><span class="mf">0.0</span>
+                                                                  <span class="nl">justifyContent</span><span class="p">:</span><span class="n">ASStackLayoutJustifyContentEnd</span>
+                                                                      <span class="nl">alignItems</span><span class="p">:</span><span class="n">ASStackLayoutAlignItemsStretch</span>
+                                                                        <span class="nl">children</span><span class="p">:</span><span class="l">@[</span><span class="nb">self</span><span class="p">.</span><span class="n">titleLabel</span><span class="p">,</span> <span class="n">verticalSpacer</span><span class="p">,</span> <span class="n">info1Stack</span><span class="p">,</span> <span class="n">info2Stack</span><span class="l">]</span><span class="p">];</span>
+
+  <span class="n">ASInsetLayoutSpec</span> <span class="o">*</span><span class="n">textWrapper</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASInsetLayoutSpec</span> <span class="nl">insetLayoutSpecWithInsets</span><span class="p">:</span><span class="n">textInsets</span> 
+                                                                          <span class="nl">child</span><span class="p">:</span><span class="n">textStack</span><span class="p">];</span>
+  <span class="n">textWrapper</span><span class="p">.</span><span class="n">flexGrow</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="n">textWrapper</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">imageSpecWithSize:</span><span class="p">(</span><span class="n">ASSizeRange</span><span class="p">)</span><span class="nv">constrainedSize</span> <span class="p">{</span>
+  <span class="n">CGFloat</span> <span class="n">imageRatio</span> <span class="o">=</span> <span class="p">[</span><span class="nb">self</span> <span class="nl">imageRatioFromSize</span><span class="p">:</span><span class="n">constrainedSize</span><span class="p">.</span><span class="n">max</span><span class="p">];</span>
+
+  <span class="n">ASRatioLayoutSpec</span> <span class="o">*</span><span class="n">imagePlace</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASRatioLayoutSpec</span> <span class="nl">ratioLayoutSpecWithRatio</span><span class="p">:</span><span class="n">imageRatio</span> <span class="nl">child</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">dealImageView</span><span class="p">];</span>
+
+  <span class="nb">self</span><span class="p">.</span><span class="n">badge</span><span class="p">.</span><span class="n">layoutPosition</span> <span class="o">=</span> <span class="n">CGPointMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">constrainedSize</span><span class="p">.</span><span class="n">max</span><span class="p">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">kFixedLabelsAreaHeight</span> <span class="o">-</span> <span class="n">kBadgeHeight</span><span class="p">);</span>
+  <span class="nb">self</span><span class="p">.</span><span class="n">badge</span><span class="p">.</span><span class="n">sizeRange</span> <span class="o">=</span> <span class="n">ASRelativeSizeRangeMake</span><span class="p">(</span><span class="n">ASRelativeSizeMake</span><span class="p">(</span><span class="n">ASRelativeDimensionMakeWithPercent</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">ASRelativeDimensionMakeWithPoints</span><span class="p">(</span><span class="n">kBadgeHeight</span><span class="p">)),</span> <span class="n">ASRelativeSizeMake</span><span class="p">(</span><span class="n">ASRelativeDimensionMakeWithPercent</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">ASRelativeDimensionMakeWithPoints</span><span class="p">(</span><span class="n">kBadgeHeight</span><span class="p">)));</span>
+  <span class="n">ASStaticLayoutSpec</span> <span class="o">*</span><span class="n">badgePosition</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStaticLayoutSpec</span> <span class="nl">staticLayoutSpecWithChildren</span><span class="p">:</span><span class="l">@[</span><span class="nb">self</span><span class="p">.</span><span class="n">badge</span><span class="l">]</span><span class="p">];</span>
+
+  <span class="n">ASOverlayLayoutSpec</span> <span class="o">*</span><span class="n">badgeOverImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASOverlayLayoutSpec</span> <span class="nl">overlayLayoutSpecWithChild</span><span class="p">:</span><span class="n">imagePlace</span> <span class="nl">overlay</span><span class="p">:</span><span class="n">badgePosition</span><span class="p">];</span>
+  <span class="n">badgeOverImage</span><span class="p">.</span><span class="n">flexGrow</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="n">badgeOverImage</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">soldOutLabelSpec</span> <span class="p">{</span>
+  <span class="n">ASCenterLayoutSpec</span> <span class="o">*</span><span class="n">centerSoldOutLabel</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASCenterLayoutSpec</span> <span class="nl">centerLayoutSpecWithCenteringOptions</span><span class="p">:</span><span class="n">ASCenterLayoutSpecCenteringXY</span> 
+  <span class="nl">sizingOptions</span><span class="p">:</span><span class="n">ASCenterLayoutSpecSizingOptionMinimumXY</span> <span class="nl">child</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">soldOutLabelFlat</span><span class="p">];</span>
+  <span class="n">ASStaticLayoutSpec</span> <span class="o">*</span><span class="n">soldOutBG</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStaticLayoutSpec</span> <span class="nl">staticLayoutSpecWithChildren</span><span class="p">:</span><span class="l">@[</span><span class="nb">self</span><span class="p">.</span><span class="n">soldOutLabelBackground</span><span class="l">]</span><span class="p">];</span>
+  <span class="n">ASCenterLayoutSpec</span> <span class="o">*</span><span class="n">centerSoldOut</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASCenterLayoutSpec</span> <span class="nl">centerLayoutSpecWithCenteringOptions</span><span class="p">:</span><span class="n">ASCenterLayoutSpecCenteringXY</span>   <span class="nl">sizingOptions</span><span class="p">:</span><span class="n">ASCenterLayoutSpecSizingOptionDefault</span> <span class="nl">child</span><span class="p">:</span><span class="n">soldOutBG</span><span class="p">];</span>
+  <span class="n">ASBackgroundLayoutSpec</span> <span class="o">*</span><span class="n">soldOutLabelOverBackground</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASBackgroundLayoutSpec</span> <span class="nl">backgroundLayoutSpecWithChild</span><span class="p">:</span><span class="n">centerSoldOutLabel</span> <span class="nl">background</span><span class="p">:</span><span class="n">centerSoldOut</span><span class="p">];</span>
+  <span class="k">return</span> <span class="n">soldOutLabelOverBackground</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3>Discussion</h3>
+
+<p>Get the full ASDK project at examples/CatDealsCollectionView.</p>
+
 
     <div class="docs-prevnext">
       

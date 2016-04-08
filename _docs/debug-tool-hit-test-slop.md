@@ -1,5 +1,5 @@
 ---
-title: Hit Test Slop (Debug Tool)
+title: Hit Test Visualization
 layout: docs
 permalink: /docs/debug-tool-hit-test-slop.html
 ---

@@ -12,7 +12,7 @@ For general discussion, announcements and help. Email AsyncDisplayKit@gmail.com 
 ###Learn more
 - Read the <a href="/guide">Getting Started guide</a>
 - Get the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">sample projects</a>
-- Browse the <a href="/appledoc">API reference</a>
+- Browse the <a href="/appledocs.html">API reference</a>
 - Watch the <a href="http://vimeo.com/103589245">NSLondon talk</a> or the <a href="https://www.youtube.com/watch?v=RY_X7l1g79Q">NSSpain talk</a>
 
 ###Apps (that we know of) that use ASDK

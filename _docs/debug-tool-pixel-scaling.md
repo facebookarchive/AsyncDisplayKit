@@ -1,5 +1,5 @@
 ---
-title: ASImageNode's .image pixel scaling (Debug Tool)
+title: Image Scaling
 layout: docs
 permalink: /docs/debug-tool-pixel-scaling.html
 ---

@@ -23,16 +23,16 @@ On an iPhone 6+, the performance may not be radically different, but on a 4S, th
 
 #A Great App Experience for All Users
 
-ASDK's performance gains allow you to easily design an great experience for every app user - across all devices, on all network connections. 
+ASDK's performance gains allow you to easily design a great experience for every app user - across all devices, on all network connections. 
 
 ##A Great Developer Experience
 
 ASDK also strives to make the developer experience great
 - platform compatability: iOS & tvOS
 - language compatability: Objective-C & Swift
-- requires fewer lines of code to build advanced apps (see <a href = "/docs/automatic-layout.html">`examples/ASDKgram`</a> for a direct comparison of UIKit-implemented app vs. ASDK-implemented app)
+- requires fewer lines of code to build advanced apps (see <a href = "/docs/automatic-layout.html">`examples/ASDKgram`</a> for a direct comparison of a UIKit implemention of an app vs. an equivalent ASDK implementation)
 - cleaner architecture patterns
-- robust code (some really brilliant minds have worked on this for 3+ years)
+- robust code (some really brilliant minds have worked on this for 3+ years).
 
 #Advanced Developer Tools
 

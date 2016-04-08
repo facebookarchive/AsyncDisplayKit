@@ -2,16 +2,16 @@
 <html prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset='utf-8'>
-    <title>AsyncDisplayKit | ASScrollNode</title>
+    <title>AsyncDisplayKit | Hit Test Visualization</title>
     <link rel='stylesheet' href='/static/main.css' type='text/css'/>
     <link rel="stylesheet" href='/static/pygments.css' type='text/css'/>
     <link rel='shortcut icon' href='/static/favicon.png'>
     <meta name='viewport' content='width=480'>
-    <meta property="og:title" content="ASScrollNode" />
+    <meta property="og:title" content="Hit Test Visualization" />
     <meta property="og:site_name" content="AsyncDisplayKit">
     <meta property='og:description' content='AsyncDisplayKit: A Library for Functional UI on iOS.'>
     <meta property='og:image' content='http://asyncdisplaykit.org/static/asyncdisplaykit-og-image.png'>
-    <meta property='og:url' content="http://asyncdisplaykit.org/docs/scroll-node.html">
+    <meta property='og:url' content="http://asyncdisplaykit.org/docs/debug-tool-hit-test-slop.html">
     <meta property='og:type' content='website'>
     <script type="text/javascript" src="//use.typekit.net/vqa1hcx.js"></script>
     <script type="text/javascript">{'try{Typekit.load();}catch(e){}'}</script>
@@ -3390,7 +3390,7 @@
             
             
             <li>
-              <a href=/docs/scroll-node.html class="active">
+              <a href=/docs/scroll-node.html>
                 ASScrollNode
               </a>
             </li>
@@ -5387,7 +5387,7 @@
             
             
             <li>
-              <a href=/docs/debug-tool-hit-test-slop.html>
+              <a href=/docs/debug-tool-hit-test-slop.html class="active">
                 Hit Test Visualization
               </a>
             </li>
@@ -5644,12 +5644,29 @@
 
 <article class='withtoc'>
     <h1>
-      ASScrollNode
-      <a class="edit-page-link" href="https://github.com/facebook/asyncdisplaykit/tree/gh-pages/_docs/scroll-node.md" target="_blank">Edit on GitHub</a>
+      Hit Test Visualization
+      <a class="edit-page-link" href="https://github.com/facebook/asyncdisplaykit/tree/gh-pages/_docs/debug-tool-hit-test-slop.md" target="_blank">Edit on GitHub</a>
     </h1>
     <p></p>
 
-    
+    <h2>Visualize tappable areas on ASControlNodes</h2>
+
+<h3>Description</h3>
+
+<p>This debug feature adds a semi-transparent neon green highlight overlay on any ASControlNodes that have a <code>target:action:</code> pair added. The tappable range is defined as the ASControlNode’s frame + its hitTestSlop (UIEdgeInsets used by the ASControlNode to extend it’s tappable range). </p>
+
+<p><strong>This debug feature is useful for quickly visualizing an ASControlNode&#39;s tappable range.</strong> In the screenshot below, you can quickly see 3 things: (1) The tappable area for the avatar image overlaps the username’s tappable area. In this case, the user avatar image is on top in the view hierarchy and is capturing some touches that should go to the username. (2) It would probably make sense to expand the hitTestSlop for the username to allow the user to more easily hit it. (3) I’ve accidentally set the hitTestSlop’s UIEdgeInsets to be positive instead of negative for the photo likes count label. It’s going to be hard for a user to tap the smaller target.</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/3419380/14057034/e1e71450-f2b1-11e5-8091-3e6f22862994.png" alt="screen shot 2016-03-25 at 4 39 23 pm"></p>
+
+<h3>Usage</h3>
+
+<p>In your AppDelegate, (1) import <code>AsyncDisplayKit+Debug.h</code> and (2) at the top of <code>didFinishLaunchingWithOptions:</code> enable this feature by adding<code>[ASControlNode setEnableHitTestDebug:YES];</code> Make sure to call this method before initializing any ASControlNodes (including ASButtonNodes, ASImageNodes, and ASTextNodes).</p>
+
+<h3>Limitations</h3>
+
+<p>This only works for ASControlNodes’s with <code>addTarget:action:</code> pairs added. <strong>It will not work with gesture recognizers.</strong></p>
+
 
     <div class="docs-prevnext">
       

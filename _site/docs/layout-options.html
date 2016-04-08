@@ -2,16 +2,16 @@
 <html prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset='utf-8'>
-    <title>AsyncDisplayKit | ASScrollNode</title>
+    <title>AsyncDisplayKit | Layout Options</title>
     <link rel='stylesheet' href='/static/main.css' type='text/css'/>
     <link rel="stylesheet" href='/static/pygments.css' type='text/css'/>
     <link rel='shortcut icon' href='/static/favicon.png'>
     <meta name='viewport' content='width=480'>
-    <meta property="og:title" content="ASScrollNode" />
+    <meta property="og:title" content="Layout Options" />
     <meta property="og:site_name" content="AsyncDisplayKit">
     <meta property='og:description' content='AsyncDisplayKit: A Library for Functional UI on iOS.'>
     <meta property='og:image' content='http://asyncdisplaykit.org/static/asyncdisplaykit-og-image.png'>
-    <meta property='og:url' content="http://asyncdisplaykit.org/docs/scroll-node.html">
+    <meta property='og:url' content="http://asyncdisplaykit.org/docs/layout-options.html">
     <meta property='og:type' content='website'>
     <script type="text/javascript" src="//use.typekit.net/vqa1hcx.js"></script>
     <script type="text/javascript">{'try{Typekit.load();}catch(e){}'}</script>
@@ -3390,7 +3390,7 @@
             
             
             <li>
-              <a href=/docs/scroll-node.html class="active">
+              <a href=/docs/scroll-node.html>
                 ASScrollNode
               </a>
             </li>
@@ -3513,7 +3513,7 @@
             
             
             <li>
-              <a href=/docs/layout-options.html>
+              <a href=/docs/layout-options.html class="active">
                 Layout Options
               </a>
             </li>
@@ -5644,12 +5644,73 @@
 
 <article class='withtoc'>
     <h1>
-      ASScrollNode
-      <a class="edit-page-link" href="https://github.com/facebook/asyncdisplaykit/tree/gh-pages/_docs/scroll-node.md" target="_blank">Edit on GitHub</a>
+      Layout Options
+      <a class="edit-page-link" href="https://github.com/facebook/asyncdisplaykit/tree/gh-pages/_docs/layout-options.md" target="_blank">Edit on GitHub</a>
     </h1>
     <p></p>
 
-    
+    <p>When using ASDK, you have three options for layout. Note that UIKit Autolayout is <strong>not</strong> supported by ASDK. </p>
+
+<h1>Manual Sizing &amp; Layout</h1>
+
+<p>This original layout method shipped with ASDK 1.0 and is analogous to UIKit&#39;s layout methods. Use this method for for ASViewControllers (unless you subclass the node).</p>
+
+<p><code>[ASDisplayNode calculateSizeThatFits:]</code> <strong>vs.</strong> <code>[UIView sizeThatFits:]</code></p>
+
+<p><code>[ASDisplayNode layout]</code> <strong>vs.</strong> <code>[UIView layoutSubviews]</code></p>
+
+<h3>Advantages (over UIKit)</h3>
+
+<ul>
+<li>Eliminates all main thread layout cost</li>
+<li>Results are cached</li>
+</ul>
+
+<h3>Shortcomings (same as UIKit):</h3>
+
+<ul>
+<li>Code duplication between methods</li>
+<li>Logic is not reusable</li>
+</ul>
+
+<h1>Unified Sizing &amp; Layout</h1>
+
+<p>This layout method does not have a UIKit analog. It is implemented by calling</p>
+
+<p><code>- (ASLayout *)calculateLayoutThatFits: (ASSizeRange)constraint</code></p>
+
+<h3>Advantages</h3>
+
+<ul>
+<li>zero duplication</li>
+<li>still async, still cached</li>
+</ul>
+
+<h3>Shortcomings</h3>
+
+<ul>
+<li>logic is not reusable, and is still manual</li>
+</ul>
+
+<h1>Automatic, Extensible Layout</h1>
+
+<p>This is the reccomended layout method. It does not have a UIKit analog and is implemented by calling</p>
+
+<p><code>- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constraint</code></p>
+
+<h3>Advantages</h3>
+
+<ul>
+<li>can reuse even complex, custom layouts</li>
+<li>built-in specs provide automatic layout</li>
+<li>combine to compose new layouts easily</li>
+<li>still async, cached, and zero duplication</li>
+</ul>
+
+<p>The diagram below shows how options #2 and #3 above both result in an ASLayout, except that in option #3, the ASLayout is produced automatically by the ASLayoutSpec.  </p>
+
+<p><INSERT DIAGRAM></p>
+
 
     <div class="docs-prevnext">
       
