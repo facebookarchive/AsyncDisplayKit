@@ -1,39 +1,8 @@
 ---
-title: Debug Tools
+title: Debug Tool: Visualize ASRangeController tuning parameters (PR #1390)
 layout: docs
-permalink: /docs/debugging.html
+permalink: /docs/debug-tool-ASRangeController.html
 ---
-
-## Visualize ASImageNode.image’s pixel scaling
-### Description
-This debug feature adds a red text label overlay on the bottom right hand corner of an ASImageNode if (and only if) the image’s size in pixels does not match it’s bounds size in pixels, e.g.
-
-`imageSizeInPixels = image.size * image.scale`
-`boundsSizeInPixels = bounds.size * contentsScale`
-`scaleFactor = imageSizeInPixels / boundsSizeInPixels`
-
-`if (scaleFactor != 1.0) {`
-      `NSString *scaleString = [NSString stringWithFormat:@"%.2fx", scaleFactor];`
-      `_debugLabelNode.hidden = NO;`
-`}`
-
-This debug feature is useful for **quickly determining if you are (1) downloading and rendering excessive amounts of image data or (2) upscaling a low quality image**. In the screenshot below, you can quickly see that the avatar image is unnecessarily large for it’s bounds size and that the center picture is more optimized, but not perfectly so. If you are using an external data source (such as the 500px API used in the example), it's likely that you won’t be able to get the scaleFactor to exactly 1.0. However, if you control your own endpoint, optimize your API / app to return a correctly sized image!
-
-![screen shot 2016-03-25 at 4 04 59 pm](https://cloud.githubusercontent.com/assets/3419380/14056994/15561daa-f2b1-11e5-9606-59d54d2b5354.png)
-### Usage
-In your AppDelegate, (1) import `AsyncDisplayKit+Debug.h` and (2) at the top of `didFinishLaunchingWithOptions:` enable this feature by adding `[ASImageNode setShouldShowImageScalingOverlay:YES];` Make sure to call this method before initializing any ASImageNodes.
-## Visualize tappable areas on ASControlNodes
-### Description
-This debug feature adds a semi-transparent neon green highlight overlay on any ASControlNodes that have a `target:action:` pair added. The tappable range is defined as the ASControlNode’s frame + its hitTestSlop (UIEdgeInsets used by the ASControlNode to extend it’s tappable range). 
-
-**This debug feature is useful for quickly visualizing an ASControlNode's tappable range.** In the screenshot below, you can quickly see 3 things: (1) The tappable area for the avatar image overlaps the username’s tappable area. In this case, the user avatar image is on top in the view hierarchy and is capturing some touches that should go to the username. (2) It would probably make sense to expand the hitTestSlop for the username to allow the user to more easily hit it. (3) I’ve accidentally set the hitTestSlop’s UIEdgeInsets to be positive instead of negative for the photo likes count label. It’s going to be hard for a user to tap the smaller target.
-
-![screen shot 2016-03-25 at 4 39 23 pm](https://cloud.githubusercontent.com/assets/3419380/14057034/e1e71450-f2b1-11e5-8091-3e6f22862994.png)
-### Usage
-In your AppDelegate, (1) import `AsyncDisplayKit+Debug.h` and (2) at the top of `didFinishLaunchingWithOptions:` enable this feature by adding` [ASControlNode setEnableHitTestDebug:YES];` Make sure to call this method before initializing any ASControlNodes (including ASButtonNodes, ASImageNodes, and ASTextNodes).
-### Limitations
-This only works for ASControlNodes’s with `addTarget:action:` pairs added. **It will not work with gesture recognizers.**
-## Visualize ASRangeController tuning parameters - PR #1390
 ### Description 
 This debug feature adds a semi-transparent subview in the bottom right hand corner of the sharedApplication keyWindow that visualizes the ASRangeTuningParameters per each ASLayoutRangeType for each visible (on-screen) instance of ASRangeController. 
 
