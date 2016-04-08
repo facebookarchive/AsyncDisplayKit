@@ -36,7 +36,7 @@ ASDK also strives to make the developer experience great
 
 #Advanced Developer Tools
 
-As ASDK has grown, some of the brightest iOS engineers have contributed advanced technologies that will enable you, as a developer using ASDK, to save yourself development time. 
+As ASDK has grown, some of the brightest iOS engineers have contributed advanced technologies that will save you, as a developer using ASDK, development time. 
 
 ###Advanced Technology
 - ASRunLoopQueue
