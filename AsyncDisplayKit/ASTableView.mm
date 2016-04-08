@@ -895,11 +895,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
-  
+
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-  ASPerformBlockWithoutAnimationCompletion(preventAnimation, ^{
+    
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
-  }, ^{
     // Push this to the next runloop to be sure the UITableView has the right content size
     dispatch_async(dispatch_get_main_queue(), ^{
       [self _checkForBatchFetching];
@@ -921,9 +921,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-  ASPerformBlockWithoutAnimationCompletion(preventAnimation, ^{
+  ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
-  }, ^{
     // Push this to the next runloop to be sure the UITableView has the right content size
     dispatch_async(dispatch_get_main_queue(), ^{
       [self _checkForBatchFetching];
@@ -948,6 +947,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
+    // Push this to the next runloop to be sure the UITableView has the right content size
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [self _checkForBatchFetching];
+    });
   });
 }
 
@@ -963,6 +966,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
+    // Push this to the next runloop to be sure the UITableView has the right content size
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [self _checkForBatchFetching];
+    });
   });
 }
 
