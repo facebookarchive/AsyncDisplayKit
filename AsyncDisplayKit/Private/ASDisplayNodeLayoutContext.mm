@@ -166,9 +166,13 @@ static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
   while (idx != NSNotFound) {
     ASDisplayNode *node = (ASDisplayNode *)layout.immediateSublayouts[idx].layoutableObject;
     ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
-    if (node != nil && [filteredNodes indexOfObjectIdenticalTo:node] != NSNotFound) {
-      [nodes addObject:node];
-      positions.push_back(idx);
+    // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
+    if (node != nil) {
+      BOOL notFiltered = (filteredNodes == nil || [filteredNodes indexOfObjectIdenticalTo:node] == NSNotFound);
+      if (notFiltered) {
+        [nodes addObject:node];
+        positions.push_back(idx);
+      }
     }
     idx = [indexes indexGreaterThanIndex:idx];
   }
