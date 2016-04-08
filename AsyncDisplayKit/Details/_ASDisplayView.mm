@@ -411,10 +411,6 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (NSArray *)accessibleElements
 {
-  if ( _accessibleElements != nil ) {
-    return _accessibleElements;
-  }
-  
   _accessibleElements = [[NSMutableArray alloc] init];
  
   ASDisplayNode *selfNode = self.asyncdisplaykit_node;
@@ -451,7 +447,7 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   for (ASDisplayNode *subnode in selfNode.subnodes) {
       // Check if this subnode is a UIAccessibilityContainer
     if (!subnode.isAccessibilityElement && [subnode accessibilityElementCount] > 0) {
-      // We are good and the view is an UIAccessibilityContainer so add that
+      // We are good and the view is an UIAccessibilityContainer so add it
       [_accessibleElements addObject:subnode.view];
     } else if (subnode.isAccessibilityElement) {
       // Create a accessiblity element from the subnode
@@ -471,7 +467,11 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (id)accessibilityElementAtIndex:(NSInteger)index
 {
-  UIAccessibilityElement *accessibilityElement = [[self accessibleElements] objectAtIndex:index];
+  if (_accessibleElements == nil) {
+    return nil;
+  }
+  
+  UIAccessibilityElement *accessibilityElement = [_accessibleElements objectAtIndex:index];
   ASDisplayNode *accessibilityElementNode = accessibilityElement.asyncdisplaykit_node;
   if (accessibilityElementNode == nil) {
     return nil;
@@ -497,7 +497,11 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (NSInteger)indexOfAccessibilityElement:(id)element
 {
-  return [self.accessibleElements indexOfObject:element];
+  if (_accessibleElements == nil) {
+    return NSNotFound;
+  }
+  
+  return [_accessibleElements indexOfObject:element];
 }
 
 @end
