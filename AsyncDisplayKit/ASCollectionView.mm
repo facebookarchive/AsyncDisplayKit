@@ -757,7 +757,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)_scheduleCheckForBatchFetching
 {
-  // Push this to the next runloop to be sure the UITableView has the right content size
+  // Push this to the next runloop to be sure the scroll view has the right content size
   dispatch_async(dispatch_get_main_queue(), ^{
     [self _checkForBatchFetching];
   });
