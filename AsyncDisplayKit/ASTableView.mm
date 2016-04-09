@@ -685,13 +685,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASScrollDirection direction = ASScrollDirectionNone;
   ASScrollDirection scrollableDirections = [self scrollableDirections];
   
-  if (ASScrollDirectionContainsHorizontalDirection(scrollableDirections)) { // Can scroll horizontally.
-    if (scrollVelocity.x < 0.0) {
-      direction |= ASScrollDirectionRight;
-    } else if (scrollVelocity.x > 0.0) {
-      direction |= ASScrollDirectionLeft;
-    }
-  }
   if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) { // Can scroll vertically.
     if (scrollVelocity.y < 0.0) {
       direction |= ASScrollDirectionDown;
