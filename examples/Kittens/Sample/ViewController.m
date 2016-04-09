@@ -177,7 +177,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
     [_kittenDataSource addObjectsFromArray:moarKittens];
     [tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
 
-    [context completeBatchFetching];
+    [context completeBatchFetching:YES];
   });
 }
 

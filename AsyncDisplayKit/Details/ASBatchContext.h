@@ -25,10 +25,13 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Let the context object know that a batch fetch was completed.
  *
- * @discussion For instance, when a table has reached the end of its data, a batch fetch will be attempted unless the context
+ * @param didComplete A boolean that states whether or not the batch fetch completed.
+ *
+ * @discussion Only by passing YES will the owner of the context know to attempt another batch update when necessary.
+ * For instance, when a table has reached the end of its data, a batch fetch will be attempted unless the context
  * object thinks that it is still fetching.
  */
-- (void)completeBatchFetching;
+- (void)completeBatchFetching:(BOOL)didComplete;
 
 /**
  * Ask the context object if the batch fetching process was cancelled by the context owner.
@@ -55,20 +58,6 @@ NS_ASSUME_NONNULL_BEGIN
  * context object's owner. Calling this method should be paired with -completeBatchFetching:.
  */
 - (void)beginBatchFetching;
-
-
-#pragma mark - Deprecated
-
-/**
- * Let the context object know that a batch fetch was completed.
- *
- * @param didComplete A boolean that states whether or not the batch fetch completed.
- *
- * @discussion Only by passing YES will the owner of the context know to attempt another batch update when necessary.
- * For instance, when a table has reached the end of its data, a batch fetch will be attempted unless the context
- * object thinks that it is still fetching.
- */
-- (void)completeBatchFetching:(BOOL)didComplete;
 
 @end
 
