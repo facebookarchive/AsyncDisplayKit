@@ -33,26 +33,6 @@ BOOL ASRunningOnOS7();
 ASDISPLAYNODE_EXTERN_C_END
 
 /**
- @summary Conditionally performs UIView geometry changes in the given block without animation and call completion block afterwards.
- 
- Used primarily to circumvent UITableView forcing insertion animations when explicitly told not to via
- `UITableViewRowAnimationNone`. More info: https://github.com/facebook/AsyncDisplayKit/pull/445
- 
- @param withoutAnimation Set to `YES` to perform given block without animation
- @param block Perform UIView geometry changes within the passed block
- @param completion Call completion block if UIView geometry changes within the passed block did complete
- */
-ASDISPLAYNODE_INLINE void ASPerformBlockWithoutAnimationCompletion(BOOL withoutAnimation, void (^block)(), void (^completion)()) {
-  [CATransaction begin];
-  [CATransaction setDisableActions:withoutAnimation];
-  if (completion != nil) {
-    [CATransaction setCompletionBlock:completion];
-  }
-  block();
-  [CATransaction commit];
-}
-
-/**
  @summary Conditionally performs UIView geometry changes in the given block without animation.
  
  Used primarily to circumvent UITableView forcing insertion animations when explicitly told not to via
@@ -62,7 +42,11 @@ ASDISPLAYNODE_INLINE void ASPerformBlockWithoutAnimationCompletion(BOOL withoutA
  @param block Perform UIView geometry changes within the passed block
  */
 ASDISPLAYNODE_INLINE void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
-  ASPerformBlockWithoutAnimationCompletion(withoutAnimation, block, nil);
+  if (withoutAnimation) {
+    [UIView performWithoutAnimation:block];
+  } else {
+    block();
+  }
 }
 
 ASDISPLAYNODE_INLINE void ASBoundsAndPositionForFrame(CGRect rect, CGPoint origin, CGPoint anchorPoint, CGRect *bounds, CGPoint *position)
