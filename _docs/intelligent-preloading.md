@@ -31,7 +31,9 @@ The size of each of these ranges is measured in "screenfuls".  While the default
 
 <img src="/static/intelligent-preloading.png">
 
-As you can see from the above visualization of a scroll view scrolling through the ranges, the leading and trailing sizes of each range will dynamically change direction based on the direction the user is scrolling.  This allows you to worry about leading and trailing sizes alone without having to worry about reacting to changing scroll directions of your user.  
+As you can see from the above visualization of the Pinterest home feed scrolling through the ranges, the leading and trailing sizes of each range will dynamically change direction based on the direction the user is scrolling.  This allows you to worry about leading and trailing sizes alone without having to worry about reacting to changing scroll directions of your user. 
+
+In this example, the user is scrolling down, so the leading (towards bottom of image direction) Fetch Data Range (yellow) and Display Range (orange) are larger than the trailing (towards top of image direction) ranges. In this example, you can also see how intelligent preloading works in multiple dimensions. In the middle of the Pinterest Home Feed, you can see a horizontal scrolling element with drum pictures. These feed isn't yet visible on the device screen (red), but it has it's own range controller that has nodes in the Fetch Data (yellow) and Display (orange) ranges. 
 
 ## Interface State Callbacks
 
