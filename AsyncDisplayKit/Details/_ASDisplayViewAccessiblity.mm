@@ -8,23 +8,27 @@
 
 #import "_ASDisplayViewAccessiblity.h"
 #import "_ASDisplayView.h"
+#import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
 #import <objc/runtime.h>
-#import <queue>
 
 
 #pragma mark - UIAccessibilityElement
 
-static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
-
 @implementation UIAccessibilityElement (_ASDisplayView)
+
++ (UIAccessibilityElement *)accessibilityElementWithContainer:(id)container node:(ASDisplayNode *)node
+{
+  UIAccessibilityElement *accessibilityElement = [[UIAccessibilityElement alloc] initWithAccessibilityContainer:container];
+  accessibilityElement.asyncdisplaykit_node = node;
+  return accessibilityElement;
+}
 
 - (void)setAsyncdisplaykit_node:(ASDisplayNode *)node
 {
-  objc_setAssociatedObject(self, ASDisplayNodeAssociatedNodeKey, node, OBJC_ASSOCIATION_ASSIGN); // Weak reference to avoid cycle, since the node retains the layer.
-  
-  // Update UIAccessibilityElement properties from node
+  objc_setAssociatedObject(self, @selector(asyncdisplaykit_node), node, OBJC_ASSOCIATION_ASSIGN);
+
   self.accessibilityIdentifier = node.accessibilityIdentifier;
   self.accessibilityLabel = node.accessibilityLabel;
   self.accessibilityHint = node.accessibilityHint;
@@ -34,13 +38,17 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (ASDisplayNode *)asyncdisplaykit_node
 {
-  return objc_getAssociatedObject(self, ASDisplayNodeAssociatedNodeKey);
+  return objc_getAssociatedObject(self, @selector(asyncdisplaykit_node));
 }
 
 @end
 
 
-#pragma mark - _ASDisplayView
+#pragma mark - _ASDisplayView / UIAccessibilityContainer
+
+static BOOL ASNodeIsAccessiblityContainer(ASDisplayNode *node) {
+  return (!node.isAccessibilityElement && [node accessibilityElementCount] > 0);
+}
 
 @interface _ASDisplayView () {
   NSMutableArray *_accessibleElements;
@@ -65,41 +73,29 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   if (selfNode.shouldRasterizeDescendants) {
     // In this case we have to go through the whole subnodes tree in BFS fashion and create all
     // accessibility elements ourselves as the view hierarchy is flattened
-    
-    // Queue used to keep track of subnodes while traversing this layout in a BFS fashion.
-    std::queue<ASDisplayNode *> queue;
-    queue.push(selfNode);
-    
-    while (!queue.empty()) {
-      ASDisplayNode *node = queue.front();
-      queue.pop();
-      
-      // Check if we have to add the node to the accessiblity nodes as it's an accessiblity element
+    ASDisplayNodePerformBlockOnEveryNodeBFS(selfNode, ^(ASDisplayNode * _Nonnull node) {
+      // For every subnode we have to create a UIAccessibilityElement as we cannot just add the view to the
+      // accessibleElements as for a subnode of a node with shouldRasterizeDescendants enabled no view exists
       if (node != selfNode && node.isAccessibilityElement) {
-        UIAccessibilityElement *accessibilityElement = [[UIAccessibilityElement alloc] initWithAccessibilityContainer:self];
-        accessibilityElement.asyncdisplaykit_node = node;
-        [_accessibleElements addObject:accessibilityElement];
+        [_accessibleElements addObject:[UIAccessibilityElement accessibilityElementWithContainer:self node:node]];
       }
-
-      // Add all subnodes to process in next step
-      for (int i = 0; i < node.subnodes.count; i++)
-        queue.push(node.subnodes[i]);
-    }
+    });
     return _accessibleElements;
   }
   
   // Handle not rasterize case
   // Create UI accessiblity elements for each subnode that represent an elment within the accessibility container
   for (ASDisplayNode *subnode in selfNode.subnodes) {
-      // Check if this subnode is a UIAccessibilityContainer
-    if (!subnode.isAccessibilityElement && [subnode accessibilityElementCount] > 0) {
-      // We are good and the view is an UIAccessibilityContainer so add it
+    if (subnode.isAccessibilityElement) {
+      if (subnode.isLayerBacked) {
+        // The same comment for layer backed subnodes is true as for subnodes within a shouldRasterizeDescendants node.
+        // See details above
+        [_accessibleElements addObject:[UIAccessibilityElement accessibilityElementWithContainer:self node:subnode]];
+      } else {
+        [_accessibleElements addObject:subnode.view];
+      }
+    } else if (ASNodeIsAccessiblityContainer(subnode)) {
       [_accessibleElements addObject:subnode.view];
-    } else if (subnode.isAccessibilityElement) {
-      // Create a accessiblity element from the subnode
-      UIAccessibilityElement *accessibilityElement = [[UIAccessibilityElement alloc] initWithAccessibilityContainer:self];
-      accessibilityElement.asyncdisplaykit_node = subnode;
-      [_accessibleElements addObject:accessibilityElement];
     }
   }
   
@@ -113,6 +109,7 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (id)accessibilityElementAtIndex:(NSInteger)index
 {
+  ASDisplayNodeAssertNotNil(_accessibleElements, @"At this point _accessibleElements should be created.");
   if (_accessibleElements == nil) {
     return nil;
   }
