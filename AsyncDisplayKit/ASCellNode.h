@@ -30,6 +30,14 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
    * Indicates a cell is no longer visible
    */
   ASCellNodeVisibilityEventInvisible,
+  /**
+   * Indicates user has started dragging the visible cell
+   */
+  ASCellNodeVisibilityEventWillBeginDragging,
+  /**
+   * Indicates user has ended dragging the visible cell
+   */
+  ASCellNodeVisibilityEventDidEndDragging,
 };
 
 /**
