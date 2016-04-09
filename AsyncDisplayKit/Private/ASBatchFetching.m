@@ -10,7 +10,6 @@
 
 BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollView> *scrollView, ASScrollDirection scrollDirection, CGPoint contentOffset)
 {
-
   // Don't fetch if the scroll view does not allow
   if (![scrollView canBatchFetch]) {
     return NO;
@@ -21,7 +20,16 @@ BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollVi
   CGRect bounds = scrollView.bounds;
   CGSize contentSize = scrollView.contentSize;
   CGFloat leadingScreens = scrollView.leadingScreensForBatching;
-  
+  return ASDisplayShouldFetchBatchForContext(context, scrollDirection, bounds, contentSize, contentOffset, leadingScreens);
+}
+
+BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
+                                         ASScrollDirection scrollDirection,
+                                         CGRect bounds,
+                                         CGSize contentSize,
+                                         CGPoint targetOffset,
+                                         CGFloat leadingScreens)
+{
   // Do not allow fetching if a batch is already in-flight and hasn't been completed or cancelled
   if ([context isFetching]) {
     return NO;
@@ -41,11 +49,11 @@ BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollVi
 
   if (ASScrollDirectionContainsDown(scrollDirection)) {
     viewLength = bounds.size.height;
-    offset = contentOffset.y;
+    offset = targetOffset.y;
     contentLength = contentSize.height;
   } else { // horizontal / right
     viewLength = bounds.size.width;
-    offset = contentOffset.x;
+    offset = targetOffset.x;
     contentLength = contentSize.width;
   }
 
