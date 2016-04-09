@@ -88,9 +88,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (instancetype)_initWithTableView:(ASTableView *)tableView;
 @end
 
-@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate,
-                           ASDataControllerSource,     _ASTableViewCellDelegate,
-                           ASCellNodeLayoutDelegate,    ASDelegateProxyInterceptor>
+@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource,     _ASTableViewCellDelegate, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView>
 {
   ASTableViewProxy *_proxyDataSource;
   ASTableViewProxy *_proxyDelegate;
@@ -524,8 +522,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
-#pragma mark -
-#pragma mark Intercepted selectors
+
+#pragma mark - Intercepted selectors
 
 - (void)setTableHeaderView:(UIView *)tableHeaderView
 {
@@ -577,75 +575,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
   return [_dataController numberOfRowsInSection:section];
-}
-
-- (ASScrollDirection)scrollDirection
-{
-  CGPoint scrollVelocity;
-  if (self.isTracking) {
-    scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
-  } else {
-    scrollVelocity = _deceleratingVelocity;
-  }
-  
-  ASScrollDirection scrollDirection = [self _scrollDirectionForVelocity:scrollVelocity];
-  return ASScrollDirectionApplyTransform(scrollDirection, self.transform);
-}
-
-- (ASScrollDirection)scrollableDirections
-{
-  ASScrollDirection scrollableDirection = ASScrollDirectionNone;
-  CGFloat totalContentWidth = self.contentSize.width + self.contentInset.left + self.contentInset.right;
-  CGFloat totalContentHeight = self.contentSize.height + self.contentInset.top + self.contentInset.bottom;
-  
-  if (self.alwaysBounceHorizontal || totalContentWidth > self.bounds.size.width) { // Can scroll horizontally.
-    scrollableDirection |= ASScrollDirectionHorizontalDirections;
-  }
-  if (self.alwaysBounceVertical || totalContentHeight > self.bounds.size.height) { // Can scroll vertically.
-    scrollableDirection |= ASScrollDirectionVerticalDirections;
-  }
-  return scrollableDirection;
-}
-
-- (ASScrollDirection)_scrollDirectionForVelocity:(CGPoint)scrollVelocity
-{
-  ASScrollDirection direction = ASScrollDirectionNone;
-  ASScrollDirection scrollableDirections = [self scrollableDirections];
-  
-  if (ASScrollDirectionContainsHorizontalDirection(scrollableDirections)) { // Can scroll horizontally.
-    if (scrollVelocity.x < 0.0) {
-      direction |= ASScrollDirectionRight;
-    } else if (scrollVelocity.x > 0.0) {
-      direction |= ASScrollDirectionLeft;
-    }
-  }
-  if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) { // Can scroll vertically.
-    if (scrollVelocity.y < 0.0) {
-      direction |= ASScrollDirectionDown;
-    } else if (scrollVelocity.y > 0.0) {
-      direction |= ASScrollDirectionUp;
-    }
-  }
-  
-  return direction;
-}
-
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
-  // If a scroll happenes the current range mode needs to go to full
-  ASInterfaceState interfaceState = [self interfaceStateForRangeController:_rangeController];
-  if (ASInterfaceStateIncludesVisible(interfaceState)) {
-    [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
-  }
-  
-  for (_ASTableViewCell *tableCell in _cellsForVisibilityUpdates) {
-    [[tableCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
-                                 inScrollView:scrollView
-                                withCellFrame:tableCell.frame];
-  }
-  if (_asyncDelegateImplementsScrollviewDidScroll) {
-    [_asyncDelegate scrollViewDidScroll:scrollView];
-  }
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
@@ -700,16 +629,22 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 }
 
 
-#pragma mark - Batch Fetching
-
-- (void)_checkForBatchFetching
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-  // Dragging will be handled in scrollViewWillEndDragging:withVelocity:targetContentOffset:
-  if ([self isDragging] || [self isTracking]) {
-    return;
+  // If a scroll happenes the current range mode needs to go to full
+  ASInterfaceState interfaceState = [self interfaceStateForRangeController:_rangeController];
+  if (ASInterfaceStateIncludesVisible(interfaceState)) {
+    [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
   }
   
-  [self _beginBatchFetchingIfNeededForScrollDirection:[self scrollableDirections] contentOffset:self.contentOffset];
+  for (_ASTableViewCell *tableCell in _cellsForVisibilityUpdates) {
+    [[tableCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
+                                 inScrollView:scrollView
+                                withCellFrame:tableCell.frame];
+  }
+  if (_asyncDelegateImplementsScrollviewDidScroll) {
+    [_asyncDelegate scrollViewDidScroll:scrollView];
+  }
 }
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
@@ -721,7 +656,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   if (targetContentOffset != NULL) {
     ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
-    [self _beginBatchFetchingIfNeededForScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
+    [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
   }
 
   if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
@@ -729,19 +664,69 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
-- (void)_beginBatchFetchingIfNeededForScrollDirection:(ASScrollDirection)scrollDirection contentOffset:(CGPoint)contentOffset
+
+#pragma mark - Scroll Direction
+
+- (ASScrollDirection)scrollDirection
 {
-  if (![self _shouldBatchFetch]) {
-    return;
+  CGPoint scrollVelocity;
+  if (self.isTracking) {
+    scrollVelocity = [self.panGestureRecognizer velocityInView:self.superview];
+  } else {
+    scrollVelocity = _deceleratingVelocity;
   }
   
-  // Check if we should batch fetch
-  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollableDirections], self.bounds, self.contentSize, self.contentOffset, _leadingScreensForBatching)) {
-    [self _beginBatchFetching];
-  }
+  ASScrollDirection scrollDirection = [self _scrollDirectionForVelocity:scrollVelocity];
+  return ASScrollDirectionApplyTransform(scrollDirection, self.transform);
 }
 
-- (BOOL)_shouldBatchFetch
+- (ASScrollDirection)_scrollDirectionForVelocity:(CGPoint)scrollVelocity
+{
+  ASScrollDirection direction = ASScrollDirectionNone;
+  ASScrollDirection scrollableDirections = [self scrollableDirections];
+  
+  if (ASScrollDirectionContainsHorizontalDirection(scrollableDirections)) { // Can scroll horizontally.
+    if (scrollVelocity.x < 0.0) {
+      direction |= ASScrollDirectionRight;
+    } else if (scrollVelocity.x > 0.0) {
+      direction |= ASScrollDirectionLeft;
+    }
+  }
+  if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) { // Can scroll vertically.
+    if (scrollVelocity.y < 0.0) {
+      direction |= ASScrollDirectionDown;
+    } else if (scrollVelocity.y > 0.0) {
+      direction |= ASScrollDirectionUp;
+    }
+  }
+  
+  return direction;
+}
+
+- (ASScrollDirection)scrollableDirections
+{
+  ASScrollDirection scrollableDirection = ASScrollDirectionNone;
+  CGFloat totalContentWidth = self.contentSize.width + self.contentInset.left + self.contentInset.right;
+  CGFloat totalContentHeight = self.contentSize.height + self.contentInset.top + self.contentInset.bottom;
+  
+  if (self.alwaysBounceHorizontal || totalContentWidth > self.bounds.size.width) { // Can scroll horizontally.
+    scrollableDirection |= ASScrollDirectionHorizontalDirections;
+  }
+  if (self.alwaysBounceVertical || totalContentHeight > self.bounds.size.height) { // Can scroll vertically.
+    scrollableDirection |= ASScrollDirectionVerticalDirections;
+  }
+  return scrollableDirection;
+}
+
+
+#pragma mark - Batch Fetching
+
+- (ASBatchContext *)batchContext
+{
+  return _batchContext;
+}
+
+- (BOOL)canBatchFetch
 {
   // if the delegate does not respond to this method, there is no point in starting to fetch
   BOOL canFetch = [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
@@ -752,12 +737,39 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
+- (void)_scheduleCheckForBatchFetching
+{
+  // Push this to the next runloop to be sure the UITableView has the right content size
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [self _checkForBatchFetching];
+  });
+}
+
+- (void)_checkForBatchFetching
+{
+  // Dragging will be handled in scrollViewWillEndDragging:withVelocity:targetContentOffset:
+  if (self.isDragging || self.isTracking) {
+    return;
+  }
+  
+  [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollableDirections] contentOffset:self.contentOffset];
+}
+
+- (void)_beginBatchFetchingIfNeededWithScrollView:(UIScrollView<ASBatchFetchingScrollView> *)scrollView forScrollDirection:(ASScrollDirection)scrollDirection contentOffset:(CGPoint)contentOffset
+{
+  if (ASDisplayShouldFetchBatchForScrollView(self, scrollDirection, contentOffset)) {
+    [self _beginBatchFetching];
+  }
+}
+
 - (void)_beginBatchFetching
 {
   [_batchContext beginBatchFetching];
-  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    [_asyncDelegate tableView:self willBeginBatchFetchWithContext:_batchContext];
-  });
+  if ([_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)]) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      [_asyncDelegate tableView:self willBeginBatchFetchWithContext:_batchContext];
+    });
+  }
 }
 
 #pragma mark - ASRangeControllerDataSource
@@ -897,13 +909,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-    
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
-    // Push this to the next runloop to be sure the UITableView has the right content size
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [self _checkForBatchFetching];
-    });
+    [self _scheduleCheckForBatchFetching];
   });
 
   if (_automaticallyAdjustsContentOffset) {
@@ -923,10 +931,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
-    // Push this to the next runloop to be sure the UITableView has the right content size
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [self _checkForBatchFetching];
-    });
+    [self _scheduleCheckForBatchFetching];
   });
 
   if (_automaticallyAdjustsContentOffset) {
@@ -947,10 +952,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
-    // Push this to the next runloop to be sure the UITableView has the right content size
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [self _checkForBatchFetching];
-    });
+    [self _scheduleCheckForBatchFetching];
   });
 }
 
@@ -966,10 +968,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
     [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
-    // Push this to the next runloop to be sure the UITableView has the right content size
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [self _checkForBatchFetching];
-    });
+    [self _scheduleCheckForBatchFetching];
   });
 }
 
