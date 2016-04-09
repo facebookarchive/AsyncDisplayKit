@@ -15,6 +15,9 @@
 #import "ASMultiDimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "AsyncDisplayKit+Debug.h"
+#import "ASCollectionView.h"
+
 
 @interface ASRangeController ()
 {
@@ -48,6 +51,10 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _didUpdateCurrentRange = NO;
   
   [[[self class] allRangeControllersWeakSet] addObject:self];
+  
+  if ([ASRangeController shouldShowRangeDebugOverlay]) {
+    [self addRangeControllerToRangeDebugOverlay];
+  }
   
   return self;
 }
@@ -146,6 +153,12 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (_dataSource && _queuedRangeUpdate) {
     [self performRangeUpdate];
   }
+  UIResponder *responder = (UIResponder *)dataSource;
+  while (responder && ![responder isKindOfClass:[UIViewController class]]) {
+    responder = [responder nextResponder];
+  }
+  
+//  NSLog(@"%@",  NSStringFromClass([responder class]) );
 }
 
 - (void)_updateVisibleNodeIndexPaths
@@ -315,6 +328,21 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   if (_didRegisterForNotifications) {
     _pendingDisplayNodesTimestamp = CFAbsoluteTimeGetCurrent();
+  }
+  
+  if ([ASRangeController shouldShowRangeDebugOverlay]) {
+    ASScrollDirection scrollableDirections = ASScrollDirectionUp | ASScrollDirectionDown;
+    if ([_dataSource isKindOfClass:NSClassFromString(@"ASCollectionView")]) {
+      scrollableDirections = (ASScrollDirection)[_dataSource performSelector:@selector(scrollableDirections)];
+    }
+    
+    [self updateRangeController:self
+       withScrollableDirections:scrollableDirections
+                scrollDirection:_scrollDirection
+                      rangeMode:rangeMode
+        displayTuningParameters:parametersDisplay
+      fetchDataTuningParameters:parametersFetchData
+                 interfaceState:selfInterfaceState];
   }
   
   _rangeIsValid = YES;

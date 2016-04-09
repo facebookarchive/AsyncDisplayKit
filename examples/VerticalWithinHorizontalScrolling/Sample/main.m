@@ -1,4 +1,4 @@
-/* This file provided by Facebook is for non-commercial testing and evaluation
+ /* This file provided by Facebook is for non-commercial testing and evaluation
  * purposes only.  Facebook reserves all rights not expressly granted.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR

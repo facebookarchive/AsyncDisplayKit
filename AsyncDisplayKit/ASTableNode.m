@@ -9,6 +9,7 @@
 #import "ASFlowLayoutController.h"
 #import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "AsyncDisplayKit+Debug.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
 @interface _ASTablePendingState : NSObject
@@ -131,6 +132,12 @@
   } else {
     return self.view.asyncDataSource;
   }
+}
+
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
+{
+  [super interfaceStateDidChange:newState fromState:oldState];
+  [ASRangeController layoutDebugOverlayIfNeeded];
 }
 
 - (ASTableView *)view
