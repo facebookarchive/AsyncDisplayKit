@@ -517,19 +517,21 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     CGRect finalRect = [intersectLayer convertRect:intersectRect toLayer:layer];
     UIColor *fillColor = [[UIColor greenColor] colorWithAlphaComponent:0.4];
   
-    // determine which edges were clipped
-    if (clippedEdges != UIRectEdgeNone) {
+    // determine if edges are clipped
+    if (clippedEdges == UIRectEdgeNone) {
+      _debugHighlightOverlay.backgroundColor = fillColor;
+    } else {
       const CGFloat borderWidth = 2.0;
-      UIColor *superhitTestSlopClipsBorderColor = [UIColor colorWithRed:30/255.0 green:90/255.0 blue:50/255.0 alpha:0.7];
-      UIColor *superClipsToBoundsBorderColor = [[UIColor orangeColor] colorWithAlphaComponent:0.8];
+      UIColor *borderColor = [[UIColor orangeColor] colorWithAlphaComponent:0.8];
+      UIColor *clipsBorderColor = [UIColor colorWithRed:30/255.0 green:90/255.0 blue:50/255.0 alpha:0.7];
       CGRect imgRect = CGRectMake(0, 0, 2.0 * borderWidth + 1.0, 2.0 * borderWidth + 1.0);
       UIGraphicsBeginImageContext(imgRect.size);
       
       [fillColor setFill];
       UIRectFill(imgRect);
       
-      [self drawEdgeIfClippedWithEdges:clippedEdges color:superhitTestSlopClipsBorderColor borderWidth:borderWidth imgRect:imgRect];
-      [self drawEdgeIfClippedWithEdges:clipsToBoundsClippedEdges color:superClipsToBoundsBorderColor borderWidth:borderWidth imgRect:imgRect];
+      [self drawEdgeIfClippedWithEdges:clippedEdges color:clipsBorderColor borderWidth:borderWidth imgRect:imgRect];
+      [self drawEdgeIfClippedWithEdges:clipsToBoundsClippedEdges color:borderColor borderWidth:borderWidth imgRect:imgRect];
       
       UIImage *debugHighlightImage = UIGraphicsGetImageFromCurrentImageContext();
       UIGraphicsEndImageContext();
@@ -538,8 +540,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       _debugHighlightOverlay.image = [debugHighlightImage resizableImageWithCapInsets:edgeInsets
                                                                          resizingMode:UIImageResizingModeStretch];
       _debugHighlightOverlay.backgroundColor = nil;
-    } else {
-      _debugHighlightOverlay.backgroundColor = fillColor;
     }
     
     _debugHighlightOverlay.frame = finalRect;
