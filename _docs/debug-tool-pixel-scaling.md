@@ -2,7 +2,9 @@
 title: Image Scaling
 layout: docs
 permalink: /docs/debug-tool-pixel-scaling.html
+next: debug-tool-hit-test-slop.html
 ---
+
 ## Visualize ASImageNode.image’s pixel scaling
 ### Description
 This debug feature adds a red text label overlay on the bottom right hand corner of an ASImageNode if (and only if) the image’s size in pixels does not match it’s bounds size in pixels, e.g.
