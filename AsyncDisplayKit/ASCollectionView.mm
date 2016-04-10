@@ -782,8 +782,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)_beginBatchFetching
 {
-  NSLog(@"begin batch fetching");
-    
   [_batchContext beginBatchFetching];
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)]) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
