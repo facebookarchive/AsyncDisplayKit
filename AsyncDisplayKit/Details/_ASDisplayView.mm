@@ -8,12 +8,7 @@
 
 #import "_ASDisplayView.h"
 
-#import <objc/runtime.h>
-
 #import "_ASCoreAnimationExtras.h"
-#import "_ASAsyncTransactionContainer.h"
-#import "ASAssert.h"
-#import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Subclasses.h"
@@ -31,6 +26,7 @@
   __unsafe_unretained ASDisplayNode *_node;  // Though UIView has a .node property added via category, since we can add an ivar to a subclass, use that for performance.
   BOOL _inHitTest;
   BOOL _inPointInside;
+  NSMutableArray *_accessibleElements;
 }
 
 @synthesize asyncdisplaykit_node = _node;
