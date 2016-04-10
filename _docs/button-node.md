@@ -2,6 +2,7 @@
 title: ASButtonNode
 layout: docs
 permalink: /docs/button-node.html
+next: text-node.html
 ---
 
 `ASButtonNode` (a subclass of `ASControlNode`) supports simple buttons, with multiple states for a text label and an image with a few different layout options. Enables layerBacking for subnodes to significantly lighten main thread impact relative to UIButton (though async preparation is the bigger win).
