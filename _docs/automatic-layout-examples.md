@@ -2,7 +2,9 @@
 title: Layout Examples
 layout: docs
 permalink: /docs/automatic-layout-examples.html
+next: automatic-layout-debugging.html
 ---
+
 Three examples in increasing order of complexity. 
 #NSSpain Talk Example
 

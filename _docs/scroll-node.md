@@ -2,6 +2,7 @@
 title: ASScrollNode
 layout: docs
 permalink: /docs/scroll-node.html
+next: automatic-layout-basics.html
 ---
 
-<div class = "warning">😑 This page is coming soon...</div>
+<div>😑 This page is coming soon...</div>

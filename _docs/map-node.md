@@ -2,6 +2,7 @@
 title: ASMapNode
 layout: docs
 permalink: /docs/map-node.html
+next: video-node.html
 ---
 
 `ASMapNode` offers completely asynchronous preparation, automatic preloading, and efficient memory handling. Its standard mode is a fully asynchronous snapshot, with liveMap mode loading automatically triggered by any `ASTableView` or `ASCollectionView`; its `.liveMap` mode can be flipped on with ease (even on a background thread) to provide a cached, fully interactive map when necessary. 
