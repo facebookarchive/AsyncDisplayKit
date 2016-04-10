@@ -1,12 +1,14 @@
 ![AsyncDisplayKit](https://github.com/facebook/AsyncDisplayKit/blob/master/docs/assets/logo.png)
 
-[![Build Status](https://travis-ci.org/facebook/AsyncDisplayKit.svg)](https://travis-ci.org/facebook/AsyncDisplayKit)
-[![Coverage Status](https://coveralls.io/repos/facebook/AsyncDisplayKit/badge.svg?branch=master)](https://coveralls.io/r/facebook/AsyncDisplayKit?branch=master)
-[![Version](https://img.shields.io/cocoapods/v/AsyncDisplayKit.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
-[![Platform](https://img.shields.io/cocoapods/p/AsyncDisplayKit.svg)]()
+[![Apps Using](https://img.shields.io/badge/appsUsing-%3E3,200-green.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Downloads](https://img.shields.io/badge/downloads-%3E336,372-green.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Platform](https://img.shields.io/badge/platforms-iOS%20%7C%20tvOS-lightgrey.svg)](http://AsyncDisplayKit.org)
+[![Languages](https://img.shields.io/badge/languages-ObjC%20%7C%20Swift-orange.svg)](http://AsyncDisplayKit.org)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+[![Version](https://img.shields.io/cocoapods/v/AsyncDisplayKit.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Build Status](https://travis-ci.org/facebook/AsyncDisplayKit.svg)](https://travis-ci.org/facebook/AsyncDisplayKit)
 [![License](https://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
-[![Downloads](https://img.shields.io/badge/downloads-%3E320k-green.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+
 
 AsyncDisplayKit is an iOS framework that keeps even the most complex user
 interfaces smooth and responsive.  It was originally built to make Facebook's
