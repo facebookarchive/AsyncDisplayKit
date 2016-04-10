@@ -31,11 +31,11 @@
   - scroll-node
 - title: Layout Engine
   items:
-  - layout-options
   - automatic-layout-basics
   - automatic-layout-containers
   - automatic-layout-examples
   - automatic-layout-debugging
+  - layout-options
 - title: Optimizations
   items:
   - layer-backing

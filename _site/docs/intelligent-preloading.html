@@ -3440,152 +3440,6 @@
           
             
             
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-            <li>
-              <a href=/docs/layout-options.html>
-                Layout Options
-              </a>
-            </li>
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-        
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
             <li>
               <a href=/docs/automatic-layout-basics.html>
                 Layout Basics
@@ -4101,6 +3955,152 @@
             
           
             
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+        
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+            <li>
+              <a href=/docs/layout-options.html>
+                Layout Options
+              </a>
+            </li>
             
           
             
@@ -5651,11 +5651,11 @@
 
     <p>While a node&#39;s ability to be rendered and measured asynchronously makes it quite powerful, another crucially important layer to ASDK is the idea of intelligent preloading.</p>
 
-<p>As was pointed out in <a href = "getting-started.html">getting started</a>, it is rarely advantageous to use a node outside of the context of one of the containers.  This is due to the fact that all nodes have a notion of their current interface state.  </p>
+<p>As was pointed out in <a href = "getting-started.html">getting started</a>, it is rarely advantageous to use a node outside of the context of one of the node containers.  This is due to the fact that all nodes have a notion of their current interface state.  </p>
 
 <p>This <code>interfaceState</code> property is constantly updated by an <code>ASRangeController</code> which all containers create and maintain internally.</p>
 
-<p>A node used outside of a container won&#39;t have its state updated by any range controller which is what results in the common flashes as nodes are rendered after realizing they&#39;re already onscreen without any warning.</p>
+<p>A node used outside of a container won&#39;t have its state updated by any range controller. This sometimes results in a flash as nodes are rendered after realizing they&#39;re already onscreen without any warning.</p>
 
 <h2>Interface State Ranges</h2>
 
@@ -5663,15 +5663,25 @@
 
 <p>A node will be in one of following ranges: </p>
 
-<ol>
-    <li><strong>Fetch Data Range:</strong> The furthest range out from being visible. This is where content should be gathered from it external source whether that’s some API or a local disk.</li>
-    <li><strong>Display Range:</strong>Here, display tasks such as text rasterization and image decoding take place.</li>
-    <li><strong>Visible Range:</strong>The node is onscreen by at least one pixel.</li>
-</ol>
+<ul>
+    <li><strong>Fetch Data Range:</strong> The furthest range out from being visible. This is where content is gathered from an external source, whether that’s some API or a local disk.</li>
+    <li><strong>Display Range:</strong> Here, display tasks such as text rasterization and image decoding take place.</li>
+    <li><strong>Visible Range:</strong> The node is onscreen by at least one pixel.</li>
+</ul>
+
+<h2>ASRangeTuningParameters</h2>
+
+<p>The size of each of these ranges is measured in &quot;screenfuls&quot;.  While the default sizes will work well for many use cases, they can be tweaked quite easily by setting the tuning parameters for range type on your scrolling node.</p>
+
+<p><img src="/static/intelligent-preloading.png"></p>
+
+<p>In the above visualization of the Pinterest home feed, the user is scrolling down.  As you can see, the sizes of the ranges in the leading direction are quite a bit larger than the content the user is moving away from (the trailing direction).  If the user were to change directions, the leading and trailing sides would dynamically swap in order to keep memory usage optimal.  This allows you to worry about defining the leading and trailing sizes without having to worry about reacting to the changing scroll directions of your user. </p>
+
+<p>In this example, you can also see how intelligent preloading works in multiple dimensions. In the middle of the Pinterest Home Feed, you can see a horizontal scrolling element with drum pictures. These feed isn&#39;t yet visible on the device screen (red), but it has it&#39;s own range controller that has nodes in the Fetch Data (yellow) and Display (orange) ranges. </p>
 
 <h2>Interface State Callbacks</h2>
 
-<p>As a user scrolls, nodes move through the ranges and react appropriately by loading data, rendering, etc.  Your own node subclasses can easily tap into this mechanism by implementing the corresponding callback methods.</p>
+<p>As a user scrolls, nodes move through the ranges and react appropriately by loading data, rendering, etc.  Your own <a href = "subclassing.html">node subclasses</a> can easily tap into this mechanism by implementing the corresponding callback methods.</p>
 
 <h3>Visible Range</h3>
 

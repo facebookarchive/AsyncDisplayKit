@@ -31,13 +31,13 @@ The size of each of these ranges is measured in "screenfuls".  While the default
 
 <img src="/static/intelligent-preloading.png">
 
-As you can see from the above visualization of the Pinterest home feed scrolling through the ranges, the leading and trailing sizes of each range will dynamically change direction based on the direction the user is scrolling.  This allows you to worry about leading and trailing sizes alone without having to worry about reacting to changing scroll directions of your user. 
+In the above visualization of the Pinterest home feed, the user is scrolling down.  As you can see, the sizes of the ranges in the leading direction are quite a bit larger than the content the user is moving away from (the trailing direction).  If the user were to change directions, the leading and trailing sides would dynamically swap in order to keep memory usage optimal.  This allows you to worry about defining the leading and trailing sizes without having to worry about reacting to the changing scroll directions of your user. 
 
-In this example, the user is scrolling down, so the leading (towards bottom of image direction) Fetch Data Range (yellow) and Display Range (orange) are larger than the trailing (towards top of image direction) ranges. In this example, you can also see how intelligent preloading works in multiple dimensions. In the middle of the Pinterest Home Feed, you can see a horizontal scrolling element with drum pictures. These feed isn't yet visible on the device screen (red), but it has it's own range controller that has nodes in the Fetch Data (yellow) and Display (orange) ranges. 
+In this example, you can also see how intelligent preloading works in multiple dimensions. In the middle of the Pinterest Home Feed, you can see a horizontal scrolling element with drum pictures. These feed isn't yet visible on the device screen (red), but it has it's own range controller that has nodes in the Fetch Data (yellow) and Display (orange) ranges. 
 
 ## Interface State Callbacks
 
-As a user scrolls, nodes move through the ranges and react appropriately by loading data, rendering, etc.  Your own node subclasses can easily tap into this mechanism by implementing the corresponding callback methods.
+As a user scrolls, nodes move through the ranges and react appropriately by loading data, rendering, etc.  Your own <a href = "subclassing.html">node subclasses</a> can easily tap into this mechanism by implementing the corresponding callback methods.
 
 ### Visible Range 
 `- (void)visibilityDidChange:(BOOL)isVisible;`

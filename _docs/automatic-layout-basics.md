@@ -10,7 +10,7 @@ ASLayout is an automatic, asynchronous, purely Objective-C box model layout feat
 
 `UIView` instances store position and size in their `center` and `bounds` properties. As constraints change, Core Animation performs a layout pass to call `layoutSubviews`, asking views to update these properties on their subviews. 
 
-`\<ASLayoutable\>` instances (all ASDisplayNodes and subclasses) do not have any size or position information. Instead, AsyncDisplayKit calls the `layoutSpecThatFits:` method with a given size constraint and the component must return a structure describing both its size, and the position and sizes of its children.
+`<ASLayoutable>` instances (all ASDisplayNodes and subclasses) do not have any size or position information. Instead, AsyncDisplayKit calls the `layoutSpecThatFits:` method with a given size constraint and the component must return a structure describing both its size, and the position and sizes of its children.
 
 ##Terminology
 

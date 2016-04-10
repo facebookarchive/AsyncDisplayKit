@@ -2,7 +2,7 @@
 title: References
 layout: docs
 permalink: /docs/references.html
-next: installation.html
+next: intelligent-preloading.html
 ---
 
 ###Join our Slack!

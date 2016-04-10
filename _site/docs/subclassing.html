@@ -3440,152 +3440,6 @@
           
             
             
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-            <li>
-              <a href=/docs/layout-options.html>
-                Layout Options
-              </a>
-            </li>
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-        
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
-          
-            
-            
             <li>
               <a href=/docs/automatic-layout-basics.html>
                 Layout Basics
@@ -4101,6 +3955,152 @@
             
           
             
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+        
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+            <li>
+              <a href=/docs/layout-options.html>
+                Layout Options
+              </a>
+            </li>
             
           
             
@@ -5649,7 +5649,26 @@
     </h1>
     <p></p>
 
-    
+    <p>While subclassing nodes is similar to writing a UIView subclass, there are a few guidelines to follow to ensure that both that you&#39;re utilizing the framework to its full potential and that your nodes behave as expected.</p>
+
+<h3>Common Override Methods</h3>
+
+<h3><code>-init</code></h3>
+
+<p>More often than not, you&#39;ll write some kind of init method that calls <code>[super init]</code> and then sets up the properties of your class.  The most important thing to remember is that your init method must be capable of being called on any queue.  Most notably, this means you definitely need to be sure never to initialize any UIKit objects in your initializer.</p>
+
+<h3><code>-didLoad</code></h3>
+
+<p>This method is similar to UIViewController&#39;s <code>-viewDidLoad</code> method and is the point where the backing view has been loaded.  It is guaranteed to be called on the main thread and is the appropriate place to set up an UIKit objects you may be using.</p>
+
+<h3><code>-layoutSpecThatFits:</code></h3>
+
+<p>This method is where you build out a layout spec object that will produces the size of the node, as well as the size and position of all subnodes.  The layout spec object that you create is maleable up until the point that it is return in this method.  After this point, it will be immutable.  It&#39;s important to remember not to cache layout specs for use later but instead to recreate them when necessary.</p>
+
+<h3><code>-layout</code></h3>
+
+<p>Right after the call to super in this method, the layout spec will have been calculated and all subnodes will have been measured and positioned.  This is a good place to manually layout subviews if you happen to be using them for some reason.  Maybe more useful is the instances where you want to create a layout that isn&#39;t easily created via a layout spec.  Sometimes it&#39;s easier to wait until most subnodes are laid out and just set a frame manually.  If that&#39;s the case, this is the place to do it.</p>
+
 
     <div class="docs-prevnext">
       

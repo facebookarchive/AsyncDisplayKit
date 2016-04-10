@@ -2,7 +2,7 @@
 title: Installation
 layout: docs
 permalink: /docs/installation.html
-next: quick-start.html
+next: references.html
 ---
 
 ###CocoaPods
