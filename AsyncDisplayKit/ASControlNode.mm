@@ -467,8 +467,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     // Even if our parents don't have clipsToBounds set and would allow us to display the debug overlay, UIKit event delivery (hitTest:)
     // will not search sub-hierarchies if one of our parents does not return YES for pointInside:.  In such a scenario, hitTestSlop
     // may not be able to expand the tap target as much as desired without also setting some hitTestSlop on the limiting parents.
-    CGRect originalRect = UIEdgeInsetsInsetRect(self.bounds, [self hitTestSlop]);
-    CGRect intersectRect = originalRect;
+    CGRect intersectRect = UIEdgeInsetsInsetRect(self.bounds, [self hitTestSlop]);
     UIRectEdge clippedEdges = UIRectEdgeNone;
     UIRectEdge clipsToBoundsClippedEdges = UIRectEdgeNone;
     CALayer *layer = self.layer;
@@ -480,18 +479,33 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     while (intersectSuperlayer && ![intersectSuperlayer.delegate respondsToSelector:@selector(contentOffset)]) {
       // Get our parent's tappable bounds.  If the parent has an associated node, consider hitTestSlop, as it will extend its pointInside:.
       CGRect parentHitRect = intersectSuperlayer.bounds;
-      BOOL parentClipsToBounds = intersectSuperlayer.masksToBounds;
+      BOOL parentClipsToBounds = NO;
+      
       ASDisplayNode *parentNode = ASLayerToDisplayNode(intersectSuperlayer);
-      if (parentNode && !parentClipsToBounds) {
-        parentHitRect = UIEdgeInsetsInsetRect(parentHitRect, [parentNode hitTestSlop]);
+      if (parentNode) {
+        UIEdgeInsets parentSlop = [parentNode hitTestSlop];
+        
+        // if parent has a hitTestSlop as well, we need to account for the fact that events will be routed towards us in that area too.
+        if (!UIEdgeInsetsEqualToEdgeInsets(UIEdgeInsetsZero, parentSlop)) {
+          parentClipsToBounds = parentNode.clipsToBounds;
+          // if the parent is clipping, this will prevent us from showing the overlay outside that area.
+          // in this case, we will make the overlay smaller so that the special highlight to indicate the overlay
+          // cannot accurately display the true tappable area is shown.
+          if (!parentClipsToBounds) {
+            parentHitRect = UIEdgeInsetsInsetRect(parentHitRect, [parentNode hitTestSlop]);
+          }
+        }
       }
       
       // Convert our current rectangle to parent coordinates, and intersect with the parent's hit rect.
       CGRect intersectRectInParentCoordinates = [intersectSuperlayer convertRect:intersectRect fromLayer:intersectLayer];
       intersectRect = CGRectIntersection(parentHitRect, intersectRectInParentCoordinates);
-      if (parentClipsToBounds) {
-        if (!CGSizeEqualToSize(parentHitRect.size, intersectRectInParentCoordinates.size)) {
-          clipsToBoundsClippedEdges = [self setEdgesOfIntersectionForChildRect:intersectRectInParentCoordinates parentRect:parentHitRect rectEdge:clipsToBoundsClippedEdges];
+      if (!CGSizeEqualToSize(parentHitRect.size, intersectRectInParentCoordinates.size)) {
+        clippedEdges = [self setEdgesOfIntersectionForChildRect:intersectRectInParentCoordinates
+                                                     parentRect:parentHitRect rectEdge:clippedEdges];
+        if (parentClipsToBounds) {
+          clipsToBoundsClippedEdges = [self setEdgesOfIntersectionForChildRect:intersectRectInParentCoordinates
+                                                                    parentRect:parentHitRect rectEdge:clipsToBoundsClippedEdges];
         }
       }
 
@@ -504,10 +518,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     UIColor *fillColor = [[UIColor greenColor] colorWithAlphaComponent:0.4];
   
     // determine which edges were clipped
-    if (!CGSizeEqualToSize(originalRect.size, finalRect.size)) {
-      
-      clippedEdges = [self setEdgesOfIntersectionForChildRect:originalRect parentRect:finalRect rectEdge:clippedEdges];
-      
+    if (clippedEdges != UIRectEdgeNone) {
       const CGFloat borderWidth = 2.0;
       UIColor *superhitTestSlopClipsBorderColor = [UIColor colorWithRed:30/255.0 green:90/255.0 blue:50/255.0 alpha:0.7];
       UIColor *superClipsToBoundsBorderColor = [[UIColor orangeColor] colorWithAlphaComponent:0.8];
