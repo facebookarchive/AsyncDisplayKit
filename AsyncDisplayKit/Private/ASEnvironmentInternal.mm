@@ -15,6 +15,9 @@
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
+#define AS_SUPPORT_PROPAGATION NO
+
+
 #pragma mark - Traversing an ASEnvironment Tree
 
 void ASEnvironmentPerformBlockOnObjectAndChildren(id<ASEnvironment> object, void(^block)(id<ASEnvironment> node))
@@ -105,6 +108,10 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
 ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentLayoutOptionsState layoutOptionsState, ASEnvironmentStatePropagation propagation) {
   // Merge object and layout options state
   LOG(@"Merge object and state: %@ - ASEnvironmentLayoutOptionsState", object);
+  
+  if (!AS_SUPPORT_PROPAGATION) {
+    return environmentState;
+  }
   
   // Support propagate up
   if (propagation == ASEnvironmentStatePropagation::UP) {
