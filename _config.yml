@@ -1,10 +1,9 @@
-
 ---
 url: http://asyncdisplaykit.org
 name: AsyncDisplayKit
 relative_permalinks: false
-markdown: kramdown
-description: Smooth asynchronous user interfaces for iOS apps.
+markdown: redcarpet
+description: Smooth asynchronous user interfaces for iOS apps. 
 timezone: America/Los_Angeles
 
 safe: true
@@ -14,13 +13,12 @@ highlighter: pygments
 defaults:
   -
     scope:
-    path: ""
-    type: "posts"
+      path: ""
+      type: "posts"
     values:
-    layout: post
-    is_post: true
+      layout: post
+      is_post: true
 
 collections:
   docs:
     output: true
-

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASLayout Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">AsyncDisplayKit </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Facebook</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/position">position</option>
+		
+		<option value="//api/name/sublayouts">sublayouts</option>
+		
+	</optgroup>
+	
+
+	
+	<optgroup label="Class Methods">
+		
+		<option value="//api/name/layoutWithLayoutableObject:size:">+ layoutWithLayoutableObject:size:</option>
+		
+		<option value="//api/name/layoutWithLayoutableObject:size:position:sublayouts:">+ layoutWithLayoutableObject:size:position:sublayouts:</option>
+		
+		<option value="//api/name/layoutWithLayoutableObject:size:sublayouts:">+ layoutWithLayoutableObject:size:sublayouts:</option>
+		
+	</optgroup>
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/flattenedLayoutUsingPredicateBlock:">- flattenedLayoutUsingPredicateBlock:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASLayout Class Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Inherits from</th>
+	<td>NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASLayout.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>Represents a computed immutable layout tree.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/position" title="position"></a>
+	<h3 class="method-title"><code><a href="#//api/name/position">&nbsp;&nbsp;position</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Position in parent. Default to CGPointNull.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite) CGPoint position</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>When being used as a sublayout, this property must not equal CGPointNull.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayout.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/sublayouts" title="sublayouts"></a>
+	<h3 class="method-title"><code><a href="#//api/name/sublayouts">&nbsp;&nbsp;sublayouts</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Array of ASLayouts. Each must have a valid non-null position.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly) NSArray *sublayouts</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayout.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutWithLayoutableObject:size:position:sublayouts:" title="layoutWithLayoutableObject:size:position:sublayouts:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutWithLayoutableObject:size:position:sublayouts:">+&nbsp;layoutWithLayoutableObject:size:position:sublayouts:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initializer.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>+ (instancetype)layoutWithLayoutableObject:(id&lt;ASLayoutable&gt;)<em>layoutableObject</em> size:(CGSize)<em>size</em> position:(CGPoint)<em>position</em> sublayouts:(NSArray *)<em>sublayouts</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>layoutableObject</code></th>
+						<td><p>The backing ASLayoutable object.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>size</code></th>
+						<td><p>The size of this layout.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>position</code></th>
+						<td><p>The posiion of this layout within its parent (if available).</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>sublayouts</code></th>
+						<td><p>Sublayouts belong to the new layout.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayout.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutWithLayoutableObject:size:sublayouts:" title="layoutWithLayoutableObject:size:sublayouts:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutWithLayoutableObject:size:sublayouts:">+&nbsp;layoutWithLayoutableObject:size:sublayouts:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Convenience initializer that has CGPointNull position.
+Best used by ASDisplayNode subclasses that are manually creating a layout for -calculateLayoutThatFits:,
+or for ASLayoutSpec subclasses that are referencing the &ldquo;self&rdquo; level in the layout tree,
+or for creating a sublayout of which the position is yet to be determined.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>+ (instancetype)layoutWithLayoutableObject:(id&lt;ASLayoutable&gt;)<em>layoutableObject</em> size:(CGSize)<em>size</em> sublayouts:(NSArray *)<em>sublayouts</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>layoutableObject</code></th>
+						<td><p>The backing ASLayoutable object.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>size</code></th>
+						<td><p>The size of this layout.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>sublayouts</code></th>
+						<td><p>Sublayouts belong to the new layout.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayout.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutWithLayoutableObject:size:" title="layoutWithLayoutableObject:size:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutWithLayoutableObject:size:">+&nbsp;layoutWithLayoutableObject:size:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Convenience that has CGPointNull position and no sublayouts.
+Best used for creating a layout that has no sublayouts, and is either a root one
+or a sublayout of which the position is yet to be determined.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>+ (instancetype)layoutWithLayoutableObject:(id&lt;ASLayoutable&gt;)<em>layoutableObject</em> size:(CGSize)<em>size</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>layoutableObject</code></th>
+						<td><p>The backing ASLayoutable object.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>size</code></th>
+						<td><p>The size of this layout.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayout.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/flattenedLayoutUsingPredicateBlock:" title="flattenedLayoutUsingPredicateBlock:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/flattenedLayoutUsingPredicateBlock:">&ndash;&nbsp;flattenedLayoutUsingPredicateBlock:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Evaluates a given predicate block against each object in the receiving layout tree
+and returns a new, 1-level deep layout containing the objects for which the predicate block returns true.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL ( ^ ) ( ASLayout *evaluatedLayout ))<em>predicateBlock</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>predicateBlock</code></th>
+						<td><p>The block is applied to a layout to be evaluated.
+The block takes 1 argument: evaluatedLayout - the layout to be evaluated.
+The block returns YES if evaluatedLayout evaluates  to true, otherwise NO.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A new, 1-level deep layout containing the layouts for which the predicate block returns true.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayout.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>
