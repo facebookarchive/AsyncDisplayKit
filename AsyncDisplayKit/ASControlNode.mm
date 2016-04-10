@@ -256,7 +256,6 @@ static BOOL _enableHitTestDebug = NO;
       _debugHighlightOverlay = [[ASImageNode alloc] init];
       _debugHighlightOverlay.zPosition = 1000;  // CALayer doesn't have -moveSublayerToFront, but this will ensure we're over the top of any siblings.
       _debugHighlightOverlay.layerBacked = YES;
-      _debugHighlightOverlay.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.4];
       [self addSubnode:_debugHighlightOverlay];
     }
   }
@@ -468,7 +467,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     // Even if our parents don't have clipsToBounds set and would allow us to display the debug overlay, UIKit event delivery (hitTest:)
     // will not search sub-hierarchies if one of our parents does not return YES for pointInside:.  In such a scenario, hitTestSlop
     // may not be able to expand the tap target as much as desired without also setting some hitTestSlop on the limiting parents.
-    CGRect intersectRect = UIEdgeInsetsInsetRect(self.bounds, [self hitTestSlop]);
+    CGRect originalRect = UIEdgeInsetsInsetRect(self.bounds, [self hitTestSlop]);
+    CGRect intersectRect = originalRect;
+    UIRectEdge clippedEdges = UIRectEdgeNone;
     CALayer *layer = self.layer;
     CALayer *intersectLayer = layer;
     CALayer *intersectSuperlayer = layer.superlayer;
@@ -492,7 +493,60 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       intersectSuperlayer = intersectLayer.superlayer;
     }
     
-    _debugHighlightOverlay.frame = [intersectLayer convertRect:intersectRect toLayer:layer];
+    CGRect finalRect = [intersectLayer convertRect:intersectRect toLayer:layer];
+    UIColor *fillColor = [[UIColor greenColor] colorWithAlphaComponent:0.4];
+  
+    // determine which edges were clipped
+    if (!CGSizeEqualToSize(originalRect.size, finalRect.size)) {
+      
+      if (originalRect.origin.y != finalRect.origin.y) {
+        clippedEdges |= UIRectEdgeTop;
+      }
+      if (originalRect.origin.x != finalRect.origin.x) {
+        clippedEdges |= UIRectEdgeLeft;
+      }
+      if (CGRectGetMaxY(originalRect) != CGRectGetMaxY(finalRect)) {
+        clippedEdges |= UIRectEdgeBottom;
+      }
+      if (CGRectGetMaxX(originalRect) != CGRectGetMaxX(finalRect)) {
+        clippedEdges |= UIRectEdgeRight;
+      }
+      
+      const CGFloat borderWidth = 2.0;
+      const UIColor *borderColor = [UIColor colorWithRed:30/255.0 green:90/255.0 blue:50/255.0 alpha:0.7];
+      CGRect imgRect = CGRectMake(0, 0, 2.0 * borderWidth + 1.0, 2.0 * borderWidth + 1.0);
+      UIGraphicsBeginImageContext(imgRect.size);
+      
+      [fillColor setFill];
+      UIRectFill(imgRect);
+      
+      [borderColor setFill];
+      
+      if (clippedEdges & UIRectEdgeTop) {
+        UIRectFill(CGRectMake(0.0, 0.0, imgRect.size.width, borderWidth));
+      }
+      if (clippedEdges & UIRectEdgeLeft) {
+        UIRectFill(CGRectMake(0.0, 0.0, borderWidth, imgRect.size.height));
+      }
+      if (clippedEdges & UIRectEdgeBottom) {
+        UIRectFill(CGRectMake(0.0, imgRect.size.height - borderWidth, imgRect.size.width, borderWidth));
+      }
+      if (clippedEdges & UIRectEdgeRight) {
+        UIRectFill(CGRectMake(imgRect.size.width - borderWidth, 0.0, borderWidth, imgRect.size.height));
+      }
+      
+      UIImage *debugHighlightImage = UIGraphicsGetImageFromCurrentImageContext();
+      UIGraphicsEndImageContext();
+  
+      UIEdgeInsets edgeInsets = UIEdgeInsetsMake(borderWidth, borderWidth, borderWidth, borderWidth);
+      _debugHighlightOverlay.image = [debugHighlightImage resizableImageWithCapInsets:edgeInsets
+                                                                         resizingMode:UIImageResizingModeStretch];
+      _debugHighlightOverlay.backgroundColor = nil;
+    } else {
+      _debugHighlightOverlay.backgroundColor = fillColor;
+    }
+    
+    _debugHighlightOverlay.frame = finalRect;
   }
 }
 
