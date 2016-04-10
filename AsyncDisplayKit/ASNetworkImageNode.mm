@@ -236,9 +236,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
             return;
           }
           
-          ASDN::MutexLocker l(_lock);
+          ASDN::MutexLocker l(strongSelf->_lock);
           //Getting a result back for a different download identifier, download must not have been successfully canceled
-          if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+          if (!ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) && downloadIdentifier != nil) {
             return;
           }
           
