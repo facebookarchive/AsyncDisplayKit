@@ -382,32 +382,27 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           return;
         }
 
-        {
-          ASDN::MutexLocker l(strongSelf->_lock);
-          
-          //Getting a result back for a different download identifier, download must not have been successfully canceled
-          if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
-              return;
-          }
-
-          if (responseImage != NULL) {
-            strongSelf->_imageLoaded = YES;
-            strongSelf.image = responseImage;
-          }
-
-          strongSelf->_downloadIdentifier = nil;
-
-          strongSelf->_cacheUUID = nil;
+        ASDN::MutexLocker l(strongSelf->_lock);
+        
+        //Getting a result back for a different download identifier, download must not have been successfully canceled
+        if (downloadIdentifier != nil && !ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier)) {
+            return;
         }
 
-        {
-          ASDN::MutexLocker l(strongSelf->_lock);
-          if (responseImage != NULL) {
-            [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
-          }
-          else if (error && _delegateSupportsDidFailWithError) {
-            [strongSelf->_delegate imageNode:strongSelf didFailWithError:error];
-          }
+        if (responseImage != nil) {
+          strongSelf->_imageLoaded = YES;
+          strongSelf.image = responseImage;
+        }
+
+        strongSelf->_downloadIdentifier = nil;
+
+        strongSelf->_cacheUUID = nil;
+
+        if (responseImage != nil) {
+          [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
+        }
+        else if (error && strongSelf->_delegateSupportsDidFailWithError) {
+          [strongSelf->_delegate imageNode:strongSelf didFailWithError:error];
         }
       };
 
@@ -417,14 +412,14 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
         void (^cacheCompletion)(UIImage *) = ^(UIImage *image) {
           // If the cache UUID changed, that means this request was cancelled.
-          if (![_cacheUUID isEqual:cacheUUID]) {
+          if (!ASObjectIsEqual(_cacheUUID, cacheUUID)) {
             return;
           }
-          
-          if (image == NULL && _downloader != nil) {
+
+          if (image == nil && _downloader != nil) {
             [self _downloadImageWithCompletion:finished];
           } else {
-            finished(image, NULL, nil);
+            finished(image, nil, nil);
           }
         };
         
