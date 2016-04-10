@@ -470,6 +470,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     CGRect originalRect = UIEdgeInsetsInsetRect(self.bounds, [self hitTestSlop]);
     CGRect intersectRect = originalRect;
     UIRectEdge clippedEdges = UIRectEdgeNone;
+    UIRectEdge clipsToBoundsClippedEdges = UIRectEdgeNone;
     CALayer *layer = self.layer;
     CALayer *intersectLayer = layer;
     CALayer *intersectSuperlayer = layer.superlayer;
@@ -479,14 +480,20 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     while (intersectSuperlayer && ![intersectSuperlayer.delegate respondsToSelector:@selector(contentOffset)]) {
       // Get our parent's tappable bounds.  If the parent has an associated node, consider hitTestSlop, as it will extend its pointInside:.
       CGRect parentHitRect = intersectSuperlayer.bounds;
+      BOOL parentClipsToBounds = intersectSuperlayer.masksToBounds;
       ASDisplayNode *parentNode = ASLayerToDisplayNode(intersectSuperlayer);
-      if (parentNode) {
+      if (parentNode && !parentClipsToBounds) {
         parentHitRect = UIEdgeInsetsInsetRect(parentHitRect, [parentNode hitTestSlop]);
       }
       
       // Convert our current rectangle to parent coordinates, and intersect with the parent's hit rect.
       CGRect intersectRectInParentCoordinates = [intersectSuperlayer convertRect:intersectRect fromLayer:intersectLayer];
       intersectRect = CGRectIntersection(parentHitRect, intersectRectInParentCoordinates);
+      if (parentClipsToBounds) {
+        if (!CGSizeEqualToSize(parentHitRect.size, intersectRectInParentCoordinates.size)) {
+          clipsToBoundsClippedEdges = [self setEdgesOfIntersectionForChildRect:intersectRectInParentCoordinates parentRect:parentHitRect rectEdge:clipsToBoundsClippedEdges];
+        }
+      }
 
       // Advance up the tree.
       intersectLayer = intersectSuperlayer;
@@ -499,41 +506,19 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     // determine which edges were clipped
     if (!CGSizeEqualToSize(originalRect.size, finalRect.size)) {
       
-      if (originalRect.origin.y != finalRect.origin.y) {
-        clippedEdges |= UIRectEdgeTop;
-      }
-      if (originalRect.origin.x != finalRect.origin.x) {
-        clippedEdges |= UIRectEdgeLeft;
-      }
-      if (CGRectGetMaxY(originalRect) != CGRectGetMaxY(finalRect)) {
-        clippedEdges |= UIRectEdgeBottom;
-      }
-      if (CGRectGetMaxX(originalRect) != CGRectGetMaxX(finalRect)) {
-        clippedEdges |= UIRectEdgeRight;
-      }
+      clippedEdges = [self setEdgesOfIntersectionForChildRect:originalRect parentRect:finalRect rectEdge:clippedEdges];
       
       const CGFloat borderWidth = 2.0;
-      const UIColor *borderColor = [UIColor colorWithRed:30/255.0 green:90/255.0 blue:50/255.0 alpha:0.7];
+      UIColor *superhitTestSlopClipsBorderColor = [UIColor colorWithRed:30/255.0 green:90/255.0 blue:50/255.0 alpha:0.7];
+      UIColor *superClipsToBoundsBorderColor = [[UIColor orangeColor] colorWithAlphaComponent:0.8];
       CGRect imgRect = CGRectMake(0, 0, 2.0 * borderWidth + 1.0, 2.0 * borderWidth + 1.0);
       UIGraphicsBeginImageContext(imgRect.size);
       
       [fillColor setFill];
       UIRectFill(imgRect);
       
-      [borderColor setFill];
-      
-      if (clippedEdges & UIRectEdgeTop) {
-        UIRectFill(CGRectMake(0.0, 0.0, imgRect.size.width, borderWidth));
-      }
-      if (clippedEdges & UIRectEdgeLeft) {
-        UIRectFill(CGRectMake(0.0, 0.0, borderWidth, imgRect.size.height));
-      }
-      if (clippedEdges & UIRectEdgeBottom) {
-        UIRectFill(CGRectMake(0.0, imgRect.size.height - borderWidth, imgRect.size.width, borderWidth));
-      }
-      if (clippedEdges & UIRectEdgeRight) {
-        UIRectFill(CGRectMake(imgRect.size.width - borderWidth, 0.0, borderWidth, imgRect.size.height));
-      }
+      [self drawEdgeIfClippedWithEdges:clippedEdges color:superhitTestSlopClipsBorderColor borderWidth:borderWidth imgRect:imgRect];
+      [self drawEdgeIfClippedWithEdges:clipsToBoundsClippedEdges color:superClipsToBoundsBorderColor borderWidth:borderWidth imgRect:imgRect];
       
       UIImage *debugHighlightImage = UIGraphicsGetImageFromCurrentImageContext();
       UIGraphicsEndImageContext();
@@ -547,6 +532,42 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     }
     
     _debugHighlightOverlay.frame = finalRect;
+  }
+}
+
+- (UIRectEdge)setEdgesOfIntersectionForChildRect:(CGRect)childRect parentRect:(CGRect)parentRect rectEdge:(UIRectEdge)rectEdge
+{
+  if (childRect.origin.y < parentRect.origin.y) {
+    rectEdge |= UIRectEdgeTop;
+  }
+  if (childRect.origin.x < parentRect.origin.x) {
+    rectEdge |= UIRectEdgeLeft;
+  }
+  if (CGRectGetMaxY(childRect) > CGRectGetMaxY(parentRect)) {
+    rectEdge |= UIRectEdgeBottom;
+  }
+  if (CGRectGetMaxX(childRect) > CGRectGetMaxX(parentRect)) {
+    rectEdge |= UIRectEdgeRight;
+  }
+  
+  return rectEdge;
+}
+
+- (void)drawEdgeIfClippedWithEdges:(UIRectEdge)rectEdge color:(UIColor *)color borderWidth:(CGFloat)borderWidth imgRect:(CGRect)imgRect
+{
+  [color setFill];
+  
+  if (rectEdge & UIRectEdgeTop) {
+    UIRectFill(CGRectMake(0.0, 0.0, imgRect.size.width, borderWidth));
+  }
+  if (rectEdge & UIRectEdgeLeft) {
+    UIRectFill(CGRectMake(0.0, 0.0, borderWidth, imgRect.size.height));
+  }
+  if (rectEdge & UIRectEdgeBottom) {
+    UIRectFill(CGRectMake(0.0, imgRect.size.height - borderWidth, imgRect.size.width, borderWidth));
+  }
+  if (rectEdge & UIRectEdgeRight) {
+    UIRectFill(CGRectMake(imgRect.size.width - borderWidth, 0.0, borderWidth, imgRect.size.height));
   }
 }
 

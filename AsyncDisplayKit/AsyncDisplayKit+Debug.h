@@ -13,6 +13,8 @@
 
 /**
  Class method to enable a visualization overlay of the tapable area on the ASControlNode. For app debugging purposes only.
+ Overlay = translucent green color, edges clipped by hitTestDebug of any parent in the hierarchy = dark green bordered edge,
+ edges clipped by clipToBounds = YES of any parent in the hierarchy = orange bordered edge.
  @param enable Specify YES to make this debug feature enabled when messaging the ASControlNode class.
  */
 + (void)setEnableHitTestDebug:(BOOL)enable;
