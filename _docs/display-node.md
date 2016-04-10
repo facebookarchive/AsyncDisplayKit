@@ -2,6 +2,7 @@
 title: ASDisplayNode
 layout: docs
 permalink: /docs/display-node.html
+next: cell-node.html
 ---
 
 ASDisplayNode is the main view abstraction over UIView and CALayer.  It initializes and owns a UIView in the same way UIViews create and own their own backing CALayers.  

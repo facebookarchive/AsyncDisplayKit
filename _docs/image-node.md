@@ -2,6 +2,7 @@
 title: ASImageNode
 layout: docs
 permalink: /docs/image-node.html
+next: network-image-node.html
 ---
 
-<div class = "warning">😑 This page is coming soon...</div>
+<div>😑 This page is coming soon...</div>

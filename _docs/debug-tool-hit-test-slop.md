@@ -2,7 +2,9 @@
 title: Hit Test Visualization
 layout: docs
 permalink: /docs/debug-tool-hit-test-slop.html
+next: debug-tool-ASRangeController.html
 ---
+
 ## Visualize tappable areas on ASControlNodes
 ### Description
 This debug feature adds a semi-transparent neon green highlight overlay on any ASControlNodes that have a `target:action:` pair added. The tappable range is defined as the ASControlNode’s frame + its hitTestSlop (UIEdgeInsets used by the ASControlNode to extend it’s tappable range). 
