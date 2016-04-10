@@ -99,9 +99,9 @@ to implement node hierarchies or custom drawing.
 
 ### Learn more
 
-* Read the [Getting Started guide](http://asyncdisplaykit.org/guide/)
+* Read the [Getting Started guide](http://asyncdisplaykit.org/docs/getting-started.html/)
 * Get the [sample projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples)
-* Browse the [API reference](http://asyncdisplaykit.org/appledoc/)
+* Browse the [API reference](http://asyncdisplaykit.org/appledocs.html)
 * Watch the [NSLondon talk](http://vimeo.com/103589245) or the [NSSpain talk](https://www.youtube.com/watch?v=RY_X7l1g79Q)
 
 ## Testing
