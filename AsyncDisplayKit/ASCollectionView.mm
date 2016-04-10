@@ -91,7 +91,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
@@ -605,8 +605,45 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   cellNode.scrollView = nil;
 }
 
-#pragma mark -
-#pragma mark Scroll Direction.
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+  // If a scroll happenes the current range mode needs to go to full
+  ASInterfaceState interfaceState = [self interfaceStateForRangeController:_rangeController];
+  if (ASInterfaceStateIncludesVisible(interfaceState)) {
+    [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
+  }
+  
+  for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
+    // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
+    [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
+                                      inScrollView:scrollView
+                                     withCellFrame:collectionCell.frame];
+  }
+  if (_asyncDelegateImplementsScrollviewDidScroll) {
+    [_asyncDelegate scrollViewDidScroll:scrollView];
+  }
+}
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+{
+  _deceleratingVelocity = CGPointMake(
+    scrollView.contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
+    scrollView.contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
+  );
+
+  if (targetContentOffset != NULL) {
+    ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
+    [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
+  }
+  
+  if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
+    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
+  }
+}
+
+
+#pragma mark - Scroll Direction.
 
 - (ASScrollDirection)scrollDirection
 {
@@ -700,45 +737,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 }
 
 
-#pragma mark -
-#pragma mark Batch Fetching
+#pragma mark - Batch Fetching
 
-- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+- (ASBatchContext *)batchContext
 {
-  _deceleratingVelocity = CGPointMake(
-    scrollView.contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
-    scrollView.contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
-  );
-
-  if (targetContentOffset != NULL) {
-    [self handleBatchFetchScrollingToOffset:*targetContentOffset];
-  }
-  
-  if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
-    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
-  }
+  return _batchContext;
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
-  // If a scroll happenes the current range mode needs to go to full
-  ASInterfaceState interfaceState = [self interfaceStateForRangeController:_rangeController];
-  if (ASInterfaceStateIncludesVisible(interfaceState)) {
-    [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
-  }
-  
-  for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
-    // Only nodes that respond to the selector are added to _cellsForVisibilityUpdates
-    [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventVisibleRectChanged
-                                      inScrollView:scrollView
-                                     withCellFrame:collectionCell.frame];
-  }
-  if (_asyncDelegateImplementsScrollviewDidScroll) {
-    [_asyncDelegate scrollViewDidScroll:scrollView];
-  }
-}
-
-- (BOOL)shouldBatchFetch
+- (BOOL)canBatchFetch
 {
   // if the delegate does not respond to this method, there is no point in starting to fetch
   BOOL canFetch = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)];
@@ -749,16 +755,37 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (void)handleBatchFetchScrollingToOffset:(CGPoint)targetOffset
+- (void)_scheduleCheckForBatchFetching
 {
-  ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
-  
-  if (![self shouldBatchFetch]) {
+  // Push this to the next runloop to be sure the scroll view has the right content size
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [self _checkForBatchFetching];
+  });
+}
+
+- (void)_checkForBatchFetching
+{
+  // Dragging will be handled in scrollViewWillEndDragging:withVelocity:targetContentOffset:
+  if (self.isDragging || self.isTracking) {
     return;
   }
   
-  if (ASDisplayShouldFetchBatchForContext(_batchContext, [self scrollDirection], self.bounds, self.contentSize, targetOffset, _leadingScreensForBatching)) {
-    [_batchContext beginBatchFetching];
+  [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollableDirections] contentOffset:self.contentOffset];
+}
+
+- (void)_beginBatchFetchingIfNeededWithScrollView:(UIScrollView<ASBatchFetchingScrollView> *)scrollView forScrollDirection:(ASScrollDirection)scrollDirection contentOffset:(CGPoint)contentOffset
+{
+  if (ASDisplayShouldFetchBatchForScrollView(self, scrollDirection, contentOffset)) {
+    [self _beginBatchFetching];
+  }
+}
+
+- (void)_beginBatchFetching
+{
+  NSLog(@"begin batch fetching");
+    
+  [_batchContext beginBatchFetching];
+  if ([_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)]) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       [_asyncDelegate collectionView:self willBeginBatchFetchWithContext:_batchContext];
     });
@@ -954,7 +981,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
       for (dispatch_block_t block in _batchUpdateBlocks) {
         block();
       }
-    } completion:completion];
+    } completion:^(BOOL finished){
+      [self _scheduleCheckForBatchFetching];
+      if (completion) { completion(finished); }
+    }];
   });
   
   [_batchUpdateBlocks removeAllObjects];
@@ -977,6 +1007,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     [UIView performWithoutAnimation:^{
       [super insertItemsAtIndexPaths:indexPaths];
+      [self _scheduleCheckForBatchFetching];
     }];
   }
 }
@@ -997,6 +1028,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     [UIView performWithoutAnimation:^{
       [super deleteItemsAtIndexPaths:indexPaths];
+      [self _scheduleCheckForBatchFetching];
     }];
   }
 }
@@ -1017,6 +1049,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
       [super insertSections:indexSet];
+      [self _scheduleCheckForBatchFetching];
     }];
   }
 }
@@ -1037,6 +1070,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
       [super deleteSections:indexSet];
+      [self _scheduleCheckForBatchFetching];
     }];
   }
 }

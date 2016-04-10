@@ -67,6 +67,10 @@ typedef struct {
   int setAccessibilityViewIsModal:1;
   int setShouldGroupAccessibilityChildren:1;
   int setAccessibilityIdentifier:1;
+  int setAccessibilityNavigationStyle:1;
+  int setAccessibilityHeaderElements:1;
+  int setAccessibilityActivationPoint:1;
+  int setAccessibilityPath:1;
 } ASPendingStateFlags;
 
 @implementation _ASPendingState
@@ -106,6 +110,10 @@ typedef struct {
   BOOL accessibilityViewIsModal;
   BOOL shouldGroupAccessibilityChildren;
   NSString *accessibilityIdentifier;
+  UIAccessibilityNavigationStyle accessibilityNavigationStyle;
+  NSArray *accessibilityHeaderElements;
+  CGPoint accessibilityActivationPoint;
+  UIBezierPath *accessibilityPath;
 
   ASPendingStateFlags _flags;
 }
@@ -226,6 +234,10 @@ static UIColor *defaultTintColor = nil;
   accessibilityViewIsModal = NO;
   shouldGroupAccessibilityChildren = NO;
   accessibilityIdentifier = nil;
+  accessibilityNavigationStyle = UIAccessibilityNavigationStyleAutomatic;
+  accessibilityHeaderElements = nil;
+  accessibilityActivationPoint = CGPointZero;
+  accessibilityPath = nil;
   edgeAntialiasingMask = (kCALayerLeftEdge | kCALayerRightEdge | kCALayerTopEdge | kCALayerBottomEdge);
 
   return self;
@@ -594,6 +606,59 @@ static UIColor *defaultTintColor = nil;
   }
 }
 
+- (UIAccessibilityNavigationStyle)accessibilityNavigationStyle
+{
+  return accessibilityNavigationStyle;
+}
+
+- (void)setAccessibilityNavigationStyle:(UIAccessibilityNavigationStyle)newAccessibilityNavigationStyle
+{
+  _flags.setAccessibilityNavigationStyle = YES;
+  accessibilityNavigationStyle = newAccessibilityNavigationStyle;
+}
+
+- (NSArray *)accessibilityHeaderElements
+{
+  return accessibilityHeaderElements;
+}
+
+- (void)setAccessibilityHeaderElements:(NSArray *)newAccessibilityHeaderElements
+{
+  _flags.setAccessibilityHeaderElements = YES;
+  if (accessibilityHeaderElements != newAccessibilityHeaderElements) {
+    accessibilityHeaderElements = [newAccessibilityHeaderElements copy];
+  }
+}
+
+- (CGPoint)accessibilityActivationPoint
+{
+  if (_flags.setAccessibilityActivationPoint) {
+    return accessibilityActivationPoint;
+  }
+  
+  // Default == Mid-point of the accessibilityFrame
+  return CGPointMake(CGRectGetMidX(accessibilityFrame), CGRectGetMidY(accessibilityFrame));
+}
+
+- (void)setAccessibilityActivationPoint:(CGPoint)newAccessibilityActivationPoint
+{
+  _flags.setAccessibilityActivationPoint = YES;
+  accessibilityActivationPoint = newAccessibilityActivationPoint;
+}
+
+- (UIBezierPath *)accessibilityPath
+{
+  return accessibilityPath;
+}
+
+- (void)setAccessibilityPath:(UIBezierPath *)newAccessibilityPath
+{
+  _flags.setAccessibilityPath = YES;
+  if (accessibilityPath != newAccessibilityPath) {
+    accessibilityPath = newAccessibilityPath;
+  }
+}
+
 - (void)applyToLayer:(CALayer *)layer
 {
   ASPendingStateFlags flags = _flags;
@@ -827,6 +892,20 @@ static UIColor *defaultTintColor = nil;
 
   if (flags.setAccessibilityIdentifier)
     view.accessibilityIdentifier = accessibilityIdentifier;
+  
+  if (flags.setAccessibilityNavigationStyle)
+    view.accessibilityNavigationStyle = accessibilityNavigationStyle;
+  
+#if TARGET_OS_TV
+  if (flags.setAccessibilityHeaderElements)
+    view.accessibilityHeaderElements = accessibilityHeaderElements;
+#endif
+  
+  if (flags.setAccessibilityActivationPoint)
+    view.accessibilityActivationPoint = accessibilityActivationPoint;
+  
+  if (flags.setAccessibilityPath)
+    view.accessibilityPath = accessibilityPath;
 
   // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
   if (flags.setFrame && setFrameDirectly) {
@@ -926,6 +1005,12 @@ static UIColor *defaultTintColor = nil;
   pendingState.accessibilityViewIsModal = view.accessibilityViewIsModal;
   pendingState.shouldGroupAccessibilityChildren = view.shouldGroupAccessibilityChildren;
   pendingState.accessibilityIdentifier = view.accessibilityIdentifier;
+  pendingState.accessibilityNavigationStyle = view.accessibilityNavigationStyle;
+#if TARGET_OS_TV
+  pendingState.accessibilityHeaderElements = view.accessibilityHeaderElements;
+#endif
+  pendingState.accessibilityActivationPoint = view.accessibilityActivationPoint;
+  pendingState.accessibilityPath = view.accessibilityPath;
   return pendingState;
 }
 
@@ -992,7 +1077,11 @@ static UIColor *defaultTintColor = nil;
   || flags.setAccessibilityElementsHidden
   || flags.setAccessibilityViewIsModal
   || flags.setShouldGroupAccessibilityChildren
-  || flags.setAccessibilityIdentifier);
+  || flags.setAccessibilityIdentifier
+  || flags.setAccessibilityNavigationStyle
+  || flags.setAccessibilityHeaderElements
+  || flags.setAccessibilityActivationPoint
+  || flags.setAccessibilityPath);
 }
 
 - (void)dealloc

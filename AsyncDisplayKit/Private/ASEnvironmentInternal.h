@@ -35,6 +35,8 @@ void ASEnvironmentPerformBlockOnObjectAndParents(id<ASEnvironment> object, void(
 
 #pragma mark - Merging
 
+static const struct ASEnvironmentStateExtensions ASEnvironmentDefaultStateExtensions = {};
+
 static const struct ASEnvironmentLayoutOptionsState ASEnvironmentDefaultLayoutOptionsState = {};
 ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentLayoutOptionsState state, ASEnvironmentStatePropagation propagation);
 

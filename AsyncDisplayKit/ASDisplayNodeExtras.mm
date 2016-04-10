@@ -10,6 +10,8 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
+#import <queue>
+
 extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window)
 {
     ASDisplayNodeCAssert(![displayNode isLayerBacked], @"displayNode must not be layer backed as it may have a nil window");
@@ -60,6 +62,24 @@ extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *
     for (ASDisplayNode *subnode in [node subnodes]) {
       ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
     }
+  }
+}
+
+extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^block)(ASDisplayNode *node))
+{
+  // Queue used to keep track of subnodes while traversing this layout in a BFS fashion.
+  std::queue<ASDisplayNode *> queue;
+  queue.push(node);
+  
+  while (!queue.empty()) {
+    node = queue.front();
+    queue.pop();
+    
+    block(node);
+
+    // Add all subnodes to process in next step
+    for (int i = 0; i < node.subnodes.count; i++)
+      queue.push(node.subnodes[i]);
   }
 }
 
