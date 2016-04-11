@@ -295,6 +295,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       image = nil;
     });
   }
+  self.animatedImage = nil;
   self.image = _defaultImage;
   _imageLoaded = NO;
 }

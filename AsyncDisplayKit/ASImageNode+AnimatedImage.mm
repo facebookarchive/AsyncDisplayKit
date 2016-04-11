@@ -36,14 +36,15 @@
     _animatedImage = animatedImage;
   }
   if (animatedImage != nil) {
+    __weak ASImageNode *weakSelf = self;
     if ([animatedImage respondsToSelector:@selector(setCoverImageReadyCallback:)]) {
       animatedImage.coverImageReadyCallback = ^(UIImage *coverImage) {
-        [self coverImageCompleted:coverImage];
+        [weakSelf coverImageCompleted:coverImage];
       };
     }
     
     animatedImage.playbackReadyCallback = ^{
-      [self animatedImageFileReady];
+      [weakSelf animatedImageFileReady];
     };
   }
 }
