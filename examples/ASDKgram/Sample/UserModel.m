@@ -7,7 +7,6 @@
 //
 
 #import "UserModel.h"
-#import <UIKit/UIKit.h>
 #import "Utilities.h"
 
 @implementation UserModel

@@ -7,9 +7,7 @@
 //
 
 #import "PhotoModel.h"
-#import <UIKit/UIKit.h>
 #import "Utilities.h"
-
 
 @implementation PhotoModel
 {

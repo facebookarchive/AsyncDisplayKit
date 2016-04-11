@@ -7,7 +7,6 @@
 //
 
 #import "LocationModel.h"
-#import <UIKit/UIKit.h>
 #import <CoreLocation/CLGeocoder.h>
 
 @implementation LocationModel

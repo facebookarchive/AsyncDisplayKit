@@ -6,9 +6,8 @@
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import "AppDelegate.h"
 
-@interface PhotoFeedViewController : UIViewController <PhotoFeedViewControllerProtocol>
+@interface PhotoFeedViewController : UIViewController <PhotoFeedControllerProtocol>
 
 @end

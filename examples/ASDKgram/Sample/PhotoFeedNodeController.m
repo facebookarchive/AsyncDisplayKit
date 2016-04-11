@@ -22,7 +22,6 @@
 {
   PhotoFeedModel   *_photoFeed;
   ASTableNode      *_tableNode;
-  UIView           *_statusBarOpaqueUnderlayView;
 }
 
 #pragma mark - Lifecycle

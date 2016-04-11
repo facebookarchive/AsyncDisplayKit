@@ -11,6 +11,7 @@
 		3EC0CDCBA10D483D9F386E5E /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D24B17D1E4A4E7A9566C5E9 /* libPods.a */; };
 		6C2C82AC19EE274300767484 /* Default-667h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C2C82AA19EE274300767484 /* Default-667h@2x.png */; };
 		6C2C82AD19EE274300767484 /* Default-736h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C2C82AB19EE274300767484 /* Default-736h@3x.png */; };
+		76229A781CBB79E000B62CEF /* WindowWithStatusBarUnderlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 76229A771CBB79E000B62CEF /* WindowWithStatusBarUnderlay.m */; };
 		767A5F111CAA3BFE004CDA8D /* tabBarIcons in Resources */ = {isa = PBXBuildFile; fileRef = 767A5F101CAA3BFE004CDA8D /* tabBarIcons */; };
 		767A5F131CAA3C66004CDA8D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 767A5F121CAA3C66004CDA8D /* Assets.xcassets */; };
 		768843801CAA37EF00D8629E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 768843681CAA37EF00D8629E /* AppDelegate.m */; };
@@ -39,6 +40,8 @@
 		3D24B17D1E4A4E7A9566C5E9 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C2C82AA19EE274300767484 /* Default-667h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-667h@2x.png"; sourceTree = SOURCE_ROOT; };
 		6C2C82AB19EE274300767484 /* Default-736h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-736h@3x.png"; sourceTree = SOURCE_ROOT; };
+		76229A761CBB79E000B62CEF /* WindowWithStatusBarUnderlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WindowWithStatusBarUnderlay.h; sourceTree = "<group>"; };
+		76229A771CBB79E000B62CEF /* WindowWithStatusBarUnderlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WindowWithStatusBarUnderlay.m; sourceTree = "<group>"; };
 		767A5F101CAA3BFE004CDA8D /* tabBarIcons */ = {isa = PBXFileReference; lastKnownFileType = folder; path = tabBarIcons; sourceTree = "<group>"; };
 		767A5F121CAA3C66004CDA8D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		768843511CAA37EF00D8629E /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AppDelegate.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -57,7 +60,7 @@
 		768843621CAA37EF00D8629E /* PhotoFeedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = PhotoFeedViewController.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		768843631CAA37EF00D8629E /* UserModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = UserModel.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		768843661CAA37EF00D8629E /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Utilities.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		768843671CAA37EF00D8629E /* Flickrgram.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Flickrgram.pch; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		768843671CAA37EF00D8629E /* Sample.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Sample.pch; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		768843681CAA37EF00D8629E /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AppDelegate.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		768843691CAA37EF00D8629E /* CommentFeedModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = CommentFeedModel.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7688436A1CAA37EF00D8629E /* CommentModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = CommentModel.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
@@ -117,6 +120,8 @@
 			children = (
 				768843511CAA37EF00D8629E /* AppDelegate.h */,
 				768843681CAA37EF00D8629E /* AppDelegate.m */,
+				76229A761CBB79E000B62CEF /* WindowWithStatusBarUnderlay.h */,
+				76229A771CBB79E000B62CEF /* WindowWithStatusBarUnderlay.m */,
 				767A5F141CAA3D8A004CDA8D /* Controller */,
 				767A5F181CAA3DB0004CDA8D /* View */,
 				767A5F171CAA3DA1004CDA8D /* Model */,
@@ -128,7 +133,7 @@
 		05E2128419D4DB510098F589 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				768843671CAA37EF00D8629E /* Flickrgram.pch */,
+				768843671CAA37EF00D8629E /* Sample.pch */,
 				7688437F1CAA37EF00D8629E /* Info.plist */,
 				768843711CAA37EF00D8629E /* main.m */,
 				767A5F121CAA3C66004CDA8D /* Assets.xcassets */,
@@ -367,6 +372,7 @@
 				768843891CAA37EF00D8629E /* main.m in Sources */,
 				7688438C1CAA37EF00D8629E /* PhotoCollectionViewCell.m in Sources */,
 				768843921CAA37EF00D8629E /* PhotoFeedViewController.m in Sources */,
+				76229A781CBB79E000B62CEF /* WindowWithStatusBarUnderlay.m in Sources */,
 				768843821CAA37EF00D8629E /* CommentModel.m in Sources */,
 				768843831CAA37EF00D8629E /* CommentsNode.m in Sources */,
 				768843961CAA37EF00D8629E /* Utilities.m in Sources */,
@@ -471,6 +477,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Sample/Sample.pch;
 				INFOPLIST_FILE = Sample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -488,6 +496,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Sample/Sample.pch;
 				INFOPLIST_FILE = Sample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

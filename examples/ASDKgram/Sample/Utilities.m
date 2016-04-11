@@ -7,7 +7,6 @@
 //
 
 #import "Utilities.h"
-#import <UIKit/UIKit.h>
 
 #define StrokeRoundedImages 0
 

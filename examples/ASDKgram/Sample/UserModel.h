@@ -6,9 +6,6 @@
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
-
 @interface UserModel : NSObject
 
 @property (nonatomic, assign, readonly) NSDictionary *dictionaryRepresentation;

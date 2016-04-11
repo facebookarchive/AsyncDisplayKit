@@ -6,7 +6,6 @@
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import "CommentFeedModel.h"
 
 @interface CommentView : UIView

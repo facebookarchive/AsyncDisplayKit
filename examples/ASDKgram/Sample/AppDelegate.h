@@ -6,16 +6,11 @@
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-
-@protocol PhotoFeedViewControllerProtocol <NSObject>
+@protocol PhotoFeedControllerProtocol <NSObject>
 - (void)resetAllData;
 @end
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
-
-@property (strong, nonatomic) UIWindow *window;
-@property (strong, nonatomic) UIView   *statusBarOpaqueUnderlayView;
 
 @end
 

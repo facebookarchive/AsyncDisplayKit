@@ -7,8 +7,9 @@
 //
 
 #import "CommentFeedModel.h"
-#import <UIKit/UIKit.h>
 #import "Utilities.h"
+
+#define NUM_COMMENTS_TO_SHOW 3
 
 #define fiveHundredPX_ENDPOINT_HOST      @"https://api.500px.com/v1/"
 #define fiveHundredPX_ENDPOINT_COMMENTS  @"photos/4928401/comments"
@@ -157,8 +158,8 @@
           if ([comments isKindOfClass:[NSArray class]]) {
             
             NSUInteger numComments = [comments count];
-            if (numComments > 3) {
-              comments = [comments subarrayWithRange:(NSRange){numComments-3, 3}];
+            if (numComments > NUM_COMMENTS_TO_SHOW) {
+              comments = [comments subarrayWithRange:(NSRange){numComments-NUM_COMMENTS_TO_SHOW, NUM_COMMENTS_TO_SHOW}];
             }
             
             for (NSDictionary *commentDictionary in comments) {
