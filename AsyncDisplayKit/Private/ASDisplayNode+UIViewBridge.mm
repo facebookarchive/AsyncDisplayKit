@@ -721,7 +721,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 // Helper function with following logic:
 // - If the node is not loaded yet use the property from the pending state
 // - In case the node is loaded
-//  - Check if the node has a view and get the
+//  - Check if the node has a view and get the value from the view if loaded or from the pending state
 //  - If view is not available, e.g. the node is layer backed return the property value
 #define _getAccessibilityFromViewOrProperty(nodeProperty, viewAndPendingViewStateProperty) __loaded(self) ? \
 (_view ? _view.viewAndPendingViewStateProperty : nodeProperty )\
