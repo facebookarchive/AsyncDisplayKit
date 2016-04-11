@@ -13,6 +13,8 @@
 #import "CommentView.h"
 
 #define DEBUG_PHOTOCELL_LAYOUT  0
+#define USE_UIKIT_AUTOLAYOUT    1
+#define USE_UIKIT_MANUAL_LAYOUT !USE_UIKIT_AUTOLAYOUT
 
 #define HEADER_HEIGHT           50
 #define USER_IMAGE_HEIGHT       30
@@ -24,6 +26,7 @@
 {
   PhotoModel   *_photoModel;
   CommentView  *_photoCommentsView;
+  
   UIImageView  *_userAvatarImageView;
   UIImageView  *_photoImageView;
   UILabel      *_userNameLabel;
@@ -31,6 +34,10 @@
   UILabel      *_photoTimeIntervalSincePostLabel;
   UILabel      *_photoLikesLabel;
   UILabel      *_photoDescriptionLabel;
+  
+  NSLayoutConstraint *_userNameYPositionWithPhotoLocation;
+  NSLayoutConstraint *_userNameYPositionWithoutPhotoLocation;
+  NSLayoutConstraint *_photoLocationYPosition;
 }
 
 #pragma mark - Class Methods
@@ -62,10 +69,8 @@
   if (self) {
     
     _photoCommentsView                   = [[CommentView alloc] init];
-
     _userAvatarImageView                 = [[UIImageView alloc] init];
     _photoImageView                      = [[UIImageView alloc] init];
-
     _userNameLabel                       = [[UILabel alloc] init];
     _photoLocationLabel                  = [[UILabel alloc] init];
     _photoTimeIntervalSincePostLabel     = [[UILabel alloc] init];
@@ -81,6 +86,21 @@
     [self addSubview:_photoTimeIntervalSincePostLabel];
     [self addSubview:_photoLikesLabel];
     [self addSubview:_photoDescriptionLabel];
+
+#if USE_UIKIT_AUTOLAYOUT
+    [_photoCommentsView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_userAvatarImageView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_photoImageView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_userNameLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_photoLocationLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_photoTimeIntervalSincePostLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_photoLikesLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_photoDescriptionLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [_photoCommentsView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    
+    [self setupConstraints];
+    [self updateConstraints];
+#endif
     
 #if DEBUG_PHOTOCELL_LAYOUT
     _userAvatarImageView.backgroundColor              = [UIColor greenColor];
@@ -96,13 +116,240 @@
   return self;
 }
 
+-(void)setFrame:(CGRect)frame
+{
+  [super setFrame:frame];
+}
+
+- (void)setupConstraints
+{
+  // _userAvatarImageView
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_userAvatarImageView
+                                                   attribute:NSLayoutAttributeLeft
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_userAvatarImageView.superview
+                                                   attribute:NSLayoutAttributeLeft
+                                                  multiplier:1.0
+                                                    constant:HORIZONTAL_BUFFER]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_userAvatarImageView
+                                                   attribute:NSLayoutAttributeTop
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_userAvatarImageView.superview
+                                                   attribute:NSLayoutAttributeTop
+                                                  multiplier:1.0
+                                                    constant:HORIZONTAL_BUFFER]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_userAvatarImageView
+                                                   attribute:NSLayoutAttributeWidth
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:nil
+                                                   attribute:NSLayoutAttributeNotAnAttribute
+                                                  multiplier:0.0
+                                                    constant:USER_IMAGE_HEIGHT]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_userAvatarImageView
+                                                   attribute:NSLayoutAttributeHeight
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_userAvatarImageView
+                                                   attribute:NSLayoutAttributeWidth
+                                                  multiplier:1.0
+                                                    constant:0.0]];
+  
+  // _userNameLabel
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_userNameLabel
+                                                   attribute:NSLayoutAttributeLeft
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_userAvatarImageView
+                                                   attribute:NSLayoutAttributeRight
+                                                  multiplier:1.0
+                                                    constant:HORIZONTAL_BUFFER]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_userNameLabel
+                                                   attribute:NSLayoutAttributeRight
+                                                   relatedBy:NSLayoutRelationLessThanOrEqual
+                                                      toItem:_photoTimeIntervalSincePostLabel
+                                                   attribute:NSLayoutAttributeLeft
+                                                  multiplier:1.0
+                                                    constant:-HORIZONTAL_BUFFER]];
+  
+  _userNameYPositionWithoutPhotoLocation = [NSLayoutConstraint constraintWithItem:_userNameLabel
+                                                                        attribute:NSLayoutAttributeCenterY
+                                                                        relatedBy:NSLayoutRelationEqual
+                                                                           toItem:_userAvatarImageView
+                                                                        attribute:NSLayoutAttributeCenterY
+                                                                       multiplier:1.0
+                                                                         constant:0.0];
+  [self addConstraint:_userNameYPositionWithoutPhotoLocation];
+  
+  _userNameYPositionWithPhotoLocation = [NSLayoutConstraint constraintWithItem:_userNameLabel
+                                                                     attribute:NSLayoutAttributeTop
+                                                                     relatedBy:NSLayoutRelationEqual
+                                                                        toItem:_userAvatarImageView
+                                                                     attribute:NSLayoutAttributeTop
+                                                                    multiplier:1.0
+                                                                      constant:-2];
+  _userNameYPositionWithPhotoLocation.active = NO;
+  [self addConstraint:_userNameYPositionWithPhotoLocation];
+  
+  // _photoLocationLabel
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoLocationLabel
+                                                   attribute:NSLayoutAttributeLeft
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_userAvatarImageView
+                                                   attribute:NSLayoutAttributeRight
+                                                  multiplier:1.0
+                                                    constant:HORIZONTAL_BUFFER]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoLocationLabel
+                                                   attribute:NSLayoutAttributeRight
+                                                   relatedBy:NSLayoutRelationLessThanOrEqual
+                                                      toItem:_photoTimeIntervalSincePostLabel
+                                                   attribute:NSLayoutAttributeLeft
+                                                  multiplier:1.0
+                                                    constant:-HORIZONTAL_BUFFER]];
+  
+  _photoLocationYPosition = [NSLayoutConstraint constraintWithItem:_photoLocationLabel
+                                                         attribute:NSLayoutAttributeBottom
+                                                         relatedBy:NSLayoutRelationEqual
+                                                            toItem:_userAvatarImageView
+                                                         attribute:NSLayoutAttributeBottom
+                                                        multiplier:1.0
+                                                          constant:2];
+  _photoLocationYPosition.active = NO;
+  [self addConstraint:_photoLocationYPosition];
+  
+  // _photoTimeIntervalSincePostLabel
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoTimeIntervalSincePostLabel
+                                                   attribute:NSLayoutAttributeRight
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoTimeIntervalSincePostLabel.superview
+                                                   attribute:NSLayoutAttributeRight
+                                                  multiplier:1.0
+                                                    constant:-HORIZONTAL_BUFFER]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoTimeIntervalSincePostLabel
+                                                   attribute:NSLayoutAttributeCenterY
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_userAvatarImageView
+                                                   attribute:NSLayoutAttributeCenterY
+                                                  multiplier:1.0
+                                                    constant:0.0]];
+  
+  // _photoImageView
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoImageView
+                                                   attribute:NSLayoutAttributeTop
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoImageView.superview
+                                                   attribute:NSLayoutAttributeTop
+                                                  multiplier:1.0
+                                                    constant:HEADER_HEIGHT]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoImageView
+                                                   attribute:NSLayoutAttributeWidth
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:self
+                                                   attribute:NSLayoutAttributeWidth
+                                                  multiplier:1.0
+                                                    constant:0.0]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoImageView
+                                                   attribute:NSLayoutAttributeHeight
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoImageView
+                                                   attribute:NSLayoutAttributeWidth
+                                                  multiplier:1.0
+                                                    constant:0.0]];
+  
+  // _photoLikesLabel
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoLikesLabel
+                                                   attribute:NSLayoutAttributeTop
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoImageView
+                                                   attribute:NSLayoutAttributeBottom
+                                                  multiplier:1.0
+                                                    constant:VERTICAL_BUFFER]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoLikesLabel
+                                                   attribute:NSLayoutAttributeLeft
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoLikesLabel.superview
+                                                   attribute:NSLayoutAttributeLeft
+                                                  multiplier:1.0
+                                                    constant:HORIZONTAL_BUFFER]];
+  
+  // _photoDescriptionLabel
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoDescriptionLabel
+                                                   attribute:NSLayoutAttributeTop
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoLikesLabel
+                                                   attribute:NSLayoutAttributeBottom
+                                                  multiplier:1.0
+                                                    constant:VERTICAL_BUFFER]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoDescriptionLabel
+                                                   attribute:NSLayoutAttributeLeft
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoDescriptionLabel.superview
+                                                   attribute:NSLayoutAttributeLeft
+                                                  multiplier:1.0
+                                                    constant:HORIZONTAL_BUFFER]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoDescriptionLabel
+                                                   attribute:NSLayoutAttributeWidth
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoDescriptionLabel.superview
+                                                   attribute:NSLayoutAttributeWidth
+                                                  multiplier:1.0
+                                                    constant:-HORIZONTAL_BUFFER]];
+  
+  // _photoCommentsView
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoCommentsView
+                                                   attribute:NSLayoutAttributeTop
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoDescriptionLabel
+                                                   attribute:NSLayoutAttributeBottom
+                                                  multiplier:1.0
+                                                    constant:VERTICAL_BUFFER]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoCommentsView
+                                                   attribute:NSLayoutAttributeLeft
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoCommentsView.superview
+                                                   attribute:NSLayoutAttributeLeft
+                                                  multiplier:1.0
+                                                    constant:HORIZONTAL_BUFFER]];
+  
+  [self addConstraint:[NSLayoutConstraint constraintWithItem:_photoCommentsView
+                                                   attribute:NSLayoutAttributeWidth
+                                                   relatedBy:NSLayoutRelationEqual
+                                                      toItem:_photoCommentsView.superview
+                                                   attribute:NSLayoutAttributeWidth
+                                                  multiplier:1.0
+                                                    constant:-HORIZONTAL_BUFFER]];
+}
+
+- (void)updateConstraints
+{
+  [super updateConstraints];
+  
+  if (_photoLocationLabel.attributedText) {
+    _userNameYPositionWithoutPhotoLocation.active = NO;
+    _userNameYPositionWithPhotoLocation.active = YES;
+    _photoLocationYPosition.active = YES;
+  } else {
+    _userNameYPositionWithoutPhotoLocation.active = YES;
+    _userNameYPositionWithPhotoLocation.active = NO;
+    _photoLocationYPosition.active = NO;
+  }
+}
+
 - (void)layoutSubviews
 {
   [super layoutSubviews];
   
+#if USE_UIKIT_PROGRAMMATIC_LAYOUT
   CGSize boundsSize = self.bounds.size;
-  
-  // FIXME: Make PhotoCellHeaderView
   
   CGRect rect = CGRectMake(HORIZONTAL_BUFFER, (HEADER_HEIGHT - USER_IMAGE_HEIGHT) / 2.0,
                            USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
@@ -151,6 +398,7 @@
   rect.size.width = boundsSize.width - HORIZONTAL_BUFFER * 2;
   rect.origin.y = CGRectGetMaxY(_photoDescriptionLabel.frame) + VERTICAL_BUFFER;
   _photoCommentsView.frame = rect;
+#endif
 }
 
 - (void)prepareForReuse
@@ -240,7 +488,11 @@
     if (locationModel == _photoModel.location) {
       _photoLocationLabel.attributedText = [photo locationAttributedStringWithFontSize:FONT_SIZE];
       [_photoLocationLabel sizeToFit];
-      [self setNeedsLayout];
+      
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateConstraints];
+        [self setNeedsLayout];
+      });
     }
   }];
 }
