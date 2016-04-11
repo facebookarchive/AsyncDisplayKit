@@ -88,6 +88,12 @@ extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node);
 extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
 
 /**
+ This function will walk the node hierarchy in a breadth first fashion. It does run the block on the node provided
+ directly to the function call.
+ */
+extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^block)(ASDisplayNode *node));
+
+/**
  Identical to ASDisplayNodePerformBlockOnEveryNode, except it does not run the block on the
  node provided directly to the function call - only on all descendants.
  */

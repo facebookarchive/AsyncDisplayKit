@@ -10,15 +10,15 @@
 
 @protocol ASLayoutableExtensibility <NSObject>
 
-/// Currently up to 4 BOOL values
+// The maximum number of extended values per type are defined in ASEnvironment.h above the ASEnvironmentStateExtensions
+// struct definition. If you try to set a value at an index after the maximum it will throw an assertion.
+
 - (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx;
 - (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx;
 
-/// Currently up to 1 NSInteger value
 - (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx;
 - (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx;
 
-/// Currently up to 1 UIEdgeInsets value
 - (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx;
 - (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx;
 

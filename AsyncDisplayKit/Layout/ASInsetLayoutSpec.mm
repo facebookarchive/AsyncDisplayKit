@@ -88,6 +88,12 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
       MAX(0, constrainedSize.max.height - insetsY),
     }
   };
+  
+  if (self.child == nil) {
+    ASDisplayNodeAssert(NO, @"Inset spec measured without a child. The spec will do nothing.");
+    return [ASLayout layoutWithLayoutableObject:self size:CGSizeZero];
+  }
+  
   ASLayout *sublayout = [self.child measureWithSizeRange:insetConstrainedSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {

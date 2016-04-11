@@ -695,20 +695,30 @@ NS_ASSUME_NONNULL_END
 - (nullable UIView *)preferredFocusedView;
 #endif
 
+@end
+
+@interface ASDisplayNode (UIViewBridgeAccessibility)
+
 // Accessibility support
-@property (atomic, assign)           BOOL isAccessibilityElement;
-@property (nullable, atomic, copy)   NSString *accessibilityLabel;
-@property (nullable, atomic, copy)   NSString *accessibilityHint;
-@property (nullable, atomic, copy)   NSString *accessibilityValue;
-@property (atomic, assign)           UIAccessibilityTraits accessibilityTraits;
-@property (atomic, assign)           CGRect accessibilityFrame;
-@property (nullable, atomic, strong) NSString *accessibilityLanguage;
-@property (atomic, assign)           BOOL accessibilityElementsHidden;
-@property (atomic, assign)           BOOL accessibilityViewIsModal;
-@property (atomic, assign)           BOOL shouldGroupAccessibilityChildren;
+@property (nonatomic, assign)           BOOL isAccessibilityElement;
+@property (nonatomic, copy, nullable)   NSString *accessibilityLabel;
+@property (nonatomic, copy, nullable)   NSString *accessibilityHint;
+@property (nonatomic, copy, nullable)   NSString *accessibilityValue;
+@property (nonatomic, assign)           UIAccessibilityTraits accessibilityTraits;
+@property (nonatomic, assign)           CGRect accessibilityFrame;
+@property (nonatomic, copy, nullable)   UIBezierPath *accessibilityPath;
+@property (nonatomic, assign)           CGPoint accessibilityActivationPoint;
+@property (nonatomic, copy, nullable)   NSString *accessibilityLanguage;
+@property (nonatomic, assign)           BOOL accessibilityElementsHidden;
+@property (nonatomic, assign)           BOOL accessibilityViewIsModal;
+@property (nonatomic, assign)           BOOL shouldGroupAccessibilityChildren;
+@property (nonatomic, assign)           UIAccessibilityNavigationStyle accessibilityNavigationStyle;
+#if TARGET_OS_TV
+@property(nonatomic, copy, nullable) 	NSArray *accessibilityHeaderElements;
+#endif
 
 // Accessibility identification support
-@property (nullable, nonatomic, copy) NSString *accessibilityIdentifier;
+@property (nonatomic, copy, nullable)   NSString *accessibilityIdentifier;
 
 @end
 
