@@ -16,14 +16,7 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASImageNode+AnimatedImagePrivate.h"
 #import "ASInternalHelpers.h"
-
-@interface ASWeakProxy : NSObject
-
-@property (nonatomic, weak, readonly) id target;
-
-+ (instancetype)weakProxyWithTarget:(id)target;
-
-@end
+#import "ASWeakProxy.h"
 
 @implementation ASImageNode (AnimatedImage)
 
@@ -103,7 +96,7 @@
     return;
   }
   
-  if (self.animatedImagePaused == YES) {
+  if (self.animatedImagePaused) {
     return;
   }
   
@@ -228,28 +221,6 @@
 #endif
   [_displayLink invalidate];
   _displayLink = nil;
-}
-
-@end
-
-@implementation ASWeakProxy
-
-- (instancetype)initWithTarget:(id)target
-{
-  if (self = [super init]) {
-    _target = target;
-  }
-  return self;
-}
-
-+ (instancetype)weakProxyWithTarget:(id)target
-{
-  return [[ASWeakProxy alloc] initWithTarget:target];
-}
-
-- (id)forwardingTargetForSelector:(SEL)aSelector
-{
-  return _target;
 }
 
 @end

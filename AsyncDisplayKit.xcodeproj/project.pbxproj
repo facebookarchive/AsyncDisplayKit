@@ -267,6 +267,10 @@
 		68B0277A1C1A79CC0041016B /* ASDisplayNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 68B027791C1A79CC0041016B /* ASDisplayNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		68B0277B1C1A79D60041016B /* ASDisplayNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 68B027791C1A79CC0041016B /* ASDisplayNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		68B8A4DC1CBD911D007E4543 /* ASImageNode+AnimatedImagePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 68B8A4DB1CBD911D007E4543 /* ASImageNode+AnimatedImagePrivate.h */; };
+		68B8A4E11CBDB958007E4543 /* ASWeakProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 68B8A4DF1CBDB958007E4543 /* ASWeakProxy.h */; };
+		68B8A4E21CBDB958007E4543 /* ASWeakProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 68B8A4DF1CBDB958007E4543 /* ASWeakProxy.h */; };
+		68B8A4E31CBDB958007E4543 /* ASWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 68B8A4E01CBDB958007E4543 /* ASWeakProxy.m */; };
+		68B8A4E41CBDB958007E4543 /* ASWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 68B8A4E01CBDB958007E4543 /* ASWeakProxy.m */; };
 		68EE0DBD1C1B4ED300BA1B99 /* ASMainSerialQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 68EE0DBB1C1B4ED300BA1B99 /* ASMainSerialQueue.h */; };
 		68EE0DBE1C1B4ED300BA1B99 /* ASMainSerialQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 68EE0DBB1C1B4ED300BA1B99 /* ASMainSerialQueue.h */; };
 		68EE0DBF1C1B4ED300BA1B99 /* ASMainSerialQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 68EE0DBC1C1B4ED300BA1B99 /* ASMainSerialQueue.mm */; };
@@ -764,6 +768,8 @@
 		68355B391CB57A5A001D4E68 /* ASPINRemoteImageDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPINRemoteImageDownloader.h; sourceTree = "<group>"; };
 		68B027791C1A79CC0041016B /* ASDisplayNode+Beta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASDisplayNode+Beta.h"; sourceTree = "<group>"; };
 		68B8A4DB1CBD911D007E4543 /* ASImageNode+AnimatedImagePrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASImageNode+AnimatedImagePrivate.h"; sourceTree = "<group>"; };
+		68B8A4DF1CBDB958007E4543 /* ASWeakProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASWeakProxy.h; sourceTree = "<group>"; };
+		68B8A4E01CBDB958007E4543 /* ASWeakProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASWeakProxy.m; sourceTree = "<group>"; };
 		68EE0DBB1C1B4ED300BA1B99 /* ASMainSerialQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMainSerialQueue.h; sourceTree = "<group>"; };
 		68EE0DBC1C1B4ED300BA1B99 /* ASMainSerialQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMainSerialQueue.mm; sourceTree = "<group>"; };
 		698548611CA9E025008A345F /* ASEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASEnvironment.h; sourceTree = "<group>"; };
@@ -1195,6 +1201,8 @@
 				296A0A311A951715005ACEAA /* ASScrollDirection.h */,
 				205F0E111B371BD7007741D0 /* ASScrollDirection.m */,
 				058D0A12195D050800B7D73C /* ASThread.h */,
+				68B8A4DF1CBDB958007E4543 /* ASWeakProxy.h */,
+				68B8A4E01CBDB958007E4543 /* ASWeakProxy.m */,
 				205F0E1F1B376416007741D0 /* CGRect+ASConvenience.h */,
 				205F0E201B376416007741D0 /* CGRect+ASConvenience.m */,
 				25B171EA1C12242700508A7A /* Data Controller */,
@@ -1472,6 +1480,7 @@
 				ACF6ED201B17843500DA7C62 /* ASDimension.h in Headers */,
 				058D0A78195D05F900B7D73C /* ASDisplayNode+DebugTiming.h in Headers */,
 				DECBD6E71BE56E1900CF4905 /* ASButtonNode.h in Headers */,
+				68B8A4E11CBDB958007E4543 /* ASWeakProxy.h in Headers */,
 				DBC452DB1C5BF64600B16017 /* NSArray+Diffing.h in Headers */,
 				058D0A4C195D05CB00B7D73C /* ASDisplayNode+Subclasses.h in Headers */,
 				058D0A4A195D05CB00B7D73C /* ASDisplayNode.h in Headers */,
@@ -1648,6 +1657,7 @@
 				DBDB83951C6E879900D0098C /* ASPagerFlowLayout.h in Headers */,
 				34EFC7691B701CE100AD841F /* ASLayoutable.h in Headers */,
 				9CDC18CD1B910E12004965E2 /* ASLayoutablePrivate.h in Headers */,
+				68B8A4E21CBDB958007E4543 /* ASWeakProxy.h in Headers */,
 				B35062201B010EFD0018CF92 /* ASLayoutController.h in Headers */,
 				B35062211B010EFD0018CF92 /* ASLayoutRangeType.h in Headers */,
 				34EFC76A1B701CE600AD841F /* ASLayoutSpec.h in Headers */,
@@ -1924,6 +1934,7 @@
 				DBDB83961C6E879900D0098C /* ASPagerFlowLayout.m in Sources */,
 				058D0A26195D050800B7D73C /* _ASCoreAnimationExtras.mm in Sources */,
 				257754B41BEE44CD00737CA5 /* ASTextKitTailTruncater.mm in Sources */,
+				68B8A4E31CBDB958007E4543 /* ASWeakProxy.m in Sources */,
 				69E1006F1CA89CB600D88C1B /* ASEnvironmentInternal.mm in Sources */,
 				AC026B711BD57DBF00BBC17E /* _ASHierarchyChangeSet.m in Sources */,
 				257754BF1BEE458E00737CA5 /* ASTextKitCoreTextAdditions.m in Sources */,
@@ -2099,6 +2110,7 @@
 				34EFC7641B701CC600AD841F /* ASCenterLayoutSpec.mm in Sources */,
 				18C2ED831B9B7DE800F627B3 /* ASCollectionNode.mm in Sources */,
 				E55D86331CA8A14000A0C26F /* ASLayoutable.mm in Sources */,
+				68B8A4E41CBDB958007E4543 /* ASWeakProxy.m in Sources */,
 				69CB62AE1CB8165900024920 /* _ASDisplayViewAccessiblity.mm in Sources */,
 				B35061F61B010EFD0018CF92 /* ASCollectionView.mm in Sources */,
 				509E68641B3AEDB7009B9150 /* ASCollectionViewLayoutController.mm in Sources */,
