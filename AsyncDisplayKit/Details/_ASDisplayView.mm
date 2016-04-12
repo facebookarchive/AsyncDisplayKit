@@ -26,7 +26,7 @@
   __unsafe_unretained ASDisplayNode *_node;  // Though UIView has a .node property added via category, since we can add an ivar to a subclass, use that for performance.
   BOOL _inHitTest;
   BOOL _inPointInside;
-  NSMutableArray *_accessibleElements;
+  NSArray *_accessibleElements;
 }
 
 @synthesize asyncdisplaykit_node = _node;

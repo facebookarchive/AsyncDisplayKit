@@ -81,8 +81,14 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
     if (finalLayoutable != child) {
-      // Layout options state of child needs to be copied to final layoutable, but don't override customized values.
-      ASEnvironmentStatePropagateUp(finalLayoutable, child.environmentState.layoutOptionsState);
+      if (ASEnvironmentStatePropagationEnabled()) {
+        ASEnvironmentStatePropagateUp(finalLayoutable, child.environmentState.layoutOptionsState);
+      } else {
+        // If state propagation is not enabled the layout options state needs to be copied manually
+        ASEnvironmentState finalLayoutableEnvironmentState = finalLayoutable.environmentState;
+        finalLayoutableEnvironmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
+        finalLayoutable.environmentState = finalLayoutableEnvironmentState;
+      }
       return finalLayoutable;
     }
   }
