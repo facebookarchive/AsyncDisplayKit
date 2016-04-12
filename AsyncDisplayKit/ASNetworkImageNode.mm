@@ -212,6 +212,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)visibilityDidChange:(BOOL)isVisible
 {
   [super visibilityDidChange:isVisible];
+	
   ASDN::MutexLocker l(_lock);
   if (_downloaderImplementsSetPriority) {
     if (_downloadIdentifier != nil) {
@@ -388,7 +389,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
         ASDN::MutexLocker l(strongSelf->_lock);
         
         //Getting a result back for a different download identifier, download must not have been successfully canceled
-        if (downloadIdentifier != nil && !ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier)) {
+        if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
             return;
         }
 
