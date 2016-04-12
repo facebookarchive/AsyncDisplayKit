@@ -6,6 +6,8 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
+#import "ASThread.h"
+
 @interface ASImageNode ()
 {
   ASDN::RecursiveMutex _animatedImageLock;

@@ -12,13 +12,20 @@
 #import "ASAssert.h"
 #import "ASThread.h"
 #import "ASImageContainerProtocolCategories.h"
-#import "PINAnimatedImage.h"
 
+#if __has_include ("PINAnimatedImage.h")
+#define PIN_ANIMATED_AVAILABLE 1
+#import "PINAnimatedImage.h"
 #import <PINRemoteImage/PINAlternateRepresentationProvider.h>
+#else
+#define PIN_ANIMATED_AVAILABLE 0
+#endif
+
 #import <PINRemoteImage/PINRemoteImageManager.h>
 #import <PINRemoteImage/NSData+ImageDetectors.h>
 #import <PINCache/PINCache.h>
 
+#if PIN_ANIMATED_AVAILABLE
 @interface ASPINRemoteImageDownloader () <PINRemoteImageManagerAlternateRepresentationProvider>
 
 @end
@@ -50,6 +57,7 @@
 }
 
 @end
+#endif
 
 @implementation ASPINRemoteImageDownloader
 
@@ -68,25 +76,33 @@
   static PINRemoteImageManager *sharedPINRemoteImageManager = nil;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
+#if PIN_ANIMATED_AVAILABLE
     sharedPINRemoteImageManager = [[PINRemoteImageManager alloc] initWithSessionConfiguration:nil alternativeRepresentationProvider:self];
+#else
+    sharedPINRemoteImageManager = [[PINRemoteImageManager alloc] initWithSessionConfiguration:nil];
+#endif
   });
   return sharedPINRemoteImageManager;
 }
 
 #pragma mark ASImageProtocols
 
+#if PIN_ANIMATED_AVAILABLE
 - (nullable id <ASAnimatedImageProtocol>)animatedImageWithData:(NSData *)animatedImageData
 {
   return [[PINAnimatedImage alloc] initWithAnimatedImageData:animatedImageData];
 }
+#endif
 
 - (id <ASImageContainerProtocol>)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
 {
   NSString *key = [[self sharedPINRemoteImageManager] cacheKeyForURL:URL processorKey:nil];
   PINRemoteImageManagerResult *result = [[self sharedPINRemoteImageManager] synchronousImageFromCacheWithCacheKey:key options:PINRemoteImageManagerDownloadOptionsSkipDecode];
+#if PIN_ANIMATED_AVAILABLE
   if (result.alternativeRepresentation) {
     return result.alternativeRepresentation;
   }
+#endif
   return result.image;
 }
 
@@ -120,18 +136,26 @@
   return [[self sharedPINRemoteImageManager] downloadImageWithURL:URL options:PINRemoteImageManagerDownloadOptionsSkipDecode completion:^(PINRemoteImageManagerResult *result) {
     /// If we're targeting the main queue and we're on the main thread, complete immediately.
     if (ASDisplayNodeThreadIsMain() && callbackQueue == dispatch_get_main_queue()) {
+#if PIN_ANIMATED_AVAILABLE
       if (result.alternativeRepresentation) {
         completion(result.alternativeRepresentation, result.error, result.UUID);
       } else {
         completion(result.image, result.error, result.UUID);
       }
+#else
+      completion(result.image, result.error, result.UUID);
+#endif
     } else {
       dispatch_async(callbackQueue, ^{
+#if PIN_ANIMATED_AVAILABLE
         if (result.alternativeRepresentation) {
           completion(result.alternativeRepresentation, result.error, result.UUID);
         } else {
           completion(result.image, result.error, result.UUID);
         }
+#else
+        completion(result.image, result.error, result.UUID);
+#endif
       });
     }
   }];
@@ -183,9 +207,11 @@
 
 - (id)alternateRepresentationWithData:(NSData *)data options:(PINRemoteImageManagerDownloadOptions)options
 {
+#if PIN_ANIMATED_AVAILABLE
     if ([data pin_isGIF]) {
         return data;
     }
+#endif
     return nil;
 }
 
