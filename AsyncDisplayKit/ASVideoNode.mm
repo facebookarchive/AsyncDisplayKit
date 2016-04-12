@@ -9,6 +9,13 @@
 #import "ASVideoNode.h"
 #import "ASDefaultPlayButton.h"
 
+BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
+  return ASObjectIsEqual(asset1, asset2)
+  || ([asset1 isKindOfClass:[AVURLAsset class]]
+      && [asset2 isKindOfClass:[AVURLAsset class]]
+      && ASObjectIsEqual(((AVURLAsset *)asset1).URL, ((AVURLAsset *)asset2).URL));
+}
+
 @interface ASVideoNode ()
 {
   ASDN::RecursiveMutex _videoLock;
@@ -204,10 +211,7 @@
 {
   ASDN::MutexLocker l(_videoLock);
   
-  if (ASObjectIsEqual(asset, _asset)
-    || ([asset isKindOfClass:[AVURLAsset class]]
-      && [_asset isKindOfClass:[AVURLAsset class]]
-      && ASObjectIsEqual(((AVURLAsset *)asset).URL, ((AVURLAsset *)_asset).URL))) {
+  if (ASAssetIsEqual(asset, _asset)) {
     return;
   }
 
@@ -418,7 +422,7 @@
 
   [self generatePlaceholderImage:_asset completion:^(AVAsset *asset, UIImage *image) {
     ASPerformBlockOnMainThread(^{
-      if (weakSelf.asset == asset) {
+      if (ASAssetIsEqual(weakSelf.asset, asset)) {
         [weakSelf setPlaceholderImage:image];
       }
     });
