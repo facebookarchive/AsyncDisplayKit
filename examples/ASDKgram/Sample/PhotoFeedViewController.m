@@ -19,8 +19,9 @@
 
 @implementation PhotoFeedViewController
 {
-  PhotoFeedModel *_photoFeed;
-  UITableView    *_tableView;
+  PhotoFeedModel          *_photoFeed;
+  UITableView             *_tableView;
+  UIActivityIndicatorView *_activityIndicatorView;
 }
 
 #pragma mark - Lifecycle
@@ -38,8 +39,7 @@
     _tableView.delegate = self;
     _tableView.dataSource = self;
     
-    _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular imageSize:[self imageSizeForScreenWidth]];
-    [self refreshFeed];
+    _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
   }
   
   return self;
@@ -50,19 +50,38 @@
 {
   [super viewDidLoad];
   
+  _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular imageSize:[self imageSizeForScreenWidth]];
+  [self refreshFeed];
+  
+  CGSize boundSize = self.view.bounds.size;
+  
   [self.view addSubview:_tableView];
+  
   _tableView.frame = self.view.bounds;
   _tableView.allowsSelection = NO;
   _tableView.separatorStyle  = UITableViewCellSeparatorStyleNone;
   [_tableView registerClass:[PhotoTableViewCell class] forCellReuseIdentifier:@"photoCell"];
+  
+  [self.view addSubview:_activityIndicatorView];
+  
+  [_activityIndicatorView sizeToFit];
+  CGRect refreshRect = _activityIndicatorView.frame;
+  refreshRect.origin = CGPointMake((boundSize.width - _activityIndicatorView.frame.size.width) / 2.0,
+                                   (boundSize.height - _activityIndicatorView.frame.size.height) / 2.0);
+  _activityIndicatorView.frame = refreshRect;
 }
 
 #pragma mark - helper methods
 
 - (void)refreshFeed
 {
+  [_activityIndicatorView startAnimating];
+  
   // small first batch
   [_photoFeed refreshFeedWithCompletionBlock:^(NSArray *newPhotos){
+    
+    [_activityIndicatorView stopAnimating];
+    
     [self insertNewRowsInTableView:newPhotos];
     [self requestCommentsForPhotos:newPhotos];
     

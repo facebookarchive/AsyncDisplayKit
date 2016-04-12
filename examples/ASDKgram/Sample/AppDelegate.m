@@ -64,15 +64,16 @@
   return YES;
 }
 
-// UITabBarControllerDelegate
-- (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController;
+#pragma mark - UITabBarControllerDelegate
+
+- (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController
 {
   if ([viewController isKindOfClass:[UINavigationController class]]) { 
     NSArray *viewControllers = [(UINavigationController *)viewController viewControllers];
     UIViewController *rootViewController = viewControllers[0];
     if ([rootViewController conformsToProtocol:@protocol(PhotoFeedControllerProtocol)]) {
       // FIXME: the dataModel does not currently handle clearing data during loading properly
-//      [(id <PhotoFeedViewControllerProtocol>)rootViewController resetAllData];
+//      [(id <PhotoFeedControllerProtocol>)rootViewController resetAllData];
     }
   }
 }

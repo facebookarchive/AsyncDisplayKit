@@ -29,8 +29,9 @@
   NSUInteger     _totalItems;
   BOOL           _fetchPageInProgress;
   BOOL           _refreshFeedInProgress;
-  
-  CLLocationCoordinate2D    _location;
+  NSURLSessionDataTask *_task;
+
+  CLLocationCoordinate2D _location;
   NSUInteger    _locationRadius;
   NSUInteger    _userID;
 }
@@ -123,7 +124,12 @@
 - (void)clearFeed
 {
   _photos = [[NSMutableArray alloc] init];
-  _ids    = [[NSMutableArray alloc] init];
+  _ids = [[NSMutableArray alloc] init];
+  _currentPage = 0;
+  _fetchPageInProgress = NO;
+  _refreshFeedInProgress = NO;
+  [_task cancel];
+  _task = nil;
 }
 
 - (void)requestPageWithCompletionBlock:(void (^)(NSArray *))block numResultsToReturn:(NSUInteger)numResults
@@ -185,7 +191,7 @@
       NSString *urlAdditions   = [NSString stringWithFormat:@"&page=%lu&rpp=%lu%@", (unsigned long)nextPage, (long)numPhotos, imageSizeParam];
       NSURL *url               = [NSURL URLWithString:[_urlString stringByAppendingString:urlAdditions]];
       NSURLSession *session    = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
-      NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+      _task = [session dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (data) {
           NSDictionary *response = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
           
@@ -223,8 +229,8 @@
           }
           _fetchPageInProgress = NO;
         });
-      }]; // end task
-      [task resume];
+      }];
+      [_task resume];
     }
   });
 }

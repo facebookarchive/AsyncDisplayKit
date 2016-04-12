@@ -16,6 +16,7 @@
 @interface UIImage (Additions)
 
 + (UIImage *)followingButtonStretchableImageForCornerRadius:(CGFloat)cornerRadius following:(BOOL)followingEnabled;
++ (void)downloadImageForURL:(NSURL *)url completion:(void (^)(UIImage *))block;
 
 - (UIImage *)makeCircularImageWithSize:(CGSize)size;
 

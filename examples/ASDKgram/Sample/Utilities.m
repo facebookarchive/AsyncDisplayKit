@@ -60,6 +60,40 @@
   return followingBtnImageStretchable;
 }
 
++ (void)downloadImageForURL:(NSURL *)url completion:(void (^)(UIImage *))block
+{
+  static NSCache *simpleImageCache = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    simpleImageCache = [[NSCache alloc] init];
+    simpleImageCache.countLimit = 10;
+  });
+  
+  if (!block) {
+    return;
+  }
+  
+  // check if image is cached
+  UIImage *image = [simpleImageCache objectForKey:url];
+  if (image) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      block(image);
+    });
+  } else {
+    // else download image
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
+    NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+      if (data) {
+        UIImage *image = [UIImage imageWithData:data];
+        dispatch_async(dispatch_get_main_queue(), ^{
+          block(image);
+        });
+      }
+    }];
+    [task resume];
+  }
+}
+
 - (UIImage *)makeCircularImageWithSize:(CGSize)size
 {
   // make a CGRect with the image's size

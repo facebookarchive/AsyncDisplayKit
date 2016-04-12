@@ -437,11 +437,9 @@
   rect.size                    = [_photoDescriptionLabel sizeThatFits:CGSizeMake(availableWidth, CGFLOAT_MAX)];
   _photoDescriptionLabel.frame = rect;
 
-  [[PINRemoteImageManager sharedImageManager] downloadImageWithURL:photo.URL
-                                                           options:PINRemoteImageManagerDownloadOptionsSkipDecode
-                                                        completion:^(PINRemoteImageManagerResult * _Nonnull result) {
-                                                          _photoImageView.image = result.image;
-                                                        }];
+  [UIImage downloadImageForURL:photo.URL completion:^(UIImage *image) {
+    _photoImageView.image = image;
+  }];
   
   [self downloadAndProcessUserAvatarForPhoto:photo];
   [self loadCommentsForPhoto:photo];
@@ -467,15 +465,10 @@
 
 - (void)downloadAndProcessUserAvatarForPhoto:(PhotoModel *)photo
 {
-  [[PINRemoteImageManager sharedImageManager] downloadImageWithURL:_photoModel.ownerUserProfile.userPicURL
-                                                           options:PINRemoteImageManagerDownloadOptionsSkipDecode
-                                                      processorKey:@"custom"
-                                                         processor:^UIImage * _Nullable(PINRemoteImageManagerResult * _Nonnull result, NSUInteger * _Nonnull cost) {
-                                                           CGSize profileImageSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
-                                                           return [result.image makeCircularImageWithSize:profileImageSize];
-                                                         } completion:^(PINRemoteImageManagerResult * _Nonnull result) {
-                                                           _userAvatarImageView.image = result.image;
-                                                         }];
+  [UIImage downloadImageForURL:photo.URL completion:^(UIImage *image) {
+    CGSize profileImageSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+    _userAvatarImageView.image = [image makeCircularImageWithSize:profileImageSize];
+  }];
 }
 
 - (void)reverseGeocodeLocationForPhoto:(PhotoModel *)photo

@@ -20,8 +20,9 @@
 
 @implementation PhotoFeedNodeController
 {
-  PhotoFeedModel   *_photoFeed;
-  ASTableNode      *_tableNode;
+  PhotoFeedModel          *_photoFeed;
+  ASTableNode             *_tableNode;
+  UIActivityIndicatorView *_activityIndicatorView;
 }
 
 #pragma mark - Lifecycle
@@ -35,12 +36,10 @@
     self.navigationItem.title = @"ASDK";
     [self.navigationController setNavigationBarHidden:YES];
     
-    _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular
-                                                          imageSize:[self imageSizeForScreenWidth]];
-    [self refreshFeed];
-
     _tableNode.dataSource = self;
     _tableNode.delegate = self;
+    
+    _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
   }
   
   return self;
@@ -51,19 +50,34 @@
 {
   [super loadView];
   
+  _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular imageSize:[self imageSizeForScreenWidth]];
+  [self refreshFeed];
+  
+  CGSize boundSize = self.view.bounds.size;
+
+  [_activityIndicatorView sizeToFit];
+  CGRect refreshRect = _activityIndicatorView.frame;
+  refreshRect.origin = CGPointMake((boundSize.width - _activityIndicatorView.frame.size.width) / 2.0,
+                                   (boundSize.height - _activityIndicatorView.frame.size.height) / 2.0);
+  _activityIndicatorView.frame = refreshRect;
+  
+  [self.view addSubview:_activityIndicatorView];
+  
   self.view.backgroundColor = [UIColor whiteColor];
   _tableNode.view.allowsSelection = NO;
   _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
   _tableNode.view.leadingScreensForBatching = AUTO_TAIL_LOADING_NUM_SCREENFULS;  // overriding default of 2.0
-
 }
 
 #pragma mark - helper methods
 
 - (void)refreshFeed
 {
+  [_activityIndicatorView startAnimating];
   // small first batch
   [_photoFeed refreshFeedWithCompletionBlock:^(NSArray *newPhotos){
+    
+    [_activityIndicatorView stopAnimating];
     
     [self insertNewRowsInTableView:newPhotos];
     [self requestCommentsForPhotos:newPhotos];
