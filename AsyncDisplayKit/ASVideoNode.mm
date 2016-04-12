@@ -91,6 +91,25 @@ BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
   }
 }
 
+- (void)willEnterForeground:(NSNotification *)notification
+{
+  ASDN::MutexLocker l(_videoLock);
+
+  if (_shouldBePlaying) {
+    [self play];
+  }
+}
+
+- (void)didEnterBackground:(NSNotification *)notification
+{
+  ASDN::MutexLocker l(_videoLock);
+
+  if (_shouldBePlaying) {
+    [self pause];
+    _shouldBePlaying = YES;
+  }
+}
+
 - (void)layout
 {
   [super layout];
@@ -114,7 +133,10 @@ BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
 - (void)didLoad
 {
   [super didLoad];
+
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
 - (void)tapped
@@ -222,7 +244,7 @@ BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
   [self setNeedsDataFetch];
 
   if (_asset != nil && _shouldAutoplay) {
-      [self play];
+    [self play];
   }
 }
 
@@ -404,7 +426,7 @@ BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
 - (void)dealloc
 {
   [_playButton removeTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
-  [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 
   @try {
     [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];

@@ -248,4 +248,54 @@
   XCTAssertNotEqual(_videoNode, firstButton.supernode);
 }
 
+- (void)testVideoThatDoesNotAutorepeatsShouldPauseOnPlaybackEnd
+{
+  _videoNode.asset = _firstAsset;
+  _videoNode.shouldAutorepeat = NO;
+
+  [_videoNode didLoad];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode play];
+
+  XCTAssertTrue(_videoNode.isPlaying);
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:AVPlayerItemDidPlayToEndTimeNotification object:_videoNode.currentItem];
+
+  XCTAssertFalse(_videoNode.isPlaying);
+  XCTAssertEqual(0, CMTimeGetSeconds(_videoNode.player.currentTime));
+}
+
+- (void)testVideoThatAutorepeatsShouldRepeatOnPlaybackEnd
+{
+  _videoNode.asset = _firstAsset;
+  _videoNode.shouldAutorepeat = YES;
+
+  [_videoNode didLoad];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode play];
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:AVPlayerItemDidPlayToEndTimeNotification object:_videoNode.currentItem];
+
+  XCTAssertTrue(_videoNode.isPlaying);
+}
+
+- (void)testBackgroundingAndForegroungingTheAppShouldPauseAndResume
+{
+  _videoNode.asset = _firstAsset;
+
+  [_videoNode didLoad];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode play];
+
+  XCTAssertTrue(_videoNode.isPlaying);
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationDidEnterBackgroundNotification object:nil];
+
+  XCTAssertFalse(_videoNode.isPlaying);
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationWillEnterForegroundNotification object:nil];
+
+  XCTAssertTrue(_videoNode.isPlaying);
+}
+
 @end
