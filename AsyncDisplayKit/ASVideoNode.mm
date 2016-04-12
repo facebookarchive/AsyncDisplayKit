@@ -419,8 +419,9 @@ BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
 - (void)generatePlaceholderImage
 {
   ASVideoNode *__weak weakSelf = self;
+  AVAsset *__weak asset = self.asset;
 
-  [self generatePlaceholderImage:_asset completion:^(AVAsset *asset, UIImage *image) {
+  [self generatePlaceholderImage:^(UIImage *image) {
     ASPerformBlockOnMainThread(^{
       if (ASAssetIsEqual(weakSelf.asset, asset)) {
         [weakSelf setPlaceholderImage:image];
@@ -430,17 +431,18 @@ BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
 }
 
 // TODO: Provide a way to override placeholder image generation. Either by subclassing or delegation.
-- (void)generatePlaceholderImage:(AVAsset *)asset completion:(void(^)(AVAsset *asset, UIImage *image))completion
+- (void)generatePlaceholderImage:(void(^)(UIImage *image))completionHandler
 {
   ASPerformBlockOnBackgroundThread(^{
-    AVAssetImageGenerator *previewImageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
+    AVAssetImageGenerator *previewImageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:self.asset];
     previewImageGenerator.appliesPreferredTrackTransform = YES;
 
-    [previewImageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:kCMTimeZero]] completionHandler:^(CMTime requestedTime, CGImageRef _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
+    [previewImageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:kCMTimeZero]]
+                                                completionHandler:^(CMTime requestedTime, CGImageRef image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError *error) {
       if (error != nil && result != AVAssetImageGeneratorCancelled) {
         ASMultiplexImageNodeLogError(@"Asset preview image generation failed with error: %@", error);
       }
-      completion(asset, image ? [UIImage imageWithCGImage:image] : nil);
+      completionHandler(image ? [UIImage imageWithCGImage:image] : nil);
     }];
   });
 }
