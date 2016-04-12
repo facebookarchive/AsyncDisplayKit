@@ -175,7 +175,7 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 // the specifications that are known to have more than one.
 - (BOOL)supportsUpwardPropagation
 {
-  return YES;
+  return ASEnvironmentStatePropagationEnabled();
 }
 
 ASEnvironmentLayoutOptionsForwarding

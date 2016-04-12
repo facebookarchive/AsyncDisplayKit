@@ -79,6 +79,9 @@ extern void ASLayoutableClearCurrentContext();
 #define ASEnvironmentLayoutOptionsForwarding \
 - (void)propagateUpLayoutOptionsState\
 {\
+  if (!ASEnvironmentStatePropagationEnabled()) {\
+    return;\
+  }\
   id<ASEnvironment> parent = [self parent];\
   if ([parent supportsUpwardPropagation]) {\
     ASEnvironmentStatePropagateUp(parent, _environmentState.layoutOptionsState);\

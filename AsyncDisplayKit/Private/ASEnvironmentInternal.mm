@@ -19,7 +19,7 @@
 
 BOOL ASEnvironmentStatePropagationEnabled()
 {
-    return AS_SUPPORT_PROPAGATION;
+  return AS_SUPPORT_PROPAGATION;
 }
 
 
