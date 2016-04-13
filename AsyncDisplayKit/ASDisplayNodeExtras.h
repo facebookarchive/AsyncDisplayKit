@@ -107,7 +107,7 @@ extern ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernode(ASDisplayNode *
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node of kind class.
  */
-extern ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c);
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c);
 
 /**
  * Given two nodes, finds their most immediate common parent.  Used for geometry conversion methods.
@@ -132,22 +132,22 @@ extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodes(ASDisplayNode *sta
 /**
  Given a display node, traverses down the node hierarchy, returning all the display nodes of kind class.
  */
-extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c);
+extern NSArray<__kindof ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c);
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node, including the start node that pass the block.
  */
-extern ASDisplayNode * _Nullable ASDisplayNodeFindFirstNode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstNode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node, excluding the start node, that pass the block
  */
-extern ASDisplayNode * _Nullable ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node of kind class.
  */
-extern ASDisplayNode * _Nullable ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c);
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c);
 
 extern UIColor *ASDisplayNodeDefaultPlaceholderColor();
 extern UIColor *ASDisplayNodeDefaultTintColor();
