@@ -179,7 +179,7 @@ ASDISPLAYNODE_INLINE void ASPendingStateApplyMetricsToLayer(_ASPendingState *sta
 static CGColorRef blackColorRef = NULL;
 static UIColor *defaultTintColor = nil;
 
-- (id)init
+- (instancetype)init
 {
   if (!(self = [super init]))
     return nil;
