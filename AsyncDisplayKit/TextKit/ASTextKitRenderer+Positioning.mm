@@ -333,6 +333,8 @@ static const CGFloat ASTextKitRendererTextCapHeightPadding = 1.3;
 - (CGRect)trailingRect
 {
   __block CGRect trailingRect = CGRectNull;
+  __block CGSize calculatedSize = CGSizeZero;
+  __block NSRange textRange = NSMakeRange(0, 0);
   [self.context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     CGSize calculatedSize = textContainer.size;
     // If have an empty string, then our whole bounds constitute trailing space.
@@ -340,15 +342,16 @@ static const CGFloat ASTextKitRendererTextCapHeightPadding = 1.3;
       trailingRect = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
       return;
     }
-
-    // Take everything after our final character as trailing space.
-    NSArray *finalRects = [self rectsForTextRange:NSMakeRange([textStorage length] - 1, 1) measureOption:ASTextKitRendererMeasureOptionLineHeight];
-    CGRect finalGlyphRect = [[finalRects lastObject] CGRectValue];
-    CGPoint origin = CGPointMake(CGRectGetMaxX(finalGlyphRect), CGRectGetMinY(finalGlyphRect));
-    CGSize size = CGSizeMake(calculatedSize.width - origin.x, calculatedSize.height - origin.y);
-    trailingRect = (CGRect){origin, size};
+      
+    textRange = NSMakeRange([textStorage length] - 1, 1);
   }];
-  return trailingRect;
+
+  // Take everything after our final character as trailing space.
+  NSArray *finalRects = [self rectsForTextRange:textRange measureOption:ASTextKitRendererMeasureOptionLineHeight];
+  CGRect finalGlyphRect = [[finalRects lastObject] CGRectValue];
+  CGPoint origin = CGPointMake(CGRectGetMaxX(finalGlyphRect), CGRectGetMinY(finalGlyphRect));
+  CGSize size = CGSizeMake(calculatedSize.width - origin.x, calculatedSize.height - origin.y);
+  return (CGRect){origin, size};
 }
 
 - (CGRect)frameForTextRange:(NSRange)textRange
