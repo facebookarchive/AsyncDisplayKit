@@ -456,12 +456,16 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (void)_updateProgressImageBlockOnDownloaderIfNeeded
 {
+	// Read our interface state so that we don't lock super while holding our lock.
+	ASInterfaceState interfaceState = self.interfaceState;
+    ASDN::MutexLocker l(_downloadIdentifierLock);
+	
 	if (!_downloaderImplementsSetProgress || _downloadIdentifier == nil) {
 		return;
 	}
 
 	ASImageDownloaderProgressImage progress = nil;
-	if (ASInterfaceStateIncludesVisible(self.interfaceState)) {
+	if (ASInterfaceStateIncludesVisible(interfaceState)) {
 		__weak __typeof__(self) weakSelf = self;
 		progress = ^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
 			__typeof__(self) strongSelf = weakSelf;

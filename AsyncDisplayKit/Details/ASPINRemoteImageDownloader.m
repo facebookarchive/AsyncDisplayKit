@@ -36,9 +36,9 @@
   return result.image;
 }
 
-- (void)fetchCachedImageWithURL:(NSURL *)URL
-                  callbackQueue:(dispatch_queue_t)callbackQueue
-                     completion:(void (^)(CGImageRef imageFromCache))completion
+- (void)cachedImageWithURL:(NSURL *)URL
+			 callbackQueue:(dispatch_queue_t)callbackQueue
+				completion:(ASImageCacherCompletion)completion
 {
   // We do not check the cache here and instead check it in downloadImageWithURL to avoid checking the cache twice.
   // If we're targeting the main queue and we're on the main thread, complete immediately.
