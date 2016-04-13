@@ -345,6 +345,11 @@ static const CGFloat ASTextKitRendererTextCapHeightPadding = 1.3;
       
     textRange = NSMakeRange([textStorage length] - 1, 1);
   }];
+  
+  // If trailing rect was set early return here
+  if (!CGRectEqualToRect(trailingRect, CGRectNull)) {
+    return trailingRect;
+  }
 
   // Take everything after our final character as trailing space.
   NSArray *finalRects = [self rectsForTextRange:textRange measureOption:ASTextKitRendererMeasureOptionLineHeight];
