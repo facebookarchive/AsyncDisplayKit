@@ -1042,8 +1042,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
+  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:_performingBatchUpdates];
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super insertItemsAtIndexPaths:indexPaths];
     }];
@@ -1063,13 +1063,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
+  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:_performingBatchUpdates];
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super deleteItemsAtIndexPaths:indexPaths];
     }];
   } else {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     [UIView performWithoutAnimation:^{
       [super deleteItemsAtIndexPaths:indexPaths];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
@@ -1084,13 +1083,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
+  [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:_performingBatchUpdates];
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super insertSections:indexSet];
     }];
   } else {
-    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
       [super insertSections:indexSet];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
@@ -1105,13 +1103,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
+  [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:_performingBatchUpdates];
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super deleteSections:indexSet];
     }];
   } else {
-    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
       [super deleteSections:indexSet];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
