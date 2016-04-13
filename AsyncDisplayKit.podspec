@@ -58,7 +58,7 @@ Pod::Spec.new do |spec|
       pin.dependency 'AsyncDisplayKit/Core'
   end
   
-  # Include optional FLAnimatedImage module
+  # Include optional PINRemoteImage module
   spec.default_subspec = 'PINRemoteImage'
 
   spec.social_media_url = 'https://twitter.com/fbOpenSource'
