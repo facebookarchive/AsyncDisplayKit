@@ -264,6 +264,7 @@
 		68355B3F1CB57A64001D4E68 /* ASPINRemoteImageDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = 68355B391CB57A5A001D4E68 /* ASPINRemoteImageDownloader.h */; };
 		68355B401CB57A69001D4E68 /* ASImageContainerProtocolCategories.m in Sources */ = {isa = PBXBuildFile; fileRef = 68355B381CB57A5A001D4E68 /* ASImageContainerProtocolCategories.m */; };
 		68355B411CB57A6C001D4E68 /* ASImageContainerProtocolCategories.h in Headers */ = {isa = PBXBuildFile; fileRef = 68355B371CB57A5A001D4E68 /* ASImageContainerProtocolCategories.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		68AF37DB1CBEF4D80077BF76 /* ASImageNode+AnimatedImagePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 68B8A4DB1CBD911D007E4543 /* ASImageNode+AnimatedImagePrivate.h */; };
 		68B0277A1C1A79CC0041016B /* ASDisplayNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 68B027791C1A79CC0041016B /* ASDisplayNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		68B0277B1C1A79D60041016B /* ASDisplayNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 68B027791C1A79CC0041016B /* ASDisplayNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		68B8A4DC1CBD911D007E4543 /* ASImageNode+AnimatedImagePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 68B8A4DB1CBD911D007E4543 /* ASImageNode+AnimatedImagePrivate.h */; };
@@ -1607,6 +1608,7 @@
 				68355B3F1CB57A64001D4E68 /* ASPINRemoteImageDownloader.h in Headers */,
 				254C6B7C1BF94DF4003EC431 /* ASTextKitRenderer+TextChecking.h in Headers */,
 				34EFC7611B701C9C00AD841F /* ASBackgroundLayoutSpec.h in Headers */,
+				68AF37DB1CBEF4D80077BF76 /* ASImageNode+AnimatedImagePrivate.h in Headers */,
 				B35062591B010F070018CF92 /* ASBaseDefines.h in Headers */,
 				B35062131B010EFD0018CF92 /* ASBasicImageDownloader.h in Headers */,
 				B35062461B010EFD0018CF92 /* ASBasicImageDownloaderInternal.h in Headers */,
