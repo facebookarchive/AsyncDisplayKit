@@ -72,10 +72,6 @@ BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
   if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
     [_spinner removeFromSupernode];
     _spinner = nil;
-
-    if (_shouldBePlaying) {
-      [self play];
-    }
   }
 }
 
@@ -330,9 +326,14 @@ BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
     }
   }
 
-  if ([self ready]) {
-    [_player play];
-  } else {
+  [_player play];
+  _shouldBePlaying = YES;
+  
+  [UIView animateWithDuration:0.15 animations:^{
+    _playButton.alpha = 0.0;
+  }];
+  
+  if (![self ready]) {
     if (!_spinner) {
       _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
         UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
@@ -346,11 +347,6 @@ BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
 
     [(UIActivityIndicatorView *)_spinner.view startAnimating];
   }
-  _shouldBePlaying = YES;
-  
-  [UIView animateWithDuration:0.15 animations:^{
-    _playButton.alpha = 0.0;
-  }];
 }
 
 - (BOOL)ready
