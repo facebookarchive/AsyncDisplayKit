@@ -212,7 +212,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)visibilityDidChange:(BOOL)isVisible
 {
   [super visibilityDidChange:isVisible];
-	
+
   ASDN::MutexLocker l(_lock);
   if (_downloaderImplementsSetPriority) {
     if (_downloadIdentifier != nil) {

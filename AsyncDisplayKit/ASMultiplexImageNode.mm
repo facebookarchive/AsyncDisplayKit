@@ -456,32 +456,32 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (void)_updateProgressImageBlockOnDownloaderIfNeeded
 {
-	// Read our interface state so that we don't lock super while holding our lock.
-	ASInterfaceState interfaceState = self.interfaceState;
+    // Read our interface state so that we don't lock super while holding our lock.
+    ASInterfaceState interfaceState = self.interfaceState;
     ASDN::MutexLocker l(_downloadIdentifierLock);
-	
-	if (!_downloaderImplementsSetProgress || _downloadIdentifier == nil) {
-		return;
-	}
+    
+    if (!_downloaderImplementsSetProgress || _downloadIdentifier == nil) {
+        return;
+    }
 
-	ASImageDownloaderProgressImage progress = nil;
-	if (ASInterfaceStateIncludesVisible(interfaceState)) {
-		__weak __typeof__(self) weakSelf = self;
-		progress = ^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
-			__typeof__(self) strongSelf = weakSelf;
-			if (strongSelf == nil) {
-				return;
-			}
+    ASImageDownloaderProgressImage progress = nil;
+    if (ASInterfaceStateIncludesVisible(interfaceState)) {
+        __weak __typeof__(self) weakSelf = self;
+        progress = ^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
+            __typeof__(self) strongSelf = weakSelf;
+            if (strongSelf == nil) {
+                return;
+            }
 
-			ASDN::MutexLocker l(strongSelf->_downloadIdentifierLock);
-			//Getting a result back for a different download identifier, download must not have been successfully canceled
-			if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
-				return;
-			}
-			strongSelf.image = progressImage;
-		};
-	}
-	[_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
+            ASDN::MutexLocker l(strongSelf->_downloadIdentifierLock);
+            //Getting a result back for a different download identifier, download must not have been successfully canceled
+            if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+                return;
+            }
+            strongSelf.image = progressImage;
+        };
+    }
+    [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
 }
 
 - (void)_clearImage
