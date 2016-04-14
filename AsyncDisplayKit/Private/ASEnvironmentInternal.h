@@ -12,7 +12,7 @@
 
 #pragma once
 
-enum class ASEnvironmentStatePropagation { DOWN, UP };
+BOOL ASEnvironmentStatePropagationEnabled();
 
 
 #pragma mark - Set and get extensible values for layout options
@@ -31,6 +31,11 @@ UIEdgeInsets _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(id<ASEnvir
 
 void ASEnvironmentPerformBlockOnObjectAndChildren(id<ASEnvironment> object, void(^block)(id<ASEnvironment> object));
 void ASEnvironmentPerformBlockOnObjectAndParents(id<ASEnvironment> object, void(^block)(id<ASEnvironment> object));
+
+
+#pragma mark - 
+
+enum class ASEnvironmentStatePropagation { DOWN, UP };
 
 
 #pragma mark - Merging

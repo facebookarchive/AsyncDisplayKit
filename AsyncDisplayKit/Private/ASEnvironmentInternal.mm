@@ -17,6 +17,11 @@
 
 #define AS_SUPPORT_PROPAGATION NO
 
+BOOL ASEnvironmentStatePropagationEnabled()
+{
+  return AS_SUPPORT_PROPAGATION;
+}
+
 
 #pragma mark - Traversing an ASEnvironment Tree
 
@@ -109,7 +114,7 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
   // Merge object and layout options state
   LOG(@"Merge object and state: %@ - ASEnvironmentLayoutOptionsState", object);
   
-  if (!AS_SUPPORT_PROPAGATION) {
+  if (!ASEnvironmentStatePropagationEnabled()) {
     return environmentState;
   }
   

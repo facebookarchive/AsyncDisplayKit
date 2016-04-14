@@ -11,9 +11,6 @@
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
-#import <objc/runtime.h>
-
-
 #pragma mark - UIAccessibilityElement
 
 @implementation UIAccessibilityElement (_ASDisplayView)
@@ -34,10 +31,27 @@
 
 #pragma mark - _ASDisplayView / UIAccessibilityContainer
 
-@interface _ASDisplayView () {
-  NSMutableArray *_accessibleElements;
+static NSArray *ASCollectUIAccessibilityElementsForNode(ASDisplayNode *viewNode, ASDisplayNode *subnode, id container) {
+  NSMutableArray *accessibleElements = [NSMutableArray array];
+  ASDisplayNodePerformBlockOnEveryNodeBFS(subnode, ^(ASDisplayNode * _Nonnull currentNode) {
+    // For every subnode that is layer backed or it's supernode has shouldRasterizeDescendants enabled
+    // we have to create a UIAccessibilityElement as no view for this node exists
+    if (currentNode != viewNode && currentNode.isAccessibilityElement) {
+      UIAccessibilityElement *accessibilityElement = [UIAccessibilityElement accessibilityElementWithContainer:container node:currentNode];
+      // As the node hierarchy is flattened it's necessary to convert the frame for each subnode in the tree to the
+      // coordinate system of the supernode
+      CGRect frame = [viewNode convertRect:currentNode.bounds fromNode:currentNode];
+      accessibilityElement.accessibilityFrame = UIAccessibilityConvertFrameToScreenCoordinates(frame, container);
+      [accessibleElements addObject:accessibilityElement];
+    }
+  });
+  
+  return [accessibleElements copy];
 }
 
+@interface _ASDisplayView () {
+  NSArray *_accessibleElements;
+}
 @end
 
 @implementation _ASDisplayView (UIAccessibilityContainer)
@@ -46,51 +60,41 @@
 
 - (NSArray *)accessibleElements
 {
-  ASDisplayNode *selfNode = self.asyncdisplaykit_node;
-  if (selfNode == nil) {
+  ASDisplayNode *viewNode = self.asyncdisplaykit_node;
+  if (viewNode == nil) {
     return nil;
   }
   
-  _accessibleElements = [[NSMutableArray alloc] init];
-  
   // Handle rasterize case
-  if (selfNode.shouldRasterizeDescendants) {
-    // If the node has shouldRasterizeDescendants enabled it's necessaty to go through the whole subnodes
-    // tree of the node in BFS fashion and create for all subnodes UIAccessibilityElement objects ourselves
-    // as the view hierarchy is flattened
-    ASDisplayNodePerformBlockOnEveryNodeBFS(selfNode, ^(ASDisplayNode * _Nonnull node) {
-      // For every subnode we have to create a UIAccessibilityElement as we cannot just add the view to the
-      // accessibleElements as for a subnode of a node with shouldRasterizeDescendants enabled no view exists
-      if (node != selfNode && node.isAccessibilityElement) {
-        UIAccessibilityElement *accessibilityElement = [UIAccessibilityElement accessibilityElementWithContainer:self node:node];
-        // As the node hierarchy is flattened it's necessary to convert the frame for each subnode in the tree to the
-        // coordinate system of the node with shouldRasterizeDescendants enabled
-        CGRect frame = [selfNode convertRect:node.bounds fromNode:node];
-        accessibilityElement.accessibilityFrame = UIAccessibilityConvertFrameToScreenCoordinates(frame, self);
-        [_accessibleElements addObject:accessibilityElement];
-      }
-    });
+  if (viewNode.shouldRasterizeDescendants) {
+    _accessibleElements = ASCollectUIAccessibilityElementsForNode(viewNode, viewNode, self);
     return _accessibleElements;
   }
   
   // Handle not rasterize case
-  // Create UI accessiblity elements for each subnode that represent an elment within the accessibility container
-  for (ASDisplayNode *subnode in selfNode.subnodes) {
+  NSMutableArray *accessibleElements = [NSMutableArray array];
+  
+  for (ASDisplayNode *subnode in viewNode.subnodes) {
     if (subnode.isAccessibilityElement) {
+      // An accessiblityElement can either be a UIView or a UIAccessibilityElement
       id accessiblityElement = nil;
       if (subnode.isLayerBacked) {
-        // The same comment for layer backed nodes is true as for subnodes within a shouldRasterizeDescendants node.
-        // See details above
+        // No view for layer backed nodes exist. It's necessary to create a UIAccessibilityElement that represents this node
         accessiblityElement = [UIAccessibilityElement accessibilityElementWithContainer:self node:subnode];
       } else {
         accessiblityElement = subnode.view;
       }
       [accessiblityElement setAccessibilityFrame:UIAccessibilityConvertFrameToScreenCoordinates(subnode.frame, self)];
-      [_accessibleElements addObject:accessiblityElement];
-    } else if ([subnode accessibilityElementCount] > 0) { // Check if it's an UIAccessibilityContainer
-      [_accessibleElements addObject:subnode.view];
+      [accessibleElements addObject:accessiblityElement];
+    } else if (subnode.isLayerBacked) {
+      // Go down the hierarchy of the layer backed subnode and collect all of the UIAccessibilityElement
+      [accessibleElements addObjectsFromArray:ASCollectUIAccessibilityElementsForNode(viewNode, subnode, self)];
+    } else if ([subnode accessibilityElementCount] > 0) {
+      // Add UIAccessibilityContainer
+      [accessibleElements addObject:subnode.view];
     }
   }
+  _accessibleElements = [accessibleElements copy];
   
   return _accessibleElements;
 }
