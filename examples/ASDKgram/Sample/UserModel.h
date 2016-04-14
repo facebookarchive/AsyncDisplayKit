@@ -8,7 +8,7 @@
 
 @interface UserModel : NSObject
 
-@property (nonatomic, assign, readonly) NSDictionary *dictionaryRepresentation;
+@property (nonatomic, strong, readonly) NSDictionary *dictionaryRepresentation;
 @property (nonatomic, assign, readonly) NSUInteger   userID;
 @property (nonatomic, strong, readonly) NSString     *username;
 @property (nonatomic, strong, readonly) NSString     *firstName;

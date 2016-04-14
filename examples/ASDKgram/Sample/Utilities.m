@@ -14,12 +14,12 @@
 
 + (UIColor *)darkBlueColor
 {
-  return [UIColor colorWithRed:18.0/255.0 green:86.0/255.0 blue:136.0/255.0 alpha:1.0];
+  return [UIColor colorWithRed:70.0/255.0 green:102.0/255.0 blue:118.0/255.0 alpha:1.0];
 }
 
 + (UIColor *)lightBlueColor
 {
-  return [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0];
+  return [UIColor colorWithRed:70.0/255.0 green:165.0/255.0 blue:196.0/255.0 alpha:1.0];
 }
 
 @end
