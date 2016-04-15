@@ -14,6 +14,11 @@
 @interface _ASTablePendingState : NSObject
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
 @property (weak, nonatomic) id <ASTableDataSource> dataSource;
+
+// If the background color is applied via the pending state it's applied to the layer of the UITableView.
+// Unfortunately UITableView does not consider using the layer backgroundColor property as it's background color,
+// so it needs to be applied to the view after the ASTableNode did load and the view is available
+@property (strong, nonatomic) UIColor *backgroundColor;
 @end
 
 @implementation _ASTablePendingState
@@ -68,12 +73,13 @@
   
   ASTableView *view = self.view;
   view.tableNode    = self;
-  
+
   if (_pendingState) {
     _ASTablePendingState *pendingState = _pendingState;
     self.pendingState    = nil;
     view.asyncDelegate   = pendingState.delegate;
     view.asyncDataSource = pendingState.dataSource;
+    view.backgroundColor = pendingState.backgroundColor;
   }
 }
 
@@ -130,6 +136,25 @@
     return _pendingState.dataSource;
   } else {
     return self.view.asyncDataSource;
+  }
+}
+
+- (void)setBackgroundColor:(UIColor *)backgroundColor
+{
+  if ([self pendingState]) {
+    _pendingState.backgroundColor = backgroundColor;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
+    self.view.backgroundColor = backgroundColor;
+  }
+}
+
+- (UIColor *)backgroundColor
+{
+  if ([self pendingState]) {
+    return _pendingState.backgroundColor;
+  } else {
+    return self.view.backgroundColor;
   }
 }
 
