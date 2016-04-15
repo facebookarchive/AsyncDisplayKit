@@ -14,11 +14,13 @@
 #import <AsyncDisplayKit/ASCenterLayoutSpec.h>
 #import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASLayout.h>
 
 @interface ASMapNode()
 {
   ASDN::RecursiveMutex _propertyLock;
   MKMapSnapshotter *_snapshotter;
+  BOOL _snapshotNeeded;
   NSArray *_annotations;
   CLLocationCoordinate2D _centerCoordinateOfMap;
 }
@@ -159,6 +161,15 @@
 
 - (void)takeSnapshot
 {
+  // do not trigger snapshot before layout
+  ASLayout *layout = self.calculatedLayout;
+  if (layout == nil || CGSizeEqualToSize(CGSizeZero, layout.size)) {
+    _snapshotNeeded = YES;
+    return;
+  }
+  
+  _snapshotNeeded = NO;
+  
   if (!_snapshotter) {
     [self setUpSnapshotter];
   }
@@ -305,6 +316,15 @@
   }
   [self setSnapshotSizeWithReloadIfNeeded:size];
   return size;
+}
+
+- (void)calculatedLayoutDidChange
+{
+  [super calculatedLayoutDidChange];
+  
+  if (_snapshotNeeded) {
+    [self takeSnapshot];
+  }
 }
 
 // -layout isn't usually needed over -layoutSpecThatFits, but this way we can avoid a needless node wrapper for MKMapView.
