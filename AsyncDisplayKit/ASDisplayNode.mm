@@ -2695,7 +2695,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 - (BOOL)supportsUpwardPropagation
 {
-  return YES;
+  return ASEnvironmentStatePropagationEnabled();
 }
 
 ASEnvironmentLayoutOptionsForwarding

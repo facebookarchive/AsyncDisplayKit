@@ -15,6 +15,14 @@
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
+#define AS_SUPPORT_PROPAGATION NO
+
+BOOL ASEnvironmentStatePropagationEnabled()
+{
+  return AS_SUPPORT_PROPAGATION;
+}
+
+
 #pragma mark - Traversing an ASEnvironment Tree
 
 void ASEnvironmentPerformBlockOnObjectAndChildren(id<ASEnvironment> object, void(^block)(id<ASEnvironment> node))
@@ -106,6 +114,10 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
   // Merge object and layout options state
   LOG(@"Merge object and state: %@ - ASEnvironmentLayoutOptionsState", object);
   
+  if (!ASEnvironmentStatePropagationEnabled()) {
+    return environmentState;
+  }
+  
   // Support propagate up
   if (propagation == ASEnvironmentStatePropagation::UP) {
 
@@ -138,10 +150,12 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
     }
     
     if (ASRelativeSizeRangeEqualToRelativeSizeRange(parentLayoutOptionsState.sizeRange, defaultState.sizeRange)) {
-      parentLayoutOptionsState.sizeRange = layoutOptionsState.sizeRange;
+      // For now it is unclear if we should be up-propagating sizeRange or layoutPosition.
+      // parentLayoutOptionsState.sizeRange = layoutOptionsState.sizeRange;
     }
     if (CGPointEqualToPoint(parentLayoutOptionsState.layoutPosition, defaultState.layoutPosition)) {
-      parentLayoutOptionsState.layoutPosition = layoutOptionsState.layoutPosition;
+      // For now it is unclear if we should be up-propagating sizeRange or layoutPosition.
+      // parentLayoutOptionsState.layoutPosition = layoutOptionsState.layoutPosition;
     }
     
     // Merge extended values if necessary

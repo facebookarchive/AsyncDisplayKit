@@ -755,8 +755,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (void)_scheduleCheckForBatchFetching
+- (void)_scheduleCheckForBatchFetchingForNumberOfChanges:(NSUInteger)changes
 {
+  // Prevent fetching will continually trigger in a loop after reaching end of content and no new content was provided
+  if (changes == 0) {
+    return;
+  }
+  
   // Push this to the next runloop to be sure the scroll view has the right content size
   dispatch_async(dispatch_get_main_queue(), ^{
     [self _checkForBatchFetching];
@@ -782,8 +787,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)_beginBatchFetching
 {
-  NSLog(@"begin batch fetching");
-    
   [_batchContext beginBatchFetching];
   if ([_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)]) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -975,6 +978,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
+  NSUInteger numberOfUpdateBlocks = _batchUpdateBlocks.count;
   ASPerformBlockWithoutAnimation(!animated, ^{
     [_layoutFacilitator collectionViewWillPerformBatchUpdates];
     [super performBatchUpdates:^{
@@ -982,7 +986,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
         block();
       }
     } completion:^(BOOL finished){
-      [self _scheduleCheckForBatchFetching];
+      [self _scheduleCheckForBatchFetchingForNumberOfChanges:numberOfUpdateBlocks];
       if (completion) { completion(finished); }
     }];
   });
@@ -1007,7 +1011,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     [UIView performWithoutAnimation:^{
       [super insertItemsAtIndexPaths:indexPaths];
-      [self _scheduleCheckForBatchFetching];
+      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
     }];
   }
 }
@@ -1028,7 +1032,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     [UIView performWithoutAnimation:^{
       [super deleteItemsAtIndexPaths:indexPaths];
-      [self _scheduleCheckForBatchFetching];
+      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
     }];
   }
 }
@@ -1049,7 +1053,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
       [super insertSections:indexSet];
-      [self _scheduleCheckForBatchFetching];
+      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
     }];
   }
 }
@@ -1070,7 +1074,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
       [super deleteSections:indexSet];
-      [self _scheduleCheckForBatchFetching];
+      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
     }];
   }
 }
