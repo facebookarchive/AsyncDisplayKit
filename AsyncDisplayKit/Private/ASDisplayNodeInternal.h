@@ -12,7 +12,6 @@
 //
 
 #import "_AS-objc-internal.h"
-#import "ASDisplayNodeExtraIvars.h"
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
@@ -124,8 +123,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   // keeps track of nodes/subnodes that have not finished display, used with placeholders
   NSMutableSet *_pendingDisplayNodes;
 
-  ASDisplayNodeExtraIvars _extra;
-  
   ASDisplayNodeContextModifier _willDisplayNodeContentWithRenderingContext;
   ASDisplayNodeContextModifier _didDisplayNodeContentWithRenderingContext;
 

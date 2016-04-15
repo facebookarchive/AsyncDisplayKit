@@ -12,7 +12,6 @@
 //
 
 #import "_AS-objc-internal.h"
-#import "ASDisplayNodeExtraIvars.h"
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
