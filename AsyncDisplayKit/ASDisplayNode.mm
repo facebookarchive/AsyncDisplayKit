@@ -681,6 +681,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   });
   
   void (^transitionBlock)() = ^{
+    if ([self _shouldAbortTransitionWithID:transitionID]) {
+      return;
+    }
+    
     ASLayout *newLayout;
     {
       ASLayoutableSetCurrentContext(ASLayoutableContextMake(transitionID, NO));
