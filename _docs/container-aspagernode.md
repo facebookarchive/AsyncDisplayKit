@@ -1,8 +1,8 @@
 ---
 title: ASPagerNode
 layout: docs
-permalink: /docs/aspagernode.html
-next: ascollectionnode.html
+permalink: /docs/container-aspagernode.html
+next: display-node.html
 ---
 
 ASPagerNode is a specialized subclass of ASCollectionNode.  Using it allows you to produce a page style UI similar to what you'd create with a UIPageViewController with UIKit.  Luckily, the API is quite a bit simpler than UIPageViewController's.
