@@ -1,5 +1,5 @@
 ---
-title: Node Containers Overview
+title:Containers Overview
 layout: docs
 permalink: /docs/node-containers-overview.html
 next: ascollectionnode.html
@@ -7,12 +7,14 @@ next: ascollectionnode.html
 
 ##Use Nodes in Node Containers##
 For optimal performance, use ASDK's nodes within a node container. ASDK offers the following node containers
-- `ASViewController` - _in place of UIKit's_ `UIViewController`
-- `ASTableNode` - _in place of UIKit's_ `UITableView`
-- `ASCollectioNode` - _in place of UIKit's_ `UICollectionView`
-- `ASPagerNode` - _in place of UIKit's_ `UIPagerView`
+<ul>
+	<li>`ASViewController` - _in place of UIKit's_ `UIViewController`</li>
+	<li>`ASTableNode` - _in place of UIKit's_ `UITableView`</li>
+	<li>`ASCollectioNode` - _in place of UIKit's_ `UICollectionView`</li>
+	<li>`ASPagerNode` - _in place of UIKit's_ `UIPagerView`</li>
+</ul>
 
-####For the Curious Developer####
+####For the More Curious Developer...####
 
 To optimize performance of an app, ASDK uses intelligent preloading to determine when content will become visible to a user. The node containers above asynchronously trigger data downloading, decoding and rendering of images and text before they reach the device's onscren display area. The node containers above manage all of this automatically for their subnodes.  For reference, UIKit does not render images or text before content comes on screen. 
 
