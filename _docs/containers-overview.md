@@ -13,6 +13,11 @@ For optimal performance, use nodes within a node container. ASDK offers the foll
 - `ASTableNode` in place of UIKit's `UITableView`
 - `ASPagerNode` in place of UIKit's `UIPagerView`
 
+####Examples####
+Examples of these node containers can be found in the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">sample projects</a>. Example code and specific sample apps are highlighted in the documentation for each node container.  
+
+For a guide on porting your UIKit app to ASDK see Porting Your App (INCLUDE LINK).
+
 ####For the More Curious Developer...####
 
 To optimize performance of an app, ASDK uses intelligent preloading to determine when content will become visible to a user. The node containers above asynchronously trigger data downloading, decoding and rendering of images and text before they reach the device's onscren display area. The node containers above manage all of this automatically for their subnodes.  For reference, UIKit does not render images or text before content comes on screen. 
