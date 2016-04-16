@@ -11,11 +11,11 @@
   - layout-engine
 - title: Node Containers
   items:
-  - node-containers-overview
-  - asviewcontroller
-  - astablenode
-  - ascollectionnode
-  - aspagernode
+  - containers-overview
+  - containers-asviewcontroller
+  - containers-astablenode
+  - containers-ascollectionnode
+  - containers-aspagernode
 - title: Nodes
   items:
   - display-node
