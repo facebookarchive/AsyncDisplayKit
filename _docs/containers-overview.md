@@ -6,7 +6,9 @@ next: containers-asviewcontroller.html
 ---
 
 ##Use Nodes in Node Containers##
-For optimal performance, use ASDK's nodes within a node container. ASDK offers the following node containers
+For optimal performance, use nodes within a node container. ASDK offers the following node containers
+
+
 
 ####For the More Curious Developer...####
 
