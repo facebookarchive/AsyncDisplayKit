@@ -12,7 +12,7 @@ next: containers-astablenode.html
 
 An `ASViewController` can be used in place of any `UIViewController` - including within a `UINavigationController`, `UITabBarController` and `UISpitViewController` or as a modal view controller.
 
-###Example Code###
+###Porting UIViewControllers to ASViewControllers###
 A `UIViewController` provides a view of its own. An `ASViewController` is assigned a node to manage in its designated initializer `initWithNode:`. 
 
 Consider the following ASViewController subclass that would like to use a custom table node as its managed node.
@@ -33,10 +33,10 @@ Consider the following ASViewController subclass that would like to use a custom
 }
 ```
 
+For a full guide on porting your UIKit app to ASDK see Porting Your App (INCLUDE LINK).
+
 ###Example Apps###
 
-###Porting Notes###
 
-For a full guide on porting your UIKit app to ASDK see Porting Your App (INCLUDE LINK).
 
 
