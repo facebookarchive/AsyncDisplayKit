@@ -1,8 +1,8 @@
 ---
-title:Containers Overview
+title: Containers Overview
 layout: docs
 permalink: /docs/node-containers-overview.html
-next: ascollectionnode.html
+next: placeholder-fade-duration.html
 ---
 
 ##Use Nodes in Node Containers##
