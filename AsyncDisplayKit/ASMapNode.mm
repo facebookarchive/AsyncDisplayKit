@@ -209,7 +209,6 @@
 
 - (void)setUpSnapshotter
 {
-  ASDisplayNodeAssert(!CGSizeEqualToSize(CGSizeZero, self.calculatedSize), @"self.calculatedSize can not be zero. Make sure that you are setting a preferredFrameSize or wrapping ASMapNode in a ASRatioLayoutSpec or similar.");
   _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:self.options];
 }
 
