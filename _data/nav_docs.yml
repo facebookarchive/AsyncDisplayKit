@@ -13,9 +13,9 @@
   items:
   - node-containers-overview
   - asviewcontroller
-  - aspagernode
-  - ascollectionnode
   - astablenode
+  - ascollectionnode
+  - aspagernode
 - title: Nodes
   items:
   - display-node
