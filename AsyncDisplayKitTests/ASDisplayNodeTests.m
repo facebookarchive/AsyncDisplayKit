@@ -75,7 +75,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
 
 @interface ASDisplayNode (HackForTests)
-+ (dispatch_queue_t)asyncSizingQueue;
 - (id)initWithViewClass:(Class)viewClass;
 - (id)initWithLayerClass:(Class)layerClass;
 
