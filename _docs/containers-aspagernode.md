@@ -1,7 +1,7 @@
 ---
 title: ASPagerNode
 layout: docs
-permalink: /docs/container-aspagernode.html
+permalink: /docs/containers-aspagernode.html
 next: display-node.html
 ---
 
