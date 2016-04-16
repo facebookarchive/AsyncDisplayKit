@@ -7,12 +7,11 @@ next: ascollectionnode.html
 
 ##Use Nodes in Node Containers##
 For optimal performance, use ASDK's nodes within a node container. ASDK offers the following node containers
-<ul>
-	<li>`ASViewController` - _in place of UIKit's_ `UIViewController`</li>
-	<li>`ASTableNode` - _in place of UIKit's_ `UITableView`</li>
-	<li>`ASCollectioNode` - _in place of UIKit's_ `UICollectionView`</li>
-	<li>`ASPagerNode` - _in place of UIKit's_ `UIPagerView`</li>
-</ul>
+
+- `ASViewController` - _in place of UIKit's_ `UIViewController`
+- `ASTableNode` - _in place of UIKit's_ `UITableView`
+- `ASCollectioNode` - _in place of UIKit's_ `UICollectionView`
+- `ASPagerNode` - _in place of UIKit's_ `UIPagerView`
 
 ####For the More Curious Developer...####
 
