@@ -1,8 +1,8 @@
 ---
 title: ASTableNode
 layout: docs
-permalink: /docs/astablenode.html
-next: display-node.html
+permalink: /docs/container-astablenode.html
+next: container-ascollectionnode.html
 ---
 
 ASTableNode is equivalent to UIKit's UITableView.  
