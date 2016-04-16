@@ -1,7 +1,7 @@
 ---
 title: ASCollectionNode
 layout: docs
-permalink: /docs/container-ascollectionnode.html
+permalink: /docs/containers-ascollectionnode.html
 next: containers-aspagernode.html
 ---
 
