@@ -9,8 +9,8 @@ next: containers-asviewcontroller.html
 For optimal performance, use nodes within a node container. ASDK offers the following node containers
 
 - `ASViewController` in place of UIKit's `UIViewController`
-- `ASTableNode` in place of UIKit's `UITableView`
 - `ASCollectioNode` in place of UIKit's `UICollectionView`
+- `ASTableNode` in place of UIKit's `UITableView`
 - `ASPagerNode` in place of UIKit's `UIPagerView`
 
 ####For the More Curious Developer...####
