@@ -35,6 +35,8 @@ Consider the following ASViewController subclass that would like to use a custom
 
 ###Example Apps###
 
+###Porting Notes###
 
+For a full guide on porting your UIKit app to ASDK see Porting Your App (INCLUDE LINK).
 
 
