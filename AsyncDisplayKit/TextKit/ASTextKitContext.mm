@@ -8,16 +8,15 @@
  *
  */
 
-#import <mutex>
-
 #import "ASTextKitContext.h"
+#import "ASThread.h"
 
 #import "ASLayoutManager.h"
 
 @implementation ASTextKitContext
 {
   // All TextKit operations (even non-mutative ones) must be executed serially.
-  std::mutex _textKitMutex;
+  ASDN::Mutex _textKitMutex;
 
   NSLayoutManager *_layoutManager;
   NSTextStorage *_textStorage;
@@ -36,8 +35,8 @@
 {
   if (self = [super init]) {
     // Concurrently initialising TextKit components crashes (rdar://18448377) so we use a global lock.
-    static std::mutex __static_mutex;
-    std::lock_guard<std::mutex> l(__static_mutex);
+    static ASDN::Mutex __staticMutex;
+    ASDN::MutexLocker l(__staticMutex);
     // Create the TextKit component stack with our default configuration.
     if (textStorageCreationBlock) {
       _textStorage = textStorageCreationBlock(attributedString);
@@ -61,11 +60,13 @@
 
 - (CGSize)constrainedSize
 {
+  ASDN::MutexLocker l(_textKitMutex);
   return _textContainer.size;
 }
 
 - (void)setConstrainedSize:(CGSize)constrainedSize
 {
+  ASDN::MutexLocker l(_textKitMutex);
   _textContainer.size = constrainedSize;
 }
 
@@ -73,7 +74,7 @@
                                                           NSTextStorage *,
                                                           NSTextContainer *))block
 {
-  std::lock_guard<std::mutex> l(_textKitMutex);
+  ASDN::MutexLocker l(_textKitMutex);
   block(_layoutManager, _textStorage, _textContainer);
 }
 
