@@ -1,8 +1,8 @@
 ---
 title: ASCollectionNode
 layout: docs
-permalink: /docs/ascollectionnode.html
-next: astablenode.html
+permalink: /docs/container-ascollectionnode.html
+next: container-aspagernode.html
 ---
 
 ASCollectionNode can be used in place of any UICollectionView.  The only requirements are that you replace your 
