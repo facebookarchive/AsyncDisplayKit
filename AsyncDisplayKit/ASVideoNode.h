@@ -8,7 +8,16 @@
 
 #import <AsyncDisplayKit/ASButtonNode.h>
 
+
+typedef enum {
+  ASVideoNodePlayerStateUnknown,
+  ASVideoNodePlayerStatePlaying,
+  ASVideoNodePlayerStatePaused,
+  ASVideoNodePlayerStateFinished
+} ASVideoNodePlayerState;
+
 @class AVAsset, AVPlayer, AVPlayerItem;
+
 @protocol ASVideoNodeDelegate;
 
 // IMPORTANT NOTES:
@@ -21,6 +30,7 @@
 @property (atomic, strong, readwrite) AVAsset *asset;
 @property (atomic, strong, readonly) AVPlayer *player;
 @property (atomic, strong, readonly) AVPlayerItem *currentItem;
+@property (atomic, strong, readonly) id timeObserver;
 
 // When autoplay is set to true, a video node will play when it has both loaded and entered the "visible" interfaceState.
 // If it leaves the visible interfaceState it will pause but will resume once it has returned
@@ -28,6 +38,8 @@
 @property (nonatomic, assign, readwrite) BOOL shouldAutorepeat;
 
 @property (nonatomic, assign, readwrite) BOOL muted;
+
+@property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
 
 @property (atomic) NSString *gravity;
 @property (atomic) ASButtonNode *playButton;
@@ -45,5 +57,8 @@
 @optional
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode;
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate;
+- (BOOL)videoNode:(ASVideoNode*)videoNode shouldChangePlayerStateTo:(ASVideoNodePlayerState)state;
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second;
 @end
 

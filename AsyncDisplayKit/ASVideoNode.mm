@@ -21,11 +21,14 @@
   BOOL _shouldAutoplay;
   
   BOOL _muted;
+  
+  ASVideoNodePlayerState _playerState;
 
   AVAsset *_asset;
   
   AVPlayerItem *_currentItem;
   AVPlayer *_player;
+  id _timeObserver;
   
   ASImageNode *_placeholderImageNode;
   
@@ -178,8 +181,8 @@
 
 - (void)tapped
 {
-  if (self.delegate && [self.delegate respondsToSelector:@selector(videoNodeWasTapped:)]) {
-    [self.delegate videoNodeWasTapped:self];
+  if (_delegate && [_delegate respondsToSelector:@selector(videoNodeWasTapped:)]) {
+    [_delegate videoNodeWasTapped:self];
   } else {
     if (_shouldBePlaying) {
       [self pause];
@@ -198,7 +201,7 @@
 - (void)fetchData
 {
   [super fetchData];
-
+  _timeObserver = nil;
   @try {
     [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
   }
@@ -217,6 +220,21 @@
       _player = [[AVPlayer alloc] initWithPlayerItem:_currentItem];
       _player.muted = _muted;
     }
+    __weak __typeof(self) weakSelf = self;
+    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMake(1, 1) queue:NULL usingBlock:^(CMTime time){
+      [weakSelf periodicTimeObserver:time];
+    }];
+  }
+}
+
+- (void)periodicTimeObserver:(CMTime)time {
+  NSTimeInterval timeInSeconds = CMTimeGetSeconds(time);
+  if (timeInSeconds <= 0) {
+    return;
+  }
+  
+  if(_delegate && [_delegate respondsToSelector:@selector(videoNode:didPlayToSecond:)]){
+    [_delegate videoNode:self didPlayToSecond:timeInSeconds];
   }
 }
 
@@ -258,6 +276,18 @@
 }
 
 #pragma mark - Video Properties
+- (void)setPlayerState:(ASVideoNodePlayerState)playerState{
+  ASDN::MutexLocker l(_videoLock);
+  
+  ASVideoNodePlayerState oldState = _playerState;
+
+  if ([_delegate respondsToSelector:@selector(videoNode:willChangePlayerState:toState:)]) {
+    [_delegate videoNode:self willChangePlayerState:oldState toState:playerState];
+  }
+  
+  _playerState = playerState;
+  
+}
 
 - (void)setPlayButton:(ASButtonNode *)playButton
 {
@@ -345,6 +375,10 @@
 {
   ASDN::MutexLocker l(_videoLock);
   
+  if(![self isStateChangeValid:ASVideoNodePlayerStatePlaying]){
+    return;
+  }
+  
   if (!_spinner) {
     _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
       UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
@@ -373,6 +407,7 @@
     }
   }
   
+  self.playerState = ASVideoNodePlayerStatePlaying;
   [_player play];
   _shouldBePlaying = YES;
   
@@ -394,7 +429,10 @@
 - (void)pause
 {
   ASDN::MutexLocker l(_videoLock);
-  
+  if(![self isStateChangeValid:ASVideoNodePlayerStatePaused]){
+    return;
+  }
+  self.playerState = ASVideoNodePlayerStatePaused;
   [_player pause];
   [((UIActivityIndicatorView *)_spinner.view) stopAnimating];
   _shouldBePlaying = NO;
@@ -408,6 +446,15 @@
   ASDN::MutexLocker l(_videoLock);
   
   return (_player.rate > 0 && !_player.error);
+}
+
+- (BOOL)isStateChangeValid:(ASVideoNodePlayerState)state{
+  if([_delegate respondsToSelector:@selector(videoNode:shouldChangePlayerStateTo:)]){
+    if(![_delegate videoNode:self shouldChangePlayerStateTo:state]){
+      return NO;
+    }
+  }
+  return YES;
 }
 
 #pragma mark - Property Accessors for Tests
@@ -446,6 +493,7 @@
 
 - (void)dealloc
 {
+  _timeObserver = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
   @try {
     [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
