@@ -9,6 +9,10 @@
 #import "ASVideoNode.h"
 #import "ASDefaultPlayButton.h"
 
+static void *ASVideoNodeContext = &ASVideoNodeContext;
+static NSString * const kPlaybackLikelyToKeepUpKey = @"playbackLikelyToKeepUp";
+static NSString * const kStatus = @"status";
+
 @interface ASVideoNode ()
 {
   ASDN::RecursiveMutex _videoLock;
@@ -80,15 +84,22 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  if ([change[@"new"] integerValue] == AVPlayerItemStatusReadyToPlay) {
-    if ([self.subnodes containsObject:_spinner]) {
-      [_spinner removeFromSupernode];
-      _spinner = nil;
+  if (context == ASVideoNodeContext) {
+    if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
+      if (_shouldBePlaying) {
+        [self play]; // autoresume after buffer catches up
+      }
+    } else if ([keyPath isEqualToString:kStatus]) {
+      NSInteger statusValue = [change[@"new"] integerValue];
+      if (statusValue == AVPlayerItemStatusReadyToPlay) {
+        if ([self.subnodes containsObject:_spinner]) {
+          [_spinner removeFromSupernode];
+          _spinner = nil;
+        }
+      }
+    } else {
+      [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
-  }
-  
-  if ([change[@"new"] integerValue] == AVPlayerItemStatusFailed) {
-    
   }
 }
 
@@ -200,7 +211,8 @@
   [super fetchData];
 
   @try {
-    [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
+    [_currentItem removeObserver:self forKeyPath:kStatus];
+    [_currentItem removeObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey];
   }
   @catch (NSException * __unused exception) {
     NSLog(@"unnecessary removal in fetch data");
@@ -209,7 +221,8 @@
   {
     ASDN::MutexLocker l(_videoLock);
     _currentItem = [[AVPlayerItem alloc] initWithAsset:_asset];
-    [_currentItem addObserver:self forKeyPath:NSStringFromSelector(@selector(status)) options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
+    [_currentItem addObserver:self forKeyPath:kStatus options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:ASVideoNodeContext];
+    [_currentItem addObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
 
     if (_player) {
       [_player replaceCurrentItemWithPlayerItem:_currentItem];
@@ -448,7 +461,8 @@
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
   @try {
-    [_currentItem removeObserver:self forKeyPath:NSStringFromSelector(@selector(status))];
+    [_currentItem removeObserver:self forKeyPath:kStatus];
+    [_currentItem removeObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey];
   }
   @catch (NSException * __unused exception) {
     NSLog(@"unnecessary removal in dealloc");
