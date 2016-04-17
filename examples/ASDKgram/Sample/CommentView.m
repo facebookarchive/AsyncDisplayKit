@@ -11,7 +11,7 @@
 #import "Utilities.h"
 
 #define INTER_COMMENT_SPACING 5
-#define NUM_COMMENTS_TO_SHOW 3
+#define NUM_COMMENTS_TO_SHOW  3
 
 @implementation CommentView
 {

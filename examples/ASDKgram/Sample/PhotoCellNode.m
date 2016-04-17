@@ -74,17 +74,9 @@
       }
     }];
     
-    _photoTimeIntervalSincePostLabel                  = [[ASTextNode alloc] init];
-    _photoTimeIntervalSincePostLabel.layerBacked      = YES;
-    _photoTimeIntervalSincePostLabel.attributedString = [photo uploadDateAttributedStringWithFontSize:FONT_SIZE];
-    
-    _photoLikesLabel                        = [[ASTextNode alloc] init];
-    _photoLikesLabel.layerBacked            = YES;
-    _photoLikesLabel.attributedString       = [photo likesAttributedStringWithFontSize:FONT_SIZE];
-    
-    _photoDescriptionLabel                  = [[ASTextNode alloc] init];
-    _photoDescriptionLabel.layerBacked      = YES;
-    _photoDescriptionLabel.attributedString = [photo descriptionAttributedStringWithFontSize:FONT_SIZE];
+    _photoTimeIntervalSincePostLabel = [self createLayerBackedTextNodeWithString:[photo uploadDateAttributedStringWithFontSize:FONT_SIZE]];
+    _photoLikesLabel                 = [self createLayerBackedTextNodeWithString:[photo likesAttributedStringWithFontSize:FONT_SIZE]];
+    _photoDescriptionLabel           = [self createLayerBackedTextNodeWithString:[photo descriptionAttributedStringWithFontSize:FONT_SIZE]];
     _photoDescriptionLabel.maximumNumberOfLines = 3;
     
     _photoCommentsView = [[CommentsNode alloc] init];
@@ -110,12 +102,11 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   // username / photo location header vertical stack
-  _photoLocationLabel.flexShrink = YES;
-  _userNameLabel.flexShrink      = YES;
+  _photoLocationLabel.flexShrink    = YES;
+  _userNameLabel.flexShrink         = YES;
   
   ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  headerSubStack.flexShrink = YES;
-  
+  headerSubStack.flexShrink         = YES;
   if (_photoLocationLabel.attributedString) {
     [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
   } else {
@@ -125,55 +116,64 @@
   // header stack
   
   _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);     // constrain avatar image frame size
-  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER;                 // to remove double spaces around spacer
+  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER;                                    // to remove double spaces around spacer
   
-  ASLayoutSpec *spacer      = [[ASLayoutSpec alloc] init];    // FIXME: long locations overflow post time - set max size?
-  spacer.flexGrow           = YES;
-  spacer.flexShrink         = YES;
+  ASLayoutSpec *spacer           = [[ASLayoutSpec alloc] init];    // FIXME: long locations overflow post time - set max size?
+  spacer.flexGrow                = YES;
+  
+  UIEdgeInsets avatarInsets      = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
+  ASInsetLayoutSpec *avatarInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
 
   ASStackLayoutSpec *headerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
   headerStack.alignItems         = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack
   headerStack.justifyContent     = ASStackLayoutJustifyContentStart;                  // justify content to the left side of the header stack
-  
-  UIEdgeInsets avatarInsets          = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
-  ASInsetLayoutSpec *avatarInset     = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
-  
-  headerStack.flexShrink = YES;
-
   [headerStack setChildren:@[avatarInset, headerSubStack, spacer, _photoTimeIntervalSincePostLabel]];
   
   // header inset stack
-  
   UIEdgeInsets insets                = UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *headerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:headerStack];
-  headerWithInset.flexShrink = YES;
   
   // footer stack
-  
   ASStackLayoutSpec *footerStack     = [ASStackLayoutSpec verticalStackLayoutSpec];
   footerStack.spacing                = VERTICAL_BUFFER;
-  
   [footerStack setChildren:@[_photoLikesLabel, _photoDescriptionLabel, _photoCommentsView]];
   
   // footer inset stack
-  
   UIEdgeInsets footerInsets          = UIEdgeInsetsMake(VERTICAL_BUFFER, HORIZONTAL_BUFFER, VERTICAL_BUFFER, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *footerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:footerInsets child:footerStack];
   
   // vertical stack
-  
   CGFloat cellWidth                  = constrainedSize.max.width;
   _photoImageView.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);              // constrain photo frame size
   
   ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space
   [verticalStack setChildren:@[headerWithInset, _photoImageView, footerWithInset]];
-  verticalStack.flexShrink = YES;
 
   return verticalStack;
 }
 
 #pragma mark - Instance Methods
+
+- (void)fetchData
+{
+  [super fetchData];
+  
+  [_photoModel.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
+    [self loadCommentsForPhoto:_photoModel];
+  }];
+}
+
+#pragma mark - Helper Methods
+
+- (ASTextNode *)createLayerBackedTextNodeWithString:(NSAttributedString *)attributedString
+{
+  ASTextNode *textNode      = [[ASTextNode alloc] init];
+  textNode.layerBacked      = YES;
+  textNode.attributedString = attributedString;
+  
+  return textNode;
+}
 
 - (void)loadCommentsForPhoto:(PhotoModel *)photo
 {
@@ -183,6 +183,5 @@
     [self setNeedsLayout];
   }
 }
-
 
 @end
