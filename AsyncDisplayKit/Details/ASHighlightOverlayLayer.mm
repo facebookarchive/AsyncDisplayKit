@@ -49,12 +49,12 @@ static const UIEdgeInsets padding = {2, 4, 1.5, 4};
   return (id<CAAction>)[NSNull null];
 }
 
-- (id)initWithRects:(NSArray *)rects
+- (instancetype)initWithRects:(NSArray *)rects
 {
   return [self initWithRects:rects targetLayer:nil];
 }
 
-- (id)initWithRects:(NSArray *)rects targetLayer:(id)targetLayer
+- (instancetype)initWithRects:(NSArray *)rects targetLayer:(id)targetLayer
 {
   if (self = [super init]) {
     _rects = [rects copy];

@@ -256,7 +256,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _environmentState = ASEnvironmentStateMakeDefault();
 }
 
-- (id)init
+- (instancetype)init
 {
   if (!(self = [super init]))
     return nil;
@@ -266,7 +266,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return self;
 }
 
-- (id)initWithViewClass:(Class)viewClass
+- (instancetype)initWithViewClass:(Class)viewClass
 {
   if (!(self = [super init]))
     return nil;
@@ -280,7 +280,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return self;
 }
 
-- (id)initWithLayerClass:(Class)layerClass
+- (instancetype)initWithLayerClass:(Class)layerClass
 {
   if (!(self = [super init]))
     return nil;
@@ -295,12 +295,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return self;
 }
 
-- (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
 {
   return [self initWithViewBlock:viewBlock didLoadBlock:nil];
 }
 
-- (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   if (!(self = [super init]))
     return nil;
@@ -315,12 +315,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return self;
 }
 
-- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock
 {
   return [self initWithLayerBlock:layerBlock didLoadBlock:nil];
 }
 
-- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
   if (!(self = [super init]))
     return nil;
