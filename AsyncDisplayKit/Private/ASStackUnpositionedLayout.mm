@@ -14,7 +14,6 @@
 
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackLayoutSpecUtilities.h"
-#import "ASLayoutOptions.h"
 
 /**
  Sizes the child given the parameters specified, and returns the computed layout.
@@ -116,8 +115,7 @@ static CGFloat computeStackDimensionSum(const std::vector<ASStackUnpositionedIte
                                                   children.empty() ? 0 : style.spacing * (children.size() - 1),
                                                   [&](CGFloat x, const ASStackUnpositionedItem &l) {
                                                     const id<ASLayoutable> child = l.child;
-                                                    const ASLayoutOptions *layoutOptions = child.layoutOptions;
-                                                    return x + layoutOptions.spacingBefore + layoutOptions.spacingAfter;
+                                                    return x + child.spacingBefore + child.spacingAfter;
                                                   });
 
   // Sum up the childrens' dimensions (including spacing) in the stack direction.

@@ -134,12 +134,14 @@
 - (void)setOptions:(MKMapSnapshotOptions *)options
 {
   ASDN::MutexLocker l(_propertyLock);
-  _options = options;
-  if (self.isLiveMap) {
-    [self applySnapshotOptions];
-  } else {
-    [self resetSnapshotter];
-    [self takeSnapshot];
+  if (!_options || ![options isEqual:_options]) {
+    _options = options;
+    if (self.isLiveMap) {
+      [self applySnapshotOptions];
+    } else if (_snapshotter) {
+      [self destroySnapshotter];
+      [self takeSnapshot];
+    }
   }
 }
 
@@ -160,7 +162,11 @@
   if (!_snapshotter) {
     [self setUpSnapshotter];
   }
-  [_snapshotter cancel];
+  
+  if (_snapshotter.isLoading) {
+    return;
+  }
+
   [_snapshotter startWithQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
              completionHandler:^(MKMapSnapshot *snapshot, NSError *error) {
                 if (!error) {
@@ -207,12 +213,10 @@
   _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:self.options];
 }
 
-- (void)resetSnapshotter
+- (void)destroySnapshotter
 {
-  // FIXME: The semantics of this method / name would suggest that we cancel + destroy the snapshotter,
-  // but not that we create a new one.  We should probably only create the new one in -takeSnapshot or something.
   [_snapshotter cancel];
-  _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:self.options];
+  _snapshotter = nil;
 }
 
 - (void)applySnapshotOptions
@@ -260,7 +264,7 @@
 
 - (void)setAnnotations:(NSArray *)annotations
 {
-  annotations = [annotations copy] ?: @[];
+  annotations = [annotations copy] ? : @[];
 
   ASDN::MutexLocker l(_propertyLock);
   _annotations = annotations;
@@ -273,11 +277,14 @@
 }
 
 #pragma mark - Layout
-- (void)setSnapshotSizeIfNeeded:(CGSize)snapshotSize
+- (void)setSnapshotSizeWithReloadIfNeeded:(CGSize)snapshotSize
 {
-  if (!CGSizeEqualToSize(self.options.size, snapshotSize)) {
+  if (snapshotSize.height > 0 && snapshotSize.width > 0 && !CGSizeEqualToSize(self.options.size, snapshotSize)) {
     _options.size = snapshotSize;
-    [self resetSnapshotter];
+    if (_snapshotter) {
+      [self destroySnapshotter];
+      [self takeSnapshot];
+    }
   }
 }
 
@@ -286,12 +293,21 @@
   CGSize size = self.preferredFrameSize;
   if (CGSizeEqualToSize(size, CGSizeZero)) {
     size = constrainedSize;
+    
+    // FIXME: Need a better way to allow maps to take up the right amount of space in a layout (sizeRange, etc)
+    // These fallbacks protect against inheriting a constrainedSize that contains a CGFLOAT_MAX value.
+    if (!isValidForLayout(size.width)) {
+      size.width = 100.0;
+    }
+    if (!isValidForLayout(size.height)) {
+      size.height = 100.0;
+    }
   }
-  [self setSnapshotSizeIfNeeded:size];
-  return constrainedSize;
+  [self setSnapshotSizeWithReloadIfNeeded:size];
+  return size;
 }
 
-// Layout isn't usually needed in the box model, but since we are making use of MKMapView this is preferred.
+// -layout isn't usually needed over -layoutSpecThatFits, but this way we can avoid a needless node wrapper for MKMapView.
 - (void)layout
 {
   [super layout];
@@ -300,10 +316,9 @@
   } else {
     // If our bounds.size is different from our current snapshot size, then let's request a new image from MKMapSnapshotter.
     if (_needsMapReloadOnBoundsChange) {
-      [self setSnapshotSizeIfNeeded:self.bounds.size];
+      [self setSnapshotSizeWithReloadIfNeeded:self.bounds.size];
       // FIXME: Adding a check for FetchData here seems to cause intermittent map load failures, but shouldn't.
       // if (ASInterfaceStateIncludesFetchData(self.interfaceState)) {
-      [self takeSnapshot];
     }
   }
 }

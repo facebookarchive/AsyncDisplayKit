@@ -55,7 +55,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  * @abstract ASMultiplexImageNode is an image node that can load and display multiple versions of an image.  For
  * example, it can display a low-resolution version of an image while the high-resolution version is loading.
  *
- * @discussion ASMultiplexImageNode begins loading images when its <esource can either return a UIImage directly, or a URL the image node should load.
+ * @discussion ASMultiplexImageNode begins loading images when its resource can either return a UIImage directly, or a URL the image node should load.
  */
 @interface ASMultiplexImageNode : ASImageNode
 
@@ -99,7 +99,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
 @property (nonatomic, readwrite, copy) NSArray<ASImageIdentifier> *imageIdentifiers;
 
 /**
- * @abstract Notify the receiver SSAAthat its data source has new UIImages or NSURLs available for <imageIdentifiers>.
+ * @abstract Notify the receiver SSAA that its data source has new UIImages or NSURLs available for <imageIdentifiers>.
  *
  * @discussion If a higher-quality image than is currently displayed is now available, it will be loaded.
  */

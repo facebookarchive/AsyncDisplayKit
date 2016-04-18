@@ -17,7 +17,7 @@
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
 #import "ASTextKitCoreTextAdditions.h"
-#import "ASTextKitHelpers.h"
+#import "ASTextKitComponents.h"
 #import "ASTextKitFontSizeAdjuster.h"
 #import "ASTextKitRenderer.h"
 #import "ASTextKitRenderer+Positioning.h"
@@ -337,7 +337,18 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   [self setNeedsDisplay];
   
-  return [[self _renderer] size];
+  CGSize size = [[self _renderer] size];
+  if (self.attributedString.length > 0) {
+    CGFloat screenScale = ASScreenScale();
+    self.ascender = round([[_attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
+    self.descender = round([[_attributedString attribute:NSFontAttributeName atIndex:_attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+    if (_renderer.currentScaleFactor > 0 && _renderer.currentScaleFactor < 1.0) {
+      // while not perfect, this is a good estimate of what the ascender of the scaled font will be.
+      self.ascender *= _renderer.currentScaleFactor;
+      self.descender *= _renderer.currentScaleFactor;
+    }
+  }
+  return size;
 }
 
 #pragma mark - Modifying User Text
@@ -353,6 +364,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 
   _attributedString = ASCleanseAttributedStringOfCoreTextAttributes(attributedString);
+    
+  if (_attributedString.length > 0) {
+    CGFloat screenScale = ASScreenScale();
+    self.ascender = round([[_attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
+    self.descender = round([[_attributedString attribute:NSFontAttributeName atIndex:_attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+  }
 
   // Sync the truncation string with attributes from the updated _attributedString
   // Without this, the size calculation of the text with truncation applied will
@@ -369,18 +386,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   self.accessibilityLabel = _attributedString.string;
 
-  if (_attributedString.length == 0) {
-    // We're not an accessibility element by default if there is no string.
-    self.isAccessibilityElement = NO;
-  } else {
-    self.isAccessibilityElement = YES;
-  }
-
-  if (attributedString.length > 0) {
-    CGFloat screenScale = ASScreenScale();
-    self.ascender = round([[attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
-    self.descender = round([[attributedString attribute:NSFontAttributeName atIndex:attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
-  }
+  // We're an accessibility element by default if there is a string.
+  self.isAccessibilityElement = _attributedString.length != 0;
 }
 
 #pragma mark - Text Layout
@@ -470,7 +477,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   // Final output vars
   __block id linkAttributeValue = nil;
-  __block NSString *linkAttributeName = nil;
   __block BOOL inTruncationMessage = NO;
 
   [renderer enumerateTextIndexesAtPosition:point usingBlock:^(NSUInteger characterIndex, CGRect glyphBoundingRect, BOOL *stop) {
@@ -539,7 +545,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
         // Set the values for the next iteration
         linkAttributeValue = value;
-        linkAttributeName = name;
 
         break;
       }
@@ -628,7 +633,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
         
         CABasicAnimation *fadeOut = [CABasicAnimation animationWithKeyPath:@"opacity"];
         fadeOut.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-        fadeOut.fromValue = possibleFadeIn.toValue ?: @(((CALayer *)weakHighlightLayer.presentationLayer).opacity);
+        fadeOut.fromValue = possibleFadeIn.toValue ? : @(((CALayer *)weakHighlightLayer.presentationLayer).opacity);
         fadeOut.toValue = @0.0;
         fadeOut.fillMode = kCAFillModeBoth;
         fadeOut.duration = ASTextNodeHighlightFadeOutDuration;
@@ -891,11 +896,16 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 {
   [super touchesMoved:touches withEvent:event];
 
+  UITouch *touch = [touches anyObject];
+  CGPoint locationInView = [touch locationInView:self.view];
+  // on 3D Touch enabled phones, this gets fired with changes in force, and usually will get fired immediately after touchesBegan:withEvent:
+  if (CGPointEqualToPoint([touch previousLocationInView:self.view], locationInView))
+    return;
+  
   // If touch has moved out of the current highlight range, clear the highlight.
   if (_highlightRange.length > 0) {
     NSRange range = NSMakeRange(0, 0);
-    CGPoint point = [[touches anyObject] locationInView:self.view];
-    [self _linkAttributeValueAtPoint:point
+    [self _linkAttributeValueAtPoint:locationInView
                        attributeName:NULL
                                range:&range
        inAdditionalTruncationMessage:NULL
@@ -1110,6 +1120,10 @@ static NSAttributedString *DefaultTruncationAttributedString()
  */
 - (NSAttributedString *)_composedTruncationString
 {
+  //If we have neither return the default
+  if (!_additionalTruncationMessage && !_truncationAttributedString) {
+    return _composedTruncationString;
+  }
   // Short circuit if we only have one or the other.
   if (!_additionalTruncationMessage) {
     return _truncationAttributedString;

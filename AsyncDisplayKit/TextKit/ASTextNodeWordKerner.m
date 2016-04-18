@@ -68,7 +68,7 @@
 {
   // If it's a space character and we have custom word kerning, use the whitespace action control character.
   if ([layoutManager.textStorage.string characterAtIndex:characterIndex] == ' ')
-    return NSControlCharacterWhitespaceAction;
+    return NSControlCharacterActionWhitespace;
 
   return defaultAction;
 }

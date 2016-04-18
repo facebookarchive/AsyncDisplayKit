@@ -16,18 +16,22 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
 
 @interface _ASTransitionContext ()
 
-@property (weak, nonatomic) id<_ASTransitionContextDelegate> delegate;
+@property (weak, nonatomic) id<_ASTransitionContextLayoutDelegate> layoutDelegate;
+@property (weak, nonatomic) id<_ASTransitionContextCompletionDelegate> completionDelegate;
 
 @end
 
 @implementation _ASTransitionContext
 
-- (instancetype)initWithAnimation:(BOOL)animated delegate:(id<_ASTransitionContextDelegate>)delegate
+- (instancetype)initWithAnimation:(BOOL)animated
+                     layoutDelegate:(id<_ASTransitionContextLayoutDelegate>)layoutDelegate
+                 completionDelegate:(id<_ASTransitionContextCompletionDelegate>)completionDelegate
 {
   self = [super init];
   if (self) {
     _animated = animated;
-    _delegate = delegate;
+    _layoutDelegate = layoutDelegate;
+    _completionDelegate = completionDelegate;
   }
   return self;
 }
@@ -36,17 +40,17 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
 
 - (ASLayout *)layoutForKey:(NSString *)key
 {
-  return [_delegate transitionContext:self layoutForKey:key];
+  return [_layoutDelegate transitionContext:self layoutForKey:key];
 }
 
 - (ASSizeRange)constrainedSizeForKey:(NSString *)key
 {
-  return [_delegate transitionContext:self constrainedSizeForKey:key];
+  return [_layoutDelegate transitionContext:self constrainedSizeForKey:key];
 }
 
 - (CGRect)initialFrameForNode:(ASDisplayNode *)node
 {
-  for (ASDisplayNode *subnode in [_delegate currentSubnodesWithTransitionContext:self]) {
+  for (ASDisplayNode *subnode in [_layoutDelegate currentSubnodesWithTransitionContext:self]) {
     if (node == subnode) {
       return node.frame;
     }
@@ -75,17 +79,17 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
 
 - (NSArray<ASDisplayNode *> *)insertedSubnodes
 {
-  return [_delegate insertedSubnodesWithTransitionContext:self];
+  return [_layoutDelegate insertedSubnodesWithTransitionContext:self];
 }
 
 - (NSArray<ASDisplayNode *> *)removedSubnodes
 {
-  return [_delegate removedSubnodesWithTransitionContext:self];
+  return [_layoutDelegate removedSubnodesWithTransitionContext:self];
 }
 
 - (void)completeTransition:(BOOL)didComplete
 {
-  [_delegate transitionContext:self didComplete:didComplete];
+  [_completionDelegate transitionContext:self didComplete:didComplete];
 }
 
 @end

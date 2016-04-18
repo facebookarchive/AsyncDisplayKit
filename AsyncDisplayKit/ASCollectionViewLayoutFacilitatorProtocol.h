@@ -6,8 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#ifndef ASCollectionViewLayoutFacilitatorProtocol_h
-#define ASCollectionViewLayoutFacilitatorProtocol_h
+#pragma once
 
 /**
  * This facilitator protocol is intended to help Layout to better
@@ -18,8 +17,8 @@
 /**
  * Inform that the collectionView is editing the cells at a list of indexPaths
  *
- * @param indexPaths, an array of NSIndexPath objects of cells being/will be edited.
- * @param isBatched, indicates whether the editing operation will be batched by the collectionView
+ * @param indexPaths an array of NSIndexPath objects of cells being/will be edited.
+ * @param isBatched indicates whether the editing operation will be batched by the collectionView
  *
  * NOTE: when isBatched, used in combination with -collectionViewWillPerformBatchUpdates
  */
@@ -28,10 +27,10 @@
 /**
  * Inform that the collectionView is editing the sections at a set of indexes
  *
- * @param indexes, an NSIndexSet of section indexes being/will be edited.
- * @param isBatched, indicates whether the editing operation will be batched by the collectionView
+ * @param indexes an NSIndexSet of section indexes being/will be edited.
+ * @param batched indicates whether the editing operation will be batched by the collectionView
  *
- * NOTE: when isBatched, used in combination with -collectionViewWillPerformBatchUpdates
+ * NOTE: when batched, used in combination with -collectionViewWillPerformBatchUpdates
  */
 - (void)collectionViewWillEditSectionsAtIndexSet:(NSIndexSet *)indexes batched:(BOOL)batched;
 
@@ -41,5 +40,3 @@
 - (void)collectionViewWillPerformBatchUpdates;
 
 @end
-
-#endif /* ASCollectionViewLayoutFacilitatorProtocol_h */

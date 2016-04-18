@@ -6,16 +6,22 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASButtonNode.h>
 
+@class AVAsset, AVPlayer, AVPlayerItem;
 @protocol ASVideoNodeDelegate;
 
-// This is a relatively new component of AsyncDisplayKit.  It has many useful features, but
-// there is room for further expansion and optimization.  Please report any issues or requests
-// in an issue on GitHub: https://github.com/facebook/AsyncDisplayKit/issues
+// IMPORTANT NOTES:
+// 1. Applications using ASVideoNode must link AVFoundation! (this provides the AV* classes below)
+// 2. This is a relatively new component of AsyncDisplayKit.  It has many useful features, but
+//    there is room for further expansion and optimization.  Please report any issues or requests
+//    in an issue on GitHub: https://github.com/facebook/AsyncDisplayKit/issues
 
 @interface ASVideoNode : ASControlNode
+
+@property (atomic, strong, readwrite) NSURL *url;
 @property (atomic, strong, readwrite) AVAsset *asset;
+
 @property (atomic, strong, readonly) AVPlayer *player;
 @property (atomic, strong, readonly) AVPlayerItem *currentItem;
 
@@ -30,6 +36,8 @@
 @property (atomic) ASButtonNode *playButton;
 
 @property (atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
+
+- (instancetype)init;
 
 - (void)play;
 - (void)pause;

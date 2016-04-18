@@ -17,6 +17,10 @@
 @interface ViewController () <ASEditableTextNodeDelegate>
 {
   ASEditableTextNode *_textNode;
+  
+  // These elements are a test case for ASTextNode truncation.
+  UILabel *_label;
+  ASTextNode *_node;
 }
 
 @end
@@ -44,6 +48,24 @@
 
   // the usual delegate methods are available; see ASEditableTextNodeDelegate
   _textNode.delegate = self;
+  
+  
+  // Do any additional setup after loading the view, typically from a nib.
+  NSDictionary *attrs = @{ NSFontAttributeName: [UIFont fontWithName:@"HelveticaNeue" size:12.0f] };
+  NSAttributedString *string = [[NSAttributedString alloc] initWithString:@"1\n2\n3\n4\n5" attributes:attrs];
+  
+  _label = [[UILabel alloc] init];
+  _label.attributedText = string;
+  _label.backgroundColor = [UIColor lightGrayColor];
+  _label.numberOfLines = 3;
+  _label.frame = CGRectMake(20, 400, 40, 100);
+  
+  _node = [[ASTextNode alloc] init];
+  _node.maximumNumberOfLines = 3;
+  _node.backgroundColor = [UIColor lightGrayColor];
+  _node.attributedString = string;
+  _node.frame = CGRectMake(70, 400, 40, 100);
+//  [_node measure:CGSizeMake(40, 50)];  No longer needed now that https://github.com/facebook/AsyncDisplayKit/issues/1295 is fixed.
 
   return self;
 }
@@ -53,6 +75,8 @@
   [super viewDidLoad];
 
   [self.view addSubnode:_textNode];
+  [self.view addSubnode:_node];
+  [self.view addSubview:_label];
 
   [self.view addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)]];
 }

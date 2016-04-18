@@ -64,7 +64,7 @@ static void __ASDisplayLayerIncrementConcurrentDisplayCount(BOOL displayIsAsync,
  */
 static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync, BOOL isRasterizing)
 {
-  // Displays while rasterizing are not counted as concurrent displays, becuase they draw in serial when their rasterizing container displays.
+  // Displays while rasterizing are not counted as concurrent displays, because they draw in serial when their rasterizing container displays.
   if (isRasterizing) {
     return;
   }
@@ -92,7 +92,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     
   BOOL rasterizingFromAscendent = (_hierarchyState & ASHierarchyStateRasterized);
 
-  // if super node is rasterizing descendents, subnodes will not have had layout calls because they don't have layers
+  // if super node is rasterizing descendants, subnodes will not have had layout calls because they don't have layers
   if (rasterizingFromAscendent) {
     [self __layout];
   }
@@ -331,7 +331,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   // FIXME: what about the degenerate case where we are calling setNeedsDisplay faster than the jobs are dequeuing
   // from the displayQueue?  Need to not cancel early fails from displaySentinel changes.
   ASSentinel *displaySentinel = (asynchronously ? _displaySentinel : nil);
-  int64_t displaySentinelValue = [displaySentinel increment];
+  int32_t displaySentinelValue = [displaySentinel increment];
 
   asdisplaynode_iscancelled_block_t isCancelledBlock = ^{
     return BOOL(displaySentinelValue != displaySentinel.value);
@@ -370,7 +370,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     // while synchronizing the final application of the results to the layer's contents property (completionBlock).
     
     // First, look to see if we are expected to join a parent's transaction container.
-    CALayer *containerLayer = _layer.asyncdisplaykit_parentTransactionContainer ?: _layer;
+    CALayer *containerLayer = _layer.asyncdisplaykit_parentTransactionContainer ? : _layer;
     
     // In the case that a transaction does not yet exist (such as for an individual node outside of a container),
     // this call will allocate the transaction and add it to _ASAsyncTransactionGroup.

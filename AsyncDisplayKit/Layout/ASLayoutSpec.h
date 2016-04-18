@@ -26,12 +26,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 
 /**
+ * Parent of the layout spec
+ */
+@property (nullable, nonatomic, weak) id<ASLayoutable> parent;
+
+/**
  * Adds a child to this layout spec using a default identifier.
  *
  * @param child A child to be added.
  *
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
- * reponsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
+ * responsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
  * only require a single child.
  *
  * For layout specs that require a known number of children (ASBackgroundLayoutSpec, for example)
@@ -50,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param identifier An identifier associated with the child.
  *
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
- * reponsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
+ * responsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
  * only require a single child.
  *
  * For layout specs that require a known number of children (ASBackgroundLayoutSpec, for example)
@@ -95,8 +100,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
 
-/** Returns all children added to this layout spec. */
-- (NSArray<id<ASLayoutable>> *)children;
+/**
+ * Returns all children added to this layout spec.
+ */
+- (nullable NSArray<id<ASLayoutable>> *)children;
 
 @end
 

@@ -198,6 +198,15 @@
 
 @end
 
+@implementation ASStackLayoutSpec (ASEnvironment)
+
+- (BOOL)supportsUpwardPropagation
+{
+  return NO;
+}
+
+@end
+
 @implementation ASStackLayoutSpec (Debugging)
 
 #pragma mark - ASLayoutableAsciiArtProtocol

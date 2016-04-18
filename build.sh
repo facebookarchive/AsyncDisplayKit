@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # **** Update me when new Xcode versions are released! ****
-PLATFORM="platform=iOS Simulator,OS=9.2,name=iPhone 6"
-SDK="iphonesimulator9.2"
+PLATFORM="platform=iOS Simulator,OS=9.3,name=iPhone 6"
+SDK="iphonesimulator9.3"
 
 
 # It is pitch black.
@@ -35,13 +35,35 @@ if [ "$MODE" = "examples" ]; then
 
     for example in examples/*/; do
         echo "Building $example."
-        pod install --project-directory=$example
-        xctool \
-            -workspace "${example}Sample.xcworkspace" \
-            -scheme Sample \
-            -sdk "$SDK" \
-            -destination "$PLATFORM" \
-            build
+
+        if [ -f "${example}/Podfile" ]; then
+          echo "Using CocoaPods"
+          pod install --project-directory=$example
+          
+          xctool \
+              -workspace "${example}Sample.xcworkspace" \
+              -scheme Sample \
+              -sdk "$SDK" \
+              -destination "$PLATFORM" \
+              build
+        elif [ -f "${example}/Cartfile" ]; then
+          echo "Using Carthage"
+          local_repo=`pwd`
+          current_branch=`git rev-parse --abbrev-ref HEAD`
+          cd $example
+          
+          echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
+          carthage update --platform iOS
+          
+          xctool \
+              -project "Sample.xcodeproj" \
+              -scheme Sample \
+              -sdk "$SDK" \
+              -destination "$PLATFORM" \
+              build
+          
+          cd ../..
+        fi
     done
     trap - EXIT
     exit 0

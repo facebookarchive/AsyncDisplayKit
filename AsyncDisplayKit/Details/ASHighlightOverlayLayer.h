@@ -20,14 +20,14 @@ NS_ASSUME_NONNULL_BEGIN
  @param rects Array containing CGRects wrapped in NSValue.
  @param targetLayer The layer that the rects are relative to.  The rects will be translated to the receiver's coordinate space when rendering.
  */
-- (id)initWithRects:(NSArray<NSValue *> *)rects targetLayer:(nullable CALayer *)targetLayer;
+- (instancetype)initWithRects:(NSArray<NSValue *> *)rects targetLayer:(nullable CALayer *)targetLayer;
 
 /**
  @summary Initializes with CGRects for the highlighting, in the receiver's coordinate space.
 
  @param rects Array containing CGRects wrapped in NSValue.
  */
-- (id)initWithRects:(NSArray<NSValue *> *)rects;
+- (instancetype)initWithRects:(NSArray<NSValue *> *)rects;
 
 @property (nullable, atomic, strong) __attribute__((NSObject)) CGColorRef highlightColor;
 @property (atomic, weak) CALayer *targetLayer;

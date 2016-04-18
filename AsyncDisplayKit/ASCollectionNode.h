@@ -52,7 +52,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Tuning parameters for a range type in the specified mode.
  *
- * @param rangeMode The range mode to get the runing parameters for.
+ * @param rangeMode The range mode to get the running parameters for.
  * @param rangeType The range type to get the tuning parameters for.
  *
  * @returns A tuning parameter value for the given range type in the given mode.
@@ -63,10 +63,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 /**
- * Set the tuning parameters for a range type in the specigied mode.
+ * Set the tuning parameters for a range type in the specified mode.
  *
  * @param tuningParameters The tuning parameters to store for a range type.
- * @param rangeMode The range mode to set the runing parameters for.
+ * @param rangeMode The range mode to set the running parameters for.
  * @param rangeType The range type to set the tuning parameters for.
  *
  * @see ASLayoutRangeMode

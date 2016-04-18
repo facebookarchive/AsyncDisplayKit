@@ -45,7 +45,6 @@ static inline BOOL ASDisplayNodeThreadIsMain()
   _Pragma("clang diagnostic push"); \
   _Pragma("clang diagnostic ignored \"-Wunused-variable\""); \
   volatile int res = (x_); \
-  ASDisplayNodeCAssert(res == 0, @"Return value of operation nonzero: %d", res); \
   assert(res == 0); \
   _Pragma("clang diagnostic pop"); \
 } while (0)

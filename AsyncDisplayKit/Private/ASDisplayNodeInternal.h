@@ -12,18 +12,19 @@
 //
 
 #import "_AS-objc-internal.h"
-#import "ASDisplayNodeExtraIvars.h"
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
-#import "ASLayoutOptions.h"
 #import "_ASTransitionContext.h"
+#import "ASDisplayNodeLayoutContext.h"
+#import "ASEnvironment.h"
 
 #include <vector>
 
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
 @class _ASPendingState;
+@class ASSentinel;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 
@@ -68,6 +69,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
     unsigned shouldRasterizeDescendants:1;
     unsigned shouldBypassEnsureDisplay:1;
     unsigned displaySuspended:1;
+    unsigned shouldAnimateSizeChanges:1;
     unsigned hasCustomDrawingPriority:1;
 
     // whether custom drawing is enabled
@@ -89,15 +91,14 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASDisplayNode * __weak _supernode;
 
   ASSentinel *_displaySentinel;
-  ASSentinel *_replaceAsyncSentinel;
+  ASSentinel *_transitionSentinel;
 
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
 
-  ASLayout *_previousLayout;
+  ASEnvironmentState _environmentState;
   ASLayout *_layout;
 
-  ASSizeRange _previousConstrainedSize;
   ASSizeRange _constrainedSize;
 
   UIEdgeInsets _hitTestSlop;
@@ -107,11 +108,9 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   _ASTransitionContext *_transitionContext;
   BOOL _usesImplicitHierarchyManagement;
 
-  NSArray<ASDisplayNode *> *_insertedSubnodes;
-  NSArray<ASDisplayNode *> *_removedSubnodes;
-  std::vector<NSInteger> _insertedSubnodePositions;
-  std::vector<NSInteger> _removedSubnodePositions;
-
+  int32_t _pendingTransitionID;
+  ASDisplayNodeLayoutContext *_pendingLayoutContext;
+  
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
   ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
@@ -124,10 +123,25 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   // keeps track of nodes/subnodes that have not finished display, used with placeholders
   NSMutableSet *_pendingDisplayNodes;
 
-  ASDisplayNodeExtraIvars _extra;
-  
   ASDisplayNodeContextModifier _willDisplayNodeContentWithRenderingContext;
   ASDisplayNodeContextModifier _didDisplayNodeContentWithRenderingContext;
+
+  // Accessibility support
+  BOOL _isAccessibilityElement;
+  NSString *_accessibilityLabel;
+  NSString *_accessibilityHint;
+  NSString *_accessibilityValue;
+  UIAccessibilityTraits _accessibilityTraits;
+  CGRect _accessibilityFrame;
+  NSString *_accessibilityLanguage;
+  BOOL _accessibilityElementsHidden;
+  BOOL _accessibilityViewIsModal;
+  BOOL _shouldGroupAccessibilityChildren;
+  NSString *_accessibilityIdentifier;
+  UIAccessibilityNavigationStyle _accessibilityNavigationStyle;
+  NSArray *_accessibilityHeaderElements;
+  CGPoint _accessibilityActivationPoint;
+  UIBezierPath *_accessibilityPath;
 
 #if TIME_DISPLAYNODE_OPS
 @public
@@ -141,7 +155,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 + (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node;
 
 // The _ASDisplayLayer backing the node, if any.
-@property (nonatomic, readonly, retain) _ASDisplayLayer *asyncLayer;
+@property (nonatomic, readonly, strong) _ASDisplayLayer *asyncLayer;
 
 // Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
@@ -179,10 +193,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)displayImmediately;
 
 // Alternative initialiser for backing with a custom view class.  Supports asynchronous display with _ASDisplayView subclasses.
-- (id)initWithViewClass:(Class)viewClass;
+- (instancetype)initWithViewClass:(Class)viewClass;
 
 // Alternative initialiser for backing with a custom layer class.  Supports asynchronous display with _ASDisplayLayer subclasses.
-- (id)initWithLayerClass:(Class)layerClass;
+- (instancetype)initWithLayerClass:(Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
 

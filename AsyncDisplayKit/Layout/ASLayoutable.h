@@ -15,6 +15,8 @@
 #import <AsyncDisplayKit/ASStaticLayoutable.h>
 
 #import <AsyncDisplayKit/ASLayoutablePrivate.h>
+#import <AsyncDisplayKit/ASEnvironment.h>
+#import <AsyncDisplayKit/ASLayoutableExtensibility.h>
 
 @class ASLayout;
 @class ASLayoutSpec;
@@ -35,9 +37,9 @@ NS_ASSUME_NONNULL_BEGIN
  * These layout options are all stored in an ASLayoutOptions class (that is defined in ASLayoutablePrivate).
  * Generally you needn't worry about the layout options class, as the layoutable protocols allow all direct
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
- * extend the backing layout options class to accomodate any new layout options.
+ * extend the backing layout options class to accommodate any new layout options.
  */
-@protocol ASLayoutable <ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate>
+@protocol ASLayoutable <ASEnvironment, ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate, ASLayoutableExtensibility>
 
 /**
  * @abstract Calculate a layout based on given size range.

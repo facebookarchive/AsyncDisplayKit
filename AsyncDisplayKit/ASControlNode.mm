@@ -9,6 +9,8 @@
 #import "ASControlNode.h"
 #import "ASControlNode+Subclasses.h"
 #import "ASThread.h"
+#import "ASDisplayNodeExtras.h"
+#import "ASImageNode.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
@@ -70,10 +72,17 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 @end
 
 #pragma mark -
+
+static BOOL _enableHitTestDebug = NO;
+
 @implementation ASControlNode
+{
+  ASImageNode *_debugHighlightOverlay;
+}
 
 #pragma mark - Lifecycle
-- (id)init
+
+- (instancetype)init
 {
   if (!(self = [super init]))
     return nil;
@@ -84,6 +93,15 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   self.userInteractionEnabled = NO;
   return self;
 }
+
+- (void)setUserInteractionEnabled:(BOOL)userInteractionEnabled
+{
+  [super setUserInteractionEnabled:userInteractionEnabled];
+  self.isAccessibilityElement = userInteractionEnabled;
+}
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 
 #pragma mark - ASDisplayNode Overrides
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -201,6 +219,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
                           withEvent:event];
 }
 
+#pragma clang diagnostic pop
+
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
   // If we're interested in touches, this is a tap (the only gesture we care about) and passed -hitTest for us, then no, you may not begin. Sir.
@@ -228,6 +248,17 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
   if (!_controlEventDispatchTable) {
     _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
+    
+    // only show tap-able areas for views with 1 or more addTarget:action: pairs
+    if (_enableHitTestDebug) {
+      
+      // add a highlight overlay node with area of ASControlNode + UIEdgeInsets
+      self.clipsToBounds = NO;
+      _debugHighlightOverlay = [[ASImageNode alloc] init];
+      _debugHighlightOverlay.zPosition = 1000;  // CALayer doesn't have -moveSublayerToFront, but this will ensure we're over the top of any siblings.
+      _debugHighlightOverlay.layerBacked = YES;
+      [self addSubnode:_debugHighlightOverlay];
+    }
   }
 
   // Enumerate the events in the mask, adding the target-action pair for each control event included in controlEventMask
@@ -236,26 +267,27 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     {
       // Do we already have an event table for this control event?
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:eventKey];
+      NSMapTable *eventDispatchTable = _controlEventDispatchTable[eventKey];
       // Create it if necessary.
       if (!eventDispatchTable)
       {
         // Create the dispatch table for this event.
         eventDispatchTable = [NSMapTable weakToStrongObjectsMapTable];
-        [_controlEventDispatchTable setObject:eventDispatchTable forKey:eventKey];
+        _controlEventDispatchTable[eventKey] = eventDispatchTable;
       }
 
       // Have we seen this target before for this event?
-      NSMutableArray *targetActions = [eventDispatchTable objectForKey:target];
+      NSMutableSet *targetActions = [eventDispatchTable objectForKey:target];
       if (!targetActions)
       {
-        // Nope. Create an actions array for it.
-        targetActions = [[NSMutableArray alloc] initWithCapacity:kASControlNodeActionDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
+        // Nope. Create an action set for it.
+        targetActions = [[NSMutableSet alloc] initWithCapacity:kASControlNodeActionDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
         [eventDispatchTable setObject:targetActions forKey:target];
       }
 
       // Add the action message.
-      // Note that bizarrely enough UIControl (at least according to the docs) supports duplicate target-action pairs for a particular control event, so we replicate that behavior.
+      // UIControl does not support duplicate target-action-events entries, so we replicate that behavior.
+      // See: https://github.com/facebook/AsyncDisplayKit/files/205466/DuplicateActionsTest.playground.zip
       [targetActions addObject:NSStringFromSelector(action)];
     });
 
@@ -270,7 +302,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   ASDN::MutexLocker l(_controlLock);
   
   // Grab the event dispatch table for this event.
-  NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)];
+  NSMapTable *eventDispatchTable = _controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)];
   if (!eventDispatchTable)
     return nil;
 
@@ -307,7 +339,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     {
       // Grab the dispatch table for this event (if we have it).
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMapTable *eventDispatchTable = [_controlEventDispatchTable objectForKey:eventKey];
+      NSMapTable *eventDispatchTable = _controlEventDispatchTable[eventKey];
       if (!eventDispatchTable)
         return;
 
@@ -340,7 +372,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       if (!target)
       {
         // Look at every target, removing target-pairs that have action (or all of its actions).
-        for (id aTarget in eventDispatchTable)
+        for (id aTarget in [eventDispatchTable copy])
           removeActionFromTarget(aTarget, action);
       }
       else
@@ -360,7 +392,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     (ASControlNodeEvent controlEvent)
     {
       // Use a copy to itereate, the action perform could call remove causing a mutation crash.
-      NSMapTable *eventDispatchTable = [[_controlEventDispatchTable objectForKey:_ASControlNodeEventKeyForControlEvent(controlEvent)] copy];
+      NSMapTable *eventDispatchTable = [_controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)] copy];
 
       // For each target interested in this event...
       for (id target in eventDispatchTable)
@@ -392,7 +424,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEvent)
 {
-  return [NSNumber numberWithInteger:controlEvent];
+  return @(controlEvent);
 }
 
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent))
@@ -423,6 +455,137 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 - (void)endTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)touchEvent
 {
+}
+
+#pragma mark - Debug
+// Layout method required when _enableHitTestDebug is enabled.
+- (void)layout
+{
+  [super layout];
+  
+  if (_debugHighlightOverlay) {
+    
+    // Even if our parents don't have clipsToBounds set and would allow us to display the debug overlay, UIKit event delivery (hitTest:)
+    // will not search sub-hierarchies if one of our parents does not return YES for pointInside:.  In such a scenario, hitTestSlop
+    // may not be able to expand the tap target as much as desired without also setting some hitTestSlop on the limiting parents.
+    CGRect intersectRect = UIEdgeInsetsInsetRect(self.bounds, [self hitTestSlop]);
+    UIRectEdge clippedEdges = UIRectEdgeNone;
+    UIRectEdge clipsToBoundsClippedEdges = UIRectEdgeNone;
+    CALayer *layer = self.layer;
+    CALayer *intersectLayer = layer;
+    CALayer *intersectSuperlayer = layer.superlayer;
+    
+    // Stop climbing if we encounter a UIScrollView, as its offset bounds origin may make it seem like our events will be clipped when
+    // scrolling will actually reveal them (because this process will not re-run due to scrolling)
+    while (intersectSuperlayer && ![intersectSuperlayer.delegate respondsToSelector:@selector(contentOffset)]) {
+      // Get our parent's tappable bounds.  If the parent has an associated node, consider hitTestSlop, as it will extend its pointInside:.
+      CGRect parentHitRect = intersectSuperlayer.bounds;
+      BOOL parentClipsToBounds = NO;
+      
+      ASDisplayNode *parentNode = ASLayerToDisplayNode(intersectSuperlayer);
+      if (parentNode) {
+        UIEdgeInsets parentSlop = [parentNode hitTestSlop];
+        
+        // if parent has a hitTestSlop as well, we need to account for the fact that events will be routed towards us in that area too.
+        if (!UIEdgeInsetsEqualToEdgeInsets(UIEdgeInsetsZero, parentSlop)) {
+          parentClipsToBounds = parentNode.clipsToBounds;
+          // if the parent is clipping, this will prevent us from showing the overlay outside that area.
+          // in this case, we will make the overlay smaller so that the special highlight to indicate the overlay
+          // cannot accurately display the true tappable area is shown.
+          if (!parentClipsToBounds) {
+            parentHitRect = UIEdgeInsetsInsetRect(parentHitRect, [parentNode hitTestSlop]);
+          }
+        }
+      }
+      
+      // Convert our current rectangle to parent coordinates, and intersect with the parent's hit rect.
+      CGRect intersectRectInParentCoordinates = [intersectSuperlayer convertRect:intersectRect fromLayer:intersectLayer];
+      intersectRect = CGRectIntersection(parentHitRect, intersectRectInParentCoordinates);
+      if (!CGSizeEqualToSize(parentHitRect.size, intersectRectInParentCoordinates.size)) {
+        clippedEdges = [self setEdgesOfIntersectionForChildRect:intersectRectInParentCoordinates
+                                                     parentRect:parentHitRect rectEdge:clippedEdges];
+        if (parentClipsToBounds) {
+          clipsToBoundsClippedEdges = [self setEdgesOfIntersectionForChildRect:intersectRectInParentCoordinates
+                                                                    parentRect:parentHitRect rectEdge:clipsToBoundsClippedEdges];
+        }
+      }
+
+      // Advance up the tree.
+      intersectLayer = intersectSuperlayer;
+      intersectSuperlayer = intersectLayer.superlayer;
+    }
+    
+    CGRect finalRect = [intersectLayer convertRect:intersectRect toLayer:layer];
+    UIColor *fillColor = [[UIColor greenColor] colorWithAlphaComponent:0.4];
+  
+    // determine if edges are clipped
+    if (clippedEdges == UIRectEdgeNone) {
+      _debugHighlightOverlay.backgroundColor = fillColor;
+    } else {
+      const CGFloat borderWidth = 2.0;
+      UIColor *borderColor = [[UIColor orangeColor] colorWithAlphaComponent:0.8];
+      UIColor *clipsBorderColor = [UIColor colorWithRed:30/255.0 green:90/255.0 blue:50/255.0 alpha:0.7];
+      CGRect imgRect = CGRectMake(0, 0, 2.0 * borderWidth + 1.0, 2.0 * borderWidth + 1.0);
+      UIGraphicsBeginImageContext(imgRect.size);
+      
+      [fillColor setFill];
+      UIRectFill(imgRect);
+      
+      [self drawEdgeIfClippedWithEdges:clippedEdges color:clipsBorderColor borderWidth:borderWidth imgRect:imgRect];
+      [self drawEdgeIfClippedWithEdges:clipsToBoundsClippedEdges color:borderColor borderWidth:borderWidth imgRect:imgRect];
+      
+      UIImage *debugHighlightImage = UIGraphicsGetImageFromCurrentImageContext();
+      UIGraphicsEndImageContext();
+  
+      UIEdgeInsets edgeInsets = UIEdgeInsetsMake(borderWidth, borderWidth, borderWidth, borderWidth);
+      _debugHighlightOverlay.image = [debugHighlightImage resizableImageWithCapInsets:edgeInsets
+                                                                         resizingMode:UIImageResizingModeStretch];
+      _debugHighlightOverlay.backgroundColor = nil;
+    }
+    
+    _debugHighlightOverlay.frame = finalRect;
+  }
+}
+
+- (UIRectEdge)setEdgesOfIntersectionForChildRect:(CGRect)childRect parentRect:(CGRect)parentRect rectEdge:(UIRectEdge)rectEdge
+{
+  if (childRect.origin.y < parentRect.origin.y) {
+    rectEdge |= UIRectEdgeTop;
+  }
+  if (childRect.origin.x < parentRect.origin.x) {
+    rectEdge |= UIRectEdgeLeft;
+  }
+  if (CGRectGetMaxY(childRect) > CGRectGetMaxY(parentRect)) {
+    rectEdge |= UIRectEdgeBottom;
+  }
+  if (CGRectGetMaxX(childRect) > CGRectGetMaxX(parentRect)) {
+    rectEdge |= UIRectEdgeRight;
+  }
+  
+  return rectEdge;
+}
+
+- (void)drawEdgeIfClippedWithEdges:(UIRectEdge)rectEdge color:(UIColor *)color borderWidth:(CGFloat)borderWidth imgRect:(CGRect)imgRect
+{
+  [color setFill];
+  
+  if (rectEdge & UIRectEdgeTop) {
+    UIRectFill(CGRectMake(0.0, 0.0, imgRect.size.width, borderWidth));
+  }
+  if (rectEdge & UIRectEdgeLeft) {
+    UIRectFill(CGRectMake(0.0, 0.0, borderWidth, imgRect.size.height));
+  }
+  if (rectEdge & UIRectEdgeBottom) {
+    UIRectFill(CGRectMake(0.0, imgRect.size.height - borderWidth, imgRect.size.width, borderWidth));
+  }
+  if (rectEdge & UIRectEdgeRight) {
+    UIRectFill(CGRectMake(imgRect.size.width - borderWidth, 0.0, borderWidth, imgRect.size.height));
+  }
+}
+
++ (void)setEnableHitTestDebug:(BOOL)enable
+{
+  _enableHitTestDebug = enable;
 }
 
 @end

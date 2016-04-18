@@ -240,7 +240,7 @@ static const char *kContextKey = NSStringFromClass(ASBasicImageDownloaderContext
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     // associate metadata with it
     NSMutableDictionary *callbackData = [NSMutableDictionary dictionary];
-    callbackData[kASBasicImageDownloaderContextCallbackQueue] = callbackQueue ?: dispatch_get_main_queue();
+    callbackData[kASBasicImageDownloaderContextCallbackQueue] = callbackQueue ? : dispatch_get_main_queue();
 
     if (downloadProgressBlock) {
       callbackData[kASBasicImageDownloaderContextProgressBlock] = [downloadProgressBlock copy];

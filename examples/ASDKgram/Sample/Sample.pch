@@ -1,0 +1,15 @@
+//
+//  ASDKgram.pch
+//  ASDKgram
+//
+//  Created by Hannah Troisi on 2/26/16.
+//  Copyright © 2016 Hannah Troisi. All rights reserved.
+//
+
+#ifndef Flickrgram_pch
+#define Flickrgram_pch
+
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+
+#endif /* Flickrgram_pch */
