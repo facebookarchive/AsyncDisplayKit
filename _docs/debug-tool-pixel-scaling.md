@@ -26,6 +26,6 @@ This debug feature is useful for **quickly determining if you are (1) downloadin
 In your `AppDelegate.m` file, 
 <ul>
   <li>import `AsyncDisplayKit+Debug.h`</li>
-  <li>add `[ASImageNode setShouldShowImageScalingOverlay:YES];` at the top of `didFinishLaunchingWithOptions:` </li>
+  <li>add `[ASImageNode setShouldShowImageScalingOverlay:YES];` at the top of your `didFinishLaunchingWithOptions:` method</li>
 </ul>
 Make sure to call this method before initializing any ASImageNodes.
