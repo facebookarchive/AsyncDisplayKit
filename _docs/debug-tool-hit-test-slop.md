@@ -5,10 +5,8 @@ permalink: /docs/debug-tool-hit-test-slop.html
 next: debug-tool-ASRangeController.html
 ---
 
-##Visualize tappable areas on ASControlNodes##
+##Visualize ASControlNode Tappable Areas##
 This debug feature adds a semi-transparent highlight overlay on any ASControlNodes containing a `target:action:` pair or gesture recognizer. The tappable range is defined as the ASControlNode’s frame + its `.hitTestSlop` `UIEdgeInsets`. Hit test slop is a unique feature of `ASControlNode` that allows it to extend its tappable range. 
-
-**This debug feature is useful for quickly visualizing ASControlNode's tappable range**
 
 In the screenshot below, you can quickly see that
 <ul> 
@@ -19,7 +17,7 @@ In the screenshot below, you can quickly see that
 
 ![screen shot 2016-03-25 at 4 39 23 pm](https://cloud.githubusercontent.com/assets/3419380/14057034/e1e71450-f2b1-11e5-8091-3e6f22862994.png)
 
-###Clipping###
+###Restrictions###
 
 A _green_ border on the edge(s) of the highlight overlay indicates that that edge of the tapable area is restricted by one of it's superview's tapable areas. An _orange_ border on the edge(s) of the highlight overlay indicates that that edge of the tapable area is clipped by .clipsToBounds of a parent in its hierarchy. 
 
