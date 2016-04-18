@@ -362,4 +362,31 @@
   XCTAssertNotEqual(_videoNode, firstButton.supernode);
 }
 
+- (void)testChangingAssetsChangesPlaceholderImage
+{
+  UIImage *firstImage = [[UIImage alloc] init];
+
+  _videoNode.asset = _firstAsset;
+  [_videoNode setPlaceholderImage:firstImage];
+  XCTAssertEqual(firstImage, _videoNode.placeholderImageNode.image);
+
+  _videoNode.asset = _secondAsset;
+  XCTAssertNotEqual(firstImage, _videoNode.placeholderImageNode.image);
+}
+
+- (void)testClearingFetchedContentShouldClearAssetData
+{
+  _videoNode.asset = _firstAsset;
+  [_videoNode fetchData];
+  [_videoNode setPlaceholderImage:[[UIImage alloc] init]];
+  XCTAssertNotNil(_videoNode.player);
+  XCTAssertNotNil(_videoNode.currentItem);
+  XCTAssertNotNil(_videoNode.placeholderImageNode.image);
+
+  [_videoNode clearFetchedData];
+  XCTAssertNil(_videoNode.player);
+  XCTAssertNil(_videoNode.currentItem);
+  XCTAssertNil(_videoNode.placeholderImageNode.image);
+}
+
 @end
