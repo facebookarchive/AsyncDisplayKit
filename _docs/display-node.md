@@ -5,13 +5,46 @@ permalink: /docs/display-node.html
 next: cell-node.html
 ---
 
+### Node Basics
+
 ASDisplayNode is the main view abstraction over UIView and CALayer.  It initializes and owns a UIView in the same way UIViews create and own their own backing CALayers.  
 
-Usually a node’s properties will be set on a background thread, and its backing view/layer will be lazily constructed with the cached properties collected by the node.  
+```
+ASDisplayNode *node = [[ASDisplayNode alloc] init];
+node.backgroundColor = [UIColor orangeColor];
+node.bounds = CGRectMake(0, 0, 100, 100);
 
-In some cases, it is desirable to initialize a node and provide a view to be used as the backing view.  These views are provided via a block that will return a view so that the actual construction of the view can be saved until later.  These nodes’ display step happens synchronously.  This is because a node can only be asynchronously displayed when it wraps an _ASDisplayView, not when it wraps a plain UIView.
+NSLog(@"Underlying view: %@", node.view);
+```
 
-The view being lazily loaded means that all setup can happen on a background thread up until the point that the view property of the node is actually accessed.  At this point, the cached values of the node will be applied to the newly created view.  From this point forward, the node’s properties should be accessed on the main thread.  Usually these concerns are taken care of by the container class managing the node.
+A node has all the same properties as a UIView, so using them should feel very familiar to anyone familiar with UIKit.
 
-The properties of the ASDisplayNode mirror the properties of UIViews and CALayers as closely as possible.  When there is an overlap, nodes will favor the naming of UIViews (except for position instead of center). 
+Properties of both views and layers are forwarded to nodes and can be easily accessed.
 
+```
+ASDisplayNode *node = [[ASDisplayNode alloc] init];
+node.clipsToBounds = YES; 				        // not .masksToBounds
+node.borderColor = [UIColor blueColor];  //layer name when there is no UIView equivalent
+NSLog(@"%@", node.layer);
+```
+
+As you can see, naming defaults to the UIView conventions<a href = "/docs/display-node.html#addendum">***</a> unless there is no UIView equivalent.  You also have access to your underlying <code>CALayer</code> just as you would when dealing with a plain <code>UIView</code>.
+
+When used with one of the <a href = "/docs/getting-started.html#node-containers">node containers</a>, a node’s properties will be set on a background thread, and its backing view/layer will be lazily constructed with the cached properties collected by the node.  You rarely need to worry about jumping to a background thread as this will be taken care of by the framework, but it's important to know that this is happening under the hood.
+
+### View Wrapping
+
+In some cases, it is desirable to initialize a node and provide a view to be used as the backing view.  These views are provided via a block that will return a view so that the actual construction of the view can be saved until later.  These nodes’ display step happens synchronously.  This is because a node can only be asynchronously displayed when it wraps an _ASDisplayView (the internal view subclass), not when it wraps a plain UIView.
+
+```
+ASDisplayNode *node = [ASDisplayNode alloc] initWithViewBlock:^{
+	SomeView *view = [[SomeView alloc] init];
+	return view;
+}];
+```
+
+Doing this allows you to wrap existing views if that is preferable to converting the UIView subclass to an ASDisplayNode subclass.
+
+<div class = "note" id = "addendum">
+	<a href = "/docs/display-node.html#addendum">***</a> The only exception is that nodes use <code>position</code> instead of <code>center</code> for reasons beyond this intro.
+</div>
