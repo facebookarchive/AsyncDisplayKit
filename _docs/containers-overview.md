@@ -15,16 +15,10 @@ It is highly recommended that you use AsyncDisplayKit's nodes within a node cont
  
 Example code and specific sample projects are highlighted in the documentation for each node container. 
 
-For a detailed description on porting an existing UIKit app to AsyncDisplayKit, read the <a href = "intelligent-preloading.html">porting guide</a>.
+For a detailed description on porting an existing UIKit app to AsyncDisplayKit, read the <a href = "porting-guide.html">porting guide</a>.
 
 ####What do I Gain by Using a Node Container?####
 
-To optimize the performance of an app, AsyncDisplayKit uses <a href = "intelligent-preloading.html">intelligent preloading</a> to determine when content is likely to become visible on-screen. A node container automatically manages its nodes and coordinates with them to trigger layout measurement, fetching data and display and visibility. Each of these operations is triggered independently at an appropriate time, depeneding on how close the content is to coming on-screen. Among other conveniences, this is why it is reccomended to use nodes within a container node. 
+A node container automatically manages the <a href = "intelligent-preloading.html">intelligent preloading</a> of its nodes. This means that all of the node's layout measurement, data fetching, decoding and rendering will be done asynchronously. Among other conveniences, this is why it is reccomended to use nodes within a container node.
 
-In contrast, classes like UIViewController, UITableView, and UICollectionView (which can be thought of as view mamagers) perform the layout measurement, display and visibility operations instaneously, at the moment that the first pixel of their next viewController or cell becomes visible on-screen. This triggers a very large burst of main thread activity that is the cause of most app performance problems.
-
-Note that it is possible to use nodes directly, without an AsyncDisplayKit node container, but unless you add additional calls, they will only start displaying once they come onscreen (as UIKit does). This can lead to performance degredation and flashing of content.
-
-
-
- 
+Note that while it _is_ possible to use nodes directly, without an AsyncDisplayKit node container, unless you add additional calls, they will only start displaying once they come onscreen (as UIKit does). This can lead to performance degredation and flashing of content.
