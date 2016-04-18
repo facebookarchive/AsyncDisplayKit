@@ -6,20 +6,23 @@ next: containers-asviewcontroller.html
 ---
 
 ##Use Nodes in Node Containers##
-For optimal performance, use nodes within a node container. ASDK offers the following node containers
+It is highly recommended that you use AsyncDisplayKit's nodes within a node container. AsyncDisplayKit offers the following node containers
 
 - `ASViewController` in place of UIKit's `UIViewController`
 - `ASCollectioNode` in place of UIKit's `UICollectionView`
-- `ASTableNode` in place of UIKit's `UITableView`
 - `ASPagerNode` in place of UIKit's `UIPagerView`
+- `ASTableNode` in place of UIKit's `UITableView`
+ 
+Example code and specific sample projects are highlighted in the documentation for each node container. For details on how to port your existing app to AsyncDisplayKit, read the porting guide (INCLUDE LINK).
 
-####Examples####
-Examples of these node containers can be found in the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">sample projects</a>. Example code and specific sample apps are highlighted in the documentation for each node container.  
+####What do I Gain by Using a Node Container?####
 
-For a guide on porting your UIKit app to ASDK see Porting Your App (INCLUDE LINK).
+To optimize the performance of an app, AsyncDisplayKit uses <a href = "intelligent-preloading.html">intelligent preloading</a> to determine when content is likely to become visible on-screen. A node container automatically keeps track of the state of its nodes and coordinates with them to trigger layout measurement, fetching data, display and visibility. Each of these operations is triggered independently at an appropriate time, depeneding on how close the content is to coming on-screen. Among other conveniences, this is why it is reccomended to use nodes within a container node. 
 
-####For the More Curious Developer...####
+In contrast, classes like UIViewController, UITableView, and UICollectionView (which can be thought of as view mamagers) perform the layout measurement, display and visibility operations instaneously, at the moment that the first pixel of their next viewController or cell becomes visible on-screen. This triggers a very large burst of main thread activity that is the cause of most app performance problems.
 
-To optimize performance of an app, ASDK uses intelligent preloading to determine when content will become visible to a user. The node containers above asynchronously trigger data downloading, decoding and rendering of images and text before they reach the device's onscren display area. The node containers above manage all of this automatically for their subnodes.  For reference, UIKit does not render images or text before content comes on screen. 
+Note that it is possible to use nodes directly, without an AsyncDisplayKit node container, but unless you add additional calls, they will only start displaying once they come onscreen (as UIKit does). This can lead to performance degredation and flashing of content.
 
-It is possible to use nodes directly, without an ASDK container, but unless you add additional calls, they will only start displaying once they come onscreen, which can lead to performance degredation and flashing of content. 
+
+
+ 
