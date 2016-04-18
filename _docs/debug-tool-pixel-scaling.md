@@ -19,7 +19,13 @@ if (scaleFactor != 1.0) {
 }
 ```
 
-This debug feature is useful for **quickly determining if you are (1) downloading and rendering excessive amounts of image data or (2) upscaling a low quality image**. In the screenshot below, you can quickly see that the avatar image is unnecessarily large for it’s bounds size and that the center picture is more optimized, but not perfectly so. If you are using an external data source (such as the 500px API used in the example), it's likely that you won’t be able to get the scaleFactor to exactly 1.0. However, if you control your own endpoint, optimize your API / app to return a correctly sized image!
+This debug feature is useful for quickly determining if you are
+<ul>
+  <li>downloading and rendering excessive amounts of image data</li> 
+  <li>upscaling a low quality image</li>
+</ul>
+
+In the screenshot below of an app with this debug feature enabled, you can see that the avatar image is unnecessarily large for it’s bounds size and that the center picture is more optimized, but not perfectly so. If you control your own endpoint, optimize your API / app to return an optimally sized image.
 
 ![screen shot 2016-03-25 at 4 04 59 pm](https://cloud.githubusercontent.com/assets/3419380/14056994/15561daa-f2b1-11e5-9606-59d54d2b5354.png)
 ### Usage
