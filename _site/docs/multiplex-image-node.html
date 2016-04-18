@@ -5650,29 +5650,29 @@
     <p></p>
 
     <p>Create components using the <code>newWithView:size:</code> class method:</p>
-<div class="highlight"><pre><code class="language-objc++" data-lang="objc++"><span class="p">+</span> <span class="p">(</span><span class="kt">instancetype</span><span class="p">)</span><span class="nf">newWithView:</span><span class="p">(</span><span class="k">const</span> <span class="n">CKComponentViewConfiguration</span> <span class="o">&amp;</span><span class="p">)</span><span class="nv">view</span>
-                       <span class="nf">size:</span><span class="p">(</span><span class="k">const</span> <span class="n">CKComponentSize</span> <span class="o">&amp;</span><span class="p">)</span><span class="nv">size</span><span class="p">;</span>
+<div class="highlight"><pre><code class="language-objc++" data-lang="objc++">+ (instancetype)newWithView:(const CKComponentViewConfiguration &amp;)view
+                       size:(const CKComponentSize &amp;)size;
 </code></pre></div>
 <p>It&#39;s important to note that you don&#39;t pass a <code>UIView</code> directly, but a <code>CKComponentViewConfiguration</code>. What&#39;s that?</p>
-<div class="highlight"><pre><code class="language-objc++" data-lang="objc++"><span class="k">struct</span> <span class="n">CKComponentViewConfiguration</span> <span class="p">{</span>
-  <span class="n">CKComponentViewClass</span> <span class="n">viewClass</span><span class="p">;</span>
-  <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">CKComponentViewAttribute</span><span class="p">,</span> <span class="kt">id</span><span class="o">&gt;</span> <span class="n">attributes</span><span class="p">;</span>
-<span class="p">};</span>
+<div class="highlight"><pre><code class="language-objc++" data-lang="objc++">struct CKComponentViewConfiguration {
+  CKComponentViewClass viewClass;
+  std::unordered_map&lt;CKComponentViewAttribute, id&gt; attributes;
+};
 </code></pre></div>
 <p>The first field is a view class. Ignore <code>CKComponentViewClass</code> for now — in most cases you just pass a class like <code>[UIImageView class]</code> or <code>[UIButton class]</code>.</p>
 
 <p>The second field holds a map of attributes to values: font, color, background image, and so forth. Again, ignore <code>CKComponentViewAttribute</code> for now; you can usually use a <code>SEL</code> as the attribute.</p>
 
 <p>Let&#39;s put one together:</p>
-<div class="highlight"><pre><code class="language-objc++" data-lang="objc++"><span class="p">[</span><span class="n">CKComponent</span> 
- <span class="nl">newWithView</span><span class="p">:{</span>
-   <span class="p">[</span><span class="bp">UIImageView</span> <span class="k">class</span><span class="p">],</span>
-   <span class="p">{</span>
-     <span class="p">{</span><span class="k">@selector</span><span class="p">(</span><span class="nl">setImage</span><span class="p">:),</span> <span class="n">image</span><span class="p">},</span>
-     <span class="p">{</span><span class="k">@selector</span><span class="p">(</span><span class="nl">setContentMode</span><span class="p">:),</span> <span class="l">@(</span><span class="n">UIViewContentModeCenter</span><span class="l">)</span><span class="p">}</span> <span class="c1">// Wrapping into an NSNumber</span>
-   <span class="p">}</span>
- <span class="p">}</span>
- <span class="nl">size</span><span class="p">:{</span><span class="n">image</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">image</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">}];</span>
+<div class="highlight"><pre><code class="language-objc++" data-lang="objc++">[CKComponent 
+ newWithView:{
+   [UIImageView class],
+   {
+     {@selector(setImage:), image},
+     {@selector(setContentMode:), @(UIViewContentModeCenter)} // Wrapping into an NSNumber
+   }
+ }
+ size:{image.size.width, image.size.height}];
 </code></pre></div>
 <p>That&#39;s all there is to it. ComponentKit does this for us:</p>
 
@@ -5689,7 +5689,7 @@
 <h2>Viewless Components</h2>
 
 <p>Often there exist logical components that don&#39;t need a corresponding view in the view hierarchy. For example a <code>CKStackLayoutComponent</code> often doesn&#39;t need to have a view; it only needs to position various subviews inside a designated area. In such situations, just pass <code>{}</code> for the view configuration and no view is created. For example:</p>
-<div class="highlight"><pre><code class="language-objc++" data-lang="objc++"><span class="p">[</span><span class="n">CKComponent</span> <span class="nl">newWithView</span><span class="p">:{}</span> <span class="nl">size</span><span class="p">:{}]</span>
+<div class="highlight"><pre><code class="language-objc++" data-lang="objc++">[CKComponent newWithView:{} size:{}]
 </code></pre></div>
 <p>(You can also just use <code>+new</code> directly, which uses this as the default.)</p>
 

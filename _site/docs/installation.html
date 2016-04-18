@@ -5652,19 +5652,19 @@
     <h3>CocoaPods</h3>
 
 <p>ASDK is available on <a href="http://cocoapods.org">CocoaPods</a>.  Add the following to your Podfile:</p>
-<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="n">pod</span> <span class="err">&#39;</span><span class="n">AsyncDisplayKit</span><span class="err">&#39;</span>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c">pod 'AsyncDisplayKit'
 </code></pre></div>
 <p>ASDK can also be used as a regular static library:  </p>
 
 <p>Copy the project to your codebase manually, adding <code>AsyncDisplayKit.xcodeproj</code> to your workspace. Add <code>libAsyncDisplayKit.a</code>, AssetsLibrary, and Photos to the &quot;Link Binary With Libraries&quot; build phase.  Include <code>-lc++ -ObjC</code> in your project linker flags.</p>
 
 <p>Import the framework header, or create an <a href="https://developer.apple.com/library/ios/documentation/swift/conceptual/buildingcocoaapps/MixandMatch.html">Objective-C bridging header</a> if you&#39;re using <strong>Swift</strong>:</p>
-<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="cp">#import &lt;AsyncDisplayKit/AsyncDisplayKit.h&gt;</span>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c">#import &lt;AsyncDisplayKit/AsyncDisplayKit.h&gt;
 </code></pre></div>
 <h3>Carthage</h3>
 
 <p>ASDK is available through <a href="https://github.com/Carthage/Carthage">Carthage</a>. Add the following to your Cartfile:</p>
-<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="n">github</span> <span class="s">&quot;facebook/AsyncDisplayKit&quot;</span>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c">github "facebook/AsyncDisplayKit"
 </code></pre></div>
 <p>Run ‘carthage update’ in Terminal and to fetch and build the ASDK library. This will create a folder named Carthage in your app’s root folder. In that folder there will be a ‘Build’ folder from where you have to drag the frameworks you want to use into the “Linked Frameworks and Libraries” section in Xcode.</p>
 

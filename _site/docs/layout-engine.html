@@ -5652,7 +5652,7 @@
     <p>AsyncDisplayKit&#39;s layout engine is based on the CSS Box Model.  While it is the feature of the framework that bears the weakest resemblance to the UIKit equivalent (AutoLayout), it is also among the most useful features once you&#39;ve gotten used to it.  With enough practice, you may just come to prefer creating declarative layouts to the constraint based approach. ;]</p>
 
 <p>The main way you participate in this system is by implementing <code>-layoutSpecThatFits:</code> in a node subclass.  Here, you declaratively build up layout specs from the inside out, returning the final spec which will contain the rest.</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+<div class="highlight"><pre><code class="language-" data-lang="">- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.direction          = ASStackLayoutDirectionVertical;
@@ -5669,7 +5669,7 @@
 <p>Layout spec&#39;s children can be any object whose class conforms to the <code>&lt;ASLayoutable&gt;</code> protocol.  All nodes, as well as all layout specs conform to the <code>&lt;ASLayoutable&gt;</code> protocol.  This means that your layout can be build up in composable chunks until you have what you want.</p>
 
 <p>Say you wanted to add 8 pts of padding to the stack you&#39;ve already set up:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+<div class="highlight"><pre><code class="language-" data-lang="">- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.direction          = ASStackLayoutDirectionVertical;

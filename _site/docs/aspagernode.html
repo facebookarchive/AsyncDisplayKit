@@ -5666,7 +5666,7 @@
 <p>These two methods, just as with ASCollectionNode and ASTableNode need to return either an ASCellNode or an block it can use to return one later.  </p>
 
 <p>One especially useful pattern is to return an ASCellNode that is initialized with an existing UIViewController or ASViewController.</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">- (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index
+<div class="highlight"><pre><code class="language-" data-lang="">- (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index
 {
     CGSize pagerNodeSize = pagerNode.bounds.size;
     NSArray *animals = self.animals[index];

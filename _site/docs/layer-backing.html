@@ -5652,7 +5652,7 @@
     <p>Layer-backing. In some cases, you can substantially improve your app&#39;s performance by using layers instead of views. Manually converting view-based code to layers is laborious due to the difference in APIs. Worse, if at some point you need to enable touch handling or other view-specific functionality, you have to manually convert everything back (and risk regressions!).</p>
 
 <p>With nodes, converting an entire subtree from views to layers is as simple as...</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">rootNode.layerBacked = YES;
+<div class="highlight"><pre><code class="language-" data-lang="">rootNode.layerBacked = YES;
 </code></pre></div>
 <p>...and if you need to go back, it&#39;s as simple as deleting one line. We recommend enabling layer-backing as a matter of course in any custom node that doesn&#39;t need touch handling.</p>
 

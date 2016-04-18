@@ -5650,7 +5650,7 @@
     <p></p>
 
     <p>Precompositing. Flattening an entire view hierarchy into a single layer also improves performance, but comes with a hit to maintainability and hierarchy-based reasoning. Nodes can do this for you too!</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">rootNode.shouldRasterizeDescendants = YES;
+<div class="highlight"><pre><code class="language-" data-lang="">rootNode.shouldRasterizeDescendants = YES;
 </code></pre></div>
 <p>...will cause the entire node hierarchy from that point on to be rendered into one layer.</p>
 

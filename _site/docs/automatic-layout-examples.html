@@ -5654,61 +5654,63 @@
 <h1>NSSpain Talk Example</h1>
 
 <p><img src="/static/layout-example-1.png"></p>
-<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">layoutSpecThatFits:</span><span class="p">(</span><span class="n">ASSizeRange</span><span class="p">)</span><span class="nv">constraint</span>
-<span class="p">{</span>
-  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">vStack</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASStackLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c">
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constraint
+{
+  ASStackLayoutSpec *vStack = [[ASStackLayoutSpec alloc] init];
 
-  <span class="p">[</span><span class="n">vStack</span> <span class="nl">setChildren</span><span class="p">:</span><span class="l">@[</span><span class="n">titleNode</span><span class="p">,</span> <span class="n">bodyNode</span><span class="l">]</span><span class="p">;</span>
+  [vStack setChildren:@[titleNode, bodyNode];
 
-  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">hstack</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASStackLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
-  <span class="n">hStack</span><span class="p">.</span><span class="n">direction</span>          <span class="o">=</span> <span class="n">ASStackLayoutDirectionHorizontal</span><span class="p">;</span>
-  <span class="n">hStack</span><span class="p">.</span><span class="n">spacing</span>            <span class="o">=</span> <span class="mf">5.0</span><span class="p">;</span>
+  ASStackLayoutSpec *hstack = [[ASStackLayoutSpec alloc] init];
+  hStack.direction          = ASStackLayoutDirectionHorizontal;
+  hStack.spacing            = 5.0;
 
-  <span class="p">[</span><span class="n">hStack</span> <span class="nl">setChildren</span><span class="p">:</span><span class="l">@[</span><span class="n">imageNode</span><span class="p">,</span> <span class="n">vStack</span><span class="l">]</span><span class="p">];</span>
+  [hStack setChildren:@[imageNode, vStack]];
 
-  <span class="n">ASInsetLayoutSpec</span> <span class="o">*</span><span class="n">insetSpec</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASInsetLayoutSpec</span> <span class="nl">insetLayoutSpecWithInsets</span><span class="p">:</span><span class="n">UIEdgeInsetsMake</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span> <span class="nl">child</span><span class="p">:</span><span class="n">hStack</span><span class="p">];</span>
+  ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(5,5,5,5) child:hStack];
 
-  <span class="k">return</span> <span class="n">insetSpec</span><span class="p">;</span>
-<span class="p">}</span>
+  return insetSpec;
+}
 </code></pre></div>
 <h3>Discussion</h3>
 
 <h1>Social App Layout</h1>
 
 <p><img src="/static/layout-example-2.png"></p>
-<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">layoutSpecThatFits:</span><span class="p">(</span><span class="n">ASSizeRange</span><span class="p">)</span><span class="nv">constrainedSize</span>
-<span class="p">{</span>
-  <span class="c1">// header stack</span>
-  <span class="n">_userAvatarImageView</span><span class="p">.</span><span class="n">preferredFrameSize</span> <span class="o">=</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="n">USER_IMAGE_HEIGHT</span><span class="p">,</span> <span class="n">USER_IMAGE_HEIGHT</span><span class="p">);</span>  <span class="c1">// constrain avatar image frame size</span>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c">- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  // header stack
+  _userAvatarImageView.preferredFrameSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);  // constrain avatar image frame size
 
-  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">spacer</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
-  <span class="n">spacer</span><span class="p">.</span><span class="n">flexGrow</span>      <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+  ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
+  spacer.flexGrow      = YES;
 
-  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">headerStack</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="n">horizontalStackLayoutSpec</span><span class="p">];</span>
-  <span class="n">headerStack</span><span class="p">.</span><span class="n">alignItems</span>         <span class="o">=</span> <span class="n">ASStackLayoutAlignItemsCenter</span><span class="p">;</span>       <span class="c1">// center items vertically in horizontal stack</span>
-  <span class="n">headerStack</span><span class="p">.</span><span class="n">justifyContent</span>     <span class="o">=</span> <span class="n">ASStackLayoutJustifyContentStart</span><span class="p">;</span>    <span class="c1">// justify content to left side of header stack</span>
-  <span class="n">headerStack</span><span class="p">.</span><span class="n">spacing</span>            <span class="o">=</span> <span class="n">HORIZONTAL_BUFFER</span><span class="p">;</span>
+  ASStackLayoutSpec *headerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  headerStack.alignItems         = ASStackLayoutAlignItemsCenter;       // center items vertically in horizontal stack
+  headerStack.justifyContent     = ASStackLayoutJustifyContentStart;    // justify content to left side of header stack
+  headerStack.spacing            = HORIZONTAL_BUFFER;
 
-  <span class="p">[</span><span class="n">headerStack</span> <span class="nl">setChildren</span><span class="p">:</span><span class="l">@[</span><span class="n">_userAvatarImageView</span><span class="p">,</span> <span class="n">_userNameLabel</span><span class="p">,</span> <span class="n">spacer</span><span class="p">,</span> <span class="n">_photoTimeIntervalSincePostLabel</span><span class="l">]</span><span class="p">];</span>
+  [headerStack setChildren:@[_userAvatarImageView, _userNameLabel, spacer, _photoTimeIntervalSincePostLabel]];
 
-  <span class="c1">// header inset stack</span>
+  // header inset stack
 
-  <span class="bp">UIEdgeInsets</span> <span class="n">insets</span>                <span class="o">=</span> <span class="n">UIEdgeInsetsMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">HORIZONTAL_BUFFER</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">HORIZONTAL_BUFFER</span><span class="p">);</span>
-  <span class="n">ASInsetLayoutSpec</span> <span class="o">*</span><span class="n">headerWithInset</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASInsetLayoutSpec</span> <span class="nl">insetLayoutSpecWithInsets</span><span class="p">:</span><span class="n">insets</span> <span class="nl">child</span><span class="p">:</span><span class="n">headerStack</span><span class="p">];</span>
-  <span class="n">headerWithInset</span><span class="p">.</span><span class="n">flexShrink</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+  UIEdgeInsets insets                = UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER);
+  ASInsetLayoutSpec *headerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:headerStack];
+  headerWithInset.flexShrink = YES;
 
-  <span class="c1">// vertical stack</span>
+  // vertical stack
 
-  <span class="n">CGFloat</span> <span class="n">cellWidth</span>                  <span class="o">=</span> <span class="n">constrainedSize</span><span class="p">.</span><span class="n">max</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
-  <span class="n">_photoImageView</span><span class="p">.</span><span class="n">preferredFrameSize</span> <span class="o">=</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="n">cellWidth</span><span class="p">,</span> <span class="n">cellWidth</span><span class="p">);</span>  <span class="c1">// constrain photo frame size</span>
+  CGFloat cellWidth                  = constrainedSize.max.width;
+  _photoImageView.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);  // constrain photo frame size
 
-  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">verticalStack</span>   <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="n">verticalStackLayoutSpec</span><span class="p">];</span>
-  <span class="n">verticalStack</span><span class="p">.</span><span class="n">alignItems</span>           <span class="o">=</span> <span class="n">ASStackLayoutAlignItemsStretch</span><span class="p">;</span>    <span class="c1">// stretch headerStack to fill horizontal space</span>
+  ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
+  verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;    // stretch headerStack to fill horizontal space
 
-  <span class="p">[</span><span class="n">verticalStack</span> <span class="nl">setChildren</span><span class="p">:</span><span class="l">@[</span><span class="n">headerWithInset</span><span class="p">,</span> <span class="n">_photoImageView</span><span class="p">,</span> <span class="n">footerWithInset</span><span class="l">]</span><span class="p">];</span>
+  [verticalStack setChildren:@[headerWithInset, _photoImageView, footerWithInset]];
 
-  <span class="k">return</span> <span class="n">verticalStack</span><span class="p">;</span>
-<span class="p">}</span>
+  return verticalStack;
+}
+
 </code></pre></div>
 <h3>Discussion</h3>
 
@@ -5717,95 +5719,95 @@
 <h1>Social App Layout 2</h1>
 
 <p><img src="/static/layout-example-3.png"></p>
-<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c"><span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">layoutSpecThatFits:</span><span class="p">(</span><span class="n">ASSizeRange</span><span class="p">)</span><span class="nv">constrainedSize</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-objective-c" data-lang="objective-c">- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize {
 
-  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">textSpec</span>  <span class="o">=</span> <span class="p">[</span><span class="nb">self</span> <span class="n">textSpec</span><span class="p">];</span>
-  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">imageSpec</span> <span class="o">=</span> <span class="p">[</span><span class="nb">self</span> <span class="nl">imageSpecWithSize</span><span class="p">:</span><span class="n">constrainedSize</span><span class="p">];</span>
-  <span class="n">ASOverlayLayoutSpec</span> <span class="o">*</span><span class="n">soldOutOverImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASOverlayLayoutSpec</span> <span class="nl">overlayLayoutSpecWithChild</span><span class="p">:</span><span class="n">imageSpec</span> 
-                                                                                  <span class="nl">overlay</span><span class="p">:[</span><span class="nb">self</span> <span class="n">soldOutLabelSpec</span><span class="p">]];</span>
+  ASLayoutSpec *textSpec  = [self textSpec];
+  ASLayoutSpec *imageSpec = [self imageSpecWithSize:constrainedSize];
+  ASOverlayLayoutSpec *soldOutOverImage = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:imageSpec 
+                                                                                  overlay:[self soldOutLabelSpec]];
 
-  <span class="bp">NSArray</span> <span class="o">*</span><span class="n">stackChildren</span> <span class="o">=</span> <span class="l">@[</span><span class="n">soldOutOverImage</span><span class="p">,</span> <span class="n">textSpec</span><span class="l">]</span><span class="p">;</span>
+  NSArray *stackChildren = @[soldOutOverImage, textSpec];
 
-  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">mainStack</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="nl">stackLayoutSpecWithDirection</span><span class="p">:</span><span class="n">ASStackLayoutDirectionVertical</span> 
-                                                                         <span class="nl">spacing</span><span class="p">:</span><span class="mf">0.0</span>
-                                                                  <span class="nl">justifyContent</span><span class="p">:</span><span class="n">ASStackLayoutJustifyContentStart</span>
-                                                                      <span class="nl">alignItems</span><span class="p">:</span><span class="n">ASStackLayoutAlignItemsStretch</span>          
-                                                                        <span class="nl">children</span><span class="p">:</span><span class="n">stackChildren</span><span class="p">];</span>
+  ASStackLayoutSpec *mainStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical 
+                                                                         spacing:0.0
+                                                                  justifyContent:ASStackLayoutJustifyContentStart
+                                                                      alignItems:ASStackLayoutAlignItemsStretch          
+                                                                        children:stackChildren];
 
-  <span class="n">ASOverlayLayoutSpec</span> <span class="o">*</span><span class="n">soldOutOverlay</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASOverlayLayoutSpec</span> <span class="nl">overlayLayoutSpecWithChild</span><span class="p">:</span><span class="n">mainStack</span> 
-                                                                                <span class="nl">overlay</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">soldOutOverlay</span><span class="p">];</span>
+  ASOverlayLayoutSpec *soldOutOverlay = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:mainStack 
+                                                                                overlay:self.soldOutOverlay];
 
-  <span class="k">return</span> <span class="n">soldOutOverlay</span><span class="p">;</span>
-<span class="p">}</span>
+  return soldOutOverlay;
+}
 
-<span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">textSpec</span> <span class="p">{</span>
-  <span class="n">CGFloat</span> <span class="n">kInsetHorizontal</span>        <span class="o">=</span> <span class="mf">16.0</span><span class="p">;</span>
-  <span class="n">CGFloat</span> <span class="n">kInsetTop</span>               <span class="o">=</span> <span class="mf">6.0</span><span class="p">;</span>
-  <span class="n">CGFloat</span> <span class="n">kInsetBottom</span>            <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
-  <span class="bp">UIEdgeInsets</span> <span class="n">textInsets</span>         <span class="o">=</span> <span class="n">UIEdgeInsetsMake</span><span class="p">(</span><span class="n">kInsetTop</span><span class="p">,</span> <span class="n">kInsetHorizontal</span><span class="p">,</span> <span class="n">kInsetBottom</span><span class="p">,</span> <span class="n">kInsetHorizontal</span><span class="p">);</span>
+- (ASLayoutSpec *)textSpec {
+  CGFloat kInsetHorizontal        = 16.0;
+  CGFloat kInsetTop               = 6.0;
+  CGFloat kInsetBottom            = 0.0;
+  UIEdgeInsets textInsets         = UIEdgeInsetsMake(kInsetTop, kInsetHorizontal, kInsetBottom, kInsetHorizontal);
 
-  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">verticalSpacer</span>    <span class="o">=</span> <span class="p">[[</span><span class="n">ASLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
-  <span class="n">verticalSpacer</span><span class="p">.</span><span class="n">flexGrow</span>         <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+  ASLayoutSpec *verticalSpacer    = [[ASLayoutSpec alloc] init];
+  verticalSpacer.flexGrow         = YES;
 
-  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">horizontalSpacer1</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
-  <span class="n">horizontalSpacer1</span><span class="p">.</span><span class="n">flexGrow</span>      <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+  ASLayoutSpec *horizontalSpacer1 = [[ASLayoutSpec alloc] init];
+  horizontalSpacer1.flexGrow      = YES;
 
-  <span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="n">horizontalSpacer2</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ASLayoutSpec</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
-  <span class="n">horizontalSpacer2</span><span class="p">.</span><span class="n">flexGrow</span>      <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+  ASLayoutSpec *horizontalSpacer2 = [[ASLayoutSpec alloc] init];
+  horizontalSpacer2.flexGrow      = YES;
 
-  <span class="bp">NSArray</span> <span class="o">*</span><span class="n">info1Children</span> <span class="o">=</span> <span class="l">@[</span><span class="nb">self</span><span class="p">.</span><span class="n">firstInfoLabel</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">distanceLabel</span><span class="p">,</span> <span class="n">horizontalSpacer1</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">originalPriceLabel</span><span class="l">]</span><span class="p">;</span>
-  <span class="bp">NSArray</span> <span class="o">*</span><span class="n">info2Children</span> <span class="o">=</span> <span class="l">@[</span><span class="nb">self</span><span class="p">.</span><span class="n">secondInfoLabel</span><span class="p">,</span> <span class="n">horizontalSpacer2</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">finalPriceLabel</span><span class="l">]</span><span class="p">;</span>
-  <span class="k">if</span> <span class="p">([</span><span class="n">ItemNode</span> <span class="n">isRTL</span><span class="p">])</span> <span class="p">{</span>
-    <span class="n">info1Children</span> <span class="o">=</span> <span class="p">[[</span><span class="n">info1Children</span> <span class="n">reverseObjectEnumerator</span><span class="p">]</span> <span class="n">allObjects</span><span class="p">];</span>
-    <span class="n">info2Children</span> <span class="o">=</span> <span class="p">[[</span><span class="n">info2Children</span> <span class="n">reverseObjectEnumerator</span><span class="p">]</span> <span class="n">allObjects</span><span class="p">];</span>
-  <span class="p">}</span>
+  NSArray *info1Children = @[self.firstInfoLabel, self.distanceLabel, horizontalSpacer1, self.originalPriceLabel];
+  NSArray *info2Children = @[self.secondInfoLabel, horizontalSpacer2, self.finalPriceLabel];
+  if ([ItemNode isRTL]) {
+    info1Children = [[info1Children reverseObjectEnumerator] allObjects];
+    info2Children = [[info2Children reverseObjectEnumerator] allObjects];
+  }
 
-  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">info1Stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="nl">stackLayoutSpecWithDirection</span><span class="p">:</span><span class="n">ASStackLayoutDirectionHorizontal</span> 
-                                                                          <span class="nl">spacing</span><span class="p">:</span><span class="mf">1.0</span>
-                                                                   <span class="nl">justifyContent</span><span class="p">:</span><span class="n">ASStackLayoutJustifyContentStart</span> 
-                                                                       <span class="nl">alignItems</span><span class="p">:</span><span class="n">ASStackLayoutAlignItemsBaselineLast</span> <span class="nl">children</span><span class="p">:</span><span class="n">info1Children</span><span class="p">];</span>
+  ASStackLayoutSpec *info1Stack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal 
+                                                                          spacing:1.0
+                                                                   justifyContent:ASStackLayoutJustifyContentStart 
+                                                                       alignItems:ASStackLayoutAlignItemsBaselineLast children:info1Children];
 
-  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">info2Stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="nl">stackLayoutSpecWithDirection</span><span class="p">:</span><span class="n">ASStackLayoutDirectionHorizontal</span> 
-                                                                          <span class="nl">spacing</span><span class="p">:</span><span class="mf">0.0</span>
-                                                                   <span class="nl">justifyContent</span><span class="p">:</span><span class="n">ASStackLayoutJustifyContentCenter</span> 
-                                                                       <span class="nl">alignItems</span><span class="p">:</span><span class="n">ASStackLayoutAlignItemsBaselineLast</span> <span class="nl">children</span><span class="p">:</span><span class="n">info2Children</span><span class="p">];</span>
+  ASStackLayoutSpec *info2Stack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal 
+                                                                          spacing:0.0
+                                                                   justifyContent:ASStackLayoutJustifyContentCenter 
+                                                                       alignItems:ASStackLayoutAlignItemsBaselineLast children:info2Children];
 
-  <span class="n">ASStackLayoutSpec</span> <span class="o">*</span><span class="n">textStack</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStackLayoutSpec</span> <span class="nl">stackLayoutSpecWithDirection</span><span class="p">:</span><span class="n">ASStackLayoutDirectionVertical</span> 
-                                                                         <span class="nl">spacing</span><span class="p">:</span><span class="mf">0.0</span>
-                                                                  <span class="nl">justifyContent</span><span class="p">:</span><span class="n">ASStackLayoutJustifyContentEnd</span>
-                                                                      <span class="nl">alignItems</span><span class="p">:</span><span class="n">ASStackLayoutAlignItemsStretch</span>
-                                                                        <span class="nl">children</span><span class="p">:</span><span class="l">@[</span><span class="nb">self</span><span class="p">.</span><span class="n">titleLabel</span><span class="p">,</span> <span class="n">verticalSpacer</span><span class="p">,</span> <span class="n">info1Stack</span><span class="p">,</span> <span class="n">info2Stack</span><span class="l">]</span><span class="p">];</span>
+  ASStackLayoutSpec *textStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical 
+                                                                         spacing:0.0
+                                                                  justifyContent:ASStackLayoutJustifyContentEnd
+                                                                      alignItems:ASStackLayoutAlignItemsStretch
+                                                                        children:@[self.titleLabel, verticalSpacer, info1Stack, info2Stack]];
 
-  <span class="n">ASInsetLayoutSpec</span> <span class="o">*</span><span class="n">textWrapper</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASInsetLayoutSpec</span> <span class="nl">insetLayoutSpecWithInsets</span><span class="p">:</span><span class="n">textInsets</span> 
-                                                                          <span class="nl">child</span><span class="p">:</span><span class="n">textStack</span><span class="p">];</span>
-  <span class="n">textWrapper</span><span class="p">.</span><span class="n">flexGrow</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+  ASInsetLayoutSpec *textWrapper = [ASInsetLayoutSpec insetLayoutSpecWithInsets:textInsets 
+                                                                          child:textStack];
+  textWrapper.flexGrow = YES;
 
-  <span class="k">return</span> <span class="n">textWrapper</span><span class="p">;</span>
-<span class="p">}</span>
+  return textWrapper;
+}
 
-<span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">imageSpecWithSize:</span><span class="p">(</span><span class="n">ASSizeRange</span><span class="p">)</span><span class="nv">constrainedSize</span> <span class="p">{</span>
-  <span class="n">CGFloat</span> <span class="n">imageRatio</span> <span class="o">=</span> <span class="p">[</span><span class="nb">self</span> <span class="nl">imageRatioFromSize</span><span class="p">:</span><span class="n">constrainedSize</span><span class="p">.</span><span class="n">max</span><span class="p">];</span>
+- (ASLayoutSpec *)imageSpecWithSize:(ASSizeRange)constrainedSize {
+  CGFloat imageRatio = [self imageRatioFromSize:constrainedSize.max];
 
-  <span class="n">ASRatioLayoutSpec</span> <span class="o">*</span><span class="n">imagePlace</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASRatioLayoutSpec</span> <span class="nl">ratioLayoutSpecWithRatio</span><span class="p">:</span><span class="n">imageRatio</span> <span class="nl">child</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">dealImageView</span><span class="p">];</span>
+  ASRatioLayoutSpec *imagePlace = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:imageRatio child:self.dealImageView];
 
-  <span class="nb">self</span><span class="p">.</span><span class="n">badge</span><span class="p">.</span><span class="n">layoutPosition</span> <span class="o">=</span> <span class="n">CGPointMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">constrainedSize</span><span class="p">.</span><span class="n">max</span><span class="p">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">kFixedLabelsAreaHeight</span> <span class="o">-</span> <span class="n">kBadgeHeight</span><span class="p">);</span>
-  <span class="nb">self</span><span class="p">.</span><span class="n">badge</span><span class="p">.</span><span class="n">sizeRange</span> <span class="o">=</span> <span class="n">ASRelativeSizeRangeMake</span><span class="p">(</span><span class="n">ASRelativeSizeMake</span><span class="p">(</span><span class="n">ASRelativeDimensionMakeWithPercent</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">ASRelativeDimensionMakeWithPoints</span><span class="p">(</span><span class="n">kBadgeHeight</span><span class="p">)),</span> <span class="n">ASRelativeSizeMake</span><span class="p">(</span><span class="n">ASRelativeDimensionMakeWithPercent</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">ASRelativeDimensionMakeWithPoints</span><span class="p">(</span><span class="n">kBadgeHeight</span><span class="p">)));</span>
-  <span class="n">ASStaticLayoutSpec</span> <span class="o">*</span><span class="n">badgePosition</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStaticLayoutSpec</span> <span class="nl">staticLayoutSpecWithChildren</span><span class="p">:</span><span class="l">@[</span><span class="nb">self</span><span class="p">.</span><span class="n">badge</span><span class="l">]</span><span class="p">];</span>
+  self.badge.layoutPosition = CGPointMake(0, constrainedSize.max.height - kFixedLabelsAreaHeight - kBadgeHeight);
+  self.badge.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMake(ASRelativeDimensionMakeWithPercent(0), ASRelativeDimensionMakeWithPoints(kBadgeHeight)), ASRelativeSizeMake(ASRelativeDimensionMakeWithPercent(1), ASRelativeDimensionMakeWithPoints(kBadgeHeight)));
+  ASStaticLayoutSpec *badgePosition = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.badge]];
 
-  <span class="n">ASOverlayLayoutSpec</span> <span class="o">*</span><span class="n">badgeOverImage</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASOverlayLayoutSpec</span> <span class="nl">overlayLayoutSpecWithChild</span><span class="p">:</span><span class="n">imagePlace</span> <span class="nl">overlay</span><span class="p">:</span><span class="n">badgePosition</span><span class="p">];</span>
-  <span class="n">badgeOverImage</span><span class="p">.</span><span class="n">flexGrow</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+  ASOverlayLayoutSpec *badgeOverImage = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:imagePlace overlay:badgePosition];
+  badgeOverImage.flexGrow = YES;
 
-  <span class="k">return</span> <span class="n">badgeOverImage</span><span class="p">;</span>
-<span class="p">}</span>
+  return badgeOverImage;
+}
 
-<span class="p">-</span> <span class="p">(</span><span class="n">ASLayoutSpec</span> <span class="o">*</span><span class="p">)</span><span class="nf">soldOutLabelSpec</span> <span class="p">{</span>
-  <span class="n">ASCenterLayoutSpec</span> <span class="o">*</span><span class="n">centerSoldOutLabel</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASCenterLayoutSpec</span> <span class="nl">centerLayoutSpecWithCenteringOptions</span><span class="p">:</span><span class="n">ASCenterLayoutSpecCenteringXY</span> 
-  <span class="nl">sizingOptions</span><span class="p">:</span><span class="n">ASCenterLayoutSpecSizingOptionMinimumXY</span> <span class="nl">child</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">soldOutLabelFlat</span><span class="p">];</span>
-  <span class="n">ASStaticLayoutSpec</span> <span class="o">*</span><span class="n">soldOutBG</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASStaticLayoutSpec</span> <span class="nl">staticLayoutSpecWithChildren</span><span class="p">:</span><span class="l">@[</span><span class="nb">self</span><span class="p">.</span><span class="n">soldOutLabelBackground</span><span class="l">]</span><span class="p">];</span>
-  <span class="n">ASCenterLayoutSpec</span> <span class="o">*</span><span class="n">centerSoldOut</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASCenterLayoutSpec</span> <span class="nl">centerLayoutSpecWithCenteringOptions</span><span class="p">:</span><span class="n">ASCenterLayoutSpecCenteringXY</span>   <span class="nl">sizingOptions</span><span class="p">:</span><span class="n">ASCenterLayoutSpecSizingOptionDefault</span> <span class="nl">child</span><span class="p">:</span><span class="n">soldOutBG</span><span class="p">];</span>
-  <span class="n">ASBackgroundLayoutSpec</span> <span class="o">*</span><span class="n">soldOutLabelOverBackground</span> <span class="o">=</span> <span class="p">[</span><span class="n">ASBackgroundLayoutSpec</span> <span class="nl">backgroundLayoutSpecWithChild</span><span class="p">:</span><span class="n">centerSoldOutLabel</span> <span class="nl">background</span><span class="p">:</span><span class="n">centerSoldOut</span><span class="p">];</span>
-  <span class="k">return</span> <span class="n">soldOutLabelOverBackground</span><span class="p">;</span>
-<span class="p">}</span>
+- (ASLayoutSpec *)soldOutLabelSpec {
+  ASCenterLayoutSpec *centerSoldOutLabel = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY 
+  sizingOptions:ASCenterLayoutSpecSizingOptionMinimumXY child:self.soldOutLabelFlat];
+  ASStaticLayoutSpec *soldOutBG = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.soldOutLabelBackground]];
+  ASCenterLayoutSpec *centerSoldOut = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY   sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:soldOutBG];
+  ASBackgroundLayoutSpec *soldOutLabelOverBackground = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:centerSoldOutLabel background:centerSoldOut];
+  return soldOutLabelOverBackground;
+}
 </code></pre></div>
 <h3>Discussion</h3>
 
