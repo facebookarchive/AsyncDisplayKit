@@ -20,7 +20,7 @@
 {
   ASDN::RecursiveMutex _propertyLock;
   MKMapSnapshotter *_snapshotter;
-  BOOL _snapshotNeeded;
+  BOOL _snapshotAfterLayout;
   NSArray *_annotations;
   CLLocationCoordinate2D _centerCoordinateOfMap;
 }
@@ -161,14 +161,14 @@
 
 - (void)takeSnapshot
 {
-  // do not trigger snapshot before layout
+  // set _snapshotNeeded to YES so if layout changes in the future, we'll try snapshotting again.
   ASLayout *layout = self.calculatedLayout;
   if (layout == nil || CGSizeEqualToSize(CGSizeZero, layout.size)) {
-    _snapshotNeeded = YES;
+    _snapshotAfterLayout = YES;
     return;
   }
   
-  _snapshotNeeded = NO;
+  _snapshotAfterLayout = NO;
   
   if (!_snapshotter) {
     [self setUpSnapshotter];
@@ -322,7 +322,7 @@
 {
   [super calculatedLayoutDidChange];
   
-  if (_snapshotNeeded) {
+  if (_snapshotAfterLayout) {
     [self takeSnapshot];
   }
 }
