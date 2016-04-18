@@ -19,7 +19,12 @@
 
 @interface ASVideoNode : ASControlNode
 
-@property (atomic, strong, readwrite) NSURL *url;
+- (instancetype)init; // ASVideoNode is created with a simple alloc/init.
+
+- (void)play;
+- (void)pause;
+- (BOOL)isPlaying;
+
 @property (atomic, strong, readwrite) AVAsset *asset;
 
 @property (atomic, strong, readonly) AVPlayer *player;
@@ -36,13 +41,6 @@
 @property (atomic) ASButtonNode *playButton;
 
 @property (atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
-
-- (instancetype)init;
-
-- (void)play;
-- (void)pause;
-
-- (BOOL)isPlaying;
 
 @end
 

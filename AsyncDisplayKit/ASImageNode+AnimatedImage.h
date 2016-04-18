@@ -9,7 +9,7 @@
 #import "ASImageNode.h"
 #import "ASImageProtocols.h"
 
-@interface ASImageNode ()
+@interface ASImageNode (AnimatedImage)
 @property (atomic, assign) BOOL animatedImagePaused;
 @property (nullable, atomic, strong) id <ASAnimatedImageProtocol> animatedImage;
 @end

@@ -71,7 +71,7 @@
 
 - (void)testOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnodeWithUrl
 {
-  _videoNode.url = _url;
+  _videoNode.asset = [AVAsset assetWithURL:_url];
   [self doOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnodeWithUrl];
 }
 
@@ -92,7 +92,7 @@
 
 - (void)testOnPauseSpinnerIsPausedIfPresentWithURL
 {
-  _videoNode.url = _url;
+  _videoNode.asset = [AVAsset assetWithURL:_url];
   [self doOnPauseSpinnerIsPausedIfPresentWithURL];
 }
 
@@ -115,7 +115,7 @@
 
 - (void)testOnVideoReadySpinnerIsStoppedAndRemovedWithURL
 {
-  _videoNode.url = _url;
+  _videoNode.asset = [AVAsset assetWithURL:_url];
   [self doOnVideoReadySpinnerIsStoppedAndRemovedWithURL];
 }
 
@@ -138,7 +138,7 @@
 
 - (void)testPlayerDefaultsToNilWithURL
 {
-  _videoNode.url = _url;
+  _videoNode.asset = [AVAsset assetWithURL:_url];
   XCTAssertNil(_videoNode.player);
 }
 
@@ -152,7 +152,7 @@
 
 - (void)testPlayerIsCreatedInFetchDataWithURL
 {
-  _videoNode.url = _url;
+  _videoNode.asset = [AVAsset assetWithURL:_url];
   _videoNode.interfaceState = ASInterfaceStateFetchData;
   
   XCTAssertNotNil(_videoNode.player);
@@ -167,7 +167,7 @@
 
 - (void)testPlayerLayerNodeIsAddedOnDidLoadIfVisibleAndAutoPlayingWithURL
 {
-  _videoNode.url = _url;
+  _videoNode.asset = [AVAsset assetWithURL:_url];
   [self doPlayerLayerNodeIsAddedOnDidLoadIfVisibleAndAutoPlayingWithURL];
 }
 
@@ -188,7 +188,7 @@
 
 - (void)testPlayerLayerNodeIsNotAddedIfVisibleButShouldNotBePlayingWithUrl
 {
-  _videoNode.url = _url;
+  _videoNode.asset = [AVAsset assetWithURL:_url];
   [self doPlayerLayerNodeIsNotAddedIfVisibleButShouldNotBePlaying];
 }
 
@@ -210,7 +210,7 @@
 
 - (void)testVideoStartsPlayingOnDidDidBecomeVisibleWhenShouldAutoplayWithURL
 {
-  _videoNode.url = _url;
+  _videoNode.asset = [AVAsset assetWithURL:_url];
   [self doVideoStartsPlayingOnDidDidBecomeVisibleWhenShouldAutoplay];
 }
 
@@ -237,7 +237,7 @@
 
 - (void)testVideoShouldPauseWhenItLeavesVisibleButShouldKnowPlayingShouldRestartLaterWithURL
 {
-  _videoNode.url = _url;
+  _videoNode.asset = [AVAsset assetWithURL:_url];
   [self doVideoShouldPauseWhenItLeavesVisibleButShouldKnowPlayingShouldRestartLater];
 }
 
@@ -260,7 +260,7 @@
 
 - (void)testVideoThatIsPlayingWhenItLeavesVisibleRangeStartsAgainWhenItComesBackWithURL
 {
-  _videoNode.url = _url;
+  _videoNode.asset = [AVAsset assetWithURL:_url];
   [self doVideoThatIsPlayingWhenItLeavesVisibleRangeStartsAgainWhenItComesBack];
 }
 
