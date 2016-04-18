@@ -27,6 +27,7 @@ static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
 }
 
 static void *ASVideoNodeContext = &ASVideoNodeContext;
+static NSString * const kPlaybackLikelyToKeepUpKey = @"playbackLikelyToKeepUp";
 static NSString * const kStatus = @"status";
 
 @interface ASVideoNode ()
@@ -116,19 +117,19 @@ static NSString * const kStatus = @"status";
 - (void)addPlayerItemObservers:(AVPlayerItem *)playerItem
 {
   [playerItem addObserver:self forKeyPath:kStatus options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:ASVideoNodeContext];
+  [playerItem addObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
 
   NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
   [notificationCenter addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:playerItem];
   [notificationCenter addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemFailedToPlayToEndTimeNotification object:playerItem];
   [notificationCenter addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemNewErrorLogEntryNotification object:playerItem];
-  [notificationCenter addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
-  [notificationCenter addObserver:self selector:@selector(didEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
 - (void)removePlayerItemObservers:(AVPlayerItem *)playerItem
 {
   @try {
     [playerItem removeObserver:self forKeyPath:kStatus context:ASVideoNodeContext];
+    [playerItem removeObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey context:ASVideoNodeContext];
   }
   @catch (NSException * __unused exception) {
     NSLog(@"Unnecessary KVO removal");
@@ -138,8 +139,6 @@ static NSString * const kStatus = @"status";
   [notificationCenter removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:playerItem];
   [notificationCenter removeObserver:self name:AVPlayerItemFailedToPlayToEndTimeNotification object:playerItem];
   [notificationCenter removeObserver:self name:AVPlayerItemNewErrorLogEntryNotification object:playerItem];
-  [notificationCenter removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
-  [notificationCenter removeObserver:self name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
 - (void)layout
@@ -241,6 +240,10 @@ static NSString * const kStatus = @"status";
       if (_placeholderImageNode.image == nil) {
         [self generatePlaceholderImage];
       }
+    }
+  } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
+    if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true) {
+      [self play]; // autoresume after buffer catches up
     }
   }
 }
@@ -489,25 +492,6 @@ static NSString * const kStatus = @"status";
     if (logEvent) {
       NSLog(@"Log code %ld domain %@ comment %@", (long)logEvent.errorStatusCode, logEvent.errorDomain, logEvent.errorComment);
     }
-  }
-}
-
-- (void)willEnterForeground:(NSNotification *)notification
-{
-  ASDN::MutexLocker l(_videoLock);
-
-  if (_shouldBePlaying) {
-    [self play];
-  }
-}
-
-- (void)didEnterBackground:(NSNotification *)notification
-{
-  ASDN::MutexLocker l(_videoLock);
-
-  if (_shouldBePlaying) {
-    [self pause];
-    _shouldBePlaying = YES;
   }
 }
 

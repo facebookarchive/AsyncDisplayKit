@@ -29,7 +29,7 @@
 @property (atomic, readonly) ASImageNode *placeholderImageNode;
 @property (atomic, readwrite) ASDisplayNode *playerNode;
 @property (atomic, readwrite) AVPlayer *player;
-@property (atomic, readonly) BOOL shouldBePlaying;
+@property (atomic, readwrite) BOOL shouldBePlaying;
 
 - (void)setPlaceholderImage:(UIImage *)image;
 
@@ -313,21 +313,17 @@
   XCTAssertTrue(_videoNode.isPlaying);
 }
 
-- (void)testBackgroundingAndForegroungingTheAppShouldPauseAndResume
+- (void)testVideoResumedWhenBufferIsLikelyToKeepUp
 {
   _videoNode.asset = _firstAsset;
 
-  [_videoNode didLoad];
   [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
-  [_videoNode play];
-
-  XCTAssertTrue(_videoNode.isPlaying);
-
-  [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationDidEnterBackgroundNotification object:nil];
+  [_videoNode pause];
+  _videoNode.shouldBePlaying = YES;
 
   XCTAssertFalse(_videoNode.isPlaying);
 
-  [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationWillEnterForegroundNotification object:nil];
+  [_videoNode observeValueForKeyPath:@"playbackLikelyToKeepUp" ofObject:[_videoNode currentItem] change:@{NSKeyValueChangeNewKey : @YES} context:NULL];
 
   XCTAssertTrue(_videoNode.isPlaying);
 }
