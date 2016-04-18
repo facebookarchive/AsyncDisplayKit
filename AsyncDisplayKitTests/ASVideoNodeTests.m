@@ -24,25 +24,14 @@
   ASDisplayNode *_playerNode;
   AVPlayer *_player;
 }
-@property (atomic) ASInterfaceState interfaceState;
-@property (atomic) ASDisplayNode *spinner;
-@property (atomic) ASDisplayNode *playerNode;
-@property (atomic) BOOL shouldBePlaying;
+@property (atomic, readwrite) ASInterfaceState interfaceState;
+@property (atomic, readonly) ASDisplayNode *spinner;
+@property (atomic, readonly) ASImageNode *placeholderImageNode;
+@property (atomic, readwrite) ASDisplayNode *playerNode;
+@property (atomic, readwrite) AVPlayer *player;
+@property (atomic, readonly) BOOL shouldBePlaying;
 
-- (void)setPlayerNode:(ASDisplayNode *)playerNode;
-@end
-
-@implementation ASVideoNode (Test)
-
-- (void)setPlayerNode:(ASDisplayNode *)playerNode
-{
-  _playerNode = playerNode;
-}
-
-- (void)setPlayer:(AVPlayer *)player
-{
-  _player = player;
-}
+- (void)setPlaceholderImage:(UIImage *)image;
 
 @end
 
@@ -291,6 +280,21 @@
   _videoNode.muted = NO;
 
   XCTAssertFalse(_videoNode.player.muted);
+}
+
+- (void)testSettingVideoGravityChangesPlaceholderContentMode
+{
+  [_videoNode setPlaceholderImage:[[UIImage alloc] init]];
+  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.placeholderImageNode.contentMode);
+
+  _videoNode.gravity = AVLayerVideoGravityResize;
+  XCTAssertEqual(UIViewContentModeScaleToFill, _videoNode.placeholderImageNode.contentMode);
+
+  _videoNode.gravity = AVLayerVideoGravityResizeAspect;
+  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.placeholderImageNode.contentMode);
+
+  _videoNode.gravity = AVLayerVideoGravityResizeAspectFill;
+  XCTAssertEqual(UIViewContentModeScaleAspectFill, _videoNode.placeholderImageNode.contentMode);
 }
 
 @end

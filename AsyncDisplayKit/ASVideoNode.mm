@@ -9,6 +9,23 @@
 #import "ASVideoNode.h"
 #import "ASDefaultPlayButton.h"
 
+static BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
+  return ASObjectIsEqual(asset1, asset2)
+  || ([asset1 isKindOfClass:[AVURLAsset class]]
+      && [asset2 isKindOfClass:[AVURLAsset class]]
+      && ASObjectIsEqual(((AVURLAsset *)asset1).URL, ((AVURLAsset *)asset2).URL));
+}
+
+static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
+  if ([videoGravity isEqualToString:AVLayerVideoGravityResizeAspect]) {
+    return UIViewContentModeScaleAspectFit;
+  } else if ([videoGravity isEqual:AVLayerVideoGravityResizeAspectFill]) {
+    return UIViewContentModeScaleAspectFill;
+  } else {
+    return UIViewContentModeScaleToFill;
+  }
+}
+
 @interface ASVideoNode ()
 {
   ASDN::RecursiveMutex _videoLock;
@@ -153,40 +170,36 @@
     imageGenerator.appliesPreferredTrackTransform = YES;
     NSArray *times = @[[NSValue valueWithCMTime:CMTimeMake(0, 1)]];
     
-    [imageGenerator generateCGImagesAsynchronouslyForTimes:times completionHandler:^(CMTime requestedTime, CGImageRef  _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
+    [imageGenerator generateCGImagesAsynchronouslyForTimes:times completionHandler:^(CMTime requestedTime, CGImageRef _Nullable image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError * _Nullable error) {
       
       ASDN::MutexLocker l(_videoLock);
       
       // Unfortunately it's not possible to generate a preview image for an HTTP live stream asset, so we'll give up here
       // http://stackoverflow.com/questions/32112205/m3u8-file-avassetimagegenerator-error
       if (image && _placeholderImageNode.image == nil) {
-        UIImage *theImage = [UIImage imageWithCGImage:image];
-        
-        if (!_placeholderImageNode) {
-          _placeholderImageNode = [[ASImageNode alloc] init];
-          _placeholderImageNode.layerBacked = YES;
-        }
-        
-        _placeholderImageNode.image = theImage;
-        
-        if ([_gravity isEqualToString:AVLayerVideoGravityResize]) {
-          _placeholderImageNode.contentMode = UIViewContentModeRedraw;
-        }
-        else if ([_gravity isEqualToString:AVLayerVideoGravityResizeAspect]) {
-          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFit;
-        }
-        else if ([_gravity isEqualToString:AVLayerVideoGravityResizeAspectFill]) {
-          _placeholderImageNode.contentMode = UIViewContentModeScaleAspectFill;
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-          ASDN::MutexLocker l(_videoLock);
-          
-          [self insertSubnode:_placeholderImageNode atIndex:0];
-          [self setNeedsLayout];
-        });
+        [self setPlaceholderImage:[UIImage imageWithCGImage:image]];
       }
     }];
+  });
+}
+
+- (void)setPlaceholderImage:(UIImage *)image
+{
+  ASDN::MutexLocker l(_videoLock);
+
+  if (_placeholderImageNode == nil) {
+    _placeholderImageNode = [[ASImageNode alloc] init];
+    _placeholderImageNode.layerBacked = YES;
+    _placeholderImageNode.contentMode = ASContentModeFromVideoGravity(_gravity);
+  }
+
+  _placeholderImageNode.image = image;
+
+  dispatch_async(dispatch_get_main_queue(), ^{
+    ASDN::MutexLocker l(_videoLock);
+
+    [self insertSubnode:_placeholderImageNode atIndex:0];
+    [self setNeedsLayout];
   });
 }
 
@@ -345,13 +358,10 @@
 {
   ASDN::MutexLocker l(_videoLock);
   
-  if (ASObjectIsEqual(asset, _asset)
-      || ([asset isKindOfClass:[AVURLAsset class]]
-          && [_asset isKindOfClass:[AVURLAsset class]]
-          && ASObjectIsEqual(((AVURLAsset *)asset).URL, ((AVURLAsset *)_asset).URL))) {
-        return;
-      }
-  
+  if (ASAssetIsEqual(asset, _asset)) {
+    return;
+  }
+
   _asset = asset;
   
   // FIXME: Adopt -setNeedsFetchData when it is available
@@ -378,6 +388,7 @@
   if (_playerNode.isNodeLoaded) {
     ((AVPlayerLayer *)_playerNode.layer).videoGravity = gravity;
   }
+  _placeholderImageNode.contentMode = ASContentModeFromVideoGravity(gravity);
   _gravity = gravity;
 }
 
@@ -508,6 +519,12 @@
   return _spinner;
 }
 
+- (ASImageNode *)placeholderImageNode
+{
+  ASDN::MutexLocker l(_videoLock);
+  return _placeholderImageNode;
+}
+
 - (AVPlayerItem *)currentItem
 {
   ASDN::MutexLocker l(_videoLock);
@@ -524,6 +541,18 @@
 {
   ASDN::MutexLocker l(_videoLock);
   return _playerNode;
+}
+
+- (void)setPlayerNode:(ASDisplayNode *)playerNode
+{
+  ASDN::MutexLocker l(_videoLock);
+  _playerNode = playerNode;
+}
+
+- (void)setPlayer:(AVPlayer *)player
+{
+  ASDN::MutexLocker l(_videoLock);
+  _player = player;
 }
 
 - (BOOL)shouldBePlaying
