@@ -113,6 +113,8 @@ static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:_currentPlayerItem];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemFailedToPlayToEndTimeNotification object:_currentPlayerItem];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemNewErrorLogEntryNotification object:_currentPlayerItem];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
   }
 }
 
@@ -124,6 +126,8 @@ static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemFailedToPlayToEndTimeNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemNewErrorLogEntryNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidEnterBackgroundNotification object:nil];
   }
 }
 
@@ -487,8 +491,8 @@ static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
   if ([_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)]) {
     [_delegate videoPlaybackDidFinish:self];
   }
-  [_player seekToTime:CMTimeMakeWithSeconds(0, 1)];
-  
+  [_player seekToTime:kCMTimeZero];
+
   if (_shouldAutorepeat) {
     [self play];
   } else {
@@ -500,19 +504,37 @@ static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
 {
   if ([notification.name isEqualToString:AVPlayerItemFailedToPlayToEndTimeNotification]) {
     NSLog(@"Failed to play video");
-  }
-  else if ([notification.name isEqualToString:AVPlayerItemNewErrorLogEntryNotification]) {
-    AVPlayerItem* item = (AVPlayerItem*)notification.object;
-    AVPlayerItemErrorLogEvent* logEvent = item.errorLog.events.lastObject;
+  } else if ([notification.name isEqualToString:AVPlayerItemNewErrorLogEntryNotification]) {
+    AVPlayerItem *item = (AVPlayerItem *)notification.object;
+    AVPlayerItemErrorLogEvent *logEvent = item.errorLog.events.lastObject;
     NSLog(@"AVPlayerItem error log entry added for video with error %@ status %@", item.error,
           (item.status == AVPlayerItemStatusFailed ? @"FAILED" : [NSString stringWithFormat:@"%ld", (long)item.status]));
     NSLog(@"Item is %@", item);
     
-    if (logEvent)
+    if (logEvent) {
       NSLog(@"Log code %ld domain %@ comment %@", (long)logEvent.errorStatusCode, logEvent.errorDomain, logEvent.errorComment);
+    }
   }
 }
 
+- (void)willEnterForeground:(NSNotification *)notification
+{
+  ASDN::MutexLocker l(_videoLock);
+
+  if (_shouldBePlaying) {
+    [self play];
+  }
+}
+
+- (void)didEnterBackground:(NSNotification *)notification
+{
+  ASDN::MutexLocker l(_videoLock);
+
+  if (_shouldBePlaying) {
+    [self pause];
+    _shouldBePlaying = YES;
+  }
+}
 
 #pragma mark - Property Accessors for Tests
 
