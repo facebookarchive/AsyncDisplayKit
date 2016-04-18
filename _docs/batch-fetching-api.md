@@ -62,9 +62,10 @@ Here you can see an example how a batch fetching cycle could look like:
 }
 ```
 
-That is all to know and if you want to see actual implementations of the batch fetching API, you can find some very basic implementations within the ASDK samples:
-
- - Kittens
- - CatDealsCollectionView
- - ASDKgram
- - ASCollectionView
+Check out the following sample apps to see the batch fetching API implemented within an app:
+<ul>
+  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a></li>
+  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/Kittens">Kittens</a></li>
+  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/CatDealsCollectionView">CatDealsCollectionView</a></li>
+  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASCollectionView">ASCollectionView</a></li>
+</ul>
