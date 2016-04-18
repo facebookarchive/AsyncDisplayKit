@@ -339,7 +339,10 @@ static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
 - (void)setPlayButton:(ASButtonNode *)playButton
 {
   ASDN::MutexLocker l(_videoLock);
-  
+
+  [_playButton removeTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
+  [_playButton removeFromSupernode];
+
   _playButton = playButton;
   
   [self addSubnode:playButton];
@@ -565,6 +568,7 @@ static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
 
 - (void)dealloc
 {
+  [_playButton removeTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
   [self removePlayerItemObservers];
   
   @try {

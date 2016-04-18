@@ -297,4 +297,19 @@
   XCTAssertEqual(UIViewContentModeScaleAspectFill, _videoNode.placeholderImageNode.contentMode);
 }
 
+- (void)testChangingPlayButtonPerformsProperCleanup
+{
+  ASButtonNode *firstButton = _videoNode.playButton;
+  XCTAssertTrue([firstButton.allTargets containsObject:_videoNode]);
+
+  ASButtonNode *secondButton = [[ASButtonNode alloc] init];
+  _videoNode.playButton = secondButton;
+
+  XCTAssertTrue([secondButton.allTargets containsObject:_videoNode]);
+  XCTAssertEqual(_videoNode, secondButton.supernode);
+
+  XCTAssertFalse([firstButton.allTargets containsObject:_videoNode]);
+  XCTAssertNotEqual(_videoNode, firstButton.supernode);
+}
+
 @end
