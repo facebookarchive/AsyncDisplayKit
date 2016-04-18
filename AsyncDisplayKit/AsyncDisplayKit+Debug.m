@@ -8,22 +8,7 @@
 
 #import "AsyncDisplayKit+Debug.h"
 
-static BOOL __enableHitTestDebug = NO;
 static BOOL __enableHierarchyCountLabel = NO;
-
-@implementation ASControlNode (Debug)
-
-+ (void)setHitTestDebugEnabled:(BOOL)enable
-{
-  __enableHitTestDebug = enable;
-}
-
-+ (BOOL)shouldShowHitTestDebugOverlay
-{
-  return __enableHitTestDebug;
-}
-
-@end
 
 @implementation ASRangeHierarchyCountInfo
 

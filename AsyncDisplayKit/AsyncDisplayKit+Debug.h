@@ -18,16 +18,6 @@
 @property (nonatomic, assign) NSInteger layerCount;
 @end
 
-@interface ASControlNode (Debug)
-/**
- Class method to enable a visualization overlay of the tapable area on the ASControlNode. For app debugging purposes only.
- @param enabled Specify YES to make this debug feature enabled when messaging the ASControlNode class.
- */
-+ (void)setHitTestDebugEnabled:(BOOL)enable;
-+ (BOOL)shouldShowHitTestDebugOverlay;
-
-@end
-
 @interface ASRangeController (Debug)
 
 /**
