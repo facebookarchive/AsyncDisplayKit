@@ -3070,6 +3070,152 @@
           
             
             
+          
+            
+            
+            <li>
+              <a href=/docs/multiplex-image-node.html class="active">
+                ASMultiplexImageNode
+              </a>
+            </li>
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+        
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
             <li>
               <a href=/docs/map-node.html>
                 ASMapNode
@@ -5649,57 +5795,13 @@
     </h1>
     <p></p>
 
-    <p>Create components using the <code>newWithView:size:</code> class method:</p>
-<div class="highlight"><pre><code class="language-objc++" data-lang="objc++">+ (instancetype)newWithView:(const CKComponentViewConfiguration &amp;)view
-                       size:(const CKComponentSize &amp;)size;
-</code></pre></div>
-<p>It&#39;s important to note that you don&#39;t pass a <code>UIView</code> directly, but a <code>CKComponentViewConfiguration</code>. What&#39;s that?</p>
-<div class="highlight"><pre><code class="language-objc++" data-lang="objc++">struct CKComponentViewConfiguration {
-  CKComponentViewClass viewClass;
-  std::unordered_map&lt;CKComponentViewAttribute, id&gt; attributes;
-};
-</code></pre></div>
-<p>The first field is a view class. Ignore <code>CKComponentViewClass</code> for now — in most cases you just pass a class like <code>[UIImageView class]</code> or <code>[UIButton class]</code>.</p>
-
-<p>The second field holds a map of attributes to values: font, color, background image, and so forth. Again, ignore <code>CKComponentViewAttribute</code> for now; you can usually use a <code>SEL</code> as the attribute.</p>
-
-<p>Let&#39;s put one together:</p>
-<div class="highlight"><pre><code class="language-objc++" data-lang="objc++">[CKComponent 
- newWithView:{
-   [UIImageView class],
-   {
-     {@selector(setImage:), image},
-     {@selector(setContentMode:), @(UIViewContentModeCenter)} // Wrapping into an NSNumber
-   }
- }
- size:{image.size.width, image.size.height}];
-</code></pre></div>
-<p>That&#39;s all there is to it. ComponentKit does this for us:</p>
-
-<ul>
-<li>Automatically creates or reuses a <code>UIImageView</code> when the component is mounted</li>
-<li>Automatically calls <code>setImage:</code> and <code>setContentMode:</code> with the given values</li>
-<li>Skips calling <code>setImage:</code> or <code>setContentMode:</code> if the value is unchanged between two updates — the most common case when updating a tree.</li>
-</ul>
-
-<h2>Primitive Arguments</h2>
-
-<p>The values in the map are of type <code>id</code>, so if you want to pass in primitive types like <code>BOOL</code>, you have to wrap them into an <code>NSValue</code> object using e.g. <code>@(value)</code> and ComponentKit will unwrap them.</p>
-
-<h2>Viewless Components</h2>
-
-<p>Often there exist logical components that don&#39;t need a corresponding view in the view hierarchy. For example a <code>CKStackLayoutComponent</code> often doesn&#39;t need to have a view; it only needs to position various subviews inside a designated area. In such situations, just pass <code>{}</code> for the view configuration and no view is created. For example:</p>
-<div class="highlight"><pre><code class="language-objc++" data-lang="objc++">[CKComponent newWithView:{} size:{}]
-</code></pre></div>
-<p>(You can also just use <code>+new</code> directly, which uses this as the default.)</p>
-
-<h2>Advanced Views</h2>
-
-<p>This is sufficient for most cases, but there is considerably more power when you need it. See <a href="advanced-views.html">Advanced Views</a> if you want to learn more.</p>
+    <div>😑 This page is coming soon...</div>
 
 
     <div class="docs-prevnext">
       
+      
+        <a class="right" href="/docs/map-node.html">Next &rarr;</a>
       
     </div>
 
