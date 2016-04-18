@@ -277,18 +277,14 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDataSource = nil;
     _proxyDataSource = _isDeallocating ? nil : [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
     
-    _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInTableView = NO;
-    _asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath = NO;
-    _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath = NO;
-    _asyncDataSourceFlags.asyncDataSourceTableViewLockDataSource = NO;
-    _asyncDataSourceFlags.asyncDataSourceTableViewUnlockDataSource = NO;
+    memset(&_asyncDataSourceFlags, 0, sizeof(_asyncDataSourceFlags));
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     
     _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInTableView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableView:)];
-    _asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeForRowAtIndexPath:)];
+    _asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewLockDataSource = [_asyncDataSource respondsToSelector:@selector(tableViewLockDataSource:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewUnlockDataSource = [_asyncDataSource respondsToSelector:@selector(tableViewUnlockDataSource:)];
     
@@ -315,13 +311,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDelegate = nil;
     _proxyDelegate = _isDeallocating ? nil : [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
     
-    _asyncDelegateFlags.asyncDelegateScrollViewDidScroll = NO;
-    _asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath = NO;
-    _asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPath = NO;
-    _asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPathDeprecated = NO;
-    _asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset = NO;
-    _asyncDelegateFlags.asyncDelegateTableViewWillBeginBatchFetchWithContext = NO;
-    _asyncDelegateFlags.asyncDelegateShouldBatchFetchForTableView = NO;
+    memset(&_asyncDelegateFlags, 0, sizeof(_asyncDelegateFlags));
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[ASTableViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
