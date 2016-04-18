@@ -161,7 +161,8 @@
 
 - (void)takeSnapshot
 {
-  // set _snapshotNeeded to YES so if layout changes in the future, we'll try snapshotting again.
+  // If our size is zero, we want to avoid calling a default sized snapshot. Set _snapshotAfterLayout to YES
+  // so if layout changes in the future, we'll try snapshotting again.
   ASLayout *layout = self.calculatedLayout;
   if (layout == nil || CGSizeEqualToSize(CGSizeZero, layout.size)) {
     _snapshotAfterLayout = YES;
