@@ -26,6 +26,7 @@
   - editable-text-node
   - image-node
   - network-image-node
+  - multiplex-image-node
   - map-node
   - video-node
   - scroll-node

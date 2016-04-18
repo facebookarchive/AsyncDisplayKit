@@ -1,6 +1,6 @@
 ---
 layout: default
-title: A React-inspired view framework for iOS 
+title: A UI Framework for Effortless Responsiveness
 id: home
 ---
 

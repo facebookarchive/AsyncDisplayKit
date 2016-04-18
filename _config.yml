@@ -8,7 +8,7 @@ timezone: America/Los_Angeles
 
 safe: true
 lsi: false
-highlighter: pygments
+highlighter: rouge
 
 defaults:
   -
