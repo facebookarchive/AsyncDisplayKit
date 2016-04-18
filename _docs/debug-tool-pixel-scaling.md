@@ -25,7 +25,7 @@ if (scaleFactor != 1.0) {
   <li>upscaling a low quality image</strong></li>
 </ul>
 
-In the screenshot below of an app with this debug feature enabled, you can see that the avatar image is unnecessarily large for it’s bounds size and that the center picture is more optimized, but not perfectly so. If you control your own endpoint, optimize your API / app to return an optimally sized image.
+In the screenshot below of an app with this debug feature enabled, you can see that the avatar image is unnecessarily large (9x too large) for it’s bounds size and that the center picture is more optimized, but not perfectly so. If you control your own endpoint, optimize your API / app to return an optimally sized image.
 
 ![screen shot 2016-03-25 at 4 04 59 pm](https://cloud.githubusercontent.com/assets/3419380/14056994/15561daa-f2b1-11e5-9606-59d54d2b5354.png)
 ### Usage
