@@ -5,10 +5,11 @@ permalink: /docs/containers-asviewcontroller.html
 next: containers-astablenode.html
 ---
 
-`ASViewController` is a subclass of `UIViewController` and adds the following features.
-- handles the measurement stuff
-- handles rotation 
-- additional memory management to help deep nativation stacks manage memory
+`ASViewController` is a subclass of `UIViewController` and adds the following features
+<ul>
+	<li>measurement handling</li>
+	<li>additional memory management to help deep nativation stacks manage memory</li>
+</ul>
 
 An `ASViewController` can be used in place of any `UIViewController` - including within a `UINavigationController`, `UITabBarController` and `UISpitViewController` or as a modal view controller.
 
