@@ -149,6 +149,11 @@
   ASPerformBlockOnBackgroundThread(^{
     ASDN::MutexLocker l(_videoLock);
     
+    // Skip the asset image generation if we don't have any tracks available that are capable of supporting it
+    NSArray<AVAssetTrack *>* visualAssetArray = [_asset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual];
+    if (!visualAssetArray || visualAssetArray.count == 0)
+      return;
+    
     AVAssetImageGenerator *imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:_asset];
     imageGenerator.appliesPreferredTrackTransform = YES;
     NSArray *times = @[[NSValue valueWithCMTime:CMTimeMake(0, 1)]];
@@ -203,7 +208,6 @@
     if (wasVisible) {
       if (_shouldBePlaying) {
         [self pause];
-        _shouldBePlaying = YES;
       }
       [(UIActivityIndicatorView *)_spinner.view stopAnimating];
       [_spinner removeFromSupernode];
