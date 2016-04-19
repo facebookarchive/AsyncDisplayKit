@@ -89,7 +89,11 @@
   [self removePlayerItemObservers];
   
   if (_asset) {
-    _currentPlayerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
+    if ([_asset.tracks count]) {
+      _currentPlayerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
+    } else {
+      _currentPlayerItem = [[AVPlayerItem alloc] initWithURL:((AVURLAsset *)_asset).URL];
+    }
   }
   
   if (_currentPlayerItem) {
