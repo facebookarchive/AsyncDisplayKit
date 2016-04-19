@@ -7,15 +7,37 @@
  */
 
 #import <UIKit/UIKit.h>
-#import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
+@protocol ASAnimatedImageProtocol;
+
+@protocol ASImageContainerProtocol <NSObject>
+
+- (UIImage *)asdk_image;
+- (NSData *)asdk_animatedImageData;
+
+@end
+
+typedef void(^ASImageCacherCompletion)(id <ASImageContainerProtocol> _Nullable imageFromCache);
 
 @protocol ASImageCacheProtocol <NSObject>
 
 @optional
+
+/**
+ @abstract Attempts to fetch an image with the given URL from a memory cache.
+ @param URL The URL of the image to retrieve from the cache.
+ @discussion This method exists to support synchronous rendering of nodes. Before the layer is drawn, this method
+ is called to attempt to get the image out of the cache synchronously. This allows drawing to occur on the main thread
+ if displaysAsynchronously is set to NO or recursivelyEnsureDisplaySynchronously: has been called.
+ 
+ If `URL` is nil, `completion` will be invoked immediately with a nil image. This method *should* block
+ the calling thread to fetch the image from a fast memory cache. It is OK to return nil from this method and instead
+ support only cachedImageWithURL:callbackQueue:completion: however, synchronous rendering will not be possible.
+ */
+- (nullable id <ASImageContainerProtocol>)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
 
 /**
  @abstract Attempts to fetch an image with the given URL from the cache.
@@ -39,7 +61,7 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
 
 @end
 
-typedef void(^ASImageDownloaderCompletion)(UIImage  * _Nullable image, NSError * _Nullable error, id _Nullable downloadIdentifier);
+typedef void(^ASImageDownloaderCompletion)(id <ASImageContainerProtocol> _Nullable image, NSError * _Nullable error, id _Nullable downloadIdentifier);
 typedef void(^ASImageDownloaderProgress)(CGFloat progress);
 typedef void(^ASImageDownloaderProgressImage)(UIImage *progressImage, id _Nullable downloadIdentifier);
 
@@ -62,6 +84,12 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
 - (void)cancelImageDownloadForIdentifier:(id)downloadIdentifier;
 
 @optional
+
+/**
+ @abstract Return an object that conforms to ASAnimatedImageProtocol
+ @param animatedImageData Data that represents an animated image.
+ */
+- (nullable id <ASAnimatedImageProtocol>)animatedImageWithData:(NSData *)animatedImageData;
 
 //You must implement the following method OR the deprecated method at the bottom
 
@@ -106,6 +134,27 @@ withDownloadIdentifier:(id)downloadIdentifier;
 
 @end
 
+@protocol ASAnimatedImageProtocol <NSObject>
+
+@property (nonatomic, strong, readwrite) void (^coverImageReadyCallback)(UIImage *coverImage);
+
+@required
+
+@property (nonatomic, readonly) UIImage *coverImage;
+@property (nonatomic, readonly) BOOL coverImageReady;
+@property (nonatomic, readonly) CFTimeInterval totalDuration;
+@property (nonatomic, readonly) NSUInteger frameInterval;
+@property (nonatomic, readonly) size_t loopCount;
+@property (nonatomic, readonly) size_t frameCount;
+@property (nonatomic, readonly) BOOL playbackReady;
+@property (nonatomic, strong, readwrite) dispatch_block_t playbackReadyCallback;
+
+- (CGImageRef)imageAtIndex:(NSUInteger)index;
+- (CFTimeInterval)durationAtIndex:(NSUInteger)index;
+- (void)clearAnimatedImageCache;
+
+@end
+
 @protocol ASImageDownloaderProtocolDeprecated <ASImageDownloaderProtocol>
 
 @optional
@@ -115,7 +164,7 @@ withDownloadIdentifier:(id)downloadIdentifier;
 - (nullable id)downloadImageWithURL:(NSURL *)URL
                       callbackQueue:(nullable dispatch_queue_t)callbackQueue
               downloadProgressBlock:(void (^ _Nullable)(CGFloat progress))downloadProgressBlock
-                         completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion;
+                         completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion ASDISPLAYNODE_DEPRECATED;
 
 @end
 
@@ -127,7 +176,7 @@ withDownloadIdentifier:(id)downloadIdentifier;
  */
 - (void)fetchCachedImageWithURL:(nullable NSURL *)URL
                   callbackQueue:(nullable dispatch_queue_t)callbackQueue
-                     completion:(void (^)(CGImageRef _Nullable imageFromCache))completion;
+                     completion:(void (^)(CGImageRef _Nullable imageFromCache))completion ASDISPLAYNODE_DEPRECATED;
 
 @end
 

@@ -146,11 +146,6 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
   [_collectionView.collectionViewLayout invalidateLayout];
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 - (void)reloadTapped
 {
   [_collectionView reloadData];
@@ -159,10 +154,12 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
 #pragma mark -
 #pragma mark ASCollectionView data source.
 
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   ItemViewModel *viewModel = _data[indexPath.item];
-  return [[ItemNode alloc] initWithViewModel:viewModel];
+  return ^{
+    return [[ItemNode alloc] initWithViewModel:viewModel];
+  };
 }
 
 - (ASCellNode *)collectionView:(UICollectionView *)collectionView nodeForSupplementaryElementOfKind:(nonnull NSString *)kind atIndexPath:(nonnull NSIndexPath *)indexPath {

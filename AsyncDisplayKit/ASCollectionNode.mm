@@ -10,7 +10,7 @@
 #import "ASCollectionInternal.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASRangeController.h"
+#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #include <vector>
 
 @interface _ASCollectionPendingState : NSObject
@@ -91,7 +91,7 @@
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    return [[ASCollectionView alloc] _initWithFrame:CGRectZero collectionViewLayout:layout layoutFacilitator:layoutFacilitator ownedByNode:YES];
+    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator ownedByNode:YES];
   };
   
   if (self = [super initWithViewBlock:collectionViewBlock]) {
@@ -167,7 +167,7 @@
   return (ASCollectionView *)[super view];
 }
 
-#if RangeControllerLoggingEnabled
+#if ASRangeControllerLoggingEnabled
 - (void)visibilityDidChange:(BOOL)isVisible
 {
   [super visibilityDidChange:isVisible];
@@ -194,7 +194,12 @@
 
 - (void)endUpdatesAnimated:(BOOL)animated
 {
-  [self.view.dataController endUpdatesAnimated:animated completion:nil];
+  [self endUpdatesAnimated:animated completion:nil];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+{
+  [self.view.dataController endUpdatesAnimated:animated completion:completion];
 }
 
 #pragma mark - ASCollectionView Forwards
@@ -217,6 +222,11 @@
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   return [self.view.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+}
+
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
+{
+  [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
 }
 
 - (void)reloadDataWithCompletion:(void (^)())completion

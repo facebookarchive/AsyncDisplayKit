@@ -22,128 +22,136 @@ static const CGFloat ASTextKitRendererTextCapHeightPadding = 1.3;
 
 @implementation ASTextKitRenderer (Tracking)
 
-- (NSArray *)rectsForTextRange:(NSRange)textRange
-                 measureOption:(ASTextKitRendererMeasureOption)measureOption
+- (NSArray *)rectsForTextRange:(NSRange)textRange measureOption:(ASTextKitRendererMeasureOption)measureOption
 {
-  __block NSArray *textRects = @[];
+  __block NSArray *textRects = nil;
   [self.context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
-    NSRange clampedRange = NSIntersectionRange(textRange, NSMakeRange(0, [textStorage length]));
-    if (clampedRange.location == NSNotFound || clampedRange.length == 0) {
-      return;
-    }
+    textRects = [self unlockedRectsForTextRange:textRange measureOptions:measureOption layoutManager:layoutManager textStorage:textStorage textContainer:textContainer];
+  }];
+  return textRects;
+}
 
-    // Used for block measure option
-    __block CGRect firstRect = CGRectNull;
-    __block CGRect lastRect = CGRectNull;
-    __block CGRect blockRect = CGRectNull;
-    NSMutableArray *mutableTextRects = [NSMutableArray array];
+/**
+ Helper function that should be called within performBlockWithLockedTextKitComponents: in an already locked state to
+ prevent a deadlock
+ */
+- (NSArray *)unlockedRectsForTextRange:(NSRange)textRange measureOptions:(ASTextKitRendererMeasureOption)measureOption layoutManager:(NSLayoutManager *)layoutManager textStorage:(NSTextStorage *)textStorage textContainer:(NSTextContainer *)textContainer
+{
+  NSRange clampedRange = NSIntersectionRange(textRange, NSMakeRange(0, [textStorage length]));
+  if (clampedRange.location == NSNotFound || clampedRange.length == 0) {
+    return @[];
+  }
 
-    NSString *string = textStorage.string;
+  // Used for block measure option
+  __block CGRect firstRect = CGRectNull;
+  __block CGRect lastRect = CGRectNull;
+  __block CGRect blockRect = CGRectNull;
+  NSMutableArray *mutableTextRects = [NSMutableArray array];
 
-    NSRange totalGlyphRange = [layoutManager glyphRangeForCharacterRange:clampedRange actualCharacterRange:NULL];
+  NSString *string = textStorage.string;
 
-    [layoutManager enumerateLineFragmentsForGlyphRange:totalGlyphRange usingBlock:^(CGRect rect,
-                                                                                    CGRect usedRect,
-                                                                                    NSTextContainer *innerTextContainer,
-                                                                                    NSRange glyphRange,
-                                                                                    BOOL *stop) {
+  NSRange totalGlyphRange = [layoutManager glyphRangeForCharacterRange:clampedRange actualCharacterRange:NULL];
 
-      CGRect lineRect = CGRectNull;
-      // If we're empty, don't bother looping through glyphs, use the default.
-      if (CGRectIsEmpty(usedRect)) {
-        lineRect = usedRect;
-      } else {
-        // TextKit's bounding rect computations are just a touch off, so we actually
-        // compose the rects by hand from the center of the given TextKit bounds and
-        // imposing the font attributes returned by the glyph's font.
-        NSRange lineGlyphRange = NSIntersectionRange(totalGlyphRange, glyphRange);
-        for (NSUInteger i = lineGlyphRange.location; i < NSMaxRange(lineGlyphRange) && i < string.length; i++) {
-          // We grab the properly sized rect for the glyph
-          CGRect properGlyphRect = [self _internalRectForGlyphAtIndex:i
-                                                        measureOption:measureOption
-                                                        layoutManager:layoutManager
-                                                        textContainer:textContainer
-                                                          textStorage:textStorage];
+  [layoutManager enumerateLineFragmentsForGlyphRange:totalGlyphRange usingBlock:^(CGRect rect,
+                                                                                  CGRect usedRect,
+                                                                                  NSTextContainer *innerTextContainer,
+                                                                                  NSRange glyphRange,
+                                                                                  BOOL *stop) {
 
-          // Don't count empty glyphs towards our line rect.
-          if (!CGRectIsEmpty(properGlyphRect)) {
-            lineRect = CGRectIsNull(lineRect) ? properGlyphRect
-            : CGRectUnion(lineRect, properGlyphRect);
-          }
+    CGRect lineRect = CGRectNull;
+    // If we're empty, don't bother looping through glyphs, use the default.
+    if (CGRectIsEmpty(usedRect)) {
+      lineRect = usedRect;
+    } else {
+      // TextKit's bounding rect computations are just a touch off, so we actually
+      // compose the rects by hand from the center of the given TextKit bounds and
+      // imposing the font attributes returned by the glyph's font.
+      NSRange lineGlyphRange = NSIntersectionRange(totalGlyphRange, glyphRange);
+      for (NSUInteger i = lineGlyphRange.location; i < NSMaxRange(lineGlyphRange) && i < string.length; i++) {
+        // We grab the properly sized rect for the glyph
+        CGRect properGlyphRect = [self _internalRectForGlyphAtIndex:i
+                                                      measureOption:measureOption
+                                                      layoutManager:layoutManager
+                                                      textContainer:textContainer
+                                                        textStorage:textStorage];
+
+        // Don't count empty glyphs towards our line rect.
+        if (!CGRectIsEmpty(properGlyphRect)) {
+          lineRect = CGRectIsNull(lineRect) ? properGlyphRect
+          : CGRectUnion(lineRect, properGlyphRect);
         }
       }
+    }
 
-      if (!CGRectIsNull(lineRect)) {
-        if (measureOption == ASTextKitRendererMeasureOptionBlock) {
-          // For the block measurement option we store the first & last rect as
-          // special cases, then merge everything else into a single block rect
-          if (CGRectIsNull(firstRect)) {
-            // We don't have a firstRect, so we must be on the first line.
-            firstRect = lineRect;
-          } else if(CGRectIsNull(lastRect)) {
-            // We don't have a lastRect, but we do have a firstRect, so we must
-            // be on the second line.  No need to merge in the blockRect just yet
-            lastRect = lineRect;
-          } else if(CGRectIsNull(blockRect)) {
-            // We have both a first and last rect, so we must be on the third line
-            // we don't have any blockRect to merge it into, so we just set it
-            // directly.
-            blockRect = lastRect;
-            lastRect = lineRect;
-          } else {
-            // Everything is already set, so we just merge this line into the
-            // block.
-            blockRect = CGRectUnion(blockRect, lastRect);
-            lastRect = lineRect;
-          }
+    if (!CGRectIsNull(lineRect)) {
+      if (measureOption == ASTextKitRendererMeasureOptionBlock) {
+        // For the block measurement option we store the first & last rect as
+        // special cases, then merge everything else into a single block rect
+        if (CGRectIsNull(firstRect)) {
+          // We don't have a firstRect, so we must be on the first line.
+          firstRect = lineRect;
+        } else if(CGRectIsNull(lastRect)) {
+          // We don't have a lastRect, but we do have a firstRect, so we must
+          // be on the second line.  No need to merge in the blockRect just yet
+          lastRect = lineRect;
+        } else if(CGRectIsNull(blockRect)) {
+          // We have both a first and last rect, so we must be on the third line
+          // we don't have any blockRect to merge it into, so we just set it
+          // directly.
+          blockRect = lastRect;
+          lastRect = lineRect;
         } else {
-          // If the block option isn't being used then each line is being treated
-          // individually.
-          [mutableTextRects addObject:[NSValue valueWithCGRect:[self.shadower offsetRectWithInternalRect:lineRect]]];
+          // Everything is already set, so we just merge this line into the
+          // block.
+          blockRect = CGRectUnion(blockRect, lastRect);
+          lastRect = lineRect;
         }
-      }
-    }];
-
-    if (measureOption == ASTextKitRendererMeasureOptionBlock) {
-      // Block measure option is handled differently with just 3 vars for the entire range.
-      if (!CGRectIsNull(firstRect)) {
-        if (!CGRectIsNull(blockRect)) {
-          CGFloat rightEdge = MAX(CGRectGetMaxX(blockRect), CGRectGetMaxX(lastRect));
-          if (rightEdge > CGRectGetMaxX(firstRect)) {
-            // Force the right side of the first rect to properly align with the
-            // right side of the rightmost of the block and last rect
-            firstRect.size.width += rightEdge - CGRectGetMaxX(firstRect);
-          }
-
-          // Force the left side of the block rect to properly align with the
-          // left side of the leftmost of the first and last rect
-          blockRect.origin.x = MIN(CGRectGetMinX(firstRect), CGRectGetMinX(lastRect));
-          // Force the right side of the block rect to properly align with the
-          // right side of the rightmost of the first and last rect
-          blockRect.size.width += MAX(CGRectGetMaxX(firstRect), CGRectGetMaxX(lastRect)) - CGRectGetMaxX(blockRect);
-        }
-        if (!CGRectIsNull(lastRect)) {
-          // Force the left edge of the last rect to properly align with the
-          // left side of the leftmost of the first and block rect, if necessary.
-          CGFloat leftEdge = MIN(CGRectGetMinX(blockRect), CGRectGetMinX(firstRect));
-          CGFloat lastRectNudgeAmount = MAX(CGRectGetMinX(lastRect) - leftEdge, 0);
-          lastRect.origin.x = MIN(leftEdge, CGRectGetMinX(lastRect));
-          lastRect.size.width += lastRectNudgeAmount;
-        }
-
-        [mutableTextRects addObject:[NSValue valueWithCGRect:[self.shadower offsetRectWithInternalRect:firstRect]]];
-      }
-      if (!CGRectIsNull(blockRect)) {
-        [mutableTextRects addObject:[NSValue valueWithCGRect:[self.shadower offsetRectWithInternalRect:blockRect]]];
-      }
-      if (!CGRectIsNull(lastRect)) {
-        [mutableTextRects addObject:[NSValue valueWithCGRect:[self.shadower offsetRectWithInternalRect:lastRect]]];
+      } else {
+        // If the block option isn't being used then each line is being treated
+        // individually.
+        [mutableTextRects addObject:[NSValue valueWithCGRect:[self.shadower offsetRectWithInternalRect:lineRect]]];
       }
     }
-    textRects = mutableTextRects;
   }];
 
-  return textRects;
+  if (measureOption == ASTextKitRendererMeasureOptionBlock) {
+    // Block measure option is handled differently with just 3 vars for the entire range.
+    if (!CGRectIsNull(firstRect)) {
+      if (!CGRectIsNull(blockRect)) {
+        CGFloat rightEdge = MAX(CGRectGetMaxX(blockRect), CGRectGetMaxX(lastRect));
+        if (rightEdge > CGRectGetMaxX(firstRect)) {
+          // Force the right side of the first rect to properly align with the
+          // right side of the rightmost of the block and last rect
+          firstRect.size.width += rightEdge - CGRectGetMaxX(firstRect);
+        }
+
+        // Force the left side of the block rect to properly align with the
+        // left side of the leftmost of the first and last rect
+        blockRect.origin.x = MIN(CGRectGetMinX(firstRect), CGRectGetMinX(lastRect));
+        // Force the right side of the block rect to properly align with the
+        // right side of the rightmost of the first and last rect
+        blockRect.size.width += MAX(CGRectGetMaxX(firstRect), CGRectGetMaxX(lastRect)) - CGRectGetMaxX(blockRect);
+      }
+      if (!CGRectIsNull(lastRect)) {
+        // Force the left edge of the last rect to properly align with the
+        // left side of the leftmost of the first and block rect, if necessary.
+        CGFloat leftEdge = MIN(CGRectGetMinX(blockRect), CGRectGetMinX(firstRect));
+        CGFloat lastRectNudgeAmount = MAX(CGRectGetMinX(lastRect) - leftEdge, 0);
+        lastRect.origin.x = MIN(leftEdge, CGRectGetMinX(lastRect));
+        lastRect.size.width += lastRectNudgeAmount;
+      }
+
+      [mutableTextRects addObject:[NSValue valueWithCGRect:[self.shadower offsetRectWithInternalRect:firstRect]]];
+    }
+    if (!CGRectIsNull(blockRect)) {
+      [mutableTextRects addObject:[NSValue valueWithCGRect:[self.shadower offsetRectWithInternalRect:blockRect]]];
+    }
+    if (!CGRectIsNull(lastRect)) {
+      [mutableTextRects addObject:[NSValue valueWithCGRect:[self.shadower offsetRectWithInternalRect:lastRect]]];
+    }
+  }
+
+  return [mutableTextRects copy];
 }
 
 - (NSUInteger)nearestTextIndexAtPosition:(CGPoint)position
@@ -342,7 +350,8 @@ static const CGFloat ASTextKitRendererTextCapHeightPadding = 1.3;
     }
 
     // Take everything after our final character as trailing space.
-    NSArray *finalRects = [self rectsForTextRange:NSMakeRange([textStorage length] - 1, 1) measureOption:ASTextKitRendererMeasureOptionLineHeight];
+    NSRange textRange = NSMakeRange([textStorage length] - 1, 1);
+    NSArray *finalRects = [self unlockedRectsForTextRange:textRange measureOptions:ASTextKitRendererMeasureOptionLineHeight layoutManager:layoutManager textStorage:textStorage textContainer:textContainer];
     CGRect finalGlyphRect = [[finalRects lastObject] CGRectValue];
     CGPoint origin = CGPointMake(CGRectGetMaxX(finalGlyphRect), CGRectGetMinY(finalGlyphRect));
     CGSize size = CGSizeMake(calculatedSize.width - origin.x, calculatedSize.height - origin.y);

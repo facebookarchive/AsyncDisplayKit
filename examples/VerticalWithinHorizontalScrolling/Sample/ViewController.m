@@ -61,11 +61,6 @@
   _pagerNode.frame = self.view.bounds;
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 #pragma mark -
 #pragma mark ASPagerNode.
 

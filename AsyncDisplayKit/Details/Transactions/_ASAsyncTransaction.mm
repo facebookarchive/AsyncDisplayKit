@@ -16,14 +16,14 @@
 NSInteger const ASDefaultTransactionPriority = 0;
 
 @interface ASDisplayNodeAsyncTransactionOperation : NSObject
-- (id)initWithOperationCompletionBlock:(asyncdisplaykit_async_transaction_operation_completion_block_t)operationCompletionBlock;
+- (instancetype)initWithOperationCompletionBlock:(asyncdisplaykit_async_transaction_operation_completion_block_t)operationCompletionBlock;
 @property (nonatomic, copy) asyncdisplaykit_async_transaction_operation_completion_block_t operationCompletionBlock;
-@property (atomic, retain) id<NSObject> value; // set on bg queue by the operation block
+@property (atomic, strong) id<NSObject> value; // set on bg queue by the operation block
 @end
 
 @implementation ASDisplayNodeAsyncTransactionOperation
 
-- (id)initWithOperationCompletionBlock:(asyncdisplaykit_async_transaction_operation_completion_block_t)operationCompletionBlock
+- (instancetype)initWithOperationCompletionBlock:(asyncdisplaykit_async_transaction_operation_completion_block_t)operationCompletionBlock
 {
   if ((self = [super init])) {
     _operationCompletionBlock = [operationCompletionBlock copy];
@@ -236,7 +236,7 @@ void ASAsyncTransactionQueue::GroupImpl::schedule(NSInteger priority, dispatch_q
             operation._block();
           }
           operation._group->leave();
-          operation._block = 0; // the block must be freed while mutex is unlocked
+          operation._block = nil; // the block must be freed while mutex is unlocked
         }
       }
       --entry._threadCount;
@@ -315,8 +315,8 @@ ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
 #pragma mark -
 #pragma mark Lifecycle
 
-- (id)initWithCallbackQueue:(dispatch_queue_t)callbackQueue
-            completionBlock:(void(^)(_ASAsyncTransaction *, BOOL))completionBlock
+- (instancetype)initWithCallbackQueue:(dispatch_queue_t)callbackQueue
+                      completionBlock:(void(^)(_ASAsyncTransaction *, BOOL))completionBlock
 {
   if ((self = [self init])) {
     if (callbackQueue == NULL) {
@@ -484,7 +484,7 @@ ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
         ASDisplayNodeAssert(_state != ASAsyncTransactionStateOpen, @"Transaction should not be open after committing group");
       }
       // If we needed to commit the group above, -completeTransaction may have already been run.
-      // It is designed to accomodate this by checking _state to ensure it is not complete.
+      // It is designed to accommodate this by checking _state to ensure it is not complete.
       [self completeTransaction];
     }
   }

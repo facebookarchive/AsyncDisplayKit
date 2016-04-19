@@ -213,17 +213,6 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @property (nonatomic, assign) BOOL passthroughNonlinkTouches;
 
-#pragma mark - ASTextKit Customization
-/**
- A block to provide a hook to provide a custom NSLayoutManager to the ASTextKitRenderer
- */
-@property (nonatomic, copy) NSLayoutManager * (^layoutManagerCreationBlock)(void);
-
-/**
- A block to provide a hook to provide a NSTextStorage to the Text Kit's layout manager.
- */
-@property (nonatomic, copy) NSTextStorage * (^textStorageCreationBlock)(NSAttributedString *attributedString);
-
 @end
 
 /**

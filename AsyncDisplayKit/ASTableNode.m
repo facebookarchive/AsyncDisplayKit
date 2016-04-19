@@ -9,7 +9,7 @@
 #import "ASFlowLayoutController.h"
 #import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASRangeController.h"
+#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
 @interface _ASTablePendingState : NSObject
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
@@ -77,6 +77,15 @@
   }
 }
 
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
+{
+    if (!self.isNodeLoaded) {
+        return;
+    }
+    
+    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+}
+
 - (_ASTablePendingState *)pendingState
 {
   if (!_pendingState && ![self isNodeLoaded]) {
@@ -129,7 +138,7 @@
   return (ASTableView *)[super view];
 }
 
-#if RangeControllerLoggingEnabled
+#if ASRangeControllerLoggingEnabled
 - (void)visibilityDidChange:(BOOL)isVisible
 {
   [super visibilityDidChange:isVisible];

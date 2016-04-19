@@ -10,13 +10,58 @@
 
 #import "NSArray+Diffing.h"
 
+@interface NSArray (ArrayDiffingTests)
+- (NSIndexSet *)_asdk_commonIndexesWithArray:(NSArray *)array compareBlock:(BOOL (^)(id lhs, id rhs))comparison;
+@end
+
 @interface ArrayDiffingTests : XCTestCase
 
 @end
 
 @implementation ArrayDiffingTests
 
-- (void)testDiffing {
+- (void)testDiffingCommonIndexes
+{
+  NSArray<NSArray *> *tests = @[
+    @[
+      @[@"bob", @"alice", @"dave"],
+      @[@"bob", @"alice", @"dave", @"gary"],
+      @[@0, @1, @2]
+    ],
+    @[
+      @[@"bob", @"alice", @"dave"],
+      @[@"bob", @"gary", @"dave"],
+      @[@0, @2]
+    ],
+    @[
+      @[@"bob", @"alice"],
+      @[@"gary", @"dave"],
+      @[],
+    ],
+    @[
+      @[@"bob", @"alice", @"dave"],
+      @[],
+      @[],
+    ],
+    @[
+      @[],
+      @[@"bob", @"alice", @"dave"],
+      @[],
+    ],
+  ];
+
+  for (NSArray *test in tests) {
+    NSIndexSet *indexSet = [test[0] _asdk_commonIndexesWithArray:test[1] compareBlock:^BOOL(id lhs, id rhs) {
+      return [lhs isEqual:rhs];
+    }];
+    
+    for (NSNumber *index in (NSArray *)test[2]) {
+      XCTAssert([indexSet containsIndex:[index integerValue]]);
+    }
+  }
+}
+
+- (void)testDiffingInsertionsAndDeletions {
   NSArray<NSArray *> *tests = @[
       @[
         @[@"bob", @"alice", @"dave"],

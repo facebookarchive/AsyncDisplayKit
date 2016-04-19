@@ -27,9 +27,4 @@
   [self.view addSubnode:_textNode];
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
-}
-
 @end

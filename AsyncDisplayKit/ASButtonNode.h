@@ -28,19 +28,17 @@
 @property (nonatomic, assign) BOOL laysOutHorizontally;
 
 /** Horizontally align content (text or image).
- Defaults to ASAlignmentMiddle.
+ Defaults to ASHorizontalAlignmentMiddle.
  */
 @property (nonatomic, assign) ASHorizontalAlignment contentHorizontalAlignment;
 
 /** Vertically align content (text or image).
- Defaults to ASAlignmentCenter.
+ Defaults to ASVerticalAlignmentCenter.
  */
 @property (nonatomic, assign) ASVerticalAlignment contentVerticalAlignment;
 
 /**
- * @discussion insets the title and the image node
- * 
- * @param contentEdgeInsets The insets used around the title and image node
+ * @discussion The insets used around the title and image node
  */
 @property (nonatomic, assign) UIEdgeInsets contentEdgeInsets;
 

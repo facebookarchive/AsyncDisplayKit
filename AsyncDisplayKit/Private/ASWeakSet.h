@@ -27,6 +27,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// Removes all objects from the set.
 - (void)removeAllObjects;
 
+/// Returns a standard *retained* NSArray of all objects.  Not free to generate, but useful for iterating over contents.
+- (NSArray *)allObjects;
+
 /**
  How many objects are contained in this set.
  

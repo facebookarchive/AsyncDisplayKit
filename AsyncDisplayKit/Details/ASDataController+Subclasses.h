@@ -6,10 +6,11 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#ifndef ASDataControllerSubclasses_Included
-#define ASDataControllerSubclasses_Included
+#pragma once
 
-//#import "ASDataController.h"
+@class ASIndexedNodeContext;
+
+typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths);
 
 @interface ASDataController (Subclasses)
 
@@ -35,15 +36,15 @@
 /**
  * Measure and layout the given nodes in optimized batches, constraining each to a given size in `constrainedSizeForNodeOfKind:atIndexPath:`.
  */
-- (void)batchLayoutNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
+- (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind completion:(ASDataControllerCompletionBlock)completionBlock;
 
-/*
+/**
  * Perform measurement and layout of loaded nodes on the main thread, skipping unloaded nodes.
  *
  * @discussion Once nodes have loaded their views, we can't layout in the background so this is a chance
  * to do so immediately on the main thread.
  */
-- (void)layoutLoadedNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths;
+- (void)layoutLoadedNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind;
 
 /**
  * Provides the size range for a specific node during the layout process.
@@ -55,12 +56,12 @@
 /**
  * Inserts the given nodes of the specified kind into the backing store, calling completion on the main thread when the write finishes.
  */
-- (void)insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
+- (void)insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(ASDataControllerCompletionBlock)completionBlock;
 
 /**
  * Deletes the given nodes of the specified kind in the backing store, calling completion on the main thread when the deletion finishes.
  */
-- (void)deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(void (^)(NSArray *nodes, NSArray *indexPaths))completionBlock;
+- (void)deleteNodesOfKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(ASDataControllerCompletionBlock)completionBlock;
 
 /**
  * Inserts the given sections of the specified kind in the backing store, calling completion on the main thread when finished.
@@ -160,5 +161,3 @@
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 @end
-
-#endif
