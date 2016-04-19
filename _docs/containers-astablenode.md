@@ -5,16 +5,18 @@ permalink: /docs/containers-astablenode.html
 next: containers-ascollectionnode.html
 ---
 
-`ASTableNode` is equivalent to UIKit's `UITableView` and can be used in place of any `UITableView`. 
+`ASTableNode` is equivalent to UIKit's `UITableView` and can be used in place of any UITableView. 
 
-`ASTableNode` replaces both of UIKit's `UITableView` required methods
+ASTableNode replaces both of UITableView's required methods
 
 `- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath` and
+
 `- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath`
 
 with **_one_** of the following methods (your choice)
 
 `- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath` or
+
 `- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath` **_(recommended)_**
 
 These two methods, need to return either an <a href = "cell-node.html">`ASCellNode`</a>. or an `ASCellNodeBlock` - a block that creates a `ASCellNode` which can be run on a background thread. 
