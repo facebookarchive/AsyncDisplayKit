@@ -10,7 +10,7 @@ It is highly recommended that you use AsyncDisplayKit's nodes within a node cont
 
 - `ASViewController` in place of UIKit's `UIViewController`
 - `ASCollectioNode` in place of UIKit's `UICollectionView`
-- `ASPagerNode` in place of UIKit's `UIPagerView`
+- `ASPagerNode` in place of UIKit's `UIPageViewController`
 - `ASTableNode` in place of UIKit's `UITableView`
  
 Example code and specific sample projects are highlighted in the documentation for each node container. 
