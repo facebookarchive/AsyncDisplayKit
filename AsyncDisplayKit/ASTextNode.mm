@@ -317,6 +317,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)calculatedLayoutDidChange
 {
+  [super calculatedLayoutDidChange];
+  
   ASLayout *layout = self.calculatedLayout;
   if (layout != nil) {
     _constrainedSize = layout.size;

@@ -31,10 +31,10 @@
   
   [self bringSubviewToFront:_statusBarOpaqueUnderlayView];
   
-  _statusBarOpaqueUnderlayView.frame = CGRectMake(0,
-                                                  0,
-                                                  [[UIScreen mainScreen] bounds].size.width,
-                                                  [[UIApplication sharedApplication] statusBarFrame].size.height);
+  CGRect statusBarFrame              = CGRectZero;
+  statusBarFrame.size.width          = [[UIScreen mainScreen] bounds].size.width;
+  statusBarFrame.size.height         = [[UIApplication sharedApplication] statusBarFrame].size.height;
+  _statusBarOpaqueUnderlayView.frame = statusBarFrame;
 }
 
 @end

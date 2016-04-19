@@ -18,7 +18,15 @@
 //    in an issue on GitHub: https://github.com/facebook/AsyncDisplayKit/issues
 
 @interface ASVideoNode : ASControlNode
+
+- (instancetype)init; // ASVideoNode is created with a simple alloc/init.
+
+- (void)play;
+- (void)pause;
+- (BOOL)isPlaying;
+
 @property (atomic, strong, readwrite) AVAsset *asset;
+
 @property (atomic, strong, readonly) AVPlayer *player;
 @property (atomic, strong, readonly) AVPlayerItem *currentItem;
 
@@ -33,11 +41,6 @@
 @property (atomic) ASButtonNode *playButton;
 
 @property (atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
-
-- (void)play;
-- (void)pause;
-
-- (BOOL)isPlaying;
 
 @end
 

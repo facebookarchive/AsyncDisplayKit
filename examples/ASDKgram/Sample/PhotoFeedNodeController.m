@@ -80,7 +80,7 @@
     [_activityIndicatorView stopAnimating];
     
     [self insertNewRowsInTableView:newPhotos];
-    [self requestCommentsForPhotos:newPhotos];
+//    [self requestCommentsForPhotos:newPhotos];
     
     // immediately start second larger fetch
     [self loadPageWithContext:nil];
@@ -93,30 +93,30 @@
   [_photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
     
     [self insertNewRowsInTableView:newPhotos];
-    [self requestCommentsForPhotos:newPhotos];
+//    [self requestCommentsForPhotos:newPhotos];
     if (context) {
       [context completeBatchFetching:YES];
     }
   } numResultsToReturn:20];
 }
 
-- (void)requestCommentsForPhotos:(NSArray *)newPhotos
-{
-  for (PhotoModel *photo in newPhotos) {
-    [photo.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
-      
-      NSInteger rowNum      = [_photoFeed indexOfPhotoModel:photo];
-      NSIndexPath *cellPath = [NSIndexPath indexPathForRow:rowNum inSection:0];
-      PhotoCellNode *cell   = (PhotoCellNode *)[_tableNode.view nodeForRowAtIndexPath:cellPath];
-      
-      if (cell) {
-        [cell loadCommentsForPhoto:photo];
-        [_tableNode.view beginUpdates];
-        [_tableNode.view endUpdates];
-      }
-    }];
-  }
-}
+//- (void)requestCommentsForPhotos:(NSArray *)newPhotos
+//{
+//  for (PhotoModel *photo in newPhotos) {
+//    [photo.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
+//      
+//      NSInteger rowNum      = [_photoFeed indexOfPhotoModel:photo];
+//      NSIndexPath *cellPath = [NSIndexPath indexPathForRow:rowNum inSection:0];
+//      PhotoCellNode *cell   = (PhotoCellNode *)[_tableNode.view nodeForRowAtIndexPath:cellPath];
+//      
+//      if (cell) {
+//        [cell loadCommentsForPhoto:photo];
+//        [_tableNode.view beginUpdates];
+//        [_tableNode.view endUpdates];
+//      }
+//    }];
+//  }
+//}
 
 - (void)insertNewRowsInTableView:(NSArray *)newPhotos
 {

@@ -16,6 +16,8 @@
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASImageNode+AnimatedImage.h>
+#import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
 
 #import "ASImageNode+CGExtras.h"
 #import "AsyncDisplayKit+Debug.h"
@@ -37,12 +39,12 @@
 // TODO: eliminate explicit parameters with a set of keys copied from the node
 @implementation _ASImageNodeDrawParameters
 
-- (id)initWithImage:(UIImage *)image
-             bounds:(CGRect)bounds
-             opaque:(BOOL)opaque
-      contentsScale:(CGFloat)contentsScale
-    backgroundColor:(UIColor *)backgroundColor
-        contentMode:(UIViewContentMode)contentMode
+- (instancetype)initWithImage:(UIImage *)image
+                       bounds:(CGRect)bounds
+                       opaque:(BOOL)opaque
+                contentsScale:(CGFloat)contentsScale
+              backgroundColor:(UIColor *)backgroundColor
+                  contentMode:(UIViewContentMode)contentMode
 {
   if (!(self = [self init]))
     return nil;
@@ -84,7 +86,7 @@
 @synthesize image = _image;
 @synthesize imageModificationBlock = _imageModificationBlock;
 
-- (id)init
+- (instancetype)init
 {
   if (!(self = [super init]))
     return nil;

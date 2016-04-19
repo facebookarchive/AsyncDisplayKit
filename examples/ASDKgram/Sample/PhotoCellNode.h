@@ -15,6 +15,5 @@
 @interface PhotoCellNode : ASCellNode
 
 - (instancetype)initWithPhotoObject:(PhotoModel *)photo;
-- (void)loadCommentsForPhoto:(PhotoModel *)photo;
 
 @end

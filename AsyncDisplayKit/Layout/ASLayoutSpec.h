@@ -25,6 +25,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)init;
 
+/**
+ * Parent of the layout spec
+ */
 @property (nullable, nonatomic, weak) id<ASLayoutable> parent;
 
 /**
@@ -97,8 +100,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
 
-/** Returns all children added to this layout spec. */
-- (NSArray<id<ASLayoutable>> *)children;
+/**
+ * Returns all children added to this layout spec.
+ */
+- (nullable NSArray<id<ASLayoutable>> *)children;
 
 @end
 

@@ -80,7 +80,7 @@ static BOOL _enableHitTestDebug = NO;
 
 #pragma mark - Lifecycle
 
-- (id)init
+- (instancetype)init
 {
   if (!(self = [super init]))
     return nil;
