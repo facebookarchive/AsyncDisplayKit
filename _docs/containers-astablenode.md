@@ -7,8 +7,6 @@ next: containers-ascollectionnode.html
 
 `ASTableNode` is equivalent to UIKit's `UITableView` and can be used in place of any UITableView. 
 
-##Just One Required Method##
-
 ASTableNode replaces UITableView's required method
 
 `tableView:cellForRowAtIndexPath:` 
@@ -21,19 +19,21 @@ or
 
 `- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath` **_(recommended)_**
 
-These two methods, need to return either an <a href = "cell-node.html">`ASCellNode`</a>. or an `ASCellNodeBlock` - a block that creates a ASCellNode which can be run on a background thread. 
-
-While `tableView:nodeForRowAtIndexPath:` will be called on the main thread, `tableView:nodeBlockForRowAtIndexPath:` is preferred because it concurrently allocates cell nodes, meaning that all of the init: methods for all of your subnodes are run in the background. 
+These two methods, need to return either an <a href = "cell-node.html">`ASCellNode`</a> or an `ASCellNodeBlock`. An ASCellNodeBlock is a block that creates a ASCellNode which can be run on a background thread. Note that ASCellNodes are used by ASTableNode, ASCollectionNod and ASPagerNode. 
 
 Note that both of these methods should not implement reuse (they will be called once per row). However, unlike UITableView, these methods are not called when the row is just about to display. 
+
+####Node Blocks are Best####
+
+While `tableView:nodeForRowAtIndexPath:` will be called on the main thread, `tableView:nodeBlockForRowAtIndexPath:` is preferred because it concurrently allocates cell nodes. This means that all of the init: methods for all of your subnodes are run in the background.
 
 ##Replace UITableViewController with ASViewController##
 
 AsyncDisplayKit does not offer an equivalent to UITableViewController. Instead, use an ASViewController initialized with an ASTableNode. 
 
-Consider, again, the ASViewController subclass PhotoFeedNodeController from the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> that uses a table node as its managed node.
+Consider, again, the ASViewController subclass - PhotoFeedNodeController - from the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> that uses a table node as its managed node.
 
-In the last section, we learned how to assign an `ASTableNode` to be managed by an `ASViewController` in its `initWithNode:` designated initializer method. Here is the code again
+An `ASTableNode` is assigned to be managed by an `ASViewController` in its `initWithNode:` designated initializer method. 
 
 ```objective-c
 - (instancetype)init
@@ -100,7 +100,7 @@ For example, you may want to set a table's separator style property. This can be
 
 An important thing to notice is that `ASTableNode` does not provide an equivalent to `UITableView`'s
 
-`- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath`
+`tableView:heightForRowAtIndexPath:`
 
 This is because in AsyncDisplayKit, nodes are responsible for determining their height themselves which means you no longer have to write code to determine this detail at the view controller level. 
 
