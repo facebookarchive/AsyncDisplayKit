@@ -17,11 +17,11 @@ In the screenshot below, you can quickly see that
 
 ![screen shot 2016-03-25 at 4 39 23 pm](https://cloud.githubusercontent.com/assets/3419380/14057034/e1e71450-f2b1-11e5-8091-3e6f22862994.png)
 
-###Restrictions###
+##Restrictions##
 
 A _green_ border on the edge(s) of the highlight overlay indicates that that edge of the tapable area is restricted by one of it's superview's tapable areas. An _orange_ border on the edge(s) of the highlight overlay indicates that that edge of the tapable area is clipped by .clipsToBounds of a parent in its hierarchy. 
 
-###Usage###
+##Usage##
 In your `AppDelegate.m` file, 
 <ul>
   <li>import `AsyncDisplayKit+Debug.h`</li>
