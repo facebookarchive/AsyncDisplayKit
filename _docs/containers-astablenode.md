@@ -9,11 +9,11 @@ next: containers-ascollectionnode.html
 
 ASTableNode replaces both of UITableView's required methods
 
-`- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath` 
+`tableView:cellForRowAtIndexPath:` 
 
 and
 
-`- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath`
+`tableView:heightForRowAtIndexPath:`
 
 with your choice of **_one_** of the following methods
 
@@ -27,13 +27,11 @@ These two methods, need to return either an <a href = "cell-node.html">`ASCellNo
 
 While `tableView:nodeForRowAtIndexPath:` will be called on the main thread, `tableView:nodeBlockForRowAtIndexPath:` is preferred because it concurrently allocates cell nodes, meaning that all of the init: methods for all of your subnodes are run in the background. 
 
-**It is very important that node blocks be thread-safe** as they can be called on the main thread or a background queue (see example below).
-
 Note that both of these methods should not implement reuse (they will be called once per row). However, unlike UITableView, these methods are not called when the row is just about to display. 
 
 ##Node Block Thread Safety Warning##
 
-It is imperative that the data model be accessed outside of the node block. This means that it is highly unlikely that you should need to use the index inside of the block. 
+It is extremely important that the data model be accessed _outside_ of the node block. Therefore, it is unlikely that you should need to use the index inside of the block. 
 
 Consider the following `tableView:nodeBlockForRowAtIndexPath:` method from the `PhotoFeedNodeController.m` file in the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a>.
 
@@ -56,16 +54,15 @@ In the example below, you can see how the index is used to access the photo mode
 ```
 
 ##Accessing the ASTableView##
+If you've used previous versions of ASDK, you'll notice that `ASTableView` has been removed in favor of `ASTableNode`.
 
 <div class = "note">
-If you've used previous versions of ASDK, you'll notice that `ASTableView` has been removed in favor of `ASTableNode`.<br><br>
-
 `ASTableView` (an actual UITableView subclass) is still used as an internal property of `ASTableNode`. While it should not be created directly, it can still be used directly by accessing the .view property of an `ASTableNode`.
 </div>
 
-For example, you may want to set a table's separator style property. This can be done by accessing the table node's view as seen in the example below. 
+**_Do not forget that anything that accesses a view using AsyncDisplayKit's node containers or nodes should be done in viewDidLoad or didLoad, respectively._**
 
-**_Don't forget that anything that accesses a view using AsyncDisplayKit's node containers or nodes should be done in viewDidLoad or didLoad, respectively._**
+For example, you may want to set a table's separator style property. This can be done by accessing the table node's view in the `viewDidLoad:` method as seen in the example below. 
 
 ```objective-c
 - (void)viewDidLoad
