@@ -242,7 +242,7 @@ static NSString * const kStatus = @"status";
       }
     }
   } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
-    if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true) {
+    if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
       [self play]; // autoresume after buffer catches up
     }
   }
