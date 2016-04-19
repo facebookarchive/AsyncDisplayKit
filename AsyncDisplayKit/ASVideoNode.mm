@@ -213,7 +213,7 @@ static NSString * const kStatus = @"status";
 
   _placeholderImageNode.image = image;
 
-  dispatch_async(dispatch_get_main_queue(), ^{
+  ASPerformBlockOnMainThread(^{
     ASDN::MutexLocker l(_videoLock);
 
     if (_placeholderImageNode != nil) {
