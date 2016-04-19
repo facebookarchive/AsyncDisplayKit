@@ -790,12 +790,12 @@ static UIColor *defaultTintColor = nil;
     view.clipsToBounds = clipsToBounds;
 
   if (flags.setBackgroundColor) {
-    // Set the background color to the layer as in the UIView bridge we use this value as background color
-    layer.backgroundColor = backgroundColor;
-
-    // We have to make sure certain nodes get the background color call directly
+    // We have to make sure certain nodes get the background color call directly set
     if (specialPropertiesHandling) {
       view.backgroundColor = [UIColor colorWithCGColor:backgroundColor];
+    } else {
+      // Set the background color to the layer as in the UIView bridge we use this value as background color
+      layer.backgroundColor = backgroundColor;
     }
   }
 
