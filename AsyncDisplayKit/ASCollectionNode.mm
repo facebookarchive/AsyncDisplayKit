@@ -16,11 +16,6 @@
 @interface _ASCollectionPendingState : NSObject
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
-
-// If the background color is applied via the pending state it's applied to the layer of the UICollectionView.
-// Unfortunately UICollectionView does not consider using the layer backgroundColor property as it's background color,
-// so it needs to be applied to the view after the ASCollectionNode did load and the view is available
-@property (strong, nonatomic) UIColor *backgroundColor;
 @end
 
 @implementation _ASCollectionPendingState
@@ -164,25 +159,6 @@
     return _pendingState.dataSource;
   } else {
     return self.view.asyncDataSource;
-  }
-}
-
-- (void)setBackgroundColor:(UIColor *)backgroundColor
-{
-  if ([self pendingState]) {
-    _pendingState.backgroundColor = backgroundColor;
-  } else {
-    ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
-    self.view.backgroundColor = backgroundColor;
-  }
-}
-
-- (UIColor *)backgroundColor
-{
-  if ([self pendingState]) {
-    return _pendingState.backgroundColor;
-  } else {
-    return self.view.backgroundColor;
   }
 }
 
