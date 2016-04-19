@@ -24,25 +24,14 @@
   ASDisplayNode *_playerNode;
   AVPlayer *_player;
 }
-@property (atomic) ASInterfaceState interfaceState;
-@property (atomic) ASDisplayNode *spinner;
-@property (atomic) ASDisplayNode *playerNode;
-@property (atomic) BOOL shouldBePlaying;
+@property (atomic, readwrite) ASInterfaceState interfaceState;
+@property (atomic, readonly) ASDisplayNode *spinner;
+@property (atomic, readonly) ASImageNode *placeholderImageNode;
+@property (atomic, readwrite) ASDisplayNode *playerNode;
+@property (atomic, readwrite) AVPlayer *player;
+@property (atomic, readonly) BOOL shouldBePlaying;
 
-- (void)setPlayerNode:(ASDisplayNode *)playerNode;
-@end
-
-@implementation ASVideoNode (Test)
-
-- (void)setPlayerNode:(ASDisplayNode *)playerNode
-{
-  _playerNode = playerNode;
-}
-
-- (void)setPlayer:(AVPlayer *)player
-{
-  _player = player;
-}
+- (void)setPlaceholderImage:(UIImage *)image;
 
 @end
 
@@ -124,7 +113,7 @@
   _videoNode.interfaceState = ASInterfaceStateFetchData;
   
   [_videoNode play];
-  [_videoNode observeValueForKeyPath:@"status" ofObject:[_videoNode currentItem] change:@{@"new" : @(AVPlayerItemStatusReadyToPlay)} context:NULL];
+  [_videoNode observeValueForKeyPath:@"status" ofObject:[_videoNode currentItem] change:@{NSKeyValueChangeNewKey : @(AVPlayerItemStatusReadyToPlay)} context:NULL];
   
   XCTAssertFalse(((UIActivityIndicatorView *)_videoNode.spinner.view).isAnimating);
 }
@@ -291,6 +280,86 @@
   _videoNode.muted = NO;
 
   XCTAssertFalse(_videoNode.player.muted);
+}
+
+- (void)testVideoThatDoesNotAutorepeatsShouldPauseOnPlaybackEnd
+{
+  _videoNode.asset = _firstAsset;
+  _videoNode.shouldAutorepeat = NO;
+
+  [_videoNode didLoad];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode play];
+
+  XCTAssertTrue(_videoNode.isPlaying);
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:AVPlayerItemDidPlayToEndTimeNotification object:_videoNode.currentItem];
+
+  XCTAssertFalse(_videoNode.isPlaying);
+  XCTAssertEqual(0, CMTimeGetSeconds(_videoNode.player.currentTime));
+}
+
+- (void)testVideoThatAutorepeatsShouldRepeatOnPlaybackEnd
+{
+  _videoNode.asset = _firstAsset;
+  _videoNode.shouldAutorepeat = YES;
+
+  [_videoNode didLoad];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode play];
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:AVPlayerItemDidPlayToEndTimeNotification object:_videoNode.currentItem];
+
+  XCTAssertTrue(_videoNode.isPlaying);
+}
+
+- (void)testBackgroundingAndForegroungingTheAppShouldPauseAndResume
+{
+  _videoNode.asset = _firstAsset;
+
+  [_videoNode didLoad];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode play];
+
+  XCTAssertTrue(_videoNode.isPlaying);
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationDidEnterBackgroundNotification object:nil];
+
+  XCTAssertFalse(_videoNode.isPlaying);
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationWillEnterForegroundNotification object:nil];
+
+  XCTAssertTrue(_videoNode.isPlaying);
+}
+
+- (void)testSettingVideoGravityChangesPlaceholderContentMode
+{
+  [_videoNode setPlaceholderImage:[[UIImage alloc] init]];
+  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.placeholderImageNode.contentMode);
+
+  _videoNode.gravity = AVLayerVideoGravityResize;
+  XCTAssertEqual(UIViewContentModeScaleToFill, _videoNode.placeholderImageNode.contentMode);
+
+  _videoNode.gravity = AVLayerVideoGravityResizeAspect;
+  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.placeholderImageNode.contentMode);
+
+  _videoNode.gravity = AVLayerVideoGravityResizeAspectFill;
+  XCTAssertEqual(UIViewContentModeScaleAspectFill, _videoNode.placeholderImageNode.contentMode);
+}
+
+- (void)testChangingPlayButtonPerformsProperCleanup
+{
+  ASButtonNode *firstButton = _videoNode.playButton;
+  XCTAssertTrue([firstButton.allTargets containsObject:_videoNode]);
+
+  ASButtonNode *secondButton = [[ASButtonNode alloc] init];
+  _videoNode.playButton = secondButton;
+
+  XCTAssertTrue([secondButton.allTargets containsObject:_videoNode]);
+  XCTAssertEqual(_videoNode, secondButton.supernode);
+
+  XCTAssertFalse([firstButton.allTargets containsObject:_videoNode]);
+  XCTAssertNotEqual(_videoNode, firstButton.supernode);
 }
 
 @end
