@@ -25,6 +25,6 @@ A _green_ border on the edge(s) of the highlight overlay indicates that that edg
 In your `AppDelegate.m` file, 
 <ul>
   <li>import `AsyncDisplayKit+Debug.h`</li>
-  <li>add `[ASControlNode setEnableHitTestDebug:YES];` at the top of your `didFinishLaunchingWithOptions:` method</li>
+  <li>add `[ASControlNode setEnableHitTestDebug:YES]` at the top of your `didFinishLaunchingWithOptions:` method</li>
 </ul>
 Make sure to call this method before initializing any ASControlNodes - including ASButtonNodes, ASImageNodes, and ASTextNodes.
