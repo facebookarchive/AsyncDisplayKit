@@ -769,4 +769,5 @@ body {
 .code {
     padding-left: 20px;
     padding-bottom: 10px;
+    overflow: auto;
 }

@@ -35,20 +35,39 @@ Consider, again, the ASViewController subclass - PhotoFeedNodeController - from 
 
 An `ASTableNode` is assigned to be managed by an `ASViewController` in its `initWithNode:` designated initializer method. 
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
 - (instancetype)init
 {
-  _tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
-  self = [super initWithNode:_tableNode];
-  
-  if (self) {
-    _tableNode.dataSource = self;
-    _tableNode.delegate = self;
-  }
-  
-  return self;
+    _tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+    self = [super initWithNode:_tableNode];
+    
+    if (self) {
+      _tableNode.dataSource = self;
+      _tableNode.delegate = self;
+    }
+    
+    return self;
 }
-```
+  </pre>
+
+  <pre lang="swift" class = "swiftCode hidden">
+func initWithModel(models: Array<Model>) {
+    let tableNode = ASTableNode(style:.Plain)
+
+    super.initWithNode(tableNode)
+
+    self.models = models  
+    self.tableNode = tableNode
+    self.tableNode.dataSource = self
+    
+    return self
+}
+</pre>
+</div>
+</div>
 
 ##Node Block Thread Safety Warning##
 
@@ -58,21 +77,44 @@ Consider the following `tableView:nodeBlockForRowAtIndexPath:` method from the `
 
 In the example below, you can see how the index is used to access the photo model before creating the node block.
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
 - (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  PhotoModel *photoModel = [_photoFeed objectAtIndex:indexPath.row];
-  
-  // this may be executed on a background thread - it is important to make sure it is thread safe
-  ASCellNode *(^ASCellNodeBlock)() = ^ASCellNode *() {
-    PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhotoObject:photoModel];
-    cellNode.delegate = self;
-    return cellNode;
-  };
-  
-  return ASCellNodeBlock;
+    PhotoModel *photoModel = [_photoFeed objectAtIndex:indexPath.row];
+    
+    // this may be executed on a background thread - it is important to make sure it is thread safe
+    ASCellNode *(^ASCellNodeBlock)() = ^ASCellNode *() {
+        PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhoto:photoModel];
+        cellNode.delegate = self;
+        return cellNode;
+    };
+    
+    return ASCellNodeBlock;
 }
-```
+  </pre>
+
+  <pre lang="swift" class = "swiftCode hidden">
+func tableView(tableView: UITableView!, nodeBlockForRowAtIndexPath indexPath: NSIndexPath) -> ASCellNodeBlock! {
+    guard photoFeed.count > indexPath.row else { return nil }
+
+    let photoModel = photoFeed[indexPath.row]
+
+    // this may be executed on a background thread - it is important to make sure it is thread safe
+    let cellNodeBlock = { () -> ASCellNode in
+        let cellNode = PhotoCellNode(photo: photoModel)
+        cellNode.delegate = self;
+        return ASCellNode()
+    }
+
+    return cellNodeBlock
+}
+</pre>
+</div>
+</div>
+
 
 ##Accessing the ASTableView##
 If you've used previous versions of ASDK, you'll notice that `ASTableView` has been removed in favor of `ASTableNode`.
