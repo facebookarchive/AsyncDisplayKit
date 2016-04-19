@@ -11,10 +11,11 @@
   - layout-engine
 - title: Node Containers
   items:
-  - asviewcontroller
-  - aspagernode
-  - ascollectionnode
-  - astablenode
+  - containers-overview
+  - containers-asviewcontroller
+  - containers-astablenode
+  - containers-ascollectionnode
+  - containers-aspagernode
 - title: Nodes
   items:
   - display-node
@@ -45,11 +46,10 @@
   - drawing-priority
 - title: Conveniences
   items:
-  - hit-test-slop
+  - batch-fetching-api
   - image-modification-block
   - placeholder-fade-duration
 - title: Debug Tools
   items:
   - debug-tool-pixel-scaling
   - debug-tool-hit-test-slop
-  - debug-tool-ASRangeController
