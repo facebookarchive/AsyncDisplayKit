@@ -22,7 +22,7 @@
 
 - (int32_t)increment
 {
-  return OSAtomicIncrement32(&_value);
+  return OSAtomicAdd32(1, &_value);
 }
 
 @end
