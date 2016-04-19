@@ -32,6 +32,6 @@ In the screenshot below of an app with this debug feature enabled, you can see t
 In your `AppDelegate.m` file, 
 <ul>
   <li>import `AsyncDisplayKit+Debug.h`</li>
-  <li>add `[ASImageNode setShouldShowImageScalingOverlay:YES];` at the top of your `didFinishLaunchingWithOptions:` method</li>
+  <li>add `[ASImageNode setShouldShowImageScalingOverlay:YES]` at the top of your `didFinishLaunchingWithOptions:` method</li>
 </ul>
 Make sure to call this method before initializing any ASImageNodes.
