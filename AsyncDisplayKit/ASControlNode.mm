@@ -71,6 +71,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 @end
 
+#pragma mark -
+
 static BOOL _enableHitTestDebug = NO;
 
 @implementation ASControlNode
@@ -97,7 +99,6 @@ static BOOL _enableHitTestDebug = NO;
   [super setUserInteractionEnabled:userInteractionEnabled];
   self.isAccessibilityElement = userInteractionEnabled;
 }
-
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"

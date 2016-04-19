@@ -8,6 +8,9 @@
 
 #import "ASControlNode.h"
 #import "ASImageNode.h"
+#import "ASTextNode.h"
+#import "ASCellNode.h"
+#import "ASRangeController.h"
 
 @interface ASControlNode (Debugging)
 
@@ -34,5 +37,29 @@
 */
 + (void)setShouldShowImageScalingOverlay:(BOOL)show;
 + (BOOL)shouldShowImageScalingOverlay;
+
+@end
+
+@interface ASRangeHierarchyCountInfo : NSObject
+@property (nonatomic, strong) ASTextNode *textNode;
+@property (nonatomic, assign) NSInteger nodeCount;
+@property (nonatomic, assign) NSInteger viewCount;
+@property (nonatomic, assign) NSInteger layerCount;
+@end
+
+@interface ASRangeController (Debug)
+
+/**
+ * Class method to enable a visualization overlay of the number of nodes, views and layers in the ASRangeController.
+ * For app debugging purposes only.
+ *
+ * @param enabled Specify YES to make this debug feature enabled when messaging the ASRangeController class.
+ */
++ (void)setHierarchyCountDebugEnabled:(BOOL)enable;
++ (BOOL)shouldShowHierarchyDebugCountsOverlay;
+
++ (void)updateRangeHierarchyCountInfo:(ASRangeHierarchyCountInfo *)info;
++ (void)debugCountsForAllSubnodes:(ASCellNode *)node increment:(BOOL)increment rangeHierarchyCountInfo:(ASRangeHierarchyCountInfo *)info;
++ (void)debugCountsForNode:(ASCellNode *)node increment:(BOOL)increment rangeHierarchyCountInfo:(ASRangeHierarchyCountInfo *)info;
 
 @end
