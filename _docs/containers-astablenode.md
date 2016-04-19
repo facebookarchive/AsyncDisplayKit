@@ -15,7 +15,7 @@ and
 
 `- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath`
 
-with **_one_** of the following methods (your choice)
+with your choice of **_one_** of the following methods
 
 `- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath` 
 
@@ -23,11 +23,13 @@ or
 
 `- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath` **_(recommended)_**
 
-These two methods, need to return either an <a href = "cell-node.html">`ASCellNode`</a>. or an `ASCellNodeBlock` - a block that creates a `ASCellNode` which can be run on a background thread. 
+These two methods, need to return either an <a href = "cell-node.html">`ASCellNode`</a>. or an `ASCellNodeBlock` - a block that creates a ASCellNode which can be run on a background thread. 
 
-Note that both of these methods should not implement reuse (they will be called once per row). Unlike `UITableView`, these methods are not called when the row is just about to display. 
+While `tableView:nodeForRowAtIndexPath:` will be called on the main thread, `tableView:nodeBlockForRowAtIndexPath:` is preferred because it concurrently allocates cell nodes, meaning that all of the `init:` methods for all of your subnodes are run in the background. 
 
-While `tableView:nodeForRowAtIndexPath:` will be called on the main thread, `tableView:nodeBlockForRowAtIndexPath:` is preferred because it concurrently allocates cell nodes, meaning that all of the `init:` methods for all of your subnodes are run in the background. **It is very important that node blocks be thread-safe** as they can be called on the main thread or a background queue (see example below).
+**It is very important that node blocks be thread-safe** as they can be called on the main thread or a background queue (see example below).
+
+Note that both of these methods should not implement reuse (they will be called once per row). However, unlike UITableView, these methods are not called when the row is just about to display. 
 
 Don't forget to set the `.dataSource` and `.deletage` methods on the table node. 
 
