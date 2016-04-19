@@ -17,12 +17,12 @@ static BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
 }
 
 static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
-  if ([videoGravity isEqualToString:AVLayerVideoGravityResizeAspect]) {
-    return UIViewContentModeScaleAspectFit;
-  } else if ([videoGravity isEqual:AVLayerVideoGravityResizeAspectFill]) {
+  if ([videoGravity isEqualToString:AVLayerVideoGravityResizeAspectFill]) {
     return UIViewContentModeScaleAspectFill;
-  } else {
+  } else if ([videoGravity isEqualToString:AVLayerVideoGravityResize]) {
     return UIViewContentModeScaleToFill;
+  } else {
+    return UIViewContentModeScaleAspectFit;
   }
 }
 
