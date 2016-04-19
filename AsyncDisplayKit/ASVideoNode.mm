@@ -270,7 +270,12 @@ static NSString * const kStatus = @"status";
 
     AVPlayerItem *playerItem = [self constructPlayerItem];
     self.currentItem = playerItem;
-    self.player = [[AVPlayer alloc] initWithPlayerItem:playerItem];
+
+    if (_player != nil) {
+      [_player replaceCurrentItemWithPlayerItem:playerItem];
+    } else {
+      self.player = [AVPlayer playerWithPlayerItem:playerItem];
+    }
 
     if (_placeholderImageNode.image == nil) {
       [self generatePlaceholderImage];
