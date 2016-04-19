@@ -39,7 +39,10 @@ Consider, the ASViewController subclass - LocationCollectionNodeController - fro
 
 An `ASCollectionNode` is assigned to be managed by an `ASViewController` in its `initWithNode:` designated initializer method. 
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
 - (instancetype)initWithCoordinates:(CLLocationCoordinate2D)coordinates
 {
   _flowLayout     = [[UICollectionViewFlowLayout alloc] init];
@@ -53,7 +56,21 @@ An `ASCollectionNode` is assigned to be managed by an `ASViewController` in its 
   
   return self;
 }
-```
+</pre>
+
+<pre lang="swift" class = "swiftCode hidden">
+func initWithCoordinates(coordinates: CLLocationsCoordinate2D) {
+  flowLayout     = UICollectionViewFlowLayout()
+  collectionNode = ASCollectionNode(collectionViewLayout: flowLayout)
+
+  super.init(node: collectionNode)
+
+  flowLayout.minimumInteritemSpacing  = 1
+  flowLayout.minimumLineSpacing       = 1
+}
+</pre>
+</div>
+</div>
 
 ##Accessing the ASCollectionView##
 If you've used previous versions of ASDK, you'll notice that `ASCollectionView` has been removed in favor of `ASCollectionNode`.
@@ -66,17 +83,33 @@ If you've used previous versions of ASDK, you'll notice that `ASCollectionView` 
 
 The LocationCollectionNodeController above accesses the ASCollectionView directly in viewDidLoad
 
-```objective-c
-- (void)loadView
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
+- (void)viewDidLoad
 {
-  [super loadView];
+  [super viewDidLoad];
   
   _collectionNode.view.asyncDelegate   = self;
   _collectionNode.view.asyncDataSource = self;
   _collectionNode.view.allowsSelection = NO;
   _collectionNode.view.backgroundColor = [UIColor whiteColor];
 }
-```
+</pre>
+
+<pre lang="swift" class = "swiftCode hidden">
+override func viewDidLoad() {
+  super.viewDidLoad()
+
+  collectionNode.view.asyncDelegate   = self
+  collectionNode.view.asyncDataSource = self
+  collectionNode.view.allowsSelection = false
+  collectionNode.view.backgroundColor = UIColor.whiteColor()
+}
+</pre>
+</div>
+</div>
 
 ##Table Row Height##
 

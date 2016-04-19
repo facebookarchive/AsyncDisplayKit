@@ -127,16 +127,31 @@ If you've used previous versions of ASDK, you'll notice that `ASTableView` has b
 
 For example, you may want to set a table's separator style property. This can be done by accessing the table node's view in the `viewDidLoad:` method as seen in the example below. 
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
 - (void)viewDidLoad
 {
   [super viewDidLoad];
   
   _tableNode.view.allowsSelection = NO;
   _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
-  _tableNode.view.leadingScreensForBatching = AUTO_TAIL_LOADING_NUM_SCREENFULS;  // overriding default of 2.0
+  _tableNode.view.leadingScreensForBatching = 3.0;  // overriding default of 2.0
 }
-```
+</pre>
+
+<pre lang="swift" class = "swiftCode hidden">
+override func viewDidLoad() {
+  super.viewDidLoad()
+
+  tableNode.view.allowsSelection = false
+  tableNode.view.separatorStyle = .None
+  tableNode.view.leadingScreensForBatching = 3.0  // overriding default of 2.0
+}
+</pre>
+</div>
+</div>
 
 ##Table Row Height##
 
