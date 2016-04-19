@@ -11,7 +11,10 @@ The main difference is that you construct and return the node you'd like managed
 
 Consider the following ASViewController subclass that would like to use a custom table node as its managed node.
 
-```
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
 - (instancetype)initWithModel:(NSArray *)models
 {
     ASTableNode *tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
@@ -25,7 +28,24 @@ Consider the following ASViewController subclass that would like to use a custom
     
     return self;
 }
-```
+  </pre>
+
+  <pre lang="swift" class = "swiftCode hidden">
+func initWithModel(models: Array<Model>) {
+	let tableNode = ASTableNode(style:.Plain)
+
+    super.initWithNode(tableNode)
+
+    self.models = models
+    
+    self.tableNode = tableNode
+    self.tableNode.dataSource = self
+    
+    return self
+}
+</pre>
+</div>
+</div>
 
 The most important line is:
 

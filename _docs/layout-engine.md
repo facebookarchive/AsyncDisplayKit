@@ -9,17 +9,33 @@ AsyncDisplayKit's layout engine is based on the CSS Box Model.  While it is the 
 
 The main way you participate in this system is by implementing `-layoutSpecThatFits:` in a node subclass.  Here, you declaratively build up layout specs from the inside out, returning the final spec which will contain the rest.
 
-```
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStack.direction  		   = ASStackLayoutDirectionVertical;
+  verticalStack.direction          = ASStackLayoutDirectionVertical;
   verticalStack.spacing            = 4.0;
   [verticalStack setChildren:_commentNodes];
-  
+
   return verticalStack;
 }
-```
+  </pre>
+
+  <pre lang="swift" class = "swiftCode hidden">
+override func layoutSpecThatFits(constrainedSize: ASSizeRange) {
+  let verticalStack = ASStackLayoutSpec()
+  verticalStack.direction = .Vertical
+  verticalStack.spacing   = 4.0
+  verticalStack.setChildren(_commentNodes)
+
+  return verticalStack
+}
+  </pre>
+</div>
+</div>
 
 Whle this example is extremely simple, it gives you an idea of how to use a layout spec.  A stack layout spec, for instance, defines a layout of nodes in which the chlidren will be laid out adjacently, in the direction specified, with the spacing specified.  It is very similar to `UIStackView` but with the added benefit of backwards compatibility.
 
@@ -29,22 +45,41 @@ Layout spec's children can be any object whose class conforms to the `<ASLayouta
 
 Say you wanted to add 8 pts of padding to the stack you've already set up:
 
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
 
-```
+  <pre lang="objc" class="objcCode">
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStack.direction  		   = ASStackLayoutDirectionVertical;
+  verticalStack.direction        = ASStackLayoutDirectionVertical;
   verticalStack.spacing            = 4.0;
   [verticalStack setChildren:_commentNodes];
   
   UIEdgeInsets insets = UIEdgeInsetsMake(8, 8, 8, 8);
   ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets 
-  																		child:verticalStack];
+                                      child:verticalStack];
   
   return insetSpec;
 }
-```
+  </pre>
+
+  <pre lang="swift" class = "swiftCode hidden">
+override func layoutSpecThatFits(constrainedSize: ASSizeRange) {
+  let verticalStack = ASStackLayoutSpec()
+  verticalStack.direction = .Vertical
+  verticalStack.spacing   = 4.0
+  verticalStack.setChildren(_commentNodes)
+
+  let insets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+  let insetSpec = ASInsetLayoutSpec(insets: insets, child: verticalStack)
+
+  return insetSpec
+}
+  </pre>
+</div>
+</div>
 
 You can easily do that by making that stack the child of an inset layout spec.
 
