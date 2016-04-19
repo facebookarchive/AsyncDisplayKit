@@ -27,11 +27,29 @@ Note that `pagerNode:nodeAtIndex:` will be called on the main thread and should 
 
 ##NodeBlock Thread Safety Warning##
 
-It is imperative that the data model be accessed outside of the `nodeNlock`. E.g. if you need to use the `indexPath` to get a photo out of a model, you should use the indexPath to get it out of the data model before creating the node block. This means that it is highly unlikely that you should need to use the `indexPath` inside of the block. 
+It is imperative that the data model be accessed outside of the node block. This means that it is highly unlikely that you should need to use the index inside of the block. 
+
+In the example below, you can see how the index is used to access the photo model before creating the node block.
+
+```objective-c
+- (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index
+{
+  PhotoModel *photoModel = [_photoFeed objectAtIndex:index];
+  
+  // this part can be executed on a background thread - it is important to make sure it is thread safe!
+  ASCellNode *(^ASCellNodeBlock)() = ^ASCellNode *() {
+    PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhotoObject:photoModel];
+    return cellNode;
+  };
+  
+  return ASCellNodeBlock;
+}
+```
 
 ##NodeBlock Example##
 
 One especially useful pattern is to return an ASCellNode that is initialized with an existing UIViewController or ASViewController.
+
 ```objective-c
 - (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index
 {
