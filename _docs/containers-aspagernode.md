@@ -25,7 +25,7 @@ Note that `pagerNode:nodeAtIndex:` will be called on the main thread and should 
 
 `pagerNode:nodeBlockAtIndex:` returns a block that creates the node for display at this index. This the reccommended option because it is more performant. It concurrently allocates cell nodes, meaning that all of the `init:` methods for all of your subnodes are run in the background. It is very important to note that blocks **must be thread-safe** as they can be called on the main thread or a background queue. They should also not implement reuse (it will be called once per row). 
 
-##NodeBlock Thread Safety Warning##
+##nodeBlockAtIndex: Thread Safety Warning & Example##
 
 It is imperative that the data model be accessed outside of the node block. This means that it is highly unlikely that you should need to use the index inside of the block. 
 
@@ -46,7 +46,7 @@ In the example below, you can see how the index is used to access the photo mode
 }
 ```
 
-##NodeBlock Example##
+##nodeAtIndex: Example##
 
 One especially useful pattern is to return an ASCellNode that is initialized with an existing UIViewController or ASViewController.
 
