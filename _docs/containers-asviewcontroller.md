@@ -18,6 +18,7 @@ A `UIViewController` provides a view of its own. An `ASViewController` is assign
 Consider the following `ASViewController` subclass from the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> that would like to use a table node as its managed node. 
 
 This table node is assigned to the `ASViewController` in its `initWithNode:` designated initializer method.
+
 ```objective-c
 - (instancetype)init
 {
