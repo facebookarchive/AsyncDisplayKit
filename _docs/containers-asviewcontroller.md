@@ -19,17 +19,6 @@ Consider the following `ASViewController` subclass from the <a href="https://git
 
 This table node is assigned to the `ASViewController` in its `initWithNode:` designated initializer method.
 ```objective-c
-@interface PhotoFeedNodeController : ASViewController
-@end
-
-@interface PhotoFeedNodeController () <ASTableDelegate, ASTableDataSource>
-@end
-
-@implementation PhotoFeedNodeController
-{
-  ASTableNode             *_tableNode;
-}
-
 - (instancetype)init
 {
   _tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
