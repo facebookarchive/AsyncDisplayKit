@@ -33,40 +33,78 @@ It is imperative that the data model be accessed outside of the node block. This
 
 In the example below, you can see how the index is used to access the photo model before creating the node block.
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
 - (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index
 {
-  PhotoModel *photoModel = [_photoFeed objectAtIndex:index];
+  PhotoModel *photoModel = _photoFeed[index];
   
   // this part can be executed on a background thread - it is important to make sure it is thread safe!
-  ASCellNode *(^ASCellNodeBlock)() = ^ASCellNode *() {
-    PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhotoObject:photoModel];
+  ASCellNode *(^cellNodeBlock)() = ^ASCellNode *() {
+    PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhoto:photoModel];
     return cellNode;
   };
   
-  return ASCellNodeBlock;
+  return cellNodeBlock;
 }
-```
+</pre>
+
+<pre lang="swift" class = "swiftCode hidden">
+func pagerNode(pagerNode: ASPagerNode!, nodeBlockAtIndex index: Int) -> ASCellNodeBlock! {
+    guard photoFeed.count > index else { return nil }
+    
+    let photoModel = photoFeed[index]
+    let cellNodeBlock = { () -> ASCellNode in
+        let cellNode = PhotoCellNode(photo: photoModel)
+        return cellNode
+    }
+    return cellNodeBlock
+}
+</pre>
+</div>
+</div>
 
 ##Use ASViewControllers For Optimal Performance##
 
 One especially useful pattern is to return an ASCellNode that is initialized with an existing UIViewController or ASViewController. For optimal performance, use an ASViewController.
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
 - (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index
 {
-    CGSize pagerNodeSize = pagerNode.bounds.size;
     NSArray *animals = self.animals[index];
     
     ASCellNode *node = [[ASCellNode alloc] initWithViewControllerBlock:^{
         return [[AnimalTableNodeController alloc] initWithAnimals:animals];;
     } didLoadBlock:nil];
     
-    node.preferredFrameSize = pagerNodeSize;
+    node.preferredFrameSize = pagerNode.bounds.size;
     
     return node;
 }
-```
+</pre>
+
+<pre lang="swift" class = "swiftCode hidden">
+func pagerNode(pagerNode: ASPagerNode!, nodeAtIndex index: Int) -> ASCellNode! {
+    guard animals.count > index else { return nil }
+
+    let animal = animals[index]
+    let node = ASCellNode(viewControllerBlock: { () -> UIViewController in
+      return AnimalTableNodeController(animals: animals)
+    }, didLoadBlock: nil)
+
+    node.preferredFrameSize = pagerNode.bounds.size
+
+    return node
+}
+</pre>
+</div>
+</div>
+
 In this example, you can see that the node is constructed using the `-initWithViewControllerBlock:` method.  It is usually necessary to provide a cell created this way with a preferredFrameSize so that it can be laid out correctly.
 
 ##Sample Apps##

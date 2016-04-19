@@ -2,7 +2,7 @@
 title: Image Scaling
 layout: docs
 permalink: /docs/debug-tool-pixel-scaling.html
-next: debug-tool-hit-test-slop.html
+next: debug-tool-ASRangeController.html
 ---
 
 ##Visualize ASImageNode.image’s pixel scaling##

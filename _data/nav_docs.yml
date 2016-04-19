@@ -46,10 +46,11 @@
   - drawing-priority
 - title: Conveniences
   items:
+  - hit-test-slop
   - batch-fetching-api
   - image-modification-block
   - placeholder-fade-duration
 - title: Debug Tools
   items:
+  - debug-tool-hit-test-visualization
   - debug-tool-pixel-scaling
-  - debug-tool-hit-test-slop

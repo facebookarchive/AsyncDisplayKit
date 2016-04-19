@@ -19,7 +19,10 @@ Consider the following `ASViewController` subclass `PhotoFeedNodeController` fro
 
 This table node is assigned to the `ASViewController` in its `initWithNode:` designated initializer method.
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
 - (instancetype)init
 {
   _tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
@@ -32,7 +35,24 @@ This table node is assigned to the `ASViewController` in its `initWithNode:` des
   
   return self;
 }
-```
+  </pre>
+
+  <pre lang="swift" class = "swiftCode hidden">
+func initWithModel(models: Array<Model>) {
+	let tableNode = ASTableNode(style:.Plain)
+
+    super.initWithNode(tableNode)
+
+    self.models = models
+    
+    self.tableNode = tableNode
+    self.tableNode.dataSource = self
+    
+    return self
+}
+</pre>
+</div>
+</div>
 
 <div class = "note">
 If your app already has a complex view controller hierarchy, it is perfectly fine to have all of them subclass `ASViewController`. That is to say, even if you don't use `ASViewController`'s designated initializer `initiWithNode:`, and only use the `ASViewController` in the manner of a traditional `UIVieWController`, this will give you the additional node support if you choose to adopt it in different areas your application. 

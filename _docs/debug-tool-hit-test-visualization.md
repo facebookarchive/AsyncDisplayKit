@@ -1,8 +1,8 @@
 ---
 title: Hit Test Visualization
 layout: docs
-permalink: /docs/debug-tool-hit-test-slop.html
-next: debug-tool-ASRangeController.html
+permalink: /docs/debug-tool-hit-test-visualization.html
+next: debug-tool-pixel-scaling.html
 ---
 
 ##Visualize ASControlNode Tappable Areas##
