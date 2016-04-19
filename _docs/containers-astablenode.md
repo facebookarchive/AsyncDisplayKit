@@ -25,13 +25,11 @@ or
 
 These two methods, need to return either an <a href = "cell-node.html">`ASCellNode`</a>. or an `ASCellNodeBlock` - a block that creates a ASCellNode which can be run on a background thread. 
 
-While `tableView:nodeForRowAtIndexPath:` will be called on the main thread, `tableView:nodeBlockForRowAtIndexPath:` is preferred because it concurrently allocates cell nodes, meaning that all of the `init:` methods for all of your subnodes are run in the background. 
+While `tableView:nodeForRowAtIndexPath:` will be called on the main thread, `tableView:nodeBlockForRowAtIndexPath:` is preferred because it concurrently allocates cell nodes, meaning that all of the init: methods for all of your subnodes are run in the background. 
 
 **It is very important that node blocks be thread-safe** as they can be called on the main thread or a background queue (see example below).
 
 Note that both of these methods should not implement reuse (they will be called once per row). However, unlike UITableView, these methods are not called when the row is just about to display. 
-
-Don't forget to set the `.dataSource` and `.deletage` methods on the table node. 
 
 ##Node Block Thread Safety Warning##
 
@@ -65,7 +63,7 @@ If you've used previous versions of ASDK, you'll notice that `ASTableView` has b
 `ASTableView` (an actual UITableView subclass) is still used as an internal property of `ASTableNode`. While it should not be created directly, it can still be used directly by accessing the .view property of an `ASTableNode`.
 </div>
 
-For example, you may want to set a table's `.separatorStyle` property. This can be done by accessing the table node's view as seen in the example below. 
+For example, you may want to set a table's separator style property. This can be done by accessing the table node's view as seen in the example below. 
 
 **_Don't forget that anything that accesses a view using AsyncDisplayKit's node containers or nodes should be done in viewDidLoad or didLoad, respectively._**
 
@@ -96,9 +94,7 @@ This is the magic of the `ASTableView`. From the level of the ASCellNode, the ce
 
 If you call `-setNeedsLayout` on an `ASCellNode`, it will automatically be perform its layout measurement again and if its overall desired size has changed, the table or collection will be informed and update. This is different from UIKit where normally you would have to call reload row / item. This saves tons of code, check out the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> to see side by side implementations of an UITableView and ASTableNode implemented social media feed. 
 
-##Sample Apps##
-
-Check out the following sample apps to see an ASTableNode implemented within an app:
+##Sample Apps with ASTableNodes##
 <ul>
   <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a></li>
   <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/Kittens">Kittens</a></li>
