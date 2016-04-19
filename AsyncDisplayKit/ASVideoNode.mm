@@ -170,7 +170,7 @@ static NSString * const kStatus = @"status";
     ASPerformBlockOnMainThread(^{
       // Ensure the asset hasn't changed since the image request was made
       if (ASAssetIsEqual(weakSelf.asset, asset)) {
-        [weakSelf setPlaceholderImage:image];
+        [weakSelf setVideoPlaceholderImage:image];
       }
     });
   }];
@@ -201,7 +201,7 @@ static NSString * const kStatus = @"status";
   });
 }
 
-- (void)setPlaceholderImage:(UIImage *)image
+- (void)setVideoPlaceholderImage:(UIImage *)image
 {
   ASDN::MutexLocker l(_videoLock);
 

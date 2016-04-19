@@ -31,7 +31,7 @@
 @property (atomic, readwrite) AVPlayer *player;
 @property (atomic, readwrite) BOOL shouldBePlaying;
 
-- (void)setPlaceholderImage:(UIImage *)image;
+- (void)setVideoPlaceholderImage:(UIImage *)image;
 
 @end
 
@@ -330,7 +330,7 @@
 
 - (void)testSettingVideoGravityChangesPlaceholderContentMode
 {
-  [_videoNode setPlaceholderImage:[[UIImage alloc] init]];
+  [_videoNode setVideoPlaceholderImage:[[UIImage alloc] init]];
   XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.placeholderImageNode.contentMode);
 
   _videoNode.gravity = AVLayerVideoGravityResize;
@@ -363,7 +363,7 @@
   UIImage *firstImage = [[UIImage alloc] init];
 
   _videoNode.asset = _firstAsset;
-  [_videoNode setPlaceholderImage:firstImage];
+  [_videoNode setVideoPlaceholderImage:firstImage];
   XCTAssertEqual(firstImage, _videoNode.placeholderImageNode.image);
 
   _videoNode.asset = _secondAsset;
@@ -374,7 +374,7 @@
 {
   _videoNode.asset = _firstAsset;
   [_videoNode fetchData];
-  [_videoNode setPlaceholderImage:[[UIImage alloc] init]];
+  [_videoNode setVideoPlaceholderImage:[[UIImage alloc] init]];
   XCTAssertNotNil(_videoNode.player);
   XCTAssertNotNil(_videoNode.currentItem);
   XCTAssertNotNil(_videoNode.placeholderImageNode.image);
