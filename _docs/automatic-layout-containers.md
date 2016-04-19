@@ -19,6 +19,5 @@ The following layoutSpecs allow you to layout a single children:
 * **ASCenterLayoutSpec** centers a component in the available space.
 * **ASRatioLayoutSpec** lays out a component at a fixed aspect ratio. Great for images, gifs and videos.
 * **ASRelativeLayoutSpec** lays out a component and positions it within the layout bounds according to vertical and horizontal positional specifiers. Similar to the “9-part” image areas, a child can be positioned at any of the 4 corners, or the middle of any of the 4 edges, as well as the center.
-* 
 
 ##Strategy
