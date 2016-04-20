@@ -10,7 +10,7 @@ This feature - created by ASDK rockstar <a href="https://github.com/facebook/Asy
 **This feature will soon be enabled by default.**
 
 <div class = "note">
-Implicit Node Hierarchy Management (INHM) is implemented using ASLayoutSpecs. If you are unfamiliar with that concept, please read that documentation (INSERT LINK) first. 
+Implicit Node Hierarchy Management is implemented using ASLayoutSpecs. If you are unfamiliar with that concept, please read that documentation (INSERT LINK) first. <br><br>
 To recap, an ASLayoutSpec completely describes the UI of a view in your app by specifying the **hierarchy state of a node and its subnodes**. An ASLayoutSpec is returned by a node from its 
 `- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize`
 method. 
