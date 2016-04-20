@@ -50,6 +50,8 @@
   - batch-fetching-api
   - image-modification-block
   - placeholder-fade-duration
+- title: Beta Features
+  - implicit-hierarchy-mgmt
 - title: Debug Tools
   items:
   - debug-tool-hit-test-visualization
