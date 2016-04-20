@@ -15,7 +15,11 @@ pod 'AsyncDisplayKit'
 
 ASDK can also be used as a regular static library:  
 
-Copy the project to your codebase manually, adding `AsyncDisplayKit.xcodeproj` to your workspace. Add `libAsyncDisplayKit.a`, AssetsLibrary, and Photos to the "Link Binary With Libraries" build phase.  Include `-lc++ -ObjC` in your project linker flags.
+<ol>
+ <li>Copy the project to your codebase manually, adding `AsyncDisplayKit.xcodeproj` to your workspace.</li> 
+ <li>Add `libAsyncDisplayKit.a`, AssetsLibrary, and Photos to the "Link Binary With Libraries" build phase.</li>
+ <li>Include `-lc++ -ObjC` in your project linker flags.</li>
+</ol>
 
 Import the framework header, or create an <a href="https://developer.apple.com/library/ios/documentation/swift/conceptual/buildingcocoaapps/MixandMatch.html">Objective-C bridging header</a> if you're using **Swift**:
 
