@@ -251,9 +251,7 @@
 		509E68661B3AEDD7009B9150 /* CGRect+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 205F0E201B376416007741D0 /* CGRect+ASConvenience.m */; };
 		636EA1A41C7FF4EC00EE152F /* NSArray+Diffing.m in Sources */ = {isa = PBXBuildFile; fileRef = DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */; };
 		636EA1A51C7FF4EF00EE152F /* ASDefaultPlayButton.m in Sources */ = {isa = PBXBuildFile; fileRef = AEB7B0191C5962EA00662EF4 /* ASDefaultPlayButton.m */; };
-		68355B301CB5799E001D4E68 /* ASImageNode+AnimatedImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 68355B2D1CB5799E001D4E68 /* ASImageNode+AnimatedImage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		68355B311CB5799E001D4E68 /* ASImageNode+AnimatedImage.mm in Sources */ = {isa = PBXBuildFile; fileRef = 68355B2E1CB5799E001D4E68 /* ASImageNode+AnimatedImage.mm */; };
-		68355B331CB579AD001D4E68 /* ASImageNode+AnimatedImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 68355B2D1CB5799E001D4E68 /* ASImageNode+AnimatedImage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		68355B341CB579B9001D4E68 /* ASImageNode+AnimatedImage.mm in Sources */ = {isa = PBXBuildFile; fileRef = 68355B2E1CB5799E001D4E68 /* ASImageNode+AnimatedImage.mm */; };
 		68355B3A1CB57A5A001D4E68 /* ASPINRemoteImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 68355B361CB57A5A001D4E68 /* ASPINRemoteImageDownloader.m */; };
 		68355B3B1CB57A5A001D4E68 /* ASImageContainerProtocolCategories.h in Headers */ = {isa = PBXBuildFile; fileRef = 68355B371CB57A5A001D4E68 /* ASImageContainerProtocolCategories.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -759,7 +757,6 @@
 		4640521B1A3F83C40061C0BA /* ASFlowLayoutController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASFlowLayoutController.h; sourceTree = "<group>"; };
 		4640521C1A3F83C40061C0BA /* ASFlowLayoutController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASFlowLayoutController.mm; sourceTree = "<group>"; };
 		4640521D1A3F83C40061C0BA /* ASLayoutController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLayoutController.h; sourceTree = "<group>"; };
-		68355B2D1CB5799E001D4E68 /* ASImageNode+AnimatedImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASImageNode+AnimatedImage.h"; sourceTree = "<group>"; };
 		68355B2E1CB5799E001D4E68 /* ASImageNode+AnimatedImage.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "ASImageNode+AnimatedImage.mm"; sourceTree = "<group>"; };
 		68355B361CB57A5A001D4E68 /* ASPINRemoteImageDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPINRemoteImageDownloader.m; sourceTree = "<group>"; };
 		68355B371CB57A5A001D4E68 /* ASImageContainerProtocolCategories.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASImageContainerProtocolCategories.h; sourceTree = "<group>"; };
@@ -1048,7 +1045,6 @@
 				0587F9BC1A7309ED00AFF0BA /* ASEditableTextNode.mm */,
 				058D09DD195D050800B7D73C /* ASImageNode.h */,
 				058D09DE195D050800B7D73C /* ASImageNode.mm */,
-				68355B2D1CB5799E001D4E68 /* ASImageNode+AnimatedImage.h */,
 				68355B2E1CB5799E001D4E68 /* ASImageNode+AnimatedImage.mm */,
 				0516FA3E1A1563D200B4EBED /* ASMultiplexImageNode.h */,
 				0516FA3F1A1563D200B4EBED /* ASMultiplexImageNode.mm */,
@@ -1536,7 +1532,6 @@
 				257754C31BEE458E00737CA5 /* ASTextNodeTypes.h in Headers */,
 				9C49C36F1B853957000B0DD5 /* ASStackLayoutable.h in Headers */,
 				69E1006D1CA89CB600D88C1B /* ASEnvironmentInternal.h in Headers */,
-				68355B301CB5799E001D4E68 /* ASImageNode+AnimatedImage.h in Headers */,
 				AC21EC101B3D0BF600C8B19A /* ASStackLayoutDefines.h in Headers */,
 				CC7FD9DE1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */,
 				ACF6ED2F1B17843500DA7C62 /* ASStackLayoutSpec.h in Headers */,
@@ -1649,7 +1644,6 @@
 				34EFC75F1B701C8600AD841F /* ASInsetLayoutSpec.h in Headers */,
 				34EFC75D1B701BE900AD841F /* ASInternalHelpers.h in Headers */,
 				34EFC7671B701CD900AD841F /* ASLayout.h in Headers */,
-				68355B331CB579AD001D4E68 /* ASImageNode+AnimatedImage.h in Headers */,
 				DEC146B71C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */,
 				DBDB83951C6E879900D0098C /* ASPagerFlowLayout.h in Headers */,
 				34EFC7691B701CE100AD841F /* ASLayoutable.h in Headers */,
