@@ -276,12 +276,18 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 @interface ASTextNode (Deprecated)
 
 /**
+ The attributedString and attributedText properties are equivalent, but attributedText is now the standard API
+ name in order to match UILabel and ASEditableTextNode.
+ 
  @see attributedText
  */
 @property (nullable, nonatomic, copy) NSAttributedString *attributedString;
 
 
 /**
+ The truncationAttributedString and truncationAttributedText properties are equivalent, but attributedText is now the
+ standard API name in order to match UILabel and ASEditableTextNode.
+ 
  @see truncationAttributedText
  */
 @property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedString;
