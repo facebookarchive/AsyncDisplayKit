@@ -6,5 +6,4 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-typedef struct _ASDisplayNodeExtraIvars {
-} ASDisplayNodeExtraIvars;
+#import <Foundation/Foundation.h>

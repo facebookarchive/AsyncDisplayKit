@@ -8,6 +8,7 @@
  *
  */
 
+#pragma once
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
@@ -33,6 +34,8 @@ typedef struct {
 } ASSizeRange;
 
 extern ASRelativeDimension const ASRelativeDimensionUnconstrained;
+
+#define isValidForLayout(x) ((isnormal(x) || x == 0.0) && x >= 0.0 && x < (CGFLOAT_MAX / 2.0))
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 NS_ASSUME_NONNULL_BEGIN

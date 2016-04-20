@@ -132,7 +132,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   NSAssert(ASDisplayNodeThreadIsMain(), @"Layout of loaded nodes must happen on the main thread.");
   ASDisplayNodeAssertTrue(nodes.count == contexts.count);
   
-  [self _layoutNodes:nodes fromContexts:contexts inIndexesOfRange:NSMakeRange(0, nodes.count) ofKind:kind];
+  [self _layoutNodes:nodes fromContexts:contexts atIndexesOfRange:NSMakeRange(0, nodes.count) ofKind:kind];
 }
 
 /**
@@ -158,7 +158,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 /**
  * Perform measurement and layout of loaded or unloaded nodes based if they will be layed out on main thread or not
  */
-- (void)_layoutNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts inIndexesOfRange:(NSRange)range ofKind:(NSString *)kind
+- (void)_layoutNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts atIndexesOfRange:(NSRange)range ofKind:(NSString *)kind
 {
   if (_dataSource == nil) {
     return;
@@ -198,7 +198,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       dispatch_apply(batchCount, queue, ^(size_t i) {
         unsigned long k = j + i;
         ASCellNode *node = [contexts[k] allocateNode];
-        ASDisplayNodeAssertNotNil(node, @"Node block created nil node");
+        if (node == nil) {
+          ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
+          node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
+        }
         allocatedNodeBuffer[i] = node;
       });
       subarray = [[NSArray alloc] initWithObjects:allocatedNodeBuffer count:batchCount];
@@ -209,7 +212,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       }
       free(allocatedNodeBuffer);
     };
-
+    
+    // Run the allocation block to concurrently create the cell nodes.  Then, handle layout for nodes that are already loaded
+    // (e.g. the dataSource may have provided cells that have been used before), which must do layout on the main thread.
+    NSRange batchRange = NSMakeRange(0, batchCount);
     if (ASDisplayNodeThreadIsMain()) {
       dispatch_semaphore_t sema = dispatch_semaphore_create(0);
       dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -218,29 +224,20 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       });
       dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
       
-      [self _layoutNodes:subarray
-            fromContexts:contexts
-        inIndexesOfRange:NSMakeRange(0, batchCount)
-                  ofKind:kind];
-      
+      [self _layoutNodes:subarray fromContexts:contexts atIndexesOfRange:batchRange ofKind:kind];
     } else {
       allocationBlock();
       [_mainSerialQueue performBlockOnMainThread:^{
-        [self _layoutNodes:subarray
-              fromContexts:contexts
-          inIndexesOfRange:NSMakeRange(0, batchCount)
-                    ofKind:kind];
+        [self _layoutNodes:subarray fromContexts:contexts atIndexesOfRange:batchRange ofKind:kind];
       }];
     }
 
     [allocatedNodes addObjectsFromArray:subarray];
 
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      // We should already have measured loaded nodes before we left the main thread. Layout the remaining once on a background thread.
-      [self _layoutNodes:allocatedNodes
-            fromContexts:contexts
-        inIndexesOfRange:NSMakeRange(j, batchCount)
-                  ofKind:kind];
+      // We should already have measured loaded nodes before we left the main thread. Layout the remaining ones on a background thread.
+      NSRange asyncBatchRange = NSMakeRange(j, batchCount);
+      [self _layoutNodes:allocatedNodes fromContexts:contexts atIndexesOfRange:asyncBatchRange ofKind:kind];
     });
   }
 

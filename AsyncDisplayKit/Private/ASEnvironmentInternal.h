@@ -12,7 +12,7 @@
 
 #pragma once
 
-enum class ASEnvironmentStatePropagation { DOWN, UP };
+BOOL ASEnvironmentStatePropagationEnabled();
 
 
 #pragma mark - Set and get extensible values for layout options
@@ -33,7 +33,14 @@ void ASEnvironmentPerformBlockOnObjectAndChildren(id<ASEnvironment> object, void
 void ASEnvironmentPerformBlockOnObjectAndParents(id<ASEnvironment> object, void(^block)(id<ASEnvironment> object));
 
 
+#pragma mark - 
+
+enum class ASEnvironmentStatePropagation { DOWN, UP };
+
+
 #pragma mark - Merging
+
+static const struct ASEnvironmentStateExtensions ASEnvironmentDefaultStateExtensions = {};
 
 static const struct ASEnvironmentLayoutOptionsState ASEnvironmentDefaultLayoutOptionsState = {};
 ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentLayoutOptionsState state, ASEnvironmentStatePropagation propagation);

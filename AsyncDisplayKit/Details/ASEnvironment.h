@@ -46,7 +46,7 @@ typedef struct ASEnvironmentLayoutOptionsState {
   ASRelativeSizeRange sizeRange;// = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero), ASRelativeSizeMakeWithCGSize(CGSizeZero));;
   CGPoint layoutPosition;// = CGPointZero;
   
-  ASEnvironmentStateExtensions _extensions;
+  struct ASEnvironmentStateExtensions _extensions;
 } ASEnvironmentLayoutOptionsState;
 
 
@@ -88,7 +88,7 @@ ASDISPLAYNODE_EXTERN_C_END
 - (id<ASEnvironment> _Nullable)parent;
 
 /// Returns all children of an object which class conforms to the ASEnvironment protocol
-- (NSArray<id<ASEnvironment>> *)children;
+- (nullable NSArray<id<ASEnvironment>> *)children;
 
 /// Classes should implement this method and return YES / NO dependent if upward propagation is enabled or not 
 - (BOOL)supportsUpwardPropagation;

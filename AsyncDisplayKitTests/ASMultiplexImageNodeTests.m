@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASImageProtocols.h>
 #import <AsyncDisplayKit/ASMultiplexImageNode.h>
+#import <AsyncDisplayKit/ASImageContainerProtocolCategories.h>
 
 #import <libkern/OSAtomic.h>
 

@@ -88,6 +88,12 @@ extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node);
 extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
 
 /**
+ This function will walk the node hierarchy in a breadth first fashion. It does run the block on the node provided
+ directly to the function call.
+ */
+extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^block)(ASDisplayNode *node));
+
+/**
  Identical to ASDisplayNodePerformBlockOnEveryNode, except it does not run the block on the
  node provided directly to the function call - only on all descendants.
  */
@@ -96,12 +102,12 @@ extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^b
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.
  */
-extern id _Nullable ASDisplayNodeFindFirstSupernode(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
+extern ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernode(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node of kind class.
  */
-extern id _Nullable ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c);
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c);
 
 /**
  * Given two nodes, finds their most immediate common parent.  Used for geometry conversion methods.
@@ -126,22 +132,22 @@ extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodes(ASDisplayNode *sta
 /**
  Given a display node, traverses down the node hierarchy, returning all the display nodes of kind class.
  */
-extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c);
+extern NSArray<__kindof ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c);
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node, including the start node that pass the block.
  */
-extern __kindof ASDisplayNode * ASDisplayNodeFindFirstNode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstNode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node, excluding the start node, that pass the block
  */
-extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node of kind class.
  */
-extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c);
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c);
 
 extern UIColor *ASDisplayNodeDefaultPlaceholderColor();
 extern UIColor *ASDisplayNodeDefaultTintColor();

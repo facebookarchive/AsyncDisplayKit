@@ -25,22 +25,22 @@
 #import "ASLayoutSpec+Debug.h"
 
 #import <objc/runtime.h>
-
-static NSString * const kDefaultChildKey = @"kDefaultChildKey";
-static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
+#import <vector>
 
 @interface ASLayoutSpec() {
   ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex _propertyLock;
+  
+  id<ASLayoutable> _child;
+  NSArray *_children;
+  NSMutableDictionary *_childrenWithIdentifier;
 }
-@property (nonatomic, strong) NSMutableDictionary *layoutChildren;
 @end
 
 @implementation ASLayoutSpec
 
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition;
-@synthesize layoutChildren = _layoutChildren;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
 - (instancetype)init
@@ -110,34 +110,45 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
     if (finalLayoutable != child) {
-      // Layout options state of child needs to be copied to final layoutable
-      finalLayoutable.environmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
+      if (ASEnvironmentStatePropagationEnabled()) {
+        ASEnvironmentStatePropagateUp(finalLayoutable, child.environmentState.layoutOptionsState);
+      } else {
+        // If state propagation is not enabled the layout options state needs to be copied manually
+        ASEnvironmentState finalLayoutableEnvironmentState = finalLayoutable.environmentState;
+        finalLayoutableEnvironmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
+        finalLayoutable.environmentState = finalLayoutableEnvironmentState;
+      }
       return finalLayoutable;
     }
   }
   return child;
 }
 
-- (NSMutableDictionary *)layoutChildren
+- (NSMutableDictionary *)childrenWithIdentifier
 {
-  if (!_layoutChildren) {
-    _layoutChildren = [NSMutableDictionary dictionary];
+  if (!_childrenWithIdentifier) {
+    _childrenWithIdentifier = [NSMutableDictionary dictionary];
   }
-  return _layoutChildren;
+  return _childrenWithIdentifier;
 }
 
 - (void)setParent:(id<ASLayoutable>)parent
 {
+  // FIXME: Locking should be evaluated here.  _parent is not widely used yet, though.
   _parent = parent;
   
   if ([parent supportsUpwardPropagation]) {
-    ASEnvironmentStatePropagateUp(parent, _environmentState.layoutOptionsState);
+    ASEnvironmentStatePropagateUp(parent, self.environmentState.layoutOptionsState);
   }
 }
 
 - (void)setChild:(id<ASLayoutable>)child;
 {
-  [self setChild:child forIdentifier:kDefaultChildKey];
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  
+  id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
+  _child = finalLayoutable;
+  [self propagateUpLayoutable:finalLayoutable];
 }
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier                     // FIX
@@ -146,45 +157,47 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
     [(ASLayoutSpec *)child setShouldVisualize:self.shouldVisualize];
   }
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-  BOOL needsToPropagateLayoutOptionsState = (child != finalLayoutable);
-  self.layoutChildren[identifier] = finalLayoutable;
-  if (needsToPropagateLayoutOptionsState) {
-    // We only need to propagate up layout options in setChild: as up propagation is currently only supported for
-    // layout specification has with one child
-    [self propagateUpLayoutOptionsState];
-  }
+  self.childrenWithIdentifier[identifier] = finalLayoutable;
+  
+  // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
+  //       layout options and one child will overwrite values from another child
+  // [self propagateUpLayoutable:finalLayoutable];
 }
 
 - (void)setChildren:(NSArray *)children                                                           // FIX
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
-  NSMutableArray *finalChildren = [NSMutableArray arrayWithCapacity:children.count];
+  std::vector<id<ASLayoutable>> finalChildren;
   for (id<ASLayoutable> child in children) {
     if ([child isKindOfClass:[ASLayoutSpec class]]) {
       [(ASLayoutSpec *)child setShouldVisualize:self.shouldVisualize];
 //      NSLog(@"%@ %@ %d", self, child, self.shouldVisualize);
     }
-    [finalChildren addObject:[self layoutableToAddFromLayoutable:child]];
+    finalChildren.push_back([self layoutableToAddFromLayoutable:child]);
   }
   
-  self.layoutChildren[kDefaultChildrenKey] = [NSArray arrayWithArray:finalChildren];
+  _children = nil;
+  if (finalChildren.size() > 0) {
+    _children = [NSArray arrayWithObjects:&finalChildren[0] count:finalChildren.size()];
+  }
 }
 
 - (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
 {
-  return self.layoutChildren[identifier];
+  return self.childrenWithIdentifier[identifier];
 }
 
 - (id<ASLayoutable>)child
 {
-  return self.layoutChildren[kDefaultChildKey];
+  return _child;
 }
 
 - (NSArray *)children
 {
-  return self.layoutChildren[kDefaultChildrenKey];
+  return [_children copy];
 }
 
 
@@ -205,7 +218,16 @@ static NSString * const kDefaultChildrenKey = @"kDefaultChildrenKey";
 // the specifications that are known to have more than one.
 - (BOOL)supportsUpwardPropagation
 {
-  return YES;
+  return ASEnvironmentStatePropagationEnabled();
+}
+
+- (void)propagateUpLayoutable:(id<ASLayoutable>)layoutable
+{
+  if ([layoutable isKindOfClass:[ASLayoutSpec class]]) {
+    [(ASLayoutSpec *)layoutable setParent:self]; // This will trigger upward propogation if needed.
+  } else if ([self supportsUpwardPropagation]) {
+    ASEnvironmentStatePropagateUp(self, layoutable.environmentState.layoutOptionsState); // Probably an ASDisplayNode
+  }
 }
 
 ASEnvironmentLayoutOptionsForwarding
