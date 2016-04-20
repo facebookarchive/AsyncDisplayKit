@@ -613,16 +613,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   BOOL didCreateNewContext = NO;
   BOOL didOverrideExistingContext = NO;
+  BOOL shouldVisualizeLayout = ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
   ASLayoutableContext context;
   if (ASLayoutableContextIsNull(ASLayoutableGetCurrentContext())) {
-    context = ASLayoutableContextMake(ASLayoutableContextDefaultTransitionID,
-                                      _shouldVisualizeLayoutSpecs);
+    context = ASLayoutableContextMake(ASLayoutableContextDefaultTransitionID, shouldVisualizeLayout);
     ASLayoutableSetCurrentContext(context);
     didCreateNewContext = YES;
   } else {
     context = ASLayoutableGetCurrentContext();
-    if (context.needsVisualizeNode != _shouldVisualizeLayoutSpecs) {
-      context.needsVisualizeNode = _shouldVisualizeLayoutSpecs;
+    if (context.needsVisualizeNode != shouldVisualizeLayout) {
+      context.needsVisualizeNode = shouldVisualizeLayout;
       ASLayoutableSetCurrentContext(context);
       didOverrideExistingContext = YES;
     }
@@ -725,7 +725,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     {
       ASDN::MutexLocker l(_propertyLock);
       
-      ASLayoutableSetCurrentContext(ASLayoutableContextMake(transitionID, _shouldVisualizeLayoutSpecs));
+      BOOL shouldVisualizeLayout = ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
+      ASLayoutableSetCurrentContext(ASLayoutableContextMake(transitionID, shouldVisualizeLayout));
       
       BOOL disableImplicitHierarchyManagement = self.usesImplicitHierarchyManagement == NO;
       self.usesImplicitHierarchyManagement = YES; // Temporary flag for 1.9.x
@@ -2911,8 +2912,12 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 - (void)setShouldVisualizeLayoutSpecs:(BOOL)shouldVisualizeLayoutSpecs
 {
   ASDN::MutexLocker l(_propertyLock);
-  if (_shouldVisualizeLayoutSpecs != shouldVisualizeLayoutSpecs) {
-    _shouldVisualizeLayoutSpecs = shouldVisualizeLayoutSpecs;
+  if (shouldVisualizeLayoutSpecs != [self shouldVisualizeLayoutSpecs]) {
+    if (shouldVisualizeLayoutSpecs) {
+      [self enterHierarchyState:ASHierarchyStateVisualizeLayout];
+    } else {
+      [self exitHierarchyState:ASHierarchyStateVisualizeLayout];
+    }
     [self setNeedsLayout];
   }
 }
@@ -2920,7 +2925,7 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 - (BOOL)shouldVisualizeLayoutSpecs
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _shouldVisualizeLayoutSpecs;
+  return ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
 }
 
 @end

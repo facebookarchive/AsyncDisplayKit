@@ -17,6 +17,7 @@
 {
   PlaygroundNode *_playgroundNode;
   ASImageNode    *_resizeHandle;
+  CGPoint        _resizeStartLocation;
 }
 
 #pragma mark - Lifecycle
@@ -34,20 +35,22 @@
     _resizeHandle                        = [[ASImageNode alloc] init];
     _resizeHandle.image                  = [UIImage imageNamed:@"resizeHandle"];
     _resizeHandle.userInteractionEnabled = YES;
-    [self.view addSubnode:_resizeHandle];
-    
-    UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self
-                                                                                       action:@selector(resizePlayground:)];
-    lpgr.minimumPressDuration = 0.0;
-    lpgr.allowableMovement = CGFLOAT_MAX;
-    [_resizeHandle.view addGestureRecognizer:lpgr];
+    [self addSubnode:_resizeHandle];
     
     [ASLayoutableInspectorNode sharedInstance].flexBasis = ASRelativeDimensionMakeWithPercent(1.0);
+    [ASLayoutableInspectorNode sharedInstance].vizNodeInsetSize = 10.0;
     
     self.shouldVisualizeLayoutSpecs = YES;
   }
   
   return self;
+}
+
+- (void)didLoad
+{
+  [super didLoad];
+  UIPanGestureRecognizer *gr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(resizePlayground:)];
+  [_resizeHandle.view addGestureRecognizer:gr];
 }
 
 // manually layout _resizeHandle              // FIXME: add this to an overlayStack in layoutSpecThatFits?
@@ -74,22 +77,18 @@
 
 #pragma mark - Gesture Handling
 
-- (void)resizePlayground:(UIGestureRecognizer *)sender
+- (void)resizePlayground:(UIPanGestureRecognizer *)sender
 {
-  NSLog(@"RESIZE PLAYGROUND");
-  
-  CGPoint firstLocation;
-  
   if (sender.state == UIGestureRecognizerStateBegan) {
-    firstLocation = [sender locationInView:sender.view];
+    _resizeStartLocation = [sender locationInView:sender.view];
   }
   else if (sender.state == UIGestureRecognizerStateChanged) {
     CGPoint location = [sender locationInView:sender.view];
-    CGPoint translation = CGPointMake(location.x - firstLocation.x, location.y - firstLocation.y);
+    CGPoint translation = CGPointMake(location.x - _resizeStartLocation.x, location.y - _resizeStartLocation.y);
     [self changePlaygroundFrameWithTranslation:translation];
   }
   else if (sender.state == UIGestureRecognizerStateEnded || sender.state == UIGestureRecognizerStateCancelled || sender.state == UIGestureRecognizerStateFailed) {
-    firstLocation = CGPointZero;
+    _resizeStartLocation = CGPointZero;
   }
 }
 

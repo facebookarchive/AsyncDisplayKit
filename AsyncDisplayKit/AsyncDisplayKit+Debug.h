@@ -10,13 +10,7 @@
 #import "ASControlNode.h"
 #import "ASImageNode.h"
 
-//@class ASDisplayNode, ASControlNode, ASImageNode;
-
-@interface ASDisplayNode ()
-{
-@protected
-  BOOL _shouldVisualizeLayoutSpecs;
-}
+@interface ASDisplayNode (Debugging)
 
 @property (nonatomic, assign) BOOL shouldVisualizeLayoutSpecs;
 

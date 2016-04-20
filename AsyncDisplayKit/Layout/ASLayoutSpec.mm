@@ -63,7 +63,11 @@
 
 - (id<ASLayoutable>)finalLayoutable
 {
-  return ((!self.neverShouldVisualize && ASLayoutableGetCurrentContext().needsVisualizeNode) ? [[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:self] : self);
+  if (ASLayoutableGetCurrentContext().needsVisualizeNode && !self.neverShouldVisualize) {
+    return [[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:self];
+  } else {
+    return self;
+  }
 }
 
 - (void)recursivelySetShouldVisualize:(BOOL)visualize
