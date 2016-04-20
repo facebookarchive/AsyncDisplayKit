@@ -11,7 +11,6 @@ AsyncDisplayKit is available on <a href="http://cocoapods.org">CocoaPods</a>.  A
  ```objective-c
 pod 'AsyncDisplayKit'
 ```
-
 ###Carthage
 
 AsyncDisplayKit is also available through <a href="https://github.com/Carthage/Carthage">Carthage</a>. Add the following to your Cartfile:
@@ -20,7 +19,6 @@ AsyncDisplayKit is also available through <a href="https://github.com/Carthage/C
 github "facebook/AsyncDisplayKit"
 ```
 Run ‘carthage update’ in Terminal and to fetch and build the AsyncDisplayKit library. This will create a folder named Carthage in your app’s root folder. In that folder there will be a ‘Build’ folder from where you have to drag the frameworks you want to use into the “Linked Frameworks and Libraries” section in Xcode.
-
 ###Static Library
 
 AsyncDisplayKit can also be used as a regular static library
