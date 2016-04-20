@@ -85,7 +85,7 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 
 // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - we have to be sure to set certain properties
 // like setFrame: and setBackgroundColor: directly to the UIView and not apply it to the layer only.
-BOOL ASDisplayNodeNeedsSpecialPropertiesSettingHandlingForFlags(ASDisplayNodeFlags flags)
+BOOL ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(ASDisplayNodeFlags flags)
 {
   return flags.synchronous && !flags.layerBacked;
 }
@@ -961,7 +961,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (self.layerBacked) {
     [_pendingViewState applyToLayer:self.layer];
   } else {
-    BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesSettingHandlingForFlags(_flags);
+    BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(_flags);
     [_pendingViewState applyToView:self.view withSpecialPropertiesHandling:specialPropertiesHandling];
   }
 

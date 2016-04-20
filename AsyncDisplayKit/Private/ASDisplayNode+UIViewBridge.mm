@@ -9,17 +9,10 @@
 #import "_ASCoreAnimationExtras.h"
 #import "_ASPendingState.h"
 #import "ASInternalHelpers.h"
-#import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASDisplayNode+Beta.h"
-#import "ASEqualityHelpers.h"
 #import "ASPendingStateController.h"
-#import "ASThread.h"
-#import "ASTextNode.h"
-#import "ASTableNode.h"
 
 /**
  * The following macros are conveniences to help in the common tasks related to the bridging that ASDisplayNode does to UIView and CALayer.
@@ -240,7 +233,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 
   // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
   struct ASDisplayNodeFlags flags = _flags;
-  BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesSettingHandlingForFlags(flags);
+  BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(flags);
 
   BOOL nodeLoaded = __loaded(self);
   BOOL isMainThread = ASDisplayNodeThreadIsMain();
@@ -583,11 +576,12 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   
   if (shouldApply) {
     CGColorRef oldBackgroundCGColor = _layer.backgroundColor;
-    _layer.backgroundColor = newBackgroundCGColor;
     
-    BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesSettingHandlingForFlags(_flags);
+    BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(_flags);
     if (specialPropertiesHandling) {
         _view.backgroundColor = newBackgroundColor;
+    } else {
+        _layer.backgroundColor = newBackgroundCGColor;
     }
       
     if (!CGColorEqualToColor(oldBackgroundCGColor, newBackgroundCGColor)) {
