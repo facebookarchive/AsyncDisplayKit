@@ -4,9 +4,9 @@ layout: resources
 permalink: /resources.html
 ---
 
-###Join our Slack!
+###AsyncDisplayKit Slack
 
-Join 60+ AsyncDisplayKit developers for real-time debugging, the latest updates, and asynchronous banter. Email AsyncDisplayKit(at)gmail.com for an invite.
+Join 60+ developers for real-time debugging, the latest updates, and asynchronous banter. Email AsyncDisplayKit(at)gmail.com for an invite.
 
 ###Sample Projects
 Scroll through the examples/README.md to see screenshots / gifs of the numerous <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">sample projects</a>.
