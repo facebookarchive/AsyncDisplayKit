@@ -64,6 +64,8 @@
     _photoDescriptionLabel                      = [[ASTextNode alloc] init];
     _photoDescriptionLabel.attributedString     = [self descriptionAttributedStringWithFontSize:FONT_SIZE];
     _photoDescriptionLabel.maximumNumberOfLines = 3;
+    
+    
   }
   
   return self;
@@ -95,7 +97,8 @@
   
   ASLayoutSpec *spacer               = [[ASLayoutSpec alloc] init];
   spacer.flexGrow                    = YES;
-  spacer.flexShrink                  = YES;
+  spacer.flexShrink                  = YES;  // FIXME: this overrides stuff :) THIS IS A SYSTEMIC ISSUE - can we make layoutSpecThatFits only run once? cache layoutSpec, just use new constrainedSize, don't put properties in layoutSpecThatFits
+  // separate the idea of laying out and rerunning with new constrainedSize
   
   ASStackLayoutSpec *headerStack     = [ASStackLayoutSpec horizontalStackLayoutSpec];
   headerStack.alignItems             = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack

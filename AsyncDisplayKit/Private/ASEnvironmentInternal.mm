@@ -15,7 +15,7 @@
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
-#define AS_SUPPORT_PROPAGATION NO
+#define AS_SUPPORT_PROPAGATION YES
 
 BOOL ASEnvironmentStatePropagationEnabled()
 {
@@ -138,6 +138,9 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
     }
     if (parentLayoutOptionsState.flexGrow == defaultState.flexGrow) {
       parentLayoutOptionsState.flexGrow = layoutOptionsState.flexGrow;
+    }
+    if (parentLayoutOptionsState.flexShrink == defaultState.flexShrink) {
+      parentLayoutOptionsState.flexShrink = layoutOptionsState.flexShrink;
     }
     if (ASRelativeDimensionEqualToRelativeDimension(parentLayoutOptionsState.flexBasis, defaultState.flexBasis)) {
       parentLayoutOptionsState.flexBasis = layoutOptionsState.flexBasis;
