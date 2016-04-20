@@ -9,7 +9,7 @@ next: containers-asviewcontroller.html
 It is highly recommended that you use AsyncDisplayKit's nodes within a node container. AsyncDisplayKit offers the following node containers
 
 - `ASViewController` in place of UIKit's `UIViewController`
-- `ASCollectioNode` in place of UIKit's `UICollectionView`
+- `ASCollectionNode` in place of UIKit's `UICollectionView`
 - `ASPagerNode` in place of UIKit's `UIPageViewController`
 - `ASTableNode` in place of UIKit's `UITableView`
  
