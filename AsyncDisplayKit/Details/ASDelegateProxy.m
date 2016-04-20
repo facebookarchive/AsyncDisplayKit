@@ -77,7 +77,7 @@
 - (BOOL)interceptsSelector:(SEL)selector
 {
   return (
-          // handled by ASPagerNodeDataSource node<->cell machinery
+          // handled by ASPagerDataSource node<->cell machinery
           selector == @selector(collectionView:nodeForItemAtIndexPath:) ||
           selector == @selector(collectionView:nodeBlockForItemAtIndexPath:) ||
           selector == @selector(collectionView:numberOfItemsInSection:) ||
