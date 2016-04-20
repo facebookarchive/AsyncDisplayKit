@@ -11,8 +11,6 @@ With this system, you simply specify the desired layout and AsyncDisplayKit will
 
 There are also easy to use APIs that allow you to fully customize the starting position of newly introduced elements, as well as the ending position of removed elements. 
 
-# AsyncDisplayKit Layout Transition API
-
 ## Animating between layouts
 
 The layout transition API makes it easy to animate between a node's generated layouts in response to some internal state change in a node.
