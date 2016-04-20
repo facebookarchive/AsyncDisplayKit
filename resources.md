@@ -11,7 +11,7 @@ Join 60+ AsyncDisplayKit developers for real-time debugging, the latest updates,
 ###Sample Projects
 Scroll through the examples/README.md to see screenshots / gifs of the numerous <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">sample projects</a>.
 
-###Video Resources
+###Videos
 <ul>
   <li><a href = "https://www.youtube.com/watch?v=RY_X7l1g79Q">AsyncDisplayKit 2.0: Intelligent User Interfaces [NSSpain 2015]</a>
   <li><a href = "https://www.youtube.com/watch?v=ZPL4Nse76oY">Effortless Responsiveness with AsyncDisplayKit [MCE 2015]</a>
