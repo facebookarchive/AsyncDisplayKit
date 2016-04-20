@@ -1,5 +1,5 @@
 ---
-title: Implicit Node Hierarchy Management
+title: Implicit Node Hierarchy Mgmt
 layout: docs
 permalink: /docs/implicit-hierarchy-mgmt.html
 next: debug-hit-test.html
