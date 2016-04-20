@@ -51,6 +51,7 @@
   - image-modification-block
   - placeholder-fade-duration
 - title: Beta Features
+  items:
   - implicit-hierarchy-mgmt
 - title: Debug Tools
   items:
