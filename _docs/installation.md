@@ -19,7 +19,7 @@ AsyncDisplayKit is also available through <a href="https://github.com/Carthage/C
  ```objective-c
 github "facebook/AsyncDisplayKit"
 ```
-Run ‘carthage update’ in Terminal and to fetch and build the ASDK library. This will create a folder named Carthage in your app’s root folder. In that folder there will be a ‘Build’ folder from where you have to drag the frameworks you want to use into the “Linked Frameworks and Libraries” section in Xcode.
+Run ‘carthage update’ in Terminal and to fetch and build the AsyncDisplayKit library. This will create a folder named Carthage in your app’s root folder. In that folder there will be a ‘Build’ folder from where you have to drag the frameworks you want to use into the “Linked Frameworks and Libraries” section in Xcode.
 
 ###Static Library
 
