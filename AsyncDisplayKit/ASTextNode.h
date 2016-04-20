@@ -34,19 +34,19 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 @interface ASTextNode : ASControlNode
 
 /**
- @abstract The attributed string to show.
+ @abstract The styled text displayed by the node.
  @discussion Defaults to nil, no text is shown.
  For inline image attachments, add an attribute of key NSAttachmentAttributeName, with a value of an NSTextAttachment.
  */
-@property (nullable, nonatomic, copy) NSAttributedString *attributedString;
+@property (nullable, nonatomic, copy) NSAttributedString *attributedText;
 
 #pragma mark - Truncation
 
 /**
- @abstract The attributedString to use when the text must be truncated.
+ @abstract The attributedText to use when the text must be truncated.
  @discussion Defaults to a localized ellipsis character.
  */
-@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedString;
+@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedText;
 
 /**
  @summary The second attributed string appended for truncation.
@@ -267,6 +267,24 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @return YES if the entity attribute should be treated as a long-press target, NO otherwise.
  */
 - (BOOL)textNode:(ASTextNode *)textNode shouldLongPressLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;
+
+@end
+
+/**
+ * @abstract Text node deprecated properties
+ */
+@interface ASTextNode (Deprecated)
+
+/**
+ @see attributedText
+ */
+@property (nullable, nonatomic, copy) NSAttributedString *attributedString;
+
+
+/**
+ @see truncationAttributedText
+ */
+@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedString;
 
 @end
 
