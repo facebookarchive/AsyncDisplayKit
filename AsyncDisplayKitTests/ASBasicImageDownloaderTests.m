@@ -16,38 +16,32 @@
 
 @implementation ASBasicImageDownloaderTests
 
-- (void)testAsynchronouslyDownloadTheSameURLTwice {
-    ASBasicImageDownloader *downloader = [ASBasicImageDownloader new];
-    
-    NSURL *URL = [NSURL URLWithString:@"http://wrongPath/wrongResource.png"];
-    
-    dispatch_group_t group = dispatch_group_create();
-    
-    __block BOOL firstDone = NO;
-    
-    dispatch_group_enter(group);
-    [downloader downloadImageWithURL:URL
-                       callbackQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-               downloadProgressBlock:nil
-                          completion:^(CGImageRef image, NSError *error) {
-                              firstDone = YES;
-                              dispatch_group_leave(group);
-                          }];
-    
-    __block BOOL secondDone = NO;
-    
-    dispatch_group_enter(group);
-    [downloader downloadImageWithURL:URL
-                       callbackQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-               downloadProgressBlock:nil
-                          completion:^(CGImageRef image, NSError *error) {
-                              secondDone = YES;
-                              dispatch_group_leave(group);
-                          }];
-    
-    XCTAssert(0 == dispatch_group_wait(group, dispatch_time(0, 10 * 1000000000)), @"URL loading takes too long");
-    
-    XCTAssert(firstDone && secondDone, @"Not all handlers has been called");
+- (void)testAsynchronouslyDownloadTheSameURLTwice
+{
+  XCTestExpectation *firstExpectation = [self expectationWithDescription:@"First ASBasicImageDownloader completion handler should be called within 3 seconds"];
+  XCTestExpectation *secondExpectation = [self expectationWithDescription:@"Second ASBasicImageDownloader completion handler should be called within 3 seconds"];
+
+  ASBasicImageDownloader *downloader = [ASBasicImageDownloader sharedImageDownloader];
+  NSURL *URL = [NSURL URLWithString:@"http://wrongPath/wrongResource.png"];
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  [downloader downloadImageWithURL:URL
+                     callbackQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+             downloadProgressBlock:nil
+                        completion:^(CGImageRef image, NSError *error) {
+                          [firstExpectation fulfill];
+                        }];
+
+  [downloader downloadImageWithURL:URL
+                     callbackQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+             downloadProgressBlock:nil
+                        completion:^(CGImageRef image, NSError *error) {
+                          [secondExpectation fulfill];
+                        }];
+#pragma clang diagnostic pop
+
+  [self waitForExpectationsWithTimeout:3 handler:nil];
 }
 
 @end

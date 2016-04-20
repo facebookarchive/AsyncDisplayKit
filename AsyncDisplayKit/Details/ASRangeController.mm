@@ -9,230 +9,566 @@
 #import "ASRangeController.h"
 
 #import "ASAssert.h"
+#import "ASWeakSet.h"
 #import "ASDisplayNodeExtras.h"
+#import "ASDisplayNodeInternal.h"
 #import "ASMultiDimensionalArrayUtils.h"
-#import "ASRangeHandlerRender.h"
-#import "ASRangeHandlerPreload.h"
 #import "ASInternalHelpers.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 
-@interface ASRangeController () {
+@interface ASRangeController ()
+{
   BOOL _rangeIsValid;
-
-  // keys should be ASLayoutRangeTypes and values NSSets containing NSIndexPaths
-  NSMutableDictionary *_rangeTypeIndexPaths;
-  NSDictionary *_rangeTypeHandlers;
   BOOL _queuedRangeUpdate;
-
+  BOOL _layoutControllerImplementsSetVisibleIndexPaths;
   ASScrollDirection _scrollDirection;
+  NSSet<NSIndexPath *> *_allPreviousIndexPaths;
+  ASLayoutRangeMode _currentRangeMode;
+  BOOL _didUpdateCurrentRange;
+  BOOL _didRegisterForNotifications;
+  CFAbsoluteTime _pendingDisplayNodesTimestamp;
 }
 
 @end
 
+static UIApplicationState __ApplicationState = UIApplicationStateActive;
+
 @implementation ASRangeController
 
-- (instancetype)init {
-  if (self = [super init]) {
+#pragma mark - Lifecycle
 
-    _rangeIsValid = YES;
-    _rangeTypeIndexPaths = [[NSMutableDictionary alloc] init];
-
-    _rangeTypeHandlers = @{
-                            @(ASLayoutRangeTypeRender): [[ASRangeHandlerRender alloc] init],
-                            @(ASLayoutRangeTypePreload): [[ASRangeHandlerPreload alloc] init],
-                            };
+- (instancetype)init
+{
+  if (!(self = [super init])) {
+    return nil;
   }
-
+  
+  _rangeIsValid = YES;
+  _currentRangeMode = ASLayoutRangeModeInvalid;
+  _didUpdateCurrentRange = NO;
+  
+  [[[self class] allRangeControllersWeakSet] addObject:self];
+  
   return self;
 }
 
-
-#pragma mark - View manipulation
-
-- (void)moveCellNode:(ASCellNode *)node toView:(UIView *)view
+- (void)dealloc
 {
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(node, @"Cannot move a nil node to a view");
-  ASDisplayNodeAssert(view, @"Cannot move a node to a non-existent view");
-
-  // force any nodes that are about to come into view to have display enabled
-  if (node.displaySuspended) {
-    [node recursivelySetDisplaySuspended:NO];
+  if (_didRegisterForNotifications) {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];
   }
-
-  [view addSubview:node.view];
 }
 
+#pragma mark - Core visible node range management API
 
-#pragma mark - API
++ (BOOL)isFirstRangeUpdateForRangeMode:(ASLayoutRangeMode)rangeMode
+{
+  return (rangeMode == ASLayoutRangeModeInvalid);
+}
+
++ (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
+                               currentRangeMode:(ASLayoutRangeMode)currentRangeMode
+{
+  BOOL isVisible = (ASInterfaceStateIncludesVisible(interfaceState));
+  BOOL isFirstRangeUpdate = [self isFirstRangeUpdateForRangeMode:currentRangeMode];
+  if (!isVisible || isFirstRangeUpdate) {
+    return ASLayoutRangeModeMinimum;
+  }
+  
+  return ASLayoutRangeModeFull;
+}
+
+- (ASInterfaceState)interfaceState
+{
+  ASInterfaceState selfInterfaceState = ASInterfaceStateNone;
+  if (_dataSource) {
+    selfInterfaceState = [_dataSource interfaceStateForRangeController:self];
+  }
+  if (__ApplicationState == UIApplicationStateBackground) {
+    // If the app is background, pretend to be invisible so that we inform each cell it is no longer being viewed by the user
+    selfInterfaceState &= ~(ASInterfaceStateVisible);
+  }
+  return selfInterfaceState;
+}
 
 - (void)visibleNodeIndexPathsDidChangeWithScrollDirection:(ASScrollDirection)scrollDirection
 {
   _scrollDirection = scrollDirection;
 
+  // Perform update immediately, so that cells receive a visibilityDidChange: call before their first pixel is visible.
+  [self scheduleRangeUpdate];
+}
+
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
+{
+  if (_currentRangeMode != rangeMode) {
+    _currentRangeMode = rangeMode;
+    _didUpdateCurrentRange = YES;
+    
+    [self scheduleRangeUpdate];
+  }
+}
+
+- (void)scheduleRangeUpdate
+{
   if (_queuedRangeUpdate) {
     return;
   }
-
+  
   // coalesce these events -- handling them multiple times per runloop is noisy and expensive
   _queuedRangeUpdate = YES;
-    
-  [self performSelector:@selector(updateVisibleNodeIndexPaths)
-             withObject:nil
-             afterDelay:0
-                inModes:@[ NSRunLoopCommonModes ]];
+  
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [self performRangeUpdate];
+  });
 }
 
-- (void)updateVisibleNodeIndexPaths
+- (void)performRangeUpdate
 {
-  if (!_queuedRangeUpdate) {
+  // Call this version if you want the update to occur immediately, such as on app suspend, as another runloop may not occur.
+  ASDisplayNodeAssertMainThread();
+  _queuedRangeUpdate = YES; // For now, set this flag as _update... expects it and clears it.
+  [self _updateVisibleNodeIndexPaths];
+}
+
+- (void)setLayoutController:(id<ASLayoutController>)layoutController
+{
+  _layoutController = layoutController;
+  _layoutControllerImplementsSetVisibleIndexPaths = [_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
+  if (_layoutController && _queuedRangeUpdate) {
+    [self performRangeUpdate];
+  }
+}
+
+- (void)setDataSource:(id<ASRangeControllerDataSource>)dataSource
+{
+  _dataSource = dataSource;
+  if (_dataSource && _queuedRangeUpdate) {
+    [self performRangeUpdate];
+  }
+}
+
+- (void)_updateVisibleNodeIndexPaths
+{
+  ASDisplayNodeAssert(_layoutController, @"An ASLayoutController is required by ASRangeController");
+  if (!_queuedRangeUpdate || !_layoutController || !_dataSource) {
     return;
   }
+  
+  // allNodes is a 2D array: it contains arrays for each section, each containing nodes.
+  NSArray<NSArray *> *allNodes = [_dataSource completedNodes];
+  NSUInteger numberOfSections = [allNodes count];
 
-  NSArray *visibleNodePaths = [_delegate rangeControllerVisibleNodeIndexPaths:self];
-
-  if ( visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
+  // TODO: Consider if we need to use this codepath, or can rely on something more similar to the data & display ranges
+  // Example: ... = [_layoutController indexPathsForScrolling:_scrollDirection rangeType:ASLayoutRangeTypeVisible];
+  NSArray<NSIndexPath *> *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
+  
+  if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
     _queuedRangeUpdate = NO;
-    return ; // don't do anything for this update, but leave _rangeIsValid to make sure we update it later
+    return; // don't do anything for this update, but leave _rangeIsValid == NO to make sure we update it later
   }
-
-  NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
-  CGSize viewportSize = [_delegate rangeControllerViewportSize:self];
-
+  
+  [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
+  
   // the layout controller needs to know what the current visible indices are to calculate range offsets
-  if ([_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)]) {
+  if (_layoutControllerImplementsSetVisibleIndexPaths) {
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
-
-  for (NSInteger i = 0; i < ASLayoutRangeTypeCount; i++) {
-    ASLayoutRangeType rangeType = (ASLayoutRangeType)i;
-    id rangeKey = @(rangeType);
-
-    // this delegate decide what happens when a node is added or removed from a range
-    id<ASRangeHandler> rangeDelegate = _rangeTypeHandlers[rangeKey];
-
-    if (!_rangeIsValid || [_layoutController shouldUpdateForVisibleIndexPaths:visibleNodePaths viewportSize:viewportSize rangeType:rangeType]) {
-      NSSet *indexPaths = [_layoutController indexPathsForScrolling:_scrollDirection viewportSize:viewportSize rangeType:rangeType];
-
-      // Notify to remove indexpaths that are leftover that are not visible or included in the _layoutController calculated paths
-      NSMutableSet *removedIndexPaths = _rangeIsValid ? [[_rangeTypeIndexPaths objectForKey:rangeKey] mutableCopy] : [NSMutableSet set];
-      [removedIndexPaths minusSet:indexPaths];
-      [removedIndexPaths minusSet:visibleNodePathsSet];
-
-      if (removedIndexPaths.count) {
-        NSArray *removedNodes = [_delegate rangeController:self nodesAtIndexPaths:[removedIndexPaths allObjects]];
-        [removedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-          // since this class usually manages large or infinite data sets, the working range
-          // directly bounds memory usage by requiring redrawing any content that falls outside the range.
-          [rangeDelegate node:node exitedRangeOfType:rangeType];
-        }];
-      }
-
-      // Notify to add indexpaths that are not currently in _rangeTypeIndexPaths
-      NSMutableSet *addedIndexPaths = [indexPaths mutableCopy];
-      [addedIndexPaths minusSet:[_rangeTypeIndexPaths objectForKey:rangeKey]];
-
-      // The preload range (for example) should include nodes that are visible
-      // TODO: remove this once we have removed the dependency on Core Animation's -display
-      if ([self shouldSkipVisibleNodesForRangeType:rangeType]) {
-        [addedIndexPaths minusSet:visibleNodePathsSet];
-      }
-      
-      if (addedIndexPaths.count) {
-        NSArray *addedNodes = [_delegate rangeController:self nodesAtIndexPaths:[addedIndexPaths allObjects]];
-        [addedNodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-          [rangeDelegate node:node enteredRangeOfType:rangeType];
-        }];
-      }
-
-      // set the range indexpaths so that we can remove/add on the next update pass
-      [_rangeTypeIndexPaths setObject:indexPaths forKey:rangeKey];
-    }
+  
+  NSArray<ASDisplayNode *> *currentSectionNodes = nil;
+  NSInteger currentSectionIndex = -1; // Set to -1 so we don't match any indexPath.section on the first iteration.
+  NSUInteger numberOfNodesInSection = 0;
+  
+  NSSet<NSIndexPath *> *visibleIndexPaths = [NSSet setWithArray:visibleNodePaths];
+  NSSet<NSIndexPath *> *displayIndexPaths = nil;
+  NSSet<NSIndexPath *> *fetchDataIndexPaths = nil;
+  
+  // Prioritize the order in which we visit each.  Visible nodes should be updated first so they are enqueued on
+  // the network or display queues before preloading (offscreen) nodes are enqueued.
+  NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
+  
+  ASInterfaceState selfInterfaceState = [self interfaceState];
+  ASLayoutRangeMode rangeMode = _currentRangeMode;
+  // If the range mode is explicitly set via updateCurrentRangeWithMode: it will last in that mode until the
+  // range controller becomes visible again or explicitly changes the range mode again
+  if ((!_didUpdateCurrentRange && ASInterfaceStateIncludesVisible(selfInterfaceState)) || [[self class] isFirstRangeUpdateForRangeMode:rangeMode]) {
+    rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
   }
 
+  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
+                                                                                      rangeType:ASLayoutRangeTypeFetchData];
+  if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersFetchData, ASRangeTuningParametersZero)) {
+    fetchDataIndexPaths = visibleIndexPaths;
+  } else {
+    fetchDataIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
+                                                          rangeMode:rangeMode
+                                                          rangeType:ASLayoutRangeTypeFetchData];
+  }
+  
+  ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeMode:rangeMode
+                                                                                    rangeType:ASLayoutRangeTypeDisplay];
+  if (rangeMode == ASLayoutRangeModeLowMemory) {
+    displayIndexPaths = [NSSet set];
+  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, ASRangeTuningParametersZero)) {
+    displayIndexPaths = visibleIndexPaths;
+  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, parametersFetchData)) {
+    displayIndexPaths = fetchDataIndexPaths;
+  } else {
+    displayIndexPaths = [_layoutController indexPathsForScrolling:_scrollDirection
+                                                        rangeMode:rangeMode
+                                                        rangeType:ASLayoutRangeTypeDisplay];
+  }
+  
+  // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
+  // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
+  // This means that during iteration, we will first visit visible, then display, then fetch data nodes.
+  [allIndexPaths unionSet:displayIndexPaths];
+  [allIndexPaths unionSet:fetchDataIndexPaths];
+  
+  // Add anything we had applied interfaceState to in the last update, but is no longer in range, so we can clear any
+  // range flags it still has enabled.  Most of the time, all but a few elements are equal; a large programmatic
+  // scroll or major main thread stall could cause entirely disjoint sets.  In either case we must visit all.
+  // Calling "-set" on NSMutableOrderedSet just references the underlying mutable data store, so we must copy it.
+  NSSet<NSIndexPath *> *allCurrentIndexPaths = [[allIndexPaths set] copy];
+  [allIndexPaths unionSet:_allPreviousIndexPaths];
+  _allPreviousIndexPaths = allCurrentIndexPaths;
+  
+  _currentRangeMode = rangeMode;
+  _didUpdateCurrentRange = NO;
+  
+  if (!_rangeIsValid) {
+    [allIndexPaths addObjectsFromArray:ASIndexPathsForTwoDimensionalArray(allNodes)];
+  }
+  
+  // TODO Don't register for notifications if this range update doesn't cause any node to enter rendering pipeline.
+  // This can be done once there is an API to observe to (or be notified upon) interface state changes or pipeline enterings
+  [self registerForNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
+  
+#if ASRangeControllerLoggingEnabled
+  ASDisplayNodeAssertTrue([visibleIndexPaths isSubsetOfSet:displayIndexPaths]);
+  NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (ASRangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
+#endif
+  
+  for (NSIndexPath *indexPath in allIndexPaths) {
+    // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.
+    // For consistency, make sure each node knows that it should measure itself if something changes.
+    ASInterfaceState interfaceState = ASInterfaceStateMeasureLayout;
+    
+    if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
+      if ([visibleIndexPaths containsObject:indexPath]) {
+        interfaceState |= (ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData);
+      } else {
+        if ([fetchDataIndexPaths containsObject:indexPath]) {
+          interfaceState |= ASInterfaceStateFetchData;
+        }
+        if ([displayIndexPaths containsObject:indexPath]) {
+          interfaceState |= ASInterfaceStateDisplay;
+        }
+      }
+    } else {
+      // If selfInterfaceState isn't visible, then visibleIndexPaths represents what /will/ be immediately visible at the
+      // instant we come onscreen.  So, fetch data and display all of those things, but don't waste resources preloading yet.
+      // We handle this as a separate case to minimize set operations for offscreen preloading, including containsObject:.
+      
+      if ([allCurrentIndexPaths containsObject:indexPath]) {
+        // DO NOT set Visible: even though these elements are in the visible range / "viewport",
+        // our overall container object is itself not visible yet.  The moment it becomes visible, we will run the condition above
+        
+        // Set Layout, Fetch Data
+        interfaceState |= ASInterfaceStateFetchData;
+        
+        if (rangeMode != ASLayoutRangeModeLowMemory) {
+          // Add Display.
+          // We might be looking at an indexPath that was previously in-range, but now we need to clear it.
+          // In that case we'll just set it back to MeasureLayout.  Only set Display | FetchData if in allCurrentIndexPaths.
+          interfaceState |= ASInterfaceStateDisplay;
+        }
+      }
+    }
+    
+    NSInteger section = indexPath.section;
+    NSInteger row     = indexPath.row;
+    
+    if (section >= 0 && row >= 0 && section < numberOfSections) {
+      if (section != currentSectionIndex) {
+        // Often we'll be dealing with indexPaths in the same section, but the set isn't sorted and we may even bounce
+        // between the same ones.  Still, this saves dozens of method calls to access the inner array and count.
+        currentSectionNodes = allNodes[section];
+        numberOfNodesInSection = [currentSectionNodes count];
+        currentSectionIndex = section;
+      }
+      
+      if (row < numberOfNodesInSection) {
+        ASDisplayNode *node = currentSectionNodes[row];
+        
+        ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
+        // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
+        if (node.interfaceState != interfaceState) {
+#if ASRangeControllerLoggingEnabled
+          [modifiedIndexPaths addObject:indexPath];
+#endif
+          [node recursivelySetInterfaceState:interfaceState];
+        }
+      }
+    }
+  }
+  
+  if (_didRegisterForNotifications) {
+    _pendingDisplayNodesTimestamp = CFAbsoluteTimeGetCurrent();
+  }
+  
   _rangeIsValid = YES;
   _queuedRangeUpdate = NO;
+  
+#if ASRangeControllerLoggingEnabled
+//  NSSet *visibleNodePathsSet = [NSSet setWithArray:visibleNodePaths];
+//  BOOL setsAreEqual = [visibleIndexPaths isEqualToSet:visibleNodePathsSet];
+//  NSLog(@"visible sets are equal: %d", setsAreEqual);
+//  if (!setsAreEqual) {
+//    NSLog(@"standard: %@", visibleIndexPaths);
+//    NSLog(@"custom: %@", visibleNodePathsSet);
+//  }
+  [modifiedIndexPaths sortUsingSelector:@selector(compare:)];
+  NSLog(@"Range update complete; modifiedIndexPaths: %@", [self descriptionWithIndexPaths:modifiedIndexPaths]);
+#endif
 }
 
-- (BOOL)shouldSkipVisibleNodesForRangeType:(ASLayoutRangeType)rangeType
+#pragma mark - Notification observers
+
+- (void)registerForNotificationsForInterfaceStateIfNeeded:(ASInterfaceState)interfaceState
 {
-  return rangeType == ASLayoutRangeTypeRender;
+  if (!_didRegisterForNotifications) {
+    ASLayoutRangeMode nextRangeMode = [ASRangeController rangeModeForInterfaceState:interfaceState
+                                                                   currentRangeMode:_currentRangeMode];
+    if (_currentRangeMode != nextRangeMode) {
+      [[NSNotificationCenter defaultCenter] addObserver:self
+                                               selector:@selector(scheduledNodesDidDisplay:)
+                                                   name:ASRenderingEngineDidDisplayScheduledNodesNotification
+                                                 object:nil];
+      _didRegisterForNotifications = YES;
+    }
+  }
 }
+
+- (void)scheduledNodesDidDisplay:(NSNotification *)notification
+{
+  CFAbsoluteTime notificationTimestamp = ((NSNumber *) notification.userInfo[ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp]).doubleValue;
+  if (_pendingDisplayNodesTimestamp < notificationTimestamp) {
+    // The rendering engine has processed all the nodes this range controller scheduled. Let's schedule a range update
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];
+    _didRegisterForNotifications = NO;
+    
+    [self scheduleRangeUpdate];
+  }
+}
+
+#pragma mark - Cell node view handling
 
 - (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node
 {
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(node, @"Cannot move a nil node to a view");
+  ASDisplayNodeAssert(contentView, @"Cannot move a node to a non-existent view");
+  
   if (node.view.superview == contentView) {
     // this content view is already correctly configured
     return;
   }
-
+  
   // clean the content view
   for (UIView *view in contentView.subviews) {
     [view removeFromSuperview];
   }
-
-  [self moveCellNode:node toView:contentView];
+  
+  [contentView addSubview:node.view];
 }
 
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+{
+  [_layoutController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+}
+
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+{
+  return [_layoutController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+}
 
 #pragma mark - ASDataControllerDelegete
 
-- (void)dataControllerBeginUpdates:(ASDataController *)dataController {
+- (void)dataControllerBeginUpdates:(ASDataController *)dataController
+{
   ASPerformBlockOnMainThread(^{
-    [_delegate rangeControllerBeginUpdates:self];
+    [_delegate didBeginUpdatesInRangeController:self];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
+- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+{
   ASPerformBlockOnMainThread(^{
-    [_delegate rangeController:self endUpdatesAnimated:animated completion:completion];
+    [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
+- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
   ASDisplayNodeAssert(nodes.count == indexPaths.count, @"Invalid index path");
-
-  NSMutableArray *nodeSizes = [NSMutableArray arrayWithCapacity:nodes.count];
-  [nodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx, BOOL *stop) {
-    [nodeSizes addObject:[NSValue valueWithCGSize:node.calculatedSize]];
-  }];
-
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
     [_delegate rangeController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
+- (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
     [_delegate rangeController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
   ASDisplayNodeAssert(sections.count == indexSet.count, @"Invalid sections");
-
-  NSMutableArray *sectionNodeSizes = [NSMutableArray arrayWithCapacity:sections.count];
-
-  [sections enumerateObjectsUsingBlock:^(NSArray *nodes, NSUInteger idx, BOOL *stop) {
-    NSMutableArray *nodeSizes = [NSMutableArray arrayWithCapacity:nodes.count];
-    [nodes enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger idx2, BOOL *stop2) {
-      [nodeSizes addObject:[NSValue valueWithCGSize:node.calculatedSize]];
-    }];
-    [sectionNodeSizes addObject:nodeSizes];
-  }];
-
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
     [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   });
 }
 
-- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions {
+- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
   ASPerformBlockOnMainThread(^{
     _rangeIsValid = NO;
     [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   });
+}
+
+#pragma mark - Memory Management
+
+// Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
+- (void)clearContents
+{
+  for (NSArray *section in [_dataSource completedNodes]) {
+    for (ASDisplayNode *node in section) {
+      if (ASInterfaceStateIncludesDisplay(node.interfaceState)) {
+        [node exitInterfaceState:ASInterfaceStateDisplay];
+      }
+    }
+  }
+}
+
+- (void)clearFetchedData
+{
+  for (NSArray *section in [_dataSource completedNodes]) {
+    for (ASDisplayNode *node in section) {
+      if (ASInterfaceStateIncludesFetchData(node.interfaceState)) {
+        [node exitInterfaceState:ASInterfaceStateFetchData];
+      }
+    }
+  }
+}
+
+#pragma mark - Class Methods (Application Notification Handlers)
+
++ (ASWeakSet *)allRangeControllersWeakSet
+{
+  static ASWeakSet<ASRangeController *> *__allRangeControllersWeakSet;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    __allRangeControllersWeakSet = [[ASWeakSet alloc] init];
+    [self registerSharedApplicationNotifications];
+  });
+  return __allRangeControllersWeakSet;
+}
+
++ (void)registerSharedApplicationNotifications
+{
+  NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+#if ASRangeControllerAutomaticLowMemoryHandling
+  [center addObserver:self selector:@selector(didReceiveMemoryWarning:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+#endif
+  [center addObserver:self selector:@selector(didEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+  [center addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
+}
+
+static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisibleOnly;
++ (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode
+{
+  ASDisplayNodeAssert(rangeMode == ASLayoutRangeModeVisibleOnly || rangeMode == ASLayoutRangeModeLowMemory, @"It is highly inadvisable to engage a larger range mode when a memory warning occurs, as this will almost certainly cause app eviction");
+  __rangeModeForMemoryWarnings = rangeMode;
+}
+
++ (void)didReceiveMemoryWarning:(NSNotification *)notification
+{
+  NSArray *allRangeControllers = [[self allRangeControllersWeakSet] allObjects];
+  for (ASRangeController *rangeController in allRangeControllers) {
+    BOOL isDisplay = ASInterfaceStateIncludesDisplay([rangeController interfaceState]);
+    [rangeController updateCurrentRangeWithMode:isDisplay ? ASLayoutRangeModeMinimum : __rangeModeForMemoryWarnings];
+    [rangeController performRangeUpdate];
+  }
+  
+#if ASRangeControllerLoggingEnabled
+  NSLog(@"+[ASRangeController didReceiveMemoryWarning] with controllers: %@", allRangeControllers);
+#endif
+}
+
++ (void)didEnterBackground:(NSNotification *)notification
+{
+  NSArray *allRangeControllers = [[self allRangeControllersWeakSet] allObjects];
+  for (ASRangeController *rangeController in allRangeControllers) {
+    // We do not want to fully collapse the Display ranges of any visible range controllers so that flashes can be avoided when
+    // the app is resumed.  Non-visible controllers can be more aggressively culled to the LowMemory state (see definitions for documentation)
+    BOOL isVisible = ASInterfaceStateIncludesVisible([rangeController interfaceState]);
+    [rangeController updateCurrentRangeWithMode:isVisible ? ASLayoutRangeModeVisibleOnly : ASLayoutRangeModeLowMemory];
+  }
+  
+  // Because -interfaceState checks __ApplicationState and always clears the "visible" bit if Backgrounded, we must set this after updating the range mode.
+  __ApplicationState = UIApplicationStateBackground;
+  for (ASRangeController *rangeController in allRangeControllers) {
+    // Trigger a range update immediately, as we may not be allowed by the system to run the update block scheduled by changing range mode.
+    [rangeController performRangeUpdate];
+  }
+  
+#if ASRangeControllerLoggingEnabled
+  NSLog(@"+[ASRangeController didEnterBackground] with controllers, after backgrounding: %@", allRangeControllers);
+#endif
+}
+
++ (void)willEnterForeground:(NSNotification *)notification
+{
+  NSArray *allRangeControllers = [[self allRangeControllersWeakSet] allObjects];
+  __ApplicationState = UIApplicationStateActive;
+  for (ASRangeController *rangeController in allRangeControllers) {
+    BOOL isVisible = ASInterfaceStateIncludesVisible([rangeController interfaceState]);
+    [rangeController updateCurrentRangeWithMode:isVisible ? ASLayoutRangeModeMinimum : ASLayoutRangeModeVisibleOnly];
+    [rangeController performRangeUpdate];
+  }
+  
+#if ASRangeControllerLoggingEnabled
+  NSLog(@"+[ASRangeController willEnterForeground] with controllers, after foregrounding: %@", allRangeControllers);
+#endif
+}
+
+#pragma mark - Debugging
+
+- (NSString *)descriptionWithIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  NSMutableString *description = [NSMutableString stringWithFormat:@"%@ %@", [super description], @" allPreviousIndexPaths:\n"];
+  for (NSIndexPath *indexPath in indexPaths) {
+    ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
+    ASInterfaceState interfaceState = node.interfaceState;
+    BOOL inVisible = ASInterfaceStateIncludesVisible(interfaceState);
+    BOOL inDisplay = ASInterfaceStateIncludesDisplay(interfaceState);
+    BOOL inFetchData = ASInterfaceStateIncludesFetchData(interfaceState);
+    [description appendFormat:@"indexPath %@, Visible: %d, Display: %d, FetchData: %d\n", indexPath, inVisible, inDisplay, inFetchData];
+  }
+  return description;
+}
+
+- (NSString *)description
+{
+  NSArray<NSIndexPath *> *indexPaths = [[_allPreviousIndexPaths allObjects] sortedArrayUsingSelector:@selector(compare:)];
+  return [self descriptionWithIndexPaths:indexPaths];
 }
 
 @end

@@ -8,6 +8,8 @@
 
 #import <AsyncDisplayKit/ASControlNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol ASTextNodeDelegate;
 
 /**
@@ -36,7 +38,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @discussion Defaults to nil, no text is shown.
  For inline image attachments, add an attribute of key NSAttachmentAttributeName, with a value of an NSTextAttachment.
  */
-@property (nonatomic, copy) NSAttributedString *attributedString;
+@property (nullable, nonatomic, copy) NSAttributedString *attributedString;
 
 #pragma mark - Truncation
 
@@ -44,18 +46,19 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @abstract The attributedString to use when the text must be truncated.
  @discussion Defaults to a localized ellipsis character.
  */
-@property (nonatomic, copy) NSAttributedString *truncationAttributedString;
+@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedString;
 
 /**
  @summary The second attributed string appended for truncation.
  @discussion This string will be highlighted on touches.
  @default nil
  */
-@property (nonatomic, copy) NSAttributedString *additionalTruncationMessage;
+@property (nullable, nonatomic, copy) NSAttributedString *additionalTruncationMessage;
 
 /**
  @abstract Determines how the text is truncated to fit within the receiver's maximum size.
  @discussion Defaults to NSLineBreakByWordWrapping.
+ @note Setting a truncationMode in attributedString will override the truncation mode set here.
  */
 @property (nonatomic, assign) NSLineBreakMode truncationMode;
 
@@ -68,7 +71,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @abstract The maximum number of lines to render of the text before truncation.
  @default 0 (No limit)
  */
-@property (nonatomic, assign) NSUInteger maximumLineCount;
+@property (nonatomic, assign) NSUInteger maximumNumberOfLines;
 
 /**
  * @abstract flexShrink is YES by default for ASTextNode, allowing it to wrap to
@@ -82,7 +85,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @property (nonatomic, readonly, assign) NSUInteger lineCount;
 
-@property (nonatomic, strong) NSArray *exclusionPaths;
+@property (nullable, nonatomic, strong) NSArray<UIBezierPath *> *exclusionPaths;
 
 #pragma mark - Placeholders
 
@@ -98,7 +101,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 /**
  @abstract The placeholder color.
  */
-@property (nonatomic, strong) UIColor *placeholderColor;
+@property (nullable, nonatomic, strong) UIColor *placeholderColor;
 
 /**
  @abstract Inset each line of the placeholder.
@@ -134,7 +137,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  a line break, the rects returned will be on opposite sides and different lines). The rects returned
  are in the coordinate system of the receiver.
  */
-- (NSArray *)rectsForTextRange:(NSRange)textRange;
+- (NSArray<NSValue *> *)rectsForTextRange:(NSRange)textRange;
 
 /**
  @abstract Returns an array of rects used for highlighting the characters in a given text range.
@@ -145,7 +148,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  are in the coordinate system of the receiver. This method is useful for visual coordination with a
  highlighted range of text.
  */
-- (NSArray *)highlightRectsForTextRange:(NSRange)textRange;
+- (NSArray<NSValue *> *)highlightRectsForTextRange:(NSRange)textRange;
 
 /**
  @abstract Returns a bounding rect for the given text range.
@@ -169,7 +172,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 /**
  @abstract The set of attribute names to consider links.  Defaults to NSLinkAttributeName.
  */
-@property (nonatomic, copy) NSArray *linkAttributeNames;
+@property (nonatomic, copy) NSArray<NSString *> *linkAttributeNames;
 
 /**
  @abstract Indicates whether the receiver has an entity at a given point.
@@ -178,7 +181,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @param rangeOut The ultimate range of the found text. Can be NULL.
  @result YES if an entity exists at `point`; NO otherwise.
  */
-- (id)linkAttributeValueAtPoint:(CGPoint)point attributeName:(out NSString **)attributeNameOut range:(out NSRange *)rangeOut;
+- (nullable id)linkAttributeValueAtPoint:(CGPoint)point attributeName:(out NSString * _Nullable * _Nullable)attributeNameOut range:(out NSRange * _Nullable)rangeOut;
 
 /**
  @abstract The style to use when highlighting text.
@@ -201,6 +204,9 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 
 /**
  @abstract Responds to actions from links in the text node.
+ @discussion The delegate must be set before the node is loaded, and implement
+             textNode:longPressedLinkAttribute:value:atPoint:textRange: in order for
+             the long press gesture recognizer to be installed.
  */
 @property (nonatomic, weak) id<ASTextNodeDelegate> delegate;
 
@@ -213,7 +219,6 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @abstract if YES will not intercept touches for non-link areas of the text. Default is NO.
  */
 @property (nonatomic, assign) BOOL passthroughNonlinkTouches;
-
 
 @end
 
@@ -240,6 +245,8 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @param value The value of the tapped attribute.
  @param point The point within textNode, in textNode's coordinate system, that was tapped.
  @param textRange The range of highlighted text.
+ @discussion In addition to implementing this method, the delegate must be set on the text
+             node before it is loaded (the recognizer is created in -didLoad)
  */
 - (void)textNode:(ASTextNode *)textNode longPressedLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point textRange:(NSRange)textRange;
 
@@ -252,7 +259,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @param attribute The attribute that was tapped. Will not be nil.
  @param value The value of the tapped attribute.
  @param point The point within textNode, in textNode's coordinate system, that was touched to trigger a highlight.
- @discussion If not implemented, the default value is NO.
+ @discussion If not implemented, the default value is YES.
  @return YES if the entity attribute should be a link, NO otherwise.
  */
 - (BOOL)textNode:(ASTextNode *)textNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;
@@ -269,3 +276,5 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 - (BOOL)textNode:(ASTextNode *)textNode shouldLongPressLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;
 
 @end
+
+NS_ASSUME_NONNULL_END

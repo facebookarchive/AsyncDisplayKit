@@ -8,6 +8,7 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
   @abstract Kinds of events possible for control nodes.
@@ -33,6 +34,13 @@ typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent)
   ASControlNodeEventAllEvents         = 0xFFFFFFFF
 };
 
+typedef NS_OPTIONS(NSUInteger, ASControlState) {
+    ASControlStateNormal       = 0,
+    ASControlStateHighlighted  = 1 << 0,                  // used when ASControlNode isHighlighted is set
+    ASControlStateDisabled     = 1 << 1,
+    ASControlStateSelected     = 1 << 2,                  // used when ASControlNode isSelected is set
+    ASControlStateReserved     = 0xFF000000               // flags reserved for internal framework use
+};
 
 /**
   @abstract ASControlNode is the base class for control nodes (such as buttons), or nodes that track touches to invoke targets with action messages.
@@ -52,7 +60,13 @@ typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent)
   @abstract Indicates whether or not the receiver is highlighted.
   @discussion This is set automatically when the there is a touch inside the control and removed on exit or touch up. This is different from touchInside in that it includes an area around the control, rather than just for touches inside the control.
  */
-@property (nonatomic, readonly, assign, getter=isHighlighted) BOOL highlighted;
+@property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
+
+/**
+ @abstract Indicates whether or not the receiver is highlighted.
+ @discussion This is set automatically when the receiver is tapped.
+ */
+@property (nonatomic, assign, getter=isSelected) BOOL selected;
 
 #pragma mark - Tracking Touches
 /**
@@ -75,7 +89,7 @@ typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent)
   @param controlEvents A bitmask specifying the control events for which the action message is sent. May not be 0. See "Control Events" for bitmask constants.
   @discussion You may call this method multiple times, and you may specify multiple target-action pairs for a particular event. Targets are held weakly.
  */
-- (void)addTarget:(id)target action:(SEL)action forControlEvents:(ASControlNodeEvent)controlEvents;
+- (void)addTarget:(nullable id)target action:(SEL)action forControlEvents:(ASControlNodeEvent)controlEvents;
 
 /**
   @abstract Returns the actions that are associated with a target and a particular control event.
@@ -83,7 +97,7 @@ typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent)
   @param controlEvent A single constant of type ASControlNodeEvent that specifies a particular user action on the control; for a list of these constants, see "Control Events". May not be 0 or ASControlNodeEventAllEvents.
   @result An array of selector names as NSString objects, or nil if there are no action selectors associated with controlEvent.
  */
-- (NSArray *)actionsForTarget:(id)target forControlEvent:(ASControlNodeEvent)controlEvent;
+- (nullable NSArray<NSString *> *)actionsForTarget:(id)target forControlEvent:(ASControlNodeEvent)controlEvent;
 
 /**
   @abstract Returns all target objects associated with the receiver.
@@ -97,13 +111,15 @@ typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent)
   @param action A selector identifying an action message. Pass NULL to remove all action messages paired with target.
   @param controlEvents A bitmask specifying the control events associated with target and action. See "Control Events" for bitmask constants. May not be 0.
  */
-- (void)removeTarget:(id)target action:(SEL)action forControlEvents:(ASControlNodeEvent)controlEvents;
+- (void)removeTarget:(nullable id)target action:(nullable SEL)action forControlEvents:(ASControlNodeEvent)controlEvents;
 
 /**
   @abstract Sends the actions for the control events for a particular event.
   @param controlEvents A bitmask specifying the control events for which to send actions. See "Control Events" for bitmask constants. May not be 0.
   @param event The event which triggered these control actions. May be nil.
  */
-- (void)sendActionsForControlEvents:(ASControlNodeEvent)controlEvents withEvent:(UIEvent *)event;
+- (void)sendActionsForControlEvents:(ASControlNodeEvent)controlEvents withEvent:(nullable UIEvent *)event;
 
 @end
+
+NS_ASSUME_NONNULL_END

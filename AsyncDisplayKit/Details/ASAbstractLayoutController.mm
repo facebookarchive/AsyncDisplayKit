@@ -7,13 +7,19 @@
  */
 
 #import "ASAbstractLayoutController.h"
-
+#import "ASAssert.h"
 #include <vector>
 
-#import "ASAssert.h"
+extern ASRangeTuningParameters const ASRangeTuningParametersZero = {};
+
+extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningParameters lhs, ASRangeTuningParameters rhs)
+{
+  return lhs.leadingBufferScreenfuls == rhs.leadingBufferScreenfuls && lhs.trailingBufferScreenfuls == rhs.trailingBufferScreenfuls;
+}
 
 @interface ASAbstractLayoutController () {
-  std::vector<ASRangeTuningParameters> _tuningParameters;
+  std::vector<std::vector<ASRangeTuningParameters>> _tuningParameters;
+  CGSize _viewportSize;
 }
 @end
 
@@ -25,14 +31,45 @@
     return nil;
   }
   
-  _tuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
-  _tuningParameters[ASLayoutRangeTypePreload] = {
-    .leadingBufferScreenfuls = 3,
-    .trailingBufferScreenfuls = 2
+  _tuningParameters = std::vector<std::vector<ASRangeTuningParameters>> (ASLayoutRangeModeCount, std::vector<ASRangeTuningParameters> (ASLayoutRangeTypeCount));
+  
+  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeDisplay] = {
+    .leadingBufferScreenfuls = 1.0,
+    .trailingBufferScreenfuls = 0.5
   };
-  _tuningParameters[ASLayoutRangeTypeRender] = {
-    .leadingBufferScreenfuls = 2,
-    .trailingBufferScreenfuls = 1
+  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeFetchData] = {
+    .leadingBufferScreenfuls = 2.5,
+    .trailingBufferScreenfuls = 1.5
+  };
+  
+  _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypeDisplay] = {
+    .leadingBufferScreenfuls = 0.25,
+    .trailingBufferScreenfuls = 0.25
+  };
+  _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypeFetchData] = {
+    .leadingBufferScreenfuls = 0.25,
+    .trailingBufferScreenfuls = 0.5
+  };
+
+  _tuningParameters[ASLayoutRangeModeVisibleOnly][ASLayoutRangeTypeDisplay] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  _tuningParameters[ASLayoutRangeModeVisibleOnly][ASLayoutRangeTypeFetchData] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  
+  // The Low Memory range mode has special handling. Because a zero range still includes the visible area / bounds,
+  // in order to implement the behavior of releasing all graphics memory (backing stores), ASRangeController must check
+  // for this range mode and use an empty set for displayIndexPaths rather than querying the ASLayoutController for the indexPaths.
+  _tuningParameters[ASLayoutRangeModeLowMemory][ASLayoutRangeTypeDisplay] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
+  };
+  _tuningParameters[ASLayoutRangeModeLowMemory][ASLayoutRangeTypeFetchData] = {
+    .leadingBufferScreenfuls = 0,
+    .trailingBufferScreenfuls = 0
   };
   
   return self;
@@ -42,54 +79,44 @@
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  return _tuningParameters[rangeType];
+  return [self tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  _tuningParameters[rangeType] = tuningParameters;
+  return [self setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
-// Support for the deprecated tuningParameters property
-- (ASRangeTuningParameters)tuningParameters
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [self tuningParametersForRangeType:ASLayoutRangeTypeRender];
+  ASDisplayNodeAssert(rangeMode < _tuningParameters.size() && rangeType < _tuningParameters[rangeMode].size(),
+                      @"Requesting a range that is OOB for the configured tuning parameters");
+  return _tuningParameters[rangeMode][rangeType];
 }
 
-// Support for the deprecated tuningParameters property
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  [self setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
+  ASDisplayNodeAssert(rangeMode < _tuningParameters.size() && rangeType < _tuningParameters[rangeMode].size(),
+                      @"Setting a range that is OOB for the configured tuning parameters");
+  _tuningParameters[rangeMode][rangeType] = tuningParameters;
 }
 
-#pragma mark - Index Path Range Support
+#pragma mark - Abstract Index Path Range Support
 
-// Support for deprecated method
-- (BOOL)shouldUpdateForVisibleIndexPath:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize
-{
-  return [self shouldUpdateForVisibleIndexPaths:indexPaths viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
-}
-
-// Support for the deprecated method
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize
-{
-  return [self indexPathsForScrolling:scrollDirection viewportSize:viewportSize rangeType:ASLayoutRangeTypeRender];
-}
-
-#pragma mark - Abstract
-
-- (BOOL)shouldUpdateForVisibleIndexPaths:(NSArray *)indexPaths viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
-{
-  ASDisplayNodeAssertNotSupported();
-  return NO;
-}
-
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection viewportSize:(CGSize)viewportSize rangeType:(ASLayoutRangeType)rangeType
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
+}
+
+- (void)setViewportSize:(CGSize)viewportSize
+{
+  _viewportSize = viewportSize;
+}
+
+- (CGSize)viewportSize
+{
+  return _viewportSize;
 }
 
 @end

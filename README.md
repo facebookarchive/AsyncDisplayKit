@@ -1,10 +1,16 @@
 ![AsyncDisplayKit](https://github.com/facebook/AsyncDisplayKit/blob/master/docs/assets/logo.png)
 
+[![Apps Using](https://img.shields.io/badge/Apps%20Using%20ASDK-%3E3,178-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Downloads](https://img.shields.io/badge/Total%20Downloads-%3E336,372-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+
+[![Platform](https://img.shields.io/badge/platforms-iOS%20%7C%20tvOS-orange.svg)](http://AsyncDisplayKit.org)
+[![Languages](https://img.shields.io/badge/languages-ObjC%20%7C%20Swift-orange.svg)](http://AsyncDisplayKit.org)
+
+[![Version](https://img.shields.io/cocoapods/v/AsyncDisplayKit.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-59C939.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Build Status](https://travis-ci.org/facebook/AsyncDisplayKit.svg)](https://travis-ci.org/facebook/AsyncDisplayKit)
-[![Coverage Status](https://coveralls.io/repos/facebook/AsyncDisplayKit/badge.svg?branch=master)](https://coveralls.io/r/facebook/AsyncDisplayKit?branch=master)
- [![Version](http://img.shields.io/cocoapods/v/AsyncDisplayKit.svg)](http://cocoapods.org/?q=AsyncDisplayKit)
- [![Platform](http://img.shields.io/cocoapods/p/AsyncDisplayKit.svg)]()
- [![License](http://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
+[![License](https://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
+
 
 AsyncDisplayKit is an iOS framework that keeps even the most complex user
 interfaces smooth and responsive.  It was originally built to make Facebook's
@@ -22,7 +28,7 @@ pod 'AsyncDisplayKit'
 
 (ASDK can also be used as a regular static library:  Copy the project to your
 codebase manually, adding `AsyncDisplayKit.xcodeproj` to your workspace.  Add
-`libAsyncDisplayKit.a`, AssetsLibrary, and Photos to the "Link Binary With
+`libAsyncDisplayKit.a`, MapKit, AssetsLibrary, and Photos to the "Link Binary With
 Libraries" build phase.  Include `-lc++ -ObjC` in your project linker flags.)
 
 Import the framework header, or create an [Objective-C bridging
@@ -57,6 +63,22 @@ dispatch_async(_backgroundQueue, ^{
 });
 ```
 
+In Swift:
+
+```swift
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) {
+  let node = ASTextNode()
+  node.attributedString = NSAttributedString(string: "hello")
+  node.measure(CGSize(width: screenWidth, height: CGFloat.max))
+  node.frame = CGRect(origin: CGPointZero, size: node.calculatedSize)
+            
+  // self.view isn't a node, so we can only use it on the main thread
+  dispatch_async(dispatch_get_main_queue()) {
+   self.view.addSubview(node.view)
+  }
+}
+```
+
 AsyncDisplayKit at a glance:
 
 * `ASImageNode` and `ASTextNode` are drop-in replacements for UIImageView and
@@ -77,9 +99,9 @@ to implement node hierarchies or custom drawing.
 
 ### Learn more
 
-* Read the [Getting Started guide](http://asyncdisplaykit.org/guide/)
+* Read the [Getting Started guide](http://asyncdisplaykit.org/docs/getting-started.html)
 * Get the [sample projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples)
-* Browse the [API reference](http://asyncdisplaykit.org/appledoc/)
+* Browse the [API reference](http://asyncdisplaykit.org/appledocs.html)
 * Watch the [NSLondon talk](http://vimeo.com/103589245) or the [NSSpain talk](https://www.youtube.com/watch?v=RY_X7l1g79Q)
 
 ## Testing

@@ -11,6 +11,7 @@
 
 #import "AppDelegate.h"
 
+#import "PresentingViewController.h"
 #import "ViewController.h"
 
 @implementation AppDelegate
@@ -31,10 +32,14 @@
 - (void)pushNewViewControllerAnimated:(BOOL)animated
 {
   UINavigationController *navController = (UINavigationController *)self.window.rootViewController;
-  
+
+#if SIMULATE_WEB_RESPONSE
+  UIViewController *viewController = [[PresentingViewController alloc] init];
+#else
   UIViewController *viewController = [[ViewController alloc] init];
   viewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Push Another Copy" style:UIBarButtonItemStylePlain target:self action:@selector(pushNewViewController)];
-
+#endif
+  
   [navController pushViewController:viewController animated:animated];
 }
 

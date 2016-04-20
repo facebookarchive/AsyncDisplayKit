@@ -14,11 +14,15 @@
 
 #import <XCTest/XCTest.h>
 
+static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
+{
+  return fabs(size1.width - size2.width) < delta && fabs(size1.height - size2.height) < delta;
+}
+
 @interface ASTextNodeTestDelegate : NSObject <ASTextNodeDelegate>
 
 @property (nonatomic, copy, readonly) NSString *tappedLinkAttribute;
 @property (nonatomic, assign, readonly) id tappedLinkValue;
-
 
 @end
 
@@ -50,7 +54,7 @@
 {
   [super setUp];
   _textNode = [[ASTextNode alloc] init];
-
+  
   UIFontDescriptor *desc =
   [UIFontDescriptor fontDescriptorWithName:@"Didot" size:18];
   NSArray *arr =
@@ -65,7 +69,17 @@
   [[NSMutableAttributedString alloc] initWithString:@"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." attributes:d];
   NSMutableParagraphStyle *para = [NSMutableParagraphStyle new];
   para.alignment = NSTextAlignmentCenter;
-  [mas addAttribute:NSParagraphStyleAttributeName value:para range:NSMakeRange(0,mas.length)];
+  para.lineSpacing = 1.0;
+  [mas addAttribute:NSParagraphStyleAttributeName value:para
+              range:NSMakeRange(0, mas.length - 1)];
+  
+  // Vary the linespacing on the last line
+  NSMutableParagraphStyle *lastLinePara = [NSMutableParagraphStyle new];
+  lastLinePara.alignment = para.alignment;
+  lastLinePara.lineSpacing = 5.0;
+  [mas addAttribute:NSParagraphStyleAttributeName value:lastLinePara
+              range:NSMakeRange(mas.length - 1, 1)];
+  
   _attributedString = mas;
   _textNode.attributedString = _attributedString;
 }
@@ -87,6 +101,13 @@
   XCTAssertTrue([_textNode.truncationAttributedString isEqualToAttributedString:truncation], @"Failed to set truncation message");
 }
 
+- (void)testSettingAdditionalTruncationMessage
+{
+  NSAttributedString *additionalTruncationMessage = [[NSAttributedString alloc] initWithString:@"read more" attributes:nil];
+  _textNode.additionalTruncationMessage = additionalTruncationMessage;
+  XCTAssertTrue([_textNode.additionalTruncationMessage isEqualToAttributedString:additionalTruncationMessage], @"Failed to set additionalTruncationMessage message");
+}
+
 - (void)testCalculatedSizeIsGreaterThanOrEqualToConstrainedSize
 {
   for (NSInteger i = 10; i < 500; i += 50) {
@@ -103,8 +124,8 @@
     CGSize constrainedSize = CGSizeMake(i, i);
     CGSize calculatedSize = [_textNode measure:constrainedSize];
     CGSize recalculatedSize = [_textNode measure:calculatedSize];
-
-    XCTAssertTrue(CGSizeEqualToSize(calculatedSize, recalculatedSize), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
+    
+    XCTAssertTrue(CGSizeEqualToSizeWithIn(calculatedSize, recalculatedSize, 4.0), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
   }
 }
 
@@ -115,7 +136,7 @@
     CGSize calculatedSize = [_textNode measure:constrainedSize];
     CGSize recalculatedSize = [_textNode measure:calculatedSize];
 
-    XCTAssertTrue(CGSizeEqualToSize(calculatedSize, recalculatedSize), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
+    XCTAssertTrue(CGSizeEqualToSizeWithIn(calculatedSize, recalculatedSize, 11.0), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
   }
 }
 

@@ -57,7 +57,7 @@ CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat parent
     case ASRelativeDimensionTypePoints:
       return dimension.value;
     case ASRelativeDimensionTypePercent:
-      return round(dimension.value * parent);
+      return dimension.value * parent;
   }
 }
 
@@ -75,6 +75,11 @@ ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)
   ASDisplayNodeCAssert(min.height <= max.height,
                        @"Range min height (%f) must not be larger than max height (%f).", min.height, max.height);
   ASSizeRange sizeRange; sizeRange.min = min; sizeRange.max = max; return sizeRange;
+}
+
+ASSizeRange ASSizeRangeMakeExactSize(CGSize size)
+{
+  return ASSizeRangeMake(size, size);
 }
 
 CGSize ASSizeRangeClamp(ASSizeRange sizeRange, CGSize size)
@@ -95,7 +100,7 @@ struct _Range {
   {
   CGFloat newMin = MAX(min, other.min);
   CGFloat newMax = MIN(max, other.max);
-  if (!(newMin > newMax)) {
+  if (newMin <= newMax) {
     return {newMin, newMax};
   } else {
     // No intersection. If we're before the other range, return our max; otherwise our min.

@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASImageProtocols.h>
 #import <AsyncDisplayKit/ASMultiplexImageNode.h>
+#import <AsyncDisplayKit/ASImageContainerProtocolCategories.h>
 
 #import <libkern/OSAtomic.h>
 
@@ -145,14 +146,14 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
     NSArray *URL;
     [inv getArgument:&URL atIndex:2];
 
-    void (^completionBlock)(CGImageRef);
+    ASImageCacherCompletion completionBlock;
     [inv getArgument:&completionBlock atIndex:4];
 
     // Call the completion block with our test image and URL.
     NSURL *testImageURL = [self _testImageURL];
     XCTAssertEqualObjects(URL, testImageURL, @"Fetching URL other than test image");
-    completionBlock([self _testImage].CGImage);
-  }] fetchCachedImageWithURL:[OCMArg any] callbackQueue:[OCMArg any] completion:[OCMArg any]];
+    completionBlock([self _testImage]);
+  }] cachedImageWithURL:[OCMArg any] callbackQueue:[OCMArg any] completion:[OCMArg any]];
 
   imageNode.imageIdentifiers = @[imageIdentifier];
   // Kick off loading.
@@ -278,7 +279,7 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
       return;
 
     // Bail if it's trying to load an identifier that's more than one step than what's loaded.
-    NSInteger nextImageIdentifier = [imageNode.loadedImageIdentifier integerValue] + 1;
+    NSInteger nextImageIdentifier = [(NSNumber *)imageNode.loadedImageIdentifier integerValue] + 1;
     if (requestedIdentifierValue != nextImageIdentifier)
       return;
 
@@ -302,25 +303,25 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
   // Mock a cache miss.
   id mockCache = [OCMockObject mockForProtocol:@protocol(ASImageCacheProtocol)];
   [[[mockCache stub] andDo:^(NSInvocation *inv) {
-    void (^completion)(CGImageRef imageFromCache);
+    ASImageCacherCompletion completion;
     [inv getArgument:&completion atIndex:4];
     completion(nil);
-  }] fetchCachedImageWithURL:[OCMArg any] callbackQueue:[OCMArg any] completion:[OCMArg any]];
+  }] cachedImageWithURL:[OCMArg any] callbackQueue:[OCMArg any] completion:[OCMArg any]];
 
   // Mock a 50%-progress URL download.
   id mockDownloader = [OCMockObject mockForProtocol:@protocol(ASImageDownloaderProtocol)];
   const CGFloat mockedProgress = 0.5;
   [[[mockDownloader stub] andDo:^(NSInvocation *inv) {
     // Simulate progress.
-    void (^progressBlock)(CGFloat progress);
+    ASImageDownloaderProgress progressBlock;
     [inv getArgument:&progressBlock atIndex:4];
     progressBlock(mockedProgress);
 
     // Simulate completion.
-    void (^completionBlock)(CGImageRef image, NSError *error);
+    ASImageDownloaderCompletion completionBlock;
     [inv getArgument:&completionBlock atIndex:5];
-    completionBlock([self _testImage].CGImage, nil);
-  }] downloadImageWithURL:[OCMArg any] callbackQueue:[OCMArg any] downloadProgressBlock:[OCMArg any] completion:[OCMArg any]];
+    completionBlock([self _testImage], nil, nil);
+  }] downloadImageWithURL:[OCMArg any] callbackQueue:[OCMArg any] downloadProgress:[OCMArg any] completion:[OCMArg any]];
 
   ASMultiplexImageNode *imageNode = [[ASMultiplexImageNode alloc] initWithCache:mockCache downloader:mockDownloader];
   NSNumber *imageIdentifier = @1;
@@ -344,7 +345,7 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
 
   // Wait until the image is loaded.
   ASRunRunLoopUntilBlockIsTrue(^BOOL{
-    return [imageNode.loadedImageIdentifier isEqual:imageIdentifier];
+    return [(id)imageNode.loadedImageIdentifier isEqual:imageIdentifier];
   });
 
   // Verify the delegation.

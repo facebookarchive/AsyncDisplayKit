@@ -10,10 +10,14 @@
 
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASDataController.h>
-#import <AsyncDisplayKit/ASFlowLayoutController.h>
 #import <AsyncDisplayKit/ASLayoutController.h>
+#import <AsyncDisplayKit/ASLayoutRangeType.h>
 
+#define ASRangeControllerLoggingEnabled 0
 
+NS_ASSUME_NONNULL_BEGIN
+
+@protocol ASRangeControllerDataSource;
 @protocol ASRangeControllerDelegate;
 
 /**
@@ -25,6 +29,11 @@
  * This includes cancelling those asynchronous operations as cells fall outside of the working ranges.
  */
 @interface ASRangeController : ASDealloc2MainObject <ASDataControllerDelegate>
+{
+  id<ASLayoutController>                  _layoutController;
+  __weak id<ASRangeControllerDataSource>  _dataSource;
+  __weak id<ASRangeControllerDelegate>    _delegate;
+}
 
 /**
  * Notify the range controller that the visible range has been updated.
@@ -41,45 +50,90 @@
  *
  * @param contentView UIView to add a (sized) node's view to.
  *
- * @param cellNode The cell node to be added.
+ * @param node The cell node to be added.
  */
 - (void)configureContentView:(UIView *)contentView forCellNode:(ASCellNode *)node;
 
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+
+// These methods call the corresponding method on each node, visiting each one that
+// the range controller has set a non-default interface state on.
+- (void)clearContents;
+- (void)clearFetchedData;
+
 /**
- * Delegate and ultimate data source.  Must not be nil.
+ * An object that describes the layout behavior of the ranged component (table view, collection view, etc.)
+ *
+ * Used primarily for providing the current range of index paths and identifying when the
+ * range controller should invalidate its range.
+ */
+@property (nonatomic, strong) id<ASLayoutController> layoutController;
+
+/**
+ * The underlying data source for the range controller
+ */
+@property (nonatomic, weak) id<ASRangeControllerDataSource> dataSource;
+
+/**
+ * Delegate for handling range controller events. Must not be nil.
  */
 @property (nonatomic, weak) id<ASRangeControllerDelegate> delegate;
-
-@property (nonatomic, strong) id<ASLayoutController> layoutController;
 
 @end
 
 
 /**
- * <ASRangeController> delegate.  For example, <ASTableView>.
+ * Data source for ASRangeController.
+ *
+ * Allows the range controller to perform external queries on the range. 
+ * Ex. range nodes, visible index paths, and viewport size.
  */
-@protocol ASRangeControllerDelegate <NSObject>
+@protocol ASRangeControllerDataSource <NSObject>
 
 /**
  * @param rangeController Sender.
  *
  * @returns an array of index paths corresponding to the nodes currently visible onscreen (i.e., the visible range).
  */
-- (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)rangeController;
+- (NSArray<NSIndexPath *> *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController;
 
 /**
  * @param rangeController Sender.
  *
  * @returns the receiver's viewport size (i.e., the screen space occupied by the visible range).
  */
-- (CGSize)rangeControllerViewportSize:(ASRangeController *)rangeController;
+- (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController;
+
+/**
+ * @param rangeController Sender.
+ *
+ * @returns the ASInterfaceState of the node that this controller is powering.  This allows nested range controllers
+ * to collaborate with one another, as an outer controller may set bits in .interfaceState such as Visible.
+ * If this controller is an orthogonally scrolling element, it waits until it is visible to preload outside the viewport.
+ */
+- (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController;
+
+- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths;
+
+- (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath;
+
+- (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
+
+@end
+
+/**
+ * Delegate for ASRangeController.
+ */
+@protocol ASRangeControllerDelegate <NSObject>
 
 /**
  * Begin updates.
  *
  * @param rangeController Sender.
  */
-- (void)rangeControllerBeginUpdates:(ASRangeController *)rangeController;
+- (void)didBeginUpdatesInRangeController:(ASRangeController *)rangeController;
 
 /**
  * End updates.
@@ -88,16 +142,7 @@
  * @param animated NO if all animations are disabled. YES otherwise.
  * @param completion Completion block.
  */
-- (void)rangeController:(ASRangeController * )rangeController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
-
-/**
- * Fetch nodes at specific index paths.
- *
- * @param rangeController Sender.
- *
- * @param indexPaths Index paths.
- */
-- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths;
+- (void)rangeController:(ASRangeController * )rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
 
 /**
  * Called for nodes insertion.
@@ -110,7 +155,7 @@
  *
  * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
  */
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  * Called for nodes deletion.
@@ -123,7 +168,7 @@
  *
  * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
  */
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  * Called for section insertion.
@@ -148,3 +193,5 @@
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 @end
+
+NS_ASSUME_NONNULL_END

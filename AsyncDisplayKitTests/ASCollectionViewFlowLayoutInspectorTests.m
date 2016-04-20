@@ -25,6 +25,11 @@
   return [[ASCellNode alloc] init];
 }
 
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  return ^{ return [[ASCellNode alloc] init]; };
+}
+
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
   return 0;
@@ -100,7 +105,7 @@
   layout.scrollDirection = UICollectionViewScrollDirectionVertical;
 
   CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   
@@ -122,7 +127,7 @@
   layout.scrollDirection = UICollectionViewScrollDirectionVertical;
   
   CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   
@@ -146,7 +151,7 @@
   layout.headerReferenceSize = CGSizeMake(125.0, 125.0);
   
   CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
@@ -167,7 +172,7 @@
   layout.footerReferenceSize = CGSizeMake(125.0, 125.0);
   
   CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
@@ -190,7 +195,7 @@
   layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
   
   CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   
@@ -212,7 +217,7 @@
   layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
   
   CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   
@@ -236,7 +241,7 @@
   layout.headerReferenceSize = CGSizeMake(125.0, 125.0);
   
   CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
@@ -257,7 +262,7 @@
   layout.footerReferenceSize = CGSizeMake(125.0, 125.0);
   
   CGRect rect = CGRectMake(0, 0, 100.0, 100.0);
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:rect collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
@@ -274,7 +279,7 @@
   InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
   HeaderReferenceSizeTestDelegate *delegate = [[HeaderReferenceSizeTestDelegate alloc] init];
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
@@ -291,7 +296,7 @@
 - (void)testThatItRespondsWithTheDefaultNumberOfSections
 {
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   XCTAssert(sections == 1, @"should return 1 by default");
@@ -304,7 +309,7 @@
 {
   InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
@@ -321,7 +326,7 @@
   InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
   HeaderReferenceSizeTestDelegate *delegate = [[HeaderReferenceSizeTestDelegate alloc] init];
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
@@ -338,7 +343,7 @@
   HeaderReferenceSizeTestDelegate *delegate = [[HeaderReferenceSizeTestDelegate alloc] init];
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   layout.footerReferenceSize = CGSizeMake(125.0, 125.0);
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
@@ -354,7 +359,7 @@
   InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
   HeaderReferenceSizeTestDelegate *delegate = [[HeaderReferenceSizeTestDelegate alloc] init];
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:NO];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];

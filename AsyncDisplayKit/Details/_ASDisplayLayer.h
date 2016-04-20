@@ -81,7 +81,7 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 /**
  @summary Delegate method to draw layer contents into a CGBitmapContext. The current UIGraphics context will be set to an appropriate context.
  @param parameters An object describing all of the properties you need to draw. Return this from -drawParametersForAsyncLayer:
- @param isCancelled Execute this block to check whether the current drawing operation has been cancelled to avoid unnecessary work. A return value of YES means cancel drawing and return.
+ @param isCancelledBlock Execute this block to check whether the current drawing operation has been cancelled to avoid unnecessary work. A return value of YES means cancel drawing and return.
  @param isRasterizing YES if the layer is being rasterized into another layer, in which case drawRect: probably wants to avoid doing things like filling its bounds with a zero-alpha color to clear the backing store.
  */
 + (void)drawRect:(CGRect)bounds withParameters:(id<NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing;
@@ -89,10 +89,22 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 /**
  @summary Delegate override to provide new layer contents as a UIImage.
  @param parameters An object describing all of the properties you need to draw. Return this from -drawParametersForAsyncLayer:
- @param isCancelled Execute this block to check whether the current drawing operation has been cancelled to avoid unnecessary work. A return value of YES means cancel drawing and return.
+ @param isCancelledBlock Execute this block to check whether the current drawing operation has been cancelled to avoid unnecessary work. A return value of YES means cancel drawing and return.
  @return A UIImage with contents that are ready to display on the main thread. Make sure that the image is already decoded before returning it here.
  */
 + (UIImage *)displayWithParameters:(id<NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock;
+
+/**
+ * @abstract instance version of drawRect class method
+ * @see drawRect:withParameters:isCancelled:isRasterizing class method
+ */
+- (void)drawRect:(CGRect)bounds withParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing;
+
+/**
+ * @abstract instance version of display class method
+ * @see displayWithParameters:isCancelled class method
+ */
+- (UIImage *)displayWithParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled;
 
 // Called on the main thread only
 

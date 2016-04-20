@@ -11,18 +11,8 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface LikesNode : ASControlNode {
-    
-    ASImageNode *_iconNode;
-    ASTextNode *_countNode;
-    
-    NSInteger _likesCount;
-    BOOL _liked;
-    
-}
+@interface LikesNode : ASControlNode
 
 - (instancetype)initWithLikesCount:(NSInteger)likesCount;
-
-+ (BOOL) getYesOrNo;
 
 @end

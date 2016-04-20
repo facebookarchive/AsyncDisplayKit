@@ -10,8 +10,9 @@
 
 @implementation UICollectionViewLayout (ASConvenience)
 
-- (BOOL)asdk_isFlowLayout {
-  return [self isKindOfClass:UICollectionViewFlowLayout.class];
+- (BOOL)asdk_isFlowLayout
+{
+  return [self isKindOfClass:[UICollectionViewFlowLayout class]];
 }
 
 @end

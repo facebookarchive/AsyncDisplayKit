@@ -15,7 +15,6 @@
 #import "ASBackgroundLayoutSpec.h"
 #import "ASRatioLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
-#import "ASLayoutOptions.h"
 
 @interface ASStackLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end
@@ -27,6 +26,8 @@
   [super setUp];
   self.recordMode = NO;
 }
+
+#pragma mark - Utility methods
 
 static NSArray *defaultSubnodes()
 {
@@ -63,6 +64,24 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   [self testStackLayoutSpecWithStyle:style sizeRange:sizeRange subnodes:subnodes identifier:identifier];
 }
 
+- (void)testStackLayoutSpecWithDirection:(ASStackLayoutDirection)direction
+                itemsHorizontalAlignment:(ASHorizontalAlignment)horizontalAlignment
+                  itemsVerticalAlignment:(ASVerticalAlignment)verticalAlignment
+                              identifier:(NSString *)identifier
+{
+  NSArray *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
+  
+  ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init];
+  stackLayoutSpec.direction = direction;
+  stackLayoutSpec.children = subnodes;
+  [stackLayoutSpec setHorizontalAlignment:horizontalAlignment];
+  [stackLayoutSpec setVerticalAlignment:verticalAlignment];
+  
+  CGSize exactSize = CGSizeMake(200, 200);
+  static ASSizeRange kSize = ASSizeRangeMake(exactSize, exactSize);
+  [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:subnodes identifier:identifier];
+}
+
 - (void)testStackLayoutSpecWithStyle:(ASStackLayoutSpecStyle)style
                            sizeRange:(ASSizeRange)sizeRange
                             subnodes:(NSArray *)subnodes
@@ -77,18 +96,30 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
                             subnodes:(NSArray *)subnodes
                           identifier:(NSString *)identifier
 {
+  ASStackLayoutSpec *stackLayoutSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:style.direction
+                                                                               spacing:style.spacing
+                                                                        justifyContent:style.justifyContent
+                                                                            alignItems:style.alignItems
+                                                                              children:children];
+  [self testStackLayoutSpec:stackLayoutSpec sizeRange:sizeRange subnodes:subnodes identifier:identifier];
+}
+
+- (void)testStackLayoutSpec:(ASStackLayoutSpec *)stackLayoutSpec
+                  sizeRange:(ASSizeRange)sizeRange
+                   subnodes:(NSArray *)subnodes
+                 identifier:(NSString *)identifier
+{
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor whiteColor]);
   
-  ASLayoutSpec *layoutSpec =
-  [ASBackgroundLayoutSpec
-   backgroundLayoutSpecWithChild:[ASStackLayoutSpec stackLayoutSpecWithDirection:style.direction spacing:style.spacing justifyContent:style.justifyContent alignItems:style.alignItems children:children]
-   background:backgroundNode];
+  ASLayoutSpec *layoutSpec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:stackLayoutSpec background:backgroundNode];
   
   NSMutableArray *newSubnodes = [NSMutableArray arrayWithObject:backgroundNode];
   [newSubnodes addObjectsFromArray:subnodes];
   
   [self testLayoutSpec:layoutSpec sizeRange:sizeRange subnodes:newSubnodes identifier:identifier];
 }
+
+#pragma mark -
 
 - (void)testUnderflowBehaviors
 {
@@ -98,6 +129,8 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentCenter flex:NO sizeRange:kSize identifier:@"justifyCenter"];
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentEnd flex:NO sizeRange:kSize identifier:@"justifyEnd"];
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentStart flex:YES sizeRange:kSize identifier:@"flex"];
+  [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentSpaceBetween flex:NO sizeRange:kSize identifier:@"justifySpaceBetween"];
+  [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentSpaceAround flex:NO sizeRange:kSize identifier:@"justifySpaceAround"];
 }
 
 - (void)testOverflowBehaviors
@@ -108,6 +141,10 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentCenter flex:NO sizeRange:kSize identifier:@"justifyCenter"];
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentEnd flex:NO sizeRange:kSize identifier:@"justifyEnd"];
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentStart flex:YES sizeRange:kSize identifier:@"flex"];
+  // On overflow, "space between" is identical to "content start"
+  [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentSpaceBetween flex:NO sizeRange:kSize identifier:@"justifyStart"];
+  // On overflow, "space around" is identical to "content center"
+  [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentSpaceAround flex:NO sizeRange:kSize identifier:@"justifyCenter"];
 }
 
 - (void)testOverflowBehaviorsWhenAllFlexShrinkChildrenHaveBeenClampedToZeroButViolationStillExists
@@ -244,6 +281,50 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   // width 0-300px; height 300px
   static ASSizeRange kVariableHeight = {{0, 300}, {300, 300}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kVariableHeight subnodes:subnodes identifier:@"variableHeight"];
+}
+
+- (void)testJustifiedSpaceBetweenWithOneChild
+{
+  ASStackLayoutSpecStyle style = {
+    .direction = ASStackLayoutDirectionHorizontal,
+    .justifyContent = ASStackLayoutJustifyContentSpaceBetween
+  };
+
+  ASStaticSizeDisplayNode *child = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
+  child.staticSize = {50, 50};
+  
+  // width 300px; height 0-INF
+  static ASSizeRange kVariableHeight = {{300, 0}, {300, INFINITY}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kVariableHeight subnodes:@[child] identifier:nil];
+}
+
+- (void)testJustifiedSpaceAroundWithOneChild
+{
+  ASStackLayoutSpecStyle style = {
+    .direction = ASStackLayoutDirectionHorizontal,
+    .justifyContent = ASStackLayoutJustifyContentSpaceAround
+  };
+  
+  ASStaticSizeDisplayNode *child = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
+  child.staticSize = {50, 50};
+  
+  // width 300px; height 0-INF
+  static ASSizeRange kVariableHeight = {{300, 0}, {300, INFINITY}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kVariableHeight subnodes:@[child] identifier:nil];
+}
+
+- (void)testJustifiedSpaceBetweenWithRemainingSpace
+{
+  // width 301px; height 0-300px; 1px remaining
+  static ASSizeRange kSize = {{301, 0}, {301, 300}};
+  [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentSpaceBetween flex:NO sizeRange:kSize identifier:nil];
+}
+
+- (void)testJustifiedSpaceAroundWithRemainingSpace
+{
+  // width 305px; height 0-300px; 5px remaining
+  static ASSizeRange kSize = {{305, 0}, {305, 300}};
+  [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentSpaceAround flex:NO sizeRange:kSize identifier:nil];
 }
 
 - (void)testChildThatChangesCrossSizeWhenMainSizeIsFlexed
@@ -520,6 +601,56 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   // This test verifies the current behavior--the snapshot contains widths 300px, 100px, and 50px.
   static ASSizeRange kSize = {{400, 0}, {400, 150}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testHorizontalAndVerticalAlignments
+{
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal itemsHorizontalAlignment:ASHorizontalAlignmentLeft itemsVerticalAlignment:ASVerticalAlignmentTop identifier:@"horizontalTopLeft"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal itemsHorizontalAlignment:ASHorizontalAlignmentMiddle itemsVerticalAlignment:ASVerticalAlignmentCenter identifier:@"horizontalCenter"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal itemsHorizontalAlignment:ASHorizontalAlignmentRight itemsVerticalAlignment:ASVerticalAlignmentBottom identifier:@"horizontalBottomRight"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionVertical itemsHorizontalAlignment:ASHorizontalAlignmentLeft itemsVerticalAlignment:ASVerticalAlignmentTop identifier:@"verticalTopLeft"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionVertical itemsHorizontalAlignment:ASHorizontalAlignmentMiddle itemsVerticalAlignment:ASVerticalAlignmentCenter identifier:@"verticalCenter"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionVertical itemsHorizontalAlignment:ASHorizontalAlignmentRight itemsVerticalAlignment:ASVerticalAlignmentBottom identifier:@"verticalBottomRight"];
+}
+
+- (void)testDirectionChangeAfterSettingHorizontalAndVerticalAlignments
+{
+  ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init]; // Default direction is horizontal
+  stackLayoutSpec.horizontalAlignment = ASHorizontalAlignmentRight;
+  stackLayoutSpec.verticalAlignment = ASVerticalAlignmentCenter;
+  XCTAssertEqual(stackLayoutSpec.alignItems, ASStackLayoutAlignItemsCenter);
+  XCTAssertEqual(stackLayoutSpec.justifyContent, ASStackLayoutJustifyContentEnd);
+  
+  stackLayoutSpec.direction = ASStackLayoutDirectionVertical;
+  XCTAssertEqual(stackLayoutSpec.alignItems, ASStackLayoutAlignItemsEnd);
+  XCTAssertEqual(stackLayoutSpec.justifyContent, ASStackLayoutJustifyContentCenter);
+}
+
+- (void)testAlignItemsAndJustifyContentRestrictionsIfHorizontalAndVerticalAlignmentsAreUsed
+{
+  ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init];
+
+  // No assertions should be thrown here because alignments are not used
+  stackLayoutSpec.alignItems = ASStackLayoutAlignItemsEnd;
+  stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentEnd;
+
+  // Set alignments and assert that assertions are thrown
+  stackLayoutSpec.horizontalAlignment = ASHorizontalAlignmentMiddle;
+  stackLayoutSpec.verticalAlignment = ASVerticalAlignmentCenter;
+  XCTAssertThrows(stackLayoutSpec.alignItems = ASStackLayoutAlignItemsEnd);
+  XCTAssertThrows(stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentEnd);
+
+  // Unset alignments. alignItems and justifyContent should not be changed
+  stackLayoutSpec.horizontalAlignment = ASHorizontalAlignmentNone;
+  stackLayoutSpec.verticalAlignment = ASVerticalAlignmentNone;
+  XCTAssertEqual(stackLayoutSpec.alignItems, ASStackLayoutAlignItemsCenter);
+  XCTAssertEqual(stackLayoutSpec.justifyContent, ASStackLayoutJustifyContentCenter);
+
+  // Now that alignments are none, setting alignItems and justifyContent should be allowed again
+  stackLayoutSpec.alignItems = ASStackLayoutAlignItemsEnd;
+  stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentEnd;
+  XCTAssertEqual(stackLayoutSpec.alignItems, ASStackLayoutAlignItemsEnd);
+  XCTAssertEqual(stackLayoutSpec.justifyContent, ASStackLayoutJustifyContentEnd);
 }
 
 @end

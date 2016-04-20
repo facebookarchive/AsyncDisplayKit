@@ -13,8 +13,10 @@
 #import "_ASDisplayLayer.h"
 #import "_ASDisplayView.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNodeTestsHelper.h"
 #import "UIView+ASConvenience.h"
+#import "ASCellNode.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
@@ -35,11 +37,11 @@ static CALayer *layerWithName(NSString *name) {
 }
 
 static NSString *orderStringFromSublayers(CALayer *l) {
-  return [[l.sublayers valueForKey:@"name"] componentsJoinedByString:@","];
+  return [[[l.sublayers valueForKey:@"asyncdisplaykit_node"] valueForKey:@"name"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubviews(UIView *v) {
-  return [[v.subviews valueForKey:@"name"] componentsJoinedByString:@","];
+  return [[[v.subviews valueForKey:@"asyncdisplaykit_node"] valueForKey:@"name"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubnodes(ASDisplayNode *n) {
@@ -73,14 +75,17 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
 
 @interface ASDisplayNode (HackForTests)
-+ (dispatch_queue_t)asyncSizingQueue;
 - (id)initWithViewClass:(Class)viewClass;
 - (id)initWithLayerClass:(Class)layerClass;
+
+// FIXME: Importing ASDisplayNodeInternal.h causes a heap of problems.
+- (void)enterInterfaceState:(ASInterfaceState)interfaceState;
 @end
 
 @interface ASTestDisplayNode : ASDisplayNode
 @property (atomic, copy) void (^willDeallocBlock)(ASTestDisplayNode *node);
 @property (atomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
+@property (atomic) BOOL hasFetchedData;
 @end
 
 @interface ASTestResponderNode : ASTestDisplayNode
@@ -91,6 +96,18 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   return _calculateSizeBlock ? _calculateSizeBlock(self, constrainedSize) : CGSizeZero;
+}
+
+- (void)fetchData
+{
+  [super fetchData];
+  self.hasFetchedData = YES;
+}
+
+- (void)clearFetchedData
+{
+  [super clearFetchedData];
+  self.hasFetchedData = NO;
 }
 
 - (void)dealloc
@@ -148,6 +165,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 }
 
 - (BOOL)resignFirstResponder {
+  [super resignFirstResponder];
   if (self.isFirstResponder) {
     self.isFirstResponder = NO;
     return YES;
@@ -259,7 +277,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   NSString *targetName = isLayerBacked ? @"layer" : @"view";
   NSString *hasLoadedView = node.nodeLoaded ? @"with view" : [NSString stringWithFormat:@"after loading %@", targetName];
 
-  id rgbBlackCGColorIdPtr = (id)[UIColor colorWithRed:0 green:0 blue:0 alpha:1].CGColor;
+//  id rgbBlackCGColorIdPtr = (id)[UIColor blackColor].CGColor;
 
   XCTAssertEqual((id)nil, node.contents, @"default contents broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.clipsToBounds, @"default clipsToBounds broken %@", hasLoadedView);
@@ -279,16 +297,27 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertTrue(CATransform3DEqualToTransform(CATransform3DIdentity, node.subnodeTransform), @"default subnodeTransform broken %@", hasLoadedView);
   XCTAssertEqual((id)nil, node.backgroundColor, @"default backgroundColor broken %@", hasLoadedView);
   XCTAssertEqual(UIViewContentModeScaleToFill, node.contentMode, @"default contentMode broken %@", hasLoadedView);
-  XCTAssertEqualObjects(rgbBlackCGColorIdPtr, (id)node.shadowColor, @"default shadowColor broken %@", hasLoadedView);
+//  XCTAssertEqualObjects(rgbBlackCGColorIdPtr, (id)node.shadowColor, @"default shadowColor broken %@", hasLoadedView);
   XCTAssertEqual(0.0f, node.shadowOpacity, @"default shadowOpacity broken %@", hasLoadedView);
   XCTAssertTrue(CGSizeEqualToSize(CGSizeMake(0, -3), node.shadowOffset), @"default shadowOffset broken %@", hasLoadedView);
   XCTAssertEqual(3.f, node.shadowRadius, @"default shadowRadius broken %@", hasLoadedView);
   XCTAssertEqual(0.0f, node.borderWidth, @"default borderWidth broken %@", hasLoadedView);
-  XCTAssertEqualObjects(rgbBlackCGColorIdPtr, (id)node.borderColor, @"default borderColor broken %@", hasLoadedView);
+//  XCTAssertEqualObjects(rgbBlackCGColorIdPtr, (id)node.borderColor, @"default borderColor broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.displaySuspended, @"default displaySuspended broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.displaysAsynchronously, @"default displaysAsynchronously broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.asyncdisplaykit_asyncTransactionContainer, @"default asyncdisplaykit_asyncTransactionContainer broken %@", hasLoadedView);
   XCTAssertEqualObjects(nil, node.name, @"default name broken %@", hasLoadedView);
+  
+  XCTAssertEqual(NO, node.isAccessibilityElement, @"default isAccessibilityElement is broken %@", hasLoadedView);
+  XCTAssertEqual((id)nil, node.accessibilityLabel, @"default accessibilityLabel is broken %@", hasLoadedView);
+  XCTAssertEqual((id)nil, node.accessibilityHint, @"default accessibilityHint is broken %@", hasLoadedView);
+  XCTAssertEqual((id)nil, node.accessibilityValue, @"default accessibilityValue is broken %@", hasLoadedView);
+  XCTAssertEqual(UIAccessibilityTraitNone, node.accessibilityTraits, @"default accessibilityTraits is broken %@", hasLoadedView);
+  XCTAssertTrue(CGRectEqualToRect(CGRectZero, node.accessibilityFrame), @"default accessibilityFrame is broken %@", hasLoadedView);
+  XCTAssertEqual((id)nil, node.accessibilityLanguage, @"default accessibilityLanguage is broken %@", hasLoadedView);
+  XCTAssertEqual(NO, node.accessibilityElementsHidden, @"default accessibilityElementsHidden is broken %@", hasLoadedView);
+  XCTAssertEqual(NO, node.accessibilityViewIsModal, @"default accessibilityViewIsModal is broken %@", hasLoadedView);
+  XCTAssertEqual(NO, node.shouldGroupAccessibilityChildren, @"default shouldGroupAccessibilityChildren is broken %@", hasLoadedView);
 
   if (!isLayerBacked) {
     XCTAssertEqual(YES, node.userInteractionEnabled, @"default userInteractionEnabled broken %@", hasLoadedView);
@@ -298,19 +327,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   } else {
     XCTAssertEqual(NO, node.userInteractionEnabled, @"layer-backed nodes do not support userInteractionEnabled %@", hasLoadedView);
     XCTAssertEqual(NO, node.exclusiveTouch, @"layer-backed nodes do not support exclusiveTouch %@", hasLoadedView);
-  }
-
-  if (!isLayerBacked) {
-    XCTAssertEqual(NO, node.isAccessibilityElement, @"default isAccessibilityElement is broken %@", hasLoadedView);
-    XCTAssertEqual((id)nil, node.accessibilityLabel, @"default accessibilityLabel is broken %@", hasLoadedView);
-    XCTAssertEqual((id)nil, node.accessibilityHint, @"default accessibilityHint is broken %@", hasLoadedView);
-    XCTAssertEqual((id)nil, node.accessibilityValue, @"default accessibilityValue is broken %@", hasLoadedView);
-    XCTAssertEqual(UIAccessibilityTraitNone, node.accessibilityTraits, @"default accessibilityTraits is broken %@", hasLoadedView);
-    XCTAssertTrue(CGRectEqualToRect(CGRectZero, node.accessibilityFrame), @"default accessibilityFrame is broken %@", hasLoadedView);
-    XCTAssertEqual((id)nil, node.accessibilityLanguage, @"default accessibilityLanguage is broken %@", hasLoadedView);
-    XCTAssertEqual(NO, node.accessibilityElementsHidden, @"default accessibilityElementsHidden is broken %@", hasLoadedView);
-    XCTAssertEqual(NO, node.accessibilityViewIsModal, @"default accessibilityViewIsModal is broken %@", hasLoadedView);
-    XCTAssertEqual(NO, node.shouldGroupAccessibilityChildren, @"default shouldGroupAccessibilityChildren is broken %@", hasLoadedView);
   }
 }
 
@@ -387,20 +403,25 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(NO, node.userInteractionEnabled, @"userInteractionEnabled broken %@", hasLoadedView);
   XCTAssertEqual((BOOL)!isLayerBacked, node.exclusiveTouch, @"exclusiveTouch broken %@", hasLoadedView);
   XCTAssertEqualObjects(@"quack like a duck", node.name, @"name broken %@", hasLoadedView);
+  
+  XCTAssertEqual(YES, node.isAccessibilityElement, @"accessibilityElement broken %@", hasLoadedView);
+  XCTAssertEqualObjects(@"Ship love", node.accessibilityLabel, @"accessibilityLabel broken %@", hasLoadedView);
+  XCTAssertEqualObjects(@"Awesome things will happen", node.accessibilityHint, @"accessibilityHint broken %@", hasLoadedView);
+  XCTAssertEqualObjects(@"1 of 2", node.accessibilityValue, @"accessibilityValue broken %@", hasLoadedView);
+  XCTAssertEqual(UIAccessibilityTraitSelected | UIAccessibilityTraitButton, node.accessibilityTraits, @"accessibilityTraits broken %@", hasLoadedView);
+  XCTAssertTrue(CGRectEqualToRect(CGRectMake(1, 2, 3, 4), node.accessibilityFrame), @"accessibilityFrame broken %@", hasLoadedView);
+  XCTAssertEqualObjects(@"mas", node.accessibilityLanguage, @"accessibilityLanguage broken %@", hasLoadedView);
+  XCTAssertEqual(YES, node.accessibilityElementsHidden, @"accessibilityElementsHidden broken %@", hasLoadedView);
+  XCTAssertEqual(YES, node.accessibilityViewIsModal, @"accessibilityViewIsModal broken %@", hasLoadedView);
+  XCTAssertEqual(YES, node.shouldGroupAccessibilityChildren, @"shouldGroupAccessibilityChildren broken %@", hasLoadedView);
+  XCTAssertEqual(UIAccessibilityNavigationStyleSeparate, node.accessibilityNavigationStyle, @"accessibilityNavigationStyle broken %@", hasLoadedView);
+  XCTAssertTrue(CGPointEqualToPoint(CGPointMake(1.0, 1.0), node.accessibilityActivationPoint), @"accessibilityActivationPoint broken %@", hasLoadedView);
+  XCTAssertNotNil(node.accessibilityPath, @"accessibilityPath broken %@", hasLoadedView);
+  
 
   if (!isLayerBacked) {
     XCTAssertEqual(UIViewAutoresizingFlexibleLeftMargin, node.autoresizingMask, @"autoresizingMask %@", hasLoadedView);
     XCTAssertEqual(NO, node.autoresizesSubviews, @"autoresizesSubviews broken %@", hasLoadedView);
-    XCTAssertEqual(YES, node.isAccessibilityElement, @"accessibilityElement broken %@", hasLoadedView);
-    XCTAssertEqualObjects(@"Ship love", node.accessibilityLabel, @"accessibilityLabel broken %@", hasLoadedView);
-    XCTAssertEqualObjects(@"Awesome things will happen", node.accessibilityHint, @"accessibilityHint broken %@", hasLoadedView);
-    XCTAssertEqualObjects(@"1 of 2", node.accessibilityValue, @"accessibilityValue broken %@", hasLoadedView);
-    XCTAssertEqual(UIAccessibilityTraitSelected | UIAccessibilityTraitButton, node.accessibilityTraits, @"accessibilityTraits broken %@", hasLoadedView);
-    XCTAssertTrue(CGRectEqualToRect(CGRectMake(1, 2, 3, 4), node.accessibilityFrame), @"accessibilityFrame broken %@", hasLoadedView);
-    XCTAssertEqualObjects(@"mas", node.accessibilityLanguage, @"accessibilityLanguage broken %@", hasLoadedView);
-    XCTAssertEqual(YES, node.accessibilityElementsHidden, @"accessibilityElementsHidden broken %@", hasLoadedView);
-    XCTAssertEqual(YES, node.accessibilityViewIsModal, @"accessibilityViewIsModal broken %@", hasLoadedView);
-    XCTAssertEqual(YES, node.shouldGroupAccessibilityChildren, @"shouldGroupAccessibilityChildren broken %@", hasLoadedView);
   }
 }
 
@@ -439,21 +460,25 @@ for (ASDisplayNode *n in @[ nodes ]) {\
     node.asyncdisplaykit_asyncTransactionContainer = YES;
     node.userInteractionEnabled = NO;
     node.name = @"quack like a duck";
+    
+    node.isAccessibilityElement = YES;
+    node.accessibilityLabel = @"Ship love";
+    node.accessibilityHint = @"Awesome things will happen";
+    node.accessibilityValue = @"1 of 2";
+    node.accessibilityTraits = UIAccessibilityTraitSelected | UIAccessibilityTraitButton;
+    node.accessibilityFrame = CGRectMake(1, 2, 3, 4);
+    node.accessibilityLanguage = @"mas";
+    node.accessibilityElementsHidden = YES;
+    node.accessibilityViewIsModal = YES;
+    node.shouldGroupAccessibilityChildren = YES;
+    node.accessibilityNavigationStyle = UIAccessibilityNavigationStyleSeparate;
+    node.accessibilityActivationPoint = CGPointMake(1.0, 1.0);
+    node.accessibilityPath = [UIBezierPath bezierPath];
 
     if (!isLayerBacked) {
       node.exclusiveTouch = YES;
       node.autoresizesSubviews = NO;
       node.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-      node.isAccessibilityElement = YES;
-      node.accessibilityLabel = @"Ship love";
-      node.accessibilityHint = @"Awesome things will happen";
-      node.accessibilityValue = @"1 of 2";
-      node.accessibilityTraits = UIAccessibilityTraitSelected | UIAccessibilityTraitButton;
-      node.accessibilityFrame = CGRectMake(1, 2, 3, 4);
-      node.accessibilityLanguage = @"mas";
-      node.accessibilityElementsHidden = YES;
-      node.accessibilityViewIsModal = YES;
-      node.shouldGroupAccessibilityChildren = YES;
     }
   }];
 
@@ -1054,7 +1079,8 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 - (void)testSubnodes
 {
   ASDisplayNode *parent = [[ASDisplayNode alloc] init];
-  XCTAssertNoThrow([parent addSubnode:nil], @"Don't try to add nil, but we'll deal.");
+  ASDisplayNode *nilNode = nil;
+  XCTAssertNoThrow([parent addSubnode:nilNode], @"Don't try to add nil, but we'll deal.");
   XCTAssertNoThrow([parent addSubnode:parent], @"Not good, test that we recover");
   XCTAssertEqual(0u, parent.subnodes.count, @"We shouldn't have any subnodes");
 }
@@ -1325,9 +1351,12 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [parent insertSubnode:c belowSubnode:b];
   XCTAssertEqualObjects(orderStringFromSublayers(parent.layer), @"a,e,d,c,b", @"Didn't match");
 
-  XCTAssertEqual(3u, parent.subnodes.count, @"Should have the right subnode count");
+  XCTAssertEqual(4u, parent.subnodes.count, @"Should have the right subnode count");
   XCTAssertEqual(4u, parent.view.subviews.count, @"Should have the right subview count");
   XCTAssertEqual(5u, parent.layer.sublayers.count, @"Should have the right sublayer count");
+  
+  [e removeFromSuperlayer];
+  XCTAssertEqual(4u, parent.layer.sublayers.count, @"Should have the right sublayer count");
 
   //TODO: assert that things deallocate immediately and don't have latent autoreleases in here
   [parent release];
@@ -1335,6 +1364,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [b release];
   [c release];
   [d release];
+  [e release];
 }
 
 - (void)testAppleBugInsertSubview
@@ -1398,11 +1428,11 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [parent.view insertSubview:d aboveSubview:a.view];
   XCTAssertEqualObjects(orderStringFromSublayers(parent.layer), @"a,d,b", @"Didn't match");
 
-  // (a,e,d,b) => (a,d,>c<,b)
+  // (a,d,b) => (a,d,>c<,b)
   [parent insertSubnode:c belowSubnode:b];
   XCTAssertEqualObjects(orderStringFromSublayers(parent.layer), @"a,d,c,b", @"Didn't match");
 
-  XCTAssertEqual(3u, parent.subnodes.count, @"Should have the right subnode count");
+  XCTAssertEqual(4u, parent.subnodes.count, @"Should have the right subnode count");
   XCTAssertEqual(4u, parent.view.subviews.count, @"Should have the right subview count");
   XCTAssertEqual(4u, parent.layer.sublayers.count, @"Should have the right sublayer count");
 
@@ -1468,13 +1498,14 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertNodesHaveParent(parent, a, b, c);
 
   // Check insertSubnode with no below
-  XCTAssertThrows([parent insertSubnode:b belowSubnode:nil], @"Can't insert below a nil");
+  ASDisplayNode *nilNode = nil;
+  XCTAssertThrows([parent insertSubnode:b belowSubnode:nilNode], @"Can't insert below a nil");
   // Check nothing was inserted
   XCTAssertNodeSubnodeSubviewSublayerOrder(parent, loaded, isLayerBacked, @"c,a,b", @"Incorrect insertion below");
 
 
-  XCTAssertThrows([parent insertSubnode:nil belowSubnode:nil], @"Can't insert a nil subnode");
-  XCTAssertThrows([parent insertSubnode:nil belowSubnode:a], @"Can't insert a nil subnode");
+  XCTAssertThrows([parent insertSubnode:nilNode belowSubnode:nilNode], @"Can't insert a nil subnode");
+  XCTAssertThrows([parent insertSubnode:nilNode belowSubnode:a], @"Can't insert a nil subnode");
 
   // Check inserting below when you're already in the array
   // (c,a,b) => (a,c,b)
@@ -1548,13 +1579,14 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 
   // Check insertSubnode with invalid parameters throws and doesn't change anything
   // (a,c,b) => (a,c,b)
-  XCTAssertThrows([parent insertSubnode:b aboveSubnode:nil], @"Can't insert below a nil");
+  ASDisplayNode *nilNode = nil;
+  XCTAssertThrows([parent insertSubnode:b aboveSubnode:nilNode], @"Can't insert below a nil");
   XCTAssertNodeSubnodeSubviewSublayerOrder(parent, loaded, isLayerBacked, @"a,c,b", @"Check no monkey business");
 
-  XCTAssertThrows([parent insertSubnode:nil aboveSubnode:nil], @"Can't insert a nil subnode");
+  XCTAssertThrows([parent insertSubnode:nilNode aboveSubnode:nilNode], @"Can't insert a nil subnode");
   XCTAssertNodeSubnodeSubviewSublayerOrder(parent, loaded, isLayerBacked, @"a,c,b", @"Check no monkey business");
 
-  XCTAssertThrows([parent insertSubnode:nil aboveSubnode:a], @"Can't insert a nil subnode");
+  XCTAssertThrows([parent insertSubnode:nilNode aboveSubnode:a], @"Can't insert a nil subnode");
   XCTAssertNodeSubnodeSubviewSublayerOrder(parent, loaded, isLayerBacked, @"a,c,b", @"Check no monkey business");
 
   // Check inserting above when you're already in the array
@@ -1661,6 +1693,79 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 - (void)testBackgroundColorOpaqueRelationshipNoLayer
 {
   [self checkBackgroundColorOpaqueRelationshipWithViewLoaded:NO layerBacked:YES];
+}
+
+// Check that nodes who have no cell node (no range controller)
+// do get their `fetchData` called, and they do report
+// the fetch data interface state.
+- (void)testInterfaceStateForNonCellNode
+{
+  ASTestWindow *window = [ASTestWindow new];
+  ASTestDisplayNode *node = [ASTestDisplayNode new];
+  XCTAssert(node.interfaceState == ASInterfaceStateNone);
+  XCTAssert(!node.hasFetchedData);
+
+  [window addSubview:node.view];
+  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
+
+  [node.view removeFromSuperview];
+  // We don't want to call -clearFetchedData on nodes that aren't being managed by a range controller.
+  // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
+  // Still, the interfaceState should be None to reflect the current state of the node.
+  // We just don't proactively clear contents or fetched data for this state transition.
+  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.interfaceState == ASInterfaceStateNone);
+}
+
+// Check that nodes who have no cell node (no range controller)
+// do get their `fetchData` called, and they do report
+// the fetch data interface state.
+- (void)testInterfaceStateForCellNode
+{
+  ASCellNode *cellNode = [ASCellNode new];
+  ASTestDisplayNode *node = [ASTestDisplayNode new];
+  XCTAssert(node.interfaceState == ASInterfaceStateNone);
+  XCTAssert(!node.hasFetchedData);
+
+  // Simulate range handler updating cell node.
+  [cellNode addSubnode:node];
+  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.interfaceState == ASInterfaceStateFetchData);
+
+  // If the node goes into a view it should not adopt the `InHierarchy` state.
+  ASTestWindow *window = [ASTestWindow new];
+  [window addSubview:cellNode.view];
+  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
+}
+
+- (void)testSetNeedsDataFetchImmediateState
+{
+  ASCellNode *cellNode = [ASCellNode new];
+  ASTestDisplayNode *node = [ASTestDisplayNode new];
+  [cellNode addSubnode:node];
+  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+  node.hasFetchedData = NO;
+  [cellNode setNeedsDataFetch];
+  XCTAssert(node.hasFetchedData);
+}
+
+- (void)testFetchDataExitingAndEnteringRange
+{
+  ASCellNode *cellNode = [ASCellNode new];
+  ASTestDisplayNode *node = [ASTestDisplayNode new];
+  [cellNode addSubnode:node];
+  [cellNode setHierarchyState:ASHierarchyStateRangeManaged];
+  
+  // Simulate enter range, fetch data, exit range
+  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+  [cellNode exitInterfaceState:ASInterfaceStateFetchData];
+  node.hasFetchedData = NO;
+  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+
+  XCTAssert(node.hasFetchedData);
 }
 
 - (void)testInitWithViewClass

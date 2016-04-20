@@ -7,7 +7,9 @@
  */
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASTextKitComponents.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASEditableTextNodeDelegate;
 
@@ -17,10 +19,34 @@
  */
 @interface ASEditableTextNode : ASDisplayNode
 
-// @abstract The text node's delegate, which must conform to the <ASEditableTextNodeDelegate> protocol.
+/**
+ * @abstract Initializes an editable text node using default TextKit components.
+ *
+ * @returns An initialized ASEditableTextNode.
+ */
+- (instancetype)init;
+
+/**
+ * @abstract Initializes an editable text node using the provided TextKit components.
+ *
+ * @param textKitComponents The TextKit stack used to render text.
+ * @param placeholderTextKitComponents The TextKit stack used to render placeholder text.
+ *
+ * @returns An initialized ASEditableTextNode.
+ */
+- (instancetype)initWithTextKitComponents:(ASTextKitComponents *)textKitComponents
+             placeholderTextKitComponents:(ASTextKitComponents *)placeholderTextKitComponents;
+
+//! @abstract The text node's delegate, which must conform to the <ASEditableTextNodeDelegate> protocol.
 @property (nonatomic, readwrite, weak) id <ASEditableTextNodeDelegate> delegate;
 
 #pragma mark - Configuration
+
+/**
+ @abstract Enable scrolling on the textView
+ @default true
+ */
+@property (nonatomic) BOOL scrollEnabled;
 
 /**
   @abstract Access to underlying UITextView for more configuration options.
@@ -29,7 +55,7 @@
 @property (nonatomic, readonly, strong) UITextView *textView;
 
 //! @abstract The attributes to apply to new text being entered by the user.
-@property (nonatomic, readwrite, strong) NSDictionary *typingAttributes;
+@property (nonatomic, readwrite, strong, nullable) NSDictionary<NSString *, id> *typingAttributes;
 
 //! @abstract The range of text currently selected. If length is zero, the range is the cursor location.
 @property (nonatomic, readwrite, assign) NSRange selectedRange;
@@ -46,25 +72,25 @@
   @abstract The styled placeholder text displayed by the text node while no text is entered
   @discussion The placeholder is displayed when the user has not entered any text and the keyboard is not visible.
  */
-@property (nonatomic, readwrite, strong) NSAttributedString *attributedPlaceholderText;
+@property (nonatomic, readwrite, strong, nullable) NSAttributedString *attributedPlaceholderText;
 
 #pragma mark - Modifying User Text
 /**
   @abstract The styled text displayed by the receiver.
   @discussion When the placeholder is displayed (as indicated by -isDisplayingPlaceholder), this value is nil. Otherwise, this value is the attributed text the user has entered. This value can be modified regardless of whether the receiver is the first responder (and thus, editing) or not. Changing this value from nil to non-nil will result in the placeholder being hidden, and the new value being displayed.
  */
-@property (nonatomic, readwrite, copy) NSAttributedString *attributedText;
+@property (nonatomic, readwrite, copy, nullable) NSAttributedString *attributedText;
 
 #pragma mark - Managing The Keyboard
 //! @abstract The text input mode used by the receiver's keyboard, if it is visible. This value is undefined if the receiver is not the first responder.
 @property (nonatomic, readonly) UITextInputMode *textInputMode;
 
-/*
+/**
  @abstract The textContainerInset of both the placeholder and typed textView. This value defaults to UIEdgeInsetsZero.
  */
 @property (nonatomic, readwrite) UIEdgeInsets textContainerInset;
 
-/*
+/**
  @abstract The returnKeyType of the keyboard. This value defaults to UIReturnKeyDefault.
  */
 @property (nonatomic, readwrite) UIReturnKeyType returnKeyType;
@@ -122,7 +148,7 @@
   @abstract Indicates to the delegate that the text node's selection has changed.
   @param editableTextNode An editable text node.
   @param fromSelectedRange The previously selected range.
-  @param toSelectedRange The current selected range. Equvialent to the <selectedRange> property.
+  @param toSelectedRange The current selected range. Equivalent to the <selectedRange> property.
   @param dueToEditing YES if the selection change was due to editing; NO otherwise.
   @discussion You can access the selection of the receiver via <selectedRange>.
  */
@@ -144,3 +170,5 @@
 
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -11,9 +11,11 @@
 #import "_ASHierarchyChangeSet.h"
 #import "ASAssert.h"
 
+#import "ASDataController+Subclasses.h"
+
 @interface ASChangeSetDataController ()
 
-@property (nonatomic, assign) NSUInteger batchUpdateCounter;
+@property (nonatomic, assign) NSUInteger changeSetBatchUpdateCounter;
 @property (nonatomic, strong) _ASHierarchyChangeSet *changeSet;
 
 @end
@@ -26,7 +28,7 @@
     return nil;
   }
   
-  _batchUpdateCounter = 0;
+  _changeSetBatchUpdateCounter = 0;
   
   return self;
 }
@@ -36,30 +38,22 @@
 - (void)beginUpdates
 {
   ASDisplayNodeAssertMainThread();
-  if (_batchUpdateCounter == 0) {
+  if (_changeSetBatchUpdateCounter == 0) {
     _changeSet = [_ASHierarchyChangeSet new];
   }
-  _batchUpdateCounter++;
+  _changeSetBatchUpdateCounter++;
 }
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
-  _batchUpdateCounter--;
+  _changeSetBatchUpdateCounter--;
   
-  if (_batchUpdateCounter == 0) {
+  if (_changeSetBatchUpdateCounter == 0) {
     [_changeSet markCompleted];
     
     [super beginUpdates];
-  
-    for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadSections:change.indexSet withAnimationOptions:change.animationOptions];
-    }
-    
-    for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
-    }
-    
+
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
       [super deleteRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
@@ -67,7 +61,15 @@
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
       [super deleteSections:change.indexSet withAnimationOptions:change.animationOptions];
     }
-    
+
+    for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
+      [super reloadSections:change.indexSet withAnimationOptions:change.animationOptions];
+    }
+
+    for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
+      [super reloadRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+    }
+
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
       [super insertSections:change.indexSet withAnimationOptions:change.animationOptions];
     }
@@ -75,7 +77,7 @@
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
       [super insertRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
-    
+
     [super endUpdatesAnimated:animated completion:completion];
     
     _changeSet = nil;
@@ -84,7 +86,7 @@
 
 - (BOOL)batchUpdating
 {
-  BOOL batchUpdating = (_batchUpdateCounter != 0);
+  BOOL batchUpdating = (_changeSetBatchUpdateCounter != 0);
   // _changeSet must be available during batch update
   ASDisplayNodeAssertTrue(batchUpdating == (_changeSet != nil));
   return batchUpdating;

@@ -13,87 +13,99 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "SupplementaryNode.h"
+#import "ItemNode.h"
+
+@interface ViewController ()
+@property (nonatomic, strong) ASCollectionView *collectionView;
+@property (nonatomic, strong) NSArray *data;
+@end
 
 @interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
-{
-  ASCollectionView *_collectionView;
-}
 
 @end
 
 
 @implementation ViewController
 
-#pragma mark -
-#pragma mark UIViewController.
-
-- (instancetype)init
+- (void)dealloc
 {
-  if (!(self = [super init]))
-    return nil;
+  self.collectionView.asyncDataSource = nil;
+  self.collectionView.asyncDelegate = nil;
   
-  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  layout.headerReferenceSize = CGSizeMake(50.0, 50.0);
-  layout.footerReferenceSize = CGSizeMake(50.0, 50.0);
-  
-  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout asyncDataFetching:YES];
-  _collectionView.asyncDataSource = self;
-  _collectionView.asyncDelegate = self;
-  _collectionView.backgroundColor = [UIColor whiteColor];
-  
-  [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
-  
-  self.navigationItem.leftItemsSupplementBackButton = YES;
-  self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(reloadTapped)];
-  
-  return self;
+  NSLog(@"ViewController is deallocing");
 }
 
 - (void)viewDidLoad
 {
   [super viewDidLoad];
   
-  [self.view addSubview:_collectionView];
-}
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  layout.headerReferenceSize = CGSizeMake(50.0, 50.0);
+  layout.footerReferenceSize = CGSizeMake(50.0, 50.0);
+  
+  self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
+  self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  self.collectionView.asyncDataSource = self;
+  self.collectionView.asyncDelegate = self;
+  self.collectionView.backgroundColor = [UIColor whiteColor];
+  
+  [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+  [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
+  [self.view addSubview:self.collectionView];
+  
+#if !SIMULATE_WEB_RESPONSE
+  self.navigationItem.leftItemsSupplementBackButton = YES;
+  self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(reloadTapped)];
+#endif
 
-- (void)viewWillLayoutSubviews
-{
-  _collectionView.frame = self.view.bounds;
-}
-
-- (BOOL)prefersStatusBarHidden
-{
-  return YES;
+#if SIMULATE_WEB_RESPONSE
+  __weak typeof(self) weakSelf = self;
+  void(^mockWebService)() = ^{
+    NSLog(@"ViewController \"got data from a web service\"");
+    ViewController *strongSelf = weakSelf;
+    if (strongSelf != nil)
+    {
+      NSLog(@"ViewController is not nil");
+      strongSelf->_data = [[NSArray alloc] init];
+      [strongSelf->_collectionView performBatchUpdates:^{
+        [strongSelf->_collectionView insertSections:[[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, 100)]];
+      } completion:nil];
+      NSLog(@"ViewController finished updating collectionView");
+    }
+    else {
+      NSLog(@"ViewController is nil - won't update collectionView");
+    }
+  };
+  
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), mockWebService);
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    [self.navigationController popViewControllerAnimated:YES];
+  });
+#endif
 }
 
 - (void)reloadTapped
 {
-  [_collectionView reloadData];
+  [self.collectionView reloadData];
 }
 
 #pragma mark -
 #pragma mark ASCollectionView data source.
 
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath;
 {
   NSString *text = [NSString stringWithFormat:@"[%zd.%zd] says hi", indexPath.section, indexPath.item];
-  ASTextCellNode *node = [[ASTextCellNode alloc] init];
-  node.text = text;
-  node.backgroundColor = [UIColor lightGrayColor];
-  
-  return node;
+  return ^{
+    return [[ItemNode alloc] initWithString:text];
+  };
 }
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   NSString *text = [kind isEqualToString:UICollectionElementKindSectionHeader] ? @"Header" : @"Footer";
   SupplementaryNode *node = [[SupplementaryNode alloc] initWithText:text];
-  if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
-    node.backgroundColor = [UIColor blueColor];
-  } else {
-    node.backgroundColor = [UIColor redColor];
-  }
+  BOOL isHeaderSection = [kind isEqualToString:UICollectionElementKindSectionHeader];
+  node.backgroundColor = isHeaderSection ? [UIColor blueColor] : [UIColor redColor];
   return node;
 }
 
@@ -104,7 +116,11 @@
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
+#if SIMULATE_WEB_RESPONSE
+  return _data == nil ? 0 : 100;
+#else
   return 100;
+#endif
 }
 
 - (void)collectionViewLockDataSource:(ASCollectionView *)collectionView
@@ -124,7 +140,8 @@
   [context completeBatchFetching:YES];
 }
 
-- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
   return UIEdgeInsetsMake(20.0, 20.0, 20.0, 20.0);
 }
 

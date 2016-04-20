@@ -20,17 +20,61 @@
 /**
  * UIView creation block. Used to create the backing view of a new display node.
  */
-typedef UIView *(^ASDisplayNodeViewBlock)();
+typedef UIView * _Nonnull(^ASDisplayNodeViewBlock)();
+
+/**
+ * UIView creation block. Used to create the backing view of a new display node.
+ */
+typedef UIViewController * _Nonnull(^ASDisplayNodeViewControllerBlock)();
 
 /**
  * CALayer creation block. Used to create the backing layer of a new display node.
  */
-typedef CALayer *(^ASDisplayNodeLayerBlock)();
+typedef CALayer * _Nonnull(^ASDisplayNodeLayerBlock)();
 
 /**
  * ASDisplayNode loaded callback block. This block is called BEFORE the -didLoad method and is always called on the main thread.
  */
-typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
+typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode * _Nonnull node);
+
+/**
+ * ASDisplayNode will / did render node content in context.
+ */
+typedef void (^ASDisplayNodeContextModifier)(_Nonnull CGContextRef context);
+
+/**
+ Interface state is available on ASDisplayNode and ASViewController, and
+ allows checking whether a node is in an interface situation where it is prudent to trigger certain
+ actions: measurement, data fetching, display, and visibility (the latter for animations or other onscreen-only effects).
+ */
+
+typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
+{
+  /** The element is not predicted to be onscreen soon and preloading should not be performed */
+  ASInterfaceStateNone          = 0,
+  /** The element may be added to a view soon that could become visible.  Measure the layout, including size calculation. */
+  ASInterfaceStateMeasureLayout = 1 << 0,
+  /** The element is likely enough to come onscreen that disk and/or network data required for display should be fetched. */
+  ASInterfaceStateFetchData     = 1 << 1,
+  /** The element is very likely to become visible, and concurrent rendering should be executed for any -setNeedsDisplay. */
+  ASInterfaceStateDisplay       = 1 << 2,
+  /** The element is physically onscreen by at least 1 pixel.
+   In practice, all other bit fields should also be set when this flag is set. */
+  ASInterfaceStateVisible       = 1 << 3,
+
+  /**
+   * The node is not contained in a cell but it is in a window.
+   *
+   * Currently we only set `interfaceState` to other values for
+   * nodes contained in table views or collection views.
+   */
+  ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay | ASInterfaceStateVisible,
+};
+
+/**
+ * Default drawing priority for display node
+ */
+extern NSInteger const ASDefaultDrawingPriority;
 
 /**
  * An `ASDisplayNode` is an abstraction over `UIView` and `CALayer` that allows you to perform calculations about a view
@@ -48,6 +92,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  */
 
+NS_ASSUME_NONNULL_BEGIN
 @interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
 
 
@@ -60,7 +105,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @return An ASDisplayNode instance whose view will be a subclass that enables asynchronous rendering, and passes 
  * through -layout and touch handling methods.
  */
-- (id)init;
+- (instancetype)init;
 
 
 /**
@@ -71,7 +116,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @return An ASDisplayNode instance that loads its view with the given block that is guaranteed to run on the main
  * queue. The view will render synchronously and -layout and touch handling methods on the node will not be called.
  */
-- (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock;
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock;
 
 /**
  * @abstract Alternative initializer with a block to create the backing view.
@@ -82,7 +127,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @return An ASDisplayNode instance that loads its view with the given block that is guaranteed to run on the main
  * queue. The view will render synchronously and -layout and touch handling methods on the node will not be called.
  */
-- (id)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
 /**
  * @abstract Alternative initializer with a block to create the backing layer.
@@ -92,7 +137,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @return An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main
  * queue. The layer will render synchronously and -layout and touch handling methods on the node will not be called.
  */
-- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock;
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock;
 
 /**
  * @abstract Alternative initializer with a block to create the backing layer.
@@ -103,7 +148,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @return An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main
  * queue. The layer will render synchronously and -layout and touch handling methods on the node will not be called.
  */
-- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock;
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
 
 /** @name Properties */
@@ -111,7 +156,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 /**
  * @abstract The name of this node, which will be displayed in `description`. The default value is nil.
  */
-@property (atomic, copy) NSString *name;
+@property (nullable, atomic, copy) NSString *name;
 
 /** 
  * @abstract Returns whether the node is synchronous.
@@ -123,7 +168,6 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 
 /** @name Getting view and layer */
 
-
 /** 
  * @abstract Returns a view.
  *
@@ -133,7 +177,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @warning The first access to it must be on the main thread, and should only be used on the main thread thereafter as 
  * well.
  */
-@property (nonatomic, readonly, retain) UIView *view;
+@property (nonatomic, readonly, strong) UIView *view;
 
 /** 
  * @abstract Returns whether a node's backing view or layer is loaded.
@@ -158,11 +202,19 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @warning The first access to it must be on the main thread, and should only be used on the main thread thereafter as 
  * well.
  */
-@property (nonatomic, readonly, retain) CALayer *layer;
+@property (nonatomic, readonly, strong) CALayer * _Nonnull layer;
+
+/**
+ * @abstract Returns the Interface State of the node.
+ *
+ * @return The current ASInterfaceState of the node, indicating whether it is visible and other situational properties.
+ *
+ * @see ASInterfaceState
+ */
+@property (nonatomic, readonly) ASInterfaceState interfaceState;
 
 
 /** @name Managing dimensions */
-
 
 /**
  * @abstract Asks the node to measure and return the size that best fits its subnodes.
@@ -299,7 +351,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 /** 
  * @abstract The receiver's immediate subnodes.
  */
-@property (nonatomic, readonly, retain) NSArray *subnodes;
+@property (nonatomic, readonly, copy) NSArray<ASDisplayNode *> *subnodes;
 
 /** 
  * @abstract The receiver's supernode.
@@ -376,6 +428,11 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  */
 @property (nonatomic, assign) BOOL displaySuspended;
 
+/**
+ * @abstract Whether size changes should be animated. Default to YES.
+ */
+@property (nonatomic, assign) BOOL shouldAnimateSizeChanges;
+
 /** 
  * @abstract Prevent the node and its descendants' layer from displaying.
  *
@@ -395,7 +452,6 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  * @see displaySuspended and setNeedsDisplay
  */
-
 - (void)recursivelyClearContents;
 
 /**
@@ -419,6 +475,11 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 - (void)recursivelyFetchData;
 
 /**
+ * @abstract Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStateFetchData
+ */
+- (void)setNeedsDataFetch;
+
+/**
  * @abstract Toggle displaying a placeholder over the node that covers content until the node and all subnodes are
  * displayed.
  *
@@ -433,6 +494,13 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  */
 @property (nonatomic, assign) NSTimeInterval placeholderFadeDuration;
 
+/**
+ * @abstract Determines drawing priority of the node. Nodes with higher priority will be drawn earlier.
+ *
+ * @discussion Defaults to ASDefaultDrawingPriority. There may be multiple drawing threads, and some of them may
+ * decide to perform operations in queued order (regardless of drawingPriority)
+ */
+@property (nonatomic, assign) NSInteger drawingPriority;
 
 /** @name Hit Testing */
 
@@ -458,7 +526,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  * @return YES if point is inside the receiver's bounds; otherwise, NO.
  */
-- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event;
+- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event;
 
 
 /** @name Converting Between View Coordinate Systems */
@@ -472,7 +540,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  * @return The point converted to the coordinate system of node.
  */
-- (CGPoint)convertPoint:(CGPoint)point toNode:(ASDisplayNode *)node;
+- (CGPoint)convertPoint:(CGPoint)point toNode:(nullable ASDisplayNode *)node;
 
 
 /** 
@@ -483,7 +551,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  * @return The point converted to the local coordinate system (bounds) of the receiver.
  */
-- (CGPoint)convertPoint:(CGPoint)point fromNode:(ASDisplayNode *)node;
+- (CGPoint)convertPoint:(CGPoint)point fromNode:(nullable ASDisplayNode *)node;
 
 
 /** 
@@ -494,7 +562,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  * @return The converted rectangle.
  */
-- (CGRect)convertRect:(CGRect)rect toNode:(ASDisplayNode *)node;
+- (CGRect)convertRect:(CGRect)rect toNode:(nullable ASDisplayNode *)node;
 
 /** 
  * @abstract Converts a rectangle from the coordinate system of another node to that of the receiver.
@@ -504,10 +572,9 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  * @return The converted rectangle.
  */
-- (CGRect)convertRect:(CGRect)rect fromNode:(ASDisplayNode *)node;
+- (CGRect)convertRect:(CGRect)rect fromNode:(nullable ASDisplayNode *)node;
 
 @end
-
 
 /**
  * Convenience methods for debugging.
@@ -524,7 +591,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 
 @end
 
-
+NS_ASSUME_NONNULL_END
 /**
  * ## UIView bridge
  *
@@ -555,7 +622,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  */
 - (void)setNeedsLayout;
 
-@property (atomic, retain)           id contents;                           // default=nil
+@property (atomic, strong, nullable) id contents;                           // default=nil
 @property (atomic, assign)           BOOL clipsToBounds;                    // default==NO
 @property (atomic, getter=isOpaque)  BOOL opaque;                           // default==YES
 
@@ -583,9 +650,9 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  * @discussion In contrast to UIView, setting a transparent color will not set opaque = NO.
  * This only affects nodes that implement +drawRect like ASTextNode.
 */
-@property (atomic, retain)           UIColor *backgroundColor;              // default=nil
+@property (atomic, strong, nullable) UIColor *backgroundColor;              // default=nil
 
-@property (atomic, retain)           UIColor *tintColor;                    // default=Blue
+@property (atomic, strong, null_resettable)    UIColor *tintColor;          // default=Blue
 - (void)tintColorDidChange;     // Notifies the node when the tintColor has changed.
 
 /**
@@ -599,13 +666,15 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 @property (atomic, assign)           UIViewContentMode contentMode;         // default=UIViewContentModeScaleToFill
 
 @property (atomic, assign, getter=isUserInteractionEnabled) BOOL userInteractionEnabled; // default=YES (NO for layer-backed nodes)
+#if TARGET_OS_IOS
 @property (atomic, assign, getter=isExclusiveTouch) BOOL exclusiveTouch;    // default=NO
-@property (atomic, assign)           CGColorRef shadowColor;                // default=opaque rgb black
+#endif
+@property (atomic, assign, nullable) CGColorRef shadowColor;                // default=opaque rgb black
 @property (atomic, assign)           CGFloat shadowOpacity;                 // default=0.0
 @property (atomic, assign)           CGSize shadowOffset;                   // default=(0, -3)
 @property (atomic, assign)           CGFloat shadowRadius;                  // default=3
 @property (atomic, assign)           CGFloat borderWidth;                   // default=0
-@property (atomic, assign)           CGColorRef borderColor;                // default=opaque rgb black
+@property (atomic, assign, nullable) CGColorRef borderColor;                // default=opaque rgb black
 
 // UIResponder methods
 // By default these fall through to the underlying view, but can be overridden.
@@ -614,22 +683,42 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
 - (BOOL)canResignFirstResponder;                                            // default==YES
 - (BOOL)resignFirstResponder;                                               // default==NO (no-op)
 - (BOOL)isFirstResponder;
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender;
+- (BOOL)canPerformAction:(nonnull SEL)action withSender:(nonnull id)sender;
+
+#if TARGET_OS_TV
+//Focus Engine
+- (void)setNeedsFocusUpdate;
+- (BOOL)canBecomeFocused;
+- (void)updateFocusIfNeeded;
+- (void)didUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context withAnimationCoordinator:(nonnull UIFocusAnimationCoordinator *)coordinator;
+- (BOOL)shouldUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context;
+- (nullable UIView *)preferredFocusedView;
+#endif
+
+@end
+
+@interface ASDisplayNode (UIViewBridgeAccessibility)
 
 // Accessibility support
-@property (atomic, assign)           BOOL isAccessibilityElement;
-@property (atomic, copy)             NSString *accessibilityLabel;
-@property (atomic, copy)             NSString *accessibilityHint;
-@property (atomic, copy)             NSString *accessibilityValue;
-@property (atomic, assign)           UIAccessibilityTraits accessibilityTraits;
-@property (atomic, assign)           CGRect accessibilityFrame;
-@property (atomic, retain)           NSString *accessibilityLanguage;
-@property (atomic, assign)           BOOL accessibilityElementsHidden;
-@property (atomic, assign)           BOOL accessibilityViewIsModal;
-@property (atomic, assign)           BOOL shouldGroupAccessibilityChildren;
+@property (nonatomic, assign)           BOOL isAccessibilityElement;
+@property (nonatomic, copy, nullable)   NSString *accessibilityLabel;
+@property (nonatomic, copy, nullable)   NSString *accessibilityHint;
+@property (nonatomic, copy, nullable)   NSString *accessibilityValue;
+@property (nonatomic, assign)           UIAccessibilityTraits accessibilityTraits;
+@property (nonatomic, assign)           CGRect accessibilityFrame;
+@property (nonatomic, copy, nullable)   UIBezierPath *accessibilityPath;
+@property (nonatomic, assign)           CGPoint accessibilityActivationPoint;
+@property (nonatomic, copy, nullable)   NSString *accessibilityLanguage;
+@property (nonatomic, assign)           BOOL accessibilityElementsHidden;
+@property (nonatomic, assign)           BOOL accessibilityViewIsModal;
+@property (nonatomic, assign)           BOOL shouldGroupAccessibilityChildren;
+@property (nonatomic, assign)           UIAccessibilityNavigationStyle accessibilityNavigationStyle;
+#if TARGET_OS_TV
+@property(nonatomic, copy, nullable) 	NSArray *accessibilityHeaderElements;
+#endif
 
 // Accessibility identification support
-@property (nonatomic, copy)          NSString *accessibilityIdentifier;
+@property (nonatomic, copy, nullable)   NSString *accessibilityIdentifier;
 
 @end
 
@@ -647,8 +736,7 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  * @param node The node to be added.
  */
-- (void)addSubnode:(ASDisplayNode *)node;
-- (NSString *)name;
+- (void)addSubnode:(nonnull ASDisplayNode *)node;
 @end
 
 /** CALayer(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to a CALayer. */
@@ -658,9 +746,9 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode *node);
  *
  * @param node The node to be added.
  */
-- (void)addSubnode:(ASDisplayNode *)node;
-- (NSString *)name;
+- (void)addSubnode:(nonnull ASDisplayNode *)node;
 @end
+
 
 @interface ASDisplayNode (Deprecated)
 

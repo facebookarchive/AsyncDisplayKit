@@ -51,7 +51,7 @@
   ASRangeTuningParameters rangeTuningParameters;
   rangeTuningParameters.leadingBufferScreenfuls = 1.0;
   rangeTuningParameters.trailingBufferScreenfuls = 0.5;
-  [_tableNode.view setTuningParameters:rangeTuningParameters forRangeType:ASLayoutRangeTypeRender];
+  [_tableNode.view setTuningParameters:rangeTuningParameters forRangeType:ASLayoutRangeTypeDisplay];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -63,7 +63,14 @@
 {
   RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
   elementNode.preferredFrameSize = _elementSize;
+  elementNode.indexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:_pageNumber];
   return elementNode;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  [tableView deselectRowAtIndexPath:indexPath animated:NO];
+  [_tableNode.view reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (void)layout

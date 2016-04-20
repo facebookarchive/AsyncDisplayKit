@@ -8,7 +8,6 @@
  *
  */
 
-@import UIKit;
 #import "ASAsciiArtBoxCreator.h"
 
 static const NSUInteger kDebugBoxPadding = 2;
@@ -112,7 +111,7 @@ typedef NS_ENUM(NSUInteger, PIDebugBoxPaddingLocation)
       [paddedLines addObject:paddedLine];
     }
     concatenatedLines = paddedLines;
-    totalLineLength += difference;
+    // totalLineLength += difference;
   }
   concatenatedLines = [self appendTopAndBottomToBoxString:concatenatedLines parent:parent];
   return [concatenatedLines componentsJoinedByString:@"\n"];

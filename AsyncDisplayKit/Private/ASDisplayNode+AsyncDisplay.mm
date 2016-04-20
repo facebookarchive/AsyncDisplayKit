@@ -8,8 +8,14 @@
 
 #import "_ASCoreAnimationExtras.h"
 #import "_ASAsyncTransaction.h"
+#import "_ASDisplayLayer.h"
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Beta.h"
+
+@interface ASDisplayNode () <_ASDisplayLayerDelegate>
+@end
 
 @implementation ASDisplayNode (AsyncDisplay)
 
@@ -58,7 +64,7 @@ static void __ASDisplayLayerIncrementConcurrentDisplayCount(BOOL displayIsAsync,
  */
 static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync, BOOL isRasterizing)
 {
-  // Displays while rasterizing are not counted as concurrent displays, becuase they draw in serial when their rasterizing container displays.
+  // Displays while rasterizing are not counted as concurrent displays, because they draw in serial when their rasterizing container displays.
   if (isRasterizing) {
     return;
   }
@@ -84,9 +90,9 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     return;
   }
     
-  BOOL rasterizingFromAscendent = [self __rasterizedContainerNode] != nil;
+  BOOL rasterizingFromAscendent = (_hierarchyState & ASHierarchyStateRasterized);
 
-  // if super node is rasterizing descendents, subnodes will not have had layout calls becase they don't have layers
+  // if super node is rasterizing descendants, subnodes will not have had layout calls because they don't have layers
   if (rasterizingFromAscendent) {
     [self __layout];
   }
@@ -174,11 +180,9 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
 - (asyncdisplaykit_async_transaction_operation_block_t)_displayBlockWithAsynchronous:(BOOL)asynchronous isCancelledBlock:(asdisplaynode_iscancelled_block_t)isCancelledBlock rasterizing:(BOOL)rasterizing
 {
-  id nodeClass = [self class];
-
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = nil;
 
-  ASDisplayNodeAssert(rasterizing || ![self __rasterizedContainerNode], @"Rasterized descendants should never display unless being drawn into the rasterized container.");
+  ASDisplayNodeAssert(rasterizing || !(_hierarchyState & ASHierarchyStateRasterized), @"Rasterized descendants should never display unless being drawn into the rasterized container.");
 
   if (!rasterizing && self.shouldRasterizeDescendants) {
     CGRect bounds = self.bounds;
@@ -221,25 +225,32 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
       return image;
     };
-  } else if (_flags.implementsImageDisplay) {
+  } else if (_flags.implementsInstanceImageDisplay || _flags.implementsImageDisplay) {
     // Capture drawParameters from delegate on main thread
     id drawParameters = [self drawParameters];
-
+    
     displayBlock = ^id{
       __ASDisplayLayerIncrementConcurrentDisplayCount(asynchronous, rasterizing);
       if (isCancelledBlock()) {
         __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
         return nil;
       }
-
+      
       ASDN_DELAY_FOR_DISPLAY();
-
-      UIImage *result = [nodeClass displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      
+      UIImage *result = nil;
+      //We can't call _willDisplayNodeContentWithRenderingContext or _didDisplayNodeContentWithRenderingContext because we don't
+      //have a context. We rely on implementors of displayWithParameters:isCancelled: to call
+      if (_flags.implementsInstanceImageDisplay) {
+        result = [self displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      } else {
+        result = [[self class] displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      }
       __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
       return result;
     };
-
-  } else if (_flags.implementsDrawRect) {
+    
+  } else if (_flags.implementsInstanceDrawRect || _flags.implementsDrawRect) {
 
     CGRect bounds = self.bounds;
     if (CGRectIsEmpty(bounds)) {
@@ -264,7 +275,20 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
         UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, contentsScaleForDisplay);
       }
 
-      [nodeClass drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      CGContextRef currentContext = UIGraphicsGetCurrentContext();
+      if (currentContext && _willDisplayNodeContentWithRenderingContext) {
+        _willDisplayNodeContentWithRenderingContext(currentContext);
+      }
+      
+      if (_flags.implementsInstanceDrawRect) {
+        [self drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      } else {
+        [[self class] drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      }
+      
+      if (currentContext && _didDisplayNodeContentWithRenderingContext) {
+        _didDisplayNodeContentWithRenderingContext(currentContext);
+      }
 
       if (isCancelledBlock()) {
         if (!rasterizing) {
@@ -296,19 +320,18 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
   ASDN::MutexLocker l(_propertyLock);
 
-  if ([self __rasterizedContainerNode]) {
+  if (_hierarchyState & ASHierarchyStateRasterized) {
     return;
   }
 
   // for async display, capture the current displaySentinel value to bail early when the job is executed if another is
   // enqueued
   // for sync display, just use nil for the displaySentinel and go
-  //
-  // REVIEW: what about the degenerate case where we are calling setNeedsDisplay faster than the jobs are dequeuing
-  // from the displayQueue?  do we want to put in some kind of timer to not cancel early fails from displaySentinel
-  // changes?
+  
+  // FIXME: what about the degenerate case where we are calling setNeedsDisplay faster than the jobs are dequeuing
+  // from the displayQueue?  Need to not cancel early fails from displaySentinel changes.
   ASSentinel *displaySentinel = (asynchronously ? _displaySentinel : nil);
-  int64_t displaySentinelValue = [displaySentinel increment];
+  int32_t displaySentinelValue = [displaySentinel increment];
 
   asdisplaynode_iscancelled_block_t isCancelledBlock = ^{
     return BOOL(displaySentinelValue != displaySentinel.value);
@@ -347,7 +370,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     // while synchronizing the final application of the results to the layer's contents property (completionBlock).
     
     // First, look to see if we are expected to join a parent's transaction container.
-    CALayer *containerLayer = _layer.asyncdisplaykit_parentTransactionContainer ?: _layer;
+    CALayer *containerLayer = _layer.asyncdisplaykit_parentTransactionContainer ? : _layer;
     
     // In the case that a transaction does not yet exist (such as for an individual node outside of a container),
     // this call will allocate the transaction and add it to _ASAsyncTransactionGroup.
@@ -356,7 +379,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     
     // Adding this displayBlock operation to the transaction will start it IMMEDIATELY.
     // The only function of the transaction commit is to gate the calling of the completionBlock.
-    [transaction addOperationWithBlock:displayBlock queue:[_ASDisplayLayer displayQueue] completion:completionBlock];
+    [transaction addOperationWithBlock:displayBlock priority:self.drawingPriority queue:[_ASDisplayLayer displayQueue] completion:completionBlock];
   } else {
     UIImage *contents = (UIImage *)displayBlock();
     completionBlock(contents, NO);
@@ -366,6 +389,30 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 - (void)cancelDisplayAsyncLayer:(_ASDisplayLayer *)asyncLayer
 {
   [_displaySentinel increment];
+}
+
+- (ASDisplayNodeContextModifier)willDisplayNodeContentWithRenderingContext
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _willDisplayNodeContentWithRenderingContext;
+}
+
+- (ASDisplayNodeContextModifier)didDisplayNodeContentWithRenderingContext
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _didDisplayNodeContentWithRenderingContext;
+}
+
+- (void)setWillDisplayNodeContentWithRenderingContext:(ASDisplayNodeContextModifier)contextModifier
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _willDisplayNodeContentWithRenderingContext = contextModifier;
+}
+
+- (void)setDidDisplayNodeContentWithRenderingContext:(ASDisplayNodeContextModifier)contextModifier;
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _didDisplayNodeContentWithRenderingContext = contextModifier;
 }
 
 @end

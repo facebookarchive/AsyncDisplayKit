@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * _OBJC_SUPPORTED_INLINE_REFCNT_WITH_DEALLOC2MAIN permits classes to implement their own reference counting and enforce
@@ -19,3 +20,5 @@
 - (BOOL)_isDeallocating;
 
 @end
+
+NS_ASSUME_NONNULL_END

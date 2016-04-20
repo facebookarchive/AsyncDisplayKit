@@ -8,13 +8,9 @@
 
 #import "_ASDisplayView.h"
 
-#import <objc/runtime.h>
-
 #import "_ASCoreAnimationExtras.h"
-#import "_ASAsyncTransactionContainer.h"
-#import "ASAssert.h"
-#import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Subclasses.h"
 
 @interface _ASDisplayView ()
@@ -22,7 +18,7 @@
 
 // Keep the node alive while its view is active.  If you create a view, add its layer to a layer hierarchy, then release
 // the view, the layer retains the view to prevent a crash.  This replicates this behaviour for the node abstraction.
-@property (nonatomic, retain, readwrite) ASDisplayNode *keepalive_node;
+@property (nonatomic, strong, readwrite) ASDisplayNode *keepalive_node;
 @end
 
 @implementation _ASDisplayView
@@ -30,6 +26,7 @@
   __unsafe_unretained ASDisplayNode *_node;  // Though UIView has a .node property added via category, since we can add an ivar to a subclass, use that for performance.
   BOOL _inHitTest;
   BOOL _inPointInside;
+  NSArray *_accessibleElements;
 }
 
 @synthesize asyncdisplaykit_node = _node;
@@ -40,7 +37,7 @@
 }
 
 #pragma mark - NSObject Overrides
-- (id)init
+- (instancetype)init
 {
   return [self initWithFrame:CGRectZero];
 }
@@ -54,12 +51,28 @@
 
 #pragma mark - UIView Overrides
 
-- (id)initWithFrame:(CGRect)frame
+- (instancetype)initWithFrame:(CGRect)frame
 {
   if (!(self = [super initWithFrame:frame]))
     return nil;
 
   return self;
+}
+
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+  BOOL visible = (newWindow != nil);
+  if (visible && !_node.inHierarchy) {
+    [_node __enterHierarchy];
+  }
+}
+
+- (void)didMoveToWindow
+{
+  BOOL visible = (self.window != nil);
+  if (!visible && _node.inHierarchy) {
+    [_node __exitHierarchy];
+  }
 }
 
 - (void)willMoveToSuperview:(UIView *)newSuperview
@@ -73,30 +86,84 @@
     self.keepalive_node = _node;
   }
   else if (currentSuperview && !newSuperview) {
+    // Clearing keepalive_node may cause deallocation of the node.  In this case, __exitHierarchy may not have an opportunity (e.g. _node will be cleared
+    // by the time -didMoveToWindow occurs after this) to clear the Visible interfaceState, which we need to do before deallocation to meet an API guarantee.
+    if (_node.inHierarchy) {
+      [_node __exitHierarchy];
+    }
     self.keepalive_node = nil;
   }
-}
+  
+  if (newSuperview) {
+    ASDisplayNode *supernode = _node.supernode;
+    BOOL supernodeLoaded = supernode.nodeLoaded;
+    ASDisplayNodeAssert(!supernode.isLayerBacked, @"Shouldn't be possible for _ASDisplayView's supernode to be layer-backed.");
+    
+    BOOL needsSupernodeUpdate = NO;
 
-- (void)willMoveToWindow:(UIWindow *)newWindow
-{
-  BOOL visible = newWindow != nil;
-  if (visible && !_node.inHierarchy) {
-    [_node __enterHierarchy];
-  } else if (!visible && _node.inHierarchy) {
-    [_node __exitHierarchy];
+    if (supernode) {
+      if (supernodeLoaded) {
+        if (supernode.layerBacked) {
+          // See comment in -didMoveToSuperview.  This case should be avoided, but is possible with app-level coding errors.
+          needsSupernodeUpdate = (supernode.layer != newSuperview.layer);
+        } else {
+          // If we have a supernode, compensate for users directly messing with views by hitching up to any new supernode.
+          needsSupernodeUpdate = (supernode.view != newSuperview);
+        }
+      } else {
+        needsSupernodeUpdate = YES;
+      }
+    } else {
+      // If we have no supernode and we are now in a view hierarchy, check to see if we can hook up to a supernode.
+      needsSupernodeUpdate = (newSuperview != nil);
+    }
+
+    if (needsSupernodeUpdate) {
+      // -removeFromSupernode is called by -addSubnode:, if it is needed.
+      [newSuperview.asyncdisplaykit_node addSubnode:_node];
+    }
   }
+
 }
 
 - (void)didMoveToSuperview
 {
-  // FIXME maybe move this logic into ASDisplayNode addSubnode/removeFromSupernode
-  UIView *superview = self.superview;
-
-  // If superview's node is different from supernode's view, fix it by setting supernode to the new superview's node.  Got that?
-  if (!superview)
-    [_node __setSupernode:nil];
-  else if (superview != _node.supernode.view)
-    [_node __setSupernode:superview.asyncdisplaykit_node];
+  ASDisplayNode *supernode = _node.supernode;
+  ASDisplayNodeAssert(!supernode.isLayerBacked, @"Shouldn't be possible for superview's node to be layer-backed.");
+  
+  if (supernode) {
+    ASDisplayNodeAssertTrue(_node.nodeLoaded);
+    UIView *superview = self.superview;
+    BOOL supernodeLoaded = supernode.nodeLoaded;
+    BOOL needsSupernodeRemoval = NO;
+    
+    if (superview) {
+      // If our new superview is not the same as the supernode's view, or the supernode has no view, disconnect.
+      if (supernodeLoaded) {
+        if (supernode.layerBacked) {
+          // As asserted at the top, this shouldn't be possible, but in production with assertions disabled it can happen.
+          // We try to make such code behave as well as feasible because it's not that hard of an error to make if some deep
+          // child node of a layer-backed node happens to be view-backed, but it is not supported and should be avoided.
+          needsSupernodeRemoval = (supernode.layer != superview.layer);
+        } else {
+          needsSupernodeRemoval = (supernode.view != superview);
+        }
+      } else {
+        needsSupernodeRemoval = YES;
+      }
+    } else {
+      // If supernode is loaded but our superview is nil, the user likely manually removed us, so disconnect supernode.
+      // The unlikely alternative: we are in __unloadNode, with shouldRasterizeSubnodes just having been turned on.
+      // In the latter case, we don't want to disassemble the node hierarchy because all views are intentionally being destroyed.
+      BOOL nodeIsRasterized = ((_node.hierarchyState & ASHierarchyStateRasterized) == ASHierarchyStateRasterized);
+      needsSupernodeRemoval = (supernodeLoaded && !nodeIsRasterized);
+    }
+    
+    if (needsSupernodeRemoval) {
+      // The node will only disconnect from its supernode, not removeFromSuperview, in this condition.
+      [_node removeFromSupernode];
+    }
+  }
 }
 
 - (void)setNeedsDisplay
@@ -133,6 +200,12 @@
 
   // Do our own mapping so as not to call super and muck up needsDisplayOnBoundsChange. If we're in a production build, fall back to resize if we see redraw
   self.layer.contentsGravity = (contentMode != UIViewContentModeRedraw) ? ASDisplayNodeCAContentsGravityFromUIContentMode(contentMode) : kCAGravityResize;
+}
+
+- (void)setBounds:(CGRect)bounds
+{
+  [super setBounds:bounds];
+  _node.threadSafeBounds = bounds;
 }
 
 #pragma mark - Event Handling + UIResponder Overrides
@@ -265,4 +338,36 @@
   return _node;
 }
 
+#if TARGET_OS_TV
+#pragma mark - tvOS
+- (BOOL)canBecomeFocused
+{
+  return [_node canBecomeFocused];
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+  return [_node didUpdateFocusInContext:context withAnimationCoordinator:coordinator];
+}
+
+- (void)setNeedsFocusUpdate
+{
+  return [_node setNeedsFocusUpdate];
+}
+
+- (void)updateFocusIfNeeded
+{
+  return [_node updateFocusIfNeeded];
+}
+
+- (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
+{
+  return [_node shouldUpdateFocusInContext:context];
+}
+
+- (UIView *)preferredFocusedView
+{
+  return [_node preferredFocusedView];
+}
+#endif
 @end

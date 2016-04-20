@@ -11,6 +11,7 @@
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  A simple layout spec that stacks a list of children vertically or horizontally.
@@ -35,10 +36,25 @@
  */
 @interface ASStackLayoutSpec : ASLayoutSpec
 
-/** Specifies the direction children are stacked in. */
+/** 
+ Specifies the direction children are stacked in. If horizontalAlignment and verticalAlignment were set, 
+ they will be resolved again, causing justifyContent and alignItems to be updated accordingly
+ */
 @property (nonatomic, assign) ASStackLayoutDirection direction;
 /** The amount of space between each child. */
 @property (nonatomic, assign) CGFloat spacing;
+/** 
+ Specifies how children are aligned horizontally. Depends on the stack direction, setting the alignment causes either
+ justifyContent or alignItems to be updated. The alignment will remain valid after future direction changes.
+ Thus, it is preferred to those properties
+ */
+@property (nonatomic, assign) ASHorizontalAlignment horizontalAlignment;
+/** 
+ Specifies how children are aligned vertically. Depends on the stack direction, setting the alignment causes either
+ justifyContent or alignItems to be updated. The alignment will remain valid after future direction changes.
+ Thus, it is preferred to those properties
+ */
+@property (nonatomic, assign) ASVerticalAlignment verticalAlignment;
 /** The amount of space between each child. */
 @property (nonatomic, assign) ASStackLayoutJustifyContent justifyContent;
 /** Orientation of children along cross axis */
@@ -55,7 +71,7 @@
  @param alignItems Orientation of the children along the cross axis
  @param children ASLayoutable children to be positioned.
  */
-+ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children;
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray<id<ASLayoutable>> *)children;
 
 /**
  * @return A stack layout spec with direction of ASStackLayoutDirectionVertical
@@ -68,3 +84,5 @@
 + (instancetype)horizontalStackLayoutSpec;
 
 @end
+
+NS_ASSUME_NONNULL_END
