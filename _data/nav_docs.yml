@@ -54,3 +54,4 @@
 - title: Beta
   items:
   - implicit-hierarchy-mgmt
+  - layout-transition-api
