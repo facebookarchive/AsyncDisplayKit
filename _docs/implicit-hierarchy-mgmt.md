@@ -1,5 +1,9 @@
-##Implicit Node Hierarchy Management##
-_ASDisplayNode+Beta.h_
+---
+title: Implicit Node Hierarchy Mgmt
+layout: docs
+permalink: /docs/implicit-hierarchy-mgmt.html
+next: debug-hit-test.html
+---
 
 This feature - created by ASDK rockstar <a href="https://github.com/facebook/AsyncDisplayKit/pulls?utf8=%E2%9C%93&q=is%3Apr+author%3Alevi+">@levi</a> - was built to support the AsyncDisplayKit Layout Transition API. However, apps using AsyncDisplayKit that don't require animations can still benefit from the reduction in code size that this feature enables.
 
@@ -139,8 +143,3 @@ This is just a simple example, but this feature has many more powerful uses.
 **Note that the subnodes of any node with this property set will inherit the property, so it is only neccessary to put it on the highest level node. Most likely that will be an ASTableNode, ASCollectionNode or ASPagerNode.**
 
 Please check it out and let us know what you think at <a href="https://github.com/facebook/AsyncDisplayKit/pull/1156">PR #1156</a>!
-
-
-
- 
-
