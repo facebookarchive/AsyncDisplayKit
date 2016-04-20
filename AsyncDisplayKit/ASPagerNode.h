@@ -66,7 +66,7 @@
 
 @end
 
-@protocol ASPagerDelegate <NSObject, ASCollectionDelegate>
+@protocol ASPagerDelegate <ASCollectionDelegate>
 
 @end
 
