@@ -106,9 +106,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSMutableArray *_batchUpdateBlocks;
   
   BOOL _asyncDataFetchingEnabled;
-  BOOL _asyncDelegateImplementsScrollviewDidScroll;
-  BOOL _asyncDataSourceImplementsConstrainedSizeForNode;
-  BOOL _asyncDataSourceImplementsNodeBlockForItemAtIndexPath;
   _ASCollectionViewNodeSizeInvalidationContext *_queuedNodeSizeInvalidationContext; // Main thread only
   BOOL _isDeallocating;
   
@@ -133,6 +130,26 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
    * The collection view never queried your data source before the update to see that it actually had 0 items.
    */
   BOOL _superIsPendingDataLoad;
+    
+  struct {
+    unsigned int asyncDelegateScrollViewDidScroll:1;
+    unsigned int asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset:1;
+    unsigned int asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath:1;
+    unsigned int asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPath:1;
+    unsigned int asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPathDeprecated:1;
+    unsigned int asyncDelegateCollectionViewWillBeginBatchFetchWithContext:1;
+    unsigned int asyncDelegateShouldBatchFetchForCollectionView:1;
+  } _asyncDelegateFlags;
+  
+  struct {
+    unsigned int asyncDataSourceConstrainedSizeForNode:1;
+    unsigned int asyncDataSourceNodeForItemAtIndexPath:1;
+    unsigned int asyncDataSourceNodeBlockForItemAtIndexPath:1;
+    unsigned int asyncDataSourceNumberOfSectionsInCollectionView:1;
+    unsigned int asyncDataSourceCollectionViewLockDataSource:1;
+    unsigned int asyncDataSourceCollectionViewUnlockDataSource:1;
+    unsigned int asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath:1;
+  } _asyncDataSourceFlags;
 }
 
 @property (atomic, assign) BOOL asyncDataSourceLocked;
@@ -333,16 +350,22 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (asyncDataSource == nil) {
     _asyncDataSource = nil;
     _proxyDataSource = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
-    _asyncDataSourceImplementsConstrainedSizeForNode = NO;
-    _asyncDataSourceImplementsNodeBlockForItemAtIndexPath = NO;
+    
+    memset(&_asyncDataSourceFlags, 0, sizeof(_asyncDataSourceFlags));
   } else {
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
-    _asyncDataSourceImplementsConstrainedSizeForNode = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
-    _asyncDataSourceImplementsNodeBlockForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
+    
+    _asyncDataSourceFlags.asyncDataSourceConstrainedSizeForNode = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
+    _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)];
+    _asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
+    _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInCollectionView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
+    _asyncDataSourceFlags.asyncDataSourceCollectionViewLockDataSource = [_asyncDataSource respondsToSelector:@selector(collectionViewLockDataSource:)];
+    _asyncDataSourceFlags.asyncDataSourceCollectionViewUnlockDataSource = [_asyncDataSource respondsToSelector:@selector(collectionViewUnlockDataSource:)];
+    _asyncDataSourceFlags.asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];;
 
     // Data-source must implement collectionView:nodeForItemAtIndexPath: or collectionView:nodeBlockForItemAtIndexPath:
-    ASDisplayNodeAssertTrue(_asyncDataSourceImplementsNodeBlockForItemAtIndexPath || [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)]);
+    ASDisplayNodeAssertTrue(_asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath || _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath);
   }
   
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
@@ -363,11 +386,19 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (asyncDelegate == nil) {
     _asyncDelegate = nil;
     _proxyDelegate = _isDeallocating ? nil : [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
-    _asyncDelegateImplementsScrollviewDidScroll = NO;
+    
+    memset(&_asyncDelegateFlags, 0, sizeof(_asyncDelegateFlags));
   } else {
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
-    _asyncDelegateImplementsScrollviewDidScroll = ([_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)] ? 1 : 0);
+    
+    _asyncDelegateFlags.asyncDelegateScrollViewDidScroll = [_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)];
+    _asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
+    _asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)];
+    _asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPathDeprecated = [_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)];
+    _asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPath = [_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNode:forItemAtIndexPath:)];
+    _asyncDelegateFlags.asyncDelegateCollectionViewWillBeginBatchFetchWithContext = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)];
+    _asyncDelegateFlags.asyncDelegateShouldBatchFetchForCollectionView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)];
   }
 
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
@@ -566,7 +597,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASCellNode *cellNode = [cell node];
   cellNode.scrollView = collectionView;
   
-  if ([_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)]) {
+  if (_asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath) {
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
   }
   
@@ -586,7 +617,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   ASCellNode *cellNode = [cell node];
 
-  if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNode:forItemAtIndexPath:)]) {
+  if (_asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPath) {
     ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
     [_asyncDelegate collectionView:self didEndDisplayingNode:cellNode forItemAtIndexPath:indexPath];
   }
@@ -597,7 +628,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  if ([_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)]) {
+  if (_asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPathDeprecated) {
     [_asyncDelegate collectionView:self didEndDisplayingNodeForItemAtIndexPath:indexPath];
   }
 #pragma clang diagnostic pop
@@ -620,7 +651,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
                                       inScrollView:scrollView
                                      withCellFrame:collectionCell.frame];
   }
-  if (_asyncDelegateImplementsScrollviewDidScroll) {
+  if (_asyncDelegateFlags.asyncDelegateScrollViewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
   }
 }
@@ -637,7 +668,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
   }
   
-  if ([_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)]) {
+  if (_asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset) {
     [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
   }
 }
@@ -747,8 +778,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)canBatchFetch
 {
   // if the delegate does not respond to this method, there is no point in starting to fetch
-  BOOL canFetch = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)];
-  if (canFetch && [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)]) {
+  BOOL canFetch = _asyncDelegateFlags.asyncDelegateCollectionViewWillBeginBatchFetchWithContext;
+  if (canFetch && _asyncDelegateFlags.asyncDelegateShouldBatchFetchForCollectionView) {
     return [_asyncDelegate shouldBatchFetchForCollectionView:self];
   } else {
     return canFetch;
@@ -788,7 +819,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)_beginBatchFetching
 {
   [_batchContext beginBatchFetching];
-  if ([_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)]) {
+  if (_asyncDelegateFlags.asyncDelegateCollectionViewWillBeginBatchFetchWithContext) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       [_asyncDelegate collectionView:self willBeginBatchFetchWithContext:_batchContext];
     });
@@ -800,7 +831,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath
 {
-  if (!_asyncDataSourceImplementsNodeBlockForItemAtIndexPath) {
+  if (!_asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath) {
     ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
     ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
     __weak __typeof__(self) weakSelf = self;
@@ -842,7 +873,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   // TODO: Move this logic into the flow layout inspector. Create a simple inspector for non-flow layouts that don't
   // implement a custom inspector.
-  if (_asyncDataSourceImplementsConstrainedSizeForNode) {
+  if (_asyncDataSourceFlags.asyncDataSourceConstrainedSizeForNode) {
     constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
   } else {
     CGSize maxSize = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero) ? self.bounds.size : _maxSizeForNodesConstrainedSize;
@@ -863,7 +894,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 }
 
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController {
-  if ([_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)]) {
+  if (_asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInCollectionView) {
     return [_asyncDataSource numberOfSectionsInCollectionView:self];
   } else {
     return 1;
@@ -875,7 +906,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has already been locked");
   
   self.asyncDataSourceLocked = YES;
-  if ([_asyncDataSource respondsToSelector:@selector(collectionViewLockDataSource:)]) {
+  if (_asyncDataSourceFlags.asyncDataSourceCollectionViewLockDataSource) {
     [_asyncDataSource collectionViewLockDataSource:self];
   }
 }
@@ -885,7 +916,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASDisplayNodeAssert(self.asyncDataSourceLocked, @"The data source has already been unlocked");
   
   self.asyncDataSourceLocked = NO;
-  if ([_asyncDataSource respondsToSelector:@selector(collectionViewUnlockDataSource:)]) {
+  if (_asyncDataSourceFlags.asyncDataSourceCollectionViewUnlockDataSource) {
     [_asyncDataSource collectionViewUnlockDataSource:self];
   }
 }
@@ -1002,13 +1033,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
+  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:_performingBatchUpdates];
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super insertItemsAtIndexPaths:indexPaths];
     }];
   } else {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     [UIView performWithoutAnimation:^{
       [super insertItemsAtIndexPaths:indexPaths];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
@@ -1023,13 +1053,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
+  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:_performingBatchUpdates];
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super deleteItemsAtIndexPaths:indexPaths];
     }];
   } else {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     [UIView performWithoutAnimation:^{
       [super deleteItemsAtIndexPaths:indexPaths];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
@@ -1044,13 +1073,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
+  [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:_performingBatchUpdates];
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super insertSections:indexSet];
     }];
   } else {
-    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
       [super insertSections:indexSet];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
@@ -1065,13 +1093,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
+  [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:_performingBatchUpdates];
   if (_performingBatchUpdates) {
-    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:YES];
     [_batchUpdateBlocks addObject:^{
       [super deleteSections:indexSet];
     }];
   } else {
-    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:NO];
     [UIView performWithoutAnimation:^{
       [super deleteSections:indexSet];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
