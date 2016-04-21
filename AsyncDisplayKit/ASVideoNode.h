@@ -64,6 +64,5 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
 @end
-#endif
-
 NS_ASSUME_NONNULL_END
+#endif
