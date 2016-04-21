@@ -16,7 +16,6 @@
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASTextNode.h>
-#import <AsyncDisplayKit/ASImageNode+AnimatedImage.h>
 #import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
 
 #import "ASImageNode+CGExtras.h"

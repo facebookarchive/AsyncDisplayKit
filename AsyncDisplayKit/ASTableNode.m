@@ -20,7 +20,7 @@
 @end
 
 @interface ASTableNode ()
-@property (nonatomic) _ASTablePendingState *pendingState;
+@property (nonatomic, strong) _ASTablePendingState *pendingState;
 @end
 
 @interface ASTableView ()
@@ -68,7 +68,7 @@
   
   ASTableView *view = self.view;
   view.tableNode    = self;
-  
+
   if (_pendingState) {
     _ASTablePendingState *pendingState = _pendingState;
     self.pendingState    = nil;

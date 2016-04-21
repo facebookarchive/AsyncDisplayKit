@@ -8,6 +8,8 @@
 
 #import <AsyncDisplayKit/ASControlNode.h>
 
+#import "ASImageProtocols.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**
@@ -118,6 +120,22 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
  */
 @property (nonatomic, assign) BOOL isDefaultFocusAppearance;
 #endif
+
+/**
+ * @abstract The animated image to playback
+ *
+ * @discussion Set this to an object which conforms to ASAnimatedImageProtocol
+ * to have the ASImageNode playback an animated image.
+ */
+@property (nullable, atomic, strong) id <ASAnimatedImageProtocol> animatedImage;
+
+/**
+ * @abstract Pause the playback of an animated image.
+ *
+ * @discussion Set to YES to pause playback of an animated image and NO to resume
+ * playback.
+ */
+@property (atomic, assign) BOOL animatedImagePaused;
 
 @end
 

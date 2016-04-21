@@ -29,9 +29,9 @@
 @property (atomic, readonly) ASImageNode *placeholderImageNode;
 @property (atomic, readwrite) ASDisplayNode *playerNode;
 @property (atomic, readwrite) AVPlayer *player;
-@property (atomic, readonly) BOOL shouldBePlaying;
+@property (atomic, readwrite) BOOL shouldBePlaying;
 
-- (void)setPlaceholderImage:(UIImage *)image;
+- (void)setVideoPlaceholderImage:(UIImage *)image;
 
 @end
 
@@ -313,28 +313,24 @@
   XCTAssertTrue(_videoNode.isPlaying);
 }
 
-- (void)testBackgroundingAndForegroungingTheAppShouldPauseAndResume
+- (void)testVideoResumedWhenBufferIsLikelyToKeepUp
 {
   _videoNode.asset = _firstAsset;
 
-  [_videoNode didLoad];
   [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
-  [_videoNode play];
-
-  XCTAssertTrue(_videoNode.isPlaying);
-
-  [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationDidEnterBackgroundNotification object:nil];
+  [_videoNode pause];
+  _videoNode.shouldBePlaying = YES;
 
   XCTAssertFalse(_videoNode.isPlaying);
 
-  [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationWillEnterForegroundNotification object:nil];
+  [_videoNode observeValueForKeyPath:@"playbackLikelyToKeepUp" ofObject:[_videoNode currentItem] change:@{NSKeyValueChangeNewKey : @YES} context:NULL];
 
   XCTAssertTrue(_videoNode.isPlaying);
 }
 
 - (void)testSettingVideoGravityChangesPlaceholderContentMode
 {
-  [_videoNode setPlaceholderImage:[[UIImage alloc] init]];
+  [_videoNode setVideoPlaceholderImage:[[UIImage alloc] init]];
   XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.placeholderImageNode.contentMode);
 
   _videoNode.gravity = AVLayerVideoGravityResize;
@@ -360,6 +356,33 @@
 
   XCTAssertFalse([firstButton.allTargets containsObject:_videoNode]);
   XCTAssertNotEqual(_videoNode, firstButton.supernode);
+}
+
+- (void)testChangingAssetsChangesPlaceholderImage
+{
+  UIImage *firstImage = [[UIImage alloc] init];
+
+  _videoNode.asset = _firstAsset;
+  [_videoNode setVideoPlaceholderImage:firstImage];
+  XCTAssertEqual(firstImage, _videoNode.placeholderImageNode.image);
+
+  _videoNode.asset = _secondAsset;
+  XCTAssertNotEqual(firstImage, _videoNode.placeholderImageNode.image);
+}
+
+- (void)testClearingFetchedContentShouldClearAssetData
+{
+  _videoNode.asset = _firstAsset;
+  [_videoNode fetchData];
+  [_videoNode setVideoPlaceholderImage:[[UIImage alloc] init]];
+  XCTAssertNotNil(_videoNode.player);
+  XCTAssertNotNil(_videoNode.currentItem);
+  XCTAssertNotNil(_videoNode.placeholderImageNode.image);
+
+  [_videoNode clearFetchedData];
+  XCTAssertNil(_videoNode.player);
+  XCTAssertNil(_videoNode.currentItem);
+  XCTAssertNil(_videoNode.placeholderImageNode.image);
 }
 
 @end

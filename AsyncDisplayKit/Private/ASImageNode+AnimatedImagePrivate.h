@@ -11,7 +11,6 @@
 @interface ASImageNode ()
 {
   ASDN::RecursiveMutex _animatedImageLock;
-  ASDN::RecursiveMutex _animatedImagePausedLock;
   ASDN::Mutex _displayLinkLock;
   id <ASAnimatedImageProtocol> _animatedImage;
   BOOL _animatedImagePaused;
