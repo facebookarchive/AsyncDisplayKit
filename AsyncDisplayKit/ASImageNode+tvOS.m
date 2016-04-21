@@ -175,14 +175,9 @@
 
 - (UIView *)getView
 {
-  UIView *view = self.view;
-  UIView *rootView = ASDisplayNodeUltimateParentOfNode(self).view
   // TODO: This needs to be re-visited to handle all possibilities.
   // If we are inside a ASCellNode, then we need to apply our focus effects to the ASCellNode view/layer rather than the ASImageNode view/layer.
-  if (CGSizeEqualToSize(rootView.frame.size, view.frame.size) && rootView) {
-    view = rootView;
-  }
-  return view;
+  return ASDisplayNodeUltimateParentOfNode(self).view;
 }
 
 @end
