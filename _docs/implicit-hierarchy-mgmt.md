@@ -1,5 +1,5 @@
 ---
-title: Implicit Node Hierarchy Management
+title: Implicit Node Hierarchy Mgmt
 layout: docs
 permalink: /docs/implicit-hierarchy-mgmt.html
 next: debug-hit-test.html
@@ -9,13 +9,10 @@ This feature - created by ASDK rockstar <a href="https://github.com/facebook/Asy
 
 **This feature will soon be enabled by default.**
 
-<div>
-Implicit Node Hierarchy Management (INHM) is implemented using ASLayoutSpecs. If you are unfamiliar with that concept, please read that documentation (INSERT LINK) first. 
-<br><br>
-To recap, an ASLayoutSpec completely describes the UI of a view in your app by specifying the **hierarchy state of a node and its subnodes**. An ASLayoutSpec is returned by a node from its 
-<br><br>
-`- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize`
-<br><br>
+<div class = "note">
+Implicit Node Hierarchy Management is implemented using ASLayoutSpecs. If you are unfamiliar with that concept, please read that documentation (INSERT LINK) first. <br><br>
+To recap, an ASLayoutSpec completely describes the UI of a view in your app by specifying the **hierarchy state of a node and its subnodes**. An ASLayoutSpec is returned by a node from its <br><br>
+`- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize` <br><br>
 method. 
 </div>
 
@@ -143,8 +140,3 @@ This is just a simple example, but this feature has many more powerful uses.
 **Note that the subnodes of any node with this property set will inherit the property, so it is only neccessary to put it on the highest level node. Most likely that will be an ASTableNode, ASCollectionNode or ASPagerNode.**
 
 Please check it out and let us know what you think at <a href="https://github.com/facebook/AsyncDisplayKit/pull/1156">PR #1156</a>!
-
-
-
- 
-
