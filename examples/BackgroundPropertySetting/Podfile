@@ -1,4 +1,6 @@
 source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '8.0'
+platform :ios, '7.1'
 use_frameworks!
-pod 'AsyncDisplayKit', :path => '../..'
+target 'Sample' do
+	pod 'AsyncDisplayKit', :path => '../..'
+end
