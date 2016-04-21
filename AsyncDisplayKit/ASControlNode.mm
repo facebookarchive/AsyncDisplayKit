@@ -96,7 +96,8 @@ static BOOL _enableHitTestDebug = NO;
 #if TARGET_OS_TV
 - (void)didLoad
 {
-  //On tvOS all control views, such as buttons, interact with the focus system even if they don't have a target set on them. Here we add our own internal tap gesture to handle this behaviour.
+  // On tvOS all controls, such as buttons, interact with the focus system even if they don't have a target set on them.
+  // Here we add our own internal tap gesture to handle this behaviour.
   self.userInteractionEnabled = YES;
   UITapGestureRecognizer *tapGestureRec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pressDown)];
   tapGestureRec.allowedPressTypes = @[@(UIPressTypeSelect)];

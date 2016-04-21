@@ -10,6 +10,6 @@
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 @interface ASImageNode (tvOS)
-@property (nonatomic) BOOL isDefaultState;
 @end
 #endif
+

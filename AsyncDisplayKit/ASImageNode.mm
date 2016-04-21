@@ -73,11 +73,6 @@
 
   void (^_displayCompletionBlock)(BOOL canceled);
   ASDN::RecursiveMutex _imageLock;
-
-#if TARGET_OS_TV
-  //tvOS
-  BOOL isDefaultState;
-#endif
   
   // Cropping.
   BOOL _cropEnabled; // Defaults to YES.

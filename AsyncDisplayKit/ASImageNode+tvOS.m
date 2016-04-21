@@ -8,13 +8,14 @@
 
 #if TARGET_OS_TV
 #import "ASImageNode+tvOS.h"
+#import <GLKit/GLKit.h>
 
 @implementation ASImageNode (tvOS)
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
   [super touchesBegan:touches withEvent:event];
-  self.isDefaultState = NO;
+  self.isDefaultFocusAppearance = NO;
   UIView *view = [self getView];
   CALayer *layer = view.layer;
   
@@ -47,16 +48,27 @@
   [CATransaction commit];
 }
 
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
   [super touchesMoved:touches withEvent:event];
   
-  if (!self.isDefaultState) {
+  // TODO: Clean up, and improve visuals.
+  
+  if (!self.isDefaultFocusAppearance) {
+    // This view may correspond to either self.view
+    // or our superview if we are in a ASCellNode
     UIView *view = [self getView];
     
     UITouch *touch = [touches anyObject];
     // Get the specific point that was touched
-    // This is quite messy in it's current state so is not ready for production. The reason it is here is for others to contribute and to make it clear what is occuring.
-    // TODO: Clean up, and improve visuals.
+    
+    // This is quite messy in it's current state so is not ready for production.
+    // The reason it is here is for others to contribute and to make it clear what is occuring.
+    
+    // We get the touch location in self.view because
+    // we are operating in that coordinate system.
+    // BUT we apply our transforms to *view since we want to apply
+    // the transforms to the root view (L: 107)
     CGPoint point = [touch locationInView:self.view];
     float pitch = 0;
     float yaw = 0;
@@ -87,8 +99,8 @@
       }
     }
     
-    CATransform3D pitchTransform = CATransform3DMakeRotation([self degressToRadians:pitch],1.0,0.0,0.0);
-    CATransform3D yawTransform = CATransform3DMakeRotation([self degressToRadians:yaw],0.0,1.0,0.0);
+    CATransform3D pitchTransform = CATransform3DMakeRotation(GLKMathDegreesToRadians(pitch),1.0,0.0,0.0);
+    CATransform3D yawTransform = CATransform3DMakeRotation(GLKMathDegreesToRadians(yaw),0.0,1.0,0.0);
     CATransform3D transform = CATransform3DConcat(pitchTransform, yawTransform);
     CATransform3D scaleAndTransform = CATransform3DConcat(transform, CATransform3DMakeAffineTransform(CGAffineTransformScale(CGAffineTransformIdentity, 1.25, 1.25)));
     
@@ -109,7 +121,7 @@
 
 - (void)finishTouches
 {
-  if (!self.isDefaultState) {
+  if (!self.isDefaultFocusAppearance) {
     UIView *view = [self getView];
     CALayer *layer = view.layer;
     
@@ -157,7 +169,7 @@
   layer.shadowPath = nil;
   [layer removeAnimationForKey:@"shadowOffset"];
   [layer removeAnimationForKey:@"shadowOpacity"];
-  self.isDefaultState = YES;
+  self.isDefaultFocusAppearance = YES;
 }
 
 - (UIView *)getView
@@ -168,11 +180,6 @@
     view = self.view.superview.superview;
   }
   return view;
-}
-
-- (float)degressToRadians:(float)value
-{
-  return value * M_PI / 180;
 }
 
 @end
