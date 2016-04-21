@@ -96,7 +96,7 @@
       view.layer.transform = scaleAndTransform;
     }];
   } else {
-    [self setDefaultState];
+    [self setDefaultFocusAppearance];
   }
 }
 
@@ -130,7 +130,7 @@
       }
     }];
   } else {
-    [self setDefaultState];
+    [self setDefaultFocusAppearance];
   }
 }
 
@@ -146,7 +146,7 @@
   view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1.25, 1.25);
 }
 
-- (void)setDefaultState
+- (void)setDefaultFocusAppearance
 {
   UIView *view = [self getView];
   CALayer *layer = view.layer;

@@ -45,7 +45,7 @@
   } else{
     //Not focused
     [coordinator addCoordinatedAnimations:^{
-      [self setDefaultState];
+      [self setDefaultFocusAppearance];
     } completion:nil];
   }
 }
@@ -74,7 +74,7 @@
   layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
 }
 
-- (void)setDefaultState
+- (void)setDefaultFocusAppearance
 {
   CALayer *layer = self.layer;
   layer.shadowOffset = CGSizeZero;
