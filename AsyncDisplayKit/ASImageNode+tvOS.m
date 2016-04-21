@@ -9,6 +9,7 @@
 #if TARGET_OS_TV
 #import "ASImageNode+tvOS.h"
 #import <GLKit/GLKit.h>
+#import "ASDisplayNodeExtras.h"
 
 @implementation ASImageNode (tvOS)
 
@@ -175,9 +176,11 @@
 - (UIView *)getView
 {
   UIView *view = self.view;
-  //If we are inside a ASCellNode, then we need to apply our focus effects to the ASCellNode view/layer rather than the ASImageNode view/layer.
-  if (CGSizeEqualToSize(self.view.superview.frame.size, self.view.frame.size) && self.view.superview.superview) {
-    view = self.view.superview.superview;
+  UIView *rootView = ASDisplayNodeUltimateParentOfNode(self).view
+  // TODO: This needs to be re-visited to handle all possibilities.
+  // If we are inside a ASCellNode, then we need to apply our focus effects to the ASCellNode view/layer rather than the ASImageNode view/layer.
+  if (CGSizeEqualToSize(rootView.frame.size, view.frame.size) && rootView) {
+    view = rootView;
   }
   return view;
 }
