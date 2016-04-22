@@ -294,8 +294,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 - (void)visibilityDidChange:(BOOL)isVisible
 {
   [super visibilityDidChange:isVisible];
-  ASDN::MutexLocker l(_downloadIdentifierLock);
+  
   if (_downloaderImplementsSetPriority) {
+    ASDN::MutexLocker l(_downloadIdentifierLock);
     if (_downloadIdentifier != nil) {
       if (isVisible) {
         [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:_downloadIdentifier];
