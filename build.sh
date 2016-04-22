@@ -20,12 +20,12 @@ MODE="$1"
 if [ "$MODE" = "tests" ]; then
     echo "Building & testing AsyncDisplayKit."
     pod install
-    xcodebuild \
+    set -o pipefail && xcodebuild \
         -workspace AsyncDisplayKit.xcworkspace \
         -scheme AsyncDisplayKit \
         -sdk "$SDK" \
         -destination "$PLATFORM" \
-        build test
+        build test | xcpretty
     trap - EXIT
     exit 0
 fi
@@ -40,12 +40,12 @@ if [ "$MODE" = "examples" ]; then
           echo "Using CocoaPods"
           pod install --project-directory=$example
           
-          xcodebuild \
+          set -o pipefail && xcodebuild \
               -workspace "${example}Sample.xcworkspace" \
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
-              build
+              build | xcpretty
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
           local_repo=`pwd`
