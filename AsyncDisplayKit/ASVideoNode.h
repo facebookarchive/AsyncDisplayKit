@@ -6,6 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#if TARGET_OS_IOS
 #import <AsyncDisplayKit/ASButtonNode.h>
 
 
@@ -20,6 +21,8 @@ typedef enum {
 
 @protocol ASVideoNodeDelegate;
 
+NS_ASSUME_NONNULL_BEGIN
+
 // IMPORTANT NOTES:
 // 1. Applications using ASVideoNode must link AVFoundation! (this provides the AV* classes below)
 // 2. This is a relatively new component of AsyncDisplayKit.  It has many useful features, but
@@ -27,13 +30,20 @@ typedef enum {
 //    in an issue on GitHub: https://github.com/facebook/AsyncDisplayKit/issues
 
 @interface ASVideoNode : ASControlNode
-@property (atomic, strong, readwrite) AVAsset *asset;
-@property (atomic, strong, readonly) AVPlayer *player;
-@property (atomic, strong, readonly) AVPlayerItem *currentItem;
-@property (atomic, strong, readonly) id timeObserver;
 
-// When autoplay is set to true, a video node will play when it has both loaded and entered the "visible" interfaceState.
-// If it leaves the visible interfaceState it will pause but will resume once it has returned
+- (void)play;
+- (void)pause;
+- (BOOL)isPlaying;
+
+@property (nullable, atomic, strong, readwrite) AVAsset *asset;
+
+@property (nullable, atomic, strong, readonly) AVPlayer *player;
+@property (nullable, atomic, strong, readonly) AVPlayerItem *currentItem;
+
+/**
+ * When shouldAutoplay is set to true, a video node will play when it has both loaded and entered the "visible" interfaceState.
+ * If it leaves the visible interfaceState it will pause but will resume once it has returned.
+ */
 @property (nonatomic, assign, readwrite) BOOL shouldAutoplay;
 @property (nonatomic, assign, readwrite) BOOL shouldAutorepeat;
 
@@ -41,24 +51,33 @@ typedef enum {
 
 @property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
 
+//! Defaults to AVLayerVideoGravityResizeAspect
 @property (atomic) NSString *gravity;
-@property (atomic) ASButtonNode *playButton;
 
-@property (atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
+//! Defaults to an ASDefaultPlayButton instance.
+@property (nullable, atomic) ASButtonNode *playButton;
 
-- (void)play;
-- (void)pause;
-
-- (BOOL)isPlaying;
+@property (nullable, atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
 
 @end
 
 @protocol ASVideoNodeDelegate <NSObject>
 @optional
+/**
+ * @abstract Delegate method invoked when the node's video has played to its end time.
+ * @param videoNode The video node has played to its end time.
+ */
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode;
+/**
+ * @abstract Delegate method invoked the node is tapped.
+ * @param videoNode The video node that was tapped.
+ * @discussion The video's play state is toggled if this method is not implemented.
+ */
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
 - (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate;
 - (BOOL)videoNode:(ASVideoNode*)videoNode shouldChangePlayerStateTo:(ASVideoNodePlayerState)state;
 - (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second;
 @end
+#endif
 
+NS_ASSUME_NONNULL_END

@@ -80,7 +80,7 @@ static BOOL _enableHitTestDebug = NO;
 
 #pragma mark - Lifecycle
 
-- (id)init
+- (instancetype)init
 {
   if (!(self = [super init]))
     return nil;
@@ -89,8 +89,20 @@ static BOOL _enableHitTestDebug = NO;
 
   // As we have no targets yet, we start off with user interaction off. When a target is added, it'll get turned back on.
   self.userInteractionEnabled = NO;
+  
   return self;
 }
+
+#if TARGET_OS_TV
+- (void)didLoad
+{
+  //On tvOS all control views, such as buttons, interact with the focus system even if they don't have a target set on them. Here we add our own internal tap gesture to handle this behaviour.
+  self.userInteractionEnabled = YES;
+  UITapGestureRecognizer *tapGestureRec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pressDown)];
+  tapGestureRec.allowedPressTypes = @[@(UIPressTypeSelect)];
+  [self.view addGestureRecognizer:tapGestureRec];
+}
+#endif
 
 - (void)setUserInteractionEnabled:(BOOL)userInteractionEnabled
 {
@@ -256,7 +268,6 @@ static BOOL _enableHitTestDebug = NO;
       _debugHighlightOverlay = [[ASImageNode alloc] init];
       _debugHighlightOverlay.zPosition = 1000;  // CALayer doesn't have -moveSublayerToFront, but this will ensure we're over the top of any siblings.
       _debugHighlightOverlay.layerBacked = YES;
-      _debugHighlightOverlay.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.4];
       [self addSubnode:_debugHighlightOverlay];
     }
   }
@@ -457,6 +468,82 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
 }
 
+#if TARGET_OS_TV
+#pragma mark - tvOS
+- (void)pressDown
+{
+  [UIView animateWithDuration:0.1 delay:0 options:UIViewAnimationCurveLinear animations:^{
+    [self setPressedState];
+  } completion:^(BOOL finished) {
+    if (finished) {
+      [UIView animateWithDuration:0.1 delay:0 options:UIViewAnimationCurveLinear animations:^{
+        [self setFocusedState];
+      } completion:nil];
+    }
+  }];
+}
+
+- (BOOL)canBecomeFocused
+{
+  return YES;
+}
+
+- (BOOL)shouldUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context
+{
+  return YES;
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+  //FIXME: This is never valid inside an ASCellNode
+  if (context.nextFocusedView && context.nextFocusedView == self.view) {
+    //Focused
+    [coordinator addCoordinatedAnimations:^{
+      [self setFocusedState];
+    } completion:nil];
+  } else{
+    //Not focused
+    [coordinator addCoordinatedAnimations:^{
+      [self setDefaultState];
+    } completion:nil];
+  }
+}
+
+- (void)setFocusedState
+{
+  CALayer *layer = self.layer;
+  layer.shadowOffset = CGSizeMake(2, 10);
+  [self applyDefaultShadowProperties: layer];
+  self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1.1, 1.1);
+}
+
+- (void)setPressedState
+{
+  CALayer *layer = self.layer;
+  layer.shadowOffset = CGSizeMake(2, 2);
+  [self applyDefaultShadowProperties: layer];
+  self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, 1);
+}
+
+- (void)applyDefaultShadowProperties:(CALayer *)layer
+{
+  layer.shadowColor = [UIColor blackColor].CGColor;
+  layer.shadowRadius = 12.0;
+  layer.shadowOpacity = 0.45;
+  layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+}
+
+- (void)setDefaultState
+{
+  CALayer *layer = self.layer;
+  layer.shadowOffset = CGSizeZero;
+  layer.shadowColor = [UIColor blackColor].CGColor;
+  layer.shadowRadius = 0;
+  layer.shadowOpacity = 0;
+  layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+  self.view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 1, 1);
+}
+#endif //TARGET_OS_TV
 #pragma mark - Debug
 // Layout method required when _enableHitTestDebug is enabled.
 - (void)layout
@@ -469,6 +556,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     // will not search sub-hierarchies if one of our parents does not return YES for pointInside:.  In such a scenario, hitTestSlop
     // may not be able to expand the tap target as much as desired without also setting some hitTestSlop on the limiting parents.
     CGRect intersectRect = UIEdgeInsetsInsetRect(self.bounds, [self hitTestSlop]);
+    UIRectEdge clippedEdges = UIRectEdgeNone;
+    UIRectEdge clipsToBoundsClippedEdges = UIRectEdgeNone;
     CALayer *layer = self.layer;
     CALayer *intersectLayer = layer;
     CALayer *intersectSuperlayer = layer.superlayer;
@@ -478,21 +567,106 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     while (intersectSuperlayer && ![intersectSuperlayer.delegate respondsToSelector:@selector(contentOffset)]) {
       // Get our parent's tappable bounds.  If the parent has an associated node, consider hitTestSlop, as it will extend its pointInside:.
       CGRect parentHitRect = intersectSuperlayer.bounds;
+      BOOL parentClipsToBounds = NO;
+      
       ASDisplayNode *parentNode = ASLayerToDisplayNode(intersectSuperlayer);
       if (parentNode) {
-        parentHitRect = UIEdgeInsetsInsetRect(parentHitRect, [parentNode hitTestSlop]);
+        UIEdgeInsets parentSlop = [parentNode hitTestSlop];
+        
+        // if parent has a hitTestSlop as well, we need to account for the fact that events will be routed towards us in that area too.
+        if (!UIEdgeInsetsEqualToEdgeInsets(UIEdgeInsetsZero, parentSlop)) {
+          parentClipsToBounds = parentNode.clipsToBounds;
+          // if the parent is clipping, this will prevent us from showing the overlay outside that area.
+          // in this case, we will make the overlay smaller so that the special highlight to indicate the overlay
+          // cannot accurately display the true tappable area is shown.
+          if (!parentClipsToBounds) {
+            parentHitRect = UIEdgeInsetsInsetRect(parentHitRect, [parentNode hitTestSlop]);
+          }
+        }
       }
       
       // Convert our current rectangle to parent coordinates, and intersect with the parent's hit rect.
       CGRect intersectRectInParentCoordinates = [intersectSuperlayer convertRect:intersectRect fromLayer:intersectLayer];
       intersectRect = CGRectIntersection(parentHitRect, intersectRectInParentCoordinates);
+      if (!CGSizeEqualToSize(parentHitRect.size, intersectRectInParentCoordinates.size)) {
+        clippedEdges = [self setEdgesOfIntersectionForChildRect:intersectRectInParentCoordinates
+                                                     parentRect:parentHitRect rectEdge:clippedEdges];
+        if (parentClipsToBounds) {
+          clipsToBoundsClippedEdges = [self setEdgesOfIntersectionForChildRect:intersectRectInParentCoordinates
+                                                                    parentRect:parentHitRect rectEdge:clipsToBoundsClippedEdges];
+        }
+      }
 
       // Advance up the tree.
       intersectLayer = intersectSuperlayer;
       intersectSuperlayer = intersectLayer.superlayer;
     }
     
-    _debugHighlightOverlay.frame = [intersectLayer convertRect:intersectRect toLayer:layer];
+    CGRect finalRect = [intersectLayer convertRect:intersectRect toLayer:layer];
+    UIColor *fillColor = [[UIColor greenColor] colorWithAlphaComponent:0.4];
+  
+    // determine if edges are clipped
+    if (clippedEdges == UIRectEdgeNone) {
+      _debugHighlightOverlay.backgroundColor = fillColor;
+    } else {
+      const CGFloat borderWidth = 2.0;
+      UIColor *borderColor = [[UIColor orangeColor] colorWithAlphaComponent:0.8];
+      UIColor *clipsBorderColor = [UIColor colorWithRed:30/255.0 green:90/255.0 blue:50/255.0 alpha:0.7];
+      CGRect imgRect = CGRectMake(0, 0, 2.0 * borderWidth + 1.0, 2.0 * borderWidth + 1.0);
+      UIGraphicsBeginImageContext(imgRect.size);
+      
+      [fillColor setFill];
+      UIRectFill(imgRect);
+      
+      [self drawEdgeIfClippedWithEdges:clippedEdges color:clipsBorderColor borderWidth:borderWidth imgRect:imgRect];
+      [self drawEdgeIfClippedWithEdges:clipsToBoundsClippedEdges color:borderColor borderWidth:borderWidth imgRect:imgRect];
+      
+      UIImage *debugHighlightImage = UIGraphicsGetImageFromCurrentImageContext();
+      UIGraphicsEndImageContext();
+  
+      UIEdgeInsets edgeInsets = UIEdgeInsetsMake(borderWidth, borderWidth, borderWidth, borderWidth);
+      _debugHighlightOverlay.image = [debugHighlightImage resizableImageWithCapInsets:edgeInsets
+                                                                         resizingMode:UIImageResizingModeStretch];
+      _debugHighlightOverlay.backgroundColor = nil;
+    }
+    
+    _debugHighlightOverlay.frame = finalRect;
+  }
+}
+
+- (UIRectEdge)setEdgesOfIntersectionForChildRect:(CGRect)childRect parentRect:(CGRect)parentRect rectEdge:(UIRectEdge)rectEdge
+{
+  if (childRect.origin.y < parentRect.origin.y) {
+    rectEdge |= UIRectEdgeTop;
+  }
+  if (childRect.origin.x < parentRect.origin.x) {
+    rectEdge |= UIRectEdgeLeft;
+  }
+  if (CGRectGetMaxY(childRect) > CGRectGetMaxY(parentRect)) {
+    rectEdge |= UIRectEdgeBottom;
+  }
+  if (CGRectGetMaxX(childRect) > CGRectGetMaxX(parentRect)) {
+    rectEdge |= UIRectEdgeRight;
+  }
+  
+  return rectEdge;
+}
+
+- (void)drawEdgeIfClippedWithEdges:(UIRectEdge)rectEdge color:(UIColor *)color borderWidth:(CGFloat)borderWidth imgRect:(CGRect)imgRect
+{
+  [color setFill];
+  
+  if (rectEdge & UIRectEdgeTop) {
+    UIRectFill(CGRectMake(0.0, 0.0, imgRect.size.width, borderWidth));
+  }
+  if (rectEdge & UIRectEdgeLeft) {
+    UIRectFill(CGRectMake(0.0, 0.0, borderWidth, imgRect.size.height));
+  }
+  if (rectEdge & UIRectEdgeBottom) {
+    UIRectFill(CGRectMake(0.0, imgRect.size.height - borderWidth, imgRect.size.width, borderWidth));
+  }
+  if (rectEdge & UIRectEdgeRight) {
+    UIRectFill(CGRectMake(imgRect.size.width - borderWidth, 0.0, borderWidth, imgRect.size.height));
   }
 }
 

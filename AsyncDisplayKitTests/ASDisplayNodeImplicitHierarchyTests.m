@@ -17,8 +17,6 @@
 
 @interface ASSpecTestDisplayNode : ASDisplayNode
 
-@property (copy, nonatomic) ASLayoutSpec * (^layoutSpecBlock)(ASSizeRange constrainedSize, NSNumber *layoutState);
-
 /**
  Simple state identifier to allow control of current spec inside of the layoutSpecBlock
  */
@@ -35,11 +33,6 @@
     _layoutState = @1;
   }
   return self;
-}
-
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
-{
-  return self.layoutSpecBlock(constrainedSize, _layoutState);
 }
 
 @end
@@ -83,7 +76,7 @@
   ASDisplayNode *node5 = [[ASDisplayNode alloc] init];
 
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
-  node.layoutSpecBlock = ^(ASSizeRange constrainedSize, NSNumber *layoutState) {
+  node.layoutSpecBlock = ^(ASSizeRange constrainedSize) {
     ASStaticLayoutSpec *staticLayout = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node4]];
     
     ASStackLayoutSpec *stack1 = [[ASStackLayoutSpec alloc] init];
@@ -109,8 +102,9 @@
   ASDisplayNode *node3 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
-  node.layoutSpecBlock = ^(ASSizeRange constrainedSize, NSNumber *layoutState){
-    if ([layoutState isEqualToNumber:@1]) {
+  __weak ASSpecTestDisplayNode *weakNode = node;
+  node.layoutSpecBlock = ^(ASSizeRange constrainedSize){
+    if ([weakNode.layoutState isEqualToNumber:@1]) {
       return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node1, node2]];
     } else {
       ASStackLayoutSpec *stackLayout = [[ASStackLayoutSpec alloc] init];

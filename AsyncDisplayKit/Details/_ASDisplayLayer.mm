@@ -31,7 +31,7 @@
 #pragma mark -
 #pragma mark Lifecycle
 
-- (id)init
+- (instancetype)init
 {
   if ((self = [super init])) {
     _displaySentinel = [[ASSentinel alloc] init];

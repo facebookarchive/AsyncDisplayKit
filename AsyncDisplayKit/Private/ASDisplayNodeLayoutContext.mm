@@ -23,8 +23,8 @@
   BOOL _calculatedSubnodeOperations;
   NSArray<ASDisplayNode *> *_insertedSubnodes;
   NSArray<ASDisplayNode *> *_removedSubnodes;
-  std::vector<NSInteger> _insertedSubnodePositions;
-  std::vector<NSInteger> _removedSubnodePositions;
+  std::vector<NSUInteger> _insertedSubnodePositions;
+  std::vector<NSUInteger> _removedSubnodePositions;
 }
 
 - (instancetype)initWithNode:(ASDisplayNode *)node
@@ -48,8 +48,8 @@
 {
   ASDN::MutexLocker l(_propertyLock);
   [self calculateSubnodeOperationsIfNeeded];
-  for (NSInteger i = 0; i < [_insertedSubnodes count]; i++) {
-    NSInteger p = _insertedSubnodePositions[i];
+  for (NSUInteger i = 0; i < [_insertedSubnodes count]; i++) {
+    NSUInteger p = _insertedSubnodePositions[i];
     [_node insertSubnode:_insertedSubnodes[i] atIndex:p];
   }
 }
@@ -58,7 +58,7 @@
 {
   ASDN::MutexLocker l(_propertyLock);
   [self calculateSubnodeOperationsIfNeeded];
-  for (NSInteger i = 0; i < [_removedSubnodes count]; i++) {
+  for (NSUInteger i = 0; i < [_removedSubnodes count]; i++) {
     [_removedSubnodes[i] removeFromSupernode];
   }
 }
@@ -77,15 +77,15 @@
                                                compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
                                                  return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
                                                }];
-    filterNodesInLayoutAtIndexes(_pendingLayout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
-    filterNodesInLayoutAtIndexesWithIntersectingNodes(_previousLayout,
+    findNodesInLayoutAtIndexes(_pendingLayout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
+    findNodesInLayoutAtIndexesWithFilteredNodes(_previousLayout,
                                                       deletions,
                                                       _insertedSubnodes,
                                                       &_removedSubnodes,
                                                       &_removedSubnodePositions);
   } else {
     NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_pendingLayout.immediateSublayouts count])];
-    filterNodesInLayoutAtIndexes(_pendingLayout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
+    findNodesInLayoutAtIndexes(_pendingLayout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
     _removedSubnodes = nil;
   }
   _calculatedSubnodeOperations = YES;
@@ -142,44 +142,37 @@
 /**
  * @abstract Stores the nodes at the given indexes in the `storedNodes` array, storing indexes in a `storedPositions` c++ vector.
  */
-static inline void filterNodesInLayoutAtIndexes(
-                                                ASLayout *layout,
-                                                NSIndexSet *indexes,
-                                                NSArray<ASDisplayNode *> * __strong *storedNodes,
-                                                std::vector<NSInteger> *storedPositions
-                                                )
+static inline void findNodesInLayoutAtIndexes(ASLayout *layout,
+                                              NSIndexSet *indexes,
+                                              NSArray<ASDisplayNode *> * __strong *storedNodes,
+                                              std::vector<NSUInteger> *storedPositions)
 {
-  filterNodesInLayoutAtIndexesWithIntersectingNodes(layout, indexes, nil, storedNodes, storedPositions);
+  findNodesInLayoutAtIndexesWithFilteredNodes(layout, indexes, nil, storedNodes, storedPositions);
 }
 
 /**
  * @abstract Stores the nodes at the given indexes in the `storedNodes` array, storing indexes in a `storedPositions` c++ vector.
- * @discussion If the node exists in the `intersectingNodes` array, the node is not added to `storedNodes`.
+ * @discussion If the node exists in the `filteredNodes` array, the node is not added to `storedNodes`.
  */
-static inline void filterNodesInLayoutAtIndexesWithIntersectingNodes(
-                                                                     ASLayout *layout,
-                                                                     NSIndexSet *indexes,
-                                                                     NSArray<ASDisplayNode *> *intersectingNodes,
-                                                                     NSArray<ASDisplayNode *> * __strong *storedNodes,
-                                                                     std::vector<NSInteger> *storedPositions
-                                                                     )
+static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
+                                                               NSIndexSet *indexes,
+                                                               NSArray<ASDisplayNode *> *filteredNodes,
+                                                               NSArray<ASDisplayNode *> * __strong *storedNodes,
+                                                               std::vector<NSUInteger> *storedPositions)
 {
   NSMutableArray<ASDisplayNode *> *nodes = [NSMutableArray array];
-  std::vector<NSInteger> positions = std::vector<NSInteger>();
-  NSInteger idx = [indexes firstIndex];
+  std::vector<NSUInteger> positions = std::vector<NSUInteger>();
+  NSUInteger idx = [indexes firstIndex];
   while (idx != NSNotFound) {
-    BOOL skip = NO;
     ASDisplayNode *node = (ASDisplayNode *)layout.immediateSublayouts[idx].layoutableObject;
     ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
-    for (ASDisplayNode *i in intersectingNodes) {
-      if (node == i) {
-        skip = YES;
-        break;
+    // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
+    if (node != nil) {
+      BOOL notFiltered = (filteredNodes == nil || [filteredNodes indexOfObjectIdenticalTo:node] == NSNotFound);
+      if (notFiltered) {
+        [nodes addObject:node];
+        positions.push_back(idx);
       }
-    }
-    if (!skip) {
-      [nodes addObject:node];
-      positions.push_back(idx);
     }
     idx = [indexes indexGreaterThanIndex:idx];
   }

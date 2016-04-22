@@ -89,7 +89,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion Gives a chance for subclasses to perform actions after the subclass and superclass have finished laying
  * out.
  */
-- (void)layoutDidFinish;
+- (void)layoutDidFinish ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Called on a background thread if !isNodeLoaded - called on the main thread if isNodeLoaded.
@@ -97,7 +97,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion When the .calculatedLayout property is set to a new ASLayout (directly from -calculateLayoutThatFits: or
  * calculated via use of -layoutSpecThatFits:), subclasses may inspect it here.
  */
-- (void)calculatedLayoutDidChange;
+- (void)calculatedLayoutDidChange ASDISPLAYNODE_REQUIRES_SUPER;
 
 /** @name Layout calculation */
 
@@ -143,6 +143,8 @@ NS_ASSUME_NONNULL_BEGIN
  * encouraged.
  *
  * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
+ *
+ * @warning Overwriting layoutSpecThatFits: in a subclass and providing a layoutSpecBlock block is currently not supported
  */
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize;
 

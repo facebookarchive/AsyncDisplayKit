@@ -64,10 +64,10 @@
 #import <AsyncDisplayKit/ASContextTransitioning.h>
 #import <AsyncDisplayKit/ASControlNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
-#import <AsyncDisplayKit/ASDisplayNodeExtraIvars.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 #import <AsyncDisplayKit/ASIndexPath.h>
+#import <AsyncDisplayKit/ASImageContainerProtocolCategories.h>
 #import <AsyncDisplayKit/ASLog.h>
 #import <AsyncDisplayKit/ASMutableAttributedStringBuilder.h>
 #import <AsyncDisplayKit/ASThread.h>

@@ -45,18 +45,18 @@ typedef NS_ENUM(NSInteger, ASBatchContextState) {
   return _state == ASBatchContextStateCancelled;
 }
 
+- (void)beginBatchFetching
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _state = ASBatchContextStateFetching;
+}
+
 - (void)completeBatchFetching:(BOOL)didComplete
 {
   if (didComplete) {
     ASDN::MutexLocker l(_propertyLock);
     _state = ASBatchContextStateCompleted;
   }
-}
-
-- (void)beginBatchFetching
-{
-  ASDN::MutexLocker l(_propertyLock);
-  _state = ASBatchContextStateFetching;
 }
 
 - (void)cancelBatchFetching

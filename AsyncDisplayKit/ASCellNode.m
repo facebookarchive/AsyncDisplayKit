@@ -163,7 +163,7 @@
 
 - (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize
 {
-  if (_layoutDelegate != nil && self.isNodeLoaded) {
+  if (_layoutDelegate != nil) {
     ASPerformBlockOnMainThread(^{
       BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
       [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];

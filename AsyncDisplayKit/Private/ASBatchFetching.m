@@ -8,34 +8,50 @@
 
 #import "ASBatchFetching.h"
 
+BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollView> *scrollView, ASScrollDirection scrollDirection, CGPoint contentOffset)
+{
+  // Don't fetch if the scroll view does not allow
+  if (![scrollView canBatchFetch]) {
+    return NO;
+  }
+  
+  // Check if we should batch fetch
+  ASBatchContext *context = scrollView.batchContext;
+  CGRect bounds = scrollView.bounds;
+  CGSize contentSize = scrollView.contentSize;
+  CGFloat leadingScreens = scrollView.leadingScreensForBatching;
+  return ASDisplayShouldFetchBatchForContext(context, scrollDirection, bounds, contentSize, contentOffset, leadingScreens);
+}
+
 BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
-                                    ASScrollDirection scrollDirection,
-                                    CGRect bounds,
-                                    CGSize contentSize,
-                                    CGPoint targetOffset,
-                                    CGFloat leadingScreens) {
-  // do not allow fetching if a batch is already in-flight and hasn't been completed or cancelled
+                                         ASScrollDirection scrollDirection,
+                                         CGRect bounds,
+                                         CGSize contentSize,
+                                         CGPoint targetOffset,
+                                         CGFloat leadingScreens)
+{
+  // Do not allow fetching if a batch is already in-flight and hasn't been completed or cancelled
   if ([context isFetching]) {
     return NO;
   }
 
-  // only Down and Right scrolls are currently supported (tail loading)
-  if (scrollDirection != ASScrollDirectionDown && scrollDirection != ASScrollDirectionRight) {
+  // Only Down and Right scrolls are currently supported (tail loading)
+  if (!ASScrollDirectionContainsDown(scrollDirection) && !ASScrollDirectionContainsRight(scrollDirection)) {
     return NO;
   }
 
-  // no fetching for null states
+  // No fetching for null states
   if (leadingScreens <= 0.0 || CGRectEqualToRect(bounds, CGRectZero)) {
     return NO;
   }
 
   CGFloat viewLength, offset, contentLength;
 
-  if (scrollDirection == ASScrollDirectionDown) {
+  if (ASScrollDirectionContainsDown(scrollDirection)) {
     viewLength = bounds.size.height;
     offset = targetOffset.y;
     contentLength = contentSize.height;
-  } else { // horizontal
+  } else { // horizontal / right
     viewLength = bounds.size.width;
     offset = targetOffset.x;
     contentLength = contentSize.width;

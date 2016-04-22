@@ -39,7 +39,15 @@ extern BOOL CGPointIsNull(CGPoint point)
   ASLayout *l = [super new];
   if (l) {
     l->_layoutableObject = layoutableObject;
-    l->_size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
+    
+    if (!isValidForLayout(size.width) || !isValidForLayout(size.height)) {
+      ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutableObject);
+      size = CGSizeZero;
+    } else {
+      size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
+    }
+    l->_size = size;
+    
     if (CGPointIsNull(position) == NO) {
       l->_position = CGPointMake(ASCeilPixelValue(position.x), ASCeilPixelValue(position.y));
     } else {
