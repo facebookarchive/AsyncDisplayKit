@@ -169,7 +169,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   // At most a layoutSpecBlock or one of the three layout methods is overridden
 #define __ASDisplayNodeCheckForLayoutMethodOverrides \
-    ASDisplayNodeAssert(_layoutSpecBlock != nil || \
+    ASDisplayNodeAssert(_layoutSpecBlock != NULL || \
     (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateSizeThatFits:)) ? 1 : 0) \
     + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(layoutSpecThatFits:)) ? 1 : 0) \
     + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateLayoutThatFits:)) ? 1 : 0) <= 1, \
@@ -1853,7 +1853,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   __ASDisplayNodeCheckForLayoutMethodOverrides;
 
   ASDN::MutexLocker l(_propertyLock);
-  if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != nil) {
+  if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
     layoutSpec.parent = self; // This causes upward propogation of any non-default layoutable values.
     layoutSpec.isMutable = NO;
@@ -1892,8 +1892,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   ASDN::MutexLocker l(_propertyLock);
   
-  if (_layoutSpecBlock != nil) {
-    return _layoutSpecBlock(constrainedSize);
+  if (_layoutSpecBlock != NULL) {
+    return _layoutSpecBlock(self, constrainedSize);
   }
   
   return nil;
