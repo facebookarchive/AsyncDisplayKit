@@ -98,8 +98,6 @@ static NSString * const kStatus = @"status";
 - (AVPlayerItem *)constructPlayerItem
 {
   ASDN::MutexLocker l(_videoLock);
-  
-  ASDisplayNodeAssert(_asset, @"ASVideoNode must be initialized with an AVAsset");
 
   AVPlayerItem *playerItem = nil;
   

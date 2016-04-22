@@ -121,6 +121,10 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
 @property (nonatomic, assign) BOOL isDefaultFocusAppearance;
 #endif
 
+@end
+
+@interface ASImageNode (AnimatedImage)
+
 /**
  * @abstract The animated image to playback
  *

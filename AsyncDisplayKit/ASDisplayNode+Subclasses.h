@@ -143,6 +143,8 @@ NS_ASSUME_NONNULL_BEGIN
  * encouraged.
  *
  * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
+ *
+ * @warning Overwriting layoutSpecThatFits: in a subclass and providing a layoutSpecBlock block is currently not supported
  */
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize;
 
