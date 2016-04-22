@@ -39,17 +39,19 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   id _downloadIdentifier;
 
   BOOL _imageLoaded;
-  
+  CGFloat _currentImageQuality;
+  CGFloat _renderedImageQuality;
+
   BOOL _delegateSupportsDidStartFetchingData;
   BOOL _delegateSupportsDidFailWithError;
   BOOL _delegateSupportsImageNodeDidFinishDecoding;
-  
+
   //set on init only
   BOOL _downloaderSupportsNewProtocol;
   BOOL _downloaderImplementsSetProgress;
   BOOL _downloaderImplementsSetPriority;
   BOOL _downloaderImplementsAnimatedImage;
-  
+
   BOOL _cacheSupportsNewProtocol;
   BOOL _cacheSupportsClearing;
   BOOL _cacheSupportsSynchronousFetch;
@@ -120,9 +122,13 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   _URL = URL;
 
-  if (reset || _URL == nil)
+  if (reset || _URL == nil) {
     self.image = _defaultImage;
-  
+    ASPerformBlockOnMainThread(^{
+      _currentImageQuality = 0.0;
+    });
+  }
+
   if (self.interfaceState & ASInterfaceStateFetchData) {
     [self fetchData];
   }
@@ -145,6 +151,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   _defaultImage = defaultImage;
 
   if (!_imageLoaded) {
+    ASPerformBlockOnMainThread(^{
+      _currentImageQuality = 0.0;
+    });
     _lock.unlock();
     // Locking: it is important to release _lock before entering setImage:, as it needs to release the lock before -invalidateCalculatedLayout.
     // If we continue to hold the lock here, it will still be locked until the next unlock() call, causing a possible deadlock with
@@ -159,6 +168,30 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 {
   ASDN::MutexLocker l(_lock);
   return _defaultImage;
+}
+
+- (void)setCurrentImageQuality:(CGFloat)currentImageQuality
+{
+  ASDN::MutexLocker l(_lock);
+  _currentImageQuality = currentImageQuality;
+}
+
+- (CGFloat)currentImageQuality
+{
+  ASDN::MutexLocker l(_lock);
+  return _currentImageQuality;
+}
+
+- (void)setRenderedImageQuality:(CGFloat)renderedImageQuality
+{
+  ASDN::MutexLocker l(_lock);
+  _renderedImageQuality = renderedImageQuality;
+}
+
+- (CGFloat)renderedImageQuality
+{
+  ASDN::MutexLocker l(_lock);
+  return _renderedImageQuality;
 }
 
 - (void)setDelegate:(id<ASNetworkImageNodeDelegate>)delegate
@@ -196,6 +229,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       if (result) {
         self.image = result;
         _imageLoaded = YES;
+        _currentImageQuality = 1.0;
       }
     }
   }
@@ -276,7 +310,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   ASImageDownloaderProgressImage progress = nil;
   if (ASInterfaceStateIncludesVisible(interfaceState)) {
     __weak __typeof__(self) weakSelf = self;
-    progress = ^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
+    progress = ^(UIImage * _Nonnull progressImage, CGFloat progress, id _Nullable downloadIdentifier) {
       __typeof__(self) strongSelf = weakSelf;
       if (strongSelf == nil) {
         return;
@@ -288,6 +322,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
         return;
       }
       strongSelf.image = progressImage;
+      ASPerformBlockOnMainThread(^{
+        strongSelf->_currentImageQuality = progress;
+      });
     };
   }
   [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
@@ -310,6 +347,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   self.animatedImage = nil;
   self.image = _defaultImage;
   _imageLoaded = NO;
+  ASPerformBlockOnMainThread(^{
+    _currentImageQuality = 0.0;
+  });
 }
 
 - (void)_cancelImageDownload
@@ -393,6 +433,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           }
           
           _imageLoaded = YES;
+          self.currentImageQuality = 1.0;
           [_delegate imageNode:self didLoadImage:self.image];
         });
       }
@@ -418,6 +459,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           } else {
             strongSelf.image = [imageContainer asdk_image];
           }
+          strongSelf->_currentImageQuality = 1.0;
         }
 
         strongSelf->_downloadIdentifier = nil;
@@ -472,13 +514,14 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 #pragma mark - ASDisplayNode+Subclasses
 
-- (void)asyncdisplaykit_asyncTransactionContainerStateDidChange
+- (void)displayDidFinish
 {
-  if (self.asyncdisplaykit_asyncTransactionContainerState == ASAsyncTransactionContainerStateNoTransactions) {
-    ASDN::MutexLocker l(_lock);
-    if (self.layer.contents != nil && _delegateSupportsImageNodeDidFinishDecoding) {
-      [self.delegate imageNodeDidFinishDecoding:self];
-    }
+  [super displayDidFinish];
+
+  ASDN::MutexLocker l(_lock);
+  if (_delegateSupportsImageNodeDidFinishDecoding && self.layer.contents != nil) {
+    _renderedImageQuality = _currentImageQuality;
+    [self.delegate imageNodeDidFinishDecoding:self];
   }
 }
 

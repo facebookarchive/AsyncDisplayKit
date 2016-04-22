@@ -174,7 +174,7 @@
   if (progressBlock) {
     [[self sharedPINRemoteImageManager] setProgressImageCallback:^(PINRemoteImageManagerResult * _Nonnull result) {
       dispatch_async(callbackQueue, ^{
-        progressBlock(result.image, result.UUID);
+        progressBlock(result.image, result.renderedImageQuality, result.UUID);
       });
     } ofTaskWithUUID:downloadIdentifier];
   } else {
