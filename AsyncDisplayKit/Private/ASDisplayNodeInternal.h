@@ -12,7 +12,6 @@
 //
 
 #import "_AS-objc-internal.h"
-#import "ASDisplayNodeExtraIvars.h"
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
@@ -26,8 +25,10 @@
 @class _ASDisplayLayer;
 @class _ASPendingState;
 @class ASSentinel;
+struct ASDisplayNodeFlags;
 
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
+BOOL ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(ASDisplayNodeFlags flags);
 
 /// Get the pending view state for the node, creating one if needed.
 _ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node);
@@ -124,8 +125,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   // keeps track of nodes/subnodes that have not finished display, used with placeholders
   NSMutableSet *_pendingDisplayNodes;
 
-  ASDisplayNodeExtraIvars _extra;
-  
   ASDisplayNodeContextModifier _willDisplayNodeContentWithRenderingContext;
   ASDisplayNodeContextModifier _didDisplayNodeContentWithRenderingContext;
 
@@ -196,10 +195,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)displayImmediately;
 
 // Alternative initialiser for backing with a custom view class.  Supports asynchronous display with _ASDisplayView subclasses.
-- (id)initWithViewClass:(Class)viewClass;
+- (instancetype)initWithViewClass:(Class)viewClass;
 
 // Alternative initialiser for backing with a custom layer class.  Supports asynchronous display with _ASDisplayLayer subclasses.
-- (id)initWithLayerClass:(Class)layerClass;
+- (instancetype)initWithLayerClass:(Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
 

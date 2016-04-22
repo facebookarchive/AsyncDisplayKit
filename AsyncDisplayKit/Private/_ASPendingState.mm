@@ -179,7 +179,7 @@ ASDISPLAYNODE_INLINE void ASPendingStateApplyMetricsToLayer(_ASPendingState *sta
 static CGColorRef blackColorRef = NULL;
 static UIColor *defaultTintColor = nil;
 
-- (id)init
+- (instancetype)init
 {
   if (!(self = [super init]))
     return nil;
@@ -745,7 +745,7 @@ static UIColor *defaultTintColor = nil;
   ASPendingStateApplyMetricsToLayer(self, layer);
 }
 
-- (void)applyToView:(UIView *)view setFrameDirectly:(BOOL)setFrameDirectly
+- (void)applyToView:(UIView *)view withSpecialPropertiesHandling:(BOOL)specialPropertiesHandling
 {
   /*
    Use our convenience setters blah here instead of layer.blah
@@ -789,8 +789,15 @@ static UIColor *defaultTintColor = nil;
   if (flags.setClipsToBounds)
     view.clipsToBounds = clipsToBounds;
 
-  if (flags.setBackgroundColor)
-    layer.backgroundColor = backgroundColor;
+  if (flags.setBackgroundColor) {
+    // We have to make sure certain nodes get the background color call directly set
+    if (specialPropertiesHandling) {
+      view.backgroundColor = [UIColor colorWithCGColor:backgroundColor];
+    } else {
+      // Set the background color to the layer as in the UIView bridge we use this value as background color
+      layer.backgroundColor = backgroundColor;
+    }
+  }
 
   if (flags.setTintColor)
     view.tintColor = self.tintColor;
@@ -907,8 +914,7 @@ static UIColor *defaultTintColor = nil;
   if (flags.setAccessibilityPath)
     view.accessibilityPath = accessibilityPath;
 
-  // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
-  if (flags.setFrame && setFrameDirectly) {
+  if (flags.setFrame && specialPropertiesHandling) {
     // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
 #if DEBUG
     // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.

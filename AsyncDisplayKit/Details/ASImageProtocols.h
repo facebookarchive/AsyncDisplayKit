@@ -11,7 +11,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
+@protocol ASAnimatedImageProtocol;
+
+@protocol ASImageContainerProtocol <NSObject>
+
+- (UIImage *)asdk_image;
+- (NSData *)asdk_animatedImageData;
+
+@end
+
+typedef void(^ASImageCacherCompletion)(id <ASImageContainerProtocol> _Nullable imageFromCache);
 
 @protocol ASImageCacheProtocol <NSObject>
 
@@ -28,7 +37,7 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
  the calling thread to fetch the image from a fast memory cache. It is OK to return nil from this method and instead
  support only cachedImageWithURL:callbackQueue:completion: however, synchronous rendering will not be possible.
  */
-- (nullable UIImage *)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
+- (nullable id <ASImageContainerProtocol>)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
 
 /**
  @abstract Attempts to fetch an image with the given URL from the cache.
@@ -52,7 +61,7 @@ typedef void(^ASImageCacherCompletion)(UIImage * _Nullable imageFromCache);
 
 @end
 
-typedef void(^ASImageDownloaderCompletion)(UIImage  * _Nullable image, NSError * _Nullable error, id _Nullable downloadIdentifier);
+typedef void(^ASImageDownloaderCompletion)(id <ASImageContainerProtocol> _Nullable image, NSError * _Nullable error, id _Nullable downloadIdentifier);
 typedef void(^ASImageDownloaderProgress)(CGFloat progress);
 typedef void(^ASImageDownloaderProgressImage)(UIImage *progressImage, id _Nullable downloadIdentifier);
 
@@ -75,6 +84,12 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
 - (void)cancelImageDownloadForIdentifier:(id)downloadIdentifier;
 
 @optional
+
+/**
+ @abstract Return an object that conforms to ASAnimatedImageProtocol
+ @param animatedImageData Data that represents an animated image.
+ */
+- (nullable id <ASAnimatedImageProtocol>)animatedImageWithData:(NSData *)animatedImageData;
 
 //You must implement the following method OR the deprecated method at the bottom
 
@@ -116,6 +131,68 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
  */
 - (void)setPriority:(ASImageDownloaderPriority)priority
 withDownloadIdentifier:(id)downloadIdentifier;
+
+@end
+
+@protocol ASAnimatedImageProtocol <NSObject>
+
+/**
+ @abstract Should be called when the objects cover image is ready.
+ @param coverImageReadyCallback a block which receives the cover image.
+ */
+@property (nonatomic, strong, readwrite) void (^coverImageReadyCallback)(UIImage *coverImage);
+
+@required
+
+/**
+ @abstract Return the objects's cover image.
+ */
+@property (nonatomic, readonly) UIImage *coverImage;
+/**
+ @abstract Return a boolean to indicate that the cover image is ready.
+ */
+@property (nonatomic, readonly) BOOL coverImageReady;
+/**
+ @abstract Return the total duration of the animated image's playback.
+ */
+@property (nonatomic, readonly) CFTimeInterval totalDuration;
+/**
+ @abstract Return the interval at which playback should occur. Will be set to a CADisplayLink's frame interval.
+ */
+@property (nonatomic, readonly) NSUInteger frameInterval;
+/**
+ @abstract Return the total number of loops the animated image should play or 0 to loop infinitely.
+ */
+@property (nonatomic, readonly) size_t loopCount;
+/**
+ @abstract Return the total number of frames in the animated image.
+ */
+@property (nonatomic, readonly) size_t frameCount;
+/**
+ @abstract Return YES when playback is ready to occur.
+ */
+@property (nonatomic, readonly) BOOL playbackReady;
+/**
+ @abstract Return any error that has occured. Playback will be paused if this returns non-nil.
+ */
+@property (nonatomic, readonly) NSError *error;
+/**
+ @abstract Should be called when playback is ready.
+ */
+@property (nonatomic, strong, readwrite) dispatch_block_t playbackReadyCallback;
+
+/**
+ @abstract Return the image at a given index.
+ */
+- (CGImageRef)imageAtIndex:(NSUInteger)index;
+/**
+ @abstract Return the duration at a given index.
+ */
+- (CFTimeInterval)durationAtIndex:(NSUInteger)index;
+/**
+ @abstract Clear any cached data. Called when playback is paused.
+ */
+- (void)clearAnimatedImageCache;
 
 @end
 

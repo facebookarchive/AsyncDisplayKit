@@ -62,7 +62,7 @@ static void _transactionGroupRunLoopObserverCallback(CFRunLoopObserverRef observ
   CFRelease(observer);
 }
 
-- (id)init
+- (instancetype)init
 {
   if ((self = [super init])) {
     _containerLayers = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];

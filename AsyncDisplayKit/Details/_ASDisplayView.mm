@@ -37,7 +37,7 @@
 }
 
 #pragma mark - NSObject Overrides
-- (id)init
+- (instancetype)init
 {
   return [self initWithFrame:CGRectZero];
 }
@@ -51,7 +51,7 @@
 
 #pragma mark - UIView Overrides
 
-- (id)initWithFrame:(CGRect)frame
+- (instancetype)initWithFrame:(CGRect)frame
 {
   if (!(self = [super initWithFrame:frame]))
     return nil;

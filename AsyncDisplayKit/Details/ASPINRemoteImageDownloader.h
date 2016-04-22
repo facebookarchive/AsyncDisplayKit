@@ -1,9 +1,9 @@
 //
 //  ASPINRemoteImageDownloader.h
-//  Pods
+//  AsyncDisplayKit
 //
 //  Created by Garrett Moon on 2/5/16.
-//
+//  Copyright © 2016 Facebook. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

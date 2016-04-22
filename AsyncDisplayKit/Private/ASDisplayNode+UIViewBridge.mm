@@ -9,16 +9,10 @@
 #import "_ASCoreAnimationExtras.h"
 #import "_ASPendingState.h"
 #import "ASInternalHelpers.h"
-#import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASDisplayNode+Beta.h"
-#import "ASEqualityHelpers.h"
 #import "ASPendingStateController.h"
-#import "ASThread.h"
-#import "ASTextNode.h"
 
 /**
  * The following macros are conveniences to help in the common tasks related to the bridging that ASDisplayNode does to UIView and CALayer.
@@ -105,7 +99,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 // Focus Engine
 - (BOOL)canBecomeFocused
 {
-  return YES;
+  return NO;
 }
 
 - (void)setNeedsFocusUpdate
@@ -122,7 +116,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 
 - (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
 {
-  return YES;
+  return NO;
 }
 
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
@@ -239,11 +233,11 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 
   // For classes like ASTableNode, ASCollectionNode, ASScrollNode and similar - make sure UIView gets setFrame:
   struct ASDisplayNodeFlags flags = _flags;
-  BOOL setFrameDirectly = flags.synchronous && !flags.layerBacked;
+  BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(flags);
 
   BOOL nodeLoaded = __loaded(self);
   BOOL isMainThread = ASDisplayNodeThreadIsMain();
-  if (!setFrameDirectly) {
+  if (!specialPropertiesHandling) {
     BOOL canReadProperties = isMainThread || !nodeLoaded;
     if (canReadProperties) {
       // We don't have to set frame directly, and we can read current properties.
@@ -582,7 +576,14 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   
   if (shouldApply) {
     CGColorRef oldBackgroundCGColor = _layer.backgroundColor;
-    _layer.backgroundColor = newBackgroundCGColor;
+    
+    BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(_flags);
+    if (specialPropertiesHandling) {
+        _view.backgroundColor = newBackgroundColor;
+    } else {
+        _layer.backgroundColor = newBackgroundCGColor;
+    }
+      
     if (!CGColorEqualToColor(oldBackgroundCGColor, newBackgroundCGColor)) {
       [self setNeedsDisplay];
     }

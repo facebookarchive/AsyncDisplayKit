@@ -9,7 +9,7 @@
 #import "CommentsNode.h"
 
 #define INTER_COMMENT_SPACING 5
-#define NUM_COMMENTS_TO_SHOW 3
+#define NUM_COMMENTS_TO_SHOW  3
 
 @implementation CommentsNode
 {
@@ -52,7 +52,7 @@
     int labelsIndex = 0;
     
     if (addViewAllCommentsLabel) {
-      commentLabelString        = [_commentFeed viewAllCommentsAttributedString];
+      commentLabelString         = [_commentFeed viewAllCommentsAttributedString];
       [[_commentNodes objectAtIndex:labelsIndex] setAttributedString:commentLabelString];
       labelsIndex++;
     }
@@ -90,7 +90,7 @@
   
   for (NSUInteger i = 0; i < numLabelsToAdd; i++) {
     
-    ASTextNode *commentLabel      = [[ASTextNode alloc] init];
+    ASTextNode *commentLabel   = [[ASTextNode alloc] init];
     commentLabel.maximumNumberOfLines = 3;
     
     [_commentNodes addObject:commentLabel];

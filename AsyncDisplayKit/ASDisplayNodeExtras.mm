@@ -90,7 +90,7 @@ extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^b
   }
 }
 
-id ASDisplayNodeFindFirstSupernode(ASDisplayNode *node, BOOL (^block)(ASDisplayNode *node))
+ASDisplayNode *ASDisplayNodeFindFirstSupernode(ASDisplayNode *node, BOOL (^block)(ASDisplayNode *node))
 {
   CALayer *layer = node.layer;
 
@@ -105,7 +105,7 @@ id ASDisplayNodeFindFirstSupernode(ASDisplayNode *node, BOOL (^block)(ASDisplayN
   return nil;
 }
 
-id ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c)
+__kindof ASDisplayNode *ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c)
 {
   return ASDisplayNodeFindFirstSupernode(start, ^(ASDisplayNode *n) {
     return [n isKindOfClass:c];
@@ -156,7 +156,7 @@ extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodes(ASDisplayNode *sta
   return list;
 }
 
-extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c)
+extern NSArray<__kindof ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c)
 {
   return ASDisplayNodeFindAllSubnodes(start, ^(ASDisplayNode *n) {
     return [n isKindOfClass:c];
@@ -180,17 +180,17 @@ static ASDisplayNode *_ASDisplayNodeFindFirstNode(ASDisplayNode *startNode, BOOL
   return nil;
 }
 
-extern __kindof ASDisplayNode * ASDisplayNodeFindFirstNode(ASDisplayNode *startNode, BOOL (^block)(ASDisplayNode *node))
+extern __kindof ASDisplayNode *ASDisplayNodeFindFirstNode(ASDisplayNode *startNode, BOOL (^block)(ASDisplayNode *node))
 {
   return _ASDisplayNodeFindFirstNode(startNode, YES, block);
 }
 
-extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnode(ASDisplayNode *startNode, BOOL (^block)(ASDisplayNode *node))
+extern __kindof ASDisplayNode *ASDisplayNodeFindFirstSubnode(ASDisplayNode *startNode, BOOL (^block)(ASDisplayNode *node))
 {
   return _ASDisplayNodeFindFirstNode(startNode, NO, block);
 }
 
-extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c)
+extern __kindof ASDisplayNode *ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c)
 {
   return ASDisplayNodeFindFirstSubnode(start, ^(ASDisplayNode *n) {
     return [n isKindOfClass:c];
