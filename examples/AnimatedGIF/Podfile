@@ -4,4 +4,3 @@ target 'ASAnimatedImage' do
 	pod 'AsyncDisplayKit', :path => '../..'
 	pod 'PINRemoteImage', '~> 3.0.0-beta'
 end
-

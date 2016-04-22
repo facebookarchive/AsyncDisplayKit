@@ -125,7 +125,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   if (reset || _URL == nil) {
     self.image = _defaultImage;
     ASPerformBlockOnMainThread(^{
-      _currentImageQuality = 0.0;
+      self.currentImageQuality = 1.0;
     });
   }
 
@@ -152,7 +152,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   if (!_imageLoaded) {
     ASPerformBlockOnMainThread(^{
-      _currentImageQuality = 0.0;
+      self.currentImageQuality = 0.0;
     });
     _lock.unlock();
     // Locking: it is important to release _lock before entering setImage:, as it needs to release the lock before -invalidateCalculatedLayout.
@@ -348,7 +348,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   self.image = _defaultImage;
   _imageLoaded = NO;
   ASPerformBlockOnMainThread(^{
-    _currentImageQuality = 0.0;
+    self.currentImageQuality = 0.0;
   });
 }
 
@@ -520,6 +520,14 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   ASDN::MutexLocker l(_lock);
   if (_delegateSupportsImageNodeDidFinishDecoding && self.layer.contents != nil) {
+    /* We store the image quality in _currentImageQuality whenever _image is set. On the following displayDidFinish, we'll know that
+     _currentImageQuality is the quality of the image that has just finished rendering. In order for this to be accurate, we
+     need to be sure we are on main thread when we set _currentImageQuality. Otherwise, it is possible for _currentImageQuality
+     to be modified at a point where it is too late to cancel the main thread's previous display (the final sentinel check has passed), 
+     but before the displayDidFinish of the previous display pass is called. In this situation, displayDidFinish would be called and we
+     would set _renderedImageQuality to the new _currentImageQuality, but the actual quality of the rendered image should be the previous 
+     value stored in _currentImageQuality. */
+
     _renderedImageQuality = _currentImageQuality;
     [self.delegate imageNodeDidFinishDecoding:self];
   }
