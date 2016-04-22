@@ -1917,7 +1917,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return _constrainedSize;
 }
 
-- (void)setLayoutSpecThatFitsBlock:(ASLayoutSpecBlock)layoutSpecBlock
+- (void)setLayoutSpecBlock:(ASLayoutSpecBlock)layoutSpecBlock
 {
   // For now there should never be a overwrite of layoutSpecThatFits: and a layoutSpecThatFitsBlock: be provided
   ASDisplayNodeAssert(!(_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits), @"Overwriting layoutSpecThatFits: and providing a layoutSpecBlock block is currently not supported");
