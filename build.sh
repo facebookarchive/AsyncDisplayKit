@@ -25,7 +25,7 @@ if [ "$MODE" = "tests" ]; then
         -scheme AsyncDisplayKit \
         -sdk "$SDK" \
         -destination "$PLATFORM" \
-        build test | xcpretty
+        build test | xcpretty -f `xcpretty-travis-formatter`
     trap - EXIT
     exit 0
 fi
@@ -45,7 +45,7 @@ if [ "$MODE" = "examples" ]; then
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
-              build | xcpretty
+              build | xcpretty -f `xcpretty-travis-formatter`
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
           local_repo=`pwd`
@@ -55,12 +55,12 @@ if [ "$MODE" = "examples" ]; then
           echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
           carthage update --platform iOS
           
-          xcodebuild \
+          set -o pipefail && xcodebuild \
               -project "Sample.xcodeproj" \
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
-              build
+              build | xcpretty -f `xcpretty-travis-formatter`
           
           cd ../..
         fi
@@ -72,12 +72,12 @@ fi
 if [ "$MODE" = "life-without-cocoapods" ]; then
     echo "Verifying that AsyncDisplayKit functions as a static library."
 
-    xcodebuild \
+    set -o pipefail && xcodebuild \
         -workspace "smoke-tests/Life Without CocoaPods/Life Without CocoaPods.xcworkspace" \
         -scheme "Life Without CocoaPods" \
         -sdk "$SDK" \
         -destination "$PLATFORM" \
-        build
+        build | xcpretty -f `xcpretty-travis-formatter`
     trap - EXIT
     exit 0
 fi
@@ -85,12 +85,12 @@ fi
 if [ "$MODE" = "framework" ]; then
     echo "Verifying that AsyncDisplayKit functions as a dynamic framework (for Swift/Carthage users)."
 
-    xcodebuild \
+    set -o pipefail && xcodebuild \
         -project "smoke-tests/Framework/Sample.xcodeproj" \
         -scheme Sample \
         -sdk "$SDK" \
         -destination "$PLATFORM" \
-        build
+        build | xcpretty -f `xcpretty-travis-formatter`
     trap - EXIT
     exit 0
 fi
