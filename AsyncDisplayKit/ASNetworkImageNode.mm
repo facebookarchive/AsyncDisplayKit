@@ -15,6 +15,7 @@
 #import "ASThread.h"
 #import "ASInternalHelpers.h"
 #import "ASImageContainerProtocolCategories.h"
+#import "ASDisplayNodeExtras.h"
 
 #if PIN_REMOTE_IMAGE
 #import "ASPINRemoteImageDownloader.h"
