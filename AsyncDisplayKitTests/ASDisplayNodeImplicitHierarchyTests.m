@@ -76,7 +76,7 @@
   ASDisplayNode *node5 = [[ASDisplayNode alloc] init];
 
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
-  node.layoutSpecBlock = ^(ASSizeRange constrainedSize) {
+  node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASStaticLayoutSpec *staticLayout = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node4]];
     
     ASStackLayoutSpec *stack1 = [[ASStackLayoutSpec alloc] init];
@@ -102,9 +102,9 @@
   ASDisplayNode *node3 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
-  __weak ASSpecTestDisplayNode *weakNode = node;
-  node.layoutSpecBlock = ^(ASSizeRange constrainedSize){
-    if ([weakNode.layoutState isEqualToNumber:@1]) {
+  node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize){
+    ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
+    if ([strongNode.layoutState isEqualToNumber:@1]) {
       return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node1, node2]];
     } else {
       ASStackLayoutSpec *stackLayout = [[ASStackLayoutSpec alloc] init];
