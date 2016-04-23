@@ -69,6 +69,5 @@ Pod::Spec.new do |spec|
   }
 
   spec.ios.deployment_target = '7.0'
-  # tvOS not recognized by older versions of Cocoapods - add this only after tvOS support complete.
-  # spec.tvos.deployment_target = '9.0'
+  spec.tvos.deployment_target = '9.0'
 end
