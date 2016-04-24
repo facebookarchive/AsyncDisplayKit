@@ -15,6 +15,7 @@
 #import "ASThread.h"
 #import "ASInternalHelpers.h"
 #import "ASImageContainerProtocolCategories.h"
+#import "ASDisplayNodeExtras.h"
 
 #if PIN_REMOTE_IMAGE
 #import "ASPINRemoteImageDownloader.h"
@@ -214,7 +215,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)visibilityDidChange:(BOOL)isVisible
 {
   [super visibilityDidChange:isVisible];
-  
+
   if (_downloaderImplementsSetPriority) {
     ASDN::MutexLocker l(_lock);
     if (_downloadIdentifier != nil) {
@@ -225,32 +226,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       }
     }
   }
-  
-  if (_downloaderImplementsSetProgress) {
-    ASDN::MutexLocker l(_lock);
-    
-    if (_downloadIdentifier != nil) {
-      __weak __typeof__(self) weakSelf = self;
-      ASImageDownloaderProgressImage progress = nil;
-      if (isVisible) {
-        progress = ^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
-          __typeof__(self) strongSelf = weakSelf;
-          if (strongSelf == nil) {
-            return;
-          }
-          
-          ASDN::MutexLocker l(_lock);
-          //Getting a result back for a different download identifier, download must not have been successfully canceled
-          if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
-            return;
-          }
-          
-          strongSelf.image = progressImage;
-        };
-      }
-      [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
-    }
-  }
+
+  [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
 
 - (void)clearFetchedData
@@ -279,6 +256,40 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 }
 
 #pragma mark - Private methods -- only call with lock.
+
+/**
+ @note: This should be called without _lock held. We will lock
+ super to read our interface state and it's best to avoid acquiring both locks.
+ */
+- (void)_updateProgressImageBlockOnDownloaderIfNeeded
+{
+  // Read our interface state before locking so that we don't lock super while holding our lock.
+  ASInterfaceState interfaceState = self.interfaceState;
+  ASDN::MutexLocker l(_lock);
+
+  if (!_downloaderImplementsSetProgress || _downloadIdentifier == nil) {
+    return;
+  }
+
+  ASImageDownloaderProgressImage progress = nil;
+  if (ASInterfaceStateIncludesVisible(interfaceState)) {
+    __weak __typeof__(self) weakSelf = self;
+    progress = ^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
+      __typeof__(self) strongSelf = weakSelf;
+      if (strongSelf == nil) {
+        return;
+      }
+
+      ASDN::MutexLocker l(strongSelf->_lock);
+      //Getting a result back for a different download identifier, download must not have been successfully canceled
+      if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+        return;
+      }
+      strongSelf.image = progressImage;
+    };
+  }
+  [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
+}
 
 - (void)_clearImage
 {
@@ -339,6 +350,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
                                                    }];
 #pragma clang diagnostic pop
     }
+    [self _updateProgressImageBlockOnDownloaderIfNeeded];
   });
 }
 
@@ -386,36 +398,31 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           return;
         }
 
-        {
-          ASDN::MutexLocker l(strongSelf->_lock);
-          
-          //Getting a result back for a different download identifier, download must not have been successfully canceled
-          if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
-              return;
-          }
-
-          if (imageContainer != nil) {
-            strongSelf->_imageLoaded = YES;
-            if ([imageContainer asdk_animatedImageData] && _downloaderImplementsAnimatedImage) {
-              strongSelf.animatedImage = [_downloader animatedImageWithData:[imageContainer asdk_animatedImageData]];
-            } else {
-              strongSelf.image = [imageContainer asdk_image];
-            }
-          }
-
-          strongSelf->_downloadIdentifier = nil;
-
-          strongSelf->_cacheUUID = nil;
+        ASDN::MutexLocker l(strongSelf->_lock);
+        
+        //Getting a result back for a different download identifier, download must not have been successfully canceled
+        if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+            return;
         }
 
-        {
-          ASDN::MutexLocker l(strongSelf->_lock);
-          if (imageContainer != nil) {
-            [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
+        if (imageContainer != nil) {
+          strongSelf->_imageLoaded = YES;
+          if ([imageContainer asdk_animatedImageData] && _downloaderImplementsAnimatedImage) {
+            strongSelf.animatedImage = [_downloader animatedImageWithData:[imageContainer asdk_animatedImageData]];
+          } else {
+            strongSelf.image = [imageContainer asdk_image];
           }
-          else if (error && _delegateSupportsDidFailWithError) {
-            [strongSelf->_delegate imageNode:strongSelf didFailWithError:error];
-          }
+        }
+
+        strongSelf->_downloadIdentifier = nil;
+
+        strongSelf->_cacheUUID = nil;
+
+        if (imageContainer != nil) {
+          [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
+        }
+        else if (error && strongSelf->_delegateSupportsDidFailWithError) {
+          [strongSelf->_delegate imageNode:strongSelf didFailWithError:error];
         }
       };
 
@@ -425,14 +432,14 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
         void (^cacheCompletion)(id <ASImageContainerProtocol>) = ^(id <ASImageContainerProtocol> imageContainer) {
           // If the cache UUID changed, that means this request was cancelled.
-          if (![_cacheUUID isEqual:cacheUUID]) {
+          if (!ASObjectIsEqual(_cacheUUID, cacheUUID)) {
             return;
           }
           
-          if ([imageContainer asdk_image] == NULL && _downloader != nil) {
+          if ([imageContainer asdk_image] == nil && _downloader != nil) {
             [self _downloadImageWithCompletion:finished];
           } else {
-            finished(imageContainer, NULL, nil);
+            finished(imageContainer, nil, nil);
           }
         };
         
