@@ -3,7 +3,6 @@
   - getting-started
   - philosophy
   - installation
-  - references
 - title: Core Concepts
   items:
   - intelligent-preloading
@@ -50,7 +49,9 @@
   - batch-fetching-api
   - image-modification-block
   - placeholder-fade-duration
-- title: Debug Tools
-  items:
   - debug-tool-hit-test-visualization
   - debug-tool-pixel-scaling
+- title: Beta
+  items:
+  - implicit-hierarchy-mgmt
+  - layout-transition-api
