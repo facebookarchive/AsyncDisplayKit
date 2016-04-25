@@ -217,7 +217,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   [super visibilityDidChange:isVisible];
 
   if (_downloaderImplementsSetPriority) {
-    ASDN::MutexLocker l(_lock);
+    _lock.lock();
     if (_downloadIdentifier != nil) {
       if (isVisible) {
         [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:_downloadIdentifier];
@@ -225,8 +225,10 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
         [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:_downloadIdentifier];
       }
     }
+    _lock.unlock();
   }
 
+  // This method has to be called without _lock held
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
 
@@ -327,7 +329,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)_downloadImageWithCompletion:(void (^)(id <ASImageContainerProtocol> imageContainer, NSError*, id downloadIdentifier))finished
 {
   ASPerformBlockOnBackgroundThread(^{
-    ASDN::MutexLocker l(_lock);
+    _lock.lock();
     if (_downloaderSupportsNewProtocol) {
       _downloadIdentifier = [_downloader downloadImageWithURL:_URL
                                                 callbackQueue:dispatch_get_main_queue()
@@ -350,7 +352,11 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
                                                    }];
 #pragma clang diagnostic pop
     }
+    _lock.unlock();
+
+    // This method has to be called without _lock held
     [self _updateProgressImageBlockOnDownloaderIfNeeded];
+      
   });
 }
 
