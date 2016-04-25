@@ -33,11 +33,11 @@ As noted in the previous section
 
 ##Replace UICollectionViewController with ASViewController##
 
-AsyncDisplayKit does not offer an equivalent to UICollectionViewController. Instead, use an ASViewController initialized with an ASCollectionNode. 
+AsyncDisplayKit does not offer an equivalent to UICollectionViewController. Instead, you can use the flexibility of ASViewController to recreate any type of UI<UIKitSubclass>ViewController. 
 
-Consider, the ASViewController subclass - LocationCollectionNodeController - from the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> that uses a collection node as its managed node.
+Consider, the following ASViewController subclass.
 
-An `ASCollectionNode` is assigned to be managed by an `ASViewController` in its `initWithNode:` designated initializer method. 
+An `ASCollectionNode` is assigned to be managed by an `ASViewController` in its `initWithNode:` designated initializer method, thus making it a sort of ASCollectionNodeController.
 
 <div class = "highlight-group">
 <span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
@@ -72,6 +72,8 @@ init() {
 </div>
 </div>
 
+This works just as well with any node such as an ASTableNode, ASPagerNode, etc.
+
 ##Accessing the ASCollectionView##
 If you've used previous versions of ASDK, you'll notice that `ASCollectionView` has been removed in favor of `ASCollectionNode`.
 
@@ -79,7 +81,7 @@ If you've used previous versions of ASDK, you'll notice that `ASCollectionView` 
 `ASCollectionView` (an actual UICollectionView subclass) is still used as an internal property of `ASCollectionNode`. While it should not be created directly, it can still be used directly by accessing the .view property of an `ASCollectionNode`.
 </div>
 
-**Do not forget that anything that accesses a view using AsyncDisplayKit's node containers or nodes should be done in viewDidLoad or didLoad, respectively.**
+<div class = "note">Do not forget that anything that accesses a view using AsyncDisplayKit's node containers or nodes should be done in viewDidLoad or didLoad, respectively.</div>
 
 The LocationCollectionNodeController above accesses the ASCollectionView directly in viewDidLoad
 
