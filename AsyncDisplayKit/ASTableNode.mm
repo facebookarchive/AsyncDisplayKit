@@ -6,6 +6,7 @@
 //  Copyright © 2015 Facebook. All rights reserved.
 //
 
+#import "ASEnvironmentInternal.h"
 #import "ASFlowLayoutController.h"
 #import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
@@ -157,5 +158,7 @@
   [super clearFetchedData];
   [self.view clearFetchedData];
 }
+
+ASDisplayTraitsCollectionTableSetEnvironmentState
 
 @end

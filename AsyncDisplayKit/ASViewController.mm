@@ -11,6 +11,7 @@
 #import "ASDimension.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASEnvironmentInternal.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
 @implementation ASViewController
@@ -42,8 +43,16 @@
   _node = node;
 
   _automaticallyAdjustRangeModeBasedOnViewEvents = NO;
-  
+
   return self;
+}
+
+- (void)dealloc
+{
+  if (_displayTraitsContext != nil) {
+    ASDisplayTraitsClearDisplayContext(self.node);
+    _displayTraitsContext = nil;
+  }
 }
 
 - (void)loadView
@@ -130,6 +139,68 @@
 - (ASInterfaceState)interfaceState
 {
   return _node.interfaceState;
+}
+
+#pragma mark - ASDisplayTraits
+
+- (ASDisplayTraits)displayTraitsForTraitCollection:(UITraitCollection *)traitCollection
+{
+  if (self.overrideDisplayTraitsWithTraitCollection) {
+    return self.overrideDisplayTraitsWithTraitCollection(traitCollection);
+  }
+  
+  ASDisplayTraits displayTraits = ASDisplayTraitsFromUITraitCollection(traitCollection);
+  displayTraits.displayContext = _displayTraitsContext;
+  return displayTraits;
+}
+
+- (ASDisplayTraits)displayTraitsForWindowSize:(CGSize)windowSize
+{
+  if (self.overrideDisplayTraitsWithWindowSize) {
+    return self.overrideDisplayTraitsWithWindowSize(windowSize);
+  }
+  return self.node.environmentState.displayTraits;
+}
+
+- (void)progagateNewDisplayTraits:(ASDisplayTraits)displayTraits
+{
+  ASEnvironmentState environmentState = self.node.environmentState;
+  ASDisplayTraits oldDisplayTraits = environmentState.displayTraits;
+  
+  if (ASDisplayTraitsIsEqualToASDisplayTraits(displayTraits, oldDisplayTraits) == NO) {
+    environmentState.displayTraits = displayTraits;
+    [self.node setEnvironmentState:environmentState];
+    [self.node setNeedsLayout];
+    
+    NSArray<id<ASEnvironment>> *children = [self.node children];
+    for (id<ASEnvironment> child in children) {
+      ASEnvironmentStatePropagateDown(child, environmentState.displayTraits);
+    }
+  }
+}
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+  [super traitCollectionDidChange:previousTraitCollection];
+  
+  ASDisplayTraits displayTraits = [self displayTraitsForTraitCollection:self.traitCollection];
+  [self progagateNewDisplayTraits:displayTraits];
+}
+
+- (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+  [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
+  
+  ASDisplayTraits displayTraits = [self displayTraitsForTraitCollection:self.traitCollection];
+  [self progagateNewDisplayTraits:displayTraits];
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+  [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+  
+  ASDisplayTraits displayTraits = [self displayTraitsForWindowSize:size];
+  [self progagateNewDisplayTraits:displayTraits];
 }
 
 @end

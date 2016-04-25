@@ -16,6 +16,7 @@
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASEnvironmentInternal.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutController.h"
@@ -88,7 +89,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (instancetype)_initWithTableView:(ASTableView *)tableView;
 @end
 
-@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource,     _ASTableViewCellDelegate, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView>
+@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate>
 {
   ASTableViewProxy *_proxyDataSource;
   ASTableViewProxy *_proxyDelegate;
@@ -175,6 +176,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _dataController = [[dataControllerClass alloc] initWithAsyncDataFetching:NO];
   _dataController.dataSource = self;
   _dataController.delegate = _rangeController;
+  _dataController.environmentDelegate = self;
   
   _layoutController.dataSource = _dataController;
 
@@ -1076,6 +1078,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   } else {
     return 1; // default section number
   }
+}
+
+#pragma mark - ASDataControllerEnvironmentDelegate
+
+- (id<ASEnvironment>)dataControllerEnvironment
+{
+  if (self.tableNode) {
+    return self.tableNode;
+  }
+  return self.strongTableNode;
 }
 
 #pragma mark - _ASTableViewCellDelegate

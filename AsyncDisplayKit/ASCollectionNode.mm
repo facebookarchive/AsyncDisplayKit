@@ -10,6 +10,7 @@
 #import "ASCollectionInternal.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASEnvironmentInternal.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #include <vector>
 
@@ -243,5 +244,7 @@
 {
   [self.view reloadDataImmediately];
 }
+
+ASDisplayTraitsCollectionTableSetEnvironmentState
 
 @end

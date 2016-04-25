@@ -2687,11 +2687,13 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 - (ASEnvironmentState)environmentState
 {
+  ASDN::MutexLocker l(_propertyLock);
   return _environmentState;
 }
 
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState
 {
+  ASDN::MutexLocker l(_propertyLock);
   _environmentState = environmentState;
 }
 
@@ -2707,7 +2709,12 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 - (BOOL)supportsUpwardPropagation
 {
-  return ASEnvironmentStatePropagationEnabled();
+  return ASEnvironmentStateUpwardPropagationEnabled();
+}
+
+- (BOOL)supportsDownwardPropagation
+{
+  return ASEnvironmentStateDownwardPropagationEnabled();
 }
 
 ASEnvironmentLayoutOptionsForwarding

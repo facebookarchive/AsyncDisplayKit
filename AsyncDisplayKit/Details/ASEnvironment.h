@@ -14,6 +14,8 @@
 #import "ASStackLayoutDefines.h"
 #import "ASRelativeSize.h"
 
+@protocol ASEnvironment;
+@class UITraitCollection;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 NS_ASSUME_NONNULL_BEGIN
@@ -59,17 +61,50 @@ typedef struct ASEnvironmentHierarchyState {
   unsigned layoutPending:1; // = NO
 } ASEnvironmentHierarchyState;
 
+#pragma mark - ASDisplayTraits
+
+typedef struct ASDisplayTraits {
+  CGFloat displayScale;
+  UIUserInterfaceSizeClass horizontalSizeClass;
+  UIUserInterfaceIdiom userInterfaceIdiom;
+  UIUserInterfaceSizeClass verticalSizeClass;
+  UIForceTouchCapability forceTouchCapability;
+  
+  // WARNING:
+  // This pointer is in a C struct and therefore not managed by ARC. It is
+  // an unsafe unretained pointer, so when you dereference it you better be
+  // sure that it is valid.
+  //
+  // Use displayContext when you wish to pass view context specific data along with the
+  // trait collcetion to subnodes. This should be a piece of data owned by an
+  // ASViewController, which will ensure that the data is still valid when laying out
+  // its subviews. When the VC is dealloc'ed, the displayContext it created will also
+  // be dealloced but any subnodes that are hanging around (why would they be?) will now
+  // have a displayContext that points to a bad pointer.
+  //
+  // An added precaution is to call ASDisplayTraitsClearDisplayContext from your ASVC's desctructor
+  // which will propagate a nil displayContext to its subnodes.
+  //__unsafe_unretained id displayContext;
+  id __unsafe_unretained displayContext;
+} ASDisplayTraits;
+
+extern void ASDisplayTraitsClearDisplayContext(id<ASEnvironment> rootEnvironment);
+
+extern ASDisplayTraits ASDisplayTraitsFromUITraitCollection(UITraitCollection *traitCollection);
+extern BOOL ASDisplayTraitsIsEqualToASDisplayTraits(ASDisplayTraits displayTraits0, ASDisplayTraits displayTraits1);
 
 #pragma mark - ASEnvironmentState
 
 typedef struct ASEnvironmentState {
   struct ASEnvironmentHierarchyState hierarchyState;
   struct ASEnvironmentLayoutOptionsState layoutOptionsState;
+  struct ASDisplayTraits displayTraits;
 } ASEnvironmentState;
 extern ASEnvironmentState ASEnvironmentStateMakeDefault();
 
 ASDISPLAYNODE_EXTERN_C_END
 
+@class ASTraitCollection;
 
 #pragma mark - ASEnvironment
 
@@ -93,6 +128,33 @@ ASDISPLAYNODE_EXTERN_C_END
 /// Classes should implement this method and return YES / NO dependent if upward propagation is enabled or not 
 - (BOOL)supportsUpwardPropagation;
 
+/// Classes should implement this method and return YES / NO dependent if downware propagation is enabled or not
+- (BOOL)supportsDownwardPropagation;
+
 @end
+
+// ASCollection/TableNodes don't actually have ASCellNodes as subnodes. Because of this we can't rely on display trait
+// downward propagation via ASEnvironment. Instead if the new environmentState has displayTraits that are different from
+// the cells', then we propagate downward explicitly and request a relayout.
+//
+// If there is any new downward propagating state, it should be added to this define.
+//
+// This logic is used in both ASCollectionNode and ASTableNode
+#define ASDisplayTraitsCollectionTableSetEnvironmentState \
+- (void)setEnvironmentState:(ASEnvironmentState)environmentState\
+{\
+  ASDisplayTraits oldDisplayTraits = self.environmentState.displayTraits;\
+  [super setEnvironmentState:environmentState];\
+  ASDisplayTraits currentDisplayTraits = environmentState.displayTraits;\
+  if (ASDisplayTraitsIsEqualToASDisplayTraits(currentDisplayTraits, oldDisplayTraits) == NO) {\
+    NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
+    for (NSArray *sectionArray in completedNodes) {\
+      for (ASCellNode *cellNode in sectionArray) {\
+        ASEnvironmentStatePropagateDown(cellNode, currentDisplayTraits);\
+        [cellNode setNeedsLayout];\
+      }\
+    }\
+  }\
+}\
 
 NS_ASSUME_NONNULL_END

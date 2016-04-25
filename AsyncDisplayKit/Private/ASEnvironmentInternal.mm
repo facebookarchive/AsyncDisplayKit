@@ -15,11 +15,17 @@
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
-#define AS_SUPPORT_PROPAGATION NO
+#define AS_SUPPORT_UPWARD_PROPAGATION NO
+#define AS_SUPPORT_DOWNWARD_PROPAGATION YES
 
-BOOL ASEnvironmentStatePropagationEnabled()
+BOOL ASEnvironmentStateUpwardPropagationEnabled()
 {
-  return AS_SUPPORT_PROPAGATION;
+  return AS_SUPPORT_UPWARD_PROPAGATION;
+}
+
+BOOL ASEnvironmentStateDownwardPropagationEnabled()
+{
+  return AS_SUPPORT_DOWNWARD_PROPAGATION;
 }
 
 
@@ -106,15 +112,15 @@ UIEdgeInsets _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(id<ASEnvir
 
 ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentHierarchyState hierarchyState, ASEnvironmentStatePropagation propagation) {
     // Merge object and hierarchy state
-  LOG(@"Merge object and state: %@ - ASEnvironmentHierarchyState", object);
+  LOG(@"Merge object and state: %@ - ASEnvironmentHierarchyState", hierarchyState);
   return environmentState;
 }
 
 ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentLayoutOptionsState layoutOptionsState, ASEnvironmentStatePropagation propagation) {
   // Merge object and layout options state
-  LOG(@"Merge object and state: %@ - ASEnvironmentLayoutOptionsState", object);
+  LOG(@"Merge object and state: %@ - ASEnvironmentLayoutOptionsState", layoutOptionsState);
   
-  if (!ASEnvironmentStatePropagationEnabled()) {
+  if (!ASEnvironmentStateUpwardPropagationEnabled() && propagation == ASEnvironmentStatePropagation::UP) {
     return environmentState;
   }
   
@@ -187,4 +193,24 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
   }
   
   return environmentState;
+}
+
+ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState childEnvironmentState, ASDisplayTraits parentDisplayTraits, ASEnvironmentStatePropagation propagation) {
+  if (propagation == ASEnvironmentStatePropagation::DOWN && !ASEnvironmentStateDownwardPropagationEnabled()) {
+    return childEnvironmentState;
+  }
+  
+  // Support propagate down
+  if (propagation == ASEnvironmentStatePropagation::DOWN) {
+    ASDisplayTraits childDisplayTraits = childEnvironmentState.displayTraits;
+    childDisplayTraits.horizontalSizeClass = parentDisplayTraits.horizontalSizeClass;
+    childDisplayTraits.verticalSizeClass = parentDisplayTraits.verticalSizeClass;
+    childDisplayTraits.userInterfaceIdiom = parentDisplayTraits.userInterfaceIdiom;
+    childDisplayTraits.forceTouchCapability = parentDisplayTraits.forceTouchCapability;
+    childDisplayTraits.displayScale = parentDisplayTraits.displayScale;
+    childDisplayTraits.displayContext = parentDisplayTraits.displayContext;
+    childEnvironmentState.displayTraits = childDisplayTraits;
+
+  }
+  return childEnvironmentState;
 }

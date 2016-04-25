@@ -12,7 +12,8 @@
 
 #pragma once
 
-BOOL ASEnvironmentStatePropagationEnabled();
+BOOL ASEnvironmentStateUpwardPropagationEnabled();
+BOOL ASEnvironmentStateDownwardPropagationEnabled();
 
 
 #pragma mark - Set and get extensible values for layout options
@@ -45,9 +46,11 @@ static const struct ASEnvironmentStateExtensions ASEnvironmentDefaultStateExtens
 static const struct ASEnvironmentLayoutOptionsState ASEnvironmentDefaultLayoutOptionsState = {};
 ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentLayoutOptionsState state, ASEnvironmentStatePropagation propagation);
 
-
 static const struct ASEnvironmentHierarchyState ASEnvironmentDefaultHierarchyState = {};
 ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentHierarchyState state, ASEnvironmentStatePropagation propagation);
+
+static const struct ASDisplayTraits ASEnvironmentDefaultDisplayTraits = {};
+ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASDisplayTraits state, ASEnvironmentStatePropagation propagation);
 
 
 #pragma mark - Propagation
