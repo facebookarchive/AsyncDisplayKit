@@ -43,7 +43,7 @@ An `ASCollectionNode` is assigned to be managed by an `ASViewController` in its 
 <span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
 <div class = "code">
   <pre lang="objc" class="objcCode">
-- (instancetype)initWithCoordinates:(CLLocationCoordinate2D)coordinates
+- (instancetype)init
 {
   _flowLayout     = [[UICollectionViewFlowLayout alloc] init];
   _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:_flowLayout];
@@ -59,7 +59,7 @@ An `ASCollectionNode` is assigned to be managed by an `ASViewController` in its 
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
-func initWithCoordinates(coordinates: CLLocationsCoordinate2D) {
+init() {
   flowLayout     = UICollectionViewFlowLayout()
   collectionNode = ASCollectionNode(collectionViewLayout: flowLayout)
 
