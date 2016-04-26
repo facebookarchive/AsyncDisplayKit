@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASImageNode+AnimatedImage.h"
+#import "ASImageNode.h"
 
 #import "ASAssert.h"
 #import "ASImageProtocols.h"
@@ -25,9 +25,12 @@
 - (void)setAnimatedImage:(id <ASAnimatedImageProtocol>)animatedImage
 {
   ASDN::MutexLocker l(_animatedImageLock);
-  if (!ASObjectIsEqual(_animatedImage, animatedImage)) {
-    _animatedImage = animatedImage;
+  if (ASObjectIsEqual(_animatedImage, animatedImage)) {
+    return;
   }
+  
+  _animatedImage = animatedImage;
+  
   if (animatedImage != nil) {
     __weak ASImageNode *weakSelf = self;
     if ([animatedImage respondsToSelector:@selector(setCoverImageReadyCallback:)]) {
@@ -50,7 +53,7 @@
 
 - (void)setAnimatedImagePaused:(BOOL)animatedImagePaused
 {
-  ASDN::MutexLocker l(_animatedImagePausedLock);
+  ASDN::MutexLocker l(_animatedImageLock);
   _animatedImagePaused = animatedImagePaused;
   ASPerformBlockOnMainThread(^{
     if (animatedImagePaused) {
@@ -63,7 +66,7 @@
 
 - (BOOL)animatedImagePaused
 {
-  ASDN::MutexLocker l(_animatedImagePausedLock);
+  ASDN::MutexLocker l(_animatedImageLock);
   return _animatedImagePaused;
 }
 
@@ -84,7 +87,7 @@
 
 - (void)animatedImageFileReady
 {
-  dispatch_async(dispatch_get_main_queue(), ^{
+  ASPerformBlockOnMainThread(^{
     [self startAnimating];
   });
 }
@@ -145,18 +148,6 @@
   } else {
     [self stopAnimating];
   }
-}
-
-- (void)__enterHierarchy
-{
-  [super __enterHierarchy];
-  [self startAnimating];
-}
-
-- (void)__exitHierarchy
-{
-  [super __exitHierarchy];
-  [self stopAnimating];
 }
 
 - (void)displayLinkFired:(CADisplayLink *)displayLink

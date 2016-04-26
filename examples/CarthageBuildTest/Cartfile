@@ -1,1 +1,1 @@
-git "file:///build.sh/will/put/local/absolute/path/here" "master"
+git "file:///Users/scottg/code/AsyncDisplayKit" "master"

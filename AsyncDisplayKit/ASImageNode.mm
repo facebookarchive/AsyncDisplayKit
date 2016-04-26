@@ -16,7 +16,6 @@
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASTextNode.h>
-#import <AsyncDisplayKit/ASImageNode+AnimatedImage.h>
 #import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
 
 #import "ASImageNode+CGExtras.h"
@@ -73,7 +72,7 @@
 
   void (^_displayCompletionBlock)(BOOL canceled);
   ASDN::RecursiveMutex _imageLock;
-
+  
   // Cropping.
   BOOL _cropEnabled; // Defaults to YES.
   BOOL _forceUpscaling; //Defaults to NO.

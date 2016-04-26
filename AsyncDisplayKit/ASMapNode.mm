@@ -14,11 +14,13 @@
 #import <AsyncDisplayKit/ASCenterLayoutSpec.h>
 #import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASLayout.h>
 
 @interface ASMapNode()
 {
   ASDN::RecursiveMutex _propertyLock;
   MKMapSnapshotter *_snapshotter;
+  BOOL _snapshotAfterLayout;
   NSArray *_annotations;
   CLLocationCoordinate2D _centerCoordinateOfMap;
 }
@@ -159,6 +161,16 @@
 
 - (void)takeSnapshot
 {
+  // If our size is zero, we want to avoid calling a default sized snapshot. Set _snapshotAfterLayout to YES
+  // so if layout changes in the future, we'll try snapshotting again.
+  ASLayout *layout = self.calculatedLayout;
+  if (layout == nil || CGSizeEqualToSize(CGSizeZero, layout.size)) {
+    _snapshotAfterLayout = YES;
+    return;
+  }
+  
+  _snapshotAfterLayout = NO;
+  
   if (!_snapshotter) {
     [self setUpSnapshotter];
   }
@@ -209,7 +221,6 @@
 
 - (void)setUpSnapshotter
 {
-  ASDisplayNodeAssert(!CGSizeEqualToSize(CGSizeZero, self.calculatedSize), @"self.calculatedSize can not be zero. Make sure that you are setting a preferredFrameSize or wrapping ASMapNode in a ASRatioLayoutSpec or similar.");
   _snapshotter = [[MKMapSnapshotter alloc] initWithOptions:self.options];
 }
 
@@ -305,6 +316,15 @@
   }
   [self setSnapshotSizeWithReloadIfNeeded:size];
   return size;
+}
+
+- (void)calculatedLayoutDidChange
+{
+  [super calculatedLayoutDidChange];
+  
+  if (_snapshotAfterLayout) {
+    [self takeSnapshot];
+  }
 }
 
 // -layout isn't usually needed over -layoutSpecThatFits, but this way we can avoid a needless node wrapper for MKMapView.

@@ -69,7 +69,11 @@
 {
   if (!_titleNode) {
     _titleNode = [[ASTextNode alloc] init];
+#if TARGET_OS_IOS 
+      // tvOS needs access to the underlying view
+      // of the button node to add a touch handler.
     [_titleNode setLayerBacked:YES];
+#endif
     [_titleNode setFlexShrink:YES];
   }
   return _titleNode;
@@ -241,40 +245,42 @@
 
 - (ASVerticalAlignment)contentVerticalAlignment
 {
-    ASDN::MutexLocker l(_propertyLock);
-    return _contentVerticalAlignment;
+  ASDN::MutexLocker l(_propertyLock);
+  return _contentVerticalAlignment;
 }
 
 - (void)setContentVerticalAlignment:(ASVerticalAlignment)contentVerticalAlignment
 {
-    ASDN::MutexLocker l(_propertyLock);
-    _contentVerticalAlignment = contentVerticalAlignment;
+  ASDN::MutexLocker l(_propertyLock);
+  _contentVerticalAlignment = contentVerticalAlignment;
 }
 
 - (ASHorizontalAlignment)contentHorizontalAlignment
 {
-    ASDN::MutexLocker l(_propertyLock);
-    return _contentHorizontalAlignment;
+  ASDN::MutexLocker l(_propertyLock);
+  return _contentHorizontalAlignment;
 }
 
 - (void)setContentHorizontalAlignment:(ASHorizontalAlignment)contentHorizontalAlignment
 {
-    ASDN::MutexLocker l(_propertyLock);
-    _contentHorizontalAlignment = contentHorizontalAlignment;
+  ASDN::MutexLocker l(_propertyLock);
+  _contentHorizontalAlignment = contentHorizontalAlignment;
 }
 
 - (UIEdgeInsets)contentEdgeInsets
 {
-    ASDN::MutexLocker l(_propertyLock);
-    return _contentEdgeInsets;
+  ASDN::MutexLocker l(_propertyLock);
+  return _contentEdgeInsets;
 }
 
 - (void)setContentEdgeInsets:(UIEdgeInsets)contentEdgeInsets
 {
-    ASDN::MutexLocker l(_propertyLock);
-    _contentEdgeInsets = contentEdgeInsets;
+  ASDN::MutexLocker l(_propertyLock);
+  _contentEdgeInsets = contentEdgeInsets;
 }
 
+
+#if TARGET_OS_IOS
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
 {
   NSDictionary *attributes = @{
@@ -286,6 +292,7 @@
                                                                attributes:attributes];
   [self setAttributedTitle:string forState:state];
 }
+#endif
 
 - (NSAttributedString *)attributedTitleForState:(ASControlState)state
 {

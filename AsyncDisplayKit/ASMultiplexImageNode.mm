@@ -22,6 +22,7 @@
 #import "ASPhotosFrameworkImageRequest.h"
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
+#import "ASDisplayNodeExtras.h"
 
 #if !AS_IOS8_SDK_OR_LATER
 #error ASMultiplexImageNode can be used on iOS 7, but must be linked against the iOS 8 SDK.
@@ -305,32 +306,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     }
   }
   
-  if (_downloaderImplementsSetProgress) {
-    ASDN::MutexLocker l(_downloadIdentifierLock);
-    
-    if (_downloadIdentifier != nil) {
-      __weak __typeof__(self) weakSelf = self;
-      ASImageDownloaderProgressImage progress = nil;
-      if (isVisible) {
-        progress = ^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
-          __typeof__(self) strongSelf = weakSelf;
-          if (strongSelf == nil) {
-            return;
-          }
-          
-          ASDN::MutexLocker l(strongSelf->_downloadIdentifierLock);
-          //Getting a result back for a different download identifier, download must not have been successfully canceled
-          if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
-            return;
-          }
-          
-          strongSelf.image = progressImage;
-        };
-      }
-      
-      [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
-    }
-  }
+  [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
 
 #pragma mark - Core
@@ -441,9 +417,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (void)_loadImageIdentifiers
 {
-  // Kill any in-flight downloads.
-  [self _setDownloadIdentifier:nil];
-
   // Grab the best possible image we can load right now.
   id bestImmediatelyAvailableImageIdentifier = nil;
   UIImage *bestImmediatelyAvailableImage = [self _bestImmediatelyAvailableImageFromDataSource:&bestImmediatelyAvailableImageIdentifier];
@@ -478,6 +451,41 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 }
 
 #pragma mark -
+
+/**
+ @note: This should be called without _downloadIdentifierLock held. We will lock
+ super to read our interface state and it's best to avoid acquiring both locks.
+ */
+- (void)_updateProgressImageBlockOnDownloaderIfNeeded
+{
+    // Read our interface state before locking so that we don't lock super while holding our lock.
+    ASInterfaceState interfaceState = self.interfaceState;
+    ASDN::MutexLocker l(_downloadIdentifierLock);
+    
+    if (!_downloaderImplementsSetProgress || _downloadIdentifier == nil) {
+        return;
+    }
+
+    ASImageDownloaderProgressImage progress = nil;
+    if (ASInterfaceStateIncludesVisible(interfaceState)) {
+        __weak __typeof__(self) weakSelf = self;
+        progress = ^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
+            __typeof__(self) strongSelf = weakSelf;
+            if (strongSelf == nil) {
+                return;
+            }
+
+            ASDN::MutexLocker l(strongSelf->_downloadIdentifierLock);
+            //Getting a result back for a different download identifier, download must not have been successfully canceled
+            if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+                return;
+            }
+            strongSelf.image = progressImage;
+        };
+    }
+    [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
+}
+
 - (void)_clearImage
 {
   // Destruction of bigger images on the main thread can be expensive
@@ -823,6 +831,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
                                                           }]];
 #pragma clang diagnostic pop
     }
+    [self _updateProgressImageBlockOnDownloaderIfNeeded];
   });
 }
 

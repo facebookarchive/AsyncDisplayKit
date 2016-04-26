@@ -1,4 +1,0 @@
-source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '8.0'
-pod 'AsyncDisplayKit', :path => '../..'
-pod 'PINRemoteImage', :git => 'https://github.com/pinterest/PINRemoteImage.git', :branch => 'addPINAnimatedImage'

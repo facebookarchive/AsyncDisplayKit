@@ -59,6 +59,7 @@
  */
 - (void)setAttributedTitle:(nullable NSAttributedString *)title forState:(ASControlState)state;
 
+#if TARGET_OS_IOS
 /**
  *  Sets the title to use for the specified state. This will reset styled title previously set with -setAttributedTitle:forState.
  *
@@ -68,7 +69,7 @@
  *  @param state The state that uses the specified title. The possible values are described in ASControlState.
  */
 - (void)setTitle:(nonnull NSString *)title withFont:(nullable UIFont *)font withColor:(nullable UIColor *)color forState:(ASControlState)state;
-
+#endif
 /**
  *  Returns the image used for a button state.
  *
