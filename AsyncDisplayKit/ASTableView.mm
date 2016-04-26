@@ -818,10 +818,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return @[];
   }
   
-  NSArray *visibleIndexPaths = self.indexPathsForVisibleRows;
+  // In this case we cannot use indexPathsForVisibleRows in this case to get all the visible index paths as apparently
+  // in a grouped UITableView it would return index paths for cells that are over the edge of the visible area.
+  // Unfortunatly this means we never get a call for -tableView:cellForRowAtIndexPath: for that cells, but we will mark
+  // mark them as visible in the range controller
+  NSMutableArray *visibleIndexPaths = [NSMutableArray array];
+  for (id cell in self.visibleCells) {
+    [visibleIndexPaths addObject:[self indexPathForCell:cell]];
+  }
   
   if (_pendingVisibleIndexPath) {
-    NSMutableSet *indexPaths = [NSMutableSet setWithArray:self.indexPathsForVisibleRows];
+    NSMutableSet *indexPaths = [NSMutableSet setWithArray:visibleIndexPaths];
     
     BOOL (^isAfter)(NSIndexPath *, NSIndexPath *) = ^BOOL(NSIndexPath *indexPath, NSIndexPath *anchor) {
       if (!anchor || !indexPath) {
@@ -857,7 +864,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
       _pendingVisibleIndexPath = nil; // not contiguous, ignore.
     } else {
       [indexPaths addObject:_pendingVisibleIndexPath];
-      visibleIndexPaths = [indexPaths.allObjects sortedArrayUsingSelector:@selector(compare:)];
+      
+      [visibleIndexPaths removeAllObjects];
+      [visibleIndexPaths addObjectsFromArray:[indexPaths.allObjects sortedArrayUsingSelector:@selector(compare:)]];
     }
   }
   
