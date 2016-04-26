@@ -394,9 +394,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (NSArray *)visibleNodes
 {
-  NSArray *indexPaths = [self indexPathsForVisibleRows];
-  NSMutableArray *visibleNodes = [[NSMutableArray alloc] init];
-
+  NSArray *indexPaths = [self visibleNodeIndexPathsForRangeController:_rangeController];
+  
+  NSMutableArray *visibleNodes = [NSMutableArray array];
   for (NSIndexPath *indexPath in indexPaths) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
     if (node) {
