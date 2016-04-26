@@ -991,9 +991,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (void)dealloc
 {
   ASDisplayNodeAssertMainThread();
-  [_completedNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *nodes, BOOL *stop) {
-    [nodes enumerateObjectsUsingBlock:^(NSMutableArray *section, NSUInteger sectionIndex, BOOL *stop) {
-      [section enumerateObjectsUsingBlock:^(ASCellNode *node, NSUInteger rowIndex, BOOL *stop) {
+  [_completedNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *sections, BOOL *stop) {
+    for (NSArray *section in sections) {
+      for (ASCellNode *node in section) {
         if (node.isNodeLoaded) {
           if (node.layerBacked) {
             [node.layer removeFromSuperlayer];
@@ -1001,8 +1001,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
             [node.view removeFromSuperview];
           }
         }
-      }];
-    }];
+      }
+    }
   }];
 }
 
