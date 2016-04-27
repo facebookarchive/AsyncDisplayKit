@@ -54,7 +54,7 @@ Pod::Spec.new do |spec|
   
   spec.subspec 'PINRemoteImage' do |pin|
       pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
-      pin.dependency 'PINRemoteImage/iOS', '>= 2.1.2'
+      pin.dependency 'PINRemoteImage/iOS', '>= 2.1.4'
       pin.dependency 'AsyncDisplayKit/Core'
   end
   
