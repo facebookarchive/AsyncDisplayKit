@@ -112,6 +112,19 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
  */
 - (void)setNeedsDisplayWithCompletion:(void (^ _Nullable)(BOOL canceled))displayCompletionBlock;
 
+#if TARGET_OS_TV
+/** 
+ * A bool to track if the current appearance of the node
+ * is the default focus appearance.
+ * Exposed here so the category methods can set it.
+ */
+@property (nonatomic, assign) BOOL isDefaultFocusAppearance;
+#endif
+
+@end
+
+@interface ASImageNode (AnimatedImage)
+
 /**
  * @abstract The animated image to playback
  *
