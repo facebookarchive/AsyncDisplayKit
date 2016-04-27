@@ -12,14 +12,17 @@
 #import "ASPagerFlowLayout.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 
-@interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
+@interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor, ASPagerFlowLayoutPageProvider>
 {
   ASPagerFlowLayout *_flowLayout;
-  ASPagerNodeProxy *_proxy;
-  __weak id <ASPagerDataSource> _pagerDataSource;
+  ASPagerNodeProxy *_dataSourceProxy;
+  ASPagerNodeProxy *_delegateProxy;
+  __weak id <ASPagerNodeDataSource> _pagerDataSource;
   BOOL _pagerDataSourceImplementsNodeBlockAtIndex;
   BOOL _pagerDataSourceImplementsConstrainedSizeForNode;
 }
+
+@property (nonatomic, assign, readonly) NSInteger numberOfPages;
 
 @end
 
@@ -28,7 +31,7 @@
 
 - (instancetype)init
 {
-  ASPagerFlowLayout *flowLayout = [[ASPagerFlowLayout alloc] init];
+  ASPagerFlowLayout *flowLayout = [[ASPagerFlowLayout alloc] initWithPageProvider:self];
   flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
   flowLayout.minimumInteritemSpacing = 0;
   flowLayout.minimumLineSpacing = 0;
@@ -42,6 +45,7 @@
   self = [super initWithCollectionViewLayout:flowLayout];
   if (self != nil) {
     _flowLayout = flowLayout;
+    _currentPageIndex = 0;
   }
   return self;
 }
@@ -63,6 +67,10 @@
   // our view is only horizontally scrollable.  This causes UICollectionViewFlowLayout to log a warning.
   // From here we cannot disable this directly (UIViewController's automaticallyAdjustsScrollViewInsets).
   cv.zeroContentInsets = YES;
+  
+  // Set the super delegate to the pager for now to inject the scroll delegate calls. If the API consumer
+  // set's the delegate on the ASPagerNode we add an ASPagerNodeProxy in between in setDelegate:
+  super.delegate = self;
 
   ASRangeTuningParameters minimumRenderParams = { .leadingBufferScreenfuls = 0.0, .trailingBufferScreenfuls = 0.0 };
   ASRangeTuningParameters minimumPreloadParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
@@ -75,15 +83,33 @@
   [self setTuningParameters:fullPreloadParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeFetchData];
 }
 
+#pragma mark - Getter / Setter
+
+- (NSInteger)numberOfPages
+{
+  return [_pagerDataSource numberOfPagesInPagerNode:self];
+}
+
 #pragma mark - Helpers
 
 - (void)scrollToPageAtIndex:(NSInteger)index animated:(BOOL)animated
 {
-  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
-  [self.view scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionLeft animated:animated];
+  // Prevent an exception to scroll to an index path that is invalid
+  if (index >= 0 && index < self.numberOfPages) {
+    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+    [self.view scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionLeft animated:animated];
+  
+    _currentPageIndex = index;
+  }
 }
 
 #pragma mark - ASCollectionViewDataSource
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
+  return self.numberOfPages;
+}
 
 - (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -95,12 +121,6 @@
   return [_pagerDataSource pagerNode:self nodeBlockAtIndex:indexPath.item];
 }
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
-{
-  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
-  return [_pagerDataSource numberOfPagesInPagerNode:self];
-}
-
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_pagerDataSourceImplementsConstrainedSizeForNode) {
@@ -109,7 +129,7 @@
   return ASSizeRangeMake(CGSizeZero, self.view.bounds.size);
 }
 
-#pragma mark - Data Source Proxy
+#pragma mark - Proxies
 
 - (id <ASPagerDataSource>)dataSource
 {
@@ -122,20 +142,59 @@
     _pagerDataSource = pagerDataSource;
     
     _pagerDataSourceImplementsNodeBlockAtIndex = [_pagerDataSource respondsToSelector:@selector(pagerNode:nodeBlockAtIndex:)];
+    _pagerDataSourceImplementsConstrainedSizeForNode = [_pagerDataSource respondsToSelector:@selector(pagerNode:constrainedSizeForNodeAtIndexPath:)];
+    
     // Data source must implement pagerNode:nodeBlockAtIndex: or pagerNode:nodeAtIndex:
     ASDisplayNodeAssertTrue(_pagerDataSourceImplementsNodeBlockAtIndex || [_pagerDataSource respondsToSelector:@selector(pagerNode:nodeAtIndex:)]);
     
-    _pagerDataSourceImplementsConstrainedSizeForNode = [_pagerDataSource respondsToSelector:@selector(pagerNode:constrainedSizeForNodeAtIndexPath:)];
+    _dataSourceProxy = pagerDataSource ? [[ASPagerNodeProxy alloc] initWithTarget:pagerDataSource interceptor:self] : nil;
     
-    _proxy = pagerDataSource ? [[ASPagerNodeProxy alloc] initWithTarget:pagerDataSource interceptor:self] : nil;
-    
-    super.dataSource = (id <ASCollectionDataSource>)_proxy;
+    super.dataSource = (id <ASCollectionDataSource>)_dataSourceProxy;
   }
+}
+
+- (void)setDelegate:(id<ASCollectionDelegate>)delegate
+{
+  _delegateProxy = delegate ? [[ASPagerNodeProxy alloc] initWithTarget:delegate interceptor:self] : nil;
+  
+  super.delegate = (id <ASCollectionDelegate>)_delegateProxy;
 }
 
 - (void)proxyTargetHasDeallocated:(ASDelegateProxy *)proxy
 {
   [self setDataSource:nil];
+  [self setDelegate:nil];
+}
+
+#pragma mark - <ASCollectionDelegate>
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+  CGFloat pageWidth = CGRectGetWidth(self.view.frame);
+  _currentPageIndex = floor((self.view.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
+}
+
+- (void)scrollViewWillEndDragging:(UIScrollView*)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint*)targetContentOffset
+{
+  CGFloat pageWidth = CGRectGetWidth(self.view.frame);
+  NSInteger newPageIndex = _currentPageIndex;
+
+  if (velocity.x == 0) {
+    // Handle slow dragging not lifting finger
+    newPageIndex = floor((targetContentOffset->x - pageWidth / 2) / pageWidth) + 1;
+  } else {
+    newPageIndex = velocity.x > 0 ? _currentPageIndex + 1 : _currentPageIndex - 1;
+
+    if (newPageIndex < 0) {
+        newPageIndex = 0;
+    }
+    if (newPageIndex > self.view.contentSize.width / pageWidth) {
+        newPageIndex = ceil(self.view.contentSize.width / pageWidth) - 1.0;
+    }
+  }
+  _currentPageIndex = newPageIndex;
+
+  *targetContentOffset = CGPointMake(newPageIndex * pageWidth, targetContentOffset->y);
 }
 
 @end

@@ -7,53 +7,56 @@
 //
 
 #import "ASPagerFlowLayout.h"
+#import "ASPagerNode.h"
 
 @interface ASPagerFlowLayout ()
 
 @property (strong, nonatomic) NSIndexPath *currentIndexPath;
+@property (weak, nonatomic) id<ASPagerFlowLayoutPageProvider> pageProvider;
 
 @end
 
 @implementation ASPagerFlowLayout
 
-- (void)invalidateLayout
+#pragma mark - Lifecycle
+
+- (instancetype)initWithPageProvider:(id<ASPagerFlowLayoutPageProvider>)pageProvider
 {
-  self.currentIndexPath = [self _indexPathForVisiblyCenteredItem];
-  [super invalidateLayout];
+  self = [super init];
+  if (self == nil) { return self; }
+  _pageProvider = pageProvider;
+  return self;
+}
+
+#pragma mark - UICollectionViewFlowLayout
+
+- (BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds
+{
+  CGRect oldBounds = self.collectionView.bounds;
+  if (!CGSizeEqualToSize(oldBounds.size, newBounds.size)) {
+    return YES;
+  }
+    
+  return NO;
 }
 
 - (CGPoint)targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 {
-  if (self.currentIndexPath) {
-    return [self _targetContentOffsetForItemAtIndexPath:self.currentIndexPath
-                                  proposedContentOffset:proposedContentOffset];
-  }
-  
-  return [super targetContentOffsetForProposedContentOffset:proposedContentOffset];
-}
-
-- (CGPoint)_targetContentOffsetForItemAtIndexPath:(NSIndexPath *)indexPath proposedContentOffset:(CGPoint)proposedContentOffset
-{
   if ([self _dataSourceIsEmpty]) {
     return proposedContentOffset;
   }
+  
+  if (_pageProvider == nil || [self _visibleRectIsInvalid]) {
+    return [super targetContentOffsetForProposedContentOffset:proposedContentOffset];
+  }
+
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:_pageProvider.currentPageIndex inSection:0];
   UICollectionViewLayoutAttributes *attributes = [self layoutAttributesForItemAtIndexPath:indexPath];
-  CGFloat xOffset = (self.collectionView.bounds.size.width - attributes.frame.size.width) / 2;
+  CGFloat xOffset = (CGRectGetWidth(self.collectionView.bounds) - CGRectGetWidth(attributes.frame)) / 2;
   return CGPointMake(attributes.frame.origin.x - xOffset, proposedContentOffset.y);
 }
 
-- (NSIndexPath *)_indexPathForVisiblyCenteredItem
-{
-  CGRect visibleRect = [self _visibleRect];
-  CGFloat visibleXCenter = CGRectGetMidX(visibleRect);
-  NSArray<UICollectionViewLayoutAttributes *> *layoutAttributes = [self layoutAttributesForElementsInRect:visibleRect];
-  for (UICollectionViewLayoutAttributes *attributes in layoutAttributes) {
-    if ([attributes representedElementCategory] == UICollectionElementCategoryCell && attributes.center.x == visibleXCenter) {
-      return attributes.indexPath;
-    }
-  }
-  return nil;
-}
+#pragma mark - Helper
 
 - (BOOL)_dataSourceIsEmpty
 {
@@ -66,6 +69,11 @@
   visibleRect.origin = self.collectionView.contentOffset;
   visibleRect.size = self.collectionView.bounds.size;
   return visibleRect;
+}
+
+- (BOOL)_visibleRectIsInvalid
+{
+  return CGRectEqualToRect([self _visibleRect], CGRectZero);
 }
 
 @end
