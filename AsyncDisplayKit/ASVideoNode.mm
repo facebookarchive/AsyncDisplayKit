@@ -173,16 +173,16 @@ static NSString * const kStatus = @"status";
 - (void)imageAtTime:(CMTime)imageTime completionHandler:(void(^)(UIImage *image))completionHandler
 {
   ASPerformBlockOnBackgroundThread(^{
-    ASDN::MutexLocker l(_videoLock);
+    AVAsset *asset = self.asset;
 
     // Skip the asset image generation if we don't have any tracks available that are capable of supporting it
-    NSArray<AVAssetTrack *>* visualAssetArray = [_asset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual];
+    NSArray<AVAssetTrack *>* visualAssetArray = [asset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual];
     if (visualAssetArray.count == 0) {
       completionHandler(nil);
       return;
     }
 
-    AVAssetImageGenerator *previewImageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:_asset];
+    AVAssetImageGenerator *previewImageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
     previewImageGenerator.appliesPreferredTrackTransform = YES;
 
     [previewImageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:imageTime]]
