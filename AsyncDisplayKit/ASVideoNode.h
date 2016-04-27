@@ -6,6 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#if TARGET_OS_IOS
 #import <AsyncDisplayKit/ASButtonNode.h>
 
 @class AVAsset, AVPlayer, AVPlayerItem;
@@ -63,5 +64,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
 @end
+#endif
 
 NS_ASSUME_NONNULL_END
