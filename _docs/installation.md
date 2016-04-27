@@ -2,8 +2,9 @@
 title: Installation
 layout: docs
 permalink: /docs/installation.html
-next: references.html
+next: intelligent-preloading.html
 ---
+
 ###CocoaPods
 AsyncDisplayKit is available on <a href="http://cocoapods.org">CocoaPods</a>.  Add the following to your Podfile:
 
