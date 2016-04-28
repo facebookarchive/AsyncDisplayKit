@@ -124,9 +124,15 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   if (reset || _URL == nil) {
     self.image = _defaultImage;
-    ASPerformBlockOnMainThread(^{
-      self.currentImageQuality = 1.0;
-    });
+    if (_URL == nil) {
+      ASPerformBlockOnMainThread(^{
+        self.currentImageQuality = 1.0;
+      });
+    } else {
+      ASPerformBlockOnMainThread(^{
+        self.currentImageQuality = 0.0;
+      });
+    }
   }
 
   if (self.interfaceState & ASInterfaceStateFetchData) {
@@ -151,9 +157,15 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   _defaultImage = defaultImage;
 
   if (!_imageLoaded) {
-    ASPerformBlockOnMainThread(^{
-      self.currentImageQuality = 0.0;
-    });
+    if (_URL == nil) {
+      ASPerformBlockOnMainThread(^{
+        self.currentImageQuality = 1.0;
+      });
+    } else {
+      ASPerformBlockOnMainThread(^{
+        self.currentImageQuality = 0.0;
+      });
+    }
     _lock.unlock();
     // Locking: it is important to release _lock before entering setImage:, as it needs to release the lock before -invalidateCalculatedLayout.
     // If we continue to hold the lock here, it will still be locked until the next unlock() call, causing a possible deadlock with
@@ -229,7 +241,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       if (result) {
         self.image = result;
         _imageLoaded = YES;
-        _currentImageQuality = 1.0;
+        dispatch_async(dispatch_get_main_queue(), ^{
+          _currentImageQuality = 1.0;
+        });
       }
     }
   }
