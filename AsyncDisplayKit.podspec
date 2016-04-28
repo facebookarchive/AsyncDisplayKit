@@ -5,7 +5,7 @@ Pod::Spec.new do |spec|
   spec.homepage     = 'http://asyncdisplaykit.org'
   spec.authors      = { 'Scott Goodson' => 'scottgoodson@gmail.com', 'Ryan Nystrom' => 'rnystrom@fb.com' }
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
-  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.9.7.3' }
+  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.9.73' }
 
   spec.documentation_url = 'http://asyncdisplaykit.org/appledoc/'
 
@@ -69,5 +69,6 @@ Pod::Spec.new do |spec|
   }
 
   spec.ios.deployment_target = '7.0'
-  spec.tvos.deployment_target = '9.0'
+# Uncomment when fixed: The platform of the target `Pods` (tvOS 9.0) is not compatible with `PINRemoteImage/iOS (2.1.4)`, which does not support `tvos`.) during validation
+# spec.tvos.deployment_target = '9.0'
 end
