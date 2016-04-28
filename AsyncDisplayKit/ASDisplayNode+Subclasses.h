@@ -242,9 +242,32 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)visibilityDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
 
+/**
+ * @abstract Called whenever the the node enters the display range.
+ *
+ * @discussion Subclasses may use this to monitor when they enter the display range.
+ */
 - (void)didEnterDisplayRange ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called whenever the the node exits the display range.
+ *
+ * @discussion Subclasses may use this to monitor when they exit the display range.
+ */
 - (void)didExitDisplayRange ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called whenever the the node enters the fetch data range.
+ *
+ * @discussion Subclasses may use this to monitor when they enter the fetch data range.
+ */
 - (void)didEnterFetchDataRange ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called whenever the the node exits the fetch data range.
+ *
+ * @discussion Subclasses may use this to monitor when they exit the fetch data range.
+ */
 - (void)didExitFetchDataRange ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**

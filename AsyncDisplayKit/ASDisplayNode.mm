@@ -2242,10 +2242,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (nowFetchData != wasFetchData) {
     if (nowFetchData) {
       [self fetchData];
+      [self didEnterFetchDataRange];
     } else {
       if ([self supportsRangeManagedInterfaceState]) {
         [self clearFetchedData];
       }
+      [self didExitFetchDataRange];
     }
   }
 
@@ -2289,6 +2291,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
         }
       }
     }
+    
+    if (nowDisplay) {
+      [self didEnterDisplayRange];
+    } else {
+      [self didExitDisplayRange];
+    }
   }
 
   // Became visible or invisible.  When range-managed, this represents literal visibility - at least one pixel
@@ -2299,29 +2307,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (nowVisible != wasVisible) {
     [self visibilityDidChange:nowVisible];
   }
-  
-  BOOL nowInDisplay = ASInterfaceStateIncludesDisplay(newState);
-  BOOL wasInDisplay = ASInterfaceStateIncludesDisplay(oldState);
-  
-  if (nowInDisplay != wasInDisplay) {
-    if (nowInDisplay) {
-      [self didEnterDisplayRange];
-    } else {
-      [self didExitDisplayRange];
-    }
-  }
-  
-  BOOL nowInFetchData = ASInterfaceStateIncludesFetchData(newState);
-  BOOL wasInFetchData = ASInterfaceStateIncludesFetchData(oldState);
 
-  if (nowInFetchData != wasInFetchData) {
-    if (nowInFetchData) {
-      [self didEnterFetchDataRange];
-    } else {
-      [self didExitFetchDataRange];
-    }
-  }
-  
   [self interfaceStateDidChange:newState fromState:oldState];
 }
 
