@@ -50,6 +50,8 @@ static NSString * const kStatus = @"status";
   AVPlayerItem *_currentPlayerItem;
   AVPlayer *_player;
   id _timeObserver;
+  int32_t _periodicTimeObserverTimescale;
+  CMTime _timeObserverInterval;
   
   ASImageNode *_placeholderImageNode; // TODO: Make ASVideoNode an ASImageNode subclass; remove this.
   
@@ -75,6 +77,7 @@ static NSString * const kStatus = @"status";
   
   self.playButton = [[ASDefaultPlayButton alloc] init];
   self.gravity = AVLayerVideoGravityResizeAspect;
+  _periodicTimeObserverTimescale = 10000;
   [self addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
   
   return self;
@@ -281,8 +284,10 @@ static NSString * const kStatus = @"status";
     if (_placeholderImageNode.image == nil) {
       [self generatePlaceholderImage];
     }
+  
     __weak __typeof(self) weakSelf = self;
-    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMake(1, 1) queue:NULL usingBlock:^(CMTime time){
+    _timeObserverInterval = CMTimeMake(1, _periodicTimeObserverTimescale);
+    _timeObserver = [_player addPeriodicTimeObserverForInterval:_timeObserverInterval queue:NULL usingBlock:^(CMTime time){
       [weakSelf periodicTimeObserver:time];
     }];
   }
@@ -612,6 +617,7 @@ static NSString * const kStatus = @"status";
 
 - (void)dealloc
 {
+  [_player removeTimeObserver:_timeObserver];
   _timeObserver = nil;
   [_playButton removeTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
   [self removePlayerItemObservers:_currentPlayerItem];

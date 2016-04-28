@@ -50,6 +50,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readwrite) BOOL muted;
 
 @property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
+//! Defaults to 100
+@property (nonatomic, assign, readwrite) int32_t periodicTimeObserverTimescale;
 
 //! Defaults to AVLayerVideoGravityResizeAspect
 @property (atomic) NSString *gravity;
