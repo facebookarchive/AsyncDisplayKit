@@ -242,6 +242,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)visibilityDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
 
+- (void)didEnterDisplayRange ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitDisplayRange ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didEnterFetchDataRange ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitFetchDataRange ASDISPLAYNODE_REQUIRES_SUPER;
+
 /**
  * Called just before the view is added to a window.
  */

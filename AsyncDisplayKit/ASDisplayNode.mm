@@ -2084,6 +2084,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertMainThread();
 }
 
+#pragma mark Hierarchy State
+
 - (void)willEnterHierarchy
 {
   ASDisplayNodeAssertMainThread();
@@ -2122,6 +2124,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     }
   }
 }
+
+#pragma mark Interface State
 
 - (void)clearContents
 {
@@ -2172,6 +2176,26 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)visibilityDidChange:(BOOL)isVisible
 {
     // subclass override
+}
+
+- (void)didEnterDisplayRange
+{
+  //subclass override
+}
+
+- (void)didExitDisplayRange
+{
+  //subclass override
+}
+
+- (void)didEnterFetchDataRange
+{
+  //subclass override
+}
+
+- (void)didExitFetchDataRange
+{
+  //subclass override
 }
 
 /**
@@ -2276,11 +2300,34 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     [self visibilityDidChange:nowVisible];
   }
   
+  BOOL nowInDisplay = ASInterfaceStateIncludesDisplay(newState);
+  BOOL wasInDisplay = ASInterfaceStateIncludesDisplay(oldState);
+  
+  if (nowInDisplay != wasInDisplay) {
+    if (nowInDisplay) {
+      [self didEnterDisplayRange];
+    } else {
+      [self didExitDisplayRange];
+    }
+  }
+  
+  BOOL nowInFetchData = ASInterfaceStateIncludesFetchData(newState);
+  BOOL wasInFetchData = ASInterfaceStateIncludesFetchData(oldState);
+
+  if (nowInFetchData != wasInFetchData) {
+    if (nowInFetchData) {
+      [self didEnterFetchDataRange];
+    } else {
+      [self didExitFetchDataRange];
+    }
+  }
+  
   [self interfaceStateDidChange:newState fromState:oldState];
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
 {
+  // subclass hook
 }
 
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState

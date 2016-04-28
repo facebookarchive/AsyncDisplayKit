@@ -86,6 +86,12 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @property (atomic, copy) void (^willDeallocBlock)(ASTestDisplayNode *node);
 @property (atomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
 @property (atomic) BOOL hasFetchedData;
+
+@property (atomic) BOOL didCallEnterDisplayRange;
+@property (atomic) BOOL didCallExitDisplayRange;
+
+@property (atomic) BOOL didCallEnterFetchDataRange;
+@property (atomic) BOOL didCallExitFetchDataRange;
 @end
 
 @interface ASTestResponderNode : ASTestDisplayNode
@@ -108,6 +114,30 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 {
   [super clearFetchedData];
   self.hasFetchedData = NO;
+}
+
+- (void)didEnterDisplayRange
+{
+  [super didEnterDisplayRange];
+  self.didCallEnterDisplayRange = YES;
+}
+
+- (void)didExitDisplayRange
+{
+  [super didExitDisplayRange];
+  self.didCallExitDisplayRange = YES;
+}
+
+- (void)didEnterFetchDataRange
+{
+  [super didEnterFetchDataRange];
+  self.didCallEnterFetchDataRange = YES;
+}
+
+- (void)didExitFetchDataRange
+{
+  [super didExitFetchDataRange];
+  self.didCallExitFetchDataRange = YES;
 }
 
 - (void)dealloc
@@ -1877,5 +1907,43 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   XCTAssert(node.bounds.size.width == 7, @"Wrong ASDisplayNode.bounds.size.width");
   XCTAssert(node.bounds.size.height == 8, @"Wrong ASDisplayNode.bounds.size.height");
 }
+
+//- (void)testDidEnterDisplayIsCalledWhenNodesEnterDisplayRange
+//{
+//  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+//
+//  [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
+//  
+//  XCTAssert([node didCallEnterDisplayRange]);
+//}
+//
+//- (void)testDidExitDisplayIsCalledWhenNodesExitDisplayRange
+//{
+//  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+//  
+//  [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
+//  [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
+//  
+//  XCTAssert([node didCallExitDisplayRange]);
+//}
+//
+//- (void)testDidEnterFetchDataIsCalledWhenNodesEnterFetchDataRange
+//{
+//  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+//  
+//  [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
+//  
+//  XCTAssert([node didCallEnterFetchDataRange]);
+//}
+//
+//- (void)testDidExitFetchDataIsCalledWhenNodesExitFetchDataRange
+//{
+//  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+//  
+//  [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
+//  [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
+//
+//  XCTAssert([node didCallExitFetchDataRange]);
+//}
 
 @end
