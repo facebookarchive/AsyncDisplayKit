@@ -522,6 +522,7 @@ static NSString * const kStatus = @"status";
 
 - (void)didPlayToEnd:(NSNotification *)notification
 {
+  self.playerState = ASVideoNodePlayerStateFinished;
   if ([_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)]) {
     [_delegate videoPlaybackDidFinish:self];
   }
