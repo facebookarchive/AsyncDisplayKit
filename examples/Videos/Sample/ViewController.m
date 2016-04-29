@@ -12,7 +12,7 @@
 #import "ViewController.h"
 
 @interface ViewController()<ASVideoNodeDelegate>
-@property (nonatomic) ASVideoNode *videoNode;
+@property (nonatomic,strong) ASVideoNode *guitarVideoNode;
 @end
 
 @implementation ViewController
@@ -20,9 +20,8 @@
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
-
-  ASVideoNode *guitarVideo = [self guitarVideo];
-  [self.view addSubnode:guitarVideo];
+  
+  [self.view addSubnode:self.guitarVideoNode];
   
   ASVideoNode *nicCageVideo = [self nicCageVideo];
   [self.view addSubnode:nicCageVideo];
@@ -31,19 +30,26 @@
   [self.view addSubnode:simonVideo];
 }
 
-- (ASVideoNode *)guitarVideo;
+- (ASVideoNode *)guitarVideoNode;
 {
-  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
+  if(_guitarVideoNode){
+    return _guitarVideoNode;
+  }
+  _guitarVideoNode = [[ASVideoNode alloc] init];
   
-  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-3045b261-7e93-4492-b7e5-5d6358376c9f-editedLiveAndDie.mov"]];
+  _guitarVideoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-3045b261-7e93-4492-b7e5-5d6358376c9f-editedLiveAndDie.mov"]];
   
-  videoNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height/3);
+  _guitarVideoNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height/3);
   
-  videoNode.gravity = AVLayerVideoGravityResizeAspectFill;
+  _guitarVideoNode.gravity = AVLayerVideoGravityResizeAspectFill;
   
-  videoNode.backgroundColor = [UIColor lightGrayColor];
+  _guitarVideoNode.backgroundColor = [UIColor lightGrayColor];
   
-  return videoNode;
+  _guitarVideoNode.periodicTimeObserverTimescale = 1; //Default is 100
+  
+  _guitarVideoNode.delegate = self;
+  
+  return _guitarVideoNode;
 }
 
 - (ASVideoNode *)nicCageVideo;
@@ -62,7 +68,7 @@
   nicCageVideo.shouldAutorepeat = YES;
   nicCageVideo.shouldAutoplay = YES;
   nicCageVideo.muted = YES;
-
+  
   return nicCageVideo;
 }
 
@@ -80,6 +86,7 @@
   simonVideo.backgroundColor = [UIColor lightGrayColor];
   simonVideo.shouldAutorepeat = YES;
   simonVideo.shouldAutoplay = YES;
+  simonVideo.muted = YES;
   
   return simonVideo;
 }
@@ -94,17 +101,49 @@
   playButton.bounds = CGRectMake(0, 0, playButton.calculatedSize.width, playButton.calculatedSize.height);
   playButton.position = CGPointMake([UIScreen mainScreen].bounds.size.width/4, ([UIScreen mainScreen].bounds.size.height/3)/2);
   [playButton setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:ASControlStateHighlighted];
-
+  
   return playButton;
 }
 
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode
 {
+  if(videoNode == self.guitarVideoNode){
+    if(videoNode.playerState == ASVideoNodePlayerStatePlaying){
+      [videoNode pause];
+    }else{
+      [videoNode play];
+    }
+    return;
+  }
   if (videoNode.player.muted == YES) {
     videoNode.player.muted = NO;
   } else {
     videoNode.player.muted = YES;
   }
+}
+
+#pragma mark - ASVideoNodeDelegate
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate{
+  //Ignore nicCageVideo
+  if(videoNode != _guitarVideoNode){
+    return;
+  }
+  
+  if(toSate == ASVideoNodePlayerStatePlaying){
+    NSLog(@"guitarVideoNode is playing");
+  }else if(toSate == ASVideoNodePlayerStateFinished){
+    NSLog(@"guitarVideoNode finished");
+  }else if(toSate == ASVideoNodePlayerStateLoading){
+    NSLog(@"guitarVideoNode is buffering");
+  }
+}
+
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second{
+  if(videoNode != _guitarVideoNode){
+    return;
+  }
+  
+  NSLog(@"guitarVideoNode playback time is: %f",second);
 }
 
 @end

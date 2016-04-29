@@ -12,6 +12,14 @@
 @class AVAsset, AVPlayer, AVPlayerItem;
 @protocol ASVideoNodeDelegate;
 
+typedef enum {
+  ASVideoNodePlayerStateUnknown,
+  ASVideoNodePlayerStatePlaying,
+  ASVideoNodePlayerStateLoading,
+  ASVideoNodePlayerStatePaused,
+  ASVideoNodePlayerStateFinished
+} ASVideoNodePlayerState;
+
 NS_ASSUME_NONNULL_BEGIN
 
 // IMPORTANT NOTES:
@@ -40,6 +48,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign, readwrite) BOOL muted;
 
+@property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
+//! Defaults to 100
+@property (nonatomic, assign, readwrite) int32_t periodicTimeObserverTimescale;
+
 //! Defaults to AVLayerVideoGravityResizeAspect
 @property (atomic) NSString *gravity;
 
@@ -63,6 +75,31 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion The video's play state is toggled if this method is not implemented.
  */
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
+/**
+ * @abstract Delegate method invoked when player changes state.
+ * @param videoNode The video node that was tapped.
+ * @param state player state before this change.
+ * @param toSate player new state.
+ * @discussion This method is called after each state change
+ */
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate;
+/**
+ * @abstract Ssks delegate if state change is allowed
+ * ASVideoNodePlayerStatePlaying or ASVideoNodePlayerStatePaused.
+ * asks delegate if state change is allowed.
+ * @param videoNode The video node that was tapped.
+ * @param state player state that is going to be set.
+ * @discussion Delegate method invoked when player changes it's state to
+ * ASVideoNodePlayerStatePlaying or ASVideoNodePlayerStatePaused 
+ * and asks delegate if state change is valid
+ */
+- (BOOL)videoNode:(ASVideoNode*)videoNode shouldChangePlayerStateTo:(ASVideoNodePlayerState)state;
+/**
+ * @abstract Delegate method invoked when player playback time is updated.
+ * @param videoNode The video node that was tapped.
+ * @param second current playback time in seconds.
+ */
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second;
 @end
 NS_ASSUME_NONNULL_END
 #endif
