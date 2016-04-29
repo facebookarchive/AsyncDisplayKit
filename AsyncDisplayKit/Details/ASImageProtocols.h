@@ -63,7 +63,7 @@ typedef void(^ASImageCacherCompletion)(id <ASImageContainerProtocol> _Nullable i
 
 typedef void(^ASImageDownloaderCompletion)(id <ASImageContainerProtocol> _Nullable image, NSError * _Nullable error, id _Nullable downloadIdentifier);
 typedef void(^ASImageDownloaderProgress)(CGFloat progress);
-typedef void(^ASImageDownloaderProgressImage)(UIImage *progressImage, id _Nullable downloadIdentifier);
+typedef void(^ASImageDownloaderProgressImage)(UIImage *progressImage, CGFloat progress, id _Nullable downloadIdentifier);
 
 typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
   ASImageDownloaderPriorityPreload = 0,

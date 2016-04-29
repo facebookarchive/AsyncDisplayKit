@@ -99,17 +99,15 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(_videoLock);
 
-  AVPlayerItem *playerItem = nil;
-  
   if (_asset != nil) {
-    if (_asset.tracks.count > 0) {
-      playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
-    } else if ([_asset isKindOfClass:[AVURLAsset class]]) {
-      playerItem = [[AVPlayerItem alloc] initWithURL:((AVURLAsset *)_asset).URL];
+    if ([_asset isKindOfClass:[AVURLAsset class]]) {
+      return [[AVPlayerItem alloc] initWithURL:((AVURLAsset *)_asset).URL];
+    } else {
+      return [[AVPlayerItem alloc] initWithAsset:_asset];
     }
   }
 
-  return playerItem;
+  return nil;
 }
 
 - (void)addPlayerItemObservers:(AVPlayerItem *)playerItem
@@ -177,16 +175,16 @@ static NSString * const kStatus = @"status";
 - (void)imageAtTime:(CMTime)imageTime completionHandler:(void(^)(UIImage *image))completionHandler
 {
   ASPerformBlockOnBackgroundThread(^{
-    ASDN::MutexLocker l(_videoLock);
+    AVAsset *asset = self.asset;
 
     // Skip the asset image generation if we don't have any tracks available that are capable of supporting it
-    NSArray<AVAssetTrack *>* visualAssetArray = [_asset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual];
+    NSArray<AVAssetTrack *>* visualAssetArray = [asset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual];
     if (visualAssetArray.count == 0) {
       completionHandler(nil);
       return;
     }
 
-    AVAssetImageGenerator *previewImageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:_asset];
+    AVAssetImageGenerator *previewImageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
     previewImageGenerator.appliesPreferredTrackTransform = YES;
 
     [previewImageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:imageTime]]

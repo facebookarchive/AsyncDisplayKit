@@ -73,6 +73,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readwrite) BOOL shouldCacheImage;
 
+/**
+ * The image quality of the current image. This is a number between 0 and 1 and can be used to track
+ * progressive progress. Calculated by dividing number of bytes / expected number of total bytes.
+ */
+@property (nonatomic, assign, readonly) CGFloat currentImageQuality;
+
+/**
+ * The image quality (value between 0 and 1) of the last image that completed displaying.
+ */
+@property (nonatomic, assign, readonly) CGFloat renderedImageQuality;
+
 @end
 
 

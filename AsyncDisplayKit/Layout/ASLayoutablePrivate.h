@@ -90,142 +90,112 @@ extern void ASLayoutableClearCurrentContext();
 \
 - (CGFloat)spacingAfter\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _environmentState.layoutOptionsState.spacingAfter;\
 }\
 \
 - (void)setSpacingAfter:(CGFloat)spacingAfter\
 {\
-  _propertyLock.lock();\
   _environmentState.layoutOptionsState.spacingAfter = spacingAfter;\
   [self propagateUpLayoutOptionsState];\
-  _propertyLock.unlock();\
 }\
 \
 - (CGFloat)spacingBefore\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _environmentState.layoutOptionsState.spacingBefore;\
 }\
 \
 - (void)setSpacingBefore:(CGFloat)spacingBefore\
 {\
-  _propertyLock.lock();\
   _environmentState.layoutOptionsState.spacingBefore = spacingBefore;\
   [self propagateUpLayoutOptionsState];\
-  _propertyLock.unlock();\
 }\
 \
 - (BOOL)flexGrow\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _environmentState.layoutOptionsState.flexGrow;\
 }\
 \
 - (void)setFlexGrow:(BOOL)flexGrow\
 {\
-  _propertyLock.lock();\
   _environmentState.layoutOptionsState.flexGrow = flexGrow;\
   [self propagateUpLayoutOptionsState];\
-  _propertyLock.unlock();\
 }\
 \
 - (BOOL)flexShrink\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _environmentState.layoutOptionsState.flexShrink;\
 }\
 \
 - (void)setFlexShrink:(BOOL)flexShrink\
 {\
-  _propertyLock.lock();\
   _environmentState.layoutOptionsState.flexShrink = flexShrink;\
   [self propagateUpLayoutOptionsState];\
-  _propertyLock.unlock();\
 }\
 \
 - (ASRelativeDimension)flexBasis\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _environmentState.layoutOptionsState.flexBasis;\
 }\
 \
 - (void)setFlexBasis:(ASRelativeDimension)flexBasis\
 {\
-  _propertyLock.lock();\
   _environmentState.layoutOptionsState.flexBasis = flexBasis;\
   [self propagateUpLayoutOptionsState];\
-  _propertyLock.unlock();\
 }\
 \
 - (ASStackLayoutAlignSelf)alignSelf\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _environmentState.layoutOptionsState.alignSelf;\
 }\
 \
 - (void)setAlignSelf:(ASStackLayoutAlignSelf)alignSelf\
 {\
-  _propertyLock.lock();\
   _environmentState.layoutOptionsState.alignSelf = alignSelf;\
   [self propagateUpLayoutOptionsState];\
-  _propertyLock.unlock();\
 }\
 \
 - (CGFloat)ascender\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _environmentState.layoutOptionsState.ascender;\
 }\
 \
 - (void)setAscender:(CGFloat)ascender\
 {\
-  _propertyLock.lock();\
   _environmentState.layoutOptionsState.ascender = ascender;\
   [self propagateUpLayoutOptionsState];\
-  _propertyLock.unlock();\
 }\
 \
 - (CGFloat)descender\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _environmentState.layoutOptionsState.descender;\
 }\
 \
 - (void)setDescender:(CGFloat)descender\
 {\
-  _propertyLock.lock();\
   _environmentState.layoutOptionsState.descender = descender;\
   [self propagateUpLayoutOptionsState];\
-  _propertyLock.unlock();\
 }\
 \
 - (ASRelativeSizeRange)sizeRange\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _environmentState.layoutOptionsState.sizeRange;\
 }\
 \
 - (void)setSizeRange:(ASRelativeSizeRange)sizeRange\
 {\
-  _propertyLock.lock();\
   _environmentState.layoutOptionsState.sizeRange = sizeRange;\
   [self propagateUpLayoutOptionsState];\
-  _propertyLock.unlock();\
 }\
 \
 - (CGPoint)layoutPosition\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _environmentState.layoutOptionsState.layoutPosition;\
 }\
 \
 - (void)setLayoutPosition:(CGPoint)layoutPosition\
 {\
-  _propertyLock.lock();\
   _environmentState.layoutOptionsState.layoutPosition = layoutPosition;\
   [self propagateUpLayoutOptionsState];\
-  _propertyLock.unlock();\
 }\
 
 
@@ -234,39 +204,30 @@ extern void ASLayoutableClearCurrentContext();
 #define ASEnvironmentLayoutExtensibilityForwarding \
 - (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx\
 {\
-  _propertyLock.lock();\
   _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(self, idx, value);\
-  _propertyLock.unlock();\
 }\
 \
 - (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(self, idx);\
 }\
 \
 - (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx\
 {\
-  _propertyLock.lock();\
   _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(self, idx, value);\
-  _propertyLock.unlock();\
 }\
 \
 - (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(self, idx);\
 }\
 \
 - (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx\
 {\
-  _propertyLock.lock();\
   _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(self, idx, value);\
-  _propertyLock.unlock();\
 }\
 \
 - (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx\
 {\
-  ASDN::MutexLocker l(_propertyLock);\
   return _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(self, idx);\
 }\

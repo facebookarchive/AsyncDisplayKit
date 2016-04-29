@@ -43,6 +43,11 @@ typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode * _Nonnull node);
 typedef void (^ASDisplayNodeContextModifier)(_Nonnull CGContextRef context);
 
 /**
+ * ASDisplayNode layout spec block. This block can be used instead of implementing layoutSpecThatFits: in subclass
+ */
+typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
+
+/**
  Interface state is available on ASDisplayNode and ASViewController, and
  allows checking whether a node is in an interface situation where it is prudent to trigger certain
  actions: measurement, data fetching, display, and visibility (the latter for animations or other onscreen-only effects).
@@ -251,6 +256,21 @@ NS_ASSUME_NONNULL_BEGIN
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
+
+
+/**
+ * @abstract Provides a way to declare a block to provide an ASLayoutSpec without having to subclass ASDisplayNode and
+ * implement layoutSpecThatFits:
+ *
+ * @return A block that takes a constrainedSize ASSizeRange argument, and must return an ASLayoutSpec that includes all
+ * of the subnodes to position in the layout. This input-output relationship is identical to the subclass override
+ * method -layoutSpecThatFits:
+ *
+ * @warning Subclasses that implement -layoutSpecThatFits: must not also use .layoutSpecBlock. Doing so will trigger
+ * an exception. A future version of the framework may support using both, calling them serially, with the
+ * .layoutSpecBlock superseding any values set by the method override.
+ */
+@property (nonatomic, readwrite, copy, nullable) ASLayoutSpecBlock layoutSpecBlock;
 
 /** 
  * @abstract Return the calculated size.

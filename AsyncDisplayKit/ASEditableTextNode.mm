@@ -36,6 +36,8 @@
 
 @implementation ASPanningOverriddenUITextView
 
+#if TARGET_OS_IOS
+ // tvOS doesn't support self.scrollsToTop
 - (BOOL)scrollEnabled
 {
   return _shouldBlockPanGesture;
@@ -48,6 +50,7 @@
 
   [super setScrollEnabled:YES];
 }
+#endif
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {

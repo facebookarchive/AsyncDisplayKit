@@ -103,4 +103,13 @@ ASDISPLAYNODE_EXTERN_C_END
  */
 - (void)cancelLayoutTransitionsInProgress;
 
+/**
+ * @abstract Indicates that the receiver and all subnodes have finished displaying. May be called more than once, for example if the receiver has
+ * a network image node. This is called after the first display pass even if network image nodes have not downloaded anything (text would be done,
+ * and other nodes that are ready to do their final display). Each render of every progressive jpeg network node would cause this to be called, so
+ * this hook could be called up to 1 + (pJPEGcount * pJPEGrenderCount) times. The render count depends on how many times the downloader calls the
+ * progressImage block.
+ */
+- (void)hierarchyDisplayDidFinish;
+
 @end

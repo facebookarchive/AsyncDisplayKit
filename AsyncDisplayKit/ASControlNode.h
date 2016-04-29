@@ -126,7 +126,7 @@ typedef NS_OPTIONS(NSUInteger, ASControlState) {
 /**
  @abstract How the node looks when it isn't focused. Exposed here so that subclasses can override.
  */
-- (void)setDefaultState;
+- (void)setDefaultFocusAppearance;
 #endif
 @end
 
