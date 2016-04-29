@@ -96,4 +96,3 @@
 - (void)scrollToPageAtIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end
-
