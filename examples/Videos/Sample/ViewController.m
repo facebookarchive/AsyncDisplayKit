@@ -110,6 +110,8 @@
   if(videoNode == self.guitarVideoNode){
     if(videoNode.playerState == ASVideoNodePlayerStatePlaying){
       [videoNode pause];
+    }else if(videoNode.playerState == ASVideoNodePlayerStateLoading) {
+      [videoNode pause];
     }else{
       [videoNode play];
     }

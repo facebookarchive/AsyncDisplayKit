@@ -28,6 +28,7 @@ static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
 
 static void *ASVideoNodeContext = &ASVideoNodeContext;
 static NSString * const kPlaybackLikelyToKeepUpKey = @"playbackLikelyToKeepUp";
+static NSString * const kplaybackBufferEmpty = @"playbackBufferEmpty";
 static NSString * const kStatus = @"status";
 
 @interface ASVideoNode ()
@@ -121,6 +122,7 @@ static NSString * const kStatus = @"status";
 {
   [playerItem addObserver:self forKeyPath:kStatus options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:ASVideoNodeContext];
   [playerItem addObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
+  [playerItem addObserver:self forKeyPath:kplaybackBufferEmpty options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
 
   NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
   [notificationCenter addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:playerItem];
@@ -133,6 +135,7 @@ static NSString * const kStatus = @"status";
   @try {
     [playerItem removeObserver:self forKeyPath:kStatus context:ASVideoNodeContext];
     [playerItem removeObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey context:ASVideoNodeContext];
+    [playerItem removeObserver:self forKeyPath:kplaybackBufferEmpty context:ASVideoNodeContext];
   }
   @catch (NSException * __unused exception) {
     NSLog(@"Unnecessary KVO removal");
@@ -236,8 +239,7 @@ static NSString * const kStatus = @"status";
 
   if ([keyPath isEqualToString:kStatus]) {
     if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
-      [_spinner removeFromSupernode];
-      _spinner = nil;
+      [self removeSpinner];
       // If we don't yet have a placeholder image update it now that we should have data available for it
       if (_placeholderImageNode.image == nil) {
         [self generatePlaceholderImage];
@@ -249,6 +251,10 @@ static NSString * const kStatus = @"status";
   } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
     if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
       [self play]; // autoresume after buffer catches up
+    }
+  } else if ([keyPath isEqualToString:kplaybackBufferEmpty]) {
+    if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+      [self showSpinner]; // show spinner and set ASVideoNodePlayerStateLoading
     }
   }
 }
@@ -471,19 +477,9 @@ static NSString * const kStatus = @"status";
     _playButton.alpha = 0.0;
   }];
   if (![self ready]) {
-    if (!_spinner) {
-      _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-        UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
-        spinnnerView.color = [UIColor whiteColor];
-
-        return spinnnerView;
-      }];
-
-      [self addSubnode:_spinner];
-    }
-    self.playerState = ASVideoNodePlayerStateLoading;
-    [(UIActivityIndicatorView *)_spinner.view startAnimating];
+    [self showSpinner];
   }else{
+    [self removeSpinner];
     self.playerState = ASVideoNodePlayerStatePlaying;
   }
 }
@@ -491,6 +487,35 @@ static NSString * const kStatus = @"status";
 - (BOOL)ready
 {
   return _currentPlayerItem.status == AVPlayerItemStatusReadyToPlay;
+}
+
+- (void)showSpinner
+{
+  ASDN::MutexLocker l(_videoLock);
+  
+  if (!_spinner) {
+    _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
+      UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
+      spinnnerView.color = [UIColor whiteColor];
+      
+      return spinnnerView;
+    }];
+    
+    [self addSubnode:_spinner];
+  }
+  self.playerState = ASVideoNodePlayerStateLoading;
+  [(UIActivityIndicatorView *)_spinner.view startAnimating];
+}
+
+- (void)removeSpinner
+{
+  ASDN::MutexLocker l(_videoLock);
+  
+  if(!_spinner) {
+    return;
+  }
+  [_spinner removeFromSupernode];
+  _spinner = nil;
 }
 
 - (void)pause
@@ -501,7 +526,7 @@ static NSString * const kStatus = @"status";
   }
   self.playerState = ASVideoNodePlayerStatePaused;
   [_player pause];
-  [((UIActivityIndicatorView *)_spinner.view) stopAnimating];
+  [self removeSpinner];
   _shouldBePlaying = NO;
   [UIView animateWithDuration:0.15 animations:^{
     _playButton.alpha = 1.0;
