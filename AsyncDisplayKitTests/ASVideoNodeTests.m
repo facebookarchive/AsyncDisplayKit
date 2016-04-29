@@ -6,6 +6,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#import <OCMock/OCMock.h>
+
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 #import <AVFoundation/AVFoundation.h>
@@ -17,6 +19,7 @@
   AVURLAsset *_firstAsset;
   AVAsset *_secondAsset;
   NSURL *_url;
+  NSArray *_requestedKeys;
 }
 @end
 
@@ -32,6 +35,7 @@
 @property (atomic, readwrite) BOOL shouldBePlaying;
 
 - (void)setVideoPlaceholderImage:(UIImage *)image;
+- (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray *)requestedKeys;
 
 @end
 
@@ -43,6 +47,7 @@
   _firstAsset = [AVURLAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
   _secondAsset = [AVAsset assetWithURL:[NSURL URLWithString:@"secondURL"]];
   _url = [NSURL URLWithString:@"testURL"];
+  _requestedKeys = @[ @"playable" ];
 }
 
 
@@ -131,22 +136,41 @@
   XCTAssertNil(_videoNode.player);
 }
 
-- (void)testPlayerIsCreatedInFetchData
+- (void)testPlayerIsCreatedAsynchronouslyInFetchData
 {
-  _videoNode.asset = _firstAsset;
+  AVAsset *asset = _firstAsset;
+  
+  id assetMock = [OCMockObject partialMockForObject:asset];
+  id videoNodeMock = [OCMockObject partialMockForObject:_videoNode];
+  
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  [[[videoNodeMock expect] andForwardToRealObject] prepareToPlayAsset:assetMock withKeys:_requestedKeys];
+  
+  _videoNode.asset = assetMock;
   _videoNode.interfaceState = ASInterfaceStateFetchData;
+  
+  [videoNodeMock verifyWithDelay:1.0f];
   
   XCTAssertNotNil(_videoNode.player);
 }
 
-- (void)testPlayerIsCreatedInFetchDataWithURL
+- (void)testPlayerIsCreatedAsynchronouslyInFetchDataWithURL
 {
-  _videoNode.asset = [AVAsset assetWithURL:_url];
+  AVAsset *asset = [AVAsset assetWithURL:_url];
+  
+  id assetMock = [OCMockObject partialMockForObject:asset];
+  id videoNodeMock = [OCMockObject partialMockForObject:_videoNode];
+  
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  [[[videoNodeMock expect] andForwardToRealObject] prepareToPlayAsset:assetMock withKeys:_requestedKeys];
+  
+  _videoNode.asset = assetMock;
   _videoNode.interfaceState = ASInterfaceStateFetchData;
+  
+  [videoNodeMock verifyWithDelay:1.0f];
   
   XCTAssertNotNil(_videoNode.player);
 }
-
 
 - (void)testPlayerLayerNodeIsAddedOnDidLoadIfVisibleAndAutoPlaying
 {
@@ -284,13 +308,18 @@
 
 - (void)testVideoThatDoesNotAutorepeatsShouldPauseOnPlaybackEnd
 {
-  _videoNode.asset = _firstAsset;
+  id assetMock = [OCMockObject partialMockForObject:_firstAsset];
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  
+  _videoNode.asset = assetMock;
   _videoNode.shouldAutorepeat = NO;
 
   [_videoNode didLoad];
   [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
   [_videoNode play];
 
+  [_videoNode prepareToPlayAsset:assetMock withKeys:_requestedKeys];
+  
   XCTAssertTrue(_videoNode.isPlaying);
 
   [[NSNotificationCenter defaultCenter] postNotificationName:AVPlayerItemDidPlayToEndTimeNotification object:_videoNode.currentItem];
@@ -372,9 +401,20 @@
 
 - (void)testClearingFetchedContentShouldClearAssetData
 {
-  _videoNode.asset = _firstAsset;
+  AVAsset *asset = _firstAsset;
+  
+  id assetMock = [OCMockObject partialMockForObject:asset];
+  id videoNodeMock = [OCMockObject partialMockForObject:_videoNode];
+  
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  [[[videoNodeMock expect] andForwardToRealObject] prepareToPlayAsset:assetMock withKeys:_requestedKeys];
+  
+  _videoNode.asset = assetMock;
   [_videoNode fetchData];
   [_videoNode setVideoPlaceholderImage:[[UIImage alloc] init]];
+  
+  [videoNodeMock verifyWithDelay:1.0f];
+  
   XCTAssertNotNil(_videoNode.player);
   XCTAssertNotNil(_videoNode.currentItem);
   XCTAssertNotNil(_videoNode.placeholderImageNode.image);
