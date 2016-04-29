@@ -316,9 +316,8 @@
 
   [_videoNode didLoad];
   [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
-  [_videoNode play];
-
   [_videoNode prepareToPlayAsset:assetMock withKeys:_requestedKeys];
+  [_videoNode play];
   
   XCTAssertTrue(_videoNode.isPlaying);
 
@@ -330,11 +329,15 @@
 
 - (void)testVideoThatAutorepeatsShouldRepeatOnPlaybackEnd
 {
-  _videoNode.asset = _firstAsset;
+  id assetMock = [OCMockObject partialMockForObject:_firstAsset];
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  
+  _videoNode.asset = assetMock;
   _videoNode.shouldAutorepeat = YES;
 
   [_videoNode didLoad];
   [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   [_videoNode play];
 
   [[NSNotificationCenter defaultCenter] postNotificationName:AVPlayerItemDidPlayToEndTimeNotification object:_videoNode.currentItem];
@@ -344,9 +347,13 @@
 
 - (void)testVideoResumedWhenBufferIsLikelyToKeepUp
 {
-  _videoNode.asset = _firstAsset;
+  id assetMock = [OCMockObject partialMockForObject:_firstAsset];
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  
+  _videoNode.asset = assetMock;
 
   [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   [_videoNode pause];
   _videoNode.shouldBePlaying = YES;
 
