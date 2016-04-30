@@ -106,7 +106,7 @@ static NSString * const kStatus = @"status";
   return nil;
 }
 
-- (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray *)requestedKeys
+- (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray<NSString *> *)requestedKeys
 {
   for (NSString *key in requestedKeys) {
     NSError *error = nil;
@@ -122,7 +122,7 @@ static NSString * const kStatus = @"status";
   }
     
   AVPlayerItem *playerItem = [self constructPlayerItem];
-  self.currentItem = playerItem;
+  [self setCurrentItem:playerItem];
   
   if (_player != nil) {
     [_player replaceCurrentItemWithPlayerItem:playerItem];
@@ -289,14 +289,13 @@ static NSString * const kStatus = @"status";
   {
     ASDN::MutexLocker l(_videoLock);
 
-    if (_asset != nil) {
-      NSArray *requestedKeys = @[ @"playable" ];
-      [_asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
-          dispatch_async(dispatch_get_main_queue(), ^{
-            [self prepareToPlayAsset:_asset withKeys:requestedKeys];
-          });
-      }];
-    }
+    AVAsset *asset = self.asset;
+    NSArray<NSString *> *requestedKeys = @[ @"playable" ];
+    [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
+      ASPerformBlockOnMainThread(^{
+        [self prepareToPlayAsset:asset withKeys:requestedKeys];
+      });
+    }];
   }
 }
 
