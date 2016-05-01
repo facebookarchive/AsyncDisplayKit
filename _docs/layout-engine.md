@@ -41,7 +41,7 @@ Whle this example is extremely simple, it gives you an idea of how to use a layo
 
 ### ASLayoutable
 
-Layout spec's children can be any object whose class conforms to the `<ASLayoutable>` protocol.  All nodes, as well as all layout specs conform to the `<ASLayoutable>` protocol.  This means that your layout can be build up in composable chunks until you have what you want.
+Layout spec's children can be any object whose class conforms to the `<ASLayoutable>` protocol.  All nodes, as well as all layout specs conform to the `<ASLayoutable>` protocol.  This means that your layout can be built up in composable chunks until you have what you want.
 
 Say you wanted to add 8 pts of padding to the stack you've already set up:
 
