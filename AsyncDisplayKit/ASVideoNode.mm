@@ -100,14 +100,39 @@ static NSString * const kStatus = @"status";
   ASDN::MutexLocker l(_videoLock);
 
   if (_asset != nil) {
-    if ([_asset isKindOfClass:[AVURLAsset class]]) {
-      return [[AVPlayerItem alloc] initWithURL:((AVURLAsset *)_asset).URL];
-    } else {
-      return [[AVPlayerItem alloc] initWithAsset:_asset];
-    }
+    return [[AVPlayerItem alloc] initWithAsset:_asset];
   }
 
   return nil;
+}
+
+- (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray<NSString *> *)requestedKeys
+{
+  for (NSString *key in requestedKeys) {
+    NSError *error = nil;
+    AVKeyValueStatus keyStatus = [asset statusOfValueForKey:key error:&error];
+    if (keyStatus == AVKeyValueStatusFailed) {
+      NSLog(@"Asset loading failed with error: %@", error);
+    }
+  }
+  
+  if (![asset isPlayable]) {
+    NSLog(@"Asset is not playable.");
+    return;
+  }
+    
+  AVPlayerItem *playerItem = [self constructPlayerItem];
+  [self setCurrentItem:playerItem];
+  
+  if (_player != nil) {
+    [_player replaceCurrentItemWithPlayerItem:playerItem];
+  } else {
+    self.player = [AVPlayer playerWithPlayerItem:playerItem];
+  }
+  
+  if (_placeholderImageNode.image == nil) {
+    [self generatePlaceholderImage];
+  }
 }
 
 - (void)addPlayerItemObservers:(AVPlayerItem *)playerItem
@@ -264,18 +289,13 @@ static NSString * const kStatus = @"status";
   {
     ASDN::MutexLocker l(_videoLock);
 
-    AVPlayerItem *playerItem = [self constructPlayerItem];
-    self.currentItem = playerItem;
-
-    if (_player != nil) {
-      [_player replaceCurrentItemWithPlayerItem:playerItem];
-    } else {
-      self.player = [AVPlayer playerWithPlayerItem:playerItem];
-    }
-
-    if (_placeholderImageNode.image == nil) {
-      [self generatePlaceholderImage];
-    }
+    AVAsset *asset = self.asset;
+    NSArray<NSString *> *requestedKeys = @[ @"playable" ];
+    [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
+      ASPerformBlockOnMainThread(^{
+        [self prepareToPlayAsset:asset withKeys:requestedKeys];
+      });
+    }];
   }
 }
 
