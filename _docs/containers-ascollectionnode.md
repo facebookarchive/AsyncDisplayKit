@@ -5,39 +5,77 @@ permalink: /docs/containers-ascollectionnode.html
 next: containers-aspagernode.html
 ---
 
-`ASCollectionNode` is equivalent to UIKit's `UICollectionView` and can be used in place of any UICollectionView. 
+ASCollectionNode is equivalent to UIKit's UICollectionView and can be used in place of any UICollectionView. 
 
 ASCollectionNode replaces UICollectionView's required method
 
-`collectionView:cellForItemAtIndexPath:` 
+<div class = "highlight-group">
+<span class="language-toggle">
+  <a data-lang="swift" class="swiftButton">Swift</a>
+  <a data-lang="objective-c" class = "active objcButton">Objective-C</a>
+</span>
+
+<div class = "code">
+  <pre lang="objc" class="objcCode">
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath;
+  </pre>
+
+  <pre lang="swift" class = "swiftCode hidden">
+override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell
+  </pre>
+</div>
+</div>
 
 with your choice of **_one_** of the following methods
 
-`- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath` 
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
 
-or
-
-`- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath` **_(recommended)_**
-
-<div class = "note">
-Note that these are the same methods as the `ASTableNode`! Please read the previous <a href = "containers-astablenode.html">`ASTableNode`</a> section as most of the details here are identical and so we will gloss over them quickly. 
+<div class = "code">
+  <pre lang="objc" class="objcCode">
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+</pre>
+  <pre lang="swift" class = "swiftCode hidden">
+override func collectionView(collectionView: ASCollectionView, nodeForItemAtIndexPath indexPath: NSIndexPath) -> ASCellNode
+  </pre>
+</div>
 </div>
 
-As noted in the previous section
+<p>
+or
+</p>
+
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+
+<div class = "code">
+  <pre lang="objc" class="objcCode">
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+</pre>
+  <pre lang="swift" class = "swiftCode hidden">
+override func collectionView(collectionView: ASCollectionView, nodeBlockForItemAtIndexPath indexPath: NSIndexPath) -> ASCellNodeBlock
+  </pre>
+</div>
+</div>
+
+It is recommended that you use the node block version of the method so that your collection node will be able to prepare and display all of its cells concurrently.
+
+As noted in the previous section:
+
 <ul>
-  <li>both of these ASCollectionView methods should not implement reuse (they will be called once per row)</li>
-  <li>`collectionView:nodeBlockForRowAtIndexPath:` is preferred to `collectionView:nodeForItemAtIndexPath:` for its concurrent processing</li>
-  <li>it is very important that node blocks be thread-safe</li>
-  <li>ASCellNodes are used by ASTableNode, ASCollectionNod and ASPagerNode</li>
+  <li>ASCollectionNodes do not utilize cell resuse.</li>
+  <li>Using the "nodeBlock" method is preferred.</li>
+  <li>It is very important that the returned node blocks are thread-safe.</li>
+  <li>ASCellNodes can be used by ASTableNode, ASCollectionNode and ASPagerNode.</li>
 </ul>
 
-##Replace UICollectionViewController with ASViewController##
+### Replacing a UICollectionViewController with an ASViewController
 
-AsyncDisplayKit does not offer an equivalent to UICollectionViewController. Instead, you can use the flexibility of ASViewController to recreate any type of UI<UIKitSubclass>ViewController. 
+AsyncDisplayKit does not offer an equivalent to UICollectionViewController. Instead, you can use the flexibility of ASViewController to recreate any type of UI<em>...</em>ViewController. 
 
 Consider, the following ASViewController subclass.
 
-An `ASCollectionNode` is assigned to be managed by an `ASViewController` in its `initWithNode:` designated initializer method, thus making it a sort of ASCollectionNodeController.
+An ASCollectionNode is assigned to be managed by an `ASViewController` in its `-initWithNode:` designated initializer method, thus making it a sort of ASCollectionNodeController.
 
 <div class = "highlight-group">
 <span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
@@ -72,16 +110,16 @@ init() {
 </div>
 </div>
 
-This works just as well with any node such as an ASTableNode, ASPagerNode, etc.
+This works just as well with any node including as an ASTableNode, ASPagerNode, etc.
 
-##Accessing the ASCollectionView##
+### Accessing the ASCollectionView
 If you've used previous versions of ASDK, you'll notice that `ASCollectionView` has been removed in favor of `ASCollectionNode`.
 
 <div class = "note">
-`ASCollectionView` (an actual UICollectionView subclass) is still used as an internal property of `ASCollectionNode`. While it should not be created directly, it can still be used directly by accessing the .view property of an `ASCollectionNode`.
-</div>
+ASCollectionView, an actual UICollectionView subclass, is still used internally by ASCollectionNode. While it should not be created directly, it can still be used directly by accessing the .view property of an ASCollectionNode.
 
-<div class = "note">Do not forget that anything that accesses a view using AsyncDisplayKit's node containers or nodes should be done in viewDidLoad or didLoad, respectively.</div>
+Don't forget that a node's <code>view</code> or <code>layer</code> property should only be accessed after viewDidLoad or didLoad, respectively, have been called.
+</div>
 
 The LocationCollectionNodeController above accesses the ASCollectionView directly in viewDidLoad
 
@@ -113,17 +151,20 @@ override func viewDidLoad() {
 </div>
 </div>
 
-##Table Row Height##
+### Cell Sizing and Layout
 
-As discussed in the previous <a href = "containers-astablenode.html">`ASTableNode`</a> section, ASCollectionNodes and ASTableNodes do not need to keep track of the height of their ASCellNodes. 
+As discussed in the <a href = "containers-astablenode.html">previous section</a>, ASCollectionNodes and ASTableNodes do not need to keep track of the height of their ASCellNodes.
 
-***constrainedSizeForNode (also in table, but more important for collection)
-    - check that (0,0) min and (infinity, infinity) max
-- example sample photo grid
-    - popover, rotated -> how to get size constraint (USE constrainedSizeForNode to do simple divide by 3 width thing)
-- document itemSize (check what happens in ASDKgram)
+Right now, cells will grow to fit their constrained size and will be laid out by whatever UICollectionViewLayout you provide.
 
-##Sample Apps with ASCollectionNodes##
+Soon, there will be a method such as ASTableNode's `-constrainedSizeForRow:` but at the moment, if you'd like to constrain the size of a cell used in a collection node, you need to wrap your layoutSpec object in an `ASStaticLayoutSpec` and provide it with a 
+
+### Examples
+
+The most detailed example of laying out the cells of an ASCollectionNode is the <a href = "https://github.com/facebook/AsyncDisplayKit/tree/master/examples/CustomCollectionView">CustomCollectionView</a> app.  It includes a Pinterest style cell layout using an ASCollectionNode and a custom `UICollectionViewLayout`.
+
+#### More Sample Apps with ASCollectionNodes
+
 <ul>
   <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a></li>
   <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/CatDealsCollectionView">CatDealsCollectionView</a></li>
