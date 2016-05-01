@@ -36,6 +36,13 @@ static NSString * const kStatus = @"status";
   ASDN::RecursiveMutex _videoLock;
   
   __weak id<ASVideoNodeDelegate> _delegate;
+  struct {
+    unsigned int delegateVideNodeShouldChangePlayerStateTo:1;
+    unsigned int delegateVideoPlaybackDidFinish:1;
+    unsigned int delegateVideoNodeWasTapped:1;
+    unsigned int delegateVideoNodeWillChangePlayerStateToState:1;
+    unsigned int delegateVideoNodeDidPlayToSecond:1;
+  } _delegateFlags;
   
   BOOL _shouldBePlaying;
   
@@ -254,15 +261,16 @@ static NSString * const kStatus = @"status";
     }
   } else if ([keyPath isEqualToString:kplaybackBufferEmpty]) {
     if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
-      [self showSpinner]; // show spinner and set ASVideoNodePlayerStateLoading
+      self.playerState = ASVideoNodePlayerStateLoading;
+      [self showSpinner];
     }
   }
 }
 
 - (void)tapped
 {
-  if (self.delegate && [self.delegate respondsToSelector:@selector(videoNodeWasTapped:)]) {
-    [self.delegate videoNodeWasTapped:self];
+  if (_delegateFlags.delegateVideoNodeWasTapped) {
+    [_delegate videoNodeWasTapped:self];
   } else {
     if (_shouldBePlaying) {
       [self pause];
@@ -307,7 +315,7 @@ static NSString * const kStatus = @"status";
     return;
   }
   
-  if(_delegate && [_delegate respondsToSelector:@selector(videoNode:didPlayToSecond:)]){
+  if(_delegateFlags.delegateVideoNodeDidPlayToSecond){
     [_delegate videoNode:self didPlayToSecond:timeInSeconds];
   }
 }
@@ -353,7 +361,7 @@ static NSString * const kStatus = @"status";
     return;
   }
   
-  if ([_delegate respondsToSelector:@selector(videoNode:willChangePlayerState:toState:)]) {
+  if (_delegateFlags.delegateVideoNodeWillChangePlayerStateToState) {
     [_delegate videoNode:self willChangePlayerState:oldState toState:playerState];
   }
   
@@ -411,6 +419,24 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(_videoLock);
   return _player;
+}
+
+- (id<ASVideoNodeDelegate>)delegate{
+  return _delegate;
+}
+
+- (void)setDelegate:(id<ASVideoNodeDelegate>)delegate
+{
+  _delegate = delegate;
+  if(_delegate == nil) {
+    memset(&_delegateFlags, 0, sizeof(_delegateFlags));
+  } else {
+    _delegateFlags.delegateVideNodeShouldChangePlayerStateTo = [_delegate respondsToSelector:@selector(videoNode:shouldChangePlayerStateTo:)];
+    _delegateFlags.delegateVideoPlaybackDidFinish = [_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)];
+    _delegateFlags.delegateVideoNodeWasTapped = [_delegate respondsToSelector:@selector(videoNodeWasTapped:)];
+    _delegateFlags.delegateVideoNodeWillChangePlayerStateToState = [_delegate respondsToSelector:@selector(videoNode:willChangePlayerState:toState:)];
+    _delegateFlags.delegateVideoNodeDidPlayToSecond = [_delegate respondsToSelector:@selector(videoNode:didPlayToSecond:)];
+  }
 }
 
 - (void)setGravity:(NSString *)gravity
@@ -503,7 +529,6 @@ static NSString * const kStatus = @"status";
     
     [self addSubnode:_spinner];
   }
-  self.playerState = ASVideoNodePlayerStateLoading;
   [(UIActivityIndicatorView *)_spinner.view startAnimating];
 }
 
@@ -542,7 +567,7 @@ static NSString * const kStatus = @"status";
 
 - (BOOL)isStateChangeValid:(ASVideoNodePlayerState)state
 {
-  if([_delegate respondsToSelector:@selector(videoNode:shouldChangePlayerStateTo:)]){
+  if(_delegateFlags.delegateVideNodeShouldChangePlayerStateTo){
     if(![_delegate videoNode:self shouldChangePlayerStateTo:state]){
       return NO;
     }
@@ -556,7 +581,7 @@ static NSString * const kStatus = @"status";
 - (void)didPlayToEnd:(NSNotification *)notification
 {
   self.playerState = ASVideoNodePlayerStateFinished;
-  if ([_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)]) {
+  if (_delegateFlags.delegateVideoPlaybackDidFinish) {
     [_delegate videoPlaybackDidFinish:self];
   }
   [_player seekToTime:kCMTimeZero];
