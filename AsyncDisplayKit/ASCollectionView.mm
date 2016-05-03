@@ -639,11 +639,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
   }
   
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  [_rangeController setNeedsUpdate];
   
-  if (cellNode.neverShowPlaceholders) {
-    [cellNode recursivelyEnsureDisplaySynchronously:YES];
-  }
   if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
     [_cellsForVisibilityUpdates addObject:cell];
   }
@@ -651,8 +648,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
-  
   ASCellNode *cellNode = [cell node];
 
   if (_asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPath) {
@@ -660,9 +655,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_asyncDelegate collectionView:self didEndDisplayingNode:cellNode forItemAtIndexPath:indexPath];
   }
   
-  if ([_cellsForVisibilityUpdates containsObject:cell]) {
-    [_cellsForVisibilityUpdates removeObject:cell];
-  }
+  [_rangeController setNeedsUpdate];
+  
+  [_cellsForVisibilityUpdates removeObject:cell];
   
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -844,6 +839,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
   [super layoutSubviews];
+  
+  // Update range controller immediately if possible & needed.
+  // Calling -updateIfNeeded in here with self.window == nil (early in the collection view's life)
+  // may cause UICollectionView data related crashes. We'll update in -didMoveToWindow anyway.
+  if (self.window != nil) {
+    [_rangeController updateIfNeeded];
+  }
 }
 
 
@@ -1030,11 +1032,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
-  
-  // Calling visibleNodeIndexPathsForRangeController: will trigger UIKit to call reloadData if it never has, which can result
+  // Calling -indexPathsForVisibleItems will trigger UIKit to call reloadData if it never has, which can result
   // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
   BOOL isZeroSized = CGRectEqualToRect(self.bounds, CGRectZero);
   return isZeroSized ? @[] : [self indexPathsForVisibleItems];
+}
+
+- (ASScrollDirection)scrollDirectionForRangeController:(ASRangeController *)rangeController
+{
+  return self.scrollDirection;
 }
 
 - (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController
@@ -1085,9 +1091,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
         block();
       }
     } completion:^(BOOL finished){
+      // Flush any range changes that happened as part of the update animations ending.
+      [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:numberOfUpdateBlocks];
       if (completion) { completion(finished); }
     }];
+    // Flush any range changes that happened as part of submitting the update.
+    [_rangeController updateIfNeeded];
   });
   
   [_batchUpdateBlocks removeAllObjects];
@@ -1114,6 +1124,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } else {
     [UIView performWithoutAnimation:^{
       [super insertItemsAtIndexPaths:indexPaths];
+      // Flush any range changes that happened as part of submitting the update.
+      [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
     }];
   }
@@ -1134,6 +1146,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } else {
     [UIView performWithoutAnimation:^{
       [super deleteItemsAtIndexPaths:indexPaths];
+      // Flush any range changes that happened as part of submitting the update.
+      [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
     }];
   }
@@ -1154,6 +1168,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } else {
     [UIView performWithoutAnimation:^{
       [super insertSections:indexSet];
+      // Flush any range changes that happened as part of submitting the update.
+      [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
     }];
   }
@@ -1174,6 +1190,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } else {
     [UIView performWithoutAnimation:^{
       [super deleteSections:indexSet];
+      // Flush any range changes that happened as part of submitting the update.
+      [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
     }];
   }
@@ -1275,7 +1293,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   // Updating the visible node index paths only for not range managed nodes. Range managed nodes will get their
   // their update in the layout pass
   if (![node supportsRangeManagedInterfaceState]) {
-    [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+    [_rangeController setNeedsUpdate];
+    [_rangeController updateIfNeeded];
   }
 }
 
