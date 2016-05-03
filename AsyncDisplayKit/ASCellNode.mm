@@ -125,6 +125,8 @@
 {
   CGSize oldSize = self.calculatedSize;
   [super __setNeedsLayout];
+  
+  ASDN::MutexLocker l(_propertyLock);
   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
 }
 
