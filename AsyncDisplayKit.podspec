@@ -54,7 +54,7 @@ Pod::Spec.new do |spec|
   
   spec.subspec 'PINRemoteImage' do |pin|
       pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
-      pin.dependency 'PINRemoteImage/iOS', '>= 2.1.4'
+      pin.dependency 'PINRemoteImage/iOS', '>= 3.0.0-beta.2'
       pin.dependency 'AsyncDisplayKit/Core'
   end
   
@@ -69,6 +69,5 @@ Pod::Spec.new do |spec|
   }
 
   spec.ios.deployment_target = '7.0'
-# Uncomment when fixed: The platform of the target `Pods` (tvOS 9.0) is not compatible with `PINRemoteImage/iOS (2.1.4)`, which does not support `tvos`.) during validation
-# spec.tvos.deployment_target = '9.0'
+  spec.tvos.deployment_target = '9.0'
 end
