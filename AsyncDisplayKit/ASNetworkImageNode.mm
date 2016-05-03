@@ -122,10 +122,14 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   _URL = URL;
 
-  if (reset || _URL == nil) {
+  BOOL hasURL = _URL == nil;
+  if (reset || hasURL) {
     self.image = _defaultImage;
-    ASPerformBlockOnMainThread(^{
-      self.currentImageQuality = 1.0;
+    /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
+     so always use a dispatch_async to ensure that we queue the operations in the correct order.
+     (see comment in displayDidFinish) */
+    dispatch_async(dispatch_get_main_queue(), ^{
+      self.currentImageQuality = hasURL ? 0.0 : 1.0;
     });
   }
 
@@ -151,8 +155,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   _defaultImage = defaultImage;
 
   if (!_imageLoaded) {
-    ASPerformBlockOnMainThread(^{
-      self.currentImageQuality = 0.0;
+    BOOL hasURL = _URL == nil;
+    /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
+     so always use a dispatch_async to ensure that we queue the operations in the correct order.
+     (see comment in displayDidFinish) */
+    dispatch_async(dispatch_get_main_queue(), ^{
+      self.currentImageQuality = hasURL ? 0.0 : 1.0;
     });
     _lock.unlock();
     // Locking: it is important to release _lock before entering setImage:, as it needs to release the lock before -invalidateCalculatedLayout.
@@ -229,7 +237,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       if (result) {
         self.image = result;
         _imageLoaded = YES;
-        _currentImageQuality = 1.0;
+        dispatch_async(dispatch_get_main_queue(), ^{
+          _currentImageQuality = 1.0;
+        });
       }
     }
   }
@@ -322,7 +332,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
         return;
       }
       strongSelf.image = progressImage;
-      ASPerformBlockOnMainThread(^{
+      dispatch_async(dispatch_get_main_queue(), ^{
         strongSelf->_currentImageQuality = progress;
       });
     };
@@ -347,7 +357,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   self.animatedImage = nil;
   self.image = _defaultImage;
   _imageLoaded = NO;
-  ASPerformBlockOnMainThread(^{
+  dispatch_async(dispatch_get_main_queue(), ^{
     self.currentImageQuality = 0.0;
   });
 }
@@ -431,9 +441,14 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
               }
             }
           }
-          
+
           _imageLoaded = YES;
-          self.currentImageQuality = 1.0;
+          /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
+           so always use a dispatch_async to ensure that we queue the operations in the correct order.
+           (see comment in displayDidFinish) */
+          dispatch_async(dispatch_get_main_queue(), ^{
+            self.currentImageQuality = 1.0;
+          });
           [_delegate imageNode:self didLoadImage:self.image];
         });
       }
@@ -459,7 +474,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           } else {
             strongSelf.image = [imageContainer asdk_image];
           }
-          strongSelf->_currentImageQuality = 1.0;
+          dispatch_async(dispatch_get_main_queue(), ^{
+            strongSelf->_currentImageQuality = 1.0;
+          });
         }
 
         strongSelf->_downloadIdentifier = nil;
