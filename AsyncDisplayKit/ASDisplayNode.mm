@@ -1005,7 +1005,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     ASDN::MutexUnlocker u(_propertyLock);
     // Cause supernode's layout to be invalidated
     // We need to release the lock to prevent a deadlock
-    [_supernode setNeedsLayout];
+    [supernode setNeedsLayout];
     return;
   }
   
