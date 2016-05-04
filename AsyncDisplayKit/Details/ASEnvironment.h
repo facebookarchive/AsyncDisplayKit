@@ -76,15 +76,14 @@ typedef struct ASEnvironmentDisplayTraits {
   // sure that it is valid.
   //
   // Use displayContext when you wish to pass view context specific data along with the
-  // trait collcetion to subnodes. This should be a piece of data owned by an
+  // display traits to subnodes. This should be a piece of data owned by an
   // ASViewController, which will ensure that the data is still valid when laying out
   // its subviews. When the VC is dealloc'ed, the displayContext it created will also
   // be dealloced but any subnodes that are hanging around (why would they be?) will now
   // have a displayContext that points to a bad pointer.
   //
-  // An added precaution is to call ASDisplayTraitsClearDisplayContext from your ASVC's desctructor
+  // As an added precaution ASDisplayTraitsClearDisplayContext is called from ASVC's desctructor
   // which will propagate a nil displayContext to its subnodes.
-  //__unsafe_unretained id displayContext;
   id __unsafe_unretained displayContext;
 } ASEnvironmentDisplayTraits;
 
@@ -104,7 +103,7 @@ extern ASEnvironmentState ASEnvironmentStateMakeDefault();
 
 ASDISPLAYNODE_EXTERN_C_END
 
-@class ASTraitCollection;
+@class ASDisplayTraits;
 
 #pragma mark - ASEnvironment
 
@@ -130,6 +129,9 @@ ASDISPLAYNODE_EXTERN_C_END
 
 /// Classes should implement this method and return YES / NO dependent if downware propagation is enabled or not
 - (BOOL)supportsTraitsCollectionPropagation;
+
+/// Returns an NSObject-representation of the environment's ASEnvironmentDisplayTraits
+- (ASDisplayTraits *)displayTraits;
 
 @end
 

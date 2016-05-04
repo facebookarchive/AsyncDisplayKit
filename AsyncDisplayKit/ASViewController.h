@@ -9,10 +9,12 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+@class ASDisplayTraits;
+
 NS_ASSUME_NONNULL_BEGIN
 
-typedef ASEnvironmentDisplayTraits (^ASEnvironmentDisplayTraitsForTraitCollectionBlock)(UITraitCollection *traitCollection);
-typedef ASEnvironmentDisplayTraits (^ASEnvironmentDisplayTraitsForTraitWindowSizeBlock)(CGSize windowSize);
+typedef ASDisplayTraits * _Nonnull (^ASDisplayTraitsForTraitCollectionBlock)(UITraitCollection *traitCollection);
+typedef ASDisplayTraits * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(CGSize windowSize);
 
 @interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController
 
@@ -25,12 +27,12 @@ typedef ASEnvironmentDisplayTraits (^ASEnvironmentDisplayTraitsForTraitWindowSiz
 /**
  * Set this block to customize the ASDisplayTraits returned when the VC transitions to the given traitCollection.
  */
-@property (nonatomic, copy) ASEnvironmentDisplayTraitsForTraitCollectionBlock overrideDisplayTraitsWithTraitCollection;
+@property (nonatomic, copy) ASDisplayTraitsForTraitCollectionBlock overrideDisplayTraitsWithTraitCollection;
 
 /**
  * Set this block to customize the ASDisplayTraits returned when the VC transitions to the given window size.
  */
-@property (nonatomic, copy) ASEnvironmentDisplayTraitsForTraitWindowSizeBlock overrideDisplayTraitsWithWindowSize;
+@property (nonatomic, copy) ASDisplayTraitsForTraitWindowSizeBlock overrideDisplayTraitsWithWindowSize;
 
 /**
  * @abstract Passthrough property to the the .interfaceState of the node.

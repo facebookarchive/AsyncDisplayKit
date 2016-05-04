@@ -324,6 +324,10 @@
 		9C55866C1BD54A3000B50E3A /* ASAsciiArtBoxCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5586671BD549CB00B50E3A /* ASAsciiArtBoxCreator.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C6BB3B21B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C6BB3B31B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9C70F2031CDA4EFA007D6C76 /* ASDisplayTraits.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C70F2011CDA4EFA007D6C76 /* ASDisplayTraits.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9C70F2041CDA4EFA007D6C76 /* ASDisplayTraits.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C70F2021CDA4EFA007D6C76 /* ASDisplayTraits.m */; };
+		9C70F2051CDA4F06007D6C76 /* ASDisplayTraits.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C70F2021CDA4EFA007D6C76 /* ASDisplayTraits.m */; };
+		9C70F2061CDA4F0C007D6C76 /* ASDisplayTraits.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C70F2011CDA4EFA007D6C76 /* ASDisplayTraits.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C8221951BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */; };
 		9C8221961BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */; };
 		9C8221971BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */; };
@@ -801,6 +805,8 @@
 		9C5586671BD549CB00B50E3A /* ASAsciiArtBoxCreator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASAsciiArtBoxCreator.h; path = AsyncDisplayKit/Layout/ASAsciiArtBoxCreator.h; sourceTree = "<group>"; };
 		9C5586681BD549CB00B50E3A /* ASAsciiArtBoxCreator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASAsciiArtBoxCreator.m; path = AsyncDisplayKit/Layout/ASAsciiArtBoxCreator.m; sourceTree = "<group>"; };
 		9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStaticLayoutable.h; path = AsyncDisplayKit/Layout/ASStaticLayoutable.h; sourceTree = "<group>"; };
+		9C70F2011CDA4EFA007D6C76 /* ASDisplayTraits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDisplayTraits.h; sourceTree = "<group>"; };
+		9C70F2021CDA4EFA007D6C76 /* ASDisplayTraits.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDisplayTraits.m; sourceTree = "<group>"; };
 		9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASStackBaselinePositionedLayout.h; sourceTree = "<group>"; };
 		9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASStackBaselinePositionedLayout.mm; sourceTree = "<group>"; };
 		9C8898BA1C738B9800D6B02E /* ASTextKitFontSizeAdjuster.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASTextKitFontSizeAdjuster.mm; path = TextKit/ASTextKitFontSizeAdjuster.mm; sourceTree = "<group>"; };
@@ -1223,6 +1229,8 @@
 				205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */,
 				205F0E0E1B371875007741D0 /* UICollectionViewLayout+ASConvenience.m */,
 				058D09FF195D050800B7D73C /* UIView+ASConvenience.h */,
+				9C70F2011CDA4EFA007D6C76 /* ASDisplayTraits.h */,
+				9C70F2021CDA4EFA007D6C76 /* ASDisplayTraits.m */,
 			);
 			path = Details;
 			sourceTree = "<group>";
@@ -1520,6 +1528,7 @@
 				257754A81BEE44CD00737CA5 /* ASTextKitContext.h in Headers */,
 				DB55C2611C6408D6004EDCF5 /* _ASTransitionContext.h in Headers */,
 				464052221A3F83C40061C0BA /* ASFlowLayoutController.h in Headers */,
+				9C70F2031CDA4EFA007D6C76 /* ASDisplayTraits.h in Headers */,
 				257754AF1BEE44CD00737CA5 /* ASTextKitRenderer+TextChecking.h in Headers */,
 				058D0A57195D05DC00B7D73C /* ASHighlightOverlayLayer.h in Headers */,
 				058D0A7C195D05F900B7D73C /* ASImageNode+CGExtras.h in Headers */,
@@ -1656,6 +1665,7 @@
 				34EFC75B1B701BAF00AD841F /* ASDimension.h in Headers */,
 				A37320101C571B740011FC94 /* ASTextNode+Beta.h in Headers */,
 				DBABFAFC1C6A8D2F0039EA4A /* _ASTransitionContext.h in Headers */,
+				9C70F2061CDA4F0C007D6C76 /* ASDisplayTraits.h in Headers */,
 				254C6B801BF94DF4003EC431 /* ASEqualityHashHelpers.h in Headers */,
 				B350624F1B010EFD0018CF92 /* ASDisplayNode+DebugTiming.h in Headers */,
 				B35061FD1B010EFD0018CF92 /* ASDisplayNode+Subclasses.h in Headers */,
@@ -2043,6 +2053,7 @@
 				ACF6ED521B17847A00DA7C62 /* ASStackUnpositionedLayout.mm in Sources */,
 				257754A61BEE44CD00737CA5 /* ASTextKitAttributes.mm in Sources */,
 				81EE38501C8E94F000456208 /* ASRunLoopQueue.mm in Sources */,
+				9C70F2041CDA4EFA007D6C76 /* ASDisplayTraits.m in Sources */,
 				92074A691CC8BADA00918F75 /* ASControlNode+tvOS.m in Sources */,
 				ACF6ED321B17843500DA7C62 /* ASStaticLayoutSpec.mm in Sources */,
 				AC026B6B1BD57D6F00BBC17E /* ASChangeSetDataController.m in Sources */,
@@ -2193,6 +2204,7 @@
 				34EFC7721B701D0300AD841F /* ASStackLayoutSpec.mm in Sources */,
 				34EFC7761B701D2A00AD841F /* ASStackPositionedLayout.mm in Sources */,
 				7AB338661C55B3420055FDE8 /* ASRelativeLayoutSpec.mm in Sources */,
+				9C70F2051CDA4F06007D6C76 /* ASDisplayTraits.m in Sources */,
 				34EFC7781B701D3100AD841F /* ASStackUnpositionedLayout.mm in Sources */,
 				DE84918E1C8FFF9F003D89E9 /* ASRunLoopQueue.mm in Sources */,
 				AC026B6C1BD57D6F00BBC17E /* ASChangeSetDataController.m in Sources */,

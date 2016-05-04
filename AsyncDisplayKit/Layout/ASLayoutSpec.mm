@@ -12,6 +12,7 @@
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
+#import "ASDisplayTraits.h"
 #import "ASEnvironmentInternal.h"
 
 #import "ASInternalHelpers.h"
@@ -202,6 +203,12 @@
 
 ASEnvironmentLayoutOptionsForwarding
 ASEnvironmentLayoutExtensibilityForwarding
+
+- (ASDisplayTraits *)displayTraits
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return [ASDisplayTraits displayTraitsWithASEnvironmentDisplayTraits:_environmentState.displayTraits];
+}
 
 @end
 

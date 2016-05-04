@@ -22,6 +22,7 @@
 #import "_ASCoreAnimationExtras.h"
 #import "ASDisplayNodeLayoutContext.h"
 #import "ASDisplayNodeExtras.h"
+#import "ASDisplayTraits.h"
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
 #import "ASEnvironmentInternal.h"
@@ -2720,6 +2721,11 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 ASEnvironmentLayoutOptionsForwarding
 ASEnvironmentLayoutExtensibilityForwarding
 
+- (ASDisplayTraits *)displayTraits
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return [ASDisplayTraits displayTraitsWithASEnvironmentDisplayTraits:_environmentState.displayTraits];
+}
 
 #if TARGET_OS_TV
 #pragma mark - UIFocusEnvironment Protocol (tvOS)

@@ -10,6 +10,7 @@
 
 #import "ASEnvironment.h"
 #import "ASEnvironmentInternal.h"
+#import <AsyncDisplayKit/ASAvailability.h>
 
 ASEnvironmentLayoutOptionsState _ASEnvironmentLayoutOptionsStateMakeDefault()
 {
@@ -46,14 +47,18 @@ ASEnvironmentDisplayTraits _ASEnvironmentDisplayTraitsMakeDefault()
 }
 
 ASEnvironmentDisplayTraits ASEnvironmentDisplayTraitsFromUITraitCollection(UITraitCollection *traitCollection)
-{  
-  return (ASEnvironmentDisplayTraits) {
-    .displayScale = traitCollection.displayScale,
-    .horizontalSizeClass = traitCollection.horizontalSizeClass,
-    .userInterfaceIdiom = traitCollection.userInterfaceIdiom,
-    .verticalSizeClass = traitCollection.verticalSizeClass,
-    .forceTouchCapability = traitCollection.forceTouchCapability,
-  };
+{
+  ASEnvironmentDisplayTraits displayTraits;
+  if (AS_AT_LEAST_IOS8) {
+    displayTraits.displayScale = traitCollection.displayScale;
+    displayTraits.horizontalSizeClass = traitCollection.horizontalSizeClass;
+    displayTraits.verticalSizeClass = traitCollection.verticalSizeClass;
+    displayTraits.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
+    if (AS_AT_LEAST_IOS9) {
+      displayTraits.forceTouchCapability = traitCollection.forceTouchCapability;
+    }
+  }
+  return displayTraits;
 }
 
 BOOL ASEnvironmentDisplayTraitsIsEqualToASEnvironmentDisplayTraits(ASEnvironmentDisplayTraits displayTraits0, ASEnvironmentDisplayTraits displayTraits1)

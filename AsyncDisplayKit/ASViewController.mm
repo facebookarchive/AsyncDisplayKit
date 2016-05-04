@@ -11,6 +11,7 @@
 #import "ASDimension.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASDisplayTraits.h"
 #import "ASEnvironmentInternal.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
@@ -146,7 +147,9 @@
 - (ASEnvironmentDisplayTraits)displayTraitsForTraitCollection:(UITraitCollection *)traitCollection
 {
   if (self.overrideDisplayTraitsWithTraitCollection) {
-    return self.overrideDisplayTraitsWithTraitCollection(traitCollection);
+    ASDisplayTraits *displayTraits = self.overrideDisplayTraitsWithTraitCollection(traitCollection);
+    displayTraits.isMutable = NO;
+    return [displayTraits environmentDisplayTraits];
   }
   
   ASEnvironmentDisplayTraits displayTraits = ASEnvironmentDisplayTraitsFromUITraitCollection(traitCollection);
@@ -157,7 +160,9 @@
 - (ASEnvironmentDisplayTraits)displayTraitsForWindowSize:(CGSize)windowSize
 {
   if (self.overrideDisplayTraitsWithWindowSize) {
-    return self.overrideDisplayTraitsWithWindowSize(windowSize);
+    ASDisplayTraits *displayTraits = self.overrideDisplayTraitsWithWindowSize(windowSize);
+    displayTraits.isMutable = NO;
+    return [displayTraits environmentDisplayTraits];
   }
   return self.node.environmentState.displayTraits;
 }

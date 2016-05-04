@@ -12,6 +12,8 @@
 #import "KittenNode.h"
 #import "OverrideViewController.h"
 
+#import <AsyncDisplayKit/ASDisplayTraits.h>
+
 static const CGFloat kOuterPadding = 16.0f;
 static const CGFloat kInnerPadding = 10.0f;
 
@@ -128,8 +130,7 @@ static const CGFloat kInnerPadding = 10.0f;
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  
-  ASEnvironmentDisplayTraits displayTraits = self.environmentState.displayTraits;
+  ASDisplayTraits *displayTraits = [self displayTraits];
   
   ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
   stackSpec.spacing = kInnerPadding;
@@ -146,19 +147,15 @@ static const CGFloat kInnerPadding = 10.0f;
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding) child:stackSpec];
 }
 
-
 + (void)defaultImageTappedAction:(ASViewController *)sourceViewController
 {
   OverrideViewController *overrideVC = [[OverrideViewController alloc] init];
   
   overrideVC.overrideDisplayTraitsWithTraitCollection = ^(UITraitCollection *traitCollection) {
-    return (ASEnvironmentDisplayTraits) {
-      .displayScale = traitCollection.displayScale,
-      .horizontalSizeClass = UIUserInterfaceSizeClassCompact,
-      .userInterfaceIdiom = traitCollection.userInterfaceIdiom,
-      .verticalSizeClass = UIUserInterfaceSizeClassCompact,
-      .forceTouchCapability = traitCollection.forceTouchCapability,
-    };
+    ASDisplayTraits *displayTraits = [ASDisplayTraits displayTraitsWithUITraitCollection:traitCollection];
+    displayTraits.horizontalSizeClass = UIUserInterfaceSizeClassCompact;
+    displayTraits.verticalSizeClass = UIUserInterfaceSizeClassCompact;
+    return displayTraits;
   };
   
   [sourceViewController presentViewController:overrideVC animated:YES completion:nil];
