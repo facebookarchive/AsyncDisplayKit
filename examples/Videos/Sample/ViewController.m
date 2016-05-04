@@ -12,7 +12,7 @@
 #import "ViewController.h"
 
 @interface ViewController()<ASVideoNodeDelegate>
-@property (nonatomic,strong) ASVideoNode *guitarVideoNode;
+@property (nonatomic, strong) ASVideoNode *guitarVideoNode;
 @end
 
 @implementation ViewController
@@ -32,7 +32,7 @@
 
 - (ASVideoNode *)guitarVideoNode;
 {
-  if(_guitarVideoNode){
+  if (_guitarVideoNode) {
     return _guitarVideoNode;
   }
   _guitarVideoNode = [[ASVideoNode alloc] init];
@@ -107,12 +107,12 @@
 
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode
 {
-  if(videoNode == self.guitarVideoNode){
-    if(videoNode.playerState == ASVideoNodePlayerStatePlaying){
+  if (videoNode == self.guitarVideoNode) {
+    if (videoNode.playerState == ASVideoNodePlayerStatePlaying) {
       [videoNode pause];
-    }else if(videoNode.playerState == ASVideoNodePlayerStateLoading) {
+    } else if(videoNode.playerState == ASVideoNodePlayerStateLoading) {
       [videoNode pause];
-    }else{
+    } else {
       [videoNode play];
     }
     return;
@@ -125,23 +125,25 @@
 }
 
 #pragma mark - ASVideoNodeDelegate
-- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate{
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate
+{
   //Ignore nicCageVideo
-  if(videoNode != _guitarVideoNode){
+  if (videoNode != _guitarVideoNode) {
     return;
   }
   
-  if(toSate == ASVideoNodePlayerStatePlaying){
+  if (toSate == ASVideoNodePlayerStatePlaying) {
     NSLog(@"guitarVideoNode is playing");
-  }else if(toSate == ASVideoNodePlayerStateFinished){
+  } else if (toSate == ASVideoNodePlayerStateFinished) {
     NSLog(@"guitarVideoNode finished");
-  }else if(toSate == ASVideoNodePlayerStateLoading){
+  } else if (toSate == ASVideoNodePlayerStateLoading) {
     NSLog(@"guitarVideoNode is buffering");
   }
 }
 
-- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second{
-  if(videoNode != _guitarVideoNode){
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second
+{
+  if (videoNode != _guitarVideoNode) {
     return;
   }
   

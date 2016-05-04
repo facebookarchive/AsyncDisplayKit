@@ -117,7 +117,7 @@ static NSString * const kStatus = @"status";
   if (_asset != nil) {
     return [[AVPlayerItem alloc] initWithAsset:_asset];
   }
-  
+
   return nil;
 }
 
@@ -282,7 +282,7 @@ static NSString * const kStatus = @"status";
       if (_placeholderImageNode.image == nil) {
         [self generatePlaceholderImage];
       }
-      if(_shouldBePlaying) {
+      if (_shouldBePlaying) {
         self.playerState = ASVideoNodePlayerStatePlaying;
       }
     }
@@ -334,7 +334,7 @@ static NSString * const kStatus = @"status";
     return;
   }
   
-  if(_delegateFlags.delegateVideoNodeDidPlayToSecond){
+  if (_delegateFlags.delegateVideoNodeDidPlayToSecond) {
     [_delegate videoNode:self didPlayToSecond:timeInSeconds];
   }
 }
@@ -344,11 +344,11 @@ static NSString * const kStatus = @"status";
   [super clearFetchedData];
   
   {
-  ASDN::MutexLocker l(_videoLock);
+    ASDN::MutexLocker l(_videoLock);
   
-  self.player = nil;
-  self.currentItem = nil;
-  _placeholderImageNode.image = nil;
+    self.player = nil;
+    self.currentItem = nil;
+    _placeholderImageNode.image = nil;
   }
 }
 
@@ -376,7 +376,7 @@ static NSString * const kStatus = @"status";
   
   ASVideoNodePlayerState oldState = _playerState;
   
-  if(oldState == playerState) {
+  if (oldState == playerState) {
     return;
   }
   
@@ -447,7 +447,7 @@ static NSString * const kStatus = @"status";
 - (void)setDelegate:(id<ASVideoNodeDelegate>)delegate
 {
   _delegate = delegate;
-  if(_delegate == nil) {
+  if (_delegate == nil) {
     memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
     _delegateFlags.delegateVideNodeShouldChangePlayerStateTo = [_delegate respondsToSelector:@selector(videoNode:shouldChangePlayerStateTo:)];
@@ -496,7 +496,7 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(_videoLock);
   
-  if(![self isStateChangeValid:ASVideoNodePlayerStatePlaying]){
+  if (![self isStateChangeValid:ASVideoNodePlayerStatePlaying]) {
     return;
   }
   
@@ -523,7 +523,7 @@ static NSString * const kStatus = @"status";
   }];
   if (![self ready]) {
     [self showSpinner];
-  }else{
+  } else {
     [self removeSpinner];
     self.playerState = ASVideoNodePlayerStatePlaying;
   }
@@ -555,7 +555,7 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(_videoLock);
   
-  if(!_spinner) {
+  if (!_spinner) {
     return;
   }
   [_spinner removeFromSupernode];
@@ -565,7 +565,7 @@ static NSString * const kStatus = @"status";
 - (void)pause
 {
   ASDN::MutexLocker l(_videoLock);
-  if(![self isStateChangeValid:ASVideoNodePlayerStatePaused]){
+  if (![self isStateChangeValid:ASVideoNodePlayerStatePaused]) {
     return;
   }
   self.playerState = ASVideoNodePlayerStatePaused;
@@ -586,8 +586,8 @@ static NSString * const kStatus = @"status";
 
 - (BOOL)isStateChangeValid:(ASVideoNodePlayerState)state
 {
-  if(_delegateFlags.delegateVideNodeShouldChangePlayerStateTo){
-    if(![_delegate videoNode:self shouldChangePlayerStateTo:state]){
+  if (_delegateFlags.delegateVideNodeShouldChangePlayerStateTo) {
+    if (![_delegate videoNode:self shouldChangePlayerStateTo:state]) {
       return NO;
     }
   }
