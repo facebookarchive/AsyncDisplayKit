@@ -15,9 +15,9 @@ AsyncDisplayKit Nodes are a thread-safe abstraction layer over UIViews and CALay
 
 <img src="/static/node-view-layer.png" alt="logo">
 
-You can access most view and layer properties when using nodes, the difference is that nodes are rendered concurrently by default, and measured and laid out asynchronously when used <a href = "/docs/automatic-layout.html">correctly</a>!
+You can access most view and layer properties when using nodes, the difference is that nodes are rendered concurrently by default, and measured and laid out asynchronously when used <a href = "/docs/layout-engine.html">correctly</a>!
 
-Too see asynchronous performance gains in action, check out the <a href = "/docs/automatic-layout.html">`examples/ASDKgram`</a> app which compares a UIKit-implemented social media feed with an ASDK-implemented social media feed! 
+Too see asynchronous performance gains in action, check out the <a href = "https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">`examples/ASDKgram`</a> app which compares a UIKit-implemented social media feed with an ASDK-implemented social media feed! 
 
 On an iPhone 6+, the performance may not be radically different, but on a 4S, the difference is dramatic! Which leads us to ASDK's next priority...
 
@@ -30,7 +30,7 @@ ASDK's performance gains allow you to easily design a great experience for every
 ASDK also strives to make the developer experience great
 - platform compatability: iOS & tvOS
 - language compatability: Objective-C & Swift
-- requires fewer lines of code to build advanced apps (see <a href = "/docs/automatic-layout.html">`examples/ASDKgram`</a> for a direct comparison of a UIKit implemention of an app vs. an equivalent ASDK implementation)
+- requires fewer lines of code to build advanced apps (see <a href = "https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">`examples/ASDKgram`</a> for a direct comparison of a UIKit implemention of an app vs. an equivalent ASDK implementation)
 - cleaner architecture patterns
 - robust code (some really brilliant minds have worked on this for 3+ years).
 
