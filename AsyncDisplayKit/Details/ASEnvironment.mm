@@ -64,11 +64,12 @@ ASEnvironmentDisplayTraits ASEnvironmentDisplayTraitsFromUITraitCollection(UITra
 BOOL ASEnvironmentDisplayTraitsIsEqualToASEnvironmentDisplayTraits(ASEnvironmentDisplayTraits displayTraits0, ASEnvironmentDisplayTraits displayTraits1)
 {
   return
-  displayTraits0.verticalSizeClass == displayTraits1.verticalSizeClass &&
-  displayTraits0.horizontalSizeClass == displayTraits1.horizontalSizeClass &&
-  displayTraits0.displayScale == displayTraits1.displayScale &&
-  displayTraits0.userInterfaceIdiom == displayTraits1.userInterfaceIdiom &&
-  displayTraits0.forceTouchCapability == displayTraits1.forceTouchCapability;
+    displayTraits0.verticalSizeClass == displayTraits1.verticalSizeClass &&
+    displayTraits0.horizontalSizeClass == displayTraits1.horizontalSizeClass &&
+    displayTraits0.displayScale == displayTraits1.displayScale &&
+    displayTraits0.userInterfaceIdiom == displayTraits1.userInterfaceIdiom &&
+    displayTraits0.forceTouchCapability == displayTraits1.forceTouchCapability &&
+    displayTraits0.displayContext == displayTraits1.displayContext;
 }
 
 ASEnvironmentState ASEnvironmentStateMakeDefault()
