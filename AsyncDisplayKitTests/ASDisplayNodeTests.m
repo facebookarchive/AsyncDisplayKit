@@ -87,11 +87,11 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @property (atomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
 @property (atomic) BOOL hasFetchedData;
 
-@property (atomic) BOOL didCallEnterDisplayRange;
-@property (atomic) BOOL didCallExitDisplayRange;
+@property (atomic) BOOL displayRangeStateChangedToYES;
+@property (atomic) BOOL displayRangeStateChangedToNO;
 
-@property (atomic) BOOL didCallEnterFetchDataRange;
-@property (atomic) BOOL didCallExitFetchDataRange;
+@property (atomic) BOOL loadStateChangedToYES;
+@property (atomic) BOOL loadStateChangedToNO;
 @end
 
 @interface ASTestResponderNode : ASTestDisplayNode
@@ -116,28 +116,26 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   self.hasFetchedData = NO;
 }
 
-- (void)didEnterDisplayRange
+- (void)displayStateDidChange:(BOOL)inDisplayState
 {
-  [super didEnterDisplayRange];
-  self.didCallEnterDisplayRange = YES;
+  [super displayStateDidChange:inDisplayState];
+  
+  if (inDisplayState) {
+    self.displayRangeStateChangedToYES = YES;
+  } else {
+    self.displayRangeStateChangedToNO = YES;
+  }
 }
 
-- (void)didExitDisplayRange
+- (void)loadStateDidChange:(BOOL)inLoadState
 {
-  [super didExitDisplayRange];
-  self.didCallExitDisplayRange = YES;
-}
-
-- (void)didEnterFetchDataRange
-{
-  [super didEnterFetchDataRange];
-  self.didCallEnterFetchDataRange = YES;
-}
-
-- (void)didExitFetchDataRange
-{
-  [super didExitFetchDataRange];
-  self.didCallExitFetchDataRange = YES;
+  [super loadStateDidChange:inLoadState];
+  
+  if (inLoadState) {
+    self.loadStateChangedToYES = YES;
+  } else {
+    self.loadStateChangedToNO = YES;
+  }
 }
 
 - (void)dealloc
@@ -1914,7 +1912,7 @@ static bool stringContainsPointer(NSString *description, const void *p) {
 
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
   
-  XCTAssert([node didCallEnterDisplayRange]);
+  XCTAssert([node displayRangeStateChangedToYES]);
 }
 
 - (void)testDidExitDisplayIsCalledWhenNodesExitDisplayRange
@@ -1924,7 +1922,7 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
   [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
   
-  XCTAssert([node didCallExitDisplayRange]);
+  XCTAssert([node displayRangeStateChangedToNO]);
 }
 
 - (void)testDidEnterFetchDataIsCalledWhenNodesEnterFetchDataRange
@@ -1933,7 +1931,7 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   
   [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
   
-  XCTAssert([node didCallEnterFetchDataRange]);
+  XCTAssert([node loadStateChangedToYES]);
 }
 
 - (void)testDidExitFetchDataIsCalledWhenNodesExitFetchDataRange
@@ -1943,7 +1941,7 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
 
-  XCTAssert([node didCallExitFetchDataRange]);
+  XCTAssert([node loadStateChangedToNO]);
 }
 
 @end

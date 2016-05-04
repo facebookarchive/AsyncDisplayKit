@@ -2178,22 +2178,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     // subclass override
 }
 
-- (void)didEnterDisplayRange
+- (void)displayStateDidChange:(BOOL)inDisplayState
 {
   //subclass override
 }
 
-- (void)didExitDisplayRange
-{
-  //subclass override
-}
-
-- (void)didEnterFetchDataRange
-{
-  //subclass override
-}
-
-- (void)didExitFetchDataRange
+- (void)loadStateDidChange:(BOOL)inLoadState
 {
   //subclass override
 }
@@ -2242,12 +2232,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (nowFetchData != wasFetchData) {
     if (nowFetchData) {
       [self fetchData];
-      [self didEnterFetchDataRange];
+      [self loadStateDidChange:YES];
     } else {
       if ([self supportsRangeManagedInterfaceState]) {
         [self clearFetchedData];
       }
-      [self didExitFetchDataRange];
+      [self loadStateDidChange:NO];
     }
   }
 
@@ -2293,9 +2283,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     }
     
     if (nowDisplay) {
-      [self didEnterDisplayRange];
+      [self displayStateDidChange:YES];
     } else {
-      [self didExitDisplayRange];
+      [self displayStateDidChange:NO];
     }
   }
 
