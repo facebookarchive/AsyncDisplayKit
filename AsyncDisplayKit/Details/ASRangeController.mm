@@ -95,7 +95,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 {
   _scrollDirection = scrollDirection;
 
-  // Perform update immediately, so that cells receive a visibilityDidChange: call before their first pixel is visible.
+  // Perform update immediately, so that cells receive a visibileStateDidChange: call before their first pixel is visible.
   [self scheduleRangeUpdate];
 }
 

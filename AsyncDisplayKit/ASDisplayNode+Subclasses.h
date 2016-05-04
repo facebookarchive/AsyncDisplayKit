@@ -240,7 +240,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion Subclasses may use this to monitor when they become visible.
  */
-- (void)visibilityDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)visibileStateDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Called whenever the the node has entered or left the display state.
