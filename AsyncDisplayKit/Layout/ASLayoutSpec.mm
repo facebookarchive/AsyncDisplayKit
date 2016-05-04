@@ -80,7 +80,7 @@
 
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
     if (finalLayoutable != child) {
-      if (ASEnvironmentStateUpwardPropagationEnabled()) {
+      if (ASEnvironmentStatePropagationEnabled()) {
         ASEnvironmentStatePropagateUp(finalLayoutable, child.environmentState.layoutOptionsState);
       } else {
         // If state propagation is not enabled the layout options state needs to be copied manually
@@ -183,12 +183,12 @@
 // the specifications that are known to have more than one.
 - (BOOL)supportsUpwardPropagation
 {
-  return ASEnvironmentStateUpwardPropagationEnabled();
+  return ASEnvironmentStatePropagationEnabled();
 }
 
-- (BOOL)supportsDownwardPropagation
+- (BOOL)supportsTraitsCollectionPropagation
 {
-  return ASEnvironmentStateDownwardPropagationEnabled();
+  return ASEnvironmentStateTraitCollectionPropagationEnabled();
 }
 
 - (void)propagateUpLayoutable:(id<ASLayoutable>)layoutable

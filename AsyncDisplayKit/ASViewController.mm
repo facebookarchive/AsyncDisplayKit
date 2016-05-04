@@ -143,18 +143,18 @@
 
 #pragma mark - ASDisplayTraits
 
-- (ASDisplayTraits)displayTraitsForTraitCollection:(UITraitCollection *)traitCollection
+- (ASEnvironmentDisplayTraits)displayTraitsForTraitCollection:(UITraitCollection *)traitCollection
 {
   if (self.overrideDisplayTraitsWithTraitCollection) {
     return self.overrideDisplayTraitsWithTraitCollection(traitCollection);
   }
   
-  ASDisplayTraits displayTraits = ASDisplayTraitsFromUITraitCollection(traitCollection);
+  ASEnvironmentDisplayTraits displayTraits = ASEnvironmentDisplayTraitsFromUITraitCollection(traitCollection);
   displayTraits.displayContext = _displayTraitsContext;
   return displayTraits;
 }
 
-- (ASDisplayTraits)displayTraitsForWindowSize:(CGSize)windowSize
+- (ASEnvironmentDisplayTraits)displayTraitsForWindowSize:(CGSize)windowSize
 {
   if (self.overrideDisplayTraitsWithWindowSize) {
     return self.overrideDisplayTraitsWithWindowSize(windowSize);
@@ -162,12 +162,12 @@
   return self.node.environmentState.displayTraits;
 }
 
-- (void)progagateNewDisplayTraits:(ASDisplayTraits)displayTraits
+- (void)progagateNewDisplayTraits:(ASEnvironmentDisplayTraits)displayTraits
 {
   ASEnvironmentState environmentState = self.node.environmentState;
-  ASDisplayTraits oldDisplayTraits = environmentState.displayTraits;
+  ASEnvironmentDisplayTraits oldDisplayTraits = environmentState.displayTraits;
   
-  if (ASDisplayTraitsIsEqualToASDisplayTraits(displayTraits, oldDisplayTraits) == NO) {
+  if (ASEnvironmentDisplayTraitsIsEqualToASEnvironmentDisplayTraits(displayTraits, oldDisplayTraits) == NO) {
     environmentState.displayTraits = displayTraits;
     [self.node setEnvironmentState:environmentState];
     [self.node setNeedsLayout];
@@ -183,7 +183,7 @@
 {
   [super traitCollectionDidChange:previousTraitCollection];
   
-  ASDisplayTraits displayTraits = [self displayTraitsForTraitCollection:self.traitCollection];
+  ASEnvironmentDisplayTraits displayTraits = [self displayTraitsForTraitCollection:self.traitCollection];
   [self progagateNewDisplayTraits:displayTraits];
 }
 
@@ -191,7 +191,7 @@
 {
   [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
   
-  ASDisplayTraits displayTraits = [self displayTraitsForTraitCollection:self.traitCollection];
+  ASEnvironmentDisplayTraits displayTraits = [self displayTraitsForTraitCollection:self.traitCollection];
   [self progagateNewDisplayTraits:displayTraits];
 }
 
@@ -199,7 +199,7 @@
 {
   [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
   
-  ASDisplayTraits displayTraits = [self displayTraitsForWindowSize:size];
+  ASEnvironmentDisplayTraits displayTraits = [self displayTraitsForWindowSize:size];
   [self progagateNewDisplayTraits:displayTraits];
 }
 

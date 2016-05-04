@@ -2709,12 +2709,12 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 - (BOOL)supportsUpwardPropagation
 {
-  return ASEnvironmentStateUpwardPropagationEnabled();
+  return ASEnvironmentStatePropagationEnabled();
 }
 
-- (BOOL)supportsDownwardPropagation
+- (BOOL)supportsTraitsCollectionPropagation
 {
-  return ASEnvironmentStateDownwardPropagationEnabled();
+  return ASEnvironmentStateTraitCollectionPropagationEnabled();
 }
 
 ASEnvironmentLayoutOptionsForwarding

@@ -79,7 +79,7 @@ extern void ASLayoutableClearCurrentContext();
 #define ASEnvironmentLayoutOptionsForwarding \
 - (void)propagateUpLayoutOptionsState\
 {\
-  if (!ASEnvironmentStateUpwardPropagationEnabled()) {\
+  if (!ASEnvironmentStatePropagationEnabled()) {\
     return;\
   }\
   id<ASEnvironment> parent = [self parent];\

@@ -159,6 +159,6 @@
   [self.view clearFetchedData];
 }
 
-ASDisplayTraitsCollectionTableSetEnvironmentState
+ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState
 
 @end

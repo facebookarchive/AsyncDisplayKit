@@ -129,7 +129,7 @@ static const CGFloat kInnerPadding = 10.0f;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   
-  ASDisplayTraits displayTraits = self.environmentState.displayTraits;
+  ASEnvironmentDisplayTraits displayTraits = self.environmentState.displayTraits;
   
   ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
   stackSpec.spacing = kInnerPadding;
@@ -152,7 +152,7 @@ static const CGFloat kInnerPadding = 10.0f;
   OverrideViewController *overrideVC = [[OverrideViewController alloc] init];
   
   overrideVC.overrideDisplayTraitsWithTraitCollection = ^(UITraitCollection *traitCollection) {
-    return (ASDisplayTraits) {
+    return (ASEnvironmentDisplayTraits) {
       .displayScale = traitCollection.displayScale,
       .horizontalSizeClass = UIUserInterfaceSizeClassCompact,
       .userInterfaceIdiom = traitCollection.userInterfaceIdiom,

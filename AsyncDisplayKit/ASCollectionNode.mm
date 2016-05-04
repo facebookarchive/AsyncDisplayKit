@@ -245,6 +245,6 @@
   [self.view reloadDataImmediately];
 }
 
-ASDisplayTraitsCollectionTableSetEnvironmentState
+ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState
 
 @end

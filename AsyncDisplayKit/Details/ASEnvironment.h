@@ -61,9 +61,9 @@ typedef struct ASEnvironmentHierarchyState {
   unsigned layoutPending:1; // = NO
 } ASEnvironmentHierarchyState;
 
-#pragma mark - ASDisplayTraits
+#pragma mark - ASEnvironmentDisplayTraits
 
-typedef struct ASDisplayTraits {
+typedef struct ASEnvironmentDisplayTraits {
   CGFloat displayScale;
   UIUserInterfaceSizeClass horizontalSizeClass;
   UIUserInterfaceIdiom userInterfaceIdiom;
@@ -86,19 +86,19 @@ typedef struct ASDisplayTraits {
   // which will propagate a nil displayContext to its subnodes.
   //__unsafe_unretained id displayContext;
   id __unsafe_unretained displayContext;
-} ASDisplayTraits;
+} ASEnvironmentDisplayTraits;
 
 extern void ASDisplayTraitsClearDisplayContext(id<ASEnvironment> rootEnvironment);
 
-extern ASDisplayTraits ASDisplayTraitsFromUITraitCollection(UITraitCollection *traitCollection);
-extern BOOL ASDisplayTraitsIsEqualToASDisplayTraits(ASDisplayTraits displayTraits0, ASDisplayTraits displayTraits1);
+extern ASEnvironmentDisplayTraits ASEnvironmentDisplayTraitsFromUITraitCollection(UITraitCollection *traitCollection);
+extern BOOL ASEnvironmentDisplayTraitsIsEqualToASEnvironmentDisplayTraits(ASEnvironmentDisplayTraits displayTraits0, ASEnvironmentDisplayTraits displayTraits1);
 
 #pragma mark - ASEnvironmentState
 
 typedef struct ASEnvironmentState {
   struct ASEnvironmentHierarchyState hierarchyState;
   struct ASEnvironmentLayoutOptionsState layoutOptionsState;
-  struct ASDisplayTraits displayTraits;
+  struct ASEnvironmentDisplayTraits displayTraits;
 } ASEnvironmentState;
 extern ASEnvironmentState ASEnvironmentStateMakeDefault();
 
@@ -129,7 +129,7 @@ ASDISPLAYNODE_EXTERN_C_END
 - (BOOL)supportsUpwardPropagation;
 
 /// Classes should implement this method and return YES / NO dependent if downware propagation is enabled or not
-- (BOOL)supportsDownwardPropagation;
+- (BOOL)supportsTraitsCollectionPropagation;
 
 @end
 
@@ -140,13 +140,13 @@ ASDISPLAYNODE_EXTERN_C_END
 // If there is any new downward propagating state, it should be added to this define.
 //
 // This logic is used in both ASCollectionNode and ASTableNode
-#define ASDisplayTraitsCollectionTableSetEnvironmentState \
+#define ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState \
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState\
 {\
-  ASDisplayTraits oldDisplayTraits = self.environmentState.displayTraits;\
+  ASEnvironmentDisplayTraits oldDisplayTraits = self.environmentState.displayTraits;\
   [super setEnvironmentState:environmentState];\
-  ASDisplayTraits currentDisplayTraits = environmentState.displayTraits;\
-  if (ASDisplayTraitsIsEqualToASDisplayTraits(currentDisplayTraits, oldDisplayTraits) == NO) {\
+  ASEnvironmentDisplayTraits currentDisplayTraits = environmentState.displayTraits;\
+  if (ASEnvironmentDisplayTraitsIsEqualToASEnvironmentDisplayTraits(currentDisplayTraits, oldDisplayTraits) == NO) {\
     NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
     for (NSArray *sectionArray in completedNodes) {\
       for (ASCellNode *cellNode in sectionArray) {\

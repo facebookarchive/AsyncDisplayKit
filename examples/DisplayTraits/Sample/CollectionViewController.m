@@ -61,7 +61,7 @@
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayTraits displayTraits = self.collectionNode.environmentState.displayTraits;
+  ASEnvironmentDisplayTraits displayTraits = self.collectionNode.environmentState.displayTraits;
   
   if (displayTraits.horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
     return ASSizeRangeMake(CGSizeMake(200, 120), CGSizeMake(200, 120));

@@ -28,7 +28,7 @@ ASEnvironmentHierarchyState _ASEnvironmentHierarchyStateMakeDefault()
 extern void ASDisplayTraitsClearDisplayContext(id<ASEnvironment> rootEnvironment)
 {
   ASEnvironmentState envState = [rootEnvironment environmentState];
-  ASDisplayTraits displayTraits = envState.displayTraits;
+  ASEnvironmentDisplayTraits displayTraits = envState.displayTraits;
   displayTraits.displayContext = nil;
   envState.displayTraits = displayTraits;
   [rootEnvironment setEnvironmentState:envState];
@@ -38,16 +38,16 @@ extern void ASDisplayTraitsClearDisplayContext(id<ASEnvironment> rootEnvironment
   }
 }
 
-ASDisplayTraits _ASDisplayTraitsMakeDefault()
+ASEnvironmentDisplayTraits _ASEnvironmentDisplayTraitsMakeDefault()
 {
-  return (ASDisplayTraits) {
+  return (ASEnvironmentDisplayTraits) {
     // Default values can be defined in here
   };
 }
 
-ASDisplayTraits ASDisplayTraitsFromUITraitCollection(UITraitCollection *traitCollection)
+ASEnvironmentDisplayTraits ASEnvironmentDisplayTraitsFromUITraitCollection(UITraitCollection *traitCollection)
 {  
-  return (ASDisplayTraits) {
+  return (ASEnvironmentDisplayTraits) {
     .displayScale = traitCollection.displayScale,
     .horizontalSizeClass = traitCollection.horizontalSizeClass,
     .userInterfaceIdiom = traitCollection.userInterfaceIdiom,
@@ -56,7 +56,7 @@ ASDisplayTraits ASDisplayTraitsFromUITraitCollection(UITraitCollection *traitCol
   };
 }
 
-BOOL ASDisplayTraitsIsEqualToASDisplayTraits(ASDisplayTraits displayTraits0, ASDisplayTraits displayTraits1)
+BOOL ASEnvironmentDisplayTraitsIsEqualToASEnvironmentDisplayTraits(ASEnvironmentDisplayTraits displayTraits0, ASEnvironmentDisplayTraits displayTraits1)
 {
   return
   displayTraits0.verticalSizeClass == displayTraits1.verticalSizeClass &&
@@ -71,7 +71,7 @@ ASEnvironmentState ASEnvironmentStateMakeDefault()
   return (ASEnvironmentState) {
     .layoutOptionsState = _ASEnvironmentLayoutOptionsStateMakeDefault(),
     .hierarchyState = _ASEnvironmentHierarchyStateMakeDefault(),
-    .displayTraits = _ASDisplayTraitsMakeDefault()
+    .displayTraits = _ASEnvironmentDisplayTraitsMakeDefault()
   };
 }
 
