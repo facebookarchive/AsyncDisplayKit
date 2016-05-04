@@ -654,6 +654,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize));
 }
 
+#pragma mark - Layout Transition
+
 - (void)transitionLayoutWithAnimation:(BOOL)animated
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(void(^)())completion
@@ -681,10 +683,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     ASDisplayNodeAssert(ASHierarchyStateIncludesLayoutPending(_hierarchyState) == NO, @"Can't start a transition when one of the supernodes is performing one.");
   }
 
-  int32_t transitionID = [self _newTransitionID];
+  int32_t transitionID = [self _startNewTransition];
   
   ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
-    ASDisplayNodeAssert([node _hasTransitionsInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
+    ASDisplayNodeAssert([node _hasTransitionInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
     node.hierarchyState |= ASHierarchyStateLayoutPending;
     node.pendingTransitionID = transitionID;
   });
@@ -726,13 +728,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       ASSizeRange previousConstrainedSize = _constrainedSize;
       [self applyLayout:newLayout constrainedSize:constrainedSize layoutContext:nil];
       
-      [self _invalidateTransitionSentinel];
-      
       ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
         [node applyPendingLayoutContext];
         [node _completeLayoutCalculation];
         node.hierarchyState &= (~ASHierarchyStateLayoutPending);
       });
+        
+      [self _finishOrCancelTransition];
       
       if (completion) {
         completion();
@@ -781,7 +783,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 }
 
-
 - (void)calculatedLayoutDidChange
 {
   // subclass override
@@ -790,17 +791,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)cancelLayoutTransitionsInProgress
 {
   ASDN::MutexLocker l(_propertyLock);
-  if ([self _hasTransitionsInProgress]) {
-    // Invalidate transition sentinel to cancel transitions in progress
-    [self _invalidateTransitionSentinel];
+  if ([self _hasTransitionInProgress]) {
+    // Cancel transition in progress
+    [self _finishOrCancelTransition];
+      
     // Tell subnodes to exit layout pending state and clear related properties
     ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
       node.hierarchyState &= (~ASHierarchyStateLayoutPending);
     });
   }
 }
-
-#pragma mark - Layout Transition
 
 - (BOOL)usesImplicitHierarchyManagement
 {
@@ -812,6 +812,40 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(_propertyLock);
   _usesImplicitHierarchyManagement = value;
+}
+
+- (BOOL)_hasTransitionInProgress
+{
+    ASDN::MutexLocker l(_propertyLock);
+    return _transitionInProgress;
+}
+
+/// Starts a new transition and returns the transition id
+- (int32_t)_startNewTransition
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _transitionInProgress = YES;
+    
+  if (!_transitionSentinel) {
+    _transitionSentinel = [[ASSentinel alloc] init];
+  }
+  return [_transitionSentinel increment];
+}
+
+- (void)_finishOrCancelTransition
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _transitionInProgress = NO;
+}
+
+- (BOOL)_shouldAbortTransitionWithID:(int32_t)transitionID
+{
+  ASDN::MutexLocker l(_propertyLock);
+  if (_transitionInProgress) {
+    return _transitionSentinel == nil || transitionID != _transitionSentinel.value;
+  }
+  
+  return YES;
 }
 
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
@@ -826,6 +860,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self _completeLayoutCalculation];
   _pendingLayoutContext = nil;
 }
+
 
 #pragma mark - _ASTransitionContextCompletionDelegate
 
@@ -1689,9 +1724,11 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
   
   if (supernodeDidChange) {
+    // Hierarchy state
     ASHierarchyState stateToEnterOrExit = (newSupernode ? newSupernode.hierarchyState
                                                         : oldSupernode.hierarchyState);
     
+    // Rasterized state
     BOOL parentWasOrIsRasterized        = (newSupernode ? newSupernode.shouldRasterizeDescendants
                                                         : oldSupernode.shouldRasterizeDescendants);
     if (parentWasOrIsRasterized) {
@@ -1700,6 +1737,10 @@ static NSInteger incrementIfFound(NSInteger i) {
     if (newSupernode) {
       [self enterHierarchyState:stateToEnterOrExit];
     } else {
+      // If a node will be removed from the supernode it should go out from the layout pending state to remove all
+      // layout pending state related properties on the node
+      stateToEnterOrExit |= ASHierarchyStateLayoutPending;
+      
       [self exitHierarchyState:stateToEnterOrExit];
     }
   }
@@ -2644,37 +2685,11 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   _flags.isInHierarchy = inHierarchy;
 }
 
-- (BOOL)_hasTransitionsInProgress
-{
-  ASDN::MutexLocker l(_propertyLock);
-  return _transitionSentinel != nil;
-}
-
-- (void)_invalidateTransitionSentinel
-{
-  ASDN::MutexLocker l(_propertyLock);
-  _transitionSentinel = nil;
-}
-
-- (BOOL)_shouldAbortTransitionWithID:(int32_t)transitionID
-{
-  ASDN::MutexLocker l(_propertyLock);
-  return _transitionSentinel == nil || transitionID != _transitionSentinel.value;
-}
-
-- (int32_t)_newTransitionID
-{
-  ASDN::MutexLocker l(_propertyLock);
-  if (!_transitionSentinel) {
-    _transitionSentinel = [[ASSentinel alloc] init];
-  }
-  return [_transitionSentinel increment];
-}
-
 - (id<ASLayoutable>)finalLayoutable
 {
   return self;
 }
+
 
 #pragma mark - ASEnvironment
 
