@@ -54,6 +54,9 @@
 #endif
 
 @interface ASCollectionNode ()
+{
+  ASDN::RecursiveMutex _environmentStateLock;
+}
 @property (nonatomic) _ASCollectionPendingState *pendingState;
 @end
 
@@ -245,6 +248,6 @@
   [self.view reloadDataImmediately];
 }
 
-ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState
+ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState(_environmentStateLock)
 
 @end

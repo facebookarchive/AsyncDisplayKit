@@ -140,9 +140,10 @@ ASDISPLAYNODE_EXTERN_C_END
 // If there is any new downward propagating state, it should be added to this define.
 //
 // This logic is used in both ASCollectionNode and ASTableNode
-#define ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState \
+#define ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState(lock) \
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState\
 {\
+  ASDN::MutexLocker l(lock);\
   ASEnvironmentDisplayTraits oldDisplayTraits = self.environmentState.displayTraits;\
   [super setEnvironmentState:environmentState];\
   ASEnvironmentDisplayTraits currentDisplayTraits = environmentState.displayTraits;\

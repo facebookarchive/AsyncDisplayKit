@@ -21,6 +21,10 @@
 @end
 
 @interface ASTableNode ()
+{
+  ASDN::RecursiveMutex _environmentStateLock;
+}
+
 @property (nonatomic, strong) _ASTablePendingState *pendingState;
 @end
 
@@ -159,6 +163,6 @@
   [self.view clearFetchedData];
 }
 
-ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState
+ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState(_environmentStateLock)
 
 @end
