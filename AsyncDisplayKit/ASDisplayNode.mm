@@ -1001,27 +1001,31 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self invalidateCalculatedLayout];
   
   if (_supernode) {
+    ASDisplayNode *supernode = _supernode;
+    ASDN::MutexUnlocker u(_propertyLock);
     // Cause supernode's layout to be invalidated
-    [_supernode setNeedsLayout];
-  } else {
-    // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
-    [self measureWithSizeRange:oldConstrainedSize];
+    // We need to release the lock to prevent a deadlock
+    [supernode setNeedsLayout];
+    return;
+  }
+  
+  // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
+  [self measureWithSizeRange:oldConstrainedSize];
 
-    CGRect oldBounds = self.bounds;
-    CGSize oldSize = oldBounds.size;
-    CGSize newSize = _layout.size;
+  CGRect oldBounds = self.bounds;
+  CGSize oldSize = oldBounds.size;
+  CGSize newSize = _layout.size;
+  
+  if (! CGSizeEqualToSize(oldSize, newSize)) {
+    self.bounds = (CGRect){ oldBounds.origin, newSize };
     
-    if (! CGSizeEqualToSize(oldSize, newSize)) {
-      self.bounds = (CGRect){ oldBounds.origin, newSize };
-      
-      // Frame's origin must be preserved. Since it is computed from bounds size, anchorPoint
-      // and position (see frame setter in ASDisplayNode+UIViewBridge), position needs to be adjusted.
-      CGPoint anchorPoint = self.anchorPoint;
-      CGPoint oldPosition = self.position;
-      CGFloat xDelta = (newSize.width - oldSize.width) * anchorPoint.x;
-      CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
-      self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
-    }
+    // Frame's origin must be preserved. Since it is computed from bounds size, anchorPoint
+    // and position (see frame setter in ASDisplayNode+UIViewBridge), position needs to be adjusted.
+    CGPoint anchorPoint = self.anchorPoint;
+    CGPoint oldPosition = self.position;
+    CGFloat xDelta = (newSize.width - oldSize.width) * anchorPoint.x;
+    CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
+    self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
   }
 }
 
