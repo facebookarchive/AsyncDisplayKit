@@ -248,6 +248,6 @@
   [self.view reloadDataImmediately];
 }
 
-ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState(_environmentStateLock)
+ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 
 @end

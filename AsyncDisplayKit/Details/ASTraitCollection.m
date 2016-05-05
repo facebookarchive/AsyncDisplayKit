@@ -6,11 +6,11 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASDisplayTraits.h"
+#import "ASTraitCollection.h"
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASAvailability.h>
 
-@implementation ASDisplayTraits
+@implementation ASTraitCollection
 
 - (instancetype)init
 {
@@ -51,35 +51,35 @@
   _forceTouchCapability = forceTouchCapability;
 }
 
-+ (ASDisplayTraits *)displayTraitsWithASEnvironmentDisplayTraits:(ASEnvironmentDisplayTraits)traits
++ (ASTraitCollection *)displayTraitsWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits
 {
-  ASDisplayTraits *displayTraits = [[ASDisplayTraits alloc] init];
-  displayTraits.displayScale = traits.displayScale;
-  displayTraits.horizontalSizeClass = traits.horizontalSizeClass;
-  displayTraits.verticalSizeClass = traits.verticalSizeClass;
-  displayTraits.userInterfaceIdiom = traits.userInterfaceIdiom;
-  displayTraits.forceTouchCapability = traits.forceTouchCapability;
-  return displayTraits;
+  ASTraitCollection *traitCollection = [[ASTraitCollection alloc] init];
+  traitCollection.displayScale = traits.displayScale;
+  traitCollection.horizontalSizeClass = traits.horizontalSizeClass;
+  traitCollection.verticalSizeClass = traits.verticalSizeClass;
+  traitCollection.userInterfaceIdiom = traits.userInterfaceIdiom;
+  traitCollection.forceTouchCapability = traits.forceTouchCapability;
+  return traitCollection;
 }
 
-+ (ASDisplayTraits *)displayTraitsWithUITraitCollection:(UITraitCollection *)traitCollection
++ (ASTraitCollection *)displayTraitsWithUITraitCollection:(UITraitCollection *)traitCollection
 {
-  ASDisplayTraits *displayTraits = [[ASDisplayTraits alloc] init];
+  ASTraitCollection *asyncTraitCollection = [[ASTraitCollection alloc] init];
   if (AS_AT_LEAST_IOS8) {
-    displayTraits.displayScale = traitCollection.displayScale;
-    displayTraits.horizontalSizeClass = traitCollection.horizontalSizeClass;
-    displayTraits.verticalSizeClass = traitCollection.verticalSizeClass;
-    displayTraits.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
+    asyncTraitCollection.displayScale = traitCollection.displayScale;
+    asyncTraitCollection.horizontalSizeClass = traitCollection.horizontalSizeClass;
+    asyncTraitCollection.verticalSizeClass = traitCollection.verticalSizeClass;
+    asyncTraitCollection.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
     if (AS_AT_LEAST_IOS9) {
-      displayTraits.forceTouchCapability = traitCollection.forceTouchCapability;
+      asyncTraitCollection.forceTouchCapability = traitCollection.forceTouchCapability;
     }
   }
-  return displayTraits;
+  return asyncTraitCollection;
 }
 
-- (ASEnvironmentDisplayTraits)environmentDisplayTraits
+- (ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  return (ASEnvironmentDisplayTraits) {
+  return (ASEnvironmentTraitCollection) {
     .displayScale = self.displayScale,
     .horizontalSizeClass = self.horizontalSizeClass,
     .userInterfaceIdiom = self.userInterfaceIdiom,

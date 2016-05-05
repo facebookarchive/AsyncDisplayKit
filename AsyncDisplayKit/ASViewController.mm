@@ -11,7 +11,7 @@
 #import "ASDimension.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
-#import "ASDisplayTraits.h"
+#import "ASTraitCollection.h"
 #import "ASEnvironmentInternal.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
@@ -51,7 +51,7 @@
 - (void)dealloc
 {
   if (_displayTraitsContext != nil) {
-    ASDisplayTraitsClearDisplayContext(self.node);
+    ASEnvironmentTraitCollectionClearDisplayContext(self.node);
     _displayTraitsContext = nil;
   }
 }
@@ -142,44 +142,44 @@
   return _node.interfaceState;
 }
 
-#pragma mark - ASDisplayTraits
+#pragma mark - ASEnvironmentTraitCollection
 
-- (ASEnvironmentDisplayTraits)displayTraitsForTraitCollection:(UITraitCollection *)traitCollection
+- (ASEnvironmentTraitCollection)displayTraitsForTraitCollection:(UITraitCollection *)traitCollection
 {
   if (self.overrideDisplayTraitsWithTraitCollection) {
-    ASDisplayTraits *displayTraits = self.overrideDisplayTraitsWithTraitCollection(traitCollection);
-    displayTraits.isMutable = NO;
-    return [displayTraits environmentDisplayTraits];
+    ASTraitCollection *asyncTraitCollection = self.overrideDisplayTraitsWithTraitCollection(traitCollection);
+    asyncTraitCollection.isMutable = NO;
+    return [asyncTraitCollection environmentTraitCollection];
   }
   
-  ASEnvironmentDisplayTraits displayTraits = ASEnvironmentDisplayTraitsFromUITraitCollection(traitCollection);
-  displayTraits.displayContext = _displayTraitsContext;
-  return displayTraits;
+  ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(traitCollection);
+  asyncTraitCollection.displayContext = _displayTraitsContext;
+  return asyncTraitCollection;
 }
 
-- (ASEnvironmentDisplayTraits)displayTraitsForWindowSize:(CGSize)windowSize
+- (ASEnvironmentTraitCollection)displayTraitsForWindowSize:(CGSize)windowSize
 {
   if (self.overrideDisplayTraitsWithWindowSize) {
-    ASDisplayTraits *displayTraits = self.overrideDisplayTraitsWithWindowSize(windowSize);
-    displayTraits.isMutable = NO;
-    return [displayTraits environmentDisplayTraits];
+    ASTraitCollection *traitCollection = self.overrideDisplayTraitsWithWindowSize(windowSize);
+    traitCollection.isMutable = NO;
+    return [traitCollection environmentTraitCollection];
   }
-  return self.node.environmentState.displayTraits;
+  return self.node.environmentState.traitCollection;
 }
 
-- (void)progagateNewDisplayTraits:(ASEnvironmentDisplayTraits)displayTraits
+- (void)progagateNewDisplayTraits:(ASEnvironmentTraitCollection)traitCollection
 {
   ASEnvironmentState environmentState = self.node.environmentState;
-  ASEnvironmentDisplayTraits oldDisplayTraits = environmentState.displayTraits;
+  ASEnvironmentTraitCollection oldTraitCollection = environmentState.traitCollection;
   
-  if (ASEnvironmentDisplayTraitsIsEqualToASEnvironmentDisplayTraits(displayTraits, oldDisplayTraits) == NO) {
-    environmentState.displayTraits = displayTraits;
+  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(traitCollection, oldTraitCollection) == NO) {
+    environmentState.traitCollection = traitCollection;
     [self.node setEnvironmentState:environmentState];
     [self.node setNeedsLayout];
     
     NSArray<id<ASEnvironment>> *children = [self.node children];
     for (id<ASEnvironment> child in children) {
-      ASEnvironmentStatePropagateDown(child, environmentState.displayTraits);
+      ASEnvironmentStatePropagateDown(child, environmentState.traitCollection);
     }
   }
 }
@@ -188,24 +188,24 @@
 {
   [super traitCollectionDidChange:previousTraitCollection];
   
-  ASEnvironmentDisplayTraits displayTraits = [self displayTraitsForTraitCollection:self.traitCollection];
-  [self progagateNewDisplayTraits:displayTraits];
+  ASEnvironmentTraitCollection traitCollection = [self displayTraitsForTraitCollection:self.traitCollection];
+  [self progagateNewDisplayTraits:traitCollection];
 }
 
 - (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
   [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
   
-  ASEnvironmentDisplayTraits displayTraits = [self displayTraitsForTraitCollection:self.traitCollection];
-  [self progagateNewDisplayTraits:displayTraits];
+  ASEnvironmentTraitCollection traitCollection = [self displayTraitsForTraitCollection:newCollection];
+  [self progagateNewDisplayTraits:traitCollection];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
   [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
   
-  ASEnvironmentDisplayTraits displayTraits = [self displayTraitsForWindowSize:size];
-  [self progagateNewDisplayTraits:displayTraits];
+  ASEnvironmentTraitCollection traitCollection = [self displayTraitsForWindowSize:size];
+  [self progagateNewDisplayTraits:traitCollection];
 }
 
 @end

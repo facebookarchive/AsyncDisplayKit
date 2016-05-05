@@ -194,21 +194,21 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
   return environmentState;
 }
 
-ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState childEnvironmentState, ASEnvironmentDisplayTraits parentDisplayTraits, ASEnvironmentStatePropagation propagation) {
+ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState childEnvironmentState, ASEnvironmentTraitCollection parentTraitCollection, ASEnvironmentStatePropagation propagation) {
   if (propagation == ASEnvironmentStatePropagation::DOWN && !ASEnvironmentStateTraitCollectionPropagationEnabled()) {
     return childEnvironmentState;
   }
   
   // Support propagate down
   if (propagation == ASEnvironmentStatePropagation::DOWN) {
-    ASEnvironmentDisplayTraits childDisplayTraits = childEnvironmentState.displayTraits;
-    childDisplayTraits.horizontalSizeClass = parentDisplayTraits.horizontalSizeClass;
-    childDisplayTraits.verticalSizeClass = parentDisplayTraits.verticalSizeClass;
-    childDisplayTraits.userInterfaceIdiom = parentDisplayTraits.userInterfaceIdiom;
-    childDisplayTraits.forceTouchCapability = parentDisplayTraits.forceTouchCapability;
-    childDisplayTraits.displayScale = parentDisplayTraits.displayScale;
-    childDisplayTraits.displayContext = parentDisplayTraits.displayContext;
-    childEnvironmentState.displayTraits = childDisplayTraits;
+    ASEnvironmentTraitCollection childTraitCollection = childEnvironmentState.traitCollection;
+    childTraitCollection.horizontalSizeClass = parentTraitCollection.horizontalSizeClass;
+    childTraitCollection.verticalSizeClass = parentTraitCollection.verticalSizeClass;
+    childTraitCollection.userInterfaceIdiom = parentTraitCollection.userInterfaceIdiom;
+    childTraitCollection.forceTouchCapability = parentTraitCollection.forceTouchCapability;
+    childTraitCollection.displayScale = parentTraitCollection.displayScale;
+    childTraitCollection.displayContext = parentTraitCollection.displayContext;
+    childEnvironmentState.traitCollection = childTraitCollection;
 
   }
   return childEnvironmentState;

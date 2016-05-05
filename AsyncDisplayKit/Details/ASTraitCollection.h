@@ -11,7 +11,7 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
 
-@interface ASDisplayTraits : NSObject
+@interface ASTraitCollection : NSObject
 
 @property (nonatomic, assign) BOOL isMutable;
 
@@ -21,9 +21,9 @@
 @property (nonatomic, assign) UIUserInterfaceSizeClass verticalSizeClass;
 @property (nonatomic, assign) UIForceTouchCapability forceTouchCapability;
 
-+ (ASDisplayTraits *)displayTraitsWithASEnvironmentDisplayTraits:(ASEnvironmentDisplayTraits)traits;
-+ (ASDisplayTraits *)displayTraitsWithUITraitCollection:(UITraitCollection *)traitCollection;
++ (ASTraitCollection *)displayTraitsWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits;
++ (ASTraitCollection *)displayTraitsWithUITraitCollection:(UITraitCollection *)traitCollection;
 
-- (ASEnvironmentDisplayTraits)environmentDisplayTraits;
+- (ASEnvironmentTraitCollection)environmentTraitCollection;
 
 @end

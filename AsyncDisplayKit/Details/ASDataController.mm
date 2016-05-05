@@ -525,7 +525,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       ASCellNodeBlock nodeBlockPropagatingDisplayTraits = ^{
         ASCellNode *cellNode = nodeBlock();
         id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
-        ASEnvironmentStatePropagateDown(cellNode, [environment environmentState].displayTraits);
+        ASEnvironmentStatePropagateDown(cellNode, [environment environmentState].traitCollection);
         return cellNode;
       };
       

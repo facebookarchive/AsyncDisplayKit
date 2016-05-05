@@ -11,7 +11,7 @@
 
 #import "CollectionViewController.h"
 #import "KittenNode.h"
-#import <AsyncDisplayKit/ASDisplayTraits.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
 
 @interface CollectionViewController () <ASCollectionDelegate, ASCollectionDataSource>
 @property (nonatomic, strong) ASCollectionNode *collectionNode;
@@ -62,9 +62,9 @@
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayTraits *displayTraits = [self.collectionNode displayTraits];
+  ASTraitCollection *traitCollection = [self.collectionNode asyncTraitCollection];
   
-  if (displayTraits.horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
+  if (traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
     return ASSizeRangeMake(CGSizeMake(200, 120), CGSizeMake(200, 120));
   }
   return ASSizeRangeMake(CGSizeMake(132, 180), CGSizeMake(132, 180));

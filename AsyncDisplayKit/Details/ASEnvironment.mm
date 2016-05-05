@@ -26,12 +26,12 @@ ASEnvironmentHierarchyState _ASEnvironmentHierarchyStateMakeDefault()
   };
 }
 
-extern void ASDisplayTraitsClearDisplayContext(id<ASEnvironment> rootEnvironment)
+extern void ASEnvironmentTraitCollectionClearDisplayContext(id<ASEnvironment> rootEnvironment)
 {
   ASEnvironmentState envState = [rootEnvironment environmentState];
-  ASEnvironmentDisplayTraits displayTraits = envState.displayTraits;
+  ASEnvironmentTraitCollection displayTraits = envState.traitCollection;
   displayTraits.displayContext = nil;
-  envState.displayTraits = displayTraits;
+  envState.traitCollection = displayTraits;
   [rootEnvironment setEnvironmentState:envState];
   
   for (id<ASEnvironment> child in [rootEnvironment children]) {
@@ -39,37 +39,37 @@ extern void ASDisplayTraitsClearDisplayContext(id<ASEnvironment> rootEnvironment
   }
 }
 
-ASEnvironmentDisplayTraits _ASEnvironmentDisplayTraitsMakeDefault()
+ASEnvironmentTraitCollection _ASEnvironmentTraitCollectionMakeDefault()
 {
-  return (ASEnvironmentDisplayTraits) {
+  return (ASEnvironmentTraitCollection) {
     // Default values can be defined in here
   };
 }
 
-ASEnvironmentDisplayTraits ASEnvironmentDisplayTraitsFromUITraitCollection(UITraitCollection *traitCollection)
+ASEnvironmentTraitCollection ASEnvironmentTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection)
 {
-  ASEnvironmentDisplayTraits displayTraits;
+  ASEnvironmentTraitCollection asyncTraitCollection;
   if (AS_AT_LEAST_IOS8) {
-    displayTraits.displayScale = traitCollection.displayScale;
-    displayTraits.horizontalSizeClass = traitCollection.horizontalSizeClass;
-    displayTraits.verticalSizeClass = traitCollection.verticalSizeClass;
-    displayTraits.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
+    asyncTraitCollection.displayScale = traitCollection.displayScale;
+    asyncTraitCollection.horizontalSizeClass = traitCollection.horizontalSizeClass;
+    asyncTraitCollection.verticalSizeClass = traitCollection.verticalSizeClass;
+    asyncTraitCollection.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
     if (AS_AT_LEAST_IOS9) {
-      displayTraits.forceTouchCapability = traitCollection.forceTouchCapability;
+      asyncTraitCollection.forceTouchCapability = traitCollection.forceTouchCapability;
     }
   }
-  return displayTraits;
+  return asyncTraitCollection;
 }
 
-BOOL ASEnvironmentDisplayTraitsIsEqualToASEnvironmentDisplayTraits(ASEnvironmentDisplayTraits displayTraits0, ASEnvironmentDisplayTraits displayTraits1)
+BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnvironmentTraitCollection traitCollection0, ASEnvironmentTraitCollection traitCollection1)
 {
   return
-    displayTraits0.verticalSizeClass == displayTraits1.verticalSizeClass &&
-    displayTraits0.horizontalSizeClass == displayTraits1.horizontalSizeClass &&
-    displayTraits0.displayScale == displayTraits1.displayScale &&
-    displayTraits0.userInterfaceIdiom == displayTraits1.userInterfaceIdiom &&
-    displayTraits0.forceTouchCapability == displayTraits1.forceTouchCapability &&
-    displayTraits0.displayContext == displayTraits1.displayContext;
+    traitCollection0.verticalSizeClass == traitCollection1.verticalSizeClass &&
+    traitCollection0.horizontalSizeClass == traitCollection1.horizontalSizeClass &&
+    traitCollection0.displayScale == traitCollection1.displayScale &&
+    traitCollection0.userInterfaceIdiom == traitCollection1.userInterfaceIdiom &&
+    traitCollection0.forceTouchCapability == traitCollection1.forceTouchCapability &&
+    traitCollection0.displayContext == traitCollection1.displayContext;
 }
 
 ASEnvironmentState ASEnvironmentStateMakeDefault()
@@ -77,7 +77,7 @@ ASEnvironmentState ASEnvironmentStateMakeDefault()
   return (ASEnvironmentState) {
     .layoutOptionsState = _ASEnvironmentLayoutOptionsStateMakeDefault(),
     .hierarchyState = _ASEnvironmentHierarchyStateMakeDefault(),
-    .displayTraits = _ASEnvironmentDisplayTraitsMakeDefault()
+    .traitCollection = _ASEnvironmentTraitCollectionMakeDefault()
   };
 }
 

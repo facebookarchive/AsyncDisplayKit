@@ -49,8 +49,8 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
 static const struct ASEnvironmentHierarchyState ASEnvironmentDefaultHierarchyState = {};
 ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentHierarchyState state, ASEnvironmentStatePropagation propagation);
 
-static const struct ASEnvironmentDisplayTraits ASEnvironmentDefaultDisplayTraits = {};
-ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentDisplayTraits state, ASEnvironmentStatePropagation propagation);
+static const struct ASEnvironmentTraitCollection ASEnvironmentDefaultTraitCollection = {};
+ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environmentState, ASEnvironmentTraitCollection state, ASEnvironmentStatePropagation propagation);
 
 
 #pragma mark - Propagation

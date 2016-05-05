@@ -63,7 +63,7 @@ typedef struct ASEnvironmentHierarchyState {
 
 #pragma mark - ASEnvironmentDisplayTraits
 
-typedef struct ASEnvironmentDisplayTraits {
+typedef struct ASEnvironmentTraitCollection {
   CGFloat displayScale;
   UIUserInterfaceSizeClass horizontalSizeClass;
   UIUserInterfaceIdiom userInterfaceIdiom;
@@ -85,25 +85,25 @@ typedef struct ASEnvironmentDisplayTraits {
   // As an added precaution ASDisplayTraitsClearDisplayContext is called from ASVC's desctructor
   // which will propagate a nil displayContext to its subnodes.
   id __unsafe_unretained displayContext;
-} ASEnvironmentDisplayTraits;
+} ASEnvironmentTraitCollection;
 
-extern void ASDisplayTraitsClearDisplayContext(id<ASEnvironment> rootEnvironment);
+extern void ASEnvironmentTraitCollectionClearDisplayContext(id<ASEnvironment> rootEnvironment);
 
-extern ASEnvironmentDisplayTraits ASEnvironmentDisplayTraitsFromUITraitCollection(UITraitCollection *traitCollection);
-extern BOOL ASEnvironmentDisplayTraitsIsEqualToASEnvironmentDisplayTraits(ASEnvironmentDisplayTraits displayTraits0, ASEnvironmentDisplayTraits displayTraits1);
+extern ASEnvironmentTraitCollection ASEnvironmentTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection);
+extern BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnvironmentTraitCollection displayTraits0, ASEnvironmentTraitCollection displayTraits1);
 
 #pragma mark - ASEnvironmentState
 
 typedef struct ASEnvironmentState {
   struct ASEnvironmentHierarchyState hierarchyState;
   struct ASEnvironmentLayoutOptionsState layoutOptionsState;
-  struct ASEnvironmentDisplayTraits displayTraits;
+  struct ASEnvironmentTraitCollection traitCollection;
 } ASEnvironmentState;
 extern ASEnvironmentState ASEnvironmentStateMakeDefault();
 
 ASDISPLAYNODE_EXTERN_C_END
 
-@class ASDisplayTraits;
+@class ASTraitCollection;
 
 #pragma mark - ASEnvironment
 
@@ -131,7 +131,7 @@ ASDISPLAYNODE_EXTERN_C_END
 - (BOOL)supportsTraitsCollectionPropagation;
 
 /// Returns an NSObject-representation of the environment's ASEnvironmentDisplayTraits
-- (ASDisplayTraits *)displayTraits;
+- (ASTraitCollection *)asyncTraitCollection;
 
 @end
 
@@ -142,18 +142,18 @@ ASDISPLAYNODE_EXTERN_C_END
 // If there is any new downward propagating state, it should be added to this define.
 //
 // This logic is used in both ASCollectionNode and ASTableNode
-#define ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState(lock) \
+#define ASEnvironmentCollectionTableSetEnvironmentState(lock) \
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState\
 {\
   ASDN::MutexLocker l(lock);\
-  ASEnvironmentDisplayTraits oldDisplayTraits = self.environmentState.displayTraits;\
+  ASEnvironmentTraitCollection oldTraits = self.environmentState.traitCollection;\
   [super setEnvironmentState:environmentState];\
-  ASEnvironmentDisplayTraits currentDisplayTraits = environmentState.displayTraits;\
-  if (ASEnvironmentDisplayTraitsIsEqualToASEnvironmentDisplayTraits(currentDisplayTraits, oldDisplayTraits) == NO) {\
+  ASEnvironmentTraitCollection currentTraits = environmentState.traitCollection;\
+  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
     NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
     for (NSArray *sectionArray in completedNodes) {\
       for (ASCellNode *cellNode in sectionArray) {\
-        ASEnvironmentStatePropagateDown(cellNode, currentDisplayTraits);\
+        ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
         [cellNode setNeedsLayout];\
       }\
     }\

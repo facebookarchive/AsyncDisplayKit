@@ -12,7 +12,7 @@
 #import "KittenNode.h"
 #import "OverrideViewController.h"
 
-#import <AsyncDisplayKit/ASDisplayTraits.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
 
 static const CGFloat kOuterPadding = 16.0f;
 static const CGFloat kInnerPadding = 10.0f;
@@ -130,13 +130,13 @@ static const CGFloat kInnerPadding = 10.0f;
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASDisplayTraits *displayTraits = [self displayTraits];
+  ASTraitCollection *traitCollection = [self asyncTraitCollection];
   
   ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
   stackSpec.spacing = kInnerPadding;
   stackSpec.children = @[_imageNode, _textNode];
   
-  if (displayTraits.horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
+  if (traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
     _imageNode.alignSelf = ASStackLayoutAlignSelfStart;
     stackSpec.direction = ASStackLayoutDirectionHorizontal;
   } else {
@@ -152,10 +152,10 @@ static const CGFloat kInnerPadding = 10.0f;
   OverrideViewController *overrideVC = [[OverrideViewController alloc] init];
   
   overrideVC.overrideDisplayTraitsWithTraitCollection = ^(UITraitCollection *traitCollection) {
-    ASDisplayTraits *displayTraits = [ASDisplayTraits displayTraitsWithUITraitCollection:traitCollection];
-    displayTraits.horizontalSizeClass = UIUserInterfaceSizeClassCompact;
-    displayTraits.verticalSizeClass = UIUserInterfaceSizeClassCompact;
-    return displayTraits;
+    ASTraitCollection *asyncTraitCollection = [ASTraitCollection displayTraitsWithUITraitCollection:traitCollection];
+    asyncTraitCollection.horizontalSizeClass = UIUserInterfaceSizeClassCompact;
+    asyncTraitCollection.verticalSizeClass = UIUserInterfaceSizeClassCompact;
+    return asyncTraitCollection;
   };
   
   [sourceViewController presentViewController:overrideVC animated:YES completion:nil];

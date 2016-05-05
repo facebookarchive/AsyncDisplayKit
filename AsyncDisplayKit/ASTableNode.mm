@@ -163,6 +163,6 @@
   [self.view clearFetchedData];
 }
 
-ASEnvironmentDisplayTraitsCollectionTableSetEnvironmentState(_environmentStateLock)
+ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 
 @end

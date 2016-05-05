@@ -9,12 +9,12 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
-@class ASDisplayTraits;
+@class ASTraitCollection;
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef ASDisplayTraits * _Nonnull (^ASDisplayTraitsForTraitCollectionBlock)(UITraitCollection *traitCollection);
-typedef ASDisplayTraits * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(CGSize windowSize);
+typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitCollectionBlock)(UITraitCollection *traitCollection);
+typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(CGSize windowSize);
 
 @interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController
 

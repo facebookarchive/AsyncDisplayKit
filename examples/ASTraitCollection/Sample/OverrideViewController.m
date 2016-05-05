@@ -10,7 +10,7 @@
  */
 
 #import "OverrideViewController.h"
-#import <AsyncDisplayKit/ASDisplayTraits.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
 
 static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
 
@@ -44,8 +44,8 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   CGFloat pointSize = 16.f;
-  ASDisplayTraits *displayTraits = [self displayTraits];
-  if (displayTraits.horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
+  ASTraitCollection *traitCollection = [self asyncTraitCollection];
+  if (traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
     // This should never happen because we override the VC's display traits to always be compact.
     pointSize = 100;
   }

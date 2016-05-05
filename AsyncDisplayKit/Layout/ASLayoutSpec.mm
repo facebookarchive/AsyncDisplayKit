@@ -12,12 +12,12 @@
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
-#import "ASDisplayTraits.h"
 #import "ASEnvironmentInternal.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASThread.h"
+#import "ASTraitCollection.h"
 
 #import <objc/runtime.h>
 #import <vector>
@@ -204,10 +204,10 @@
 ASEnvironmentLayoutOptionsForwarding
 ASEnvironmentLayoutExtensibilityForwarding
 
-- (ASDisplayTraits *)displayTraits
+- (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(_propertyLock);
-  return [ASDisplayTraits displayTraitsWithASEnvironmentDisplayTraits:_environmentState.displayTraits];
+  return [ASTraitCollection displayTraitsWithASEnvironmentTraitCollection:_environmentState.traitCollection];
 }
 
 @end

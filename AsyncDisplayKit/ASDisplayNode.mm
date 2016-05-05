@@ -22,7 +22,7 @@
 #import "_ASCoreAnimationExtras.h"
 #import "ASDisplayNodeLayoutContext.h"
 #import "ASDisplayNodeExtras.h"
-#import "ASDisplayTraits.h"
+#import "ASTraitCollection.h"
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
 #import "ASEnvironmentInternal.h"
@@ -2721,10 +2721,10 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 ASEnvironmentLayoutOptionsForwarding
 ASEnvironmentLayoutExtensibilityForwarding
 
-- (ASDisplayTraits *)displayTraits
+- (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(_propertyLock);
-  return [ASDisplayTraits displayTraitsWithASEnvironmentDisplayTraits:_environmentState.displayTraits];
+  return [ASTraitCollection displayTraitsWithASEnvironmentTraitCollection:_environmentState.traitCollection];
 }
 
 #if TARGET_OS_TV
