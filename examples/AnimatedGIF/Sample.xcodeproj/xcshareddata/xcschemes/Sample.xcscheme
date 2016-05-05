@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "683ADB9D1CA19883005863A4"
-               BuildableName = "ASAnimatedImage.app"
-               BlueprintName = "ASAnimatedImage"
+               BuildableName = "Sample.app"
+               BlueprintName = "Sample"
                ReferencedContainer = "container:Sample.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -33,8 +33,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "683ADB9D1CA19883005863A4"
-            BuildableName = "ASAnimatedImage.app"
-            BlueprintName = "ASAnimatedImage"
+            BuildableName = "Sample.app"
+            BlueprintName = "Sample"
             ReferencedContainer = "container:Sample.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -56,8 +56,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "683ADB9D1CA19883005863A4"
-            BuildableName = "ASAnimatedImage.app"
-            BlueprintName = "ASAnimatedImage"
+            BuildableName = "Sample.app"
+            BlueprintName = "Sample"
             ReferencedContainer = "container:Sample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -75,8 +75,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "683ADB9D1CA19883005863A4"
-            BuildableName = "ASAnimatedImage.app"
-            BlueprintName = "ASAnimatedImage"
+            BuildableName = "Sample.app"
+            BlueprintName = "Sample"
             ReferencedContainer = "container:Sample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
