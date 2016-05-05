@@ -47,7 +47,12 @@ extern NSArray *ASFindElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray
 /**
  * Return all the index paths of mutable multidimensional array at given index set, in ascending order.
  */
-extern NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *MultidimensionalArray, NSIndexSet *indexSet);
+extern NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensionalArray, NSIndexSet *indexSet);
+
+/**
+ * Return the index paths of the given multidimensional array that are present in the given index paths array.
+ */
+extern NSArray<NSIndexPath *> *ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths(NSArray *multidimensionalArray, NSArray<NSIndexPath *> *indexPaths);
 
 /**
  * Return all the index paths of a two-dimensional array, in ascending order.

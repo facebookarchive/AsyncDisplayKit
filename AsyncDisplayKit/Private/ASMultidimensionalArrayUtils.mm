@@ -53,6 +53,23 @@ static void ASRecursivelyFindIndexPathsForMultidimensionalArray(NSObject *obj, N
   }
 }
 
+static BOOL ASElementExistsAtIndexPath(NSMutableArray *mutableArray, NSIndexPath *indexPath) {
+  NSUInteger indexLength = indexPath.length;
+  ASDisplayNodeCAssert(indexLength != 0, @"Must have a non-zero indexPath length");
+  NSUInteger firstIndex = [indexPath indexAtPosition:0];
+  BOOL elementExists = firstIndex < mutableArray.count;
+
+  if (indexLength == 1) {
+    return elementExists;
+  }
+
+  if (!elementExists) {
+    return NO;
+  }
+
+  return ASElementExistsAtIndexPath(mutableArray[firstIndex], [indexPath indexPathByRemovingLastIndex]);
+}
+
 #pragma mark - Public Methods
 
 NSObject<NSCopying> *ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> *obj)
@@ -138,6 +155,18 @@ NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensiona
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
     ASRecursivelyFindIndexPathsForMultidimensionalArray(multidimensionalArray[idx], [NSIndexPath indexPathWithIndex:idx], res);
   }];
+
+  return res;
+}
+
+NSArray<NSIndexPath *> *ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths(NSArray *multidimensionalArray, NSArray<NSIndexPath *> *indexPaths)
+{
+  NSMutableArray *res = [NSMutableArray array];
+  for (NSIndexPath *indexPath in indexPaths) {
+    if (ASElementExistsAtIndexPath(multidimensionalArray, indexPath)) {
+      [res addObject:indexPath];
+    }
+  }
 
   return res;
 }
