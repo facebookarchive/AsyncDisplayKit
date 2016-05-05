@@ -58,6 +58,11 @@
   }
 }
 
+- (void)dealloc
+{
+  [self destroySnapshotter];
+}
+
 - (void)setLayerBacked:(BOOL)layerBacked
 {
   ASDisplayNodeAssert(!self.isLiveMap, @"ASMapNode can not be layer backed whilst .liveMap = YES, set .liveMap = NO to use layer backing.");
@@ -179,12 +184,18 @@
     return;
   }
 
+  __weak __typeof__(self) weakSelf = self;
   [_snapshotter startWithQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
              completionHandler:^(MKMapSnapshot *snapshot, NSError *error) {
+                 __typeof__(self) strongSelf = weakSelf;
+                if (!strongSelf) {
+                  return;
+                }
+                 
                 if (!error) {
                   UIImage *image = snapshot.image;
-                  
-                  if (_annotations.count > 0) {
+                  NSArray *annotations = strongSelf.annotations;
+                  if (annotations.count > 0) {
                     // Only create a graphics context if we have annotations to draw.
                     // The MKMapSnapshotter is currently not capable of rendering annotations automatically.
                     
@@ -198,7 +209,7 @@
                     UIImage *pinImage = pin.image;
                     CGSize pinSize = pin.bounds.size;
                     
-                    for (id<MKAnnotation> annotation in _annotations) {
+                    for (id<MKAnnotation> annotation in annotations) {
                       CGPoint point = [snapshot pointForCoordinate:annotation.coordinate];
                       if (CGRectContainsPoint(finalImageRect, point)) {
                         CGPoint pinCenterOffset = pin.centerOffset;
@@ -214,7 +225,7 @@
                     UIGraphicsEndImageContext();
                   }
                   
-                  self.image = image;
+                  strongSelf.image = image;
                 }
   }];
 }
