@@ -268,10 +268,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDataSource in the ViewController's dealloc. In this case our _asyncDataSource
-  // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to nil out
-  // super.dataSource in this case because calls to ASTableViewProxy will start failing and cause crashes.
-  
-  super.dataSource = nil;
+  // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to hold a strong
+  // reference to the old dataSource in this case because calls to ASTableViewProxy will start failing and cause crashes.
+  NS_VALID_UNTIL_END_OF_SCOPE id oldDataSource = self.dataSource;
   
   if (asyncDataSource == nil) {
     _asyncDataSource = nil;
@@ -299,13 +298,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDelegate in the ViewController's dealloc. In this case our _asyncDelegate
-  // will return as nil (ARC magic) even though the _proxyDelegate still exists. It's really important to nil out
-  // super.delegate in this case because calls to ASTableViewProxy will start failing and cause crashes.
-  
-  // Order is important here, the asyncDelegate must be callable while nilling super.delegate to avoid random crashes
-  // in UIScrollViewAccessibility.
-
-  super.delegate = nil;
+  // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to hold a strong
+  // reference to the old delegate in this case because calls to ASTableViewProxy will start failing and cause crashes.
+  NS_VALID_UNTIL_END_OF_SCOPE id oldDelegate = super.delegate;
   
   if (asyncDelegate == nil) {
     _asyncDelegate = nil;
