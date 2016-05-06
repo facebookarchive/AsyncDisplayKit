@@ -8,9 +8,14 @@
 
 #import "ASVideoPlayerNode.h"
 
-static NSString * const kASVideoPlayerNodePlayButton = @"playButton";
+static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
+static NSString * const kASVideoPlayerNodeDurationKeyPath = @"duration";
+static NSString * const kASVideoPlayerNodePlaybackButton  = @"playbackButtonNode";
+static NSString * const kASVideoPlayerNodeElapsedLabel    = @"elapsedTextNode";
+static NSString * const kASVideoPlayerNodeDurationLabel   = @"durationTextNode";
+static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNode";
 
-@interface ASVideoPlayerNode()
+@interface ASVideoPlayerNode() <ASVideoNodeDelegate>
 {
   ASDN::RecursiveMutex _videoPlayerLock;
   
@@ -23,7 +28,15 @@ static NSString * const kASVideoPlayerNodePlayButton = @"playButton";
 
   NSArray *_neededControls;
 
-  NSMutableDictionary *_cachedControls;
+  NSMutableArray *_cachedControls;
+
+  ASControlNode *_playbackButtonNode;
+  ASTextNode  *_elapsedTextNode;
+  ASTextNode  *_durationTextNode;
+  ASDisplayNode *_scrubberNode;
+
+  BOOL _scrubbing;
+
 }
 
 @end
@@ -47,6 +60,7 @@ static NSString * const kASVideoPlayerNodePlayButton = @"playButton";
   }
   
   _url = url;
+  _asset = [AVAsset assetWithURL:_url];
   
   [self privateInit];
   
@@ -58,7 +72,7 @@ static NSString * const kASVideoPlayerNodePlayButton = @"playButton";
   if (!(self = [super init])) {
     return nil;
   }
-  
+
   _asset = asset;
 
   [self privateInit];
@@ -70,10 +84,11 @@ static NSString * const kASVideoPlayerNodePlayButton = @"playButton";
 {
 
   _neededControls = [self createNeededControlElementsArray];
-  _cachedControls = [[NSMutableDictionary alloc] init];
+  _cachedControls = [[NSMutableArray alloc] init];
 
   _videoNode = [[ASVideoNode alloc] init];
-  _videoNode.asset = [AVAsset assetWithURL:_url];
+  _videoNode.asset = _asset;
+  _videoNode.delegate = self;
   [self addSubnode:_videoNode];
 
   _controlsHolderNode = [[ASDisplayNode alloc] init];
@@ -81,53 +96,203 @@ static NSString * const kASVideoPlayerNodePlayButton = @"playButton";
   [self addSubnode:_controlsHolderNode];
 
   [self createControls];
+
+  [self addObservers];
 }
 
 - (NSArray*)createNeededControlElementsArray
 {
   //TODO:: Maybe here we will ask delegate what he needs and we force delegate to use our static strings or something like that
-  return @[kASVideoPlayerNodePlayButton];
+  return @[ kASVideoPlayerNodePlaybackButton, kASVideoPlayerNodeElapsedLabel, kASVideoPlayerNodeScrubber, kASVideoPlayerNodeDurationLabel ];
 }
+
+- (void)addObservers
+{
+  [_videoNode addObserver:self forKeyPath:kASVideoPlayerNodeDurationKeyPath options:NSKeyValueObservingOptionNew context:ASVideoPlayerNodeContext];
+}
+
+- (void)removeObservers
+{
+  [_videoNode removeObserver:self forKeyPath:kASVideoPlayerNodeDurationKeyPath];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+  ASDN::MutexLocker l(_videoPlayerLock);
+
+  if (object != _videoNode) {
+    return;
+  }
+
+  if ([keyPath isEqualToString:kASVideoPlayerNodeDurationKeyPath]) {
+    [(UISlider*)_scrubberNode.view setMaximumValue:round(_videoNode.duration)];
+    [self updateDurationTimeLabel];
+  }
+
+}
+
 
 #pragma mark - UI
 - (void)createControls
 {
+  ASDN::MutexLocker l(_videoPlayerLock);
+
   for (NSString *controlType in _neededControls) {
-    if ([controlType isEqualToString:kASVideoPlayerNodePlayButton]) {
-      [self createPlayButton];
+    if ([controlType isEqualToString:kASVideoPlayerNodePlaybackButton]) {
+      [self createPlaybackButton];
+    } else if ([controlType isEqualToString:kASVideoPlayerNodeElapsedLabel]) {
+      [self createElapsedTextField];
+    } else if ([controlType isEqualToString:kASVideoPlayerNodeScrubber]) {
+      [self createScrubber];
+    } else if ([controlType isEqualToString:kASVideoPlayerNodeDurationLabel]) {
+      [self createDurationTextField];
     }
   }
 }
 
-- (void)createPlayButton
+- (void)createPlaybackButton
 {
-  ASControlNode *playButton = [_cachedControls objectForKey:kASVideoPlayerNodePlayButton];
-  if (!playButton) {
-    playButton = [[ASControlNode alloc] init];
-    playButton.preferredFrameSize = CGSizeMake(20.0, 20.0);
-    playButton.backgroundColor  = [UIColor redColor];
-
-    [_cachedControls setObject:playButton forKey:kASVideoPlayerNodePlayButton];
+  if (_playbackButtonNode == nil) {
+    _playbackButtonNode = [[ASControlNode alloc] init];
+    _playbackButtonNode.preferredFrameSize = CGSizeMake(20.0, 20.0);
+    _playbackButtonNode.backgroundColor  = [UIColor redColor];
+    [_playbackButtonNode addTarget:self action:@selector(playbackButtonTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+    [_cachedControls addObject:_playbackButtonNode];
   }
 
-  [self addSubnode:playButton];
+  [self addSubnode:_playbackButtonNode];
 }
+
+- (void)createElapsedTextField
+{
+  if (_elapsedTextNode == nil) {
+    _elapsedTextNode = [[ASTextNode alloc] init];
+    _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00"];
+    _elapsedTextNode.flexGrow = YES;
+
+    [_cachedControls addObject:_elapsedTextNode];
+  }
+  [self addSubnode:_elapsedTextNode];
+}
+
+- (void)createDurationTextField
+{
+  if (_durationTextNode == nil) {
+    _durationTextNode = [[ASTextNode alloc] init];
+    _durationTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00"];
+    _durationTextNode.flexGrow = YES;
+
+    [_cachedControls addObject:_durationTextNode];
+  }
+  [self addSubnode:_durationTextNode];
+}
+
+- (void)createScrubber
+{
+  if (_scrubberNode == nil) {
+    _scrubberNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull{
+      UISlider *slider = [[UISlider alloc] initWithFrame:CGRectZero];
+      slider.minimumValue = 0.0;
+
+      [slider addTarget:self action:@selector(scrubbingDidBegin) forControlEvents:UIControlEventTouchDown];
+      [slider addTarget:self action:@selector(scrubbingDidEnd) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchCancel];
+      [slider addTarget:self action:@selector(scrubberValueChanged:) forControlEvents:UIControlEventValueChanged];
+
+      return slider;
+    }];
+
+    _scrubberNode.flexShrink = YES;
+
+    [_cachedControls addObject:_scrubberNode];
+  }
+
+  [self addSubnode:_scrubberNode];
+}
+
+- (void)updateDurationTimeLabel
+{
+  NSString *formatedDuration = [self timeFormatted:round(_videoNode.duration)];
+  _durationTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration];
+}
+
+- (void)updateElapsedTimeLabel:(NSTimeInterval)seconds
+{
+  NSString *formatedDuration = [self timeFormatted:round(seconds)];
+  _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration];
+}
+
+- (NSAttributedString*)timeLabelAttributedStringForString:(NSString*)string
+{
+  //TODO:: maybe we can ask delegate for this options too
+  NSDictionary *options = @{
+                            NSFontAttributeName : [UIFont systemFontOfSize:12.0],
+                            NSForegroundColorAttributeName: [UIColor whiteColor]
+                            };
+
+  NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:string attributes:options];
+
+  return attributedString;
+}
+
+#pragma mark - ASVideoNodeDelegate
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second
+{
+  if(_scrubbing){
+    return;
+  }
+  [self updateElapsedTimeLabel:second];
+  [(UISlider*)_scrubberNode.view setValue:second animated:YES];
+}
+
+#pragma mark - Actions
+- (void)playbackButtonTapped:(ASControlNode*)node
+{
+  if (_videoNode.playerState == ASVideoNodePlayerStatePlaying) {
+    [_videoNode pause];
+    _playbackButtonNode.backgroundColor = [UIColor greenColor];
+  } else {
+    [_videoNode play];
+    _playbackButtonNode.backgroundColor = [UIColor redColor];
+  }
+}
+
+- (void)scrubbingDidBegin
+{
+  NSLog(@"scrubbingDidBegin");
+  _scrubbing = YES;
+}
+
+- (void)scrubbingDidEnd
+{
+  NSLog(@"scrubbingDidEnd");
+  _scrubbing = NO;
+}
+
+- (void)scrubberValueChanged:(UISlider*)slider
+{
+  CGFloat seconds = slider.value;
+  NSLog(@"scrubberValueChanged, value is : %f",seconds);
+  [self updateElapsedTimeLabel:seconds];
+  [_videoNode.player seekToTime:CMTimeMakeWithSeconds(seconds, _videoNode.periodicTimeObserverTimescale)];
+}
+
 
 #pragma mark - Layout
 - (ASLayoutSpec*)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   _videoNode.preferredFrameSize = constrainedSize.max;
+  _scrubberNode.preferredFrameSize = CGSizeMake(constrainedSize.max.width, 44.0);
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;
 
   ASStackLayoutSpec *controlsSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
-                                                                            spacing:0.0
+                                                                            spacing:10.0
                                                                      justifyContent:ASStackLayoutJustifyContentStart
-                                                                         alignItems:ASStackLayoutAlignItemsStart
-                                                                           children:[_cachedControls allValues]];
+                                                                         alignItems:ASStackLayoutAlignItemsCenter
+                                                                           children:_cachedControls];
 
-  UIEdgeInsets insets = UIEdgeInsetsMake(8.0, 8.0, 8.0, 8.0);
+  UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
 
   ASInsetLayoutSpec *controlsInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:controlsSpec];
 
@@ -141,6 +306,23 @@ static NSString * const kASVideoPlayerNodePlayButton = @"playButton";
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:mainVerticalStack];
 
   return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[overlaySpec]];
+}
+
+#pragma mark - Helpers
+- (NSString *)timeFormatted:(int)totalSeconds
+{
+
+  int seconds = totalSeconds % 60;
+  int minutes = (totalSeconds / 60) % 60;
+
+  return [NSString stringWithFormat:@"%02d:%02d", minutes, seconds];
+}
+
+#pragma mark - Lifecycle
+
+- (void)dealloc
+{
+  [self removeObservers];
 }
 
 @end

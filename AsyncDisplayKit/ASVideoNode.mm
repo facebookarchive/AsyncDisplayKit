@@ -57,6 +57,7 @@ static NSString * const kStatus = @"status";
   
   AVPlayerItem *_currentPlayerItem;
   AVPlayer *_player;
+  CGFloat _duration;
   
   id _timeObserver;
   int32_t _periodicTimeObserverTimescale;
@@ -148,6 +149,11 @@ static NSString * const kStatus = @"status";
   if (_placeholderImageNode.image == nil) {
     [self generatePlaceholderImage];
   }
+
+  [self willChangeValueForKey:@"duration"];
+  _duration = CMTimeGetSeconds(asset.duration);
+  [self didChangeValueForKey:@"duration"];
+
   
   __weak __typeof(self) weakSelf = self;
   _timeObserverInterval = CMTimeMake(1, _periodicTimeObserverTimescale);

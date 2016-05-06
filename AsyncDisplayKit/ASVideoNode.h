@@ -39,6 +39,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, atomic, strong, readonly) AVPlayer *player;
 @property (nullable, atomic, strong, readonly) AVPlayerItem *currentItem;
 
+@property (nonatomic,assign,readonly) CGFloat duration;
+
 /**
  * When shouldAutoplay is set to true, a video node will play when it has both loaded and entered the "visible" interfaceState.
  * If it leaves the visible interfaceState it will pause but will resume once it has returned.
