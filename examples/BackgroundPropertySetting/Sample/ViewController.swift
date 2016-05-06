@@ -24,7 +24,7 @@ final class ViewController: ASViewController, ASCollectionDelegate, ASCollection
 		layout.minimumInteritemSpacing = padding
 		layout.minimumLineSpacing = padding
 		super.init(node: ASCollectionNode(collectionViewLayout: layout))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Color", style: .Plain, target: self, action: #selector(didTapColorsButton))
+		navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Color", style: .Plain, target: self, action: #selector(didTapColorsButton))
 		navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Layout", style: .Plain, target: self, action: #selector(didTapLayoutButton))
 		collectionNode.delegate = self
 		collectionNode.dataSource = self
