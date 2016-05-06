@@ -77,6 +77,7 @@
 #import <AsyncDisplayKit/UIView+ASConvenience.h>
 #import <AsyncDisplayKit/ASRunLoopQueue.h>
 #import <AsyncDisplayKit/ASTextKitComponents.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
 
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
 
