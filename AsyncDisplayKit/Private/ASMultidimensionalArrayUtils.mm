@@ -67,7 +67,12 @@ static BOOL ASElementExistsAtIndexPathForMultidimensionalArray(NSArray *array, N
     return NO;
   }
 
-  return ASElementExistsAtIndexPathForMultidimensionalArray(array[firstIndex], [indexPath indexPathByRemovingLastIndex]);
+  NSUInteger indexesLength = indexLength - 1;
+  NSUInteger indexes[indexesLength];
+  [indexPath getIndexes:indexes range:NSMakeRange(1, indexesLength)];
+  NSIndexPath *indexPathByRemovingFirstIndex = [NSIndexPath indexPathWithIndexes:indexes length:indexesLength];
+
+  return ASElementExistsAtIndexPathForMultidimensionalArray(array[firstIndex], indexPathByRemovingFirstIndex);
 }
 
 #pragma mark - Public Methods
