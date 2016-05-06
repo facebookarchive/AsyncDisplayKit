@@ -373,7 +373,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _pendingViewState = nil;
 
   _displaySentinel = nil;
-  _transitionSentinel = nil;
 
   _pendingDisplayNodes = nil;
 }
@@ -825,11 +824,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(_propertyLock);
   _transitionInProgress = YES;
-    
-  if (!_transitionSentinel) {
-    _transitionSentinel = [[ASSentinel alloc] init];
-  }
-  return [_transitionSentinel increment];
+  _transitionID = OSAtomicAdd32(1, &_transitionID);
+  return _transitionID;
 }
 
 - (void)_finishOrCancelTransition
@@ -841,11 +837,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (BOOL)_shouldAbortTransitionWithID:(int32_t)transitionID
 {
   ASDN::MutexLocker l(_propertyLock);
-  if (_transitionInProgress) {
-    return _transitionSentinel == nil || transitionID != _transitionSentinel.value;
-  }
-  
-  return YES;
+  return (!_transitionInProgress || _transitionID != transitionID);
 }
 
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context

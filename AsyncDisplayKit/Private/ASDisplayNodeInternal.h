@@ -94,7 +94,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
   ASSentinel *_displaySentinel;
 
-  ASSentinel *_transitionSentinel;
+  int32_t _transitionID;
   BOOL _transitionInProgress;
 
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
