@@ -161,9 +161,7 @@
   for (NSString *kind in [self supplementaryKinds]) {
     LOG(@"Populating elements of kind: %@, for index paths: %@", kind, indexPaths);
     NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
-    for (NSIndexPath *indexPath in indexPaths) {
-      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts];
-    }
+    [self _populateSupplementaryNodesOfKind:kind atIndexPaths:indexPaths mutableContexts:contexts];
     _pendingContexts[kind] = contexts;
   }
 }
@@ -190,9 +188,7 @@
 {
   for (NSString *kind in [self supplementaryKinds]) {
     NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
-    for (NSIndexPath *indexPath in indexPaths) {
-      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts];
-    }
+    [self _populateSupplementaryNodesOfKind:kind atIndexPaths:indexPaths mutableContexts:contexts];
     _pendingContexts[kind] = contexts;
   }
 }
@@ -235,6 +231,23 @@
   id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
   
+  [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+    NSUInteger rowNum = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:idx];
+    NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
+    for (NSUInteger i = 0; i < rowNum; i++) {
+      NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
+      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts];
+    }
+  }];
+}
+
+- (void)_populateSupplementaryNodesOfKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
+{
+  NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
+  for (NSIndexPath *indexPath in indexPaths) {
+    [sections addIndex:indexPath.section];
+  }
+
   [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
     NSUInteger rowNum = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:idx];
     NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
