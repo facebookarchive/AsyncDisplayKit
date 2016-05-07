@@ -11,6 +11,6 @@
 
 @interface ASPINRemoteImageDownloader : NSObject <ASImageCacheProtocol, ASImageDownloaderProtocol>
 
-+ (instancetype)sharedDownloader;
++ (ASPINRemoteImageDownloader *)sharedDownloader;
 
 @end
