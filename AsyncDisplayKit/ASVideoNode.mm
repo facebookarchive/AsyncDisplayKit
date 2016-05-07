@@ -28,6 +28,7 @@ static UIViewContentMode ASContentModeFromVideoGravity(NSString *videoGravity) {
 
 static void *ASVideoNodeContext = &ASVideoNodeContext;
 static NSString * const kPlaybackLikelyToKeepUpKey = @"playbackLikelyToKeepUp";
+static NSString * const kplaybackBufferEmpty = @"playbackBufferEmpty";
 static NSString * const kStatus = @"status";
 
 @interface ASVideoNode ()
@@ -35,6 +36,13 @@ static NSString * const kStatus = @"status";
   ASDN::RecursiveMutex _videoLock;
   
   __weak id<ASVideoNodeDelegate> _delegate;
+  struct {
+    unsigned int delegateVideNodeShouldChangePlayerStateTo:1;
+    unsigned int delegateVideoPlaybackDidFinish:1;
+    unsigned int delegateVideoNodeWasTapped:1;
+    unsigned int delegateVideoNodeWillChangePlayerStateToState:1;
+    unsigned int delegateVideoNodeDidPlayToSecond:1;
+  } _delegateFlags;
   
   BOOL _shouldBePlaying;
   
@@ -43,10 +51,16 @@ static NSString * const kStatus = @"status";
   
   BOOL _muted;
   
+  ASVideoNodePlayerState _playerState;
+  
   AVAsset *_asset;
   
   AVPlayerItem *_currentPlayerItem;
   AVPlayer *_player;
+  
+  id _timeObserver;
+  int32_t _periodicTimeObserverTimescale;
+  CMTime _timeObserverInterval;
   
   ASImageNode *_placeholderImageNode; // TODO: Make ASVideoNode an ASImageNode subclass; remove this.
   
@@ -72,6 +86,7 @@ static NSString * const kStatus = @"status";
   
   self.playButton = [[ASDefaultPlayButton alloc] init];
   self.gravity = AVLayerVideoGravityResizeAspect;
+  _periodicTimeObserverTimescale = 10000;
   [self addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
   
   return self;
@@ -100,21 +115,53 @@ static NSString * const kStatus = @"status";
   ASDN::MutexLocker l(_videoLock);
 
   if (_asset != nil) {
-    if ([_asset isKindOfClass:[AVURLAsset class]]) {
-      return [[AVPlayerItem alloc] initWithURL:((AVURLAsset *)_asset).URL];
-    } else {
-      return [[AVPlayerItem alloc] initWithAsset:_asset];
-    }
+    return [[AVPlayerItem alloc] initWithAsset:_asset];
   }
 
   return nil;
+}
+
+- (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray<NSString *> *)requestedKeys
+{
+  for (NSString *key in requestedKeys) {
+    NSError *error = nil;
+    AVKeyValueStatus keyStatus = [asset statusOfValueForKey:key error:&error];
+    if (keyStatus == AVKeyValueStatusFailed) {
+      NSLog(@"Asset loading failed with error: %@", error);
+    }
+  }
+  
+  if (![asset isPlayable]) {
+    NSLog(@"Asset is not playable.");
+    return;
+  }
+
+  AVPlayerItem *playerItem = [self constructPlayerItem];
+  [self setCurrentItem:playerItem];
+  
+  if (_player != nil) {
+    [_player replaceCurrentItemWithPlayerItem:playerItem];
+  } else {
+    self.player = [AVPlayer playerWithPlayerItem:playerItem];
+  }
+  
+  if (_placeholderImageNode.image == nil) {
+    [self generatePlaceholderImage];
+  }
+  
+  __weak __typeof(self) weakSelf = self;
+  _timeObserverInterval = CMTimeMake(1, _periodicTimeObserverTimescale);
+  _timeObserver = [_player addPeriodicTimeObserverForInterval:_timeObserverInterval queue:NULL usingBlock:^(CMTime time){
+    [weakSelf periodicTimeObserver:time];
+  }];
 }
 
 - (void)addPlayerItemObservers:(AVPlayerItem *)playerItem
 {
   [playerItem addObserver:self forKeyPath:kStatus options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:ASVideoNodeContext];
   [playerItem addObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
-
+  [playerItem addObserver:self forKeyPath:kplaybackBufferEmpty options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
+  
   NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
   [notificationCenter addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:playerItem];
   [notificationCenter addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemFailedToPlayToEndTimeNotification object:playerItem];
@@ -126,6 +173,7 @@ static NSString * const kStatus = @"status";
   @try {
     [playerItem removeObserver:self forKeyPath:kStatus context:ASVideoNodeContext];
     [playerItem removeObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey context:ASVideoNodeContext];
+    [playerItem removeObserver:self forKeyPath:kplaybackBufferEmpty context:ASVideoNodeContext];
   }
   @catch (NSException * __unused exception) {
     NSLog(@"Unnecessary KVO removal");
@@ -229,25 +277,31 @@ static NSString * const kStatus = @"status";
 
   if ([keyPath isEqualToString:kStatus]) {
     if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
-      [_spinner removeFromSupernode];
-      _spinner = nil;
-
+      [self removeSpinner];
       // If we don't yet have a placeholder image update it now that we should have data available for it
       if (_placeholderImageNode.image == nil) {
         [self generatePlaceholderImage];
+      }
+      if (_shouldBePlaying) {
+        self.playerState = ASVideoNodePlayerStatePlaying;
       }
     }
   } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
     if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
       [self play]; // autoresume after buffer catches up
     }
+  } else if ([keyPath isEqualToString:kplaybackBufferEmpty]) {
+    if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+      self.playerState = ASVideoNodePlayerStateLoading;
+      [self showSpinner];
+    }
   }
 }
 
 - (void)tapped
 {
-  if (self.delegate && [self.delegate respondsToSelector:@selector(videoNodeWasTapped:)]) {
-    [self.delegate videoNodeWasTapped:self];
+  if (_delegateFlags.delegateVideoNodeWasTapped) {
+    [_delegate videoNodeWasTapped:self];
   } else {
     if (_shouldBePlaying) {
       [self pause];
@@ -262,20 +316,26 @@ static NSString * const kStatus = @"status";
   [super fetchData];
   
   {
-    ASDN::MutexLocker l(_videoLock);
+  ASDN::MutexLocker l(_videoLock);
+  AVAsset *asset = self.asset;
+  NSArray<NSString *> *requestedKeys = @[ @"playable" ];
+  [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
+    ASPerformBlockOnMainThread(^{
+      [self prepareToPlayAsset:asset withKeys:requestedKeys];
+    });
+  }];
+  }
+}
 
-    AVPlayerItem *playerItem = [self constructPlayerItem];
-    self.currentItem = playerItem;
-
-    if (_player != nil) {
-      [_player replaceCurrentItemWithPlayerItem:playerItem];
-    } else {
-      self.player = [AVPlayer playerWithPlayerItem:playerItem];
-    }
-
-    if (_placeholderImageNode.image == nil) {
-      [self generatePlaceholderImage];
-    }
+- (void)periodicTimeObserver:(CMTime)time
+{
+  NSTimeInterval timeInSeconds = CMTimeGetSeconds(time);
+  if (timeInSeconds <= 0) {
+    return;
+  }
+  
+  if (_delegateFlags.delegateVideoNodeDidPlayToSecond) {
+    [_delegate videoNode:self didPlayToSecond:timeInSeconds];
   }
 }
 
@@ -310,6 +370,23 @@ static NSString * const kStatus = @"status";
 
 
 #pragma mark - Video Properties
+- (void)setPlayerState:(ASVideoNodePlayerState)playerState
+{
+  ASDN::MutexLocker l(_videoLock);
+  
+  ASVideoNodePlayerState oldState = _playerState;
+  
+  if (oldState == playerState) {
+    return;
+  }
+  
+  if (_delegateFlags.delegateVideoNodeWillChangePlayerStateToState) {
+    [_delegate videoNode:self willChangePlayerState:oldState toState:playerState];
+  }
+  
+  _playerState = playerState;
+  
+}
 
 - (void)setPlayButton:(ASButtonNode *)playButton
 {
@@ -363,6 +440,24 @@ static NSString * const kStatus = @"status";
   return _player;
 }
 
+- (id<ASVideoNodeDelegate>)delegate{
+  return _delegate;
+}
+
+- (void)setDelegate:(id<ASVideoNodeDelegate>)delegate
+{
+  _delegate = delegate;
+  if (_delegate == nil) {
+    memset(&_delegateFlags, 0, sizeof(_delegateFlags));
+  } else {
+    _delegateFlags.delegateVideNodeShouldChangePlayerStateTo = [_delegate respondsToSelector:@selector(videoNode:shouldChangePlayerStateTo:)];
+    _delegateFlags.delegateVideoPlaybackDidFinish = [_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)];
+    _delegateFlags.delegateVideoNodeWasTapped = [_delegate respondsToSelector:@selector(videoNodeWasTapped:)];
+    _delegateFlags.delegateVideoNodeWillChangePlayerStateToState = [_delegate respondsToSelector:@selector(videoNode:willChangePlayerState:toState:)];
+    _delegateFlags.delegateVideoNodeDidPlayToSecond = [_delegate respondsToSelector:@selector(videoNode:didPlayToSecond:)];
+  }
+}
+
 - (void)setGravity:(NSString *)gravity
 {
   ASDN::MutexLocker l(_videoLock);
@@ -401,6 +496,10 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(_videoLock);
 
+  if (![self isStateChangeValid:ASVideoNodePlayerStatePlaying]) {
+    return;
+  }
+
   if (_player == nil) {
     [self setNeedsDataFetch];
   }
@@ -415,26 +514,18 @@ static NSString * const kStatus = @"status";
     }
   }
   
+  
   [_player play];
   _shouldBePlaying = YES;
   
   [UIView animateWithDuration:0.15 animations:^{
     _playButton.alpha = 0.0;
   }];
-
   if (![self ready]) {
-    if (!_spinner) {
-      _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-        UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
-        spinnnerView.color = [UIColor whiteColor];
-
-        return spinnnerView;
-      }];
-
-      [self addSubnode:_spinner];
-    }
-
-    [(UIActivityIndicatorView *)_spinner.view startAnimating];
+    [self showSpinner];
+  } else {
+    [self removeSpinner];
+    self.playerState = ASVideoNodePlayerStatePlaying;
   }
 }
 
@@ -443,12 +534,43 @@ static NSString * const kStatus = @"status";
   return _currentPlayerItem.status == AVPlayerItemStatusReadyToPlay;
 }
 
-- (void)pause
+- (void)showSpinner
 {
   ASDN::MutexLocker l(_videoLock);
   
+  if (!_spinner) {
+    _spinner = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
+      UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
+      spinnnerView.color = [UIColor whiteColor];
+      
+      return spinnnerView;
+    }];
+    
+    [self addSubnode:_spinner];
+  }
+  [(UIActivityIndicatorView *)_spinner.view startAnimating];
+}
+
+- (void)removeSpinner
+{
+  ASDN::MutexLocker l(_videoLock);
+  
+  if (!_spinner) {
+    return;
+  }
+  [_spinner removeFromSupernode];
+  _spinner = nil;
+}
+
+- (void)pause
+{
+  ASDN::MutexLocker l(_videoLock);
+  if (![self isStateChangeValid:ASVideoNodePlayerStatePaused]) {
+    return;
+  }
+  self.playerState = ASVideoNodePlayerStatePaused;
   [_player pause];
-  [((UIActivityIndicatorView *)_spinner.view) stopAnimating];
+  [self removeSpinner];
   _shouldBePlaying = NO;
   [UIView animateWithDuration:0.15 animations:^{
     _playButton.alpha = 1.0;
@@ -462,12 +584,23 @@ static NSString * const kStatus = @"status";
   return (_player.rate > 0 && !_player.error);
 }
 
+- (BOOL)isStateChangeValid:(ASVideoNodePlayerState)state
+{
+  if (_delegateFlags.delegateVideNodeShouldChangePlayerStateTo) {
+    if (![_delegate videoNode:self shouldChangePlayerStateTo:state]) {
+      return NO;
+    }
+  }
+  return YES;
+}
+
 
 #pragma mark - Playback observers
 
 - (void)didPlayToEnd:(NSNotification *)notification
 {
-  if ([_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)]) {
+  self.playerState = ASVideoNodePlayerStateFinished;
+  if (_delegateFlags.delegateVideoPlaybackDidFinish) {
     [_delegate videoPlaybackDidFinish:self];
   }
   [_player seekToTime:kCMTimeZero];
@@ -563,6 +696,8 @@ static NSString * const kStatus = @"status";
 
 - (void)dealloc
 {
+  [_player removeTimeObserver:_timeObserver];
+  _timeObserver = nil;
   [_playButton removeTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
   [self removePlayerItemObservers:_currentPlayerItem];
 }

@@ -339,8 +339,6 @@
 		9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.m */; };
 		A2763D791CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = A2763D771CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h */; };
 		A2763D7A1CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = A2763D771CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h */; };
-		A2763D7B1CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = A2763D781CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.m */; };
-		A2763D7C1CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = A2763D781CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.m */; };
 		A32FEDD51C501B6A004F642A /* ASTextKitFontSizeAdjuster.h in Headers */ = {isa = PBXBuildFile; fileRef = A32FEDD31C501B6A004F642A /* ASTextKitFontSizeAdjuster.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A373200F1C571B730011FC94 /* ASTextNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = A373200E1C571B050011FC94 /* ASTextNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A37320101C571B740011FC94 /* ASTextNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = A373200E1C571B050011FC94 /* ASTextNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -751,7 +749,7 @@
 		257754BB1BEE458E00737CA5 /* ASTextKitCoreTextAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASTextKitCoreTextAdditions.h; path = TextKit/ASTextKitCoreTextAdditions.h; sourceTree = "<group>"; };
 		257754BC1BEE458E00737CA5 /* ASTextNodeTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASTextNodeTypes.h; path = TextKit/ASTextNodeTypes.h; sourceTree = "<group>"; };
 		257754BD1BEE458E00737CA5 /* ASTextNodeWordKerner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASTextNodeWordKerner.m; path = TextKit/ASTextNodeWordKerner.m; sourceTree = "<group>"; };
-		25E327541C16819500A2170C /* ASPagerNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ASPagerNode.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		25E327541C16819500A2170C /* ASPagerNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ASPagerNode.h; sourceTree = "<group>"; };
 		25E327551C16819500A2170C /* ASPagerNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = ASPagerNode.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		2911485B1A77147A005D0878 /* ASControlNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASControlNodeTests.m; sourceTree = "<group>"; };
 		292C59991A956527007E5DD6 /* ASLayoutRangeType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLayoutRangeType.h; sourceTree = "<group>"; };

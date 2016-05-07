@@ -125,6 +125,10 @@
 {
   CGSize oldSize = self.calculatedSize;
   [super __setNeedsLayout];
+  
+  //Adding this lock because lock used to be held when this method was called. Not sure if it's necessary for
+  //didRelayoutFromOldSize:toNewSize:
+  ASDN::MutexLocker l(_propertyLock);
   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
 }
 
