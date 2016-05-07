@@ -96,8 +96,9 @@
 
 - (id <ASImageContainerProtocol>)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
 {
-  NSString *key = [[self sharedPINRemoteImageManager] cacheKeyForURL:URL processorKey:nil];
-  PINRemoteImageManagerResult *result = [[self sharedPINRemoteImageManager] synchronousImageFromCacheWithCacheKey:key options:PINRemoteImageManagerDownloadOptionsSkipDecode];
+  PINRemoteImageManager *manager = [self sharedPINRemoteImageManager];
+  NSString *key = [manager cacheKeyForURL:URL processorKey:nil];
+  PINRemoteImageManagerResult *result = [manager synchronousImageFromCacheWithCacheKey:key options:PINRemoteImageManagerDownloadOptionsSkipDecode];
 #if PIN_ANIMATED_AVAILABLE
   if (result.alternativeRepresentation) {
     return result.alternativeRepresentation;
@@ -133,7 +134,16 @@
                    downloadProgress:(ASImageDownloaderProgress)downloadProgress
                          completion:(ASImageDownloaderCompletion)completion;
 {
-  return [[self sharedPINRemoteImageManager] downloadImageWithURL:URL options:PINRemoteImageManagerDownloadOptionsSkipDecode completion:^(PINRemoteImageManagerResult *result) {
+  return [[self sharedPINRemoteImageManager] downloadImageWithURL:URL options:PINRemoteImageManagerDownloadOptionsSkipDecode progressDownload:^(int64_t completedBytes, int64_t totalBytes) {
+    /// If we're targeting the main queue and we're on the main thread, complete immediately.
+    if (ASDisplayNodeThreadIsMain() && callbackQueue == dispatch_get_main_queue()) {
+      downloadProgress(totalBytes / (CGFloat)completedBytes);
+    } else {
+      dispatch_async(callbackQueue, ^{
+        downloadProgress(totalBytes / (CGFloat)completedBytes);
+      });
+    }
+  } completion:^(PINRemoteImageManagerResult * _Nonnull result) {
     /// If we're targeting the main queue and we're on the main thread, complete immediately.
     if (ASDisplayNodeThreadIsMain() && callbackQueue == dispatch_get_main_queue()) {
 #if PIN_ANIMATED_AVAILABLE
