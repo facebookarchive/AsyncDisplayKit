@@ -135,7 +135,7 @@
                          completion:(ASImageDownloaderCompletion)completion;
 {
   return [[self sharedPINRemoteImageManager] downloadImageWithURL:URL options:PINRemoteImageManagerDownloadOptionsSkipDecode progressDownload:^(int64_t completedBytes, int64_t totalBytes) {
-    /// If we're targeting the main queue and we're on the main thread, complete immediately.
+    /// If we're targeting the main queue and we're on the main thread, call immediately.
     if (ASDisplayNodeThreadIsMain() && callbackQueue == dispatch_get_main_queue()) {
       downloadProgress(totalBytes / (CGFloat)completedBytes);
     } else {
