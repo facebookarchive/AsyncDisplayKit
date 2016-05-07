@@ -2,7 +2,6 @@
 
 [![Apps Using](https://img.shields.io/badge/Apps%20Using%20ASDK-%3E3,658-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
 [![Downloads](https://img.shields.io/badge/Total%20Downloads-%3E377,749-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
-[![Slack Status](http://asdk-slack-auto-invite.herokuapp.com/badge.svg)](http://asdk-slack-auto-invite.herokuapp.com)
 
 [![Platform](https://img.shields.io/badge/platforms-iOS%20%7C%20tvOS-orange.svg)](http://AsyncDisplayKit.org)
 [![Languages](https://img.shields.io/badge/languages-ObjC%20%7C%20Swift-orange.svg)](http://AsyncDisplayKit.org)
