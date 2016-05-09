@@ -117,6 +117,12 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  */
 @property (nullable, nonatomic, readonly) ASImageIdentifier displayedImageIdentifier;
 
+/**
+ * @abstract If the downloader implements progressive image rendering and this value is YES progressive renders of the
+ * image will be displayed as the image downloads.  Defaults to YES.
+ */
+@property (nonatomic, assign, readwrite) BOOL shouldRenderProgressImages;
+
 #if TARGET_OS_IOS
 /**
  * @abstract The image manager that this image node should use when requesting images from the Photos framework. If this is `nil` (the default), then `PHImageManager.defaultManager` is used.
