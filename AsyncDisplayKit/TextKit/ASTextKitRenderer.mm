@@ -156,7 +156,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     }];
   }
   
-  [self truncater];
+  [[self truncater] truncate];
   
   // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
   // -usedRectForTextContainer:).
