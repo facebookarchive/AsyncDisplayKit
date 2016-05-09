@@ -137,25 +137,30 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (void)_calculateSize
 {
-  [self truncater];
   // if we have no scale factors or an unconstrained width, there is no reason to try to adjust the font size
   if (isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
     _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
   }
   
-  // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
-  // -usedRectForTextContainer:).
   __block NSTextStorage *scaledTextStorage = nil;
   BOOL isScaled = [self isScaled];
-  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
-    if (isScaled) {
+  if (isScaled) {
+    // apply the string scale before truncating or else we may truncate the string after we've done the work to shrink it.
+    [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
       NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
       [ASTextKitFontSizeAdjuster adjustFontSizeForAttributeString:scaledString withScaleFactor:_currentScaleFactor];
       scaledTextStorage = [[NSTextStorage alloc] initWithAttributedString:scaledString];
       
       [textStorage removeLayoutManager:layoutManager];
       [scaledTextStorage addLayoutManager:layoutManager];
-    }
+    }];
+  }
+  
+  [[self truncater] truncate];
+  
+  // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
+  // -usedRectForTextContainer:).
+  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     [layoutManager ensureLayoutForTextContainer:textContainer];
   }];
   
