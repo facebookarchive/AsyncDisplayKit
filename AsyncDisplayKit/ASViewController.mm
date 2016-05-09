@@ -13,10 +13,14 @@
 #import "ASDisplayNode+Beta.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
+#define AS_LOG_VISIBILITY_CHANGES 1
+
 @implementation ASViewController
 {
   BOOL _ensureDisplayed;
   BOOL _automaticallyAdjustRangeModeBasedOnViewEvents;
+  BOOL _parentManagesVisibilityDepth;
+  NSInteger _visibilityDepth;
 }
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -81,21 +85,75 @@
   [super viewDidLayoutSubviews];
 }
 
+- (void)didMoveToParentViewController:(UIViewController *)parent
+{
+  [super didMoveToParentViewController:parent];
+  [self visibilityDepthDidChange];
+}
+
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
   [_node measureWithSizeRange:[self nodeConstrainedSize]];
   [_node recursivelyFetchData];
-    
-  [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeFull];
+  
+  if (_parentManagesVisibilityDepth == NO) {
+    _visibilityDepth = 0;
+    [self visibilityDepthDidChange];
+  }
 }
 
 - (void)viewDidDisappear:(BOOL)animated
 {
   [super viewDidDisappear:animated];
   
-  [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeMinimum];
+  if (_parentManagesVisibilityDepth == NO) {
+    _visibilityDepth = 1;
+    [self visibilityDepthDidChange];
+  }
+}
+
+- (NSInteger)visibilityDepth
+{
+  if (self.parentViewController && _parentManagesVisibilityDepth == NO) {
+    _parentManagesVisibilityDepth = [self.parentViewController conformsToProtocol:@protocol(ASManagesChildVisibilityDepth)];
+  }
+  
+  if (_parentManagesVisibilityDepth) {
+    return [(id <ASManagesChildVisibilityDepth>)self.parentViewController visibilityDepthOfChildViewController:self];
+  }
+  return _visibilityDepth;
+}
+
+- (void)visibilityDepthDidChange
+{
+  ASLayoutRangeMode rangeMode = ASLayoutRangeModeForVisibilityDepth(self.visibilityDepth);
+#if AS_LOG_VISIBILITY_CHANGES
+  NSString *rangeModeString;
+  switch (rangeMode) {
+    case ASLayoutRangeModeMinimum:
+      rangeModeString = @"Minimum";
+      break;
+      
+    case ASLayoutRangeModeFull:
+      rangeModeString = @"Full";
+      break;
+      
+    case ASLayoutRangeModeVisibleOnly:
+      rangeModeString = @"Visible Only";
+      break;
+      
+    case ASLayoutRangeModeLowMemory:
+      rangeModeString = @"Low Memory";
+      break;
+      
+    default:
+      break;
+  }
+  NSLog(@"Updating visibility of:%@ to: %@ (visibility depth: %d)", self, rangeModeString, self.visibilityDepth);
+#endif
+  [self updateCurrentRangeModeWithModeIfPossible:rangeMode];
 }
 
 #pragma mark - Automatic range mode
@@ -113,7 +171,9 @@
 - (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
 {
   if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
-  if (![_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]) { return; }
+  if (![_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]) {
+    return;
+  }
 
   id<ASRangeControllerUpdateRangeProtocol> updateRangeNode = (id<ASRangeControllerUpdateRangeProtocol>)_node;
   [updateRangeNode updateCurrentRangeWithMode:rangeMode];
