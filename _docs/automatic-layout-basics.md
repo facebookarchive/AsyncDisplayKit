@@ -31,5 +31,5 @@ You don’t need to be aware of **`ASLayout`** except to know that it represents
 
 ##Layout for UIKit Components:
 - for UIViews that are added directly, you will still need to manually lay it out in `didLoad:`
-- for UIViews that are added ASDisplay initWithViewBlock, you can then include it in `layoutSpecThatFits:`
+- for UIViews that are added via `[ASDisplayNode initWithViewBlock:]` or its variants, you can then include it in `layoutSpecThatFits:`
 
