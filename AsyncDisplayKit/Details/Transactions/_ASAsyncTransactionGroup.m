@@ -82,8 +82,8 @@ static void _transactionGroupRunLoopObserverCallback(CFRunLoopObserverRef observ
   ASDisplayNodeAssertMainThread();
 
   if ([_containerLayers count]) {
-    NSHashTable *containerLayersToCommit = [_containerLayers copy];
-    [_containerLayers removeAllObjects];
+    NSHashTable *containerLayersToCommit = _containerLayers;
+    _containerLayers = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
 
     for (CALayer *containerLayer in containerLayersToCommit) {
       // Note that the act of committing a transaction may open a new transaction,
