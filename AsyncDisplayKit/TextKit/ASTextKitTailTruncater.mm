@@ -30,8 +30,6 @@
     _context = context;
     _truncationAttributedString = truncationAttributedString;
     _avoidTailTruncationSet = avoidTailTruncationSet;
-
-    [self _truncate];
   }
   return self;
 }
@@ -153,7 +151,7 @@
   }
 }
 
-- (void)_truncate
+- (void)truncate
 {
   [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     NSUInteger originalStringLength = textStorage.length;

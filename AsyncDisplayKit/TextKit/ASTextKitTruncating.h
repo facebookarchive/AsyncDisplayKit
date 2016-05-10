@@ -33,4 +33,9 @@
      truncationAttributedString:(NSAttributedString *)truncationAttributedString
          avoidTailTruncationSet:(NSCharacterSet *)avoidTailTruncationSet;
 
+/**
+ *  Actually do the truncation.
+ */
+- (void)truncate;
+
 @end
