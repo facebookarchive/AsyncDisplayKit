@@ -74,6 +74,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readwrite) BOOL shouldCacheImage;
 
 /**
+ * If the downloader implements progressive image rendering and this value is YES progressive renders of the
+ * image will be displayed as the image downloads. Regardless of this properties value, progress renders will
+ * only occur when the node is visible. Defaults to YES.
+ */
+@property (nonatomic, assign, readwrite) BOOL shouldRenderProgressImages;
+
+/**
  * The image quality of the current image. This is a number between 0 and 1 and can be used to track
  * progressive progress. Calculated by dividing number of bytes / expected number of total bytes.
  */

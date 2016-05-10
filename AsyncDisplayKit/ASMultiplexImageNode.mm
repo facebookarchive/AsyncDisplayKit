@@ -85,6 +85,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   ASDN::RecursiveMutex _downloadIdentifierLock;
   id _downloadIdentifier;
   
+  // Properties
+  ASDN::RecursiveMutex _propertyLock;
+  BOOL _shouldRenderProgressImages;
+  
   //set on init only
   BOOL _downloaderSupportsNewProtocol;
   BOOL _downloaderImplementsSetProgress;
@@ -185,6 +189,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   
   _cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
   _cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
+  
+  _shouldRenderProgressImages = YES;
   
   self.shouldBypassEnsureDisplay = YES;
 
@@ -339,6 +345,27 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   #endif
 }
 
+
+- (void)setShouldRenderProgressImages:(BOOL)shouldRenderProgressImages
+{
+  ASDN::MutexLocker l(_propertyLock);
+  if (shouldRenderProgressImages == _shouldRenderProgressImages) {
+    return;
+  }
+  
+  _shouldRenderProgressImages = shouldRenderProgressImages;
+  
+  
+  ASDN::MutexUnlocker u(_propertyLock);
+  [self _updateProgressImageBlockOnDownloaderIfNeeded];
+}
+
+- (BOOL)shouldRenderProgressImages
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _shouldRenderProgressImages;
+}
+
 #pragma mark -
 
 #pragma mark -
@@ -458,32 +485,34 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
  */
 - (void)_updateProgressImageBlockOnDownloaderIfNeeded
 {
-    // Read our interface state before locking so that we don't lock super while holding our lock.
-    ASInterfaceState interfaceState = self.interfaceState;
-    ASDN::MutexLocker l(_downloadIdentifierLock);
-    
-    if (!_downloaderImplementsSetProgress || _downloadIdentifier == nil) {
+  BOOL shouldRenderProgressImages = self.shouldRenderProgressImages;
+  
+  // Read our interface state before locking so that we don't lock super while holding our lock.
+  ASInterfaceState interfaceState = self.interfaceState;
+  ASDN::MutexLocker l(_downloadIdentifierLock);
+  
+  if (!_downloaderImplementsSetProgress || _downloadIdentifier == nil) {
+    return;
+  }
+  
+  ASImageDownloaderProgressImage progress = nil;
+  if (shouldRenderProgressImages && ASInterfaceStateIncludesVisible(interfaceState)) {
+    __weak __typeof__(self) weakSelf = self;
+    progress = ^(UIImage * _Nonnull progressImage, CGFloat progress, id _Nullable downloadIdentifier) {
+      __typeof__(self) strongSelf = weakSelf;
+      if (strongSelf == nil) {
         return;
-    }
-
-    ASImageDownloaderProgressImage progress = nil;
-    if (ASInterfaceStateIncludesVisible(interfaceState)) {
-        __weak __typeof__(self) weakSelf = self;
-        progress = ^(UIImage * _Nonnull progressImage, CGFloat progress, id _Nullable downloadIdentifier) {
-            __typeof__(self) strongSelf = weakSelf;
-            if (strongSelf == nil) {
-                return;
-            }
-
-            ASDN::MutexLocker l(strongSelf->_downloadIdentifierLock);
-            //Getting a result back for a different download identifier, download must not have been successfully canceled
-            if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
-                return;
-            }
-            strongSelf.image = progressImage;
-        };
-    }
-    [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
+      }
+      
+      ASDN::MutexLocker l(strongSelf->_downloadIdentifierLock);
+      //Getting a result back for a different download identifier, download must not have been successfully canceled
+      if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+        return;
+      }
+      strongSelf.image = progressImage;
+    };
+  }
+  [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
 }
 
 - (void)_clearImage

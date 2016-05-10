@@ -45,6 +45,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   BOOL _delegateSupportsDidStartFetchingData;
   BOOL _delegateSupportsDidFailWithError;
   BOOL _delegateSupportsImageNodeDidFinishDecoding;
+  
+  BOOL _shouldRenderProgressImages;
 
   //set on init only
   BOOL _downloaderSupportsNewProtocol;
@@ -83,6 +85,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   _cacheSupportsSynchronousFetch = [cache respondsToSelector:@selector(synchronouslyFetchedCachedImageWithURL:)];
   
   _shouldCacheImage = YES;
+  _shouldRenderProgressImages = YES;
   self.shouldBypassEnsureDisplay = YES;
 
   return self;
@@ -218,6 +221,26 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   return _delegate;
 }
 
+- (void)setShouldRenderProgressImages:(BOOL)shouldRenderProgressImages
+{
+  ASDN::MutexLocker l(_lock);
+  if (shouldRenderProgressImages == _shouldRenderProgressImages) {
+    return;
+  }
+  
+  _shouldRenderProgressImages = shouldRenderProgressImages;
+  
+  
+  ASDN::MutexUnlocker u(_lock);
+  [self _updateProgressImageBlockOnDownloaderIfNeeded];
+}
+
+- (BOOL)shouldRenderProgressImages
+{
+  ASDN::MutexLocker l(_lock);
+  return _shouldRenderProgressImages;
+}
+
 - (BOOL)placeholderShouldPersist
 {
   ASDN::MutexLocker l(_lock);
@@ -309,6 +332,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
  */
 - (void)_updateProgressImageBlockOnDownloaderIfNeeded
 {
+  BOOL shouldRenderProgressImages = self.shouldRenderProgressImages;
+  
   // Read our interface state before locking so that we don't lock super while holding our lock.
   ASInterfaceState interfaceState = self.interfaceState;
   ASDN::MutexLocker l(_lock);
@@ -318,7 +343,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 
   ASImageDownloaderProgressImage progress = nil;
-  if (ASInterfaceStateIncludesVisible(interfaceState)) {
+  if (shouldRenderProgressImages && ASInterfaceStateIncludesVisible(interfaceState)) {
     __weak __typeof__(self) weakSelf = self;
     progress = ^(UIImage * _Nonnull progressImage, CGFloat progress, id _Nullable downloadIdentifier) {
       __typeof__(self) strongSelf = weakSelf;
