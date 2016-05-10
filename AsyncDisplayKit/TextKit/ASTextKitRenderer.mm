@@ -256,7 +256,9 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (std::vector<NSRange>)visibleRanges
 {
-  return [self truncater].visibleRanges;
+  ASTextKitTailTruncater *truncater = [self truncater];
+  [truncater truncate];
+  return truncater.visibleRanges;
 }
 
 @end
