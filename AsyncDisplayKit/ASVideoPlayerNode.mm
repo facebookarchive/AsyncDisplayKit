@@ -9,11 +9,6 @@
 #import "ASVideoPlayerNode.h"
 
 static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
-static NSString * const kASVideoPlayerNodeDurationKeyPath = @"duration";
-static NSString * const kASVideoPlayerNodePlaybackButton  = @"playbackButtonNode";
-static NSString * const kASVideoPlayerNodeElapsedLabel    = @"elapsedTextNode";
-static NSString * const kASVideoPlayerNodeDurationLabel   = @"durationTextNode";
-static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNode";
 
 @interface ASVideoPlayerNode() <ASVideoNodeDelegate>
 {
@@ -34,6 +29,7 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
   ASTextNode  *_elapsedTextNode;
   ASTextNode  *_durationTextNode;
   ASDisplayNode *_scrubberNode;
+  ASStackLayoutSpec *_controlFlexGrowSpacerSpec;
 
   BOOL _isSeeking;
   CGFloat _duration;
@@ -104,7 +100,11 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
 - (NSArray*)createNeededControlElementsArray
 {
   //TODO:: Maybe here we will ask delegate what he needs and we force delegate to use our static strings or something like that
-  return @[ kASVideoPlayerNodePlaybackButton, kASVideoPlayerNodeElapsedLabel, kASVideoPlayerNodeScrubber, kASVideoPlayerNodeDurationLabel ];
+  return @[ @(ASVideoPlayerNodeControlTypePlaybackButton),
+            @(ASVideoPlayerNodeControlTypeElapsedText),
+            @(ASVideoPlayerNodeControlTypeScrubber),
+            @(ASVideoPlayerNodeControlTypeFlexGrowSpacer),
+            @(ASVideoPlayerNodeControlTypeDurationText) ];
 }
 
 - (void)addObservers
@@ -122,15 +122,26 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
 {
   ASDN::MutexLocker l(_videoPlayerLock);
 
-  for (NSString *controlType in _neededControls) {
-    if ([controlType isEqualToString:kASVideoPlayerNodePlaybackButton]) {
-      [self createPlaybackButton];
-    } else if ([controlType isEqualToString:kASVideoPlayerNodeElapsedLabel]) {
-      [self createElapsedTextField];
-    } else if ([controlType isEqualToString:kASVideoPlayerNodeScrubber]) {
-      [self createScrubber];
-    } else if ([controlType isEqualToString:kASVideoPlayerNodeDurationLabel]) {
-      [self createDurationTextField];
+  for (int i = 0; i < _neededControls.count; i++) {
+    ASVideoPlayerNodeControlType type = (ASVideoPlayerNodeControlType)[[_neededControls objectAtIndex:i] integerValue];
+    switch (type) {
+      case ASVideoPlayerNodeControlTypePlaybackButton:
+        [self createPlaybackButton];
+        break;
+      case ASVideoPlayerNodeControlTypeElapsedText:
+        [self createElapsedTextField];
+        break;
+      case ASVideoPlayerNodeControlTypeDurationText:
+        [self createDurationTextField];
+        break;
+      case ASVideoPlayerNodeControlTypeScrubber:
+        [self createScrubber];
+        break;
+      case ASVideoPlayerNodeControlTypeFlexGrowSpacer:
+        [self createControlFlexGrowSpacer];
+        break;
+      default:
+        break;
     }
   }
 }
@@ -163,7 +174,6 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
   if (_elapsedTextNode == nil) {
     _elapsedTextNode = [[ASTextNode alloc] init];
     _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00"];
-    _elapsedTextNode.flexGrow = YES;
 
     [_cachedControls addObject:_elapsedTextNode];
   }
@@ -175,7 +185,6 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
   if (_durationTextNode == nil) {
     _durationTextNode = [[ASTextNode alloc] init];
     _durationTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00"];
-    _durationTextNode.flexGrow = YES;
 
     [_cachedControls addObject:_durationTextNode];
   }
@@ -203,6 +212,16 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
   }
 
   [self addSubnode:_scrubberNode];
+}
+
+- (void)createControlFlexGrowSpacer
+{
+  if (_controlFlexGrowSpacerSpec == nil) {
+    _controlFlexGrowSpacerSpec = [[ASStackLayoutSpec alloc] init];
+    _controlFlexGrowSpacerSpec.flexGrow = YES;
+  }
+
+  [_cachedControls addObject:_controlFlexGrowSpacerSpec];
 }
 
 - (void)updateDurationTimeLabel
@@ -233,11 +252,12 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
 #pragma mark - ASVideoNodeDelegate
 - (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate
 {
-  if(toSate == ASVideoNodePlayerStateReadyToPlay){
+  if (toSate == ASVideoNodePlayerStateReadyToPlay) {
     _duration = CMTimeGetSeconds(_videoNode.currentItem.duration);
     [self updateDurationTimeLabel];
   }
 }
+
 - (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second
 {
   if(_isSeeking){
@@ -277,13 +297,13 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
 
 - (void)changedSeekValue:(UISlider*)slider
 {
-  CGFloat percentage  = slider.value * 100;
+  CGFloat percentage = slider.value * 100;
   [self seekToTime:percentage];
 }
 
 -(void)seekToTime:(CGFloat)percentComplete
 {
-  CGFloat seconds     = (_duration * percentComplete) / 100;
+  CGFloat seconds = (_duration * percentComplete) / 100;
 
   [self updateElapsedTimeLabel:seconds];
   [_videoNode.player seekToTime:CMTimeMakeWithSeconds(seconds, _videoNode.periodicTimeObserverTimescale)];
@@ -308,10 +328,13 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
                                                                      justifyContent:ASStackLayoutJustifyContentStart
                                                                          alignItems:ASStackLayoutAlignItemsCenter
                                                                            children:_cachedControls];
+  controlbarSpec.alignSelf = ASStackLayoutAlignSelfStretch;
 
   UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
 
   ASInsetLayoutSpec *controlbarInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:controlbarSpec];
+
+  controlbarInsetSpec.alignSelf = ASStackLayoutAlignSelfStretch;
 
   ASStackLayoutSpec *mainVerticalStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
                                                                                  spacing:0.0

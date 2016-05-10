@@ -15,7 +15,7 @@
 typedef enum {
   ASVideoNodePlayerStateUnknown,
   ASVideoNodePlayerStateReadyToPlay,
-  ASVideoNodePlayerStatePlaybackLikelyToKeepUp,
+  ASVideoNodePlayerStatePlaybackLikelyToKeepUpButNotPlaying,
   ASVideoNodePlayerStatePlaying,
   ASVideoNodePlayerStateLoading,
   ASVideoNodePlayerStatePaused,

@@ -14,12 +14,26 @@
 
 @class AVAsset;
 
+typedef enum {
+  ASVideoPlayerNodeControlTypePlaybackButton,
+  ASVideoPlayerNodeControlTypeElapsedText,
+  ASVideoPlayerNodeControlTypeDurationText,
+  ASVideoPlayerNodeControlTypeScrubber,
+  ASVideoPlayerNodeControlTypeFlexGrowSpacer,
+} ASVideoPlayerNodeControlType;
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ASVideoPlayerNode : ASDisplayNode
 
+@property (nonatomic,assign,readonly) CGFloat duration;
+
 - (instancetype)initWithUrl:(NSURL*)url;
 - (instancetype)initWithAsset:(AVAsset*)asset;
+
+#pragma mark - Public API
+-(void)seekToTime:(CGFloat)percentComplete;
+
 @end
 NS_ASSUME_NONNULL_END
 #endif

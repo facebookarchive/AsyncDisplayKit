@@ -288,7 +288,7 @@ static NSString * const kStatus = @"status";
       }
     }
   } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
-    self.playerState = ASVideoNodePlayerStatePlaybackLikelyToKeepUp;
+    self.playerState = ASVideoNodePlayerStatePlaybackLikelyToKeepUpButNotPlaying;
     if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
       [self play]; // autoresume after buffer catches up
     }
