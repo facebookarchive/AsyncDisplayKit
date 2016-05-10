@@ -36,6 +36,7 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
   ASDisplayNode *_scrubberNode;
 
   BOOL _isSeeking;
+  CGFloat _duration;
 
 }
 
@@ -108,28 +109,13 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
 
 - (void)addObservers
 {
-  [_videoNode addObserver:self forKeyPath:kASVideoPlayerNodeDurationKeyPath options:NSKeyValueObservingOptionNew context:ASVideoPlayerNodeContext];
+
 }
 
 - (void)removeObservers
 {
-  [_videoNode removeObserver:self forKeyPath:kASVideoPlayerNodeDurationKeyPath];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-  ASDN::MutexLocker l(_videoPlayerLock);
-
-  if (object != _videoNode) {
-    return;
-  }
-
-  if ([keyPath isEqualToString:kASVideoPlayerNodeDurationKeyPath]) {
-    [self updateDurationTimeLabel];
-  }
 
 }
-
 
 #pragma mark - UI
 - (void)createControls
@@ -221,7 +207,7 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
 
 - (void)updateDurationTimeLabel
 {
-  NSString *formatedDuration = [self timeFormatted:round(_videoNode.duration)];
+  NSString *formatedDuration = [self timeFormatted:round(_duration)];
   _durationTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration];
 }
 
@@ -245,15 +231,21 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
 }
 
 #pragma mark - ASVideoNodeDelegate
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate
+{
+  if(toSate == ASVideoNodePlayerStateReadyToPlay){
+    _duration = CMTimeGetSeconds(_videoNode.currentItem.duration);
+    [self updateDurationTimeLabel];
+  }
+}
 - (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second
 {
   if(_isSeeking){
     return;
   }
-  CGFloat duration = CMTimeGetSeconds(videoNode.currentItem.duration);
 
   [self updateElapsedTimeLabel:second];
-  [(UISlider*)_scrubberNode.view setValue:(second/duration) animated:NO];
+  [(UISlider*)_scrubberNode.view setValue:(second/_duration) animated:NO];
 }
 
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode
@@ -291,8 +283,7 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
 
 -(void)seekToTime:(CGFloat)percentComplete
 {
-  CGFloat duration    = CMTimeGetSeconds(_videoNode.currentItem.duration);
-  CGFloat seconds     = (duration * percentComplete) / 100;
+  CGFloat seconds     = (_duration * percentComplete) / 100;
 
   [self updateElapsedTimeLabel:seconds];
   [_videoNode.player seekToTime:CMTimeMakeWithSeconds(seconds, _videoNode.periodicTimeObserverTimescale)];

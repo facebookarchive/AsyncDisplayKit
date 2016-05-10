@@ -57,7 +57,6 @@ static NSString * const kStatus = @"status";
   
   AVPlayerItem *_currentPlayerItem;
   AVPlayer *_player;
-  CGFloat _duration;
   
   id _timeObserver;
   int32_t _periodicTimeObserverTimescale;
@@ -150,11 +149,6 @@ static NSString * const kStatus = @"status";
     [self generatePlaceholderImage];
   }
 
-  [self willChangeValueForKey:@"duration"];
-  _duration = CMTimeGetSeconds(asset.duration);
-  [self didChangeValueForKey:@"duration"];
-
-  
   __weak __typeof(self) weakSelf = self;
   _timeObserverInterval = CMTimeMake(1, _periodicTimeObserverTimescale);
   _timeObserver = [_player addPeriodicTimeObserverForInterval:_timeObserverInterval queue:NULL usingBlock:^(CMTime time){
@@ -283,6 +277,7 @@ static NSString * const kStatus = @"status";
 
   if ([keyPath isEqualToString:kStatus]) {
     if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
+      self.playerState = ASVideoNodePlayerStateReadyToPlay;
       [self removeSpinner];
       // If we don't yet have a placeholder image update it now that we should have data available for it
       if (_placeholderImageNode.image == nil) {
@@ -293,6 +288,7 @@ static NSString * const kStatus = @"status";
       }
     }
   } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
+    self.playerState = ASVideoNodePlayerStatePlaybackLikelyToKeepUp;
     if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
       [self play]; // autoresume after buffer catches up
     }
