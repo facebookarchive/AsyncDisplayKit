@@ -35,7 +35,7 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
   ASTextNode  *_durationTextNode;
   ASDisplayNode *_scrubberNode;
 
-  BOOL _scrubbing;
+  BOOL _isSeeking;
 
 }
 
@@ -125,7 +125,6 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
   }
 
   if ([keyPath isEqualToString:kASVideoPlayerNodeDurationKeyPath]) {
-    [(UISlider*)_scrubberNode.view setMaximumValue:round(_videoNode.duration)];
     [self updateDurationTimeLabel];
   }
 
@@ -148,6 +147,16 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
       [self createDurationTextField];
     }
   }
+}
+
+- (void)removeControls
+{
+  [_cachedControls enumerateObjectsUsingBlock:^(ASDisplayNode   *_Nonnull node, NSUInteger idx, BOOL * _Nonnull stop) {
+    [node.view removeFromSuperview];
+    [node removeFromSupernode];
+    node = nil;
+    NSLog(@"%@",_playbackButtonNode);
+  }];
 }
 
 - (void)createPlaybackButton
@@ -193,10 +202,11 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
     _scrubberNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull{
       UISlider *slider = [[UISlider alloc] initWithFrame:CGRectZero];
       slider.minimumValue = 0.0;
+      slider.maximumValue = 1.0;
 
-      [slider addTarget:self action:@selector(scrubbingDidBegin) forControlEvents:UIControlEventTouchDown];
-      [slider addTarget:self action:@selector(scrubbingDidEnd) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchCancel];
-      [slider addTarget:self action:@selector(scrubberValueChanged:) forControlEvents:UIControlEventValueChanged];
+      [slider addTarget:self action:@selector(beganSeek) forControlEvents:UIControlEventTouchDown];
+      [slider addTarget:self action:@selector(endedSeek) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchCancel];
+      [slider addTarget:self action:@selector(changedSeekValue:) forControlEvents:UIControlEventValueChanged];
 
       return slider;
     }];
@@ -237,11 +247,18 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
 #pragma mark - ASVideoNodeDelegate
 - (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second
 {
-  if(_scrubbing){
+  if(_isSeeking){
     return;
   }
+  CGFloat duration = CMTimeGetSeconds(videoNode.currentItem.duration);
+
   [self updateElapsedTimeLabel:second];
-  [(UISlider*)_scrubberNode.view setValue:second animated:YES];
+  [(UISlider*)_scrubberNode.view setValue:(second/duration) animated:NO];
+}
+
+- (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode
+{
+  //[self removeControls];
 }
 
 #pragma mark - Actions
@@ -256,24 +273,33 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
   }
 }
 
-- (void)scrubbingDidBegin
+- (void)beganSeek
 {
-  NSLog(@"scrubbingDidBegin");
-  _scrubbing = YES;
+  _isSeeking = YES;
 }
 
-- (void)scrubbingDidEnd
+- (void)endedSeek
 {
-  NSLog(@"scrubbingDidEnd");
-  _scrubbing = NO;
+  _isSeeking = NO;
 }
 
-- (void)scrubberValueChanged:(UISlider*)slider
+- (void)changedSeekValue:(UISlider*)slider
 {
-  CGFloat seconds = slider.value;
-  NSLog(@"scrubberValueChanged, value is : %f",seconds);
+  CGFloat percentage  = slider.value * 100;
+  [self seekToTime:percentage];
+}
+
+-(void)seekToTime:(CGFloat)percentComplete
+{
+  CGFloat duration    = CMTimeGetSeconds(_videoNode.currentItem.duration);
+  CGFloat seconds     = (duration * percentComplete) / 100;
+
   [self updateElapsedTimeLabel:seconds];
   [_videoNode.player seekToTime:CMTimeMakeWithSeconds(seconds, _videoNode.periodicTimeObserverTimescale)];
+
+  if (_videoNode.playerState != ASVideoNodePlayerStatePlaying) {
+    [_videoNode play];
+  }
 }
 
 
@@ -286,7 +312,7 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;
 
-  ASStackLayoutSpec *controlsSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+  ASStackLayoutSpec *controlbarSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
                                                                             spacing:10.0
                                                                      justifyContent:ASStackLayoutJustifyContentStart
                                                                          alignItems:ASStackLayoutAlignItemsCenter
@@ -294,13 +320,13 @@ static NSString * const kASVideoPlayerNodeScrubber        = @"elapsedScrubberNod
 
   UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
 
-  ASInsetLayoutSpec *controlsInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:controlsSpec];
+  ASInsetLayoutSpec *controlbarInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:controlbarSpec];
 
   ASStackLayoutSpec *mainVerticalStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
                                                                                  spacing:0.0
                                                                           justifyContent:ASStackLayoutJustifyContentStart
                                                                               alignItems:ASStackLayoutAlignItemsStart
-                                                                                children:@[spacer,controlsInsetSpec]];
+                                                                                children:@[spacer,controlbarInsetSpec]];
 
   
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:mainVerticalStack];
