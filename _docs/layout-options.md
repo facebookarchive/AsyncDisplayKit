@@ -8,7 +8,7 @@ next: layer-backing.html
 When using ASDK, you have three options for layout. Note that UIKit Autolayout is **not** supported by ASDK. 
 #Manual Sizing & Layout
 
-This original layout method shipped with ASDK 1.0 and is analogous to UIKit's layout methods. Use this method for for ASViewControllers (unless you subclass the node).
+This original layout method shipped with ASDK 1.0 and is analogous to UIKit's layout methods. Use this method for ASViewControllers (unless you subclass the node).
 
 `[ASDisplayNode calculateSizeThatFits:]` **vs.** `[UIView sizeThatFits:]`
 
