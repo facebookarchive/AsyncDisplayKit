@@ -1,24 +1,24 @@
 ---
-title: Implicit Node Hierarchy Mgmt
+title: Implicit Hierarchy Management
 layout: docs
 permalink: /docs/implicit-hierarchy-mgmt.html
 next: debug-hit-test.html
 ---
 
-This feature - created by ASDK rockstar <a href="https://github.com/facebook/AsyncDisplayKit/pulls?utf8=%E2%9C%93&q=is%3Apr+author%3Alevi+">@levi</a> - was built to support the AsyncDisplayKit Layout Transition API. However, apps using AsyncDisplayKit that don't require animations can still benefit from the reduction in code size that this feature enables.
+This feature was initially a result of building the AsyncDisplayKit Layout Transition API. However, even apps using AsyncDisplayKit that don't require animations can still benefit from the reduction in code size that this feature enables.
 
-**This feature will soon be enabled by default.**
+**This feature will soon be enabled by default for all ASDisplayNodes using ASLayouts.**
 
 <div class = "note">
-Implicit Node Hierarchy Management is implemented using ASLayoutSpecs. If you are unfamiliar with that concept, please read that documentation (INSERT LINK) first. <br><br>
+Implicit Hierarchy Management is implemented using ASLayoutSpecs. If you are unfamiliar with that concept, please read that documentation (INSERT LINK) first. <br><br>
 To recap, an ASLayoutSpec completely describes the UI of a view in your app by specifying the **hierarchy state of a node and its subnodes**. An ASLayoutSpec is returned by a node from its <br><br>
 `- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize` <br><br>
 method. 
 </div>
 
-When enabled, INHM, means that your nodes no longer require `addSubnode:` or `removeFromSupernode` method calls. The presence or absence of the INHM node _and_ its subnodes are determined in the layoutSpecThatFits: method. 
+When enabled, IHM, means that your nodes no longer require `addSubnode:` or `removeFromSupernode` method calls. The presence or absence of the IHM node _and_ its subnodes are determined in the layoutSpecThatFits: method. 
 
-**Note that the subnodes of any node with this property set will inherit INHM, so it is only neccessary to put it on the highest level node. Most likely that will be an ASTableNode, ASCollectionNode or ASPagerNode.**
+**Note that the subnodes of any node with this property set will inherit IHM, so it is only neccessary to put it on the highest level node. Most likely that will be an ASTableNode, ASCollectionNode or ASPagerNode.**
 
 ####Example####
 Consider the following `ASCellNode` subclass `PhotoCellNode` from the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> which produces a simple social media photo feed UI.
