@@ -130,7 +130,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  
  * @see `+[NSURL URLWithAssetLocalIdentifier:targetSize:contentMode:options:]` below.
  */
-@property (nonatomic, strong) PHImageManager *imageManager;
+@property (nullable, nonatomic, strong) PHImageManager *imageManager;
 #endif
 @end
 
