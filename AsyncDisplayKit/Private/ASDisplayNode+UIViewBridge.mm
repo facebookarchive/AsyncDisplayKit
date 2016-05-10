@@ -37,6 +37,7 @@
 #if DISPLAYNODE_USE_LOCKS
 #define _bridge_prologue_read ASDN::MutexLocker l(_propertyLock); ASDisplayNodeAssertThreadAffinity(self)
 #define _bridge_prologue_write ASDN::MutexLocker l(_propertyLock)
+#define _bridge_prologue_write_unlock ASDN::MutexUnlocker u(_propertyLock)
 #else
 #define _bridge_prologue_read ASDisplayNodeAssertThreadAffinity(self)
 #define _bridge_prologue_write
@@ -331,7 +332,11 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
     // The node is loaded and we're on main.
     // Quite the opposite of setNeedsDisplay, we must call __setNeedsLayout before messaging
     // the view or layer to ensure that measurement and implicitly added subnodes have been handled.
+    
+    // Calling __setNeedsLayout while holding the property lock can cause deadlocks
+    _bridge_prologue_write_unlock;
     [self __setNeedsLayout];
+    _bridge_prologue_write;
     _messageToViewOrLayer(setNeedsLayout);
   } else if (__loaded(self)) {
     // The node is loaded but we're not on main.
@@ -341,7 +346,9 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
     [ASDisplayNodeGetPendingState(self) setNeedsLayout];
   } else {
     // The node is not loaded and we're not on main.
+    _bridge_prologue_write_unlock;
     [self __setNeedsLayout];
+    _bridge_prologue_write;
   }
 }
 

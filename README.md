@@ -1,7 +1,7 @@
 ![AsyncDisplayKit](https://github.com/facebook/AsyncDisplayKit/blob/master/docs/assets/logo.png)
 
-[![Apps Using](https://img.shields.io/badge/Apps%20Using%20ASDK-%3E3,178-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
-[![Downloads](https://img.shields.io/badge/Total%20Downloads-%3E336,372-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Apps Using](https://img.shields.io/badge/Apps%20Using%20ASDK-%3E3,658-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Downloads](https://img.shields.io/badge/Total%20Downloads-%3E377,749-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
 
 [![Platform](https://img.shields.io/badge/platforms-iOS%20%7C%20tvOS-orange.svg)](http://AsyncDisplayKit.org)
 [![Languages](https://img.shields.io/badge/languages-ObjC%20%7C%20Swift-orange.svg)](http://AsyncDisplayKit.org)
