@@ -463,8 +463,12 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   }
 
   // Grab the best available image from the data source.
+  UIImage *existingImage = self.image;
   for (id imageIdentifier in _imageIdentifiers) {
-    UIImage *image = [_dataSource multiplexImageNode:self imageForImageIdentifier:imageIdentifier];
+    // If this image is already loaded, don't request it from the data source again because
+    // the data source may generate a new instance of UIImage that returns NO for isEqual:
+    // and we'll end up in an infinite loading loop.
+    UIImage *image = ASObjectIsEqual(imageIdentifier, _loadedImageIdentifier) ? existingImage : [_dataSource multiplexImageNode:self imageForImageIdentifier:imageIdentifier];
     if (image) {
       if (imageIdentifierOut) {
         *imageIdentifierOut = imageIdentifier;
