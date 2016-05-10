@@ -75,7 +75,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * If the downloader implements progressive image rendering and this value is YES progressive renders of the
- * image will be displayed as the image downloads.  Defaults to YES.
+ * image will be displayed as the image downloads. Regardless of this properties value, progress renders will
+ * only occur when the node is visible. Defaults to YES.
  */
 @property (nonatomic, assign, readwrite) BOOL shouldRenderProgressImages;
 
