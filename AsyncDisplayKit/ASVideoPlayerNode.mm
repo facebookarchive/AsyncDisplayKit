@@ -320,6 +320,13 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _videoNode.preferredFrameSize = constrainedSize.max;
   _scrubberNode.preferredFrameSize = CGSizeMake(constrainedSize.max.width, 44.0);
 
+  //TODO:: here wi will ask delegate for it's own ASLayoutSpec
+  // something like layoutSpecForVideoPlayerNode:forConstrainedsize:forControls
+  return [self defaultLayoutSpecThatFits:constrainedSize];
+}
+
+- (ASLayoutSpec*)defaultLayoutSpecThatFits:(ASSizeRange)constrainedSize
+{
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;
 
