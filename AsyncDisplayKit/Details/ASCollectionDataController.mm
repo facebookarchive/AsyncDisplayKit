@@ -73,6 +73,7 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
+
     [_pendingContexts removeObjectForKey:kind];
   }
 }
@@ -101,6 +102,7 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
+
     [_pendingContexts removeObjectForKey:kind];
   }
 }
@@ -135,6 +137,7 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
+
     [_pendingContexts removeObjectForKey:kind];
   }
 }
@@ -172,7 +175,6 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
     [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-    [_pendingContexts removeObjectForKey:kind];
   }];
 }
 
@@ -201,7 +203,6 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-    [_pendingContexts removeObjectForKey:kind];
   }];
 }
 
@@ -216,12 +217,7 @@
     NSUInteger rowCount = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:i];
     for (NSUInteger j = 0; j < rowCount; j++) {
       NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:j];
-      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts];
-
-
-
-
-
+      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
     }
   }
 }
@@ -236,13 +232,16 @@
     NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
     for (NSUInteger i = 0; i < rowNum; i++) {
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
-      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts];
+      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
     }
   }];
 }
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
 {
+  id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+
   NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
   for (NSIndexPath *indexPath in indexPaths) {
     [sections addIndex:indexPath.section];
@@ -253,12 +252,12 @@
     NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
     for (NSUInteger i = 0; i < rowNum; i++) {
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
-      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts];
+      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
     }
   }];
 }
 
-- (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
+- (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
       ASCellNodeBlock supplementaryCellBlock;
       if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
