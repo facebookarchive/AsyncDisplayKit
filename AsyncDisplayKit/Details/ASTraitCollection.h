@@ -32,7 +32,7 @@
  *  This makes sure that the VC is the owner of the context and ASEnvironmentTraitCollections will not
  *  have a reference to a dangling pointer.
  */
-@property (nonatomic, strong, readonly) id traitColectionContext;
+@property (nonatomic, strong, readonly) id traitCollectionContext;
 
 
 + (ASTraitCollection *)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits;

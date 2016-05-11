@@ -52,6 +52,10 @@
 - (void)dealloc
 {
   if (_traitColectionContext != nil) {
+    // The setter will iterate through the VC's subnodes and replace the traitCollectionContext in their ASEnvironmentTraitCollection with nil.
+    // Since the VC holds the only strong reference to this context and we are in the process of destroying
+    // the VC, all the references in the subnodes will be unsafe unless we nil them out. More than likely all the subnodes will be dealloc'ed
+    // as part of the VC being dealloc'ed, but this is just to make extra sure.
     self.traitColectionContext = nil;
   }
 }
@@ -158,7 +162,7 @@
 {
   if (self.overrideDisplayTraitsWithTraitCollection) {
     ASTraitCollection *asyncTraitCollection = self.overrideDisplayTraitsWithTraitCollection(traitCollection);
-    self.traitColectionContext = asyncTraitCollection.traitColectionContext;
+    self.traitColectionContext = asyncTraitCollection.traitCollectionContext;
     return [asyncTraitCollection environmentTraitCollection];
   }
   
@@ -171,7 +175,7 @@
 {
   if (self.overrideDisplayTraitsWithWindowSize) {
     ASTraitCollection *traitCollection = self.overrideDisplayTraitsWithWindowSize(windowSize);
-    self.traitColectionContext = traitCollection.traitColectionContext;
+    self.traitColectionContext = traitCollection.traitCollectionContext;
     return [traitCollection environmentTraitCollection];
   }
   return self.node.environmentTraitCollection;

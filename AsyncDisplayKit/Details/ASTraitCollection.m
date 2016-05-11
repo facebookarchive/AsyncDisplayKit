@@ -26,7 +26,7 @@
       _horizontalSizeClass = horizontalSizeClass;
       _verticalSizeClass = verticalSizeClass;
       _forceTouchCapability = forceTouchCapability;
-      _traitColectionContext = traitCollectionContext;
+      _traitCollectionContext = traitCollectionContext;
     }
     return self;
 }
@@ -91,7 +91,7 @@
     .userInterfaceIdiom = self.userInterfaceIdiom,
     .verticalSizeClass = self.verticalSizeClass,
     .forceTouchCapability = self.forceTouchCapability,
-    .displayContext = self.traitColectionContext,
+    .displayContext = self.traitCollectionContext,
   };
 }
 
