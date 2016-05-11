@@ -23,6 +23,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateScrubberThumbTintColor:1;
     unsigned int delegateScrubberThumbImage:1;
     unsigned int delegateTimeLabelAttributes:1;
+    unsigned int delegateLayoutSpecForControls:1;
   } _delegateFlags;
   
   NSURL *_url;
@@ -34,7 +35,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   NSArray *_neededControls;
 
-  NSMutableArray *_cachedControls;
+  NSMutableDictionary *_cachedControls;
 
   ASControlNode *_playbackButtonNode;
   ASTextNode  *_elapsedTextNode;
@@ -91,7 +92,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)privateInit
 {
 
-  _cachedControls = [[NSMutableArray alloc] init];
+  _cachedControls = [[NSMutableDictionary alloc] init];
 
   _videoNode = [[ASVideoNode alloc] init];
   _videoNode.asset = _asset;
@@ -123,7 +124,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   return @[ @(ASVideoPlayerNodeControlTypePlaybackButton),
             @(ASVideoPlayerNodeControlTypeElapsedText),
             @(ASVideoPlayerNodeControlTypeScrubber),
-            @(ASVideoPlayerNodeControlTypeFlexGrowSpacer),
             @(ASVideoPlayerNodeControlTypeDurationText) ];
 }
 
@@ -172,12 +172,12 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)removeControls
 {
-  [_cachedControls enumerateObjectsUsingBlock:^(ASDisplayNode   *_Nonnull node, NSUInteger idx, BOOL * _Nonnull stop) {
-    [node.view removeFromSuperview];
-    [node removeFromSupernode];
-    node = nil;
-    NSLog(@"%@",_playbackButtonNode);
-  }];
+//  [_cachedControls enumerateObjectsUsingBlock:^(ASDisplayNode   *_Nonnull node, NSUInteger idx, BOOL * _Nonnull stop) {
+//    [node.view removeFromSuperview];
+//    [node removeFromSupernode];
+//    node = nil;
+//    NSLog(@"%@",_playbackButtonNode);
+//  }];
 }
 
 - (void)createPlaybackButton
@@ -187,7 +187,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _playbackButtonNode.preferredFrameSize = CGSizeMake(20.0, 20.0);
     _playbackButtonNode.backgroundColor  = [UIColor redColor];
     [_playbackButtonNode addTarget:self action:@selector(playbackButtonTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
-    [_cachedControls addObject:_playbackButtonNode];
+    [_cachedControls setObject:_playbackButtonNode forKey:@(ASVideoPlayerNodeControlTypePlaybackButton)];
   }
 
   [self addSubnode:_playbackButtonNode];
@@ -199,7 +199,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _elapsedTextNode = [[ASTextNode alloc] init];
     _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00" forControlType:ASVideoPlayerNodeControlTypeElapsedText];
 
-    [_cachedControls addObject:_elapsedTextNode];
+    [_cachedControls setObject:_elapsedTextNode forKey:@(ASVideoPlayerNodeControlTypeElapsedText)];
   }
   [self addSubnode:_elapsedTextNode];
 }
@@ -210,7 +210,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _durationTextNode = [[ASTextNode alloc] init];
     _durationTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00" forControlType:ASVideoPlayerNodeControlTypeDurationText];
 
-    [_cachedControls addObject:_durationTextNode];
+    [_cachedControls setObject:_durationTextNode forKey:@(ASVideoPlayerNodeControlTypeDurationText)];
   }
   [self addSubnode:_durationTextNode];
 }
@@ -250,7 +250,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
     _scrubberNode.flexShrink = YES;
 
-    [_cachedControls addObject:_scrubberNode];
+    [_cachedControls setObject:_scrubberNode forKey:@(ASVideoPlayerNodeControlTypeScrubber)];
   }
 
   [self addSubnode:_scrubberNode];
@@ -263,7 +263,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _controlFlexGrowSpacerSpec.flexGrow = YES;
   }
 
-  [_cachedControls addObject:_controlFlexGrowSpacerSpec];
+  [_cachedControls setObject:_controlFlexGrowSpacerSpec forKey:@(ASVideoPlayerNodeControlTypeFlexGrowSpacer)];
 }
 
 - (void)updateDurationTimeLabel
@@ -360,20 +360,51 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
+- (NSArray *)controlsForLayoutSpec
+{
+  NSMutableArray *controls = [[NSMutableArray alloc] initWithCapacity:_cachedControls.count];
+
+  if (_cachedControls[ @(ASVideoPlayerNodeControlTypePlaybackButton) ]) {
+    [controls addObject:_cachedControls[ @(ASVideoPlayerNodeControlTypePlaybackButton) ]];
+  }
+
+  if (_cachedControls[ @(ASVideoPlayerNodeControlTypeElapsedText) ]) {
+    [controls addObject:_cachedControls[ @(ASVideoPlayerNodeControlTypeElapsedText) ]];
+  }
+
+  if (_cachedControls[ @(ASVideoPlayerNodeControlTypeScrubber) ]) {
+    [controls addObject:_cachedControls[ @(ASVideoPlayerNodeControlTypeScrubber) ]];
+  }
+
+  if (_cachedControls[ @(ASVideoPlayerNodeControlTypeDurationText) ]) {
+    [controls addObject:_cachedControls[ @(ASVideoPlayerNodeControlTypeDurationText) ]];
+  }
+
+  return controls;
+}
 
 #pragma mark - Layout
 - (ASLayoutSpec*)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   _videoNode.preferredFrameSize = constrainedSize.max;
-  _scrubberNode.preferredFrameSize = CGSizeMake(constrainedSize.max.width, 44.0);
 
-  //TODO:: here wi will ask delegate for it's own ASLayoutSpec
-  // something like layoutSpecForVideoPlayerNode:forConstrainedsize:forControls
-  return [self defaultLayoutSpecThatFits:constrainedSize];
+  ASLayoutSpec *layoutSpec;
+
+  if (_delegateFlags.delegateLayoutSpecForControls) {
+    layoutSpec = [_delegate videoPlayerNodeLayoutSpec:self forControls:_cachedControls forConstrainedSize:constrainedSize];
+  } else {
+    layoutSpec = [self defaultLayoutSpecThatFits:constrainedSize];
+  }
+
+  ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
+
+  return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[overlaySpec]];
 }
 
 - (ASLayoutSpec*)defaultLayoutSpecThatFits:(ASSizeRange)constrainedSize
 {
+  _scrubberNode.preferredFrameSize = CGSizeMake(constrainedSize.max.width, 44.0);
+
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;
 
@@ -381,7 +412,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
                                                                             spacing:10.0
                                                                      justifyContent:ASStackLayoutJustifyContentStart
                                                                          alignItems:ASStackLayoutAlignItemsCenter
-                                                                           children:_cachedControls];
+                                                                           children: [self controlsForLayoutSpec] ];
   controlbarSpec.alignSelf = ASStackLayoutAlignSelfStretch;
 
   UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
@@ -396,10 +427,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
                                                                               alignItems:ASStackLayoutAlignItemsStart
                                                                                 children:@[spacer,controlbarInsetSpec]];
 
-  
-  ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:mainVerticalStack];
-
-  return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[overlaySpec]];
+  return mainVerticalStack;
 }
 
 #pragma mark - Properties
@@ -420,6 +448,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateScrubberThumbTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbTint:)];
     _delegateFlags.delegateScrubberThumbImage = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbImage:)];
     _delegateFlags.delegateTimeLabelAttributes = [_delegate respondsToSelector:@selector(videoPlayerNodeTimeLabelAttributes:timeLabelType:)];
+    _delegateFlags.delegateLayoutSpecForControls = [_delegate respondsToSelector:@selector(videoPlayerNodeLayoutSpec:forControls:forConstrainedSize:)];
   }
 }
 

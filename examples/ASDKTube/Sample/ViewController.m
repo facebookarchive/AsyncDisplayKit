@@ -77,12 +77,57 @@
 
 - (NSDictionary *)videoPlayerNodeTimeLabelAttributes:(ASVideoPlayerNode *)videoPlayerNode timeLabelType:(ASVideoPlayerNodeControlType)timeLabelType
 {
-  NSDictionary *options = @{
-                            NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:13.0],
-                            NSForegroundColorAttributeName: [UIColor orangeColor]
-                            };
+  NSDictionary *options;
+
+  if (timeLabelType == ASVideoPlayerNodeControlTypeElapsedText) {
+    options = @{
+                NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:13.0],
+                NSForegroundColorAttributeName: [UIColor orangeColor]
+                };
+  } else if (timeLabelType == ASVideoPlayerNodeControlTypeDurationText) {
+    options = @{
+                NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:13.0],
+                NSForegroundColorAttributeName: [UIColor redColor]
+                };
+  }
 
   return options;
 }
+
+- (ASLayoutSpec *)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer
+                                forControls:(NSDictionary *)controls
+                         forConstrainedSize:(ASSizeRange)constrainedSize
+{
+  ASDisplayNode *scrubber = controls[@(ASVideoPlayerNodeControlTypeScrubber)];
+  if (scrubber) {
+    scrubber.preferredFrameSize = CGSizeMake(constrainedSize.max.width, 44.0);
+  }
+
+  ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
+  spacer.flexGrow = YES;
+
+  ASStackLayoutSpec *controlbarSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+                                                                              spacing:10.0
+                                                                       justifyContent:ASStackLayoutJustifyContentStart
+                                                                           alignItems:ASStackLayoutAlignItemsCenter
+                                                                             children: @[scrubber] ];
+  controlbarSpec.alignSelf = ASStackLayoutAlignSelfStretch;
+
+  UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
+
+  ASInsetLayoutSpec *controlbarInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:controlbarSpec];
+
+  controlbarInsetSpec.alignSelf = ASStackLayoutAlignSelfStretch;
+
+  ASStackLayoutSpec *mainVerticalStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+                                                                                 spacing:0.0
+                                                                          justifyContent:ASStackLayoutJustifyContentStart
+                                                                              alignItems:ASStackLayoutAlignItemsStart
+                                                                                children:@[spacer,controlbarInsetSpec]];
+
+
+  return mainVerticalStack;
+}
+
 
 @end

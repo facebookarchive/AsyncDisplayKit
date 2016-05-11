@@ -53,6 +53,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (UIColor *)videoPlayerNodeScrubberMinimumTrackTint:(ASVideoPlayerNode *)videoPlayer;
 - (UIColor *)videoPlayerNodeScrubberThumbTint:(ASVideoPlayerNode *)videoPlayer;
 - (UIImage *)videoPlayerNodeScrubberThumbImage:(ASVideoPlayerNode *)videoPlayer;
+- (ASLayoutSpec *)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer
+                                forControls:(NSDictionary *)controls
+                         forConstrainedSize:(ASSizeRange)constrainedSize;
 @end
 NS_ASSUME_NONNULL_END
 #endif
