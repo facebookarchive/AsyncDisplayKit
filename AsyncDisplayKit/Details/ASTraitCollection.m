@@ -12,68 +12,74 @@
 
 @implementation ASTraitCollection
 
-- (instancetype)init
+- (instancetype)initWithDisplayScale:(CGFloat)displayScale
+                  userInterfaceIdiom:(UIUserInterfaceIdiom)userInterfaceIdiom
+                 horizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
+                   verticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
+                forceTouchCapability:(UIForceTouchCapability)forceTouchCapability
+              traitCollectionContext:(id)traitCollectionContext
 {
     self = [super init];
     if (self) {
-        _isMutable = YES;
+      _displayScale = displayScale;
+      _userInterfaceIdiom = userInterfaceIdiom;
+      _horizontalSizeClass = horizontalSizeClass;
+      _verticalSizeClass = verticalSizeClass;
+      _forceTouchCapability = forceTouchCapability;
+      _traitColectionContext = traitCollectionContext;
     }
     return self;
 }
 
-- (void)setDisplayScale:(CGFloat)displayScale
++ (ASTraitCollection *)traitCollectionWithDisplayScale:(CGFloat)displayScale
+                                    userInterfaceIdiom:(UIUserInterfaceIdiom)userInterfaceIdiom
+                                   horizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
+                                     verticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
+                                  forceTouchCapability:(UIForceTouchCapability)forceTouchCapability
+                                traitCollectionContext:(id)traitCollectionContext
 {
-  ASDisplayNodeAssert(self.isMutable, @"ASDisplayTraits is no longer mutable");
-  _displayScale = displayScale;
+  return [[[self class] alloc] initWithDisplayScale:displayScale
+                                 userInterfaceIdiom:userInterfaceIdiom
+                                horizontalSizeClass:horizontalSizeClass
+                                  verticalSizeClass:verticalSizeClass
+                               forceTouchCapability:forceTouchCapability
+                             traitCollectionContext:traitCollectionContext];
 }
 
-- (void)setHorizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
++ (ASTraitCollection *)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits
 {
-  ASDisplayNodeAssert(self.isMutable, @"ASDisplayTraits is no longer mutable");
-  _horizontalSizeClass = horizontalSizeClass;
+  return [[[self class] alloc] initWithDisplayScale:traits.displayScale
+                                 userInterfaceIdiom:traits.userInterfaceIdiom
+                                horizontalSizeClass:traits.horizontalSizeClass
+                                  verticalSizeClass:traits.verticalSizeClass
+                               forceTouchCapability:traits.forceTouchCapability
+                             traitCollectionContext:traits.displayContext];
+
 }
 
-- (void)setUserInterfaceIdiom:(UIUserInterfaceIdiom)userInterfaceIdiom
++ (ASTraitCollection *)traitCollectionWithUITraitCollection:(UITraitCollection *)traitCollection
+                                     traitCollectionContext:(id)traitCollectionContext
 {
-  ASDisplayNodeAssert(self.isMutable, @"ASDisplayTraits is no longer mutable");
-  _userInterfaceIdiom = userInterfaceIdiom;
-}
-
-- (void)setVerticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
-{
-  ASDisplayNodeAssert(self.isMutable, @"ASDisplayTraits is no longer mutable");
-  _verticalSizeClass = verticalSizeClass;
-}
-
-- (void)setForceTouchCapability:(UIForceTouchCapability)forceTouchCapability
-{
-  ASDisplayNodeAssert(self.isMutable, @"ASDisplayTraits is no longer mutable");
-  _forceTouchCapability = forceTouchCapability;
-}
-
-+ (ASTraitCollection *)displayTraitsWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits
-{
-  ASTraitCollection *traitCollection = [[ASTraitCollection alloc] init];
-  traitCollection.displayScale = traits.displayScale;
-  traitCollection.horizontalSizeClass = traits.horizontalSizeClass;
-  traitCollection.verticalSizeClass = traits.verticalSizeClass;
-  traitCollection.userInterfaceIdiom = traits.userInterfaceIdiom;
-  traitCollection.forceTouchCapability = traits.forceTouchCapability;
-  return traitCollection;
-}
-
-+ (ASTraitCollection *)displayTraitsWithUITraitCollection:(UITraitCollection *)traitCollection
-{
-  ASTraitCollection *asyncTraitCollection = [[ASTraitCollection alloc] init];
-  if (AS_AT_LEAST_IOS8) {
-    asyncTraitCollection.displayScale = traitCollection.displayScale;
-    asyncTraitCollection.horizontalSizeClass = traitCollection.horizontalSizeClass;
-    asyncTraitCollection.verticalSizeClass = traitCollection.verticalSizeClass;
-    asyncTraitCollection.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
-    if (AS_AT_LEAST_IOS9) {
-      asyncTraitCollection.forceTouchCapability = traitCollection.forceTouchCapability;
-    }
+  ASTraitCollection *asyncTraitCollection = nil;
+  if (AS_AT_LEAST_IOS9) {
+    asyncTraitCollection = [[[self class] alloc] initWithDisplayScale:traitCollection.displayScale
+                                                   userInterfaceIdiom:traitCollection.userInterfaceIdiom
+                                                  horizontalSizeClass:traitCollection.horizontalSizeClass
+                                                    verticalSizeClass:traitCollection.verticalSizeClass
+                                                 forceTouchCapability:traitCollection.forceTouchCapability
+                                               traitCollectionContext:traitCollectionContext];
   }
+  else if (AS_AT_LEAST_IOS8) {
+    asyncTraitCollection = [[[self class] alloc] initWithDisplayScale:traitCollection.displayScale
+                                                   userInterfaceIdiom:traitCollection.userInterfaceIdiom
+                                                  horizontalSizeClass:traitCollection.horizontalSizeClass
+                                                    verticalSizeClass:traitCollection.verticalSizeClass
+                                                 forceTouchCapability:0
+                                               traitCollectionContext:traitCollectionContext];
+  } else {
+    asyncTraitCollection = [[[self class] alloc] init];
+  }
+  
   return asyncTraitCollection;
 }
 
@@ -85,6 +91,7 @@
     .userInterfaceIdiom = self.userInterfaceIdiom,
     .verticalSizeClass = self.verticalSizeClass,
     .forceTouchCapability = self.forceTouchCapability,
+    .displayContext = self.traitColectionContext,
   };
 }
 

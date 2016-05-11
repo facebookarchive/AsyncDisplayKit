@@ -9,6 +9,7 @@
 #import "ASViewController.h"
 #import "ASAssert.h"
 #import "ASDimension.h"
+#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASTraitCollection.h"
@@ -50,9 +51,8 @@
 
 - (void)dealloc
 {
-  if (_displayTraitsContext != nil) {
-    ASEnvironmentTraitCollectionClearDisplayContext(self.node);
-    _displayTraitsContext = nil;
+  if (_traitColectionContext != nil) {
+    self.traitColectionContext = nil;
   }
 }
 
@@ -144,16 +144,26 @@
 
 #pragma mark - ASEnvironmentTraitCollection
 
+- (void)setTraitColectionContext:(id)traitColectionContext
+{
+  if (_traitColectionContext != traitColectionContext) {
+    // propagate first so that nodes aren't hanging around with a dealloc'ed pointer
+    ASEnvironmentTraitCollectionUpdateDisplayContext(self.node, traitColectionContext);
+    
+    _traitColectionContext = traitColectionContext;
+  }
+}
+
 - (ASEnvironmentTraitCollection)displayTraitsForTraitCollection:(UITraitCollection *)traitCollection
 {
   if (self.overrideDisplayTraitsWithTraitCollection) {
     ASTraitCollection *asyncTraitCollection = self.overrideDisplayTraitsWithTraitCollection(traitCollection);
-    asyncTraitCollection.isMutable = NO;
+    self.traitColectionContext = asyncTraitCollection.traitColectionContext;
     return [asyncTraitCollection environmentTraitCollection];
   }
   
   ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(traitCollection);
-  asyncTraitCollection.displayContext = _displayTraitsContext;
+  asyncTraitCollection.displayContext = self.traitColectionContext;
   return asyncTraitCollection;
 }
 
@@ -161,10 +171,10 @@
 {
   if (self.overrideDisplayTraitsWithWindowSize) {
     ASTraitCollection *traitCollection = self.overrideDisplayTraitsWithWindowSize(windowSize);
-    traitCollection.isMutable = NO;
+    self.traitColectionContext = traitCollection.traitColectionContext;
     return [traitCollection environmentTraitCollection];
   }
-  return self.node.environmentState.traitCollection;
+  return self.node.environmentTraitCollection;
 }
 
 - (void)progagateNewDisplayTraits:(ASEnvironmentTraitCollection)traitCollection
@@ -174,7 +184,7 @@
   
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(traitCollection, oldTraitCollection) == NO) {
     environmentState.traitCollection = traitCollection;
-    [self.node setEnvironmentState:environmentState];
+    self.node.environmentState = environmentState;
     [self.node setNeedsLayout];
     
     NSArray<id<ASEnvironment>> *children = [self.node children];

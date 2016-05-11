@@ -87,10 +87,10 @@ typedef struct ASEnvironmentTraitCollection {
   id __unsafe_unretained displayContext;
 } ASEnvironmentTraitCollection;
 
-extern void ASEnvironmentTraitCollectionClearDisplayContext(id<ASEnvironment> rootEnvironment);
+extern void ASEnvironmentTraitCollectionUpdateDisplayContext(id<ASEnvironment> rootEnvironment, id _Nullable context);
 
 extern ASEnvironmentTraitCollection ASEnvironmentTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection);
-extern BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnvironmentTraitCollection displayTraits0, ASEnvironmentTraitCollection displayTraits1);
+extern BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnvironmentTraitCollection lhs, ASEnvironmentTraitCollection rhs);
 
 #pragma mark - ASEnvironmentState
 
@@ -132,6 +132,10 @@ ASDISPLAYNODE_EXTERN_C_END
 
 /// Returns an NSObject-representation of the environment's ASEnvironmentDisplayTraits
 - (ASTraitCollection *)asyncTraitCollection;
+
+/// Returns a struct-representation of the environment's ASEnvironmentDisplayTraits. This only exists as a internal
+/// convenience method. Users should access the trait collections through the NSObject based asyncTraitCollection API
+- (ASEnvironmentTraitCollection)environmentTraitCollection;
 
 @end
 

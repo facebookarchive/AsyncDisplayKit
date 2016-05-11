@@ -2718,13 +2718,18 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   return ASEnvironmentStateTraitCollectionPropagationEnabled();
 }
 
+- (ASEnvironmentTraitCollection)environmentTraitCollection
+{
+  return _environmentState.traitCollection;
+}
+
 ASEnvironmentLayoutOptionsForwarding
 ASEnvironmentLayoutExtensibilityForwarding
 
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(_propertyLock);
-  return [ASTraitCollection displayTraitsWithASEnvironmentTraitCollection:_environmentState.traitCollection];
+  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:_environmentState.traitCollection];
 }
 
 #if TARGET_OS_TV

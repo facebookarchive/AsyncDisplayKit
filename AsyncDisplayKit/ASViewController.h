@@ -22,7 +22,17 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
 
 @property (nonatomic, strong, readonly) DisplayNodeType node;
 
-@property (nonatomic, strong) id displayTraitsContext;
+/**
+ *  An optional context to pass along with an ASTraitCollection.
+ *  This can be used to pass any internal state to all subnodes via the ASTraitCollection that is not
+ *  included in UITraitCollection. This could range from more fine-tuned size classes to a class of
+ *  constants that is based upon the new trait collection.
+ *
+ *  Be aware that internally this context is held by a C struct which cannot retain the pointer. Therefore
+ *  ASVC keeps a strong reference to the context to make sure that it stays alive. If you change this value
+ *  it will propagate the change to the subnodes.
+ */
+@property (nonatomic, strong) id _Nullable traitColectionContext;
 
 /**
  * Set this block to customize the ASDisplayTraits returned when the VC transitions to the given traitCollection.

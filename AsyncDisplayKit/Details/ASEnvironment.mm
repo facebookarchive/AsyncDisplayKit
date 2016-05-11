@@ -26,11 +26,11 @@ ASEnvironmentHierarchyState _ASEnvironmentHierarchyStateMakeDefault()
   };
 }
 
-extern void ASEnvironmentTraitCollectionClearDisplayContext(id<ASEnvironment> rootEnvironment)
+extern void ASEnvironmentTraitCollectionUpdateDisplayContext(id<ASEnvironment> rootEnvironment, id context)
 {
   ASEnvironmentState envState = [rootEnvironment environmentState];
   ASEnvironmentTraitCollection displayTraits = envState.traitCollection;
-  displayTraits.displayContext = nil;
+  displayTraits.displayContext = context;
   envState.traitCollection = displayTraits;
   [rootEnvironment setEnvironmentState:envState];
   
@@ -61,15 +61,15 @@ ASEnvironmentTraitCollection ASEnvironmentTraitCollectionFromUITraitCollection(U
   return asyncTraitCollection;
 }
 
-BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnvironmentTraitCollection traitCollection0, ASEnvironmentTraitCollection traitCollection1)
+BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnvironmentTraitCollection lhs, ASEnvironmentTraitCollection rhs)
 {
   return
-    traitCollection0.verticalSizeClass == traitCollection1.verticalSizeClass &&
-    traitCollection0.horizontalSizeClass == traitCollection1.horizontalSizeClass &&
-    traitCollection0.displayScale == traitCollection1.displayScale &&
-    traitCollection0.userInterfaceIdiom == traitCollection1.userInterfaceIdiom &&
-    traitCollection0.forceTouchCapability == traitCollection1.forceTouchCapability &&
-    traitCollection0.displayContext == traitCollection1.displayContext;
+    lhs.verticalSizeClass == rhs.verticalSizeClass &&
+    lhs.horizontalSizeClass == rhs.horizontalSizeClass &&
+    lhs.displayScale == rhs.displayScale &&
+    lhs.userInterfaceIdiom == rhs.userInterfaceIdiom &&
+    lhs.forceTouchCapability == rhs.forceTouchCapability &&
+    lhs.displayContext == rhs.displayContext;
 }
 
 ASEnvironmentState ASEnvironmentStateMakeDefault()
