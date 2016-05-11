@@ -1793,7 +1793,8 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (BOOL)_shouldHavePlaceholderLayer
 {
-  return (_placeholderEnabled && [self __implementsDisplay]);
+  CGSize layoutSize = (_layout ? _layout.size : CGSizeZero);
+  return (CGSizeEqualToSize(layoutSize, CGSizeZero) == NO && _placeholderEnabled && [self __implementsDisplay]);
 }
 
 - (void)_setupPlaceholderLayerIfNeeded
