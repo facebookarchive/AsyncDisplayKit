@@ -13,7 +13,7 @@
 #import "ASDisplayNode+Beta.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
-#define AS_LOG_VISIBILITY_CHANGES 1
+#define AS_LOG_VISIBILITY_CHANGES 0
 
 @implementation ASViewController
 {
