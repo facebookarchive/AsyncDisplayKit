@@ -8,23 +8,22 @@
 
 #import "ASPagerFlowLayout.h"
 
-@interface ASPagerFlowLayout ()
-
-@property (strong, nonatomic) NSIndexPath *currentIndexPath;
+@interface ASPagerFlowLayout () {
+  BOOL _didRotate;
+  CGRect _cachedCollectionViewBounds;
+  NSIndexPath *_currentIndexPath;
+}
 
 @end
 
-@implementation ASPagerFlowLayout {
-    BOOL _didRotate;
-    CGRect _cachedCollectionViewBounds;
-}
+@implementation ASPagerFlowLayout
 
 - (CGPoint)targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset withScrollingVelocity:(CGPoint)velocity
 {
-    NSInteger currentPage = ceil(proposedContentOffset.x / self.collectionView.bounds.size.width);
-    self.currentIndexPath = [NSIndexPath indexPathForItem:currentPage inSection:0];
-    
-    return [super targetContentOffsetForProposedContentOffset:proposedContentOffset withScrollingVelocity:velocity];
+  NSInteger currentPage = ceil(proposedContentOffset.x / self.collectionView.bounds.size.width);
+  _currentIndexPath = [NSIndexPath indexPathForItem:currentPage inSection:0];
+  
+  return [super targetContentOffsetForProposedContentOffset:proposedContentOffset withScrollingVelocity:velocity];
 }
 
 
@@ -42,7 +41,7 @@
     NSArray<UICollectionViewLayoutAttributes *> *layoutAttributes = [self layoutAttributesForElementsInRect:visibleRect];
     for (UICollectionViewLayoutAttributes *attributes in layoutAttributes) {
       if ([attributes representedElementCategory] == UICollectionElementCategoryCell && attributes.center.x == visibleXCenter) {
-        self.currentIndexPath = attributes.indexPath;
+        _currentIndexPath = attributes.indexPath;
         break;
       }
     }
@@ -58,8 +57,8 @@
     // try to use the current index path to not end up setting the target content offset to something in between pages
     if (_didRotate || (!self.collectionView.isDecelerating && !self.collectionView.isTracking)) {
         _didRotate = NO;
-        if (self.currentIndexPath) {
-            return [self _targetContentOffsetForItemAtIndexPath:self.currentIndexPath proposedContentOffset:proposedContentOffset];
+        if (_currentIndexPath) {
+          return [self _targetContentOffsetForItemAtIndexPath:_currentIndexPath proposedContentOffset:proposedContentOffset];
         }
     }
     
@@ -72,13 +71,19 @@
     return proposedContentOffset;
   }
   
-  CGFloat currentPageXOffset = self.currentIndexPath.item * CGRectGetWidth(self.collectionView.bounds);
-    return CGPointMake(currentPageXOffset, proposedContentOffset.y);
+  UICollectionViewLayoutAttributes *attributes = [self layoutAttributesForItemAtIndexPath:_currentIndexPath];
+  if (attributes == nil) {
+    return proposedContentOffset;
+  }
+  
+  CGFloat xOffset = (CGRectGetWidth(self.collectionView.bounds) - CGRectGetWidth(attributes.frame)) / 2.0;
+  return CGPointMake(attributes.frame.origin.x - xOffset, proposedContentOffset.y);
 }
 
 - (BOOL)_dataSourceIsEmpty
 {
-    return ([self.collectionView numberOfSections] == 0 || [self.collectionView numberOfItemsInSection:0] == 0);
+    return ([self.collectionView numberOfSections] == 0 ||
+            [self.collectionView numberOfItemsInSection:0] == 0);
 }
 
 @end
