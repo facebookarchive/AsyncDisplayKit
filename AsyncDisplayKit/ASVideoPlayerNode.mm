@@ -21,6 +21,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateScrubberMaximumTrackTintColor:1;
     unsigned int delegateScrubberMinimumTrackTintColor:1;
     unsigned int delegateScrubberThumbTintColor:1;
+    unsigned int delegateScrubberThumbImage:1;
+    unsigned int delegateTimeLabelAttributes:1;
   } _delegateFlags;
   
   NSURL *_url;
@@ -41,7 +43,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   ASStackLayoutSpec *_controlFlexGrowSpacerSpec;
 
   BOOL _isSeeking;
-  CGFloat _duration;
+  CMTime _duration;
 
 }
 
@@ -112,7 +114,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
-- (NSArray*)createNeededControlElementsArray
+- (NSArray*)createControlElementArray
 {
   if (_delegateFlags.delegateNeededControls) {
     return [_delegate videoPlayerNodeNeededControls:self];
@@ -141,7 +143,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   ASDN::MutexLocker l(_videoPlayerLock);
 
   if (_neededControls == nil) {
-    _neededControls = [self createNeededControlElementsArray];
+    _neededControls = [self createControlElementArray];
   }
 
   for (int i = 0; i < _neededControls.count; i++) {
@@ -195,7 +197,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_elapsedTextNode == nil) {
     _elapsedTextNode = [[ASTextNode alloc] init];
-    _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00"];
+    _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00" forControlType:ASVideoPlayerNodeControlTypeElapsedText];
 
     [_cachedControls addObject:_elapsedTextNode];
   }
@@ -206,7 +208,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_durationTextNode == nil) {
     _durationTextNode = [[ASTextNode alloc] init];
-    _durationTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00"];
+    _durationTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00" forControlType:ASVideoPlayerNodeControlTypeDurationText];
 
     [_cachedControls addObject:_durationTextNode];
   }
@@ -229,9 +231,15 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
         slider.maximumTrackTintColor  = [_delegate videoPlayerNodeScrubberMaximumTrackTint:self];
       }
 
-      if (_delegateFlags.delegateScrubberThumbTintColor){
-        slider.thumbTintColor         = [_delegate videoPlayerNodeScrubberThumbTint:self];
+      if (_delegateFlags.delegateScrubberThumbTintColor) {
+        slider.thumbTintColor  = [_delegate videoPlayerNodeScrubberThumbTint:self];
       }
+
+      if (_delegateFlags.delegateScrubberThumbImage) {
+        UIImage *thumbImage = [_delegate videoPlayerNodeScrubberThumbImage:self];
+        [slider setThumbImage:thumbImage forState:UIControlStateNormal];
+      }
+
 
       [slider addTarget:self action:@selector(beganSeek) forControlEvents:UIControlEventTouchDown];
       [slider addTarget:self action:@selector(endedSeek) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchCancel];
@@ -260,23 +268,28 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)updateDurationTimeLabel
 {
-  NSString *formatedDuration = [self timeFormatted:round(_duration)];
-  _durationTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration];
+  NSString *formatedDuration = [self timeStringForCMTime:_duration];
+  _durationTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration forControlType:ASVideoPlayerNodeControlTypeDurationText];
 }
 
 - (void)updateElapsedTimeLabel:(NSTimeInterval)seconds
 {
-  NSString *formatedDuration = [self timeFormatted:round(seconds)];
-  _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration];
+  NSString *formatedDuration = [self timeStringForCMTime:CMTimeMakeWithSeconds( seconds, _videoNode.periodicTimeObserverTimescale )];
+  _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration forControlType:ASVideoPlayerNodeControlTypeElapsedText];
 }
 
-- (NSAttributedString*)timeLabelAttributedStringForString:(NSString*)string
+- (NSAttributedString*)timeLabelAttributedStringForString:(NSString*)string forControlType:(ASVideoPlayerNodeControlType)controlType
 {
-  //TODO:: maybe we can ask delegate for this options too
-  NSDictionary *options = @{
-                            NSFontAttributeName : [UIFont systemFontOfSize:12.0],
-                            NSForegroundColorAttributeName: [UIColor whiteColor]
-                            };
+  NSDictionary *options;
+  if (_delegateFlags.delegateTimeLabelAttributes) {
+    options = [_delegate videoPlayerNodeTimeLabelAttributes:self timeLabelType:controlType];
+  } else {
+    options = @{
+                NSFontAttributeName : [UIFont systemFontOfSize:12.0],
+                NSForegroundColorAttributeName: [UIColor whiteColor]
+                };
+  }
+
 
   NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:string attributes:options];
 
@@ -287,7 +300,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate
 {
   if (toSate == ASVideoNodePlayerStateReadyToPlay) {
-    _duration = CMTimeGetSeconds(_videoNode.currentItem.duration);
+    _duration = _videoNode.currentItem.duration;
     [self updateDurationTimeLabel];
   }
 }
@@ -299,7 +312,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 
   [self updateElapsedTimeLabel:second];
-  [(UISlider*)_scrubberNode.view setValue:(second/_duration) animated:NO];
+  [(UISlider*)_scrubberNode.view setValue:(second/ CMTimeGetSeconds(_duration) ) animated:NO];
 }
 
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode
@@ -337,7 +350,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 -(void)seekToTime:(CGFloat)percentComplete
 {
-  CGFloat seconds = (_duration * percentComplete) / 100;
+  CGFloat seconds = ( CMTimeGetSeconds(_duration) * percentComplete ) / 100;
 
   [self updateElapsedTimeLabel:seconds];
   [_videoNode.player seekToTime:CMTimeMakeWithSeconds(seconds, _videoNode.periodicTimeObserverTimescale)];
@@ -405,17 +418,27 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateScrubberMaximumTrackTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberMaximumTrackTint:)];
     _delegateFlags.delegateScrubberMinimumTrackTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberMinimumTrackTint:)];
     _delegateFlags.delegateScrubberThumbTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbTint:)];
+    _delegateFlags.delegateScrubberThumbImage = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbImage:)];
+    _delegateFlags.delegateTimeLabelAttributes = [_delegate respondsToSelector:@selector(videoPlayerNodeTimeLabelAttributes:timeLabelType:)];
   }
 }
 
 #pragma mark - Helpers
-- (NSString *)timeFormatted:(int)totalSeconds
+- (NSString *)timeStringForCMTime:(CMTime)time
 {
+  NSUInteger dTotalSeconds = CMTimeGetSeconds(time);
 
-  int seconds = totalSeconds % 60;
-  int minutes = (totalSeconds / 60) % 60;
+  NSUInteger dHours = floor(dTotalSeconds / 3600);
+  NSUInteger dMinutes = floor(dTotalSeconds % 3600 / 60);
+  NSUInteger dSeconds = floor(dTotalSeconds % 3600 % 60);
 
-  return [NSString stringWithFormat:@"%02d:%02d", minutes, seconds];
+  NSString *videoDurationText;
+  if (dHours > 0) {
+    videoDurationText = [NSString stringWithFormat:@"%i:%01i:%02i", (int)dHours, (int)dMinutes, (int)dSeconds];
+  } else {
+    videoDurationText = [NSString stringWithFormat:@"%01i:%02i", (int)dMinutes, (int)dSeconds];
+  }
+  return videoDurationText;
 }
 
 #pragma mark - Lifecycle

@@ -57,23 +57,32 @@
   return @[ @(ASVideoPlayerNodeControlTypePlaybackButton),
             @(ASVideoPlayerNodeControlTypeElapsedText),
             @(ASVideoPlayerNodeControlTypeScrubber),
-            @(ASVideoPlayerNodeControlTypeFlexGrowSpacer),
             @(ASVideoPlayerNodeControlTypeDurationText) ];
 }
 
 - (UIColor *)videoPlayerNodeScrubberMaximumTrackTint:(ASVideoPlayerNode *)videoPlayer
 {
-  return [UIColor clearColor];
+  return [UIColor colorWithRed:1 green:1 blue:1 alpha:0.3];
 }
 
 - (UIColor *)videoPlayerNodeScrubberMinimumTrackTint:(ASVideoPlayerNode *)videoPlayer
 {
-  return [UIColor orangeColor];
+  return [UIColor whiteColor];
 }
 
 - (UIColor *)videoPlayerNodeScrubberThumbTint:(ASVideoPlayerNode *)videoPlayer
 {
-  return [UIColor orangeColor];
+  return [UIColor whiteColor];
+}
+
+- (NSDictionary *)videoPlayerNodeTimeLabelAttributes:(ASVideoPlayerNode *)videoPlayerNode timeLabelType:(ASVideoPlayerNodeControlType)timeLabelType
+{
+  NSDictionary *options = @{
+                            NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:13.0],
+                            NSForegroundColorAttributeName: [UIColor orangeColor]
+                            };
+
+  return options;
 }
 
 @end

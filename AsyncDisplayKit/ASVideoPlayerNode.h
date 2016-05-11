@@ -27,9 +27,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASVideoPlayerNode : ASDisplayNode
 
-@property (nullable, atomic, weak, readwrite) id<ASVideoPlayerNodeDelegate> delegate;
+@property (nullable, atomic, weak) id<ASVideoPlayerNodeDelegate> delegate;
 
-@property (nonatomic,assign,readonly) CGFloat duration;
+@property (nonatomic,assign,readonly) CMTime duration;
 
 - (instancetype)initWithUrl:(NSURL*)url;
 - (instancetype)initWithAsset:(AVAsset*)asset;
@@ -46,9 +46,13 @@ NS_ASSUME_NONNULL_BEGIN
  * @param videoPlayer
  */
 - (NSArray *)videoPlayerNodeNeededControls:(ASVideoPlayerNode*)videoPlayer;
-- (UIColor *)videoPlayerNodeScrubberMaximumTrackTint:(ASVideoPlayerNode*)videoPlayer;
-- (UIColor *)videoPlayerNodeScrubberMinimumTrackTint:(ASVideoPlayerNode*)videoPlayer;
-- (UIColor *)videoPlayerNodeScrubberThumbTint:(ASVideoPlayerNode*)videoPlayer;
+- (NSDictionary *)videoPlayerNodeTimeLabelAttributes:(ASVideoPlayerNode *)videoPlayerNode timeLabelType:(ASVideoPlayerNodeControlType)timeLabelType;
+
+#pragma mark - Scrubber delegate methods
+- (UIColor *)videoPlayerNodeScrubberMaximumTrackTint:(ASVideoPlayerNode *)videoPlayer;
+- (UIColor *)videoPlayerNodeScrubberMinimumTrackTint:(ASVideoPlayerNode *)videoPlayer;
+- (UIColor *)videoPlayerNodeScrubberThumbTint:(ASVideoPlayerNode *)videoPlayer;
+- (UIImage *)videoPlayerNodeScrubberThumbImage:(ASVideoPlayerNode *)videoPlayer;
 @end
 NS_ASSUME_NONNULL_END
 #endif
