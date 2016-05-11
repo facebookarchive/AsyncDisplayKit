@@ -11,7 +11,7 @@
 
 #import "ViewController.h"
 
-@interface ViewController()<ASVideoNodeDelegate>
+@interface ViewController()<ASVideoPlayerNodeDelegate>
 @property (nonatomic, strong) ASVideoPlayerNode *videoPlayerNode;
 @end
 
@@ -44,28 +44,36 @@
   NSURL *fileUrl = [NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-3045b261-7e93-4492-b7e5-5d6358376c9f-editedLiveAndDie.mov"];
 
   _videoPlayerNode = [[ASVideoPlayerNode alloc] initWithUrl:fileUrl];
-
-  //_videoPlayerNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
+  _videoPlayerNode.delegate = self;
 
   _videoPlayerNode.backgroundColor = [UIColor blackColor];
 
   return _videoPlayerNode;
-  
-//  _guitarVideoNode = [[ASVideoNode alloc] init];
-//  
-//  _guitarVideoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-3045b261-7e93-4492-b7e5-5d6358376c9f-editedLiveAndDie.mov"]];
-//  
-//  _guitarVideoNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height/3);
-//  
-//  _guitarVideoNode.gravity = AVLayerVideoGravityResizeAspectFill;
-//  
-//  _guitarVideoNode.backgroundColor = [UIColor lightGrayColor];
-//  
-//  _guitarVideoNode.periodicTimeObserverTimescale = 1; //Default is 100
-//  
-//  _guitarVideoNode.delegate = self;
-//  
-//  return _guitarVideoNode;
+}
+
+#pragma mark - ASVideoPlayerNodeDelegate
+- (NSArray *)videoPlayerNodeNeededControls:(ASVideoPlayerNode *)videoPlayer
+{
+  return @[ @(ASVideoPlayerNodeControlTypePlaybackButton),
+            @(ASVideoPlayerNodeControlTypeElapsedText),
+            @(ASVideoPlayerNodeControlTypeScrubber),
+            @(ASVideoPlayerNodeControlTypeFlexGrowSpacer),
+            @(ASVideoPlayerNodeControlTypeDurationText) ];
+}
+
+- (UIColor *)videoPlayerNodeScrubberMaximumTrackTint:(ASVideoPlayerNode *)videoPlayer
+{
+  return [UIColor clearColor];
+}
+
+- (UIColor *)videoPlayerNodeScrubberMinimumTrackTint:(ASVideoPlayerNode *)videoPlayer
+{
+  return [UIColor orangeColor];
+}
+
+- (UIColor *)videoPlayerNodeScrubberThumbTint:(ASVideoPlayerNode *)videoPlayer
+{
+  return [UIColor orangeColor];
 }
 
 @end

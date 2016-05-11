@@ -13,6 +13,15 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 @interface ASVideoPlayerNode() <ASVideoNodeDelegate>
 {
   ASDN::RecursiveMutex _videoPlayerLock;
+
+  __weak id<ASVideoPlayerNodeDelegate> _delegate;
+
+  struct {
+    unsigned int delegateNeededControls:1;
+    unsigned int delegateScrubberMaximumTrackTintColor:1;
+    unsigned int delegateScrubberMinimumTrackTintColor:1;
+    unsigned int delegateScrubberThumbTintColor:1;
+  } _delegateFlags;
   
   NSURL *_url;
   AVAsset *_asset;
@@ -80,7 +89,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)privateInit
 {
 
-  _neededControls = [self createNeededControlElementsArray];
   _cachedControls = [[NSMutableArray alloc] init];
 
   _videoNode = [[ASVideoNode alloc] init];
@@ -92,14 +100,24 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _controlsHolderNode.backgroundColor = [UIColor greenColor];
   [self addSubnode:_controlsHolderNode];
 
-  [self createControls];
-
   [self addObservers];
+}
+
+- (void)didLoad
+{
+  [super didLoad];
+  {
+    ASDN::MutexLocker l(_videoPlayerLock);
+    [self createControls];
+  }
 }
 
 - (NSArray*)createNeededControlElementsArray
 {
-  //TODO:: Maybe here we will ask delegate what he needs and we force delegate to use our static strings or something like that
+  if (_delegateFlags.delegateNeededControls) {
+    return [_delegate videoPlayerNodeNeededControls:self];
+  }
+
   return @[ @(ASVideoPlayerNodeControlTypePlaybackButton),
             @(ASVideoPlayerNodeControlTypeElapsedText),
             @(ASVideoPlayerNodeControlTypeScrubber),
@@ -121,6 +139,10 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)createControls
 {
   ASDN::MutexLocker l(_videoPlayerLock);
+
+  if (_neededControls == nil) {
+    _neededControls = [self createNeededControlElementsArray];
+  }
 
   for (int i = 0; i < _neededControls.count; i++) {
     ASVideoPlayerNodeControlType type = (ASVideoPlayerNodeControlType)[[_neededControls objectAtIndex:i] integerValue];
@@ -198,6 +220,18 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       UISlider *slider = [[UISlider alloc] initWithFrame:CGRectZero];
       slider.minimumValue = 0.0;
       slider.maximumValue = 1.0;
+
+      if (_delegateFlags.delegateScrubberMinimumTrackTintColor) {
+        slider.minimumTrackTintColor  = [_delegate videoPlayerNodeScrubberMinimumTrackTint:self];
+      }
+
+      if (_delegateFlags.delegateScrubberMaximumTrackTintColor) {
+        slider.maximumTrackTintColor  = [_delegate videoPlayerNodeScrubberMaximumTrackTint:self];
+      }
+
+      if (_delegateFlags.delegateScrubberThumbTintColor){
+        slider.thumbTintColor         = [_delegate videoPlayerNodeScrubberThumbTint:self];
+      }
 
       [slider addTarget:self action:@selector(beganSeek) forControlEvents:UIControlEventTouchDown];
       [slider addTarget:self action:@selector(endedSeek) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchCancel];
@@ -353,6 +387,25 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:mainVerticalStack];
 
   return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[overlaySpec]];
+}
+
+#pragma mark - Properties
+- (id<ASVideoPlayerNodeDelegate>)delegate{
+  return _delegate;
+}
+
+- (void)setDelegate:(id<ASVideoPlayerNodeDelegate>)delegate
+{
+  _delegate = delegate;
+  
+  if (_delegate == nil) {
+    memset(&_delegateFlags, 0, sizeof(_delegateFlags));
+  } else {
+    _delegateFlags.delegateNeededControls = [_delegate respondsToSelector:@selector(videoPlayerNodeNeededControls:)];
+    _delegateFlags.delegateScrubberMaximumTrackTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberMaximumTrackTint:)];
+    _delegateFlags.delegateScrubberMinimumTrackTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberMinimumTrackTint:)];
+    _delegateFlags.delegateScrubberThumbTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbTint:)];
+  }
 }
 
 #pragma mark - Helpers
