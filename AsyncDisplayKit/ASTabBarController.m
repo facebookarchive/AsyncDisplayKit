@@ -14,43 +14,13 @@
   NSInteger _visibilityDepth;
 }
 
-- (void)didMoveToParentViewController:(UIViewController *)parent
-{
-  [super didMoveToParentViewController:parent];
-  [self visibilityDepthDidChange];
-}
+ASVisibilityDidMoveToParentViewController;
 
-- (void)viewWillAppear:(BOOL)animated
-{
-  [super viewWillAppear:animated];
-  
-  if (_parentManagesVisibilityDepth == NO) {
-    _visibilityDepth = 0;
-    [self visibilityDepthDidChange];
-  }
-}
+ASVisibilityViewWillAppear;
 
-- (void)viewDidDisappear:(BOOL)animated
-{
-  [super viewDidDisappear:animated];
-  
-  if (_parentManagesVisibilityDepth == NO) {
-    _visibilityDepth = 1;
-    [self visibilityDepthDidChange];
-  }
-}
+ASVisibilityViewDidDisappearImplementation;
 
-- (NSInteger)visibilityDepth
-{
-  if (self.parentViewController && _parentManagesVisibilityDepth == NO) {
-    _parentManagesVisibilityDepth = [self.parentViewController conformsToProtocol:@protocol(ASManagesChildVisibilityDepth)];
-  }
-  
-  if (_parentManagesVisibilityDepth) {
-    return [(id <ASManagesChildVisibilityDepth>)self.parentViewController visibilityDepthOfChildViewController:self];
-  }
-  return _visibilityDepth;
-}
+ASVisibilityDepthImplementation;
 
 - (void)visibilityDepthDidChange
 {
