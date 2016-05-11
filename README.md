@@ -105,7 +105,8 @@ to implement node hierarchies or custom drawing.
 * Watch the [NSLondon talk](http://vimeo.com/103589245) or the [NSSpain talk](https://www.youtube.com/watch?v=RY_X7l1g79Q)
 
 ## Getting Help
-We use Slack for real-time debugging, community updates, and general talk about ASDK. Email AsyncDisplayKit(at)gmail.com to get an invite.
+
+We use Slack for real-time debugging, community updates, and general talk about ASDK. Signup at http://asdk-slack-auto-invite.herokuapp.com or email AsyncDisplayKit(at)gmail.com to get an invite.
 
 ## Testing
 
