@@ -85,7 +85,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param toSate player new state.
  * @discussion This method is called after each state change
  */
-- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate;
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toState;
 /**
  * @abstract Ssks delegate if state change is allowed
  * ASVideoNodePlayerStatePlaying or ASVideoNodePlayerStatePaused.

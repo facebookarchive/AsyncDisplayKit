@@ -24,6 +24,10 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateScrubberThumbImage:1;
     unsigned int delegateTimeLabelAttributes:1;
     unsigned int delegateLayoutSpecForControls:1;
+    unsigned int delegateVideoNodeDidPlayToTime:1;
+    unsigned int delegateVideoNodeWillChangeState:1;
+    unsigned int delegateVideoNodeShouldChangeState:1;
+    unsigned int delegateVideoNodePlaybackDidFinish:1;
   } _delegateFlags;
   
   NSURL *_url;
@@ -297,17 +301,36 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 }
 
 #pragma mark - ASVideoNodeDelegate
-- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toState
 {
-  if (toSate == ASVideoNodePlayerStateReadyToPlay) {
+  if (_delegateFlags.delegateVideoNodeWillChangeState) {
+    [_delegate videoPlayerNode:self willChangeVideoNodeState:state toVideoNodeState:toState];
+  }
+
+  if (toState == ASVideoNodePlayerStateReadyToPlay) {
     _duration = _videoNode.currentItem.duration;
     [self updateDurationTimeLabel];
   }
 }
 
+- (BOOL)videoNode:(ASVideoNode *)videoNode shouldChangePlayerStateTo:(ASVideoNodePlayerState)state
+{
+  if (_delegateFlags.delegateVideoNodeShouldChangeState) {
+    return [_delegate videoPlayerNode:self shouldChangeVideoNodeStateTo:state];
+  }
+  return YES;
+}
+
 - (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second
 {
-  if(_isSeeking){
+  //TODO: ask Max about CMTime problem in ASVideoNode Header file
+  //as we said yesterday, we must use CMTime in ASVideoNode instead of NSTimeInterval
+  //when this will be done, must just proxy value to delegate
+  if (_delegateFlags.delegateVideoNodeDidPlayToTime) {
+    [_delegate videoPlayerNode:self didPlayToTime:_videoNode.player.currentTime];
+  }
+
+  if (_isSeeking) {
     return;
   }
 
@@ -317,6 +340,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode
 {
+  if (_delegateFlags.delegateVideoNodePlaybackDidFinish) {
+    [_delegate videoPlayerNodePlaybackDidFinish:self];
+  }
   //[self removeControls];
 }
 
@@ -449,6 +475,10 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateScrubberThumbImage = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbImage:)];
     _delegateFlags.delegateTimeLabelAttributes = [_delegate respondsToSelector:@selector(videoPlayerNodeTimeLabelAttributes:timeLabelType:)];
     _delegateFlags.delegateLayoutSpecForControls = [_delegate respondsToSelector:@selector(videoPlayerNodeLayoutSpec:forControls:forConstrainedSize:)];
+    _delegateFlags.delegateVideoNodeDidPlayToTime = [_delegate respondsToSelector:@selector(videoPlayerNode:didPlayToTime:)];
+    _delegateFlags.delegateVideoNodeWillChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:willChangeVideoNodeState:toVideoNodeState:)];
+    _delegateFlags.delegateVideoNodePlaybackDidFinish = [_delegate respondsToSelector:@selector(videoPlayerNodePlaybackDidFinish:)];
+    _delegateFlags.delegateVideoNodeShouldChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:shouldChangeVideoNodeStateTo:)];
   }
 }
 

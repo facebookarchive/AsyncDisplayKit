@@ -129,5 +129,4 @@
   return mainVerticalStack;
 }
 
-
 @end
