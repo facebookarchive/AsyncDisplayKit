@@ -677,9 +677,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
   for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
-    [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventWillBeginDragging
-                                          inScrollView:scrollView
-                                         withCellFrame:collectionCell.frame];
+    [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventWillBeginDragging inScrollView:scrollView withCellFrame:collectionCell.frame];
   }
   if (_asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging) {
     [_asyncDelegate scrollViewWillBeginDragging:scrollView];
@@ -688,14 +686,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
-    for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
-        [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventDidEndDragging
-                                          inScrollView:scrollView
-                                         withCellFrame:collectionCell.frame];
-    }
-    if (_asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging) {
-        [_asyncDelegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
-    }
+  for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
+    [[collectionCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventDidEndDragging inScrollView:scrollView withCellFrame:collectionCell.frame];
+  }
+  if (_asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging) {
+    [_asyncDelegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
+  }
 }
 
 #pragma mark - Scroll Direction.

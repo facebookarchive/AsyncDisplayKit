@@ -699,9 +699,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
   for (_ASTableViewCell *tableViewCell in _cellsForVisibilityUpdates) {
-    [[tableViewCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventWillBeginDragging
-                                          inScrollView:scrollView
-                                         withCellFrame:tableViewCell.frame];
+    [[tableViewCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventWillBeginDragging inScrollView:scrollView withCellFrame:tableViewCell.frame];
   }
   if (_asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging) {
     [_asyncDelegate scrollViewWillBeginDragging:scrollView];
@@ -711,9 +709,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
   for (_ASTableViewCell *tableViewCell in _cellsForVisibilityUpdates) {
-    [[tableViewCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventDidEndDragging
-                                          inScrollView:scrollView
-                                         withCellFrame:tableViewCell.frame];
+    [[tableViewCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventDidEndDragging inScrollView:scrollView withCellFrame:tableViewCell.frame];
   }
   if (_asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging) {
     [_asyncDelegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
