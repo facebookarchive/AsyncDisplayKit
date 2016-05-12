@@ -218,7 +218,7 @@ static NSString * const kStatus = @"status";
     if (_spinnerNode) {
         ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
         centerLayoutSpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
-        [children addObject:_spinnerNode];
+        [children addObject:centerLayoutSpec];
     }
     
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
