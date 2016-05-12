@@ -20,6 +20,8 @@ ASVisibilityViewWillAppear;
 
 ASVisibilityViewDidDisappearImplementation;
 
+ASVisibilitySetVisibilityDepth;
+
 ASVisibilityDepthImplementation;
 
 - (void)visibilityDepthDidChange

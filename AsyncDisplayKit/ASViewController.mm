@@ -95,10 +95,11 @@ ASVisibilityDidMoveToParentViewController;
   [_node recursivelyFetchData];
   
   if (_parentManagesVisibilityDepth == NO) {
-    _visibilityDepth = 0;
-    [self visibilityDepthDidChange];
+    [self setVisibilityDepth:0];
   }
 }
+
+ASVisibilitySetVisibilityDepth;
 
 ASVisibilityViewDidDisappearImplementation;
 

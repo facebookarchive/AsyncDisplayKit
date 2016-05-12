@@ -46,6 +46,16 @@ ASLayoutRangeMode ASLayoutRangeModeForVisibilityDepth(NSUInteger visibilityDepth
 
 @end
 
+#define ASVisibilitySetVisibilityDepth \
+- (void)setVisibilityDepth:(NSUInteger)visibilityDepth \
+{ \
+  if (_visibilityDepth == visibilityDepth) { \
+    return; \
+  } \
+  _visibilityDepth = visibilityDepth; \
+  [self visibilityDepthDidChange]; \
+}
+
 #define ASVisibilityDepthImplementation \
 - (NSInteger)visibilityDepth \
 { \
@@ -65,8 +75,7 @@ ASLayoutRangeMode ASLayoutRangeModeForVisibilityDepth(NSUInteger visibilityDepth
   [super viewDidDisappear:animated]; \
   \
   if (_parentManagesVisibilityDepth == NO) { \
-    _visibilityDepth = 1; \
-    [self visibilityDepthDidChange]; \
+    [self setVisibilityDepth:1]; \
   } \
 }
 
@@ -76,8 +85,7 @@ ASLayoutRangeMode ASLayoutRangeModeForVisibilityDepth(NSUInteger visibilityDepth
   [super viewWillAppear:animated]; \
   \
   if (_parentManagesVisibilityDepth == NO) { \
-    _visibilityDepth = 0; \
-    [self visibilityDepthDidChange]; \
+    [self setVisibilityDepth:0]; \
   } \
 }
 
