@@ -39,8 +39,8 @@ ASVisibilityDepthImplementation;
   NSAssert(viewControllerIndex != NSNotFound, @"childViewController is not in the navigation stack.");
   
   if (viewControllerIndex == self.viewControllers.count - 1) {
-    //view controller is at the top
-    return [self visibilityDepth] + 0;
+    //view controller is at the top, just return our own visibility depth.
+    return [self visibilityDepth];
   } else if (viewControllerIndex == 0) {
     //view controller is the root view controller. Can be accessed by holding the back button.
     return [self visibilityDepth] + 1;
