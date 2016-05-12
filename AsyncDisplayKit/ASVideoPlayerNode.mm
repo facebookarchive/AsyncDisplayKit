@@ -485,6 +485,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 #pragma mark - Helpers
 - (NSString *)timeStringForCMTime:(CMTime)time
 {
+  //TODO: ask Max if delegate for this thing will be useful;
   NSUInteger dTotalSeconds = CMTimeGetSeconds(time);
 
   NSUInteger dHours = floor(dTotalSeconds / 3600);
@@ -493,9 +494,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   NSString *videoDurationText;
   if (dHours > 0) {
-    videoDurationText = [NSString stringWithFormat:@"%i:%01i:%02i", (int)dHours, (int)dMinutes, (int)dSeconds];
+    videoDurationText = [NSString stringWithFormat:@"%i:%02i:%02i", (int)dHours, (int)dMinutes, (int)dSeconds];
   } else {
-    videoDurationText = [NSString stringWithFormat:@"%01i:%02i", (int)dMinutes, (int)dSeconds];
+    videoDurationText = [NSString stringWithFormat:@"%02i:%02i", (int)dMinutes, (int)dSeconds];
   }
   return videoDurationText;
 }

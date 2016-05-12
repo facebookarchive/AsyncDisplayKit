@@ -81,12 +81,12 @@
 
   if (timeLabelType == ASVideoPlayerNodeControlTypeElapsedText) {
     options = @{
-                NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:13.0],
+                NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:16.0],
                 NSForegroundColorAttributeName: [UIColor orangeColor]
                 };
   } else if (timeLabelType == ASVideoPlayerNodeControlTypeDurationText) {
     options = @{
-                NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:13.0],
+                NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:16.0],
                 NSForegroundColorAttributeName: [UIColor redColor]
                 };
   }
@@ -98,19 +98,53 @@
                                 forControls:(NSDictionary *)controls
                          forConstrainedSize:(ASSizeRange)constrainedSize
 {
-  ASDisplayNode *scrubber = controls[@(ASVideoPlayerNodeControlTypeScrubber)];
-  if (scrubber) {
-    scrubber.preferredFrameSize = CGSizeMake(constrainedSize.max.width, 44.0);
+
+  NSMutableArray *bottomControls = [[NSMutableArray alloc] init];
+  NSMutableArray *topControls = [[NSMutableArray alloc] init];
+
+  ASDisplayNode *scrubberNode = controls[@(ASVideoPlayerNodeControlTypeScrubber)];
+  ASDisplayNode *playbackButtonNode = controls[@(ASVideoPlayerNodeControlTypePlaybackButton)];
+  ASTextNode *elapsedTexNode = controls[@(ASVideoPlayerNodeControlTypeElapsedText)];
+  ASTextNode *durationTexNode = controls[@(ASVideoPlayerNodeControlTypeDurationText)];
+
+  if (playbackButtonNode) {
+    [bottomControls addObject:playbackButtonNode];
+  }
+
+  if (scrubberNode) {
+    scrubberNode.preferredFrameSize = CGSizeMake(constrainedSize.max.width, 44.0);
+    [bottomControls addObject:scrubberNode];
+  }
+
+  if (elapsedTexNode) {
+    [topControls addObject:elapsedTexNode];
+  }
+
+  if (durationTexNode) {
+    [topControls addObject:durationTexNode];
   }
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;
 
+  ASStackLayoutSpec *topBarSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+                                                                              spacing:10.0
+                                                                       justifyContent:ASStackLayoutJustifyContentCenter
+                                                                           alignItems:ASStackLayoutAlignItemsCenter
+                                                                             children:topControls];
+
+
+
+  UIEdgeInsets topBarSpecInsets = UIEdgeInsetsMake(20.0, 10.0, 0.0, 10.0);
+
+  ASInsetLayoutSpec *topBarSpecInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:topBarSpecInsets child:topBarSpec];
+  topBarSpecInsetSpec.alignSelf = ASStackLayoutAlignSelfStretch;
+
   ASStackLayoutSpec *controlbarSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
                                                                               spacing:10.0
                                                                        justifyContent:ASStackLayoutJustifyContentStart
                                                                            alignItems:ASStackLayoutAlignItemsCenter
-                                                                             children: @[scrubber] ];
+                                                                             children:bottomControls];
   controlbarSpec.alignSelf = ASStackLayoutAlignSelfStretch;
 
   UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
@@ -123,7 +157,7 @@
                                                                                  spacing:0.0
                                                                           justifyContent:ASStackLayoutJustifyContentStart
                                                                               alignItems:ASStackLayoutAlignItemsStart
-                                                                                children:@[spacer,controlbarInsetSpec]];
+                                                                                children:@[ topBarSpecInsetSpec, spacer, controlbarInsetSpec ]];
 
 
   return mainVerticalStack;
