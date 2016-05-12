@@ -228,4 +228,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  */
 - (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy;
 
+/**
+ *  Convenience method to access this node's trait collection struct. Externally, users should interact
+ *  with the trait collection via ASTraitCollection
+ */
+- (ASEnvironmentTraitCollection)environmentTraitCollection;
+
 @end

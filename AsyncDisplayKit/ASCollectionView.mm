@@ -91,7 +91,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
@@ -225,6 +225,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _dataController = [[ASCollectionDataController alloc] initWithAsyncDataFetching:NO];
   _dataController.delegate = _rangeController;
   _dataController.dataSource = self;
+  _dataController.environmentDelegate = self;
   
   _batchContext = [[ASBatchContext alloc] init];
   
@@ -915,6 +916,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_asyncDataSourceFlags.asyncDataSourceCollectionViewUnlockDataSource) {
     [_asyncDataSource collectionViewUnlockDataSource:self];
   }
+}
+
+- (id<ASEnvironment>)dataControllerEnvironment
+{
+  if (self.collectionNode) {
+    return self.collectionNode;
+  }
+  return self.strongCollectionNode;
 }
 
 #pragma mark - ASCollectionViewDataControllerSource Supplementary view support

@@ -13,6 +13,7 @@
 #import "ASAssert.h"
 #import "ASCellNode.h"
 #import "ASDisplayNode.h"
+#import "ASEnvironmentInternal.h"
 #import "ASFlowLayoutController.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -519,8 +520,17 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     for (NSUInteger i = 0; i < rowNum; i++) {
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
       ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
+      
+      // When creating a node, make sure to pass along the current display traits so it will be laid out properly
+      ASCellNodeBlock nodeBlockPropagatingDisplayTraits = ^{
+        ASCellNode *cellNode = nodeBlock();
+        id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+        ASEnvironmentStatePropagateDown(cellNode, [environment environmentTraitCollection]);
+        return cellNode;
+      };
+      
       ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-      [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
+      [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlockPropagatingDisplayTraits
                                                                 indexPath:indexPath
                                                           constrainedSize:constrainedSize]];
     }

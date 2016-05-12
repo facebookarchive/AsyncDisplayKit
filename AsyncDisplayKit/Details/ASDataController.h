@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class ASCellNode;
 @class ASDataController;
+@protocol ASEnvironment;
 
 typedef NSUInteger ASDataControllerAnimationOptions;
 
@@ -64,6 +65,11 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  */
 - (void)dataControllerUnlockDataSource;
 
+
+@end
+
+@protocol ASDataControllerEnvironmentDelegate
+- (id<ASEnvironment>)dataControllerEnvironment;
 @end
 
 /**
@@ -121,6 +127,11 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  Delegate to notify when data is updated.
  */
 @property (nonatomic, weak) id<ASDataControllerDelegate> delegate;
+
+/**
+ *
+ */
+@property (nonatomic, weak) id<ASDataControllerEnvironmentDelegate> environmentDelegate;
 
 /**
  *  Designated initializer.
