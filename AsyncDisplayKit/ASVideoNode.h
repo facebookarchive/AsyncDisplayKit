@@ -58,9 +58,6 @@ NS_ASSUME_NONNULL_BEGIN
 //! Defaults to AVLayerVideoGravityResizeAspect
 @property (atomic) NSString *gravity;
 
-//! Defaults to an ASDefaultPlayButton instance.
-@property (nullable, atomic) ASButtonNode *playButton;
-
 @property (nullable, atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
 
 @end

@@ -23,6 +23,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateScrubberThumbTintColor:1;
     unsigned int delegateScrubberThumbImage:1;
     unsigned int delegateTimeLabelAttributes:1;
+    unsigned int delegateTimeLabelAttributedString:1;
     unsigned int delegateLayoutSpecForControls:1;
     unsigned int delegateVideoNodeDidPlayToTime:1;
     unsigned int delegateVideoNodeWillChangeState:1;
@@ -176,12 +177,13 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)removeControls
 {
-//  [_cachedControls enumerateObjectsUsingBlock:^(ASDisplayNode   *_Nonnull node, NSUInteger idx, BOOL * _Nonnull stop) {
-//    [node.view removeFromSuperview];
-//    [node removeFromSupernode];
-//    node = nil;
-//    NSLog(@"%@",_playbackButtonNode);
-//  }];
+  NSArray *controls = [_cachedControls allValues];
+  [controls enumerateObjectsUsingBlock:^(ASDisplayNode   *_Nonnull node, NSUInteger idx, BOOL * _Nonnull stop) {
+    [node.view removeFromSuperview];
+    [node removeFromSupernode];
+    //node = nil;
+    NSLog(@"%@",_playbackButtonNode);
+  }];
 }
 
 - (void)createPlaybackButton
@@ -272,13 +274,13 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)updateDurationTimeLabel
 {
-  NSString *formatedDuration = [self timeStringForCMTime:_duration];
+  NSString *formatedDuration = [self timeStringForCMTime:_duration forTimeLabelType:ASVideoPlayerNodeControlTypeDurationText];
   _durationTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration forControlType:ASVideoPlayerNodeControlTypeDurationText];
 }
 
 - (void)updateElapsedTimeLabel:(NSTimeInterval)seconds
 {
-  NSString *formatedDuration = [self timeStringForCMTime:CMTimeMakeWithSeconds( seconds, _videoNode.periodicTimeObserverTimescale )];
+  NSString *formatedDuration = [self timeStringForCMTime:CMTimeMakeWithSeconds( seconds, _videoNode.periodicTimeObserverTimescale ) forTimeLabelType:ASVideoPlayerNodeControlTypeElapsedText];
   _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration forControlType:ASVideoPlayerNodeControlTypeElapsedText];
 }
 
@@ -307,7 +309,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     [_delegate videoPlayerNode:self willChangeVideoNodeState:state toVideoNodeState:toState];
   }
 
-  if (toState == ASVideoNodePlayerStateReadyToPlay) {
+  if (toState == ASVideoNodePlayerStateReadyToPlay && _durationTextNode) {
     _duration = _videoNode.currentItem.duration;
     [self updateDurationTimeLabel];
   }
@@ -334,8 +336,13 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     return;
   }
 
-  [self updateElapsedTimeLabel:second];
-  [(UISlider*)_scrubberNode.view setValue:(second/ CMTimeGetSeconds(_duration) ) animated:NO];
+  if (_elapsedTextNode) {
+    [self updateElapsedTimeLabel:second];
+  }
+
+  if (_scrubberNode) {
+    [(UISlider*)_scrubberNode.view setValue:(second/ CMTimeGetSeconds(_duration) ) animated:NO];
+  }
 }
 
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode
@@ -343,7 +350,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   if (_delegateFlags.delegateVideoNodePlaybackDidFinish) {
     [_delegate videoPlayerNodePlaybackDidFinish:self];
   }
-  //[self removeControls];
 }
 
 #pragma mark - Actions
@@ -423,6 +429,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
+  overlaySpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
 
   return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[overlaySpec]];
 }
@@ -479,13 +486,17 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateVideoNodeWillChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:willChangeVideoNodeState:toVideoNodeState:)];
     _delegateFlags.delegateVideoNodePlaybackDidFinish = [_delegate respondsToSelector:@selector(videoPlayerNodePlaybackDidFinish:)];
     _delegateFlags.delegateVideoNodeShouldChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:shouldChangeVideoNodeStateTo:)];
+    _delegateFlags.delegateTimeLabelAttributedString = [_delegate respondsToSelector:@selector(videoPlayerNode:timeStringForTimeLabelType:forTime:)];
   }
 }
 
 #pragma mark - Helpers
-- (NSString *)timeStringForCMTime:(CMTime)time
+- (NSString *)timeStringForCMTime:(CMTime)time forTimeLabelType:(ASVideoPlayerNodeControlType)type
 {
-  //TODO: ask Max if delegate for this thing will be useful;
+  if (_delegateFlags.delegateTimeLabelAttributedString) {
+    return [_delegate videoPlayerNode:self timeStringForTimeLabelType:type forTime:time];
+  }
+
   NSUInteger dTotalSeconds = CMTimeGetSeconds(time);
 
   NSUInteger dHours = floor(dTotalSeconds / 3600);

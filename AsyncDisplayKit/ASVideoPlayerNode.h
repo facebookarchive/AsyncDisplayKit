@@ -66,6 +66,9 @@ NS_ASSUME_NONNULL_BEGIN
  * @param timeLabelType
  */
 - (NSDictionary *)videoPlayerNodeTimeLabelAttributes:(ASVideoPlayerNode *)videoPlayerNode timeLabelType:(ASVideoPlayerNodeControlType)timeLabelType;
+- (NSString *)videoPlayerNode:(ASVideoPlayerNode *)videoPlayerNode
+   timeStringForTimeLabelType:(ASVideoPlayerNodeControlType)timeLabelType
+                      forTime:(CMTime)time;
 
 #pragma mark Scrubber delegate methods
 - (UIColor *)videoPlayerNodeScrubberMaximumTrackTint:(ASVideoPlayerNode *)videoPlayer;
