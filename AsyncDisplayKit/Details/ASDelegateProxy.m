@@ -27,10 +27,6 @@
           // used for ASCellNode visibility
           selector == @selector(scrollViewDidScroll:) ||
           
-          // used for ASCellNode user interaction
-          selector == @selector(scrollViewWillBeginDragging:) ||
-          selector == @selector(scrollViewDidEndDragging:willDecelerate:) ||
-
           // used for ASRangeController visibility updates
           selector == @selector(tableView:willDisplayCell:forRowAtIndexPath:) ||
           selector == @selector(tableView:didEndDisplayingCell:forRowAtIndexPath:) ||
@@ -65,10 +61,6 @@
           
           // used for ASCellNode visibility
           selector == @selector(scrollViewDidScroll:) ||
-          
-          // used for ASCellNode user interaction
-          selector == @selector(scrollViewWillBeginDragging:) ||
-          selector == @selector(scrollViewDidEndDragging:willDecelerate:) ||
           
           // intercepted due to not being supported by ASCollectionView (prevent bugs caused by usage)
           selector == @selector(collectionView:canMoveItemAtIndexPath:) ||
