@@ -37,7 +37,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithAsset:(AVAsset*)asset;
 
 #pragma mark - Public API
--(void)seekToTime:(CGFloat)percentComplete;
+- (void)seekToTime:(CGFloat)percentComplete;
+- (void)play;
+- (void)pause;
+- (BOOL)isPlaying;
 
 @end
 

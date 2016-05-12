@@ -398,7 +398,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self seekToTime:percentage];
 }
 
--(void)seekToTime:(CGFloat)percentComplete
+#pragma mark - Public API
+- (void)seekToTime:(CGFloat)percentComplete
 {
   CGFloat seconds = ( CMTimeGetSeconds(_duration) * percentComplete ) / 100;
 
@@ -408,6 +409,21 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   if (_videoNode.playerState != ASVideoNodePlayerStatePlaying) {
     [_videoNode play];
   }
+}
+
+- (void)play
+{
+  [_videoNode play];
+}
+
+- (void)pause
+{
+  [_videoNode pause];
+}
+
+- (BOOL)isPlaying
+{
+  return [_videoNode isPlaying];
 }
 
 - (NSArray *)controlsForLayoutSpec
