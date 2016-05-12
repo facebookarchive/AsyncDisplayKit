@@ -35,8 +35,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   AVAsset *_asset;
   
   ASVideoNode *_videoNode;
-  
-  ASDisplayNode *_controlsHolderNode;
 
   NSArray *_neededControls;
 
@@ -51,6 +49,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   BOOL _isSeeking;
   CMTime _duration;
 
+  BOOL _disableControls;
 }
 
 @end
@@ -88,6 +87,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 
   _asset = asset;
+  _disableControls = NO;
 
   [self privateInit];
 
@@ -103,10 +103,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _videoNode.asset = _asset;
   _videoNode.delegate = self;
   [self addSubnode:_videoNode];
-
-  _controlsHolderNode = [[ASDisplayNode alloc] init];
-  _controlsHolderNode.backgroundColor = [UIColor greenColor];
-  [self addSubnode:_controlsHolderNode];
 
   [self addObservers];
 }
@@ -147,8 +143,16 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   ASDN::MutexLocker l(_videoPlayerLock);
 
+  if (_disableControls) {
+    return;
+  }
+
   if (_neededControls == nil) {
     _neededControls = [self createControlElementArray];
+  }
+
+  if (_cachedControls == nil) {
+    _cachedControls = [[NSMutableDictionary alloc] init];
   }
 
   for (int i = 0; i < _neededControls.count; i++) {
@@ -173,17 +177,31 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
         break;
     }
   }
+
+  ASPerformBlockOnMainThread(^{
+    ASDN::MutexLocker l(_videoPlayerLock);
+    [self setNeedsLayout];
+  });
 }
 
 - (void)removeControls
 {
   NSArray *controls = [_cachedControls allValues];
   [controls enumerateObjectsUsingBlock:^(ASDisplayNode   *_Nonnull node, NSUInteger idx, BOOL * _Nonnull stop) {
-    [node.view removeFromSuperview];
     [node removeFromSupernode];
-    //node = nil;
-    NSLog(@"%@",_playbackButtonNode);
   }];
+
+  [self cleanCachedControls];
+}
+
+- (void)cleanCachedControls
+{
+  [_cachedControls removeAllObjects];
+
+  _playbackButtonNode = nil;
+  _elapsedTextNode = nil;
+  _durationTextNode = nil;
+  _scrubberNode = nil;
 }
 
 - (void)createPlaybackButton
@@ -348,7 +366,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode
 {
   if (_delegateFlags.delegateVideoNodePlaybackDidFinish) {
-    [_delegate videoPlayerNodePlaybackDidFinish:self];
+    [_delegate videoPlayerNodeDidPlayToEnd:self];
   }
 }
 
@@ -484,9 +502,20 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateLayoutSpecForControls = [_delegate respondsToSelector:@selector(videoPlayerNodeLayoutSpec:forControls:forConstrainedSize:)];
     _delegateFlags.delegateVideoNodeDidPlayToTime = [_delegate respondsToSelector:@selector(videoPlayerNode:didPlayToTime:)];
     _delegateFlags.delegateVideoNodeWillChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:willChangeVideoNodeState:toVideoNodeState:)];
-    _delegateFlags.delegateVideoNodePlaybackDidFinish = [_delegate respondsToSelector:@selector(videoPlayerNodePlaybackDidFinish:)];
+    _delegateFlags.delegateVideoNodePlaybackDidFinish = [_delegate respondsToSelector:@selector(videoPlayerNodeDidPlayToEnd:)];
     _delegateFlags.delegateVideoNodeShouldChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:shouldChangeVideoNodeStateTo:)];
     _delegateFlags.delegateTimeLabelAttributedString = [_delegate respondsToSelector:@selector(videoPlayerNode:timeStringForTimeLabelType:forTime:)];
+  }
+}
+
+- (void)setDisableControls:(BOOL)disableControls
+{
+  _disableControls = disableControls;
+
+  if (_disableControls && _cachedControls.count > 0) {
+    [self removeControls];
+  } else if (!_disableControls) {
+    [self createControls];
   }
 }
 

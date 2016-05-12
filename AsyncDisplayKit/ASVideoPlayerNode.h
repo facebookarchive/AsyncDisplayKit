@@ -31,6 +31,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic,assign,readonly) CMTime duration;
 
+@property (nonatomic, assign) BOOL disableControls;
+
 - (instancetype)initWithUrl:(NSURL*)url;
 - (instancetype)initWithAsset:(AVAsset*)asset;
 
@@ -108,7 +110,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract Delegate method invoked when the ASVideoNode has played to its end time.
  * @param videoPlayerNode The video node has played to its end time.
  */
-- (void)videoPlayerNodePlaybackDidFinish:(ASVideoPlayerNode *)videoPlayer;
+- (void)videoPlayerNodeDidPlayToEnd:(ASVideoPlayerNode *)videoPlayer;
 
 @end
 NS_ASSUME_NONNULL_END
