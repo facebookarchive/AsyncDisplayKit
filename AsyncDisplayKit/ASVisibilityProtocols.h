@@ -8,9 +8,15 @@
 
 #import "ASLayoutRangeType.h"
 
+#import "ASBaseDefines.h"
+
 @class UIViewController;
 
-ASLayoutRangeMode ASLayoutRangeModeForVisibilityDepth(NSUInteger visibilityDepth);
+ASDISPLAYNODE_EXTERN_C_BEGIN
+
+extern ASLayoutRangeMode ASLayoutRangeModeForVisibilityDepth(NSUInteger visibilityDepth);
+
+ASDISPLAYNODE_EXTERN_C_END
 
 @protocol ASVisibilityDepth <NSObject>
 
