@@ -191,14 +191,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   for (NSUInteger j = 0; j < nodeCount; j += kASDataControllerSizingCountPerProcessor) {
     NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, nodeCount - j);
 
-    __block NSArray *subarray;
+    // Get subcontexts for the range of nodes that will be allocated
+    NSArray *subcontexts = [contexts subarrayWithRange:NSMakeRange(j, batchCount)];
+
     // Allocate nodes concurrently.
+    __block NSArray *subarray;
     dispatch_block_t allocationBlock = ^{
       __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(batchCount, sizeof(ASCellNode *));
       dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
       dispatch_apply(batchCount, queue, ^(size_t i) {
-        unsigned long k = j + i;
-        ASCellNode *node = [contexts[k] allocateNode];
+        ASCellNode *node = [subcontexts[i] allocateNode];
         if (node == nil) {
           ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
           node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
@@ -225,11 +227,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       });
       dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
       
-      [self _layoutNodes:subarray fromContexts:contexts atIndexesOfRange:batchRange ofKind:kind];
+      [self _layoutNodes:subarray fromContexts:subcontexts atIndexesOfRange:batchRange ofKind:kind];
     } else {
       allocationBlock();
       [_mainSerialQueue performBlockOnMainThread:^{
-        [self _layoutNodes:subarray fromContexts:contexts atIndexesOfRange:batchRange ofKind:kind];
+        [self _layoutNodes:subarray fromContexts:subcontexts atIndexesOfRange:batchRange ofKind:kind];
       }];
     }
 
