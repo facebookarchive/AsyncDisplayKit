@@ -209,7 +209,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         allocatedNodeBuffer[i] = node;
         allocatedContextBuffer[i] = context;
       });
-      subarrayOfNodes = [[NSArray alloc] initWithObjects:allocatedNodeBuffer count:batchCount];
+      subarrayOfNodes = [NSArray arrayWithObjects:allocatedNodeBuffer count:batchCount];
       subarrayOfContexts = [NSArray arrayWithObjects:allocatedContextBuffer count:batchCount];
       // Nil out buffer indexes to allow arc to free the stored cells.
       for (int i = 0; i < batchCount; i++) {
