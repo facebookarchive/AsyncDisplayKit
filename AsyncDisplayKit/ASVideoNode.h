@@ -101,8 +101,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second;
 /**
- * @abstract Delegate method invoked when playerback stalls.
- * @param videoNode The video node that has experience the stall
+ * @abstract Delegate method invoked when the video player stalls.
+ * @param videoNode The video node that has experienced the stall
  * @param second Current playback time when the stall happens
  */
 - (void)videoNode:(ASVideoNode *)videoNode didStallAtSecond:(NSTimeInterval)second;
