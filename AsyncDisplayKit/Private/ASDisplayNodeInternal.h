@@ -93,7 +93,9 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASDisplayNode * __weak _supernode;
 
   ASSentinel *_displaySentinel;
-  ASSentinel *_transitionSentinel;
+
+  int32_t _transitionID;
+  BOOL _transitionInProgress;
 
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
@@ -225,5 +227,11 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  * If YES, this method must be called on the main thread and the node must not be layer-backed.
  */
 - (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy;
+
+/**
+ *  Convenience method to access this node's trait collection struct. Externally, users should interact
+ *  with the trait collection via ASTraitCollection
+ */
+- (ASEnvironmentTraitCollection)environmentTraitCollection;
 
 @end

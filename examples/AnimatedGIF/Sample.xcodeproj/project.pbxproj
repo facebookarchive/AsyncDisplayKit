@@ -10,21 +10,6 @@
 	<string>46</string>
 	<key>objects</key>
 	<dict>
-		<key>0B6F8FB1A868B03EF67DF043</key>
-		<dict>
-			<key>includeInIndex</key>
-			<string>1</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>text.xcconfig</string>
-			<key>name</key>
-			<string>Pods-ASAnimatedImage.debug.xcconfig</string>
-			<key>path</key>
-			<string>Pods/Target Support Files/Pods-ASAnimatedImage/Pods-ASAnimatedImage.debug.xcconfig</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
 		<key>26A96BEEF893B1FA39F144CF</key>
 		<dict>
 			<key>buildActionMask</key>
@@ -44,10 +29,23 @@
 			<key>shellPath</key>
 			<string>/bin/sh</string>
 			<key>shellScript</key>
-			<string>"${SRCROOT}/Pods/Target Support Files/Pods-ASAnimatedImage/Pods-ASAnimatedImage-frameworks.sh"
+			<string>"${SRCROOT}/Pods/Target Support Files/Pods-Sample/Pods-Sample-frameworks.sh"
 </string>
 			<key>showEnvVarsInLog</key>
 			<string>0</string>
+		</dict>
+		<key>26E3F7C63D79A1F47BEF1AA2</key>
+		<dict>
+			<key>explicitFileType</key>
+			<string>archive.ar</string>
+			<key>includeInIndex</key>
+			<string>0</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>libPods-Sample.a</string>
+			<key>sourceTree</key>
+			<string>BUILT_PRODUCTS_DIR</string>
 		</dict>
 		<key>2ADE0E7B5309A9CD043DDB3E</key>
 		<dict>
@@ -68,7 +66,7 @@
 			<key>shellPath</key>
 			<string>/bin/sh</string>
 			<key>shellScript</key>
-			<string>"${SRCROOT}/Pods/Target Support Files/Pods-ASAnimatedImage/Pods-ASAnimatedImage-resources.sh"
+			<string>"${SRCROOT}/Pods/Target Support Files/Pods-Sample/Pods-Sample-resources.sh"
 </string>
 			<key>showEnvVarsInLog</key>
 			<string>0</string>
@@ -169,7 +167,7 @@
 			<string>2147483647</string>
 			<key>files</key>
 			<array>
-				<string>8A17DB1E5A9F378F4D5F692C</string>
+				<string>9AE987532BDC7AC1FD693515</string>
 			</array>
 			<key>isa</key>
 			<string>PBXFrameworksBuildPhase</string>
@@ -185,6 +183,8 @@
 				<string>683ADBB11CA19883005863A4</string>
 				<string>683ADBAE1CA19883005863A4</string>
 				<string>683ADBAC1CA19883005863A4</string>
+				<string>DE5187DA1CD9AA2A00EC11DE</string>
+				<string>DE5187D91CD9AA2A00EC11DE</string>
 			</array>
 			<key>isa</key>
 			<string>PBXResourcesBuildPhase</string>
@@ -211,7 +211,7 @@
 			<key>isa</key>
 			<string>PBXNativeTarget</string>
 			<key>name</key>
-			<string>ASAnimatedImage</string>
+			<string>Sample</string>
 			<key>productName</key>
 			<string>ASAnimatedImage</string>
 			<key>productReference</key>
@@ -228,7 +228,7 @@
 			<key>isa</key>
 			<string>PBXFileReference</string>
 			<key>path</key>
-			<string>ASAnimatedImage.app</string>
+			<string>Sample.app</string>
 			<key>sourceTree</key>
 			<string>BUILT_PRODUCTS_DIR</string>
 		</dict>
@@ -624,7 +624,7 @@
 		<key>683ADBB61CA19883005863A4</key>
 		<dict>
 			<key>baseConfigurationReference</key>
-			<string>0B6F8FB1A868B03EF67DF043</string>
+			<string>DE5187D71CD9AA2A00EC11DE</string>
 			<key>buildSettings</key>
 			<dict>
 				<key>ASSETCATALOG_COMPILER_APPICON_NAME</key>
@@ -634,7 +634,7 @@
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<string>$(inherited) @executable_path/Frameworks</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
-				<string>facebook.ASAnimatedImage</string>
+				<string>com.facebook.AsyncDisplayKit.Sample</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
 			</dict>
@@ -646,7 +646,7 @@
 		<key>683ADBB71CA19883005863A4</key>
 		<dict>
 			<key>baseConfigurationReference</key>
-			<string>74003104499E495B12A29469</string>
+			<string>DE5187D81CD9AA2A00EC11DE</string>
 			<key>buildSettings</key>
 			<dict>
 				<key>ASSETCATALOG_COMPILER_APPICON_NAME</key>
@@ -656,7 +656,7 @@
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<string>$(inherited) @executable_path/Frameworks</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
-				<string>facebook.ASAnimatedImage</string>
+				<string>com.facebook.AsyncDisplayKit.Sample</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
 			</dict>
@@ -699,8 +699,8 @@ fi
 		<dict>
 			<key>children</key>
 			<array>
-				<string>0B6F8FB1A868B03EF67DF043</string>
-				<string>74003104499E495B12A29469</string>
+				<string>DE5187D71CD9AA2A00EC11DE</string>
+				<string>DE5187D81CD9AA2A00EC11DE</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -709,47 +709,12 @@ fi
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
-		<key>74003104499E495B12A29469</key>
-		<dict>
-			<key>includeInIndex</key>
-			<string>1</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>text.xcconfig</string>
-			<key>name</key>
-			<string>Pods-ASAnimatedImage.release.xcconfig</string>
-			<key>path</key>
-			<string>Pods/Target Support Files/Pods-ASAnimatedImage/Pods-ASAnimatedImage.release.xcconfig</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>78115B140B67E393DB5B13B0</key>
-		<dict>
-			<key>explicitFileType</key>
-			<string>archive.ar</string>
-			<key>includeInIndex</key>
-			<string>0</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>path</key>
-			<string>libPods-ASAnimatedImage.a</string>
-			<key>sourceTree</key>
-			<string>BUILT_PRODUCTS_DIR</string>
-		</dict>
-		<key>8A17DB1E5A9F378F4D5F692C</key>
-		<dict>
-			<key>fileRef</key>
-			<string>78115B140B67E393DB5B13B0</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
-		</dict>
 		<key>8C6AC07DE55B51935C632F56</key>
 		<dict>
 			<key>children</key>
 			<array>
 				<string>A6F2399FA1A86586D9BDAE05</string>
-				<string>78115B140B67E393DB5B13B0</string>
+				<string>26E3F7C63D79A1F47BEF1AA2</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -757,6 +722,13 @@ fi
 			<string>Frameworks</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
+		</dict>
+		<key>9AE987532BDC7AC1FD693515</key>
+		<dict>
+			<key>fileRef</key>
+			<string>26E3F7C63D79A1F47BEF1AA2</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
 		</dict>
 		<key>A6F2399FA1A86586D9BDAE05</key>
 		<dict>
@@ -770,6 +742,50 @@ fi
 			<string>libPods.a</string>
 			<key>sourceTree</key>
 			<string>BUILT_PRODUCTS_DIR</string>
+		</dict>
+		<key>DE5187D71CD9AA2A00EC11DE</key>
+		<dict>
+			<key>fileEncoding</key>
+			<string>4</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text.xcconfig</string>
+			<key>name</key>
+			<string>Pods-Sample.debug.xcconfig</string>
+			<key>path</key>
+			<string>Pods/Target Support Files/Pods-Sample/Pods-Sample.debug.xcconfig</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>DE5187D81CD9AA2A00EC11DE</key>
+		<dict>
+			<key>fileEncoding</key>
+			<string>4</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text.xcconfig</string>
+			<key>name</key>
+			<string>Pods-Sample.release.xcconfig</string>
+			<key>path</key>
+			<string>Pods/Target Support Files/Pods-Sample/Pods-Sample.release.xcconfig</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>DE5187D91CD9AA2A00EC11DE</key>
+		<dict>
+			<key>fileRef</key>
+			<string>DE5187D71CD9AA2A00EC11DE</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
+		<key>DE5187DA1CD9AA2A00EC11DE</key>
+		<dict>
+			<key>fileRef</key>
+			<string>DE5187D81CD9AA2A00EC11DE</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
 		</dict>
 	</dict>
 	<key>rootObject</key>

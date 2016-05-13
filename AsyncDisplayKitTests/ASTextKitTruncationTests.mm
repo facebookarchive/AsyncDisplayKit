@@ -53,6 +53,7 @@
   ASTextKitTailTruncater *tailTruncater = [[ASTextKitTailTruncater alloc] initWithContext:context
                                                                truncationAttributedString:nil
                                                                    avoidTailTruncationSet:nil];
+  [tailTruncater truncate];
   XCTAssert(NSEqualRanges(textKitVisibleRange, tailTruncater.visibleRanges[0]));
 }
 
@@ -71,6 +72,7 @@
   ASTextKitTailTruncater *tailTruncater = [[ASTextKitTailTruncater alloc] initWithContext:context
                                                                truncationAttributedString:[self _simpleTruncationAttributedString]
                                                                    avoidTailTruncationSet:[NSCharacterSet characterSetWithCharactersInString:@""]];
+  [tailTruncater truncate];
   __block NSString *drawnString;
   [context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     drawnString = textStorage.string;
@@ -95,7 +97,7 @@
   ASTextKitTailTruncater *tailTruncater = [[ASTextKitTailTruncater alloc] initWithContext:context
                                                                truncationAttributedString:[self _simpleTruncationAttributedString]
                                                                    avoidTailTruncationSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
-  (void)tailTruncater;
+  [tailTruncater truncate];
   __block NSString *drawnString;
   [context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     drawnString = textStorage.string;
@@ -120,8 +122,7 @@
   ASTextKitTailTruncater *tailTruncater = [[ASTextKitTailTruncater alloc] initWithContext:context
                                                                truncationAttributedString:[self _simpleTruncationAttributedString]
                                                                    avoidTailTruncationSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
-  // So Xcode doesn't yell at me for an unused var...
-  (void)tailTruncater;
+  [tailTruncater truncate];
   __block NSString *drawnString;
   [context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     drawnString = textStorage.string;
@@ -144,9 +145,9 @@
                                                            layoutManagerDelegate:nil
                                                         textStorageCreationBlock:nil];
 
-  XCTAssertNoThrow([[ASTextKitTailTruncater alloc] initWithContext:context
+  XCTAssertNoThrow([[[ASTextKitTailTruncater alloc] initWithContext:context
                                         truncationAttributedString:[self _simpleTruncationAttributedString]
-                                            avoidTailTruncationSet:[NSCharacterSet characterSetWithCharactersInString:@"."]]);
+                                            avoidTailTruncationSet:[NSCharacterSet characterSetWithCharactersInString:@"."]] truncate]);
 }
 
 @end

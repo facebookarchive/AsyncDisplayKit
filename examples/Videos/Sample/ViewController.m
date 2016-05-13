@@ -10,101 +10,169 @@
  */
 
 #import "ViewController.h"
+#import "ASLayoutSpec.h"
+#import "ASStaticLayoutSpec.h"
 
 @interface ViewController()<ASVideoNodeDelegate>
-@property (nonatomic) ASVideoNode *videoNode;
+@property (nonatomic, strong) ASDisplayNode *rootNode;
+@property (nonatomic, strong) ASVideoNode *guitarVideoNode;
 @end
 
 @implementation ViewController
+
+#pragma mark - UIViewController
 
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
 
-  ASVideoNode *guitarVideo = [self guitarVideo];
-  [self.view addSubnode:guitarVideo];
+  // Root node for the view controller
+  _rootNode = [ASDisplayNode new];
+  _rootNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   
-  ASVideoNode *nicCageVideo = [self nicCageVideo];
-  [self.view addSubnode:nicCageVideo];
+  ASVideoNode *guitarVideoNode = self.guitarVideoNode;
+  [_rootNode addSubnode:self.guitarVideoNode];
   
-  ASVideoNode *simonVideo = [self simonVideo];
-  [self.view addSubnode:simonVideo];
+  ASVideoNode *nicCageVideoNode = self.nicCageVideoNode;
+  [_rootNode addSubnode:nicCageVideoNode];
+  
+  // Video node with custom play button
+  ASVideoNode *simonVideoNode = self.simonVideoNode;
+  simonVideoNode.playButton = self.playButton;
+  [_rootNode addSubnode:simonVideoNode];
+  
+  _rootNode.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    guitarVideoNode.layoutPosition = CGPointMake(0, 0);
+    guitarVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height/3);
+    
+    nicCageVideoNode.layoutPosition = CGPointMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+    nicCageVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+    
+    simonVideoNode.layoutPosition = CGPointMake(0, [UIScreen mainScreen].bounds.size.height - ([UIScreen mainScreen].bounds.size.height/3));
+    simonVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode]];
+  };
+  [self.view addSubnode:_rootNode];
 }
 
-- (ASVideoNode *)guitarVideo;
+- (void)viewDidLayoutSubviews
 {
-  ASVideoNode *videoNode = [[ASVideoNode alloc] init];
+  [super viewDidLayoutSubviews];
   
-  videoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-3045b261-7e93-4492-b7e5-5d6358376c9f-editedLiveAndDie.mov"]];
-  
-  videoNode.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height/3);
-  
-  videoNode.gravity = AVLayerVideoGravityResizeAspectFill;
-  
-  videoNode.backgroundColor = [UIColor lightGrayColor];
-  
-  return videoNode;
+  // After all subviews are layed out we have to measure it and move the root node to the right place
+  CGSize viewSize = self.view.bounds.size;
+  [self.rootNode measureWithSizeRange:ASSizeRangeMake(viewSize, viewSize)];
+  [self.rootNode setNeedsLayout];
 }
 
-- (ASVideoNode *)nicCageVideo;
-{
-  ASVideoNode *nicCageVideo = [[ASVideoNode alloc] init];
-  
-  nicCageVideo.delegate = self;
-  
-  nicCageVideo.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
-  
-  nicCageVideo.frame = CGRectMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3, [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
-  
-  nicCageVideo.gravity = AVLayerVideoGravityResize;
-  
-  nicCageVideo.backgroundColor = [UIColor lightGrayColor];
-  nicCageVideo.shouldAutorepeat = YES;
-  nicCageVideo.shouldAutoplay = YES;
-  nicCageVideo.muted = YES;
+#pragma mark - Getter / Setter
 
-  return nicCageVideo;
+- (ASVideoNode *)guitarVideoNode;
+{
+  if (_guitarVideoNode) {
+    return _guitarVideoNode;
+  }
+  
+  _guitarVideoNode = [[ASVideoNode alloc] init];
+  _guitarVideoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-3045b261-7e93-4492-b7e5-5d6358376c9f-editedLiveAndDie.mov"]];
+  _guitarVideoNode.gravity = AVLayerVideoGravityResizeAspectFill;
+  _guitarVideoNode.backgroundColor = [UIColor lightGrayColor];
+  _guitarVideoNode.periodicTimeObserverTimescale = 1; //Default is 100
+  _guitarVideoNode.delegate = self;
+  
+  return _guitarVideoNode;
 }
 
-- (ASVideoNode *)simonVideo;
+- (ASVideoNode *)nicCageVideoNode;
 {
-  ASVideoNode *simonVideo = [[ASVideoNode alloc] init];
+  ASVideoNode *nicCageVideoNode = [[ASVideoNode alloc] init];
+  nicCageVideoNode.delegate = self;
+  nicCageVideoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
+  nicCageVideoNode.gravity = AVLayerVideoGravityResize;
+  nicCageVideoNode.backgroundColor = [UIColor lightGrayColor];
+  nicCageVideoNode.shouldAutorepeat = YES;
+  nicCageVideoNode.shouldAutoplay = YES;
+  nicCageVideoNode.muted = YES;
+  
+  return nicCageVideoNode;
+}
+
+- (ASVideoNode *)simonVideoNode
+{
+  ASVideoNode *simonVideoNode = [[ASVideoNode alloc] init];
   
   NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"simon" ofType:@"mp4"]];
-  simonVideo.asset = [AVAsset assetWithURL:url];
+  simonVideoNode.asset = [AVAsset assetWithURL:url];
+  simonVideoNode.gravity = AVLayerVideoGravityResizeAspect;
+  simonVideoNode.backgroundColor = [UIColor lightGrayColor];
+  simonVideoNode.shouldAutorepeat = YES;
+  simonVideoNode.shouldAutoplay = YES;
+  simonVideoNode.muted = YES;
   
-  simonVideo.frame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - ([UIScreen mainScreen].bounds.size.height/3), [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
-  
-  simonVideo.gravity = AVLayerVideoGravityResizeAspect;
-  
-  simonVideo.backgroundColor = [UIColor lightGrayColor];
-  simonVideo.shouldAutorepeat = YES;
-  simonVideo.shouldAutoplay = YES;
-  
-  return simonVideo;
+  return simonVideoNode;
 }
 
 - (ASButtonNode *)playButton;
 {
-  ASButtonNode *playButton = [[ASButtonNode alloc] init];
+  ASButtonNode *playButtonNode = [[ASButtonNode alloc] init];
   
   UIImage *image = [UIImage imageNamed:@"playButton@2x.png"];
-  [playButton setImage:image forState:ASControlStateNormal];
-  [playButton measure:CGSizeMake(50, 50)];
-  playButton.bounds = CGRectMake(0, 0, playButton.calculatedSize.width, playButton.calculatedSize.height);
-  playButton.position = CGPointMake([UIScreen mainScreen].bounds.size.width/4, ([UIScreen mainScreen].bounds.size.height/3)/2);
-  [playButton setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:ASControlStateHighlighted];
-
-  return playButton;
+  [playButtonNode setImage:image forState:ASControlStateNormal];
+  [playButtonNode setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:ASControlStateHighlighted];
+  
+  // Change placement of play button if necessary
+  //playButtonNode.contentHorizontalAlignment = ASHorizontalAlignmentStart;
+  //playButtonNode.contentVerticalAlignment = ASVerticalAlignmentCenter;
+  
+  return playButtonNode;
 }
+
+#pragma mark - Actions
 
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode
 {
+  if (videoNode == self.guitarVideoNode) {
+    if (videoNode.playerState == ASVideoNodePlayerStatePlaying) {
+      [videoNode pause];
+    } else if(videoNode.playerState == ASVideoNodePlayerStateLoading) {
+      [videoNode pause];
+    } else {
+      [videoNode play];
+    }
+    return;
+  }
   if (videoNode.player.muted == YES) {
     videoNode.player.muted = NO;
   } else {
     videoNode.player.muted = YES;
   }
+}
+
+#pragma mark - ASVideoNodeDelegate
+
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate
+{
+  //Ignore nicCageVideo
+  if (videoNode != _guitarVideoNode) {
+    return;
+  }
+  
+  if (toSate == ASVideoNodePlayerStatePlaying) {
+    NSLog(@"guitarVideoNode is playing");
+  } else if (toSate == ASVideoNodePlayerStateFinished) {
+    NSLog(@"guitarVideoNode finished");
+  } else if (toSate == ASVideoNodePlayerStateLoading) {
+    NSLog(@"guitarVideoNode is buffering");
+  }
+}
+
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second
+{
+  if (videoNode != _guitarVideoNode) {
+    return;
+  }
+  
+  NSLog(@"guitarVideoNode playback time is: %f",second);
 }
 
 @end

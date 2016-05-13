@@ -342,7 +342,7 @@ NS_ASSUME_NONNULL_BEGIN
  * This is a node-based UICollectionViewDataSource.
  */
 #define ASCollectionViewDataSource ASCollectionDataSource
-@protocol ASCollectionDataSource <ASCommonCollectionViewDataSource, NSObject>
+@protocol ASCollectionDataSource <ASCommonCollectionViewDataSource>
 
 @optional
 
