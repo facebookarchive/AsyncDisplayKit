@@ -190,27 +190,33 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
   for (NSUInteger j = 0; j < nodeCount; j += kASDataControllerSizingCountPerProcessor) {
     NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, nodeCount - j);
-
-    __block NSArray *subarray;
+    
     // Allocate nodes concurrently.
+    __block NSArray *subarrayOfContexts;
+    __block NSArray *subarrayOfNodes;
     dispatch_block_t allocationBlock = ^{
+      __strong ASIndexedNodeContext **allocatedContextBuffer = (__strong ASIndexedNodeContext **)calloc(batchCount, sizeof(ASIndexedNodeContext *));
       __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(batchCount, sizeof(ASCellNode *));
       dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
       dispatch_apply(batchCount, queue, ^(size_t i) {
         unsigned long k = j + i;
-        ASCellNode *node = [contexts[k] allocateNode];
+        ASIndexedNodeContext *context = contexts[k];
+        ASCellNode *node = [context allocateNode];
         if (node == nil) {
           ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
           node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
         }
         allocatedNodeBuffer[i] = node;
+        allocatedContextBuffer[i] = context;
       });
-      subarray = [[NSArray alloc] initWithObjects:allocatedNodeBuffer count:batchCount];
-
+      subarrayOfNodes = [[NSArray alloc] initWithObjects:allocatedNodeBuffer count:batchCount];
+      subarrayOfContexts = [NSArray arrayWithObjects:allocatedContextBuffer count:batchCount];
       // Nil out buffer indexes to allow arc to free the stored cells.
       for (int i = 0; i < batchCount; i++) {
+        allocatedContextBuffer[i] = nil;
         allocatedNodeBuffer[i] = nil;
       }
+      free(allocatedContextBuffer);
       free(allocatedNodeBuffer);
     };
     
@@ -225,15 +231,15 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       });
       dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
       
-      [self _layoutNodes:subarray fromContexts:contexts atIndexesOfRange:batchRange ofKind:kind];
+      [self _layoutNodes:subarrayOfNodes fromContexts:subarrayOfContexts atIndexesOfRange:batchRange ofKind:kind];
     } else {
       allocationBlock();
       [_mainSerialQueue performBlockOnMainThread:^{
-        [self _layoutNodes:subarray fromContexts:contexts atIndexesOfRange:batchRange ofKind:kind];
+        [self _layoutNodes:subarrayOfNodes fromContexts:subarrayOfContexts atIndexesOfRange:batchRange ofKind:kind];
       }];
     }
 
-    [allocatedNodes addObjectsFromArray:subarray];
+    [allocatedNodes addObjectsFromArray:subarrayOfNodes];
 
     dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       // We should already have measured loaded nodes before we left the main thread. Layout the remaining ones on a background thread.
