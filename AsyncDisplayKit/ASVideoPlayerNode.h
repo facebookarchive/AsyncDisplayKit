@@ -33,6 +33,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL disableControls;
 
+#pragma mark - ASVideoNode property proxy
+/**
+ * When shouldAutoplay is set to true, a video node will play when it has both loaded and entered the "visible" interfaceState.
+ * If it leaves the visible interfaceState it will pause but will resume once it has returned.
+ */
+@property (nonatomic, assign, readwrite) BOOL shouldAutoplay;
+@property (nonatomic, assign, readwrite) BOOL shouldAutorepeat;
+@property (nonatomic, assign, readwrite) BOOL muted;
+@property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
+//! Defaults to 100
+@property (nonatomic, assign) int32_t periodicTimeObserverTimescale;
+//! Defaults to AVLayerVideoGravityResizeAspect
+@property (atomic) NSString *gravity;
+
 - (instancetype)initWithUrl:(NSURL*)url;
 - (instancetype)initWithAsset:(AVAsset*)asset;
 

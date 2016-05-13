@@ -50,6 +50,12 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   CMTime _duration;
 
   BOOL _disableControls;
+
+  BOOL _shouldAutoplay;
+  BOOL _shouldAutorepeat;
+  BOOL _muted;
+  int32_t _periodicTimeObserverTimescale;
+  NSString *_gravity;
 }
 
 @end
@@ -533,6 +539,49 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   } else if (!_disableControls) {
     [self createControls];
   }
+}
+
+- (void)setShouldAutoplay:(BOOL)shouldAutoplay
+{
+  _shouldAutoplay = shouldAutoplay;
+  _videoNode.shouldAutoplay = _shouldAutoplay;
+}
+
+- (void)setShouldAutorepeat:(BOOL)shouldAutorepeat
+{
+  _shouldAutorepeat = shouldAutorepeat;
+  _videoNode.shouldAutorepeat = YES;
+}
+
+- (void)setMuted:(BOOL)muted
+{
+  _muted = muted;
+  _videoNode.muted = _muted;
+}
+
+- (void)setPeriodicTimeObserverTimescale:(int32_t)periodicTimeObserverTimescale
+{
+  _periodicTimeObserverTimescale = periodicTimeObserverTimescale;
+  _videoNode.periodicTimeObserverTimescale = _periodicTimeObserverTimescale;
+}
+
+- (NSString*)gravity
+{
+  if (_gravity == nil) {
+    _gravity = _videoNode.gravity;
+  }
+  return _gravity;
+}
+
+- (void)setGravity:(NSString *)gravity
+{
+  _gravity = gravity;
+  _videoNode.gravity = _gravity;
+}
+
+- (ASVideoNodePlayerState)playerState
+{
+  return _videoNode.playerState;
 }
 
 #pragma mark - Helpers
