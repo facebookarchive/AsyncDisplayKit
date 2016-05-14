@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/ASBaseDefines.h>
+#import "ASBaseDefines.h"
 #import <Foundation/Foundation.h>
 
 typedef struct {

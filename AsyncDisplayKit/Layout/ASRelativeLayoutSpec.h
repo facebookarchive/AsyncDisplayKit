@@ -5,7 +5,7 @@
 //  Created by Samuel Stow on 12/31/15.
 //
 
-#import <AsyncDisplayKit/ASLayoutSpec.h>
+#import "ASLayoutSpec.h"
 
 /** How the child is positioned within the spec. */
 typedef NS_OPTIONS(NSUInteger, ASRelativeLayoutSpecPosition) {

@@ -15,8 +15,8 @@
 
 #import <libkern/OSAtomic.h>
 
-#import <AsyncDisplayKit/ASAssert.h>
-#import <AsyncDisplayKit/ASBaseDefines.h>
+#import "ASAssert.h"
+#import "ASBaseDefines.h"
 
 
 static inline BOOL ASDisplayNodeThreadIsMain()

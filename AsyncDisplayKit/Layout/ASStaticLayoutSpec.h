@@ -8,8 +8,8 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutSpec.h>
-#import <AsyncDisplayKit/ASRelativeSize.h>
+#import "ASLayoutSpec.h"
+#import "ASRelativeSize.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

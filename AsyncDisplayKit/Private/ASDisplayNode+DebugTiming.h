@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/ASDisplayNode.h>
+#import "ASDisplayNode.h"
 
 @interface ASDisplayNode (DebugTiming)
 

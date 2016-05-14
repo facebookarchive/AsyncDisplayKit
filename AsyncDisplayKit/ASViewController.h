@@ -7,8 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <AsyncDisplayKit/ASDisplayNode.h>
-#import <AsyncDisplayKit/ASVisibilityProtocols.h>
+#import "ASDisplayNode.h"
+#import "ASVisibilityProtocols.h"
 
 @class ASTraitCollection;
 

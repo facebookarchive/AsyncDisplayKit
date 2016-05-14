@@ -8,8 +8,8 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutSpec.h>
-#import <AsyncDisplayKit/ASStackLayoutDefines.h>
+#import "ASLayoutSpec.h"
+#import "ASStackLayoutDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

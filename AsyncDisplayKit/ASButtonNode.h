@@ -6,8 +6,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/ASTextNode.h>
-#import <AsyncDisplayKit/ASImageNode.h>
+#import "ASTextNode.h"
+#import "ASImageNode.h"
 
 @interface ASButtonNode : ASControlNode
 

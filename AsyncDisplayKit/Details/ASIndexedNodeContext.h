@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/ASDataController.h>
+#import "ASDataController.h"
 
 @interface ASIndexedNodeContext : NSObject
 

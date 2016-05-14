@@ -8,8 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-#import <AsyncDisplayKit/ASChangeSetDataController.h>
-#import <AsyncDisplayKit/ASDimension.h>
+#import "ASChangeSetDataController.h"
+#import "ASDimension.h"
 
 @class ASDisplayNode;
 @class ASCollectionDataController;

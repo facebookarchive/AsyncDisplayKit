@@ -6,8 +6,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/ASAbstractLayoutController.h>
-#import <AsyncDisplayKit/ASBaseDefines.h>
+#import "ASAbstractLayoutController.h"
+#import "ASBaseDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import "ASInternalHelpers.h"
 
 typedef NSUInteger ASDataControllerAnimationOptions;
 

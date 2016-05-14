@@ -6,7 +6,7 @@
 //  Copyright © 2015 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/ASTableView.h>
+#import "ASTableView.h"
 
 /**
  * ASTableNode is a node based class that wraps an ASTableView. It can be used

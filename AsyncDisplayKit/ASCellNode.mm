@@ -11,14 +11,14 @@
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
 #import "ASDisplayNodeInternal.h"
-#import <AsyncDisplayKit/_ASDisplayView.h>
-#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
-#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
-#import <AsyncDisplayKit/ASTextNode.h>
+#import "_ASDisplayView.h"
+#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+Beta.h"
+#import "ASTextNode.h"
 
-#import <AsyncDisplayKit/ASViewController.h>
-#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
-#import <AsyncDisplayKit/ASLayout.h>
+#import "ASViewController.h"
+#import "ASInsetLayoutSpec.h"
+#import "ASLayout.h"
 
 #pragma mark -
 #pragma mark ASCellNode

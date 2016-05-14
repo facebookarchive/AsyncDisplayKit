@@ -9,7 +9,7 @@
  */
 
 #import <UIKit/UIKit.h>
-#import <AsyncDisplayKit/ASEnvironment.h>
+#import "ASEnvironment.h"
 
 @interface ASTraitCollection : NSObject
 

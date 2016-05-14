@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/ASDisplayNode.h>
+#import "ASDisplayNode.h"
 
 extern NSString * const ASTransitionContextFromLayoutKey;
 extern NSString * const ASTransitionContextToLayoutKey;

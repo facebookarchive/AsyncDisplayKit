@@ -7,8 +7,8 @@
 //
 
 #import "ASTraitCollection.h"
-#import <AsyncDisplayKit/ASAssert.h>
-#import <AsyncDisplayKit/ASAvailability.h>
+#import "ASAssert.h"
+#import "ASAvailability.h"
 
 @implementation ASTraitCollection
 

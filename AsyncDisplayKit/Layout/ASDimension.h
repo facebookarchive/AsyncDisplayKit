@@ -10,7 +10,7 @@
 
 #pragma once
 #import <UIKit/UIKit.h>
-#import <AsyncDisplayKit/ASBaseDefines.h>
+#import "ASBaseDefines.h"
 
 /**
  A dimension relative to constraints to be provided in the future.

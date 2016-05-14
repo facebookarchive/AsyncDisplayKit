@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/ASImageNode.h>
+#import "ASImageNode.h"
 #if TARGET_OS_IOS
 #import <MapKit/MapKit.h>
 

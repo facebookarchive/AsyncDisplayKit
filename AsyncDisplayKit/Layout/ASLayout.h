@@ -11,8 +11,8 @@
 #pragma once
 
 #import <UIKit/UIKit.h>
-#import <AsyncDisplayKit/ASAssert.h>
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import "ASAssert.h"
+#import "ASLayoutable.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
