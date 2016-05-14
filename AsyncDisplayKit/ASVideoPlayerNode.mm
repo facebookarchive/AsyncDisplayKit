@@ -7,6 +7,7 @@
 //
 
 #import "ASVideoPlayerNode.h"
+#import "ASDefaultPlaybackButton.h"
 
 static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
@@ -18,6 +19,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   struct {
     unsigned int delegateNeededControls:1;
+    unsigned int delegatePlaybackButtonTint:1;
     unsigned int delegateScrubberMaximumTrackTintColor:1;
     unsigned int delegateScrubberMinimumTrackTintColor:1;
     unsigned int delegateScrubberThumbTintColor:1;
@@ -29,6 +31,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateVideoNodeWillChangeState:1;
     unsigned int delegateVideoNodeShouldChangeState:1;
     unsigned int delegateVideoNodePlaybackDidFinish:1;
+    unsigned int delegateVideoNodeTapped:1;
   } _delegateFlags;
   
   NSURL *_url;
@@ -40,7 +43,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   NSMutableDictionary *_cachedControls;
 
-  ASControlNode *_playbackButtonNode;
+  ASDefaultPlaybackButton *_playbackButtonNode;
   ASTextNode  *_elapsedTextNode;
   ASTextNode  *_durationTextNode;
   ASDisplayNode *_scrubberNode;
@@ -56,6 +59,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   BOOL _muted;
   int32_t _periodicTimeObserverTimescale;
   NSString *_gravity;
+
+  UIColor *_defaultControlsColor;
 }
 
 @end
@@ -103,6 +108,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)privateInit
 {
 
+  _defaultControlsColor = [UIColor whiteColor];
   _cachedControls = [[NSMutableDictionary alloc] init];
 
   _videoNode = [[ASVideoNode alloc] init];
@@ -213,9 +219,13 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)createPlaybackButton
 {
   if (_playbackButtonNode == nil) {
-    _playbackButtonNode = [[ASControlNode alloc] init];
-    _playbackButtonNode.preferredFrameSize = CGSizeMake(20.0, 20.0);
-    _playbackButtonNode.backgroundColor  = [UIColor redColor];
+    _playbackButtonNode = [[ASDefaultPlaybackButton alloc] init];
+    _playbackButtonNode.preferredFrameSize = CGSizeMake(16.0, 22.0);
+    if (_delegateFlags.delegatePlaybackButtonTint) {
+      _playbackButtonNode.tintColor = [_delegate videoPlayerNodePlaybackButtonTint:self];
+    } else {
+      _playbackButtonNode.tintColor = _defaultControlsColor;
+    }
     [_playbackButtonNode addTarget:self action:@selector(playbackButtonTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
     [_cachedControls setObject:_playbackButtonNode forKey:@(ASVideoPlayerNodeControlTypePlaybackButton)];
   }
@@ -316,7 +326,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   } else {
     options = @{
                 NSFontAttributeName : [UIFont systemFontOfSize:12.0],
-                NSForegroundColorAttributeName: [UIColor whiteColor]
+                NSForegroundColorAttributeName: _defaultControlsColor
                 };
   }
 
@@ -336,6 +346,12 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   if (toState == ASVideoNodePlayerStateReadyToPlay && _durationTextNode) {
     _duration = _videoNode.currentItem.duration;
     [self updateDurationTimeLabel];
+  }
+
+  if (toState == ASVideoNodePlayerStatePlaying) {
+    _playbackButtonNode.buttonType = ASDefaultPlaybackButtonTypePause;
+  } else {
+    _playbackButtonNode.buttonType = ASDefaultPlaybackButtonTypePlay;
   }
 }
 
@@ -376,15 +392,26 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
+- (void)videoNodeWasTapped:(ASVideoNode *)videoNode
+{
+  if (_delegateFlags.delegateVideoNodeTapped) {
+    [_delegate videoPlayerNodeWasTapped:self];
+  } else {
+    if (videoNode.playerState == ASVideoNodePlayerStatePlaying) {
+      [videoNode pause];
+    } else {
+      [videoNode play];
+    }
+  }
+}
+
 #pragma mark - Actions
 - (void)playbackButtonTapped:(ASControlNode*)node
 {
   if (_videoNode.playerState == ASVideoNodePlayerStatePlaying) {
     [_videoNode pause];
-    _playbackButtonNode.backgroundColor = [UIColor greenColor];
   } else {
     [_videoNode play];
-    _playbackButtonNode.backgroundColor = [UIColor redColor];
   }
 }
 
@@ -458,25 +485,35 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 #pragma mark - Layout
 - (ASLayoutSpec*)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _videoNode.preferredFrameSize = constrainedSize.max;
+  CGSize maxSize = constrainedSize.max;
+  if (!CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero)) {
+    maxSize = self.preferredFrameSize;
+  }
+
+  // Prevent crashes through if infinite width or height
+  if (isinf(maxSize.width) || isinf(maxSize.height)) {
+    ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoPlayerNode");
+    maxSize = CGSizeZero;
+  }
+  _videoNode.preferredFrameSize = maxSize;
 
   ASLayoutSpec *layoutSpec;
 
   if (_delegateFlags.delegateLayoutSpecForControls) {
-    layoutSpec = [_delegate videoPlayerNodeLayoutSpec:self forControls:_cachedControls forConstrainedSize:constrainedSize];
+    layoutSpec = [_delegate videoPlayerNodeLayoutSpec:self forControls:_cachedControls forMaximumSize:maxSize];
   } else {
-    layoutSpec = [self defaultLayoutSpecThatFits:constrainedSize];
+    layoutSpec = [self defaultLayoutSpecThatFits:maxSize];
   }
 
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
-  overlaySpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
+  overlaySpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
 
   return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[overlaySpec]];
 }
 
-- (ASLayoutSpec*)defaultLayoutSpecThatFits:(ASSizeRange)constrainedSize
+- (ASLayoutSpec*)defaultLayoutSpecThatFits:(CGSize)maxSize
 {
-  _scrubberNode.preferredFrameSize = CGSizeMake(constrainedSize.max.width, 44.0);
+  _scrubberNode.preferredFrameSize = CGSizeMake(maxSize.width, 44.0);
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;
@@ -521,12 +558,14 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateScrubberThumbTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbTint:)];
     _delegateFlags.delegateScrubberThumbImage = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbImage:)];
     _delegateFlags.delegateTimeLabelAttributes = [_delegate respondsToSelector:@selector(videoPlayerNodeTimeLabelAttributes:timeLabelType:)];
-    _delegateFlags.delegateLayoutSpecForControls = [_delegate respondsToSelector:@selector(videoPlayerNodeLayoutSpec:forControls:forConstrainedSize:)];
+    _delegateFlags.delegateLayoutSpecForControls = [_delegate respondsToSelector:@selector(videoPlayerNodeLayoutSpec:forControls:forMaximumSize:)];
     _delegateFlags.delegateVideoNodeDidPlayToTime = [_delegate respondsToSelector:@selector(videoPlayerNode:didPlayToTime:)];
     _delegateFlags.delegateVideoNodeWillChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:willChangeVideoNodeState:toVideoNodeState:)];
     _delegateFlags.delegateVideoNodePlaybackDidFinish = [_delegate respondsToSelector:@selector(videoPlayerNodeDidPlayToEnd:)];
     _delegateFlags.delegateVideoNodeShouldChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:shouldChangeVideoNodeStateTo:)];
     _delegateFlags.delegateTimeLabelAttributedString = [_delegate respondsToSelector:@selector(videoPlayerNode:timeStringForTimeLabelType:forTime:)];
+    _delegateFlags.delegatePlaybackButtonTint = [_delegate respondsToSelector:@selector(videoPlayerNodePlaybackButtonTint:)];
+    _delegateFlags.delegateVideoNodeTapped = [_delegate respondsToSelector:@selector(videoPlayerNodeWasTapped:)];
   }
 }
 

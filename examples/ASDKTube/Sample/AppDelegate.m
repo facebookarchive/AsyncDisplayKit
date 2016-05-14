@@ -10,18 +10,36 @@
  */
 
 #import "AppDelegate.h"
+#import "WindowWithStatusBarUnderlay.h"
+#import "Utilities.h"
+#import "VideoFeedNodeController.h"
 
-#import "ViewController.h"
 
 @implementation AppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-  self.window.backgroundColor = [UIColor whiteColor];
-  self.window.rootViewController = [[ViewController alloc] init];
-  [self.window makeKeyAndVisible];
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+
+  // this UIWindow subclass is neccessary to make the status bar opaque
+  _window                  = [[WindowWithStatusBarUnderlay alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+  _window.backgroundColor  = [UIColor whiteColor];
+
+
+  VideoFeedNodeController *asdkHomeFeedVC      = [[VideoFeedNodeController alloc] init];
+  UINavigationController *asdkHomeFeedNavCtrl  = [[UINavigationController alloc] initWithRootViewController:asdkHomeFeedVC];
+
+
+  _window.rootViewController = asdkHomeFeedNavCtrl;
+  [_window makeKeyAndVisible];
+
+  // Nav Bar appearance
+  NSDictionary *attributes = @{NSForegroundColorAttributeName:[UIColor whiteColor]};
+  [[UINavigationBar appearance] setTitleTextAttributes:attributes];
+  [[UINavigationBar appearance] setBarTintColor:[UIColor lighOrangeColor]];
+  [[UINavigationBar appearance] setTranslucent:NO];
+
+  [application setStatusBarStyle:UIStatusBarStyleLightContent];
+
+
   return YES;
 }
-
 @end

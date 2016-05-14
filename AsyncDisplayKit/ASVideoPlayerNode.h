@@ -71,12 +71,12 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract Delegate method invoked in layoutSpecThatFits:
  * @param videoPlayer
  * @param controls - Dictionary of controls which are used in videoPlayer; Dictionary keys are ASVideoPlayerNodeControlType
- * @param constrainedSize - ASSizeRange for ASVideoPlayerNode
+ * @param maxSize - Maximum size for ASVideoPlayerNode
  * @discussion - Developer can layout whole ASVideoPlayerNode as he wants. ASVideoNode is locked and it can't be changed
  */
 - (ASLayoutSpec *)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer
                                 forControls:(NSDictionary *)controls
-                         forConstrainedSize:(ASSizeRange)constrainedSize;
+                             forMaximumSize:(CGSize)maxSize;
 
 #pragma mark Text delegate methods
 /**
@@ -95,8 +95,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (UIColor *)videoPlayerNodeScrubberThumbTint:(ASVideoPlayerNode *)videoPlayer;
 - (UIImage *)videoPlayerNodeScrubberThumbImage:(ASVideoPlayerNode *)videoPlayer;
 
+#pragma mark - Playback button delegate methods
+- (UIColor *)videoPlayerNodePlaybackButtonTint:(ASVideoPlayerNode *)videoPlayer;
+
 
 #pragma mark ASVideoNodeDelegate proxy methods
+/**
+ * @abstract Delegate method invoked when ASVideoPlayerNode playback time is taped.
+ * @param videoPlayerNode The ASVideoPlayerNode that was tapped.
+ */
+- (void)videoPlayerNodeWasTapped:(ASVideoPlayerNode *)videoPlayer;
 /**
  * @abstract Delegate method invoked when ASVideoNode playback time is updated.
  * @param videoPlayerNode The video node that was tapped.
