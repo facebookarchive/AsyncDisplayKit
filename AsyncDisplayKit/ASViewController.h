@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASVisibilityProtocols.h>
 
 @class ASTraitCollection;
 
@@ -16,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitCollectionBlock)(UITraitCollection *traitCollection);
 typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(CGSize windowSize);
 
-@interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController
+@interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController <ASVisibilityDepth>
 
 - (instancetype)initWithNode:(DisplayNodeType)node NS_DESIGNATED_INITIALIZER;
 
