@@ -95,6 +95,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (UIColor *)videoPlayerNodeScrubberThumbTint:(ASVideoPlayerNode *)videoPlayer;
 - (UIImage *)videoPlayerNodeScrubberThumbImage:(ASVideoPlayerNode *)videoPlayer;
 
+#pragma mark - Playback button delegate methods
+- (UIColor *)videoPlayerNodePlaybackButtonTint:(ASVideoPlayerNode *)videoPlayer;
+
 
 #pragma mark ASVideoNodeDelegate proxy methods
 /**

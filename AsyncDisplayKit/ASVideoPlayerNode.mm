@@ -7,6 +7,7 @@
 //
 
 #import "ASVideoPlayerNode.h"
+#import "ASDefaultPlaybackButton.h"
 
 static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
@@ -18,6 +19,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   struct {
     unsigned int delegateNeededControls:1;
+    unsigned int delegatePlaybackButtonTint:1;
     unsigned int delegateScrubberMaximumTrackTintColor:1;
     unsigned int delegateScrubberMinimumTrackTintColor:1;
     unsigned int delegateScrubberThumbTintColor:1;
@@ -40,7 +42,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   NSMutableDictionary *_cachedControls;
 
-  ASControlNode *_playbackButtonNode;
+  ASDefaultPlaybackButton *_playbackButtonNode;
   ASTextNode  *_elapsedTextNode;
   ASTextNode  *_durationTextNode;
   ASDisplayNode *_scrubberNode;
@@ -213,9 +215,13 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)createPlaybackButton
 {
   if (_playbackButtonNode == nil) {
-    _playbackButtonNode = [[ASControlNode alloc] init];
-    _playbackButtonNode.preferredFrameSize = CGSizeMake(20.0, 20.0);
-    _playbackButtonNode.backgroundColor  = [UIColor redColor];
+    _playbackButtonNode = [[ASDefaultPlaybackButton alloc] init];
+    _playbackButtonNode.preferredFrameSize = CGSizeMake(16.0, 22.0);
+    if (_delegateFlags.delegatePlaybackButtonTint) {
+      _playbackButtonNode.tintColor = [_delegate videoPlayerNodePlaybackButtonTint:self];
+    } else {
+      _playbackButtonNode.tintColor = [UIColor whiteColor];
+    }
     [_playbackButtonNode addTarget:self action:@selector(playbackButtonTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
     [_cachedControls setObject:_playbackButtonNode forKey:@(ASVideoPlayerNodeControlTypePlaybackButton)];
   }
@@ -337,6 +343,12 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _duration = _videoNode.currentItem.duration;
     [self updateDurationTimeLabel];
   }
+
+  if (toState == ASVideoNodePlayerStatePlaying) {
+    _playbackButtonNode.buttonType = ASDefaultPlaybackButtonTypePause;
+  } else {
+    _playbackButtonNode.buttonType = ASDefaultPlaybackButtonTypePlay;
+  }
 }
 
 - (BOOL)videoNode:(ASVideoNode *)videoNode shouldChangePlayerStateTo:(ASVideoNodePlayerState)state
@@ -381,10 +393,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_videoNode.playerState == ASVideoNodePlayerStatePlaying) {
     [_videoNode pause];
-    _playbackButtonNode.backgroundColor = [UIColor greenColor];
   } else {
     [_videoNode play];
-    _playbackButtonNode.backgroundColor = [UIColor redColor];
   }
 }
 
@@ -527,6 +537,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateVideoNodePlaybackDidFinish = [_delegate respondsToSelector:@selector(videoPlayerNodeDidPlayToEnd:)];
     _delegateFlags.delegateVideoNodeShouldChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:shouldChangeVideoNodeStateTo:)];
     _delegateFlags.delegateTimeLabelAttributedString = [_delegate respondsToSelector:@selector(videoPlayerNode:timeStringForTimeLabelType:forTime:)];
+    _delegateFlags.delegatePlaybackButtonTint = [_delegate respondsToSelector:@selector(videoPlayerNodePlaybackButtonTint:)];
   }
 }
 

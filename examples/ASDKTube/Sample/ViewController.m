@@ -99,7 +99,7 @@
   return options;
 }
 
-- (ASLayoutSpec *)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer
+/*- (ASLayoutSpec *)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer
                                 forControls:(NSDictionary *)controls
                          forConstrainedSize:(ASSizeRange)constrainedSize
 {
@@ -166,6 +166,6 @@
 
 
   return mainVerticalStack;
-}
+}*/
 
 @end
