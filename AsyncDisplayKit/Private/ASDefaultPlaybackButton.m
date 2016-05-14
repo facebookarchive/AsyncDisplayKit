@@ -38,9 +38,9 @@
 - (nullable id<NSObject>)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
   return @{
-           @"buttonType" : [NSNumber numberWithInt:_buttonType],
-           @"color" : self.tintColor
-           };
+    @"buttonType" : [NSNumber numberWithInt:_buttonType],
+    @"color" : self.tintColor
+  };
 }
 
 + (void)drawRect:(CGRect)bounds withParameters:(id<NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing

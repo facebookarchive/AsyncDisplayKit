@@ -58,6 +58,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   BOOL _muted;
   int32_t _periodicTimeObserverTimescale;
   NSString *_gravity;
+
+  UIColor *_defaultControlsColor;
 }
 
 @end
@@ -105,6 +107,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)privateInit
 {
 
+  _defaultControlsColor = [UIColor whiteColor];
   _cachedControls = [[NSMutableDictionary alloc] init];
 
   _videoNode = [[ASVideoNode alloc] init];
@@ -220,7 +223,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     if (_delegateFlags.delegatePlaybackButtonTint) {
       _playbackButtonNode.tintColor = [_delegate videoPlayerNodePlaybackButtonTint:self];
     } else {
-      _playbackButtonNode.tintColor = [UIColor whiteColor];
+      _playbackButtonNode.tintColor = _defaultControlsColor;
     }
     [_playbackButtonNode addTarget:self action:@selector(playbackButtonTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
     [_cachedControls setObject:_playbackButtonNode forKey:@(ASVideoPlayerNodeControlTypePlaybackButton)];
@@ -322,7 +325,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   } else {
     options = @{
                 NSFontAttributeName : [UIFont systemFontOfSize:12.0],
-                NSForegroundColorAttributeName: [UIColor whiteColor]
+                NSForegroundColorAttributeName: _defaultControlsColor
                 };
   }
 
