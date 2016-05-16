@@ -16,7 +16,7 @@
 {
   ASPagerFlowLayout *_flowLayout;
   ASPagerNodeProxy *_proxy;
-  __weak id <ASPagerNodeDataSource> _pagerDataSource;
+  __weak id <ASPagerDataSource> _pagerDataSource;
   BOOL _pagerDataSourceImplementsNodeBlockAtIndex;
   BOOL _pagerDataSourceImplementsConstrainedSizeForNode;
 }
@@ -111,12 +111,12 @@
 
 #pragma mark - Data Source Proxy
 
-- (id <ASPagerNodeDataSource>)dataSource
+- (id <ASPagerDataSource>)dataSource
 {
   return _pagerDataSource;
 }
 
-- (void)setDataSource:(id <ASPagerNodeDataSource>)pagerDataSource
+- (void)setDataSource:(id <ASPagerDataSource>)pagerDataSource
 {
   if (pagerDataSource != _pagerDataSource) {
     _pagerDataSource = pagerDataSource;

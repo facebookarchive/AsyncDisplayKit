@@ -61,7 +61,16 @@ typedef void(^ASImageCacherCompletion)(id <ASImageContainerProtocol> _Nullable i
 
 @end
 
+/**
+ @param image The image that was downloaded, if the image could be successfully downloaded; nil otherwise.
+ @param error An error describing why the download of `URL` failed, if the download failed; nil otherwise.
+ @param downloadIdentifier The identifier for the download task that completed.
+ */
 typedef void(^ASImageDownloaderCompletion)(id <ASImageContainerProtocol> _Nullable image, NSError * _Nullable error, id _Nullable downloadIdentifier);
+
+/**
+ @param progress The progress of the download, in the range of (0.0, 1.0), inclusive.
+ */
 typedef void(^ASImageDownloaderProgress)(CGFloat progress);
 typedef void(^ASImageDownloaderProgressImage)(UIImage *progressImage, CGFloat progress, id _Nullable downloadIdentifier);
 
@@ -98,10 +107,7 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
  @param URL The URL of the image to download.
  @param callbackQueue The queue to call `downloadProgressBlock` and `completion` on.
  @param downloadProgress The block to be invoked when the download of `URL` progresses.
- @param progress The progress of the download, in the range of (0.0, 1.0), inclusive.
  @param completion The block to be invoked when the download has completed, or has failed.
- @param image The image that was downloaded, if the image could be successfully downloaded; nil otherwise.
- @param error An error describing why the download of `URL` failed, if the download failed; nil otherwise.
  @discussion This method is likely to be called on the main thread, so any custom implementations should make sure to background any expensive download operations.
  @result An opaque identifier to be used in canceling the download, via `cancelImageDownloadForIdentifier:`. You must
  retain the identifier if you wish to use it later.
@@ -109,7 +115,7 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
 - (nullable id)downloadImageWithURL:(NSURL *)URL
                       callbackQueue:(dispatch_queue_t)callbackQueue
                    downloadProgress:(nullable ASImageDownloaderProgress)downloadProgress
-                         completion:(nullable ASImageDownloaderCompletion)completion;
+                         completion:(ASImageDownloaderCompletion)completion;
 
 
 /**

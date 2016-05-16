@@ -67,7 +67,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   NSArray *_exclusionPaths;
 
-  NSAttributedString *_composedTruncationString;
+  NSAttributedString *_composedTruncationText;
 
   NSString *_highlightedLinkAttributeName;
   id _highlightedLinkAttributeValue;
@@ -105,7 +105,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     self.needsDisplayOnBoundsChange = YES;
 
     _truncationMode = NSLineBreakByWordWrapping;
-    _composedTruncationString = DefaultTruncationAttributedString();
+    _composedTruncationText = DefaultTruncationAttributedString();
 
     // The common case is for a text node to be non-opaque and blended over some background.
     self.opaque = NO;
@@ -158,8 +158,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (NSString *)description
 {
-  NSString *plainString = [[_attributedString string] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-  NSString *truncationString = [_composedTruncationString string];
+  NSString *plainString = [[_attributedText string] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+  NSString *truncationString = [_composedTruncationText string];
   if (plainString.length > 50)
     plainString = [[plainString substringToIndex:50] stringByAppendingString:@"\u2026"];
   return [NSString stringWithFormat:@"<%@: %p; text = \"%@\"; truncation string = \"%@\"; frame = %@; renderer = %p>", self.class, self, plainString, truncationString, self.nodeLoaded ? NSStringFromCGRect(self.layer.frame) : nil, _renderer];
@@ -237,8 +237,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 - (ASTextKitAttributes)_rendererAttributes
 {
   return {
-    .attributedString = _attributedString,
-    .truncationAttributedString = _composedTruncationString,
+    .attributedString = _attributedText,
+    .truncationAttributedString = _composedTruncationText,
     .lineBreakMode = _truncationMode,
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
@@ -340,10 +340,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   [self setNeedsDisplay];
   
   CGSize size = [[self _renderer] size];
-  if (self.attributedString.length > 0) {
+  if (_attributedText.length > 0) {
     CGFloat screenScale = ASScreenScale();
-    self.ascender = round([[_attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
-    self.descender = round([[_attributedString attribute:NSFontAttributeName atIndex:_attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+    self.ascender = round([[_attributedText attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
+    self.descender = round([[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
     if (_renderer.currentScaleFactor > 0 && _renderer.currentScaleFactor < 1.0) {
       // while not perfect, this is a good estimate of what the ascender of the scaled font will be.
       self.ascender *= _renderer.currentScaleFactor;
@@ -355,28 +355,28 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Modifying User Text
 
-- (void)setAttributedString:(NSAttributedString *)attributedString
+- (void)setAttributedText:(NSAttributedString *)attributedText
 {
-  if (attributedString == nil) {
-    attributedString = [[NSAttributedString alloc] initWithString:@"" attributes:nil];
+  if (attributedText == nil) {
+    attributedText = [[NSAttributedString alloc] initWithString:@"" attributes:nil];
   }
 
-  if (ASObjectIsEqual(attributedString, _attributedString)) {
+  if (ASObjectIsEqual(attributedText, _attributedText)) {
     return;
   }
 
-  _attributedString = ASCleanseAttributedStringOfCoreTextAttributes(attributedString);
+  _attributedText = ASCleanseAttributedStringOfCoreTextAttributes(attributedText);
     
-  if (_attributedString.length > 0) {
+  if (_attributedText.length > 0) {
     CGFloat screenScale = ASScreenScale();
-    self.ascender = round([[_attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
-    self.descender = round([[_attributedString attribute:NSFontAttributeName atIndex:_attributedString.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+    self.ascender = round([[_attributedText attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
+    self.descender = round([[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
   }
 
   // Sync the truncation string with attributes from the updated _attributedString
   // Without this, the size calculation of the text with truncation applied will
-  // not take into account the attributes of attributedString in the last line
-  [self _updateComposedTruncationString];
+  // not take into account the attributes of attributedText in the last line
+  [self _updateComposedTruncationText];
   
   // We need an entirely new renderer
   [self _invalidateRenderer];
@@ -386,10 +386,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   [self setNeedsDisplay];
 
-  self.accessibilityLabel = _attributedString.string;
+  self.accessibilityLabel = _attributedText.string;
 
   // We're an accessibility element by default if there is a string.
-  self.isAccessibilityElement = _attributedString.length != 0;
+  self.isAccessibilityElement = _attributedText.length != 0;
 }
 
 #pragma mark - Text Layout
@@ -470,7 +470,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 {
   ASTextKitRenderer *renderer = [self _renderer];
   NSRange visibleRange = renderer.visibleRanges[0];
-  NSAttributedString *attributedString = _attributedString;
+  NSAttributedString *attributedString = _attributedText;
   NSRange clampedRange = NSIntersectionRange(visibleRange, NSMakeRange(0, attributedString.length));
 
   // Check in a 9-point region around the actual touch point so we make sure
@@ -1023,14 +1023,14 @@ static NSAttributedString *DefaultTruncationAttributedString()
   return defaultTruncationAttributedString;
 }
 
-- (void)setTruncationAttributedString:(NSAttributedString *)truncationAttributedString
+- (void)setTruncationAttributedText:(NSAttributedString *)truncationAttributedText
 {
-  if (ASObjectIsEqual(_truncationAttributedString, truncationAttributedString)) {
+  if (ASObjectIsEqual(_truncationAttributedText, truncationAttributedText)) {
     return;
   }
 
-  _truncationAttributedString = [truncationAttributedString copy];
-  [self _invalidateTruncationString];
+  _truncationAttributedText = [truncationAttributedText copy];
+  [self _invalidateTruncationText];
 }
 
 - (void)setAdditionalTruncationMessage:(NSAttributedString *)additionalTruncationMessage
@@ -1040,7 +1040,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
   }
 
   _additionalTruncationMessage = [additionalTruncationMessage copy];
-  [self _invalidateTruncationString];
+  [self _invalidateTruncationText];
 }
 
 - (void)setTruncationMode:(NSLineBreakMode)truncationMode
@@ -1055,7 +1055,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
 - (BOOL)isTruncated
 {
   NSRange visibleRange = [self _renderer].visibleRanges[0];
-  return visibleRange.length < _attributedString.length;
+  return visibleRange.length < _attributedText.length;
 }
 
 - (void)setPointSizeScaleFactors:(NSArray *)pointSizeScaleFactors
@@ -1082,14 +1082,14 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 #pragma mark - Truncation Message
 
-- (void)_updateComposedTruncationString
+- (void)_updateComposedTruncationText
 {
-  _composedTruncationString = [self _prepareTruncationStringForDrawing:[self _composedTruncationString]];
+  _composedTruncationText = [self _prepareTruncationStringForDrawing:[self _composedTruncationText]];
 }
 
-- (void)_invalidateTruncationString
+- (void)_invalidateTruncationText
 {
-  [self _updateComposedTruncationString];
+  [self _updateComposedTruncationText];
   [self _invalidateRenderer];
   [self setNeedsDisplay];
 }
@@ -1111,7 +1111,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
   NSUInteger additionalTruncationMessageLength = _additionalTruncationMessage.length;
   // We get the location of the truncation token, then add the length of the
   // truncation attributed string +1 for the space between.
-  NSRange range = NSMakeRange(truncationTokenIndex + _truncationAttributedString.length + 1, additionalTruncationMessageLength);
+  NSRange range = NSMakeRange(truncationTokenIndex + _truncationAttributedText.length + 1, additionalTruncationMessageLength);
   return range;
 }
 
@@ -1120,24 +1120,24 @@ static NSAttributedString *DefaultTruncationAttributedString()
  * additional truncation message and a truncation attributed string, they will
  * be properly composed.
  */
-- (NSAttributedString *)_composedTruncationString
+- (NSAttributedString *)_composedTruncationText
 {
   //If we have neither return the default
-  if (!_additionalTruncationMessage && !_truncationAttributedString) {
-    return _composedTruncationString;
+  if (!_additionalTruncationMessage && !_truncationAttributedText) {
+    return _composedTruncationText;
   }
   // Short circuit if we only have one or the other.
   if (!_additionalTruncationMessage) {
-    return _truncationAttributedString;
+    return _truncationAttributedText;
   }
-  if (!_truncationAttributedString) {
+  if (!_truncationAttributedText) {
     return _additionalTruncationMessage;
   }
 
   // If we've reached this point, both _additionalTruncationMessage and
   // _truncationAttributedString are present.  Compose them.
 
-  NSMutableAttributedString *newComposedTruncationString = [[NSMutableAttributedString alloc] initWithAttributedString:_truncationAttributedString];
+  NSMutableAttributedString *newComposedTruncationString = [[NSMutableAttributedString alloc] initWithAttributedString:_truncationAttributedText];
   [newComposedTruncationString replaceCharactersInRange:NSMakeRange(newComposedTruncationString.length, 0) withString:@" "];
   [newComposedTruncationString appendAttributedString:_additionalTruncationMessage];
   return newComposedTruncationString;
@@ -1153,9 +1153,9 @@ static NSAttributedString *DefaultTruncationAttributedString()
   truncationString = ASCleanseAttributedStringOfCoreTextAttributes(truncationString);
   NSMutableAttributedString *truncationMutableString = [truncationString mutableCopy];
   // Grab the attributes from the full string
-  if (_attributedString.length > 0) {
-    NSAttributedString *originalString = _attributedString;
-    NSInteger originalStringLength = _attributedString.length;
+  if (_attributedText.length > 0) {
+    NSAttributedString *originalString = _truncationAttributedText;
+    NSInteger originalStringLength = _truncationAttributedText.length;
     // Add any of the original string's attributes to the truncation string,
     // but don't overwrite any of the truncation string's attributes
     NSDictionary *originalStringAttributes = [originalString attributesAtIndex:originalStringLength-1 effectiveRange:NULL];
@@ -1167,6 +1167,30 @@ static NSAttributedString *DefaultTruncationAttributedString()
      }];
   }
   return truncationMutableString;
+}
+
+@end
+
+@implementation ASTextNode (Deprecated)
+
+- (void)setAttributedString:(NSAttributedString *)attributedString
+{
+  self.attributedText = attributedString;
+}
+
+- (NSAttributedString *)attributedString
+{
+  return self.attributedText;
+}
+
+- (void)setTruncationAttributedString:(NSAttributedString *)truncationAttributedString
+{
+  self.truncationAttributedText = truncationAttributedString;
+}
+
+- (NSAttributedString *)truncationAttributedString
+{
+  return self.truncationAttributedText;
 }
 
 @end

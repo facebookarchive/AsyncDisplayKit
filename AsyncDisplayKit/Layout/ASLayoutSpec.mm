@@ -17,6 +17,7 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASThread.h"
+#import "ASTraitCollection.h"
 
 #import <objc/runtime.h>
 #import <vector>
@@ -184,6 +185,11 @@
   return ASEnvironmentStatePropagationEnabled();
 }
 
+- (BOOL)supportsTraitsCollectionPropagation
+{
+  return ASEnvironmentStateTraitCollectionPropagationEnabled();
+}
+
 - (void)propagateUpLayoutable:(id<ASLayoutable>)layoutable
 {
   if ([layoutable isKindOfClass:[ASLayoutSpec class]]) {
@@ -193,8 +199,19 @@
   }
 }
 
+- (ASEnvironmentTraitCollection)environmentTraitCollection
+{
+  return _environmentState.traitCollection;
+}
+
 ASEnvironmentLayoutOptionsForwarding
 ASEnvironmentLayoutExtensibilityForwarding
+
+- (ASTraitCollection *)asyncTraitCollection
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:_environmentState.traitCollection];
+}
 
 @end
 

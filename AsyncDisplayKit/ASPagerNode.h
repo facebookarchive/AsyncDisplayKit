@@ -11,7 +11,8 @@
 @class ASPagerNode;
 @class ASPagerFlowLayout;
 
-@protocol ASPagerNodeDataSource <NSObject>
+#define ASPagerNodeDataSource ASPagerDataSource
+@protocol ASPagerDataSource <NSObject>
 
 /**
  * This method replaces -collectionView:numberOfItemsInSection:
@@ -65,25 +66,30 @@
 
 @end
 
+@protocol ASPagerDelegate <ASCollectionDelegate>
+
+@end
+
 @interface ASPagerNode : ASCollectionNode
 
-// Configures a default horizontal, paging flow layout with 0 inter-item spacing.
+/// Configures a default horizontal, paging flow layout with 0 inter-item spacing.
 - (instancetype)init;
 
-// Initializer with custom-configured flow layout properties.
+/// Initializer with custom-configured flow layout properties.
 - (instancetype)initWithCollectionViewLayout:(ASPagerFlowLayout *)flowLayout;
 
-// Data Source is required, and uses a different protocol from ASCollectionNode.
-- (void)setDataSource:(id <ASPagerNodeDataSource>)dataSource;
-- (id <ASPagerNodeDataSource>)dataSource;
+/// Data Source is required, and uses a different protocol from ASCollectionNode.
+- (void)setDataSource:(id <ASPagerDataSource>)dataSource;
+- (id <ASPagerDataSource>)dataSource;
 
 // Delegate is optional, and uses the same protocol as ASCollectionNode.
 // This includes UIScrollViewDelegate as well as most methods from UICollectionViewDelegate, like willDisplay...
-@property (nonatomic, weak) id <ASCollectionDelegate> delegate;
+@property (nonatomic, weak) id <ASPagerDelegate> delegate;
 
-// The underlying ASCollectionView object.
+/// The underlying ASCollectionView object.
 @property (nonatomic, readonly) ASCollectionView *view;
 
+/// Scroll the contents of the receiver to ensure that the page is visible.
 - (void)scrollToPageAtIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end

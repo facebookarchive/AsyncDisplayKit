@@ -13,10 +13,14 @@
 #import "ASDisplayNode+Beta.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
+#define AS_LOG_VISIBILITY_CHANGES 0
+
 @implementation ASViewController
 {
   BOOL _ensureDisplayed;
   BOOL _automaticallyAdjustRangeModeBasedOnViewEvents;
+  BOOL _parentManagesVisibilityDepth;
+  NSInteger _visibilityDepth;
 }
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -81,21 +85,54 @@
   [super viewDidLayoutSubviews];
 }
 
+ASVisibilityDidMoveToParentViewController;
+
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
   [_node measureWithSizeRange:[self nodeConstrainedSize]];
   [_node recursivelyFetchData];
-    
-  [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeFull];
+  
+  if (_parentManagesVisibilityDepth == NO) {
+    [self setVisibilityDepth:0];
+  }
 }
 
-- (void)viewDidDisappear:(BOOL)animated
+ASVisibilitySetVisibilityDepth;
+
+ASVisibilityViewDidDisappearImplementation;
+
+ASVisibilityDepthImplementation;
+
+- (void)visibilityDepthDidChange
 {
-  [super viewDidDisappear:animated];
-  
-  [self updateCurrentRangeModeWithModeIfPossible:ASLayoutRangeModeMinimum];
+  ASLayoutRangeMode rangeMode = ASLayoutRangeModeForVisibilityDepth(self.visibilityDepth);
+#if AS_LOG_VISIBILITY_CHANGES
+  NSString *rangeModeString;
+  switch (rangeMode) {
+    case ASLayoutRangeModeMinimum:
+      rangeModeString = @"Minimum";
+      break;
+      
+    case ASLayoutRangeModeFull:
+      rangeModeString = @"Full";
+      break;
+      
+    case ASLayoutRangeModeVisibleOnly:
+      rangeModeString = @"Visible Only";
+      break;
+      
+    case ASLayoutRangeModeLowMemory:
+      rangeModeString = @"Low Memory";
+      break;
+      
+    default:
+      break;
+  }
+  NSLog(@"Updating visibility of:%@ to: %@ (visibility depth: %d)", self, rangeModeString, self.visibilityDepth);
+#endif
+  [self updateCurrentRangeModeWithModeIfPossible:rangeMode];
 }
 
 #pragma mark - Automatic range mode
@@ -113,7 +150,9 @@
 - (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
 {
   if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
-  if (![_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]) { return; }
+  if (![_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]) {
+    return;
+  }
 
   id<ASRangeControllerUpdateRangeProtocol> updateRangeNode = (id<ASRangeControllerUpdateRangeProtocol>)_node;
   [updateRangeNode updateCurrentRangeWithMode:rangeMode];

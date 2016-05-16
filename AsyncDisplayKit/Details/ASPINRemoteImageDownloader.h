@@ -9,8 +9,12 @@
 #import <Foundation/Foundation.h>
 #import "ASImageProtocols.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface ASPINRemoteImageDownloader : NSObject <ASImageCacheProtocol, ASImageDownloaderProtocol>
 
-+ (instancetype)sharedDownloader;
++ (ASPINRemoteImageDownloader *)sharedDownloader;
 
 @end
+
+NS_ASSUME_NONNULL_END

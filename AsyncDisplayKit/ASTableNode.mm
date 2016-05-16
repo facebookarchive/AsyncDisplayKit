@@ -6,6 +6,7 @@
 //  Copyright © 2015 Facebook. All rights reserved.
 //
 
+#import "ASEnvironmentInternal.h"
 #import "ASFlowLayoutController.h"
 #import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
@@ -20,6 +21,10 @@
 @end
 
 @interface ASTableNode ()
+{
+  ASDN::RecursiveMutex _environmentStateLock;
+}
+
 @property (nonatomic, strong) _ASTablePendingState *pendingState;
 @end
 
@@ -157,5 +162,7 @@
   [super clearFetchedData];
   [self.view clearFetchedData];
 }
+
+ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 
 @end
