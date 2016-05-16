@@ -101,6 +101,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark ASVideoNodeDelegate proxy methods
 /**
+ * @abstract Delegate method invoked when ASVideoPlayerNode playback time is taped.
+ * @param videoPlayerNode The ASVideoPlayerNode that was tapped.
+ */
+- (void)videoPlayerNodeWasTapped:(ASVideoPlayerNode *)videoPlayer;
+/**
  * @abstract Delegate method invoked when ASVideoNode playback time is updated.
  * @param videoPlayerNode The video node that was tapped.
  * @param second current playback time.

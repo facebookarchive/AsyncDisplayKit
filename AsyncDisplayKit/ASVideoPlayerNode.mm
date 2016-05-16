@@ -31,6 +31,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateVideoNodeWillChangeState:1;
     unsigned int delegateVideoNodeShouldChangeState:1;
     unsigned int delegateVideoNodePlaybackDidFinish:1;
+    unsigned int delegateVideoNodeTapped:1;
   } _delegateFlags;
   
   NSURL *_url;
@@ -393,10 +394,14 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode
 {
-  if (videoNode.playerState == ASVideoNodePlayerStatePlaying) {
-    [videoNode pause];
+  if (_delegateFlags.delegateVideoNodeTapped) {
+    [_delegate videoPlayerNodeWasTapped:self];
   } else {
-    [videoNode play];
+    if (videoNode.playerState == ASVideoNodePlayerStatePlaying) {
+      [videoNode pause];
+    } else {
+      [videoNode play];
+    }
   }
 }
 
@@ -560,6 +565,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateVideoNodeShouldChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:shouldChangeVideoNodeStateTo:)];
     _delegateFlags.delegateTimeLabelAttributedString = [_delegate respondsToSelector:@selector(videoPlayerNode:timeStringForTimeLabelType:forTime:)];
     _delegateFlags.delegatePlaybackButtonTint = [_delegate respondsToSelector:@selector(videoPlayerNodePlaybackButtonTint:)];
+    _delegateFlags.delegateVideoNodeTapped = [_delegate respondsToSelector:@selector(videoPlayerNodeWasTapped:)];
   }
 }
 
