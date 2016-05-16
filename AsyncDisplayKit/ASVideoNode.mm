@@ -349,7 +349,8 @@ static NSString * const kStatus = @"status";
   {
   ASDN::MutexLocker l(_videoLock);
   AVAsset *asset = self.asset;
-  NSArray<NSString *> *requestedKeys = @[ @"playable" ];
+  NSArray<NSString *> *requestedKeys = @[@"playable"];
+  self.playerState = ASVideoNodePlayerStateLoading;
   [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
     ASPerformBlockOnMainThread(^{
       [self prepareToPlayAsset:asset withKeys:requestedKeys];
