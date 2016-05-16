@@ -5,12 +5,13 @@ permalink: /docs/control-node.html
 next: button-node.html
 ---
 
-ASControlNode is the ASDK equivalent to UIControl.  You don't create instantce of ASControlNode directly.  Instead, you can use it as a subclassing point when creating controls of your own.  In fact, <a href = "#">ASTextNode</a> and <a href = "#">ASImageNode</a> are subclasses of ASControlNode which means they can easily be used in the same way you would normally use a UIButton.
+ASControlNode is the ASDK equivalent to UIControl.  You don't create instances of ASControlNode directly.  Instead, you can use it as a subclassing point when creating controls of your own.  In fact, <a href = "/docs/text-node.html">ASTextNode</a>, <a href = "/docs/image-node.html">ASImageNode</a>, <href = "#">ASVideoNode</a> and <a href = "/docs/video-node.html">ASMapNode</a> are all subclasses of ASControlNode.
+
+This fact is especially useful when it comes to image and text nodes.  Having the ability to add target-action pairs means that you can use any text or image node as a button without having to rely on creating gesture recognizers, as you would with text in UIKit, or creating extraneous views as you might when using UIButton.
 
 ### Control State
 
 Like UIControl, ASControlNode has a state which defines its appearance and ability to support user interactions.  Its state can be one of any state defined by `ASControlState`.
-
 
 <div class = "highlight-group">
 <span class="language-toggle"><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
@@ -55,11 +56,11 @@ typedef NS_OPTIONS(NSUInteger, ASControlNodeEvent)
   /** All events, including system events. */
   ASControlNodeEventAllEvents         = 0xFFFFFFFF
 };
-  </pre>
+</pre>
 </div>
 </div>
 
-Assigning a target and action for these events is done with the same methods as a UIControl, namely using `–addTarget:action:forControlEvents:` or  `–actionsForTarget:forControlEvent:`.
+Assigning a target and action for these events is done with the same methods as a UIControl, namely using `–addTarget:action:forControlEvents:`.
 
 ### Hit Test Slop
 
