@@ -873,7 +873,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // (see _layoutNodes:atIndexPaths:withAnimationOptions:).
     [_editingTransactionQueue addOperationWithBlock:^{
       [_mainSerialQueue performBlockOnMainThread:^{
-        for (NSString *kind in [_completedNodes keyEnumerator]) {
+        for (NSString *kind in _completedNodes) {
           [self _relayoutNodesOfKind:kind];
         }
       }];
