@@ -391,6 +391,15 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
+- (void)videoNodeWasTapped:(ASVideoNode *)videoNode
+{
+  if (videoNode.playerState == ASVideoNodePlayerStatePlaying) {
+    [videoNode pause];
+  } else {
+    [videoNode play];
+  }
+}
+
 #pragma mark - Actions
 - (void)playbackButtonTapped:(ASControlNode*)node
 {
@@ -471,25 +480,35 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 #pragma mark - Layout
 - (ASLayoutSpec*)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _videoNode.preferredFrameSize = constrainedSize.max;
+  CGSize maxSize = constrainedSize.max;
+  if (!CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero)) {
+    maxSize = self.preferredFrameSize;
+  }
+
+  // Prevent crashes through if infinite width or height
+  if (isinf(maxSize.width) || isinf(maxSize.height)) {
+    ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoPlayerNode");
+    maxSize = CGSizeZero;
+  }
+  _videoNode.preferredFrameSize = maxSize;
 
   ASLayoutSpec *layoutSpec;
 
   if (_delegateFlags.delegateLayoutSpecForControls) {
-    layoutSpec = [_delegate videoPlayerNodeLayoutSpec:self forControls:_cachedControls forConstrainedSize:constrainedSize];
+    layoutSpec = [_delegate videoPlayerNodeLayoutSpec:self forControls:_cachedControls forMaximumSize:maxSize];
   } else {
-    layoutSpec = [self defaultLayoutSpecThatFits:constrainedSize];
+    layoutSpec = [self defaultLayoutSpecThatFits:maxSize];
   }
 
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
-  overlaySpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
+  overlaySpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
 
   return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[overlaySpec]];
 }
 
-- (ASLayoutSpec*)defaultLayoutSpecThatFits:(ASSizeRange)constrainedSize
+- (ASLayoutSpec*)defaultLayoutSpecThatFits:(CGSize)maxSize
 {
-  _scrubberNode.preferredFrameSize = CGSizeMake(constrainedSize.max.width, 44.0);
+  _scrubberNode.preferredFrameSize = CGSizeMake(maxSize.width, 44.0);
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;
@@ -534,7 +553,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateScrubberThumbTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbTint:)];
     _delegateFlags.delegateScrubberThumbImage = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbImage:)];
     _delegateFlags.delegateTimeLabelAttributes = [_delegate respondsToSelector:@selector(videoPlayerNodeTimeLabelAttributes:timeLabelType:)];
-    _delegateFlags.delegateLayoutSpecForControls = [_delegate respondsToSelector:@selector(videoPlayerNodeLayoutSpec:forControls:forConstrainedSize:)];
+    _delegateFlags.delegateLayoutSpecForControls = [_delegate respondsToSelector:@selector(videoPlayerNodeLayoutSpec:forControls:forMaximumSize:)];
     _delegateFlags.delegateVideoNodeDidPlayToTime = [_delegate respondsToSelector:@selector(videoPlayerNode:didPlayToTime:)];
     _delegateFlags.delegateVideoNodeWillChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:willChangeVideoNodeState:toVideoNodeState:)];
     _delegateFlags.delegateVideoNodePlaybackDidFinish = [_delegate respondsToSelector:@selector(videoPlayerNodeDidPlayToEnd:)];

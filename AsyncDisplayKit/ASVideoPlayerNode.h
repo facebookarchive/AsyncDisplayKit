@@ -71,12 +71,12 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract Delegate method invoked in layoutSpecThatFits:
  * @param videoPlayer
  * @param controls - Dictionary of controls which are used in videoPlayer; Dictionary keys are ASVideoPlayerNodeControlType
- * @param constrainedSize - ASSizeRange for ASVideoPlayerNode
+ * @param maxSize - Maximum size for ASVideoPlayerNode
  * @discussion - Developer can layout whole ASVideoPlayerNode as he wants. ASVideoNode is locked and it can't be changed
  */
 - (ASLayoutSpec *)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer
                                 forControls:(NSDictionary *)controls
-                         forConstrainedSize:(ASSizeRange)constrainedSize;
+                             forMaximumSize:(CGSize)maxSize;
 
 #pragma mark Text delegate methods
 /**
