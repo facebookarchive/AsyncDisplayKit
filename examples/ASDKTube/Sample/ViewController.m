@@ -10,30 +10,72 @@
  */
 
 #import "ViewController.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASVideoPlayerNode.h>
+#import "VideoModel.h"
+#import "VideoContentCell.h"
 
-@interface ViewController()<ASVideoPlayerNodeDelegate>
+@interface ViewController()<ASVideoPlayerNodeDelegate, ASTableDelegate, ASTableDataSource>
 @property (nonatomic, strong) ASVideoPlayerNode *videoPlayerNode;
 @end
 
 @implementation ViewController
+{
+  ASTableNode *_tableNode;
+  NSMutableArray<VideoModel*> *_videoFeedData;
+}
 
 - (instancetype)init
 {
-  if (!(self = [super initWithNode:self.videoPlayerNode])) {
+  _tableNode = [[ASTableNode alloc] init];
+  _tableNode.delegate = self;
+  _tableNode.dataSource = self;
+
+  if (!(self = [super initWithNode:_tableNode])) {
     return nil;
   }
   
   return self;
 }
 
+- (void)loadView
+{
+  [super loadView];
+
+  _videoFeedData = [[NSMutableArray alloc] initWithObjects:[[VideoModel alloc] init], [[VideoModel alloc] init], nil];
+
+  [_tableNode.view reloadData];
+}
+
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
-  
+
   //[self.view addSubnode:self.videoPlayerNode];
   
   //[self.videoPlayerNode setNeedsLayout];
 }
+
+#pragma mark - ASCollectionDelegate - ASCollectionDataSource
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+  return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+  return _videoFeedData.count;
+}
+
+- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  VideoModel *videoObject = [_videoFeedData objectAtIndex:indexPath.row];
+  VideoContentCell *cellNode = [[VideoContentCell alloc] initWithVideoObject:videoObject];
+  return cellNode;
+}
+
+//- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath{
+//  CGFloat fullWidth = [UIScreen mainScreen].bounds.size.width;
+//  return ASSizeRangeMake(CGSizeMake(fullWidth, 0.0), CGSizeMake(fullWidth, 400.0));
+//}
 
 - (ASVideoPlayerNode *)videoPlayerNode;
 {
@@ -57,47 +99,47 @@
 }
 
 #pragma mark - ASVideoPlayerNodeDelegate
-- (NSArray *)videoPlayerNodeNeededControls:(ASVideoPlayerNode *)videoPlayer
-{
-  return @[ @(ASVideoPlayerNodeControlTypePlaybackButton),
-            @(ASVideoPlayerNodeControlTypeElapsedText),
-            @(ASVideoPlayerNodeControlTypeScrubber),
-            @(ASVideoPlayerNodeControlTypeDurationText) ];
-}
-
-- (UIColor *)videoPlayerNodeScrubberMaximumTrackTint:(ASVideoPlayerNode *)videoPlayer
-{
-  return [UIColor colorWithRed:1 green:1 blue:1 alpha:0.3];
-}
-
-- (UIColor *)videoPlayerNodeScrubberMinimumTrackTint:(ASVideoPlayerNode *)videoPlayer
-{
-  return [UIColor whiteColor];
-}
-
-- (UIColor *)videoPlayerNodeScrubberThumbTint:(ASVideoPlayerNode *)videoPlayer
-{
-  return [UIColor whiteColor];
-}
-
-- (NSDictionary *)videoPlayerNodeTimeLabelAttributes:(ASVideoPlayerNode *)videoPlayerNode timeLabelType:(ASVideoPlayerNodeControlType)timeLabelType
-{
-  NSDictionary *options;
-
-  if (timeLabelType == ASVideoPlayerNodeControlTypeElapsedText) {
-    options = @{
-                NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:16.0],
-                NSForegroundColorAttributeName: [UIColor orangeColor]
-                };
-  } else if (timeLabelType == ASVideoPlayerNodeControlTypeDurationText) {
-    options = @{
-                NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:16.0],
-                NSForegroundColorAttributeName: [UIColor redColor]
-                };
-  }
-
-  return options;
-}
+//- (NSArray *)videoPlayerNodeNeededControls:(ASVideoPlayerNode *)videoPlayer
+//{
+//  return @[ @(ASVideoPlayerNodeControlTypePlaybackButton),
+//            @(ASVideoPlayerNodeControlTypeElapsedText),
+//            @(ASVideoPlayerNodeControlTypeScrubber),
+//            @(ASVideoPlayerNodeControlTypeDurationText) ];
+//}
+//
+//- (UIColor *)videoPlayerNodeScrubberMaximumTrackTint:(ASVideoPlayerNode *)videoPlayer
+//{
+//  return [UIColor colorWithRed:1 green:1 blue:1 alpha:0.3];
+//}
+//
+//- (UIColor *)videoPlayerNodeScrubberMinimumTrackTint:(ASVideoPlayerNode *)videoPlayer
+//{
+//  return [UIColor whiteColor];
+//}
+//
+//- (UIColor *)videoPlayerNodeScrubberThumbTint:(ASVideoPlayerNode *)videoPlayer
+//{
+//  return [UIColor whiteColor];
+//}
+//
+//- (NSDictionary *)videoPlayerNodeTimeLabelAttributes:(ASVideoPlayerNode *)videoPlayerNode timeLabelType:(ASVideoPlayerNodeControlType)timeLabelType
+//{
+//  NSDictionary *options;
+//
+//  if (timeLabelType == ASVideoPlayerNodeControlTypeElapsedText) {
+//    options = @{
+//                NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:16.0],
+//                NSForegroundColorAttributeName: [UIColor orangeColor]
+//                };
+//  } else if (timeLabelType == ASVideoPlayerNodeControlTypeDurationText) {
+//    options = @{
+//                NSFontAttributeName : [UIFont fontWithName:@"HelveticaNeue-Medium" size:16.0],
+//                NSForegroundColorAttributeName: [UIColor redColor]
+//                };
+//  }
+//
+//  return options;
+//}
 
 /*- (ASLayoutSpec *)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer
                                 forControls:(NSDictionary *)controls
