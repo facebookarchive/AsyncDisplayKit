@@ -140,7 +140,7 @@
     if (image) {
       [self setNeedsDisplay];
       
-      if ([ASImageNode shouldShowImageScalingOverlay]) {
+      if ([ASImageNode shouldShowImageScalingOverlay] && _debugLabelNode == nil) {
         ASPerformBlockOnMainThread(^{
           _debugLabelNode = [[ASTextNode alloc] init];
           _debugLabelNode.layerBacked = YES;

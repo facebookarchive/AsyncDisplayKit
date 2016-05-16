@@ -262,7 +262,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
     
     // only show tap-able areas for views with 1 or more addTarget:action: pairs
-    if ([ASControlNode enableHitTestDebug]) {
+    if ([ASControlNode enableHitTestDebug] && _debugHighlightOverlay == nil) {
       ASPerformBlockOnMainThread(^{
         // add a highlight overlay node with area of ASControlNode + UIEdgeInsets
         self.clipsToBounds = NO;
