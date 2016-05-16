@@ -41,7 +41,7 @@ Properties of both views and layers are forwarded to nodes and can be easily acc
 <div class = "code">
 	<pre lang="objc" class="objcCode">
 ASDisplayNode *node = [[ASDisplayNode alloc] init];
-node.clipsToBounds = YES; 				        // not .masksToBounds
+node.clipsToBounds = YES;				  // not .masksToBounds
 node.borderColor = [UIColor blueColor];  //layer name when there is no UIView equivalent
 
 NSLog(@"Backing layer: %@", node.layer);
@@ -49,7 +49,7 @@ NSLog(@"Backing layer: %@", node.layer);
 
 	<pre lang="swift" class = "swiftCode hidden">
 let node = ASDisplayNode()
-node.clipsToBounds = true			        // not .masksToBounds
+node.clipsToBounds = true			     // not .masksToBounds
 node.borderColor = UIColor.blueColor()  //layer name when there is no UIView equivalent
 
 print("Backing layer: \(node.layer)")
@@ -71,7 +71,7 @@ In some cases, it is desirable to initialize a node and provide a view to be use
 <div class = "code">
 	<pre lang="objc" class="objcCode">
 ASDisplayNode *node = [ASDisplayNode alloc] initWithViewBlock:^{
-	SomeView *view = [[SomeView alloc] init];
+	SomeView *view  = [[SomeView alloc] init];
 	return view;
 }];
 	</pre>

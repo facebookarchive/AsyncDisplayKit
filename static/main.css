@@ -774,3 +774,8 @@ body {
     padding-bottom: 10px;
     overflow: auto;
 }
+pre {
+    font-family: 'Inconsolata' !important;
+    font-weight: 500;
+    color: #333333;
+}
