@@ -29,7 +29,6 @@
 }
 @property (atomic, readwrite) ASInterfaceState interfaceState;
 @property (atomic, readonly) ASDisplayNode *spinner;
-@property (atomic, readonly) ASImageNode *placeholderImageNode;
 @property (atomic, readwrite) ASDisplayNode *playerNode;
 @property (atomic, readwrite) AVPlayer *player;
 @property (atomic, readwrite) BOOL shouldBePlaying;
@@ -404,6 +403,32 @@
 
   _videoNode.asset = _secondAsset;
   XCTAssertNotEqual(firstImage, _videoNode.placeholderImageNode.image);
+}
+
+- (void)testSettingPlaceholderImageNode
+{
+  _videoNode.asset = _firstAsset;
+  ASImageNode* replacementImageNode = [[ASImageNode alloc] init];
+  _videoNode.placeholderImageNode = replacementImageNode;
+  
+  XCTAssertEqual(_videoNode.placeholderImageNode, replacementImageNode);
+}
+
+- (void)testSettingPlaceholderImageNodeReplacesImageFromAsset
+{
+  UIImage *firstImage = [[UIImage alloc] init];
+  
+  _videoNode.asset = _firstAsset;
+  [_videoNode setVideoPlaceholderImage:firstImage];
+  XCTAssertEqual(firstImage, _videoNode.placeholderImageNode.image);
+  
+  ASImageNode* originalImageNode = _videoNode.placeholderImageNode;
+  ASImageNode* replacementImageNode = [[ASImageNode alloc] init];
+  _videoNode.placeholderImageNode = replacementImageNode;
+  
+  XCTAssertEqual(_videoNode.placeholderImageNode, replacementImageNode);
+  XCTAssertFalse([_videoNode.children containsObject:originalImageNode]);
+  XCTAssertTrue([_videoNode.children containsObject:replacementImageNode]);
 }
 
 - (void)testClearingFetchedContentShouldClearAssetData

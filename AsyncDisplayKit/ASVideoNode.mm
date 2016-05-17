@@ -280,22 +280,10 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(_videoLock);
 
-  if (_placeholderImageNode == nil && image != nil) {
-    _placeholderImageNode = [[ASImageNode alloc] init];
-    _placeholderImageNode.layerBacked = YES;
-    _placeholderImageNode.contentMode = ASContentModeFromVideoGravity(_gravity);
-  }
-
-  _placeholderImageNode.image = image;
-
-  ASPerformBlockOnMainThread(^{
-    ASDN::MutexLocker l(_videoLock);
-
-    if (_placeholderImageNode != nil) {
-      [self insertSubnode:_placeholderImageNode atIndex:0];
-      [self setNeedsLayout];
-    }
-  });
+  ASImageNode* placeholderImageNode = [[ASImageNode alloc] init];
+  placeholderImageNode.image = image;
+  
+  [self setPlaceholderImageNode:placeholderImageNode];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -672,6 +660,26 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(_videoLock);
   return _placeholderImageNode;
+}
+
+- (void)setPlaceholderImageNode:(ASImageNode *)placeholderImageNode
+{
+  ASDN::MutexLocker l(_videoLock);
+  
+  if (_placeholderImageNode != nil)
+    [_placeholderImageNode removeFromSupernode];
+  
+  _placeholderImageNode = placeholderImageNode;
+  
+  _placeholderImageNode.layerBacked = YES;
+  _placeholderImageNode.contentMode = ASContentModeFromVideoGravity(_gravity);
+  
+  ASPerformBlockOnMainThread(^{
+    ASDN::MutexLocker l(_videoLock);
+    
+    [self insertSubnode:_placeholderImageNode atIndex:0];
+    [self setNeedsLayout];
+  });
 }
 
 - (AVPlayerItem *)currentItem

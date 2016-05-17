@@ -36,6 +36,9 @@
   ASVideoNode *nicCageVideoNode = self.nicCageVideoNode;
   [_rootNode addSubnode:nicCageVideoNode];
   
+  ASVideoNode *placeholderImageVideoNode = self.placeholderImageVideoNode;
+  [_rootNode addSubnode:placeholderImageVideoNode];
+  
   // Video node with custom play button
   ASVideoNode *simonVideoNode = self.simonVideoNode;
   simonVideoNode.playButton = self.playButton;
@@ -50,7 +53,11 @@
     
     simonVideoNode.layoutPosition = CGPointMake(0, [UIScreen mainScreen].bounds.size.height - ([UIScreen mainScreen].bounds.size.height/3));
     simonVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode]];
+    
+    placeholderImageVideoNode.layoutPosition = CGPointMake(0, [UIScreen mainScreen].bounds.size.height/3);
+    placeholderImageVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+    
+    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode, placeholderImageVideoNode]];
   };
   [self.view addSubnode:_rootNode];
 }
@@ -95,6 +102,26 @@
   nicCageVideoNode.muted = YES;
   
   return nicCageVideoNode;
+}
+
+// HLS video with a placeholder image
+- (ASVideoNode *)placeholderImageVideoNode;
+{
+  ASVideoNode *placeholderImageVideoNode = [[ASVideoNode alloc] init];
+  // placeholderImageVideoNode.delegate = self;
+  placeholderImageVideoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"https://files.parsetfss.com/8a8a3b0c-619e-4e4d-b1d5-1b5ba9bf2b42/tfss-753fe655-86bb-46da-89b7-aa59c60e49c0-niccage.mp4"]];
+  placeholderImageVideoNode.gravity = AVLayerVideoGravityResize;
+  placeholderImageVideoNode.backgroundColor = [UIColor lightGrayColor];
+  placeholderImageVideoNode.shouldAutorepeat = YES;
+  placeholderImageVideoNode.shouldAutoplay = NO;
+  placeholderImageVideoNode.muted = YES;
+  
+  ASImageNode* placeholder = [[ASImageNode alloc] init];
+  placeholder.image = [UIImage imageNamed:@"bearacrat.jpg"];
+  
+  placeholderImageVideoNode.placeholderImageNode = placeholder;
+  
+  return placeholderImageVideoNode;
 }
 
 - (ASVideoNode *)simonVideoNode
