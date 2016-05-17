@@ -9,8 +9,11 @@
 #import "ASViewController.h"
 #import "ASAssert.h"
 #import "ASDimension.h"
+#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASTraitCollection.h"
+#import "ASEnvironmentInternal.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 
 #define AS_LOG_VISIBILITY_CHANGES 0
@@ -46,8 +49,19 @@
   _node = node;
 
   _automaticallyAdjustRangeModeBasedOnViewEvents = NO;
-  
+
   return self;
+}
+
+- (void)dealloc
+{
+  if (_traitColectionContext != nil) {
+    // The setter will iterate through the VC's subnodes and replace the traitCollectionContext in their ASEnvironmentTraitCollection with nil.
+    // Since the VC holds the only strong reference to this context and we are in the process of destroying
+    // the VC, all the references in the subnodes will be unsafe unless we nil them out. More than likely all the subnodes will be dealloc'ed
+    // as part of the VC being dealloc'ed, but this is just to make extra sure.
+    self.traitColectionContext = nil;
+  }
 }
 
 - (void)loadView
@@ -169,6 +183,82 @@ ASVisibilityDepthImplementation;
 - (ASInterfaceState)interfaceState
 {
   return _node.interfaceState;
+}
+
+#pragma mark - ASEnvironmentTraitCollection
+
+- (void)setTraitColectionContext:(id)traitColectionContext
+{
+  if (_traitColectionContext != traitColectionContext) {
+    // propagate first so that nodes aren't hanging around with a dealloc'ed pointer
+    ASEnvironmentTraitCollectionUpdateDisplayContext(self.node, traitColectionContext);
+    
+    _traitColectionContext = traitColectionContext;
+  }
+}
+
+- (ASEnvironmentTraitCollection)displayTraitsForTraitCollection:(UITraitCollection *)traitCollection
+{
+  if (self.overrideDisplayTraitsWithTraitCollection) {
+    ASTraitCollection *asyncTraitCollection = self.overrideDisplayTraitsWithTraitCollection(traitCollection);
+    self.traitColectionContext = asyncTraitCollection.traitCollectionContext;
+    return [asyncTraitCollection environmentTraitCollection];
+  }
+  
+  ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(traitCollection);
+  asyncTraitCollection.displayContext = self.traitColectionContext;
+  return asyncTraitCollection;
+}
+
+- (ASEnvironmentTraitCollection)displayTraitsForWindowSize:(CGSize)windowSize
+{
+  if (self.overrideDisplayTraitsWithWindowSize) {
+    ASTraitCollection *traitCollection = self.overrideDisplayTraitsWithWindowSize(windowSize);
+    self.traitColectionContext = traitCollection.traitCollectionContext;
+    return [traitCollection environmentTraitCollection];
+  }
+  return self.node.environmentTraitCollection;
+}
+
+- (void)progagateNewDisplayTraits:(ASEnvironmentTraitCollection)traitCollection
+{
+  ASEnvironmentState environmentState = self.node.environmentState;
+  ASEnvironmentTraitCollection oldTraitCollection = environmentState.traitCollection;
+  
+  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(traitCollection, oldTraitCollection) == NO) {
+    environmentState.traitCollection = traitCollection;
+    self.node.environmentState = environmentState;
+    [self.node setNeedsLayout];
+    
+    NSArray<id<ASEnvironment>> *children = [self.node children];
+    for (id<ASEnvironment> child in children) {
+      ASEnvironmentStatePropagateDown(child, environmentState.traitCollection);
+    }
+  }
+}
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+  [super traitCollectionDidChange:previousTraitCollection];
+  
+  ASEnvironmentTraitCollection traitCollection = [self displayTraitsForTraitCollection:self.traitCollection];
+  [self progagateNewDisplayTraits:traitCollection];
+}
+
+- (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+  [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
+  
+  ASEnvironmentTraitCollection traitCollection = [self displayTraitsForTraitCollection:newCollection];
+  [self progagateNewDisplayTraits:traitCollection];
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+  [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+  
+  ASEnvironmentTraitCollection traitCollection = [self displayTraitsForWindowSize:size];
+  [self progagateNewDisplayTraits:traitCollection];
 }
 
 @end
