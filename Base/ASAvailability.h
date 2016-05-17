@@ -27,6 +27,10 @@
 #define kCFCoreFoundationVersionNumber_iOS_8_4 1145.15
 #endif
 
+#ifndef kCFCoreFoundationVersionNumber_iOS_9_0
+#define kCFCoreFoundationVersionNumber_iOS_9_0 1240.10
+#endif
+
 #ifndef __IPHONE_7_0
 #define __IPHONE_7_0 70000
 #endif
@@ -46,4 +50,4 @@
 #define AS_AT_LEAST_IOS7 (kCFCoreFoundationVersionNumber > kCFCoreFoundationVersionNumber_iOS_6_1)
 #define AS_AT_LEAST_IOS7_1 (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_7_1)
 #define AS_AT_LEAST_IOS8 (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_8_0)
-#define AS_AT_LEAST_IOS9 (kCFCoreFoundationVersionNumber > kCFCoreFoundationVersionNumber_iOS_8_4)
+#define AS_AT_LEAST_IOS9 (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_9_0)
