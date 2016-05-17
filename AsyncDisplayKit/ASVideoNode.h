@@ -105,7 +105,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param videoNode The video node that has experienced the stall
  * @param second Current playback time when the stall happens
  */
-- (void)videoNode:(ASVideoNode *)videoNode didStallAtSecond:(NSTimeInterval)second;
+- (void)videoNode:(ASVideoNode *)videoNode didStallAtTimeInterval:(NSTimeInterval)second;
 
 @end
 NS_ASSUME_NONNULL_END
