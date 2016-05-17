@@ -318,8 +318,11 @@ static NSString * const kStatus = @"status";
       }
     }
   } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
-    if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
-      [self play]; // autoresume after buffer catches up
+    /* Predicts whether the current loading rate and playback buffer status is sufficient to play from the AVPlayerItem.CurrentTime to the end without requiring a buffering pause
+     * We want to resume the video playback even when the loading rate isn't sufficient to play until the end and further re-buffering is needed.
+     */
+    if (_shouldBePlaying && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+      [self play]; 
     }
   } else if ([keyPath isEqualToString:kplaybackBufferEmpty]) {
     if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
