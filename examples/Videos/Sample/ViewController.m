@@ -28,6 +28,7 @@
 
   // Root node for the view controller
   _rootNode = [ASDisplayNode new];
+  _rootNode.frame = self.view.bounds;
   _rootNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   
   ASVideoNode *guitarVideoNode = self.guitarVideoNode;
@@ -52,16 +53,6 @@
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode]];
   };
   [self.view addSubnode:_rootNode];
-}
-
-- (void)viewDidLayoutSubviews
-{
-  [super viewDidLayoutSubviews];
-  
-  // After all subviews are layed out we have to measure it and move the root node to the right place
-  CGSize viewSize = self.view.bounds.size;
-  [self.rootNode measureWithSizeRange:ASSizeRangeMake(viewSize, viewSize)];
-  [self.rootNode setNeedsLayout];
 }
 
 #pragma mark - Getter / Setter
