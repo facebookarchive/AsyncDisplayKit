@@ -47,6 +47,17 @@
 
 @end
 
+/**
+ * Simple "Null Object" inspector for non-flow layouts that does not implement a custom inspector, provides a zero
+ * constrained size and throws an exception if methods are called from <ASCollectionViewLayoutInspecting>
+ */
+@interface ASCollectionViewCustomLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
+
+@end
+
+/**
+ * A layout inspector implementation specific for the sizing behavior of UICollectionViewFlowLayouts
+ */
 @interface ASCollectionViewFlowLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
 
 @property (nonatomic, weak) UICollectionViewFlowLayout *layout;
