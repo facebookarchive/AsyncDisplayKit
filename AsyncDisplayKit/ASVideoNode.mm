@@ -42,7 +42,7 @@ static NSString * const kStatus = @"status";
     unsigned int delegateVideoNodeWasTapped:1;
     unsigned int delegateVideoNodeWillChangePlayerStateToState:1;
     unsigned int delegateVideoNodeDidPlayToSecond:1;
-    unsigned int delegateVideoNodeDidStallAtSecond:1;
+    unsigned int delegateVideoNodeDidStallAtTimeInterval:1;
   } _delegateFlags;
   
   BOOL _shouldBePlaying;
@@ -165,7 +165,7 @@ static NSString * const kStatus = @"status";
   
   NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
   [notificationCenter addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:playerItem];
-  [notificationCenter addObserver:self selector:@selector(didStall:) name:AVPlayerItemPlaybackStalledNotification object:playerItem];
+  [notificationCenter addObserver:self selector:@selector(videoNodeDidStall:) name:AVPlayerItemPlaybackStalledNotification object:playerItem];
   [notificationCenter addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemFailedToPlayToEndTimeNotification object:playerItem];
   [notificationCenter addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemNewErrorLogEntryNotification object:playerItem];
 }
@@ -488,7 +488,7 @@ static NSString * const kStatus = @"status";
     _delegateFlags.delegateVideoNodeWasTapped = [_delegate respondsToSelector:@selector(videoNodeWasTapped:)];
     _delegateFlags.delegateVideoNodeWillChangePlayerStateToState = [_delegate respondsToSelector:@selector(videoNode:willChangePlayerState:toState:)];
     _delegateFlags.delegateVideoNodeDidPlayToSecond = [_delegate respondsToSelector:@selector(videoNode:didPlayToSecond:)];
-    _delegateFlags.delegateVideoNodeDidStallAtSecond = [_delegate respondsToSelector:@selector(videoNode:didStallAtSecond:)];
+    _delegateFlags.delegateVideoNodeDidStallAtTimeInterval = [_delegate respondsToSelector:@selector(videoNode:didStallAtTimeInterval:)];
   }
 }
 
@@ -647,12 +647,12 @@ static NSString * const kStatus = @"status";
   }
 }
 
-- (void)didStall:(NSNotification *)notification
+- (void)videoNodeDidStall:(NSNotification *)notification
 {
   self.playerState = ASVideoNodePlayerStateLoading;
   [self showSpinner];
-  if (_delegateFlags.delegateVideoNodeDidStallAtSecond) {
-    [_delegate videoNode:self didStallAtSecond:CMTimeGetSeconds(_player.currentItem.currentTime)];
+  if (_delegateFlags.delegateVideoNodeDidStallAtTimeInterval) {
+    [_delegate videoNode:self didStallAtTimeInterval:CMTimeGetSeconds(_player.currentItem.currentTime)];
   }
 }
 
