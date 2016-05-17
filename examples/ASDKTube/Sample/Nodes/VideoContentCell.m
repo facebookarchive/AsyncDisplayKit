@@ -99,7 +99,7 @@
 }
 
 #pragma mark - ASVideoPlayerNodeDelegate
-- (void)videoPlayerNodeWasTapped:(ASVideoPlayerNode *)videoPlayer
+- (void)didTapVideoPlayerNode:(ASVideoPlayerNode *)videoPlayer
 {
   if (_videoPlayerNode.playerState == ASVideoNodePlayerStatePlaying) {
     NSLog(@"TRANSITION");

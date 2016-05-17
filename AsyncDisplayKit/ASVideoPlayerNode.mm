@@ -31,7 +31,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateVideoNodeWillChangeState:1;
     unsigned int delegateVideoNodeShouldChangeState:1;
     unsigned int delegateVideoNodePlaybackDidFinish:1;
-    unsigned int delegateVideoNodeTapped:1;
+    unsigned int delegateDidTapVideoPlayerNode:1;
   } _delegateFlags;
   
   NSURL *_url;
@@ -72,7 +72,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     return nil;
   }
 
-  [self privateInit];
+  [self _init];
 
   return self;
 }
@@ -86,7 +86,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _url = url;
   _asset = [AVAsset assetWithURL:_url];
   
-  [self privateInit];
+  [self _init];
   
   return self;
 }
@@ -100,12 +100,12 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _asset = asset;
   _disableControls = NO;
 
-  [self privateInit];
+  [self _init];
 
   return self;
 }
 
-- (void)privateInit
+- (void)_init
 {
 
   _defaultControlsColor = [UIColor whiteColor];
@@ -226,7 +226,12 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     } else {
       _playbackButtonNode.tintColor = _defaultControlsColor;
     }
-    [_playbackButtonNode addTarget:self action:@selector(playbackButtonTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
+
+    if (_videoNode.playerState == ASVideoNodePlayerStatePlaying) {
+      _playbackButtonNode.buttonType = ASDefaultPlaybackButtonTypePause;
+    }
+
+    [_playbackButtonNode addTarget:self action:@selector(didTapPlaybackButton:) forControlEvents:ASControlNodeEventTouchUpInside];
     [_cachedControls setObject:_playbackButtonNode forKey:@(ASVideoPlayerNodeControlTypePlaybackButton)];
   }
 
@@ -281,9 +286,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       }
 
 
-      [slider addTarget:self action:@selector(beganSeek) forControlEvents:UIControlEventTouchDown];
-      [slider addTarget:self action:@selector(endedSeek) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchCancel];
-      [slider addTarget:self action:@selector(changedSeekValue:) forControlEvents:UIControlEventValueChanged];
+      [slider addTarget:self action:@selector(beginSeek) forControlEvents:UIControlEventTouchDown];
+      [slider addTarget:self action:@selector(endSeek) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchCancel];
+      [slider addTarget:self action:@selector(seekTimeDidChange:) forControlEvents:UIControlEventValueChanged];
 
       return slider;
     }];
@@ -394,8 +399,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)videoNodeWasTapped:(ASVideoNode *)videoNode
 {
-  if (_delegateFlags.delegateVideoNodeTapped) {
-    [_delegate videoPlayerNodeWasTapped:self];
+  if (_delegateFlags.delegateDidTapVideoPlayerNode) {
+    [_delegate didTapVideoPlayerNode:self];
   } else {
     if (videoNode.playerState == ASVideoNodePlayerStatePlaying) {
       [videoNode pause];
@@ -406,7 +411,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 }
 
 #pragma mark - Actions
-- (void)playbackButtonTapped:(ASControlNode*)node
+- (void)didTapPlaybackButton:(ASControlNode*)node
 {
   if (_videoNode.playerState == ASVideoNodePlayerStatePlaying) {
     [_videoNode pause];
@@ -415,17 +420,17 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
-- (void)beganSeek
+- (void)beginSeek
 {
   _isSeeking = YES;
 }
 
-- (void)endedSeek
+- (void)endSeek
 {
   _isSeeking = NO;
 }
 
-- (void)changedSeekValue:(UISlider*)slider
+- (void)seekTimeDidChange:(UISlider*)slider
 {
   CGFloat percentage = slider.value * 100;
   [self seekToTime:percentage];
@@ -541,7 +546,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 }
 
 #pragma mark - Properties
-- (id<ASVideoPlayerNodeDelegate>)delegate{
+- (id<ASVideoPlayerNodeDelegate>)delegate
+{
   return _delegate;
 }
 
@@ -565,7 +571,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateVideoNodeShouldChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:shouldChangeVideoNodeStateTo:)];
     _delegateFlags.delegateTimeLabelAttributedString = [_delegate respondsToSelector:@selector(videoPlayerNode:timeStringForTimeLabelType:forTime:)];
     _delegateFlags.delegatePlaybackButtonTint = [_delegate respondsToSelector:@selector(videoPlayerNodePlaybackButtonTint:)];
-    _delegateFlags.delegateVideoNodeTapped = [_delegate respondsToSelector:@selector(videoPlayerNodeWasTapped:)];
+    _delegateFlags.delegateDidTapVideoPlayerNode = [_delegate respondsToSelector:@selector(didTapVideoPlayerNode:)];
   }
 }
 
@@ -604,7 +610,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _videoNode.periodicTimeObserverTimescale = _periodicTimeObserverTimescale;
 }
 
-- (NSString*)gravity
+- (NSString *)gravity
 {
   if (_gravity == nil) {
     _gravity = _videoNode.gravity;
