@@ -28,7 +28,7 @@ static BOOL __shouldShowImageScalingOverlay = NO;
 
 static BOOL __enableHitTestDebug = NO;
 
-@interface ASControlNode (Debugging)
+@interface ASControlNode (DebuggingInternal)
 
 - (ASImageNode *)debugHighlightOverlay;
 
