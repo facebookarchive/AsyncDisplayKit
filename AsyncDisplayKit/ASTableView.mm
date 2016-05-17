@@ -117,6 +117,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   
   struct {
     unsigned int asyncDelegateScrollViewDidScroll:1;
+    unsigned int asyncDelegateScrollViewWillBeginDragging:1;
+    unsigned int asyncDelegateScrollViewDidEndDragging:1;
     unsigned int asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath:1;
     unsigned int asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPath:1;
     unsigned int asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPathDeprecated:1;
@@ -320,6 +322,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
     _asyncDelegateFlags.asyncDelegateTableViewWillBeginBatchFetchWithContext = [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
     _asyncDelegateFlags.asyncDelegateShouldBatchFetchForTableView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)];
+    _asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)];
+    _asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)];
   }
   
   super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
@@ -692,6 +696,25 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+  for (_ASTableViewCell *tableViewCell in _cellsForVisibilityUpdates) {
+    [[tableViewCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventWillBeginDragging inScrollView:scrollView withCellFrame:tableViewCell.frame];
+  }
+  if (_asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging) {
+    [_asyncDelegate scrollViewWillBeginDragging:scrollView];
+  }
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+  for (_ASTableViewCell *tableViewCell in _cellsForVisibilityUpdates) {
+    [[tableViewCell node] cellNodeVisibilityEvent:ASCellNodeVisibilityEventDidEndDragging inScrollView:scrollView withCellFrame:tableViewCell.frame];
+  }
+  if (_asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging) {
+    [_asyncDelegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
+  }
+}
 
 #pragma mark - Scroll Direction
 
