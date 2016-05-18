@@ -347,7 +347,10 @@ static NSString * const kStatus = @"status";
     
   } else if (_delegateFlags.delegateDidTapVideoNode_deprecated) {
     // TODO: This method is deprecated, remove in ASDK 2.0
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [_delegate videoNodeWasTapped:self];
+#pragma clang diagnostic pop
   } else {
     if (_shouldBePlaying) {
       [self pause];
@@ -396,7 +399,10 @@ static NSString * const kStatus = @"status";
     
   } else if (_delegateFlags.delegateVideoNodeDidPlayToTimeInterval_deprecated) {
     // TODO: This method is deprecated, remove in ASDK 2.0
-    [_delegate videoNode:self didPlayToSecond:timeInSeconds];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+      [_delegate videoNode:self didPlayToSecond:timeInSeconds];
+#pragma clang diagnostic pop
   }
 }
 
@@ -677,7 +683,10 @@ static NSString * const kStatus = @"status";
     [_delegate videoDidPlayToEnd:self];
   } else if (_delegateFlags.delegateVideoDidPlayToEnd_deprecated) {
     // TODO: This method is deprecated, remove in ASDK 2.0
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [_delegate videoPlaybackDidFinish:self];
+#pragma clang diagnostic pop
   }
   [_player seekToTime:kCMTimeZero];
 
