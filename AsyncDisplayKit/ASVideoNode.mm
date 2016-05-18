@@ -46,6 +46,11 @@ static NSString * const kStatus = @"status";
     unsigned int delegateVideoNodeDidFinishInitialLoading:1;
     unsigned int delegateVideoNodeDidStallAtTimeInterval:1;
     unsigned int delegateVideoNodeDidRecoverFromStall:1;
+    
+    //Flags for deprecated methods
+    unsigned int delegateVideoDidPlayToEnd_deprecated:1;
+    unsigned int delegateDidTapVideoNode_deprecated:1;
+    unsigned int delegateVideoNodeDidPlayToTimeInterval_deprecated:1;
   } _delegateFlags;
   
   BOOL _shouldBePlaying;
@@ -339,6 +344,10 @@ static NSString * const kStatus = @"status";
 {
   if (_delegateFlags.delegateDidTapVideoNode) {
     [_delegate didTapVideoNode:self];
+    
+  } else if (_delegateFlags.delegateDidTapVideoNode_deprecated) {
+    // TODO: This method is deprecated, remove in ASDK 2.0
+    [_delegate videoNodeWasTapped:self];
   } else {
     if (_shouldBePlaying) {
       [self pause];
@@ -384,6 +393,10 @@ static NSString * const kStatus = @"status";
   
   if (_delegateFlags.delegateVideoNodeDidPlayToTimeInterval) {
     [_delegate videoNode:self didPlayToTimeInterval:timeInSeconds];
+    
+  } else if (_delegateFlags.delegateVideoNodeDidPlayToTimeInterval_deprecated) {
+    // TODO: This method is deprecated, remove in ASDK 2.0
+    [_delegate videoNode:self didPlayToSecond:timeInSeconds];
   }
 }
 
@@ -506,6 +519,14 @@ static NSString * const kStatus = @"status";
     _delegateFlags.delegateVideoNodeDidFinishInitialLoading = [_delegate respondsToSelector:@selector(videoNodeDidFinishInitialLoading:)];
     _delegateFlags.delegateVideoNodeDidStallAtTimeInterval = [_delegate respondsToSelector:@selector(videoNode:didStallAtTimeInterval:)];
     _delegateFlags.delegateVideoNodeDidRecoverFromStall = [_delegate respondsToSelector:@selector(videoNodeDidRecoverFromStall:)];
+      
+    // deprecated methods
+    _delegateFlags.delegateVideoDidPlayToEnd_deprecated =  [_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)];
+    _delegateFlags.delegateVideoNodeDidPlayToTimeInterval_deprecated = [_delegate respondsToSelector:@selector(videoNode:didPlayToSecond:)];
+    _delegateFlags.delegateDidTapVideoNode_deprecated = [_delegate respondsToSelector:@selector(videoNodeWasTapped:)];
+    ASDisplayNodeAssert((_delegateFlags.delegateVideoDidPlayToEnd && _delegateFlags.delegateVideoDidPlayToEnd_deprecated) == NO, @"Implemented both deprecated and non-deprecated methods - please remove videoPlaybackDidFinish, it's deprecated");
+    ASDisplayNodeAssert((_delegateFlags.delegateVideoNodeDidPlayToTimeInterval && _delegateFlags.delegateVideoNodeDidPlayToTimeInterval_deprecated) == NO, @"Implemented both deprecated and non-deprecated methods - please remove videoNodeWasTapped, it's deprecated");
+    ASDisplayNodeAssert((_delegateFlags.delegateDidTapVideoNode && _delegateFlags.delegateDidTapVideoNode_deprecated) == NO, @"Implemented both deprecated and non-deprecated methods - please remove didPlayToSecond, it's deprecated");
   }
 }
 
@@ -654,6 +675,9 @@ static NSString * const kStatus = @"status";
   self.playerState = ASVideoNodePlayerStateFinished;
   if (_delegateFlags.delegateVideoDidPlayToEnd) {
     [_delegate videoDidPlayToEnd:self];
+  } else if (_delegateFlags.delegateVideoDidPlayToEnd_deprecated) {
+    // TODO: This method is deprecated, remove in ASDK 2.0
+    [_delegate videoPlaybackDidFinish:self];
   }
   [_player seekToTime:kCMTimeZero];
 

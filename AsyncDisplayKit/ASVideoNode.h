@@ -124,6 +124,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)videoNodeDidRecoverFromStall:(ASVideoNode *)videoNode;
 
+// Below are deprecated methods.  To be removed in ASDK 2.0 release
+- (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode __deprecated;
+- (void)videoNodeWasTapped:(ASVideoNode *)videoNode __deprecated;
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second __deprecated;
+
 @end
 NS_ASSUME_NONNULL_END
 #endif
