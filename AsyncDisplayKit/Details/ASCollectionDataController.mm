@@ -51,7 +51,9 @@
 
 - (void)willReloadData
 {
-  [_pendingContexts enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray<ASIndexedNodeContext *> *contexts, BOOL *stop) {
+  NSArray *keys = _pendingContexts.allKeys;
+  for (NSString *kind in keys) {
+    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
     // Remove everything that existed before the reload, now that we're ready to insert replacements
     NSArray *indexPaths = [self indexPathsForEditingNodesOfKind:kind];
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
@@ -72,7 +74,7 @@
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
     [_pendingContexts removeObjectForKey:kind];
-  }];
+  }
 }
 
 - (void)prepareForInsertSections:(NSIndexSet *)sections
@@ -87,7 +89,9 @@
 
 - (void)willInsertSections:(NSIndexSet *)sections
 {
-  [_pendingContexts enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray<ASIndexedNodeContext *> *contexts, BOOL *stop) {
+  NSArray *keys = _pendingContexts.allKeys;
+  for (NSString *kind in keys) {
+    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
     NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:sections.count];
     for (NSUInteger i = 0; i < sections.count; i++) {
       [sectionArray addObject:[NSMutableArray array]];
@@ -98,7 +102,7 @@
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
     [_pendingContexts removeObjectForKey:kind];
-  }];
+  }
 }
 
 - (void)willDeleteSections:(NSIndexSet *)sections
@@ -122,7 +126,9 @@
 
 - (void)willReloadSections:(NSIndexSet *)sections
 {
-  [_pendingContexts enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray<ASIndexedNodeContext *> *contexts, BOOL *stop) {
+  NSArray *keys = _pendingContexts.allKeys;
+  for (NSString *kind in keys) {
+    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
     NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], sections);
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
     // reinsert the elements
@@ -130,7 +136,7 @@
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
     [_pendingContexts removeObjectForKey:kind];
-  }];
+  }
 }
 
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
