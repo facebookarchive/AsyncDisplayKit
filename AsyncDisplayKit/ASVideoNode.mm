@@ -38,17 +38,21 @@ static NSString * const kStatus = @"status";
   __weak id<ASVideoNodeDelegate> _delegate;
   struct {
     unsigned int delegateVideNodeShouldChangePlayerStateTo:1;
-    unsigned int delegateVideoPlaybackDidFinish:1;
-    unsigned int delegateVideoNodeWasTapped:1;
+    unsigned int delegateVideoDidPlayToEnd:1;
+    unsigned int delegateDidTapVideoNode:1;
     unsigned int delegateVideoNodeWillChangePlayerStateToState:1;
-    unsigned int delegateVideoNodeDidPlayToSecond:1;
+    unsigned int delegateVideoNodeDidPlayToTimeInterval:1;
+    unsigned int delegateVideoNodeDidStartInitialLoading:1;
+    unsigned int delegateVideoNodeDidFinishInitialLoading:1;
+    unsigned int delegateVideoNodeDidStallAtTimeInterval:1;
+    unsigned int delegateVideoNodeDidRecoverFromStall:1;
   } _delegateFlags;
   
   BOOL _shouldBePlaying;
   
   BOOL _shouldAutorepeat;
   BOOL _shouldAutoplay;
-  
+  BOOL _shouldAggressivelyRecoverFromStall;
   BOOL _muted;
   
   ASVideoNodePlayerState _playerState;
@@ -164,6 +168,7 @@ static NSString * const kStatus = @"status";
   
   NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
   [notificationCenter addObserver:self selector:@selector(didPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:playerItem];
+  [notificationCenter addObserver:self selector:@selector(videoNodeDidStall:) name:AVPlayerItemPlaybackStalledNotification object:playerItem];
   [notificationCenter addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemFailedToPlayToEndTimeNotification object:playerItem];
   [notificationCenter addObserver:self selector:@selector(errorWhilePlaying:) name:AVPlayerItemNewErrorLogEntryNotification object:playerItem];
 }
@@ -181,6 +186,7 @@ static NSString * const kStatus = @"status";
 
   NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
   [notificationCenter removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:playerItem];
+  [notificationCenter removeObserver:self name: AVPlayerItemPlaybackStalledNotification object:playerItem];
   [notificationCenter removeObserver:self name:AVPlayerItemFailedToPlayToEndTimeNotification object:playerItem];
   [notificationCenter removeObserver:self name:AVPlayerItemNewErrorLogEntryNotification object:playerItem];
 }
@@ -313,12 +319,12 @@ static NSString * const kStatus = @"status";
       if (_placeholderImageNode.image == nil) {
         [self generatePlaceholderImage];
       }
-      if (_shouldBePlaying) {
-        self.playerState = ASVideoNodePlayerStatePlaying;
-      }
     }
   } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
-    if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+    if (_shouldBePlaying && (_shouldAggressivelyRecoverFromStall || [change[NSKeyValueChangeNewKey] boolValue]) && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+      if (self.playerState == ASVideoNodePlayerStateLoading && _delegateFlags.delegateVideoNodeDidRecoverFromStall) {
+        [_delegate videoNodeDidRecoverFromStall:self];
+      }
       [self play]; // autoresume after buffer catches up
     }
   } else if ([keyPath isEqualToString:kplaybackBufferEmpty]) {
@@ -331,8 +337,8 @@ static NSString * const kStatus = @"status";
 
 - (void)tapped
 {
-  if (_delegateFlags.delegateVideoNodeWasTapped) {
-    [_delegate videoNodeWasTapped:self];
+  if (_delegateFlags.delegateDidTapVideoNode) {
+    [_delegate didTapVideoNode:self];
   } else {
     if (_shouldBePlaying) {
       [self pause];
@@ -349,10 +355,20 @@ static NSString * const kStatus = @"status";
   {
   ASDN::MutexLocker l(_videoLock);
   AVAsset *asset = self.asset;
+  // Return immediately if the asset is nil;
+  if (asset == nil || self.playerState == ASVideoNodePlayerStateInitialLoading) {
+      return;
+  }
   NSArray<NSString *> *requestedKeys = @[@"playable"];
-  self.playerState = ASVideoNodePlayerStateStartupLoading;
+  self.playerState = ASVideoNodePlayerStateInitialLoading;
+  if (_delegateFlags.delegateVideoNodeDidStartInitialLoading) {
+      [_delegate videoNodeDidStartInitialLoading:self];
+  }
   [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
     ASPerformBlockOnMainThread(^{
+      if (_delegateFlags.delegateVideoNodeDidFinishInitialLoading) {
+        [_delegate videoNodeDidFinishInitialLoading:self];
+      }
       [self prepareToPlayAsset:asset withKeys:requestedKeys];
     });
   }];
@@ -366,8 +382,8 @@ static NSString * const kStatus = @"status";
     return;
   }
   
-  if (_delegateFlags.delegateVideoNodeDidPlayToSecond) {
-    [_delegate videoNode:self didPlayToSecond:timeInSeconds];
+  if (_delegateFlags.delegateVideoNodeDidPlayToTimeInterval) {
+    [_delegate videoNode:self didPlayToTimeInterval:timeInSeconds];
   }
 }
 
@@ -482,10 +498,14 @@ static NSString * const kStatus = @"status";
     memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
     _delegateFlags.delegateVideNodeShouldChangePlayerStateTo = [_delegate respondsToSelector:@selector(videoNode:shouldChangePlayerStateTo:)];
-    _delegateFlags.delegateVideoPlaybackDidFinish = [_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)];
-    _delegateFlags.delegateVideoNodeWasTapped = [_delegate respondsToSelector:@selector(videoNodeWasTapped:)];
+    _delegateFlags.delegateVideoDidPlayToEnd = [_delegate respondsToSelector:@selector(videoDidPlayToEnd:)];
+    _delegateFlags.delegateDidTapVideoNode = [_delegate respondsToSelector:@selector(didTapVideoNode:)];
     _delegateFlags.delegateVideoNodeWillChangePlayerStateToState = [_delegate respondsToSelector:@selector(videoNode:willChangePlayerState:toState:)];
-    _delegateFlags.delegateVideoNodeDidPlayToSecond = [_delegate respondsToSelector:@selector(videoNode:didPlayToSecond:)];
+    _delegateFlags.delegateVideoNodeDidPlayToTimeInterval = [_delegate respondsToSelector:@selector(videoNode:didPlayToTimeInterval:)];
+    _delegateFlags.delegateVideoNodeDidStartInitialLoading = [_delegate respondsToSelector:@selector(videoNodeDidStartInitialLoading:)];
+    _delegateFlags.delegateVideoNodeDidFinishInitialLoading = [_delegate respondsToSelector:@selector(videoNodeDidFinishInitialLoading:)];
+    _delegateFlags.delegateVideoNodeDidStallAtTimeInterval = [_delegate respondsToSelector:@selector(videoNode:didStallAtTimeInterval:)];
+    _delegateFlags.delegateVideoNodeDidRecoverFromStall = [_delegate respondsToSelector:@selector(videoNodeDidRecoverFromStall:)];
   }
 }
 
@@ -632,8 +652,8 @@ static NSString * const kStatus = @"status";
 - (void)didPlayToEnd:(NSNotification *)notification
 {
   self.playerState = ASVideoNodePlayerStateFinished;
-  if (_delegateFlags.delegateVideoPlaybackDidFinish) {
-    [_delegate videoPlaybackDidFinish:self];
+  if (_delegateFlags.delegateVideoDidPlayToEnd) {
+    [_delegate videoDidPlayToEnd:self];
   }
   [_player seekToTime:kCMTimeZero];
 
@@ -641,6 +661,15 @@ static NSString * const kStatus = @"status";
     [self play];
   } else {
     [self pause];
+  }
+}
+
+- (void)videoNodeDidStall:(NSNotification *)notification
+{
+  self.playerState = ASVideoNodePlayerStateLoading;
+  [self showSpinner];
+  if (_delegateFlags.delegateVideoNodeDidStallAtTimeInterval) {
+    [_delegate videoNode:self didStallAtTimeInterval:CMTimeGetSeconds(_player.currentItem.currentTime)];
   }
 }
 

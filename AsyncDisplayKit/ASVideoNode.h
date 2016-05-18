@@ -14,9 +14,9 @@
 
 typedef enum {
   ASVideoNodePlayerStateUnknown,
-  ASVideoNodePlayerStatePlaying,
-  ASVideoNodePlayerStateStartupLoading,
+  ASVideoNodePlayerStateInitialLoading,
   ASVideoNodePlayerStateLoading,
+  ASVideoNodePlayerStatePlaying,
   ASVideoNodePlayerStatePaused,
   ASVideoNodePlayerStateFinished
 } ASVideoNodePlayerState;
@@ -48,6 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readwrite) BOOL shouldAutorepeat;
 
 @property (nonatomic, assign, readwrite) BOOL muted;
+@property (nonatomic, assign, readwrite) BOOL shouldAggressivelyRecoverFromStall;
 
 @property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
 //! Defaults to 100
@@ -69,26 +70,26 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract Delegate method invoked when the node's video has played to its end time.
  * @param videoNode The video node has played to its end time.
  */
-- (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode;
+- (void)videoDidPlayToEnd:(ASVideoNode *)videoNode;
 /**
  * @abstract Delegate method invoked the node is tapped.
  * @param videoNode The video node that was tapped.
  * @discussion The video's play state is toggled if this method is not implemented.
  */
-- (void)videoNodeWasTapped:(ASVideoNode *)videoNode;
+- (void)didTapVideoNode:(ASVideoNode *)videoNode;
 /**
  * @abstract Delegate method invoked when player changes state.
- * @param videoNode The video node that was tapped.
+ * @param videoNode The video node.
  * @param state player state before this change.
- * @param toSate player new state.
+ * @param toState player new state.
  * @discussion This method is called after each state change
  */
-- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate;
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toState;
 /**
  * @abstract Ssks delegate if state change is allowed
  * ASVideoNodePlayerStatePlaying or ASVideoNodePlayerStatePaused.
  * asks delegate if state change is allowed.
- * @param videoNode The video node that was tapped.
+ * @param videoNode The video node.
  * @param state player state that is going to be set.
  * @discussion Delegate method invoked when player changes it's state to
  * ASVideoNodePlayerStatePlaying or ASVideoNodePlayerStatePaused 
@@ -97,10 +98,32 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)videoNode:(ASVideoNode*)videoNode shouldChangePlayerStateTo:(ASVideoNodePlayerState)state;
 /**
  * @abstract Delegate method invoked when player playback time is updated.
- * @param videoNode The video node that was tapped.
+ * @param videoNode The video node.
  * @param second current playback time in seconds.
  */
-- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second;
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToTimeInterval:(NSTimeInterval)timeInterval;
+/**
+ * @abstract Delegate method invoked when the video player stalls.
+ * @param videoNode The video node that has experienced the stall
+ * @param second Current playback time when the stall happens
+ */
+- (void)videoNode:(ASVideoNode *)videoNode didStallAtTimeInterval:(NSTimeInterval)timeInterval;
+/**
+ * @abstract Delegate method invoked when the video player starts the inital asset loading
+ * @param videoNode The videoNode
+ */
+- (void)videoNodeDidStartInitialLoading:(ASVideoNode *)videoNode;
+/**
+ * @abstract Delegate method invoked when the video is done loading the asset and can start the playback
+ * @param videoNode The videoNode
+ */
+- (void)videoNodeDidFinishInitialLoading:(ASVideoNode *)videoNode;
+/**
+ * @abstract Delegate method invoked when the video node has recovered from the stall
+ * @param videoNode The videoNode
+ */
+- (void)videoNodeDidRecoverFromStall:(ASVideoNode *)videoNode;
+
 @end
 NS_ASSUME_NONNULL_END
 #endif
