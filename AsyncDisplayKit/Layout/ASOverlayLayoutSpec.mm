@@ -18,7 +18,7 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
 
 @implementation ASOverlayLayoutSpec
 
-- (instancetype)initWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
+- (instancetype)initWithChild:(id<ASLayoutProducer>)child overlay:(id<ASLayoutProducer>)overlay
 {
   if (!(self = [super init])) {
     return nil;
@@ -29,17 +29,17 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
   return self;
 }
 
-+ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
++ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutProducer>)child overlay:(id<ASLayoutProducer>)overlay
 {
   return [[self alloc] initWithChild:child overlay:overlay];
 }
 
-- (void)setOverlay:(id<ASLayoutable>)overlay
+- (void)setOverlay:(id<ASLayoutProducer>)overlay
 {
   [super setChild:overlay forIdentifier:kOverlayChildKey];
 }
 
-- (id<ASLayoutable>)overlay
+- (id<ASLayoutProducer>)overlay
 {
   return [super childForIdentifier:kOverlayChildKey];
 }
@@ -58,7 +58,7 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
     [sublayouts addObject:overlayLayout];
   }
   
-  return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithProducer:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
 - (void)setChildren:(NSArray *)children
@@ -76,7 +76,7 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
 
 @implementation ASOverlayLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutProducerAsciiArtProtocol
 
 - (NSString *)debugBoxString
 {

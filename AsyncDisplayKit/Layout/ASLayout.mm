@@ -23,13 +23,13 @@ extern BOOL CGPointIsNull(CGPoint point)
 
 @implementation ASLayout
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                      size:(CGSize)size
-                                  position:(CGPoint)position
-                                sublayouts:(NSArray *)sublayouts
-                                 flattened:(BOOL)flattened
++ (instancetype)layoutWithProducer:(id<ASLayoutProducer>)producer
+                              size:(CGSize)size
+                          position:(CGPoint)position
+                        sublayouts:(NSArray *)sublayouts
+                         flattened:(BOOL)flattened
 {
-  ASDisplayNodeAssert(layoutableObject, @"layoutableObject is required.");
+  ASDisplayNodeAssert(producer, @"producer is required.");
 #if DEBUG
   for (ASLayout *sublayout in sublayouts) {
     ASDisplayNodeAssert(!CGPointIsNull(sublayout.position), @"Invalid position is not allowed in sublayout.");
@@ -38,10 +38,10 @@ extern BOOL CGPointIsNull(CGPoint point)
   
   ASLayout *l = [super new];
   if (l) {
-    l->_layoutableObject = layoutableObject;
+    l->_layoutProducer = producer;
     
     if (!isValidForLayout(size.width) || !isValidForLayout(size.height)) {
-      ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutableObject);
+      ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), producer);
       size = CGSizeZero;
     } else {
       size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
@@ -67,23 +67,23 @@ extern BOOL CGPointIsNull(CGPoint point)
   return l;
 }
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                      size:(CGSize)size
-                                sublayouts:(NSArray *)sublayouts
++ (instancetype)layoutWithProducer:(id<ASLayoutProducer>)producer
+                              size:(CGSize)size
+                        sublayouts:(NSArray *)sublayouts
 {
-  return [self layoutWithLayoutableObject:layoutableObject size:size position:CGPointNull sublayouts:sublayouts flattened:NO];
+  return [self layoutWithProducer:producer size:size position:CGPointNull sublayouts:sublayouts flattened:NO];
 }
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size
++ (instancetype)layoutWithProducer:(id<ASLayoutProducer>)producer size:(CGSize)size
 {
-  return [self layoutWithLayoutableObject:layoutableObject size:size sublayouts:nil];
+  return [self layoutWithProducer:producer size:size sublayouts:nil];
 }
 
-+ (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                               size:(CGSize)size
-                                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
++ (instancetype)flattenedLayoutWithProducer:(id<ASLayoutProducer>)producer
+                                       size:(CGSize)size
+                                 sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
 {
-  return [self layoutWithLayoutableObject:layoutableObject size:size position:CGPointNull sublayouts:sublayouts flattened:YES];
+  return [self layoutWithProducer:producer size:size position:CGPointNull sublayouts:sublayouts flattened:YES];
 }
 
 - (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *))predicateBlock
@@ -109,11 +109,11 @@ extern BOOL CGPointIsNull(CGPoint point)
       context.visited = YES;
       
       if (predicateBlock(context.layout)) {
-        [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:context.layout.layoutableObject
-                                                                       size:context.layout.size
-                                                                   position:context.absolutePosition
-                                                                 sublayouts:nil
-                                                                  flattened:context.flattened]];
+        [flattenedSublayouts addObject:[ASLayout layoutWithProducer:context.layout.layoutProducer
+                                                               size:context.layout.size
+                                                           position:context.absolutePosition
+                                                         sublayouts:nil
+                                                          flattened:context.flattened]];
       }
       
       for (ASLayout *sublayout in context.layout.sublayouts) {
@@ -124,7 +124,7 @@ extern BOOL CGPointIsNull(CGPoint point)
     }
   }
 
-  return [ASLayout flattenedLayoutWithLayoutableObject:_layoutableObject size:_size sublayouts:flattenedSublayouts];
+  return [ASLayout flattenedLayoutWithProducer:_layoutProducer size:_size sublayouts:flattenedSublayouts];
 }
 
 - (CGRect)frame

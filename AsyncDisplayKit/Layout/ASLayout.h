@@ -12,7 +12,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASAssert.h>
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASLayoutProducer.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,9 +24,9 @@ extern BOOL CGPointIsNull(CGPoint point);
 @interface ASLayout : NSObject
 
 /**
- * The underlying object described by this layout
+ * The underlying object which produced this layout
  */
-@property (nonatomic, weak, readonly) id<ASLayoutable> layoutableObject;
+@property (nonatomic, weak, readonly) id<ASLayoutProducer> layoutProducer;
 
 /**
  * Size of the current layout
@@ -58,7 +58,7 @@ extern BOOL CGPointIsNull(CGPoint point);
 /**
  * Initializer.
  *
- * @param layoutableObject The backing ASLayoutable object.
+ * @param producer The ASLayoutProducer that generated the layout.
  *
  * @param size The size of this layout.
  *
@@ -66,11 +66,11 @@ extern BOOL CGPointIsNull(CGPoint point);
  *
  * @param sublayouts Sublayouts belong to the new layout.
  */
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                      size:(CGSize)size
-                                  position:(CGPoint)position
-                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
-                                 flattened:(BOOL)flattened;
++ (instancetype)layoutWithProducer:(id<ASLayoutProducer>)producer
+                              size:(CGSize)size
+                          position:(CGPoint)position
+                        sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
+                         flattened:(BOOL)flattened;
 
 /**
  * Convenience initializer that has CGPointNull position.
@@ -78,39 +78,39 @@ extern BOOL CGPointIsNull(CGPoint point);
  * or for ASLayoutSpec subclasses that are referencing the "self" level in the layout tree,
  * or for creating a sublayout of which the position is yet to be determined.
  *
- * @param layoutableObject The backing ASLayoutable object.
+ * @param producer The ASLayoutProducer that generated the layout.
  *
  * @param size The size of this layout.
  *
  * @param sublayouts Sublayouts belong to the new layout.
  */
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                      size:(CGSize)size
-                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
++ (instancetype)layoutWithProducer:(id<ASLayoutProducer>)producer
+                              size:(CGSize)size
+                        sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
 /**
  * Convenience that has CGPointNull position and no sublayouts. 
  * Best used for creating a layout that has no sublayouts, and is either a root one
  * or a sublayout of which the position is yet to be determined.
  *
- * @param layoutableObject The backing ASLayoutable object.
+ * @param producer The ASLayoutProducer that generated the layout.
  *
  * @param size The size of this layout.
  */
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
++ (instancetype)layoutWithProducer:(id<ASLayoutProducer>)producer size:(CGSize)size;
 
 /**
  * Convenience initializer that is flattened and has CGPointNull position.
  *
- * @param layoutableObject The backing ASLayoutable object.
+ * @param producer The backing ASLayoutProducer object.
  *
  * @param size The size of this layout.
  *
  * @param sublayouts Sublayouts belong to the new layout.
  */
-+ (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                               size:(CGSize)size
-                                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
++ (instancetype)flattenedLayoutWithProducer:(id<ASLayoutProducer>)producer
+                                       size:(CGSize)size
+                                 sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
 /**
  * @abstract Evaluates a given predicate block against each object in the receiving layout tree

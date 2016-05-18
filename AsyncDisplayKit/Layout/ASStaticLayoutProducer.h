@@ -13,9 +13,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- *  Layout options that can be defined for an ASLayoutable being added to a ASStaticLayoutSpec. 
+ *  Layout options that can be defined for an ASLayoutProducer being added to a ASStaticLayoutSpec. 
  */
-@protocol ASStaticLayoutable
+@protocol ASStaticLayoutProducer
 
 /**
  If specified, the child's size is restricted according to this size. Percentages are resolved relative to the static layout spec.

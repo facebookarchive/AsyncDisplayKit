@@ -13,7 +13,7 @@
 #import "ASInternalHelpers.h"
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackLayoutSpecUtilities.h"
-#import "ASLayoutable.h"
+#import "ASLayoutProducer.h"
 #import "ASAssert.h"
 
 static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,

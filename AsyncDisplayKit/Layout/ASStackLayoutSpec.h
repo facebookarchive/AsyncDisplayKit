@@ -69,9 +69,9 @@ NS_ASSUME_NONNULL_BEGIN
  @param spacing The spacing between the children
  @param justifyContent If no children are flexible, this describes how to fill any extra space
  @param alignItems Orientation of the children along the cross axis
- @param children ASLayoutable children to be positioned.
+ @param children ASLayoutProducer children to be positioned.
  */
-+ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray<id<ASLayoutable>> *)children;
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray<id<ASLayoutProducer>> *)children;
 
 /**
  * @return A stack layout spec with direction of ASStackLayoutDirectionVertical

@@ -24,12 +24,12 @@
   CGFloat _ratio;
 }
 
-+ (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child
++ (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutProducer>)child
 {
   return [[self alloc] initWithRatio:ratio child:child];
 }
 
-- (instancetype)initWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;
+- (instancetype)initWithRatio:(CGFloat)ratio child:(id<ASLayoutProducer>)child;
 {
   if (!(self = [super init])) {
     return nil;
@@ -72,7 +72,7 @@
   const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
   ASLayout *sublayout = [self.child measureWithSizeRange:childRange];
   sublayout.position = CGPointZero;
-  return [ASLayout layoutWithLayoutableObject:self size:sublayout.size sublayouts:@[sublayout]];
+  return [ASLayout layoutWithProducer:self size:sublayout.size sublayouts:@[sublayout]];
 }
 
 - (void)setChildren:(NSArray *)children
@@ -90,7 +90,7 @@
 
 @implementation ASRatioLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutProducerAsciiArtProtocol
 
 - (NSString *)asciiArtName
 {

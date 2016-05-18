@@ -75,7 +75,7 @@
                                                  insertions:&insertions
                                                   deletions:&deletions
                                                compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
-                                                 return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
+                                                 return ASObjectIsEqual(lhs.layoutProducer, rhs.layoutProducer);
                                                }];
     findNodesInLayoutAtIndexes(_pendingLayout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
     findNodesInLayoutAtIndexesWithFilteredNodes(_previousLayout,
@@ -164,7 +164,7 @@ static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
   std::vector<NSUInteger> positions = std::vector<NSUInteger>();
   NSUInteger idx = [indexes firstIndex];
   while (idx != NSNotFound) {
-    ASDisplayNode *node = (ASDisplayNode *)layout.immediateSublayouts[idx].layoutableObject;
+    ASDisplayNode *node = (ASDisplayNode *)layout.immediateSublayouts[idx].layoutProducer;
     ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
     // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
     if (node != nil) {

@@ -26,7 +26,7 @@
   ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex _propertyLock;
   
-  id<ASLayoutable> _child;
+  id<ASLayoutProducer> _child;
   NSArray *_children;
   NSMutableDictionary *_childrenWithIdentifier;
 }
@@ -36,7 +36,7 @@
 
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition;
-@synthesize isFinalLayoutable = _isFinalLayoutable;
+@synthesize isFinalLayoutProducer = _isFinalLayoutProducer;
 
 - (instancetype)init
 {
@@ -53,43 +53,43 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+  return [ASLayout layoutWithProducer:self size:constrainedSize.min];
 }
 
-- (id<ASLayoutable>)finalLayoutable
+- (id<ASLayoutProducer>)finalLayoutProducer
 {
   return self;
 }
 
-- (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
+- (id<ASLayoutProducer>)layoutProducerToAddFromProducer:(id<ASLayoutProducer>)child
 {
-  if (self.isFinalLayoutable == NO) {
+  if (self.isFinalLayoutProducer == NO) {
     
-    // If you are getting recursion crashes here after implementing finalLayoutable, make sure
-    // that you are setting isFinalLayoutable flag to YES. This must be one BEFORE adding a child
-    // to the new ASLayoutable.
+    // If you are getting recursion crashes here after implementing finalLayoutProducer, make sure
+    // that you are setting isFinalLayoutProducer flag to YES. This must be one BEFORE adding a child
+    // to the new ASLayoutProducer.
     //
     // For example:
-    //- (id<ASLayoutable>)finalLayoutable
+    //- (id<ASLayoutProducer>)finalLayoutProducer
     //{
     //  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
     //  insetSpec.insets = UIEdgeInsetsMake(10,10,10,10);
-    //  insetSpec.isFinalLayoutable = YES;
+    //  insetSpec.isFinalLayoutProducer = YES;
     //  [insetSpec setChild:self];
     //  return insetSpec;
     //}
 
-    id<ASLayoutable> finalLayoutable = [child finalLayoutable];
-    if (finalLayoutable != child) {
+    id<ASLayoutProducer> finalLayoutProducer = [child finalLayoutProducer];
+    if (finalLayoutProducer != child) {
       if (ASEnvironmentStatePropagationEnabled()) {
-        ASEnvironmentStatePropagateUp(finalLayoutable, child.environmentState.layoutOptionsState);
+        ASEnvironmentStatePropagateUp(finalLayoutProducer, child.environmentState.layoutOptionsState);
       } else {
         // If state propagation is not enabled the layout options state needs to be copied manually
-        ASEnvironmentState finalLayoutableEnvironmentState = finalLayoutable.environmentState;
-        finalLayoutableEnvironmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
-        finalLayoutable.environmentState = finalLayoutableEnvironmentState;
+        ASEnvironmentState environmentState = finalLayoutProducer.environmentState;
+        environmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
+        finalLayoutProducer.environmentState = environmentState;
       }
-      return finalLayoutable;
+      return finalLayoutProducer;
     }
   }
   return child;
@@ -103,7 +103,7 @@
   return _childrenWithIdentifier;
 }
 
-- (void)setParent:(id<ASLayoutable>)parent
+- (void)setParent:(id<ASLayoutProducer>)parent
 {
   // FIXME: Locking should be evaluated here.  _parent is not widely used yet, though.
   _parent = parent;
@@ -113,34 +113,34 @@
   }
 }
 
-- (void)setChild:(id<ASLayoutable>)child;
+- (void)setChild:(id<ASLayoutProducer>)child;
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
-  id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-  _child = finalLayoutable;
-  [self propagateUpLayoutable:finalLayoutable];
+  id<ASLayoutProducer> finalLayoutProducer = [self layoutProducerToAddFromProducer:child];
+  _child = finalLayoutProducer;
+  [self propagateUpLayoutProducer:finalLayoutProducer];
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+- (void)setChild:(id<ASLayoutProducer>)child forIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
-  id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-  self.childrenWithIdentifier[identifier] = finalLayoutable;
+  id<ASLayoutProducer> finalLayoutProducer = [self layoutProducerToAddFromProducer:child];
+  self.childrenWithIdentifier[identifier] = finalLayoutProducer;
   
-  // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
+  // TODO: Should we propagate up the layout producer at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
-  // [self propagateUpLayoutable:finalLayoutable];
+  // [self propagateUpLayoutProducer:finalLayoutProducer];
 }
 
 - (void)setChildren:(NSArray *)children
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
-  std::vector<id<ASLayoutable>> finalChildren;
-  for (id<ASLayoutable> child in children) {
-    finalChildren.push_back([self layoutableToAddFromLayoutable:child]);
+  std::vector<id<ASLayoutProducer>> finalChildren;
+  for (id<ASLayoutProducer> child in children) {
+    finalChildren.push_back([self layoutProducerToAddFromProducer:child]);
   }
   
   _children = nil;
@@ -149,12 +149,12 @@
   }
 }
 
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
+- (id<ASLayoutProducer>)childForIdentifier:(NSString *)identifier
 {
   return self.childrenWithIdentifier[identifier];
 }
 
-- (id<ASLayoutable>)child
+- (id<ASLayoutProducer>)child
 {
   return _child;
 }
@@ -190,12 +190,12 @@
   return ASEnvironmentStateTraitCollectionPropagationEnabled();
 }
 
-- (void)propagateUpLayoutable:(id<ASLayoutable>)layoutable
+- (void)propagateUpLayoutProducer:(id<ASLayoutProducer>)producer
 {
-  if ([layoutable isKindOfClass:[ASLayoutSpec class]]) {
-    [(ASLayoutSpec *)layoutable setParent:self]; // This will trigger upward propogation if needed.
+  if ([producer isKindOfClass:[ASLayoutSpec class]]) {
+    [(ASLayoutSpec *)producer setParent:self]; // This will trigger upward propogation if needed.
   } else if ([self supportsUpwardPropagation]) {
-    ASEnvironmentStatePropagateUp(self, layoutable.environmentState.layoutOptionsState); // Probably an ASDisplayNode
+    ASEnvironmentStatePropagateUp(self, producer.environmentState.layoutOptionsState); // Probably an ASDisplayNode
   }
 }
 
@@ -217,12 +217,12 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 @implementation ASLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutProducerAsciiArtProtocol
 
 + (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction
 {
   NSMutableArray *childStrings = [NSMutableArray array];
-  for (id<ASLayoutableAsciiArtProtocol> layoutChild in children) {
+  for (id<ASLayoutProducerAsciiArtProtocol> layoutChild in children) {
     NSString *childString = [layoutChild asciiArtString];
     if (childString) {
       [childStrings addObject:childString];
