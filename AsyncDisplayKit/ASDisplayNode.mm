@@ -614,18 +614,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
     _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                               pendingLayout:newLayout
-                                                      pendingConstrainedSize:constrainedSize
-                                                              previousLayout:previousLayout
-                                                     previousConstrainedSize:previousConstrainedSize];
+                                                          pendingLayout:newLayout
+                                                 pendingConstrainedSize:constrainedSize
+                                                         previousLayout:previousLayout
+                                                previousConstrainedSize:previousConstrainedSize];
   } else {
     ASLayoutTransition *layoutContext;
     if (self.usesImplicitHierarchyManagement) {
       layoutContext = [[ASLayoutTransition alloc] initWithNode:self
-                                                         pendingLayout:newLayout
-                                                pendingConstrainedSize:constrainedSize
-                                                        previousLayout:previousLayout
-                                               previousConstrainedSize:previousConstrainedSize];
+                                                 pendingLayout:newLayout
+                                        pendingConstrainedSize:constrainedSize
+                                                previousLayout:previousLayout
+                                       previousConstrainedSize:previousConstrainedSize];
     }
     [self applyLayout:newLayout constrainedSize:constrainedSize layoutContext:layoutContext];
     [self _completeLayoutCalculation];
@@ -741,10 +741,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       }
       
       _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                                 pendingLayout:newLayout
-                                                        pendingConstrainedSize:constrainedSize
-                                                                previousLayout:previousLayout
-                                                       previousConstrainedSize:previousConstrainedSize];
+                                                            pendingLayout:newLayout
+                                                   pendingConstrainedSize:constrainedSize
+                                                           previousLayout:previousLayout
+                                                  previousConstrainedSize:previousConstrainedSize];
       [_pendingLayoutTransition applySubnodeInsertions];
 
       _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
