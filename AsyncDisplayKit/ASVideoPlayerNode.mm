@@ -368,7 +368,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   return YES;
 }
 
-- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToTimeInterval:(NSTimeInterval)timeInterval
 {
   //TODO: ask Max about CMTime problem in ASVideoNode Header file
   //as we said yesterday, we must use CMTime in ASVideoNode instead of NSTimeInterval
@@ -382,22 +382,22 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 
   if (_elapsedTextNode) {
-    [self updateElapsedTimeLabel:second];
+    [self updateElapsedTimeLabel:timeInterval];
   }
 
   if (_scrubberNode) {
-    [(UISlider*)_scrubberNode.view setValue:(second/ CMTimeGetSeconds(_duration) ) animated:NO];
+    [(UISlider*)_scrubberNode.view setValue:( timeInterval / CMTimeGetSeconds(_duration) ) animated:NO];
   }
 }
 
-- (void)videoPlaybackDidFinish:(ASVideoNode *)videoNode
+- (void)videoDidPlayToEnd:(ASVideoNode *)videoNode
 {
   if (_delegateFlags.delegateVideoNodePlaybackDidFinish) {
     [_delegate videoPlayerNodeDidPlayToEnd:self];
   }
 }
 
-- (void)videoNodeWasTapped:(ASVideoNode *)videoNode
+- (void)didTapVideoNode:(ASVideoNode *)videoNode
 {
   if (_delegateFlags.delegateDidTapVideoPlayerNode) {
     [_delegate didTapVideoPlayerNode:self];

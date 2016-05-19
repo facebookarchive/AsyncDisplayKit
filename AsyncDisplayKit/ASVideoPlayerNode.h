@@ -107,7 +107,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)didTapVideoPlayerNode:(ASVideoPlayerNode *)videoPlayer;
 /**
  * @abstract Delegate method invoked when ASVideoNode playback time is updated.
- * @param videoPlayerNode The video node that was tapped.
+ * @param videoPlayerNode The video player node
  * @param second current playback time.
  */
 - (void)videoPlayerNode:(ASVideoPlayerNode *)videoPlayer didPlayToTime:(CMTime)time;
@@ -119,7 +119,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param toSate ASVideoNode new state.
  * @discussion This method is called after each state change
  */
-- (void)videoPlayerNode:(ASVideoPlayerNode *)videoPlayer willChangeVideoNodeState:(ASVideoNodePlayerState)state toVideoNodeState:(ASVideoNodePlayerState)toSate;
+- (void)videoPlayerNode:(ASVideoPlayerNode *)videoPlayer willChangeVideoNodeState:(ASVideoNodePlayerState)state toVideoNodeState:(ASVideoNodePlayerState)toState;
 
 /**
  * @abstract Delegate method is invoked when ASVideoNode decides to change state.
