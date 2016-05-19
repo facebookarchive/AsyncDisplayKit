@@ -48,9 +48,9 @@ static NSString * const kStatus = @"status";
     unsigned int delegateVideoNodeDidRecoverFromStall:1;
     
     //Flags for deprecated methods
-    unsigned int delegateVideoDidPlayToEnd_deprecated:1;
-    unsigned int delegateDidTapVideoNode_deprecated:1;
-    unsigned int delegateVideoNodeDidPlayToTimeInterval_deprecated:1;
+    unsigned int delegateVideoPlaybackDidFinish_deprecated:1;
+    unsigned int delegateVideoNodeWasTapped_deprecated:1;
+    unsigned int delegateVideoNodeDidPlayToSecond_deprecated:1;
   } _delegateFlags;
   
   BOOL _shouldBePlaying;
@@ -345,7 +345,7 @@ static NSString * const kStatus = @"status";
   if (_delegateFlags.delegateDidTapVideoNode) {
     [_delegate didTapVideoNode:self];
     
-  } else if (_delegateFlags.delegateDidTapVideoNode_deprecated) {
+  } else if (_delegateFlags.delegateVideoNodeWasTapped_deprecated) {
     // TODO: This method is deprecated, remove in ASDK 2.0
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -397,7 +397,7 @@ static NSString * const kStatus = @"status";
   if (_delegateFlags.delegateVideoNodeDidPlayToTimeInterval) {
     [_delegate videoNode:self didPlayToTimeInterval:timeInSeconds];
     
-  } else if (_delegateFlags.delegateVideoNodeDidPlayToTimeInterval_deprecated) {
+  } else if (_delegateFlags.delegateVideoNodeDidPlayToSecond_deprecated) {
     // TODO: This method is deprecated, remove in ASDK 2.0
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -527,12 +527,12 @@ static NSString * const kStatus = @"status";
     _delegateFlags.delegateVideoNodeDidRecoverFromStall = [_delegate respondsToSelector:@selector(videoNodeDidRecoverFromStall:)];
       
     // deprecated methods
-    _delegateFlags.delegateVideoDidPlayToEnd_deprecated =  [_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)];
-    _delegateFlags.delegateVideoNodeDidPlayToTimeInterval_deprecated = [_delegate respondsToSelector:@selector(videoNode:didPlayToSecond:)];
-    _delegateFlags.delegateDidTapVideoNode_deprecated = [_delegate respondsToSelector:@selector(videoNodeWasTapped:)];
-    ASDisplayNodeAssert((_delegateFlags.delegateVideoDidPlayToEnd && _delegateFlags.delegateVideoDidPlayToEnd_deprecated) == NO, @"Implemented both deprecated and non-deprecated methods - please remove videoPlaybackDidFinish, it's deprecated");
-    ASDisplayNodeAssert((_delegateFlags.delegateVideoNodeDidPlayToTimeInterval && _delegateFlags.delegateVideoNodeDidPlayToTimeInterval_deprecated) == NO, @"Implemented both deprecated and non-deprecated methods - please remove videoNodeWasTapped, it's deprecated");
-    ASDisplayNodeAssert((_delegateFlags.delegateDidTapVideoNode && _delegateFlags.delegateDidTapVideoNode_deprecated) == NO, @"Implemented both deprecated and non-deprecated methods - please remove didPlayToSecond, it's deprecated");
+    _delegateFlags.delegateVideoPlaybackDidFinish_deprecated =  [_delegate respondsToSelector:@selector(videoPlaybackDidFinish:)];
+    _delegateFlags.delegateVideoNodeDidPlayToSecond_deprecated = [_delegate respondsToSelector:@selector(videoNode:didPlayToSecond:)];
+    _delegateFlags.delegateVideoNodeWasTapped_deprecated = [_delegate respondsToSelector:@selector(videoNodeWasTapped:)];
+    ASDisplayNodeAssert((_delegateFlags.delegateVideoDidPlayToEnd && _delegateFlags.delegateVideoPlaybackDidFinish_deprecated) == NO, @"Implemented both deprecated and non-deprecated methods - please remove videoPlaybackDidFinish, it's deprecated");
+    ASDisplayNodeAssert((_delegateFlags.delegateVideoNodeDidPlayToTimeInterval && _delegateFlags.delegateVideoNodeDidPlayToSecond_deprecated) == NO, @"Implemented both deprecated and non-deprecated methods - please remove videoNodeWasTapped, it's deprecated");
+    ASDisplayNodeAssert((_delegateFlags.delegateDidTapVideoNode && _delegateFlags.delegateVideoNodeWasTapped_deprecated) == NO, @"Implemented both deprecated and non-deprecated methods - please remove didPlayToSecond, it's deprecated");
   }
 }
 
@@ -681,7 +681,7 @@ static NSString * const kStatus = @"status";
   self.playerState = ASVideoNodePlayerStateFinished;
   if (_delegateFlags.delegateVideoDidPlayToEnd) {
     [_delegate videoDidPlayToEnd:self];
-  } else if (_delegateFlags.delegateVideoDidPlayToEnd_deprecated) {
+  } else if (_delegateFlags.delegateVideoPlaybackDidFinish_deprecated) {
     // TODO: This method is deprecated, remove in ASDK 2.0
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
