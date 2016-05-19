@@ -113,7 +113,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   BOOL _usesImplicitHierarchyManagement;
 
   int32_t _pendingTransitionID;
-  ASLayoutTransition *_pendingLayoutContext;
+  ASLayoutTransition *_pendingLayoutTransition;
   
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
