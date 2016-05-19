@@ -74,7 +74,6 @@ static NSString * const kStatus = @"status";
   ASImageNode *_placeholderImageNode; // TODO: Make ASVideoNode an ASImageNode subclass; remove this.
 
   ASDisplayNode *_playerNode;
-  ASDisplayNode *_spinnerNode;
   NSString *_gravity;
 }
 
@@ -220,13 +219,6 @@ static NSString * const kStatus = @"status";
         [children addObject:_playerNode];
     }
     
-    // Center spinner node
-    if (_spinnerNode) {
-        ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
-        centerLayoutSpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
-        [children addObject:centerLayoutSpec];
-    }
-    
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
 }
 
@@ -303,7 +295,6 @@ static NSString * const kStatus = @"status";
   if ([keyPath isEqualToString:kStatus]) {
     if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
       self.playerState = ASVideoNodePlayerStateReadyToPlay;
-      [self removeSpinner];
       // If we don't yet have a placeholder image update it now that we should have data available for it
       if (_placeholderImageNode.image == nil) {
         [self generatePlaceholderImage];
@@ -320,7 +311,6 @@ static NSString * const kStatus = @"status";
   } else if ([keyPath isEqualToString:kplaybackBufferEmpty]) {
     if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
       self.playerState = ASVideoNodePlayerStateLoading;
-      [self showSpinner];
     }
   }
 }
@@ -559,9 +549,8 @@ static NSString * const kStatus = @"status";
   _shouldBePlaying = YES;
 
   if (![self ready]) {
-    [self showSpinner];
+    self.playerState = ASVideoNodePlayerStateLoading;
   } else {
-    [self removeSpinner];
     self.playerState = ASVideoNodePlayerStatePlaying;
   }
 }
@@ -569,35 +558,6 @@ static NSString * const kStatus = @"status";
 - (BOOL)ready
 {
   return _currentPlayerItem.status == AVPlayerItemStatusReadyToPlay;
-}
-
-- (void)showSpinner
-{
-  ASDN::MutexLocker l(_videoLock);
-  
-  if (!_spinnerNode) {
-    _spinnerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-      UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
-      spinnnerView.color = [UIColor whiteColor];
-      return spinnnerView;
-    }];
-    _spinnerNode.preferredFrameSize = CGSizeMake(44.0, 44.0);
-      
-    [self addSubnode:_spinnerNode];
-    [self setNeedsLayout];
-  }
-  [(UIActivityIndicatorView *)_spinnerNode.view startAnimating];
-}
-
-- (void)removeSpinner
-{
-  ASDN::MutexLocker l(_videoLock);
-  
-  if (!_spinnerNode) {
-    return;
-  }
-  [_spinnerNode removeFromSupernode];
-  _spinnerNode = nil;
 }
 
 - (void)pause
@@ -608,7 +568,6 @@ static NSString * const kStatus = @"status";
   }
   self.playerState = ASVideoNodePlayerStatePaused;
   [_player pause];
-  [self removeSpinner];
   _shouldBePlaying = NO;
 }
 
@@ -656,7 +615,6 @@ static NSString * const kStatus = @"status";
 - (void)videoNodeDidStall:(NSNotification *)notification
 {
   self.playerState = ASVideoNodePlayerStateLoading;
-  [self showSpinner];
   if (_delegateFlags.delegateVideoNodeDidStallAtTimeInterval) {
     [_delegate videoNode:self didStallAtTimeInterval:CMTimeGetSeconds(_player.currentItem.currentTime)];
   }
@@ -680,13 +638,6 @@ static NSString * const kStatus = @"status";
 }
 
 #pragma mark - Internal Properties
-
-- (ASDisplayNode *)spinner
-{
-  ASDN::MutexLocker l(_videoLock);
-  return _spinnerNode;
-}
-
 - (ASImageNode *)placeholderImageNode
 {
   ASDN::MutexLocker l(_videoLock);

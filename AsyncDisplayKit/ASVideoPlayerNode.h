@@ -42,6 +42,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readwrite) BOOL shouldAutorepeat;
 @property (nonatomic, assign, readwrite) BOOL muted;
 @property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
+@property (nonatomic, assign, readwrite) BOOL shouldAggressivelyRecoverFromStall;
+
 //! Defaults to 100
 @property (nonatomic, assign) int32_t periodicTimeObserverTimescale;
 //! Defaults to AVLayerVideoGravityResizeAspect
@@ -94,6 +96,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (UIColor *)videoPlayerNodeScrubberMinimumTrackTint:(ASVideoPlayerNode *)videoPlayer;
 - (UIColor *)videoPlayerNodeScrubberThumbTint:(ASVideoPlayerNode *)videoPlayer;
 - (UIImage *)videoPlayerNodeScrubberThumbImage:(ASVideoPlayerNode *)videoPlayer;
+
+#pragma mark - Spinner delegate methods
+- (UIColor *)videoPlayerNodeSpinnerTint:(ASVideoPlayerNode *)videoPlayer;
 
 #pragma mark - Playback button delegate methods
 - (UIColor *)videoPlayerNodePlaybackButtonTint:(ASVideoPlayerNode *)videoPlayer;

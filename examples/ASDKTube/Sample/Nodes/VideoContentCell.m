@@ -31,7 +31,6 @@
 {
   self = [super init];
   if (self) {
-    
     _videoModel = video;
 
     _titleNode = [[ASTextNode alloc] init];
@@ -55,6 +54,7 @@
 
     _videoPlayerNode = [[ASVideoPlayerNode alloc] initWithUrl:_videoModel.url];
     _videoPlayerNode.delegate = self;
+    _videoPlayerNode.backgroundColor = [UIColor blackColor];
     [self addSubnode:_videoPlayerNode];
   }
   return self;
@@ -101,19 +101,20 @@
 #pragma mark - ASVideoPlayerNodeDelegate
 - (void)didTapVideoPlayerNode:(ASVideoPlayerNode *)videoPlayer
 {
-  if (_videoPlayerNode.playerState == ASVideoNodePlayerStatePlaying) {
+  if (_videoPlayerNode.isPlaying) {
     NSLog(@"TRANSITION");
+    [_videoPlayerNode pause];
   } else {
     [_videoPlayerNode play];
   }
 }
 
-- (NSArray *)videoPlayerNodeNeededControls:(ASVideoPlayerNode *)videoPlayer
+/*- (NSArray *)videoPlayerNodeNeededControls:(ASVideoPlayerNode *)videoPlayer
 {
   return @[ @(ASVideoPlayerNodeControlTypePlaybackButton) ];
-}
+}*/
 
-- (ASLayoutSpec *)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer forControls:(NSDictionary *)controls forMaximumSize:(CGSize)maxSize
+/*- (ASLayoutSpec *)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer forControls:(NSDictionary *)controls forMaximumSize:(CGSize)maxSize
 {
   NSMutableArray *bottomControls = [[NSMutableArray alloc] init];
 
@@ -147,5 +148,5 @@
 
 
   return mainVerticalStack;
-}
+}*/
 @end

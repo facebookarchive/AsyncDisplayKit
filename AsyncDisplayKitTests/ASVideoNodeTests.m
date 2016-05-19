@@ -50,13 +50,6 @@
   _requestedKeys = @[ @"playable" ];
 }
 
-
-- (void)testSpinnerDefaultsToNil
-{
-  XCTAssertNil(_videoNode.spinner);
-}
-
-
 - (void)testOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnode
 {
   _videoNode.asset = _firstAsset;
@@ -73,8 +66,6 @@
 {
   _videoNode.interfaceState = ASInterfaceStateFetchData;
   [_videoNode play];
-  
-  XCTAssertNotNil(_videoNode.spinner);
 }
 
 
@@ -96,8 +87,7 @@
   
   [_videoNode play];
   [_videoNode pause];
-  
-  XCTAssertFalse(((UIActivityIndicatorView *)_videoNode.spinner.view).isAnimating);
+
 }
 
 
@@ -119,8 +109,6 @@
   
   [_videoNode play];
   [_videoNode observeValueForKeyPath:@"status" ofObject:[_videoNode currentItem] change:@{NSKeyValueChangeNewKey : @(AVPlayerItemStatusReadyToPlay)} context:NULL];
-  
-  XCTAssertFalse(((UIActivityIndicatorView *)_videoNode.spinner.view).isAnimating);
 }
 
 

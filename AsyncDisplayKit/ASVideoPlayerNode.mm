@@ -19,6 +19,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   struct {
     unsigned int delegateNeededControls:1;
+    unsigned int delegateSpinnerTintColor:1;
     unsigned int delegatePlaybackButtonTint:1;
     unsigned int delegateScrubberMaximumTrackTintColor:1;
     unsigned int delegateScrubberMinimumTrackTintColor:1;
@@ -48,6 +49,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   ASTextNode  *_durationTextNode;
   ASDisplayNode *_scrubberNode;
   ASStackLayoutSpec *_controlFlexGrowSpacerSpec;
+  ASDisplayNode *_spinnerNode;
 
   BOOL _isSeeking;
   CMTime _duration;
@@ -59,6 +61,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   BOOL _muted;
   int32_t _periodicTimeObserverTimescale;
   NSString *_gravity;
+
+  BOOL _shouldAggressivelyRecoverFromStall;
 
   UIColor *_defaultControlsColor;
 }
@@ -355,8 +359,17 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   if (toState == ASVideoNodePlayerStatePlaying) {
     _playbackButtonNode.buttonType = ASDefaultPlaybackButtonTypePause;
-  } else {
+    [self removeSpinner];
+  } else if (toState != ASVideoNodePlayerStatePlaybackLikelyToKeepUpButNotPlaying && toState != ASVideoNodePlayerStateReadyToPlay) {
     _playbackButtonNode.buttonType = ASDefaultPlaybackButtonTypePlay;
+  }
+
+  if (toState == ASVideoNodePlayerStateLoading || toState == ASVideoNodePlayerStateInitialLoading) {
+    [self showSpinner];
+  }
+
+  if (toState == ASVideoNodePlayerStateReadyToPlay || toState == ASVideoNodePlayerStatePaused || toState == ASVideoNodePlayerStatePlaybackLikelyToKeepUpButNotPlaying) {
+    [self removeSpinner];
   }
 }
 
@@ -402,22 +415,55 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   if (_delegateFlags.delegateDidTapVideoPlayerNode) {
     [_delegate didTapVideoPlayerNode:self];
   } else {
-    if (videoNode.playerState == ASVideoNodePlayerStatePlaying) {
-      [videoNode pause];
-    } else {
-      [videoNode play];
-    }
+    [self manageVideoNodePlayback];
   }
 }
 
 #pragma mark - Actions
-- (void)didTapPlaybackButton:(ASControlNode*)node
+- (void)manageVideoNodePlayback
 {
   if (_videoNode.playerState == ASVideoNodePlayerStatePlaying) {
     [_videoNode pause];
   } else {
     [_videoNode play];
   }
+}
+
+- (void)showSpinner
+{
+  ASDN::MutexLocker l(_videoPlayerLock);
+
+  if (!_spinnerNode) {
+    _spinnerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
+      UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
+      spinnnerView.color = _defaultControlsColor;
+      if (_delegateFlags.delegateSpinnerTintColor) {
+        spinnnerView.color = [_delegate videoPlayerNodeSpinnerTint:self];
+      }
+      return spinnnerView;
+    }];
+    _spinnerNode.preferredFrameSize = CGSizeMake(44.0, 44.0);
+
+    [self addSubnode:_spinnerNode];
+    [self setNeedsLayout];
+  }
+  [(UIActivityIndicatorView *)_spinnerNode.view startAnimating];
+}
+
+- (void)removeSpinner
+{
+  ASDN::MutexLocker l(_videoPlayerLock);
+
+  if (!_spinnerNode) {
+    return;
+  }
+  [_spinnerNode removeFromSupernode];
+  _spinnerNode = nil;
+}
+
+- (void)didTapPlaybackButton:(ASControlNode*)node
+{
+  [self manageVideoNodePlayback];
 }
 
 - (void)beginSeek
@@ -445,7 +491,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [_videoNode.player seekToTime:CMTimeMakeWithSeconds(seconds, _videoNode.periodicTimeObserverTimescale)];
 
   if (_videoNode.playerState != ASVideoNodePlayerStatePlaying) {
-    [_videoNode play];
+    [self manageVideoNodePlayback];
   }
 }
 
@@ -510,10 +556,20 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     layoutSpec = [self defaultLayoutSpecThatFits:maxSize];
   }
 
+  NSMutableArray *children = [[NSMutableArray alloc] init];
+
+  if (_spinnerNode) {
+    ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
+    centerLayoutSpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
+    [children addObject:centerLayoutSpec];
+  }
+
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
   overlaySpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
 
-  return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[overlaySpec]];
+  [children addObject:overlaySpec];
+
+  return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
 }
 
 - (ASLayoutSpec*)defaultLayoutSpecThatFits:(CGSize)maxSize
@@ -559,6 +615,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
     _delegateFlags.delegateNeededControls = [_delegate respondsToSelector:@selector(videoPlayerNodeNeededControls:)];
+    _delegateFlags.delegateSpinnerTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeSpinnerTint:)];
     _delegateFlags.delegateScrubberMaximumTrackTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberMaximumTrackTint:)];
     _delegateFlags.delegateScrubberMinimumTrackTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberMinimumTrackTint:)];
     _delegateFlags.delegateScrubberThumbTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbTint:)];
@@ -627,6 +684,17 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (ASVideoNodePlayerState)playerState
 {
   return _videoNode.playerState;
+}
+
+- (BOOL)shouldAggressivelyRecoverFromStall
+{
+  return _videoNode.shouldAggressivelyRecoverFromStall;
+}
+
+- (void)setShouldAggressivelyRecoverFromStall:(BOOL)shouldAggressivelyRecoverFromStall
+{
+  _shouldAggressivelyRecoverFromStall = shouldAggressivelyRecoverFromStall;
+  _videoNode.shouldAggressivelyRecoverFromStall = _shouldAggressivelyRecoverFromStall;
 }
 
 #pragma mark - Helpers
