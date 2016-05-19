@@ -313,6 +313,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   [super reloadData];
 }
 
+- (void)relayoutAllNodes
+{
+  [_dataController relayoutAllNodes];
+}
+
 - (void)waitUntilAllUpdatesAreCommitted
 {
   ASDisplayNodeAssertMainThread();

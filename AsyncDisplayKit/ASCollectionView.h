@@ -165,6 +165,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reloadDataImmediately;
 
 /**
+ * Triggers a relayout of all nodes.
+ *
+ */
+- (void)relayoutAllNodes;
+
+/**
  *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
  */
 - (void)waitUntilAllUpdatesAreCommitted;
