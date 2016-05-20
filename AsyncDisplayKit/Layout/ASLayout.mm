@@ -50,6 +50,7 @@ extern BOOL CGPointIsNull(CGPoint point)
     }
     l->_constrainedSizeRange = sizeRange;
     l->_size = size;
+    l->_dirty = NO;
     
     if (CGPointIsNull(position) == NO) {
       l->_position = CGPointMake(ASCeilPixelValue(position.x), ASCeilPixelValue(position.y));

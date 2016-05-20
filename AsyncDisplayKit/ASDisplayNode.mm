@@ -650,10 +650,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
   }
   
-  // only calculate the size if
-  //  - we haven't already
-  //  - the constrained size range is different
-  return (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _layout.constrainedSizeRange));
+  // Only generate a new layout if:
+  // - The current layout is dirty
+  // - The passed constrained size is different than the layout's constrained size
+  return ([self _dirtyLayout] || !ASSizeRangeEqualToSizeRange(constrainedSize, _layout.constrainedSizeRange));
+}
+
+- (BOOL)_dirtyLayout
+{
+  return _layout == nil || _layout.isDirty;
 }
 
 #pragma mark - Layout Transition
@@ -1019,7 +1024,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
   
-  if (!_flags.isMeasured) {
+  if ([self _dirtyLayout]) {
     return;
   }
   
@@ -1095,7 +1100,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Normally measure will be called before layout occurs. If this doesn't happen, nothing is going to call it at all.
   // We simply call measureWithSizeRange: using a size range equal to whatever bounds were provided to that element or
   // try to measure the node with the largest size as possible
-  if (self.supernode == nil && !self.supportsRangeManagedInterfaceState && !_flags.isMeasured) {
+  if (self.supernode == nil && !self.supportsRangeManagedInterfaceState && [self _dirtyLayout] == NO) {
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
@@ -1108,7 +1113,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDisplayNodeAssertMainThread();
   
-  if (!_flags.isMeasured) {
+  if ([self _dirtyLayout]) {
     return;
   }
   
@@ -2058,8 +2063,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)invalidateCalculatedLayout
 {
   ASDN::MutexLocker l(_propertyLock);
-  // This will cause -measureWithSizeRange: to actually compute the size instead of returning the previously cached size
-  _flags.isMeasured = NO;
+
+  // This will cause the next call to -measureWithSizeRange: to actually compute a new layout
+  // instead of returning the current layout
+  _layout.dirty = YES;
 }
 
 - (void)__didLoad
@@ -2395,8 +2402,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   }
 }
 
-- (void)applyLayout:(ASLayout *)layout
-      layoutContext:(ASLayoutTransition *)layoutContext
+- (void)applyLayout:(ASLayout *)layout layoutContext:(ASLayoutTransition *)layoutContext
 {
   ASDN::MutexLocker l(_propertyLock);
   _layout = layout;
@@ -2404,8 +2410,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertTrue(layout.layoutableObject == self);
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
-
-  _flags.isMeasured = YES;
   
   if (self.usesImplicitHierarchyManagement && layoutContext != nil) {
     [layoutContext applySubnodeInsertions];

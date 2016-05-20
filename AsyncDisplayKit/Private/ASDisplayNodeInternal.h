@@ -82,7 +82,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
     unsigned implementsDrawParameters:1;
 
     // internal state
-    unsigned isMeasured:1;
     unsigned isEnteringHierarchy:1;
     unsigned isExitingHierarchy:1;
     unsigned isInHierarchy:1;
