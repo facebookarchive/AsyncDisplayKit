@@ -354,6 +354,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [super reloadData];
 }
 
+- (void)relayoutItems
+{
+  [_dataController relayoutAllNodes];
+}
+
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
   [_layoutController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];

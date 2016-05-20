@@ -168,7 +168,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Triggers a relayout of all nodes.
  *
  */
-- (void)relayoutAllNodes;
+- (void)relayoutItems;
 
 /**
  *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
