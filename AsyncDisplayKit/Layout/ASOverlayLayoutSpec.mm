@@ -58,7 +58,10 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
     [sublayouts addObject:overlayLayout];
   }
   
-  return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:contentsLayout.size
+                                   sublayouts:sublayouts];
 }
 
 @end

@@ -41,6 +41,11 @@ extern BOOL CGPointIsNull(CGPoint point);
 @property (nonatomic, readwrite) CGPoint position;
 
 /**
+ * The size range that was use to determine the size of the layout.
+ */
+@property (nonatomic, readonly) ASSizeRange constrainedSizeRange;
+
+/**
  * Array of ASLayouts. Each must have a valid non-null position.
  */
 @property (nonatomic, readonly) NSArray<ASLayout *> *sublayouts;
@@ -67,6 +72,7 @@ extern BOOL CGPointIsNull(CGPoint point);
  * @param sublayouts Sublayouts belong to the new layout.
  */
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                      constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size
                                   position:(CGPoint)position
                                 sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
@@ -85,6 +91,7 @@ extern BOOL CGPointIsNull(CGPoint point);
  * @param sublayouts Sublayouts belong to the new layout.
  */
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                      constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size
                                 sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
@@ -97,7 +104,9 @@ extern BOOL CGPointIsNull(CGPoint point);
  *
  * @param size The size of this layout.
  */
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size;
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                      constrainedSizeRange:(ASSizeRange)sizeRange
+                                      size:(CGSize)size;
 
 /**
  * Convenience initializer that is flattened and has CGPointNull position.
@@ -109,6 +118,7 @@ extern BOOL CGPointIsNull(CGPoint point);
  * @param sublayouts Sublayouts belong to the new layout.
  */
 + (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                               constrainedSizeRange:(ASSizeRange)sizeRange
                                                size:(CGSize)size
                                          sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
