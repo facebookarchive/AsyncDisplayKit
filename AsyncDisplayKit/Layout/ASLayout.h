@@ -13,6 +13,7 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASDimension.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
