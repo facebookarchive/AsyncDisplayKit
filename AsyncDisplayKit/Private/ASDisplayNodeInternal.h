@@ -103,8 +103,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASEnvironmentState _environmentState;
   ASLayout *_layout;
 
-  ASSizeRange _constrainedSize;
-
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
   

@@ -16,15 +16,11 @@
 
 @property (nonatomic, readonly, weak) ASDisplayNode *node;
 @property (nonatomic, readonly, strong) ASLayout *pendingLayout;
-@property (nonatomic, readonly, assign) ASSizeRange pendingConstrainedSize;
 @property (nonatomic, readonly, strong) ASLayout *previousLayout;
-@property (nonatomic, readonly, assign) ASSizeRange previousConstrainedSize;
 
 - (instancetype)initWithNode:(ASDisplayNode *)node
                pendingLayout:(ASLayout *)pendingLayout
-      pendingConstrainedSize:(ASSizeRange)pendingConstrainedSize
-              previousLayout:(ASLayout *)previousLayout
-     previousConstrainedSize:(ASSizeRange)previousConstrainedSize;
+              previousLayout:(ASLayout *)previousLayout;
 
 - (void)applySubnodeInsertions;
 

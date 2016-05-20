@@ -616,25 +616,20 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self cancelLayoutTransitionsInProgress];
 
   ASLayout *previousLayout = _layout;
-  ASSizeRange previousConstrainedSize = _constrainedSize;
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
   
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
     _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                           pendingLayout:newLayout
-                                                 pendingConstrainedSize:constrainedSize
-                                                         previousLayout:previousLayout
-                                                previousConstrainedSize:previousConstrainedSize];
+                                                         previousLayout:previousLayout];
   } else {
     ASLayoutTransition *layoutContext;
     if (self.usesImplicitHierarchyManagement) {
       layoutContext = [[ASLayoutTransition alloc] initWithNode:self
                                                  pendingLayout:newLayout
-                                        pendingConstrainedSize:constrainedSize
-                                                previousLayout:previousLayout
-                                       previousConstrainedSize:previousConstrainedSize];
+                                                previousLayout:previousLayout];
     }
-    [self applyLayout:newLayout constrainedSize:constrainedSize layoutContext:layoutContext];
+    [self applyLayout:newLayout layoutContext:layoutContext];
     [self _completeLayoutCalculation];
   }
 
@@ -658,7 +653,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // only calculate the size if
   //  - we haven't already
   //  - the constrained size range is different
-  return (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _constrainedSize));
+  return (!_flags.isMeasured || !ASSizeRangeEqualToSizeRange(constrainedSize, _layout.constrainedSizeRange));
 }
 
 #pragma mark - Layout Transition
@@ -667,9 +662,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(void(^)())completion
 {
-  ASSizeRange currentConstrainedSize = _constrainedSize;
   [self invalidateCalculatedLayout];
-  [self transitionLayoutWithSizeRange:currentConstrainedSize
+  [self transitionLayoutWithSizeRange:_layout.constrainedSizeRange
                              animated:animated
                    shouldMeasureAsync:shouldMeasureAsync
                 measurementCompletion:completion];
@@ -732,8 +726,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       }
       
       ASLayout *previousLayout = _layout;
-      ASSizeRange previousConstrainedSize = _constrainedSize;
-      [self applyLayout:newLayout constrainedSize:constrainedSize layoutContext:nil];
+      [self applyLayout:newLayout layoutContext:nil];
       
       ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
         [node applyPendingLayoutContext];
@@ -749,9 +742,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       
       _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                             pendingLayout:newLayout
-                                                   pendingConstrainedSize:constrainedSize
-                                                           previousLayout:previousLayout
-                                                  previousConstrainedSize:previousConstrainedSize];
+                                                          previousLayout:previousLayout];
       [_pendingLayoutTransition applySubnodeInsertions];
 
       _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
@@ -1032,7 +1023,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return;
   }
   
-  ASSizeRange oldConstrainedSize = _constrainedSize;
   [self invalidateCalculatedLayout];
   
   if (_supernode) {
@@ -1045,7 +1035,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
-  [self measureWithSizeRange:oldConstrainedSize];
+  [self measureWithSizeRange:_layout.constrainedSizeRange];
 
   CGRect oldBounds = self.bounds;
   CGSize oldSize = oldBounds.size;
@@ -2014,7 +2004,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (ASSizeRange)constrainedSizeForCalculatedLayout
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _constrainedSize;
+  return _layout.constrainedSizeRange;
 }
 
 - (void)setLayoutSpecBlock:(ASLayoutSpecBlock)layoutSpecBlock
@@ -2400,15 +2390,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(_propertyLock);
   if (_pendingLayoutTransition) {
-    [self applyLayout:_pendingLayoutTransition.pendingLayout
-      constrainedSize:_pendingLayoutTransition.pendingConstrainedSize
-        layoutContext:_pendingLayoutTransition];
+    [self applyLayout:_pendingLayoutTransition.pendingLayout layoutContext:_pendingLayoutTransition];
     _pendingLayoutTransition = nil;
   }
 }
 
 - (void)applyLayout:(ASLayout *)layout
-    constrainedSize:(ASSizeRange)constrainedSize
       layoutContext:(ASLayoutTransition *)layoutContext
 {
   ASDN::MutexLocker l(_propertyLock);
@@ -2418,7 +2405,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
 
-  _constrainedSize = constrainedSize;
   _flags.isMeasured = YES;
   
   if (self.usesImplicitHierarchyManagement && layoutContext != nil) {
