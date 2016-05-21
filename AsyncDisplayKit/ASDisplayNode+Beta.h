@@ -8,6 +8,8 @@
 
 #import "ASContextTransitioning.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 ASDISPLAYNODE_EXTERN_C_BEGIN
 void ASPerformBlockOnMainThread(void (^block)());
 void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
@@ -35,12 +37,12 @@ ASDISPLAYNODE_EXTERN_C_END
  * restoring context if necessary. Restoring can be done in contextDidDisplayNodeContent
  * This block can be called from *any* thread and it is unsafe to access any UIKit main thread properties from it.
  */
-@property (nonatomic, strong) ASDisplayNodeContextModifier willDisplayNodeContentWithRenderingContext;
+@property (nonatomic, copy, nullable) ASDisplayNodeContextModifier willDisplayNodeContentWithRenderingContext;
 
 /**
  * @abstract allow modification of a context after the node's content is drawn
  */
-@property (nonatomic, strong) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
+@property (nonatomic, copy, nullable) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
 
 /** @name Layout Transitioning */
 
@@ -73,7 +75,7 @@ ASDISPLAYNODE_EXTERN_C_END
 - (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
                              animated:(BOOL)animated
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(void(^)())completion;
+                measurementCompletion:(nullable void(^)())completion;
 
 /**
  * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
@@ -88,8 +90,8 @@ ASDISPLAYNODE_EXTERN_C_END
  * @see animateLayoutTransition:
  */
 - (void)transitionLayoutWithAnimation:(BOOL)animated
-                         shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                      measurementCompletion:(void(^)())completion;
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(nullable void(^)())completion;
 
 
 /**
@@ -113,3 +115,5 @@ ASDISPLAYNODE_EXTERN_C_END
 - (void)hierarchyDisplayDidFinish;
 
 @end
+
+NS_ASSUME_NONNULL_END
