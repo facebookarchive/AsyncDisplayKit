@@ -42,7 +42,7 @@
   NSArray *children = self.children;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:children.count];
 
-  for (id<ASLayoutable> child in children) {
+  for (id<ASLayoutProducer> child in children) {
     CGPoint layoutPosition = child.layoutPosition;
     CGSize autoMaxSize = CGSizeMake(maxConstrainedSize.width  - layoutPosition.x,
                                     maxConstrainedSize.height - layoutPosition.y);
@@ -67,17 +67,17 @@
     size.height = MAX(size.height, sublayoutPosition.y + sublayoutSize.height);
   }
 
-  return [ASLayout layoutWithLayoutableObject:self
-                                         size:ASSizeRangeClamp(constrainedSize, size)
-                                   sublayouts:sublayouts];
+  return [ASLayout layoutWithProducer:self
+                                 size:ASSizeRangeClamp(constrainedSize, size)
+                           sublayouts:sublayouts];
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+- (void)setChild:(id<ASLayoutProducer>)child forIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(NO, @"ASStaticLayoutSpec only supports setChildren");
 }
 
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
+- (id<ASLayoutProducer>)childForIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(NO, @"ASStaticLayoutSpec only supports children");
   return nil;
@@ -96,7 +96,7 @@
 
 @implementation ASStaticLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutProducerAsciiArtProtocol
 
 - (NSString *)debugBoxString
 {

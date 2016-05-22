@@ -42,7 +42,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
 
 @implementation ASInsetLayoutSpec
 
-- (instancetype)initWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
+- (instancetype)initWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutProducer>)child;
 {
   if (!(self = [super init])) {
     return nil;
@@ -53,7 +53,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   return self;
 }
 
-+ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child
++ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutProducer>)child
 {
   return [[self alloc] initWithInsets:insets child:child];
 }
@@ -91,7 +91,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   
   if (self.child == nil) {
     ASDisplayNodeAssert(NO, @"Inset spec measured without a child. The spec will do nothing.");
-    return [ASLayout layoutWithLayoutableObject:self size:CGSizeZero];
+    return [ASLayout layoutWithProducer:self size:CGSizeZero];
   }
   
   ASLayout *sublayout = [self.child measureWithSizeRange:insetConstrainedSize];
@@ -112,7 +112,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   
   sublayout.position = CGPointMake(x, y);
   
-  return [ASLayout layoutWithLayoutableObject:self size:computedSize sublayouts:@[sublayout]];
+  return [ASLayout layoutWithProducer:self size:computedSize sublayouts:@[sublayout]];
 }
 
 - (void)setChildren:(NSArray *)children

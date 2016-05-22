@@ -21,7 +21,7 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
 
 @implementation ASBackgroundLayoutSpec
 
-- (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
+- (instancetype)initWithChild:(id<ASLayoutProducer>)child background:(id<ASLayoutProducer>)background
 {
   if (!(self = [super init])) {
     return nil;
@@ -33,7 +33,7 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
   return self;
 }
 
-+ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutProducer>)child background:(id<ASLayoutProducer>)background;
 {
   return [[self alloc] initWithChild:child background:background];
 }
@@ -55,15 +55,15 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
   contentsLayout.position = CGPointZero;
   [sublayouts addObject:contentsLayout];
 
-  return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithProducer:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
-- (void)setBackground:(id<ASLayoutable>)background
+- (void)setBackground:(id<ASLayoutProducer>)background
 {
   [super setChild:background forIdentifier:kBackgroundChildKey];
 }
 
-- (id<ASLayoutable>)background
+- (id<ASLayoutProducer>)background
 {
   return [super childForIdentifier:kBackgroundChildKey];
 }

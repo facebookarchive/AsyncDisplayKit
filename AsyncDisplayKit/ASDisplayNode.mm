@@ -64,7 +64,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition;
 @synthesize name = _name;
 @synthesize preferredFrameSize = _preferredFrameSize;
-@synthesize isFinalLayoutable = _isFinalLayoutable;
+@synthesize isFinalLayoutProducer = _isFinalLayoutProducer;
 @synthesize threadSafeBounds = _threadSafeBounds;
 
 static BOOL usesImplicitHierarchyManagement = NO;
@@ -642,8 +642,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
-    ASLayoutableContext context =  ASLayoutableGetCurrentContext();
-    if (ASLayoutableContextIsNull(context) || _pendingTransitionID != context.transitionID) {
+    ASLayoutProducerContext context =  ASLayoutProducerGetCurrentContext();
+    if (ASLayoutProducerContextIsNull(context) || _pendingTransitionID != context.transitionID) {
       return NO;
     }
   }
@@ -698,7 +698,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     
     ASLayout *newLayout;
     {
-      ASLayoutableSetCurrentContext(ASLayoutableContextMake(transitionID, NO));
+      ASLayoutProducerSetCurrentContext(ASLayoutProducerContextMake(transitionID, NO));
 
       ASDN::MutexLocker l(_propertyLock);
       BOOL disableImplicitHierarchyManagement = self.usesImplicitHierarchyManagement == NO;
@@ -708,7 +708,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         self.usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
       }
       
-      ASLayoutableClearCurrentContext();
+      ASLayoutProducerClearCurrentContext();
     }
     
     if ([self _shouldAbortTransitionWithID:transitionID]) {
@@ -1897,26 +1897,26 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(_propertyLock);
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
-    layoutSpec.parent = self; // This causes upward propogation of any non-default layoutable values.
+    layoutSpec.parent = self; // This causes upward propogation of any non-default layout producer values.
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
-    // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
-    if (layout.layoutableObject != self) {
+    // Make sure the producer of the root layout is `self`, so that the flattened layout will be structurally correct.
+    if (layout.layoutProducer != self) {
       layout.position = CGPointZero;
-      layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
+      layout = [ASLayout layoutWithProducer:self size:layout.size sublayouts:@[layout]];
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
       if (self.usesImplicitHierarchyManagement) {
-        return ASObjectIsEqual(layout, evaluatedLayout) == NO && [evaluatedLayout.layoutableObject isKindOfClass:[ASDisplayNode class]];
+        return ASObjectIsEqual(layout, evaluatedLayout) == NO && [evaluatedLayout.layoutProducer isKindOfClass:[ASDisplayNode class]];
       } else {
-        return [_subnodes containsObject:evaluatedLayout.layoutableObject];
+        return [_subnodes containsObject:evaluatedLayout.layoutProducer];
       }
     }];
   } else {
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
     // assume that the default implementation of -calculateSizeThatFits: returns it.
     CGSize size = [self calculateSizeThatFits:constrainedSize.max];
-    return [ASLayout layoutWithLayoutableObject:self size:ASSizeRangeClamp(constrainedSize, size)];
+    return [ASLayout layoutWithProducer:self size:ASSizeRangeClamp(constrainedSize, size)];
   }
 }
 
@@ -2307,7 +2307,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       // Leaving layout pending state, reset related properties
       {
         ASDN::MutexLocker l(_propertyLock);
-        _pendingTransitionID = ASLayoutableContextInvalidTransitionID;
+        _pendingTransitionID = ASLayoutProducerContextInvalidTransitionID;
         _pendingLayoutContext = nil;
       }
     }
@@ -2356,7 +2356,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(_propertyLock);
   _layout = layout;
   
-  ASDisplayNodeAssertTrue(layout.layoutableObject == self);
+  ASDisplayNodeAssertTrue(layout.layoutProducer == self);
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
 
@@ -2383,7 +2383,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)__layoutSublayouts
 {
   for (ASLayout *subnodeLayout in _layout.immediateSublayouts) {
-    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
+    ((ASDisplayNode *)subnodeLayout.layoutProducer).frame = [subnodeLayout frame];
   }
 }
 
@@ -2678,7 +2678,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   _flags.isInHierarchy = inHierarchy;
 }
 
-- (id<ASLayoutable>)finalLayoutable
+- (id<ASLayoutProducer>)finalLayoutProducer
 {
   return self;
 }
@@ -2822,7 +2822,7 @@ ASEnvironmentLayoutExtensibilityForwarding
   return subtree;
 }
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutProducerAsciiArtProtocol
 
 - (NSString *)asciiArtString
 {

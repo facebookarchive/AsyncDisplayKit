@@ -121,12 +121,12 @@
   _baselineRelativeArrangement = baselineRelativeArrangement;
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+- (void)setChild:(id<ASLayoutProducer>)child forIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
 }
 
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
+- (id<ASLayoutProducer>)childForIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports children");
   return nil;
@@ -135,14 +135,14 @@
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   if (self.children.count == 0) {
-    return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+    return [ASLayout layoutWithProducer:self size:constrainedSize.min];
   }
   
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
   BOOL needsBaselinePass = _baselineRelativeArrangement || _alignItems == ASStackLayoutAlignItemsBaselineFirst || _alignItems == ASStackLayoutAlignItemsBaselineLast;
   
-  std::vector<id<ASLayoutable>> stackChildren = std::vector<id<ASLayoutable>>();
-  for (id<ASLayoutable> child in self.children) {
+  std::vector<id<ASLayoutProducer>> stackChildren = std::vector<id<ASLayoutProducer>>();
+  for (id<ASLayoutProducer> child in self.children) {
     stackChildren.push_back(child);
   }
   
@@ -173,7 +173,7 @@
     sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
   }
   
-  return [ASLayout layoutWithLayoutableObject:self
+  return [ASLayout layoutWithProducer:self
                                          size:ASSizeRangeClamp(constrainedSize, finalSize)
                                    sublayouts:sublayouts];
 }
@@ -209,7 +209,7 @@
 
 @implementation ASStackLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutProducerAsciiArtProtocol
 
 - (NSString *)asciiArtString
 {

@@ -13,13 +13,13 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- This layout spec lays out a single layoutable child and then overlays a layoutable object on top of it streched to its size
+ This layout spec lays out a single layout producer child and then overlays a layout producer object on top of it streched to its size
  */
 @interface ASOverlayLayoutSpec : ASLayoutSpec
 
-@property (nullable, nonatomic, strong) id<ASLayoutable> overlay;
+@property (nullable, nonatomic, strong) id<ASLayoutProducer> overlay;
 
-+ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(nullable id<ASLayoutable>)overlay;
++ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutProducer>)child overlay:(nullable id<ASLayoutProducer>)overlay;
 
 @end
 

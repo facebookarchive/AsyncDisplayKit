@@ -36,7 +36,7 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** Lays out a single layoutable child and position it so that it is centered into the layout bounds.
+/** Lays out a single layout producer child and position it so that it is centered into the layout bounds.
   * NOTE: ASRelativeLayoutSpec offers all of the capabilities of Center, and more.
   * Check it out if you would like to be able to position the child at any corner or the middle of an edge.
  */
@@ -56,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (instancetype)centerLayoutSpecWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
                                        sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
-                                               child:(id<ASLayoutable>)child;
+                                               child:(id<ASLayoutProducer>)child;
 
 @end
 

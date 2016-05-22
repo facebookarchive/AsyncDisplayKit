@@ -8,13 +8,13 @@
  *
  */
 
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASLayoutProducer.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 /** A layout spec is an immutable object that describes a layout, loosely inspired by React. */
-@interface ASLayoutSpec : NSObject <ASLayoutable>
+@interface ASLayoutSpec : NSObject <ASLayoutProducer>
 
 /** 
  * Creation of a layout spec should only happen by a user in layoutSpecThatFits:. During that method, a
@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Parent of the layout spec
  */
-@property (nullable, nonatomic, weak) id<ASLayoutable> parent;
+@property (nullable, nonatomic, weak) id<ASLayoutProducer> parent;
 
 /**
  * Adds a child to this layout spec using a default identifier.
@@ -45,7 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
  * setChild:forIdentifier: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
  * property that behind the scenes is calling setChild:forIdentifier:.
  */
-- (void)setChild:(id<ASLayoutable>)child;
+- (void)setChild:(id<ASLayoutProducer>)child;
 
 /**
  * Adds a child with the given identifier to this layout spec.
@@ -64,12 +64,12 @@ NS_ASSUME_NONNULL_BEGIN
  * setChild:forIdentifier: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
  * property that behind the scenes is calling setChild:forIdentifier:.
  */
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier;
+- (void)setChild:(id<ASLayoutProducer>)child forIdentifier:(NSString *)identifier;
 
 /**
  * Adds childen to this layout spec.
  *
- * @param children An array of ASLayoutable children to be added.
+ * @param children An array of ASLayoutProducer children to be added.
  * 
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
  * reponsibility of holding on to the spec children. Some layout specs, like ASStackLayoutSpec,
@@ -77,13 +77,13 @@ NS_ASSUME_NONNULL_BEGIN
  * For good measure, in these layout specs it probably makes sense to define
  * setChild: and setChild:forIdentifier: methods to do something appropriate or to assert.
  */
-- (void)setChildren:(NSArray<id<ASLayoutable>> *)children;
+- (void)setChildren:(NSArray<id<ASLayoutProducer>> *)children;
 
 /**
  * Get child methods
  *
  * There is a corresponding "getChild" method for the above "setChild" methods.  If a subclass
- * has extra layoutable children, it is recommended to make a corresponding get method for that
+ * has extra layout producer children, it is recommended to make a corresponding get method for that
  * child. For example, the ASBackgroundLayoutSpec responds to backgroundChild.
  * 
  * If a get method is called on a spec that doesn't make sense, then the standard is to assert.
@@ -91,23 +91,23 @@ NS_ASSUME_NONNULL_BEGIN
  */
 
 /** Returns the child added to this layout spec using the default identifier. */
-- (nullable id<ASLayoutable>)child;
+- (nullable id<ASLayoutProducer>)child;
 
 /**
  * Returns the child added to this layout spec using the given identifier.
  *
  * @param identifier An identifier associated withe the child.
  */
-- (nullable id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
+- (nullable id<ASLayoutProducer>)childForIdentifier:(NSString *)identifier;
 
 /**
  * Returns all children added to this layout spec.
  */
-- (nullable NSArray<id<ASLayoutable>> *)children;
+- (nullable NSArray<id<ASLayoutProducer>> *)children;
 
 @end
 
-@interface ASLayoutSpec (Debugging) <ASLayoutableAsciiArtProtocol>
+@interface ASLayoutSpec (Debugging) <ASLayoutProducerAsciiArtProtocol>
 /**
  *  Used by other layout specs to create ascii art debug strings
  */

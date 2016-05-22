@@ -1,5 +1,5 @@
 //
-//  ASLayoutableExtensibility.h
+//  ASLayoutProducerExtensibility.h
 //  AsyncDisplayKit
 //
 //  Created by Michael Schneider on 3/29/16.
@@ -8,7 +8,7 @@
 
 #import <UIKit/UIGeometry.h>
 
-@protocol ASLayoutableExtensibility <NSObject>
+@protocol ASLayoutProducerExtensibility <NSObject>
 
 // The maximum number of extended values per type are defined in ASEnvironment.h above the ASEnvironmentStateExtensions
 // struct definition. If you try to set a value at an index after the maximum it will throw an assertion.

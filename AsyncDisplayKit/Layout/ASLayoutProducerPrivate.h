@@ -11,53 +11,53 @@
 #import <Foundation/Foundation.h>
 
 @class ASLayoutSpec;
-@protocol ASLayoutable;
+@protocol ASLayoutProducer;
 
-struct ASLayoutableContext {
+struct ASLayoutProducerContext {
   int32_t transitionID;
   BOOL needsVisualizeNode;
 };
 
-extern int32_t const ASLayoutableContextInvalidTransitionID;
+extern int32_t const ASLayoutProducerContextInvalidTransitionID;
 
-extern int32_t const ASLayoutableContextDefaultTransitionID;
+extern int32_t const ASLayoutProducerContextDefaultTransitionID;
 
-extern struct ASLayoutableContext const ASLayoutableContextNull;
+extern struct ASLayoutProducerContext const ASLayoutProducerContextNull;
 
-extern BOOL ASLayoutableContextIsNull(struct ASLayoutableContext context);
+extern BOOL ASLayoutProducerContextIsNull(struct ASLayoutProducerContext context);
 
-extern struct ASLayoutableContext ASLayoutableContextMake(int32_t transitionID, BOOL needsVisualizeNode);
+extern struct ASLayoutProducerContext ASLayoutProducerContextMake(int32_t transitionID, BOOL needsVisualizeNode);
 
-extern void ASLayoutableSetCurrentContext(struct ASLayoutableContext context);
+extern void ASLayoutProducerSetCurrentContext(struct ASLayoutProducerContext context);
 
-extern struct ASLayoutableContext ASLayoutableGetCurrentContext();
+extern struct ASLayoutProducerContext ASLayoutProducerGetCurrentContext();
 
-extern void ASLayoutableClearCurrentContext();
+extern void ASLayoutProducerClearCurrentContext();
 
 /**
- *  The base protocol for ASLayoutable. Generally the methods/properties in this class do not need to be
+ *  The base protocol for ASLayoutProducer. Generally the methods/properties in this class do not need to be
  *  called by the end user and are only called internally. However, there may be a case where the methods are useful.
  */
-@protocol ASLayoutablePrivate <NSObject>
+@protocol ASLayoutProducerPrivate <NSObject>
 
 /**
- *  @abstract This method can be used to give the user a chance to wrap an ASLayoutable in an ASLayoutSpec 
+ *  @abstract This method can be used to give the user a chance to wrap an ASLayoutProducer in an ASLayoutSpec 
  *  just before it is added to a parent ASLayoutSpec. For example, if you wanted an ASTextNode that was always 
- *  inside of an ASInsetLayoutSpec, you could subclass ASTextNode and implement finalLayoutable so that it wraps
+ *  inside of an ASInsetLayoutSpec, you could subclass ASTextNode and implement finalLayoutProducer so that it wraps
  *  itself in an inset spec.
  *
- *  Note that any ASLayoutable other than self that is returned MUST set isFinalLayoutable to YES. Make sure
- *  to do this BEFORE adding a child to the ASLayoutable.
+ *  Note that any ASLayoutProducer other than self that is returned MUST set isFinalLayoutProducer to YES. Make sure
+ *  to do this BEFORE adding a child to the ASLayoutProducer.
  *
- *  @return The layoutable that will be added to the parent layout spec. Defaults to self.
+ *  @return The layout producer that will be added to the parent layout spec. Defaults to self.
  */
-- (id<ASLayoutable>)finalLayoutable;
+- (id<ASLayoutProducer>)finalLayoutProducer;
 
 /**
- *  A flag to indicate that this ASLayoutable was created in finalLayoutable. This MUST be set to YES
- *  before adding a child to this layoutable.
+ *  A flag to indicate that this ASLayoutProducer was created in finalLayoutProducer. This MUST be set to YES
+ *  before adding a child to this layout producer.
  */
-@property (nonatomic, assign) BOOL isFinalLayoutable;
+@property (nonatomic, assign) BOOL isFinalLayoutProducer;
 
 @end
 
@@ -65,8 +65,8 @@ extern void ASLayoutableClearCurrentContext();
 #pragma mark - ASLayoutOptionsForwarding
 
 /**
- *  Both an ASDisplayNode and an ASLayoutSpec conform to ASLayoutable. There are several properties
- *  in ASLayoutable that are used when a node or spec is used in a layout spec.
+ *  Both an ASDisplayNode and an ASLayoutSpec conform to ASLayoutProducer. There are several properties
+ *  in ASLayoutProducer that are used when a node or spec is used in a layout spec.
  *  These properties are provided for convenience, as they are forwards to the node or spec's
  *  properties. Instead of duplicating the property forwarding in both classes, we
  *  create a define that allows us to easily implement the forwards in one place.
@@ -199,7 +199,7 @@ extern void ASLayoutableClearCurrentContext();
 }\
 
 
-#pragma mark - ASLayoutableExtensibility
+#pragma mark - ASLayoutProducerExtensibility
 
 #define ASEnvironmentLayoutExtensibilityForwarding \
 - (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx\

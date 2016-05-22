@@ -14,9 +14,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- *  Layout options that can be defined for an ASLayoutable being added to a ASStackLayoutSpec.
+ *  Layout options that can be defined for an ASLayoutProducer being added to a ASStackLayoutSpec.
  */
-@protocol ASStackLayoutable <NSObject>
+@protocol ASStackLayoutProducer <NSObject>
 
 /**
  * @abstract Additional space to place before this object in the stacking direction.
