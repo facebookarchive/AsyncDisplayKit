@@ -389,11 +389,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return [_dataController indexPathForNode:cellNode];
 }
 
-- (NSArray *)visibleNodes
+- (NSArray<ASCellNode *> *)visibleNodes
 {
   NSArray *indexPaths = [self visibleNodeIndexPathsForRangeController:_rangeController];
   
-  NSMutableArray *visibleNodes = [NSMutableArray array];
+  NSMutableArray<ASCellNode *> *visibleNodes = [NSMutableArray array];
   for (NSIndexPath *indexPath in indexPaths) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
     if (node) {
