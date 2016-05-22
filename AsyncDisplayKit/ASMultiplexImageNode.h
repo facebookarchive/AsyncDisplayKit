@@ -8,8 +8,8 @@
 
 #if TARGET_OS_IOS
 
-#import <AsyncDisplayKit/ASImageNode.h>
-#import <AsyncDisplayKit/ASImageProtocols.h>
+#import "ASImageNode.h"
+#import "ASImageProtocols.h"
 #import <Photos/Photos.h>
 
 NS_ASSUME_NONNULL_BEGIN

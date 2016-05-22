@@ -8,7 +8,7 @@
  *
  */
 
-#import <AsyncDisplayKit/ASRelativeSize.h>
+#import "ASRelativeSize.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -7,7 +7,7 @@
  */
 
 #if TARGET_OS_IOS
-#import <AsyncDisplayKit/ASButtonNode.h>
+#import "ASButtonNode.h"
 
 @class AVAsset, AVPlayer, AVPlayerItem;
 @protocol ASVideoNodeDelegate;

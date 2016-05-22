@@ -6,7 +6,7 @@
 //  Copyright © 2015 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/ASCollectionNode.h>
+#import "ASCollectionNode.h"
 
 @class ASPagerNode;
 @class ASPagerFlowLayout;

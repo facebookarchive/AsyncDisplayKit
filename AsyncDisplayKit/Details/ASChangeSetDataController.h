@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/ASDataController.h>
+#import "ASDataController.h"
 
 /**
  * @abstract Subclass of ASDataController that simulates ordering of operations in batch updates defined in UITableView and UICollectionView.

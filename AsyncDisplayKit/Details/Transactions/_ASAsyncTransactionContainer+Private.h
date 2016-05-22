@@ -6,7 +6,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/_ASAsyncTransactionContainer.h>
+#import "_ASAsyncTransactionContainer.h"
 
 
 @interface CALayer (ASAsyncTransactionContainerTransactions)

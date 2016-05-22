@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/ASDisplayNode.h>
+#import "ASDisplayNode.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

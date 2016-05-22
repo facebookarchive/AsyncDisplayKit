@@ -6,8 +6,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <AsyncDisplayKit/ASDisplayNode.h>
-#import <AsyncDisplayKit/ASTextKitComponents.h>
+#import "ASDisplayNode.h"
+#import "ASTextKitComponents.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

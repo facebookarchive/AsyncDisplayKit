@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/ASCollectionView.h>
+#import "ASCollectionView.h"
 
 @protocol ASCollectionViewLayoutFacilitatorProtocol;
 

@@ -9,8 +9,8 @@
  */
 
 #import <UIKit/UIKit.h>
-#import <AsyncDisplayKit/ASBaseDefines.h>
-#import <AsyncDisplayKit/ASDimension.h>
+#import "ASBaseDefines.h"
+#import "ASDimension.h"
 
 /** 
  Expresses a size with relative dimensions.
