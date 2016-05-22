@@ -941,7 +941,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       [self _addSubnodeViewsAndLayers];
     }
     
-    if (self.interfaceState & ASInterfaceStateVisible) {
+    if (ASInterfaceStateIncludesVisible(self.interfaceState)) {
       // TODO: Change this to recursivelyEnsureDisplay - but need a variant that does not skip
       // nodes that have shouldBypassEnsureDisplay set (such as image nodes) so they are rasterized.
       [self recursivelyDisplayImmediately];
