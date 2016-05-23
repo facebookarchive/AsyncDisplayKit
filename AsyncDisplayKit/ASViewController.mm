@@ -8,6 +8,7 @@
 
 #import "ASViewController.h"
 #import "ASAssert.h"
+#import "ASAvailability.h"
 #import "ASDimension.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
@@ -82,6 +83,13 @@
   _node.frame = frame;
   _node.autoresizingMask = autoresizingMask;
   self.view = view;
+  
+  // ensure that self.node has a valid trait collection before a subclass's implementation of viewDidLoad.
+  // Any subnodes added in viewDidLoad will then inherit the proper environment.
+  if (AS_AT_LEAST_IOS8) {
+    ASEnvironmentTraitCollection traitCollection = [self displayTraitsForTraitCollection:self.traitCollection];
+    [self progagateNewDisplayTraits:traitCollection];
+  }
 }
 
 - (void)viewWillLayoutSubviews

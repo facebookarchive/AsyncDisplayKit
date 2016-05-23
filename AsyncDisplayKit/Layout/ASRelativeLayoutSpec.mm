@@ -9,10 +9,15 @@
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
+#import "ASTraitCollection.h"
 
 @implementation ASRelativeLayoutSpec
 
-- (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
+- (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
+                          verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition
+                              sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
+                                     child:(id<ASLayoutable>)child
+                           traitCollection:(ASTraitCollection *)traitCollection
 {
   if (!(self = [super init])) {
     return nil;
@@ -21,13 +26,23 @@
   _horizontalPosition = horizontalPosition;
   _verticalPosition = verticalPosition;
   _sizingOption = sizingOption;
-  [self setChild:child];
+  self.environmentTraitCollection = [traitCollection environmentTraitCollection];
+  [self setChild:child withTraitCollection:traitCollection];
   return self;
 }
 
 + (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
 {
-  return [[self alloc] initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:child];
+  return [self relativePositionLayoutSpecWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:child traitCollection:nil];
+}
+
++ (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
+                                                verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition
+                                                    sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
+                                                           child:(id<ASLayoutable>)child
+                                                 traitCollection:(ASTraitCollection *)traitCollection
+{
+  return [[self alloc] initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:child traitCollection:traitCollection];
 }
 
 - (void)setHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
@@ -95,12 +110,6 @@
 - (void)setChildren:(NSArray *)children
 {
   ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-}
-
-- (NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-  return nil;
 }
 
 - (CGFloat)proportionOfAxisForAxisPosition:(ASRelativeLayoutSpecPosition)position

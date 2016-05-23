@@ -514,6 +514,17 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }
 }
 
+- (ASCellNodeBlock)nodeBlockPropagatingTraitCollectionFromNodeBlock:(ASCellNodeBlock)nodeBlock
+{
+  // When creating a node, make sure to pass along the current display traits so it will be laid out properly
+  return  ^{
+    ASCellNode *cellNode = nodeBlock();
+    id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+    ASEnvironmentStatePropagateDown(cellNode, [environment environmentTraitCollection]);
+    return cellNode;
+  };
+}
+
 /**
  * Fetches row contexts for the provided sections from the data source.
  */
@@ -527,16 +538,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
       ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
       
-      // When creating a node, make sure to pass along the current display traits so it will be laid out properly
-      ASCellNodeBlock nodeBlockPropagatingDisplayTraits = ^{
-        ASCellNode *cellNode = nodeBlock();
-        id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
-        ASEnvironmentStatePropagateDown(cellNode, [environment environmentTraitCollection]);
-        return cellNode;
-      };
-      
       ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-      [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlockPropagatingDisplayTraits
+      [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:[self nodeBlockPropagatingTraitCollectionFromNodeBlock:nodeBlock]
                                                                 indexPath:indexPath
                                                           constrainedSize:constrainedSize]];
     }
@@ -794,7 +797,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       for (NSIndexPath *indexPath in sortedIndexPaths) {
         ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
         ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
+        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:[self nodeBlockPropagatingTraitCollectionFromNodeBlock:nodeBlock]
                                                                   indexPath:indexPath
                                                             constrainedSize:constrainedSize]];
       }
@@ -845,7 +848,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       for (NSIndexPath *indexPath in indexPaths) {
         ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
         ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
+        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:[self nodeBlockPropagatingTraitCollectionFromNodeBlock:nodeBlock]
                                                                   indexPath:indexPath
                                                             constrainedSize:constrainedSize]];
       }

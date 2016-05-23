@@ -21,12 +21,13 @@
 
 - (instancetype)initWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
                            sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
-                                   child:(id<ASLayoutable>)child;
+                                   child:(id<ASLayoutable>)child
+                         traitCollection:(ASTraitCollection *)traitCollection
 {
   ASRelativeLayoutSpecPosition verticalPosition = [self verticalPositionFromCenteringOptions:centeringOptions];
   ASRelativeLayoutSpecPosition horizontalPosition = [self horizontalPositionFromCenteringOptions:centeringOptions];
   
-  if (!(self = [super initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOptions child:child])) {
+  if (!(self = [super initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOptions child:child traitCollection:traitCollection])) {
     return nil;
   }
   _centeringOptions = centeringOptions;
@@ -38,7 +39,15 @@
                                        sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
                                                child:(id<ASLayoutable>)child
 {
-  return [[self alloc] initWithCenteringOptions:centeringOptions sizingOptions:sizingOptions child:child];
+  return [self centerLayoutSpecWithCenteringOptions:centeringOptions sizingOptions:sizingOptions child:child traitCollection:nil];
+}
+
++ (instancetype)centerLayoutSpecWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+                                       sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
+                                               child:(id<ASLayoutable>)child
+                                     traitCollection:(nullable ASTraitCollection *)traitCollection
+{
+  return [[self alloc] initWithCenteringOptions:centeringOptions sizingOptions:sizingOptions child:child traitCollection:traitCollection];
 }
 
 - (void)setCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions

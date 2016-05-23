@@ -113,7 +113,13 @@
   }
 }
 
-- (void)setChild:(id<ASLayoutable>)child;
+- (void)setChild:(id<ASLayoutable>)child
+{
+  id<ASEnvironment> parent = [child parent];
+  [self setChild:child withTraitCollection:[parent asyncTraitCollection]];
+}
+
+- (void)setChild:(id<ASLayoutable>)child withTraitCollection:(ASTraitCollection *)traitCollection
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
@@ -123,6 +129,12 @@
 }
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+{
+  id<ASEnvironment> parent = [child parent];
+  [self setChild:child forIdentifier:identifier withTraitCollection:[parent asyncTraitCollection]];
+}
+
+- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier withTraitCollection:(ASTraitCollection *)traitCollection
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
@@ -135,6 +147,13 @@
 }
 
 - (void)setChildren:(NSArray *)children
+{
+  id<ASLayoutable> child = [children firstObject];
+  id<ASEnvironment> parent = [child parent];
+  [self setChildren:children withTraitCollection:[parent asyncTraitCollection]];
+}
+
+- (void)setChildren:(NSArray<id<ASLayoutable>> *)children withTraitCollection:(ASTraitCollection *)traitCollection
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
@@ -202,6 +221,11 @@
 - (ASEnvironmentTraitCollection)environmentTraitCollection
 {
   return _environmentState.traitCollection;
+}
+
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traitCollection
+{
+  _environmentState.traitCollection = traitCollection;
 }
 
 ASEnvironmentLayoutOptionsForwarding

@@ -1249,6 +1249,9 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.
   [subnode __setSupernode:self];
 
+  // propagate our traits to the child we are about to add.
+  ASEnvironmentStatePropagateDown(subnode, [self environmentTraitCollection]);
+  
   if (self.nodeLoaded) {
     // If this node has a view or layer, force the subnode to also create its view or layer and add it to the hierarchy here.
     // Otherwise there is no way for the subnode's view or layer to enter the hierarchy, except recursing down all
@@ -1294,7 +1297,10 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
     _subnodes = [[NSMutableArray alloc] init];
   [_subnodes insertObject:subnode atIndex:subnodeIndex];
   [subnode __setSupernode:self];
-
+  
+  // propagate our traits to the child we are about to add.
+  ASEnvironmentStatePropagateDown(subnode, [self environmentTraitCollection]);
+  
   // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.
   if (!_flags.shouldRasterizeDescendants && [self __shouldLoadViewOrLayer]) {
     if (_layer) {
@@ -2719,6 +2725,11 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 - (ASEnvironmentTraitCollection)environmentTraitCollection
 {
   return _environmentState.traitCollection;
+}
+
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
+{
+  _environmentState.traitCollection = environmentTraitCollection;
 }
 
 ASEnvironmentLayoutOptionsForwarding

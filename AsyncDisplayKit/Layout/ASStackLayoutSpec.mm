@@ -19,6 +19,7 @@
 #import "ASStackLayoutSpecUtilities.h"
 #import "ASStackUnpositionedLayout.h"
 #import "ASThread.h"
+#import "ASTraitCollection.h"
 
 @implementation ASStackLayoutSpec
 {
@@ -27,12 +28,26 @@
 
 - (instancetype)init
 {
-  return [self initWithDirection:ASStackLayoutDirectionHorizontal spacing:0.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:nil];
+  return [self initWithDirection:ASStackLayoutDirectionHorizontal spacing:0.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:nil traitCollection:nil];
 }
 
-+ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction
+                                     spacing:(CGFloat)spacing
+                              justifyContent:(ASStackLayoutJustifyContent)justifyContent
+                                  alignItems:(ASStackLayoutAlignItems)alignItems
+                                    children:(NSArray *)children
 {
-  return [[self alloc] initWithDirection:direction spacing:spacing justifyContent:justifyContent alignItems:alignItems children:children];
+  return [self stackLayoutSpecWithDirection:direction spacing:spacing justifyContent:justifyContent alignItems:alignItems children:children traitCollection:nil];
+}
+
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction
+                                     spacing:(CGFloat)spacing
+                              justifyContent:(ASStackLayoutJustifyContent)justifyContent
+                                  alignItems:(ASStackLayoutAlignItems)alignItems
+                                    children:(NSArray<id<ASLayoutable>> *)children
+                             traitCollection:(ASTraitCollection *)traitCollection
+{
+  return [[self alloc] initWithDirection:direction spacing:spacing justifyContent:justifyContent alignItems:alignItems children:children traitCollection:traitCollection];
 }
 
 + (instancetype)verticalStackLayoutSpec
@@ -49,7 +64,12 @@
   return stackLayoutSpec;
 }
 
-- (instancetype)initWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
+- (instancetype)initWithDirection:(ASStackLayoutDirection)direction
+                          spacing:(CGFloat)spacing
+                   justifyContent:(ASStackLayoutJustifyContent)justifyContent
+                       alignItems:(ASStackLayoutAlignItems)alignItems
+                         children:(NSArray *)children
+                  traitCollection:(ASTraitCollection *)traitCollection
 {
   if (!(self = [super init])) {
     return nil;
@@ -61,7 +81,8 @@
   _alignItems = alignItems;
   _justifyContent = justifyContent;
   
-  [self setChildren:children];
+  self.environmentTraitCollection = [traitCollection environmentTraitCollection];
+  [self setChildren:children withTraitCollection:traitCollection];
   return self;
 }
 

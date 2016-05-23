@@ -58,6 +58,11 @@ NS_ASSUME_NONNULL_BEGIN
                                        sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
                                                child:(id<ASLayoutable>)child;
 
++ (instancetype)centerLayoutSpecWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+                                       sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
+                                               child:(id<ASLayoutable>)child
+                                     traitCollection:(nullable ASTraitCollection *)traitCollection;
+
 @end
 
 NS_ASSUME_NONNULL_END

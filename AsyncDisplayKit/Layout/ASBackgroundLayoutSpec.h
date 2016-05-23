@@ -24,6 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
  @param background A layoutable object that is laid out behind the child. If this is nil, the background is omitted.
  */
 + (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(nullable id<ASLayoutable>)background;
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(nullable id<ASLayoutable>)background traitCollect:(nullable ASTraitCollection *)traitCollection;
+
+- (void)setBackground:(id<ASLayoutable>)background traitCollection:(nullable ASTraitCollection *)traitCollection;
 
 @end
 

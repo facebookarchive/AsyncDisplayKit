@@ -12,9 +12,9 @@
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
-
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
+#import "ASTraitCollection.h"
 
 @interface ASInsetLayoutSpec ()
 {
@@ -42,20 +42,26 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
 
 @implementation ASInsetLayoutSpec
 
-- (instancetype)initWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
+- (instancetype)initWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child traitCollection:(nullable ASTraitCollection *)traitCollection
 {
   if (!(self = [super init])) {
     return nil;
   }
   ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
   _insets = insets;
-  [self setChild:child];
+  self.environmentTraitCollection = [traitCollection environmentTraitCollection];
+  [self setChild:child withTraitCollection:traitCollection];
   return self;
 }
 
 + (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child
 {
-  return [[self alloc] initWithInsets:insets child:child];
+  return [self insetLayoutSpecWithInsets:insets child:child traitCollection:nil];
+}
+
++ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child traitCollection:(nullable ASTraitCollection *)traitCollection
+{
+  return [[self alloc] initWithInsets:insets child:child traitCollection:traitCollection];
 }
 
 - (void)setInsets:(UIEdgeInsets)insets

@@ -137,6 +137,8 @@ ASDISPLAYNODE_EXTERN_C_END
 /// convenience method. Users should access the trait collections through the NSObject based asyncTraitCollection API
 - (ASEnvironmentTraitCollection)environmentTraitCollection;
 
+/// sets a trait collection on this environment state.
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
 @end
 
 // ASCollection/TableNodes don't actually have ASCellNodes as subnodes. Because of this we can't rely on display trait
@@ -154,13 +156,15 @@ ASDISPLAYNODE_EXTERN_C_END
   [super setEnvironmentState:environmentState];\
   ASEnvironmentTraitCollection currentTraits = environmentState.traitCollection;\
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
-    NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
-    for (NSArray *sectionArray in completedNodes) {\
-      for (ASCellNode *cellNode in sectionArray) {\
-        ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
-        [cellNode setNeedsLayout];\
+    dispatch_async(dispatch_get_main_queue(), ^{\
+      NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
+      for (NSArray *sectionArray in completedNodes) {\
+        for (ASCellNode *cellNode in sectionArray) {\
+          ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
+          [cellNode setNeedsLayout];\
+        }\
       }\
-    }\
+    });\
   }\
 }\
 
