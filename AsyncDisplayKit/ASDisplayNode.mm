@@ -26,6 +26,7 @@
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
 #import "ASEnvironmentInternal.h"
+#import "ASLayoutValidation.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -852,6 +853,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [_pendingLayoutTransition applySubnodeRemovals];
   [self _completeLayoutCalculation];
   _pendingLayoutTransition = nil;
+}
+
+#pragma mark - Layout Validation
+
+- (void)validateLayout:(ASLayout *)layout
+{
+  ASLayoutableValidation *validation = [[ASLayoutableValidation alloc] init];
+  [validation registerValidator:[[ASLayoutableStaticValidator alloc] init]];
+  [validation registerValidator:[[ASLayoutableStackValidator alloc] init]];
+  [validation validateLayout:layout];
 }
 
 
@@ -1905,12 +1916,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
-    if (layout.layoutableObject != self) {
+    BOOL isRootLayout = (layout.layoutableObject != self);
+    if (isRootLayout) {
       layout.position = CGPointZero;
-      layout = [ASLayout layoutWithLayoutableObject:self
-                               constrainedSizeRange:constrainedSize
-                                               size:layout.size
-                                         sublayouts:@[layout]];
+      layout = [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:layout.size sublayouts:@[layout]];
+#if DEBUG
+      [self validateLayout:layout];
+#endif
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
       if (self.usesImplicitHierarchyManagement) {
