@@ -1016,6 +1016,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self displayImmediately];
 }
 
+- (ASSizeRange)__constrainedSizeForLayout
+{
+  return _constrainedSize;
+}
+
 - (void)__setNeedsLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
@@ -1025,7 +1030,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return;
   }
   
-  ASSizeRange oldConstrainedSize = _constrainedSize;
+  ASSizeRange oldConstrainedSize = [self __constrainedSizeForLayout];
   [self invalidateCalculatedLayout];
   
   if (_supernode) {

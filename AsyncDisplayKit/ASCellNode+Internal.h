@@ -23,6 +23,15 @@
  */
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
 
+/**
+ * Notifies the delegate that the specified cell node has a new constrained size.
+ * The notification is done on main thread.
+ *
+ * @param cellNode A node informing the delegate about the it's size.
+ * @param oldConstrainedSize The previous constrained size of the node.
+ */
+- (ASSizeRange)cellNode:(ASCellNode *)node constrainedSizeForLayoutWithOldConstrainedSize:(ASSizeRange)oldConstrainedSize;
+
 @end
 
 @interface ASCellNode ()
