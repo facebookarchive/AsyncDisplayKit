@@ -29,17 +29,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nullable, atomic, weak) id<ASVideoPlayerNodeDelegate> delegate;
 
-@property (nonatomic,assign,readonly) CMTime duration;
+@property (nonatomic, assign, readonly) CMTime duration;
 
-@property (nonatomic, assign) BOOL disableControls;
+@property (nonatomic, assign) BOOL controlsDisabled;
+
+@property (nonatomic, assign, readonly) BOOL loadAssetWhenNodeBecomesVisible;
 
 #pragma mark - ASVideoNode property proxy
 /**
  * When shouldAutoplay is set to true, a video node will play when it has both loaded and entered the "visible" interfaceState.
  * If it leaves the visible interfaceState it will pause but will resume once it has returned.
  */
-@property (nonatomic, assign, readwrite) BOOL shouldAutoplay;
-@property (nonatomic, assign, readwrite) BOOL shouldAutorepeat;
+@property (nonatomic, assign, readwrite) BOOL shouldAutoPlay;
+@property (nonatomic, assign, readwrite) BOOL shouldAutoRepeat;
 @property (nonatomic, assign, readwrite) BOOL muted;
 @property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
 @property (nonatomic, assign, readwrite) BOOL shouldAggressivelyRecoverFromStall;
@@ -51,6 +53,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithUrl:(NSURL*)url;
 - (instancetype)initWithAsset:(AVAsset*)asset;
+- (instancetype)initWithUrl:(NSURL *)url loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
+- (instancetype)initWithAsset:(AVAsset *)asset loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
 
 #pragma mark - Public API
 - (void)seekToTime:(CGFloat)percentComplete;
@@ -67,7 +71,16 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract Delegate method invoked before creating controlbar controls
  * @param videoPlayer
  */
-- (NSArray *)videoPlayerNodeNeededControls:(ASVideoPlayerNode*)videoPlayer;
+- (NSArray *)videoPlayerNodeNeededDefaultControls:(ASVideoPlayerNode*)videoPlayer;
+
+/**
+ * @abstract Delegate method invoked before creating default controls, asks delegate for custom controls dictionary.
+ * This dictionary must constain only ASDisplayNode subclass objects.
+ * @param videoPlayer
+ * @discussion - This method is invoked only when developer implements videoPlayerNodeLayoutSpec:forControls:forMaximumSize:
+ * and gives ability to add custom constrols to ASVideoPlayerNode, for example mute button.
+ */
+- (NSDictionary *)videoPlayerNodeCustomControls:(ASVideoPlayerNode*)videoPlayer;
 
 /**
  * @abstract Delegate method invoked in layoutSpecThatFits:
@@ -106,7 +119,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark ASVideoNodeDelegate proxy methods
 /**
- * @abstract Delegate method invoked when ASVideoPlayerNode playback time is taped.
+ * @abstract Delegate method invoked when ASVideoPlayerNode is taped.
  * @param videoPlayerNode The ASVideoPlayerNode that was tapped.
  */
 - (void)didTapVideoPlayerNode:(ASVideoPlayerNode *)videoPlayer;

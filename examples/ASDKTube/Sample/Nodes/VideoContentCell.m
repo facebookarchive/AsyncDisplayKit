@@ -25,6 +25,7 @@
   ASNetworkImageNode *_avatarNode;
   ASVideoPlayerNode *_videoPlayerNode;
   ASControlNode *_likeButtonNode;
+  ASButtonNode *_muteButtonNode;
 }
 
 - (instancetype)initWithVideoObject:(VideoModel *)video
@@ -52,10 +53,16 @@
     _likeButtonNode.backgroundColor = [UIColor redColor];
     [self addSubnode:_likeButtonNode];
 
-    _videoPlayerNode = [[ASVideoPlayerNode alloc] initWithUrl:_videoModel.url];
+    _muteButtonNode = [[ASButtonNode alloc] init];
+    _muteButtonNode.preferredFrameSize = CGSizeMake(16.0, 22.0);
+    [_muteButtonNode addTarget:self action:@selector(didTapMuteButton) forControlEvents:ASControlNodeEventTouchUpInside];
+
+    _videoPlayerNode = [[ASVideoPlayerNode alloc] initWithUrl:_videoModel.url loadAssetWhenNodeBecomesVisible:YES];
     _videoPlayerNode.delegate = self;
     _videoPlayerNode.backgroundColor = [UIColor blackColor];
     [self addSubnode:_videoPlayerNode];
+
+    [self setMuteButtonIcon];
   }
   return self;
 }
@@ -98,55 +105,113 @@
   return verticalStack;
 }
 
+- (void)setMuteButtonIcon
+{
+  if (_videoPlayerNode.muted) {
+    [_muteButtonNode setImage:[UIImage imageNamed:@"ico-mute"] forState:ASControlStateNormal];
+  } else {
+    [_muteButtonNode setImage:[UIImage imageNamed:@"ico-unmute"] forState:ASControlStateNormal];
+  }
+}
+
+- (void)didTapMuteButton
+{
+  _videoPlayerNode.muted = !_videoPlayerNode.muted;
+  [self setMuteButtonIcon];
+}
+
 #pragma mark - ASVideoPlayerNodeDelegate
 - (void)didTapVideoPlayerNode:(ASVideoPlayerNode *)videoPlayer
 {
-  if (_videoPlayerNode.isPlaying) {
+  if (_videoPlayerNode.playerState == ASVideoNodePlayerStatePlaying) {
     NSLog(@"TRANSITION");
+    _videoPlayerNode.controlsDisabled = !_videoPlayerNode.controlsDisabled;
     [_videoPlayerNode pause];
   } else {
     [_videoPlayerNode play];
   }
 }
 
-/*- (NSArray *)videoPlayerNodeNeededControls:(ASVideoPlayerNode *)videoPlayer
+- (NSDictionary *)videoPlayerNodeCustomControls:(ASVideoPlayerNode *)videoPlayer
 {
-  return @[ @(ASVideoPlayerNodeControlTypePlaybackButton) ];
-}*/
+  return @{
+    @"muteControl" : _muteButtonNode
+  };
+}
 
-/*- (ASLayoutSpec *)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer forControls:(NSDictionary *)controls forMaximumSize:(CGSize)maxSize
+- (NSArray *)controlsForControlBar:(NSDictionary *)availableControls
 {
-  NSMutableArray *bottomControls = [[NSMutableArray alloc] init];
+  NSMutableArray *controls = [[NSMutableArray alloc] init];
 
-  ASDisplayNode *playbackButtonNode = controls[@(ASVideoPlayerNodeControlTypePlaybackButton)];
-
-  if (playbackButtonNode) {
-    [bottomControls addObject:playbackButtonNode];
+  if (availableControls[ @(ASVideoPlayerNodeControlTypePlaybackButton) ]) {
+    [controls addObject:availableControls[ @(ASVideoPlayerNodeControlTypePlaybackButton) ]];
   }
 
+  if (availableControls[ @(ASVideoPlayerNodeControlTypeElapsedText) ]) {
+    [controls addObject:availableControls[ @(ASVideoPlayerNodeControlTypeElapsedText) ]];
+  }
+
+  if (availableControls[ @(ASVideoPlayerNodeControlTypeScrubber) ]) {
+    [controls addObject:availableControls[ @(ASVideoPlayerNodeControlTypeScrubber) ]];
+  }
+
+  if (availableControls[ @(ASVideoPlayerNodeControlTypeDurationText) ]) {
+    [controls addObject:availableControls[ @(ASVideoPlayerNodeControlTypeDurationText) ]];
+  }
+
+  return controls;
+}
+
+#pragma mark - Layout
+- (ASLayoutSpec*)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer forControls:(NSDictionary *)controls forMaximumSize:(CGSize)maxSize
+{
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;
 
+  UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
+
+  if (controls[ @(ASVideoPlayerNodeControlTypeScrubber) ]) {
+    ASDisplayNode *scrubber = controls[ @(ASVideoPlayerNodeControlTypeScrubber) ];
+    scrubber.preferredFrameSize = CGSizeMake(maxSize.width, 44.0);
+  }
+
+  NSArray *controlBarControls = [self controlsForControlBar:controls];
+  NSMutableArray *topBarControls = [[NSMutableArray alloc] init];
+
+  //Our custom control
+  if (controls[@"muteControl"]) {
+    [topBarControls addObject:controls[@"muteControl"]];
+  }
+
+
+  ASStackLayoutSpec *topBarSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+                                                                          spacing:10.0
+                                                                   justifyContent:ASStackLayoutJustifyContentStart
+                                                                       alignItems:ASStackLayoutAlignItemsCenter
+                                                                         children:topBarControls];
+
+  ASInsetLayoutSpec *topBarInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:topBarSpec];
+
   ASStackLayoutSpec *controlbarSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
-  spacing:10.0
-  justifyContent:ASStackLayoutJustifyContentStart
-  alignItems:ASStackLayoutAlignItemsCenter
-  children:bottomControls];
+                                                                              spacing:10.0
+                                                                       justifyContent:ASStackLayoutJustifyContentStart
+                                                                           alignItems:ASStackLayoutAlignItemsCenter
+                                                                             children: controlBarControls ];
   controlbarSpec.alignSelf = ASStackLayoutAlignSelfStretch;
 
-  UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
+
 
   ASInsetLayoutSpec *controlbarInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:controlbarSpec];
 
   controlbarInsetSpec.alignSelf = ASStackLayoutAlignSelfStretch;
 
   ASStackLayoutSpec *mainVerticalStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-  spacing:0.0
-  justifyContent:ASStackLayoutJustifyContentStart
-  alignItems:ASStackLayoutAlignItemsStart
-  children:@[ spacer, controlbarInsetSpec ]];
-
+                                                                                 spacing:0.0
+                                                                          justifyContent:ASStackLayoutJustifyContentStart
+                                                                              alignItems:ASStackLayoutAlignItemsStart
+                                                                                children:@[topBarInsetSpec, spacer, controlbarInsetSpec]];
 
   return mainVerticalStack;
-}*/
+
+}
 @end

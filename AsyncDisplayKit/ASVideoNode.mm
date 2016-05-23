@@ -443,10 +443,6 @@ static NSString * const kStatus = @"status";
   _asset = asset;
 
   [self setNeedsDataFetch];
-
-  if (_shouldAutoplay) {
-    [self play];
-  }
 }
 
 - (AVAsset *)asset

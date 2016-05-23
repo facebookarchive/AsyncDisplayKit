@@ -18,7 +18,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   __weak id<ASVideoPlayerNodeDelegate> _delegate;
 
   struct {
-    unsigned int delegateNeededControls:1;
+    unsigned int delegateNeededDefaultControls:1;
+    unsigned int delegateCustomControls:1;
     unsigned int delegateSpinnerTintColor:1;
     unsigned int delegatePlaybackButtonTint:1;
     unsigned int delegateScrubberMaximumTrackTintColor:1;
@@ -40,7 +41,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   
   ASVideoNode *_videoNode;
 
-  NSArray *_neededControls;
+  NSArray *_neededDefaultControls;
 
   NSMutableDictionary *_cachedControls;
 
@@ -51,13 +52,14 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   ASStackLayoutSpec *_controlFlexGrowSpacerSpec;
   ASDisplayNode *_spinnerNode;
 
+  BOOL _loadAssetWhenNodeBecomesVisible;
   BOOL _isSeeking;
   CMTime _duration;
 
-  BOOL _disableControls;
+  BOOL _controlsDisabled;
 
-  BOOL _shouldAutoplay;
-  BOOL _shouldAutorepeat;
+  BOOL _shouldAutoPlay;
+  BOOL _shouldAutoRepeat;
   BOOL _muted;
   int32_t _periodicTimeObserverTimescale;
   NSString *_gravity;
@@ -89,6 +91,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   
   _url = url;
   _asset = [AVAsset assetWithURL:_url];
+  _loadAssetWhenNodeBecomesVisible = YES;
   
   [self _init];
   
@@ -102,7 +105,36 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 
   _asset = asset;
-  _disableControls = NO;
+  _loadAssetWhenNodeBecomesVisible = YES;
+
+  [self _init];
+
+  return self;
+}
+
+- (instancetype)initWithUrl:(NSURL *)url loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible
+{
+  if (!(self = [super init])) {
+    return nil;
+  }
+
+  _url = url;
+  _asset = [AVAsset assetWithURL:_url];
+  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
+
+  [self _init];
+
+  return self;
+}
+
+- (instancetype)initWithAsset:(AVAsset *)asset loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible
+{
+  if (!(self = [super init])) {
+    return nil;
+  }
+
+  _asset = asset;
+  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
 
   [self _init];
 
@@ -111,16 +143,15 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)_init
 {
-
   _defaultControlsColor = [UIColor whiteColor];
   _cachedControls = [[NSMutableDictionary alloc] init];
 
   _videoNode = [[ASVideoNode alloc] init];
-  _videoNode.asset = _asset;
   _videoNode.delegate = self;
+  if (_loadAssetWhenNodeBecomesVisible == NO) {
+    _videoNode.asset = _asset;
+  }
   [self addSubnode:_videoNode];
-
-  [self addObservers];
 }
 
 - (void)didLoad
@@ -132,10 +163,21 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
-- (NSArray*)createControlElementArray
+- (void)visibilityDidChange:(BOOL)isVisible
 {
-  if (_delegateFlags.delegateNeededControls) {
-    return [_delegate videoPlayerNodeNeededControls:self];
+  [super visibilityDidChange:isVisible];
+
+  ASDN::MutexLocker l(_videoPlayerLock);
+
+  if (isVisible && _loadAssetWhenNodeBecomesVisible && _asset != _videoNode.asset) {
+    _videoNode.asset = _asset;
+  }
+}
+
+- (NSArray *)createDefaultControlElementArray
+{
+  if (_delegateFlags.delegateNeededDefaultControls) {
+    return [_delegate videoPlayerNodeNeededDefaultControls:self];
   }
 
   return @[ @(ASVideoPlayerNodeControlTypePlaybackButton),
@@ -144,35 +186,25 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
             @(ASVideoPlayerNodeControlTypeDurationText) ];
 }
 
-- (void)addObservers
-{
-
-}
-
-- (void)removeObservers
-{
-
-}
-
 #pragma mark - UI
 - (void)createControls
 {
   ASDN::MutexLocker l(_videoPlayerLock);
 
-  if (_disableControls) {
+  if (_controlsDisabled) {
     return;
   }
 
-  if (_neededControls == nil) {
-    _neededControls = [self createControlElementArray];
+  if (_neededDefaultControls == nil) {
+    _neededDefaultControls = [self createDefaultControlElementArray];
   }
 
   if (_cachedControls == nil) {
     _cachedControls = [[NSMutableDictionary alloc] init];
   }
 
-  for (int i = 0; i < _neededControls.count; i++) {
-    ASVideoPlayerNodeControlType type = (ASVideoPlayerNodeControlType)[[_neededControls objectAtIndex:i] integerValue];
+  for (id object in _neededDefaultControls) {
+    ASVideoPlayerNodeControlType type = (ASVideoPlayerNodeControlType)[object integerValue];
     switch (type) {
       case ASVideoPlayerNodeControlTypePlaybackButton:
         [self createPlaybackButton];
@@ -191,6 +223,19 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
         break;
       default:
         break;
+    }
+  }
+
+  if (_delegateFlags.delegateCustomControls && _delegateFlags.delegateLayoutSpecForControls) {
+    NSDictionary *customControls = [_delegate videoPlayerNodeCustomControls:self];
+    for (id key in customControls) {
+      id node = customControls[key];
+      if (![node isKindOfClass:[ASDisplayNode class]]) {
+        continue;
+      }
+
+      [self addSubnode:node];
+      [_cachedControls setObject:node forKey:key];
     }
   }
 
@@ -246,7 +291,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_elapsedTextNode == nil) {
     _elapsedTextNode = [[ASTextNode alloc] init];
-    _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00" forControlType:ASVideoPlayerNodeControlTypeElapsedText];
+    _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00"
+                                                                  forControlType:ASVideoPlayerNodeControlTypeElapsedText];
+    _elapsedTextNode.truncationMode = NSLineBreakByClipping;
 
     [_cachedControls setObject:_elapsedTextNode forKey:@(ASVideoPlayerNodeControlTypeElapsedText)];
   }
@@ -257,7 +304,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_durationTextNode == nil) {
     _durationTextNode = [[ASTextNode alloc] init];
-    _durationTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00" forControlType:ASVideoPlayerNodeControlTypeDurationText];
+    _durationTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00"
+                                                                   forControlType:ASVideoPlayerNodeControlTypeDurationText];
+    _durationTextNode.truncationMode = NSLineBreakByClipping;
 
     [_cachedControls setObject:_durationTextNode forKey:@(ASVideoPlayerNodeControlTypeDurationText)];
   }
@@ -317,14 +366,20 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)updateDurationTimeLabel
 {
-  NSString *formatedDuration = [self timeStringForCMTime:_duration forTimeLabelType:ASVideoPlayerNodeControlTypeDurationText];
-  _durationTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration forControlType:ASVideoPlayerNodeControlTypeDurationText];
+  if (!_durationTextNode) {
+    return;
+  }
+  NSString *formattedDuration = [self timeStringForCMTime:_duration forTimeLabelType:ASVideoPlayerNodeControlTypeDurationText];
+  _durationTextNode.attributedString = [self timeLabelAttributedStringForString:formattedDuration forControlType:ASVideoPlayerNodeControlTypeDurationText];
 }
 
 - (void)updateElapsedTimeLabel:(NSTimeInterval)seconds
 {
-  NSString *formatedDuration = [self timeStringForCMTime:CMTimeMakeWithSeconds( seconds, _videoNode.periodicTimeObserverTimescale ) forTimeLabelType:ASVideoPlayerNodeControlTypeElapsedText];
-  _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:formatedDuration forControlType:ASVideoPlayerNodeControlTypeElapsedText];
+  if (!_elapsedTextNode) {
+    return;
+  }
+  NSString *formatteElapsed = [self timeStringForCMTime:CMTimeMakeWithSeconds( seconds, _videoNode.periodicTimeObserverTimescale ) forTimeLabelType:ASVideoPlayerNodeControlTypeElapsedText];
+  _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:formatteElapsed forControlType:ASVideoPlayerNodeControlTypeElapsedText];
 }
 
 - (NSAttributedString*)timeLabelAttributedStringForString:(NSString*)string forControlType:(ASVideoPlayerNodeControlType)controlType
@@ -352,7 +407,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     [_delegate videoPlayerNode:self willChangeVideoNodeState:state toVideoNodeState:toState];
   }
 
-  if (toState == ASVideoNodePlayerStateReadyToPlay && _durationTextNode) {
+  if (toState == ASVideoNodePlayerStateReadyToPlay) {
     _duration = _videoNode.currentItem.duration;
     [self updateDurationTimeLabel];
   }
@@ -383,9 +438,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)videoNode:(ASVideoNode *)videoNode didPlayToTimeInterval:(NSTimeInterval)timeInterval
 {
-  //TODO: ask Max about CMTime problem in ASVideoNode Header file
-  //as we said yesterday, we must use CMTime in ASVideoNode instead of NSTimeInterval
-  //when this will be done, must just proxy value to delegate
   if (_delegateFlags.delegateVideoNodeDidPlayToTime) {
     [_delegate videoPlayerNode:self didPlayToTime:_videoNode.player.currentTime];
   }
@@ -415,12 +467,12 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   if (_delegateFlags.delegateDidTapVideoPlayerNode) {
     [_delegate didTapVideoPlayerNode:self];
   } else {
-    [self manageVideoNodePlayback];
+    [self togglePlayPause];
   }
 }
 
 #pragma mark - Actions
-- (void)manageVideoNodePlayback
+- (void)togglePlayPause
 {
   if (_videoNode.playerState == ASVideoNodePlayerStatePlaying) {
     [_videoNode pause];
@@ -463,7 +515,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)didTapPlaybackButton:(ASControlNode*)node
 {
-  [self manageVideoNodePlayback];
+  [self togglePlayPause];
 }
 
 - (void)beginSeek
@@ -491,7 +543,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [_videoNode.player seekToTime:CMTimeMakeWithSeconds(seconds, _videoNode.periodicTimeObserverTimescale)];
 
   if (_videoNode.playerState != ASVideoNodePlayerStatePlaying) {
-    [self manageVideoNodePlayback];
+    [self togglePlayPause];
   }
 }
 
@@ -609,12 +661,17 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)setDelegate:(id<ASVideoPlayerNodeDelegate>)delegate
 {
+  if (delegate == _delegate) {
+    return;
+  }
+
   _delegate = delegate;
   
   if (_delegate == nil) {
     memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
-    _delegateFlags.delegateNeededControls = [_delegate respondsToSelector:@selector(videoPlayerNodeNeededControls:)];
+    _delegateFlags.delegateNeededDefaultControls = [_delegate respondsToSelector:@selector(videoPlayerNodeNeededDefaultControls:)];
+    _delegateFlags.delegateCustomControls = [_delegate respondsToSelector:@selector(videoPlayerNodeCustomControls:)];
     _delegateFlags.delegateSpinnerTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeSpinnerTint:)];
     _delegateFlags.delegateScrubberMaximumTrackTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberMaximumTrackTint:)];
     _delegateFlags.delegateScrubberMinimumTrackTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberMinimumTrackTint:)];
@@ -632,37 +689,53 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
-- (void)setDisableControls:(BOOL)disableControls
+- (void)setControlsDisabled:(BOOL)controlsDisabled
 {
-  _disableControls = disableControls;
+  if (_controlsDisabled == controlsDisabled) {
+    return;
+  }
+  
+  _controlsDisabled = controlsDisabled;
 
-  if (_disableControls && _cachedControls.count > 0) {
+  if (_controlsDisabled && _cachedControls.count > 0) {
     [self removeControls];
-  } else if (!_disableControls) {
+  } else if (!_controlsDisabled) {
     [self createControls];
   }
 }
 
-- (void)setShouldAutoplay:(BOOL)shouldAutoplay
+- (void)setShouldAutoPlay:(BOOL)shouldAutoPlay
 {
-  _shouldAutoplay = shouldAutoplay;
-  _videoNode.shouldAutoplay = _shouldAutoplay;
+  if (_shouldAutoPlay == shouldAutoPlay) {
+    return;
+  }
+  _shouldAutoPlay = shouldAutoPlay;
+  _videoNode.shouldAutoplay = _shouldAutoPlay;
 }
 
-- (void)setShouldAutorepeat:(BOOL)shouldAutorepeat
+- (void)setShouldAutoRepeat:(BOOL)shouldAutoRepeat
 {
-  _shouldAutorepeat = shouldAutorepeat;
-  _videoNode.shouldAutorepeat = YES;
+  if (_shouldAutoRepeat == shouldAutoRepeat) {
+    return;
+  }
+  _shouldAutoRepeat = shouldAutoRepeat;
+  _videoNode.shouldAutorepeat = _shouldAutoRepeat;
 }
 
 - (void)setMuted:(BOOL)muted
 {
+  if (_muted == muted) {
+    return;
+  }
   _muted = muted;
   _videoNode.muted = _muted;
 }
 
 - (void)setPeriodicTimeObserverTimescale:(int32_t)periodicTimeObserverTimescale
 {
+  if (_periodicTimeObserverTimescale == periodicTimeObserverTimescale) {
+    return;
+  }
   _periodicTimeObserverTimescale = periodicTimeObserverTimescale;
   _videoNode.periodicTimeObserverTimescale = _periodicTimeObserverTimescale;
 }
@@ -677,6 +750,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)setGravity:(NSString *)gravity
 {
+  if (_gravity == gravity) {
+    return;
+  }
   _gravity = gravity;
   _videoNode.gravity = _gravity;
 }
@@ -693,6 +769,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)setShouldAggressivelyRecoverFromStall:(BOOL)shouldAggressivelyRecoverFromStall
 {
+  if (_shouldAggressivelyRecoverFromStall == shouldAggressivelyRecoverFromStall) {
+    return;
+  }
   _shouldAggressivelyRecoverFromStall = shouldAggressivelyRecoverFromStall;
   _videoNode.shouldAggressivelyRecoverFromStall = _shouldAggressivelyRecoverFromStall;
 }
@@ -717,13 +796,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     videoDurationText = [NSString stringWithFormat:@"%02i:%02i", (int)dMinutes, (int)dSeconds];
   }
   return videoDurationText;
-}
-
-#pragma mark - Lifecycle
-
-- (void)dealloc
-{
-  [self removeObservers];
 }
 
 @end
