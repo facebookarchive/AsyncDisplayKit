@@ -1126,6 +1126,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 #pragma mark - ASCellNodeLayoutDelegate
 
+-(ASSizeRange)cellNode:(ASCellNode *)node constrainedSizeForLayoutWithOldConstrainedSize:(ASSizeRange)oldConstrainedSize
+{
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  return [self dataController:_dataController constrainedSizeForNodeAtIndexPath:indexPath];
+}
+
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();
