@@ -135,6 +135,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reloadDataImmediately;
 
 /**
+ * Triggers a relayout of all nodes.
+ *
+ */
+- (void)relayoutItems;
+
+/**
  *  begins a batch of insert, delete reload and move operations. This method must be called from the main thread.
  */
 - (void)beginUpdates;
