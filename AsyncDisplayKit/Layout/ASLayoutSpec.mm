@@ -126,6 +126,7 @@
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
   _child = finalLayoutable;
   [self propagateUpLayoutable:finalLayoutable];
+  ASEnvironmentStatePropagateDown(self, [traitCollection environmentTraitCollection]);
 }
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
@@ -140,6 +141,7 @@
   
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
   self.childrenWithIdentifier[identifier] = finalLayoutable;
+  ASEnvironmentStatePropagateDown(self, [traitCollection environmentTraitCollection]);
   
   // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
@@ -166,6 +168,7 @@
   if (finalChildren.size() > 0) {
     _children = [NSArray arrayWithObjects:&finalChildren[0] count:finalChildren.size()];
   }
+  ASEnvironmentStatePropagateDown(self, [traitCollection environmentTraitCollection]);
 }
 
 - (id<ASLayoutable>)childForIdentifier:(NSString *)identifier

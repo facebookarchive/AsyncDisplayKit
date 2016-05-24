@@ -126,10 +126,4 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   ASDisplayNodeAssert(NO, @"not supported by this layout spec");
 }
 
-- (NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-  return nil;
-}
-
 @end
