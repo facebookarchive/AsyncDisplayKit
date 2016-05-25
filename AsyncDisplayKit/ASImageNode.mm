@@ -94,6 +94,7 @@
   self.contentsScale = ASScreenScale();
   self.contentMode = UIViewContentModeScaleAspectFill;
   self.opaque = NO;
+  self.backgroundColor = [UIColor clearColor];
 
   _cropEnabled = YES;
   _forceUpscaling = NO;
