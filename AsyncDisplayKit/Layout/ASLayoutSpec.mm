@@ -26,7 +26,6 @@
   ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex _propertyLock;
   
-  id<ASLayoutable> _child;
   NSArray *_children;
   NSMutableDictionary *_childrenWithIdentifier;
 }
@@ -118,7 +117,7 @@
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-  _child = finalLayoutable;
+  _children = @[finalLayoutable];
   [self propagateUpLayoutable:finalLayoutable];
 }
 
@@ -128,6 +127,7 @@
   
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
   self.childrenWithIdentifier[identifier] = finalLayoutable;
+  self.children = [self.children arrayByAddingObject:finalLayoutable];
   
   // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
@@ -156,7 +156,7 @@
 
 - (id<ASLayoutable>)child
 {
-  return _child;
+  return [_children firstObject];
 }
 
 - (NSArray *)children

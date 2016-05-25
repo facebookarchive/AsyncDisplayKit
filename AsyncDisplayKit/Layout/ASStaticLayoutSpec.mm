@@ -72,17 +72,6 @@
                                    sublayouts:sublayouts];
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
-{
-  ASDisplayNodeAssert(NO, @"ASStaticLayoutSpec only supports setChildren");
-}
-
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
-{
-  ASDisplayNodeAssert(NO, @"ASStaticLayoutSpec only supports children");
-  return nil;
-}
-
 @end
 
 @implementation ASStaticLayoutSpec (ASEnvironment)
