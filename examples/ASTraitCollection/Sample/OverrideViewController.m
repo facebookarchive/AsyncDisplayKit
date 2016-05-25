@@ -63,9 +63,9 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
   _textNode.attributedString = string;
   
   ASStackLayoutSpec *stackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
-  [stackSpec setChildren:@[_textNode, _buttonNode] withTraitCollection:traitCollection];
+  [stackSpec setChildren:@[_textNode, _buttonNode]];
   stackSpec.spacing = 10;
-  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(40, 20, 20, 20) child:stackSpec traitCollection:traitCollection];
+  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(40, 20, 20, 20) child:stackSpec];
 }
 
 @end
