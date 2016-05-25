@@ -13,42 +13,30 @@
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
 #import "ASLayout.h"
-#import "ASTraitCollection.h"
 
 static NSString * const kOverlayChildKey = @"kOverlayChildKey";
 
 @implementation ASOverlayLayoutSpec
 
-- (instancetype)initWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay traitCollection:(nullable ASTraitCollection *)traitCollection
+- (instancetype)initWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
   if (!(self = [super init])) {
     return nil;
   }
   ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
-  self.environmentTraitCollection = [traitCollection environmentTraitCollection];
-  [self setOverlay:overlay traitCollection:traitCollection];
-  [self setChild:child withTraitCollection:traitCollection];
+  self.overlay = overlay;
+  [self setChild:child];
   return self;
 }
 
 + (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
-  return [self overlayLayoutSpecWithChild:child overlay:overlay traitCollection:nil];
-}
-
-+ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(nullable id<ASLayoutable>)overlay traitCollection:(nullable ASTraitCollection *)traitCollection
-{
-  return [[self alloc] initWithChild:child overlay:overlay traitCollection:traitCollection];
+  return [[self alloc] initWithChild:child overlay:overlay];
 }
 
 - (void)setOverlay:(id<ASLayoutable>)overlay
 {
-  [self setOverlay:overlay traitCollection:nil];
-}
-
-- (void)setOverlay:(id<ASLayoutable> _Nullable)overlay traitCollection:(nullable ASTraitCollection *)traitCollection
-{
-  return [super setChild:overlay forIdentifier:kOverlayChildKey withTraitCollection:traitCollection];
+  [super setChild:overlay forIdentifier:kOverlayChildKey];
 }
 
 - (id<ASLayoutable>)overlay

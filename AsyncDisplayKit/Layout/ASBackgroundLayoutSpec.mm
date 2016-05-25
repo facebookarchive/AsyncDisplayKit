@@ -13,7 +13,6 @@
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
 #import "ASLayout.h"
-#import "ASTraitCollection.h"
 
 static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
 
@@ -22,27 +21,21 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
 
 @implementation ASBackgroundLayoutSpec
 
-- (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background traitCollection:(ASTraitCollection *)traitCollection
+- (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
 {
   if (!(self = [super init])) {
     return nil;
   }
   
   ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-  self.environmentTraitCollection = [traitCollection environmentTraitCollection];
-  [self setChild:child withTraitCollection:traitCollection];
-  [self setBackground:background traitCollection:traitCollection];
+  [self setChild:child];
+  self.background = background;
   return self;
 }
 
 + (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
 {
-  return [self backgroundLayoutSpecWithChild:child background:background traitCollect:nil];
-}
-
-+ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(nullable id<ASLayoutable>)background traitCollect:(nullable ASTraitCollection *)traitCollection
-{
-  return [[self alloc] initWithChild:child background:background traitCollection:traitCollection];
+  return [[self alloc] initWithChild:child background:background];
 }
 
 /**
@@ -67,12 +60,7 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
 
 - (void)setBackground:(id<ASLayoutable>)background
 {
-  [self setBackground:background traitCollection:nil];
-}
-
-- (void)setBackground:(id<ASLayoutable>)background traitCollection:(ASTraitCollection *)traitCollection
-{
-  [super setChild:background forIdentifier:kBackgroundChildKey withTraitCollection:traitCollection];
+  [super setChild:background forIdentifier:kBackgroundChildKey];
 }
 
 - (id<ASLayoutable>)background

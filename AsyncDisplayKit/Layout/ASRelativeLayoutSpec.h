@@ -54,12 +54,6 @@ NS_ASSUME_NONNULL_BEGIN
                                                     sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
                                                            child:(id<ASLayoutable>)child;
 
-+ (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
-                                                verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition
-                                                    sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
-                                                           child:(id<ASLayoutable>)child
-                                                 traitCollection:(nullable ASTraitCollection *)traitCollection;
-
 /*!
  * @discussion convenience initializer for a ASRelativeLayoutSpec
  * @param horizontalPosition how to position the item on the horizontal (x) axis
@@ -71,8 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
                           verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition
                               sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
-                                     child:(id<ASLayoutable>)child
-                           traitCollection:(nullable ASTraitCollection *)traitCollection;
+                                     child:(id<ASLayoutable>)child;
 
 @end
 

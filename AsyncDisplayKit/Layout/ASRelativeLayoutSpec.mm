@@ -9,15 +9,10 @@
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-#import "ASTraitCollection.h"
 
 @implementation ASRelativeLayoutSpec
 
-- (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
-                          verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition
-                              sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
-                                     child:(id<ASLayoutable>)child
-                           traitCollection:(ASTraitCollection *)traitCollection
+- (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
 {
   if (!(self = [super init])) {
     return nil;
@@ -26,23 +21,13 @@
   _horizontalPosition = horizontalPosition;
   _verticalPosition = verticalPosition;
   _sizingOption = sizingOption;
-  self.environmentTraitCollection = [traitCollection environmentTraitCollection];
-  [self setChild:child withTraitCollection:traitCollection];
+  [self setChild:child];
   return self;
 }
 
 + (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
 {
-  return [self relativePositionLayoutSpecWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:child traitCollection:nil];
-}
-
-+ (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
-                                                verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition
-                                                    sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
-                                                           child:(id<ASLayoutable>)child
-                                                 traitCollection:(ASTraitCollection *)traitCollection
-{
-  return [[self alloc] initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:child traitCollection:traitCollection];
+  return [[self alloc] initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:child];
 }
 
 - (void)setHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition

@@ -95,4 +95,14 @@
   };
 }
 
+- (BOOL)isEqualToTraitCollection:(ASTraitCollection *)traitCollection
+{
+  return self.displayScale == traitCollection.displayScale &&
+  self.horizontalSizeClass == traitCollection.horizontalSizeClass &&
+  self.verticalSizeClass == traitCollection.verticalSizeClass &&
+  self.userInterfaceIdiom == traitCollection.userInterfaceIdiom &&
+  self.traitCollectionContext == traitCollection.traitCollectionContext &&
+  self.forceTouchCapability == traitCollection.forceTouchCapability;
+}
+
 @end

@@ -11,6 +11,8 @@
 #import <AsyncDisplayKit/ASLayoutable.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 
+@class ASTraitCollection;
+
 NS_ASSUME_NONNULL_BEGIN
 
 /** A layout spec is an immutable object that describes a layout, loosely inspired by React. */
@@ -22,6 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
  * set to NO and any further mutations will cause an assert.
  */
 @property (nonatomic, assign) BOOL isMutable;
+
+@property (nonatomic, strong, nullable) ASTraitCollection *traitCollection;
 
 - (instancetype)init;
 
@@ -46,7 +50,6 @@ NS_ASSUME_NONNULL_BEGIN
  * property that behind the scenes is calling setChild:forIdentifier:.
  */
 - (void)setChild:(id<ASLayoutable>)child;
-- (void)setChild:(id<ASLayoutable>)child withTraitCollection:(ASTraitCollection *)traitCollection;
 
 /**
  * Adds a child with the given identifier to this layout spec.
@@ -66,7 +69,6 @@ NS_ASSUME_NONNULL_BEGIN
  * property that behind the scenes is calling setChild:forIdentifier:.
  */
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier;
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier withTraitCollection:(ASTraitCollection *)traitCollection;
 
 /**
  * Adds childen to this layout spec.
@@ -80,7 +82,6 @@ NS_ASSUME_NONNULL_BEGIN
  * setChild: and setChild:forIdentifier: methods to do something appropriate or to assert.
  */
 - (void)setChildren:(NSArray<id<ASLayoutable>> *)children;
-- (void)setChildren:(NSArray<id<ASLayoutable>> *)children withTraitCollection:(ASTraitCollection *)traitCollection;
 
 /**
  * Get child methods

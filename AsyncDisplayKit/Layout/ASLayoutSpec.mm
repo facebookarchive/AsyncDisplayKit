@@ -115,47 +115,26 @@
 
 - (void)setChild:(id<ASLayoutable>)child
 {
-  id<ASEnvironment> parent = [child parent];
-  [self setChild:child withTraitCollection:[parent asyncTraitCollection]];
-}
-
-- (void)setChild:(id<ASLayoutable>)child withTraitCollection:(ASTraitCollection *)traitCollection
-{
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
   _child = finalLayoutable;
   [self propagateUpLayoutable:finalLayoutable];
-  ASEnvironmentStatePropagateDown(self, [traitCollection environmentTraitCollection]);
 }
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
-{
-  id<ASEnvironment> parent = [child parent];
-  [self setChild:child forIdentifier:identifier withTraitCollection:[parent asyncTraitCollection]];
-}
-
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier withTraitCollection:(ASTraitCollection *)traitCollection
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
   self.childrenWithIdentifier[identifier] = finalLayoutable;
-  ASEnvironmentStatePropagateDown(self, [traitCollection environmentTraitCollection]);
   
   // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
   // [self propagateUpLayoutable:finalLayoutable];
 }
 
-- (void)setChildren:(NSArray *)children
-{
-  id<ASLayoutable> child = [children firstObject];
-  id<ASEnvironment> parent = [child parent];
-  [self setChildren:children withTraitCollection:[parent asyncTraitCollection]];
-}
-
-- (void)setChildren:(NSArray<id<ASLayoutable>> *)children withTraitCollection:(ASTraitCollection *)traitCollection
+- (void)setChildren:(NSArray<id<ASLayoutable>> *)children
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
@@ -168,7 +147,6 @@
   if (finalChildren.size() > 0) {
     _children = [NSArray arrayWithObjects:&finalChildren[0] count:finalChildren.size()];
   }
-  ASEnvironmentStatePropagateDown(self, [traitCollection environmentTraitCollection]);
 }
 
 - (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
@@ -186,6 +164,13 @@
   return [_children copy];
 }
 
+- (void)setTraitCollection:(ASTraitCollection *)traitCollection
+{
+  if ([traitCollection isEqualToTraitCollection:self.traitCollection] == NO) {
+    _traitCollection = traitCollection;
+    ASEnvironmentStatePropagateDown(self, [traitCollection environmentTraitCollection]);
+  }
+}
 
 #pragma mark - ASEnvironment
 

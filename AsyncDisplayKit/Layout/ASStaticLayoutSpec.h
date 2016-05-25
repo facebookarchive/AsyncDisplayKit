@@ -24,7 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
  @param children Children to be positioned at fixed positions, each conforms to ASStaticLayoutable
  */
 + (instancetype)staticLayoutSpecWithChildren:(NSArray<id<ASStaticLayoutable>> *)children;
-+ (instancetype)staticLayoutSpecWithChildren:(NSArray<id<ASStaticLayoutable>> *)children traitCollection:(nullable ASTraitCollection *)traitCollection;
 
 @end
 

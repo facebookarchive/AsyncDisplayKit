@@ -20,9 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, strong) id<ASLayoutable> overlay;
 
 + (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(nullable id<ASLayoutable>)overlay;
-+ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(nullable id<ASLayoutable>)overlay traitCollection:(nullable ASTraitCollection *)traitCollection;
-
-- (void)setOverlay:(id<ASLayoutable> _Nullable)overlay traitCollection:(nullable ASTraitCollection *)traitCollection;
 
 @end
 

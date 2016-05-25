@@ -13,32 +13,25 @@
 #import "ASLayoutSpecUtilities.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-#import "ASTraitCollection.h"
 
 @implementation ASStaticLayoutSpec
 
 + (instancetype)staticLayoutSpecWithChildren:(NSArray *)children
 {
-  return [self staticLayoutSpecWithChildren:children traitCollection:nil];
-}
-
-+ (instancetype)staticLayoutSpecWithChildren:(NSArray<id<ASStaticLayoutable>> *)children traitCollection:(ASTraitCollection *)traitCollection
-{
-  return [[self alloc] initWithChildren:children traitCollection:traitCollection];
+  return [[self alloc] initWithChildren:children];
 }
 
 - (instancetype)init
 {
-    return [self initWithChildren:@[] traitCollection:nil];
+    return [self initWithChildren:@[]];
 }
 
-- (instancetype)initWithChildren:(NSArray *)children traitCollection:(ASTraitCollection *)traitCollection
+- (instancetype)initWithChildren:(NSArray *)children
 {
   if (!(self = [super init])) {
     return nil;
   }
-  self.environmentTraitCollection = [traitCollection environmentTraitCollection];
-  [self setChildren:children withTraitCollection:traitCollection];
+  self.children = children;
   return self;
 }
 

@@ -38,7 +38,6 @@ NS_ASSUME_NONNULL_BEGIN
  @param child The wrapped child to inset.
  */
 + (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
-+ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child traitCollection:(nullable ASTraitCollection *)traitCollection;
 
 @end
 

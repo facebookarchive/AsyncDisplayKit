@@ -50,5 +50,6 @@
 
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection;
+- (BOOL)isEqualToTraitCollection:(ASTraitCollection *)traitCollection;
 
 @end

@@ -15,9 +15,9 @@
 
 #import "ASAssert.h"
 #import "ASBaseDefines.h"
+
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-#import "ASTraitCollection.h"
 
 @implementation ASRatioLayoutSpec
 {
@@ -26,15 +26,10 @@
 
 + (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child
 {
-  return [self ratioLayoutSpecWithRatio:ratio child:child traitCollection:nil];
+  return [[self alloc] initWithRatio:ratio child:child];
 }
 
-+ (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child traitCollection:(ASTraitCollection *)traitCollection
-{
-  return [[self alloc] initWithRatio:ratio child:child traitCollection:traitCollection];
-}
-
-- (instancetype)initWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child traitCollection:(ASTraitCollection *)traitCollection
+- (instancetype)initWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;
 {
   if (!(self = [super init])) {
     return nil;
@@ -42,8 +37,7 @@
   ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
   ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
   _ratio = ratio;
-  self.environmentTraitCollection = [traitCollection environmentTraitCollection];
-  [self setChild:child withTraitCollection:traitCollection];
+  [self setChild:child];
   return self;
 }
 
