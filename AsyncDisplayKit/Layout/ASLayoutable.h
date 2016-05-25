@@ -84,6 +84,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) ASRelativeDimension flexBasis;
 
 /**
+ * @abstract This view is invisible, and it doesn't take any space for layout purposes.
+ * Used when attached to a layout.
+ */
+@property (nonatomic, readwrite) BOOL flexGone;
+
+/**
  * @abstract Orientation of the object along cross axis, overriding alignItems
  * Used when attached to a stack layout.
  */

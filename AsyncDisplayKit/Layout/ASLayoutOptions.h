@@ -76,6 +76,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) BOOL flexGrow;
 @property (nonatomic, readwrite) BOOL flexShrink;
 @property (nonatomic, readwrite) ASRelativeDimension flexBasis;
+@property (nonatomic, readwrite) BOOL flexGone;
 @property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
 @property (nonatomic, readwrite) CGFloat ascender;
 @property (nonatomic, readwrite) CGFloat descender;

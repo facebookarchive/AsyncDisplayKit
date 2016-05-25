@@ -83,6 +83,16 @@ return self.layoutOptions.flexBasis;\
 self.layoutOptions.flexBasis = flexBasis;\
 }\
 \
+- (BOOL)flexGone\
+{\
+return self.layoutOptions.flexGone;\
+}\
+\
+- (void)setFlexGone:(BOOL)flexGone\
+{\
+self.layoutOptions.flexGone = flexGone;\
+}\
+\
 - (ASStackLayoutAlignSelf)alignSelf\
 {\
 return self.layoutOptions.alignSelf;\

@@ -28,6 +28,7 @@
 @synthesize flexGrow = _flexGrow;
 @synthesize flexShrink = _flexShrink;
 @synthesize flexBasis = _flexBasis;
+@synthesize flexGone = _flexGone;
 @synthesize alignSelf = _alignSelf;
 
 @synthesize ascender = _ascender;
@@ -98,6 +99,7 @@ static Class gDefaultLayoutOptionsClass = nil;
   self.spacingBefore = layoutOptions.spacingBefore;
   self.flexGrow = layoutOptions.flexGrow;
   self.flexShrink = layoutOptions.flexShrink;
+  self.flexGone = layoutOptions.flexGone;
   self.alignSelf = layoutOptions.alignSelf;
   
   self.ascender = layoutOptions.ascender;
@@ -187,6 +189,19 @@ static Class gDefaultLayoutOptionsClass = nil;
   ASDN::MutexLocker l(_propertyLock);
   _flexShrink = flexShrink;
 }
+
+- (BOOL)flexGone
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _flexShrink;
+}
+
+- (void)setFlexGone:(BOOL)flexGone
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _flexGone = flexGone;
+}
+
 
 - (ASRelativeDimension)flexBasis
 {
