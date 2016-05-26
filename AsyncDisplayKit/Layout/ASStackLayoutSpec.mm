@@ -134,7 +134,7 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  if (self.children.count == 0) {
+  if (self.children.count == 0 || self.flexGone) {
     return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
   }
   
