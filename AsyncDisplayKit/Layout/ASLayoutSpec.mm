@@ -117,8 +117,10 @@
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-  _children = @[finalLayoutable];
-  [self propagateUpLayoutable:finalLayoutable];
+  if (finalLayoutable) {
+    _children = @[finalLayoutable];
+    [self propagateUpLayoutable:finalLayoutable];
+  }
 }
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
@@ -127,7 +129,9 @@
   
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
   self.childrenWithIdentifier[identifier] = finalLayoutable;
-  self.children = [self.children arrayByAddingObject:finalLayoutable];
+  if (finalLayoutable) {
+    self.children = [self.children arrayByAddingObject:finalLayoutable];
+  }
   
   // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
