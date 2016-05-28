@@ -72,10 +72,8 @@ static NSString * const kStatus = @"status";
   CMTime _timeObserverInterval;
   
   ASImageNode *_placeholderImageNode; // TODO: Make ASVideoNode an ASImageNode subclass; remove this.
-  
-  ASButtonNode *_playButtonNode;
+
   ASDisplayNode *_playerNode;
-  ASDisplayNode *_spinnerNode;
   NSString *_gravity;
 }
 
@@ -92,8 +90,7 @@ static NSString * const kStatus = @"status";
   if (!(self = [super init])) {
     return nil;
   }
-  
-  self.playButton = [[ASDefaultPlayButton alloc] init];
+
   self.gravity = AVLayerVideoGravityResizeAspect;
   _periodicTimeObserverTimescale = 10000;
   [self addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
@@ -157,7 +154,7 @@ static NSString * const kStatus = @"status";
   if (_placeholderImageNode.image == nil) {
     [self generatePlaceholderImage];
   }
-  
+
   __weak __typeof(self) weakSelf = self;
   _timeObserverInterval = CMTimeMake(1, _periodicTimeObserverTimescale);
   _timeObserver = [_player addPeriodicTimeObserverForInterval:_timeObserverInterval queue:NULL usingBlock:^(CMTime time){
@@ -212,10 +209,7 @@ static NSString * const kStatus = @"status";
     
     // Stretch out play button, placeholder image player node to the max size
     NSMutableArray *children = [NSMutableArray array];
-    if (_playButtonNode) {
-        _playButtonNode.preferredFrameSize = maxSize;
-        [children addObject:_playButtonNode];
-    }
+
     if (_placeholderImageNode) {
         _placeholderImageNode.preferredFrameSize = maxSize;
         [children addObject:_placeholderImageNode];
@@ -225,26 +219,7 @@ static NSString * const kStatus = @"status";
         [children addObject:_playerNode];
     }
     
-    // Center spinner node
-    if (_spinnerNode) {
-        ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
-        centerLayoutSpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
-        [children addObject:centerLayoutSpec];
-    }
-    
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
-}
-
-- (void)layout
-{
-  [super layout];
-  
-  CGRect bounds = self.bounds;
-  
-  ASDN::MutexLocker l(_videoLock);
-  CGFloat horizontalDiff = (CGRectGetWidth(bounds) - CGRectGetWidth(_playButtonNode.bounds))/2;
-  CGFloat verticalDiff = (CGRectGetHeight(bounds) - CGRectGetHeight(_playButtonNode.bounds))/2;
-  _playButtonNode.hitTestSlop = UIEdgeInsetsMake(-verticalDiff, -horizontalDiff, -verticalDiff, -horizontalDiff);
 }
 
 - (void)generatePlaceholderImage
@@ -319,13 +294,14 @@ static NSString * const kStatus = @"status";
 
   if ([keyPath isEqualToString:kStatus]) {
     if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
-      [self removeSpinner];
+      self.playerState = ASVideoNodePlayerStateReadyToPlay;
       // If we don't yet have a placeholder image update it now that we should have data available for it
       if (_placeholderImageNode.image == nil) {
         [self generatePlaceholderImage];
       }
     }
   } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
+    self.playerState = ASVideoNodePlayerStatePlaybackLikelyToKeepUpButNotPlaying;
     if (_shouldBePlaying && (_shouldAggressivelyRecoverFromStall || [change[NSKeyValueChangeNewKey] boolValue]) && ASInterfaceStateIncludesVisible(self.interfaceState)) {
       if (self.playerState == ASVideoNodePlayerStateLoading && _delegateFlags.delegateVideoNodeDidRecoverFromStall) {
         [_delegate videoNodeDidRecoverFromStall:self];
@@ -335,7 +311,6 @@ static NSString * const kStatus = @"status";
   } else if ([keyPath isEqualToString:kplaybackBufferEmpty]) {
     if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
       self.playerState = ASVideoNodePlayerStateLoading;
-      [self showSpinner];
     }
   }
 }
@@ -455,26 +430,6 @@ static NSString * const kStatus = @"status";
   _playerState = playerState;
 }
 
-- (void)setPlayButton:(ASButtonNode *)playButton
-{
-  ASDN::MutexLocker l(_videoLock);
-
-  [_playButtonNode removeTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
-  [_playButtonNode removeFromSupernode];
-
-  _playButtonNode = playButton;
-  [_playButtonNode addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
-
-  [self addSubnode:playButton];
-  [self setNeedsLayout];
-}
-
-- (ASButtonNode *)playButton
-{
-  ASDN::MutexLocker l(_videoLock);
-  return _playButtonNode;
-}
-
 - (void)setAsset:(AVAsset *)asset
 {
   ASDN::MutexLocker l(_videoLock);
@@ -488,10 +443,6 @@ static NSString * const kStatus = @"status";
   _asset = asset;
 
   [self setNeedsDataFetch];
-
-  if (_shouldAutoplay) {
-    [self play];
-  }
 }
 
 - (AVAsset *)asset
@@ -583,11 +534,8 @@ static NSString * const kStatus = @"status";
   if (_playerNode == nil) {
     _playerNode = [self constructPlayerNode];
 
-    if (_playButtonNode.supernode == self) {
-      [self insertSubnode:_playerNode belowSubnode:_playButtonNode];
-    } else {
-      [self addSubnode:_playerNode];
-    }
+    [self addSubnode:_playerNode];
+
       
     [self setNeedsLayout];
   }
@@ -595,14 +543,10 @@ static NSString * const kStatus = @"status";
   
   [_player play];
   _shouldBePlaying = YES;
-  
-  [UIView animateWithDuration:0.15 animations:^{
-    _playButtonNode.alpha = 0.0;
-  }];
+
   if (![self ready]) {
-    [self showSpinner];
+    self.playerState = ASVideoNodePlayerStateLoading;
   } else {
-    [self removeSpinner];
     self.playerState = ASVideoNodePlayerStatePlaying;
   }
 }
@@ -610,35 +554,6 @@ static NSString * const kStatus = @"status";
 - (BOOL)ready
 {
   return _currentPlayerItem.status == AVPlayerItemStatusReadyToPlay;
-}
-
-- (void)showSpinner
-{
-  ASDN::MutexLocker l(_videoLock);
-  
-  if (!_spinnerNode) {
-    _spinnerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-      UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
-      spinnnerView.color = [UIColor whiteColor];
-      return spinnnerView;
-    }];
-    _spinnerNode.preferredFrameSize = CGSizeMake(44.0, 44.0);
-      
-    [self addSubnode:_spinnerNode];
-    [self setNeedsLayout];
-  }
-  [(UIActivityIndicatorView *)_spinnerNode.view startAnimating];
-}
-
-- (void)removeSpinner
-{
-  ASDN::MutexLocker l(_videoLock);
-  
-  if (!_spinnerNode) {
-    return;
-  }
-  [_spinnerNode removeFromSupernode];
-  _spinnerNode = nil;
 }
 
 - (void)pause
@@ -649,11 +564,7 @@ static NSString * const kStatus = @"status";
   }
   self.playerState = ASVideoNodePlayerStatePaused;
   [_player pause];
-  [self removeSpinner];
   _shouldBePlaying = NO;
-  [UIView animateWithDuration:0.15 animations:^{
-    _playButtonNode.alpha = 1.0;
-  }];
 }
 
 - (BOOL)isPlaying
@@ -700,7 +611,6 @@ static NSString * const kStatus = @"status";
 - (void)videoNodeDidStall:(NSNotification *)notification
 {
   self.playerState = ASVideoNodePlayerStateLoading;
-  [self showSpinner];
   if (_delegateFlags.delegateVideoNodeDidStallAtTimeInterval) {
     [_delegate videoNode:self didStallAtTimeInterval:CMTimeGetSeconds(_player.currentItem.currentTime)];
   }
@@ -724,13 +634,6 @@ static NSString * const kStatus = @"status";
 }
 
 #pragma mark - Internal Properties
-
-- (ASDisplayNode *)spinner
-{
-  ASDN::MutexLocker l(_videoLock);
-  return _spinnerNode;
-}
-
 - (ASImageNode *)placeholderImageNode
 {
   ASDN::MutexLocker l(_videoLock);
@@ -794,7 +697,6 @@ static NSString * const kStatus = @"status";
 {
   [_player removeTimeObserver:_timeObserver];
   _timeObserver = nil;
-  [_playButtonNode removeTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
   [self removePlayerItemObservers:_currentPlayerItem];
 }
 

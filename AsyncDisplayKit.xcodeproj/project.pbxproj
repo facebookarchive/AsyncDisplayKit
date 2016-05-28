@@ -311,6 +311,14 @@
 		7AB338691C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7AB338681C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm */; };
 		81EE384F1C8E94F000456208 /* ASRunLoopQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		81EE38501C8E94F000456208 /* ASRunLoopQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */; };
+		8B0768B31CE752EC002E1453 /* ASDefaultPlaybackButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */; };
+		8B0768B41CE752EC002E1453 /* ASDefaultPlaybackButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 8B0768B21CE752EC002E1453 /* ASDefaultPlaybackButton.m */; };
+		8BBBAB8C1CEBAF1700107FC6 /* ASDefaultPlaybackButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */; };
+		8BBBAB8D1CEBAF1E00107FC6 /* ASDefaultPlaybackButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 8B0768B21CE752EC002E1453 /* ASDefaultPlaybackButton.m */; };
+		8BDA5FC51CDBDDE1007D13B2 /* ASVideoPlayerNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BDA5FC31CDBDDE1007D13B2 /* ASVideoPlayerNode.h */; };
+		8BDA5FC61CDBDDE1007D13B2 /* ASVideoPlayerNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8BDA5FC41CDBDDE1007D13B2 /* ASVideoPlayerNode.mm */; };
+		8BDA5FC71CDBDF91007D13B2 /* ASVideoPlayerNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BDA5FC31CDBDDE1007D13B2 /* ASVideoPlayerNode.h */; };
+		8BDA5FC81CDBDF95007D13B2 /* ASVideoPlayerNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8BDA5FC41CDBDDE1007D13B2 /* ASVideoPlayerNode.mm */; };
 		92074A611CC8BA1900918F75 /* ASImageNode+tvOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 92074A5F1CC8BA1900918F75 /* ASImageNode+tvOS.h */; };
 		92074A621CC8BA1900918F75 /* ASImageNode+tvOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 92074A5F1CC8BA1900918F75 /* ASImageNode+tvOS.h */; };
 		92074A631CC8BA1900918F75 /* ASImageNode+tvOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 92074A601CC8BA1900918F75 /* ASImageNode+tvOS.m */; };
@@ -820,6 +828,10 @@
 		7AB338681C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRelativeLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASRunLoopQueue.h; path = ../ASRunLoopQueue.h; sourceTree = "<group>"; };
 		81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASRunLoopQueue.mm; path = ../ASRunLoopQueue.mm; sourceTree = "<group>"; };
+		8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDefaultPlaybackButton.h; sourceTree = "<group>"; };
+		8B0768B21CE752EC002E1453 /* ASDefaultPlaybackButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDefaultPlaybackButton.m; sourceTree = "<group>"; };
+		8BDA5FC31CDBDDE1007D13B2 /* ASVideoPlayerNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASVideoPlayerNode.h; sourceTree = "<group>"; };
+		8BDA5FC41CDBDDE1007D13B2 /* ASVideoPlayerNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASVideoPlayerNode.mm; sourceTree = "<group>"; };
 		92074A5F1CC8BA1900918F75 /* ASImageNode+tvOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASImageNode+tvOS.h"; sourceTree = "<group>"; };
 		92074A601CC8BA1900918F75 /* ASImageNode+tvOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ASImageNode+tvOS.m"; sourceTree = "<group>"; };
 		92074A651CC8BADA00918F75 /* ASControlNode+tvOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASControlNode+tvOS.h"; sourceTree = "<group>"; };
@@ -908,6 +920,7 @@
 		B30BF6511C5964B0004FCD53 /* ASLayoutManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASLayoutManager.m; path = TextKit/ASLayoutManager.m; sourceTree = "<group>"; };
 		B35061DA1B010EDF0018CF92 /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncDisplayKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B35061DD1B010EDF0018CF92 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../AsyncDisplayKit-iOS/Info.plist"; sourceTree = "<group>"; };
+		BDC2D162BD55A807C1475DA5 /* Pods-AsyncDisplayKitTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.profile.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.profile.xcconfig"; sourceTree = "<group>"; };
 		CC3B20811C3F76D600798563 /* ASPendingStateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPendingStateController.h; sourceTree = "<group>"; };
 		CC3B20821C3F76D600798563 /* ASPendingStateController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASPendingStateController.mm; sourceTree = "<group>"; };
 		CC3B20871C3F7A5400798563 /* ASWeakSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASWeakSet.h; sourceTree = "<group>"; };
@@ -1064,6 +1077,8 @@
 				92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */,
 				AEEC47DF1C20C2DD00EC1693 /* ASVideoNode.h */,
 				AEEC47E01C20C2DD00EC1693 /* ASVideoNode.mm */,
+				8BDA5FC31CDBDDE1007D13B2 /* ASVideoPlayerNode.h */,
+				8BDA5FC41CDBDDE1007D13B2 /* ASVideoPlayerNode.mm */,
 				055F1A3A19ABD43F004DAFF1 /* ASCellNode.h */,
 				AC6456071B0A335000CF11B8 /* ASCellNode.mm */,
 				18C2ED7C1B9B7DE800F627B3 /* ASCollectionNode.h */,
@@ -1332,6 +1347,8 @@
 				CC3B20881C3F7A5400798563 /* ASWeakSet.m */,
 				DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */,
 				DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */,
+				8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */,
+				8B0768B21CE752EC002E1453 /* ASDefaultPlaybackButton.m */,
 			);
 			path = Private;
 			sourceTree = "<group>";
@@ -1476,6 +1493,7 @@
 			children = (
 				FB07EABBCF28656C6297BC2D /* Pods-AsyncDisplayKitTests.debug.xcconfig */,
 				D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */,
+				BDC2D162BD55A807C1475DA5 /* Pods-AsyncDisplayKitTests.profile.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -1570,6 +1588,7 @@
 				DBDB83941C6E879900D0098C /* ASPagerFlowLayout.h in Headers */,
 				058D0A4F195D05CB00B7D73C /* ASImageNode.h in Headers */,
 				05F20AA41A15733C00DCA68A /* ASImageProtocols.h in Headers */,
+				8BDA5FC51CDBDDE1007D13B2 /* ASVideoPlayerNode.h in Headers */,
 				430E7C8F1B4C23F100697A4C /* ASIndexPath.h in Headers */,
 				ACF6ED221B17843500DA7C62 /* ASInsetLayoutSpec.h in Headers */,
 				ACF6ED4B1B17847A00DA7C62 /* ASInternalHelpers.h in Headers */,
@@ -1591,6 +1610,7 @@
 				B13CA1001C52004900E031AB /* ASCollectionNode+Beta.h in Headers */,
 				0442850D1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */,
 				0516FA401A1563D200B4EBED /* ASMultiplexImageNode.h in Headers */,
+				8B0768B31CE752EC002E1453 /* ASDefaultPlaybackButton.h in Headers */,
 				058D0A59195D05DC00B7D73C /* ASMutableAttributedStringBuilder.h in Headers */,
 				055B9FA81A1C154B00035D6D /* ASNetworkImageNode.h in Headers */,
 				ACF6ED2B1B17843500DA7C62 /* ASOverlayLayoutSpec.h in Headers */,
@@ -1747,6 +1767,7 @@
 				DECBD6E81BE56E1900CF4905 /* ASButtonNode.h in Headers */,
 				B35062241B010EFD0018CF92 /* ASMutableAttributedStringBuilder.h in Headers */,
 				B13CA0F81C519EBA00E031AB /* ASCollectionViewLayoutFacilitatorProtocol.h in Headers */,
+				8BBBAB8C1CEBAF1700107FC6 /* ASDefaultPlaybackButton.h in Headers */,
 				B35062061B010EFD0018CF92 /* ASNetworkImageNode.h in Headers */,
 				34EFC76C1B701CED00AD841F /* ASOverlayLayoutSpec.h in Headers */,
 				B35062261B010EFD0018CF92 /* ASRangeController.h in Headers */,
@@ -1790,6 +1811,7 @@
 				B350623A1B010EFD0018CF92 /* NSMutableAttributedString+TextKitAdditions.h in Headers */,
 				044284FF1BAA3BD600D16268 /* UICollectionViewLayout+ASConvenience.h in Headers */,
 				B35062431B010EFD0018CF92 /* UIView+ASConvenience.h in Headers */,
+				8BDA5FC71CDBDF91007D13B2 /* ASVideoPlayerNode.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1836,12 +1858,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 058D09D2195D04C000B7D73C /* Build configuration list for PBXNativeTarget "AsyncDisplayKitTests" */;
 			buildPhases = (
-				2E61B6A0DB0F436A9DDBE86F /* Check Pods Manifest.lock */,
+				2E61B6A0DB0F436A9DDBE86F /* 📦 Check Pods Manifest.lock */,
 				058D09B8195D04C000B7D73C /* Sources */,
 				058D09B9195D04C000B7D73C /* Frameworks */,
 				058D09BA195D04C000B7D73C /* Resources */,
-				3B9D88CDF51B429C8409E4B6 /* Copy Pods Resources */,
-				B130AB1AC0A1E5162E211C19 /* Embed Pods Frameworks */,
+				3B9D88CDF51B429C8409E4B6 /* 📦 Copy Pods Resources */,
+				B130AB1AC0A1E5162E211C19 /* 📦 Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1942,14 +1964,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		2E61B6A0DB0F436A9DDBE86F /* Check Pods Manifest.lock */ = {
+		2E61B6A0DB0F436A9DDBE86F /* 📦 Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Check Pods Manifest.lock";
+			name = "📦 Check Pods Manifest.lock";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1957,14 +1979,14 @@
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
-		3B9D88CDF51B429C8409E4B6 /* Copy Pods Resources */ = {
+		3B9D88CDF51B429C8409E4B6 /* 📦 Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Copy Pods Resources";
+			name = "📦 Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1972,14 +1994,14 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		B130AB1AC0A1E5162E211C19 /* Embed Pods Frameworks */ = {
+		B130AB1AC0A1E5162E211C19 /* 📦 Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Embed Pods Frameworks";
+			name = "📦 Embed Pods Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2004,6 +2026,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				058D0A22195D050800B7D73C /* _ASAsyncTransaction.mm in Sources */,
+				8B0768B41CE752EC002E1453 /* ASDefaultPlaybackButton.m in Sources */,
 				E55D86321CA8A14000A0C26F /* ASLayoutable.mm in Sources */,
 				68FC85E41CE29B7E00EDD713 /* ASTabBarController.m in Sources */,
 				058D0A23195D050800B7D73C /* _ASAsyncTransactionContainer.m in Sources */,
@@ -2108,6 +2131,7 @@
 				055F1A3519ABD3E3004DAFF1 /* ASTableView.mm in Sources */,
 				058D0A17195D050800B7D73C /* ASTextNode.mm in Sources */,
 				257754AC1BEE44CD00737CA5 /* ASTextKitRenderer.mm in Sources */,
+				8BDA5FC61CDBDDE1007D13B2 /* ASVideoPlayerNode.mm in Sources */,
 				205F0E221B376416007741D0 /* CGRect+ASConvenience.m in Sources */,
 				257754B21BEE44CD00737CA5 /* ASTextKitShadower.mm in Sources */,
 				9CFFC6BE1CCAC52B006A6476 /* ASEnvironment.mm in Sources */,
@@ -2164,6 +2188,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9C70F2091CDABA36007D6C76 /* ASViewController.mm in Sources */,
+				8BBBAB8D1CEBAF1E00107FC6 /* ASDefaultPlaybackButton.m in Sources */,
 				DE4843DB1C93EAB100A1F33B /* ASLayoutTransition.mm in Sources */,
 				B30BF6541C59D889004FCD53 /* ASLayoutManager.m in Sources */,
 				92DD2FE71BF4D0850074C9DD /* ASMapNode.mm in Sources */,
@@ -2252,6 +2277,7 @@
 				B35062091B010EFD0018CF92 /* ASScrollNode.m in Sources */,
 				B35062561B010EFD0018CF92 /* ASSentinel.m in Sources */,
 				9C8221981BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */,
+				8BDA5FC81CDBDF95007D13B2 /* ASVideoPlayerNode.mm in Sources */,
 				34EFC7721B701D0300AD841F /* ASStackLayoutSpec.mm in Sources */,
 				34EFC7761B701D2A00AD841F /* ASStackPositionedLayout.mm in Sources */,
 				7AB338661C55B3420055FDE8 /* ASRelativeLayoutSpec.mm in Sources */,
@@ -2648,7 +2674,7 @@
 		};
 		DB1020821CBCA2AD00FA6FE1 /* Profile */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */;
+			baseConfigurationReference = BDC2D162BD55A807C1475DA5 /* Pods-AsyncDisplayKitTests.profile.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_CODE_COVERAGE = YES;

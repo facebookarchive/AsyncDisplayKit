@@ -15,8 +15,10 @@
 typedef enum {
   ASVideoNodePlayerStateUnknown,
   ASVideoNodePlayerStateInitialLoading,
-  ASVideoNodePlayerStateLoading,
+  ASVideoNodePlayerStateReadyToPlay,
+  ASVideoNodePlayerStatePlaybackLikelyToKeepUpButNotPlaying,
   ASVideoNodePlayerStatePlaying,
+  ASVideoNodePlayerStateLoading,
   ASVideoNodePlayerStatePaused,
   ASVideoNodePlayerStateFinished
 } ASVideoNodePlayerState;
@@ -40,6 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, atomic, strong, readonly) AVPlayer *player;
 @property (nullable, atomic, strong, readonly) AVPlayerItem *currentItem;
 
+
 /**
  * When shouldAutoplay is set to true, a video node will play when it has both loaded and entered the "visible" interfaceState.
  * If it leaves the visible interfaceState it will pause but will resume once it has returned.
@@ -56,9 +59,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 //! Defaults to AVLayerVideoGravityResizeAspect
 @property (atomic) NSString *gravity;
-
-//! Defaults to an ASDefaultPlayButton instance.
-@property (nullable, atomic) ASButtonNode *playButton;
 
 @property (nullable, atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
 
