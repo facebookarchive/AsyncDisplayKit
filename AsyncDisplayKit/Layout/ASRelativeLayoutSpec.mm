@@ -49,6 +49,10 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  if(self.flexGone)
+  {
+    return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+  }
   CGSize size = {
     constrainedSize.max.width,
     constrainedSize.max.height

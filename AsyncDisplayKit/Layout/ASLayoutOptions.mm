@@ -193,7 +193,7 @@ static Class gDefaultLayoutOptionsClass = nil;
 - (BOOL)flexGone
 {
   ASDN::MutexLocker l(_propertyLock);
-  return _flexShrink;
+  return _flexGone;
 }
 
 - (void)setFlexGone:(BOOL)flexGone

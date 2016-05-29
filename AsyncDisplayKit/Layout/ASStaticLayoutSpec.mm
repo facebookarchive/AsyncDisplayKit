@@ -38,6 +38,10 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  if(self.flexGone)
+  {
+    return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+  }
   CGSize maxConstrainedSize = CGSizeMake(constrainedSize.max.width, constrainedSize.max.height);
   
   NSArray *children = self.children;

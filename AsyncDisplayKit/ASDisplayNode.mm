@@ -1827,6 +1827,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
+  if (self.flexGone) {
+    return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+  }
   ASDN::MutexLocker l(_propertyLock);
   if (_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];

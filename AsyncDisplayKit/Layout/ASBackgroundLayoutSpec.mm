@@ -43,6 +43,10 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  if(self.flexGone)
+  {
+    return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+  }
   ASLayout *contentsLayout = [[self child] measureWithSizeRange:constrainedSize];
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
