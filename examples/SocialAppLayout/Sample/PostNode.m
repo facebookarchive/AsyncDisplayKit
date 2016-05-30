@@ -15,6 +15,8 @@
 #import "LikesNode.h"
 #import "CommentsNode.h"
 
+#define PostNodeDividerColor [UIColor lightGrayColor]
+
 @interface PostNode() <ASNetworkImageNodeDelegate, ASTextNodeDelegate>
 
 @property (strong, nonatomic) Post *post;
@@ -33,6 +35,8 @@
 @end
 
 @implementation PostNode
+
+#pragma mark - Lifecycle
 
 - (instancetype)initWithPost:(Post *)post
 {
@@ -149,7 +153,7 @@
         
         // Hairline cell separator
         _divider = [[ASDisplayNode alloc] init];
-        _divider.backgroundColor = [UIColor lightGrayColor];
+        [self updateDividerColor];
         [self addSubnode:_divider];
         
         // Via
@@ -172,6 +176,20 @@
     }
     return self;
 }
+
+- (void)updateDividerColor
+{
+    /*
+     * UITableViewCell traverses through all its descendant views and adjusts their background color accordingly
+     * either to [UIColor clearColor], although potentially it could use the same color as the selection highlight itself.
+     * After selection, the same trick is performed again in reverse, putting all the backgrounds back as they used to be.
+     * But in our case, we don't want to have the background color disappearing so we reset it after highlighting or
+     * selection is done.
+     */
+    _divider.backgroundColor = PostNodeDividerColor;
+}
+
+#pragma mark - ASDisplayNode
 
 - (void)didLoad
 {
@@ -245,7 +263,23 @@
     _divider.frame = CGRectMake(0.0f, 0.0f, self.calculatedSize.width, pixelHeight);
 }
 
-#pragma mark - ASTextNodeDelegate methods.
+#pragma mark - ASCellNode
+
+- (void)setHighlighted:(BOOL)highlighted
+{
+    [super setHighlighted:highlighted];
+    
+    [self updateDividerColor];
+}
+
+- (void)setSelected:(BOOL)selected
+{
+    [super setSelected:selected];
+    
+    [self updateDividerColor];
+}
+
+#pragma mark - <ASTextNodeDelegate>
 
 - (BOOL)textNode:(ASTextNode *)richTextNode shouldHighlightLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point
 {
