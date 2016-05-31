@@ -115,7 +115,8 @@
 - (void)setChild:(id<ASLayoutable>)child
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
   if (finalLayoutable) {
     _children = @[finalLayoutable];
@@ -126,6 +127,7 @@
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
   
   id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
   self.childrenWithIdentifier[identifier] = finalLayoutable;
