@@ -8,12 +8,15 @@
 
 #import <Foundation/Foundation.h>
 #import "ASImageProtocols.h"
+#import <PINRemoteImage/PINRemoteImageManager.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ASPINRemoteImageDownloader : NSObject <ASImageCacheProtocol, ASImageDownloaderProtocol>
 
 + (ASPINRemoteImageDownloader *)sharedDownloader;
+
+- (PINRemoteImageManager *)sharedPINRemoteImageManager;
 
 @end
 
