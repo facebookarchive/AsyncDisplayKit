@@ -816,11 +816,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     // Sort indexPath in order to avoid messing up the index when deleting in several batches.
-    NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
-    
     // When you delete at an index, you invalidate all subsequent indices, and we never want to use an invalid index
     // in a later delete so we should have the sorted index path's array in descendent order
-    sortedIndexPaths = [[sortedIndexPaths reverseObjectEnumerator] allObjects];
+    NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(asdk_inverseCompare:)];
 
     [_editingTransactionQueue addOperationWithBlock:^{
       LOG(@"Edit Transaction - deleteRows: %@", indexPaths);
