@@ -11,6 +11,8 @@
 #import "ASThread.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASImageNode.h"
+#import "AsyncDisplayKit+Debug.h"
+#import "ASInternalHelpers.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
@@ -70,8 +72,6 @@ id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEv
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent));
 
 @end
-
-static BOOL _enableHitTestDebug = NO;
 
 @implementation ASControlNode
 {
@@ -262,14 +262,15 @@ static BOOL _enableHitTestDebug = NO;
     _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
     
     // only show tap-able areas for views with 1 or more addTarget:action: pairs
-    if (_enableHitTestDebug) {
-      
-      // add a highlight overlay node with area of ASControlNode + UIEdgeInsets
-      self.clipsToBounds = NO;
-      _debugHighlightOverlay = [[ASImageNode alloc] init];
-      _debugHighlightOverlay.zPosition = 1000;  // CALayer doesn't have -moveSublayerToFront, but this will ensure we're over the top of any siblings.
-      _debugHighlightOverlay.layerBacked = YES;
-      [self addSubnode:_debugHighlightOverlay];
+    if ([ASControlNode enableHitTestDebug] && _debugHighlightOverlay == nil) {
+      ASPerformBlockOnMainThread(^{
+        // add a highlight overlay node with area of ASControlNode + UIEdgeInsets
+        self.clipsToBounds = NO;
+        _debugHighlightOverlay = [[ASImageNode alloc] init];
+        _debugHighlightOverlay.zPosition = 1000;  // ensure we're over the top of any siblings
+        _debugHighlightOverlay.layerBacked = YES;
+        [self addSubnode:_debugHighlightOverlay];
+      });
     }
   }
 
@@ -470,134 +471,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 }
 
 #pragma mark - Debug
-// Layout method required when _enableHitTestDebug is enabled.
-- (void)layout
+- (ASImageNode *)debugHighlightOverlay
 {
-  [super layout];
-  
-  if (_debugHighlightOverlay) {
-    
-    // Even if our parents don't have clipsToBounds set and would allow us to display the debug overlay, UIKit event delivery (hitTest:)
-    // will not search sub-hierarchies if one of our parents does not return YES for pointInside:.  In such a scenario, hitTestSlop
-    // may not be able to expand the tap target as much as desired without also setting some hitTestSlop on the limiting parents.
-    CGRect intersectRect = UIEdgeInsetsInsetRect(self.bounds, [self hitTestSlop]);
-    UIRectEdge clippedEdges = UIRectEdgeNone;
-    UIRectEdge clipsToBoundsClippedEdges = UIRectEdgeNone;
-    CALayer *layer = self.layer;
-    CALayer *intersectLayer = layer;
-    CALayer *intersectSuperlayer = layer.superlayer;
-    
-    // Stop climbing if we encounter a UIScrollView, as its offset bounds origin may make it seem like our events will be clipped when
-    // scrolling will actually reveal them (because this process will not re-run due to scrolling)
-    while (intersectSuperlayer && ![intersectSuperlayer.delegate respondsToSelector:@selector(contentOffset)]) {
-      // Get our parent's tappable bounds.  If the parent has an associated node, consider hitTestSlop, as it will extend its pointInside:.
-      CGRect parentHitRect = intersectSuperlayer.bounds;
-      BOOL parentClipsToBounds = NO;
-      
-      ASDisplayNode *parentNode = ASLayerToDisplayNode(intersectSuperlayer);
-      if (parentNode) {
-        UIEdgeInsets parentSlop = [parentNode hitTestSlop];
-        
-        // if parent has a hitTestSlop as well, we need to account for the fact that events will be routed towards us in that area too.
-        if (!UIEdgeInsetsEqualToEdgeInsets(UIEdgeInsetsZero, parentSlop)) {
-          parentClipsToBounds = parentNode.clipsToBounds;
-          // if the parent is clipping, this will prevent us from showing the overlay outside that area.
-          // in this case, we will make the overlay smaller so that the special highlight to indicate the overlay
-          // cannot accurately display the true tappable area is shown.
-          if (!parentClipsToBounds) {
-            parentHitRect = UIEdgeInsetsInsetRect(parentHitRect, [parentNode hitTestSlop]);
-          }
-        }
-      }
-      
-      // Convert our current rectangle to parent coordinates, and intersect with the parent's hit rect.
-      CGRect intersectRectInParentCoordinates = [intersectSuperlayer convertRect:intersectRect fromLayer:intersectLayer];
-      intersectRect = CGRectIntersection(parentHitRect, intersectRectInParentCoordinates);
-      if (!CGSizeEqualToSize(parentHitRect.size, intersectRectInParentCoordinates.size)) {
-        clippedEdges = [self setEdgesOfIntersectionForChildRect:intersectRectInParentCoordinates
-                                                     parentRect:parentHitRect rectEdge:clippedEdges];
-        if (parentClipsToBounds) {
-          clipsToBoundsClippedEdges = [self setEdgesOfIntersectionForChildRect:intersectRectInParentCoordinates
-                                                                    parentRect:parentHitRect rectEdge:clipsToBoundsClippedEdges];
-        }
-      }
-
-      // Advance up the tree.
-      intersectLayer = intersectSuperlayer;
-      intersectSuperlayer = intersectLayer.superlayer;
-    }
-    
-    CGRect finalRect = [intersectLayer convertRect:intersectRect toLayer:layer];
-    UIColor *fillColor = [[UIColor greenColor] colorWithAlphaComponent:0.4];
-  
-    // determine if edges are clipped
-    if (clippedEdges == UIRectEdgeNone) {
-      _debugHighlightOverlay.backgroundColor = fillColor;
-    } else {
-      const CGFloat borderWidth = 2.0;
-      UIColor *borderColor = [[UIColor orangeColor] colorWithAlphaComponent:0.8];
-      UIColor *clipsBorderColor = [UIColor colorWithRed:30/255.0 green:90/255.0 blue:50/255.0 alpha:0.7];
-      CGRect imgRect = CGRectMake(0, 0, 2.0 * borderWidth + 1.0, 2.0 * borderWidth + 1.0);
-      UIGraphicsBeginImageContext(imgRect.size);
-      
-      [fillColor setFill];
-      UIRectFill(imgRect);
-      
-      [self drawEdgeIfClippedWithEdges:clippedEdges color:clipsBorderColor borderWidth:borderWidth imgRect:imgRect];
-      [self drawEdgeIfClippedWithEdges:clipsToBoundsClippedEdges color:borderColor borderWidth:borderWidth imgRect:imgRect];
-      
-      UIImage *debugHighlightImage = UIGraphicsGetImageFromCurrentImageContext();
-      UIGraphicsEndImageContext();
-  
-      UIEdgeInsets edgeInsets = UIEdgeInsetsMake(borderWidth, borderWidth, borderWidth, borderWidth);
-      _debugHighlightOverlay.image = [debugHighlightImage resizableImageWithCapInsets:edgeInsets
-                                                                         resizingMode:UIImageResizingModeStretch];
-      _debugHighlightOverlay.backgroundColor = nil;
-    }
-    
-    _debugHighlightOverlay.frame = finalRect;
-  }
-}
-
-- (UIRectEdge)setEdgesOfIntersectionForChildRect:(CGRect)childRect parentRect:(CGRect)parentRect rectEdge:(UIRectEdge)rectEdge
-{
-  if (childRect.origin.y < parentRect.origin.y) {
-    rectEdge |= UIRectEdgeTop;
-  }
-  if (childRect.origin.x < parentRect.origin.x) {
-    rectEdge |= UIRectEdgeLeft;
-  }
-  if (CGRectGetMaxY(childRect) > CGRectGetMaxY(parentRect)) {
-    rectEdge |= UIRectEdgeBottom;
-  }
-  if (CGRectGetMaxX(childRect) > CGRectGetMaxX(parentRect)) {
-    rectEdge |= UIRectEdgeRight;
-  }
-  
-  return rectEdge;
-}
-
-- (void)drawEdgeIfClippedWithEdges:(UIRectEdge)rectEdge color:(UIColor *)color borderWidth:(CGFloat)borderWidth imgRect:(CGRect)imgRect
-{
-  [color setFill];
-  
-  if (rectEdge & UIRectEdgeTop) {
-    UIRectFill(CGRectMake(0.0, 0.0, imgRect.size.width, borderWidth));
-  }
-  if (rectEdge & UIRectEdgeLeft) {
-    UIRectFill(CGRectMake(0.0, 0.0, borderWidth, imgRect.size.height));
-  }
-  if (rectEdge & UIRectEdgeBottom) {
-    UIRectFill(CGRectMake(0.0, imgRect.size.height - borderWidth, imgRect.size.width, borderWidth));
-  }
-  if (rectEdge & UIRectEdgeRight) {
-    UIRectFill(CGRectMake(imgRect.size.width - borderWidth, 0.0, borderWidth, imgRect.size.height));
-  }
-}
-
-+ (void)setEnableHitTestDebug:(BOOL)enable
-{
-  _enableHitTestDebug = enable;
+  return _debugHighlightOverlay;
 }
 
 @end
