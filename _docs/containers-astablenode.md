@@ -183,7 +183,7 @@ For example, you may want to set a table's separator style property. This can be
   
   _tableNode.view.allowsSelection = NO;
   _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
-  _tableNode.view.leadingScreensForBatching = 3.0;  // overriding default of 2.0
+  _tableNode.view.leadingScreensForBatching = 3.0;  // default is 2.0
 }
 </pre>
 
@@ -193,7 +193,7 @@ override func viewDidLoad() {
 
   tableNode.view.allowsSelection = false
   tableNode.view.separatorStyle = .None
-  tableNode.view.leadingScreensForBatching = 3.0  // overriding default of 2.0
+  tableNode.view.leadingScreensForBatching = 3.0  // default is 2.0
 }
 </pre>
 </div>
@@ -219,7 +219,6 @@ This is different from UIKit where normally you would have to call reload row / 
 
 ### Sample Apps with ASTableNodes
 <ul>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a></li>
   <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a></li>
   <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/Kittens">Kittens</a></li>
 </ul>

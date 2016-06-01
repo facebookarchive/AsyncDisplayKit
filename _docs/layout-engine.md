@@ -53,7 +53,7 @@ Say you wanted to add 8 pts of padding to the stack you've already set up:
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStack.direction        = ASStackLayoutDirectionVertical;
+  verticalStack.direction          = ASStackLayoutDirectionVertical;
   verticalStack.spacing            = 4.0;
   [verticalStack setChildren:_commentNodes];
   
