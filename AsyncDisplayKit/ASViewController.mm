@@ -56,7 +56,7 @@
 
 - (void)dealloc
 {
-  if (_traitColectionContext != nil) {
+  if (_traitCollectionContext != nil) {
     // The setter will iterate through the VC's subnodes and replace the traitCollectionContext in their ASEnvironmentTraitCollection with nil.
     // Since the VC holds the only strong reference to this context and we are in the process of destroying
     // the VC, all the references in the subnodes will be unsafe unless we nil them out. More than likely all the subnodes will be dealloc'ed
@@ -195,13 +195,14 @@ ASVisibilityDepthImplementation;
 
 #pragma mark - ASEnvironmentTraitCollection
 
-- (void)setTraitColectionContext:(id)traitColectionContext
+- (void)setTraitColectionContext:(id)traitCollectionContext
 {
-  if (_traitColectionContext != traitColectionContext) {
-    // propagate first so that nodes aren't hanging around with a dealloc'ed pointer
-    ASEnvironmentTraitCollectionUpdateDisplayContext(self.node, traitColectionContext);
+  if (_traitCollectionContext != traitCollectionContext) {
+    // nil out the displayContext in the subnodes so they aren't hanging around with a dealloc'ed pointer don't set
+    // the new context yet as this will cause ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection to fail
+    ASEnvironmentTraitCollectionUpdateDisplayContext(self.node, nil);
     
-    _traitColectionContext = traitColectionContext;
+    _traitCollectionContext = traitCollectionContext;
   }
 }
 
@@ -214,7 +215,7 @@ ASVisibilityDepthImplementation;
   }
   
   ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(traitCollection);
-  asyncTraitCollection.displayContext = self.traitColectionContext;
+  asyncTraitCollection.displayContext = self.traitCollectionContext;
   return asyncTraitCollection;
 }
 
