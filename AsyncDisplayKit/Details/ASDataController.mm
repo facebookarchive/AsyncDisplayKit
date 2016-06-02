@@ -816,9 +816,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
     // Sort indexPath in order to avoid messing up the index when deleting in several batches.
-    // When you delete at an index, you invalidate all subsequent indices, and we never want to use an invalid index
-    // in a later delete so we should have the sorted index path's array in descendent order
-    NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(asdk_inverseCompare:)];
+    // FIXME: Shouldn't deletes be sorted in descending order?
+    NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
 
     [_editingTransactionQueue addOperationWithBlock:^{
       LOG(@"Edit Transaction - deleteRows: %@", indexPaths);
@@ -840,6 +839,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
       
       // Sort indexPath to avoid messing up the index when deleting
+      // FIXME: Shouldn't deletes be sorted in descending order?
       NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
       
       id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
@@ -854,13 +854,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
                                                  environmentTraitCollection:environmentTraitCollection]];
       }
       
-      // When you delete at an index, you invalidate all subsequent indices, and we never want to use an invalid
-      // index in a later delete so we should have the sorted index path's array in descendent order
-      NSArray *reverseSortedIndexPaths = [[sortedIndexPaths reverseObjectEnumerator] allObjects];
-
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
-        [self _deleteNodesAtIndexPaths:reverseSortedIndexPaths withAnimationOptions:animationOptions];
+        [self _deleteNodesAtIndexPaths:sortedIndexPaths withAnimationOptions:animationOptions];
         [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
       }];
     }];
