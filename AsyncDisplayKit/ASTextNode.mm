@@ -469,7 +469,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
                  forHighlighting:(BOOL)highlighting
 {
   ASTextKitRenderer *renderer = [self _renderer];
-  NSRange visibleRange = renderer.visibleRanges[0];
+  NSRange visibleRange = renderer.firstVisibleRange;
   NSAttributedString *attributedString = _attributedText;
   NSRange clampedRange = NSIntersectionRange(visibleRange, NSMakeRange(0, attributedString.length));
 
@@ -784,14 +784,18 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   // FIXME: Replace this implementation with reusable CALayers that have .backgroundColor set.
   // This would completely eliminate the memory and performance cost of the backing store.
   CGSize size = self.calculatedSize;
+  if (CGSizeEqualToSize(size, CGSizeZero)) {
+    return nil;
+  }
+  
   UIGraphicsBeginImageContext(size);
   [self.placeholderColor setFill];
 
   ASTextKitRenderer *renderer = [self _renderer];
-  NSRange textRange = renderer.visibleRanges[0];
+  NSRange visibleRange = renderer.firstVisibleRange;
 
   // cap height is both faster and creates less subpixel blending
-  NSArray *lineRects = [self _rectsForTextRange:textRange measureOption:ASTextKitRendererMeasureOptionLineHeight];
+  NSArray *lineRects = [self _rectsForTextRange:visibleRange measureOption:ASTextKitRendererMeasureOptionLineHeight];
 
   // fill each line with the placeholder color
   for (NSValue *rectValue in lineRects) {
@@ -860,7 +864,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   BOOL linkCrossesVisibleRange = (lastCharIndex > range.location) && (lastCharIndex < NSMaxRange(range) - 1);
 
   if (inAdditionalTruncationMessage) {
-    NSRange visibleRange = [self _renderer].visibleRanges[0];
+    ASTextKitRenderer *renderer = [self _renderer];
+    NSRange visibleRange = renderer.firstVisibleRange;
     NSRange truncationMessageRange = [self _additionalTruncationMessageRangeWithVisibleRange:visibleRange];
     [self _setHighlightRange:truncationMessageRange forAttributeName:ASTextNodeTruncationTokenAttributeName value:nil animated:YES];
   } else if (range.length && !linkCrossesVisibleRange && linkAttributeValue != nil && linkAttributeName != nil) {
@@ -1054,8 +1059,8 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 - (BOOL)isTruncated
 {
-  NSRange visibleRange = [self _renderer].visibleRanges[0];
-  return visibleRange.length < _attributedText.length;
+  ASTextKitRenderer *renderer = [self _renderer];
+  return renderer.firstVisibleRange.length < _attributedText.length;
 }
 
 - (void)setPointSizeScaleFactors:(NSArray *)pointSizeScaleFactors

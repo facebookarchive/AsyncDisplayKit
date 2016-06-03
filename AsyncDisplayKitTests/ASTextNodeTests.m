@@ -140,6 +140,15 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   }
 }
 
+- (void)testMeasureWithZeroSizeAndPlaceholder
+{
+  _textNode.placeholderEnabled = YES;
+  
+  XCTAssertNoThrow([_textNode measure:CGSizeZero], @"Measure with zero size and placeholder enabled should not throw an exception");
+  XCTAssertNoThrow([_textNode measure:CGSizeMake(0, 100)], @"Measure with zero width and placeholder enabled should not throw an exception");
+  XCTAssertNoThrow([_textNode measure:CGSizeMake(100, 0)], @"Measure with zero height and placeholder enabled should not throw an exception");
+}
+
 - (void)testAccessibility
 {
   _textNode.attributedText = _attributedText;
