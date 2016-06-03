@@ -1088,7 +1088,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // with negative sizes after applying margins, which will cause
   // measureWithSizeRange: on subnodes to assert.
   if (!CGRectEqualToRect(bounds, CGRectZero)) {
+    // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
+    // was created
+    if ([self _shouldHavePlaceholderLayer]) {
+      [self _setupPlaceholderLayerIfNeeded];
+    }
     _placeholderLayer.frame = bounds;
+  
     [self layout];
     [self layoutDidFinish];
   }
