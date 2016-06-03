@@ -7,6 +7,8 @@
 //
 
 #import "ASIndexedNodeContext.h"
+#import "ASEnvironmentInternal.h"
+#import "ASCellNode.h"
 
 @interface ASIndexedNodeContext ()
 
@@ -19,7 +21,8 @@
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
                         indexPath:(NSIndexPath *)indexPath
-                  constrainedSize:(ASSizeRange)constrainedSize;
+                  constrainedSize:(ASSizeRange)constrainedSize
+       environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
   NSAssert(nodeBlock != nil && indexPath != nil, @"Node block and index path must not be nil");
   self = [super init];
@@ -27,6 +30,7 @@
     _nodeBlock = nodeBlock;
     _indexPath = indexPath;
     _constrainedSize = constrainedSize;
+    _environmentTraitCollection = environmentTraitCollection;
   }
   return self;
 }
@@ -36,6 +40,7 @@
   NSAssert(_nodeBlock != nil, @"Node block is gone. Should not execute it more than once");
   ASCellNode *node = _nodeBlock();
   _nodeBlock = nil;
+  ASEnvironmentStatePropagateDown(node, _environmentTraitCollection);
   return node;
 }
 

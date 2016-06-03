@@ -214,12 +214,12 @@
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  return _environmentState.traitCollection;
+  return _environmentState.environmentTraitCollection;
 }
 
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traitCollection
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  _environmentState.traitCollection = traitCollection;
+  _environmentState.environmentTraitCollection = environmentTraitCollection;
 }
 
 ASEnvironmentLayoutOptionsForwarding
@@ -228,7 +228,7 @@ ASEnvironmentLayoutExtensibilityForwarding
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(_propertyLock);
-  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:_environmentState.traitCollection];
+  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
 
 @end

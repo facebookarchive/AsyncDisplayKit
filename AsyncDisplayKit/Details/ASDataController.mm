@@ -514,22 +514,14 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   }
 }
 
-- (ASCellNodeBlock)nodeBlockPropagatingTraitCollectionFromNodeBlock:(ASCellNodeBlock)nodeBlock
-{
-  // When creating a node, make sure to pass along the current display traits so it will be laid out properly
-  return  ^{
-    ASCellNode *cellNode = nodeBlock();
-    id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
-    ASEnvironmentStatePropagateDown(cellNode, [environment environmentTraitCollection]);
-    return cellNode;
-  };
-}
-
 /**
  * Fetches row contexts for the provided sections from the data source.
  */
 - (NSArray<ASIndexedNodeContext *> *)_populateFromDataSourceWithSectionIndexSet:(NSIndexSet *)indexSet
 {
+  id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+  
   NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
   [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
     NSUInteger rowNum = [_dataSource dataController:self rowsInSection:idx];
@@ -539,9 +531,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
       
       ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-      [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:[self nodeBlockPropagatingTraitCollectionFromNodeBlock:nodeBlock]
+      [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
                                                                 indexPath:indexPath
-                                                          constrainedSize:constrainedSize]];
+                                                          constrainedSize:constrainedSize
+                                               environmentTraitCollection:environmentTraitCollection]];
     }
   }];
   return contexts;
@@ -794,12 +787,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
 
     [self accessDataSourceWithBlock:^{
+      id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+      ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+      
       for (NSIndexPath *indexPath in sortedIndexPaths) {
         ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
         ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:[self nodeBlockPropagatingTraitCollectionFromNodeBlock:nodeBlock]
+        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
                                                                   indexPath:indexPath
-                                                            constrainedSize:constrainedSize]];
+                                                            constrainedSize:constrainedSize
+                                                 environmentTraitCollection:environmentTraitCollection]];
       }
 
       [_editingTransactionQueue addOperationWithBlock:^{
@@ -845,12 +842,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       // FIXME: Shouldn't deletes be sorted in descending order?
       [indexPaths sortedArrayUsingSelector:@selector(compare:)];
       
+      id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+      ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+      
       for (NSIndexPath *indexPath in indexPaths) {
         ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
         ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:[self nodeBlockPropagatingTraitCollectionFromNodeBlock:nodeBlock]
+        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
                                                                   indexPath:indexPath
-                                                            constrainedSize:constrainedSize]];
+                                                            constrainedSize:constrainedSize
+                                                 environmentTraitCollection:environmentTraitCollection]];
       }
 
       [_editingTransactionQueue addOperationWithBlock:^{

@@ -1248,9 +1248,6 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   // This call will apply our .hierarchyState to the new subnode.
   // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.
   [subnode __setSupernode:self];
-
-  // propagate our traits to the child we are about to add.
-  ASEnvironmentStatePropagateDown(subnode, [self environmentTraitCollection]);
   
   if (self.nodeLoaded) {
     // If this node has a view or layer, force the subnode to also create its view or layer and add it to the hierarchy here.
@@ -1297,9 +1294,6 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
     _subnodes = [[NSMutableArray alloc] init];
   [_subnodes insertObject:subnode atIndex:subnodeIndex];
   [subnode __setSupernode:self];
-  
-  // propagate our traits to the child we are about to add.
-  ASEnvironmentStatePropagateDown(subnode, [self environmentTraitCollection]);
   
   // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.
   if (!_flags.shouldRasterizeDescendants && [self __shouldLoadViewOrLayer]) {
@@ -1742,6 +1736,9 @@ static NSInteger incrementIfFound(NSInteger i) {
       
       [self exitHierarchyState:stateToEnterOrExit];
     }
+    
+    // now that we have a supernode, propagate its traits to self.
+    ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
   }
 }
 
@@ -2725,12 +2722,12 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  return _environmentState.traitCollection;
+  return _environmentState.environmentTraitCollection;
 }
 
 - (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  _environmentState.traitCollection = environmentTraitCollection;
+  _environmentState.environmentTraitCollection = environmentTraitCollection;
 }
 
 ASEnvironmentLayoutOptionsForwarding
@@ -2739,7 +2736,7 @@ ASEnvironmentLayoutExtensibilityForwarding
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(_propertyLock);
-  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:_environmentState.traitCollection];
+  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
 
 #if TARGET_OS_TV

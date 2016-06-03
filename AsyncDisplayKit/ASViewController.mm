@@ -61,7 +61,7 @@
     // Since the VC holds the only strong reference to this context and we are in the process of destroying
     // the VC, all the references in the subnodes will be unsafe unless we nil them out. More than likely all the subnodes will be dealloc'ed
     // as part of the VC being dealloc'ed, but this is just to make extra sure.
-    self.traitColectionContext = nil;
+    self.traitCollectionContext = nil;
   }
 }
 
@@ -87,8 +87,8 @@
   // ensure that self.node has a valid trait collection before a subclass's implementation of viewDidLoad.
   // Any subnodes added in viewDidLoad will then inherit the proper environment.
   if (AS_AT_LEAST_IOS8) {
-    ASEnvironmentTraitCollection traitCollection = [self displayTraitsForTraitCollection:self.traitCollection];
-    [self progagateNewDisplayTraits:traitCollection];
+    ASEnvironmentTraitCollection traitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
+    [self progagateNewEnvironmentTraitCollection:traitCollection];
   }
 }
 
@@ -195,7 +195,7 @@ ASVisibilityDepthImplementation;
 
 #pragma mark - ASEnvironmentTraitCollection
 
-- (void)setTraitColectionContext:(id)traitCollectionContext
+- (void)setTraitCollectionContext:(id)traitCollectionContext
 {
   if (_traitCollectionContext != traitCollectionContext) {
     // nil out the displayContext in the subnodes so they aren't hanging around with a dealloc'ed pointer don't set
@@ -206,11 +206,11 @@ ASVisibilityDepthImplementation;
   }
 }
 
-- (ASEnvironmentTraitCollection)displayTraitsForTraitCollection:(UITraitCollection *)traitCollection
+- (ASEnvironmentTraitCollection)environmentTraitCollectionForUITraitCollection:(UITraitCollection *)traitCollection
 {
   if (self.overrideDisplayTraitsWithTraitCollection) {
     ASTraitCollection *asyncTraitCollection = self.overrideDisplayTraitsWithTraitCollection(traitCollection);
-    self.traitColectionContext = asyncTraitCollection.traitCollectionContext;
+    self.traitCollectionContext = asyncTraitCollection.traitCollectionContext;
     return [asyncTraitCollection environmentTraitCollection];
   }
   
@@ -219,29 +219,29 @@ ASVisibilityDepthImplementation;
   return asyncTraitCollection;
 }
 
-- (ASEnvironmentTraitCollection)displayTraitsForWindowSize:(CGSize)windowSize
+- (ASEnvironmentTraitCollection)environmentTraitCollectionForWindowSize:(CGSize)windowSize
 {
   if (self.overrideDisplayTraitsWithWindowSize) {
     ASTraitCollection *traitCollection = self.overrideDisplayTraitsWithWindowSize(windowSize);
-    self.traitColectionContext = traitCollection.traitCollectionContext;
+    self.traitCollectionContext = traitCollection.traitCollectionContext;
     return [traitCollection environmentTraitCollection];
   }
   return self.node.environmentTraitCollection;
 }
 
-- (void)progagateNewDisplayTraits:(ASEnvironmentTraitCollection)traitCollection
+- (void)progagateNewEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
   ASEnvironmentState environmentState = self.node.environmentState;
-  ASEnvironmentTraitCollection oldTraitCollection = environmentState.traitCollection;
+  ASEnvironmentTraitCollection oldEnvironmentTraitCollection = environmentState.environmentTraitCollection;
   
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(traitCollection, oldTraitCollection) == NO) {
-    environmentState.traitCollection = traitCollection;
+  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection) == NO) {
+    environmentState.environmentTraitCollection = environmentTraitCollection;
     self.node.environmentState = environmentState;
     [self.node setNeedsLayout];
     
     NSArray<id<ASEnvironment>> *children = [self.node children];
     for (id<ASEnvironment> child in children) {
-      ASEnvironmentStatePropagateDown(child, environmentState.traitCollection);
+      ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
     }
   }
 }
@@ -250,24 +250,24 @@ ASVisibilityDepthImplementation;
 {
   [super traitCollectionDidChange:previousTraitCollection];
   
-  ASEnvironmentTraitCollection traitCollection = [self displayTraitsForTraitCollection:self.traitCollection];
-  [self progagateNewDisplayTraits:traitCollection];
+  ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
+  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
 - (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
   [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
   
-  ASEnvironmentTraitCollection traitCollection = [self displayTraitsForTraitCollection:newCollection];
-  [self progagateNewDisplayTraits:traitCollection];
+  ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:newCollection];
+  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
   [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
   
-  ASEnvironmentTraitCollection traitCollection = [self displayTraitsForWindowSize:size];
-  [self progagateNewDisplayTraits:traitCollection];
+  ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForWindowSize:size];
+  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
 @end

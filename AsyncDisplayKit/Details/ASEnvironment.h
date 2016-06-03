@@ -97,7 +97,7 @@ extern BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(AS
 typedef struct ASEnvironmentState {
   struct ASEnvironmentHierarchyState hierarchyState;
   struct ASEnvironmentLayoutOptionsState layoutOptionsState;
-  struct ASEnvironmentTraitCollection traitCollection;
+  struct ASEnvironmentTraitCollection environmentTraitCollection;
 } ASEnvironmentState;
 extern ASEnvironmentState ASEnvironmentStateMakeDefault();
 
@@ -152,9 +152,9 @@ ASDISPLAYNODE_EXTERN_C_END
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState\
 {\
   ASDN::MutexLocker l(lock);\
-  ASEnvironmentTraitCollection oldTraits = self.environmentState.traitCollection;\
+  ASEnvironmentTraitCollection oldTraits = self.environmentState.environmentTraitCollection;\
   [super setEnvironmentState:environmentState];\
-  ASEnvironmentTraitCollection currentTraits = environmentState.traitCollection;\
+  ASEnvironmentTraitCollection currentTraits = environmentState.environmentTraitCollection;\
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
     dispatch_async(dispatch_get_main_queue(), ^{\
       NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\

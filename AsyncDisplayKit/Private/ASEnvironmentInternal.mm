@@ -201,14 +201,14 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState childEnvi
   
   // Support propagate down
   if (propagation == ASEnvironmentStatePropagation::DOWN) {
-    ASEnvironmentTraitCollection childTraitCollection = childEnvironmentState.traitCollection;
+    ASEnvironmentTraitCollection childTraitCollection = childEnvironmentState.environmentTraitCollection;
     childTraitCollection.horizontalSizeClass = parentTraitCollection.horizontalSizeClass;
     childTraitCollection.verticalSizeClass = parentTraitCollection.verticalSizeClass;
     childTraitCollection.userInterfaceIdiom = parentTraitCollection.userInterfaceIdiom;
     childTraitCollection.forceTouchCapability = parentTraitCollection.forceTouchCapability;
     childTraitCollection.displayScale = parentTraitCollection.displayScale;
     childTraitCollection.displayContext = parentTraitCollection.displayContext;
-    childEnvironmentState.traitCollection = childTraitCollection;
+    childEnvironmentState.environmentTraitCollection = childTraitCollection;
 
   }
   return childEnvironmentState;
