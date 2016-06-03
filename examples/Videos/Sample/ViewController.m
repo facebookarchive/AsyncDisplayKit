@@ -10,8 +10,7 @@
  */
 
 #import "ViewController.h"
-#import "ASLayoutSpec.h"
-#import "ASStaticLayoutSpec.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 @interface ViewController()<ASVideoNodeDelegate>
 @property (nonatomic, strong) ASDisplayNode *rootNode;
@@ -22,10 +21,20 @@
 
 #pragma mark - UIViewController
 
-- (void)viewWillAppear:(BOOL)animated
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-  [super viewWillAppear:animated];
+  self = [super initWithNibName:nil bundle:nil];
+  if (self) {
 
+    
+  }
+  return self;
+}
+
+- (void)viewDidLoad
+{
+  [super viewDidLoad];
+  
   // Root node for the view controller
   _rootNode = [ASDisplayNode new];
   _rootNode.frame = self.view.bounds;

@@ -48,8 +48,11 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 @end
 
-//#define LOG(...) NSLog(__VA_ARGS__)
-#define LOG(...)
+#if ASDisplayNodeLoggingEnabled
+  #define LOG(...) NSLog(__VA_ARGS__)
+#else
+  #define LOG(...)
+#endif
 
 // Conditionally time these scopes to our debug ivars (only exist in debug/profile builds)
 #if TIME_DISPLAYNODE_OPS
@@ -1094,13 +1097,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // try to measure the node with the largest size as possible
   if (self.supernode == nil && !self.supportsRangeManagedInterfaceState && !_flags.isMeasured) {
     if (CGRectEqualToRect(bounds, CGRectZero)) {
-      // FIXME: Better log to let developers know that the node was not measured before the layout call and no frame was set
-      NSLog(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
+      LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
-      ASSizeRange measureSizeRange = ASSizeRangeMake(CGSizeZero, bounds.size);
-      if ([self shouldMeasureWithSizeRange:measureSizeRange]) {
-        [self measureWithSizeRange:measureSizeRange];
-      }
+      [self measureWithSizeRange:ASSizeRangeMake(CGSizeZero, bounds.size)];
     }
   }
 }
