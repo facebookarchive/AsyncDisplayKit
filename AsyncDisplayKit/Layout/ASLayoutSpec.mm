@@ -44,7 +44,7 @@
   }
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
-  
+  _children = [NSArray array];
   return self;
 }
 
@@ -115,24 +115,35 @@
 - (void)setChild:(id<ASLayoutable>)child
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-
-  id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-  if (finalLayoutable) {
-    _children = @[finalLayoutable];
-    [self propagateUpLayoutable:finalLayoutable];
+  if (child) {
+    id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
+    if (finalLayoutable) {
+      _children = @[finalLayoutable];
+      [self propagateUpLayoutable:finalLayoutable];
+    }
+  } else {
+    // remove the only child
+    _children = [NSArray array];
   }
 }
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-  
-  id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-  self.childrenWithIdentifier[identifier] = finalLayoutable;
-  if (finalLayoutable) {
-    self.children = [self.children arrayByAddingObject:finalLayoutable];
+  if (child) {
+    id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
+    self.childrenWithIdentifier[identifier] = finalLayoutable;
+    if (finalLayoutable) {
+      _children = [_children arrayByAddingObject:finalLayoutable];
+    }
+  } else {
+    id<ASLayoutable> oldChild = self.childrenWithIdentifier[identifier];
+    if (oldChild) {
+      self.childrenWithIdentifier[identifier] = nil;
+      NSMutableArray *mutableChildren = [_children mutableCopy];
+      [mutableChildren removeObject:oldChild];
+      _children = [mutableChildren copy];
+    }
   }
   
   // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
@@ -152,6 +163,8 @@
   _children = nil;
   if (finalChildren.size() > 0) {
     _children = [NSArray arrayWithObjects:&finalChildren[0] count:finalChildren.size()];
+  } else {
+    _children = [NSArray array];
   }
 }
 
@@ -167,7 +180,7 @@
 
 - (NSArray *)children
 {
-  return [_children copy];
+  return _children;
 }
 
 - (void)setTraitCollection:(ASTraitCollection *)traitCollection
