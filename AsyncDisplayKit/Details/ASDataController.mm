@@ -782,7 +782,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
 
-    // sort indexPath to avoid messing up the index when inserting in several batches
+    // Sort indexPath to avoid messing up the index when inserting in several batches
     NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
     NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
 
@@ -815,7 +815,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
     [_editingTransactionQueue waitUntilAllOperationsAreFinished];
     
-    // sort indexPath in order to avoid messing up the index when deleting
+    // Sort indexPath in order to avoid messing up the index when deleting in several batches.
     // FIXME: Shouldn't deletes be sorted in descending order?
     NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
 
@@ -838,14 +838,14 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     [self accessDataSourceWithBlock:^{
       NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
       
-      // FIXME: This doesn't currently do anything
+      // Sort indexPath to avoid messing up the index when deleting
       // FIXME: Shouldn't deletes be sorted in descending order?
-      [indexPaths sortedArrayUsingSelector:@selector(compare:)];
+      NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
       
       id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
       ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
       
-      for (NSIndexPath *indexPath in indexPaths) {
+      for (NSIndexPath *indexPath in sortedIndexPaths) {
         ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
         ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
         [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
@@ -853,10 +853,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
                                                             constrainedSize:constrainedSize
                                                  environmentTraitCollection:environmentTraitCollection]];
       }
-
+      
       [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
-        [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+        [self _deleteNodesAtIndexPaths:sortedIndexPaths withAnimationOptions:animationOptions];
         [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
       }];
     }];
@@ -875,7 +875,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // (see _layoutNodes:atIndexPaths:withAnimationOptions:).
     [_editingTransactionQueue addOperationWithBlock:^{
       [_mainSerialQueue performBlockOnMainThread:^{
-        for (NSString *kind in [_completedNodes keyEnumerator]) {
+        for (NSString *kind in _completedNodes) {
           [self _relayoutNodesOfKind:kind];
         }
       }];
