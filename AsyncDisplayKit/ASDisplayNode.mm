@@ -48,8 +48,11 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 @end
 
-//#define LOG(...) NSLog(__VA_ARGS__)
-#define LOG(...)
+#if ASDisplayNodeLoggingEnabled
+  #define LOG(...) NSLog(__VA_ARGS__)
+#else
+  #define LOG(...)
+#endif
 
 // Conditionally time these scopes to our debug ivars (only exist in debug/profile builds)
 #if TIME_DISPLAYNODE_OPS
@@ -1078,19 +1081,54 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(_propertyLock);
   CGRect bounds = self.bounds;
-  if (CGRectEqualToRect(bounds, CGRectZero)) {
-    // Performing layout on a zero-bounds view often results in frame calculations
-    // with negative sizes after applying margins, which will cause
-    // measureWithSizeRange: on subnodes to assert.
+
+  [self measureNodeWithBoundsIfNecessary:bounds];
+
+  // Performing layout on a zero-bounds view often results in frame calculations
+  // with negative sizes after applying margins, which will cause
+  // measureWithSizeRange: on subnodes to assert.
+  if (!CGRectEqualToRect(bounds, CGRectZero)) {
+    _placeholderLayer.frame = bounds;
+    [self layout];
+    [self layoutDidFinish];
+  }
+}
+
+- (void)measureNodeWithBoundsIfNecessary:(CGRect)bounds
+{
+  // Normally measure will be called before layout occurs. If this doesn't happen, nothing is going to call it at all.
+  // We simply call measureWithSizeRange: using a size range equal to whatever bounds were provided to that element or
+  // try to measure the node with the largest size as possible
+  if (self.supernode == nil && !self.supportsRangeManagedInterfaceState && !_flags.isMeasured) {
+    if (CGRectEqualToRect(bounds, CGRectZero)) {
+      LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
+    } else {
+      [self measureWithSizeRange:ASSizeRangeMake(CGSizeZero, bounds.size)];
+    }
+  }
+}
+
+- (void)layout
+{
+  ASDisplayNodeAssertMainThread();
+  
+  if (!_flags.isMeasured) {
     return;
   }
-  _placeholderLayer.frame = bounds;
-  [self layout];
-  [self layoutDidFinish];
+  
+  [self __layoutSublayouts];
+}
+
+- (void)__layoutSublayouts
+{
+  for (ASLayout *subnodeLayout in _layout.immediateSublayouts) {
+    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
+  }
 }
 
 - (void)layoutDidFinish
 {
+  // Hook for subclasses
 }
 
 - (CATransform3D)_transformToAncestor:(ASDisplayNode *)ancestor
@@ -2374,24 +2412,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (self.usesImplicitHierarchyManagement && layoutContext != nil) {
     [layoutContext applySubnodeInsertions];
     [layoutContext applySubnodeRemovals];
-  }
-}
-
-- (void)layout
-{
-  ASDisplayNodeAssertMainThread();
-
-  if (!_flags.isMeasured) {
-    return;
-  }
-  
-  [self __layoutSublayouts];
-}
-
-- (void)__layoutSublayouts
-{
-  for (ASLayout *subnodeLayout in _layout.immediateSublayouts) {
-    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
   }
 }
 
