@@ -178,6 +178,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 + (void)initialize
 {
+  [super initialize];
   if (self != [ASDisplayNode class]) {
     
     // Subclasses should never override these
@@ -199,8 +200,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   BOOL instancesOverrideRespondsToSelector = ASSubclassOverridesSelector([NSObject class], self, @selector(respondsToSelector:));
   struct ASDisplayNodeFlags flags = GetASDisplayNodeFlags(self, nil);
   ASDisplayNodeMethodOverrides methodOverrides = GetASDisplayNodeMethodOverrides(self);
+  
+  Class initializeSelf = self;
 
   IMP staticInitialize = imp_implementationWithBlock(^(ASDisplayNode *node) {
+    ASDisplayNodeAssert(node.class == initializeSelf, @"Node class %@ does not have a matching _staticInitialize method; check to ensure [super initialize] is called within any custom +initialize implementations!  Overridden methods will not be called unless they are also implemented by superclass %@", node.class, initializeSelf);
     node->_flags = (classOverridesRespondsToSelector || instancesOverrideRespondsToSelector) ? GetASDisplayNodeFlags(node.class, node) : flags;
     node->_methodOverrides = (classOverridesRespondsToSelector) ? GetASDisplayNodeMethodOverrides(node.class) : methodOverrides;
   });
