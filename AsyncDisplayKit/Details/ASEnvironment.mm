@@ -29,13 +29,13 @@ ASEnvironmentHierarchyState _ASEnvironmentHierarchyStateMakeDefault()
 extern void ASEnvironmentTraitCollectionUpdateDisplayContext(id<ASEnvironment> rootEnvironment, id context)
 {
   ASEnvironmentState envState = [rootEnvironment environmentState];
-  ASEnvironmentTraitCollection displayTraits = envState.traitCollection;
-  displayTraits.displayContext = context;
-  envState.traitCollection = displayTraits;
+  ASEnvironmentTraitCollection environmentTraitCollection = envState.environmentTraitCollection;
+  environmentTraitCollection.displayContext = context;
+  envState.environmentTraitCollection = environmentTraitCollection;
   [rootEnvironment setEnvironmentState:envState];
   
   for (id<ASEnvironment> child in [rootEnvironment children]) {
-    ASEnvironmentStatePropagateDown(child, displayTraits);
+    ASEnvironmentStatePropagateDown(child, environmentTraitCollection);
   }
 }
 
@@ -77,7 +77,7 @@ ASEnvironmentState ASEnvironmentStateMakeDefault()
   return (ASEnvironmentState) {
     .layoutOptionsState = _ASEnvironmentLayoutOptionsStateMakeDefault(),
     .hierarchyState = _ASEnvironmentHierarchyStateMakeDefault(),
-    .traitCollection = _ASEnvironmentTraitCollectionMakeDefault()
+    .environmentTraitCollection = _ASEnvironmentTraitCollectionMakeDefault()
   };
 }
 

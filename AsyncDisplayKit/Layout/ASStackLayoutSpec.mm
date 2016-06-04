@@ -121,17 +121,6 @@
   _baselineRelativeArrangement = baselineRelativeArrangement;
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
-{
-  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
-}
-
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
-{
-  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports children");
-  return nil;
-}
-
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   if (self.children.count == 0) {

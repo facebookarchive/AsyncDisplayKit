@@ -33,7 +33,7 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
  *  ASVC keeps a strong reference to the context to make sure that it stays alive. If you change this value
  *  it will propagate the change to the subnodes.
  */
-@property (nonatomic, strong) id _Nullable traitColectionContext;
+@property (nonatomic, strong) id _Nullable traitCollectionContext;
 
 /**
  * Set this block to customize the ASDisplayTraits returned when the VC transitions to the given traitCollection.

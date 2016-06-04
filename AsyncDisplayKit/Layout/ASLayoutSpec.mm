@@ -26,7 +26,6 @@
   ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex _propertyLock;
   
-  id<ASLayoutable> _child;
   NSArray *_children;
   NSMutableDictionary *_childrenWithIdentifier;
 }
@@ -45,7 +44,7 @@
   }
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
-  
+  _children = [NSArray array];
   return self;
 }
 
@@ -113,28 +112,46 @@
   }
 }
 
-- (void)setChild:(id<ASLayoutable>)child;
+- (void)setChild:(id<ASLayoutable>)child
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  
-  id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-  _child = finalLayoutable;
-  [self propagateUpLayoutable:finalLayoutable];
+  if (child) {
+    id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
+    if (finalLayoutable) {
+      _children = @[finalLayoutable];
+      [self propagateUpLayoutable:finalLayoutable];
+    }
+  } else {
+    // remove the only child
+    _children = [NSArray array];
+  }
 }
 
 - (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  
-  id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-  self.childrenWithIdentifier[identifier] = finalLayoutable;
+  if (child) {
+    id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
+    self.childrenWithIdentifier[identifier] = finalLayoutable;
+    if (finalLayoutable) {
+      _children = [_children arrayByAddingObject:finalLayoutable];
+    }
+  } else {
+    id<ASLayoutable> oldChild = self.childrenWithIdentifier[identifier];
+    if (oldChild) {
+      self.childrenWithIdentifier[identifier] = nil;
+      NSMutableArray *mutableChildren = [_children mutableCopy];
+      [mutableChildren removeObject:oldChild];
+      _children = [mutableChildren copy];
+    }
+  }
   
   // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
   // [self propagateUpLayoutable:finalLayoutable];
 }
 
-- (void)setChildren:(NSArray *)children
+- (void)setChildren:(NSArray<id<ASLayoutable>> *)children
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
@@ -146,6 +163,8 @@
   _children = nil;
   if (finalChildren.size() > 0) {
     _children = [NSArray arrayWithObjects:&finalChildren[0] count:finalChildren.size()];
+  } else {
+    _children = [NSArray array];
   }
 }
 
@@ -156,14 +175,21 @@
 
 - (id<ASLayoutable>)child
 {
-  return _child;
+  return [_children firstObject];
 }
 
 - (NSArray *)children
 {
-  return [_children copy];
+  return _children;
 }
 
+- (void)setTraitCollection:(ASTraitCollection *)traitCollection
+{
+  if ([traitCollection isEqualToTraitCollection:self.traitCollection] == NO) {
+    _traitCollection = traitCollection;
+    ASEnvironmentStatePropagateDown(self, [traitCollection environmentTraitCollection]);
+  }
+}
 
 #pragma mark - ASEnvironment
 
@@ -201,7 +227,12 @@
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  return _environmentState.traitCollection;
+  return _environmentState.environmentTraitCollection;
+}
+
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
+{
+  _environmentState.environmentTraitCollection = environmentTraitCollection;
 }
 
 ASEnvironmentLayoutOptionsForwarding
@@ -210,7 +241,7 @@ ASEnvironmentLayoutExtensibilityForwarding
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(_propertyLock);
-  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:_environmentState.traitCollection];
+  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
 
 @end

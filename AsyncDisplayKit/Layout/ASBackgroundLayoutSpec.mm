@@ -68,15 +68,4 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
   return [super childForIdentifier:kBackgroundChildKey];
 }
 
-- (void)setChildren:(NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-}
-
-- (NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-  return nil;
-}
-
 @end

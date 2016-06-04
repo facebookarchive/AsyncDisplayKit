@@ -7,15 +7,18 @@
 //
 
 #import <AsyncDisplayKit/ASDataController.h>
+#import <AsyncDisplayKit/ASEnvironment.h>
 
 @interface ASIndexedNodeContext : NSObject
 
 @property (nonatomic, readonly, strong) NSIndexPath *indexPath;
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSize;
+@property (nonatomic, readonly, assign) ASEnvironmentTraitCollection environmentTraitCollection;
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
                         indexPath:(NSIndexPath *)indexPath
-                  constrainedSize:(ASSizeRange)constrainedSize;
+                  constrainedSize:(ASSizeRange)constrainedSize
+       environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
 
 /**
  * Returns a node allocated by executing node block. Node block will be nil out immediately.

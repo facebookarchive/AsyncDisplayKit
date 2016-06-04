@@ -61,17 +61,6 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
   return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
-- (void)setChildren:(NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-}
-
-- (NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-  return nil;
-}
-
 @end
 
 @implementation ASOverlayLayoutSpec (Debugging)
