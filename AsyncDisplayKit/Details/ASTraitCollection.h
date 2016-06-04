@@ -28,7 +28,7 @@
  *  Be aware that internally this context is held by a C struct which cannot retain the pointer. 
  *  ASTraitCollection is generally a very short-lived class, existing only to provide a non-struct API
  *  to trait collections. When an ASTraitCollection is returned via one of ASViewController's 2 
- *  custom trait collection creation blocks, traitColectionContext is assigned to the VC's traitColectionContext.
+ *  custom trait collection creation blocks, traitCollectionContext is assigned to the VC's traitCollectionContext.
  *  This makes sure that the VC is the owner of the context and ASEnvironmentTraitCollections will not
  *  have a reference to a dangling pointer.
  */
@@ -50,5 +50,6 @@
 
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection;
+- (BOOL)isEqualToTraitCollection:(ASTraitCollection *)traitCollection;
 
 @end

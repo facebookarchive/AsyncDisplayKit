@@ -20,7 +20,6 @@
   NSCharacterSet *_avoidTailTruncationSet;
 }
 @synthesize visibleRanges = _visibleRanges;
-@synthesize truncationStringRect = _truncationStringRect;
 
 - (instancetype)initWithContext:(ASTextKitContext *)context
      truncationAttributedString:(NSAttributedString *)truncationAttributedString
@@ -183,6 +182,16 @@
 
     _visibleRanges = { visibleCharacterRange };
   }];
+}
+
+- (NSRange)firstVisibleRange
+{
+  std::vector<NSRange> visibleRanges = _visibleRanges;
+  if (visibleRanges.size() > 0) {
+    return visibleRanges[0];
+  }
+
+  return NSMakeRange(NSNotFound, 0);
 }
 
 @end

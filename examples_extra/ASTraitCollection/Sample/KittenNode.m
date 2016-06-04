@@ -130,13 +130,11 @@ static const CGFloat kInnerPadding = 10.0f;
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASTraitCollection *traitCollection = [self asyncTraitCollection];
-  
   ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
   stackSpec.spacing = kInnerPadding;
-  stackSpec.children = @[_imageNode, _textNode];
+  [stackSpec setChildren:@[_imageNode, _textNode]];
   
-  if (traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
+  if (self.asyncTraitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
     _imageNode.alignSelf = ASStackLayoutAlignSelfStart;
     stackSpec.direction = ASStackLayoutDirectionHorizontal;
   } else {

@@ -78,11 +78,21 @@
  The character range from the original attributedString that is displayed by the renderer given the parameters in the
  initializer.
  */
-- (std::vector<NSRange>)visibleRanges;
+@property (nonatomic, assign, readonly) std::vector<NSRange> visibleRanges;
 
 /**
  The number of lines shown in the string.
  */
 - (NSUInteger)lineCount;
+
+@end
+
+@interface ASTextKitRenderer (ASTextKitRendererConvenience)
+
+/**
+ Returns the first visible range or an NSRange with location of NSNotFound and size of 0 if no first visible
+ range exists
+ */
+@property (nonatomic, assign, readonly) NSRange firstVisibleRange;
 
 @end

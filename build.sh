@@ -17,6 +17,12 @@ trap trap_handler INT TERM EXIT
 
 MODE="$1"
 
+if type xcpretty-travis-formatter &> /dev/null; then
+    FORMATTER="-f $(xcpretty-travis-formatter)"
+  else
+    FORMATTER="-s"
+fi
+
 if [ "$MODE" = "tests" ]; then
     echo "Building & testing AsyncDisplayKit."
     pod install
@@ -25,7 +31,7 @@ if [ "$MODE" = "tests" ]; then
         -scheme AsyncDisplayKit \
         -sdk "$SDK" \
         -destination "$PLATFORM" \
-        build test | xcpretty -f `xcpretty-travis-formatter`
+        build test | xcpretty $FORMATTER
     trap - EXIT
     exit 0
 fi
@@ -45,7 +51,7 @@ if [ "$MODE" = "examples" ]; then
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
-              build | xcpretty -f `xcpretty-travis-formatter`
+              build | xcpretty $FORMATTER
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
           local_repo=`pwd`
@@ -60,7 +66,7 @@ if [ "$MODE" = "examples" ]; then
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
-              build | xcpretty -f `xcpretty-travis-formatter`
+              build | xcpretty $FORMATTER
           
           cd ../..
         fi
@@ -77,7 +83,7 @@ if [ "$MODE" = "life-without-cocoapods" ]; then
         -scheme "Life Without CocoaPods" \
         -sdk "$SDK" \
         -destination "$PLATFORM" \
-        build | xcpretty -f `xcpretty-travis-formatter`
+        build | xcpretty $FORMATTER
     trap - EXIT
     exit 0
 fi
@@ -90,7 +96,7 @@ if [ "$MODE" = "framework" ]; then
         -scheme Sample \
         -sdk "$SDK" \
         -destination "$PLATFORM" \
-        build | xcpretty -f `xcpretty-travis-formatter`
+        build | xcpretty $FORMATTER
     trap - EXIT
     exit 0
 fi

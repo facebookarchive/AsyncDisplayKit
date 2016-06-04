@@ -97,7 +97,7 @@ extern BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(AS
 typedef struct ASEnvironmentState {
   struct ASEnvironmentHierarchyState hierarchyState;
   struct ASEnvironmentLayoutOptionsState layoutOptionsState;
-  struct ASEnvironmentTraitCollection traitCollection;
+  struct ASEnvironmentTraitCollection environmentTraitCollection;
 } ASEnvironmentState;
 extern ASEnvironmentState ASEnvironmentStateMakeDefault();
 
@@ -137,6 +137,8 @@ ASDISPLAYNODE_EXTERN_C_END
 /// convenience method. Users should access the trait collections through the NSObject based asyncTraitCollection API
 - (ASEnvironmentTraitCollection)environmentTraitCollection;
 
+/// sets a trait collection on this environment state.
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
 @end
 
 // ASCollection/TableNodes don't actually have ASCellNodes as subnodes. Because of this we can't rely on display trait
@@ -150,17 +152,19 @@ ASDISPLAYNODE_EXTERN_C_END
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState\
 {\
   ASDN::MutexLocker l(lock);\
-  ASEnvironmentTraitCollection oldTraits = self.environmentState.traitCollection;\
+  ASEnvironmentTraitCollection oldTraits = self.environmentState.environmentTraitCollection;\
   [super setEnvironmentState:environmentState];\
-  ASEnvironmentTraitCollection currentTraits = environmentState.traitCollection;\
+  ASEnvironmentTraitCollection currentTraits = environmentState.environmentTraitCollection;\
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
-    NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
-    for (NSArray *sectionArray in completedNodes) {\
-      for (ASCellNode *cellNode in sectionArray) {\
-        ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
-        [cellNode setNeedsLayout];\
+    ASPerformBlockOnMainThread(^{\
+      NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
+      for (NSArray *sectionArray in completedNodes) {\
+        for (ASCellNode *cellNode in sectionArray) {\
+          ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
+          [cellNode setNeedsLayout];\
+        }\
       }\
-    }\
+    });\
   }\
 }\
 

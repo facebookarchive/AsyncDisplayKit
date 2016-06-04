@@ -11,6 +11,7 @@
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASEnvironmentInternal.h"
+#import "ASInternalHelpers.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #include <vector>
 

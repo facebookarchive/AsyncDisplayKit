@@ -58,14 +58,14 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
 template <typename ASEnvironmentStateType>
 void ASEnvironmentStatePropagateDown(id<ASEnvironment> object, ASEnvironmentStateType state) {
   ASEnvironmentPerformBlockOnObjectAndChildren(object, ^(id<ASEnvironment> node) {
-    object.environmentState = ASEnvironmentMergeObjectAndState(object.environmentState, state, ASEnvironmentStatePropagation::DOWN);
+    node.environmentState = ASEnvironmentMergeObjectAndState(node.environmentState, state, ASEnvironmentStatePropagation::DOWN);
   });
 }
 
 template <typename ASEnvironmentStateType>
 void ASEnvironmentStatePropagateUp(id<ASEnvironment> object, ASEnvironmentStateType state) {
   ASEnvironmentPerformBlockOnObjectAndParents(object, ^(id<ASEnvironment> node) {
-    object.environmentState = ASEnvironmentMergeObjectAndState(object.environmentState, state, ASEnvironmentStatePropagation::UP);
+    node.environmentState = ASEnvironmentMergeObjectAndState(node.environmentState, state, ASEnvironmentStatePropagation::UP);
   });
 }
 
