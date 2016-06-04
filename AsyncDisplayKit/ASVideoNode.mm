@@ -71,8 +71,6 @@ static NSString * const kStatus = @"status";
   int32_t _periodicTimeObserverTimescale;
   CMTime _timeObserverInterval;
   
-  ASImageNode *_placeholderImageNode; // TODO: Make ASVideoNode an ASImageNode subclass; remove this.
-
   ASDisplayNode *_playerNode;
   NSString *_gravity;
 }
@@ -151,7 +149,7 @@ static NSString * const kStatus = @"status";
     self.player = [AVPlayer playerWithPlayerItem:playerItem];
   }
   
-  if (_placeholderImageNode.image == nil) {
+  if (self.image == nil) {
     [self generatePlaceholderImage];
   }
 
@@ -193,33 +191,34 @@ static NSString * const kStatus = @"status";
   [notificationCenter removeObserver:self name:AVPlayerItemNewErrorLogEntryNotification object:playerItem];
 }
 
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (void)layout
 {
-    // All subnodes should taking the whole node frame
-    CGSize maxSize = constrainedSize.max;
-    if (!CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero)) {
-        maxSize = self.preferredFrameSize;
-    }
-    
-    // Prevent crashes through if infinite width or height
-    if (isinf(maxSize.width) || isinf(maxSize.height)) {
-        ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoNode");
-        maxSize = CGSizeZero;
-    }
-    
-    // Stretch out play button, placeholder image player node to the max size
-    NSMutableArray *children = [NSMutableArray array];
+  [super layout];
+  // The _playerNode wraps AVPlayerLayer, and therefore should extend across the entire bounds.
+  _playerNode.frame = self.bounds;
+}
 
-    if (_placeholderImageNode) {
-        _placeholderImageNode.preferredFrameSize = maxSize;
-        [children addObject:_placeholderImageNode];
-    }
-    if (_playerNode) {
-        _playerNode.preferredFrameSize = maxSize;
-        [children addObject:_playerNode];
-    }
-    
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+{
+  ASDN::MutexLocker l(_videoLock);
+  CGSize calculatedSize = constrainedSize;
+  
+  // if a preferredFrameSize is set, call the superclass to return that instead of using the image size.
+  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO)
+    calculatedSize = self.preferredFrameSize;
+ 
+  // Prevent crashes through if infinite width or height
+  if (isinf(calculatedSize.width) || isinf(calculatedSize.height)) {
+    ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoNode");
+    calculatedSize = CGSizeZero;
+  }
+  
+  if (_playerNode) {
+    _playerNode.preferredFrameSize = calculatedSize;
+    [_playerNode measure:calculatedSize];
+  }
+  
+  return calculatedSize;
 }
 
 - (void)generatePlaceholderImage
@@ -265,23 +264,10 @@ static NSString * const kStatus = @"status";
 - (void)setVideoPlaceholderImage:(UIImage *)image
 {
   ASDN::MutexLocker l(_videoLock);
-
-  if (_placeholderImageNode == nil && image != nil) {
-    _placeholderImageNode = [[ASImageNode alloc] init];
-    _placeholderImageNode.layerBacked = YES;
-    _placeholderImageNode.contentMode = ASContentModeFromVideoGravity(_gravity);
+  if (image != nil) {
+    self.contentMode = ASContentModeFromVideoGravity(_gravity);
   }
-
-  _placeholderImageNode.image = image;
-
-  ASPerformBlockOnMainThread(^{
-    ASDN::MutexLocker l(_videoLock);
-
-    if (_placeholderImageNode != nil) {
-      [self insertSubnode:_placeholderImageNode atIndex:0];
-      [self setNeedsLayout];
-    }
-  });
+  self.image = image;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -296,7 +282,7 @@ static NSString * const kStatus = @"status";
     if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
       self.playerState = ASVideoNodePlayerStateReadyToPlay;
       // If we don't yet have a placeholder image update it now that we should have data available for it
-      if (_placeholderImageNode.image == nil) {
+      if (self.image == nil) {
         [self generatePlaceholderImage];
       }
     }
@@ -390,7 +376,6 @@ static NSString * const kStatus = @"status";
 
     self.player = nil;
     self.currentItem = nil;
-    _placeholderImageNode.image = nil;
   }
 }
 
@@ -493,7 +478,7 @@ static NSString * const kStatus = @"status";
   if (_playerNode.isNodeLoaded) {
     ((AVPlayerLayer *)_playerNode.layer).videoGravity = gravity;
   }
-  _placeholderImageNode.contentMode = ASContentModeFromVideoGravity(gravity);
+  self.contentMode = ASContentModeFromVideoGravity(gravity);
   _gravity = gravity;
 }
 
@@ -634,11 +619,6 @@ static NSString * const kStatus = @"status";
 }
 
 #pragma mark - Internal Properties
-- (ASImageNode *)placeholderImageNode
-{
-  ASDN::MutexLocker l(_videoLock);
-  return _placeholderImageNode;
-}
 
 - (AVPlayerItem *)currentItem
 {
