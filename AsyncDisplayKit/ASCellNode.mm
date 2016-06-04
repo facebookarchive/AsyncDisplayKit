@@ -121,6 +121,11 @@
   ASDisplayNodeAssert(!layerBacked, @"ASCellNode does not support layer-backing.");
 }
 
+-(ASSizeRange)__constrainedSizeForLayout
+{
+  return [_layoutDelegate cellNode:self constrainedSizeForLayoutWithOldConstrainedSize:_constrainedSize];
+}
+
 - (void)__setNeedsLayout
 {
   CGSize oldSize = self.calculatedSize;

@@ -1118,6 +1118,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 #pragma mark - ASCellNodeDelegate
 
+- (ASSizeRange)cellNode:(ASCellNode *)node constrainedSizeForLayoutWithOldConstrainedSize:(ASSizeRange)oldConstrainedSize
+{
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  return [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
+}
+
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();
