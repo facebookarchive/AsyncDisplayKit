@@ -152,7 +152,7 @@
                                                                    avoidTailTruncationSet:nil];
   XCTAssertNoThrow([tailTruncater truncate]);
   XCTAssert(tailTruncater.visibleRanges.size() == 0);
-  NSEqualRanges(NSMakeRange(NSNotFound, 0), tailTruncater.firstVisibleRange);
+  NSEqualRanges(NSMakeRange(0, 0), tailTruncater.firstVisibleRange);
 }
 
 - (void)testHandleZeroHeightConstrainedSize
