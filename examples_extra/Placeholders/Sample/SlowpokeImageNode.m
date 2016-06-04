@@ -16,7 +16,7 @@
 static CGFloat const kASDKLogoAspectRatio = 2.79;
 
 @interface ASImageNode (ForwardWorkaround)
-// This is a workaround until subclass overwritting of custom drawing class methods is fixed
+// This is a workaround until subclass overriding of custom drawing class methods is fixed
 - (UIImage *)displayWithParameters:(id<NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock;
 @end
 
