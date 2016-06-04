@@ -135,6 +135,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reloadDataImmediately;
 
 /**
+ * Triggers a relayout of all nodes.
+ *
+ */
+- (void)relayoutItems;
+
+/**
  *  begins a batch of insert, delete reload and move operations. This method must be called from the main thread.
  */
 - (void)beginUpdates;
@@ -285,9 +291,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Similar to -visibleCells.
  *
- * @returns an array containing the nodes being displayed on screen.
+ * @returns an array containing the cell nodes being displayed on screen.
  */
-- (NSArray<ASDisplayNode *> *)visibleNodes;
+- (NSArray<ASCellNode *> *)visibleNodes;
 
 /**
  * YES to automatically adjust the contentOffset when cells are inserted or deleted "before"

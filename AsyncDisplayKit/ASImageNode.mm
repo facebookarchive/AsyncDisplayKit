@@ -94,6 +94,11 @@
   self.contentsScale = ASScreenScale();
   self.contentMode = UIViewContentModeScaleAspectFill;
   self.opaque = NO;
+  
+  // If no backgroundColor is set to the image node and it's a subview of UITableViewCell, UITableView is setting
+  // the opaque value of all subviews to YES if highlighting / selection is happening and does not set it back to the
+  // initial value. With setting a explicit backgroundColor we can prevent that change.
+  self.backgroundColor = [UIColor clearColor];
 
   _cropEnabled = YES;
   _forceUpscaling = NO;

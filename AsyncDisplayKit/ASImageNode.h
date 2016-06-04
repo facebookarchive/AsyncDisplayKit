@@ -156,7 +156,7 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
  *
  * @returns An ASImageNode image modification block.
  */
-asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat borderWidth, UIColor *borderColor);
+asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat borderWidth, UIColor * _Nullable borderColor);
 
 /**
  * @abstract Image modification block that applies a tint color à la UIImage configured with

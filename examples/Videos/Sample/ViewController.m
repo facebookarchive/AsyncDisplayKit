@@ -38,7 +38,6 @@
   
   // Video node with custom play button
   ASVideoNode *simonVideoNode = self.simonVideoNode;
-  simonVideoNode.playButton = self.playButton;
   [_rootNode addSubnode:simonVideoNode];
   
   _rootNode.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
@@ -129,7 +128,7 @@
 
 #pragma mark - Actions
 
-- (void)videoNodeWasTapped:(ASVideoNode *)videoNode
+- (void)didTapVideoNode:(ASVideoNode *)videoNode
 {
   if (videoNode == self.guitarVideoNode) {
     if (videoNode.playerState == ASVideoNodePlayerStatePlaying) {
@@ -150,29 +149,29 @@
 
 #pragma mark - ASVideoNodeDelegate
 
-- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toSate
+- (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toState
 {
   //Ignore nicCageVideo
   if (videoNode != _guitarVideoNode) {
     return;
   }
   
-  if (toSate == ASVideoNodePlayerStatePlaying) {
+  if (toState == ASVideoNodePlayerStatePlaying) {
     NSLog(@"guitarVideoNode is playing");
-  } else if (toSate == ASVideoNodePlayerStateFinished) {
+  } else if (toState == ASVideoNodePlayerStateFinished) {
     NSLog(@"guitarVideoNode finished");
-  } else if (toSate == ASVideoNodePlayerStateLoading) {
+  } else if (toState == ASVideoNodePlayerStateLoading) {
     NSLog(@"guitarVideoNode is buffering");
   }
 }
 
-- (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second
+- (void)videoNode:(ASVideoNode *)videoNode didPlayToTimeInterval:(NSTimeInterval)timeInterval
 {
   if (videoNode != _guitarVideoNode) {
     return;
   }
   
-  NSLog(@"guitarVideoNode playback time is: %f",second);
+  NSLog(@"guitarVideoNode playback time is: %f",timeInterval);
 }
 
 @end
