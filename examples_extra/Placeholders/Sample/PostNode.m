@@ -60,6 +60,10 @@
 - (UIImage *)placeholderImage
 {
   CGSize size = self.calculatedSize;
+  if (CGSizeEqualToSize(size, CGSizeZero)) {
+    return nil;
+  }
+  
   UIGraphicsBeginImageContext(size);
   [[UIColor colorWithWhite:0.9 alpha:1] setFill];
   UIRectFill((CGRect){CGPointZero, size});
@@ -78,6 +82,8 @@
 
 - (void)layout
 {
+  [super layout];
+  
   CGSize textSize = _textNode.calculatedSize;
   CGSize needyChildSize = _needyChildNode.calculatedSize;
 
