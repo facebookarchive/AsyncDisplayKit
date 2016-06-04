@@ -59,7 +59,6 @@
   NSAttributedString *truncationAttributedString = self.attributes.truncationAttributedString;
 
   // get the index of the last character, so we can handle text in the truncation token
-  NSRange visibleRange = self.truncater.visibleRanges[0];
   __block NSRange truncationTokenRange = { NSNotFound, 0 };
 
   [truncationAttributedString enumerateAttribute:ASTextKitTruncationAttributeName inRange:NSMakeRange(0, truncationAttributedString.length)
@@ -75,6 +74,7 @@
     truncationTokenRange = { 0, truncationAttributedString.length };
   }
 
+  NSRange visibleRange = self.truncater.firstVisibleRange;
   truncationTokenRange.location += NSMaxRange(visibleRange);
   
   __block CGFloat minDistance = CGFLOAT_MAX;

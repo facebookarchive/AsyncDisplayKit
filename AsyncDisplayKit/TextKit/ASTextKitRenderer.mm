@@ -262,3 +262,17 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 }
 
 @end
+
+@implementation ASTextKitRenderer (ASTextKitRendererConvenience)
+
+- (NSRange)firstVisibleRange
+{
+  std::vector<NSRange> visibleRanges = self.visibleRanges;
+  if (visibleRanges.size() > 0) {
+    return visibleRanges[0];
+  }
+  
+  return NSMakeRange(NSNotFound, 0);
+}
+
+@end
