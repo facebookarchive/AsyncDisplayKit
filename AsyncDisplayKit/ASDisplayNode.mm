@@ -653,10 +653,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Only generate a new layout if:
   // - The current layout is dirty
   // - The passed constrained size is different than the layout's constrained size
-  return ([self _dirtyLayout] || !ASSizeRangeEqualToSizeRange(constrainedSize, _layout.constrainedSizeRange));
+  return ([self _hasDirtyLayout] || !ASSizeRangeEqualToSizeRange(constrainedSize, _layout.constrainedSizeRange));
 }
 
-- (BOOL)_dirtyLayout
+- (BOOL)_hasDirtyLayout
 {
   return _layout == nil || _layout.isDirty;
 }
@@ -1024,7 +1024,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
   
-  if ([self _dirtyLayout]) {
+  if ([self _hasDirtyLayout]) {
     return;
   }
   
@@ -1100,7 +1100,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Normally measure will be called before layout occurs. If this doesn't happen, nothing is going to call it at all.
   // We simply call measureWithSizeRange: using a size range equal to whatever bounds were provided to that element or
   // try to measure the node with the largest size as possible
-  if (self.supernode == nil && !self.supportsRangeManagedInterfaceState && [self _dirtyLayout] == NO) {
+  if (self.supernode == nil && !self.supportsRangeManagedInterfaceState && [self _hasDirtyLayout] == NO) {
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
@@ -1113,7 +1113,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDisplayNodeAssertMainThread();
   
-  if ([self _dirtyLayout]) {
+  if ([self _hasDirtyLayout]) {
     return;
   }
   
