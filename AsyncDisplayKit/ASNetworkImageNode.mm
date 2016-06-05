@@ -267,6 +267,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     }
   }
 
+  // TODO: Consider removing this; it predates ASInterfaceState, which now ensures that even non-range-managed nodes get a -fetchData call.
   [self fetchData];
   
   if (self.image == nil && _downloaderImplementsSetPriority) {

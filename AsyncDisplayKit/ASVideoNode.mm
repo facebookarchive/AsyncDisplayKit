@@ -339,18 +339,22 @@ static NSString * const kStatus = @"status";
 {
   [super fetchData];
   
-  {
   ASDN::MutexLocker l(_videoLock);
   AVAsset *asset = self.asset;
   // Return immediately if the asset is nil;
   if (asset == nil || self.playerState == ASVideoNodePlayerStateInitialLoading) {
       return;
   }
-  NSArray<NSString *> *requestedKeys = @[@"playable"];
+
+  // FIXME: Nothing appears to prevent this method from sending the delegate notification / calling load on the asset
+  // multiple times, even after the asset is fully loaded and ready to play.  There should probably be a playerState
+  // for NotLoaded or such, besides Unknown, so this can be easily checked before proceeding.
   self.playerState = ASVideoNodePlayerStateInitialLoading;
   if (_delegateFlags.delegateVideoNodeDidStartInitialLoading) {
       [_delegate videoNodeDidStartInitialLoading:self];
   }
+  
+  NSArray<NSString *> *requestedKeys = @[@"playable"];
   [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
     ASPerformBlockOnMainThread(^{
       if (_delegateFlags.delegateVideoNodeDidFinishInitialLoading) {
@@ -359,7 +363,6 @@ static NSString * const kStatus = @"status";
       [self prepareToPlayAsset:asset withKeys:requestedKeys];
     });
   }];
-  }
 }
 
 - (void)periodicTimeObserver:(CMTime)time
