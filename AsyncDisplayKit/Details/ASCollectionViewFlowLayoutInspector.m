@@ -13,6 +13,35 @@
 #import "ASAssert.h"
 #import "ASEqualityHelpers.h"
 
+
+
+@implementation ASCollectionViewCustomLayoutInspector
+
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+}
+
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
+  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+}
+
+- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind
+{
+  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
+  return 0;
+}
+
+- (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
+{
+  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
+  return 0;
+}
+
+@end
+ 
 @implementation ASCollectionViewFlowLayoutInspector {
   BOOL _delegateImplementsReferenceSizeForHeader;
   BOOL _delegateImplementsReferenceSizeForFooter;
@@ -50,8 +79,11 @@
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  // TODO: Provide constrained size for flow layout item nodes
-  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+  if ([collectionView.asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)]) {
+    return [collectionView.asyncDataSource collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+  } else {
+    return ASSizeRangeMake(_layout.itemSize, _layout.itemSize);
+  }
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
