@@ -108,10 +108,7 @@
 {
   UICollectionViewLayout *layout = [[UICollectionViewLayout alloc] init];
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
-  XCTAssert(collectionView.layoutInspector != nil, @"should automatically set a layout delegate for custom layouts");
-  XCTAssert([collectionView.layoutInspector isKindOfClass:[ASCollectionViewCustomLayoutInspector class]], @"should have a internal custom layout inspector by default");
-  XCTAssert(ASSizeRangeEqualToSizeRange([collectionView.layoutInspector collectionView:collectionView constrainedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], ASSizeRangeMake(CGSizeZero, CGSizeZero)), @"should return a zero constrainted size range in internal custom layout inspector");
-  XCTAssertThrows([collectionView.layoutInspector collectionView:collectionView supplementaryNodesOfKind:UICollectionElementKindSectionHeader inSection:0], @"should throw an exception for <ASCollectionViewLayoutInspecting> methods");
+  XCTAssert(collectionView.layoutInspector == nil, @"should not set a layout delegate for custom layouts");
 }
 
 - (void)testThatRegisteringASupplementaryNodeStoresItForIntrospection
