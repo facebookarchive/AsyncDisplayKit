@@ -7,12 +7,19 @@ Pod::Spec.new do |spec|
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
   spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.9.8' }
 
+  spec.dependency 'PINRemoteImage/iOS', '>= 3.0.0-beta.2'
+
   spec.documentation_url = 'http://asyncdisplaykit.org/appledoc/'
 
   spec.frameworks = 'AssetsLibrary'
   spec.weak_frameworks = 'Photos','MapKit'
   spec.requires_arc = true
-  
+
+  spec.ios.deployment_target = '7.0'
+
+  # Uncomment when fixed: issues with tvOS build for release 1.9.8
+  # spec.tvos.deployment_target = '9.0'
+
   # Subspecs
   spec.subspec 'Core' do |core|
     core.public_header_files = [
@@ -53,6 +60,7 @@ Pod::Spec.new do |spec|
   end
   
   spec.subspec 'PINRemoteImage' do |pin|
+      pin.xcconfig = { "FRAMEWORK_SEARCH_PATHS" => "$(PODS_ROOT)/PINRemoteImage"}
       pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
       pin.dependency 'PINRemoteImage/iOS', '>= 3.0.0-beta.2'
       pin.dependency 'AsyncDisplayKit/Core'
@@ -67,10 +75,5 @@ Pod::Spec.new do |spec|
        'CLANG_CXX_LANGUAGE_STANDARD' => 'c++11',
        'CLANG_CXX_LIBRARY' => 'libc++'
   }
-
-  spec.ios.deployment_target = '7.0'
-
-# Uncomment when fixed: issues with tvOS build for release 1.9.73
-# spec.tvos.deployment_target = '9.0'
 
 end
