@@ -51,7 +51,7 @@
 {
   if (self.flexGone)
   {
-    return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+    return [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:constrainedSize.min];
   }
   std::vector<CGSize> sizeOptions;
   if (!isinf(constrainedSize.max.width)) {

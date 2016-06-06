@@ -51,7 +51,7 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
 {
   if (self.flexGone)
   {
-    return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+    return [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:constrainedSize.min];
   }
   ASLayout *contentsLayout = [self.child measureWithSizeRange:constrainedSize];
   contentsLayout.position = CGPointZero;

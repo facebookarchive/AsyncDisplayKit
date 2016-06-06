@@ -40,6 +40,7 @@ typedef struct ASEnvironmentLayoutOptionsState {
   CGFloat spacingAfter;// = 0;
   BOOL flexGrow;// = NO;
   BOOL flexShrink;// = NO;
+  BOOL flexGone;// = NO;
   ASRelativeDimension flexBasis;// = ASRelativeDimensionUnconstrained;
   ASStackLayoutAlignSelf alignSelf;// = ASStackLayoutAlignSelfAuto;
   CGFloat ascender;// = 0;
