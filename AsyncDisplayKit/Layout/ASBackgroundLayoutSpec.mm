@@ -43,7 +43,7 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  if(self.flexGone)
+  if (self.flexGone)
   {
     return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
   }
