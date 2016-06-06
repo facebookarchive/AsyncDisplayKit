@@ -2377,7 +2377,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDisplayNodeAssertMainThread();
 
-  if (![self _hasDirtyLayout]) {
+  if ([self _hasDirtyLayout]) {
     return;
   }
   
