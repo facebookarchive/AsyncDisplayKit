@@ -2173,9 +2173,14 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   });
 }
 
-- (void)visibileStateDidChange:(BOOL)isVisible
+- (void)visibilityDidChange:(BOOL)isVisible
 {
-    // subclass override
+  // subclass override
+}
+
+- (void)visibleStateDidChange:(BOOL)isVisible
+{
+  // subclass override
 }
 
 - (void)displayStateDidChange:(BOOL)inDisplayState
@@ -2282,11 +2287,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       }
     }
     
-    if (nowDisplay) {
-      [self displayStateDidChange:YES];
-    } else {
-      [self displayStateDidChange:NO];
-    }
+    [self displayStateDidChange:nowDisplay];
   }
 
   // Became visible or invisible.  When range-managed, this represents literal visibility - at least one pixel
@@ -2295,7 +2296,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   BOOL wasVisible = ASInterfaceStateIncludesVisible(oldState);
 
   if (nowVisible != wasVisible) {
-    [self visibileStateDidChange:nowVisible];
+    [self visibleStateDidChange:nowVisible];
+    [self visibilityDidChange:nowVisible];   //TODO: remove once this method has been deprecated
   }
 
   [self interfaceStateDidChange:newState fromState:oldState];

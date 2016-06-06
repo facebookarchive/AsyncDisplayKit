@@ -145,9 +145,9 @@
 }
 
 #if ASRangeControllerLoggingEnabled
-- (void)visibileStateDidChange:(BOOL)isVisible
+- (void)visibleStateDidChange:(BOOL)isVisible
 {
-  [super visibileStateDidChange:isVisible];
+  [super visibleStateDidChange:isVisible];
   NSLog(@"%@ - visible: %d", self, isVisible);
 }
 #endif

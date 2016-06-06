@@ -223,11 +223,10 @@
   }];
   _videoNode.playerNode.layer.frame = CGRectZero;
   
-  [_videoNode visibileStateDidChange:YES];
+  [_videoNode visibleStateDidChange:YES];
 
   XCTAssertTrue(_videoNode.shouldBePlaying);
 }
-
 
 - (void)testVideoShouldPauseWhenItLeavesVisibleButShouldKnowPlayingShouldRestartLater
 {

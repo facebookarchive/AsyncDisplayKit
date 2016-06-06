@@ -382,9 +382,9 @@ static NSString * const kStatus = @"status";
   }
 }
 
-- (void)visibileStateDidChange:(BOOL)isVisible
+- (void)visibleStateDidChange:(BOOL)isVisible
 {
-  [super visibileStateDidChange:isVisible];
+  [super visibleStateDidChange:isVisible];
   
   ASDN::MutexLocker l(_videoLock);
   

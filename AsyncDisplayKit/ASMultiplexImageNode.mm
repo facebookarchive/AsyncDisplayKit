@@ -295,11 +295,11 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   }
 }
 
-/* visibilityDidChange in ASNetworkImageNode has a very similar implementation. Changes here are likely necessary
+/* visibileStateDidChange in ASNetworkImageNode has a very similar implementation. Changes here are likely necessary
  in ASNetworkImageNode as well. */
-- (void)visibileStateDidChange:(BOOL)isVisible
+- (void)visibleStateDidChange:(BOOL)isVisible
 {
-  [super visibileStateDidChange:isVisible];
+  [super visibleStateDidChange:isVisible];
   
   if (_downloaderImplementsSetPriority) {
     ASDN::MutexLocker l(_downloadIdentifierLock);

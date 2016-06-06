@@ -135,9 +135,9 @@
   [self.animatedImage clearAnimatedImageCache];
 }
 
-- (void)visibileStateDidChange:(BOOL)isVisible
+- (void)visibleStateDidChange:(BOOL)isVisible
 {
-  [super visibileStateDidChange:isVisible];
+  [super visibleStateDidChange:isVisible];
   
   ASDisplayNodeAssertMainThread();
   if (isVisible) {

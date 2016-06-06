@@ -214,9 +214,9 @@
   // To be overriden by subclasses
 }
 
-- (void)visibileStateDidChange:(BOOL)isVisible
+- (void)visibleStateDidChange:(BOOL)isVisible
 {
-  [super visibileStateDidChange:isVisible];
+  [super visibleStateDidChange:isVisible];
   
   CGRect cellFrame = CGRectZero;
   if (_scrollView) {
