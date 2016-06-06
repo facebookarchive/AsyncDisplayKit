@@ -29,7 +29,6 @@
 }
 @property (atomic, readwrite) ASInterfaceState interfaceState;
 @property (atomic, readonly) ASDisplayNode *spinner;
-@property (atomic, readonly) ASImageNode *placeholderImageNode;
 @property (atomic, readwrite) ASDisplayNode *playerNode;
 @property (atomic, readwrite) AVPlayer *player;
 @property (atomic, readwrite) BOOL shouldBePlaying;
@@ -355,16 +354,16 @@
 - (void)testSettingVideoGravityChangesPlaceholderContentMode
 {
   [_videoNode setVideoPlaceholderImage:[[UIImage alloc] init]];
-  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.placeholderImageNode.contentMode);
+  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.contentMode);
 
   _videoNode.gravity = AVLayerVideoGravityResize;
-  XCTAssertEqual(UIViewContentModeScaleToFill, _videoNode.placeholderImageNode.contentMode);
+  XCTAssertEqual(UIViewContentModeScaleToFill, _videoNode.contentMode);
 
   _videoNode.gravity = AVLayerVideoGravityResizeAspect;
-  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.placeholderImageNode.contentMode);
+  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.contentMode);
 
   _videoNode.gravity = AVLayerVideoGravityResizeAspectFill;
-  XCTAssertEqual(UIViewContentModeScaleAspectFill, _videoNode.placeholderImageNode.contentMode);
+  XCTAssertEqual(UIViewContentModeScaleAspectFill, _videoNode.contentMode);
 }
 
 - (void)testChangingAssetsChangesPlaceholderImage
@@ -373,10 +372,10 @@
 
   _videoNode.asset = _firstAsset;
   [_videoNode setVideoPlaceholderImage:firstImage];
-  XCTAssertEqual(firstImage, _videoNode.placeholderImageNode.image);
+  XCTAssertEqual(firstImage, _videoNode.image);
 
   _videoNode.asset = _secondAsset;
-  XCTAssertNotEqual(firstImage, _videoNode.placeholderImageNode.image);
+  XCTAssertNotEqual(firstImage, _videoNode.image);
 }
 
 - (void)testClearingFetchedContentShouldClearAssetData
@@ -397,12 +396,12 @@
   
   XCTAssertNotNil(_videoNode.player);
   XCTAssertNotNil(_videoNode.currentItem);
-  XCTAssertNotNil(_videoNode.placeholderImageNode.image);
+  XCTAssertNotNil(_videoNode.image);
 
   [_videoNode clearFetchedData];
   XCTAssertNil(_videoNode.player);
   XCTAssertNil(_videoNode.currentItem);
-  XCTAssertNil(_videoNode.placeholderImageNode.image);
+  XCTAssertNil(_videoNode.image);
 }
 
 @end

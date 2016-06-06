@@ -8,6 +8,7 @@
 
 #if TARGET_OS_IOS
 #import <AsyncDisplayKit/ASButtonNode.h>
+#import <AsyncDisplayKit/ASNetworkImageNode.h>
 
 @class AVAsset, AVPlayer, AVPlayerItem;
 @protocol ASVideoNodeDelegate;
@@ -31,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 //    there is room for further expansion and optimization.  Please report any issues or requests
 //    in an issue on GitHub: https://github.com/facebook/AsyncDisplayKit/issues
 
-@interface ASVideoNode : ASControlNode
+@interface ASVideoNode : ASNetworkImageNode
 
 - (void)play;
 - (void)pause;
@@ -60,11 +61,11 @@ NS_ASSUME_NONNULL_BEGIN
 //! Defaults to AVLayerVideoGravityResizeAspect
 @property (atomic) NSString *gravity;
 
-@property (nullable, atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
+@property (nullable, atomic, weak, readwrite) id<ASVideoNodeDelegate, ASNetworkImageNodeDelegate> delegate;
 
 @end
 
-@protocol ASVideoNodeDelegate <NSObject>
+@protocol ASVideoNodeDelegate <ASNetworkImageNodeDelegate>
 @optional
 /**
  * @abstract Delegate method invoked when the node's video has played to its end time.
