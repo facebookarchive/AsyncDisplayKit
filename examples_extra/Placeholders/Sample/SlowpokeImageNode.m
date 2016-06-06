@@ -15,9 +15,14 @@
 
 static CGFloat const kASDKLogoAspectRatio = 2.79;
 
+@interface ASImageNode (ForwardWorkaround)
+// This is a workaround until subclass overriding of custom drawing class methods is fixed
+- (UIImage *)displayWithParameters:(id<NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock;
+@end
+
 @implementation SlowpokeImageNode
 
-+ (UIImage *)displayWithParameters:(id<NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
+- (UIImage *)displayWithParameters:(id<NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
 {
   usleep( (long)(0.5 * USEC_PER_SEC) ); // artificial delay of 0.5s
   
@@ -46,6 +51,10 @@ static CGFloat const kASDKLogoAspectRatio = 2.79;
 - (UIImage *)placeholderImage
 {
   CGSize size = self.calculatedSize;
+  if (CGSizeEqualToSize(size, CGSizeZero)) {
+    return nil;
+  }
+
   UIGraphicsBeginImageContext(size);
   [[UIColor whiteColor] setFill];
   [[UIColor colorWithWhite:0.9 alpha:1] setStroke];

@@ -1088,7 +1088,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // with negative sizes after applying margins, which will cause
   // measureWithSizeRange: on subnodes to assert.
   if (!CGRectEqualToRect(bounds, CGRectZero)) {
+    // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
+    // was created
+    if ([self _shouldHavePlaceholderLayer]) {
+      [self _setupPlaceholderLayerIfNeeded];
+    }
     _placeholderLayer.frame = bounds;
+  
     [self layout];
     [self layoutDidFinish];
   }
@@ -1886,7 +1892,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   }
   
   // Kick off the recursion first, so that all necessary display calls are sent and the displayQueue is full of parallelizable work.
-  for (CALayer *sublayer in layer.sublayers) {
+  // NOTE: The docs report that `sublayers` returns a copy but it actually doesn't.
+  for (CALayer *sublayer in [layer.sublayers copy]) {
     recursivelyTriggerDisplayForLayer(sublayer, shouldBlock);
   }
   

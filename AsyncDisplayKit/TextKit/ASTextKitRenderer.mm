@@ -272,7 +272,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     return visibleRanges[0];
   }
   
-  return NSMakeRange(NSNotFound, 0);
+  return NSMakeRange(0, 0);
 }
 
 @end
