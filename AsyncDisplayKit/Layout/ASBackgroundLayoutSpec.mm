@@ -55,7 +55,10 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
   contentsLayout.position = CGPointZero;
   [sublayouts addObject:contentsLayout];
 
-  return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:contentsLayout.size
+                                   sublayouts:sublayouts];
 }
 
 - (void)setBackground:(id<ASLayoutable>)background

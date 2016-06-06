@@ -160,4 +160,70 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
  */
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
+/**
+ * Notifies the subclass to perform setup before rows are inserted in the data controller.
+ *
+ * @discussion This method will be performed before the data controller enters its editing queue.
+ * The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * data stores before entering into editing the backing store on a background thread.
+ *
+ * @param indexPaths Index paths for the rows to be inserted.
+ */
+- (void)prepareForInsertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
+
+/**
+ * Notifies the subclass that the data controller will insert new rows at the given index paths.
+ *
+ * @discussion This method will be performed on the data controller's editing background queue before the parent's
+ * concrete implementation. This is a great place to perform any additional transformations like supplementary views
+ * or header/footer nodes.
+ *
+ * @param indexPaths Index paths for the rows to be inserted.
+ */
+- (void)willInsertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
+
+/**
+ * Notifies the subclass to perform setup before rows are deleted in the data controller.
+ *
+ * @discussion This method will be performed before the data controller enters its editing queue.
+ * The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * data stores before entering into editing the backing store on a background thread.
+ *
+ * @param indexPaths Index paths for the rows to be deleted.
+ */
+- (void)prepareForDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
+
+/**
+ * Notifies the subclass that the data controller will delete rows at the given index paths.
+ *
+ * @discussion This method will be performed before the data controller enters its editing queue.
+ * The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * data stores before entering into editing the backing store on a background thread.
+ *
+ * @param indexPaths Index paths for the rows to be deleted.
+ */
+- (void)willDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
+
+/**
+ * Notifies the subclass to perform any work needed before the given rows will be reloaded.
+ *
+ * @discussion This method will be performed before the data controller enters its editing queue, usually on the main
+ * thread. The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * data stores before entering into editing the backing store on a background thread.
+ *
+ * @param indexPaths Index paths for the rows to be reloaded.
+ */
+- (void)prepareForReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
+
+/**
+ * Notifies the subclass that the data controller will reload the rows at the given index paths.
+ *
+ * @discussion This method will be performed on the data controller's editing background queue before the parent's
+ * concrete implementation. This is a great place to perform any additional transformations like supplementary views
+ * or header/footer nodes.
+ *
+ * @param indexPaths Index paths for the rows to be reloaded.
+ */
+- (void)willReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
+
 @end
