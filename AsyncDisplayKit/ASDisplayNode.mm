@@ -204,7 +204,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   struct ASDisplayNodeFlags flags = GetASDisplayNodeFlags(self, nil);
   ASDisplayNodeMethodOverrides methodOverrides = GetASDisplayNodeMethodOverrides(self);
   
-  Class initializeSelf = self;
+  __unused Class initializeSelf = self;
 
   IMP staticInitialize = imp_implementationWithBlock(^(ASDisplayNode *node) {
     ASDisplayNodeAssert(node.class == initializeSelf, @"Node class %@ does not have a matching _staticInitialize method; check to ensure [super initialize] is called within any custom +initialize implementations!  Overridden methods will not be called unless they are also implemented by superclass %@", node.class, initializeSelf);
