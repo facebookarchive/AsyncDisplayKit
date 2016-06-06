@@ -73,7 +73,6 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-
     [_pendingContexts removeObjectForKey:kind];
   }
 }
@@ -102,7 +101,6 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-
     [_pendingContexts removeObjectForKey:kind];
   }
 }
@@ -137,7 +135,6 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-
     [_pendingContexts removeObjectForKey:kind];
   }
 }
@@ -178,7 +175,6 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-
     [_pendingContexts removeObjectForKey:kind];
   }
 }
@@ -205,13 +201,12 @@
   NSArray *keys = _pendingContexts.allKeys;
   for (NSString *kind in keys) {
     NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
-    
+
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
     // reinsert the elements
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-    
     [_pendingContexts removeObjectForKey:kind];
   }
 }
