@@ -461,7 +461,7 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
   [asyncDelegate release];
 }
 
-- (void)testTransaction
+/*- (void)testTransaction
 {
   _ASDisplayLayerTestDelegateMode delegateModes = _ASDisplayLayerTestDelegateModeDidDisplay | _ASDisplayLayerTestDelegateModeDrawParameters;
   [_ASDisplayLayerTestDelegate setClassModes:_ASDisplayLayerTestDelegateClassModeDisplay];
@@ -543,7 +543,7 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
 
   [containerLayer release];
   dispatch_release(displayAsyncLayer1Sema);
-}
+}*/
 
 - (void)checkSuspendResume:(BOOL)displaysAsynchronously
 {

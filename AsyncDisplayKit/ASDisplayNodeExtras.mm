@@ -10,6 +10,8 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
+#import <queue>
+
 extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window)
 {
     ASDisplayNodeCAssert(![displayNode isLayerBacked], @"displayNode must not be layer backed as it may have a nil window");
@@ -51,13 +53,33 @@ extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *
   }
   
   if (layer) {
-    for (CALayer *sublayer in [layer sublayers]) {
+    /// NOTE: The docs say `sublayers` returns a copy, but it does not.
+    /// See: http://stackoverflow.com/questions/14854480/collection-calayerarray-0x1ed8faa0-was-mutated-while-being-enumerated
+    for (CALayer *sublayer in [[layer sublayers] copy]) {
       ASDisplayNodePerformBlockOnEveryNode(sublayer, nil, block);
     }
   } else if (node) {
     for (ASDisplayNode *subnode in [node subnodes]) {
       ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
     }
+  }
+}
+
+extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^block)(ASDisplayNode *node))
+{
+  // Queue used to keep track of subnodes while traversing this layout in a BFS fashion.
+  std::queue<ASDisplayNode *> queue;
+  queue.push(node);
+  
+  while (!queue.empty()) {
+    node = queue.front();
+    queue.pop();
+    
+    block(node);
+
+    // Add all subnodes to process in next step
+    for (int i = 0; i < node.subnodes.count; i++)
+      queue.push(node.subnodes[i]);
   }
 }
 
@@ -68,7 +90,7 @@ extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^b
   }
 }
 
-id ASDisplayNodeFindFirstSupernode(ASDisplayNode *node, BOOL (^block)(ASDisplayNode *node))
+ASDisplayNode *ASDisplayNodeFindFirstSupernode(ASDisplayNode *node, BOOL (^block)(ASDisplayNode *node))
 {
   CALayer *layer = node.layer;
 
@@ -83,7 +105,7 @@ id ASDisplayNodeFindFirstSupernode(ASDisplayNode *node, BOOL (^block)(ASDisplayN
   return nil;
 }
 
-id ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c)
+__kindof ASDisplayNode *ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c)
 {
   return ASDisplayNodeFindFirstSupernode(start, ^(ASDisplayNode *n) {
     return [n isKindOfClass:c];
@@ -134,7 +156,7 @@ extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodes(ASDisplayNode *sta
   return list;
 }
 
-extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c)
+extern NSArray<__kindof ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c)
 {
   return ASDisplayNodeFindAllSubnodes(start, ^(ASDisplayNode *n) {
     return [n isKindOfClass:c];
@@ -158,17 +180,17 @@ static ASDisplayNode *_ASDisplayNodeFindFirstNode(ASDisplayNode *startNode, BOOL
   return nil;
 }
 
-extern __kindof ASDisplayNode * ASDisplayNodeFindFirstNode(ASDisplayNode *startNode, BOOL (^block)(ASDisplayNode *node))
+extern __kindof ASDisplayNode *ASDisplayNodeFindFirstNode(ASDisplayNode *startNode, BOOL (^block)(ASDisplayNode *node))
 {
   return _ASDisplayNodeFindFirstNode(startNode, YES, block);
 }
 
-extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnode(ASDisplayNode *startNode, BOOL (^block)(ASDisplayNode *node))
+extern __kindof ASDisplayNode *ASDisplayNodeFindFirstSubnode(ASDisplayNode *startNode, BOOL (^block)(ASDisplayNode *node))
 {
   return _ASDisplayNodeFindFirstNode(startNode, NO, block);
 }
 
-extern __kindof ASDisplayNode * ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c)
+extern __kindof ASDisplayNode *ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c)
 {
   return ASDisplayNodeFindFirstSubnode(start, ^(ASDisplayNode *n) {
     return [n isKindOfClass:c];

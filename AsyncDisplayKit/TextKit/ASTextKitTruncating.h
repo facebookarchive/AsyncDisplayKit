@@ -14,10 +14,21 @@
 
 #import "ASTextKitRenderer.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol ASTextKitTruncating <NSObject>
 
+/**
+ The character range from the original attributedString that is displayed by the renderer given the parameters in the
+ initializer.
+ */
 @property (nonatomic, assign, readonly) std::vector<NSRange> visibleRanges;
-@property (nonatomic, assign, readonly) CGRect truncationStringRect;
+
+/**
+ Returns the first visible range or an NSRange with location of NSNotFound and size of 0 if no first visible
+ range exists
+ */
+@property (nonatomic, assign, readonly) NSRange firstVisibleRange;
 
 /**
  A truncater object is initialized with the full state of the text.  It is a Single Responsibility Object that is
@@ -30,7 +41,14 @@
  The truncater should not store a strong reference to the context to prevent retain cycles.
  */
 - (instancetype)initWithContext:(ASTextKitContext *)context
-     truncationAttributedString:(NSAttributedString *)truncationAttributedString
-         avoidTailTruncationSet:(NSCharacterSet *)avoidTailTruncationSet;
+     truncationAttributedString:(NSAttributedString * _Nullable)truncationAttributedString
+         avoidTailTruncationSet:(NSCharacterSet * _Nullable)avoidTailTruncationSet;
+
+/**
+ Actually do the truncation.
+ */
+- (void)truncate;
 
 @end
+
+NS_ASSUME_NONNULL_END

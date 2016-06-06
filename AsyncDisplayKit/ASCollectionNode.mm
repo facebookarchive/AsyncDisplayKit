@@ -10,6 +10,8 @@
 #import "ASCollectionInternal.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASEnvironmentInternal.h"
+#import "ASInternalHelpers.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #include <vector>
 
@@ -53,6 +55,9 @@
 #endif
 
 @interface ASCollectionNode ()
+{
+  ASDN::RecursiveMutex _environmentStateLock;
+}
 @property (nonatomic) _ASCollectionPendingState *pendingState;
 @end
 
@@ -243,5 +248,7 @@
 {
   [self.view reloadDataImmediately];
 }
+
+ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 
 @end

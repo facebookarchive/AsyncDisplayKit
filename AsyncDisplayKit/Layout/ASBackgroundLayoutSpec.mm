@@ -59,7 +59,10 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
   contentsLayout.position = CGPointZero;
   [sublayouts addObject:contentsLayout];
 
-  return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:contentsLayout.size
+                                   sublayouts:sublayouts];
 }
 
 - (void)setBackground:(id<ASLayoutable>)background
@@ -70,17 +73,6 @@ static NSString * const kBackgroundChildKey = @"kBackgroundChildKey";
 - (id<ASLayoutable>)background
 {
   return [super childForIdentifier:kBackgroundChildKey];
-}
-
-- (void)setChildren:(NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-}
-
-- (NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-  return nil;
 }
 
 @end

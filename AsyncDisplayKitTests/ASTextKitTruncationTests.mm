@@ -53,7 +53,9 @@
   ASTextKitTailTruncater *tailTruncater = [[ASTextKitTailTruncater alloc] initWithContext:context
                                                                truncationAttributedString:nil
                                                                    avoidTailTruncationSet:nil];
+  [tailTruncater truncate];
   XCTAssert(NSEqualRanges(textKitVisibleRange, tailTruncater.visibleRanges[0]));
+  XCTAssert(NSEqualRanges(textKitVisibleRange, tailTruncater.firstVisibleRange));
 }
 
 - (void)testSimpleTailTruncation
@@ -71,6 +73,7 @@
   ASTextKitTailTruncater *tailTruncater = [[ASTextKitTailTruncater alloc] initWithContext:context
                                                                truncationAttributedString:[self _simpleTruncationAttributedString]
                                                                    avoidTailTruncationSet:[NSCharacterSet characterSetWithCharactersInString:@""]];
+  [tailTruncater truncate];
   __block NSString *drawnString;
   [context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     drawnString = textStorage.string;
@@ -78,6 +81,7 @@
   NSString *expectedString = @"90's cray photo booth tote bag bespoke Carles. Plaid wayfarers...";
   XCTAssertEqualObjects(expectedString, drawnString);
   XCTAssert(NSEqualRanges(NSMakeRange(0, 62), tailTruncater.visibleRanges[0]));
+  XCTAssert(NSEqualRanges(NSMakeRange(0, 62), tailTruncater.firstVisibleRange));
 }
 
 - (void)testAvoidedCharTailWordBoundaryTruncation
@@ -95,7 +99,7 @@
   ASTextKitTailTruncater *tailTruncater = [[ASTextKitTailTruncater alloc] initWithContext:context
                                                                truncationAttributedString:[self _simpleTruncationAttributedString]
                                                                    avoidTailTruncationSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
-  (void)tailTruncater;
+  [tailTruncater truncate];
   __block NSString *drawnString;
   [context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     drawnString = textStorage.string;
@@ -120,8 +124,7 @@
   ASTextKitTailTruncater *tailTruncater = [[ASTextKitTailTruncater alloc] initWithContext:context
                                                                truncationAttributedString:[self _simpleTruncationAttributedString]
                                                                    avoidTailTruncationSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
-  // So Xcode doesn't yell at me for an unused var...
-  (void)tailTruncater;
+  [tailTruncater truncate];
   __block NSString *drawnString;
   [context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     drawnString = textStorage.string;
@@ -129,6 +132,27 @@
   // This should have removed the additional "." in the string right after Carles.
   NSString *expectedString = @"90's cray photo booth t...";
   XCTAssertEqualObjects(expectedString, drawnString);
+}
+
+- (void)testHandleZeroSizeConstrainedSize
+{
+  CGSize constrainedSize = CGSizeZero;
+  NSAttributedString *attributedString = [self _sentenceAttributedString];
+  
+  ASTextKitContext *context = [[ASTextKitContext alloc] initWithAttributedString:attributedString
+                                                                 lineBreakMode:NSLineBreakByWordWrapping
+                                                          maximumNumberOfLines:0
+                                                                exclusionPaths:nil
+                                                               constrainedSize:constrainedSize
+                                                    layoutManagerCreationBlock:nil
+                                                         layoutManagerDelegate:nil
+                                                      textStorageCreationBlock:nil];
+  ASTextKitTailTruncater *tailTruncater = [[ASTextKitTailTruncater alloc] initWithContext:context
+                                                               truncationAttributedString:[self _simpleTruncationAttributedString]
+                                                                   avoidTailTruncationSet:nil];
+  XCTAssertNoThrow([tailTruncater truncate]);
+  XCTAssert(tailTruncater.visibleRanges.size() == 0);
+  NSEqualRanges(NSMakeRange(0, 0), tailTruncater.firstVisibleRange);
 }
 
 - (void)testHandleZeroHeightConstrainedSize
@@ -144,9 +168,10 @@
                                                            layoutManagerDelegate:nil
                                                         textStorageCreationBlock:nil];
 
-  XCTAssertNoThrow([[ASTextKitTailTruncater alloc] initWithContext:context
-                                        truncationAttributedString:[self _simpleTruncationAttributedString]
-                                            avoidTailTruncationSet:[NSCharacterSet characterSetWithCharactersInString:@"."]]);
+  ASTextKitTailTruncater *tailTruncater = [[ASTextKitTailTruncater alloc] initWithContext:context
+                                                               truncationAttributedString:[self _simpleTruncationAttributedString]
+                                                                   avoidTailTruncationSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
+  XCTAssertNoThrow([tailTruncater truncate]);
 }
 
 @end

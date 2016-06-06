@@ -55,7 +55,10 @@
 {
   ASLayout *layout = [layoutSpecUnderTest measureWithSizeRange:sizeRange];
   layout.position = CGPointZero;
-  layout = [ASLayout layoutWithLayoutableObject:self size:layout.size sublayouts:@[layout]];
+  layout = [ASLayout layoutWithLayoutableObject:self
+                           constrainedSizeRange:sizeRange
+                                           size:layout.size
+                                     sublayouts:@[layout]];
   _layoutUnderTest = [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
     return [self.subnodes containsObject:(ASDisplayNode *)evaluatedLayout.layoutableObject];
   }];

@@ -11,7 +11,6 @@
 #import "ASStaticLayoutSpec.h"
 
 #import "ASLayoutSpecUtilities.h"
-#import "ASLayoutOptions.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
@@ -73,19 +72,18 @@
   }
 
   return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
                                          size:ASSizeRangeClamp(constrainedSize, size)
                                    sublayouts:sublayouts];
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
-{
-  ASDisplayNodeAssert(NO, @"ASStaticLayoutSpec only supports setChildren");
-}
+@end
 
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
+@implementation ASStaticLayoutSpec (ASEnvironment)
+
+- (BOOL)supportsUpwardPropagation
 {
-  ASDisplayNodeAssert(NO, @"ASStaticLayoutSpec only supports children");
-  return nil;
+  return NO;
 }
 
 @end

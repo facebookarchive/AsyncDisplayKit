@@ -137,25 +137,30 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (void)_calculateSize
 {
-  [self truncater];
   // if we have no scale factors or an unconstrained width, there is no reason to try to adjust the font size
   if (isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
     _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
   }
   
-  // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
-  // -usedRectForTextContainer:).
   __block NSTextStorage *scaledTextStorage = nil;
   BOOL isScaled = [self isScaled];
-  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
-    if (isScaled) {
+  if (isScaled) {
+    // apply the string scale before truncating or else we may truncate the string after we've done the work to shrink it.
+    [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
       NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
       [ASTextKitFontSizeAdjuster adjustFontSizeForAttributeString:scaledString withScaleFactor:_currentScaleFactor];
       scaledTextStorage = [[NSTextStorage alloc] initWithAttributedString:scaledString];
       
       [textStorage removeLayoutManager:layoutManager];
       [scaledTextStorage addLayoutManager:layoutManager];
-    }
+    }];
+  }
+  
+  [[self truncater] truncate];
+  
+  // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
+  // -usedRectForTextContainer:).
+  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     [layoutManager ensureLayoutForTextContainer:textContainer];
   }];
   
@@ -189,9 +194,10 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   // We add an assertion so we can track the rare conditions where a graphics context is not present
   ASDisplayNodeAssertNotNil(context, @"This is no good without a context.");
   
-  // This renderer may not be the one that did the sizing. If that is the case its _currentScaleFactor will not be set, so we should compute it now
-  if (_sizeIsCalculated == NO && isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
-    _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
+  // This renderer may not be the one that did the sizing. If that is the case its truncation and currentScaleFactor may not have been evaluated.
+  // If there's any possibility we need to truncate or scale (e.g. width is not infinite, perform the size calculation.
+  if (_sizeIsCalculated == NO && isinf(_constrainedSize.width) == NO) {
+    [self _calculateSize];
   }
 
   CGRect shadowInsetBounds = [[self shadower] insetRectWithConstrainedRect:bounds];
@@ -250,7 +256,23 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (std::vector<NSRange>)visibleRanges
 {
-  return [self truncater].visibleRanges;
+  ASTextKitTailTruncater *truncater = [self truncater];
+  [truncater truncate];
+  return truncater.visibleRanges;
+}
+
+@end
+
+@implementation ASTextKitRenderer (ASTextKitRendererConvenience)
+
+- (NSRange)firstVisibleRange
+{
+  std::vector<NSRange> visibleRanges = self.visibleRanges;
+  if (visibleRanges.size() > 0) {
+    return visibleRanges[0];
+  }
+  
+  return NSMakeRange(0, 0);
 }
 
 @end

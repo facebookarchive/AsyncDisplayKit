@@ -1,11 +1,16 @@
 ![AsyncDisplayKit](https://github.com/facebook/AsyncDisplayKit/blob/master/docs/assets/logo.png)
 
-[![Build Status](https://travis-ci.org/facebook/AsyncDisplayKit.svg)](https://travis-ci.org/facebook/AsyncDisplayKit)
-[![Coverage Status](https://coveralls.io/repos/facebook/AsyncDisplayKit/badge.svg?branch=master)](https://coveralls.io/r/facebook/AsyncDisplayKit?branch=master)
+[![Apps Using](https://img.shields.io/badge/Apps%20Using%20ASDK-%3E3,658-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Downloads](https://img.shields.io/badge/Total%20Downloads-%3E377,749-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+
+[![Platform](https://img.shields.io/badge/platforms-iOS%20%7C%20tvOS-orange.svg)](http://AsyncDisplayKit.org)
+[![Languages](https://img.shields.io/badge/languages-ObjC%20%7C%20Swift-orange.svg)](http://AsyncDisplayKit.org)
+
 [![Version](https://img.shields.io/cocoapods/v/AsyncDisplayKit.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
-[![Platform](https://img.shields.io/cocoapods/p/AsyncDisplayKit.svg)]()
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-59C939.svg?style=flat)](https://github.com/Carthage/Carthage)
+[![Build Status](https://travis-ci.org/facebook/AsyncDisplayKit.svg)](https://travis-ci.org/facebook/AsyncDisplayKit)
 [![License](https://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
-[![Downloads](https://img.shields.io/badge/downloads-%3E120k-green.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+
 
 AsyncDisplayKit is an iOS framework that keeps even the most complex user
 interfaces smooth and responsive.  It was originally built to make Facebook's
@@ -92,12 +97,16 @@ You can also easily [create your own
 nodes](https://github.com/facebook/AsyncDisplayKit/blob/master/AsyncDisplayKit/ASDisplayNode%2BSubclasses.h)
 to implement node hierarchies or custom drawing.
 
-### Learn more
+## Learn more
 
-* Read the [Getting Started guide](http://asyncdisplaykit.org/guide/)
+* Read the [Getting Started guide](http://asyncdisplaykit.org/docs/getting-started.html)
 * Get the [sample projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples)
-* Browse the [API reference](http://asyncdisplaykit.org/appledoc/)
+* Browse the [API reference](http://asyncdisplaykit.org/appledocs.html)
 * Watch the [NSLondon talk](http://vimeo.com/103589245) or the [NSSpain talk](https://www.youtube.com/watch?v=RY_X7l1g79Q)
+
+## Getting Help
+
+We use Slack for real-time debugging, community updates, and general talk about ASDK. Signup at http://asdk-slack-auto-invite.herokuapp.com or email AsyncDisplayKit(at)gmail.com to get an invite.
 
 ## Testing
 

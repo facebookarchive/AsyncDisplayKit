@@ -93,18 +93,10 @@
     ASRoundPixelValue((size.height - sublayout.size.height) * yPosition)
   };
   
-  return [ASLayout layoutWithLayoutableObject:self size:size sublayouts:@[sublayout]];
-}
-
-- (void)setChildren:(NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-}
-
-- (NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-  return nil;
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:size
+                                   sublayouts:@[sublayout]];
 }
 
 - (CGFloat)proportionOfAxisForAxisPosition:(ASRelativeLayoutSpecPosition)position

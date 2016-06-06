@@ -15,7 +15,6 @@
 #import "ASBackgroundLayoutSpec.h"
 #import "ASRatioLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
-#import "ASLayoutOptions.h"
 
 @interface ASStackLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end
@@ -606,19 +605,19 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
 
 - (void)testHorizontalAndVerticalAlignments
 {
-  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal itemsHorizontalAlignment:ASAlignmentLeft itemsVerticalAlignment:ASAlignmentTop identifier:@"horizontalTopLeft"];
-  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal itemsHorizontalAlignment:ASAlignmentMiddle itemsVerticalAlignment:ASAlignmentCenter identifier:@"horizontalCenter"];
-  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal itemsHorizontalAlignment:ASAlignmentRight itemsVerticalAlignment:ASAlignmentBottom identifier:@"horizontalBottomRight"];
-  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionVertical itemsHorizontalAlignment:ASAlignmentLeft itemsVerticalAlignment:ASAlignmentTop identifier:@"verticalTopLeft"];
-  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionVertical itemsHorizontalAlignment:ASAlignmentMiddle itemsVerticalAlignment:ASAlignmentCenter identifier:@"verticalCenter"];
-  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionVertical itemsHorizontalAlignment:ASAlignmentRight itemsVerticalAlignment:ASAlignmentBottom identifier:@"verticalBottomRight"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal itemsHorizontalAlignment:ASHorizontalAlignmentLeft itemsVerticalAlignment:ASVerticalAlignmentTop identifier:@"horizontalTopLeft"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal itemsHorizontalAlignment:ASHorizontalAlignmentMiddle itemsVerticalAlignment:ASVerticalAlignmentCenter identifier:@"horizontalCenter"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal itemsHorizontalAlignment:ASHorizontalAlignmentRight itemsVerticalAlignment:ASVerticalAlignmentBottom identifier:@"horizontalBottomRight"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionVertical itemsHorizontalAlignment:ASHorizontalAlignmentLeft itemsVerticalAlignment:ASVerticalAlignmentTop identifier:@"verticalTopLeft"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionVertical itemsHorizontalAlignment:ASHorizontalAlignmentMiddle itemsVerticalAlignment:ASVerticalAlignmentCenter identifier:@"verticalCenter"];
+  [self testStackLayoutSpecWithDirection:ASStackLayoutDirectionVertical itemsHorizontalAlignment:ASHorizontalAlignmentRight itemsVerticalAlignment:ASVerticalAlignmentBottom identifier:@"verticalBottomRight"];
 }
 
 - (void)testDirectionChangeAfterSettingHorizontalAndVerticalAlignments
 {
   ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init]; // Default direction is horizontal
-  stackLayoutSpec.horizontalAlignment = ASAlignmentRight;
-  stackLayoutSpec.verticalAlignment = ASAlignmentCenter;
+  stackLayoutSpec.horizontalAlignment = ASHorizontalAlignmentRight;
+  stackLayoutSpec.verticalAlignment = ASVerticalAlignmentCenter;
   XCTAssertEqual(stackLayoutSpec.alignItems, ASStackLayoutAlignItemsCenter);
   XCTAssertEqual(stackLayoutSpec.justifyContent, ASStackLayoutJustifyContentEnd);
   
@@ -636,8 +635,8 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentEnd;
 
   // Set alignments and assert that assertions are thrown
-  stackLayoutSpec.horizontalAlignment = ASAlignmentMiddle;
-  stackLayoutSpec.verticalAlignment = ASAlignmentCenter;
+  stackLayoutSpec.horizontalAlignment = ASHorizontalAlignmentMiddle;
+  stackLayoutSpec.verticalAlignment = ASVerticalAlignmentCenter;
   XCTAssertThrows(stackLayoutSpec.alignItems = ASStackLayoutAlignItemsEnd);
   XCTAssertThrows(stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentEnd);
 

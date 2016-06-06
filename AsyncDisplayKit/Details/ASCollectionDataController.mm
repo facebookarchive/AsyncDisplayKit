@@ -51,7 +51,9 @@
 
 - (void)willReloadData
 {
-  [_pendingContexts enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray<ASIndexedNodeContext *> *contexts, BOOL *stop) {
+  NSArray *keys = _pendingContexts.allKeys;
+  for (NSString *kind in keys) {
+    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
     // Remove everything that existed before the reload, now that we're ready to insert replacements
     NSArray *indexPaths = [self indexPathsForEditingNodesOfKind:kind];
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
@@ -72,7 +74,7 @@
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
     [_pendingContexts removeObjectForKey:kind];
-  }];
+  }
 }
 
 - (void)prepareForInsertSections:(NSIndexSet *)sections
@@ -87,7 +89,9 @@
 
 - (void)willInsertSections:(NSIndexSet *)sections
 {
-  [_pendingContexts enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray<ASIndexedNodeContext *> *contexts, BOOL *stop) {
+  NSArray *keys = _pendingContexts.allKeys;
+  for (NSString *kind in keys) {
+    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
     NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:sections.count];
     for (NSUInteger i = 0; i < sections.count; i++) {
       [sectionArray addObject:[NSMutableArray array]];
@@ -98,7 +102,7 @@
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
     [_pendingContexts removeObjectForKey:kind];
-  }];
+  }
 }
 
 - (void)willDeleteSections:(NSIndexSet *)sections
@@ -122,7 +126,9 @@
 
 - (void)willReloadSections:(NSIndexSet *)sections
 {
-  [_pendingContexts enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray<ASIndexedNodeContext *> *contexts, BOOL *stop) {
+  NSArray *keys = _pendingContexts.allKeys;
+  for (NSString *kind in keys) {
+    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
     NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], sections);
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
     // reinsert the elements
@@ -130,7 +136,7 @@
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
     [_pendingContexts removeObjectForKey:kind];
-  }];
+  }
 }
 
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
@@ -150,40 +156,114 @@
   }
 }
 
+- (void)prepareForInsertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  for (NSString *kind in [self supplementaryKinds]) {
+    LOG(@"Populating elements of kind: %@, for index paths: %@", kind, indexPaths);
+    NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
+    [self _populateSupplementaryNodesOfKind:kind atIndexPaths:indexPaths mutableContexts:contexts];
+    _pendingContexts[kind] = contexts;
+  }
+}
+
+- (void)willInsertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  NSArray *keys = _pendingContexts.allKeys;
+  for (NSString *kind in keys) {
+    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
+
+    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
+      [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
+    }];
+    [_pendingContexts removeObjectForKey:kind];
+  }
+}
+
+- (void)willDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  for (NSString *kind in [self supplementaryKinds]) {
+    NSArray<NSIndexPath *> *deletedIndexPaths = ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths([self editingNodesOfKind:kind], indexPaths);
+    [self deleteNodesOfKind:kind atIndexPaths:deletedIndexPaths completion:nil];
+  }
+}
+
+- (void)prepareForReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  for (NSString *kind in [self supplementaryKinds]) {
+    NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
+    [self _populateSupplementaryNodesOfKind:kind atIndexPaths:indexPaths mutableContexts:contexts];
+    _pendingContexts[kind] = contexts;
+  }
+}
+
+- (void)willReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  NSArray *keys = _pendingContexts.allKeys;
+  for (NSString *kind in keys) {
+    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
+
+    [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
+    // reinsert the elements
+    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
+      [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
+    }];
+    [_pendingContexts removeObjectForKey:kind];
+  }
+}
+
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withMutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
 {
+  id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+  
   NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryNodeOfKind:kind];
   for (NSUInteger i = 0; i < sectionCount; i++) {
     NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:i];
     NSUInteger rowCount = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:i];
     for (NSUInteger j = 0; j < rowCount; j++) {
       NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:j];
-
-      ASCellNodeBlock supplementaryCellBlock;
-      if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
-        supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
-      } else {
-        ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
-        supplementaryCellBlock = ^{ return supplementaryNode; };
-      }
-      
-      ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
-      ASIndexedNodeContext *context = [[ASIndexedNodeContext alloc] initWithNodeBlock:supplementaryCellBlock
-                                                                            indexPath:indexPath
-                                                                      constrainedSize:constrainedSize];
-      [contexts addObject:context];
+      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
     }
   }
 }
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withSections:(NSIndexSet *)sections mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
 {
+  id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+  
   [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
     NSUInteger rowNum = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:idx];
     NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
     for (NSUInteger i = 0; i < rowNum; i++) {
       NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
+      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
+    }
+  }];
+}
 
+- (void)_populateSupplementaryNodesOfKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
+{
+  id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+
+  NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
+  for (NSIndexPath *indexPath in indexPaths) {
+    [sections addIndex:indexPath.section];
+  }
+
+  [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+    NSUInteger rowNum = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:idx];
+    NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
+    for (NSUInteger i = 0; i < rowNum; i++) {
+      NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
+      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
+    }
+  }];
+}
+
+- (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
+{
       ASCellNodeBlock supplementaryCellBlock;
       if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
         supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
@@ -195,10 +275,9 @@
       ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
       ASIndexedNodeContext *context = [[ASIndexedNodeContext alloc] initWithNodeBlock:supplementaryCellBlock
                                                                             indexPath:indexPath
-                                                                        constrainedSize:constrainedSize];
+                                                                        constrainedSize:constrainedSize
+                                                           environmentTraitCollection:environmentTraitCollection];
       [contexts addObject:context];
-    }
-  }];
 }
 
 #pragma mark - Sizing query

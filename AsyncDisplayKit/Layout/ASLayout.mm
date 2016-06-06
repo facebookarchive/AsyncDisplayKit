@@ -12,6 +12,7 @@
 #import "ASAssert.h"
 #import "ASLayoutSpecUtilities.h"
 #import "ASInternalHelpers.h"
+#import "ASDimension.h"
 #import <queue>
 
 CGPoint const CGPointNull = {NAN, NAN};
@@ -24,6 +25,7 @@ extern BOOL CGPointIsNull(CGPoint point)
 @implementation ASLayout
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                      constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size
                                   position:(CGPoint)position
                                 sublayouts:(NSArray *)sublayouts
@@ -39,7 +41,17 @@ extern BOOL CGPointIsNull(CGPoint point)
   ASLayout *l = [super new];
   if (l) {
     l->_layoutableObject = layoutableObject;
-    l->_size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
+    
+    if (!isValidForLayout(size.width) || !isValidForLayout(size.height)) {
+      ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutableObject);
+      size = CGSizeZero;
+    } else {
+      size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
+    }
+    l->_constrainedSizeRange = sizeRange;
+    l->_size = size;
+    l->_dirty = NO;
+    
     if (CGPointIsNull(position) == NO) {
       l->_position = CGPointMake(ASCeilPixelValue(position.x), ASCeilPixelValue(position.y));
     } else {
@@ -60,22 +72,39 @@ extern BOOL CGPointIsNull(CGPoint point)
 }
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                      constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size
                                 sublayouts:(NSArray *)sublayouts
 {
-  return [self layoutWithLayoutableObject:layoutableObject size:size position:CGPointNull sublayouts:sublayouts flattened:NO];
+  return [self layoutWithLayoutableObject:layoutableObject
+                     constrainedSizeRange:sizeRange
+                                     size:size
+                                 position:CGPointNull
+                               sublayouts:sublayouts
+                                flattened:NO];
 }
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject size:(CGSize)size
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                      constrainedSizeRange:(ASSizeRange)sizeRange
+                                      size:(CGSize)size
 {
-  return [self layoutWithLayoutableObject:layoutableObject size:size sublayouts:nil];
+  return [self layoutWithLayoutableObject:layoutableObject
+                     constrainedSizeRange:sizeRange
+                                     size:size
+                               sublayouts:nil];
 }
 
 + (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                               constrainedSizeRange:(ASSizeRange)sizeRange
                                                size:(CGSize)size
                                          sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
 {
-  return [self layoutWithLayoutableObject:layoutableObject size:size position:CGPointNull sublayouts:sublayouts flattened:YES];
+  return [self layoutWithLayoutableObject:layoutableObject
+                     constrainedSizeRange:sizeRange
+                                     size:size
+                                 position:CGPointNull
+                               sublayouts:sublayouts
+                                flattened:YES];
 }
 
 - (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *))predicateBlock
@@ -102,6 +131,7 @@ extern BOOL CGPointIsNull(CGPoint point)
       
       if (predicateBlock(context.layout)) {
         [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:context.layout.layoutableObject
+                                                       constrainedSizeRange:context.layout.constrainedSizeRange
                                                                        size:context.layout.size
                                                                    position:context.absolutePosition
                                                                  sublayouts:nil
@@ -116,7 +146,10 @@ extern BOOL CGPointIsNull(CGPoint point)
     }
   }
 
-  return [ASLayout flattenedLayoutWithLayoutableObject:_layoutableObject size:_size sublayouts:flattenedSublayouts];
+  return [ASLayout flattenedLayoutWithLayoutableObject:_layoutableObject
+                                  constrainedSizeRange:_constrainedSizeRange
+                                                  size:_size
+                                            sublayouts:flattenedSublayouts];
 }
 
 - (CGRect)frame

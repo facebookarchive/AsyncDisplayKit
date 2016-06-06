@@ -12,7 +12,6 @@
 
 #import "ASDisplayNode+Subclasses.h"
 #import "ASEqualityHelpers.h"
-#import "ASTextKitHelpers.h"
 #import "ASTextNodeWordKerner.h"
 #import "ASThread.h"
 
@@ -37,6 +36,8 @@
 
 @implementation ASPanningOverriddenUITextView
 
+#if TARGET_OS_IOS
+ // tvOS doesn't support self.scrollsToTop
 - (BOOL)scrollEnabled
 {
   return _shouldBlockPanGesture;
@@ -45,8 +46,11 @@
 - (void)setScrollEnabled:(BOOL)scrollEnabled
 {
   _shouldBlockPanGesture = !scrollEnabled;
+  self.scrollsToTop = scrollEnabled;
+
   [super setScrollEnabled:YES];
 }
+#endif
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
@@ -94,20 +98,28 @@
 #pragma mark - NSObject Overrides
 - (instancetype)init
 {
+  return [self initWithTextKitComponents:[ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero]
+            placeholderTextKitComponents:[ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero]];
+}
+
+- (instancetype)initWithTextKitComponents:(ASTextKitComponents *)textKitComponents
+             placeholderTextKitComponents:(ASTextKitComponents *)placeholderTextKitComponents
+{
   if (!(self = [super init]))
     return nil;
 
   _displayingPlaceholder = YES;
+  _scrollEnabled = YES;
 
   // Create the scaffolding for the text view.
-  _textKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
+  _textKitComponents = textKitComponents;
   _textKitComponents.layoutManager.delegate = self;
   _wordKerner = [[ASTextNodeWordKerner alloc] init];
   _returnKeyType = UIReturnKeyDefault;
   _textContainerInset = UIEdgeInsetsZero;
   
   // Create the placeholder scaffolding.
-  _placeholderTextKitComponents = [ASTextKitComponents componentsWithAttributedSeedString:nil textContainerSize:CGSizeZero];
+  _placeholderTextKitComponents = placeholderTextKitComponents;
   _placeholderTextKitComponents.layoutManager.delegate = self;
 
   return self;
@@ -161,7 +173,7 @@
 
   // Create and configure our text view.
   _textKitComponents.textView = self.textView;
-  //_textKitComponents.textView = NO; // Unfortunately there's a bug here with iOS 7 DP5 that causes the text-view to only be one line high when scrollEnabled is NO. rdar://14729288
+  _textKitComponents.textView.scrollEnabled = _scrollEnabled;
   _textKitComponents.textView.delegate = self;
   #if TARGET_OS_IOS
   _textKitComponents.textView.editable = YES;
@@ -179,7 +191,7 @@
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
   CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
   textSize = ceilSizeValue(textSize);
-  return CGSizeMake(constrainedSize.width, fminf(textSize.height, constrainedSize.height));
+  return CGSizeMake(fminf(textSize.width, constrainedSize.width), fminf(textSize.height, constrainedSize.height));
 }
 
 - (void)layout

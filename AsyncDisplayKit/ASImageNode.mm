@@ -16,6 +16,7 @@
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
 
 #import "ASImageNode+CGExtras.h"
 #import "AsyncDisplayKit+Debug.h"
@@ -37,12 +38,12 @@
 // TODO: eliminate explicit parameters with a set of keys copied from the node
 @implementation _ASImageNodeDrawParameters
 
-- (id)initWithImage:(UIImage *)image
-             bounds:(CGRect)bounds
-             opaque:(BOOL)opaque
-      contentsScale:(CGFloat)contentsScale
-    backgroundColor:(UIColor *)backgroundColor
-        contentMode:(UIViewContentMode)contentMode
+- (instancetype)initWithImage:(UIImage *)image
+                       bounds:(CGRect)bounds
+                       opaque:(BOOL)opaque
+                contentsScale:(CGFloat)contentsScale
+              backgroundColor:(UIColor *)backgroundColor
+                  contentMode:(UIViewContentMode)contentMode
 {
   if (!(self = [self init]))
     return nil;
@@ -71,7 +72,7 @@
 
   void (^_displayCompletionBlock)(BOOL canceled);
   ASDN::RecursiveMutex _imageLock;
-
+  
   // Cropping.
   BOOL _cropEnabled; // Defaults to YES.
   BOOL _forceUpscaling; //Defaults to NO.
@@ -84,7 +85,7 @@
 @synthesize image = _image;
 @synthesize imageModificationBlock = _imageModificationBlock;
 
-- (id)init
+- (instancetype)init
 {
   if (!(self = [super init]))
     return nil;
@@ -93,6 +94,11 @@
   self.contentsScale = ASScreenScale();
   self.contentMode = UIViewContentModeScaleAspectFill;
   self.opaque = NO;
+  
+  // If no backgroundColor is set to the image node and it's a subview of UITableViewCell, UITableView is setting
+  // the opaque value of all subviews to YES if highlighting / selection is happening and does not set it back to the
+  // initial value. With setting a explicit backgroundColor we can prevent that change.
+  self.backgroundColor = [UIColor clearColor];
 
   _cropEnabled = YES;
   _forceUpscaling = NO;
@@ -100,12 +106,6 @@
   _cropDisplayBounds = CGRectNull;
   _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
   
-  if ([ASImageNode shouldShowImageScalingOverlay]) {
-    _debugLabelNode = [[ASTextNode alloc] init];
-    _debugLabelNode.layerBacked = YES;
-    [self addSubnode:_debugLabelNode];
-  }
-
   return self;
 }
 
@@ -144,6 +144,14 @@
     [self invalidateCalculatedLayout];
     if (image) {
       [self setNeedsDisplay];
+      
+      if ([ASImageNode shouldShowImageScalingOverlay] && _debugLabelNode == nil) {
+        ASPerformBlockOnMainThread(^{
+          _debugLabelNode = [[ASTextNode alloc] init];
+          _debugLabelNode.layerBacked = YES;
+          [self addSubnode:_debugLabelNode];
+        });
+      }
     } else {
       self.contents = nil;
     }

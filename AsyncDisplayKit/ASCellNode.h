@@ -14,9 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef NSUInteger ASCellNodeAnimation;
 
-typedef enum : NSUInteger {
-  /** 
-   * Indicates a cell has just became visible 
+typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
+  /**
+   * Indicates a cell has just became visible
    */
   ASCellNodeVisibilityEventVisible,
   /**
@@ -26,14 +26,26 @@ typedef enum : NSUInteger {
    * Use CGRectIntersect between cellFrame and scrollView.bounds to get this rectangle
    */
   ASCellNodeVisibilityEventVisibleRectChanged,
-  /** 
-   * Indicates a cell is no longer visible 
+  /**
+   * Indicates a cell is no longer visible
    */
   ASCellNodeVisibilityEventInvisible,
-} ASCellNodeVisibilityEvent;
+  /**
+   * Indicates user has started dragging the visible cell
+   */
+  ASCellNodeVisibilityEventWillBeginDragging,
+  /**
+   * Indicates user has ended dragging the visible cell
+   */
+  ASCellNodeVisibilityEventDidEndDragging,
+};
 
 /**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
+ 
+ * @note When a cell node is contained inside a collection view (or table view),
+ * calling `-setNeedsLayout` will also notify the collection on the main thread
+ * so that the collection can update its item layout if the cell's size changed.
  */
 @interface ASCellNode : ASDisplayNode
 
@@ -66,12 +78,12 @@ typedef enum : NSUInteger {
 //@property (atomic, retain) UIColor *backgroundColor;
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
-/*
+/**
  * A Boolean value that indicates whether the node is selected.
  */
 @property (nonatomic, assign) BOOL selected;
 
-/*
+/**
  * A Boolean value that indicates whether the node is highlighted.
  */
 @property (nonatomic, assign) BOOL highlighted;
@@ -84,17 +96,6 @@ typedef enum : NSUInteger {
 - (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesCancelled:(nullable NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not.
- *
- * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
- * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
- * The delegate will then be notified on main thread.
- *
- * This method can be called inside of an animation block (to animate all of the layout changes).
- */
-- (void)setNeedsLayout;
 
 /**
  * @abstract Initializes a cell with a given view controller block.

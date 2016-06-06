@@ -121,21 +121,12 @@
   _baselineRelativeArrangement = baselineRelativeArrangement;
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
-{
-  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
-}
-
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
-{
-  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports children");
-  return nil;
-}
-
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   if (self.children.count == 0 || self.flexGone ) {
-    return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+    return [ASLayout layoutWithLayoutableObject:self
+                     constrainedSizeRange:constrainedSize
+                                           size:constrainedSize.min];
   }
   
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
@@ -174,6 +165,7 @@
   }
   
   return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
                                          size:ASSizeRangeClamp(constrainedSize, finalSize)
                                    sublayouts:sublayouts];
 }
@@ -194,6 +186,15 @@
   } else {
     _justifyContent = justifyContent(_verticalAlignment, _justifyContent);
   }
+}
+
+@end
+
+@implementation ASStackLayoutSpec (ASEnvironment)
+
+- (BOOL)supportsUpwardPropagation
+{
+  return NO;
 }
 
 @end

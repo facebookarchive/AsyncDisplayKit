@@ -54,16 +54,16 @@
     };
 }
 
-+ (NSDictionary *)cellControlStyle {
-    
++ (NSDictionary *)cellControlStyle
+{
     return @{
         NSFontAttributeName : [UIFont systemFontOfSize:13.0],
         NSForegroundColorAttributeName: [UIColor lightGrayColor]
     };
 }
 
-+ (NSDictionary *)cellControlColoredStyle {
-    
++ (NSDictionary *)cellControlColoredStyle
+{
     return @{
         NSFontAttributeName : [UIFont systemFontOfSize:13.0],
         NSForegroundColorAttributeName: [UIColor colorWithRed:59.0/255.0 green:89.0/255.0 blue:152.0/255.0 alpha:1.0]

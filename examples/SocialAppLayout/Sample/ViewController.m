@@ -45,8 +45,8 @@
     _tableView.asyncDelegate = nil;
 }
 
-- (void)viewDidLoad {
-    
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     
     self.tableView = [[ASTableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain asyncDataFetching:YES];
@@ -57,8 +57,8 @@
     [self.view addSubview:self.tableView];
 }
 
-- (void)createSocialAppDataSource {
-    
+- (void)createSocialAppDataSource
+{
     _socialAppDataSource = [[NSMutableArray alloc] init];
     
     Post *newPost = [[Post alloc] init];
