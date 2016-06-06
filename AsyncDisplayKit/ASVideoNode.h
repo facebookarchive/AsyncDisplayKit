@@ -61,11 +61,11 @@ NS_ASSUME_NONNULL_BEGIN
 //! Defaults to AVLayerVideoGravityResizeAspect
 @property (atomic) NSString *gravity;
 
-@property (nullable, atomic, weak, readwrite) id<ASVideoNodeDelegate> delegate;
+@property (nullable, atomic, weak, readwrite) id<ASVideoNodeDelegate, ASNetworkImageNodeDelegate> delegate;
 
 @end
 
-@protocol ASVideoNodeDelegate <NSObject>
+@protocol ASVideoNodeDelegate <ASNetworkImageNodeDelegate>
 @optional
 /**
  * @abstract Delegate method invoked when the node's video has played to its end time.
