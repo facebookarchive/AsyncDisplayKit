@@ -15,8 +15,6 @@
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 #import <AsyncDisplayKit/ASLayoutable.h>
 
-#define ASDisplayNodeLoggingEnabled 0
-
 @class ASDisplayNode;
 
 /**
