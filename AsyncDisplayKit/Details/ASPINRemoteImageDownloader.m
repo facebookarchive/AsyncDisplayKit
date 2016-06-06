@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#ifdef PIN_REMOTE_IMAGE
+#if PIN_REMOTE_IMAGE
 #import "ASPINRemoteImageDownloader.h"
 
 #import "ASAssert.h"
