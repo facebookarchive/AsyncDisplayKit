@@ -91,7 +91,9 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   
   if (self.child == nil) {
     ASDisplayNodeAssert(NO, @"Inset spec measured without a child. The spec will do nothing.");
-    return [ASLayout layoutWithLayoutableObject:self size:CGSizeZero];
+    return [ASLayout layoutWithLayoutableObject:self
+                           constrainedSizeRange:constrainedSize
+                                           size:CGSizeZero];
   }
   
   ASLayout *sublayout = [self.child measureWithSizeRange:insetConstrainedSize];
@@ -112,7 +114,10 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   
   sublayout.position = CGPointMake(x, y);
   
-  return [ASLayout layoutWithLayoutableObject:self size:computedSize sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:computedSize
+                                   sublayouts:@[sublayout]];
 }
 
 @end

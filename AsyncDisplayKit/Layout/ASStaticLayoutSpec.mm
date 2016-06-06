@@ -68,6 +68,7 @@
   }
 
   return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
                                          size:ASSizeRangeClamp(constrainedSize, size)
                                    sublayouts:sublayouts];
 }

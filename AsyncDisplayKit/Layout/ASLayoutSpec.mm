@@ -52,7 +52,9 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:constrainedSize.min];
 }
 
 - (id<ASLayoutable>)finalLayoutable

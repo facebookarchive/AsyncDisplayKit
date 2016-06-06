@@ -72,7 +72,10 @@
   const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
   ASLayout *sublayout = [self.child measureWithSizeRange:childRange];
   sublayout.position = CGPointZero;
-  return [ASLayout layoutWithLayoutableObject:self size:sublayout.size sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:sublayout.size
+                                   sublayouts:@[sublayout]];
 }
 
 @end

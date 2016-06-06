@@ -89,7 +89,10 @@
     ASRoundPixelValue((size.height - sublayout.size.height) * yPosition)
   };
   
-  return [ASLayout layoutWithLayoutableObject:self size:size sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:size
+                                   sublayouts:@[sublayout]];
 }
 
 - (CGFloat)proportionOfAxisForAxisPosition:(ASRelativeLayoutSpecPosition)position
