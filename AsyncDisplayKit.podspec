@@ -7,8 +7,6 @@ Pod::Spec.new do |spec|
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
   spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.9.8' }
 
-  spec.dependency 'PINRemoteImage/iOS', '>= 3.0.0-beta.2'
-
   spec.documentation_url = 'http://asyncdisplaykit.org/appledoc/'
 
   spec.frameworks = 'AssetsLibrary'
@@ -60,7 +58,6 @@ Pod::Spec.new do |spec|
   end
   
   spec.subspec 'PINRemoteImage' do |pin|
-      pin.xcconfig = { "FRAMEWORK_SEARCH_PATHS" => "$(PODS_ROOT)/PINRemoteImage"}
       pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
       pin.dependency 'PINRemoteImage/iOS', '>= 3.0.0-beta.2'
       pin.dependency 'AsyncDisplayKit/Core'
