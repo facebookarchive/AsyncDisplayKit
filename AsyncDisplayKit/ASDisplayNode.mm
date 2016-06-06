@@ -1827,7 +1827,9 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
 }
 
-// Helper method to summarize whether or not the node run through the display process
+/**
+ * Helper method to summarize whether or not the node run through the display process
+ */
 - (BOOL)__implementsDisplay
 {
   return _flags.implementsDrawRect || _flags.implementsImageDisplay || _flags.shouldRasterizeDescendants || _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
@@ -1840,7 +1842,9 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (BOOL)_shouldHavePlaceholderLayer
 {
-  return (_placeholderEnabled && [self __implementsDisplay]);
+  ASDisplayNodeAssertMainThread();
+  CGSize calculatedSize = [self calculatedSize];
+  return (CGSizeEqualToSize(calculatedSize, CGSizeZero) == NO && _placeholderEnabled && [self __implementsDisplay]);
 }
 
 - (void)_setupPlaceholderLayerIfNeeded
