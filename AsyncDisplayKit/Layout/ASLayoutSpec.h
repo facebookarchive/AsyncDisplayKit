@@ -11,8 +11,6 @@
 #import <AsyncDisplayKit/ASLayoutable.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 
-@class ASTraitCollection;
-
 NS_ASSUME_NONNULL_BEGIN
 
 /** A layout spec is an immutable object that describes a layout, loosely inspired by React. */
@@ -24,8 +22,6 @@ NS_ASSUME_NONNULL_BEGIN
  * set to NO and any further mutations will cause an assert.
  */
 @property (nonatomic, assign) BOOL isMutable;
-
-@property (nonatomic, strong, nullable) ASTraitCollection *traitCollection;
 
 - (instancetype)init;
 
