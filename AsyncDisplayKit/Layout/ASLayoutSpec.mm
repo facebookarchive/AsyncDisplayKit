@@ -25,9 +25,7 @@
 @interface ASLayoutSpec() {
   ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex _propertyLock;
-  
-  NSArray *_children;
-  NSMutableDictionary *_childrenWithIdentifier;
+  std::vector<id<ASLayoutable>> _children;
 }
 @end
 
@@ -45,7 +43,6 @@
   }
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
-  _children = [NSArray array];
   return self;
 }
 
@@ -102,14 +99,6 @@
   return child;
 }
 
-- (NSMutableDictionary *)childrenWithIdentifier
-{
-  if (!_childrenWithIdentifier) {
-    _childrenWithIdentifier = [NSMutableDictionary dictionary];
-  }
-  return _childrenWithIdentifier;
-}
-
 - (void)setParent:(id<ASLayoutable>)parent
 {
   // FIXME: Locking should be evaluated here.  _parent is not widely used yet, though.
@@ -126,34 +115,29 @@
   if (child) {
     id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
     if (finalLayoutable) {
-      _children = @[finalLayoutable];
+      _children.insert(_children.begin(), finalLayoutable);
       [self propagateUpLayoutable:finalLayoutable];
     }
-  } else {
-    // remove the only child
-    _children = [NSArray array];
+  } else if (_children.size() > 0) {
+    _children.erase(_children.begin());
   }
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
+- (void)setChild:(id<ASLayoutable>)child forIndex:(NSUInteger)index
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   if (child) {
     id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-    self.childrenWithIdentifier[identifier] = finalLayoutable;
-    if (finalLayoutable) {
-      _children = [_children arrayByAddingObject:finalLayoutable];
+    if (index > _children.size()) {
+      _children.insert(_children.end(), finalLayoutable);
+    } else {
+      _children.insert(_children.begin() + index, finalLayoutable);
     }
   } else {
-    id<ASLayoutable> oldChild = self.childrenWithIdentifier[identifier];
-    if (oldChild) {
-      self.childrenWithIdentifier[identifier] = nil;
-      NSMutableArray *mutableChildren = [_children mutableCopy];
-      [mutableChildren removeObject:oldChild];
-      _children = [mutableChildren copy];
+    if (_children.begin() + index < _children.end()) {
+      _children.erase(_children.begin() + index);
     }
   }
-  
   // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
   // [self propagateUpLayoutable:finalLayoutable];
@@ -163,32 +147,31 @@
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
-  std::vector<id<ASLayoutable>> finalChildren;
+  _children.clear();
   for (id<ASLayoutable> child in children) {
-    finalChildren.push_back([self layoutableToAddFromLayoutable:child]);
-  }
-  
-  _children = nil;
-  if (finalChildren.size() > 0) {
-    _children = [NSArray arrayWithObjects:&finalChildren[0] count:finalChildren.size()];
-  } else {
-    _children = [NSArray array];
+    _children.push_back([self layoutableToAddFromLayoutable:child]);
   }
 }
 
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
+- (id<ASLayoutable>)childForIndex:(NSUInteger)index
 {
-  return self.childrenWithIdentifier[identifier];
+  if (index < _children.size()) {
+    return _children[index];
+  }
+  return nil;
 }
 
 - (id<ASLayoutable>)child
 {
-  return [_children firstObject];
+  if (_children.size() > 0) {
+    return _children[0];
+  }
+  return nil;
 }
 
 - (NSArray *)children
 {
-  return _children;
+  return [NSArray arrayWithObjects:&_children[0] count:_children.size()];
 }
 
 #pragma mark - ASEnvironment
