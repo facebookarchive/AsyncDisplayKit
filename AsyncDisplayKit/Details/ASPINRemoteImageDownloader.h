@@ -6,6 +6,8 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
+#if PIN_REMOTE_IMAGE
+
 #import <Foundation/Foundation.h>
 #import "ASImageProtocols.h"
 #import <PINRemoteImage/PINRemoteImageManager.h>
@@ -21,3 +23,5 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+
+#endif
