@@ -24,6 +24,8 @@ extern BOOL CGPointIsNull(CGPoint point)
 
 @implementation ASLayout
 
+@dynamic frame;
+
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                       constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size

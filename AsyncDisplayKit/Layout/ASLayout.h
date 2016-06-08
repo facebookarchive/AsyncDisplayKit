@@ -69,6 +69,12 @@ extern BOOL CGPointIsNull(CGPoint point);
 @property (nonatomic, readonly, getter=isFlattened) BOOL flattened;
 
 /**
+ * @abstract Returns a valid frame for the current layout computed with the size and position.
+ * @discussion Clamps the layout's origin or position to 0 if any of the calculated values are infinite.
+ */
+@property (nonatomic, readonly) CGRect frame;
+
+/**
  * Initializer.
  *
  * @param layoutableObject The backing ASLayoutable object.
@@ -141,12 +147,6 @@ extern BOOL CGPointIsNull(CGPoint point);
  * @return A new, 1-level deep layout containing the layouts for which the predicate block returns true.
  */
 - (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *evaluatedLayout))predicateBlock;
-
-/**
- * @abstract Returns a valid frame for the current layout computed with the size and position.
- * @discussion Clamps the layout's origin or position to 0 if any of the calculated values are infinite.
- */
-- (CGRect)frame;
 
 @end
 
