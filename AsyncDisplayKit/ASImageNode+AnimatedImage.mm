@@ -39,6 +39,10 @@
       };
     }
     
+    if (animatedImage.playbackReady) {
+      [self animatedImageFileReady];
+    }
+
     animatedImage.playbackReadyCallback = ^{
       [weakSelf animatedImageFileReady];
     };
