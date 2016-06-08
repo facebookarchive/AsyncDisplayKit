@@ -135,8 +135,13 @@ extern BOOL CGPointIsNull(CGPoint point)
       context.visited = YES;
 
       if (predicateBlock(context.layout)) {
-        [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:context.layout.layoutableObject constrainedSizeRange:context.layout.constrainedSizeRange size:context.layout.size
-                                                                   position:context.absolutePosition sublayouts:nil flattened:context.flattened gone:context.gone]];
+        [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:context.layout.layoutableObject
+                                                       constrainedSizeRange:context.layout.constrainedSizeRange
+                                                                       size:context.layout.size
+                                                                   position:context.absolutePosition
+                                                                 sublayouts:nil
+                                                                  flattened:context.flattened
+                                                                       gone:context.gone]];
       }
 
       for (ASLayout *sublayout in context.layout.sublayouts) {
