@@ -17,7 +17,13 @@
 
 #import <queue>
 
-#pragma mark ASLayoutableBlockValidator
+#pragma mark - Helpers
+
+static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, Class cl) {
+  return [NSString stringWithFormat:@"%@ was set on %@. It is either unecessary or the node needs to be wrapped in a %@", NSStringFromSelector(selector), obj, NSStringFromClass(cl)];
+}
+
+#pragma mark - ASLayoutableBlockValidator
 
 @implementation ASLayoutableBlockValidator
 
@@ -43,20 +49,22 @@
 
 @end
 
-#pragma mark ASLayoutableStaticValidator
+#pragma mark - ASLayoutableStaticValidator
 
 @implementation ASLayoutableStaticValidator
 
 - (void)validateLayout:(ASLayout *)layout
 {
-  id<ASLayoutable> layoutable = layout.layoutableObject;
-  for (ASLayout * sublayout in layout.sublayouts) {
+  for (ASLayout *sublayout in layout.sublayouts) {
+    id<ASLayoutable> layoutable = layout.layoutableObject;
     id<ASLayoutable> sublayoutLayoutable = sublayout.layoutableObject;
+    
+    NSString *assertMessage = nil;
+    Class stackContainerClass = [ASStaticLayoutSpec class];
     
     // Check for default sizeRange and layoutPosition
     ASRelativeSizeRange sizeRange = sublayoutLayoutable.sizeRange;
-    ASRelativeSizeRange zeroSizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero),
-                                                                ASRelativeSizeMakeWithCGSize(CGSizeZero));
+    ASRelativeSizeRange zeroSizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeZero);
     
     // Currently setting the preferredFrameSize also updates the sizeRange. Create a size range based on the
     // preferredFrameSize and check it if it's the same as the current sizeRange to be sure it was not changed manually
@@ -66,24 +74,26 @@
     }
     ASRelativeSizeRange preferredFrameSizeRange = ASRelativeSizeRangeMakeWithExactCGSize(preferredFrameSize);
     
-    if ((ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, zeroSizeRange) ||
-         ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, preferredFrameSizeRange))
-        && CGPointEqualToPoint(sublayoutLayoutable.layoutPosition, CGPointZero)) {
+    if (ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, zeroSizeRange) == NO &&
+        ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, preferredFrameSizeRange) == NO) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(sizeRange), sublayoutLayoutable, stackContainerClass);
+    } else if (!CGPointEqualToPoint(sublayoutLayoutable.layoutPosition, CGPointZero)) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(layoutPosition), sublayoutLayoutable, stackContainerClass);
+    }
+    
+    // Sublayout layoutable should be wrapped in a ASStaticLayoutSpec
+    if (assertMessage == nil || [layoutable isKindOfClass:stackContainerClass]) {
       continue;
     }
     
-    // Sublayout layoutable needs to be wrapped in a ASStaticLayoutSpec
-    if ([layoutable isKindOfClass:[ASStaticLayoutSpec class]]) {
-      continue;
-    }
-
-    ASDisplayNodeCAssert(NO, @"A property was set that requires the ASLayoutable to be wrapped in a ASStaticLayoutSpec");
+    ASDisplayNodeCAssert(NO, assertMessage);
   }
 }
 
 @end
 
-#pragma mark ASLayoutableStackValidator
+
+#pragma mark - ASLayoutableStackValidator
 
 @implementation ASLayoutableStackValidator
 
@@ -95,23 +105,30 @@
   for (ASLayout *sublayout in layout.sublayouts) {
     id<ASLayoutable> sublayoutLayoutable = sublayout.layoutableObject;
     
+    NSString *assertMessage = nil;
+    Class stackContainerClass = [ASStackLayoutSpec class];
+    
     // Check if default values related to ASStackLayoutSpec have changed
-    if (sublayoutLayoutable.spacingBefore == 0 &&
-        sublayoutLayoutable.spacingAfter == 0 &&
-        !sublayoutLayoutable.flexGrow &&
-        !sublayoutLayoutable.flexShrink &&
-        ASRelativeDimensionEqualToRelativeDimension([sublayoutLayoutable flexBasis], ASRelativeDimensionUnconstrained) &&
-        sublayoutLayoutable.alignSelf == ASStackLayoutAlignSelfAuto)
-    {
+    if (sublayoutLayoutable.spacingBefore != 0) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(spacingBefore), sublayoutLayoutable, stackContainerClass);
+    } else if (sublayoutLayoutable.spacingAfter != 0) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(spacingAfter), sublayoutLayoutable, stackContainerClass);
+    } else if (sublayoutLayoutable.flexGrow == YES) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexGrow), sublayoutLayoutable, stackContainerClass);
+    } else if (sublayoutLayoutable.flexShrink == YES) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexShrink), sublayoutLayoutable, stackContainerClass);
+    } else if (!ASRelativeDimensionEqualToRelativeDimension(sublayoutLayoutable.flexBasis, ASRelativeDimensionUnconstrained) ) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexBasis), sublayoutLayoutable, stackContainerClass);
+    } else if (sublayoutLayoutable.alignSelf != ASStackLayoutAlignSelfAuto) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(alignSelf), sublayoutLayoutable, stackContainerClass);
+    }
+    
+    // Sublayout layoutable should be wrapped in a ASStackLayoutSpec
+    if (assertMessage == nil || [layoutable isKindOfClass:stackContainerClass]) {
       continue;
     }
     
-    // Sublayout layoutable needs to be wrapped in a ASStackLayoutSpec
-    if ([layoutable isKindOfClass:[ASStackLayoutSpec class]]) {
-      continue;
-    }
-    
-    ASDisplayNodeCAssert(NO, @"A property was set that requires the ASLayoutable to be wrapped in a ASStackLayoutSpec");
+    ASDisplayNodeCAssert(NO, assertMessage);
   }
 }
 
