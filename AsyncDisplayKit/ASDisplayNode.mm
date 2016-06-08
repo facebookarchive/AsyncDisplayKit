@@ -123,8 +123,11 @@ static struct ASDisplayNodeFlags GetASDisplayNodeFlags(Class c, ASDisplayNode *i
   flags.isInHierarchy = NO;
   flags.displaysAsynchronously = YES;
   flags.shouldAnimateSizeChanges = YES;
-  flags.implementsDrawRect = ([c respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
-  flags.implementsImageDisplay = ([c respondsToSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0);
+  
+  // Checks if subclasses implements custom drawing behavior
+  flags.implementsDrawRect = [c methodForSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] != [ASDisplayNode methodForSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0;
+  flags.implementsImageDisplay = [c methodForSelector:@selector(displayWithParameters:isCancelled:)] != [ASDisplayNode methodForSelector:@selector(displayWithParameters:isCancelled:)] ? 1 : 0;
+  
   if (instance) {
     flags.implementsDrawParameters = ([instance respondsToSelector:@selector(drawParametersForAsyncLayer:)] ? 1 : 0);
     flags.implementsInstanceDrawRect = ([instance respondsToSelector:@selector(drawRect:withParameters:isCancelled:isRasterizing:)] ? 1 : 0);
@@ -1079,7 +1082,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // measureWithSizeRange: on subnodes to assert.
     return;
   }
+  
+  // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
+  // was created
+  if ([self _shouldHavePlaceholderLayer]) {
+      [self _setupPlaceholderLayerIfNeeded];
+  }
   _placeholderLayer.frame = bounds;
+
   [self layout];
   [self layoutDidFinish];
 }

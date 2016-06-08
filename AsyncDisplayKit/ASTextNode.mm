@@ -33,22 +33,24 @@ static const CGFloat ASTextNodeHighlightLightOpacity = 0.11;
 static const CGFloat ASTextNodeHighlightDarkOpacity = 0.22;
 static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncationAttribute";
 
-@interface ASTextNodeDrawParameters : NSObject
+@interface _ASTextNodeDrawParameters : NSObject<_ASDisplayLayerDelegateForward>
 
 @property (nonatomic, assign, readonly) CGRect bounds;
-
 @property (nonatomic, strong, readonly) UIColor *backgroundColor;
+@property (nonatomic, weak, readonly) id<_ASDisplayLayerDelegate> delegate;
 
 @end
 
-@implementation ASTextNodeDrawParameters
+@implementation _ASTextNodeDrawParameters
 
 - (instancetype)initWithBounds:(CGRect)bounds
                backgroundColor:(UIColor *)backgroundColor
+                      delegate:(id)delegate
 {
   if (self = [super init]) {
     _bounds = bounds;
     _backgroundColor = backgroundColor;
+    _delegate = delegate;
   }
   return self;
 }
@@ -413,8 +415,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Drawing
 
-- (void)drawRect:(CGRect)bounds withParameters:(ASTextNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing
+- (void)drawRect:(CGRect)bounds withParameters:(_ASTextNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing
 {
+  ASDisplayNodeAssert([parameters isKindOfClass:[_ASTextNodeDrawParameters class]], @"Calling super for drawRect:withParameters:isCancelled:isRasterizing: in a ASTextNode subclass must pass in the original parameters to superclass implementation.");
+  
   CGContextRef context = UIGraphicsGetCurrentContext();
   ASDisplayNodeAssert(context, @"This is no good without a context.");
   
@@ -446,7 +450,9 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
-  return [[ASTextNodeDrawParameters alloc] initWithBounds:self.threadSafeBounds backgroundColor:self.backgroundColor];
+  return [[_ASTextNodeDrawParameters alloc] initWithBounds:self.threadSafeBounds
+                                           backgroundColor:self.backgroundColor
+                                                  delegate:self];
 }
 
 #pragma mark - Attributes

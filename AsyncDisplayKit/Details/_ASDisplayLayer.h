@@ -134,3 +134,9 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 - (void)cancelDisplayAsyncLayer:(_ASDisplayLayer *)asyncLayer;
 
 @end
+
+@protocol _ASDisplayLayerDelegateForward <NSObject>
+
+- (id<_ASDisplayLayerDelegate>) delegate;
+   
+@end

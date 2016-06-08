@@ -22,7 +22,7 @@ static CGFloat const kASDKLogoAspectRatio = 2.79;
 
 @implementation SlowpokeImageNode
 
-- (UIImage *)displayWithParameters:(id<NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
++ (UIImage *)displayWithParameters:(id<NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
 {
   usleep( (long)(0.5 * USEC_PER_SEC) ); // artificial delay of 0.5s
   
