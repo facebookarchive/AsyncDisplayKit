@@ -14,6 +14,7 @@
   ASDN::Mutex _displayLinkLock;
   id <ASAnimatedImageProtocol> _animatedImage;
   BOOL _animatedImagePaused;
+  NSString *_animatedImageRunLoopMode;
   CADisplayLink *_displayLink;
   
   //accessed on main thread only

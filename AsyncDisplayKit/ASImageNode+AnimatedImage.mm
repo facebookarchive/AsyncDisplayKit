@@ -85,6 +85,23 @@
   }
 }
 
+- (NSString *)animatedImageRunLoopMode
+{
+  ASDN::MutexLocker l(_displayLinkLock);
+  return _animatedImageRunLoopMode;
+}
+
+- (void)setAnimatedImageRunLoopMode:(NSString *)runLoopMode
+{
+  ASDN::MutexLocker l(_displayLinkLock);
+
+  if (_displayLink != nil) {
+    [_displayLink removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:_animatedImageRunLoopMode];
+    [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:runLoopMode];
+  }
+  _animatedImageRunLoopMode = runLoopMode;
+}
+
 - (void)animatedImageFileReady
 {
   ASPerformBlockOnMainThread(^{
@@ -116,7 +133,7 @@
     _displayLink = [CADisplayLink displayLinkWithTarget:[ASWeakProxy weakProxyWithTarget:self] selector:@selector(displayLinkFired:)];
     _displayLink.frameInterval = self.animatedImage.frameInterval;
     
-    [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:_animatedImageRunLoopMode];
   } else {
     _displayLink.paused = NO;
   }

@@ -141,6 +141,13 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
  */
 @property (atomic, assign) BOOL animatedImagePaused;
 
+/**
+ * @abstract The runloop mode used to animte th image.
+ *
+ * @discussion Defaults to NSDefaultRunLoopMode. Another commonly used mode is NSRunLoopCommonModes.
+ */
+@property (atomic, strong) NSString *animatedImageRunLoopMode;
+
 @end
 
 
