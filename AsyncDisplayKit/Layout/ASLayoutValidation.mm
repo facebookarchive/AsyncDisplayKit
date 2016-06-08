@@ -17,6 +17,15 @@
 
 #import <queue>
 
+#pragma mark - Layout Validation
+
+void ASLayoutableValidateLayout(ASLayout *layout) {
+    ASLayoutableValidation *validation = [[ASLayoutableValidation alloc] init];
+    [validation registerValidator:[[ASLayoutableStaticValidator alloc] init]];
+    [validation registerValidator:[[ASLayoutableStackValidator alloc] init]];
+    [validation validateLayout:layout];
+}
+
 #pragma mark - Helpers
 
 static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, Class cl) {

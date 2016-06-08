@@ -9,10 +9,16 @@
  */
 
 #import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class ASLayout;
+
+// Enable or disable automatic layout validation
+#define LAYOUT_VALIDATION 0
+
+extern void ASLayoutableValidateLayout(ASLayout *layout);
 
 #pragma mark - ASLayoutableValidator
 
@@ -45,6 +51,9 @@ typedef void (^ASLayoutableBlockValidatorBlock)(id layout);
 
 @end
 
+/*
+ * Not in use at the moment
+ */
 @interface ASLayoutablePreferredSizeValidator : NSObject<ASLayoutableValidator>
 
 @end

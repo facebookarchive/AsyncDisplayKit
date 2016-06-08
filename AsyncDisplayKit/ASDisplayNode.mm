@@ -26,11 +26,11 @@
 #import "ASEqualityHelpers.h"
 #import "ASRunLoopQueue.h"
 #import "ASEnvironmentInternal.h"
-#import "ASLayoutValidation.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutSpec.h"
+#import "ASLayoutValidation.h"
 #import "ASCellNode.h"
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
@@ -854,17 +854,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self _completeLayoutCalculation];
   _pendingLayoutTransition = nil;
 }
-
-#pragma mark - Layout Validation
-
-- (void)validateLayout:(ASLayout *)layout
-{
-  ASLayoutableValidation *validation = [[ASLayoutableValidation alloc] init];
-  [validation registerValidator:[[ASLayoutableStaticValidator alloc] init]];
-  [validation registerValidator:[[ASLayoutableStackValidator alloc] init]];
-  [validation validateLayout:layout];
-}
-
 
 #pragma mark - _ASTransitionContextCompletionDelegate
 
@@ -1920,8 +1909,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     if (isRootLayout) {
       layout.position = CGPointZero;
       layout = [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:layout.size sublayouts:@[layout]];
-#if DEBUG
-      [self validateLayout:layout];
+#if LAYOUT_VALIDATION
+      ASLayoutableValidateLayout(layout);
 #endif
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
