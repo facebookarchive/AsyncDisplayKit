@@ -122,22 +122,21 @@ extern BOOL CGPointIsNull(CGPoint point)
   queue.push({self, CGPointMake(0, 0), NO});
   
   while (!queue.empty()) {
-    Context &context = queue.front();
-    ASLayout *layout = context.layout;
+    Context context = queue.front();
     queue.pop();
 
-    if (predicateBlock(layout)) {
-      [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:layout.layoutableObject
-                                                     constrainedSizeRange:layout.constrainedSizeRange
-                                                                     size:layout.size
+    if (predicateBlock(context.layout)) {
+      [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:context.layout.layoutableObject
+                                                     constrainedSizeRange:context.layout.constrainedSizeRange
+                                                                     size:context.layout.size
                                                                  position:context.relativePosition
                                                                sublayouts:nil
                                                                 flattened:context.flattened]];
     }
     
-    for (ASLayout *sublayout in layout.sublayouts) {
+    for (ASLayout *sublayout in context.layout.sublayouts) {
       // Mark layout trees that have already been flattened for future identification of immediate sublayouts
-      BOOL flattened = context.flattened ? : layout.flattened;
+      BOOL flattened = context.flattened ? : context.layout.flattened;
       queue.push({sublayout, context.relativePosition + sublayout.position, flattened});
     }
   }
