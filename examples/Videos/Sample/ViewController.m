@@ -16,8 +16,7 @@
 //
 
 #import "ViewController.h"
-#import "ASLayoutSpec.h"
-#import "ASStaticLayoutSpec.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 @interface ViewController()<ASVideoNodeDelegate>
 @property (nonatomic, strong) ASDisplayNode *rootNode;
@@ -28,12 +27,23 @@
 
 #pragma mark - UIViewController
 
-- (void)viewWillAppear:(BOOL)animated
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-  [super viewWillAppear:animated];
+  self = [super initWithNibName:nil bundle:nil];
+  if (self) {
 
+    
+  }
+  return self;
+}
+
+- (void)viewDidLoad
+{
+  [super viewDidLoad];
+  
   // Root node for the view controller
   _rootNode = [ASDisplayNode new];
+  _rootNode.frame = self.view.bounds;
   _rootNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   
   ASVideoNode *guitarVideoNode = self.guitarVideoNode;
@@ -66,16 +76,6 @@
   };
   
   [self.view addSubnode:_rootNode];
-}
-
-- (void)viewDidLayoutSubviews
-{
-  [super viewDidLayoutSubviews];
-  
-  // After all subviews are layed out we have to measure it and move the root node to the right place
-  CGSize viewSize = self.view.bounds.size;
-  [self.rootNode measureWithSizeRange:ASSizeRangeMake(viewSize, viewSize)];
-  [self.rootNode setNeedsLayout];
 }
 
 #pragma mark - Getter / Setter
