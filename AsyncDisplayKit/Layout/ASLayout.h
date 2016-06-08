@@ -69,6 +69,13 @@ extern BOOL CGPointIsNull(CGPoint point);
 @property (nonatomic, readonly, getter=isFlattened) BOOL flattened;
 
 /**
+ * @abstract This view is invisible, and it doesn't take any space for layout purposes.
+ * Used when attached to a layout.
+ */
+@property (nonatomic, readonly, getter=isGone) BOOL gone;
+
+
+/**
  * Initializer.
  *
  * @param layoutableObject The backing ASLayoutable object.
@@ -79,12 +86,13 @@ extern BOOL CGPointIsNull(CGPoint point);
  *
  * @param sublayouts Sublayouts belong to the new layout.
  */
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
++ (instancetype)layoutWithLayoutableObject:(id <ASLayoutable>)layoutableObject
                       constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size
                                   position:(CGPoint)position
-                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
-                                 flattened:(BOOL)flattened;
+                                sublayouts:(NSArray *)sublayouts
+                                 flattened:(BOOL)flattened
+                                      gone:(BOOL)gone;
 
 /**
  * Convenience initializer that has CGPointNull position.

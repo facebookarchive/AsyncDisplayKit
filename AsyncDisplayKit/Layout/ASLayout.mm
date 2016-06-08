@@ -1,18 +1,19 @@
- /*
- *  Copyright (c) 2014-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the BSD-style license found in the
- *  LICENSE file in the root directory of this source tree. An additional grant
- *  of patent rights can be found in the PATENTS file in the same directory.
- *
- */
+/*
+*  Copyright (c) 2014-present, Facebook, Inc.
+*  All rights reserved.
+*
+*  This source code is licensed under the BSD-style license found in the
+*  LICENSE file in the root directory of this source tree. An additional grant
+*  of patent rights can be found in the PATENTS file in the same directory.
+*
+*/
 
 #import "ASLayout.h"
 #import "ASAssert.h"
 #import "ASLayoutSpecUtilities.h"
 #import "ASInternalHelpers.h"
 #import "ASDimension.h"
+#import "ASRelativeSize.h"
 #import <queue>
 
 CGPoint const CGPointNull = {NAN, NAN};
@@ -24,12 +25,13 @@ extern BOOL CGPointIsNull(CGPoint point)
 
 @implementation ASLayout
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
++ (instancetype)layoutWithLayoutableObject:(id <ASLayoutable>)layoutableObject
                       constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size
                                   position:(CGPoint)position
                                 sublayouts:(NSArray *)sublayouts
                                  flattened:(BOOL)flattened
+                                      gone:(BOOL)gone
 {
   ASDisplayNodeAssert(layoutableObject, @"layoutableObject is required.");
 #if DEBUG
@@ -37,11 +39,11 @@ extern BOOL CGPointIsNull(CGPoint point)
     ASDisplayNodeAssert(!CGPointIsNull(sublayout.position), @"Invalid position is not allowed in sublayout.");
   }
 #endif
-  
+
   ASLayout *l = [super new];
   if (l) {
     l->_layoutableObject = layoutableObject;
-    
+
     if (!isValidForLayout(size.width) || !isValidForLayout(size.height)) {
       ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutableObject);
       size = CGSizeZero;
@@ -49,9 +51,9 @@ extern BOOL CGPointIsNull(CGPoint point)
       size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
     }
     l->_constrainedSizeRange = sizeRange;
-    l->_size = size;
+    l->_size = gone ? sizeRange.min : size;
     l->_dirty = NO;
-    
+
     if (CGPointIsNull(position) == NO) {
       l->_position = CGPointMake(ASCeilPixelValue(position.x), ASCeilPixelValue(position.y));
     } else {
@@ -59,7 +61,7 @@ extern BOOL CGPointIsNull(CGPoint point)
     }
     l->_sublayouts = [sublayouts copy];
     l->_flattened = flattened;
-    
+    l->_gone = gone;
     NSMutableArray<ASLayout *> *result = [NSMutableArray array];
     for (ASLayout *sublayout in l->_sublayouts) {
       if (!sublayout.isFlattened) {
@@ -81,7 +83,8 @@ extern BOOL CGPointIsNull(CGPoint point)
                                      size:size
                                  position:CGPointNull
                                sublayouts:sublayouts
-                                flattened:NO];
+                                flattened:NO
+                                     gone:layoutableObject.flexGone];
 }
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
@@ -104,44 +107,43 @@ extern BOOL CGPointIsNull(CGPoint point)
                                      size:size
                                  position:CGPointNull
                                sublayouts:sublayouts
-                                flattened:YES];
+                                flattened:YES
+                                     gone:layoutableObject.flexGone];
 }
 
 - (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *))predicateBlock
 {
   NSMutableArray *flattenedSublayouts = [NSMutableArray array];
-  
+
   struct Context {
     ASLayout *layout;
     CGPoint absolutePosition;
     BOOL visited;
     BOOL flattened;
+    BOOL gone;
   };
-  
+
   // Queue used to keep track of sublayouts while traversing this layout in a BFS fashion.
   std::queue<Context> queue;
-  queue.push({self, CGPointMake(0, 0), NO, NO});
-  
+  queue.push({self, CGPointMake(0, 0), NO, NO, NO});
+
   while (!queue.empty()) {
     Context &context = queue.front();
     if (context.visited) {
       queue.pop();
     } else {
       context.visited = YES;
-      
+
       if (predicateBlock(context.layout)) {
-        [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:context.layout.layoutableObject
-                                                       constrainedSizeRange:context.layout.constrainedSizeRange
-                                                                       size:context.layout.size
-                                                                   position:context.absolutePosition
-                                                                 sublayouts:nil
-                                                                  flattened:context.flattened]];
+        [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:context.layout.layoutableObject constrainedSizeRange:context.layout.constrainedSizeRange size:context.layout.size
+                                                                   position:context.absolutePosition sublayouts:nil flattened:context.flattened gone:context.gone]];
       }
-      
+
       for (ASLayout *sublayout in context.layout.sublayouts) {
         // Mark layout trees that have already been flattened for future identification of immediate sublayouts
         BOOL flattened = context.flattened ? : context.layout.flattened;
-        queue.push({sublayout, context.absolutePosition + sublayout.position, NO, flattened});
+        BOOL gone = context.gone || sublayout.layoutableObject.flexGone? : context.layout.gone;
+        queue.push({sublayout, context.absolutePosition + sublayout.position, NO, flattened, gone});
       }
     }
   }
@@ -165,7 +167,7 @@ extern BOOL CGPointIsNull(CGPoint point)
     adjustedOrigin.y = 0;
   }
   subnodeFrame.origin = adjustedOrigin;
-  
+
   CGSize adjustedSize = _size;
   if (isfinite(adjustedSize.width) == NO) {
     ASDisplayNodeAssert(0, @"Layout has an invalid size");
@@ -176,7 +178,7 @@ extern BOOL CGPointIsNull(CGPoint point)
     adjustedSize.height = 0;
   }
   subnodeFrame.size = adjustedSize;
-  
+
   return subnodeFrame;
 }
 

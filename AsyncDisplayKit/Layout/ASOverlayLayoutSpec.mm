@@ -49,10 +49,6 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  if (self.flexGone)
-  {
-    return [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:constrainedSize.min];
-  }
   ASLayout *contentsLayout = [self.child measureWithSizeRange:constrainedSize];
   contentsLayout.position = CGPointZero;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithObject:contentsLayout];

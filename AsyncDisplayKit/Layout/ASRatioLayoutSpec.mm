@@ -49,10 +49,6 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  if (self.flexGone)
-  {
-    return [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:constrainedSize.min];
-  }
   std::vector<CGSize> sizeOptions;
   if (!isinf(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {

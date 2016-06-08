@@ -614,7 +614,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   ASLayout *previousLayout = _layout;
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
-  
+
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
     _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                           pendingLayout:newLayout
@@ -1897,9 +1897,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
 
-  if (self.flexGone) {
-    return [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:constrainedSize.min];
-  }
   ASDN::MutexLocker l(_propertyLock);
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
