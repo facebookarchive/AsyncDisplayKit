@@ -113,36 +113,32 @@ extern BOOL CGPointIsNull(CGPoint point)
   
   struct Context {
     ASLayout *layout;
-    CGPoint absolutePosition;
-    BOOL visited;
+    CGPoint relativePosition;
     BOOL flattened;
   };
   
   // Queue used to keep track of sublayouts while traversing this layout in a BFS fashion.
   std::queue<Context> queue;
-  queue.push({self, CGPointMake(0, 0), NO, NO});
+  queue.push({self, CGPointMake(0, 0), NO});
   
   while (!queue.empty()) {
     Context &context = queue.front();
-    if (context.visited) {
-      queue.pop();
-    } else {
-      context.visited = YES;
-      
-      if (predicateBlock(context.layout)) {
-        [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:context.layout.layoutableObject
-                                                       constrainedSizeRange:context.layout.constrainedSizeRange
-                                                                       size:context.layout.size
-                                                                   position:context.absolutePosition
-                                                                 sublayouts:nil
-                                                                  flattened:context.flattened]];
-      }
-      
-      for (ASLayout *sublayout in context.layout.sublayouts) {
-        // Mark layout trees that have already been flattened for future identification of immediate sublayouts
-        BOOL flattened = context.flattened ? : context.layout.flattened;
-        queue.push({sublayout, context.absolutePosition + sublayout.position, NO, flattened});
-      }
+    ASLayout *layout = context.layout;
+    queue.pop();
+
+    if (predicateBlock(layout)) {
+      [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:layout.layoutableObject
+                                                     constrainedSizeRange:layout.constrainedSizeRange
+                                                                     size:layout.size
+                                                                 position:context.relativePosition
+                                                               sublayouts:nil
+                                                                flattened:context.flattened]];
+    }
+    
+    for (ASLayout *sublayout in layout.sublayouts) {
+      // Mark layout trees that have already been flattened for future identification of immediate sublayouts
+      BOOL flattened = context.flattened ? : layout.flattened;
+      queue.push({sublayout, context.relativePosition + sublayout.position, flattened});
     }
   }
 
