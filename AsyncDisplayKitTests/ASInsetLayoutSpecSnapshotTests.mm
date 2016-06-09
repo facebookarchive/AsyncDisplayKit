@@ -45,12 +45,6 @@ static NSString *nameForInsets(UIEdgeInsets insets)
 
 @implementation ASInsetLayoutSpecSnapshotTests
 
-- (void)setUp
-{
-  [super setUp];
-  self.recordMode = NO;
-}
-
 - (void)testInsetsWithVariableSize
 {
   for (NSUInteger combination = 0; combination < 16; combination++) {
