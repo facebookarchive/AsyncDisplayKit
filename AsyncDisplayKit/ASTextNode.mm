@@ -260,7 +260,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // actually dealloc.
     __block ASTextKitRenderer *renderer = _renderer;
     
-    ASPerformBlockOnBackgroundThread(^{
+    ASPerformBlockOnDeallocationQueue(^{
       renderer = nil;
     });
     _renderer = nil;
