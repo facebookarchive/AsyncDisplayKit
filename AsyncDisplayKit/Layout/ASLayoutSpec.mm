@@ -185,14 +185,6 @@
   return _children;
 }
 
-- (void)setTraitCollection:(ASTraitCollection *)traitCollection
-{
-  if ([traitCollection isEqualToTraitCollection:self.traitCollection] == NO) {
-    _traitCollection = traitCollection;
-    ASEnvironmentStatePropagateDown(self, [traitCollection environmentTraitCollection]);
-  }
-}
-
 #pragma mark - ASEnvironment
 
 - (ASEnvironmentState)environmentState
