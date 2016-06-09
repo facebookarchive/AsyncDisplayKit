@@ -12,7 +12,6 @@
 
 #import "ASAssert.h"
 #import "ASDimension.h"
-#import "ASDisplayNode.h"
 #import "ASInternalHelpers.h"
 #import "ASLayoutSpecUtilities.h"
 
@@ -36,7 +35,7 @@ extern BOOL CGPointIsNull(CGPoint point)
 
 @implementation ASLayout
 
-@dynamic frame;
+@dynamic frame, type;
 
 - (instancetype)initWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                     constrainedSizeRange:(ASSizeRange)sizeRange
@@ -159,7 +158,7 @@ extern BOOL CGPointIsNull(CGPoint point)
     Context context = queue.front();
     queue.pop();
 
-    if (self != context.layout && [context.layout.layoutableObject isKindOfClass:[ASDisplayNode class]]) {
+    if (self != context.layout && context.layout.type == ASLayoutableTypeDisplayNode) {
       ASLayout *layout = [ASLayout layoutWithLayout:context.layout position:context.absolutePosition];
       layout.flattened = YES;
       [flattenedSublayouts addObject:layout];
@@ -176,6 +175,13 @@ extern BOOL CGPointIsNull(CGPoint point)
                          constrainedSizeRange:_constrainedSizeRange
                                          size:_size
                                    sublayouts:flattenedSublayouts];
+}
+
+#pragma mark - Accessors
+
+- (ASLayoutableType)type
+{
+  return _layoutableObject.layoutableType;
 }
 
 - (CGRect)frame

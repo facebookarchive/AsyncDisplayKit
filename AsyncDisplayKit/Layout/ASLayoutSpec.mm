@@ -34,7 +34,8 @@
 @implementation ASLayoutSpec
 
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
-@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition;
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
+         alignSelf, ascender, descender, sizeRange, layoutPosition, layoutableType;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
 - (instancetype)init
@@ -46,6 +47,11 @@
   _environmentState = ASEnvironmentStateMakeDefault();
   _children = [NSArray array];
   return self;
+}
+
+- (ASLayoutableType)layoutableType
+{
+  return ASLayoutableTypeLayoutSpec;
 }
 
 #pragma mark - Layout

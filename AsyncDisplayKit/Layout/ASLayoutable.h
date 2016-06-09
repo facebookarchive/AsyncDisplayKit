@@ -21,6 +21,11 @@
 @class ASLayout;
 @class ASLayoutSpec;
 
+typedef NS_ENUM(NSUInteger, ASLayoutableType) {
+  ASLayoutableTypeLayoutSpec,
+  ASLayoutableTypeDisplayNode
+};
+
 NS_ASSUME_NONNULL_BEGIN
 
 /** 
@@ -41,6 +46,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @protocol ASLayoutable <ASEnvironment, ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate, ASLayoutableExtensibility>
 
+@property (nonatomic, readonly) ASLayoutableType layoutableType;
+
 /**
  * @abstract Calculate a layout based on given size range.
  *
@@ -49,7 +56,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @return An ASLayout instance defining the layout of the receiver and its children.
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
-
 
 #pragma mark - Layout options from the Layoutable Protocols
 

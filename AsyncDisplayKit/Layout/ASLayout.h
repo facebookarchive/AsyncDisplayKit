@@ -32,6 +32,11 @@ extern BOOL CGPointIsNull(CGPoint point);
 @property (nonatomic, weak, readonly) id<ASLayoutable> layoutableObject;
 
 /**
+ * The type of ASLayoutable that created this layout
+ */
+@property (nonatomic, readonly) ASLayoutableType type;
+
+/**
  * Size of the current layout
  */
 @property (nonatomic, readonly) CGSize size;
