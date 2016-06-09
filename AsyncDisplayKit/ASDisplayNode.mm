@@ -1905,8 +1905,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
-    BOOL isRootLayout = (layout.layoutableObject != self);
-    if (isRootLayout) {
+    BOOL isFinalLayoutable = (layout.layoutableObject != self);
+    if (isFinalLayoutable) {
       layout.position = CGPointZero;
       layout = [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:layout.size sublayouts:@[layout]];
 #if LAYOUT_VALIDATION

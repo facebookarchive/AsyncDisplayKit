@@ -18,7 +18,11 @@ NS_ASSUME_NONNULL_BEGIN
 // Enable or disable automatic layout validation
 #define LAYOUT_VALIDATION 0
 
+ASDISPLAYNODE_EXTERN_C_BEGIN
+
 extern void ASLayoutableValidateLayout(ASLayout *layout);
+
+ASDISPLAYNODE_EXTERN_C_END
 
 #pragma mark - ASLayoutableValidator
 
@@ -64,7 +68,7 @@ typedef void (^ASLayoutableBlockValidatorBlock)(id layout);
 @interface ASLayoutableValidation : NSObject
 
 /// Currently registered validators
-@property (copy, nonatomic, readonly) NSMutableArray<id<ASLayoutableValidator>> *validators;
+@property (copy, nonatomic, readonly) NSArray<id<ASLayoutableValidator>> *validators;
 
 /// Start from given layout and validates each layout in the layout tree with registered validators
 - (void)validateLayout:(ASLayout *)layout;

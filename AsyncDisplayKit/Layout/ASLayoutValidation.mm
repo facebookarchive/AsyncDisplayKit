@@ -160,10 +160,11 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 #pragma mark - ASLayoutableValidation
 
 @interface ASLayoutableValidation ()
-@property (copy, nonatomic) NSMutableArray<id<ASLayoutableValidator>> *validators;
 @end
 
-@implementation ASLayoutableValidation
+@implementation ASLayoutableValidation {
+  NSMutableArray *_validators;
+}
 
 #pragma mark Lifecycle
 
@@ -178,21 +179,26 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 
 #pragma mark Validator Management
 
+- (NSArray<id<ASLayoutableValidator>> *)validators
+{
+  return [_validators copy];
+}
+
 - (void)registerValidator:(id<ASLayoutableValidator>)validator
 {
-  [self.validators addObject:validator];
+  [_validators addObject:validator];
 }
 
 - (id<ASLayoutableValidator>)registerValidatorWithBlock:(ASLayoutableBlockValidatorBlock)block
 {
   ASLayoutableBlockValidator *blockValidator = [[ASLayoutableBlockValidator alloc] initWithBlock:block];
-  [self.validators addObject:blockValidator];
+  [_validators addObject:blockValidator];
   return blockValidator;
 }
 
 - (void)unregisterValidator:(id<ASLayoutableValidator>)validator
 {
-  [self.validators removeObject:validator];
+  [_validators removeObject:validator];
 }
 
 #pragma mark Validation Process
