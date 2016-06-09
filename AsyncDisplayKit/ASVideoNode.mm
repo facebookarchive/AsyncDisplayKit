@@ -224,7 +224,7 @@ static NSString * const kStatus = @"status";
 - (void)generatePlaceholderImage
 {
   ASVideoNode * __weak weakSelf = self;
-  AVAsset * __weak asset = self.asset;
+  AVAsset *asset = self.asset;
 
   [self imageAtTime:kCMTimeZero completionHandler:^(UIImage *image) {
     ASPerformBlockOnMainThread(^{
