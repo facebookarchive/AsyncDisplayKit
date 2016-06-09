@@ -18,8 +18,7 @@
 
 CGPoint const CGPointNull = {NAN, NAN};
 
-extern BOOL CGPointIsNull(CGPoint point)
-{
+extern BOOL CGPointIsNull(CGPoint point) {
   return isnan(point.x) && isnan(point.y);
 }
 
@@ -44,14 +43,16 @@ extern BOOL CGPointIsNull(CGPoint point)
   if (l) {
     l->_layoutableObject = layoutableObject;
 
-    if (!isValidForLayout(size.width) || !isValidForLayout(size.height)) {
+    if (gone) {
+      size = sizeRange.min;
+    } else if (!isValidForLayout(size.width) || !isValidForLayout(size.height)) {
       ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutableObject);
       size = CGSizeZero;
     } else {
       size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
     }
     l->_constrainedSizeRange = sizeRange;
-    l->_size = gone ? sizeRange.min : size;
+    l->_size = size;
     l->_dirty = NO;
 
     if (CGPointIsNull(position) == NO) {
@@ -73,7 +74,7 @@ extern BOOL CGPointIsNull(CGPoint point)
   return l;
 }
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
++ (instancetype)layoutWithLayoutableObject:(id <ASLayoutable>)layoutableObject
                       constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size
                                 sublayouts:(NSArray *)sublayouts
@@ -87,7 +88,7 @@ extern BOOL CGPointIsNull(CGPoint point)
                                      gone:layoutableObject.flexGone];
 }
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
++ (instancetype)layoutWithLayoutableObject:(id <ASLayoutable>)layoutableObject
                       constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size
 {
@@ -97,7 +98,7 @@ extern BOOL CGPointIsNull(CGPoint point)
                                sublayouts:nil];
 }
 
-+ (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
++ (instancetype)flattenedLayoutWithLayoutableObject:(id <ASLayoutable>)layoutableObject
                                constrainedSizeRange:(ASSizeRange)sizeRange
                                                size:(CGSize)size
                                          sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
@@ -115,7 +116,8 @@ extern BOOL CGPointIsNull(CGPoint point)
 {
   NSMutableArray *flattenedSublayouts = [NSMutableArray array];
 
-  struct Context {
+  struct Context
+  {
     ASLayout *layout;
     CGPoint absolutePosition;
     BOOL visited;
@@ -146,8 +148,8 @@ extern BOOL CGPointIsNull(CGPoint point)
 
       for (ASLayout *sublayout in context.layout.sublayouts) {
         // Mark layout trees that have already been flattened for future identification of immediate sublayouts
-        BOOL flattened = context.flattened ? : context.layout.flattened;
-        BOOL gone = context.gone || sublayout.layoutableObject.flexGone? : context.layout.gone;
+        BOOL flattened = context.flattened ?: context.layout.flattened;
+        BOOL gone = context.gone || sublayout.layoutableObject.flexGone ?: context.layout.gone;
         queue.push({sublayout, context.absolutePosition + sublayout.position, NO, flattened, gone});
       }
     }
