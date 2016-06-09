@@ -139,7 +139,7 @@ extern BOOL CGPointIsNull(CGPoint point)
                                                        constrainedSizeRange:context.layout.constrainedSizeRange
                                                                        size:context.layout.size
                                                                    position:context.absolutePosition
-                                                                 sublayouts:nil
+                                                                 sublayouts:context.layout.sublayouts
                                                                   flattened:context.flattened
                                                                        gone:context.gone]];
       }
