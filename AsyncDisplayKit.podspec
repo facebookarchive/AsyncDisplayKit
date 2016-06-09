@@ -1,18 +1,23 @@
 Pod::Spec.new do |spec|
   spec.name         = 'AsyncDisplayKit'
-  spec.version      = '1.9.8'
+  spec.version      = '1.9.80'
   spec.license      =  { :type => 'BSD' }
   spec.homepage     = 'http://asyncdisplaykit.org'
   spec.authors      = { 'Scott Goodson' => 'scottgoodson@gmail.com', 'Ryan Nystrom' => 'rnystrom@fb.com' }
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
-  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.9.8' }
+  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => '1.9.80' }
 
   spec.documentation_url = 'http://asyncdisplaykit.org/appledoc/'
 
   spec.frameworks = 'AssetsLibrary'
   spec.weak_frameworks = 'Photos','MapKit'
   spec.requires_arc = true
-  
+
+  spec.ios.deployment_target = '7.0'
+
+  # Uncomment when fixed: issues with tvOS build for release 1.9.8
+  # spec.tvos.deployment_target = '9.0'
+
   # Subspecs
   spec.subspec 'Core' do |core|
     core.public_header_files = [
@@ -67,10 +72,5 @@ Pod::Spec.new do |spec|
        'CLANG_CXX_LANGUAGE_STANDARD' => 'c++11',
        'CLANG_CXX_LIBRARY' => 'libc++'
   }
-
-  spec.ios.deployment_target = '7.0'
-
-# Uncomment when fixed: issues with tvOS build for release 1.9.73
-# spec.tvos.deployment_target = '9.0'
 
 end
