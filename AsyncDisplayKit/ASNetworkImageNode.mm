@@ -469,9 +469,13 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
             // If the file may be an animated gif and then created an animated image.
             id<ASAnimatedImageProtocol> animatedImage = nil;
-            if (_downloaderImplementsAnimatedImage && [_URL.pathExtension isEqualToString:@"gif"]) {
+            if (_downloaderImplementsAnimatedImage) {
               NSData *data = [NSData dataWithContentsOfURL:_URL];
               animatedImage = [_downloader animatedImageWithData:data];
+
+              if ([animatedImage respondsToSelector:@selector(isDataSupported:)] && [animatedImage isDataSupported:data] == NO) {
+                animatedImage = nil;
+              }
             }
 
             if (animatedImage != nil) {

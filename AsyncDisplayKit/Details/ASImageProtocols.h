@@ -142,11 +142,20 @@ withDownloadIdentifier:(id)downloadIdentifier;
 
 @protocol ASAnimatedImageProtocol <NSObject>
 
+@optional
+
 /**
  @abstract Should be called when the objects cover image is ready.
  @param coverImageReadyCallback a block which receives the cover image.
  */
 @property (nonatomic, strong, readwrite) void (^coverImageReadyCallback)(UIImage *coverImage);
+
+/**
+ @abstract Returns whether the supplied data contains a supported animated image format.
+ @param data the data to check if contains a supported animated image.
+ */
+- (BOOL)isDataSupported:(NSData *)data;
+
 
 @required
 

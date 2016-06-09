@@ -56,6 +56,11 @@
   return self.fileReady;
 }
 
+- (BOOL)isDataSupported:(NSData *)data
+{
+  return [data pin_isGIF];
+}
+
 @end
 #endif
 
