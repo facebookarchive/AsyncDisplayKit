@@ -8,6 +8,8 @@
 
 #import "ASThread.h"
 
+extern NSString *const ASAnimatedImageDefaultRunLoopMode;
+
 @interface ASImageNode ()
 {
   ASDN::RecursiveMutex _animatedImageLock;

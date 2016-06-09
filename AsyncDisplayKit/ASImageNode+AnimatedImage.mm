@@ -18,6 +18,8 @@
 #import "ASInternalHelpers.h"
 #import "ASWeakProxy.h"
 
+NSString *const ASAnimatedImageDefaultRunLoopMode = NSDefaultRunLoopMode;
+
 @implementation ASImageNode (AnimatedImage)
 
 #pragma mark - GIF support
@@ -94,6 +96,10 @@
 - (void)setAnimatedImageRunLoopMode:(NSString *)runLoopMode
 {
   ASDN::MutexLocker l(_displayLinkLock);
+
+  if (runLoopMode == nil) {
+    runLoopMode = ASAnimatedImageDefaultRunLoopMode;
+  }
 
   if (_displayLink != nil) {
     [_displayLink removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:_animatedImageRunLoopMode];

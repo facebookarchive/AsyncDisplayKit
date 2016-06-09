@@ -105,7 +105,7 @@
   _cropRect = CGRectMake(0.5, 0.5, 0, 0);
   _cropDisplayBounds = CGRectNull;
   _placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
-  _animatedImageRunLoopMode = NSDefaultRunLoopMode;
+  _animatedImageRunLoopMode = ASAnimatedImageDefaultRunLoopMode;
   
   return self;
 }
