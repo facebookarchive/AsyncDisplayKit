@@ -389,17 +389,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
 /**
- * Provides the constrained size range for measuring the node at the index path.
- *
- * @param collectionView The sender.
- *
- * @param indexPath The index path of the node.
- *
- * @returns A constrained size range for layout the node at this index path.
- */
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
-
-/**
  * Indicator to lock the data source for data fetching in async mode.
  * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
  * due to the data access in async mode.
@@ -476,6 +465,17 @@ NS_ASSUME_NONNULL_BEGIN
  * This method is deprecated. Use @c collectionView:didEndDisplayingNode:forItemAtIndexPath: instead.
  */
 - (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Provides the constrained size range for measuring the node at the index path.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the node.
+ *
+ * @returns A constrained size range for layout the node at this index path.
+ */
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
 
