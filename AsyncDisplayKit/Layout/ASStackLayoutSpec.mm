@@ -125,7 +125,7 @@
 {
   if (self.children.count == 0) {
     return [ASLayout layoutWithLayoutableObject:self
-                           constrainedSizeRange:constrainedSize
+                     constrainedSizeRange:constrainedSize
                                            size:constrainedSize.min];
   }
   

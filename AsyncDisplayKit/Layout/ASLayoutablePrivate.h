@@ -132,6 +132,17 @@ extern void ASLayoutableClearCurrentContext();
   [self propagateUpLayoutOptionsState];\
 }\
 \
+- (BOOL)flexGone\
+{\
+  return _environmentState.layoutOptionsState.flexGone;\
+}\
+\
+- (void)setFlexGone:(BOOL)flexGone\
+{\
+  _environmentState.layoutOptionsState.flexGone = flexGone;\
+  [self propagateUpLayoutOptionsState];\
+}\
+\
 - (ASRelativeDimension)flexBasis\
 {\
   return _environmentState.layoutOptionsState.flexBasis;\

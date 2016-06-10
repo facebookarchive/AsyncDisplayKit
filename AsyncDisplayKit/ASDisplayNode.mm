@@ -62,7 +62,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @implementation ASDisplayNode
 
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
-@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition;
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, flexGone, alignSelf, ascender, descender, sizeRange, layoutPosition;
 @synthesize name = _name;
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
@@ -201,7 +201,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   BOOL instancesOverrideRespondsToSelector = ASSubclassOverridesSelector([NSObject class], self, @selector(respondsToSelector:));
   struct ASDisplayNodeFlags flags = GetASDisplayNodeFlags(self, nil);
   ASDisplayNodeMethodOverrides methodOverrides = GetASDisplayNodeMethodOverrides(self);
-  
+
   __unused Class initializeSelf = self;
 
   IMP staticInitialize = imp_implementationWithBlock(^(ASDisplayNode *node) {
@@ -267,7 +267,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
-  
+
   _environmentState = ASEnvironmentStateMakeDefault();
 }
 
@@ -356,7 +356,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertMainThread();
   // Synchronous nodes may not be able to call the hierarchy notifications, so only enforce for regular nodes.
   ASDisplayNodeAssert(_flags.synchronous || !ASInterfaceStateIncludesVisible(_interfaceState), @"Node should always be marked invisible before deallocating; interfaceState: %lu, %@", (unsigned long)_interfaceState, self);
-  
+
   self.asyncLayer.asyncDelegate = nil;
   _view.asyncdisplaykit_node = nil;
   _layer.asyncdisplaykit_node = nil;
@@ -615,7 +615,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   ASLayout *previousLayout = _layout;
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
-  
+
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
     _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                           pendingLayout:newLayout
@@ -688,7 +688,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   int32_t transitionID = [self _startNewTransition];
-  
+
   ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
     ASDisplayNodeAssert([node _hasTransitionInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
     node.hierarchyState |= ASHierarchyStateLayoutPending;
@@ -699,7 +699,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     if ([self _shouldAbortTransitionWithID:transitionID]) {
       return;
     }
-    
+
     ASLayout *newLayout;
     {
       ASLayoutableSetCurrentContext(ASLayoutableContextMake(transitionID, NO));
@@ -711,7 +711,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       if (disableImplicitHierarchyManagement) {
         self.usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
       }
-      
+
       ASLayoutableClearCurrentContext();
     }
     
@@ -736,9 +736,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         [node _completeLayoutCalculation];
         node.hierarchyState &= (~ASHierarchyStateLayoutPending);
       });
-        
+
       [self _finishOrCancelTransition];
-      
+
       if (completion) {
         completion();
       }
@@ -795,7 +795,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if ([self _hasTransitionInProgress]) {
     // Cancel transition in progress
     [self _finishOrCancelTransition];
-      
+
     // Tell subnodes to exit layout pending state and clear related properties
     ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
       node.hierarchyState &= (~ASHierarchyStateLayoutPending);
@@ -1024,7 +1024,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if ([self _hasDirtyLayout]) {
     return;
   }
-  
+
   [self invalidateCalculatedLayout];
   
   if (_supernode) {
@@ -1035,17 +1035,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [supernode setNeedsLayout];
     return;
   }
-  
+
   // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
   [self measureWithSizeRange:_layout.constrainedSizeRange];
 
   CGRect oldBounds = self.bounds;
   CGSize oldSize = oldBounds.size;
   CGSize newSize = _layout.size;
-  
+
   if (! CGSizeEqualToSize(oldSize, newSize)) {
     self.bounds = (CGRect){ oldBounds.origin, newSize };
-    
+
     // Frame's origin must be preserved. Since it is computed from bounds size, anchorPoint
     // and position (see frame setter in ASDisplayNode+UIViewBridge), position needs to be adjusted.
     CGPoint anchorPoint = self.anchorPoint;
@@ -1247,7 +1247,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   // This call will apply our .hierarchyState to the new subnode.
   // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.
   [subnode __setSupernode:self];
-  
+
   if (self.nodeLoaded) {
     // If this node has a view or layer, force the subnode to also create its view or layer and add it to the hierarchy here.
     // Otherwise there is no way for the subnode's view or layer to enter the hierarchy, except recursing down all
@@ -1293,7 +1293,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
     _subnodes = [[NSMutableArray alloc] init];
   [_subnodes insertObject:subnode atIndex:subnodeIndex];
   [subnode __setSupernode:self];
-  
+
   // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.
   if (!_flags.shouldRasterizeDescendants && [self __shouldLoadViewOrLayer]) {
     if (_layer) {
@@ -1600,7 +1600,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   if (!_flags.isInHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
     _flags.isEnteringHierarchy = YES;
     _flags.isInHierarchy = YES;
-    
+
     if (_flags.shouldRasterizeDescendants) {
       // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
       [self _recursiveWillEnterHierarchy];
@@ -1647,7 +1647,7 @@ static NSInteger incrementIfFound(NSInteger i) {
     } else {
       [self didExitHierarchy];
     }
-    
+
     _flags.isExitingHierarchy = NO;
   }
 }
@@ -1732,10 +1732,10 @@ static NSInteger incrementIfFound(NSInteger i) {
       // If a node will be removed from the supernode it should go out from the layout pending state to remove all
       // layout pending state related properties on the node
       stateToEnterOrExit |= ASHierarchyStateLayoutPending;
-      
+
       [self exitHierarchyState:stateToEnterOrExit];
     }
-    
+
     // now that we have a supernode, propagate its traits to self.
     ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
   }
@@ -1764,7 +1764,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 
   if (_pendingDisplayNodes.count == 0) {
     [self hierarchyDisplayDidFinish];
-    
+
     if (_placeholderLayer.superlayer && ![self placeholderShouldPersist]) {
       void (^cleanupBlock)() = ^{
         [_placeholderLayer removeFromSuperlayer];
@@ -1936,7 +1936,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
-    
+
   ASDN::MutexLocker l(_propertyLock);
   return _preferredFrameSize;
 }
@@ -1946,11 +1946,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   __ASDisplayNodeCheckForLayoutMethodOverrides;
 
   ASDN::MutexLocker l(_propertyLock);
-  
+
   if (_layoutSpecBlock != NULL) {
     return _layoutSpecBlock(self, constrainedSize);
   }
-  
+
   return nil;
 }
 
@@ -1976,7 +1976,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   // For now there should never be a overwrite of layoutSpecThatFits: and a layoutSpecThatFitsBlock: be provided
   ASDisplayNodeAssert(!(_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits), @"Overwriting layoutSpecThatFits: and providing a layoutSpecBlock block is currently not supported");
-  
+
   _layoutSpecBlock = layoutSpecBlock;
 }
 
@@ -2070,7 +2070,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     // same runloop.  Strategy: strong reference (might be the last!), wait one runloop, and confirm we are still outside the hierarchy (both layer-backed and view-backed).
     // TODO: This approach could be optimized by only performing the dispatch for root elements + recursively apply the interface state change. This would require a closer
     // integration with _ASDisplayLayer to ensure that the superlayer pointer has been cleared by this stage (to check if we are root or not), or a different delegate call.
-    
+
     if (ASInterfaceStateIncludesVisible(_interfaceState)) {
       dispatch_async(dispatch_get_main_queue(), ^{
         // This block intentionally retains self.
@@ -2384,7 +2384,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if ([self _hasDirtyLayout]) {
     return;
   }
-  
+
   [self __layoutSublayouts];
 }
 
