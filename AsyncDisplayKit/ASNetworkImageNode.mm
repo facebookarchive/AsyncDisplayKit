@@ -457,14 +457,31 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           } else {
             // First try to load the path directly, for efficiency assuming a developer who
             // doesn't want caching is trying to be as minimal as possible.
-            self.image = [UIImage imageWithContentsOfFile:_URL.path];
-            if (!self.image) {
+            UIImage *nonAnimatedImage = [UIImage imageWithContentsOfFile:_URL.path];
+            if (nonAnimatedImage == nil) {
               // If we couldn't find it, execute an -imageNamed:-like search so we can find resources even if the
               // extension is not provided in the path.  This allows the same path to work regardless of shouldCacheImage.
               NSString *filename = [[NSBundle mainBundle] pathForResource:_URL.path.lastPathComponent ofType:nil];
-              if (filename) {
-                self.image = [UIImage imageWithContentsOfFile:filename];
+              if (filename != nil) {
+                nonAnimatedImage = [UIImage imageWithContentsOfFile:filename];
               }
+            }
+
+            // If the file may be an animated gif and then created an animated image.
+            id<ASAnimatedImageProtocol> animatedImage = nil;
+            if (_downloaderImplementsAnimatedImage) {
+              NSData *data = [NSData dataWithContentsOfURL:_URL];
+              animatedImage = [_downloader animatedImageWithData:data];
+
+              if ([animatedImage respondsToSelector:@selector(isDataSupported:)] && [animatedImage isDataSupported:data] == NO) {
+                animatedImage = nil;
+              }
+            }
+
+            if (animatedImage != nil) {
+              self.animatedImage = animatedImage;
+            } else {
+              self.image = nonAnimatedImage;
             }
           }
 
