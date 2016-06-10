@@ -20,12 +20,6 @@ static const ASSizeRange kSize = {{320, 320}, {320, 320}};
 
 @implementation ASOverlayLayoutSpecSnapshotTests
 
-- (void)setUp
-{
-  [super setUp];
-  self.recordMode = NO;
-}
-
 - (void)testOverlay
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);

@@ -99,5 +99,6 @@ ASDISPLAYNODE_EXTERN_C_END
 - (void)didMoveToParentViewController:(UIViewController *)parent \
 { \
   [super didMoveToParentViewController:parent]; \
+  _parentManagesVisibilityDepth = NO; \
   [self visibilityDepthDidChange]; \
 }

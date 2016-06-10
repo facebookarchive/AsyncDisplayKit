@@ -16,12 +16,6 @@
 
 @implementation ASStaticLayoutSpecSnapshotTests
 
-- (void)setUp
-{
-  [super setUp];
-  self.recordMode = NO;
-}
-
 - (void)testSizingBehaviour
 {
   [self testWithSizeRange:ASSizeRangeMake(CGSizeMake(150, 200), CGSizeMake(FLT_MAX, FLT_MAX))

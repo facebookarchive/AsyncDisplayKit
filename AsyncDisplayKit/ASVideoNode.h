@@ -55,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readwrite) BOOL shouldAggressivelyRecoverFromStall;
 
 @property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
-//! Defaults to 100
+//! Defaults to 1000
 @property (nonatomic, assign) int32_t periodicTimeObserverTimescale;
 
 //! Defaults to AVLayerVideoGravityResizeAspect

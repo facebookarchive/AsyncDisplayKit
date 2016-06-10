@@ -21,12 +21,6 @@
 
 @implementation ASStackLayoutSpecSnapshotTests
 
-- (void)setUp
-{
-  [super setUp];
-  self.recordMode = NO;
-}
-
 #pragma mark - Utility methods
 
 static NSArray *defaultSubnodes()

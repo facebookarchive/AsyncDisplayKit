@@ -30,6 +30,7 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutSpec.h"
+#import "ASLayoutValidation.h"
 #import "ASCellNode.h"
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
@@ -853,7 +854,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self _completeLayoutCalculation];
   _pendingLayoutTransition = nil;
 }
-
 
 #pragma mark - _ASTransitionContextCompletionDelegate
 
@@ -1901,16 +1901,20 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
     layoutSpec.parent = self; // This causes upward propogation of any non-default layoutable values.
-    layoutSpec.traitCollection = self.asyncTraitCollection;
+    
+    // manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
+    ASEnvironmentStatePropagateDown(layoutSpec, self.environmentTraitCollection);
+    
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
-    if (layout.layoutableObject != self) {
+    BOOL isFinalLayoutable = (layout.layoutableObject != self);
+    if (isFinalLayoutable) {
       layout.position = CGPointZero;
-      layout = [ASLayout layoutWithLayoutableObject:self
-                               constrainedSizeRange:constrainedSize
-                                               size:layout.size
-                                         sublayouts:@[layout]];
+      layout = [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:layout.size sublayouts:@[layout]];
+#if LAYOUT_VALIDATION
+      ASLayoutableValidateLayout(layout);
+#endif
     }
     return [layout flattenedLayoutUsingPredicateBlock:^BOOL(ASLayout *evaluatedLayout) {
       if (self.usesImplicitHierarchyManagement) {

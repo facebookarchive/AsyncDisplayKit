@@ -20,6 +20,12 @@
 
 @implementation ASLayoutSpecSnapshotTestCase
 
+- (void)setUp
+{
+  [super setUp];
+  self.recordMode = NO;
+}
+
 - (void)testLayoutSpec:(ASLayoutSpec *)layoutSpec
              sizeRange:(ASSizeRange)sizeRange
               subnodes:(NSArray *)subnodes
