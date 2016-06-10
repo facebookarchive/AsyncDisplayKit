@@ -16,7 +16,7 @@
 {
   ASPagerFlowLayout *_flowLayout;
   ASPagerNodeProxy *_proxy;
-  __weak id <ASPagerDataSource> _pagerDataSource;
+  __weak id <ASPagerNodeDataSource> _pagerDataSource;
   BOOL _pagerDataSourceImplementsNodeBlockAtIndex;
   BOOL _pagerDataSourceImplementsConstrainedSizeForNode;
 }
@@ -25,6 +25,8 @@
 
 @implementation ASPagerNode
 @dynamic view, delegate, dataSource;
+
+#pragma mark - Lifecycle
 
 - (instancetype)init
 {
@@ -45,6 +47,8 @@
   }
   return self;
 }
+
+#pragma mark - ASDisplayNode
 
 - (void)didLoad
 {
@@ -73,6 +77,13 @@
   ASRangeTuningParameters fullPreloadParams = { .leadingBufferScreenfuls = 2.0, .trailingBufferScreenfuls = 2.0 };
   [self setTuningParameters:fullRenderParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeDisplay];
   [self setTuningParameters:fullPreloadParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeFetchData];
+}
+
+#pragma mark - Getters / Setters
+
+- (NSInteger)currentPageIndex
+{
+  return (self.view.contentOffset.x / CGRectGetWidth(self.view.bounds));
 }
 
 #pragma mark - Helpers

@@ -89,8 +89,10 @@
 /// The underlying ASCollectionView object.
 @property (nonatomic, readonly) ASCollectionView *view;
 
-/// Scroll the contents of the receiver to ensure that the page is visible.
+/// Returns the current page index
+@property (nonatomic, assign, readonly) NSInteger currentPageIndex;
+
+/// Scroll the contents of the receiver to ensure that the page is visible
 - (void)scrollToPageAtIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end
-
