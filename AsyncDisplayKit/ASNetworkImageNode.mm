@@ -278,11 +278,11 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 }
 
-/* visibilityDidChange in ASMultiplexImageNode has a very similar implementation. Changes here are likely necessary
+/* visibileStateDidChange in ASMultiplexImageNode has a very similar implementation. Changes here are likely necessary
  in ASMultiplexImageNode as well. */
-- (void)visibilityDidChange:(BOOL)isVisible
+- (void)visibleStateDidChange:(BOOL)isVisible
 {
-  [super visibilityDidChange:isVisible];
+  [super visibleStateDidChange:isVisible];
 
   if (_downloaderImplementsSetPriority) {
     _lock.lock();

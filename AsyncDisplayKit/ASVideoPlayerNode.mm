@@ -163,9 +163,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
-- (void)visibilityDidChange:(BOOL)isVisible
+- (void)visibleStateDidChange:(BOOL)isVisible
 {
-  [super visibilityDidChange:isVisible];
+  [super visibleStateDidChange:isVisible];
 
   ASDN::MutexLocker l(_videoPlayerLock);
 

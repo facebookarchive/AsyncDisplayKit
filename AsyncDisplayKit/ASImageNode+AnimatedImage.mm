@@ -158,9 +158,9 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSDefaultRunLoopMode;
   [self.animatedImage clearAnimatedImageCache];
 }
 
-- (void)visibilityDidChange:(BOOL)isVisible
+- (void)visibleStateDidChange:(BOOL)isVisible
 {
-  [super visibilityDidChange:isVisible];
+  [super visibleStateDidChange:isVisible];
   
   ASDisplayNodeAssertMainThread();
   if (isVisible) {

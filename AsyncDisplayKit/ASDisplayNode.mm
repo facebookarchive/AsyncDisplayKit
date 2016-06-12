@@ -2044,6 +2044,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertMainThread();
 }
 
+#pragma mark Hierarchy State
+
 - (void)willEnterHierarchy
 {
   ASDisplayNodeAssertMainThread();
@@ -2064,7 +2066,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (![self supportsRangeManagedInterfaceState]) {
     self.interfaceState = ASInterfaceStateNone;
   } else {
-    // This case is important when tearing down hierarchies.  We must deliver a visibilityDidChange:NO callback, as part our API guarantee that this method can be used for
+    // This case is important when tearing down hierarchies.  We must deliver a visibileStateDidChange:NO callback, as part our API guarantee that this method can be used for
     // things like data analytics about user content viewing.  We cannot call the method in the dealloc as any incidental retain operations in client code would fail.
     // Additionally, it may be that a Standard UIView which is containing us is moving between hierarchies, and we should not send the call if we will be re-added in the
     // same runloop.  Strategy: strong reference (might be the last!), wait one runloop, and confirm we are still outside the hierarchy (both layer-backed and view-backed).
@@ -2082,6 +2084,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     }
   }
 }
+
+#pragma mark Interface State
 
 - (void)clearContents
 {
@@ -2131,7 +2135,22 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)visibilityDidChange:(BOOL)isVisible
 {
-    // subclass override
+  // subclass override
+}
+
+- (void)visibleStateDidChange:(BOOL)isVisible
+{
+  // subclass override
+}
+
+- (void)displayStateDidChange:(BOOL)inDisplayState
+{
+  //subclass override
+}
+
+- (void)loadStateDidChange:(BOOL)inLoadState
+{
+  //subclass override
 }
 
 /**
@@ -2178,10 +2197,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (nowFetchData != wasFetchData) {
     if (nowFetchData) {
       [self fetchData];
+      [self loadStateDidChange:YES];
     } else {
       if ([self supportsRangeManagedInterfaceState]) {
         [self clearFetchedData];
       }
+      [self loadStateDidChange:NO];
     }
   }
 
@@ -2225,6 +2246,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
         }
       }
     }
+    
+    [self displayStateDidChange:nowDisplay];
   }
 
   // Became visible or invisible.  When range-managed, this represents literal visibility - at least one pixel
@@ -2233,14 +2256,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   BOOL wasVisible = ASInterfaceStateIncludesVisible(oldState);
 
   if (nowVisible != wasVisible) {
-    [self visibilityDidChange:nowVisible];
+    [self visibleStateDidChange:nowVisible];
+    [self visibilityDidChange:nowVisible];   //TODO: remove once this method has been deprecated
   }
-  
+
   [self interfaceStateDidChange:newState fromState:oldState];
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
 {
+  // subclass hook
 }
 
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState

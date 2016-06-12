@@ -86,6 +86,12 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @property (atomic, copy) void (^willDeallocBlock)(ASTestDisplayNode *node);
 @property (atomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
 @property (atomic) BOOL hasFetchedData;
+
+@property (atomic) BOOL displayRangeStateChangedToYES;
+@property (atomic) BOOL displayRangeStateChangedToNO;
+
+@property (atomic) BOOL loadStateChangedToYES;
+@property (atomic) BOOL loadStateChangedToNO;
 @end
 
 @interface ASTestResponderNode : ASTestDisplayNode
@@ -108,6 +114,28 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 {
   [super clearFetchedData];
   self.hasFetchedData = NO;
+}
+
+- (void)displayStateDidChange:(BOOL)inDisplayState
+{
+  [super displayStateDidChange:inDisplayState];
+  
+  if (inDisplayState) {
+    self.displayRangeStateChangedToYES = YES;
+  } else {
+    self.displayRangeStateChangedToNO = YES;
+  }
+}
+
+- (void)loadStateDidChange:(BOOL)inLoadState
+{
+  [super loadStateDidChange:inLoadState];
+  
+  if (inLoadState) {
+    self.loadStateChangedToYES = YES;
+  } else {
+    self.loadStateChangedToNO = YES;
+  }
 }
 
 - (void)dealloc
@@ -1876,6 +1904,44 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   XCTAssert(node.bounds.origin.y == 2, @"Wrong ASDisplayNode.bounds.origin.y");
   XCTAssert(node.bounds.size.width == 7, @"Wrong ASDisplayNode.bounds.size.width");
   XCTAssert(node.bounds.size.height == 8, @"Wrong ASDisplayNode.bounds.size.height");
+}
+
+- (void)testDidEnterDisplayIsCalledWhenNodesEnterDisplayRange
+{
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+
+  [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
+  
+  XCTAssert([node displayRangeStateChangedToYES]);
+}
+
+- (void)testDidExitDisplayIsCalledWhenNodesExitDisplayRange
+{
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  
+  [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
+  [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
+  
+  XCTAssert([node displayRangeStateChangedToNO]);
+}
+
+- (void)testDidEnterFetchDataIsCalledWhenNodesEnterFetchDataRange
+{
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  
+  [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
+  
+  XCTAssert([node loadStateChangedToYES]);
+}
+
+- (void)testDidExitFetchDataIsCalledWhenNodesExitFetchDataRange
+{
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  
+  [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
+  [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
+
+  XCTAssert([node loadStateChangedToNO]);
 }
 
 @end
