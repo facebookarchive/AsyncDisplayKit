@@ -51,6 +51,7 @@ if [ "$MODE" = "examples" ]; then
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
+              -derivedDataPath ~/ \
               build | xcpretty $FORMATTER
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
