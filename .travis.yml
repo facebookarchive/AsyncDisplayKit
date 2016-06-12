@@ -9,7 +9,7 @@ before_install:
   - brew update
   - brew outdated xctool || brew upgrade xctool
   - brew outdated carthage || brew upgrade carthage
-  - gem install cocoapods -v 0.38.2
+  - gem install cocoapods -v 1.0.1
   - gem install xcpretty
   - gem install xcpretty-travis-formatter
 #  - gem install slather
