@@ -406,6 +406,19 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView;
 
+/**
+ * DEPRECATED: Use the method on the ASCollectionDelegate instead.
+ * Provides the constrained size range for measuring the node at the index path.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the node.
+ *
+ * @returns A constrained size range for layout the node at this index path.
+ */
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+
+
 @end
 
 

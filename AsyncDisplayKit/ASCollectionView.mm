@@ -150,6 +150,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     unsigned int asyncDataSourceNumberOfSectionsInCollectionView:1;
     unsigned int asyncDataSourceCollectionViewLockDataSource:1;
     unsigned int asyncDataSourceCollectionViewUnlockDataSource:1;
+    unsigned int asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath:1;
   } _asyncDataSourceFlags;
 }
 
@@ -368,6 +369,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInCollectionView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
     _asyncDataSourceFlags.asyncDataSourceCollectionViewLockDataSource = [_asyncDataSource respondsToSelector:@selector(collectionViewLockDataSource:)];
     _asyncDataSourceFlags.asyncDataSourceCollectionViewUnlockDataSource = [_asyncDataSource respondsToSelector:@selector(collectionViewUnlockDataSource:)];
+    _asyncDataSourceFlags.asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
 
     // Data-source must implement collectionView:nodeForItemAtIndexPath: or collectionView:nodeBlockForItemAtIndexPath:
     ASDisplayNodeAssertTrue(_asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath || _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath);
@@ -402,7 +404,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDelegateFlags.asyncDelegateShouldBatchFetchForCollectionView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)];
     _asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)];
     _asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)];
-    _asyncDelegateFlags.asyncDelegateCollectionViewConstrainedSizeForNodeAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];;
+    _asyncDelegateFlags.asyncDelegateCollectionViewConstrainedSizeForNodeAtIndexPath = [_asyncDelegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];;
   }
 
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
@@ -902,6 +904,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   // implement a custom inspector.
   if (_asyncDelegateFlags.asyncDelegateCollectionViewConstrainedSizeForNodeAtIndexPath) {
     constrainedSize = [_asyncDelegate collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
+  } else if (_asyncDataSourceFlags.asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath) {
+    constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
   } else {
     CGSize maxSize = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero) ? self.bounds.size : _maxSizeForNodesConstrainedSize;
     if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
