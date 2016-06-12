@@ -67,7 +67,7 @@
   }
   if (_previousLayout) {
     NSIndexSet *insertions, *deletions;
-    [_previousLayout.immediateSublayouts asdk_diffWithArray:_pendingLayout.immediateSublayouts
+    [_previousLayout.sublayouts asdk_diffWithArray:_pendingLayout.sublayouts
                                                  insertions:&insertions
                                                   deletions:&deletions
                                                compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
@@ -80,7 +80,7 @@
                                                       &_removedSubnodes,
                                                       &_removedSubnodePositions);
   } else {
-    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_pendingLayout.immediateSublayouts count])];
+    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_pendingLayout.sublayouts count])];
     findNodesInLayoutAtIndexes(_pendingLayout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
     _removedSubnodes = nil;
   }
@@ -160,7 +160,7 @@ static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
   std::vector<NSUInteger> positions = std::vector<NSUInteger>();
   NSUInteger idx = [indexes firstIndex];
   while (idx != NSNotFound) {
-    ASDisplayNode *node = (ASDisplayNode *)layout.immediateSublayouts[idx].layoutableObject;
+    ASDisplayNode *node = (ASDisplayNode *)layout.sublayouts[idx].layoutableObject;
     ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
     // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
     if (node != nil) {

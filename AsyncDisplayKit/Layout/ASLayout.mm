@@ -9,10 +9,12 @@
  */
 
 #import "ASLayout.h"
+
 #import "ASAssert.h"
-#import "ASLayoutSpecUtilities.h"
-#import "ASInternalHelpers.h"
 #import "ASDimension.h"
+#import "ASInternalHelpers.h"
+#import "ASLayoutSpecUtilities.h"
+
 #import <queue>
 
 CGPoint const CGPointNull = {NAN, NAN};
@@ -22,25 +24,35 @@ extern BOOL CGPointIsNull(CGPoint point)
   return isnan(point.x) && isnan(point.y);
 }
 
+@interface ASLayout ()
+
+/**
+ * A boolean describing if the current layout has been flattened.
+ */
+@property (nonatomic, getter=isFlattened) BOOL flattened;
+
+@end
+
 @implementation ASLayout
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                      constrainedSizeRange:(ASSizeRange)sizeRange
-                                      size:(CGSize)size
-                                  position:(CGPoint)position
-                                sublayouts:(NSArray *)sublayouts
-                                 flattened:(BOOL)flattened
+@dynamic frame, type;
+
+- (instancetype)initWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                    constrainedSizeRange:(ASSizeRange)sizeRange
+                                    size:(CGSize)size
+                                position:(CGPoint)position
+                              sublayouts:(NSArray *)sublayouts
 {
-  ASDisplayNodeAssert(layoutableObject, @"layoutableObject is required.");
+  self = [super init];
+  if (self) {
+    NSParameterAssert(layoutableObject);
 #if DEBUG
-  for (ASLayout *sublayout in sublayouts) {
-    ASDisplayNodeAssert(!CGPointIsNull(sublayout.position), @"Invalid position is not allowed in sublayout.");
-  }
+    for (ASLayout *sublayout in sublayouts) {
+      ASDisplayNodeAssert(CGPointIsNull(sublayout.position) == NO, @"Invalid position is not allowed in sublayout.");
+    }
 #endif
-  
-  ASLayout *l = [super new];
-  if (l) {
-    l->_layoutableObject = layoutableObject;
+    
+    _layoutableObject = layoutableObject;
     
     if (!isValidForLayout(size.width) || !isValidForLayout(size.height)) {
       ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutableObject);
@@ -48,27 +60,40 @@ extern BOOL CGPointIsNull(CGPoint point)
     } else {
       size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
     }
-    l->_constrainedSizeRange = sizeRange;
-    l->_size = size;
-    l->_dirty = NO;
+    _constrainedSizeRange = sizeRange;
+    _size = size;
+    _dirty = NO;
     
     if (CGPointIsNull(position) == NO) {
-      l->_position = CGPointMake(ASCeilPixelValue(position.x), ASCeilPixelValue(position.y));
+      _position = CGPointMake(ASCeilPixelValue(position.x), ASCeilPixelValue(position.y));
     } else {
-      l->_position = position;
+      _position = position;
     }
-    l->_sublayouts = [sublayouts copy];
-    l->_flattened = flattened;
-    
-    NSMutableArray<ASLayout *> *result = [NSMutableArray array];
-    for (ASLayout *sublayout in l->_sublayouts) {
-      if (!sublayout.isFlattened) {
-        [result addObject:sublayout];
-      }
-    }
-    l->_immediateSublayouts = result;
+    _sublayouts = sublayouts != nil ? [sublayouts copy] : @[];
+    _flattened = NO;
   }
-  return l;
+  return self;
+}
+
+- (instancetype)init
+{
+  ASDisplayNodeAssert(NO, @"Use the designated initializer");
+  return [self init];
+}
+
+#pragma mark - Class Constructors
+
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
+                      constrainedSizeRange:(ASSizeRange)sizeRange
+                                      size:(CGSize)size
+                                  position:(CGPoint)position
+                                sublayouts:(NSArray *)sublayouts
+{
+  return [[self alloc] initWithLayoutableObject:layoutableObject
+                           constrainedSizeRange:sizeRange
+                                           size:size
+                                       position:position
+                                     sublayouts:sublayouts];
 }
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
@@ -80,8 +105,7 @@ extern BOOL CGPointIsNull(CGPoint point)
                      constrainedSizeRange:sizeRange
                                      size:size
                                  position:CGPointNull
-                               sublayouts:sublayouts
-                                flattened:NO];
+                               sublayouts:sublayouts];
 }
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
@@ -103,53 +127,61 @@ extern BOOL CGPointIsNull(CGPoint point)
                      constrainedSizeRange:sizeRange
                                      size:size
                                  position:CGPointNull
-                               sublayouts:sublayouts
-                                flattened:YES];
+                               sublayouts:sublayouts];
 }
 
-- (ASLayout *)flattenedLayoutUsingPredicateBlock:(BOOL (^)(ASLayout *))predicateBlock
++ (instancetype)layoutWithLayout:(ASLayout *)layout position:(CGPoint)position
+{
+  return [self layoutWithLayoutableObject:layout.layoutableObject
+                     constrainedSizeRange:layout.constrainedSizeRange
+                                     size:layout.size
+                                 position:position
+                               sublayouts:layout.sublayouts];
+}
+
+#pragma mark - Layout Flattening
+
+- (ASLayout *)filteredNodeLayoutTree
 {
   NSMutableArray *flattenedSublayouts = [NSMutableArray array];
   
   struct Context {
     ASLayout *layout;
     CGPoint absolutePosition;
-    BOOL visited;
-    BOOL flattened;
   };
   
   // Queue used to keep track of sublayouts while traversing this layout in a BFS fashion.
   std::queue<Context> queue;
-  queue.push({self, CGPointMake(0, 0), NO, NO});
+  queue.push({self, CGPointMake(0, 0)});
   
   while (!queue.empty()) {
-    Context &context = queue.front();
-    if (context.visited) {
-      queue.pop();
-    } else {
-      context.visited = YES;
-      
-      if (predicateBlock(context.layout)) {
-        [flattenedSublayouts addObject:[ASLayout layoutWithLayoutableObject:context.layout.layoutableObject
-                                                       constrainedSizeRange:context.layout.constrainedSizeRange
-                                                                       size:context.layout.size
-                                                                   position:context.absolutePosition
-                                                                 sublayouts:nil
-                                                                  flattened:context.flattened]];
-      }
-      
-      for (ASLayout *sublayout in context.layout.sublayouts) {
-        // Mark layout trees that have already been flattened for future identification of immediate sublayouts
-        BOOL flattened = context.flattened ? : context.layout.flattened;
-        queue.push({sublayout, context.absolutePosition + sublayout.position, NO, flattened});
+    Context context = queue.front();
+    queue.pop();
+
+    if (self != context.layout && context.layout.type == ASLayoutableTypeDisplayNode) {
+      ASLayout *layout = [ASLayout layoutWithLayout:context.layout position:context.absolutePosition];
+      layout.flattened = YES;
+      [flattenedSublayouts addObject:layout];
+    }
+    
+    for (ASLayout *sublayout in context.layout.sublayouts) {
+      if (sublayout.isFlattened == NO) {
+        queue.push({sublayout, context.absolutePosition + sublayout.position});
       }
     }
   }
 
-  return [ASLayout flattenedLayoutWithLayoutableObject:_layoutableObject
-                                  constrainedSizeRange:_constrainedSizeRange
-                                                  size:_size
-                                            sublayouts:flattenedSublayouts];
+  return [ASLayout layoutWithLayoutableObject:_layoutableObject
+                         constrainedSizeRange:_constrainedSizeRange
+                                         size:_size
+                                   sublayouts:flattenedSublayouts];
+}
+
+#pragma mark - Accessors
+
+- (ASLayoutableType)type
+{
+  return _layoutableObject.layoutableType;
 }
 
 - (CGRect)frame
