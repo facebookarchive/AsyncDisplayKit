@@ -681,6 +681,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
                                  inScrollView:scrollView
                                 withCellFrame:tableCell.frame];
   }
+
+  [self _checkForBatchFetching];
+
   if (_asyncDelegateFlags.asyncDelegateScrollViewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
   }
