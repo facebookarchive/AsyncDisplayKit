@@ -45,7 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
  * setChild:forIdentifier: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
  * property that behind the scenes is calling setChild:forIdentifier:.
  */
-- (void)setChild:(id<ASLayoutable>)child;
+@property (nullable, strong, nonatomic) id<ASLayoutable> child;
 
 /**
  * Adds a child with the given identifier to this layout spec.
@@ -77,21 +77,7 @@ NS_ASSUME_NONNULL_BEGIN
  * For good measure, in these layout specs it probably makes sense to define
  * setChild: and setChild:forIdentifier: methods to do something appropriate or to assert.
  */
-- (void)setChildren:(NSArray<id<ASLayoutable>> *)children;
-
-/**
- * Get child methods
- *
- * There is a corresponding "getChild" method for the above "setChild" methods.  If a subclass
- * has extra layoutable children, it is recommended to make a corresponding get method for that
- * child. For example, the ASBackgroundLayoutSpec responds to backgroundChild.
- * 
- * If a get method is called on a spec that doesn't make sense, then the standard is to assert.
- * For example, calling children on an ASInsetLayoutSpec will assert.
- */
-
-/** Returns the child added to this layout spec using the default identifier. */
-- (nullable id<ASLayoutable>)child;
+@property (nullable, strong, nonatomic) NSArray<id<ASLayoutable>> *children;
 
 /**
  * Returns the child added to this layout spec using the given identifier.
@@ -99,11 +85,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @param identifier An identifier associated withe the child.
  */
 - (nullable id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
-
-/**
- * Returns all children added to this layout spec.
- */
-- (nullable NSArray<id<ASLayoutable>> *)children;
 
 @end
 
