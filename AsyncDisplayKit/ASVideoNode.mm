@@ -120,11 +120,16 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(_videoLock);
 
+  AVPlayerItem *playerItem = nil;
   if (_asset != nil) {
-    return [[AVPlayerItem alloc] initWithAsset:_asset];
+    if ([_asset isKindOfClass:[AVURLAsset class]] && _asset.tracks.count == 0) {
+      playerItem = [[AVPlayerItem alloc] initWithURL:((AVURLAsset *)_asset).URL];
+    } else {
+      playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
+    }
   }
 
-  return nil;
+  return playerItem;
 }
 
 - (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray<NSString *> *)requestedKeys
