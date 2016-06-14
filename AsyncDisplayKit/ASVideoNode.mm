@@ -126,14 +126,25 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(__instanceLock__);
 
+  AVPlayerItem *playerItem = nil;
   if (_asset != nil) {
-    AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
-    playerItem.videoComposition = _videoComposition;
-    playerItem.audioMix = _audioMix;
-    return playerItem;
+    if ([_asset isKindOfClass:[AVURLAsset class]] && [self hasURLAsset]) {
+      playerItem = [[AVPlayerItem alloc] initWithURL:((AVURLAsset *)_asset).URL];
+      _asset = [playerItem asset];
+    } else {
+      playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
+    }
   }
 
-  return nil;
+  playerItem.videoComposition = _videoComposition;
+  playerItem.audioMix = _audioMix;
+  return playerItem;
+}
+
+- (BOOL)hasURLAsset
+{
+  // The array of AVAssetTrack objects available via the tracks property of an URL asset is typically empty for streaming-based media
+  return _asset.tracks.count == 0;
 }
 
 - (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray<NSString *> *)requestedKeys
