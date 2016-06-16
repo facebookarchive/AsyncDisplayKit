@@ -2,7 +2,8 @@
 title: ASCollectionNode
 layout: docs
 permalink: /docs/containers-ascollectionnode.html
-next: containers-aspagernode.html
+prevPage: containers-astablenode.html
+nextPage: containers-aspagernode.html
 ---
 
 ASCollectionNode is equivalent to UIKit's UICollectionView and can be used in place of any UICollectionView. 

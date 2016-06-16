@@ -2,7 +2,8 @@
 title: Hit Test Visualization
 layout: docs
 permalink: /docs/debug-tool-hit-test-visualization.html
-next: debug-tool-pixel-scaling.html
+prevPage: placeholder-fade-duration.html
+nextPage: debug-tool-pixel-scaling.html
 ---
 
 ##Visualize ASControlNode Tappable Areas##

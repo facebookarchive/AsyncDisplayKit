@@ -2,7 +2,8 @@
 title: Layer Backing
 layout: docs
 permalink: /docs/layer-backing.html
-next: synchronous-concurrency.html
+prevPage: layout-options.html
+nextPage: synchronous-concurrency.html
 ---
 
 Layer-backing. In some cases, you can substantially improve your app's performance by using layers instead of views. Manually converting view-based code to layers is laborious due to the difference in APIs. Worse, if at some point you need to enable touch handling or other view-specific functionality, you have to manually convert everything back (and risk regressions!).

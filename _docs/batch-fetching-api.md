@@ -2,7 +2,8 @@
 title: Batch Fetching API
 layout: docs
 permalink: /docs/batch-fetching-api.html
-next: image-modification-block.html
+prevPage: hit-test-slop.html
+nextPage: image-modification-block.html
 ---
 
 AsyncDisplayKit's Batch Fetching API makes it easy for developers to add fetching of new data in chunks. In case the user scrolled to a specific range of a table or collection view the automatic batch fetching mechanism of ASDK kicks in.

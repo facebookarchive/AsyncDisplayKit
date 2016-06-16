@@ -2,7 +2,8 @@
 title: ASNetworkImageNode
 layout: docs
 permalink: /docs/network-image-node.html
-next: multiplex-image-node.html
+prevPage: image-node.html
+nextPage: multiplex-image-node.html
 ---
 
 ASNetworkImageNode can be used any time you need to display an image that is being hosted remotely.  All you have to do is set the .URL property with the appropriate NSURL instance and the image will be asynchonously loaded and concurrently rendered for you.

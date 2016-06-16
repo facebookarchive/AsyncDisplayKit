@@ -2,7 +2,8 @@
 title: Philosophy
 layout: docs
 permalink: /docs/philosophy.html
-next: installation.html
+prevPage: getting-started.html
+nextPage: installation.html
 ---
 
 #Asynchronous Performance Gains

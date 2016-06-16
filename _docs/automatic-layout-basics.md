@@ -2,7 +2,8 @@
 title: Layout Basics
 layout: docs
 permalink: /docs/automatic-layout-basics.html
-next: automatic-layout-containers.html
+prevPage: scroll-node.html
+nextPage: automatic-layout-containers.html
 ---
 
 ##Box Model Layout

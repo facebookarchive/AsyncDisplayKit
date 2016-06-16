@@ -2,7 +2,8 @@
 title: Layout Containers
 layout: docs
 permalink: /docs/automatic-layout-containers.html
-next: automatic-layout-examples.html
+prevPage: automatic-layout-basics.html
+nextPage: automatic-layout-examples.html 
 ---
 
 AsyncDisplayKit includes a library of components that can be composed to declaratively specify a layout. The following LayoutSpecs allow you to have multiple children:

@@ -2,7 +2,8 @@
 title: ASPagerNode
 layout: docs
 permalink: /docs/containers-aspagernode.html
-next: display-node.html
+prevPage: containers-ascollectionnode.html
+nextPage: display-node.html
 ---
 
 `ASPagerNode` is a subclass of `ASCollectionNode` with a specific UICollectionViewLayout used under the hood. 

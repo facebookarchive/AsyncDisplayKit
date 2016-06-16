@@ -2,7 +2,8 @@
 title: Layout Engine 
 layout: docs
 permalink: /docs/layout-engine.html
-next: containers-overview.html
+prevPage: subclassing.html
+nextPage: containers-overview.html
 ---
 
 AsyncDisplayKit's layout engine is based on the CSS Box Model.  While it is the feature of the framework that bears the weakest resemblance to the UIKit equivalent (AutoLayout), it is also among the most useful features once you've gotten used to it.  With enough practice, you may just come to prefer creating declarative layouts to the constraint based approach. ;]

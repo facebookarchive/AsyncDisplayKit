@@ -2,7 +2,7 @@
 title: Layout Transition API
 layout: docs
 permalink: /docs/layout-transition-api.html
-next: layout-transition-api.html
+prevPage: implicit-hierarchy-mgmt.html
 ---
 ###Overview
 <a href="https://github.com/facebook/AsyncDisplayKit/pulls?utf8=%E2%9C%93&q=is%3Apr+author%3Alevi+">@levi</a> designed this API to make all animations with AsyncDisplayKit easy - even transforming an entire set of views into a completely different set of views!

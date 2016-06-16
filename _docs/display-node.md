@@ -2,7 +2,8 @@
 title: ASDisplayNode
 layout: docs
 permalink: /docs/display-node.html
-next: cell-node.html
+prevPage: containers-aspagernode.html
+nextPage: cell-node.html
 ---
 
 ### Node Basics

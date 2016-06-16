@@ -2,7 +2,8 @@
 title: ASVideoNode
 layout: docs
 permalink: /docs/video-node.html
-next: scroll-node.html
+prevPage: map-node.html
+nextPage: scroll-node.html
 ---
 
 `ASVideoNode` is a newer class that exposes a relatively full-featured API, and is designed for both efficient and convenient implementation of embedded videos in scrolling views.

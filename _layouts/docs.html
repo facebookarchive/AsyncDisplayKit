@@ -17,16 +17,16 @@ sectionid: docs
 
     {{ content }}
 
-<!--    <div class="docs-prevnext">-->
-<!--      {% if page.prev %}-->
-<!--        <a href="/docs/{{ page.prev }}">&larr; Prev</a>-->
-<!--      {% endif %}-->
-<!--      {% if page.next %}-->
-<!--        <a class="right" href="/docs/{{ page.next }}">Next &rarr;</a>-->
-<!--      {% endif %}-->
-<!--    </div>-->
-<!---->
-<!--    <a id="_"></a>-->
+    <div class="docs-prevnext">
+      {% if page.prevPage %}
+        <a href="/docs/{{ page.prevPage }}">&larr; Prev</a>
+      {% endif %}
+      {% if page.nextPage %}
+        <a class="right" href="/docs/{{ page.nextPage }}">Next &rarr;</a>
+      {% endif %}
+    </div>
+
+    <a id="_"></a>
 </article>
 
 </div></section>
