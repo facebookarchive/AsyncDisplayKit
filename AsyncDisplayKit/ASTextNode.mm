@@ -236,6 +236,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (ASTextKitAttributes)_rendererAttributes
 {
+  std::lock_guard<std::recursive_mutex> l(_textLock);
+  
   return {
     .attributedString = _attributedText,
     .truncationAttributedString = _composedTruncationText,
