@@ -619,7 +619,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
     if (_activeHighlightLayer) {
       if (animated) {
-        __unsafe_unretained CALayer *weakHighlightLayer = _activeHighlightLayer;
+        __weak CALayer *weakHighlightLayer = _activeHighlightLayer;
         _activeHighlightLayer = nil;
 
         weakHighlightLayer.opacity = 0.0;
