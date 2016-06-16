@@ -120,6 +120,19 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   CGPoint _deceleratingVelocity;
   
+#if !AS_AT_LEAST_IOS9
+  /**
+   A strong reference to the underlying layer.
+   
+   In iOS < 9, ASCollectionView may be leaked even though its node,
+   its layer, its owning VC, everything else is deallocated. This shouldn't
+   be possible because UIView should retain its layer. However, it happens and it puts
+   the collection view into an extremely dangerous state with a dangling layer pointer
+   and crashes are inevitable.
+   */
+  CALayer *_retainedLayer;
+#endif
+  
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
    
@@ -237,6 +250,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   _asyncDataFetchingEnabled = NO;
   _asyncDataSourceLocked = NO;
+  
+#if !AS_AT_LEAST_IOS9
+  _retainedLayer = self.layer;
+#endif
   
   _performingBatchUpdates = NO;
   _batchUpdateBlocks = [NSMutableArray array];
