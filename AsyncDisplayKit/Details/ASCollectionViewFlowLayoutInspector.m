@@ -8,29 +8,72 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <UIKit/UIKit.h>
-
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASCollectionView.h"
 #import "ASAssert.h"
 #import "ASEqualityHelpers.h"
 
+#define kDefaultItemSize CGSizeMake(50, 50)
+
+#pragma mark - ASCollectionViewNullLayoutInspector
+
+@implementation ASCollectionViewNullLayoutInspector
+
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssert(NO, @"To support a custom collection view layout in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
+  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+}
+
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
+  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+}
+
+- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind
+{
+  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
+  return 0;
+}
+
+- (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
+{
+  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
+  return 0;
+}
+
+@end
+
+
+#pragma mark - ASCollectionViewFlowLayoutInspector
+
+@interface ASCollectionViewFlowLayoutInspector ()
+@property (nonatomic, weak) UICollectionViewFlowLayout *layout;
+@end
+ 
 @implementation ASCollectionViewFlowLayoutInspector {
-  BOOL _delegateImplementsReferenceSizeForHeader;
-  BOOL _delegateImplementsReferenceSizeForFooter;
+  struct {
+    unsigned int implementsReferenceSizeForHeader:1;
+    unsigned int implementsReferenceSizeForFooter:1;
+  } _delegateFlags;
+  
+  struct {
+    unsigned int implementsConstrainedSizeForNodeAtIndexPath:1;
+    unsigned int implementsNumberOfSectionsInCollectionView:1;
+  } _dataSourceFlags;
 }
 
 #pragma mark - Accessors
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout;
 {
+  NSParameterAssert(collectionView);
+  NSParameterAssert(flowLayout);
+  
   self = [super init];
-
-  if (flowLayout == nil) {
-    ASDisplayNodeAssert(NO, @"Should never create a layout inspector without a layout");
-  }
-
   if (self != nil) {
+    [self didChangeCollectionViewDataSource:collectionView.asyncDataSource];
     [self didChangeCollectionViewDelegate:collectionView.asyncDelegate];
     _layout = flowLayout;
   }
@@ -40,11 +83,20 @@
 - (void)didChangeCollectionViewDelegate:(id<ASCollectionDelegate>)delegate;
 {
   if (delegate == nil) {
-    _delegateImplementsReferenceSizeForHeader = NO;
-    _delegateImplementsReferenceSizeForFooter = NO;
+    memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
-    _delegateImplementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
-    _delegateImplementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
+    _delegateFlags.implementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
+    _delegateFlags.implementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
+  }
+}
+
+- (void)didChangeCollectionViewDataSource:(id<ASCollectionDataSource>)dataSource
+{
+  if (dataSource == nil) {
+    memset(&_dataSourceFlags, 0, sizeof(_dataSourceFlags));
+  } else {
+    _dataSourceFlags.implementsConstrainedSizeForNodeAtIndexPath = [dataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
+    _dataSourceFlags.implementsNumberOfSectionsInCollectionView = [dataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
   }
 }
 
@@ -52,8 +104,25 @@
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  // TODO: Provide constrained size for flow layout item nodes
-  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+  // First check if delegate provides a constrained size
+  if (_dataSourceFlags.implementsConstrainedSizeForNodeAtIndexPath) {
+    return [collectionView.asyncDataSource collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+  }
+  
+  // Check if item size as constrained size is given
+  CGSize itemSize = _layout.itemSize;
+  if (!CGSizeEqualToSize(itemSize, kDefaultItemSize)) {
+    return ASSizeRangeMake(itemSize, itemSize);
+  }
+  
+  // No constrained size is given try to let the cells layout itself as far as possible based on the scrollable direction
+  CGSize maxSize = collectionView.bounds.size;
+  if (ASScrollDirectionContainsHorizontalDirection([collectionView scrollableDirections])) {
+    maxSize.width = FLT_MAX;
+  } else {
+    maxSize.height = FLT_MAX;
+  }
+  return ASSizeRangeMake(CGSizeZero, maxSize);
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -61,16 +130,16 @@
   CGSize constrainedSize;
   CGSize supplementarySize = [self sizeForSupplementaryViewOfKind:kind inSection:indexPath.section collectionView:collectionView];
   if (_layout.scrollDirection == UICollectionViewScrollDirectionVertical) {
-    constrainedSize = CGSizeMake(collectionView.bounds.size.width, supplementarySize.height);
+    constrainedSize = CGSizeMake(CGRectGetWidth(collectionView.bounds), supplementarySize.height);
   } else {
-    constrainedSize = CGSizeMake(supplementarySize.height, collectionView.bounds.size.height);
+    constrainedSize = CGSizeMake(supplementarySize.height, CGRectGetHeight(collectionView.bounds));
   }
   return ASSizeRangeMake(CGSizeZero, constrainedSize);
 }
 
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind
 {
-  if ([collectionView.asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)]) {
+  if (_dataSourceFlags.implementsNumberOfSectionsInCollectionView) {
     return [collectionView.asyncDataSource numberOfSectionsInCollectionView:collectionView];
   } else {
     return 1;
@@ -87,13 +156,13 @@
 - (CGSize)sizeForSupplementaryViewOfKind:(NSString *)kind inSection:(NSUInteger)section collectionView:(ASCollectionView *)collectionView
 {
   if (ASObjectIsEqual(kind, UICollectionElementKindSectionHeader)) {
-    if (_delegateImplementsReferenceSizeForHeader) {
+    if (_delegateFlags.implementsReferenceSizeForHeader) {
       return [[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForHeaderInSection:section];
     } else {
       return [self.layout headerReferenceSize];
     }
   } else if (ASObjectIsEqual(kind, UICollectionElementKindSectionFooter)) {
-    if (_delegateImplementsReferenceSizeForFooter) {
+    if (_delegateFlags.implementsReferenceSizeForFooter) {
       return [[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForFooterInSection:section];
     } else {
       return [self.layout footerReferenceSize];

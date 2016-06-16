@@ -14,12 +14,15 @@
 #import <AsyncDisplayKit/ASDimension.h>
 
 @class ASCollectionView;
+@protocol ASCollectionDataSource;
 @protocol ASCollectionDelegate;
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASCollectionViewLayoutInspecting <NSObject>
 
 /**
- * Provides the size range needed to measure the collection view's item.
+ * Asks the inspector to provide a constarained size range for the given collection view node.
  */
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 
@@ -47,12 +50,32 @@
  */
 - (void)didChangeCollectionViewDelegate:(id<ASCollectionDelegate>)delegate;
 
+/**
+ * Allow the inspector to respond to dataSource changes.
+ *
+ * @discussion A great time to update perform selector caches!
+ */
+- (void)didChangeCollectionViewDataSource:(id<ASCollectionDataSource>)dataSource;
+
 @end
 
+/**
+ * Simple "Null Object" inspector for non-flow layouts that does throws exceptions if methods are called
+ * from <ASCollectionViewLayoutInspecting>
+ */
+@interface ASCollectionViewNullLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
+
+@end
+
+/**
+ * A layout inspector implementation specific for the sizing behavior of UICollectionViewFlowLayouts
+ */
 @interface ASCollectionViewFlowLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
 
-@property (nonatomic, weak) UICollectionViewFlowLayout *layout;
+@property (nonatomic, weak, readonly) UICollectionViewFlowLayout *layout;
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout;
 
 @end
+
+NS_ASSUME_NONNULL_END
