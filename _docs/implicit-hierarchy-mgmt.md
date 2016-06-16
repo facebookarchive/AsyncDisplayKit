@@ -2,7 +2,8 @@
 title: Implicit Hierarchy Management
 layout: docs
 permalink: /docs/implicit-hierarchy-mgmt.html
-next: debug-hit-test.html
+prevPage: debug-tool-pixel-scaling.html
+nextPage: debug-hit-test.html
 ---
 
 This feature was initially a result of building the AsyncDisplayKit Layout Transition API. However, even apps using AsyncDisplayKit that don't require animations can still benefit from the reduction in code size that this feature enables.

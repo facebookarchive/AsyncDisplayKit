@@ -2,7 +2,8 @@
 title: Hit Test Slop
 layout: docs
 permalink: /docs/hit-test-slop.html
-next: batch-fetching-api.html
+prevPage: drawing-priority.html
+nextPage: batch-fetching-api.html
 ---
 
 `ASDisplayNode` has a `hitTestSlop` property of type `UIEdgeInsets` that when set to a non-zero inset, increase the bounds for hit testing to make it easier to tap or perform gestures on this node. 

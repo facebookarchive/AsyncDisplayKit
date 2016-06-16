@@ -2,7 +2,8 @@
 title: ASTextCellNode
 layout: docs
 permalink: /docs/text-cell-node.html
-next: control-node.html
+prevPage: cell-node.html
+nextPage: control-node.html
 ---
 
 ASTextCellNode is a simple ASCellNode subclass you can use when all you need is a cell with styled text. 

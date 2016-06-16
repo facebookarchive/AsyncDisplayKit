@@ -2,7 +2,8 @@
 title: ASEditableTextNode
 layout: docs
 permalink: /docs/editable-text-node.html
-next: image-node.html
+prevPage: text-node.html
+nextPage: image-node.html
 ---
 
 `ASEditableTextNode` provides a flexible, efficient, and animation-friendly editable text component. 

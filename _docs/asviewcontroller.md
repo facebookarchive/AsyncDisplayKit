@@ -2,7 +2,8 @@
 title: ASViewController
 layout: docs
 permalink: /docs/asviewcontroller.html
-next: aspagernode.html
+prevPage: 
+nextPage: aspagernode.html
 ---
 
 ASViewController is a direct subclass of UIViewController.  For the most part, it can be used in place of any UIViewController relatively easily.  

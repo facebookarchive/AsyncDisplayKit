@@ -2,7 +2,8 @@
 title: Intelligent Preloading 
 layout: docs
 permalink: /docs/intelligent-preloading.html
-next: subclassing.html
+prevPage: installation.html
+nextPage: subclassing.html
 ---
 
 While a node's ability to be rendered and measured asynchronously makes it quite powerful, another crucially important layer to ASDK is the idea of intelligent preloading.

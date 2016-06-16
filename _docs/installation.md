@@ -2,7 +2,8 @@
 title: Installation
 layout: docs
 permalink: /docs/installation.html
-next: intelligent-preloading.html
+prevPage: philosophy.html
+nextPage: intelligent-preloading.html
 ---
 
 ### CocoaPods

@@ -2,7 +2,8 @@
 title: ASTableNode
 layout: docs
 permalink: /docs/containers-astablenode.html
-next: containers-ascollectionnode.html
+prevPage: containers-asviewcontroller.html
+nextPage: containers-ascollectionnode.html
 ---
 
 ASTableNode is equivalent to UIKit's UITableView and can be used in place of any UITableView. 

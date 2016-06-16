@@ -2,7 +2,8 @@
 title: Synchronous Concurrency
 layout: docs
 permalink: /docs/synchronous-concurrency.html
-next: subtree-rasterization.html
+prevPage: layer-backing.html
+nextPage: subtree-rasterization.html
 ---
 
 Both `ASViewController` and `ASCellNode` have a property called `neverShowPlaceholders`.  

@@ -2,7 +2,8 @@
 title: ASControlNode
 layout: docs
 permalink: /docs/control-node.html
-next: button-node.html
+prevPage: text-cell-node.html
+nextPage: button-node.html
 ---
 
 ASControlNode is the ASDK equivalent to UIControl.  You don't create instances of ASControlNode directly.  Instead, you can use it as a subclassing point when creating controls of your own.  In fact, <a href = "/docs/text-node.html">ASTextNode</a>, <a href = "/docs/image-node.html">ASImageNode</a>, <href = "#">ASVideoNode</a> and <a href = "/docs/video-node.html">ASMapNode</a> are all subclasses of ASControlNode.

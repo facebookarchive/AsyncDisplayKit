@@ -2,7 +2,7 @@
 title: Getting Started
 layout: docs
 permalink: /docs/getting-started.html
-next: philosophy.html
+nextPage: philosophy.html
 ---
 
 AsyncDisplayKit's basic unit is the `node`.  ASDisplayNode is an abstraction
