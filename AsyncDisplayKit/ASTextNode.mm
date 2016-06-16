@@ -68,6 +68,7 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   NSString *_highlightedLinkAttributeName;
   id _highlightedLinkAttributeValue;
+  ASTextNodeHighlightStyle _highlightStyle;
   NSRange _highlightRange;
   ASHighlightOverlayLayer *_activeHighlightLayer;
 
@@ -195,7 +196,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   // If we are view-backed and the delegate cares, support the long-press callback.
   SEL longPressCallback = @selector(textNode:longPressedLinkAttribute:value:atPoint:textRange:);
-  if (!self.isLayerBacked && [self.delegate respondsToSelector:longPressCallback]) {
+  if (!self.isLayerBacked && [_delegate respondsToSelector:longPressCallback]) {
     _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(_handleLongPress:)];
     _longPressGestureRecognizer.cancelsTouchesInView = self.longPressCancelsTouches;
     _longPressGestureRecognizer.delegate = self;
@@ -258,7 +259,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 - (void)_invalidateRendererIfNeededForBoundsSize:(CGSize)boundsSize
 {
   if ([self _needInvalidateRendererForBoundsSize:boundsSize]) {
-    // Our bounds of frame have changed to a size that is not identical to our constraining size,
+    // Our bounds have changed to a size that is not identical to our constraining size,
     // so our previous layout information is invalid, and TextKit may draw at the
     // incorrect origin.
     {
@@ -489,6 +490,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 {
   ASDisplayNodeAssertMainThread();
   
+  std::lock_guard<std::recursive_mutex> l(_textLock);
+  
   ASTextKitRenderer *renderer = [self _renderer];
   NSRange visibleRange = renderer.firstVisibleRange;
   NSAttributedString *attributedString = _attributedText;
@@ -590,8 +593,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     }
 
     // Ask our delegate if a long-press on an attribute is relevant
-    if ([self.delegate respondsToSelector:@selector(textNode:shouldLongPressLinkAttribute:value:atPoint:)]) {
-      return [self.delegate textNode:self
+    if ([_delegate respondsToSelector:@selector(textNode:shouldLongPressLinkAttribute:value:atPoint:)]) {
+      return [_delegate textNode:self
         shouldLongPressLinkAttribute:_highlightedLinkAttributeName
                                value:_highlightedLinkAttributeValue
                              atPoint:[gestureRecognizer locationInView:self.view]];
@@ -612,6 +615,20 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Highlighting
 
+- (ASTextNodeHighlightStyle)highlightStyle
+{
+  std::lock_guard<std::recursive_mutex> l(_textLock);
+  
+  return _highlightStyle;
+}
+
+- (void)setHighlightStyle:(ASTextNodeHighlightStyle)highlightStyle
+{
+  std::lock_guard<std::recursive_mutex> l(_textLock);
+  
+  _highlightStyle = highlightStyle;
+}
+
 - (NSRange)highlightRange
 {
   ASDisplayNodeAssertMainThread();
@@ -626,8 +643,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)setHighlightRange:(NSRange)highlightRange animated:(BOOL)animated
 {
-  ASDisplayNodeAssertMainThread();
-  
   [self _setHighlightRange:highlightRange forAttributeName:nil value:nil animated:animated];
 }
 
@@ -885,6 +900,9 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
   ASDisplayNodeAssertMainThread();
+  
+  std::lock_guard<std::recursive_mutex> l(_textLock);
+  
   [super touchesBegan:touches withEvent:event];
 
   CGPoint point = [[touches anyObject] locationInView:self.view];
@@ -903,8 +921,7 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
   BOOL linkCrossesVisibleRange = (lastCharIndex > range.location) && (lastCharIndex < NSMaxRange(range) - 1);
 
   if (inAdditionalTruncationMessage) {
-    ASTextKitRenderer *renderer = [self _renderer];
-    NSRange visibleRange = renderer.firstVisibleRange;
+    NSRange visibleRange = [self _renderer].firstVisibleRange;
     NSRange truncationMessageRange = [self _additionalTruncationMessageRangeWithVisibleRange:visibleRange];
     [self _setHighlightRange:truncationMessageRange forAttributeName:ASTextNodeTruncationTokenAttributeName value:nil animated:YES];
   } else if (range.length && !linkCrossesVisibleRange && linkAttributeValue != nil && linkAttributeName != nil) {
@@ -972,9 +989,9 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
   
   // Respond to long-press when it begins, not when it ends.
   if (longPressRecognizer.state == UIGestureRecognizerStateBegan) {
-    if ([self.delegate respondsToSelector:@selector(textNode:longPressedLinkAttribute:value:atPoint:textRange:)]) {
+    if ([_delegate respondsToSelector:@selector(textNode:longPressedLinkAttribute:value:atPoint:textRange:)]) {
       CGPoint touchPoint = [_longPressGestureRecognizer locationInView:self.view];
-      [self.delegate textNode:self longPressedLinkAttribute:_highlightedLinkAttributeName value:_highlightedLinkAttributeValue atPoint:touchPoint textRange:_highlightRange];
+      [_delegate textNode:self longPressedLinkAttribute:_highlightedLinkAttributeName value:_highlightedLinkAttributeValue atPoint:touchPoint textRange:_highlightRange];
     }
   }
 }
