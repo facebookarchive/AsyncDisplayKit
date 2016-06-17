@@ -531,7 +531,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   BOOL shouldReleaseImageOnBackgroundThread = imageSize.width > kMinReleaseImageOnBackgroundSize.width ||
   imageSize.height > kMinReleaseImageOnBackgroundSize.height;
   if (shouldReleaseImageOnBackgroundThread) {
-    ASPerformBlockOnBackgroundThread(^{
+    ASPerformBlockOnDeallocationQueue(^{
       image = nil;
     });
   }

@@ -52,6 +52,17 @@ void ASPerformBlockOnBackgroundThread(void (^block)())
   }
 }
 
+void ASPerformBlockOnDeallocationQueue(void (^block)())
+{
+  static dispatch_queue_t queue;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    queue = dispatch_queue_create("org.AsyncDisplayKit.deallocationQueue", DISPATCH_QUEUE_SERIAL);
+  });
+  
+  dispatch_async(queue, block);
+}
+
 CGFloat ASScreenScale()
 {
   static CGFloat __scale = 0.0;
