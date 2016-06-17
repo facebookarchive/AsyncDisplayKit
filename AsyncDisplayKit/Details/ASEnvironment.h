@@ -159,13 +159,13 @@ ASDISPLAYNODE_EXTERN_C_END
   [super setEnvironmentState:environmentState];\
   ASEnvironmentTraitCollection currentTraits = environmentState.environmentTraitCollection;\
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
-    dispatch_async(dispatch_get_main_queue(), ^{\
+    /* Must dispatch to main for self.view && [self.view.dataController completedNodes]*/ \
+    ASPerformBlockOnMainThread(^{\
       BOOL needsLayout = (oldTraits.displayContext == currentTraits.displayContext) || currentTraits.displayContext != nil;\
       NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
       for (NSArray *sectionArray in completedNodes) {\
         for (ASCellNode *cellNode in sectionArray) {\
           ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
-          [cellNode setNeedsLayout];\
           if (needsLayout) {\
             [cellNode setNeedsLayout];\
           }\
