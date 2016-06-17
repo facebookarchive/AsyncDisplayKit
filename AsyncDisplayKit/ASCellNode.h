@@ -99,6 +99,8 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesCancelled:(nullable NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
+- (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes;
+
 /**
  * @abstract Initializes a cell with a given view controller block.
  *
