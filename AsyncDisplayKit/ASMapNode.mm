@@ -24,7 +24,7 @@
   MKMapSnapshotter *_snapshotter;
   BOOL _snapshotAfterLayout;
   NSArray *_annotations;
-  CLLocationCoordinate2D _centerCoordinateOfMap;
+//  CLLocationCoordinate2D _centerCoordinateOfMap;
 }
 @end
 
@@ -46,7 +46,7 @@
   
   _needsMapReloadOnBoundsChange = YES;
   _liveMap = NO;
-  _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
+//  _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
   _annotations = @[];
   return self;
 }
@@ -55,7 +55,6 @@
 {
   [super didLoad];
   if (self.isLiveMap) {
-    self.userInteractionEnabled = YES;
     [self addLiveMap];
   }
 }
@@ -161,7 +160,18 @@
 
 - (void)setRegion:(MKCoordinateRegion)region
 {
-  self.options.region = region;
+  MKMapSnapshotOptions * __weak oldOptions = self.options;
+  MKMapSnapshotOptions * options = [[MKMapSnapshotOptions alloc] init];
+  options.camera = oldOptions.camera;
+  options.mapRect = oldOptions.mapRect;
+  options.mapType = oldOptions.mapType;
+  options.showsPointsOfInterest = oldOptions.showsPointsOfInterest;
+  options.showsBuildings = oldOptions.showsBuildings;
+  options.size = oldOptions.size;
+  options.scale = oldOptions.scale;
+  options.region = region;
+  self.options = options;
+//  self.options.region = region;
 }
 
 #pragma mark - Snapshotter
@@ -257,6 +267,7 @@
 - (void)addLiveMap
 {
   ASDisplayNodeAssertMainThread();
+  self.userInteractionEnabled = YES;
   if (!_mapView) {
     __weak ASMapNode *weakSelf = self;
     _mapView = [[MKMapView alloc] initWithFrame:CGRectZero];
@@ -266,16 +277,17 @@
     [weakSelf setNeedsLayout];
     [weakSelf.view addSubview:_mapView];
     
-    if (CLLocationCoordinate2DIsValid(_centerCoordinateOfMap)) {
-      [_mapView setCenterCoordinate:_centerCoordinateOfMap];
-    }
+//    if (CLLocationCoordinate2DIsValid(_centerCoordinateOfMap)) {
+//      [_mapView setCenterCoordinate:_centerCoordinateOfMap];
+//    }
   }
 }
 
 - (void)removeLiveMap
 {
+  self.userInteractionEnabled = false;
   // FIXME: With MKCoordinateRegion, isn't the center coordinate fully specified?  Do we need this?
-  _centerCoordinateOfMap = _mapView.centerCoordinate;
+//  _centerCoordinateOfMap = _mapView.centerCoordinate;
   [_mapView removeFromSuperview];
   _mapView = nil;
 }

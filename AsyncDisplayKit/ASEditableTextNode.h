@@ -164,7 +164,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)editableTextNodeDidUpdateText:(ASEditableTextNode *)editableTextNode;
 
 /**
-  @abstract Indicates to the delegate that teh text node has finished editing.
+  @abstract Indicates to the delegate that the text node has finished editing.
   @param editableTextNode An editable text node.
   @discussion The invocation of this method coincides with the keyboard animating to become hidden.
  */
