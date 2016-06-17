@@ -28,6 +28,7 @@
 
 #import <CoreFoundation/CoreFoundation.h>
 
+static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 //#define LOG(...) NSLog(__VA_ARGS__)
@@ -132,6 +133,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   struct {
     unsigned int asyncDataSourceNumberOfSectionsInTableView:1;
     unsigned int asyncDataSourceTableViewNodeBlockForRowAtIndexPath:1;
+    unsigned int asyncDataSourceTableViewConstrainedSizeForRowAtIndexPath:1;
     unsigned int asyncDataSourceTableViewNodeForRowAtIndexPath:1;
     unsigned int asyncDataSourceTableViewLockDataSource:1;
     unsigned int asyncDataSourceTableViewUnlockDataSource:1;
@@ -290,6 +292,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInTableView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableView:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeForRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)];
+    _asyncDataSourceFlags.asyncDataSourceTableViewConstrainedSizeForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:constrainedSizeForRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewLockDataSource = [_asyncDataSource respondsToSelector:@selector(tableViewLockDataSource:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewUnlockDataSource = [_asyncDataSource respondsToSelector:@selector(tableViewUnlockDataSource:)];
     
@@ -1079,8 +1082,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0),
-                         CGSizeMake(_nodesConstrainedWidth, FLT_MAX));
+  ASSizeRange constrainedSize = kInvalidSizeRange;
+  if (_asyncDataSourceFlags.asyncDataSourceTableViewConstrainedSizeForRowAtIndexPath) {
+    ASSizeRange dataSourceConstrainedSize = [_asyncDataSource tableView:self constrainedSizeForRowAtIndexPath:indexPath];
+    // ignore widths in the returned size range (for TableView)
+    constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, dataSourceConstrainedSize.min.height),
+                                      CGSizeMake(_nodesConstrainedWidth, dataSourceConstrainedSize.max.height));
+  } else {
+    constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0),
+                                      CGSizeMake(_nodesConstrainedWidth, FLT_MAX));
+  }
+  return constrainedSize;
 }
 
 - (void)dataControllerLockDataSource

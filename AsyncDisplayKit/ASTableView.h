@@ -358,6 +358,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
+ * Similar to -tableView:heightForRowAtIndexPath:
+ * Provides the constrained size range for measuring the row at the index path.
+ * Note: the widths in the returned size range are ignored!
+ * @param tableView The sender.
+ *
+ * @param indexPath The index path of the node.
+ *
+ * @returns A constrained size range for layout the node at this index path.
+ */
+- (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
  * Indicator to lock the data source for data fetching in async mode.
  * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
  * due to the data access in async mode.
