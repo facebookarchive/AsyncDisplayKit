@@ -1515,40 +1515,35 @@ static NSInteger incrementIfFound(NSInteger i) {
   [subnode __setSupernode:nil];
 }
 
+// NOTE: You must not called this method while holding the receiver's property lock. This may cause deadlocks.
 - (void)removeFromSupernode
 {
-  ASDisplayNodeAssertThreadAffinity(self);
-  BOOL shouldRemoveFromSuperviewOrSuperlayer = NO;
+  _propertyLock.lock();
+    __weak ASDisplayNode *supernode = _supernode;
+    __weak UIView *view = _view;
+    __weak CALayer *layer = _layer;
+    BOOL layerBacked = _flags.layerBacked;
+  _propertyLock.unlock();
   
-  {
-    ASDN::MutexLocker l(_propertyLock);
-    if (!_supernode)
-      return;
+  if (supernode == nil) {
+    return;
+  }
 
+  [supernode _removeSubnode:self];
+
+  if (self.nodeLoaded && supernode.nodeLoaded) {
     // Check to ensure that our view or layer is actually inside of our supernode; otherwise, don't remove it.
     // Though _ASDisplayView decouples the supernode if it is inserted inside another view hierarchy, this is
     // more difficult to guarantee with _ASDisplayLayer because CoreAnimation doesn't have a -didMoveToSuperlayer.
-    
-    if (self.nodeLoaded && _supernode.nodeLoaded) {
-      if (_flags.layerBacked || _supernode.layerBacked) {
-        shouldRemoveFromSuperviewOrSuperlayer = (_layer.superlayer == _supernode.layer);
-      } else {
-        shouldRemoveFromSuperviewOrSuperlayer = (_view.superview == _supernode.view);
-      }
-    }
-  }
-  
-  // Do this before removing the view from the hierarchy, as the node will clear its supernode pointer when its view is removed from the hierarchy.
-  // This call may result in the object being destroyed.
-  [_supernode _removeSubnode:self];
-
-  if (shouldRemoveFromSuperviewOrSuperlayer) {
     ASPerformBlockOnMainThread(^{
-      ASDN::MutexLocker l(_propertyLock);
-      if (_flags.layerBacked) {
-        [_layer removeFromSuperlayer];
+      if (layerBacked || supernode.layerBacked) {
+        if (layer.superlayer == supernode.layer) {
+          [layer removeFromSuperlayer];
+        }
       } else {
-        [_view removeFromSuperview];
+        if (view.superview == supernode.view) {
+          [view removeFromSuperview];
+        }
       }
     });
   }
