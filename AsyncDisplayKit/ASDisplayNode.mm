@@ -1518,6 +1518,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 // NOTE: You must not called this method while holding the receiver's property lock. This may cause deadlocks.
 - (void)removeFromSupernode
 {
+  ASDisplayNodeAssertThreadAffinity(self);
   _propertyLock.lock();
     __weak ASDisplayNode *supernode = _supernode;
     __weak UIView *view = _view;
