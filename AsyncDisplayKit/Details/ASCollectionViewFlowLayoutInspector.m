@@ -15,14 +15,57 @@
 
 #define kDefaultItemSize CGSizeMake(50, 50)
 
-#pragma mark - ASCollectionViewNullLayoutInspector
+#pragma mark - Helper Functions
 
-@implementation ASCollectionViewNullLayoutInspector
+// Returns a constrained size to let the cells layout itself as far as possible based on the scrollable direction
+// of the collection view
+static ASSizeRange ASDefaultConstrainedSizeForNodeForCollectionView(ASCollectionView *collectionView) {
+  CGSize maxSize = collectionView.bounds.size;
+  if (ASScrollDirectionContainsHorizontalDirection(collectionView.scrollableDirections)) {
+    maxSize.width = FLT_MAX;
+  } else {
+    maxSize.height = FLT_MAX;
+  }
+  return ASSizeRangeMake(CGSizeZero, maxSize);
+}
+
+#pragma mark - ASCollectionViewDefaultCustomLayoutInspector
+
+@implementation ASCollectionViewDefaultCustomLayoutInspector {
+  struct {
+    unsigned int implementsConstrainedSizeForNodeAtIndexPath:1;
+  } _dataSourceFlags;
+}
+
+#pragma mark Lifecycle
+
+- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView
+{
+  self = [super init];
+  if (self != nil) {
+    [self didChangeCollectionViewDataSource:collectionView.asyncDataSource];
+  }
+  return self;
+}
+
+#pragma mark ASCollectionViewLayoutInspecting
+
+- (void)didChangeCollectionViewDataSource:(id<ASCollectionDataSource>)dataSource
+{
+  if (dataSource == nil) {
+    memset(&_dataSourceFlags, 0, sizeof(_dataSourceFlags));
+  } else {
+    _dataSourceFlags.implementsConstrainedSizeForNodeAtIndexPath = [dataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
+  }
+}
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayNodeAssert(NO, @"To support a custom collection view layout in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
-  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+  if (_dataSourceFlags.implementsConstrainedSizeForNodeAtIndexPath) {
+    return [collectionView.asyncDataSource collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+  }
+  
+  return ASDefaultConstrainedSizeForNodeForCollectionView(collectionView);
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -64,7 +107,7 @@
   } _dataSourceFlags;
 }
 
-#pragma mark - Accessors
+#pragma mark Lifecycle
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout;
 {
@@ -79,6 +122,8 @@
   }
   return self;
 }
+
+#pragma mark ASCollectionViewLayoutInspecting
 
 - (void)didChangeCollectionViewDelegate:(id<ASCollectionDelegate>)delegate;
 {
@@ -100,29 +145,18 @@
   }
 }
 
-#pragma mark - ASCollectionViewLayoutInspecting
-
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  // First check if delegate provides a constrained size
   if (_dataSourceFlags.implementsConstrainedSizeForNodeAtIndexPath) {
     return [collectionView.asyncDataSource collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
   }
   
-  // Check if item size as constrained size is given
   CGSize itemSize = _layout.itemSize;
   if (!CGSizeEqualToSize(itemSize, kDefaultItemSize)) {
     return ASSizeRangeMake(itemSize, itemSize);
   }
   
-  // No constrained size is given try to let the cells layout itself as far as possible based on the scrollable direction
-  CGSize maxSize = collectionView.bounds.size;
-  if (ASScrollDirectionContainsHorizontalDirection([collectionView scrollableDirections])) {
-    maxSize.width = FLT_MAX;
-  } else {
-    maxSize.height = FLT_MAX;
-  }
-  return ASSizeRangeMake(CGSizeZero, maxSize);
+  return ASDefaultConstrainedSizeForNodeForCollectionView(collectionView);
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath

@@ -60,10 +60,14 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /**
- * Simple "Null Object" inspector for non-flow layouts that does throws exceptions if methods are called
- * from <ASCollectionViewLayoutInspecting>
+ * A layout inspector for non-flow layouts that returns a constrained size to let the cells layout itself as
+ * far as possible based on the scrollable direction of the collection view. It throws exceptions for delegate
+ * methods that are related to supplementary node's management.
  */
-@interface ASCollectionViewNullLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
+@interface ASCollectionViewDefaultCustomLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
+
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView NS_DESIGNATED_INITIALIZER;
 
 @end
 
@@ -74,7 +78,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, weak, readonly) UICollectionViewFlowLayout *layout;
 
-- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout;
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout NS_DESIGNATED_INITIALIZER;
 
 @end
 

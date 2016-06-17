@@ -124,14 +124,12 @@
   XCTAssert([collectionView.layoutInspector isKindOfClass:[ASCollectionViewFlowLayoutInspector class]], @"should have a flow layout inspector by default");
 }
 
-- (void)testThatItDoesNotSetALayoutInspectorForCustomLayouts
+- (void)testThatISetALayoutInspectorForCustomLayouts
 {
   UICollectionViewLayout *layout = [[UICollectionViewLayout alloc] init];
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
-  XCTAssert(collectionView.layoutInspector != nil, @"should automatically set a layout delegate for custom layouts");
-  XCTAssert([collectionView.layoutInspector isKindOfClass:[ASCollectionViewNullLayoutInspector class]], @"should have a null layout inspector by default if no layout inspector is given for a custom layout");
-  XCTAssertThrows([collectionView.layoutInspector collectionView:collectionView constrainedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], @"should throw an exception for <ASCollectionViewLayoutInspecting> methods");
-  XCTAssertThrows([collectionView.layoutInspector collectionView:collectionView supplementaryNodesOfKind:UICollectionElementKindSectionHeader inSection:0], @"should throw an exception for <ASCollectionViewLayoutInspecting> methods");
+  XCTAssert(collectionView.layoutInspector != nil, @"should automatically set a layout delegate for flow layouts");
+  XCTAssert([collectionView.layoutInspector isKindOfClass:[ASCollectionViewDefaultCustomLayoutInspector class]], @"should have a flow layout inspector by default");
 }
 
 - (void)testThatRegisteringASupplementaryNodeStoresItForIntrospection

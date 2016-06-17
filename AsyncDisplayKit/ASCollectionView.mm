@@ -254,7 +254,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     // Custom layouts will need to roll their own ASCollectionViewLayoutInspecting implementation and set a layout
     // delegate. In the meantime ASDK provides a null layout inspector that does not provide any implementation
     // and throws an exception for methods that should be implemented in the <ASCollectionViewLayoutInspecting>
-    _defaultLayoutInspector = [[ASCollectionViewNullLayoutInspector alloc] init];
+    _defaultLayoutInspector = [[ASCollectionViewDefaultCustomLayoutInspector alloc] initWithCollectionView:self];
   }
   _layoutInspector = _defaultLayoutInspector;
   
