@@ -2089,7 +2089,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)clearContents
 {
   // No-op if these haven't been created yet, as that guarantees they don't have contents that needs to be released.
-  _layer.contents = nil;
+  if ([_layer isKindOfClass:[_ASDisplayLayer class]]) {
+    _layer.contents = nil;
+  }
   _placeholderLayer.contents = nil;
   _placeholderImage = nil;
 }
