@@ -774,36 +774,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
-- (void)prepareForInsertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
-}
-
-- (void)willInsertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
-}
-
-- (void)prepareForDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
-}
-
-- (void)willDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
-}
-
-- (void)prepareForReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
-}
-
-- (void)willReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
-}
-
 #pragma mark - Row Editing (External API)
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
@@ -831,11 +801,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
                                                  environmentTraitCollection:environmentTraitCollection]];
       }
 
-      [self prepareForInsertRowsAtIndexPaths:indexPaths];
-
       [_editingTransactionQueue addOperationWithBlock:^{
-        [self willInsertRowsAtIndexPaths:indexPaths];
-
         LOG(@"Edit Transaction - insertRows: %@", indexPaths);
         [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
       }];
@@ -855,11 +821,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     // FIXME: Shouldn't deletes be sorted in descending order?
     NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
 
-    [self prepareForDeleteRowsAtIndexPaths:sortedIndexPaths];
-
     [_editingTransactionQueue addOperationWithBlock:^{
-      [self willDeleteRowsAtIndexPaths:sortedIndexPaths];
-
       LOG(@"Edit Transaction - deleteRows: %@", indexPaths);
       [self _deleteNodesAtIndexPaths:sortedIndexPaths withAnimationOptions:animationOptions];
     }];
@@ -893,12 +855,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
                                                             constrainedSize:constrainedSize
                                                  environmentTraitCollection:environmentTraitCollection]];
       }
-
-      [self prepareForReloadRowsAtIndexPaths:indexPaths];
       
       [_editingTransactionQueue addOperationWithBlock:^{
-        [self willReloadRowsAtIndexPaths:indexPaths];
-
         LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
         [self _deleteNodesAtIndexPaths:sortedIndexPaths withAnimationOptions:animationOptions];
         [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
