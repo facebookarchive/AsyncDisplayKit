@@ -358,9 +358,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
- * Similar to -tableView:heightForRowAtIndexPath:
  * Provides the constrained size range for measuring the row at the index path.
  * Note: the widths in the returned size range are ignored!
+ * 
  * @param tableView The sender.
  *
  * @param indexPath The index path of the node.
