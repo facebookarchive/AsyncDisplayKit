@@ -63,6 +63,16 @@ struct ASImageNodeDrawParameters {
 
 #pragma mark - NSObject
 
++ (void)initialize
+{
+  [super initialize];
+  
+  if (self != [ASImageNode class]) {
+    // Prevent custom drawing in subclasses
+    ASDisplayNodeAssert(!ASSubclassOverridesClassSelector([ASImageNode class], self, @selector(displayWithParameters:isCancelled:)), @"Subclass %@ must not override displayWithParameters:isCancelled: method. Custom drawing in %@ subclass is not supported.", NSStringFromClass(self), NSStringFromClass([ASImageNode class]));
+  }
+}
+
 - (instancetype)init
 {
   if (!(self = [super init]))

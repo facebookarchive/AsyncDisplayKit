@@ -71,6 +71,16 @@ struct ASTextNodeDrawParameter {
 
 #pragma mark - NSObject
 
++ (void)initialize
+{
+  [super initialize];
+  
+  if (self != [ASTextNode class]) {
+    // Prevent custom drawing in subclasses
+    ASDisplayNodeAssert(!ASSubclassOverridesClassSelector([ASTextNode class], self, @selector(drawRect:withParameters:isCancelled:isRasterizing:)), @"Subclass %@ must not override drawRect:withParameters:isCancelled:isRasterizing: method. Custom drawing in %@ subclass is not supported.", NSStringFromClass(self), NSStringFromClass([ASTextNode class]));
+  }
+}
+
 static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (instancetype)init
