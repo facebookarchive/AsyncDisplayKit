@@ -1791,7 +1791,26 @@ static NSInteger incrementIfFound(NSInteger i) {
 // Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay
 {
-  return _flags.implementsDrawRect || _flags.implementsImageDisplay || _flags.shouldRasterizeDescendants || _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
+  return _flags.implementsDrawRect || _flags.implementsImageDisplay || _flags.shouldRasterizeDescendants ||
+         _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
+}
+
+- (BOOL)__canClearContentsOfLayer
+{
+  // The layer contents should not be cleared in case the node is wrapping a UIImageView.UIImageView is specifically
+  // optimized for performance and does not use the usual way to provide the contents of the CALayer via the
+  // CALayerDelegate method that backs the UIImageView.
+  return !_flags.synchronous || _viewClass != [UIImageView class];
+}
+
+- (BOOL)__canCallNeedsDisplayOfLayer
+{
+  // Prevent calling setNeedsDisplay on a layer that backs a UIImageView. Usually calling setNeedsDisplay on a CALayer
+  // triggers a recreation of the contents of layer unfortunately calling it on a CALayer that backs a UIImageView
+  // it goes trough the normal flow to assign the contents to a layer via the CALayerDelegate methods. Unfortunately
+  // UIImageView does not do recreate the layer contents the usual way, it actually does not implement some of the
+  // methods at all instead it throws away the contents of the layer and nothing will show up.
+  return _flags.synchronous && _viewClass != [UIImageView class];
 }
 
 - (BOOL)placeholderShouldPersist
@@ -1841,6 +1860,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // (even a runloop observer at a late call order will not stop the next frame from compositing, showing placeholders).
   
   ASDisplayNode *node = [layer asyncdisplaykit_node];
+  
+  if ([node __canCallNeedsDisplayOfLayer]) {
+    // Layers for UIKit components that are wrapped wtihin a node needs to be set to be displayed as the contents of
+    // the layer get's cleared and would not be recreated otherwise
+    [layer setNeedsDisplay];
+  }
+  
   if ([node __implementsDisplay]) {
     // For layers that do get displayed here, this immediately kicks off the work on the concurrent -[_ASDisplayLayer displayQueue].
     // At the same time, it creates an associated _ASAsyncTransaction, which we can use to block on display completion.  See ASDisplayNode+AsyncDisplay.mm.
@@ -2088,8 +2114,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)clearContents
 {
-  // No-op if these haven't been created yet, as that guarantees they don't have contents that needs to be released.
-  _layer.contents = nil;
+  if ([self __canClearContentsOfLayer]) {
+    // No-op if these haven't been created yet, as that guarantees they don't have contents that needs to be released.
+    _layer.contents = nil;
+  }
+  
   _placeholderLayer.contents = nil;
   _placeholderImage = nil;
 }
