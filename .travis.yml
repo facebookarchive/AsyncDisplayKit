@@ -17,7 +17,9 @@ before_install:
 install: echo "<3"
 env:
   - MODE=tests
-  - MODE=examples
+  - MODE=examples-pt1
+  - MODE=examples-pt2
+  - MODE=examples-pt3
   - MODE=life-without-cocoapods
   - MODE=framework
 script: ./build.sh $MODE
