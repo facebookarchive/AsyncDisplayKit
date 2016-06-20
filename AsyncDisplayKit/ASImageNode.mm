@@ -174,7 +174,7 @@ struct ASImageNodeDrawParameters {
   ASDN::MutexLocker l(_imageLock);
   
   _drawParameter = {
-    .bounds = self.threadSafeBounds,
+    .bounds = self.bounds,
     .opaque = self.opaque,
     .contentsScale = _contentsScaleForDisplay,
     .backgroundColor = self.backgroundColor,
