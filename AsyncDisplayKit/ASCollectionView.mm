@@ -1002,6 +1002,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
+  
+  // We must re-check the batch measurement range when additional cells enter the same visual area
+  // Use case is - User has 10 items visible, and wants to trigger batch updates at 2x visible screen size, so 20 records need to be fetched. User modifies the collection view (by pinch or other means) and it results in 15 items in the visible space. In order to achieve the 2x batch promise, we now need 30 records. This accounts for that by triggering a remeasurement at the appropriate time.
+  [self _checkForBatchFetching];
+  
   // Calling visibleNodeIndexPathsForRangeController: will trigger UIKit to call reloadData if it never has, which can result
   // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
   BOOL isZeroSized = CGRectEqualToRect(self.bounds, CGRectZero);
