@@ -210,7 +210,14 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 - (void)setBounds:(CGRect)bounds
 {
   [super setBounds:bounds];
+  [self updateDrawingParameter];
   [self _invalidateRendererIfNeededForBoundsSize:bounds.size];
+}
+
+- (void)setBackgroundColor:(UIColor *)backgroundColor
+{
+  [super setBackgroundColor:backgroundColor];
+  [self updateDrawingParameter];
 }
 
 #pragma mark - Renderer Management
@@ -428,13 +435,14 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Drawing
 
-- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
+- (void)updateDrawingParameter
 {
+  std::lock_guard<std::recursive_mutex> l(_textLock);
+  
   _drawParameter = {
     .backgroundColor = self.backgroundColor,
     .bounds = self.bounds
   };
-  return nil;
 }
 
 - (void)drawRect:(CGRect)bounds withParameters:(id <NSObject>)p isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing;
