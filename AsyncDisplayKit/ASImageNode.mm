@@ -26,15 +26,15 @@
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
 
-@interface _ASImageNodeDrawParameters : NSObject
+@interface _ASImageNodeDrawParameters : NSObject<_ASDisplayLayerDelegateForward>
 
-@property (nonatomic, retain) UIImage *image;
+@property (nonatomic, strong) UIImage *image;
 @property (nonatomic, assign) BOOL opaque;
 @property (nonatomic, assign) CGRect bounds;
 @property (nonatomic, assign) CGFloat contentsScale;
 @property (nonatomic, strong) UIColor *backgroundColor;
 @property (nonatomic, assign) UIViewContentMode contentMode;
-
+@property (nonatomic, weak, readonly) id<_ASDisplayLayerDelegate> delegate;
 @end
 
 // TODO: eliminate explicit parameters with a set of keys copied from the node
@@ -46,6 +46,7 @@
                 contentsScale:(CGFloat)contentsScale
               backgroundColor:(UIColor *)backgroundColor
                   contentMode:(UIViewContentMode)contentMode
+                     delegate:(id)delegate
 {
   if (!(self = [self init]))
     return nil;
@@ -56,6 +57,7 @@
   _contentsScale = contentsScale;
   _backgroundColor = backgroundColor;
   _contentMode = contentMode;
+  _delegate = delegate;
 
   return self;
 }
@@ -184,7 +186,8 @@
                                                     opaque:self.opaque
                                              contentsScale:self.contentsScaleForDisplay
                                            backgroundColor:self.backgroundColor
-                                               contentMode:self.contentMode];
+                                               contentMode:self.contentMode
+                                                  delegate:self];
 }
 
 - (NSDictionary *)debugLabelAttributes
@@ -195,6 +198,8 @@
 
 - (UIImage *)displayWithParameters:(_ASImageNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
 {
+  ASDisplayNodeAssert([parameters isKindOfClass:[_ASImageNodeDrawParameters class]], @"Calling super for displayWithParameters:isCancelled: in a ASImageNode subclass must pass in the original parameters to superclass implementation.");
+  
   UIImage *image = parameters.image;
   if (!image) {
     return nil;

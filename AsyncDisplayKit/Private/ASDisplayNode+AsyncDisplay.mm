@@ -85,6 +85,34 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   return nil;
 }
 
++ (void)drawRect:(CGRect)bounds withParameters:(id <_ASDisplayLayerDelegateForward>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing
+{
+  ASDisplayNodeAssert([parameters conformsToProtocol:@protocol(_ASDisplayLayerDelegateForward)], @"Calling super for drawRect:withParameters:isCancelled:isRasterizing: must pass in the original parameters to superclass implementation.");
+  
+  if ([parameters conformsToProtocol:@protocol(_ASDisplayLayerDelegateForward)]) {
+    id <_ASDisplayLayerDelegateForward> internalParameters = (id <_ASDisplayLayerDelegateForward>)parameters;
+    id<_ASDisplayLayerDelegate> delegate = internalParameters.delegate;
+    if (delegate != nil) {
+      [delegate drawRect:bounds withParameters:parameters isCancelled:isCancelledBlock isRasterizing:isRasterizing];
+    }
+  }
+}
+
++ (UIImage *)displayWithParameters:(id <NSObject>)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
+{
+  ASDisplayNodeAssert([parameters conformsToProtocol:@protocol(_ASDisplayLayerDelegateForward)], @"Calling super for displayWithParameters:isCancelled: must pass in the original parameters to superclass implementation.");
+  
+  if ([parameters conformsToProtocol:@protocol(_ASDisplayLayerDelegateForward)]) {
+    id <_ASDisplayLayerDelegateForward> internalParameters = (id <_ASDisplayLayerDelegateForward>)parameters;
+    id<_ASDisplayLayerDelegate> delegate = internalParameters.delegate;
+    if (delegate != nil) {
+      return [delegate displayWithParameters:parameters isCancelled:isCancelledBlock];
+    }
+  }
+
+  return nil;
+}
+
 - (void)_recursivelyRasterizeSelfAndSublayersWithIsCancelledBlock:(asdisplaynode_iscancelled_block_t)isCancelledBlock displayBlocks:(NSMutableArray *)displayBlocks
 {
   // Skip subtrees that are hidden or zero alpha.
@@ -241,12 +269,12 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       ASDN_DELAY_FOR_DISPLAY();
       
       UIImage *result = nil;
-      //We can't call _willDisplayNodeContentWithRenderingContext or _didDisplayNodeContentWithRenderingContext because we don't
-      //have a context. We rely on implementors of displayWithParameters:isCancelled: to call
-      if (_flags.implementsInstanceImageDisplay) {
-        result = [self displayWithParameters:drawParameters isCancelled:isCancelledBlock];
-      } else {
+      // We can't call _willDisplayNodeContentWithRenderingContext or _didDisplayNodeContentWithRenderingContext because we don't
+      // have a context. We rely on implementors of displayWithParameters:isCancelled: to call
+      if (_flags.implementsImageDisplay) {
         result = [[self class] displayWithParameters:drawParameters isCancelled:isCancelledBlock];
+      } else {
+        result = [self displayWithParameters:drawParameters isCancelled:isCancelledBlock];
       }
       __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
       return result;
@@ -282,11 +310,12 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
         _willDisplayNodeContentWithRenderingContext(currentContext);
       }
       
-      if (_flags.implementsInstanceDrawRect) {
-        [self drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
-      } else {
+      if (_flags.implementsDrawRect) {
         [[self class] drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
+      } else {
+        [self drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
       }
+      
       
       if (currentContext && _didDisplayNodeContentWithRenderingContext) {
         _didDisplayNodeContentWithRenderingContext(currentContext);
