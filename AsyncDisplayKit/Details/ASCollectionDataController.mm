@@ -199,7 +199,7 @@
 
     // If any of the contexts remain after the deletion, re-insert them, e.g.
     // UICollectionElementKindSectionHeader remains even if item 0 is deleted.
-    NSMutableArray<ASIndexedNodeContext *> *contexts = [_pendingContexts[kind] filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^(ASIndexedNodeContext *context, NSDictionary *_) {
+    NSArray<ASIndexedNodeContext *> *contexts = [_pendingContexts[kind] filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^(ASIndexedNodeContext *context, NSDictionary *_) {
       return [deletedIndexPaths containsObject:context.indexPath];
     }]];
 
