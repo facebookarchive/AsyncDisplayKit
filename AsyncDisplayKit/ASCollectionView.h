@@ -282,6 +282,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
+- (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
 /**
  * Similar to -indexPathForCell:.
  *

@@ -444,6 +444,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return [_dataController nodeAtIndexPath:indexPath];
 }
 
+- (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
+}
+
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
   return [_dataController indexPathForNode:cellNode];
