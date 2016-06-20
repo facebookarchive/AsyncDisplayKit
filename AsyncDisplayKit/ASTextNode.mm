@@ -441,7 +441,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   _drawParameter = {
     .backgroundColor = self.backgroundColor,
-    .bounds = self.bounds
+    .bounds = self.threadSafeBounds
   };
 }
 
