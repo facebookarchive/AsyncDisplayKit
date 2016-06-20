@@ -22,7 +22,7 @@
 #import "ASInternalHelpers.h"
 #import "ASWeakProxy.h"
 
-NSString *const ASAnimatedImageDefaultRunLoopMode = NSDefaultRunLoopMode;
+NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 
 @implementation ASImageNode (AnimatedImage)
 
