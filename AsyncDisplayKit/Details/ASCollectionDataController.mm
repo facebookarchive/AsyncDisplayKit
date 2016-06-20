@@ -305,8 +305,7 @@
       return nodesOfKindInSection[itemIndex];
     }
   }
-  ASDisplayNodeAssert(NO, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self.collectionDataSource);
-  return [[ASCellNode alloc] init];
+  return nil;
 }
 
 #pragma mark - Private Helpers
