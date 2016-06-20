@@ -1,9 +1,3 @@
-<!--- Please fill out as much of this as you can. Thanks! -->
-
-### Reproduction Steps
-
-### Relevant Info
-<!--- AsyncDisplayKit version? iOS version? CocoPods version? Whatever makes sense for your issue. -->
-<!--- For deadlocks, please include the results of '> bt all' -->
-
-### Project or Screenshot that Demonstrates the Issue
+<!--- The more information you include, the faster we can help you out! Please include: a sample project
+<!--- or screenshots, code snippets, AsyncDisplayKit version, and/or backtraces for any crashes (> bt all). 
+<!--- Please delete these lines before posting. -->
