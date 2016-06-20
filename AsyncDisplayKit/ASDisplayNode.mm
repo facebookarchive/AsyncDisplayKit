@@ -445,9 +445,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   // Update flags related to special handling of UIImageView layers. More details on the flags
-  BOOL isUIIMageViewViewClass = [view isKindOfClass:[UIImageView class]];
-  _flags.canClearContentsOfLayer = !isUIIMageViewViewClass;
-  _flags.canCallNeedsDisplayOfLayer = (_flags.synchronous && !isUIIMageViewViewClass);
+  if (_flags.synchronous) {
+    if ([view isKindOfClass:[UIImageView class]]) {
+      _flags.canClearContentsOfLayer = NO;
+    } else {
+      _flags.canCallNeedsDisplayOfLayer = YES;
+    }
+  }
 
   return view;
 }
