@@ -128,12 +128,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     unsigned int asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset:1;
     unsigned int asyncDelegateTableViewWillBeginBatchFetchWithContext:1;
     unsigned int asyncDelegateShouldBatchFetchForTableView:1;
+    unsigned int asyncDelegateTableViewConstrainedSizeForRowAtIndexPath:1;
   } _asyncDelegateFlags;
   
   struct {
     unsigned int asyncDataSourceNumberOfSectionsInTableView:1;
     unsigned int asyncDataSourceTableViewNodeBlockForRowAtIndexPath:1;
-    unsigned int asyncDataSourceTableViewConstrainedSizeForRowAtIndexPath:1;
     unsigned int asyncDataSourceTableViewNodeForRowAtIndexPath:1;
     unsigned int asyncDataSourceTableViewLockDataSource:1;
     unsigned int asyncDataSourceTableViewUnlockDataSource:1;
@@ -292,7 +292,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInTableView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableView:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeForRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)];
-    _asyncDataSourceFlags.asyncDataSourceTableViewConstrainedSizeForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:constrainedSizeForRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewLockDataSource = [_asyncDataSource respondsToSelector:@selector(tableViewLockDataSource:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewUnlockDataSource = [_asyncDataSource respondsToSelector:@selector(tableViewUnlockDataSource:)];
     
@@ -329,6 +328,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDelegateFlags.asyncDelegateShouldBatchFetchForTableView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)];
     _asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)];
     _asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)];
+    _asyncDelegateFlags.asyncDelegateTableViewConstrainedSizeForRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:constrainedSizeForRowAtIndexPath:)];
+
   }
   
   super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
@@ -1083,11 +1084,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASSizeRange constrainedSize = kInvalidSizeRange;
-  if (_asyncDataSourceFlags.asyncDataSourceTableViewConstrainedSizeForRowAtIndexPath) {
-    ASSizeRange dataSourceConstrainedSize = [_asyncDataSource tableView:self constrainedSizeForRowAtIndexPath:indexPath];
+  if (_asyncDelegateFlags.asyncDelegateTableViewConstrainedSizeForRowAtIndexPath) {
+    ASSizeRange delegateConstrainedSize = [_asyncDelegate tableView:self constrainedSizeForRowAtIndexPath:indexPath];
     // ignore widths in the returned size range (for TableView)
-    constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, dataSourceConstrainedSize.min.height),
-                                      CGSizeMake(_nodesConstrainedWidth, dataSourceConstrainedSize.max.height));
+    constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.min.height),
+                                      CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.max.height));
   } else {
     constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0),
                                       CGSizeMake(_nodesConstrainedWidth, FLT_MAX));
