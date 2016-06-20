@@ -273,6 +273,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _preferredFrameSize = CGSizeZero;
   
   _environmentState = ASEnvironmentStateMakeDefault();
+  
+  _flags.canClearContentsOfLayer = YES;
+  _flags.canCallNeedsDisplayOfLayer = NO;
 }
 
 - (instancetype)init
@@ -440,6 +443,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
     view = [[_viewClass alloc] init];
   }
+  
+  // Update flags related to special handling of UIImageView layers. More details on the flags
+  BOOL isUIIMageViewViewClass = [view isKindOfClass:[UIImageView class]];
+  _flags.canClearContentsOfLayer = !isUIIMageViewViewClass;
+  _flags.canCallNeedsDisplayOfLayer = (_flags.synchronous && !isUIIMageViewViewClass);
 
   return view;
 }
@@ -1788,29 +1796,18 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
 }
 
-// Helper method to summarize whether or not the node run through the display process
+/// Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay
 {
   return _flags.implementsDrawRect || _flags.implementsImageDisplay || _flags.shouldRasterizeDescendants ||
          _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
 }
 
-- (BOOL)__canClearContentsOfLayer
-{
-  // The layer contents should not be cleared in case the node is wrapping a UIImageView.UIImageView is specifically
-  // optimized for performance and does not use the usual way to provide the contents of the CALayer via the
-  // CALayerDelegate method that backs the UIImageView.
-  return !_flags.synchronous || _viewClass != [UIImageView class];
-}
-
+// Helper method to determine if it's save to call setNeedsDisplay on a layer without throwing away the content.
+// For details look at the comment on the canCallNeedsDisplayOfLayer flag
 - (BOOL)__canCallNeedsDisplayOfLayer
 {
-  // Prevent calling setNeedsDisplay on a layer that backs a UIImageView. Usually calling setNeedsDisplay on a CALayer
-  // triggers a recreation of the contents of layer unfortunately calling it on a CALayer that backs a UIImageView
-  // it goes trough the normal flow to assign the contents to a layer via the CALayerDelegate methods. Unfortunately
-  // UIImageView does not do recreate the layer contents the usual way, it actually does not implement some of the
-  // methods at all instead it throws away the contents of the layer and nothing will show up.
-  return _flags.synchronous && _viewClass != [UIImageView class];
+  return _flags.canCallNeedsDisplayOfLayer;
 }
 
 - (BOOL)placeholderShouldPersist
@@ -2114,7 +2111,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)clearContents
 {
-  if ([self __canClearContentsOfLayer]) {
+  if (_flags.canClearContentsOfLayer) {
     // No-op if these haven't been created yet, as that guarantees they don't have contents that needs to be released.
     _layer.contents = nil;
   }
