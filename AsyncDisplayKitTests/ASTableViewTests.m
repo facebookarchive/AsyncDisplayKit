@@ -139,10 +139,10 @@
 
 @end
 
-@interface ASTableViewFilledDataSourceWithRowSize : ASTableViewFilledDataSource
+@interface ASTableViewFilledDelegate : NSObject <ASTableViewDelegate>
 @end
 
-@implementation ASTableViewFilledDataSourceWithRowSize
+@implementation ASTableViewFilledDelegate
 
 - (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -165,9 +165,10 @@
   ASTestTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectMake(0, 0, 100, 400)
                                                                   style:UITableViewStylePlain];
   
-  ASTableViewFilledDataSourceWithRowSize *dataSource = [ASTableViewFilledDataSourceWithRowSize new];
+  ASTableViewFilledDelegate *delegate = [ASTableViewFilledDelegate new];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
 
-  tableView.asyncDelegate = dataSource;
+  tableView.asyncDelegate = delegate;
   tableView.asyncDataSource = dataSource;
   
   [tableView reloadDataImmediately];
