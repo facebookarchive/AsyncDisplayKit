@@ -151,7 +151,7 @@ static NSString * const kStatus = @"status";
     self.player = [AVPlayer playerWithPlayerItem:playerItem];
   }
   
-  if (self.image == nil) {
+  if (self.image == nil && self.URL == nil) {
     [self generatePlaceholderImage];
   }
 
@@ -284,7 +284,7 @@ static NSString * const kStatus = @"status";
     if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
       self.playerState = ASVideoNodePlayerStateReadyToPlay;
       // If we don't yet have a placeholder image update it now that we should have data available for it
-      if (self.image == nil) {
+      if (self.image == nil && self.URL == nil) {
         [self generatePlaceholderImage];
       }
     }
