@@ -119,6 +119,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind completion:(ASDataControllerCompletionBlock)completionBlock
 {
+  ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"%@ must be called on the editing transaction queue", NSStringFromSelector(_cmd));
+  
   NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
   NSUInteger count = contexts.count;
   
@@ -152,6 +154,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"%@ must be called on the editing transaction queue", NSStringFromSelector(_cmd));
+  
   [self batchLayoutNodesFromContexts:contexts ofKind:ASDataControllerRowNodeKind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
     // Insert finished nodes into data storage
     [self _insertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
@@ -163,6 +167,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_layoutNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts atIndexesOfRange:(NSRange)range ofKind:(NSString *)kind
 {
+  ASDisplayNodeAssert([NSOperationQueue currentQueue] != _editingTransactionQueue, @"%@ should not be called on the editing transaction queue", NSStringFromSelector(_cmd));
+  
   if (_dataSource == nil) {
     return;
   }
@@ -182,6 +188,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)_layoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind completion:(ASDataControllerCompletionBlock)completionBlock
 {
+  ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"%@ must be called on the editing transaction queue", NSStringFromSelector(_cmd));
+  
   if (!contexts.count || _dataSource == nil) {
     return;
   }
@@ -359,7 +367,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_insertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"%@ must be called on the editing transaction queue", NSStringFromSelector(_cmd));
+  
   [self insertNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
+    ASDisplayNodeAssertMainThread();
+    
     if (_delegateDidInsertNodes)
       [_delegate dataController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   }];
@@ -373,7 +385,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_deleteNodesAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"%@ must be called on the editing transaction queue", NSStringFromSelector(_cmd));
+  
   [self deleteNodesOfKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
+    ASDisplayNodeAssertMainThread();
+    
     if (_delegateDidDeleteNodes)
       [_delegate dataController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   }];
@@ -387,7 +403,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_insertSections:(NSMutableArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"%@ must be called on the editing transaction queue", NSStringFromSelector(_cmd));
+  
   [self insertSections:sections ofKind:ASDataControllerRowNodeKind atIndexSet:indexSet completion:^(NSArray *sections, NSIndexSet *indexSet) {
+    ASDisplayNodeAssertMainThread();
+    
     if (_delegateDidInsertSections)
       [_delegate dataController:self didInsertSections:sections atIndexSet:indexSet withAnimationOptions:animationOptions];
   }];
@@ -401,7 +421,11 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_deleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  ASDisplayNodeAssert([NSOperationQueue currentQueue] == _editingTransactionQueue, @"%@ must be called on the editing transaction queue", NSStringFromSelector(_cmd));
+  
   [self deleteSectionsOfKind:ASDataControllerRowNodeKind atIndexSet:indexSet completion:^(NSIndexSet *indexSet) {
+    ASDisplayNodeAssertMainThread();
+    
     if (_delegateDidDeleteSections)
       [_delegate dataController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   }];
