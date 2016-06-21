@@ -20,12 +20,15 @@
 #import "ASTraitCollection.h"
 
 #import <objc/runtime.h>
+#import <map>
 #import <vector>
+
+typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASChildMap;
 
 @interface ASLayoutSpec() {
   ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex _propertyLock;
-  std::vector<id<ASLayoutable>> _children;
+  ASChildMap _children;
 }
 @end
 
@@ -115,11 +118,11 @@
   if (child) {
     id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
     if (finalLayoutable) {
-      _children.insert(_children.begin(), finalLayoutable);
+      _children[0] = finalLayoutable;
       [self propagateUpLayoutable:finalLayoutable];
     }
   } else if (_children.size() > 0) {
-    _children.erase(_children.begin());
+    _children.erase(0);
   }
 }
 
@@ -128,15 +131,9 @@
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   if (child) {
     id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-    if (index > _children.size()) {
-      _children.insert(_children.end(), finalLayoutable);
-    } else {
-      _children.insert(_children.begin() + index, finalLayoutable);
-    }
+    _children[index] = finalLayoutable;
   } else {
-    if (_children.begin() + index < _children.end()) {
-      _children.erase(_children.begin() + index);
-    }
+    _children.erase(index);
   }
   // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
@@ -148,9 +145,9 @@
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
   _children.clear();
-  for (id<ASLayoutable> child in children) {
-    _children.push_back([self layoutableToAddFromLayoutable:child]);
-  }
+  [children enumerateObjectsUsingBlock:^(id<ASLayoutable>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    _children[idx] = obj;
+  }];
 }
 
 - (id<ASLayoutable>)childForIndex:(NSUInteger)index
@@ -163,15 +160,17 @@
 
 - (id<ASLayoutable>)child
 {
-  if (_children.size() > 0) {
-    return _children[0];
-  }
-  return nil;
+  return _children[0];
 }
 
 - (NSArray *)children
 {
-  return [NSArray arrayWithObjects:&_children[0] count:_children.size()];
+  std::vector<ASLayout *> children;
+  for (ASChildMap::iterator it = _children.begin(); it != _children.end(); ++it ) {
+    children.push_back(it->second);
+  }
+  
+  return [NSArray arrayWithObjects:&children[0] count:children.size()];
 }
 
 #pragma mark - ASEnvironment
