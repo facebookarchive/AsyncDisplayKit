@@ -44,9 +44,11 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   CGFloat _currentImageQuality;
   CGFloat _renderedImageQuality;
 
+  // TODO: Move this to flags
   BOOL _delegateSupportsDidStartFetchingData;
   BOOL _delegateSupportsDidFailWithError;
-  BOOL _delegateSupportsImageNodeDidFinishDecoding;
+  BOOL _delegateSupportsDidFinishDecoding;
+  BOOL _delegateSupportsDidLoadImage;
   
   BOOL _shouldRenderProgressImages;
 
@@ -214,7 +216,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   
   _delegateSupportsDidStartFetchingData = [delegate respondsToSelector:@selector(imageNodeDidStartFetchingData:)];
   _delegateSupportsDidFailWithError = [delegate respondsToSelector:@selector(imageNode:didFailWithError:)];
-  _delegateSupportsImageNodeDidFinishDecoding = [delegate respondsToSelector:@selector(imageNodeDidFinishDecoding:)];
+  _delegateSupportsDidFinishDecoding = [delegate respondsToSelector:@selector(imageNodeDidFinishDecoding:)];
+  _delegateSupportsDidLoadImage = [delegate respondsToSelector:@selector(imageNode:didLoadImage:)];
 }
 
 - (id<ASNetworkImageNodeDelegate>)delegate
@@ -378,7 +381,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   BOOL shouldReleaseImageOnBackgroundThread = imageSize.width > kMinReleaseImageOnBackgroundSize.width ||
                                               imageSize.height > kMinReleaseImageOnBackgroundSize.height;
   if (shouldReleaseImageOnBackgroundThread) {
-    ASPerformBlockOnBackgroundThread(^{
+    ASPerformBlockOnDeallocationQueue(^{
       image = nil;
     });
   }
@@ -494,7 +497,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           dispatch_async(dispatch_get_main_queue(), ^{
             self.currentImageQuality = 1.0;
           });
-          [_delegate imageNode:self didLoadImage:self.image];
+          if (_delegateSupportsDidLoadImage) {
+            [_delegate imageNode:self didLoadImage:self.image];
+          }
         });
       }
     } else {
@@ -529,7 +534,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
         strongSelf->_cacheUUID = nil;
 
         if (imageContainer != nil) {
-          [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
+          if (strongSelf->_delegateSupportsDidLoadImage) {
+            [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
+          }
         }
         else if (error && strongSelf->_delegateSupportsDidFailWithError) {
           [strongSelf->_delegate imageNode:strongSelf didFailWithError:error];
@@ -581,7 +588,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   [super displayDidFinish];
 
   ASDN::MutexLocker l(_lock);
-  if (_delegateSupportsImageNodeDidFinishDecoding && self.layer.contents != nil) {
+  if (_delegateSupportsDidFinishDecoding && self.layer.contents != nil) {
     /* We store the image quality in _currentImageQuality whenever _image is set. On the following displayDidFinish, we'll know that
      _currentImageQuality is the quality of the image that has just finished rendering. In order for this to be accurate, we
      need to be sure we are on main thread when we set _currentImageQuality. Otherwise, it is possible for _currentImageQuality

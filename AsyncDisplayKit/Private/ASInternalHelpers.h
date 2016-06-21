@@ -17,8 +17,15 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector);
 BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL selector);
+
+/// Dispatches the given block to the main queue if not already running on the main thread
 void ASPerformBlockOnMainThread(void (^block)());
-void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT 
+
+/// Dispatches the given block to a background queue with priority of DISPATCH_QUEUE_PRIORITY_DEFAULT if not already run on a background queue
+void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
+
+/// Dispatches a block on to a serial queue that's main purpose is for deallocation of objects on a background thread
+void ASPerformBlockOnDeallocationQueue(void (^block)());
 
 CGFloat ASScreenScale();
 

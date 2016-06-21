@@ -22,7 +22,7 @@
 #import "ASInternalHelpers.h"
 #import "ASWeakProxy.h"
 
-NSString *const ASAnimatedImageDefaultRunLoopMode = NSDefaultRunLoopMode;
+NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 
 @implementation ASImageNode (AnimatedImage)
 
@@ -45,6 +45,10 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSDefaultRunLoopMode;
       };
     }
     
+    if (animatedImage.playbackReady) {
+      [self animatedImageFileReady];
+    }
+
     animatedImage.playbackReadyCallback = ^{
       [weakSelf animatedImageFileReady];
     };

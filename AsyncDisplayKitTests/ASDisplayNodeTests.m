@@ -1638,6 +1638,57 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [c release];
 }
 
+- (void)testRemoveFromViewBackedLoadedSupernode
+{
+  DeclareNodeNamed(a);
+  DeclareNodeNamed(b);
+  [b addSubnode:a];
+  [a view];
+  [b view];
+  XCTAssertNodesLoaded(a, b);
+  XCTAssertEqual(a.supernode, b);
+  XCTAssertEqual(a.view.superview, b.view);
+  
+  [a removeFromSupernode];
+  XCTAssertNil(a.supernode);
+  XCTAssertNil(a.view.superview);
+}
+
+- (void)testRemoveFromLayerBackedLoadedSupernode
+{
+  DeclareNodeNamed(a);
+  a.layerBacked = YES;
+  DeclareNodeNamed(b);
+  b.layerBacked = YES;
+  [b addSubnode:a];
+  [a layer];
+  [b layer];
+  XCTAssertNodesLoaded(a, b);
+  XCTAssertEqual(a.supernode, b);
+  XCTAssertEqual(a.layer.superlayer, b.layer);
+  
+  [a removeFromSupernode];
+  XCTAssertNil(a.supernode);
+  XCTAssertNil(a.layer.superlayer);
+}
+
+- (void)testRemoveLayerBackedFromViewBackedLoadedSupernode
+{
+  DeclareNodeNamed(a);
+  a.layerBacked = YES;
+  DeclareNodeNamed(b);
+  [b addSubnode:a];
+  [a layer];
+  [b view];
+  XCTAssertNodesLoaded(a, b);
+  XCTAssertEqual(a.supernode, b);
+  XCTAssertEqual(a.layer.superlayer, b.layer);
+  
+  [a removeFromSupernode];
+  XCTAssertNil(a.supernode);
+  XCTAssertNil(a.layer.superlayer);
+}
+
 - (void)testSubnodeAddedBeforeLoadingExternalView
 {
   UIView *view = [[UIDisplayNodeTestView alloc] init];

@@ -192,8 +192,7 @@
 {
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
   CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
-  textSize = ceilSizeValue(textSize);
-  return CGSizeMake(fminf(textSize.width, constrainedSize.width), fminf(textSize.height, constrainedSize.height));
+  return CGSizeMake(fminf(ceilf(textSize.width), constrainedSize.width), fminf(ceilf(textSize.height), constrainedSize.height));
 }
 
 - (void)layout
