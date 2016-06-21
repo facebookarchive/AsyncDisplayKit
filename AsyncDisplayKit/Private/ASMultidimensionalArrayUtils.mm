@@ -25,8 +25,10 @@ static void ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(NSMutableArray 
   }
 
   if (curIndexPath.length < dimension - 1) {
-    for (int i = 0; i < mutableArray.count; i++) {
-      ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(mutableArray[i], indexPaths, curIdx, [curIndexPath indexPathByAddingIndex:i], dimension, updateBlock);
+    NSInteger i = 0;
+    for (NSMutableArray *subarray in mutableArray) {
+      ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(subarray, indexPaths, curIdx, [curIndexPath indexPathByAddingIndex:i], dimension, updateBlock);
+      i += 1;
     }
   } else {
     NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] init];
