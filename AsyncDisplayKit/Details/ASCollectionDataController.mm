@@ -32,9 +32,9 @@
   NSMutableDictionary<NSString *, NSMutableArray<ASIndexedNodeContext *> *> *_pendingContexts;
 }
 
-- (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled
+- (instancetype)init
 {
-  self = [super initWithAsyncDataFetching:asyncDataFetchingEnabled];
+  self = [super init];
   if (self != nil) {
     _pendingContexts = [NSMutableDictionary dictionary];
   }
