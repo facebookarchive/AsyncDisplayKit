@@ -69,6 +69,8 @@ static NSString * const kStatus = @"status";
   ASVideoNodePlayerState _playerState;
   
   AVAsset *_asset;
+  AVVideoComposition *_videoComposition;
+  AVAudioMix *_audioMix;
   
   AVPlayerItem *_currentPlayerItem;
   AVPlayer *_player;
@@ -125,7 +127,10 @@ static NSString * const kStatus = @"status";
   ASDN::MutexLocker l(_propertyLock);
 
   if (_asset != nil) {
-    return [[AVPlayerItem alloc] initWithAsset:_asset];
+    AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
+    playerItem.videoComposition = _videoComposition;
+    playerItem.audioMix = _audioMix;
+    return playerItem;
   }
 
   return nil;
@@ -451,6 +456,34 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(_propertyLock);
   return _asset;
+}
+
+- (void)setVideoComposition:(AVVideoComposition *)videoComposition
+{
+  ASDN::MutexLocker l(_propertyLock);
+
+  _videoComposition = videoComposition;
+  _currentPlayerItem.videoComposition = videoComposition;
+}
+
+- (AVVideoComposition *)videoComposition
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _videoComposition;
+}
+
+- (void)setAudioMix:(AVAudioMix *)audioMix
+{
+  ASDN::MutexLocker l(_propertyLock);
+
+  _audioMix = audioMix;
+  _currentPlayerItem.audioMix = audioMix;
+}
+
+- (AVAudioMix *)audioMix
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _audioMix;
 }
 
 - (AVPlayer *)player
