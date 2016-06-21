@@ -49,6 +49,7 @@ static NSString * const kStatus = @"status";
     unsigned int delegateVideoNodeDidPlayToTimeInterval:1;
     unsigned int delegateVideoNodeDidStartInitialLoading:1;
     unsigned int delegateVideoNodeDidFinishInitialLoading:1;
+    unsigned int delegateVideoNodeDidSetCurrentItem:1;
     unsigned int delegateVideoNodeDidStallAtTimeInterval:1;
     unsigned int delegateVideoNodeDidRecoverFromStall:1;
     
@@ -153,7 +154,11 @@ static NSString * const kStatus = @"status";
   } else {
     self.player = [AVPlayer playerWithPlayerItem:playerItem];
   }
-  
+
+  if (_delegateFlags.delegateVideoNodeDidSetCurrentItem) {
+    [_delegate videoNode:self didSetCurrentItem:playerItem];
+  }
+
   if (self.image == nil && self.URL == nil) {
     [self generatePlaceholderImage];
   }
@@ -473,6 +478,7 @@ static NSString * const kStatus = @"status";
     _delegateFlags.delegateVideoNodeDidPlayToTimeInterval = [_delegate respondsToSelector:@selector(videoNode:didPlayToTimeInterval:)];
     _delegateFlags.delegateVideoNodeDidStartInitialLoading = [_delegate respondsToSelector:@selector(videoNodeDidStartInitialLoading:)];
     _delegateFlags.delegateVideoNodeDidFinishInitialLoading = [_delegate respondsToSelector:@selector(videoNodeDidFinishInitialLoading:)];
+    _delegateFlags.delegateVideoNodeDidSetCurrentItem = [_delegate respondsToSelector:@selector(videoNode:didSetCurrentItem:)];
     _delegateFlags.delegateVideoNodeDidStallAtTimeInterval = [_delegate respondsToSelector:@selector(videoNode:didStallAtTimeInterval:)];
     _delegateFlags.delegateVideoNodeDidRecoverFromStall = [_delegate respondsToSelector:@selector(videoNodeDidRecoverFromStall:)];
       

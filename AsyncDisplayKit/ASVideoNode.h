@@ -122,6 +122,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)videoNodeDidFinishInitialLoading:(ASVideoNode *)videoNode;
 /**
+ * @abstract Delegate method invoked when the AVPlayerItem for the asset has been set up and can be accessed throught currentItem.
+ * @param videoNode The videoNode.
+ * @param currentItem The AVPlayerItem that was constructed from the asset.
+ */
+- (void)videoNode:(ASVideoNode *)videoNode didSetCurrentItem:(AVPlayerItem *)currentItem;
+/**
  * @abstract Delegate method invoked when the video node has recovered from the stall
  * @param videoNode The videoNode
  */
