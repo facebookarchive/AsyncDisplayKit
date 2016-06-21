@@ -90,8 +90,22 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
 {
   [super setUp];
 
-  _mockCache = [OCMockObject mockForProtocol:@protocol(ASImageCacheProtocol)];
-  _mockDownloader = [OCMockObject mockForProtocol:@protocol(ASImageDownloaderProtocol)];
+  _mockCache = [[OCMockObject mockForProtocol:@protocol(ASImageCacheProtocol)] retain];
+  _mockDownloader = [[OCMockObject mockForProtocol:@protocol(ASImageDownloaderProtocol)] retain];
+}
+
+- (void)tearDown
+{
+  if(_mockCache) {
+    [_mockCache release];
+    _mockCache = nil;
+  }
+  if(_mockDownloader) {
+    [_mockDownloader release];
+    _mockDownloader = nil;
+  }
+
+  [super tearDown];
 }
 
 - (void)testDataSourceImageMethod
