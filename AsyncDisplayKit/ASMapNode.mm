@@ -48,7 +48,7 @@
   _liveMap = NO;
 //  _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
   _annotations = @[];
-  _showAnnotationsState = ASMapNodeShowAnnotationsIgnored;
+  _showAnnotationsOptions = ASMapNodeShowAnnotationsOptionsIgnored;
   return self;
 }
 
@@ -278,8 +278,8 @@
     [weakSelf setNeedsLayout];
     [weakSelf.view addSubview:_mapView];
 
-    if (self.showAnnotationsState & ASMapNodeShowAnnotationsZoomed) {
-      BOOL const animated = self.showAnnotationsState & ASMapNodeShowAnnotationsAnimated;
+    if (self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
+      BOOL const animated = self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
       [_mapView showAnnotations:_mapView.annotations animated:animated];
     }
     
@@ -314,12 +314,12 @@
     [_mapView removeAnnotations:_mapView.annotations];
     [_mapView addAnnotations:annotations];
 
-    if (self.showAnnotationsState & ASMapNodeShowAnnotationsZoomed) {
-      BOOL const animated = self.showAnnotationsState & ASMapNodeShowAnnotationsAnimated;
+    if (self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
+      BOOL const animated = self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
       [_mapView showAnnotations:_mapView.annotations animated:animated];
     }
   } else {
-    if (self.showAnnotationsState & ASMapNodeShowAnnotationsZoomed) {
+    if (self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
       self.region = [self regionToFitAnnotations:annotations];
     }
     else {
