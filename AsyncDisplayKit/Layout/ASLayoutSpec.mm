@@ -121,7 +121,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
       _children[0] = finalLayoutable;
       [self propagateUpLayoutable:finalLayoutable];
     }
-  } else if (_children.size() > 0) {
+  } else {
     _children.erase(0);
   }
 }
