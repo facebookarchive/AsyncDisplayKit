@@ -461,7 +461,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       NSUInteger editingNodesSectionCount = editingNodes.count;
       
       if (editingNodesSectionCount) {
-        NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodesSectionCount)];
+        NSIndexSet *indexSet = [[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodesSectionCount)];
         [self _deleteNodesAtIndexPaths:ASIndexPathsForTwoDimensionalArray(editingNodes) withAnimationOptions:animationOptions];
         [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
       }
