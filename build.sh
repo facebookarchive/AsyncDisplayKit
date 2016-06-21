@@ -47,7 +47,7 @@ if [ "$MODE" = "examples-pt1" ]; then
           pod install --project-directory=$example
           
           set -o pipefail && xcodebuild \
-              -workspace "${example}Sample.xcworkspace" \
+              -workspace "${example}/Sample.xcworkspace" \
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
@@ -87,7 +87,7 @@ if [ "$MODE" = "examples-pt2" ]; then
           pod install --project-directory=$example
           
           set -o pipefail && xcodebuild \
-              -workspace "${example}Sample.xcworkspace" \
+              -workspace "${example}/Sample.xcworkspace" \
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
@@ -127,7 +127,7 @@ if [ "$MODE" = "examples-pt3" ]; then
           pod install --project-directory=$example
           
           set -o pipefail && xcodebuild \
-              -workspace "${example}Sample.xcworkspace" \
+              -workspace "${example}/Sample.xcworkspace" \
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
