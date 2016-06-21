@@ -145,8 +145,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
 {
-  [node measureWithSizeRange:constrainedSize];
-  node.frame = CGRectMake(0.0f, 0.0f, node.calculatedSize.width, node.calculatedSize.height);
+  CGSize size = [node measureWithSizeRange:constrainedSize].size;
+  node.frame = { .size = size };
 }
 
 /**
@@ -286,7 +286,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
   NSMutableArray *editingNodes = _editingNodes[kind];
   ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(editingNodes, indexPaths, nodes);
-  _editingNodes[kind] = editingNodes;
   
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
   NSMutableArray *completedNodes = ASTwoDimensionalArrayDeepMutableCopy(editingNodes);
@@ -549,11 +548,10 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
   
   NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
-  [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    NSUInteger rowNum = [_dataSource dataController:self rowsInSection:idx];
-    NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
+  [indexSet enumerateIndexesUsingBlock:^(NSUInteger sectionIndex, BOOL *stop) {
+    NSUInteger rowNum = [_dataSource dataController:self rowsInSection:sectionIndex];
     for (NSUInteger i = 0; i < rowNum; i++) {
-      NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
+      NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sectionIndex];
       ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
       
       ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
@@ -1045,17 +1043,15 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
 {
   ASDisplayNodeAssertMainThread();
-
-  NSArray *nodes = [self completedNodes];
-  NSUInteger numberOfNodes = nodes.count;
   
+  NSInteger section = 0;
   // Loop through each section to look for the cellNode
-  for (NSUInteger i = 0; i < numberOfNodes; i++) {
-    NSArray *sectionNodes = nodes[i];
-    NSUInteger cellIndex = [sectionNodes indexOfObjectIdenticalTo:cellNode];
-    if (cellIndex != NSNotFound) {
-      return [NSIndexPath indexPathForRow:cellIndex inSection:i];
+  for (NSArray *sectionNodes in [self completedNodes]) {
+    NSUInteger item = [sectionNodes indexOfObjectIdenticalTo:cellNode];
+    if (item != NSNotFound) {
+      return [NSIndexPath indexPathForItem:item inSection:section];
     }
+    section += 1;
   }
   
   return nil;
