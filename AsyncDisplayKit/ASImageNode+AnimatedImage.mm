@@ -45,6 +45,10 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
       };
     }
     
+    if (animatedImage.playbackReady) {
+      [self animatedImageFileReady];
+    }
+
     animatedImage.playbackReadyCallback = ^{
       [weakSelf animatedImageFileReady];
     };
