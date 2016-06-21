@@ -56,7 +56,6 @@
   _liveMapToggleButton  = [[ASButtonNode alloc] init];
   _mapNode              = [[ASMapNode alloc] init];
 
-
   [self addSubnode:_latEditableNode];
   [self addSubnode:_lonEditableNode];
   [self addSubnode:_deltaLatEditableNode];

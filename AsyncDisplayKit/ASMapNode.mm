@@ -48,6 +48,7 @@
   _liveMap = NO;
 //  _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
   _annotations = @[];
+  _showAnnotationsState = ASMapNodeShowAnnotationsIgnored;
   return self;
 }
 
@@ -276,6 +277,11 @@
     [_mapView addAnnotations:_annotations];
     [weakSelf setNeedsLayout];
     [weakSelf.view addSubview:_mapView];
+
+    if (self.showAnnotationsState & ASMapNodeShowAnnotationsZoomed) {
+      BOOL const animated = self.showAnnotationsState & ASMapNodeShowAnnotationsAnimated;
+      [_mapView showAnnotations:_mapView.annotations animated:animated];
+    }
     
 //    if (CLLocationCoordinate2DIsValid(_centerCoordinateOfMap)) {
 //      [_mapView setCenterCoordinate:_centerCoordinateOfMap];
@@ -307,9 +313,42 @@
   if (self.isLiveMap) {
     [_mapView removeAnnotations:_mapView.annotations];
     [_mapView addAnnotations:annotations];
+
+    if (self.showAnnotationsState & ASMapNodeShowAnnotationsZoomed) {
+      BOOL const animated = self.showAnnotationsState & ASMapNodeShowAnnotationsAnimated;
+      [_mapView showAnnotations:_mapView.annotations animated:animated];
+    }
   } else {
-    [self takeSnapshot];
+    if (self.showAnnotationsState & ASMapNodeShowAnnotationsZoomed) {
+      self.region = [self regionToFitAnnotations:annotations];
+    }
+    else {
+      [self takeSnapshot];
+    }
   }
+}
+
+-(MKCoordinateRegion)regionToFitAnnotations:(NSArray<id<MKAnnotation>> *)annotations
+{
+  if([annotations count] == 0)
+    return MKCoordinateRegionForMapRect(MKMapRectWorld);
+
+  CLLocationCoordinate2D topLeftCoord = CLLocationCoordinate2DMake(-90, 180);
+  CLLocationCoordinate2D bottomRightCoord = CLLocationCoordinate2DMake(90, -180);
+
+  for (id<MKAnnotation> annotation in _annotations) {
+    topLeftCoord = CLLocationCoordinate2DMake(fmax(topLeftCoord.latitude, annotation.coordinate.latitude),
+                                              fmin(topLeftCoord.longitude, annotation.coordinate.longitude));
+    bottomRightCoord = CLLocationCoordinate2DMake(fmin(bottomRightCoord.latitude, annotation.coordinate.latitude),
+                                                  fmax(bottomRightCoord.longitude, annotation.coordinate.longitude));
+  }
+
+  MKCoordinateRegion region = MKCoordinateRegionMake(CLLocationCoordinate2DMake(topLeftCoord.latitude - (topLeftCoord.latitude - bottomRightCoord.latitude) * 0.5,
+                                                                                topLeftCoord.longitude + (bottomRightCoord.longitude - topLeftCoord.longitude) * 0.5),
+                                                     MKCoordinateSpanMake(fabs(topLeftCoord.latitude - bottomRightCoord.latitude) * 2,
+                                                                          fabs(bottomRightCoord.longitude - topLeftCoord.longitude) * 2));
+
+  return region;
 }
 
 #pragma mark - Layout

@@ -14,6 +14,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_OPTIONS(NSUInteger, ASMapNodeShowAnnotationsState)
+{
+  /** The annotations' positions are ignored, use the region or options specified instead. */
+  ASMapNodeShowAnnotationsIgnored  = 0,
+  /** The annotations' positions are used to calculate the region to show in the map, equivalent to showAnnotations:animated. */
+  ASMapNodeShowAnnotationsZoomed   = 1 << 0,
+  /** This will only have an effect if combined with the Zoomed state with liveMap turned on.*/
+  ASMapNodeShowAnnotationsAnimated = 1 << 1
+};
+
 @interface ASMapNode : ASImageNode
 
 /**
@@ -53,6 +63,12 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract The annotations to display on the map.
  */
 @property (nonatomic, copy) NSArray<id<MKAnnotation>> *annotations;
+
+/**
+ * @abstract This property specifies how to show the annotations.
+ * @default Default value is ASMapNodeShowAnnotationsIgnored
+ */
+@property (nonatomic, assign) ASMapNodeShowAnnotationsState showAnnotationsState;
 
 @end
 
