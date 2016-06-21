@@ -457,7 +457,7 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
       // Allow subclasses to perform setup before going into the edit transaction
       [self prepareForReloadData];
       
-      void (^transactionBlock)() = ^{
+      [_editingTransactionQueue addOperationWithBlock:^{
         LOG(@"Edit Transaction - reloadData");
         
         // Remove everything that existed before the reload, now that we're ready to insert replacements
@@ -484,12 +484,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
         if (completion) {
           dispatch_async(dispatch_get_main_queue(), completion);
         }
-      };
-      
+      }];
       if (synchronously) {
-        transactionBlock();
-      } else {
-        [_editingTransactionQueue addOperationWithBlock:transactionBlock];
+        [self waitUntilAllUpdatesAreCommitted];
       }
     }];
   }];
