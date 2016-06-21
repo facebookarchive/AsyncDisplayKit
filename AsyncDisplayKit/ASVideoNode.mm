@@ -453,7 +453,9 @@ static NSString * const kStatus = @"status";
 
 - (void)setDelegate:(id<ASVideoNodeDelegate>)delegate
 {
+  [super setDelegate:delegate];
   _delegate = delegate;
+  
   if (_delegate == nil) {
     memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
