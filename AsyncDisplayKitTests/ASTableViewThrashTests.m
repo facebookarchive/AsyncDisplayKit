@@ -386,17 +386,17 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
      @"oldData",
      @"deletedSectionIndexes",
      @"replacedSectionIndexes",
-     @"reloadedSections",
+     @"replacingSections",
      @"insertedSectionIndexes",
-     @"_insertedSectionIndexes",
+     @"insertedSections",
      @"deletedItemIndexes",
      @"replacedItemIndexes",
-     @"reloadedItems",
+     @"replacingItems",
      @"insertedItemIndexes",
-     @"_insertedItemIndexes"
+     @"insertedItems"
   ]];
   [aCoder encodeObject:dict forKey:@"_dict"];
-  [aCoder encodeObject:@(ASThrashUpdateCurrentSerializationVersion) forKey:@"_version"];
+  [aCoder encodeInteger:ASThrashUpdateCurrentSerializationVersion forKey:@"_version"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
@@ -432,8 +432,12 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
     NSArray *indexPaths = [indexes indexPathsInSection:sec];
     [tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
   }];
-  
-  [tableView endUpdates];
+  @try {
+    [tableView endUpdates];
+  } @catch (NSException *exception) {
+    NSLog(@"Rejected update base64: %@", self.base64Representation);
+    @throw exception;
+  }
 }
 
 @end
@@ -449,6 +453,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 #else
   ASTableView *tableView;
 #endif
+  ASThrashUpdate *currentUpdate;
 }
 
 - (void)setUp {
@@ -477,7 +482,28 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
   [self verifyTableStateWithHierarchy];
 }
 
-- (void)DISABLED_testThrashingWildly {
+- (void)testSpecificThrashing {
+  NSURL *caseURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"ASThrashTestRecordedCase" withExtension:nil subdirectory:@"TestResources"];
+  NSString *base64 = [NSString stringWithContentsOfURL:caseURL encoding:NSUTF8StringEncoding error:nil];
+  
+  ASThrashUpdate *update = [ASThrashUpdate thrashUpdateWithBase64String:base64];
+  if (update == nil) {
+    return;
+  }
+  
+  currentUpdate = update;
+  
+  LOG(@"Deleted items: %@\nDeleted sections: %@\nReplaced items: %@\nReplaced sections: %@\nInserted items: %@\nInserted sections: %@\nNew data: %@", ASThrashArrayDescription(deletedItems), deletedSections, ASThrashArrayDescription(replacedItems), replacedSections, ASThrashArrayDescription(insertedItems), insertedSections, ASThrashArrayDescription(ds.data));
+  
+  [update applyToTableView:tableView];
+#if !USE_UIKIT_REFERENCE
+  XCTAssertNoThrow([tableView waitUntilAllUpdatesAreCommitted], @"Update assertion failure: %@", update);
+#endif
+  [self verifyTableStateWithHierarchy];
+  currentUpdate = nil;
+}
+
+- (void)testThrashingWildly {
   for (NSInteger i = 0; i < 100; i++) {
     [self setUp];
     [self _testThrashingWildly];
@@ -486,18 +512,19 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 }
 
 - (void)_testThrashingWildly {
-  [self verifyTableStateWithHierarchy];
   LOG(@"\n*******\nNext Iteration\n*******\nOld data: %@", ASThrashArrayDescription(ds.data));
   
   ASThrashUpdate *update = [[ASThrashUpdate alloc] initWithData:ds.data];
+  currentUpdate = update;
   
   LOG(@"Deleted items: %@\nDeleted sections: %@\nReplaced items: %@\nReplaced sections: %@\nInserted items: %@\nInserted sections: %@\nNew data: %@", ASThrashArrayDescription(deletedItems), deletedSections, ASThrashArrayDescription(replacedItems), replacedSections, ASThrashArrayDescription(insertedItems), insertedSections, ASThrashArrayDescription(ds.data));
   
   [update applyToTableView:tableView];
 #if !USE_UIKIT_REFERENCE
-  [tableView waitUntilAllUpdatesAreCommitted];
+  XCTAssertNoThrow([tableView waitUntilAllUpdatesAreCommitted], @"Update assertion failure: %@", update);
 #endif
   [self verifyTableStateWithHierarchy];
+  currentUpdate = nil;
 }
 
 #pragma mark Helpers
