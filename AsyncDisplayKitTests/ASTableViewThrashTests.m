@@ -16,6 +16,9 @@
 
 #define kInitialSectionCount 20
 #define kInitialItemCount 20
+#define kMinimumItemCount 5
+#define kMinimumSectionCount 3
+#define kFickleness 0.1
 
 #if USE_UIKIT_REFERENCE
 #define kCellReuseID @"ASThrashTestCellReuseID"
@@ -35,23 +38,38 @@ static NSString *ASThrashArrayDescription(NSArray *array) {
 }
 #pragma clang diagnostic pop
 
-@interface ASThrashTestItem: NSObject
-#if USE_UIKIT_REFERENCE
-/// This is used to identify the row with the table view (UIKit only).
-@property (nonatomic, readonly) CGFloat rowHeight;
-#endif
+static volatile int32_t ASThrashTestItemNextID = 1;
+@interface ASThrashTestItem: NSObject <NSSecureCoding>
+@property (nonatomic, readonly) NSInteger itemID;
+
+- (CGFloat)rowHeight;
 @end
 
 @implementation ASThrashTestItem
 
++ (BOOL)supportsSecureCoding {
+  return YES;
+}
+
 - (instancetype)init {
   self = [super init];
   if (self != nil) {
-#if USE_UIKIT_REFERENCE
-    _rowHeight = arc4random_uniform(500);
-#endif
+    _itemID = OSAtomicIncrement32(&ASThrashTestItemNextID);
   }
   return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+  self = [super init];
+  if (self != nil) {
+    _itemID = [aDecoder decodeIntegerForKey:@"itemID"];
+    NSAssert(_itemID > 0, @"Failed to decode %@", self);
+  }
+  return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)aCoder {
+  [aCoder encodeInteger:_itemID forKey:@"itemID"];
 }
 
 + (NSMutableArray <ASThrashTestItem *> *)itemsWithCount:(NSInteger)count {
@@ -62,38 +80,28 @@ static NSString *ASThrashArrayDescription(NSArray *array) {
   return result;
 }
 
+- (CGFloat)rowHeight {
+  return (self.itemID % 400) ?: 44;
+}
+
+
 - (NSString *)description {
-#if USE_UIKIT_REFERENCE
-  return [NSString stringWithFormat:@"<Item: rowHeight=%lu>", (unsigned long)self.rowHeight];
-#else
-  return [NSString stringWithFormat:@"<Item: %p>", self];
-#endif
+  return [NSString stringWithFormat:@"<Item %lu>", (unsigned long)_itemID];
 }
 
 @end
 
-@interface ASThrashTestSection: NSObject
+@interface ASThrashTestSection: NSObject <NSCopying, NSSecureCoding>
 @property (nonatomic, strong, readonly) NSMutableArray *items;
+@property (nonatomic, readonly) NSInteger sectionID;
 
-/// This is used to identify the section with the table view.
-@property (nonatomic, readonly) CGFloat headerHeight;
+- (CGFloat)headerHeight;
 @end
 
+static volatile int32_t ASThrashTestSectionNextID = 1;
 @implementation ASThrashTestSection
 
-- (instancetype)initWithCount:(NSInteger)count {
-  self = [super init];
-  if (self != nil) {
-    _items = [ASThrashTestItem itemsWithCount:count];
-    _headerHeight = arc4random_uniform(500) + 1;
-  }
-  return self;
-}
-
-- (instancetype)init {
-  return [self initWithCount:0];
-}
-
+/// Create an array of sections with the given count
 + (NSMutableArray <ASThrashTestSection *> *)sectionsWithCount:(NSInteger)count {
   NSMutableArray *result = [NSMutableArray arrayWithCapacity:count];
   for (NSInteger i = 0; i < count; i += 1) {
@@ -102,8 +110,59 @@ static NSString *ASThrashArrayDescription(NSArray *array) {
   return result;
 }
 
+- (instancetype)initWithCount:(NSInteger)count {
+  self = [super init];
+  if (self != nil) {
+    _sectionID = OSAtomicIncrement32(&ASThrashTestSectionNextID);
+    _items = [ASThrashTestItem itemsWithCount:count];
+  }
+  return self;
+}
+
+- (instancetype)init {
+  return [self initWithCount:0];
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+  self = [super init];
+  if (self != nil) {
+    _items = [aDecoder decodeObjectOfClass:[NSArray class] forKey:@"items"];
+    _sectionID = [aDecoder decodeIntegerForKey:@"sectionID"];
+    NSAssert(_sectionID > 0, @"Failed to decode %@", self);
+  }
+  return self;
+}
+
++ (BOOL)supportsSecureCoding {
+  return YES;
+}
+
+- (void)encodeWithCoder:(NSCoder *)aCoder {
+  [aCoder encodeObject:_items forKey:@"items"];
+  [aCoder encodeInteger:_sectionID forKey:@"sectionID"];
+}
+
+- (CGFloat)headerHeight {
+  return self.sectionID % 400 ?: 44;
+}
+
 - (NSString *)description {
-  return [NSString stringWithFormat:@"<Section: headerHeight=%lu, itemCount=%lu>", (unsigned long)self.headerHeight, (unsigned long)self.items.count];
+  return [NSString stringWithFormat:@"<Section %lu: itemCount=%lu>", (unsigned long)_sectionID, (unsigned long)self.items.count];
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+  ASThrashTestSection *copy = [[ASThrashTestSection alloc] init];
+  copy->_sectionID = _sectionID;
+  copy->_items = [_items mutableCopy];
+  return copy;
+}
+
+- (BOOL)isEqual:(id)object {
+  if ([object isKindOfClass:[ASThrashTestSection class]]) {
+    return [(ASThrashTestSection *)object sectionID] == _sectionID;
+  } else {
+    return NO;
+  }
 }
 
 @end
@@ -188,6 +247,195 @@ static NSString *ASThrashArrayDescription(NSArray *array) {
   return result;
 }
 
+/// `insertMode` means that for each index selected, the max goes up by one.
++ (NSMutableIndexSet *)randomIndexesLessThan:(NSInteger)max probability:(float)probability insertMode:(BOOL)insertMode {
+  NSMutableIndexSet *indexes = [[NSMutableIndexSet alloc] init];
+  u_int32_t cutoff = probability * 100;
+  for (NSInteger i = 0; i < max; i++) {
+    if (arc4random_uniform(100) < cutoff) {
+      [indexes addIndex:i];
+      if (insertMode) {
+        max += 1;
+      }
+    }
+  }
+  return indexes;
+}
+
+@end
+
+static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
+
+@interface ASThrashUpdate : NSObject <NSSecureCoding>
+@property (nonatomic, strong, readonly) NSMutableArray<ASThrashTestSection *> *oldData;
+@property (nonatomic, strong, readonly) NSMutableArray<ASThrashTestSection *> *data;
+@property (nonatomic, strong, readonly) NSMutableIndexSet *deletedSectionIndexes;
+@property (nonatomic, strong, readonly) NSMutableIndexSet *replacedSectionIndexes;
+/// The sections used to replace the replaced sections.
+@property (nonatomic, strong, readonly) NSMutableArray<ASThrashTestSection *> *replacingSections;
+@property (nonatomic, strong, readonly) NSMutableIndexSet *insertedSectionIndexes;
+@property (nonatomic, strong, readonly) NSMutableArray<ASThrashTestSection *> *insertedSections;
+@property (nonatomic, strong, readonly) NSMutableArray<NSMutableIndexSet *> *deletedItemIndexes;
+@property (nonatomic, strong, readonly) NSMutableArray<NSMutableIndexSet *> *replacedItemIndexes;
+/// The items used to replace the replaced items.
+@property (nonatomic, strong, readonly) NSMutableArray<ASThrashTestSection *> *replacingItems;
+@property (nonatomic, strong, readonly) NSMutableArray<NSMutableIndexSet *> *insertedItemIndexes;
+@property (nonatomic, strong, readonly) NSMutableArray<ASThrashTestSection *> *insertedItems;
+
+/// NOTE: `data` will be modified
+- (instancetype)initWithData:(NSArray<ASThrashTestSection *> *)data;
+
++ (ASThrashUpdate *)thrashUpdateWithBase64String:(NSString *)base64;
+- (NSString *)base64Representation;
+@end
+
+@implementation ASThrashUpdate
+
+- (instancetype)initWithData:(NSMutableArray<ASThrashTestSection *> *)data {
+  self = [super init];
+  if (self != nil) {
+    _oldData = [[NSMutableArray alloc] initWithArray:data copyItems:YES];
+    
+    _deletedItemIndexes = [NSMutableArray array];
+    _replacedItemIndexes = [NSMutableArray array];
+    _insertedItemIndexes = [NSMutableArray array];
+    
+    // Randomly reload some items
+    for (ASThrashTestSection *section in data) {
+      NSMutableIndexSet *indexes = [NSIndexSet randomIndexesLessThan:section.items.count probability:kFickleness insertMode:NO];
+      NSArray *newItems = [ASThrashTestItem itemsWithCount:indexes.count];
+      [section.items replaceObjectsAtIndexes:indexes withObjects:newItems];
+      [_replacedItemIndexes addObject:indexes];
+    }
+    
+    // Randomly replace some sections
+    _replacedSectionIndexes = [NSIndexSet randomIndexesLessThan:data.count probability:kFickleness insertMode:NO];
+    _replacingSections = [ASThrashTestSection sectionsWithCount:_replacedSectionIndexes.count];
+    [data replaceObjectsAtIndexes:_replacedSectionIndexes withObjects:_replacingSections];
+    
+    // Randomly delete some items
+    [data enumerateObjectsUsingBlock:^(ASThrashTestSection * _Nonnull section, NSUInteger idx, BOOL * _Nonnull stop) {
+      if (section.items.count >= kMinimumItemCount) {
+        NSMutableIndexSet *indexes = [NSIndexSet randomIndexesLessThan:section.items.count probability:kFickleness insertMode:NO];
+        
+        /// Cannot reload & delete the same item.
+        [indexes removeIndexes:_replacedItemIndexes[idx]];
+        
+        [section.items removeObjectsAtIndexes:indexes];
+        [_deletedItemIndexes addObject:indexes];
+      } else {
+        [_deletedItemIndexes addObject:[NSMutableIndexSet indexSet]];
+      }
+    }];
+    
+    // Randomly delete some sections
+    if (data.count >= kMinimumSectionCount) {
+      _deletedSectionIndexes = [NSIndexSet randomIndexesLessThan:data.count probability:kFickleness insertMode:NO];
+    } else {
+      _deletedSectionIndexes = [NSMutableIndexSet indexSet];
+    }
+    // Cannot replace & delete the same section.
+    [_deletedSectionIndexes removeIndexes:_replacedSectionIndexes];
+    
+    // Cannot delete/replace item in deleted/replaced section
+    [_deletedSectionIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+      [_replacedItemIndexes[idx] removeAllIndexes];
+      [_deletedItemIndexes[idx] removeAllIndexes];
+    }];
+    [_replacedSectionIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+      [_replacedItemIndexes[idx] removeAllIndexes];
+      [_deletedItemIndexes[idx] removeAllIndexes];
+    }];
+    [data removeObjectsAtIndexes:_deletedSectionIndexes];
+    
+    // Randomly insert some sections
+    _insertedSectionIndexes = [NSIndexSet randomIndexesLessThan:(data.count + 1) probability:kFickleness insertMode:YES];
+    _insertedSections = [ASThrashTestSection sectionsWithCount:_insertedSectionIndexes.count];
+    [data insertObjects:_insertedSections atIndexes:_insertedSectionIndexes];
+    
+    // Randomly insert some items
+    for (ASThrashTestSection *section in data) {
+      // Only insert items into the old sections – not replaced/inserted sections.
+      if ([_oldData containsObject:section]) {
+        NSMutableIndexSet *indexes = [NSIndexSet randomIndexesLessThan:(section.items.count + 1) probability:kFickleness insertMode:YES];
+        NSArray *newItems = [ASThrashTestItem itemsWithCount:indexes.count];
+        [section.items insertObjects:newItems atIndexes:indexes];
+        [_insertedItemIndexes addObject:indexes];
+      } else {
+        [_insertedItemIndexes addObject:[NSMutableIndexSet indexSet]];
+      }
+    }
+  }
+  return self;
+}
+
++ (BOOL)supportsSecureCoding {
+  return YES;
+}
+
++ (ASThrashUpdate *)thrashUpdateWithBase64String:(NSString *)base64 {
+  return [NSKeyedUnarchiver unarchiveObjectWithData:[[NSData alloc] initWithBase64EncodedString:base64 options:kNilOptions]];
+}
+
+- (NSString *)base64Representation {
+  return [[NSKeyedArchiver archivedDataWithRootObject:self] base64EncodedStringWithOptions:kNilOptions];
+}
+
+- (void)encodeWithCoder:(NSCoder *)aCoder {
+  NSDictionary *dict = [self dictionaryWithValuesForKeys:@[
+     @"oldData",
+     @"deletedSectionIndexes",
+     @"replacedSectionIndexes",
+     @"reloadedSections",
+     @"insertedSectionIndexes",
+     @"_insertedSectionIndexes",
+     @"deletedItemIndexes",
+     @"replacedItemIndexes",
+     @"reloadedItems",
+     @"insertedItemIndexes",
+     @"_insertedItemIndexes"
+  ]];
+  [aCoder encodeObject:dict forKey:@"_dict"];
+  [aCoder encodeObject:@(ASThrashUpdateCurrentSerializationVersion) forKey:@"_version"];
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+  self = [super init];
+  if (self != nil) {
+    NSAssert(ASThrashUpdateCurrentSerializationVersion == [aDecoder decodeIntegerForKey:@"_version"], @"This thrash update was archived from a different version and can't be read. Sorry.");
+    NSDictionary *dict = [aDecoder decodeObjectOfClass:[NSDictionary class] forKey:@"_dict"];
+    [self setValuesForKeysWithDictionary:dict];
+  }
+  return self;
+}
+
+- (void)applyToTableView:(UITableView *)tableView {
+  [tableView beginUpdates];
+  
+  [tableView insertSections:_insertedSectionIndexes withRowAnimation:UITableViewRowAnimationNone];
+  
+  [tableView deleteSections:_deletedSectionIndexes withRowAnimation:UITableViewRowAnimationNone];
+  
+  [tableView reloadSections:_replacedSectionIndexes withRowAnimation:UITableViewRowAnimationNone];
+  
+  [_insertedItemIndexes enumerateObjectsUsingBlock:^(NSMutableIndexSet * _Nonnull indexes, NSUInteger idx, BOOL * _Nonnull stop) {
+    NSArray *indexPaths = [indexes indexPathsInSection:idx];
+    [tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
+  }];
+  
+  [_deletedItemIndexes enumerateObjectsUsingBlock:^(NSMutableIndexSet * _Nonnull indexes, NSUInteger sec, BOOL * _Nonnull stop) {
+    NSArray *indexPaths = [indexes indexPathsInSection:sec];
+    [tableView deleteRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
+  }];
+  
+  [_replacedItemIndexes enumerateObjectsUsingBlock:^(NSMutableIndexSet * _Nonnull indexes, NSUInteger sec, BOOL * _Nonnull stop) {
+    NSArray *indexPaths = [indexes indexPathsInSection:sec];
+    [tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
+  }];
+  
+  [tableView endUpdates];
+}
+
 @end
 
 @interface ASTableViewThrashTests: XCTestCase
@@ -201,16 +449,9 @@ static NSString *ASThrashArrayDescription(NSArray *array) {
 #else
   ASTableView *tableView;
 #endif
-  
-  NSInteger minimumItemCount;
-  NSInteger minimumSectionCount;
-  float fickleness;
 }
 
 - (void)setUp {
-  minimumItemCount = 5;
-  minimumSectionCount = 3;
-  fickleness = 0.1;
   window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   ds = [[ASThrashDataSource alloc] init];
 #if USE_UIKIT_REFERENCE
@@ -248,127 +489,15 @@ static NSString *ASThrashArrayDescription(NSArray *array) {
   [self verifyTableStateWithHierarchy];
   LOG(@"\n*******\nNext Iteration\n*******\nOld data: %@", ASThrashArrayDescription(ds.data));
   
-  // NOTE: This is not a deep copy, so these sections will still have their
-  // item counts updated throughout the update.
-  NSArray *oldSections = [ds.data copy];
-  
-  NSMutableArray <NSMutableIndexSet *> *deletedItems = [NSMutableArray array];
-  NSMutableArray <NSMutableIndexSet *> *replacedItems = [NSMutableArray array];
-  NSMutableArray <NSMutableIndexSet *> *insertedItems = [NSMutableArray array];
-  
-  // Randomly reload some items
-  for (ASThrashTestSection *section in ds.data) {
-    NSMutableIndexSet *indexes = [self randomIndexesLessThan:section.items.count probability:fickleness insertMode:NO];
-    NSArray *newItems = [ASThrashTestItem itemsWithCount:indexes.count];
-    [section.items replaceObjectsAtIndexes:indexes withObjects:newItems];
-    [replacedItems addObject:indexes];
-  }
-  
-  // Randomly replace some sections
-  NSMutableIndexSet *replacedSections = [self randomIndexesLessThan:ds.data.count probability:fickleness insertMode:NO];
-  NSArray *replacingSections = [ASThrashTestSection sectionsWithCount:replacedSections.count];
-  [ds.data replaceObjectsAtIndexes:replacedSections withObjects:replacingSections];
-  
-  // Randomly delete some items
-  [ds.data enumerateObjectsUsingBlock:^(ASThrashTestSection * _Nonnull section, NSUInteger idx, BOOL * _Nonnull stop) {
-    if (section.items.count >= minimumItemCount) {
-      NSMutableIndexSet *indexes = [self randomIndexesLessThan:section.items.count probability:fickleness insertMode:NO];
-      
-      /// Cannot reload & delete the same item.
-      [indexes removeIndexes:replacedItems[idx]];
-      
-      [section.items removeObjectsAtIndexes:indexes];
-      [deletedItems addObject:indexes];
-    } else {
-      [deletedItems addObject:[NSMutableIndexSet indexSet]];
-    }
-  }];
-  
-  // Randomly delete some sections
-  NSMutableIndexSet *deletedSections = nil;
-  if (ds.data.count >= minimumSectionCount) {
-    deletedSections = [self randomIndexesLessThan:ds.data.count probability:fickleness insertMode:NO];
-  } else {
-    deletedSections = [NSMutableIndexSet indexSet];
-  }
-  // Cannot replace & delete the same section.
-  [deletedSections removeIndexes:replacedSections];
-  
-  // Cannot delete/replace item in deleted/replaced section
-  [deletedSections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-    [replacedItems[idx] removeAllIndexes];
-    [deletedItems[idx] removeAllIndexes];
-  }];
-  [replacedSections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-    [replacedItems[idx] removeAllIndexes];
-    [deletedItems[idx] removeAllIndexes];
-  }];
-  [ds.data removeObjectsAtIndexes:deletedSections];
-  
-  // Randomly insert some sections
-  NSMutableIndexSet *insertedSections = [self randomIndexesLessThan:(ds.data.count + 1) probability:fickleness insertMode:YES];
-  NSArray *newSections = [ASThrashTestSection sectionsWithCount:insertedSections.count];
-  [ds.data insertObjects:newSections atIndexes:insertedSections];
-  
-  // Randomly insert some items
-  for (ASThrashTestSection *section in ds.data) {
-    // Only insert items into the old sections – not replaced/inserted sections.
-    if ([oldSections containsObject:section]) {
-      NSMutableIndexSet *indexes = [self randomIndexesLessThan:(section.items.count + 1) probability:fickleness insertMode:YES];
-      NSArray *newItems = [ASThrashTestItem itemsWithCount:indexes.count];
-      [section.items insertObjects:newItems atIndexes:indexes];
-      [insertedItems addObject:indexes];
-    } else {
-      [insertedItems addObject:[NSMutableIndexSet indexSet]];
-    }
-  }
+  ASThrashUpdate *update = [[ASThrashUpdate alloc] initWithData:ds.data];
   
   LOG(@"Deleted items: %@\nDeleted sections: %@\nReplaced items: %@\nReplaced sections: %@\nInserted items: %@\nInserted sections: %@\nNew data: %@", ASThrashArrayDescription(deletedItems), deletedSections, ASThrashArrayDescription(replacedItems), replacedSections, ASThrashArrayDescription(insertedItems), insertedSections, ASThrashArrayDescription(ds.data));
   
-  // TODO: Submit changes in random order, randomly chunked up
-  
-  [tableView beginUpdates];
-  [insertedItems enumerateObjectsUsingBlock:^(NSMutableIndexSet * _Nonnull indexes, NSUInteger idx, BOOL * _Nonnull stop) {
-    NSArray *indexPaths = [indexes indexPathsInSection:idx];
-    [tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-  }];
-  
-  [tableView insertSections:insertedSections withRowAnimation:UITableViewRowAnimationNone];
-  
-  [tableView deleteSections:deletedSections withRowAnimation:UITableViewRowAnimationNone];
-  
-  [tableView reloadSections:replacedSections withRowAnimation:UITableViewRowAnimationNone];
-  
-  [deletedItems enumerateObjectsUsingBlock:^(NSMutableIndexSet * _Nonnull indexes, NSUInteger sec, BOOL * _Nonnull stop) {
-    NSArray *indexPaths = [indexes indexPathsInSection:sec];
-    [tableView deleteRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-  }];
-  
-  [replacedItems enumerateObjectsUsingBlock:^(NSMutableIndexSet * _Nonnull indexes, NSUInteger sec, BOOL * _Nonnull stop) {
-    NSArray *indexPaths = [indexes indexPathsInSection:sec];
-    [tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-  }];
-  
-  [tableView endUpdates];
+  [update applyToTableView:tableView];
 #if !USE_UIKIT_REFERENCE
   [tableView waitUntilAllUpdatesAreCommitted];
 #endif
   [self verifyTableStateWithHierarchy];
-}
-
-/// `insertMode` means that for each index selected, the max goes up by one.
-- (NSMutableIndexSet *)randomIndexesLessThan:(NSInteger)max probability:(float)probability insertMode:(BOOL)insertMode {
-  NSMutableIndexSet *indexes = [[NSMutableIndexSet alloc] init];
-  u_int32_t cutoff = probability * 100;
-  for (NSInteger i = 0; i < max; i++) {
-    if (arc4random_uniform(100) < cutoff) {
-      [indexes addIndex:i];
-      if (insertMode) {
-        max += 1;
-      }
-    }
-  }
-  return indexes;
 }
 
 #pragma mark Helpers
