@@ -273,6 +273,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _preferredFrameSize = CGSizeZero;
   
   _environmentState = ASEnvironmentStateMakeDefault();
+  
+  _flags.canClearContentsOfLayer = YES;
+  _flags.canCallNeedsDisplayOfLayer = NO;
 }
 
 - (instancetype)init
@@ -439,6 +442,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       _viewClass = [self.class viewClass];
     }
     view = [[_viewClass alloc] init];
+  }
+  
+  // Update flags related to special handling of UIImageView layers. More details on the flags
+  if (_flags.synchronous) {
+    if ([view isKindOfClass:[UIImageView class]]) {
+      _flags.canClearContentsOfLayer = NO;
+    } else {
+      _flags.canCallNeedsDisplayOfLayer = YES;
+    }
   }
 
   return view;
@@ -1788,10 +1800,18 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
 }
 
-// Helper method to summarize whether or not the node run through the display process
+/// Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay
 {
-  return _flags.implementsDrawRect || _flags.implementsImageDisplay || _flags.shouldRasterizeDescendants || _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
+  return _flags.implementsDrawRect || _flags.implementsImageDisplay || _flags.shouldRasterizeDescendants ||
+         _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
+}
+
+// Helper method to determine if it's save to call setNeedsDisplay on a layer without throwing away the content.
+// For details look at the comment on the canCallNeedsDisplayOfLayer flag
+- (BOOL)__canCallNeedsDisplayOfLayer
+{
+  return _flags.canCallNeedsDisplayOfLayer;
 }
 
 - (BOOL)placeholderShouldPersist
@@ -1841,6 +1861,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // (even a runloop observer at a late call order will not stop the next frame from compositing, showing placeholders).
   
   ASDisplayNode *node = [layer asyncdisplaykit_node];
+  
+  if ([node __canCallNeedsDisplayOfLayer]) {
+    // Layers for UIKit components that are wrapped wtihin a node needs to be set to be displayed as the contents of
+    // the layer get's cleared and would not be recreated otherwise
+    [layer setNeedsDisplay];
+  }
+  
   if ([node __implementsDisplay]) {
     // For layers that do get displayed here, this immediately kicks off the work on the concurrent -[_ASDisplayLayer displayQueue].
     // At the same time, it creates an associated _ASAsyncTransaction, which we can use to block on display completion.  See ASDisplayNode+AsyncDisplay.mm.
@@ -2088,8 +2115,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)clearContents
 {
-  // No-op if these haven't been created yet, as that guarantees they don't have contents that needs to be released.
-  _layer.contents = nil;
+  if (_flags.canClearContentsOfLayer) {
+    // No-op if these haven't been created yet, as that guarantees they don't have contents that needs to be released.
+    _layer.contents = nil;
+  }
+  
   _placeholderLayer.contents = nil;
   _placeholderImage = nil;
 }

@@ -75,6 +75,20 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
     unsigned displaySuspended:1;
     unsigned shouldAnimateSizeChanges:1;
     unsigned hasCustomDrawingPriority:1;
+    
+    // Wrapped view handling
+    
+    // The layer contents should not be cleared in case the node is wrapping a UIImageView.UIImageView is specifically
+    // optimized for performance and does not use the usual way to provide the contents of the CALayer via the
+    // CALayerDelegate method that backs the UIImageView.
+    unsigned canClearContentsOfLayer:1;
+    
+    // Prevent calling setNeedsDisplay on a layer that backs a UIImageView. Usually calling setNeedsDisplay on a CALayer
+    // triggers a recreation of the contents of layer unfortunately calling it on a CALayer that backs a UIImageView
+    // it goes trough the normal flow to assign the contents to a layer via the CALayerDelegate methods. Unfortunately
+    // UIImageView does not do recreate the layer contents the usual way, it actually does not implement some of the
+    // methods at all instead it throws away the contents of the layer and nothing will show up.
+    unsigned canCallNeedsDisplayOfLayer:1;
 
     // whether custom drawing is enabled
     unsigned implementsInstanceDrawRect:1;

@@ -1,4 +1,7 @@
 language: objective-c
+cache:
+  - bundler
+  - cocoapods
 osx_image: xcode7.3
 git:
   depth: 10
@@ -6,7 +9,7 @@ before_install:
   - brew update
   - brew outdated xctool || brew upgrade xctool
   - brew outdated carthage || brew upgrade carthage
-  - gem install cocoapods -v 0.38.2
+  - gem install cocoapods -v 1.0.1
   - gem install xcpretty
   - gem install xcpretty-travis-formatter
 #  - gem install slather
@@ -14,7 +17,9 @@ before_install:
 install: echo "<3"
 env:
   - MODE=tests
-  - MODE=examples
+  - MODE=examples-pt1
+  - MODE=examples-pt2
+  - MODE=examples-pt3
   - MODE=life-without-cocoapods
   - MODE=framework
 script: ./build.sh $MODE
