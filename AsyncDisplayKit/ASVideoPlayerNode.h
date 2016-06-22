@@ -58,8 +58,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithUrl:(NSURL*)url;
 - (instancetype)initWithAsset:(AVAsset*)asset;
+- (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix;
 - (instancetype)initWithUrl:(NSURL *)url loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
 - (instancetype)initWithAsset:(AVAsset *)asset loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
+- (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
 
 #pragma mark - Public API
 - (void)seekToTime:(CGFloat)percentComplete;
@@ -159,6 +161,13 @@ NS_ASSUME_NONNULL_BEGIN
  * @param videoPlayerNode The video node has played to its end time.
  */
 - (void)videoPlayerNodeDidPlayToEnd:(ASVideoPlayerNode *)videoPlayer;
+
+/**
+ * @abstract Delegate method invoked when the ASVideoNode has constructed its AVPlayerItem for the asset.
+ * @param videoPlayerNode The video player node.
+ * @param currentItem The AVPlayerItem that was constructed from the asset.
+ */
+- (void)videoPlayerNode:(ASVideoPlayerNode *)videoPlayer didSetCurrentItem:(AVPlayerItem *)currentItem;
 
 @end
 NS_ASSUME_NONNULL_END
