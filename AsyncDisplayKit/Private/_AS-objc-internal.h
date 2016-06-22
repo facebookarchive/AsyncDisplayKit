@@ -442,7 +442,7 @@ typedef enum {
     -(BOOL)_tryRetain {                                                         \
         __typeof__(_rc_ivar) _prev;                                             \
         do {                                                                    \
-            _prev = _rc_ivar;                                                   \
+            _prev = __atomic_load_n(&_rc_ivar, __ATOMIC_SEQ_CST);;              \
             if (_prev & 1) {                                                    \
                 return 0;                                                       \
             } else if (_prev == -2) {                                           \
@@ -454,12 +454,13 @@ typedef enum {
         return 1;                                                               \
     }                                                                           \
     -(BOOL)_isDeallocating {                                                    \
-        if (_rc_ivar == -2) {                                                   \
+        __typeof__(_rc_ivar) _prev = __atomic_load_n(&_rc_ivar, __ATOMIC_SEQ_CST); \
+        if (_prev == -2) {                                                      \
             return 1;                                                           \
-        } else if (_rc_ivar < -2) {                                             \
+        } else if (_prev < -2) {                                                \
             __builtin_trap(); /* BUG: over-release elsewhere */                 \
         }                                                                       \
-        return _rc_ivar & 1;                                                    \
+        return _prev & 1;                                                       \
     }
 
 #define _OBJC_SUPPORTED_INLINE_REFCNT_LOGIC(_rc_ivar, _dealloc2main)            \

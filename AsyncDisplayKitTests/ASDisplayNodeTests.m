@@ -21,18 +21,18 @@
 #import "ASCellNode.h"
 
 // Conveniences for making nodes named a certain way
-#define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
+#define DeclareNodeNamed(n) ASDisplayNode *n = [[[ASDisplayNode alloc] init] autorelease]; n.name = @#n
 #define DeclareViewNamed(v) UIView *v = viewWithName(@#v)
 #define DeclareLayerNamed(l) CALayer *l = layerWithName(@#l)
 
 static UIView *viewWithName(NSString *name) {
-  ASDisplayNode *n = [[ASDisplayNode alloc] init];
+  ASDisplayNode *n = [[[ASDisplayNode alloc] init] autorelease];
   n.name = name;
   return n.view;
 }
 
 static CALayer *layerWithName(NSString *name) {
-  ASDisplayNode *n = [[ASDisplayNode alloc] init];
+  ASDisplayNode *n = [[[ASDisplayNode alloc] init] autorelease];
   n.layerBacked = YES;
   n.name = name;
   return n.layer;
@@ -144,6 +144,12 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 {
   if (_willDeallocBlock) {
     _willDeallocBlock(self);
+    [_willDeallocBlock release];
+    _willDeallocBlock = nil;
+  }
+  if (_calculateSizeBlock) {
+    [_calculateSizeBlock release];
+    _calculateSizeBlock = nil;
   }
   [super dealloc];
 }
@@ -214,19 +220,19 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 }
 
 - (void)testOverriddenFirstResponderBehavior {
-  ASTestDisplayNode *node = [[ASTestResponderNode alloc] init];
+  ASTestDisplayNode *node = [[[ASTestResponderNode alloc] init] autorelease];
   XCTAssertTrue([node canBecomeFirstResponder]);
   XCTAssertTrue([node becomeFirstResponder]);
 }
 
 - (void)testDefaultFirstResponderBehavior {
-  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
   XCTAssertFalse([node canBecomeFirstResponder]);
   XCTAssertFalse([node becomeFirstResponder]);
 }
 
 - (void)testLayerBackedFirstResponderBehavior {
-  ASTestDisplayNode *node = [[ASTestResponderNode alloc] init];
+  ASTestDisplayNode *node = [[[ASTestResponderNode alloc] init] autorelease];
   node.layerBacked = YES;
   XCTAssertTrue([node canBecomeFirstResponder]);
   XCTAssertFalse([node becomeFirstResponder]);
@@ -250,6 +256,8 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   [self executeOffThread:^{
     node = [[ASDisplayNode alloc] init];
   }];
+  // executeOffThread: blocks until the background thread finishes executing.
+  node = [node autorelease]; // XXX This is very bad style.
 
   UIView *view = node.view;
   XCTAssertNotNil(view, @"Getting node's view on-thread should succeed.");
@@ -257,7 +265,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
 - (void)testNodeCreatedOffThreadWithExistingView
 {
-  UIView *view = [[UIDisplayNodeTestView alloc] init];
+  UIView *view = [[[UIDisplayNodeTestView alloc] init] autorelease];
 
   __block ASDisplayNode *node = nil;
   [self executeOffThread:^{
@@ -265,6 +273,8 @@ for (ASDisplayNode *n in @[ nodes ]) {\
       return view;
     }];
   }];
+  // executeOffThread: blocks until the background thread finishes executing.
+  node = [node autorelease]; // XXX This is very bad style.
 
   XCTAssertFalse(node.layerBacked, @"Can't be layer backed");
   XCTAssertTrue(node.synchronous, @"Node with plain view should be synchronous");
@@ -283,6 +293,9 @@ for (ASDisplayNode *n in @[ nodes ]) {\
       return view;
     }];
   }];
+  // executeOffThread: blocks until the background thread finishes executing.
+  view = [view autorelease]; // XXX This is very bad style.
+  node = [node autorelease]; // XXX This is very bad style.
 
   XCTAssertNil(view, @"View block should not be invoked yet");
   [node view];
@@ -293,10 +306,10 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
 - (void)testNodeCreatedWithLazyAsyncView
 {
-  ASDisplayNode *node = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
+  ASDisplayNode *node = [[[ASDisplayNode alloc] initWithViewBlock:^UIView *{
     XCTAssertTrue([NSThread isMainThread], @"View block must run on the main queue");
-    return [[_ASDisplayView alloc] init];
-  }];
+    return [[[_ASDisplayView alloc] init] autorelease];
+  }] autorelease];
 
   XCTAssertThrows([node view], @"Externally provided views should be synchronous");
   XCTAssertTrue(node.synchronous, @"Node with externally provided view should be synchronous");
@@ -631,7 +644,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 // Perform parallel updates of a standard UIView/CALayer and an ASDisplayNode and ensure they are equivalent.
 - (void)testDeriveFrameFromBoundsPositionAnchorPoint
 {
-  UIView *plainView = [[UIView alloc] initWithFrame:CGRectZero];
+  UIView *plainView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
   plainView.layer.anchorPoint = CGPointMake(0.25f, 0.75f);
   plainView.layer.position = CGPointMake(10, 20);
   plainView.layer.bounds = CGRectMake(0, 0, 60, 80);
@@ -643,6 +656,8 @@ for (ASDisplayNode *n in @[ nodes ]) {\
     node.bounds = CGRectMake(0, 0, 60, 80);
     node.position = CGPointMake(10, 20);
   }];
+  // executeOffThread: blocks until the background thread finishes executing.
+  node = [node autorelease]; // XXX This is very bad style.
 
   XCTAssertTrue(CGRectEqualToRect(plainView.frame, node.frame), @"Node frame should match UIView frame before realization.");
   XCTAssertTrue(CGRectEqualToRect(plainView.frame, node.view.frame), @"Realized view frame should match UIView frame.");
@@ -651,7 +666,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 // Perform parallel updates of a standard UIView/CALayer and an ASDisplayNode and ensure they are equivalent.
 - (void)testSetFrameSetsBoundsPosition
 {
-  UIView *plainView = [[UIView alloc] initWithFrame:CGRectZero];
+  UIView *plainView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
   plainView.layer.anchorPoint = CGPointMake(0.25f, 0.75f);
   plainView.layer.frame = CGRectMake(10, 20, 60, 80);
 
@@ -661,6 +676,8 @@ for (ASDisplayNode *n in @[ nodes ]) {\
     node.anchorPoint = CGPointMake(0.25f, 0.75f);
     node.frame = CGRectMake(10, 20, 60, 80);
   }];
+  // executeOffThread: blocks until the background thread finishes executing.
+  node = [node autorelease]; // XXX This is very bad style.
 
   XCTAssertTrue(CGPointEqualToPoint(plainView.layer.position, node.position), @"Node position should match UIView position before realization.");
   XCTAssertTrue(CGRectEqualToRect(plainView.layer.bounds, node.bounds), @"Node bounds should match UIView bounds before realization.");
@@ -921,7 +938,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
 - (void)testDisplayNodePointConversionOnDeepHierarchies
 {
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *node = [[[ASDisplayNode alloc] init] autorelease];
 
   // 7 deep (six below root); each one positioned at position = (1, 1)
   _addTonsOfSubnodes(node, 2, 6, ^(ASDisplayNode *createdNode) {
@@ -1108,7 +1125,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 
 - (void)testSubnodes
 {
-  ASDisplayNode *parent = [[ASDisplayNode alloc] init];
+  ASDisplayNode *parent = [[[ASDisplayNode alloc] init] autorelease];
   ASDisplayNode *nilNode = nil;
   XCTAssertNoThrow([parent addSubnode:nilNode], @"Don't try to add nil, but we'll deal.");
   XCTAssertNoThrow([parent addSubnode:parent], @"Not good, test that we recover");
@@ -1211,11 +1228,6 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertNodesHaveParent(nilParent, a,d);
 
   //TODO: assert that things deallocate immediately and don't have latent autoreleases in here
-  [parent release];
-  [a release];
-  [b release];
-  [c release];
-  [d release];
 }
 
 - (void)testInsertSubnodeAtIndexView
@@ -1344,17 +1356,12 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertNodesHaveParent(nilParent, d);
 
   //TODO: assert that things deallocate immediately and don't have latent autoreleases in here
-  [parent release];
-  [a release];
-  [b release];
-  [c release];
-  [d release];
 }
 
 // This tests our resiliancy to having other views and layers inserted into our view or layer
 - (void)testInsertSubviewAtIndexWithMeddlingViewsAndLayersViewBacked
 {
-  ASDisplayNode *parent = [[ASDisplayNode alloc] init];
+  ASDisplayNode *parent = [[[ASDisplayNode alloc] init] autorelease];
 
   DeclareNodeNamed(a);
   DeclareNodeNamed(b);
@@ -1389,12 +1396,6 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertEqual(4u, parent.layer.sublayers.count, @"Should have the right sublayer count");
 
   //TODO: assert that things deallocate immediately and don't have latent autoreleases in here
-  [parent release];
-  [a release];
-  [b release];
-  [c release];
-  [d release];
-  [e release];
 }
 
 - (void)testAppleBugInsertSubview
@@ -1467,11 +1468,6 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertEqual(4u, parent.layer.sublayers.count, @"Should have the right sublayer count");
 
   //TODO: assert that things deallocate immediately and don't have latent autoreleases in here
-  [parent release];
-  [a release];
-  [b release];
-  [c release];
-  [d release];
 }
 
 
@@ -1550,10 +1546,6 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertNodesHaveParent(parent, a, c, b);
 
   //TODO: assert that things deallocate immediately and don't have latent autoreleases in here
-  [parent release];
-  [a release];
-  [b release];
-  [c release];
 }
 
 - (void)testInsertSubnodeAboveWithView
@@ -1632,10 +1624,6 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertNodesHaveParent(parent, a, c, b);
 
   //TODO: assert that things deallocate immediately and don't have latent autoreleases in here
-  [parent release];
-  [a release];
-  [b release];
-  [c release];
 }
 
 - (void)testRemoveFromViewBackedLoadedSupernode
@@ -1702,6 +1690,9 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
     child = [[ASDisplayNode alloc] init];
     [parent addSubnode:child];
   }];
+  // executeOffThread: blocks until the background thread finishes executing.
+  parent = [parent autorelease]; // XXX This is very bad style.
+  child = [child autorelease]; // XXX This is very bad style.
 
   XCTAssertEqual(1, parent.subnodes.count, @"Parent should have 1 subnode");
   XCTAssertEqualObjects(parent, child.supernode, @"Child has the wrong parent");
@@ -1714,14 +1705,14 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 
 - (void)testSubnodeAddedAfterLoadingExternalView
 {
-  UIView *view = [[UIDisplayNodeTestView alloc] init];
-  ASDisplayNode *parent = [[ASDisplayNode alloc] initWithViewBlock:^{
+  UIView *view = [[[UIDisplayNodeTestView alloc] init] autorelease];
+  ASDisplayNode *parent = [[[ASDisplayNode alloc] initWithViewBlock:^{
     return view;
-  }];
+  }] autorelease];
 
   [parent view];
 
-  ASDisplayNode *child = [[ASDisplayNode alloc] init];
+  ASDisplayNode *child = [[[ASDisplayNode alloc] init] autorelease];
   [parent addSubnode:child];
 
   XCTAssertEqual(1, parent.subnodes.count, @"Parent should have 1 subnode");
@@ -1851,7 +1842,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 
 - (void)testInitWithViewClass
 {
-  ASDisplayNode *scrollNode = [[ASDisplayNode alloc] initWithViewClass:[UIScrollView class]];
+  ASDisplayNode *scrollNode = [[[ASDisplayNode alloc] initWithViewClass:[UIScrollView class]] autorelease];
 
   XCTAssertFalse(scrollNode.isLayerBacked, @"Can't be layer backed");
   XCTAssertFalse(scrollNode.nodeLoaded, @"Shouldn't have a view yet");
@@ -1866,7 +1857,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 
 - (void)testInitWithLayerClass
 {
-  ASDisplayNode *transformNode = [[ASDisplayNode alloc] initWithLayerClass:[CATransformLayer class]];
+  ASDisplayNode *transformNode = [[[ASDisplayNode alloc] initWithLayerClass:[CATransformLayer class]] autorelease];
 
   XCTAssertTrue(transformNode.isLayerBacked, @"Created with layer class => should be layer-backed by default");
   XCTAssertFalse(transformNode.nodeLoaded, @"Shouldn't have a view yet");
@@ -1949,7 +1940,7 @@ static bool stringContainsPointer(NSString *description, const void *p) {
 
 - (void)testBounds
 {
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *node = [[[ASDisplayNode alloc] init] autorelease];
   node.bounds = CGRectMake(1, 2, 3, 4);
   node.frame = CGRectMake(5, 6, 7, 8);
 
@@ -1961,7 +1952,7 @@ static bool stringContainsPointer(NSString *description, const void *p) {
 
 - (void)testDidEnterDisplayIsCalledWhenNodesEnterDisplayRange
 {
-  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
 
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
   
@@ -1970,7 +1961,7 @@ static bool stringContainsPointer(NSString *description, const void *p) {
 
 - (void)testDidExitDisplayIsCalledWhenNodesExitDisplayRange
 {
-  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
   
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
   [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
@@ -1980,7 +1971,7 @@ static bool stringContainsPointer(NSString *description, const void *p) {
 
 - (void)testDidEnterFetchDataIsCalledWhenNodesEnterFetchDataRange
 {
-  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
   
   [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
   
@@ -1989,7 +1980,7 @@ static bool stringContainsPointer(NSString *description, const void *p) {
 
 - (void)testDidExitFetchDataIsCalledWhenNodesExitFetchDataRange
 {
-  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
   
   [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];

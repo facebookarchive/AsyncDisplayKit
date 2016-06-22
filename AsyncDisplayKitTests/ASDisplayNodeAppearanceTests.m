@@ -60,11 +60,11 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 @end
 
 // Conveniences for making nodes named a certain way
-#define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
+#define DeclareNodeNamed(n) ASDisplayNode *n = [[[ASDisplayNode alloc] init] autorelease]; n.name = @#n
 #define DeclareViewNamed(v) UIView *v = viewWithName(@#v)
 
 static UIView *viewWithName(NSString *name) {
-  ASDisplayNode *n = [[ASDisplayNode alloc] init];
+  ASDisplayNode *n = [[[ASDisplayNode alloc] init] autorelease];
   n.name = name;
   return n.view;
 }
@@ -130,7 +130,7 @@ static UIView *viewWithName(NSString *name) {
 - (void)checkAppearanceMethodsCalledWithRootNodeInWindowLayerBacked:(BOOL)isLayerBacked
 {
   // ASDisplayNode visibility does not change if modifying a hierarchy that is not in a window.  So create one and add the superview to it.
-  UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectZero];
+  UIWindow *window = [[[UIWindow alloc] initWithFrame:CGRectZero] autorelease];
 
   DeclareNodeNamed(n);
   DeclareViewNamed(superview);
@@ -162,15 +162,12 @@ static UIView *viewWithName(NSString *name) {
 
   XCTAssertEqual([_willEnterHierarchyCounts countForObject:n], 1u, @"willEnterHierarchy not called when node's view added to hierarchy");
   XCTAssertEqual([_didExitHierarchyCounts countForObject:n], 1u, @"didExitHierarchy erroneously called");
-
-  [superview release];
-  [window release];
 }
 
 - (void)checkManualAppearanceViewLoaded:(BOOL)isViewLoaded layerBacked:(BOOL)isLayerBacked
 {
   // ASDisplayNode visibility does not change if modifying a hierarchy that is not in a window.  So create one and add the superview to it.
-  UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectZero];
+  UIWindow *window = [[[UIWindow alloc] initWithFrame:CGRectZero] autorelease];
 
   DeclareNodeNamed(parent);
   DeclareNodeNamed(a);
@@ -263,13 +260,13 @@ static UIView *viewWithName(NSString *name) {
 - (void)testSynchronousIntermediaryView
 {
   // Parent is a wrapper node for a scrollview
-  ASDisplayNode *parentSynchronousNode = [[ASDisplayNode alloc] initWithViewClass:[UIScrollView class]];
+  ASDisplayNode *parentSynchronousNode = [[[ASDisplayNode alloc] initWithViewClass:[UIScrollView class]] autorelease];
   DeclareNodeNamed(layerBackedNode);
   DeclareNodeNamed(viewBackedNode);
 
   layerBackedNode.layerBacked = YES;
 
-  UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectZero];
+  UIWindow *window = [[[UIWindow alloc] initWithFrame:CGRectZero] autorelease];
   [parentSynchronousNode addSubnode:layerBackedNode];
   [parentSynchronousNode addSubnode:viewBackedNode];
 
@@ -303,11 +300,6 @@ static UIView *viewWithName(NSString *name) {
   XCTAssertFalse(parentSynchronousNode.inHierarchy, @"Should not have changed");
   XCTAssertFalse(layerBackedNode.inHierarchy, @"Should have been marked invisible when synchronous superview was removed from the window");
   XCTAssertFalse(viewBackedNode.inHierarchy, @"Should have been marked invisible when synchronous superview was removed from the window");
-
-  [window release];
-  [parentSynchronousNode release];
-  [layerBackedNode release];
-  [viewBackedNode release];
 }
 
 - (void)checkMoveAcrossHierarchyLayerBacked:(BOOL)isLayerBacked useManualCalls:(BOOL)useManualDisable useNodeAPI:(BOOL)useNodeAPI

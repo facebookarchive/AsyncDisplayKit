@@ -227,7 +227,12 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
 // DANGER: Don't use the delegate as the parameters in real code; this is not thread-safe and just for accounting in unit tests!
 + (void)drawRect:(CGRect)bounds withParameters:(_ASDisplayLayerTestDelegate *)delegate isCancelled:(asdisplaynode_iscancelled_block_t)sentinelBlock isRasterizing:(BOOL)isRasterizing
 {
-  delegate->_drawRectCount++;
+  __atomic_add_fetch(&delegate->_drawRectCount, 1, __ATOMIC_SEQ_CST);
+}
+
+- (NSUInteger)drawRectCount
+{
+  return(__atomic_load_n(&_drawRectCount, __ATOMIC_SEQ_CST));
 }
 
 - (void)dealloc
@@ -267,9 +272,9 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
   // make sure we don't lock up the tests indefinitely; fail after 1 sec by using an async barrier
   __block BOOL didHitBarrier = NO;
   dispatch_barrier_async([_ASDisplayLayer displayQueue], ^{
-    didHitBarrier = YES;
+    __atomic_store_n(&didHitBarrier, YES, __ATOMIC_SEQ_CST);
   });
-  XCTAssertTrue(ASDisplayNodeRunRunLoopUntilBlockIsTrue(^BOOL{ return didHitBarrier; }));
+  XCTAssertTrue(ASDisplayNodeRunRunLoopUntilBlockIsTrue(^BOOL{ return __atomic_load_n(&didHitBarrier, __ATOMIC_SEQ_CST); }));
 }
 
 - (void)waitForLayer:(_ASDisplayLayerTestLayer *)layer asyncDisplayCount:(NSUInteger)count
