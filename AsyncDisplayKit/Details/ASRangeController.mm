@@ -333,6 +333,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [modifiedIndexPaths sortUsingSelector:@selector(compare:)];
   NSLog(@"Range update complete; modifiedIndexPaths: %@", [self descriptionWithIndexPaths:modifiedIndexPaths]);
 #endif
+  [_delegate didCompleteUpdatesInRangeController:self];
 }
 
 #pragma mark - Notification observers
