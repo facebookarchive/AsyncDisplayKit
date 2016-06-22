@@ -9,15 +9,6 @@
 @import XCTest;
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-typedef NS_ENUM(NSUInteger, ASThrashChangeType) {
-  ASThrashReplaceItem,
-  ASThrashReplaceSection,
-  ASThrashDeleteItem,
-  ASThrashDeleteSection,
-  ASThrashInsertItem,
-  ASThrashInsertSection
-};
-
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
@@ -63,7 +54,7 @@ static NSString *ASThrashArrayDescription(NSArray *array) {
   return self;
 }
 
-+ (NSArray <ASThrashTestItem *> *)itemsWithCount:(NSInteger)count {
++ (NSMutableArray <ASThrashTestItem *> *)itemsWithCount:(NSInteger)count {
   NSMutableArray *result = [NSMutableArray arrayWithCapacity:count];
   for (NSInteger i = 0; i < count; i += 1) {
     [result addObject:[[ASThrashTestItem alloc] init]];
@@ -93,11 +84,8 @@ static NSString *ASThrashArrayDescription(NSArray *array) {
 - (instancetype)initWithCount:(NSInteger)count {
   self = [super init];
   if (self != nil) {
-    _items = [NSMutableArray arrayWithCapacity:count];
+    _items = [ASThrashTestItem itemsWithCount:count];
     _headerHeight = arc4random_uniform(500) + 1;
-    for (NSInteger i = 0; i < count; i++) {
-      [_items addObject:[ASThrashTestItem new]];
-    }
   }
   return self;
 }
