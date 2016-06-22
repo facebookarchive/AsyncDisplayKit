@@ -284,13 +284,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /**
- * Similar to -collectionView:viewForSupplementaryElementOfKind:atIndexPath:.
+ * Similar to -supplementaryViewForElementKind:atIndexPath:
  *
+ * @param elementKind The kind of supplementary node to locate.
  * @param indexPath The index path of the requested supplementary node.
  *
- * @returns a supplementary node for display at this indexpath or nil
+ * @returns The specified supplementary node or nil
  */
-- (nullable ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+- (nullable ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Similar to -indexPathForCell:.
