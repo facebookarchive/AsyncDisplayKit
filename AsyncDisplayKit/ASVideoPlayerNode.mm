@@ -38,6 +38,10 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateVideoNodePlaybackDidFinish:1;
     unsigned int delegateDidTapVideoPlayerNode:1;
     unsigned int delegateVideoPlayerNodeDidSetCurrentItem:1;
+    unsigned int delegateVideoPlayerNodeDidStallAtTimeInterval:1;
+    unsigned int delegateVideoPlayerNodeDidStartInitialLoading:1;
+    unsigned int delegateVideoPlayerNodeDidFinishInitialLoading:1;
+    unsigned int delegateVideoPlayerNodeDidRecoverFromStall:1;
   } _delegateFlags;
   
   NSURL *_url;
@@ -532,6 +536,34 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
+- (void)videoNode:(ASVideoNode *)videoNode didStallAtTimeInterval:(NSTimeInterval)timeInterval
+{
+  if (_delegateFlags.delegateVideoPlayerNodeDidStallAtTimeInterval) {
+    [_delegate videoPlayerNode:self didStallAtTimeInterval:timeInterval];
+  }
+}
+
+- (void)videoNodeDidStartInitialLoading:(ASVideoNode *)videoNode
+{
+  if (_delegateFlags.delegateVideoPlayerNodeDidStartInitialLoading) {
+    [_delegate videoPlayerNodeDidStartInitialLoading:self];
+  }
+}
+
+- (void)videoNodeDidFinishInitialLoading:(ASVideoNode *)videoNode
+{
+  if (_delegateFlags.delegateVideoPlayerNodeDidFinishInitialLoading) {
+    [_delegate videoPlayerNodeDidFinishInitialLoading:self];
+  }
+}
+
+- (void)videoNodeDidRecoverFromStall:(ASVideoNode *)videoNode
+{
+  if (_delegateFlags.delegateVideoPlayerNodeDidRecoverFromStall) {
+    [_delegate videoPlayerNodeDidRecoverFromStall:self];
+  }
+}
+
 #pragma mark - Actions
 - (void)togglePlayPause
 {
@@ -755,6 +787,10 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegatePlaybackButtonTint = [_delegate respondsToSelector:@selector(videoPlayerNodePlaybackButtonTint:)];
     _delegateFlags.delegateDidTapVideoPlayerNode = [_delegate respondsToSelector:@selector(didTapVideoPlayerNode:)];
     _delegateFlags.delegateVideoPlayerNodeDidSetCurrentItem = [_delegate respondsToSelector:@selector(videoPlayerNode:didSetCurrentItem:)];
+    _delegateFlags.delegateVideoPlayerNodeDidStallAtTimeInterval = [_delegate respondsToSelector:@selector(videoPlayerNode:didStallAtTimeInterval:)];
+    _delegateFlags.delegateVideoPlayerNodeDidStartInitialLoading = [_delegate respondsToSelector:@selector(videoPlayerNodeDidStartInitialLoading:)];
+    _delegateFlags.delegateVideoPlayerNodeDidFinishInitialLoading = [_delegate respondsToSelector:@selector(videoPlayerNodeDidFinishInitialLoading:)];
+    _delegateFlags.delegateVideoPlayerNodeDidRecoverFromStall = [_delegate respondsToSelector:@selector(videoPlayerNodeDidRecoverFromStall:)];
   }
 }
 
