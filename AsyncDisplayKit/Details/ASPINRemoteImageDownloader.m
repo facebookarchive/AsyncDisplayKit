@@ -88,14 +88,14 @@
   
 #if PIN_ANIMATED_AVAILABLE
     // Check that Carthage users have linked both PINRemoteImage & PINCache by testing for one file each
-    if (!(NSClassFromString(@"PINRemoteImageManager.m"))) {
+    if (!(NSClassFromString(@"PINRemoteImageManager"))) {
         NSException *e = [NSException
                           exceptionWithName:@"FrameworkSetupException"
                           reason:@"Missing the path to the PINRemoteImage framework."
                           userInfo:nil];
         @throw e;
     }
-    if (!(NSClassFromString(@"PINCache.m"))) {
+    if (!(NSClassFromString(@"PINCache"))) {
         NSException *e = [NSException
                           exceptionWithName:@"FrameworkSetupException"
                           reason:@"Missing the path to the PINCache framework."
