@@ -32,25 +32,10 @@ static const CGFloat ASTextNodeHighlightLightOpacity = 0.11;
 static const CGFloat ASTextNodeHighlightDarkOpacity = 0.22;
 static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncationAttribute";
 
-@interface ASTextNodeDrawParameters : NSObject
-
-@property (nonatomic, assign, readonly) CGRect bounds;
-@property (nonatomic, strong, readonly) UIColor *backgroundColor;
-
-@end
-
-@implementation ASTextNodeDrawParameters
-
-- (instancetype)initWithBounds:(CGRect)bounds backgroundColor:(UIColor *)backgroundColor
-{
-  if (self = [super init]) {
-    _bounds = bounds;
-    _backgroundColor = backgroundColor;
-  }
-  return self;
-}
-
-@end
+struct ASTextNodeDrawParameter {
+  CGRect bounds;
+  UIColor *backgroundColor;
+};
 
 @interface ASTextNode () <UIGestureRecognizerDelegate, NSLayoutManagerDelegate>
 
@@ -78,11 +63,23 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
   ASTextKitRenderer *_renderer;
 
+  ASTextNodeDrawParameter _drawParameter;
+
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
 }
 @dynamic placeholderEnabled;
 
 #pragma mark - NSObject
+
++ (void)initialize
+{
+  [super initialize];
+  
+  if (self != [ASTextNode class]) {
+    // Prevent custom drawing in subclasses
+    ASDisplayNodeAssert(!ASSubclassOverridesClassSelector([ASTextNode class], self, @selector(drawRect:withParameters:isCancelled:isRasterizing:)), @"Subclass %@ must not override drawRect:withParameters:isCancelled:isRasterizing: method. Custom drawing in %@ subclass is not supported.", NSStringFromClass(self), NSStringFromClass([ASTextNode class]));
+  }
+}
 
 static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
@@ -431,27 +428,40 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 #pragma mark - Drawing
 
-- (void)drawRect:(CGRect)bounds withParameters:(ASTextNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing
+- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
   std::lock_guard<std::recursive_mutex> l(_textLock);
+  
+  _drawParameter = {
+    .backgroundColor = self.backgroundColor,
+    .bounds = self.bounds
+  };
+  return nil;
+}
+
+
+- (void)drawRect:(CGRect)bounds withParameters:(id <NSObject>)p isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing;
+{
+  std::lock_guard<std::recursive_mutex> l(_textLock);
+
+  ASTextNodeDrawParameter drawParameter = _drawParameter;
+  CGRect drawParameterBounds = drawParameter.bounds;
+  UIColor *backgroundColor = isRasterizing ? nil : drawParameter.backgroundColor;
   
   CGContextRef context = UIGraphicsGetCurrentContext();
   ASDisplayNodeAssert(context, @"This is no good without a context.");
   
   CGContextSaveGState(context);
   
-  ASTextKitRenderer *renderer = [self _rendererWithBounds:parameters.bounds];
+  ASTextKitRenderer *renderer = [self _rendererWithBounds:drawParameterBounds];
   UIEdgeInsets shadowPadding = [self shadowPaddingWithRenderer:renderer];
-  CGPoint boundsOrigin = parameters.bounds.origin;
+  CGPoint boundsOrigin = drawParameterBounds.origin;
   CGPoint textOrigin = CGPointMake(boundsOrigin.x - shadowPadding.left, boundsOrigin.y - shadowPadding.top);
   
   // Fill background
-  if (!isRasterizing) {
-    UIColor *backgroundColor = parameters.backgroundColor;
-    if (backgroundColor) {
-      [backgroundColor setFill];
-      UIRectFillUsingBlendMode(CGContextGetClipBoundingBox(context), kCGBlendModeCopy);
-    }
+  if (backgroundColor != nil) {
+    [backgroundColor setFill];
+    UIRectFillUsingBlendMode(CGContextGetClipBoundingBox(context), kCGBlendModeCopy);
   }
   
   // Draw shadow
@@ -462,11 +472,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   [renderer drawInContext:context bounds:bounds];
   
   CGContextRestoreGState(context);
-}
-
-- (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
-{
-  return [[ASTextNodeDrawParameters alloc] initWithBounds:self.threadSafeBounds backgroundColor:self.backgroundColor];
 }
 
 #pragma mark - Attributes
