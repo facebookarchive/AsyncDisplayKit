@@ -493,14 +493,12 @@
   }
   
   if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
-    // Handle preferred frame size
     stack.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(self.preferredFrameSize);
     spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
   }
   
   if (_backgroundImageNode.image) {
-    spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec
-                                                      background:_backgroundImageNode];
+    spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec background:_backgroundImageNode];
   }
   
   return spec;
