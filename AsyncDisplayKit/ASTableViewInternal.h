@@ -34,4 +34,7 @@
  */
 - (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass ownedByNode:(BOOL)ownedByNode;
 
+/// Set YES and we'll log every time we call [super insertRows…] etc
+@property (nonatomic) BOOL test_enableSuperUpdateCallLogging;
+
 @end

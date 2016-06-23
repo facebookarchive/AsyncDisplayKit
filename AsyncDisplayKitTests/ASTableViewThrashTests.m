@@ -8,6 +8,7 @@
 
 @import XCTest;
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import "ASTableViewInternal.h"
 
 // Set to 1 to use UITableView and see if the issue still exists.
 #define USE_UIKIT_REFERENCE 0
@@ -477,6 +478,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
   }
   
   ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:_update.oldData];
+  ds.tableView.test_enableSuperUpdateCallLogging = YES;
   [self applyUpdate:_update toDataSource:ds];
   [self verifyDataSource:ds];
 }

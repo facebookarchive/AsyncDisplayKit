@@ -14,6 +14,7 @@
 #import "ASInternalHelpers.h"
 #import "_ASHierarchyChangeSet.h"
 #import "ASAssert.h"
+#import "NSIndexSet+ASHelpers.h"
 
 #import "ASDataController+Subclasses.h"
 
@@ -47,8 +48,16 @@
     
     [super beginUpdates];
 
+    for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
+      [super deleteRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+    }
+    
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
       [super deleteRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+    }
+    
+    for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
+      [super deleteSections:change.indexSet withAnimationOptions:change.animationOptions];
     }
     
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
@@ -58,13 +67,12 @@
     // TODO: Shouldn't reloads be processed before deletes, since deletes affect
     // the index space and reloads don't?
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadSections:change.indexSet withAnimationOptions:change.animationOptions];
+      NSIndexSet *newIndexes = [change.indexSet as_indexesByMapping:^(NSUInteger idx) {
+        return [_changeSet newSectionForOldSection:idx];
+      }];
+      [super insertSections:newIndexes withAnimationOptions:change.animationOptions];
     }
-
-    for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
-    }
-
+    
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
       [super insertSections:change.indexSet withAnimationOptions:change.animationOptions];
     }

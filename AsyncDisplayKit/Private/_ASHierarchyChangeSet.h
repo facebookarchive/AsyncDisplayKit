@@ -13,6 +13,8 @@
 #import <Foundation/Foundation.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef NSUInteger ASDataControllerAnimationOptions;
 
 typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
@@ -34,11 +36,11 @@ typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
 @property (nonatomic, readonly) ASDataControllerAnimationOptions animationOptions;
 
 /// Index paths are sorted descending for changeType .Delete, ascending otherwise
-@property (nonatomic, strong, readonly) NSArray *indexPaths;
+@property (nonatomic, strong, readonly) NSArray<NSIndexPath *> *indexPaths;
 
 @property (nonatomic, readonly) _ASHierarchyChangeType changeType;
 
-+ (NSDictionary *)sectionToIndexSetMapFromChanges:(NSArray *)changes ofType:(_ASHierarchyChangeType)changeType;
++ (NSDictionary *)sectionToIndexSetMapFromChanges:(NSArray<_ASHierarchyItemChange *> *)changes ofType:(_ASHierarchyChangeType)changeType;
 @end
 
 @interface _ASHierarchyChangeSet : NSObject
@@ -56,7 +58,15 @@ typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
  @precondition The change set must be completed.
  @returns The new section index, or NSNotFound if the given section was deleted.
  */
-- (NSInteger)newSectionForOldSection:(NSInteger)oldSection;
+- (NSUInteger)newSectionForOldSection:(NSUInteger)oldSection;
+
+/**
+ Get the index path after the update for the item at the given index path before the update.
+ 
+ @precondition The change set must be completed.
+ @returns The new index path, or nil if the given item (or its section) was deleted.
+ */
+- (nullable NSIndexPath *)newIndexPathForOldIndexPath:(NSIndexPath *)indexPath;
 
 @property (nonatomic, readonly) BOOL completed;
 
@@ -77,13 +87,18 @@ typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
  - Inserted sections, ascending order
  - Inserted items, ascending order
  */
-- (NSArray /*<_ASHierarchySectionChange *>*/ *)sectionChangesOfType:(_ASHierarchyChangeType)changeType;
-- (NSArray /*<_ASHierarchyItemChange *>*/ *)itemChangesOfType:(_ASHierarchyChangeType)changeType;
+- (NSArray <_ASHierarchySectionChange *> *)sectionChangesOfType:(_ASHierarchyChangeType)changeType;
+- (NSArray <_ASHierarchyItemChange *> *)itemChangesOfType:(_ASHierarchyChangeType)changeType;
+
+/// Returns all item indexes affected by changes of the given type in the given section.
+- (NSIndexSet *)indexesForItemChangesOfType:(_ASHierarchyChangeType)changeType inSection:(NSUInteger)section;
 
 - (void)deleteSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)insertSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)reloadSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;
-- (void)insertItems:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
-- (void)deleteItems:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
-- (void)reloadItems:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
+- (void)insertItems:(NSArray<NSIndexPath *> *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
+- (void)deleteItems:(NSArray<NSIndexPath *> *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
+- (void)reloadItems:(NSArray<NSIndexPath *> *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
 @end
+
+NS_ASSUME_NONNULL_END
