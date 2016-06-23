@@ -430,6 +430,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 
+/**
+ * Informs the delegate that the collection view will add the node
+ * at the given index path to the view hierarchy.
+ *
+ * @param collectionView The sender.
+ * @param indexPath The index path of the item that will be displayed.
+ *
+ * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
+ *   passed into this method may not correspond to the same item in your data source
+ *   if your data source has been updated since the last edit was processed.
+ */
 - (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
@@ -440,6 +451,10 @@ NS_ASSUME_NONNULL_BEGIN
  * @param collectionView The sender.
  * @param node The node which was removed from the view hierarchy.
  * @param indexPath The index path at which the node was located before it was removed.
+ *
+ * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
+ *   passed into this method may not correspond to the same item in your data source
+ *   if your data source has been updated since the last edit was processed.
  */
 - (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath;
 
@@ -474,6 +489,10 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Informs the delegate that the collection view did remove the node which was previously
  * at the given index path from the view hierarchy.
+ *
+ * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
+ *   passed into this method may not correspond to the same item in your data source
+ *   if your data source has been updated since the last edit was processed.
  *
  * This method is deprecated. Use @c collectionView:didEndDisplayingNode:forItemAtIndexPath: instead.
  */
