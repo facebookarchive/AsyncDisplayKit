@@ -1,8 +1,6 @@
 //
-//  ASRelativeLayoutSpec.h
+//  ASRelativeLayoutDefines.h
 //  AsyncDisplayKit
-//
-//  Created by Samuel Stow on 12/31/15.
 //
 //  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
 //  This source code is licensed under the BSD-style license found in the
