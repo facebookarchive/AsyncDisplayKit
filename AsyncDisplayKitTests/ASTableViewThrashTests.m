@@ -26,8 +26,6 @@
 #define kFickleness 0.1
 #define kThrashingIterationCount 100
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
 static NSString *ASThrashArrayDescription(NSArray *array) {
   NSMutableString *str = [NSMutableString stringWithString:@"(\n"];
   NSInteger i = 0;
@@ -38,7 +36,6 @@ static NSString *ASThrashArrayDescription(NSArray *array) {
   [str appendString:@")"];
   return str;
 }
-#pragma clang diagnostic pop
 
 static volatile int32_t ASThrashTestItemNextID = 1;
 @interface ASThrashTestItem: NSObject <NSSecureCoding>
