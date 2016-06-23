@@ -308,7 +308,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
   self = [super init];
   if (self != nil) {
     _data = [[NSMutableArray alloc] initWithArray:data copyItems:YES];
-    _oldData = [[NSMutableArray alloc] initWithArray:data copyItems:YES];
+    _oldData = [[NSArray alloc] initWithArray:data copyItems:YES];
     
     _deletedItemIndexes = [NSMutableArray array];
     _replacedItemIndexes = [NSMutableArray array];
