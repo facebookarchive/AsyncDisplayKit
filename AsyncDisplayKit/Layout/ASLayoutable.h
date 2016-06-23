@@ -17,9 +17,18 @@
 #import <AsyncDisplayKit/ASLayoutablePrivate.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
 #import <AsyncDisplayKit/ASLayoutableExtensibility.h>
+#import <AsyncDisplayKit/ASRelativeLayoutDefines.h>
+#import <AsyncDisplayKit/ASCenterLayoutDefines.h>
+
 
 @class ASLayout;
-@class ASLayoutSpec;
+@class ASRatioLayoutSpec;
+@class ASBackgroundLayoutSpec;
+@class ASOverlayLayoutSpec;
+@class ASInsetLayoutSpec;
+@class ASStaticLayoutSpec;
+@class ASCenterLayoutSpec;
+@class ASRelativeLayoutSpec;
 
 typedef NS_ENUM(NSUInteger, ASLayoutableType) {
   ASLayoutableTypeLayoutSpec,
@@ -115,6 +124,69 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** The position of this object within its parent spec. */
 @property (nonatomic, assign) CGPoint layoutPosition;
+
+#pragma mark - Convenience
+
+// TODO: Finalize documentation
+/**
+ * Set flexBasis on the receiver and return the receiver.
+ */
+- (instancetype)withFlexBasis:(ASRelativeDimension)flexBasis;
+
+/**
+ * Set flexGrow on the receiver and return the receiver.
+ */
+- (instancetype)withFlexGrow:(BOOL)flexGrow;
+
+/**
+ * Set flexShrink on the receiver and return the receiver.
+ */
+- (instancetype)withFlexShrink:(BOOL)flexShrink;
+
+/**
+ * Set flexShrink on the receiver and return the receiver.
+ */
+- (instancetype)withAlignSelf:(ASStackLayoutAlignSelf)alignSelf;
+
+/**
+ * Set spacingBefore and spacingAfter on the receiver, then return the receiver.
+ */
+- (instancetype)withSpacingBefore:(CGFloat)spacingBefore after:(CGFloat)spacingAfter;
+
+/**
+ * Embed the receiver in a center layout spec with the given options.
+ */
+- (ASCenterLayoutSpec *)centeredWithOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions;
+
+/**
+ * Embed the receiver in a relative layout spec with the given options.
+ */
+- (ASRelativeLayoutSpec *)positionedRelativeWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption;
+
+/**
+ * Embed the receiver in a static layout spec with the given size range and layout position
+ */
+- (ASStaticLayoutSpec *)withStaticSizeRange:(ASRelativeSizeRange)sizeRange position:(CGPoint)layoutPosition;
+
+/**
+ * Embed the receiver in a ratio layout spec with the given ratio.
+ */
+- (ASRatioLayoutSpec *)withAspectRatio:(CGFloat)ratio;
+
+/**
+ * Embed the receiver in an overlay layout spec with the given overlay.
+ */
+- (ASOverlayLayoutSpec *)withOverlay:(nullable id<ASLayoutable>)overlay;
+
+/**
+ * Embed the receiver in a background layout spec with the given background.
+ */
+- (ASBackgroundLayoutSpec *)withBackground:(nullable id<ASLayoutable>)background;
+
+/**
+ * Embed the receiver in an inset layout spec with the given insets.
+ */
+- (ASInsetLayoutSpec *)withInset:(UIEdgeInsets)insets;
 
 @end
 

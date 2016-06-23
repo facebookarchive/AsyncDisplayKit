@@ -598,6 +598,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface ASDisplayNode (Convenience)
+
+/**
+ * Set preferredFrameSize and return self.
+ */
+- (instancetype)withPreferredFrameSize:(CGSize)preferredFrameSize;
+
+@end
+
 /**
  * Convenience methods for debugging.
  */

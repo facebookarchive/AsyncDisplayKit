@@ -35,6 +35,14 @@
 #import "ASLayoutValidation.h"
 #import "ASCellNode.h"
 
+// ASLayoutableConvenience imports
+#import "ASCenterLayoutSpec.h"
+#import "ASStaticLayoutSpec.h"
+#import "ASRatioLayoutSpec.h"
+#import "ASOverlayLayoutSpec.h"
+#import "ASBackgroundLayoutSpec.h"
+#import "ASInsetLayoutSpec.h"
+
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
 NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
@@ -63,7 +71,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 @implementation ASDisplayNode
 
-// these dynamic properties all defined in ASLayoutOptionsPrivate.m
+// these dynamic properties all defined in ASLayoutablePrivate.h
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
          alignSelf, ascender, descender, sizeRange, layoutPosition, layoutableType;
 
@@ -2829,6 +2837,21 @@ ASEnvironmentLayoutExtensibilityForwarding
   }
 }
 #endif
+
+#pragma mark - ASLayoutableConvenience
+
+ASLayoutableConvenienceImpl
+
+@end
+
+@implementation ASDisplayNode (Convenience)
+
+- (instancetype)withPreferredFrameSize:(CGSize)preferredFrameSize
+{
+  self.preferredFrameSize = preferredFrameSize;
+  return self;
+}
+
 @end
 
 @implementation ASDisplayNode (Debugging)
