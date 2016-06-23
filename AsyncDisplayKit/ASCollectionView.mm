@@ -58,6 +58,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _node.highlighted = highlighted;
 }
 
+- (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
+{
+  [_node applyLayoutAttributes:layoutAttributes];
+}
+
 @end
 
 #pragma mark -

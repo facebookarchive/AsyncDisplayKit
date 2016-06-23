@@ -211,6 +211,11 @@
 
 #pragma clang diagnostic pop
 
+- (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
+{
+  // To be overriden by subclasses
+}
+
 - (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event inScrollView:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame
 {
   // To be overriden by subclasses

@@ -99,6 +99,13 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 - (void)touchesCancelled:(nullable NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
+/** 
+ * Called by the system when ASCellNode is used with an ASCollectionNode.  It will not be called by ASTableNode.
+ * When the UICollectionViewLayout object returns a new UICollectionViewLayoutAttributes object, the corresponding ASCellNode will be updated.
+ * See UICollectionViewCell's applyLayoutAttributes: for a full description.
+*/
+- (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes;
+
 /**
  * @abstract Initializes a cell with a given view controller block.
  *
