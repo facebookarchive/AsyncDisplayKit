@@ -9,6 +9,7 @@
 @import XCTest;
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
+// Set to 1 to use UITableView and see if the issue still exists.
 #define USE_UIKIT_REFERENCE 0
 
 #if USE_UIKIT_REFERENCE
@@ -84,7 +85,6 @@ static volatile int32_t ASThrashTestItemNextID = 1;
 - (CGFloat)rowHeight {
   return (self.itemID % 400) ?: 44;
 }
-
 
 - (NSString *)description {
   return [NSString stringWithFormat:@"<Item %lu>", (unsigned long)_itemID];
@@ -299,7 +299,6 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 @property (nonatomic, strong, readonly) NSMutableArray<NSMutableIndexSet *> *insertedItemIndexes;
 @property (nonatomic, strong, readonly) NSMutableArray<NSArray <ASThrashTestItem *> *> *insertedItems;
 
-/// NOTE: `data` will be modified
 - (instancetype)initWithData:(NSArray<ASThrashTestSection *> *)data;
 
 + (ASThrashUpdate *)thrashUpdateWithBase64String:(NSString *)base64;
