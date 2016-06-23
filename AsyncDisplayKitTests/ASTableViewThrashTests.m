@@ -462,7 +462,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 #pragma mark Test Methods
 
 - (void)testInitialDataRead {
-  ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:[ASThrashTestSection sectionsWithCount:20]];
+  ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:[ASThrashTestSection sectionsWithCount:kInitialSectionCount]];
   [self verifyDataSource:ds];
 }
 
@@ -484,7 +484,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 - (void)DISABLED_testThrashingWildly {
   for (NSInteger i = 0; i < kThrashingIterationCount; i++) {
     [self setUp];
-    ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:[ASThrashTestSection sectionsWithCount:20]];
+    ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:[ASThrashTestSection sectionsWithCount:kInitialSectionCount]];
     _update = [[ASThrashUpdate alloc] initWithData:ds.data];
     
     [self applyUpdate:_update toDataSource:ds];
