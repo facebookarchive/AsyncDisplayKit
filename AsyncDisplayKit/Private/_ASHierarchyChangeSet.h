@@ -23,6 +23,8 @@ typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
   _ASHierarchyChangeTypeInsert
 };
 
+NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
+
 @interface _ASHierarchySectionChange : NSObject
 
 // FIXME: Generalize this to `changeMetadata` dict?
@@ -49,8 +51,6 @@ typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
 @property (nonatomic, strong, readonly) NSIndexSet *deletedSections;
 /// @precondition The change set must be completed.
 @property (nonatomic, strong, readonly) NSIndexSet *insertedSections;
-/// @precondition The change set must be completed.
-@property (nonatomic, strong, readonly) NSIndexSet *reloadedSections;
 
 /**
  Get the section index after the update for the given section before the update.

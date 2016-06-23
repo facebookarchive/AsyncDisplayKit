@@ -10,7 +10,7 @@
 
 @interface NSIndexSet (ASHelpers)
 
-- (NSIndexSet *)as_indexesByMapping:(NSUInteger (^)(NSUInteger))block;
+- (NSIndexSet *)as_indexesByMapping:(NSUInteger (^)(NSUInteger idx))block;
 
 - (NSIndexSet *)as_intersectionWithIndexes:(NSIndexSet *)indexes;
 
@@ -19,5 +19,7 @@
 
 /// If you've got an old index, and you insert items using this index set, this returns the new index.
 - (NSUInteger)as_indexByInsertingItemsBelowIndex:(NSUInteger)index;
+
+- (NSString *)as_smallDescription;
 
 @end

@@ -13,6 +13,21 @@
 #import "_ASHierarchyChangeSet.h"
 #import "ASInternalHelpers.h"
 #import "NSIndexSet+ASHelpers.h"
+#import "ASAssert.h"
+
+NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
+{
+  switch (changeType) {
+    case _ASHierarchyChangeTypeInsert:
+      return @"Insert";
+    case _ASHierarchyChangeTypeDelete:
+      return @"Delete";
+    case _ASHierarchyChangeTypeReload:
+      return @"Reload";
+    default:
+      return @"(invalid)";
+  }
+}
 
 @interface _ASHierarchySectionChange ()
 - (instancetype)initWithChangeType:(_ASHierarchyChangeType)changeType indexSet:(NSIndexSet *)indexSet animationOptions:(ASDataControllerAnimationOptions)animationOptions;
@@ -35,21 +50,6 @@
  Assumes: `changes` is [_ASHierarchyItemChange] all with the same changeType
  */
 + (void)sortAndCoalesceChanges:(NSMutableArray *)changes ignoringChangesInSections:(NSIndexSet *)sections;
-@end
-
-@implementation NSIndexSet (ASHierarchyHelpers)
-
-- (NSIndexSet *)intersectionWithIndexes:(NSIndexSet *)indexes
-{
-  NSMutableIndexSet *result = [NSMutableIndexSet indexSet];
-  [self enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
-    [indexes enumerateRangesInRange:range options:kNilOptions usingBlock:^(NSRange range, BOOL * _Nonnull stop) {
-      [result addIndexesInRange:range];
-    }];
-  }];
-  return result;
-}
-
 @end
 
 @interface _ASHierarchyChangeSet ()
@@ -224,37 +224,30 @@
 - (void)_sortAndCoalesceChangeArrays
 {
   @autoreleasepool {
+
+    // Split reloaded section indexes into deletes and inserts
+    // Delete the old section, insert the new section it corresponds to.
+    for (_ASHierarchySectionChange *change in _reloadSectionChanges) {
+      NSIndexSet *newSections = [change.indexSet as_indexesByMapping:^(NSUInteger idx) {
+        NSUInteger newSec = [self newSectionForOldSection:idx];
+        NSAssert(newSec != NSNotFound, nil);
+        return newSec;
+      }];
+      
+      _ASHierarchySectionChange *deleteChange = [[_ASHierarchySectionChange alloc] initWithChangeType:_ASHierarchyChangeTypeDelete indexSet:change.indexSet animationOptions:change.animationOptions];
+      [_deleteSectionChanges addObject:deleteChange];
+      
+      _ASHierarchySectionChange *insertChange = [[_ASHierarchySectionChange alloc] initWithChangeType:_ASHierarchyChangeTypeInsert indexSet:newSections animationOptions:change.animationOptions];
+      [_insertSectionChanges addObject:insertChange];
+    }
+
+    _reloadSectionChanges = nil;
+    
     [_ASHierarchySectionChange sortAndCoalesceChanges:_deleteSectionChanges];
     [_ASHierarchySectionChange sortAndCoalesceChanges:_insertSectionChanges];
     [_ASHierarchySectionChange sortAndCoalesceChanges:_reloadSectionChanges];
-
-    _deletedSections = [[_ASHierarchySectionChange allIndexesInSectionChanges:_deleteSectionChanges] copy];
-    _insertedSections = [[_ASHierarchySectionChange allIndexesInSectionChanges:_insertSectionChanges] copy];
-    _reloadedSections = [[_ASHierarchySectionChange allIndexesInSectionChanges:_reloadSectionChanges] copy];
-
-    NSIndexSet *deletedAndReloaded = [_deletedSections intersectionWithIndexes:_reloadedSections];
-    NSAssert(deletedAndReloaded.count == 0, @"Request to delete and reload the same section(s): %@", deletedAndReloaded);
-    
-    // These are invalid old section indexes.
-    NSMutableIndexSet *deletedOrReloaded = [_deletedSections mutableCopy];
-    [deletedOrReloaded addIndexes:_reloadedSections];
-
-    // These are invalid new section indexes.
-    NSMutableIndexSet *insertedOrReloaded = [_insertedSections mutableCopy];
-
-    // Get the new section that each reloaded section index corresponds to.
-    // Coalesce reload sections' indexes into deletes and inserts
-    [_reloadedSections enumerateIndexesUsingBlock:^(NSUInteger oldIndex, __unused BOOL * stop) {
-      NSUInteger newIndex = [self newSectionForOldSection:oldIndex];
-      if (newIndex != NSNotFound) {
-        [insertedOrReloaded addIndex:newIndex];
-      }
-      [deletedOrReloaded addIndex:oldIndex];
-    }];
-
-    _deletedSections = deletedOrReloaded;
-    _insertedSections = insertedOrReloaded;
-    _reloadedSections = nil;
+    _deletedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_deleteSectionChanges];
+    _insertedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_insertSectionChanges];
 
     // reload items changes need to be adjusted so that we access the correct indexPaths in the datasource
     NSDictionary *insertedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_insertItemChanges ofType:_ASHierarchyChangeTypeInsert];
@@ -296,13 +289,17 @@
     [_reloadItemChanges removeAllObjects];
     
     // Ignore item deletes in reloaded/deleted sections.
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:deletedOrReloaded];
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:_deletedSections];
 
     // Ignore item inserts in reloaded(new)/inserted sections.
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:insertedOrReloaded];
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:_insertedSections];
   }
 }
 
+- (NSString *)description
+{
+  return [NSString stringWithFormat:@"<%@ %p: deletedSections=%@, insertedSections=%@, deletedItems=%@, insertedItems=%@>", NSStringFromClass(self.class), self, _deletedSections, _insertedSections, _deleteItemChanges, _insertItemChanges];
+}
 
 
 @end
@@ -313,6 +310,7 @@
 {
   self = [super init];
   if (self) {
+    ASDisplayNodeAssert(indexSet.count > 0, @"Request to create _ASHierarchySectionChange with no sections!");
     _changeType = changeType;
     _indexSet = indexSet;
     _animationOptions = animationOptions;
@@ -385,6 +383,11 @@
   return indexes;
 }
 
+- (NSString *)description
+{
+  return [NSString stringWithFormat:@"<%@: anim=%lu, type=%@, indexes=%@>", NSStringFromClass(self.class), (unsigned long)_animationOptions, NSStringFromASHierarchyChangeType(_changeType), [self.indexSet as_smallDescription]];
+}
+
 @end
 
 @implementation _ASHierarchyItemChange
@@ -393,6 +396,7 @@
 {
   self = [super init];
   if (self) {
+    ASDisplayNodeAssert(indexPaths.count > 0, @"Request to create _ASHierarchyItemChange with no items!");
     _changeType = changeType;
     if (presorted) {
       _indexPaths = indexPaths;
@@ -487,6 +491,11 @@
   }
 
   [changes setArray:result];
+}
+
+- (NSString *)description
+{
+  return [NSString stringWithFormat:@"<%@: anim=%lu, type=%@, indexPaths=%@>", NSStringFromClass(self.class), (unsigned long)_animationOptions, NSStringFromASHierarchyChangeType(_changeType), self.indexPaths];
 }
 
 @end

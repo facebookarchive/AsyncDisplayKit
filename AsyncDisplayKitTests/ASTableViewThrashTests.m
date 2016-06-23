@@ -446,17 +446,22 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 @implementation ASTableViewThrashTests {
   // The current update, which will be logged in case of a failure.
   ASThrashUpdate *_update;
+  BOOL _failed;
 }
 
 #pragma mark Overrides
 
 - (void)tearDown {
+  if (_failed && _update != nil) {
+    NSLog(@"Failed update %@: %@", _update, _update.logFriendlyBase64Representation);
+  }
+  _failed = NO;
   _update = nil;
 }
 
 // NOTE: Despite the documentation, this is not always called if an exception is caught.
 - (void)recordFailureWithDescription:(NSString *)description inFile:(NSString *)filePath atLine:(NSUInteger)lineNumber expected:(BOOL)expected {
-  [self logCurrentUpdateIfNeeded];
+  _failed = YES;
   [super recordFailureWithDescription:description inFile:filePath atLine:lineNumber expected:expected];
 }
 
@@ -497,12 +502,6 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 
 #pragma mark Helpers
 
-- (void)logCurrentUpdateIfNeeded {
-  if (_update != nil) {
-    NSLog(@"Failed update %@: %@", _update, _update.logFriendlyBase64Representation);
-  }
-}
-
 - (void)applyUpdate:(ASThrashUpdate *)update toDataSource:(ASThrashDataSource *)dataSource {
   TableView *tableView = dataSource.tableView;
   
@@ -535,7 +534,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
     [tableView waitUntilAllUpdatesAreCommitted];
 #endif
   } @catch (NSException *exception) {
-    [self logCurrentUpdateIfNeeded];
+    _failed = YES;
     @throw exception;
   }
 }
