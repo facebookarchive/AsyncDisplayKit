@@ -1,1 +1,1 @@
-git "file:///Users/scottg/code/AsyncDisplayKit" "master"
+github "Facebook/AsyncDisplayKit" "master"
