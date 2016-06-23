@@ -147,6 +147,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)rangeController:(ASRangeController * )rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
 
 /**
+ * Completed updates to cell node addition and removal.
+ *
+ * @param rangeController Sender.
+ */
+- (void)didCompleteUpdatesInRangeController:(ASRangeController *)rangeController;
+
+/**
  * Called for nodes insertion.
  *
  * @param rangeController Sender.

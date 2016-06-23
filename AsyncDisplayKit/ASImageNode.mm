@@ -26,46 +26,18 @@
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
 
-@interface _ASImageNodeDrawParameters : NSObject
-
-@property (nonatomic, retain) UIImage *image;
-@property (nonatomic, assign) BOOL opaque;
-@property (nonatomic, assign) CGRect bounds;
-@property (nonatomic, assign) CGFloat contentsScale;
-@property (nonatomic, strong) UIColor *backgroundColor;
-@property (nonatomic, assign) UIViewContentMode contentMode;
-
-@end
-
-// TODO: eliminate explicit parameters with a set of keys copied from the node
-@implementation _ASImageNodeDrawParameters
-
-- (instancetype)initWithImage:(UIImage *)image
-                       bounds:(CGRect)bounds
-                       opaque:(BOOL)opaque
-                contentsScale:(CGFloat)contentsScale
-              backgroundColor:(UIColor *)backgroundColor
-                  contentMode:(UIViewContentMode)contentMode
-{
-  if (!(self = [self init]))
-    return nil;
-
-  _image = image;
-  _opaque = opaque;
-  _bounds = bounds;
-  _contentsScale = contentsScale;
-  _backgroundColor = backgroundColor;
-  _contentMode = contentMode;
-
-  return self;
-}
-
-- (NSString *)description
-{
-  return [NSString stringWithFormat:@"<%@ : %p opaque:%@ bounds:%@ contentsScale:%.2f backgroundColor:%@ contentMode:%@>", [self class], self, @(self.opaque), NSStringFromCGRect(self.bounds), self.contentsScale, self.backgroundColor, ASDisplayNodeNSStringFromUIContentMode(self.contentMode)];
-}
-
-@end
+struct ASImageNodeDrawParameters {
+  BOOL opaque;
+  CGRect bounds;
+  CGFloat contentsScale;
+  UIColor *backgroundColor;
+  UIViewContentMode contentMode;
+  BOOL cropEnabled;
+  BOOL forceUpscaling;
+  CGRect cropRect;
+  CGRect cropDisplayBounds;
+  asimagenode_modification_block_t imageModificationBlock;
+};
 
 @implementation ASImageNode
 {
@@ -75,17 +47,31 @@
   void (^_displayCompletionBlock)(BOOL canceled);
   ASDN::RecursiveMutex _imageLock;
   
+  // Drawing
+  ASImageNodeDrawParameters _drawParameter;
+  ASTextNode *_debugLabelNode;
+  
   // Cropping.
   BOOL _cropEnabled; // Defaults to YES.
   BOOL _forceUpscaling; //Defaults to NO.
   CGRect _cropRect; // Defaults to CGRectMake(0.5, 0.5, 0, 0)
-  CGRect _cropDisplayBounds;
-  
-  ASTextNode *_debugLabelNode;
+  CGRect _cropDisplayBounds; // Defaults to CGRectNull
 }
 
 @synthesize image = _image;
 @synthesize imageModificationBlock = _imageModificationBlock;
+
+#pragma mark - NSObject
+
++ (void)initialize
+{
+  [super initialize];
+  
+  if (self != [ASImageNode class]) {
+    // Prevent custom drawing in subclasses
+    ASDisplayNodeAssert(!ASSubclassOverridesClassSelector([ASImageNode class], self, @selector(displayWithParameters:isCancelled:)), @"Subclass %@ must not override displayWithParameters:isCancelled: method. Custom drawing in %@ subclass is not supported.", NSStringFromClass(self), NSStringFromClass([ASImageNode class]));
+  }
+}
 
 - (instancetype)init
 {
@@ -124,6 +110,8 @@
   return nil;
 }
 
+#pragma mark - Layout and Sizing
+
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(_imageLock);
@@ -135,6 +123,8 @@
   else
     return CGSizeZero;
 }
+
+#pragma mark - Setter / Getter
 
 - (void)setImage:(UIImage *)image
 {
@@ -177,54 +167,72 @@
   self.placeholderEnabled = placeholderColor != nil;
 }
 
+#pragma mark - Drawing
+
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
-  return [[_ASImageNodeDrawParameters alloc] initWithImage:self.image
-                                                    bounds:self.bounds
-                                                    opaque:self.opaque
-                                             contentsScale:self.contentsScaleForDisplay
-                                           backgroundColor:self.backgroundColor
-                                               contentMode:self.contentMode];
+  ASDN::MutexLocker l(_imageLock);
+  
+  _drawParameter = {
+    .bounds = self.bounds,
+    .opaque = self.opaque,
+    .contentsScale = _contentsScaleForDisplay,
+    .backgroundColor = self.backgroundColor,
+    .contentMode = self.contentMode,
+    .cropEnabled = _cropEnabled,
+    .forceUpscaling = _forceUpscaling,
+    .cropRect = _cropRect,
+    .cropDisplayBounds = _cropDisplayBounds,
+    .imageModificationBlock = _imageModificationBlock
+  };
+  
+  return nil;
 }
 
 - (NSDictionary *)debugLabelAttributes
 {
-  return @{ NSFontAttributeName: [UIFont systemFontOfSize:15.0],
-            NSForegroundColorAttributeName: [UIColor redColor] };
+  return @{
+    NSFontAttributeName: [UIFont systemFontOfSize:15.0],
+    NSForegroundColorAttributeName: [UIColor redColor]
+  };
 }
 
-- (UIImage *)displayWithParameters:(_ASImageNodeDrawParameters *)parameters isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
+- (UIImage *)displayWithParameters:(id<NSObject> *)parameter isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
 {
-  UIImage *image = parameters.image;
-  if (!image) {
+  UIImage *image = self.image;
+  if (image == nil) {
     return nil;
   }
   
+  CGRect drawParameterBounds    = CGRectZero;
   BOOL forceUpscaling           = NO;
-  BOOL cropEnabled              = NO;
-  BOOL isOpaque                 = parameters.opaque;
-  UIColor *backgroundColor      = parameters.backgroundColor;
-  UIViewContentMode contentMode = parameters.contentMode;
+  BOOL cropEnabled              = YES;
+  BOOL isOpaque                 = NO;
+  UIColor *backgroundColor      = nil;
+  UIViewContentMode contentMode = UIViewContentModeScaleAspectFill;
   CGFloat contentsScale         = 0.0;
   CGRect cropDisplayBounds      = CGRectZero;
   CGRect cropRect               = CGRectZero;
   asimagenode_modification_block_t imageModificationBlock;
-  
+
+  ASDN::MutexLocker l(_imageLock);
   {
-    ASDN::MutexLocker l(_imageLock);
+    ASImageNodeDrawParameters drawParameter = _drawParameter;
     
-    // FIXME: There is a small risk of these values changing between the main thread creation of drawParameters, and the execution of this method.
-    // We should package these up into the draw parameters object.  Might be easiest to create a struct for the non-objects and make it one property.
-    cropEnabled = _cropEnabled;
-    forceUpscaling = _forceUpscaling;
-    contentsScale = _contentsScaleForDisplay;
-    cropDisplayBounds = _cropDisplayBounds;
-    cropRect = _cropRect;
-    imageModificationBlock = _imageModificationBlock;
+    drawParameterBounds       = drawParameter.bounds;
+    forceUpscaling            = drawParameter.forceUpscaling;
+    cropEnabled               = drawParameter.cropEnabled;
+    isOpaque                  = drawParameter.opaque;
+    backgroundColor           = drawParameter.backgroundColor;
+    contentMode               = drawParameter.contentMode;
+    contentsScale             = drawParameter.contentsScale;
+    cropDisplayBounds         = drawParameter.cropDisplayBounds;
+    cropRect                  = drawParameter.cropRect;
+    imageModificationBlock    = drawParameter.imageModificationBlock;
   }
   
   BOOL hasValidCropBounds = cropEnabled && !CGRectIsNull(cropDisplayBounds) && !CGRectIsEmpty(cropDisplayBounds);
-  CGRect bounds = (hasValidCropBounds ? cropDisplayBounds : parameters.bounds);
+  CGRect bounds = (hasValidCropBounds ? cropDisplayBounds : drawParameterBounds);
   
   ASDisplayNodeContextModifier preContextBlock = self.willDisplayNodeContentWithRenderingContext;
   ASDisplayNodeContextModifier postContextBlock = self.didDisplayNodeContentWithRenderingContext;
@@ -359,7 +367,6 @@
   }
 }
 
-#pragma mark -
 - (void)setNeedsDisplayWithCompletion:(void (^ _Nullable)(BOOL canceled))displayCompletionBlock
 {
   if (self.displaySuspended) {
@@ -378,6 +385,7 @@
 }
 
 #pragma mark - Cropping
+
 - (BOOL)isCropEnabled
 {
   ASDN::MutexLocker l(_imageLock);
@@ -462,6 +470,7 @@
 }
 
 #pragma mark - Debug
+
 - (void)layout
 {
   [super layout];
@@ -477,6 +486,7 @@
 @end
 
 #pragma mark - Extras
+
 extern asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat borderWidth, UIColor *borderColor)
 {
   return ^(UIImage *originalImage) {
