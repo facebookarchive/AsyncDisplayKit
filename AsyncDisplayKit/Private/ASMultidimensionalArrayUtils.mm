@@ -41,7 +41,7 @@ static void ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(NSMutableArray 
   }
 }
 
-static void ASRecursivelyFindIndexPathsForMultidimensionalArray(NSObject *obj, NSIndexPath *curIndexPath, NSMutableArray *res)
+static void ASRecursivelyFindIndexPathsForMultidimensionalArray(NSObject *obj, NSIndexPath *curIndexPath, NSMutableArray <NSIndexPath *>*res)
 {
   if (![obj isKindOfClass:[NSArray class]]) {
     [res addObject:curIndexPath];
