@@ -1,1 +1,1 @@
-git "file:///Users/hmtroisi/code/AsyncDisplayKit" "carthage"
+github "Facebook/AsyncDisplayKit" "master"
