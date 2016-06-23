@@ -15,6 +15,7 @@
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASStaticLayoutSpec.h"
 
 @interface ASButtonNode ()
 {
@@ -489,6 +490,12 @@
   
   if (UIEdgeInsetsEqualToEdgeInsets(UIEdgeInsetsZero, contentEdgeInsets) == NO) {
     spec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentEdgeInsets child:spec];
+  }
+  
+  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
+    // Handle preferred frame size
+    stack.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(self.preferredFrameSize);
+    spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
   }
   
   if (_backgroundImageNode.image) {
