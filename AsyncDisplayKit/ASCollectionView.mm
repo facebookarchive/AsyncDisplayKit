@@ -498,18 +498,21 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)insertSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController insertSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController deleteSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController reloadSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
@@ -522,18 +525,21 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
