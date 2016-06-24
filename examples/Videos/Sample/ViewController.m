@@ -27,16 +27,6 @@
 
 #pragma mark - UIViewController
 
-- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-  self = [super initWithNibName:nil bundle:nil];
-  if (self) {
-
-    
-  }
-  return self;
-}
-
 - (void)viewDidLoad
 {
   [super viewDidLoad];
