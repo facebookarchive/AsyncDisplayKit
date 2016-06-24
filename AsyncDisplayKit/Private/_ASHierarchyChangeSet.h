@@ -71,6 +71,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 @property (nonatomic, readonly) BOOL completed;
 
 /// Call this once the change set has been constructed to prevent future modifications to the changeset. Calling this more than once is a programmer error.
+/// NOTE: Calling this method will cause the changeset to convert all reloads into delete/insert pairs.
 - (void)markCompleted;
 
 /**
