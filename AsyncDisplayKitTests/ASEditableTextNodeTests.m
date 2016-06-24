@@ -54,7 +54,7 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
 - (void)testAllocASEditableTextNode
 {
   ASEditableTextNode *node = [[ASEditableTextNode alloc] init];
-  XCTAssertTrue([[node class] isSubclassOfClass:[ASEditableTextNode class]], @"ASTextNode alloc should return an instance of ASTextNode, instead returned %@", [node class]);
+  XCTAssertTrue([[node class] isSubclassOfClass:[ASEditableTextNode class]], @"ASEditableTextNode alloc should return an instance of ASEditableTextNode, instead returned %@", [node class]);
 }
 
 #pragma mark - ASEditableTextNode Tests
@@ -62,19 +62,32 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
 - (void)testUITextInputTraitDefaults
 {
   ASEditableTextNode *editableTextNode = [[ASEditableTextNode alloc] init];
-  XCTAssertTrue(editableTextNode.textView.autocapitalizationType == UITextAutocapitalizationTypeSentences, @"textView's autocapitalizationType should be UITextAutocapitalizationTypeSentences.");
-  XCTAssertTrue(editableTextNode.textView.autocorrectionType == UITextAutocorrectionTypeDefault,           @"textView's autocorrectionType should be UITextAutocorrectionTypeDefault.");
-  XCTAssertTrue(editableTextNode.textView.spellCheckingType == UITextSpellCheckingTypeDefault,             @"textView's spellCheckingType should be UITextSpellCheckingTypeDefault.");
-  XCTAssertTrue(editableTextNode.textView.keyboardType == UIKeyboardTypeDefault,                           @"textView's keyboardType should be UIKeyboardTypeDefault.");
-  XCTAssertTrue(editableTextNode.textView.keyboardAppearance == UIKeyboardAppearanceDefault,               @"textView's keyboardAppearance should be UIKeyboardAppearanceDefault.");
-  XCTAssertTrue(editableTextNode.textView.returnKeyType == UIReturnKeyDefault,                             @"textView's returnKeyType should be UIReturnKeyDefault.");
-  XCTAssertTrue(editableTextNode.textView.enablesReturnKeyAutomatically == NO,                             @"textView's enablesReturnKeyAutomatically should be enablesReturnKeyAutomatically.");
-  XCTAssertTrue(editableTextNode.textView.isSecureTextEntry == NO,                                         @"textView's isSecureTextEntry should be isSecureTextEntry.");
+  
+  XCTAssertTrue(editableTextNode.autocapitalizationType == UITextAutocapitalizationTypeSentences, @"_ASTextInputTraitsPendingState's autocapitalizationType default should be UITextAutocapitalizationTypeSentences.");
+  XCTAssertTrue(editableTextNode.autocorrectionType == UITextAutocorrectionTypeDefault,           @"_ASTextInputTraitsPendingState's autocorrectionType default should be UITextAutocorrectionTypeDefault.");
+  XCTAssertTrue(editableTextNode.spellCheckingType == UITextSpellCheckingTypeDefault,             @"_ASTextInputTraitsPendingState's spellCheckingType default should be UITextSpellCheckingTypeDefault.");
+  XCTAssertTrue(editableTextNode.keyboardType == UIKeyboardTypeDefault,                           @"_ASTextInputTraitsPendingState's keyboardType default should be UIKeyboardTypeDefault.");
+  XCTAssertTrue(editableTextNode.keyboardAppearance == UIKeyboardAppearanceDefault,               @"_ASTextInputTraitsPendingState's keyboardAppearance default should be UIKeyboardAppearanceDefault.");
+  XCTAssertTrue(editableTextNode.returnKeyType == UIReturnKeyDefault,                             @"_ASTextInputTraitsPendingState's returnKeyType default should be UIReturnKeyDefault.");
+  XCTAssertTrue(editableTextNode.enablesReturnKeyAutomatically == NO,                             @"_ASTextInputTraitsPendingState's enablesReturnKeyAutomatically default should be NO.");
+  XCTAssertTrue(editableTextNode.isSecureTextEntry == NO,                                         @"_ASTextInputTraitsPendingState's isSecureTextEntry default should be NO.");
+  
+  XCTAssertTrue(editableTextNode.textView.autocapitalizationType == UITextAutocapitalizationTypeSentences, @"textView's autocapitalizationType default should be UITextAutocapitalizationTypeSentences.");
+  XCTAssertTrue(editableTextNode.textView.autocorrectionType == UITextAutocorrectionTypeDefault,           @"textView's autocorrectionType default should be UITextAutocorrectionTypeDefault.");
+  XCTAssertTrue(editableTextNode.textView.spellCheckingType == UITextSpellCheckingTypeDefault,             @"textView's spellCheckingType default should be UITextSpellCheckingTypeDefault.");
+  XCTAssertTrue(editableTextNode.textView.keyboardType == UIKeyboardTypeDefault,                           @"textView's keyboardType default should be UIKeyboardTypeDefault.");
+  XCTAssertTrue(editableTextNode.textView.keyboardAppearance == UIKeyboardAppearanceDefault,               @"textView's keyboardAppearance default should be UIKeyboardAppearanceDefault.");
+  XCTAssertTrue(editableTextNode.textView.returnKeyType == UIReturnKeyDefault,                             @"textView's returnKeyType default should be UIReturnKeyDefault.");
+  XCTAssertTrue(editableTextNode.textView.enablesReturnKeyAutomatically == NO,                             @"textView's enablesReturnKeyAutomatically default should be NO.");
+  XCTAssertTrue(editableTextNode.textView.isSecureTextEntry == NO,                                         @"textView's isSecureTextEntry default should be NO.");
 }
 
 - (void)testUITextInputTraitsSetTraitsBeforeViewLoaded
 {
+  // UITextView ignores any values set on the first 3 properties below if secureTextEntry is enabled.
+  // Because of this UIKit behavior, we'll test secure entry seperately
   ASEditableTextNode *editableTextNode = [[ASEditableTextNode alloc] init];
+  
   editableTextNode.autocapitalizationType = UITextAutocapitalizationTypeWords;
   editableTextNode.autocorrectionType = UITextAutocorrectionTypeYes;
   editableTextNode.spellCheckingType = UITextSpellCheckingTypeYes;
@@ -82,21 +95,27 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   editableTextNode.keyboardAppearance = UIKeyboardAppearanceDark;
   editableTextNode.returnKeyType = UIReturnKeyGo;
   editableTextNode.enablesReturnKeyAutomatically = YES;
-  editableTextNode.secureTextEntry = YES;
-  
+
   XCTAssertTrue(editableTextNode.textView.autocapitalizationType == UITextAutocapitalizationTypeWords, @"textView's autocapitalizationType should be UITextAutocapitalizationTypeAllCharacters.");
-  XCTAssertTrue(editableTextNode.textView.autocorrectionType == UITextAutocorrectionTypeYes,                   @"textView's autocorrectionType should be UITextAutocorrectionTypeYes.");
-  XCTAssertTrue(editableTextNode.textView.spellCheckingType == UITextSpellCheckingTypeYes,                     @"textView's spellCheckingType should be UITextSpellCheckingTypeYes.");
-  XCTAssertTrue(editableTextNode.textView.keyboardType == UIKeyboardTypeTwitter,                               @"textView's keyboardType should be UIKeyboardTypeTwitter.");
-  XCTAssertTrue(editableTextNode.textView.keyboardAppearance == UIKeyboardAppearanceDark,                      @"textView's keyboardAppearance should be UIKeyboardAppearanceDark.");
-  XCTAssertTrue(editableTextNode.textView.returnKeyType == UIReturnKeyGo,                                      @"textView's returnKeyType should be UIReturnKeyGo.");
-  XCTAssertTrue(editableTextNode.textView.enablesReturnKeyAutomatically == YES,                                @"textView's enablesReturnKeyAutomatically should be enablesReturnKeyAutomatically.");
-  XCTAssertTrue(editableTextNode.textView.isSecureTextEntry == YES,                                            @"textView's isSecureTextEntry should be isSecureTextEntry.");
+  XCTAssertTrue(editableTextNode.textView.autocorrectionType == UITextAutocorrectionTypeYes,           @"textView's autocorrectionType should be UITextAutocorrectionTypeYes.");
+  XCTAssertTrue(editableTextNode.textView.spellCheckingType == UITextSpellCheckingTypeYes,             @"textView's spellCheckingType should be UITextSpellCheckingTypeYes.");
+  XCTAssertTrue(editableTextNode.textView.keyboardType == UIKeyboardTypeTwitter,                       @"textView's keyboardType should be UIKeyboardTypeTwitter.");
+  XCTAssertTrue(editableTextNode.textView.keyboardAppearance == UIKeyboardAppearanceDark,              @"textView's keyboardAppearance should be UIKeyboardAppearanceDark.");
+  XCTAssertTrue(editableTextNode.textView.returnKeyType == UIReturnKeyGo,                              @"textView's returnKeyType should be UIReturnKeyGo.");
+  XCTAssertTrue(editableTextNode.textView.enablesReturnKeyAutomatically == YES,                        @"textView's enablesReturnKeyAutomatically should be YES.");
+  
+  ASEditableTextNode *secureEditableTextNode = [[ASEditableTextNode alloc] init];
+  secureEditableTextNode.secureTextEntry = YES;
+  
+  XCTAssertTrue(secureEditableTextNode.textView.secureTextEntry == YES,                                @"textView's isSecureTextEntry should be YES.");
 }
 
 - (void)testUITextInputTraitsChangeTraitAfterViewLoaded
 {
+  // UITextView ignores any values set on the first 3 properties below if secureTextEntry is enabled.
+  // Because of this UIKit behavior, we'll test secure entry seperately
   ASEditableTextNode *editableTextNode = [[ASEditableTextNode alloc] init];
+
   editableTextNode.textView.autocapitalizationType = UITextAutocapitalizationTypeWords;
   editableTextNode.textView.autocorrectionType = UITextAutocorrectionTypeYes;
   editableTextNode.textView.spellCheckingType = UITextSpellCheckingTypeYes;
@@ -104,16 +123,19 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   editableTextNode.textView.keyboardAppearance = UIKeyboardAppearanceDark;
   editableTextNode.textView.returnKeyType = UIReturnKeyGo;
   editableTextNode.textView.enablesReturnKeyAutomatically = YES;
-  editableTextNode.textView.secureTextEntry = YES;
   
-  XCTAssertTrue(editableTextNode.autocapitalizationType == UITextAutocapitalizationTypeWords, @"textView's autocapitalizationType should be UITextAutocapitalizationTypeAllCharacters.");
-  XCTAssertTrue(editableTextNode.autocorrectionType == UITextAutocorrectionTypeYes,                   @"textView's autocorrectionType should be UITextAutocorrectionTypeYes.");
-  XCTAssertTrue(editableTextNode.spellCheckingType == UITextSpellCheckingTypeYes,                     @"textView's spellCheckingType should be UITextSpellCheckingTypeYes.");
-  XCTAssertTrue(editableTextNode.keyboardType == UIKeyboardTypeTwitter,                               @"textView's keyboardType should be UIKeyboardTypeTwitter.");
-  XCTAssertTrue(editableTextNode.keyboardAppearance == UIKeyboardAppearanceDark,                      @"textView's keyboardAppearance should be UIKeyboardAppearanceDark.");
-  XCTAssertTrue(editableTextNode.returnKeyType == UIReturnKeyGo,                                      @"textView's returnKeyType should be UIReturnKeyGo.");
-  XCTAssertTrue(editableTextNode.enablesReturnKeyAutomatically == YES,                                @"textView's enablesReturnKeyAutomatically should be enablesReturnKeyAutomatically.");
-  XCTAssertTrue(editableTextNode.isSecureTextEntry == YES,                                            @"textView's isSecureTextEntry should be isSecureTextEntry.");
+  XCTAssertTrue(editableTextNode.textView.autocapitalizationType == UITextAutocapitalizationTypeWords, @"textView's autocapitalizationType should be UITextAutocapitalizationTypeAllCharacters.");
+  XCTAssertTrue(editableTextNode.textView.autocorrectionType == UITextAutocorrectionTypeYes,           @"textView's autocorrectionType should be UITextAutocorrectionTypeYes.");
+  XCTAssertTrue(editableTextNode.textView.spellCheckingType == UITextSpellCheckingTypeYes,             @"textView's spellCheckingType should be UITextSpellCheckingTypeYes.");
+  XCTAssertTrue(editableTextNode.textView.keyboardType == UIKeyboardTypeTwitter,                       @"textView's keyboardType should be UIKeyboardTypeTwitter.");
+  XCTAssertTrue(editableTextNode.textView.keyboardAppearance == UIKeyboardAppearanceDark,              @"textView's keyboardAppearance should be UIKeyboardAppearanceDark.");
+  XCTAssertTrue(editableTextNode.textView.returnKeyType == UIReturnKeyGo,                              @"textView's returnKeyType should be UIReturnKeyGo.");
+  XCTAssertTrue(editableTextNode.textView.enablesReturnKeyAutomatically == YES,                        @"textView's enablesReturnKeyAutomatically should be YES.");
+  
+  ASEditableTextNode *secureEditableTextNode = [[ASEditableTextNode alloc] init];
+  secureEditableTextNode.textView.secureTextEntry = YES;
+  
+  XCTAssertTrue(secureEditableTextNode.textView.secureTextEntry == YES,                                @"textView's isSecureTextEntry should be YES.");
 }
 
 - (void)testSetPreferredFrameSize

@@ -208,7 +208,6 @@
     {
       ASDN::MutexLocker l(_textInputTraitsLock);
       if (_textInputTraits) {
-        NSLog(@"%ld = %ld", (long)_textInputTraits.autocapitalizationType, (long)UITextAutocapitalizationTypeWords);
         textView.autocapitalizationType         = _textInputTraits.autocapitalizationType;
         textView.autocorrectionType             = _textInputTraits.autocorrectionType;
         textView.spellCheckingType              = _textInputTraits.spellCheckingType;
@@ -217,7 +216,6 @@
         textView.returnKeyType                  = _textInputTraits.returnKeyType;
         textView.enablesReturnKeyAutomatically  = _textInputTraits.enablesReturnKeyAutomatically;
         textView.secureTextEntry                = _textInputTraits.isSecureTextEntry;
-        NSLog(@"%@ = %ld", textView, textView.autocapitalizationType);
       }
     }
     
