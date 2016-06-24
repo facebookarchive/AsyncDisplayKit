@@ -100,8 +100,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   ASRangeController *_rangeController;
 
-  BOOL _asyncDataFetchingEnabled;
-
   ASBatchContext *_batchContext;
 
   NSIndexPath *_pendingVisibleIndexPath;
@@ -133,12 +131,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     unsigned int asyncDataSourceNumberOfSectionsInTableView:1;
     unsigned int asyncDataSourceTableViewNodeBlockForRowAtIndexPath:1;
     unsigned int asyncDataSourceTableViewNodeForRowAtIndexPath:1;
-    unsigned int asyncDataSourceTableViewLockDataSource:1;
-    unsigned int asyncDataSourceTableViewUnlockDataSource:1;
   } _asyncDataSourceFlags;
 }
 
-@property (atomic, assign) BOOL asyncDataSourceLocked;
 @property (nonatomic, strong, readwrite) ASDataController *dataController;
 
 // Used only when ASTableView is created directly rather than through ASTableNode.
@@ -177,15 +172,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
   
-  _dataController = [[dataControllerClass alloc] initWithAsyncDataFetching:NO];
+  _dataController = [[dataControllerClass alloc] init];
   _dataController.dataSource = self;
   _dataController.delegate = _rangeController;
   _dataController.environmentDelegate = self;
   
   _layoutController.dataSource = _dataController;
-
-  _asyncDataFetchingEnabled = NO;
-  _asyncDataSourceLocked = NO;
 
   _leadingScreensForBatching = 2.0;
   _batchContext = [[ASBatchContext alloc] init];
@@ -290,8 +282,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInTableView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableView:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeForRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)];
-    _asyncDataSourceFlags.asyncDataSourceTableViewLockDataSource = [_asyncDataSource respondsToSelector:@selector(tableViewLockDataSource:)];
-    _asyncDataSourceFlags.asyncDataSourceTableViewUnlockDataSource = [_asyncDataSource respondsToSelector:@selector(tableViewUnlockDataSource:)];
     
     // Data source must implement tableView:nodeBlockForRowAtIndexPath: or tableView:nodeForRowAtIndexPath:
     ASDisplayNodeAssertTrue(_asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath || _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath);
@@ -968,6 +958,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
+- (void)didCompleteUpdatesInRangeController:(ASRangeController *)rangeController
+{
+  [self _checkForBatchFetching];
+}
+
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
@@ -1076,28 +1071,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   return ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0),
                          CGSizeMake(_nodesConstrainedWidth, FLT_MAX));
-}
-
-- (void)dataControllerLockDataSource
-{
-  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has already been locked");
-
-  self.asyncDataSourceLocked = YES;
-
-  if (_asyncDataSourceFlags.asyncDataSourceTableViewLockDataSource) {
-    [_asyncDataSource tableViewLockDataSource:self];
-  }
-}
-
-- (void)dataControllerUnlockDataSource
-{
-  ASDisplayNodeAssert(self.asyncDataSourceLocked, @"The data source has already been unlocked");
-
-  self.asyncDataSourceLocked = NO;
-
-  if (_asyncDataSourceFlags.asyncDataSourceTableViewUnlockDataSource) {
-    [_asyncDataSource tableViewUnlockDataSource:self];
-  }
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section

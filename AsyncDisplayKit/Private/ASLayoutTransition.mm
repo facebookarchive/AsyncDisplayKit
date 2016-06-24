@@ -48,9 +48,12 @@
 {
   ASDN::MutexLocker l(_propertyLock);
   [self calculateSubnodeOperationsIfNeeded];
-  for (NSUInteger i = 0; i < [_insertedSubnodes count]; i++) {
+  
+  NSUInteger i = 0;
+  for (ASDisplayNode *node in _insertedSubnodes) {
     NSUInteger p = _insertedSubnodePositions[i];
-    [_node insertSubnode:_insertedSubnodes[i] atIndex:p];
+    [_node insertSubnode:node atIndex:p];
+    i += 1;
   }
 }
 
@@ -58,8 +61,8 @@
 {
   ASDN::MutexLocker l(_propertyLock);
   [self calculateSubnodeOperationsIfNeeded];
-  for (NSUInteger i = 0; i < [_removedSubnodes count]; i++) {
-    [_removedSubnodes[i] removeFromSupernode];
+  for (ASDisplayNode *subnode in _removedSubnodes) {
+    [subnode removeFromSupernode];
   }
 }
 

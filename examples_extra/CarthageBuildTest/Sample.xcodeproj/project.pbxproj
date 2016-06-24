@@ -14,6 +14,8 @@
 		871BB3591C7C98B1005CF62A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 871BB3581C7C98B1005CF62A /* Assets.xcassets */; };
 		871BB35C1C7C98B1005CF62A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 871BB35A1C7C98B1005CF62A /* LaunchScreen.storyboard */; };
 		871BB3651C7C99B0005CF62A /* AsyncDisplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 871BB3641C7C99B0005CF62A /* AsyncDisplayKit.framework */; };
+		DEAE185D1D1A504A0083FAD0 /* PINCache.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DEAE185B1D1A504A0083FAD0 /* PINCache.framework */; };
+		DEAE185E1D1A504A0083FAD0 /* PINRemoteImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DEAE185C1D1A504A0083FAD0 /* PINRemoteImage.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +30,8 @@
 		871BB35B1C7C98B1005CF62A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		871BB35D1C7C98B1005CF62A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		871BB3641C7C99B0005CF62A /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AsyncDisplayKit.framework; path = Carthage/Build/iOS/AsyncDisplayKit.framework; sourceTree = SOURCE_ROOT; };
+		DEAE185B1D1A504A0083FAD0 /* PINCache.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PINCache.framework; path = ../Carthage/Build/iOS/PINCache.framework; sourceTree = "<group>"; };
+		DEAE185C1D1A504A0083FAD0 /* PINRemoteImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PINRemoteImage.framework; path = ../Carthage/Build/iOS/PINRemoteImage.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +40,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				871BB3651C7C99B0005CF62A /* AsyncDisplayKit.framework in Frameworks */,
+				DEAE185D1D1A504A0083FAD0 /* PINCache.framework in Frameworks */,
+				DEAE185E1D1A504A0083FAD0 /* PINRemoteImage.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +93,8 @@
 			isa = PBXGroup;
 			children = (
 				871BB3641C7C99B0005CF62A /* AsyncDisplayKit.framework */,
+				DEAE185B1D1A504A0083FAD0 /* PINCache.framework */,
+				DEAE185C1D1A504A0083FAD0 /* PINRemoteImage.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -126,7 +134,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 871BB3441C7C98B1005CF62A /* Build configuration list for PBXProject "CarthageExample" */;
+			buildConfigurationList = 871BB3441C7C98B1005CF62A /* Build configuration list for PBXProject "Sample" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -325,7 +333,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		871BB3441C7C98B1005CF62A /* Build configuration list for PBXProject "CarthageExample" */ = {
+		871BB3441C7C98B1005CF62A /* Build configuration list for PBXProject "Sample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				871BB35E1C7C98B1005CF62A /* Debug */,

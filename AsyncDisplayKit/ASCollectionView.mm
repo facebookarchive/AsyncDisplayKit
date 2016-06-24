@@ -58,6 +58,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _node.highlighted = highlighted;
 }
 
+- (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
+{
+  [_node applyLayoutAttributes:layoutAttributes];
+}
+
 @end
 
 #pragma mark -
@@ -107,7 +112,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   BOOL _performingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
   
-  BOOL _asyncDataFetchingEnabled;
   _ASCollectionViewNodeSizeInvalidationContext *_queuedNodeSizeInvalidationContext; // Main thread only
   BOOL _isDeallocating;
   
@@ -150,13 +154,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     unsigned int asyncDataSourceNodeForItemAtIndexPath:1;
     unsigned int asyncDataSourceNodeBlockForItemAtIndexPath:1;
     unsigned int asyncDataSourceNumberOfSectionsInCollectionView:1;
-    unsigned int asyncDataSourceCollectionViewLockDataSource:1;
-    unsigned int asyncDataSourceCollectionViewUnlockDataSource:1;
     unsigned int asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath:1;
   } _asyncDataSourceFlags;
 }
-
-@property (atomic, assign) BOOL asyncDataSourceLocked;
 
 // Used only when ASCollectionView is created directly rather than through ASCollectionNode.
 // We create a node so that logic related to appearance, memory management, etc can be located there
@@ -226,7 +226,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
   
-  _dataController = [[ASCollectionDataController alloc] initWithAsyncDataFetching:NO];
+  _dataController = [[ASCollectionDataController alloc] init];
   _dataController.delegate = _rangeController;
   _dataController.dataSource = self;
   _dataController.environmentDelegate = self;
@@ -234,9 +234,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _batchContext = [[ASBatchContext alloc] init];
   
   _leadingScreensForBatching = 2.0;
-  
-  _asyncDataFetchingEnabled = NO;
-  _asyncDataSourceLocked = NO;
   
   _performingBatchUpdates = NO;
   _batchUpdateBlocks = [NSMutableArray array];
@@ -370,9 +367,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInCollectionView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
-    _asyncDataSourceFlags.asyncDataSourceCollectionViewLockDataSource = [_asyncDataSource respondsToSelector:@selector(collectionViewLockDataSource:)];
-    _asyncDataSourceFlags.asyncDataSourceCollectionViewUnlockDataSource = [_asyncDataSource respondsToSelector:@selector(collectionViewUnlockDataSource:)];
-    _asyncDataSourceFlags.asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];;
+    _asyncDataSourceFlags.asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
 
     // Data-source must implement collectionView:nodeForItemAtIndexPath: or collectionView:nodeBlockForItemAtIndexPath:
     ASDisplayNodeAssertTrue(_asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath || _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath);
@@ -932,26 +927,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (void)dataControllerLockDataSource
-{
-  ASDisplayNodeAssert(!self.asyncDataSourceLocked, @"The data source has already been locked");
-  
-  self.asyncDataSourceLocked = YES;
-  if (_asyncDataSourceFlags.asyncDataSourceCollectionViewLockDataSource) {
-    [_asyncDataSource collectionViewLockDataSource:self];
-  }
-}
-
-- (void)dataControllerUnlockDataSource
-{
-  ASDisplayNodeAssert(self.asyncDataSourceLocked, @"The data source has already been unlocked");
-  
-  self.asyncDataSourceLocked = NO;
-  if (_asyncDataSourceFlags.asyncDataSourceCollectionViewUnlockDataSource) {
-    [_asyncDataSource collectionViewUnlockDataSource:self];
-  }
-}
-
 - (id<ASEnvironment>)dataControllerEnvironment
 {
   if (self.collectionNode) {
@@ -1002,6 +977,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
+  
   // Calling visibleNodeIndexPathsForRangeController: will trigger UIKit to call reloadData if it never has, which can result
   // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
   BOOL isZeroSized = CGRectEqualToRect(self.bounds, CGRectZero);
@@ -1063,6 +1039,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   [_batchUpdateBlocks removeAllObjects];
   _performingBatchUpdates = NO;
+}
+
+- (void)didCompleteUpdatesInRangeController:(ASRangeController *)rangeController
+{
+  [self _checkForBatchFetching];
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions

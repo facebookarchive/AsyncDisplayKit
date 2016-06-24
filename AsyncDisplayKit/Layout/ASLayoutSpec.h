@@ -40,10 +40,9 @@ NS_ASSUME_NONNULL_BEGIN
  * only require a single child.
  *
  * For layout specs that require a known number of children (ASBackgroundLayoutSpec, for example)
- * a subclass should use this method to set the "primary" child. It can then use setChild:forIdentifier:
- * to set any other required children. Ideally a subclass would hide this from the user, and use the
- * setChild:forIdentifier: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
- * property that behind the scenes is calling setChild:forIdentifier:.
+ * a subclass should use this method to set the "primary" child. This is actually the same as calling 
+ * setChild:forIdentifier:0. All other children should be set by defining convenience methods
+ * that call setChild:forIdentifier behind the scenes.
  */
 - (void)setChild:(id<ASLayoutable>)child;
 
@@ -52,19 +51,19 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param child A child to be added.
  *
- * @param identifier An identifier associated with the child.
+ * @param index An index associated with the child.
  *
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
  * responsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
  * only require a single child.
  *
  * For layout specs that require a known number of children (ASBackgroundLayoutSpec, for example)
- * a subclass should use the setChild method to set the "primary" child. It can then use this method
+ * a subclass can use the setChild method to set the "primary" child. It should then use this method
  * to set any other required children. Ideally a subclass would hide this from the user, and use the
- * setChild:forIdentifier: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
- * property that behind the scenes is calling setChild:forIdentifier:.
+ * setChild:forIndex: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
+ * property that behind the scenes is calling setChild:forIndex:.
  */
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier;
+- (void)setChild:(id<ASLayoutable>)child forIndex:(NSUInteger)index;
 
 /**
  * Adds childen to this layout spec.
@@ -94,11 +93,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable id<ASLayoutable>)child;
 
 /**
- * Returns the child added to this layout spec using the given identifier.
+ * Returns the child added to this layout spec using the given index.
  *
- * @param identifier An identifier associated withe the child.
+ * @param index An identifier associated withe the child.
  */
-- (nullable id<ASLayoutable>)childForIdentifier:(NSString *)identifier;
+- (nullable id<ASLayoutable>)childForIndex:(NSUInteger)index;
 
 /**
  * Returns all children added to this layout spec.

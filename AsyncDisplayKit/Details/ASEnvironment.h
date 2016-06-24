@@ -147,6 +147,9 @@ ASDISPLAYNODE_EXTERN_C_END
 //
 // If there is any new downward propagating state, it should be added to this define.
 //
+// If the only change in a trait collection is that its dislplayContext has gone from non-nil to nil,
+// assume that we are clearing the context as part of a ASVC dealloc and do not trigger a layout.
+//
 // This logic is used in both ASCollectionNode and ASTableNode
 #define ASEnvironmentCollectionTableSetEnvironmentState(lock) \
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState\
@@ -156,12 +159,16 @@ ASDISPLAYNODE_EXTERN_C_END
   [super setEnvironmentState:environmentState];\
   ASEnvironmentTraitCollection currentTraits = environmentState.environmentTraitCollection;\
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
+    /* Must dispatch to main for self.view && [self.view.dataController completedNodes]*/ \
     ASPerformBlockOnMainThread(^{\
+      BOOL needsLayout = (oldTraits.displayContext == currentTraits.displayContext) || currentTraits.displayContext != nil;\
       NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
       for (NSArray *sectionArray in completedNodes) {\
         for (ASCellNode *cellNode in sectionArray) {\
           ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
-          [cellNode setNeedsLayout];\
+          if (needsLayout) {\
+            [cellNode setNeedsLayout];\
+          }\
         }\
       }\
     });\
