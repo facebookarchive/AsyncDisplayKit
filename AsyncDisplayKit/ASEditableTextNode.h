@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
  @abstract Implements a node that supports text editing.
  @discussion Does not support layer backing.
  */
-@interface ASEditableTextNode : ASDisplayNode
+@interface ASEditableTextNode : ASDisplayNode <UITextInputTraits>
 
 /**
  * @abstract Initializes an editable text node using default TextKit components.
@@ -93,9 +93,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) UIEdgeInsets textContainerInset;
 
 /**
- @abstract The returnKeyType of the keyboard. This value defaults to UIReturnKeyDefault.
+ @abstract <UITextInputTraits> properties.
  */
-@property (nonatomic, readwrite) UIReturnKeyType returnKeyType;
+@property(nonatomic, readwrite, assign) UITextAutocapitalizationType autocapitalizationType; // default is UITextAutocapitalizationTypeSentences
+@property(nonatomic, readwrite, assign) UITextAutocorrectionType autocorrectionType;         // default is UITextAutocorrectionTypeDefault
+@property(nonatomic, readwrite, assign) UITextSpellCheckingType spellCheckingType;           // default is UITextSpellCheckingTypeDefault;
+@property(nonatomic, readwrite, assign) UIKeyboardType keyboardType;                         // default is UIKeyboardTypeDefault
+@property(nonatomic, readwrite, assign) UIKeyboardAppearance keyboardAppearance;             // default is UIKeyboardAppearanceDefault
+@property(nonatomic, readwrite, assign) UIReturnKeyType returnKeyType;                       // default is UIReturnKeyDefault (See note under UIReturnKeyType enum)
+@property(nonatomic, readwrite, assign) BOOL enablesReturnKeyAutomatically;                  // default is NO (when YES, will automatically disable return key when text widget has zero-length contents, and will automatically enable when text widget has non-zero-length contents)
+@property(nonatomic, readwrite, assign, getter=isSecureTextEntry) BOOL secureTextEntry;      // default is NO
 
 /**
   @abstract Indicates whether the receiver's text view is the first responder, and thus has the keyboard visible and is prepared for editing by the user.
