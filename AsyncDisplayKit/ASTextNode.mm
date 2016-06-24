@@ -326,8 +326,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   ASLayout *layout = self.calculatedLayout;
   
-  std::lock_guard<std::recursive_mutex> l(_textLock);
   if (layout != nil) {
+    std::lock_guard<std::recursive_mutex> l(_textLock);
     _constrainedSize = layout.size;
     _renderer.constrainedSize = layout.size;
   }
@@ -713,6 +713,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
       }
 
       if (highlightTargetLayer != nil) {
+        std::lock_guard<std::recursive_mutex> l(_textLock);
+
         NSArray *highlightRects = [[self _renderer] rectsForTextRange:highlightRange measureOption:ASTextKitRendererMeasureOptionBlock];
         NSMutableArray *converted = [NSMutableArray arrayWithCapacity:highlightRects.count];
         for (NSValue *rectValue in highlightRects) {
@@ -906,8 +908,6 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 {
   ASDisplayNodeAssertMainThread();
   
-  std::lock_guard<std::recursive_mutex> l(_textLock);
-  
   [super touchesBegan:touches withEvent:event];
 
   CGPoint point = [[touches anyObject] locationInView:self.view];
@@ -926,7 +926,11 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
   BOOL linkCrossesVisibleRange = (lastCharIndex > range.location) && (lastCharIndex < NSMaxRange(range) - 1);
 
   if (inAdditionalTruncationMessage) {
-    NSRange visibleRange = [self _renderer].firstVisibleRange;
+    NSRange visibleRange = NSMakeRange(0, 0);
+    {
+      std::lock_guard<std::recursive_mutex> l(_textLock);
+      visibleRange = [self _renderer].firstVisibleRange;
+    }
     NSRange truncationMessageRange = [self _additionalTruncationMessageRangeWithVisibleRange:visibleRange];
     [self _setHighlightRange:truncationMessageRange forAttributeName:ASTextNodeTruncationTokenAttributeName value:nil animated:YES];
   } else if (range.length && !linkCrossesVisibleRange && linkAttributeValue != nil && linkAttributeName != nil) {
