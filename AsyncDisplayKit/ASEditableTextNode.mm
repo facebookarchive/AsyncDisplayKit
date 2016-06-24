@@ -22,14 +22,14 @@
 **/
 @interface _ASTextInputTraitsPendingState : NSObject
 
-@property (nonatomic, assign) UITextAutocapitalizationType autocapitalizationType;
-@property (nonatomic, assign) UITextAutocorrectionType autocorrectionType;
-@property (nonatomic, assign) UITextSpellCheckingType spellCheckingType;
-@property (nonatomic, assign) UIKeyboardAppearance keyboardAppearance;
-@property (nonatomic, assign) UIKeyboardType keyboardType;
-@property (nonatomic, assign) UIReturnKeyType returnKeyType;
-@property (nonatomic, assign) BOOL enablesReturnKeyAutomatically;
-@property (nonatomic, assign, getter=isSecureTextEntry) BOOL secureTextEntry;
+@property (nonatomic, readwrite, assign) UITextAutocapitalizationType autocapitalizationType;
+@property (nonatomic, readwrite, assign) UITextAutocorrectionType autocorrectionType;
+@property (nonatomic, readwrite, assign) UITextSpellCheckingType spellCheckingType;
+@property (nonatomic, readwrite, assign) UIKeyboardAppearance keyboardAppearance;
+@property (nonatomic, readwrite, assign) UIKeyboardType keyboardType;
+@property (nonatomic, readwrite, assign) UIReturnKeyType returnKeyType;
+@property (nonatomic, readwrite, assign) BOOL enablesReturnKeyAutomatically;
+@property (nonatomic, readwrite, assign, getter=isSecureTextEntry) BOOL secureTextEntry;
 
 @end
 
@@ -212,11 +212,11 @@
         textView.autocapitalizationType         = _textInputTraits.autocapitalizationType;
         textView.autocorrectionType             = _textInputTraits.autocorrectionType;
         textView.spellCheckingType              = _textInputTraits.spellCheckingType;
-//        textView.keyboardType                   = _textInputTraits.keyboardType;
-//        textView.keyboardAppearance             = _textInputTraits.keyboardAppearance;
-//        textView.returnKeyType                  = _textInputTraits.returnKeyType;
-//        textView.enablesReturnKeyAutomatically  = _textInputTraits.enablesReturnKeyAutomatically;
-//        textView.secureTextEntry                = _textInputTraits.isSecureTextEntry;
+        textView.keyboardType                   = _textInputTraits.keyboardType;
+        textView.keyboardAppearance             = _textInputTraits.keyboardAppearance;
+        textView.returnKeyType                  = _textInputTraits.returnKeyType;
+        textView.enablesReturnKeyAutomatically  = _textInputTraits.enablesReturnKeyAutomatically;
+        textView.secureTextEntry                = _textInputTraits.isSecureTextEntry;
         NSLog(@"%@ = %ld", textView, textView.autocapitalizationType);
       }
     }
