@@ -725,16 +725,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
-- (void)prepareForReloadSections:(NSIndexSet *)sections
-{
-  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
-}
-
-- (void)willReloadSections:(NSIndexSet *)sections
-{
-  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
-}
-
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
