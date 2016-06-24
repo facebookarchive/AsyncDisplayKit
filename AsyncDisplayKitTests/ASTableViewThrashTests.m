@@ -20,8 +20,8 @@
 #define TableView ASTableView
 #endif
 
-#define kInitialSectionCount 20
-#define kInitialItemCount 20
+#define kInitialSectionCount 10
+#define kInitialItemCount 10
 #define kMinimumItemCount 5
 #define kMinimumSectionCount 3
 #define kFickleness 0.1
@@ -488,7 +488,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
   [self verifyDataSource:ds];
 }
 
-- (void)DISABLED_testThrashingWildly {
+- (void)testThrashingWildly {
   for (NSInteger i = 0; i < kThrashingIterationCount; i++) {
     [self setUp];
     ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:[ASThrashTestSection sectionsWithCount:kInitialSectionCount]];
