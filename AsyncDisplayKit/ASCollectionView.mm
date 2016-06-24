@@ -95,6 +95,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
   id<ASCollectionViewLayoutInspecting> _defaultLayoutInspector;
+  id<ASCollectionViewLayoutInspecting> _layoutInspector;
   NSMutableSet *_cellsForVisibilityUpdates;
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
@@ -156,6 +157,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     unsigned int asyncDataSourceNumberOfSectionsInCollectionView:1;
     unsigned int asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath:1;
   } _asyncDataSourceFlags;
+  
+  struct {
+    unsigned int layoutInspectorDidChangeCollectionViewDataSource:1;
+    unsigned int layoutInspectorDidChangeCollectionViewDelegate:1;
+  } _layoutInspectorFlags;
 }
 
 // Used only when ASCollectionView is created directly rather than through ASCollectionNode.
@@ -245,20 +251,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   // and should not trigger a relayout.
   _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
   
-  if ([layout asdk_isFlowLayout]) {
-    // Register the default layout inspector delegate for flow layouts only
-    UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
-    ASDisplayNodeAssertNotNil(layout, @"Collection view layout must be a flow layout to use the built-in inspector");
-    _defaultLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
-  } else {
-    // Custom layouts will need to roll their own ASCollectionViewLayoutInspecting implementation and set a layout
-    // delegate. In the meantime ASDK provides a null layout inspector that does not provide any implementation
-    // and throws an exception for methods that should be implemented in the <ASCollectionViewLayoutInspecting>
-    _defaultLayoutInspector = [[ASCollectionViewDefaultCustomLayoutInspector alloc] initWithCollectionView:self];
-  }
-  _layoutInspector = _defaultLayoutInspector;
-  
   _layoutFacilitator = layoutFacilitator;
+  
+  // Trigger creating the layout inspector
+  [self layoutInspector];
   
   _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
@@ -373,8 +369,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
-    
-  if ([_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDataSource:)]) {
+  
+  if (_layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDataSource) {
     [_layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
   }
 }
@@ -409,9 +405,47 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
-  if ([_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDelegate:)]) {
+  if (_layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDelegate) {
     [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
   }
+}
+
+- (void)setCollectionViewLayout:(UICollectionViewLayout *)collectionViewLayout
+{
+  [super setCollectionViewLayout:collectionViewLayout];
+  
+  // Trigger recreation of layout inspector with new collection view layout
+  if (_layoutInspector != nil) {
+    _layoutInspector = nil;
+    [self layoutInspector];
+  }
+}
+
+- (id<ASCollectionViewLayoutInspecting>)layoutInspector
+{
+  if (_layoutInspector == nil) {
+    UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
+    if ([layout asdk_isFlowLayout]) {
+      // Register the default layout inspector delegate for flow layouts only
+      _defaultLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
+    } else {
+      // Register the default layout inspector delegate for custom collection view layouts
+      _defaultLayoutInspector = [[ASCollectionViewLayoutInspector alloc] initWithCollectionView:self];
+    }
+    
+    // Explicitly call the setter to wire up the _layoutInspectorFlags
+    self.layoutInspector = _defaultLayoutInspector;
+  }
+
+  return _layoutInspector;
+}
+
+- (void)setLayoutInspector:(id<ASCollectionViewLayoutInspecting>)layoutInspector
+{
+  _layoutInspector = layoutInspector;
+  
+  _layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDataSource = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDataSource:)];
+  _layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDelegate = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDelegate:)];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType

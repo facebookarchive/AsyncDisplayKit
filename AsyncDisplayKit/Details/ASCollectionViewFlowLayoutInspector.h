@@ -64,7 +64,7 @@ NS_ASSUME_NONNULL_BEGIN
  * far as possible based on the scrollable direction of the collection view. It throws exceptions for delegate
  * methods that are related to supplementary node's management.
  */
-@interface ASCollectionViewDefaultCustomLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
+@interface ASCollectionViewLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView NS_DESIGNATED_INITIALIZER;

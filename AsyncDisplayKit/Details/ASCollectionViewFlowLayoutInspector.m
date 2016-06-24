@@ -19,7 +19,7 @@
 
 // Returns a constrained size to let the cells layout itself as far as possible based on the scrollable direction
 // of the collection view
-static ASSizeRange ASDefaultConstrainedSizeForNodeForCollectionView(ASCollectionView *collectionView) {
+static inline ASSizeRange NodeConstrainedSizeWithCollectionView(ASCollectionView *collectionView) {
   CGSize maxSize = collectionView.bounds.size;
   if (ASScrollDirectionContainsHorizontalDirection(collectionView.scrollableDirections)) {
     maxSize.width = FLT_MAX;
@@ -29,9 +29,9 @@ static ASSizeRange ASDefaultConstrainedSizeForNodeForCollectionView(ASCollection
   return ASSizeRangeMake(CGSizeZero, maxSize);
 }
 
-#pragma mark - ASCollectionViewDefaultCustomLayoutInspector
+#pragma mark - ASCollectionViewLayoutInspector
 
-@implementation ASCollectionViewDefaultCustomLayoutInspector {
+@implementation ASCollectionViewLayoutInspector {
   struct {
     unsigned int implementsConstrainedSizeForNodeAtIndexPath:1;
   } _dataSourceFlags;
@@ -65,7 +65,7 @@ static ASSizeRange ASDefaultConstrainedSizeForNodeForCollectionView(ASCollection
     return [collectionView.asyncDataSource collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
   }
   
-  return ASDefaultConstrainedSizeForNodeForCollectionView(collectionView);
+  return NodeConstrainedSizeWithCollectionView(collectionView);
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -152,11 +152,11 @@ static ASSizeRange ASDefaultConstrainedSizeForNodeForCollectionView(ASCollection
   }
   
   CGSize itemSize = _layout.itemSize;
-  if (!CGSizeEqualToSize(itemSize, kDefaultItemSize)) {
+  if (CGSizeEqualToSize(itemSize, kDefaultItemSize) == NO) {
     return ASSizeRangeMake(itemSize, itemSize);
   }
   
-  return ASDefaultConstrainedSizeForNodeForCollectionView(collectionView);
+  return NodeConstrainedSizeWithCollectionView(collectionView);
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
