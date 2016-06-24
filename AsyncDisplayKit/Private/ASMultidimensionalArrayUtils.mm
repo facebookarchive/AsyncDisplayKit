@@ -79,6 +79,7 @@ static BOOL ASElementExistsAtIndexPathForMultidimensionalArray(NSArray *array, N
   NSUInteger indexes[indexesLength];
   [indexPath getIndexes:indexes range:NSMakeRange(1, indexesLength)];
   NSIndexPath *indexPathByRemovingFirstIndex;
+  // Use -indexPathForItem:inSection: if possible because it does not allocate into the heap
   if (indexesLength == 2) {
     indexPathByRemovingFirstIndex = [NSIndexPath indexPathForItem:indexes[1] inSection:indexes[0]];
   } else {
