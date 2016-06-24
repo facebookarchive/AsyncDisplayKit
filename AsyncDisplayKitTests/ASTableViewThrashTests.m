@@ -146,7 +146,7 @@ static volatile int32_t ASThrashTestSectionNextID = 1;
 }
 
 - (NSString *)description {
-  return [NSString stringWithFormat:@"<Section %lu: itemCount=%lu>", (unsigned long)_sectionID, (unsigned long)self.items.count];
+  return [NSString stringWithFormat:@"<Section %lu: itemCount=%lu, items=%@>", (unsigned long)_sectionID, (unsigned long)self.items.count, ASThrashArrayDescription(self.items)];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -554,7 +554,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
       XCTAssertEqual([tableView rectForRowAtIndexPath:indexPath].size.height, item.rowHeight);
 #else
       ASThrashTestNode *node = (ASThrashTestNode *)[tableView nodeForRowAtIndexPath:indexPath];
-      XCTAssertEqual(node.item, item);
+      XCTAssertEqualObjects(node.item, item, @"Wrong node at index path %@", indexPath);
 #endif
     }
   }

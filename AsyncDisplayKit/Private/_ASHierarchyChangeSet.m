@@ -131,6 +131,8 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 - (NSUInteger)newSectionForOldSection:(NSUInteger)oldSection
 {
+  ASDisplayNodeAssertNotNil(_deletedSections, @"Cannot call %@ before `markCompleted` returns.", NSStringFromSelector(_cmd));
+  ASDisplayNodeAssertNotNil(_insertedSections, @"Cannot call %@ before `markCompleted` returns.", NSStringFromSelector(_cmd));
   [self _ensureCompleted];
   if ([_deletedSections containsIndex:oldSection]) {
     return NSNotFound;
@@ -225,6 +227,10 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 {
   @autoreleasepool {
 
+    // Give these their "pre-reloads" values. Once we add in the reloads we'll re-process them.
+    _deletedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_deleteSectionChanges];
+    _insertedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_insertSectionChanges];
+    
     // Split reloaded section indexes into deletes and inserts
     // Delete the old section, insert the new section it corresponds to.
     for (_ASHierarchySectionChange *change in _reloadSectionChanges) {
@@ -245,7 +251,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
     
     [_ASHierarchySectionChange sortAndCoalesceChanges:_deleteSectionChanges];
     [_ASHierarchySectionChange sortAndCoalesceChanges:_insertSectionChanges];
-    [_ASHierarchySectionChange sortAndCoalesceChanges:_reloadSectionChanges];
     _deletedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_deleteSectionChanges];
     _insertedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_insertSectionChanges];
 
