@@ -46,7 +46,7 @@
   return result;
 }
 
-- (NSUInteger)as_indexByInsertingItemsBelowIndex:(NSUInteger)index
+- (NSUInteger)as_indexChangeByInsertingItemsBelowIndex:(NSUInteger)index
 {
   __block NSUInteger newIndex = index;
   [self enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
@@ -56,7 +56,7 @@
       *stop = YES;
     }
   }];
-  return newIndex;
+  return newIndex - index;
 }
 
 - (NSString *)as_smallDescription

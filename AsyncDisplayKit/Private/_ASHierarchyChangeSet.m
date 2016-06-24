@@ -139,7 +139,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   }
 
   NSUInteger newIndex = oldSection - [_deletedSections countOfIndexesInRange:NSMakeRange(0, oldSection)];
-  newIndex = [_insertedSections as_indexByInsertingItemsBelowIndex:newIndex];
+  newIndex += [_insertedSections as_indexChangeByInsertingItemsBelowIndex:newIndex];
   return newIndex;
 }
 
@@ -276,7 +276,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
         item -= [indicesDeletedInSection countOfIndexesInRange:NSMakeRange(0, item)];
         // Update row number based on insertions that are above the current row in the future section
         NSIndexSet *indicesInsertedInSection = insertedIndexPathsMap[@(section)];
-        item = [indicesInsertedInSection as_indexByInsertingItemsBelowIndex:item];
+        item += [indicesInsertedInSection as_indexChangeByInsertingItemsBelowIndex:item];
         
         //TODO: reuse the old indexPath object if section and row aren't changed
         NSIndexPath *newIndexPath = [NSIndexPath indexPathForItem:item inSection:section];
