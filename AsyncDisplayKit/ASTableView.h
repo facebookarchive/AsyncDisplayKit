@@ -44,18 +44,8 @@ NS_ASSUME_NONNULL_BEGIN
  * The frame of the table view changes as table cells are added and deleted.
  *
  * @param style A constant that specifies the style of the table view. See UITableViewStyle for descriptions of valid constants.
- *
- * @param asyncDataFetchingEnabled This option is reserved for future use, and currently a no-op.
- *
- * @discussion If asyncDataFetching is enabled, the `ASTableView` will fetch data through `tableView:numberOfRowsInSection:` and
- * `tableView:nodeForRowAtIndexPath:` in async mode from background thread. Otherwise, the methods will be invoked synchronically
- * from calling thread.
- * Enabling asyncDataFetching could avoid blocking main thread for `ASCellNode` allocation, which is frequently reported issue for
- * large scale data. On another hand, the application code need take the responsibility to avoid data inconsistence. Specifically,
- * we will lock the data source through `tableViewLockDataSource`, and unlock it by `tableViewUnlockDataSource` after the data fetching.
- * The application should not update the data source while the data source is locked, to keep data consistence.
  */
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled;
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style;
 
 /**
  * Tuning parameters for a range type in full mode.
@@ -363,8 +353,9 @@ NS_ASSUME_NONNULL_BEGIN
  * due to the data access in async mode.
  *
  * @param tableView The sender.
+ * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)tableViewLockDataSource:(ASTableView *)tableView;
+- (void)tableViewLockDataSource:(ASTableView *)tableView ASDISPLAYNODE_DEPRECATED;
 
 /**
  * Indicator to unlock the data source for data fetching in asyn mode.
@@ -372,8 +363,9 @@ NS_ASSUME_NONNULL_BEGIN
  * due to the data access in async mode.
  *
  * @param tableView The sender.
+ * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)tableViewUnlockDataSource:(ASTableView *)tableView;
+- (void)tableViewUnlockDataSource:(ASTableView *)tableView ASDISPLAYNODE_DEPRECATED;
 
 @end
 
@@ -456,6 +448,12 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @protocol ASTableViewDelegate <ASTableDelegate>
+@end
+
+@interface ASTableView (Deprecated)
+
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled ASDISPLAYNODE_DEPRECATED;
+
 @end
 
 NS_ASSUME_NONNULL_END

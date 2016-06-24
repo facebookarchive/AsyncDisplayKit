@@ -407,8 +407,9 @@ NS_ASSUME_NONNULL_BEGIN
  * due to the data access in async mode.
  *
  * @param collectionView The sender.
+ * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView;
+- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
 
 /**
  * Indicator to unlock the data source for data fetching in async mode.
@@ -416,8 +417,9 @@ NS_ASSUME_NONNULL_BEGIN
  * due to the data access in async mode.
  *
  * @param collectionView The sender.
+ * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView;
+- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
 
 @end
 

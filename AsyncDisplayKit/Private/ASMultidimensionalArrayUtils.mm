@@ -11,6 +11,10 @@
 #import "ASAssert.h"
 #import "ASMultidimensionalArrayUtils.h"
 
+// Import UIKit to get [NSIndexPath indexPathForItem:inSection:] which uses
+// static memory addresses rather than allocating new index path objects.
+#import <UIKit/UIKit.h>
+
 #pragma mark - Internal Methods
 
 static void ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray,
@@ -25,8 +29,10 @@ static void ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(NSMutableArray 
   }
 
   if (curIndexPath.length < dimension - 1) {
-    for (int i = 0; i < mutableArray.count; i++) {
-      ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(mutableArray[i], indexPaths, curIdx, [curIndexPath indexPathByAddingIndex:i], dimension, updateBlock);
+    NSInteger i = 0;
+    for (NSMutableArray *subarray in mutableArray) {
+      ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(subarray, indexPaths, curIdx, [curIndexPath indexPathByAddingIndex:i], dimension, updateBlock);
+      i += 1;
     }
   } else {
     NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] init];
@@ -72,7 +78,12 @@ static BOOL ASElementExistsAtIndexPathForMultidimensionalArray(NSArray *array, N
   NSUInteger indexesLength = indexLength - 1;
   NSUInteger indexes[indexesLength];
   [indexPath getIndexes:indexes range:NSMakeRange(1, indexesLength)];
-  NSIndexPath *indexPathByRemovingFirstIndex = [NSIndexPath indexPathWithIndexes:indexes length:indexesLength];
+  NSIndexPath *indexPathByRemovingFirstIndex;
+  if (indexesLength == 2) {
+    indexPathByRemovingFirstIndex = [NSIndexPath indexPathForItem:indexes[1] inSection:indexes[0]];
+  } else {
+    indexPathByRemovingFirstIndex = [NSIndexPath indexPathWithIndexes:indexes length:indexesLength];
+  }
 
   return ASElementExistsAtIndexPathForMultidimensionalArray(array[firstIndex], indexPathByRemovingFirstIndex);
 }
@@ -184,9 +195,8 @@ NSArray *ASIndexPathsForTwoDimensionalArray(NSArray <NSArray *>* twoDimensionalA
   NSUInteger section = 0;
   for (NSArray *subarray in twoDimensionalArray) {
     ASDisplayNodeCAssert([subarray isKindOfClass:[NSArray class]], @"This function expects NSArray<NSArray *> *");
-    NSUInteger itemCount = subarray.count;
-    for (NSUInteger item = 0; item < itemCount; item++) {
-      [result addObject:[NSIndexPath indexPathWithIndexes:(const NSUInteger []){ section, item } length:2]];
+    for (NSUInteger item = 0; item < subarray.count; item++) {
+      [result addObject:[NSIndexPath indexPathForItem:item inSection:section]];
     }
     section++;
   }
