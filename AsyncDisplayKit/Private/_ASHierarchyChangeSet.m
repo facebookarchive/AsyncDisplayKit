@@ -143,30 +143,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   return newIndex;
 }
 
-- (nullable NSIndexPath *)newIndexPathForOldIndexPath:(NSIndexPath *)indexPath
-{
-  [self _ensureCompleted];
-  // If section was deleted, nil
-  NSUInteger oldSection = indexPath.section;
-  NSUInteger newSection = [self newSectionForOldSection:oldSection];
-  if (newSection == NSNotFound) {
-    return nil;
-  }
-  
-  NSUInteger newItem = indexPath.item;
-  NSIndexSet *deletedItemsInOldSection = [self indexesForItemChangesOfType:_ASHierarchyChangeTypeDelete inSection:oldSection];
-  newItem -= [deletedItemsInOldSection countOfIndexesInRange:NSMakeRange(0, newItem)];
-  
-  for (_ASHierarchyItemChange *change in _deleteItemChanges) {
-    // If item was deleted, nil
-    if ([change.indexPaths containsObject:indexPath]) {
-      return nil;
-    }
-  }
-
-  return [NSIndexPath indexPathForItem:newItem inSection:newSection];
-}
-
 - (void)deleteItems:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options
 {
   [self _ensureNotCompleted];

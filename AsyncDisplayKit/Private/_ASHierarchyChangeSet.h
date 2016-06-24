@@ -60,14 +60,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  */
 - (NSUInteger)newSectionForOldSection:(NSUInteger)oldSection;
 
-/**
- Get the index path after the update for the item at the given index path before the update.
- 
- @precondition The change set must be completed.
- @returns The new index path, or nil if the given item (or its section) was deleted.
- */
-- (nullable NSIndexPath *)newIndexPathForOldIndexPath:(NSIndexPath *)indexPath;
-
 @property (nonatomic, readonly) BOOL completed;
 
 /// Call this once the change set has been constructed to prevent future modifications to the changeset. Calling this more than once is a programmer error.
