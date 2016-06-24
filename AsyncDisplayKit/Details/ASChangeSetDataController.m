@@ -109,8 +109,10 @@
   if ([self batchUpdating]) {
     [_changeSet reloadSections:sections animationOptions:animationOptions];
   } else {
+    [self beginUpdates];
     [super deleteSections:sections withAnimationOptions:animationOptions];
     [super insertSections:sections withAnimationOptions:animationOptions];
+    [self endUpdates];
   }
 }
 
@@ -153,8 +155,10 @@
   if ([self batchUpdating]) {
     [_changeSet reloadItems:indexPaths animationOptions:animationOptions];
   } else {
+    [self beginUpdates];
     [super deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
     [super insertRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [self endUpdates];
   }
 }
 
