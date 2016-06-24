@@ -40,7 +40,7 @@
   if (!(self = [super init]))
     return nil;
   
-  // set default values
+  // set default values, as defined in Apple's comments in UITextInputTraits.h
   _autocapitalizationType = UITextAutocapitalizationTypeSentences;
   _autocorrectionType = UITextAutocorrectionTypeDefault;
   _spellCheckingType = UITextSpellCheckingTypeDefault;
