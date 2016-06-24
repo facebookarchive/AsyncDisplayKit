@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
  @abstract Implements a node that supports text editing.
  @discussion Does not support layer backing.
  */
-@interface ASEditableTextNode : ASDisplayNode
+@interface ASEditableTextNode : ASDisplayNode <UITextInputTraits>
 
 /**
  * @abstract Initializes an editable text node using default TextKit components.
@@ -93,9 +93,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) UIEdgeInsets textContainerInset;
 
 /**
- @abstract The returnKeyType of the keyboard. This value defaults to UIReturnKeyDefault.
+ @abstract <UITextInputTraits> properties.
  */
-@property (nonatomic, readwrite) UIReturnKeyType returnKeyType;
+@property(nonatomic) UITextAutocapitalizationType autocapitalizationType; // default is UITextAutocapitalizationTypeSentences
+@property(nonatomic) UITextAutocorrectionType autocorrectionType;         // default is UITextAutocorrectionTypeDefault
+@property(nonatomic) UITextSpellCheckingType spellCheckingType NS_AVAILABLE_IOS(5_0); // default is UITextSpellCheckingTypeDefault;
+@property(nonatomic) UIKeyboardType keyboardType;                         // default is UIKeyboardTypeDefault
+@property(nonatomic) UIKeyboardAppearance keyboardAppearance;             // default is UIKeyboardAppearanceDefault
+@property(nonatomic) UIReturnKeyType returnKeyType;                       // default is UIReturnKeyDefault (See note under UIReturnKeyType enum)
+@property(nonatomic) BOOL enablesReturnKeyAutomatically;                  // default is NO (when YES, will automatically disable return key when text widget has zero-length contents, and will automatically enable when text widget has non-zero-length contents)
+@property(nonatomic,getter=isSecureTextEntry) BOOL secureTextEntry;       // default is NO
 
 /**
   @abstract Indicates whether the receiver's text view is the first responder, and thus has the keyboard visible and is prepared for editing by the user.

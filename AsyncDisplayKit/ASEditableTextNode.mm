@@ -18,6 +18,42 @@
 #import "ASThread.h"
 
 /**
+ @abstract Object to hold UITextView's pending UITextInputTraits
+**/
+@interface _ASTextInputTraitsPendingState : NSObject
+
+@property (nonatomic, assign) UITextAutocapitalizationType autocapitalizationType;
+@property (nonatomic, assign) UITextAutocorrectionType autocorrectionType;
+@property (nonatomic, assign) UITextSpellCheckingType spellCheckingType;
+@property (nonatomic, assign) UIKeyboardAppearance keyboardAppearance;
+@property (nonatomic, assign) UIKeyboardType keyboardType;
+@property (nonatomic, assign) UIReturnKeyType returnKeyType;
+@property (nonatomic, assign) BOOL enablesReturnKeyAutomatically;
+@property (nonatomic, assign, getter=isSecureTextEntry) BOOL secureTextEntry;
+
+@end
+
+@implementation _ASTextInputTraitsPendingState
+
+- (instancetype)init
+{
+  if (!(self = [super init]))
+    return nil;
+  
+  // set default values
+  _autocapitalizationType = UITextAutocapitalizationTypeSentences;
+  _autocorrectionType = UITextAutocorrectionTypeDefault;
+  _spellCheckingType = UITextSpellCheckingTypeDefault;
+  _keyboardAppearance = UIKeyboardAppearanceDefault;
+  _keyboardType = UIKeyboardTypeDefault;
+  _returnKeyType = UIReturnKeyDefault;
+  
+  return self;
+}
+
+@end
+
+/**
  @abstract As originally reported in rdar://14729288, when scrollEnabled = NO,
    UITextView does not calculate its contentSize. This makes it difficult 
    for a client to embed a UITextView inside a different scroll view with 
@@ -85,6 +121,10 @@
   ASTextKitComponents *_placeholderTextKitComponents;
   // Forwards NSLayoutManagerDelegate methods related to word kerning
   ASTextNodeWordKerner *_wordKerner;
+  
+  // UITextInputTraits
+  ASDN::RecursiveMutex _textInputTraitsLock;
+  _ASTextInputTraitsPendingState *_textInputTraits;
 
   // Misc. State.
   BOOL _displayingPlaceholder; // Defaults to YES.
@@ -92,6 +132,8 @@
   BOOL _selectionChangedForEditedText;
   NSRange _previousSelectedRange;
 }
+
+@property (nonatomic, strong, readonly) _ASTextInputTraitsPendingState *textInputTraits;
 
 @end
 
@@ -117,13 +159,12 @@
   _textKitComponents = textKitComponents;
   _textKitComponents.layoutManager.delegate = self;
   _wordKerner = [[ASTextNodeWordKerner alloc] init];
-  _returnKeyType = UIReturnKeyDefault;
   _textContainerInset = UIEdgeInsetsZero;
   
   // Create the placeholder scaffolding.
   _placeholderTextKitComponents = placeholderTextKitComponents;
   _placeholderTextKitComponents.layoutManager.delegate = self;
-
+  
   return self;
 }
 
@@ -151,8 +192,6 @@
 {
   [super didLoad];
 
-  ASDN::MutexLocker l(_textKitLock);
-
   void (^configureTextView)(UITextView *) = ^(UITextView *textView) {
     if (!_displayingPlaceholder || textView != _textKitComponents.textView) {
       // If showing the placeholder, don't propagate backgroundColor/opaque to the editable textView.  It is positioned over the placeholder to accept taps to begin editing, and if it's opaque/colored then it'll obscure the placeholder.
@@ -164,28 +203,50 @@
       textView.opaque = NO;
     }
     textView.textContainerInset = self.textContainerInset;
+    
+    // Configure textView with UITextInputTraits
+    {
+      ASDN::MutexLocker l(_textInputTraitsLock);
+      if (_textInputTraits) {
+        NSLog(@"%ld = %ld", (long)_textInputTraits.autocapitalizationType, (long)UITextAutocapitalizationTypeWords);
+        textView.autocapitalizationType         = _textInputTraits.autocapitalizationType;
+        textView.autocorrectionType             = _textInputTraits.autocorrectionType;
+        textView.spellCheckingType              = _textInputTraits.spellCheckingType;
+//        textView.keyboardType                   = _textInputTraits.keyboardType;
+//        textView.keyboardAppearance             = _textInputTraits.keyboardAppearance;
+//        textView.returnKeyType                  = _textInputTraits.returnKeyType;
+//        textView.enablesReturnKeyAutomatically  = _textInputTraits.enablesReturnKeyAutomatically;
+//        textView.secureTextEntry                = _textInputTraits.isSecureTextEntry;
+        NSLog(@"%@ = %ld", textView, textView.autocapitalizationType);
+      }
+    }
+    
+    [self.view addSubview:textView];
   };
+
+  ASDN::MutexLocker l(_textKitLock);
 
   // Create and configure the placeholder text view.
   _placeholderTextKitComponents.textView = [[UITextView alloc] initWithFrame:CGRectZero textContainer:_placeholderTextKitComponents.textContainer];
   _placeholderTextKitComponents.textView.userInteractionEnabled = NO;
   _placeholderTextKitComponents.textView.accessibilityElementsHidden = YES;
   configureTextView(_placeholderTextKitComponents.textView);
-  [self.view addSubview:_placeholderTextKitComponents.textView];
 
   // Create and configure our text view.
-  _textKitComponents.textView = self.textView;
+  _textKitComponents.textView = [[ASPanningOverriddenUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
   _textKitComponents.textView.scrollEnabled = _scrollEnabled;
   _textKitComponents.textView.delegate = self;
   #if TARGET_OS_IOS
   _textKitComponents.textView.editable = YES;
   #endif
   _textKitComponents.textView.typingAttributes = _typingAttributes;
-  _textKitComponents.textView.returnKeyType = _returnKeyType;
   _textKitComponents.textView.accessibilityHint = _placeholderTextKitComponents.textStorage.string;
   configureTextView(_textKitComponents.textView);
-  [self.view addSubview:_textKitComponents.textView];
+
   [self _updateDisplayingPlaceholder];
+    
+  // once view is loaded, setters set directly on view
+  _textInputTraits = nil;
 }
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
@@ -261,9 +322,8 @@
 - (UITextView *)textView
 {
   ASDisplayNodeAssertMainThread();
-  if (!_textKitComponents.textView) {
-    _textKitComponents.textView = [[ASPanningOverriddenUITextView alloc] initWithFrame:CGRectZero textContainer:_textKitComponents.textContainer];
-  }
+  [self view];
+  ASDisplayNodeAssert(_textKitComponents.textView != nil, @"UITextView must be created in -[ASEditableTextNode didLoad]");
   return _textKitComponents.textView;
 }
 
@@ -425,13 +485,6 @@
   return [_textKitComponents.textView textInputMode];
 }
 
-- (void)setReturnKeyType:(UIReturnKeyType)returnKeyType
-{
-  ASDN::MutexLocker l(_textKitLock);
-  _returnKeyType = returnKeyType;
-  [_textKitComponents.textView setReturnKeyType:_returnKeyType];
-}
-
 - (BOOL)isFirstResponder
 {
   ASDN::MutexLocker l(_textKitLock);
@@ -458,6 +511,176 @@
 {
   ASDN::MutexLocker l(_textKitLock);
   return [_textKitComponents.textView resignFirstResponder];
+}
+
+#pragma mark - UITextInputTraits
+
+- (_ASTextInputTraitsPendingState *)textInputTraits
+{
+  if (!_textInputTraits) {
+    _textInputTraits = [[_ASTextInputTraitsPendingState alloc] init];
+  }
+  return _textInputTraits;
+}
+
+- (void)setAutocapitalizationType:(UITextAutocapitalizationType)autocapitalizationType
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    [self.textView setAutocapitalizationType:autocapitalizationType];
+  } else {
+    [self.textInputTraits setAutocapitalizationType:autocapitalizationType];
+  }
+}
+
+- (UITextAutocapitalizationType)autocapitalizationType
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    return [self.textView autocapitalizationType];
+  } else {
+    return [self.textInputTraits autocapitalizationType];
+  }
+}
+
+- (void)setAutocorrectionType:(UITextAutocorrectionType)autocorrectionType
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    [self.textView setAutocorrectionType:autocorrectionType];
+  } else {
+    [self.textInputTraits setAutocorrectionType:autocorrectionType];
+  }
+}
+
+- (UITextAutocorrectionType)autocorrectionType
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    return [self.textView autocorrectionType];
+  } else {
+    return [self.textInputTraits autocorrectionType];
+  }
+}
+
+- (void)setSpellCheckingType:(UITextSpellCheckingType)spellCheckingType
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    [self.textView setSpellCheckingType:spellCheckingType];
+  } else {
+    [self.textInputTraits setSpellCheckingType:spellCheckingType];
+  }
+}
+
+- (UITextSpellCheckingType)spellCheckingType
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    return [self.textView spellCheckingType];
+  } else {
+    return [self.textInputTraits spellCheckingType];
+  }
+}
+
+- (void)setEnablesReturnKeyAutomatically:(BOOL)enablesReturnKeyAutomatically
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    [self.textView setEnablesReturnKeyAutomatically:enablesReturnKeyAutomatically];
+  } else {
+    [self.textInputTraits setEnablesReturnKeyAutomatically:enablesReturnKeyAutomatically];
+  }
+}
+
+- (BOOL)enablesReturnKeyAutomatically
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    return [self.textView enablesReturnKeyAutomatically];
+  } else {
+    return [self.textInputTraits enablesReturnKeyAutomatically];
+  }
+}
+
+- (void)setKeyboardAppearance:(UIKeyboardAppearance)setKeyboardAppearance
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    [self.textView setKeyboardAppearance:setKeyboardAppearance];
+  } else {
+    [self.textInputTraits setKeyboardAppearance:setKeyboardAppearance];
+  }
+}
+
+- (UIKeyboardAppearance)keyboardAppearance
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    return [self.textView keyboardAppearance];
+  } else {
+    return [self.textInputTraits keyboardAppearance];
+  }
+}
+
+- (void)setKeyboardType:(UIKeyboardType)keyboardType
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    [self.textView setKeyboardType:keyboardType];
+  } else {
+    [self.textInputTraits setKeyboardType:keyboardType];
+  }
+}
+
+- (UIKeyboardType)keyboardType
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    return [self.textView keyboardType];
+  } else {
+    return [self.textInputTraits keyboardType];
+  }
+}
+
+- (void)setReturnKeyType:(UIReturnKeyType)returnKeyType
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    [self.textView setReturnKeyType:returnKeyType];
+  } else {
+    [self.textInputTraits setReturnKeyType:returnKeyType];
+  }
+}
+
+- (UIReturnKeyType)returnKeyType
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    return [self.textView returnKeyType];
+  } else {
+    return [self.textInputTraits returnKeyType];
+  }
+}
+
+- (void)setSecureTextEntry:(BOOL)secureTextEntry
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    [self.textView setSecureTextEntry:secureTextEntry];
+  } else {
+    [self.textInputTraits setSecureTextEntry:secureTextEntry];
+  }
+}
+
+- (BOOL)isSecureTextEntry
+{
+  ASDN::MutexLocker l(_textInputTraitsLock);
+  if (self.isNodeLoaded) {
+    return [self.textView isSecureTextEntry];
+  } else {
+    return [self.textInputTraits isSecureTextEntry];
+  }
 }
 
 #pragma mark - UITextView Delegate
