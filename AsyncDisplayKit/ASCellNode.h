@@ -81,14 +81,16 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
 /**
- * A Boolean value that indicates whether the node is selected.
+ * A Boolean value that is synchronized with the underlying collection or tableView cell property.
+ * Setting this value is equivalent to calling selectItem / deselectItem on the collection or table.
  */
-@property (nonatomic, assign) BOOL selected;
+@property (nonatomic, assign, getter=isSelected) BOOL selected;
 
 /**
- * A Boolean value that indicates whether the node is highlighted.
+ * A Boolean value that is synchronized with the underlying collection or tableView cell property.
+ * Setting this value is equivalent to calling highlightItem / unHighlightItem on the collection or table.
  */
-@property (nonatomic, assign) BOOL highlighted;
+@property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
 
 /*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
@@ -147,6 +149,9 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  * The text inset or outset for each edge. The default value is 15.0 horizontal and 11.0 vertical padding.
  */
 @property (nonatomic, assign) UIEdgeInsets textInsets;
+
+- (BOOL)selected ASDISPLAYNODE_DEPRECATED;
+- (BOOL)highlighted ASDISPLAYNODE_DEPRECATED;
 
 @end
 

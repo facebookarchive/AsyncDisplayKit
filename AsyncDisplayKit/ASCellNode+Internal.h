@@ -12,7 +12,7 @@
 
 #import "ASCellNode.h"
 
-@protocol ASCellNodeLayoutDelegate <NSObject>
+@protocol ASCellNodeInteractionDelegate <NSObject>
 
 /**
  * Notifies the delegate that the specified cell node has done a relayout.
@@ -27,14 +27,19 @@
  */
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
 
+/*
+ * Methods to be called whenever the selection or highlight state changes
+ * on ASCellNode. UIKit internally stores these values to update reusable cells.
+ */
+
+- (void)nodeSelectedStateDidChange:(ASCellNode *)node;
+- (void)nodeHighlightedStateDidChange:(ASCellNode *)node;
+
 @end
 
 @interface ASCellNode ()
 
-/*
- * A delegate to be notified (on main thread) after a relayout.
- */
-@property (nonatomic, weak) id<ASCellNodeLayoutDelegate> layoutDelegate;
+@property (nonatomic, weak) id <ASCellNodeInteractionDelegate> interactionDelegate;
 
 /*
  * Back-pointer to the containing scrollView instance, set only for visible cells.  Used for Cell Visibility Event callbacks.

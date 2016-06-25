@@ -66,20 +66,39 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)setNode:(ASCellNode *)node
 {
   _node = node;
-  node.selected = self.selected;
-  node.highlighted = self.highlighted;
+  if (node.selected != self.selected) {
+    node.selected = self.selected;
+  }
+  if (node.highlighted != self.highlighted) {
+    node.highlighted = self.highlighted;
+  }
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
 {
-  [super setSelected:selected animated:animated];
-  _node.selected = selected;
+  if (selected != self.selected) {
+    [super setSelected:selected animated:animated];
+  }
+  if (selected != _node.selected) {
+    _node.selected = selected;
+  }
 }
 
 - (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated
 {
-  [super setHighlighted:highlighted animated:animated];
-  _node.highlighted = highlighted;
+  if (highlighted != self.highlighted) {
+    [super setHighlighted:highlighted animated:animated];
+  }
+  if (highlighted != _node.highlighted) {
+    _node.highlighted = highlighted;
+  }
+}
+
+- (void)prepareForReuse
+{
+  // Need to clear node pointer before UIKit calls setSelected:NO / setHighlighted:NO on its cells
+  self.node = nil;
+  [super prepareForReuse];
 }
 
 @end
@@ -91,7 +110,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (instancetype)_initWithTableView:(ASTableView *)tableView;
 @end
 
-@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate>
+@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate>
 {
   ASTableViewProxy *_proxyDataSource;
   ASTableViewProxy *_proxyDelegate;
@@ -1046,8 +1065,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return ^{
       __typeof__(self) strongSelf = weakSelf;
       [node enterHierarchyState:ASHierarchyStateRangeManaged];
-      if (node.layoutDelegate == nil) {
-        node.layoutDelegate = strongSelf;
+      if (node.interactionDelegate == nil) {
+        node.interactionDelegate = strongSelf;
       }
       return node;
     };
@@ -1059,8 +1078,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     __typeof__(self) strongSelf = weakSelf;
     ASCellNode *node = block();
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
-    if (node.layoutDelegate == nil) {
-      node.layoutDelegate = strongSelf;
+    if (node.interactionDelegate == nil) {
+      node.interactionDelegate = strongSelf;
     }
     return node;
   };
@@ -1126,7 +1145,27 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
-#pragma mark - ASCellNodeLayoutDelegate
+#pragma mark - ASCellNodeDelegate
+
+- (void)nodeSelectedStateDidChange:(ASCellNode *)node
+{
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath) {
+    if (node.isSelected) {
+      [self selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
+    } else {
+      [self deselectRowAtIndexPath:indexPath animated:NO];
+    }
+  }
+}
+
+- (void)nodeHighlightedStateDidChange:(ASCellNode *)node
+{
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath) {
+    [self cellForRowAtIndexPath:indexPath].highlighted = node.isHighlighted;
+  }
+}
 
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {

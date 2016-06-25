@@ -36,7 +36,7 @@
 @end
 
 @implementation ASCellNode
-@synthesize layoutDelegate = _layoutDelegate;
+@synthesize interactionDelegate = _interactionDelegate;
 
 - (instancetype)init
 {
@@ -170,12 +170,38 @@
 
 - (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize
 {
-  if (_layoutDelegate != nil) {
+  if (_interactionDelegate != nil) {
     ASPerformBlockOnMainThread(^{
       BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
-      [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
+      [_interactionDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }
+}
+
+- (void)setSelected:(BOOL)selected
+{
+  if (_selected != selected) {
+    _selected = selected;
+    [_interactionDelegate nodeSelectedStateDidChange:self];
+  }
+}
+
+- (void)setHighlighted:(BOOL)highlighted
+{
+  if (_highlighted != highlighted) {
+      _highlighted = highlighted;
+      [_interactionDelegate nodeHighlightedStateDidChange:self];
+    }
+}
+
+- (BOOL)selected
+{
+  return self.isSelected;
+}
+
+- (BOOL)highlighted
+{
+  return self.isSelected;
 }
 
 #pragma clang diagnostic push
