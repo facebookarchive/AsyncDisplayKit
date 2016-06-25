@@ -124,6 +124,12 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 
 @end
 
+@interface ASCellNode (Deprecated)
+
+- (BOOL)selected ASDISPLAYNODE_DEPRECATED;
+- (BOOL)highlighted ASDISPLAYNODE_DEPRECATED;
+
+@end
 
 /**
  * Simple label-style cell node.  Read its source for an example of custom <ASCellNode>s.
@@ -149,9 +155,6 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  * The text inset or outset for each edge. The default value is 15.0 horizontal and 11.0 vertical padding.
  */
 @property (nonatomic, assign) UIEdgeInsets textInsets;
-
-- (BOOL)selected ASDISPLAYNODE_DEPRECATED;
-- (BOOL)highlighted ASDISPLAYNODE_DEPRECATED;
 
 @end
 
