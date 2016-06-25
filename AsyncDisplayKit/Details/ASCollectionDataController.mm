@@ -32,9 +32,9 @@
   NSMutableDictionary<NSString *, NSMutableArray<ASIndexedNodeContext *> *> *_pendingContexts;
 }
 
-- (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled
+- (instancetype)init
 {
-  self = [super initWithAsyncDataFetching:asyncDataFetchingEnabled];
+  self = [super init];
   if (self != nil) {
     _pendingContexts = [NSMutableDictionary dictionary];
   }
@@ -53,15 +53,13 @@
 
 - (void)willReloadData
 {
-  NSArray *keys = _pendingContexts.allKeys;
-  for (NSString *kind in keys) {
-    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
+  [_pendingContexts enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, NSMutableArray<ASIndexedNodeContext *> * _Nonnull contexts, __unused BOOL * _Nonnull stop) {
     // Remove everything that existed before the reload, now that we're ready to insert replacements
     NSArray *indexPaths = [self indexPathsForEditingNodesOfKind:kind];
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
     
     NSArray *editingNodes = [self editingNodesOfKind:kind];
-    NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodes.count)];
+    NSIndexSet *indexSet = [[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodes.count)];
     [self deleteSectionsOfKind:kind atIndexSet:indexSet completion:nil];
     
     // Insert each section
@@ -75,8 +73,8 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-    [_pendingContexts removeObjectForKey:kind];
-  }
+  }];
+  [_pendingContexts removeAllObjects];
 }
 
 - (void)prepareForInsertSections:(NSIndexSet *)sections

@@ -408,8 +408,7 @@
 {
   CGSize tableViewSize = CGSizeMake(100, 500);
   ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
-                                                                style:UITableViewStylePlain
-                                                    asyncDataFetching:YES];
+                                                                style:UITableViewStylePlain];
   ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
 
   tableView.asyncDelegate = dataSource;

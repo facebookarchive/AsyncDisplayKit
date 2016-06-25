@@ -26,17 +26,6 @@
 
 @implementation ASChangeSetDataController
 
-- (instancetype)initWithAsyncDataFetching:(BOOL)asyncDataFetchingEnabled
-{
-  if (!(self = [super initWithAsyncDataFetching:asyncDataFetchingEnabled])) {
-    return nil;
-  }
-  
-  _changeSetBatchUpdateCounter = 0;
-  
-  return self;
-}
-
 #pragma mark - Batching (External API)
 
 - (void)beginUpdates
@@ -66,6 +55,8 @@
       [super deleteSections:change.indexSet withAnimationOptions:change.animationOptions];
     }
 
+    // TODO: Shouldn't reloads be processed before deletes, since deletes affect
+    // the index space and reloads don't?
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
       [super reloadSections:change.indexSet withAnimationOptions:change.animationOptions];
     }
