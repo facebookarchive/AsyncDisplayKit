@@ -82,13 +82,10 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
 #if UseAutomaticLayout
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASCenterLayoutSpec *centerSpec = [[ASCenterLayoutSpec alloc] init];
-  centerSpec.centeringOptions = ASCenterLayoutSpecCenteringX;
-  centerSpec.sizingOptions = ASCenterLayoutSpecSizingOptionMinimumY;
-  centerSpec.child = _textNode;
-  
-  UIEdgeInsets padding =UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding);
-  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:padding child:centerSpec];
+  return [[_textNode
+           centeredWithOptions:ASCenterLayoutSpecCenteringX
+           sizingOptions:ASCenterLayoutSpecSizingOptionMinimumY]
+          withInset:UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding)];
 }
 #else
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize

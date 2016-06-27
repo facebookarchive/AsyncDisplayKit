@@ -546,6 +546,10 @@
 		CC3B208E1C3F7D0A00798563 /* ASWeakSetTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */; };
 		CC3B20901C3F892D00798563 /* ASBridgedPropertiesTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208F1C3F892D00798563 /* ASBridgedPropertiesTests.mm */; };
 		CC4981B31D1A02BE004E13CC /* ASTableViewThrashTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */; };
+		CC4981B61D1C6109004E13CC /* ASRelativeLayoutDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4981B51D1C5CEF004E13CC /* ASRelativeLayoutDefines.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CC4981B71D1C6109004E13CC /* ASRelativeLayoutDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4981B51D1C5CEF004E13CC /* ASRelativeLayoutDefines.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CC4981B81D1C611B004E13CC /* ASCenterLayoutDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4981B41D1C5CD4004E13CC /* ASCenterLayoutDefines.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CC4981B91D1C611E004E13CC /* ASCenterLayoutDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4981B41D1C5CD4004E13CC /* ASCenterLayoutDefines.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC7FD9DE1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC7FD9DF1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; };
 		CC7FD9E11BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */; };
@@ -937,6 +941,8 @@
 		CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASWeakSetTests.m; sourceTree = "<group>"; };
 		CC3B208F1C3F892D00798563 /* ASBridgedPropertiesTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASBridgedPropertiesTests.mm; sourceTree = "<group>"; };
 		CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableViewThrashTests.m; sourceTree = "<group>"; };
+		CC4981B41D1C5CD4004E13CC /* ASCenterLayoutDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ASCenterLayoutDefines.h; path = AsyncDisplayKit/Layout/ASCenterLayoutDefines.h; sourceTree = "<group>"; };
+		CC4981B51D1C5CEF004E13CC /* ASRelativeLayoutDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ASRelativeLayoutDefines.h; path = AsyncDisplayKit/Layout/ASRelativeLayoutDefines.h; sourceTree = "<group>"; };
 		CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPhotosFrameworkImageRequest.h; sourceTree = "<group>"; };
 		CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequest.m; sourceTree = "<group>"; };
 		CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequestTests.m; sourceTree = "<group>"; };
@@ -1449,6 +1455,7 @@
 				9C5586681BD549CB00B50E3A /* ASAsciiArtBoxCreator.m */,
 				ACF6ED011B17843500DA7C62 /* ASBackgroundLayoutSpec.h */,
 				ACF6ED021B17843500DA7C62 /* ASBackgroundLayoutSpec.mm */,
+				CC4981B41D1C5CD4004E13CC /* ASCenterLayoutDefines.h */,
 				ACF6ED031B17843500DA7C62 /* ASCenterLayoutSpec.h */,
 				ACF6ED041B17843500DA7C62 /* ASCenterLayoutSpec.mm */,
 				ACF6ED071B17843500DA7C62 /* ASDimension.h */,
@@ -1469,6 +1476,7 @@
 				ACF6ED131B17843500DA7C62 /* ASOverlayLayoutSpec.mm */,
 				ACF6ED141B17843500DA7C62 /* ASRatioLayoutSpec.h */,
 				ACF6ED151B17843500DA7C62 /* ASRatioLayoutSpec.mm */,
+				CC4981B51D1C5CEF004E13CC /* ASRelativeLayoutDefines.h */,
 				7A06A7391C35F08800FE8DAA /* ASRelativeLayoutSpec.h */,
 				7A06A7381C35F08800FE8DAA /* ASRelativeLayoutSpec.mm */,
 				AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */,
@@ -1545,6 +1553,7 @@
 				058D0A76195D05F900B7D73C /* _ASScopeTimer.h in Headers */,
 				68EE0DBD1C1B4ED300BA1B99 /* ASMainSerialQueue.h in Headers */,
 				257754B31BEE44CD00737CA5 /* ASTextKitTailTruncater.h in Headers */,
+				CC4981B81D1C611B004E13CC /* ASCenterLayoutDefines.h in Headers */,
 				205F0E191B37339C007741D0 /* ASAbstractLayoutController.h in Headers */,
 				058D0A82195D060300B7D73C /* ASAssert.h in Headers */,
 				0516FA3C1A15563400B4EBED /* ASAvailability.h in Headers */,
@@ -1666,6 +1675,7 @@
 				257754AD1BEE44CD00737CA5 /* ASTextKitRenderer+Positioning.h in Headers */,
 				DEC146B61C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */,
 				205F0E211B376416007741D0 /* CGRect+ASConvenience.h in Headers */,
+				CC4981B61D1C6109004E13CC /* ASRelativeLayoutDefines.h in Headers */,
 				058D0A66195D05DC00B7D73C /* NSMutableAttributedString+TextKitAdditions.h in Headers */,
 				205F0E0F1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h in Headers */,
 				058D0A6F195D05EC00B7D73C /* UIView+ASConvenience.h in Headers */,
@@ -1703,6 +1713,7 @@
 				254C6B7D1BF94DF4003EC431 /* ASTextKitShadower.h in Headers */,
 				B35062581B010F070018CF92 /* ASAvailability.h in Headers */,
 				DE84918D1C8FFF2B003D89E9 /* ASRunLoopQueue.h in Headers */,
+				CC4981B91D1C611E004E13CC /* ASCenterLayoutDefines.h in Headers */,
 				254C6B731BF94DF4003EC431 /* ASTextKitCoreTextAdditions.h in Headers */,
 				A2763D7A1CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h in Headers */,
 				254C6B7A1BF94DF4003EC431 /* ASTextKitRenderer.h in Headers */,
@@ -1824,6 +1835,7 @@
 				B35062391B010EFD0018CF92 /* ASThread.h in Headers */,
 				2C107F5B1BA9F54500F13DE5 /* AsyncDisplayKit.h in Headers */,
 				509E68651B3AEDC5009B9150 /* CGRect+ASConvenience.h in Headers */,
+				CC4981B71D1C6109004E13CC /* ASRelativeLayoutDefines.h in Headers */,
 				B350623A1B010EFD0018CF92 /* NSMutableAttributedString+TextKitAdditions.h in Headers */,
 				044284FF1BAA3BD600D16268 /* UICollectionViewLayout+ASConvenience.h in Headers */,
 				B35062431B010EFD0018CF92 /* UIView+ASConvenience.h in Headers */,

@@ -112,56 +112,57 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  // username / photo location header vertical stack
-  _photoLocationLabel.flexShrink    = YES;
   _userNameLabel.flexShrink         = YES;
   
-  ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  headerSubStack.flexShrink         = YES;
-  if (_photoLocationLabel.attributedString) {
-    [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
-  } else {
-    [headerSubStack setChildren:@[_userNameLabel]];
-  }
-  
-  // header stack
-  
-  _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);     // constrain avatar image frame size
-  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER;                                    // to remove double spaces around spacer
-  
-  ASLayoutSpec *spacer           = [[ASLayoutSpec alloc] init];    // FIXME: long locations overflow post time - set max size?
-  spacer.flexGrow                = YES;
-  
-  UIEdgeInsets avatarInsets      = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
-  ASInsetLayoutSpec *avatarInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
-
-  ASStackLayoutSpec *headerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
-  headerStack.alignItems         = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack
-  headerStack.justifyContent     = ASStackLayoutJustifyContentStart;                  // justify content to the left side of the header stack
-  [headerStack setChildren:@[avatarInset, headerSubStack, spacer, _photoTimeIntervalSincePostLabel]];
-  
-  // header inset stack
-  UIEdgeInsets insets                = UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER);
-  ASInsetLayoutSpec *headerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:headerStack];
-  
-  // footer stack
-  ASStackLayoutSpec *footerStack     = [ASStackLayoutSpec verticalStackLayoutSpec];
-  footerStack.spacing                = VERTICAL_BUFFER;
-  [footerStack setChildren:@[_photoLikesLabel, _photoDescriptionLabel, _photoCommentsView]];
-  
-  // footer inset stack
-  UIEdgeInsets footerInsets          = UIEdgeInsetsMake(VERTICAL_BUFFER, HORIZONTAL_BUFFER, VERTICAL_BUFFER, HORIZONTAL_BUFFER);
-  ASInsetLayoutSpec *footerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:footerInsets child:footerStack];
-  
-  // vertical stack
-  CGFloat cellWidth                  = constrainedSize.max.width;
-  _photoImageView.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);              // constrain photo frame size
-  
-  ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space
-  [verticalStack setChildren:@[headerWithInset, _photoImageView, footerWithInset]];
-
-  return verticalStack;
+  return
+  // Main vertical stack
+  [ASStackLayoutSpec
+   stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+   spacing:0
+   justifyContent:ASStackLayoutJustifyContentStart
+   alignItems:ASStackLayoutAlignItemsStretch
+   children:
+   @[
+     // Horizontal stack header
+     [[ASStackLayoutSpec
+       stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+       spacing:0
+       justifyContent:ASStackLayoutJustifyContentStart
+       alignItems:ASStackLayoutAlignItemsCenter
+       children:
+       @[
+         // Avatar
+         [[_userAvatarImageView
+           withPreferredFrameSize:CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT)]
+          withInset:UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER)],
+         // Username & Location vertical stack
+         [[ASStackLayoutSpec
+           stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+           spacing:0
+           justifyContent:ASStackLayoutJustifyContentStart
+           alignItems:ASStackLayoutAlignItemsStart
+           children:(_photoLocationLabel.attributedString ? @[_userNameLabel, [_photoLocationLabel withFlexShrink:YES]] : @[_userNameLabel])]
+          withFlexShrink:YES],
+         // Spacer
+         [[[ASLayoutSpec alloc] init] withFlexGrow:YES],
+         // Timestamp text
+         [_photoTimeIntervalSincePostLabel withSpacingBefore:HORIZONTAL_BUFFER after:0]]]
+      withInset:UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER)],
+     // Photo
+     [_photoImageView withPreferredFrameSize:CGSizeMake(constrainedSize.max.width, constrainedSize.max.width)],
+     // Vertical bottom – likes, description, comments.
+     [[ASStackLayoutSpec
+       stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+       spacing:VERTICAL_BUFFER
+       justifyContent:ASStackLayoutJustifyContentStart
+       alignItems:ASStackLayoutAlignItemsStart
+       children:
+       @[
+         _photoLikesLabel,
+         _photoDescriptionLabel,
+         _photoCommentsView]]
+      withInset:UIEdgeInsetsMake(VERTICAL_BUFFER, HORIZONTAL_BUFFER, VERTICAL_BUFFER, HORIZONTAL_BUFFER)]
+     ]];
 }
 
 #pragma mark - Instance Methods

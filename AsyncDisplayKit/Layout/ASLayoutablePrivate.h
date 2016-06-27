@@ -61,6 +61,65 @@ extern void ASLayoutableClearCurrentContext();
 
 @end
 
+#pragma mark - ASLayoutableConvenience
+
+#define ASLayoutableConvenienceImpl \
+- (instancetype)withFlexBasis:(ASRelativeDimension)flexBasis\
+{\
+  self.flexBasis = flexBasis;\
+  return self;\
+}\
+- (instancetype)withFlexGrow:(BOOL)flexGrow\
+{\
+  self.flexGrow = flexGrow;\
+  return self;\
+}\
+- (instancetype)withFlexShrink:(BOOL)flexShrink\
+{\
+  self.flexShrink = flexShrink;\
+  return self;\
+}\
+- (instancetype)withAlignSelf:(ASStackLayoutAlignSelf)alignSelf\
+{\
+  self.alignSelf = alignSelf;\
+  return self;\
+}\
+- (instancetype)withSpacingBefore:(CGFloat)spacingBefore after:(CGFloat)spacingAfter\
+{\
+  self.spacingBefore = spacingBefore;\
+  self.spacingAfter = spacingAfter;\
+  return self;\
+}\
+- (ASStaticLayoutSpec *)withStaticSizeRange:(ASRelativeSizeRange)sizeRange position:(CGPoint)layoutPosition\
+{\
+  self.sizeRange = sizeRange;\
+  self.layoutPosition = layoutPosition;\
+  return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[ self ]];\
+}\
+- (ASCenterLayoutSpec *)centeredWithOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions\
+{\
+  return [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:centeringOptions sizingOptions:sizingOptions child:self];\
+}\
+- (ASRelativeLayoutSpec *)positionedRelativeWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption\
+{\
+  return [ASRelativeLayoutSpec relativePositionLayoutSpecWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:self];\
+}\
+- (ASRatioLayoutSpec *)withAspectRatio:(CGFloat)ratio\
+{\
+  return [ASRatioLayoutSpec ratioLayoutSpecWithRatio:ratio child:self];\
+}\
+- (ASOverlayLayoutSpec *)withOverlay:(nullable id<ASLayoutable>)overlay\
+{\
+  return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:self overlay:overlay];\
+}\
+- (ASBackgroundLayoutSpec *)withBackground:(nullable id<ASLayoutable>)background\
+{\
+  return [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:self background:background];\
+}\
+- (ASInsetLayoutSpec *)withInset:(UIEdgeInsets)insets\
+{\
+  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:self];\
+}
 
 #pragma mark - ASLayoutOptionsForwarding
 

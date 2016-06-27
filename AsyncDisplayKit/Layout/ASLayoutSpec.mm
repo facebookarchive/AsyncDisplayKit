@@ -23,6 +23,14 @@
 #import <map>
 #import <vector>
 
+// ASLayoutableConvenience imports
+#import "ASCenterLayoutSpec.h"
+#import "ASStaticLayoutSpec.h"
+#import "ASRatioLayoutSpec.h"
+#import "ASOverlayLayoutSpec.h"
+#import "ASBackgroundLayoutSpec.h"
+#import "ASInsetLayoutSpec.h"
+
 typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASChildMap;
 
 @interface ASLayoutSpec() {
@@ -225,6 +233,10 @@ ASEnvironmentLayoutExtensibilityForwarding
   ASDN::MutexLocker l(_propertyLock);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
+
+#pragma mark ASLayoutableConvenience
+
+ASLayoutableConvenienceImpl
 
 @end
 
