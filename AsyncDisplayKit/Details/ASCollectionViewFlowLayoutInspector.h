@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 
+@optional
+
 /**
  * Asks the inspector to provide a constrained size range for the given supplementary node.
  */
@@ -40,8 +42,6 @@ NS_ASSUME_NONNULL_BEGIN
  * Asks the inspector for the number of supplementary views for the given kind in the specified section.
  */
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
-
-@optional
 
 /**
  * Allow the inspector to respond to delegate changes.
