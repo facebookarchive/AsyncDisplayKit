@@ -44,6 +44,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   CGFloat _currentImageQuality;
   CGFloat _renderedImageQuality;
 
+  BOOL _needsToApplyPendingContentMode;
+  UIViewContentMode _pendingContentModeState;
+    
   // TODO: Move this to flags
   BOOL _delegateSupportsDidStartFetchingData;
   BOOL _delegateSupportsDidFailWithError;
@@ -173,6 +176,11 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     // Locking: it is important to release _lock before entering setImage:, as it needs to release the lock before -invalidateCalculatedLayout.
     // If we continue to hold the lock here, it will still be locked until the next unlock() call, causing a possible deadlock with
     // -[ASNetworkImageNode displayWillStart] (which is called on a different thread / main, at an unpredictable time due to ASMainRunloopQueue).
+    BOOL stretchable = !UIEdgeInsetsEqualToEdgeInsets(defaultImage.capInsets, UIEdgeInsetsZero);
+    if (stretchable) {
+      _pendingContentModeState = self.contentMode;
+      _needsToApplyPendingContentMode = YES;
+    }
     self.image = defaultImage;
   } else {
     _lock.unlock();
@@ -183,6 +191,23 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 {
   ASDN::MutexLocker l(_lock);
   return _defaultImage;
+}
+
+- (void)setImage:(UIImage *)image
+{
+  if (_needsToApplyPendingContentMode && !ASObjectIsEqual(image, _defaultImage)) {
+    _needsToApplyPendingContentMode = NO;
+    self.contentMode = _pendingContentModeState;
+  }
+  [super setImage:image];
+}
+
+- (void)setContentMode:(UIViewContentMode)contentMode
+{
+  if (_needsToApplyPendingContentMode) {
+    _pendingContentModeState = contentMode;
+  }
+  [super setContentMode:contentMode];
 }
 
 - (void)setCurrentImageQuality:(CGFloat)currentImageQuality
