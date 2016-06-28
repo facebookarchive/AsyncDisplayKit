@@ -1187,20 +1187,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   if (indexPaths.count > 0) {
     [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
-    UICollectionViewLayoutInvalidationContext *inval = [[UICollectionViewLayoutInvalidationContext alloc] init];
+    UICollectionViewLayoutInvalidationContext *inval = [[[[self.collectionViewLayout class] invalidationContextClass] alloc] init];
     if (AS_AT_LEAST_IOS8) {
       [inval invalidateItemsAtIndexPaths:indexPaths];
     }
     
-    if (_queuedNodeSizeInvalidationContext.shouldAnimate) {
-      [UIView animateWithDuration:0.5 animations:^{
+    [UIView performWithoutAnimation:^{
         [self.collectionViewLayout invalidateLayoutWithContext:inval];
         [self layoutIfNeeded];
-      }];
-      
-    } else {
-      [self.collectionViewLayout invalidateLayoutWithContext:inval];
-    }
+    }];
   }
   
   _queuedNodeSizeInvalidationContext = nil;
