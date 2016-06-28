@@ -18,7 +18,7 @@ interfaces smooth and responsive.  It was originally built to make Facebook's
 [pop](https://github.com/facebook/pop)'s physics-based animations &mdash; but
 it's just as powerful with UIKit Dynamics and conventional app designs.
 
-### Quick start
+### Quick start 
 
 ASDK is available on [CocoaPods](http://cocoapods.org).  Add the following to your Podfile:
 
