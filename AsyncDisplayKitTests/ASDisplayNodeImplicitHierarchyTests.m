@@ -130,4 +130,88 @@
   XCTAssertEqual(node.subnodes[2], node2);
 }
 
+- (void)testMeasurementInBackgroundThreadWithLoadedNode
+{
+  ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
+  ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
+  
+  ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
+    ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
+    if ([strongNode.layoutState isEqualToNumber:@1]) {
+      return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node1]];
+    } else {
+      return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node2]];
+    }
+  };
+  
+  // Intentionally trigger view creation
+  [node2 view];
+  
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Fix IHM layout also if one node is already loaded"];
+  
+  dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    
+    [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+    XCTAssertEqual(node.subnodes[0], node1);
+    
+    node.layoutState = @2;
+    [node invalidateCalculatedLayout];
+    [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+    
+    // Dispatch back to the main thread to let the insertion / deletion of subnodes happening
+    dispatch_async(dispatch_get_main_queue(), ^{
+      XCTAssertEqual(node.subnodes[0], node2);
+      [expectation fulfill];
+    });
+  });
+  
+  [self waitForExpectationsWithTimeout:5.0 handler:^(NSError *error) {
+    if (error) {
+      NSLog(@"Timeout Error: %@", error);
+    }
+  }];
+}
+
+- (void)testTransitionLayoutWithAnimationWithLoadedNodes
+{
+  ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
+  ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
+  
+  ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  
+  node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
+    ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
+    if ([strongNode.layoutState isEqualToNumber:@1]) {
+      return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node1]];
+    } else {
+      return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node2]];
+    }
+  };
+ 
+  // Intentionally trigger view creation
+  [node2 view];
+  
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Fix IHM layout transition also if one node is already loaded"];
+  
+  [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+  XCTAssertEqual(node.subnodes[0], node1);
+  
+  node.layoutState = @2;
+  [node invalidateCalculatedLayout];
+  [node transitionLayoutWithAnimation:YES shouldMeasureAsync:YES measurementCompletion:^{
+    // Push this to the next runloop to let async insertion / removing of nodes finished before checking
+    dispatch_async(dispatch_get_main_queue(), ^{
+      XCTAssertEqual(node.subnodes[0], node2);
+      [expectation fulfill];
+    });
+  }];
+  
+  [self waitForExpectationsWithTimeout:5.0 handler:^(NSError *error) {
+    if (error) {
+      NSLog(@"Timeout Error: %@", error);
+    }
+  }];
+}
+
 @end

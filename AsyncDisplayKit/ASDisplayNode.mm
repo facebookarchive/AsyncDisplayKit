@@ -15,6 +15,7 @@
 
 #import <objc/runtime.h>
 #import <deque>
+#import <queue>
 
 #import "_ASAsyncTransaction.h"
 #import "_ASAsyncTransactionContainer+Private.h"
@@ -626,7 +627,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (! [self shouldMeasureWithSizeRange:constrainedSize]) {
     return _layout;
   }
-
+  
   [self cancelLayoutTransitionsInProgress];
 
   ASLayout *previousLayout = _layout;
@@ -637,13 +638,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                                                           pendingLayout:newLayout
                                                          previousLayout:previousLayout];
   } else {
-    ASLayoutTransition *layoutContext;
+    ASLayoutTransition *layoutTransition = nil;
     if (self.usesImplicitHierarchyManagement) {
-      layoutContext = [[ASLayoutTransition alloc] initWithNode:self
-                                                 pendingLayout:newLayout
-                                                previousLayout:previousLayout];
+      layoutTransition = [[ASLayoutTransition alloc] initWithNode:self
+                                                    pendingLayout:newLayout
+                                                   previousLayout:previousLayout];
     }
-    [self applyLayout:newLayout layoutContext:layoutContext];
+    
+    [self _applyLayout:newLayout layoutTransition:layoutTransition];
     [self _completeLayoutCalculation];
   }
 
@@ -678,6 +680,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (ASLayoutableType)layoutableType
 {
   return ASLayoutableTypeDisplayNode;
+}
+
+- (BOOL)canLayoutAsynchronous
+{
+  return !self.isNodeLoaded;
 }
 
 #pragma mark - Layout Transition
@@ -750,10 +757,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       }
       
       ASLayout *previousLayout = _layout;
-      [self applyLayout:newLayout layoutContext:nil];
+      [self _applyLayout:newLayout layoutTransition:nil];
       
       ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
-        [node applyPendingLayoutContext];
+        [node _applyPendingLayoutContext];
         [node _completeLayoutCalculation];
         node.hierarchyState &= (~ASHierarchyStateLayoutPending);
       });
@@ -776,6 +783,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     });
   };
 
+  // TODO ihm: Can we always push the measure to the background thread and remove the parameter from the API?
   if (shouldMeasureAsync) {
     ASPerformBlockOnBackgroundThread(transitionBlock);
   } else {
@@ -838,8 +846,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (BOOL)_hasTransitionInProgress
 {
-    ASDN::MutexLocker l(_propertyLock);
-    return _transitionInProgress;
+  ASDN::MutexLocker l(_propertyLock);
+  return _transitionInProgress;
 }
 
 /// Starts a new transition and returns the transition id
@@ -2414,16 +2422,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   });
 }
 
-- (void)applyPendingLayoutContext
+- (void)_applyPendingLayoutContext
 {
   ASDN::MutexLocker l(_propertyLock);
   if (_pendingLayoutTransition) {
-    [self applyLayout:_pendingLayoutTransition.pendingLayout layoutContext:_pendingLayoutTransition];
+    [self _applyLayout:_pendingLayoutTransition.pendingLayout layoutTransition:_pendingLayoutTransition];
     _pendingLayoutTransition = nil;
   }
 }
 
-- (void)applyLayout:(ASLayout *)layout layoutContext:(ASLayoutTransition *)layoutContext
+- (void)_applyLayout:(ASLayout *)layout layoutTransition:(ASLayoutTransition *)layoutTransition
 {
   ASDN::MutexLocker l(_propertyLock);
   _layout = layout;
@@ -2432,10 +2440,22 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
   
-  if (self.usesImplicitHierarchyManagement && layoutContext != nil) {
-    [layoutContext applySubnodeInsertions];
-    [layoutContext applySubnodeRemovals];
+  if (layoutTransition == nil || self.usesImplicitHierarchyManagement == NO) {
+    return;
   }
+
+  // Trampoline to the main thread if necessary
+  if (ASDisplayNodeThreadIsMain() == NO && layoutTransition.canTransitionAsynchronous == NO) {
+
+    // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
+    ASPerformBlockOnMainThread(^{
+      [layoutTransition applySubnodeTransition];
+    });
+    
+    return;
+  }
+  
+  [layoutTransition applySubnodeTransition];
 }
 
 - (void)layout
