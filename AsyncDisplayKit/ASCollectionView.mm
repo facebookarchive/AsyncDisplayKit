@@ -24,6 +24,7 @@
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "_ASDisplayLayer.h"
+#import "ASAvailability.h"
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
@@ -1023,15 +1024,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)rangeController:(ASRangeController *)rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
-
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
+  NSUInteger numberOfUpdateBlocks = _batchUpdateBlocks.count;
+  if (numberOfUpdateBlocks == 0 || !self.asyncDataSource || _superIsPendingDataLoad) {
     if (completion) {
       completion(NO);
     }
+    _performingBatchUpdates = NO;
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
-  NSUInteger numberOfUpdateBlocks = _batchUpdateBlocks.count;
   ASPerformBlockWithoutAnimation(!animated, ^{
     [_layoutFacilitator collectionViewWillPerformBatchUpdates];
     [super performBatchUpdates:^{
@@ -1186,11 +1187,20 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   if (indexPaths.count > 0) {
     [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
+    UICollectionViewLayoutInvalidationContext *inval = [[UICollectionViewLayoutInvalidationContext alloc] init];
+    if (AS_AT_LEAST_IOS8) {
+      [inval invalidateItemsAtIndexPaths:indexPaths];
+    }
     
-    ASPerformBlockWithoutAnimation(!_queuedNodeSizeInvalidationContext.shouldAnimate, ^{
-      // Perform an empty update transaction here to trigger UICollectionView to requery row sizes and layout its subviews again
-      [super performBatchUpdates:^{} completion:nil];
-    });
+    if (_queuedNodeSizeInvalidationContext.shouldAnimate) {
+      [UIView animateWithDuration:0.5 animations:^{
+        [self.collectionViewLayout invalidateLayoutWithContext:inval];
+        [self layoutIfNeeded];
+      }];
+      
+    } else {
+      [self.collectionViewLayout invalidateLayoutWithContext:inval];
+    }
   }
   
   _queuedNodeSizeInvalidationContext = nil;
