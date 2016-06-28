@@ -164,6 +164,10 @@ static NSString * const kStatus = @"status";
 
 - (void)addPlayerItemObservers:(AVPlayerItem *)playerItem
 {
+  if (playerItem == nil) {
+    return;
+  }
+  
   [playerItem addObserver:self forKeyPath:kStatus options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:ASVideoNodeContext];
   [playerItem addObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
   [playerItem addObserver:self forKeyPath:kplaybackBufferEmpty options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
@@ -641,7 +645,9 @@ static NSString * const kStatus = @"status";
 
   _currentPlayerItem = currentItem;
 
-  [self addPlayerItemObservers:currentItem];
+  if (currentItem != nil) {
+    [self addPlayerItemObservers:currentItem];
+  }
 }
 
 - (ASDisplayNode *)playerNode
