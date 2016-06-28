@@ -1191,7 +1191,7 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
     [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     UICollectionViewLayoutInvalidationContext *inval = [[[[self.collectionViewLayout class] invalidationContextClass] alloc] init];
     
-    // NOTE: If we invalidate specific items, then flow layout
+    // NOTE: We don't invalidate specific items here because the layout
     // will not move other items to account for the change. This is almost
     // never good, so we intentionally don't do it.
     
