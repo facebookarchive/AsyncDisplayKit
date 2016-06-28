@@ -14,6 +14,7 @@
 #import "ASInternalHelpers.h"
 #import "_ASHierarchyChangeSet.h"
 #import "ASAssert.h"
+#import "NSIndexSet+ASHelpers.h"
 
 #import "ASDataController+Subclasses.h"
 
@@ -47,6 +48,9 @@
     
     [super beginUpdates];
 
+    NSAssert([_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload].count == 0, @"Expected reload item changes to have been converted into insert/deletes.");
+    NSAssert([_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload].count == 0, @"Expected reload section changes to have been converted into insert/deletes.");
+    
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
       [super deleteRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
@@ -54,17 +58,7 @@
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
       [super deleteSections:change.indexSet withAnimationOptions:change.animationOptions];
     }
-
-    // TODO: Shouldn't reloads be processed before deletes, since deletes affect
-    // the index space and reloads don't?
-    for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadSections:change.indexSet withAnimationOptions:change.animationOptions];
-    }
-
-    for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
-      [super reloadRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
-    }
-
+    
     for (_ASHierarchySectionChange *change in [_changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
       [super insertSections:change.indexSet withAnimationOptions:change.animationOptions];
     }
@@ -115,7 +109,10 @@
   if ([self batchUpdating]) {
     [_changeSet reloadSections:sections animationOptions:animationOptions];
   } else {
-    [super reloadSections:sections withAnimationOptions:animationOptions];
+    [self beginUpdates];
+    [super deleteSections:sections withAnimationOptions:animationOptions];
+    [super insertSections:sections withAnimationOptions:animationOptions];
+    [self endUpdates];
   }
 }
 
@@ -158,7 +155,10 @@
   if ([self batchUpdating]) {
     [_changeSet reloadItems:indexPaths animationOptions:animationOptions];
   } else {
-    [super reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [self beginUpdates];
+    [super deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [super insertRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [self endUpdates];
   }
 }
 

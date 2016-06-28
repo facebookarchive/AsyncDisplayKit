@@ -147,6 +147,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 // Always set, whether ASCollectionView is created directly or via ASCollectionNode.
 @property (nonatomic, weak)   ASTableNode *tableNode;
 
+@property (nonatomic) BOOL test_enableSuperUpdateCallLogging;
 @end
 
 @implementation ASTableView
@@ -459,18 +460,21 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController insertSections:sections withAnimationOptions:animation];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController deleteSections:sections withAnimationOptions:animation];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController reloadSections:sections withAnimationOptions:animation];
 }
 
@@ -483,18 +487,21 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
@@ -978,6 +985,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    if (self.test_enableSuperUpdateCallLogging) {
+      NSLog(@"-[super insertRowsAtIndexPaths]: %@", indexPaths);
+    }
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
   });
@@ -998,6 +1008,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    if (self.test_enableSuperUpdateCallLogging) {
+      NSLog(@"-[super deleteRowsAtIndexPaths]: %@", indexPaths);
+    }
     [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
   });
@@ -1019,6 +1032,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    if (self.test_enableSuperUpdateCallLogging) {
+      NSLog(@"-[super insertSections]: %@", indexSet);
+    }
     [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
   });
@@ -1035,6 +1051,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    if (self.test_enableSuperUpdateCallLogging) {
+      NSLog(@"-[super deleteSections]: %@", indexSet);
+    }
     [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
   });
