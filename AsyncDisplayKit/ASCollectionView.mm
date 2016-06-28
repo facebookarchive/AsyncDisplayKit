@@ -30,6 +30,9 @@ static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimation
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
+/// The duration used when animating to new layout attributes
+static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
+
 #pragma mark -
 #pragma mark ASCellNode<->UICollectionViewCell bridging.
 
@@ -1188,14 +1191,18 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (indexPaths.count > 0) {
     [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
     UICollectionViewLayoutInvalidationContext *inval = [[[[self.collectionViewLayout class] invalidationContextClass] alloc] init];
-    if (AS_AT_LEAST_IOS8) {
-      [inval invalidateItemsAtIndexPaths:indexPaths];
-    }
     
-    [UIView performWithoutAnimation:^{
-        [self.collectionViewLayout invalidateLayoutWithContext:inval];
-        [self layoutIfNeeded];
-    }];
+    // NOTE: If we invalidate specific items, then flow layout
+    // will not move other items to account for the change. This is almost
+    // never good, so we intentionally don't do it.
+    
+    [self.collectionViewLayout invalidateLayoutWithContext:inval];
+    
+    if (_queuedNodeSizeInvalidationContext.shouldAnimate) {
+      [UIView animateWithDuration:kASCollectionViewAnimationDuration animations:^{
+          [self layoutIfNeeded];
+      }];
+    }
   }
   
   _queuedNodeSizeInvalidationContext = nil;
