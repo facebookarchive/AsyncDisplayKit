@@ -46,7 +46,7 @@ CALayers:
 
 You can construct entire node hierarchies in parallel, or instantiate and size
 a single node on a background thread &mdash; for example, you could do
-something like this in a UIViewController:
+something like this in a UIViewController: 
 
 ```objective-c
 dispatch_async(_backgroundQueue, ^{
