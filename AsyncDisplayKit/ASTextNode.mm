@@ -371,7 +371,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     attributedText = [[NSAttributedString alloc] initWithString:@"" attributes:nil];
   }
   
-  // Don't hold the textLock for too long
+  // Don't hold textLock for too long.
   {
     std::lock_guard<std::recursive_mutex> l(_textLock);
     if (ASObjectIsEqual(attributedText, _attributedText)) {
@@ -379,6 +379,14 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     }
 
     _attributedText = ASCleanseAttributedStringOfCoreTextAttributes(attributedText);
+    
+    // Sync the truncation string with attributes from the updated _attributedString
+    // Without this, the size calculation of the text with truncation applied will
+    // not take into account the attributes of attributedText in the last line
+    [self _updateComposedTruncationText];
+    
+    // We need an entirely new renderer
+    [self _invalidateRenderer];
   }
   
   NSUInteger length = attributedText.length;
@@ -387,14 +395,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     self.ascender = round([[attributedText attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
     self.descender = round([[attributedText attribute:NSFontAttributeName atIndex:length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
   }
-
-  // Sync the truncation string with attributes from the updated _attributedString
-  // Without this, the size calculation of the text with truncation applied will
-  // not take into account the attributes of attributedText in the last line
-  [self _updateComposedTruncationText];
-  
-  // We need an entirely new renderer
-  [self _invalidateRenderer];
 
   // Tell the display node superclasses that the cached layout is incorrect now
   [self invalidateCalculatedLayout];
