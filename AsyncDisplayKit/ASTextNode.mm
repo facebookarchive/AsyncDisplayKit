@@ -366,22 +366,26 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)setAttributedText:(NSAttributedString *)attributedText
 {
-  std::lock_guard<std::recursive_mutex> l(_textLock);
   
   if (attributedText == nil) {
     attributedText = [[NSAttributedString alloc] initWithString:@"" attributes:nil];
   }
+  
+  // Don't hold the textLock for too long
+  {
+    std::lock_guard<std::recursive_mutex> l(_textLock);
+    if (ASObjectIsEqual(attributedText, _attributedText)) {
+      return;
+    }
 
-  if (ASObjectIsEqual(attributedText, _attributedText)) {
-    return;
+    _attributedText = ASCleanseAttributedStringOfCoreTextAttributes(attributedText);
   }
-
-  _attributedText = ASCleanseAttributedStringOfCoreTextAttributes(attributedText);
-    
-  if (_attributedText.length > 0) {
+  
+  NSUInteger length = attributedText.length;
+  if (length > 0) {
     CGFloat screenScale = ASScreenScale();
-    self.ascender = round([[_attributedText attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
-    self.descender = round([[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+    self.ascender = round([[attributedText attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
+    self.descender = round([[attributedText attribute:NSFontAttributeName atIndex:length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
   }
 
   // Sync the truncation string with attributes from the updated _attributedString
@@ -399,8 +403,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   
   // Accessiblity
-  self.accessibilityLabel = _attributedText.string;
-  self.isAccessibilityElement = (_attributedText.length != 0); // We're an accessibility element by default if there is a string.
+  self.accessibilityLabel = attributedText.string;
+  self.isAccessibilityElement = (length != 0); // We're an accessibility element by default if there is a string.
 }
 
 #pragma mark - Text Layout
