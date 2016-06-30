@@ -21,7 +21,7 @@
 - (instancetype)init; // UITableViewStylePlain
 - (instancetype)initWithStyle:(UITableViewStyle)style;
 
-@property (nonatomic, readonly) ASTableView *view;
+@property (strong, nonatomic, readonly) ASTableView *view;
 
 // These properties can be set without triggering the view to be created, so it's fine to set them in -init.
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
