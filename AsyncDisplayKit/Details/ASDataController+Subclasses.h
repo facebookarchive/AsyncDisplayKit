@@ -9,6 +9,7 @@
 //
 
 #pragma once
+#import <vector>
 
 @class ASIndexedNodeContext;
 
@@ -32,6 +33,21 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
  * Read only access to the underlying completed nodes of the given kind
  */
 - (NSMutableArray *)completedNodesOfKind:(NSString *)kind;
+
+/**
+ * Ensure that next time `itemCountsFromDataSource` is called, new values are retrieved.
+ *
+ * This must be called on the main thread.
+ */
+- (void)invalidateDataSourceItemCounts;
+
+/**
+ * Returns the most recently gathered item counts from the data source. If the counts
+ * have been invalidated, this synchronously queries the data source and saves the result.
+ *
+ * This must be called on the main thread.
+ */
+- (std::vector<NSInteger>)itemCountsFromDataSource;
 
 #pragma mark - Node sizing
 

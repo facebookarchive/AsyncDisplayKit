@@ -14,6 +14,8 @@
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASCellNode.h"
 #import "ASCollectionNode.h"
+#import "ASDisplayNode+Beta.h"
+#import <vector>
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
@@ -33,17 +35,18 @@
 
 @interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate>
 
-@property (nonatomic, assign) NSInteger numberOfSections;
-@property (nonatomic, assign) NSInteger numberOfItemsInSection;
-
 @end
 
-@implementation ASCollectionViewTestDelegate
+@implementation ASCollectionViewTestDelegate {
+  @package
+  std::vector<NSInteger> _itemCounts;
+}
 
 - (id)initWithNumberOfSections:(NSInteger)numberOfSections numberOfItemsInSection:(NSInteger)numberOfItemsInSection {
   if (self = [super init]) {
-    _numberOfSections = numberOfSections;
-    _numberOfItemsInSection = numberOfItemsInSection;
+    for (NSInteger i = 0; i < numberOfSections; i++) {
+      _itemCounts.push_back(numberOfItemsInSection);
+    }
   }
 
   return self;
@@ -66,11 +69,11 @@
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
-  return self.numberOfSections;
+  return _itemCounts.size();
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-  return self.numberOfItemsInSection;
+  return _itemCounts[section];
 }
 
 @end
@@ -84,23 +87,21 @@
 
 @implementation ASCollectionViewTestController
 
-- (void)viewDidLoad {
-  [super viewDidLoad];
-
-  self.asyncDelegate = [[ASCollectionViewTestDelegate alloc] initWithNumberOfSections:10 numberOfItemsInSection:10];
-
-  self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds
-                                           collectionViewLayout:[UICollectionViewFlowLayout new]];
-  self.collectionView.asyncDataSource = self.asyncDelegate;
-  self.collectionView.asyncDelegate = self.asyncDelegate;
-
-  [self.view addSubview:self.collectionView];
-}
-
-- (void)viewWillLayoutSubviews {
-  [super viewWillLayoutSubviews];
-
-  self.collectionView.frame = self.view.bounds;
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  if (self) {
+    // Populate these immediately so that they're not unexpectedly nil during tests.
+    self.asyncDelegate = [[ASCollectionViewTestDelegate alloc] initWithNumberOfSections:10 numberOfItemsInSection:10];
+    
+    self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds
+                                             collectionViewLayout:[UICollectionViewFlowLayout new]];
+    self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.collectionView.asyncDataSource = self.asyncDelegate;
+    self.collectionView.asyncDelegate = self.asyncDelegate;
+    
+    [self.view addSubview:self.collectionView];
+  }
+  return self;
 }
 
 @end
@@ -250,6 +251,110 @@
 {
   ASCollectionNode *node = [[ASCollectionNode alloc] initWithFrame:CGRectZero collectionViewLayout:[[UICollectionViewFlowLayout alloc] init]];
   XCTAssert([node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]);
+}
+
+#pragma mark - Update Validations
+
+#define updateValidationTestPrologue \
+  [ASDisplayNode setSuppressesInvalidCollectionUpdateExceptions:NO];\
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];\
+  __unused ASCollectionViewTestDelegate *del = testController.asyncDelegate;\
+  __unused ASCollectionView *cv = testController.collectionView;\
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];\
+  window.rootViewController = testController;\
+  \
+  [testController.collectionView reloadDataImmediately];\
+  [testController.collectionView layoutIfNeeded];
+
+- (void)testThatSubmittingAValidInsertDoesNotThrowAnException
+{
+  updateValidationTestPrologue
+  NSInteger sectionCount = del->_itemCounts.size();
+  
+  del->_itemCounts[sectionCount - 1]++;
+  XCTAssertNoThrow([cv insertItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:0 inSection:sectionCount - 1] ]]);
+}
+
+- (void)testThatSubmittingAValidReloadDoesNotThrowAnException
+{
+  updateValidationTestPrologue
+  NSInteger sectionCount = del->_itemCounts.size();
+  
+  XCTAssertNoThrow([cv reloadItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:0 inSection:sectionCount - 1] ]]);
+}
+
+- (void)testThatSubmittingAnInvalidInsertThrowsAnException
+{
+  updateValidationTestPrologue
+  NSInteger sectionCount = del->_itemCounts.size();
+  
+  XCTAssertThrows([cv insertItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:0 inSection:sectionCount + 1] ]]);
+}
+
+- (void)testThatSubmittingAnInvalidDeleteThrowsAnException
+{
+  updateValidationTestPrologue
+  NSInteger sectionCount = del->_itemCounts.size();
+  
+  XCTAssertThrows([cv deleteItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:0 inSection:sectionCount + 1] ]]);
+}
+
+- (void)testThatDeletingAndReloadingTheSameItemThrowsAnException
+{
+  updateValidationTestPrologue
+  
+  XCTAssertThrows([cv performBatchUpdates:^{
+    NSArray *indexPaths = @[ [NSIndexPath indexPathForItem:0 inSection:0] ];
+    [cv deleteItemsAtIndexPaths:indexPaths];
+    [cv reloadItemsAtIndexPaths:indexPaths];
+  } completion:nil]);
+}
+
+- (void)testThatHavingAnIncorrectSectionCountThrowsAnException
+{
+  updateValidationTestPrologue
+  
+  XCTAssertThrows([cv deleteSections:[NSIndexSet indexSetWithIndex:0]]);
+}
+
+- (void)testThatHavingAnIncorrectItemCountThrowsAnException
+{
+  updateValidationTestPrologue
+  
+  XCTAssertThrows([cv deleteItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:0 inSection:0] ]]);
+}
+
+- (void)testThatHavingAnIncorrectItemCountWithNoUpdatesThrowsAnException
+{
+  updateValidationTestPrologue
+  
+  XCTAssertThrows([cv performBatchUpdates:^{
+    del->_itemCounts[0]++;
+  } completion:nil]);
+}
+
+- (void)testThatInsertingAnInvalidSectionThrowsAnException
+{
+  updateValidationTestPrologue
+  NSInteger sectionCount = del->_itemCounts.size();
+  
+  del->_itemCounts.push_back(10);
+  XCTAssertThrows([cv performBatchUpdates:^{
+    [cv insertSections:[NSIndexSet indexSetWithIndex:sectionCount + 1]];
+  } completion:nil]);
+}
+
+- (void)testThatDeletingAndReloadingASectionThrowsAnException
+{
+  updateValidationTestPrologue
+  NSInteger sectionCount = del->_itemCounts.size();
+  
+  del->_itemCounts.pop_back();
+  XCTAssertThrows([cv performBatchUpdates:^{
+    NSIndexSet *sections = [NSIndexSet indexSetWithIndex:sectionCount - 1];
+    [cv reloadSections:sections];
+    [cv deleteSections:sections];
+  } completion:nil]);
 }
 
 @end

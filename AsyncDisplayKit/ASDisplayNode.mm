@@ -89,6 +89,18 @@ static BOOL usesImplicitHierarchyManagement = NO;
   usesImplicitHierarchyManagement = enabled;
 }
 
+static BOOL suppressesInvalidCollectionUpdateExceptions = YES;
+
++ (BOOL)suppressesInvalidCollectionUpdateExceptions
+{
+  return suppressesInvalidCollectionUpdateExceptions;
+}
+
++ (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses
+{
+  suppressesInvalidCollectionUpdateExceptions = suppresses;
+}
+
 BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector)
 {
   return ASSubclassOverridesSelector([ASDisplayNode class], subclass, selector);
