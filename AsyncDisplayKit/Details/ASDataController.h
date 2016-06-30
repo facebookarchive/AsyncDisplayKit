@@ -124,6 +124,15 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  */
 @property (nonatomic, weak) id<ASDataControllerEnvironmentDelegate> environmentDelegate;
 
+/**
+ * Returns YES if reloadData has been called at least once. Before this point it is
+ * important to ignore/suppress some operations. For example, inserting a section
+ * before the initial data load should have no effect.
+ *
+ * This must be called on the main thread.
+ */
+@property (nonatomic, readonly) BOOL initialReloadDataHasBeenCalled;
+
 /** @name Data Updating */
 
 - (void)beginUpdates;

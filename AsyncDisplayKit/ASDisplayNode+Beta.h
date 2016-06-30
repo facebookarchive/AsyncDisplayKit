@@ -23,6 +23,20 @@ ASDISPLAYNODE_EXTERN_C_END
 + (BOOL)usesImplicitHierarchyManagement;
 + (void)setUsesImplicitHierarchyManagement:(BOOL)enabled;
 
+/**
+ * ASTableView and ASCollectionView now throw exceptions on invalid updates
+ * like their UIKit counterparts. If YES, these classes will log messages
+ * on invalid updates rather than throwing exceptions.
+ *
+ * Note that even if AsyncDisplayKit's exception is suppressed, the app may still crash
+ * as it proceeds with an invalid update.
+ *
+ * This currently defaults to YES. In a future release it will default to NO and later
+ * be removed entirely.
+ */
++ (BOOL)suppressesInvalidCollectionUpdateExceptions;
++ (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses;
+
 /** @name Layout */
 
 
