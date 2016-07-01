@@ -1100,7 +1100,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // measureWithSizeRange: on subnodes to assert.
     return;
   }
+
+  // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
+  // was created
+  if ([self _shouldHavePlaceholderLayer]) {
+    [self _setupPlaceholderLayerIfNeeded];
+  }
   _placeholderLayer.frame = bounds;
+
   [self layout];
   [self layoutDidFinish];
 }
