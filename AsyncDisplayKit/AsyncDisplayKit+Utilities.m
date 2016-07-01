@@ -19,8 +19,9 @@
                                    backgroundColor:(UIColor *)backgroundColor
                                          fillColor:(UIColor *)fillColor
                                        borderColor:(UIColor *)borderColor
+                                       borderWidth:(CGFloat)borderWidth
 {
-    return [[self class] as_resizableRoundedImageWithCornerRadius:cornerRadius scale:scale backgroundColor:backgroundColor fillColor:fillColor borderColor:borderColor roundedCorner:UIRectCornerAllCorners];
+    return [[self class] as_resizableRoundedImageWithCornerRadius:cornerRadius scale:scale backgroundColor:backgroundColor fillColor:fillColor borderColor:borderColor borderWidth:borderWidth roundedCorner:UIRectCornerAllCorners];
 }
 
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
@@ -28,6 +29,7 @@
                                    backgroundColor:(UIColor *)backgroundColor
                                          fillColor:(UIColor *)fillColor
                                        borderColor:(UIColor *)borderColor
+                                       borderWidth:(CGFloat)borderWidth
                                      roundedCorner:(UIRectCorner)roundedCorners
 {
     static NSCache *__pathCache = nil;
@@ -83,7 +85,7 @@
     if (borderColor) {
         [borderColor setStroke];
 
-        CGFloat lineWidth = 1.0 / scale;
+        CGFloat lineWidth = borderWidth / scale;
         CGRect strokeRect = CGRectInset(bounds, lineWidth / 2.0, lineWidth / 2.0);
 
         // It is rarer to have a stroke path, and our cache key only handles rounded rects for the exact-stretchable
