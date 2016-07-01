@@ -35,6 +35,11 @@
     dispatch_once(&onceToken, ^{
         __pathCache = [[NSCache alloc] init];
     });
+  
+    // Treat clear background color as no background color
+    if ([backgroundColor isEqual:[UIColor clearColor]]) {
+        backgroundColor = nil;
+    }
 
     CGFloat dimension = (cornerRadius * 2) + 1;
     CGRect bounds = CGRectMake(0, 0, dimension, dimension);
@@ -62,6 +67,8 @@
         }
     }
 
+    //We should probably check if the background color has any alpha component but that
+    //might be expensive due to needing to check mulitple color spaces.
     UIGraphicsBeginImageContextWithOptions(bounds.size, backgroundColor != nil, scale);
 
     if (backgroundColor) {
