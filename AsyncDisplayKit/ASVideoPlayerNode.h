@@ -49,6 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readwrite) BOOL muted;
 @property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
 @property (nonatomic, assign, readwrite) BOOL shouldAggressivelyRecoverFromStall;
+@property (nullable, atomic, strong, readwrite) NSURL *placeholderImageURL;
 
 //! Defaults to 100
 @property (nonatomic, assign) int32_t periodicTimeObserverTimescale;

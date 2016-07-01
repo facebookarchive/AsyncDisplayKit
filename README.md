@@ -10,7 +10,7 @@
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-59C939.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Build Status](https://travis-ci.org/facebook/AsyncDisplayKit.svg)](https://travis-ci.org/facebook/AsyncDisplayKit)
 [![License](https://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
-
+ 
 
 AsyncDisplayKit is an iOS framework that keeps even the most complex user
 interfaces smooth and responsive.  It was originally built to make Facebook's
@@ -18,14 +18,14 @@ interfaces smooth and responsive.  It was originally built to make Facebook's
 [pop](https://github.com/facebook/pop)'s physics-based animations &mdash; but
 it's just as powerful with UIKit Dynamics and conventional app designs.
 
-### Quick start
+### Quick start  
 
 ASDK is available on [CocoaPods](http://cocoapods.org).  Add the following to your Podfile:
 
 ```ruby
 pod 'AsyncDisplayKit'
 ```
-
+ 
 (ASDK can also be used as a regular static library:  Copy the project to your
 codebase manually, adding `AsyncDisplayKit.xcodeproj` to your workspace.  Add
 `libAsyncDisplayKit.a`, MapKit, AssetsLibrary, and Photos to the "Link Binary With
@@ -46,7 +46,7 @@ CALayers:
 
 You can construct entire node hierarchies in parallel, or instantiate and size
 a single node on a background thread &mdash; for example, you could do
-something like this in a UIViewController:
+something like this in a UIViewController: 
 
 ```objective-c
 dispatch_async(_backgroundQueue, ^{
