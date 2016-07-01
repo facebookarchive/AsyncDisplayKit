@@ -28,6 +28,7 @@
 
 #import <CoreFoundation/CoreFoundation.h>
 
+static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 //#define LOG(...) NSLog(__VA_ARGS__)
@@ -125,6 +126,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     unsigned int asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset:1;
     unsigned int asyncDelegateTableViewWillBeginBatchFetchWithContext:1;
     unsigned int asyncDelegateShouldBatchFetchForTableView:1;
+    unsigned int asyncDelegateTableViewConstrainedSizeForRowAtIndexPath:1;
   } _asyncDelegateFlags;
   
   struct {
@@ -145,6 +147,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 // Always set, whether ASCollectionView is created directly or via ASCollectionNode.
 @property (nonatomic, weak)   ASTableNode *tableNode;
 
+@property (nonatomic) BOOL test_enableSuperUpdateCallLogging;
 @end
 
 @implementation ASTableView
@@ -316,6 +319,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDelegateFlags.asyncDelegateShouldBatchFetchForTableView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)];
     _asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)];
     _asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)];
+    _asyncDelegateFlags.asyncDelegateTableViewConstrainedSizeForRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:constrainedSizeForRowAtIndexPath:)];
+
   }
   
   super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
@@ -455,18 +460,21 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController insertSections:sections withAnimationOptions:animation];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController deleteSections:sections withAnimationOptions:animation];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController reloadSections:sections withAnimationOptions:animation];
 }
 
@@ -479,18 +487,21 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
 }
 
@@ -974,6 +985,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    if (self.test_enableSuperUpdateCallLogging) {
+      NSLog(@"-[super insertRowsAtIndexPaths]: %@", indexPaths);
+    }
     [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
   });
@@ -994,6 +1008,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    if (self.test_enableSuperUpdateCallLogging) {
+      NSLog(@"-[super deleteRowsAtIndexPaths]: %@", indexPaths);
+    }
     [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
   });
@@ -1015,6 +1032,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    if (self.test_enableSuperUpdateCallLogging) {
+      NSLog(@"-[super insertSections]: %@", indexSet);
+    }
     [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
   });
@@ -1031,6 +1051,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
   ASPerformBlockWithoutAnimation(preventAnimation, ^{
+    if (self.test_enableSuperUpdateCallLogging) {
+      NSLog(@"-[super deleteSections]: %@", indexSet);
+    }
     [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
   });
@@ -1069,8 +1092,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0),
-                         CGSizeMake(_nodesConstrainedWidth, FLT_MAX));
+  ASSizeRange constrainedSize = kInvalidSizeRange;
+  if (_asyncDelegateFlags.asyncDelegateTableViewConstrainedSizeForRowAtIndexPath) {
+    ASSizeRange delegateConstrainedSize = [_asyncDelegate tableView:self constrainedSizeForRowAtIndexPath:indexPath];
+    // ignore widths in the returned size range (for TableView)
+    constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.min.height),
+                                      CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.max.height));
+  } else {
+    constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0),
+                                      CGSizeMake(_nodesConstrainedWidth, FLT_MAX));
+  }
+  return constrainedSize;
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section

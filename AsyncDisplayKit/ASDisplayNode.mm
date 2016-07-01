@@ -1100,7 +1100,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // measureWithSizeRange: on subnodes to assert.
     return;
   }
+
+  // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
+  // was created
+  if ([self _shouldHavePlaceholderLayer]) {
+    [self _setupPlaceholderLayerIfNeeded];
+  }
   _placeholderLayer.frame = bounds;
+
   [self layout];
   [self layoutDidFinish];
 }
@@ -2755,7 +2762,12 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState
 {
+  ASEnvironmentTraitCollection oldTraitCollection = _environmentState.environmentTraitCollection;
   _environmentState = environmentState;
+  
+  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(oldTraitCollection, _environmentState.environmentTraitCollection) == NO) {
+    [self asyncTraitCollectionDidChange];
+  }
 }
 
 - (ASDisplayNode *)parent
@@ -2785,7 +2797,10 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 - (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  _environmentState.environmentTraitCollection = environmentTraitCollection;
+  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, _environmentState.environmentTraitCollection) == NO) {
+    _environmentState.environmentTraitCollection = environmentTraitCollection;
+    [self asyncTraitCollectionDidChange];
+  }
 }
 
 ASEnvironmentLayoutOptionsForwarding
@@ -2795,6 +2810,11 @@ ASEnvironmentLayoutExtensibilityForwarding
 {
   ASDN::MutexLocker l(_propertyLock);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+}
+
+- (void)asyncTraitCollectionDidChange
+{
+
 }
 
 #if TARGET_OS_TV

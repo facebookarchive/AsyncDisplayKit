@@ -115,30 +115,6 @@
   }
 }
 
-- (void)prepareForReloadSections:(NSIndexSet *)sections
-{
-  for (NSString *kind in [self supplementaryKinds]) {
-    NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
-    [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableContexts:contexts];
-    _pendingContexts[kind] = contexts;
-  }
-}
-
-- (void)willReloadSections:(NSIndexSet *)sections
-{
-  NSArray *keys = _pendingContexts.allKeys;
-  for (NSString *kind in keys) {
-    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
-    NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], sections);
-    [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
-    // reinsert the elements
-    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
-      [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
-    }];
-    [_pendingContexts removeObjectForKey:kind];
-  }
-}
-
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   for (NSString *kind in [self supplementaryKinds]) {
@@ -184,30 +160,6 @@
   for (NSString *kind in [self supplementaryKinds]) {
     NSArray<NSIndexPath *> *deletedIndexPaths = ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths([self editingNodesOfKind:kind], indexPaths);
     [self deleteNodesOfKind:kind atIndexPaths:deletedIndexPaths completion:nil];
-  }
-}
-
-- (void)prepareForReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-  for (NSString *kind in [self supplementaryKinds]) {
-    NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
-    [self _populateSupplementaryNodesOfKind:kind atIndexPaths:indexPaths mutableContexts:contexts];
-    _pendingContexts[kind] = contexts;
-  }
-}
-
-- (void)willReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-  NSArray *keys = _pendingContexts.allKeys;
-  for (NSString *kind in keys) {
-    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
-
-    [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
-    // reinsert the elements
-    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
-      [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
-    }];
-    [_pendingContexts removeObjectForKey:kind];
   }
 }
 

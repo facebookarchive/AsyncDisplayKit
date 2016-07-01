@@ -411,22 +411,22 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  [_collectionNode setTuningParameters:tuningParameters forRangeType:rangeType];
+  [_rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [_collectionNode tuningParametersForRangeType:rangeType];
+  return [_rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  [_collectionNode setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+  [_rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [_collectionNode tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+  return [_rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
 }
 
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
@@ -498,18 +498,21 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)insertSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController insertSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController deleteSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController reloadSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
@@ -522,18 +525,21 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
