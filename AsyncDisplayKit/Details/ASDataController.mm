@@ -143,8 +143,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
 {
-  CGSize size = [node measureWithSizeRange:constrainedSize].size;
-  node.frame = { .size = size };
+  CGRect frame = CGRectZero;
+  frame.size = [node measureWithSizeRange:constrainedSize].size;
+  node.frame = frame;
 }
 
 /**
@@ -849,8 +850,9 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     for (ASCellNode *node in section) {
       NSIndexPath *indexPath = [NSIndexPath indexPathForRow:rowIndex inSection:sectionIndex];
       ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
-      CGSize size = [node measureWithSizeRange:constrainedSize].size;
-      node.frame = { .size = size };
+      CGRect frame = CGRectZero;
+      frame.size = [node measureWithSizeRange:constrainedSize].size;
+      node.frame = frame;
       rowIndex += 1;
     }
     sectionIndex += 1;
