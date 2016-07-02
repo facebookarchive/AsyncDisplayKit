@@ -18,22 +18,19 @@
 
 #import "ASDataController+Subclasses.h"
 
-@interface ASChangeSetDataController ()
-
-@property (nonatomic, assign) NSUInteger changeSetBatchUpdateCounter;
-@property (nonatomic, strong) _ASHierarchyChangeSet *changeSet;
-
-@end
-
-@implementation ASChangeSetDataController
+@implementation ASChangeSetDataController {
+  NSInteger _changeSetBatchUpdateCounter;
+  _ASHierarchyChangeSet *_changeSet;
+}
 
 #pragma mark - Batching (External API)
 
 - (void)beginUpdates
 {
   ASDisplayNodeAssertMainThread();
-  if (_changeSetBatchUpdateCounter == 0) {
+  if (_changeSetBatchUpdateCounter <= 0) {
     _changeSet = [_ASHierarchyChangeSet new];
+    _changeSetBatchUpdateCounter = 0;
   }
   _changeSetBatchUpdateCounter++;
 }
@@ -42,6 +39,9 @@
 {
   ASDisplayNodeAssertMainThread();
   _changeSetBatchUpdateCounter--;
+  
+  // Prevent calling endUpdatesAnimated:completion: in an unbalanced way
+  NSAssert(_changeSetBatchUpdateCounter >= 0, @"endUpdatesAnimated:completion: called without having a balanced beginUpdates call");
   
   if (_changeSetBatchUpdateCounter == 0) {
     [_changeSet markCompleted];
