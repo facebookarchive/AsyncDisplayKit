@@ -65,7 +65,6 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   if (!(self = [super init])) {
     return nil;
   }
-  ASDisplayNodeAssert(![self isMemberOfClass:[ASDataController class]], @"ASDataController is an abstract class and should not be instantiated. Instantiate a subclass instead.");
   
   _completedNodes = [NSMutableDictionary dictionary];
   _editingNodes = [NSMutableDictionary dictionary];
@@ -143,9 +142,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
  */
 - (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
 {
-  CGRect frame = CGRectZero;
-  frame.size = [node measureWithSizeRange:constrainedSize].size;
-  node.frame = frame;
+  CGSize size = [node measureWithSizeRange:constrainedSize].size;
+  node.frame = { .size = size };
 }
 
 /**
@@ -663,7 +661,29 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)reloadSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  ASDisplayNodeAssert(NO, @"ASDataController does not support %@. Call this on ASChangeSetDataController the reload will be broken into delete & insert.", NSStringFromSelector(_cmd));
+  [self performEditCommandWithBlock:^{
+    ASDisplayNodeAssertMainThread();
+    LOG(@"Edit Command - reloadSections: %@", sections);
+    
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+
+    NSArray<ASIndexedNodeContext *> *contexts= [self _populateFromDataSourceWithSectionIndexSet:sections];
+
+    [self prepareForReloadSections:sections];
+    
+    [_editingTransactionQueue addOperationWithBlock:^{
+      [self willReloadSections:sections];
+
+      NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes[ASDataControllerRowNodeKind], sections);
+      
+      LOG(@"Edit Transaction - reloadSections: updatedIndexPaths: %@, indexPaths: %@, _editingNodes: %@", updatedIndexPaths, indexPaths, ASIndexPathsForTwoDimensionalArray(_editingNodes[ASDataControllerRowNodeKind]));
+      
+      [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
+
+      // reinsert the elements
+      [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
+    }];
+  }];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
@@ -726,6 +746,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
+- (void)prepareForReloadSections:(NSIndexSet *)sections
+{
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
+}
+
+- (void)willReloadSections:(NSIndexSet *)sections
+{
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
+}
+
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
@@ -747,6 +777,16 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 }
 
 - (void)willDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
+}
+
+- (void)prepareForReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
+}
+
+- (void)willReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
@@ -813,7 +853,40 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  ASDisplayNodeAssert(NO, @"ASDataController does not support %@. Call this on ASChangeSetDataController and the reload will be broken into delete & insert.", NSStringFromSelector(_cmd));
+  [self performEditCommandWithBlock:^{
+    ASDisplayNodeAssertMainThread();
+    LOG(@"Edit Command - reloadRows: %@", indexPaths);
+
+    [_editingTransactionQueue waitUntilAllOperationsAreFinished];
+    
+    NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+    
+    // Sort indexPath to avoid messing up the index when deleting
+    // FIXME: Shouldn't deletes be sorted in descending order?
+    NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
+    
+    id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+    ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+    
+    for (NSIndexPath *indexPath in sortedIndexPaths) {
+      ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
+      ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
+      [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
+                                                                indexPath:indexPath
+                                                          constrainedSize:constrainedSize
+                                               environmentTraitCollection:environmentTraitCollection]];
+    }
+
+    [self prepareForReloadRowsAtIndexPaths:indexPaths];
+    
+    [_editingTransactionQueue addOperationWithBlock:^{
+      [self willReloadRowsAtIndexPaths:indexPaths];
+
+      LOG(@"Edit Transaction - reloadRows: %@", indexPaths);
+      [self _deleteNodesAtIndexPaths:sortedIndexPaths withAnimationOptions:animationOptions];
+      [self _batchLayoutNodesFromContexts:contexts withAnimationOptions:animationOptions];
+    }];
+  }];
 }
 
 - (void)relayoutAllNodes
@@ -850,9 +923,8 @@ static void *kASSizingQueueContext = &kASSizingQueueContext;
     for (ASCellNode *node in section) {
       NSIndexPath *indexPath = [NSIndexPath indexPathForRow:rowIndex inSection:sectionIndex];
       ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
-      CGRect frame = CGRectZero;
-      frame.size = [node measureWithSizeRange:constrainedSize].size;
-      node.frame = frame;
+      CGSize size = [node measureWithSizeRange:constrainedSize].size;
+      node.frame = { .size = size };
       rowIndex += 1;
     }
     sectionIndex += 1;

@@ -76,9 +76,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 @end
 
 @implementation ASVideoPlayerNode
-
-@dynamic placeholderImageURL;
-
 - (instancetype)init
 {
   if (!(self = [super init])) {
@@ -772,16 +769,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (BOOL)shouldAggressivelyRecoverFromStall
 {
   return _videoNode.shouldAggressivelyRecoverFromStall;
-}
-
-- (void) setPlaceholderImageURL:(NSURL *)placeholderImageURL
-{
-  _videoNode.URL = placeholderImageURL;
-}
-
-- (NSURL*) placeholderImageURL
-{
-  return _videoNode.URL;
 }
 
 - (void)setShouldAggressivelyRecoverFromStall:(BOOL)shouldAggressivelyRecoverFromStall

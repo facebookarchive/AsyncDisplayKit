@@ -118,15 +118,6 @@
   return self;
 }
 
-- (BOOL)conformsToProtocol:(Protocol *)aProtocol
-{
-  if (_target) {
-    return [_target conformsToProtocol:aProtocol];
-  } else {
-    return [super conformsToProtocol:aProtocol];
-  }
-}
-
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
   if ([self interceptsSelector:aSelector]) {

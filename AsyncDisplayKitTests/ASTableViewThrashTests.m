@@ -8,7 +8,6 @@
 
 @import XCTest;
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
-#import "ASTableViewInternal.h"
 
 // Set to 1 to use UITableView and see if the issue still exists.
 #define USE_UIKIT_REFERENCE 0
@@ -20,8 +19,8 @@
 #define TableView ASTableView
 #endif
 
-#define kInitialSectionCount 10
-#define kInitialItemCount 10
+#define kInitialSectionCount 20
+#define kInitialItemCount 20
 #define kMinimumItemCount 5
 #define kMinimumSectionCount 3
 #define kFickleness 0.1
@@ -146,7 +145,7 @@ static volatile int32_t ASThrashTestSectionNextID = 1;
 }
 
 - (NSString *)description {
-  return [NSString stringWithFormat:@"<Section %lu: itemCount=%lu, items=%@>", (unsigned long)_sectionID, (unsigned long)self.items.count, ASThrashArrayDescription(self.items)];
+  return [NSString stringWithFormat:@"<Section %lu: itemCount=%lu>", (unsigned long)_sectionID, (unsigned long)self.items.count];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -446,22 +445,17 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 @implementation ASTableViewThrashTests {
   // The current update, which will be logged in case of a failure.
   ASThrashUpdate *_update;
-  BOOL _failed;
 }
 
 #pragma mark Overrides
 
 - (void)tearDown {
-  if (_failed && _update != nil) {
-    NSLog(@"Failed update %@: %@", _update, _update.logFriendlyBase64Representation);
-  }
-  _failed = NO;
   _update = nil;
 }
 
 // NOTE: Despite the documentation, this is not always called if an exception is caught.
 - (void)recordFailureWithDescription:(NSString *)description inFile:(NSString *)filePath atLine:(NSUInteger)lineNumber expected:(BOOL)expected {
-  _failed = YES;
+  [self logCurrentUpdateIfNeeded];
   [super recordFailureWithDescription:description inFile:filePath atLine:lineNumber expected:expected];
 }
 
@@ -483,12 +477,11 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
   }
   
   ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:_update.oldData];
-  ds.tableView.test_enableSuperUpdateCallLogging = YES;
   [self applyUpdate:_update toDataSource:ds];
   [self verifyDataSource:ds];
 }
 
-- (void)testThrashingWildly {
+- (void)DISABLED_testThrashingWildly {
   for (NSInteger i = 0; i < kThrashingIterationCount; i++) {
     [self setUp];
     ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:[ASThrashTestSection sectionsWithCount:kInitialSectionCount]];
@@ -501,6 +494,12 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 }
 
 #pragma mark Helpers
+
+- (void)logCurrentUpdateIfNeeded {
+  if (_update != nil) {
+    NSLog(@"Failed update %@: %@", _update, _update.logFriendlyBase64Representation);
+  }
+}
 
 - (void)applyUpdate:(ASThrashUpdate *)update toDataSource:(ASThrashDataSource *)dataSource {
   TableView *tableView = dataSource.tableView;
@@ -534,7 +533,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
     [tableView waitUntilAllUpdatesAreCommitted];
 #endif
   } @catch (NSException *exception) {
-    _failed = YES;
+    [self logCurrentUpdateIfNeeded];
     @throw exception;
   }
 }
@@ -554,7 +553,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
       XCTAssertEqual([tableView rectForRowAtIndexPath:indexPath].size.height, item.rowHeight);
 #else
       ASThrashTestNode *node = (ASThrashTestNode *)[tableView nodeForRowAtIndexPath:indexPath];
-      XCTAssertEqualObjects(node.item, item, @"Wrong node at index path %@", indexPath);
+      XCTAssertEqual(node.item, item);
 #endif
     }
   }

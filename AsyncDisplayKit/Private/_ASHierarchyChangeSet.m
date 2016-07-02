@@ -12,22 +12,6 @@
 
 #import "_ASHierarchyChangeSet.h"
 #import "ASInternalHelpers.h"
-#import "NSIndexSet+ASHelpers.h"
-#import "ASAssert.h"
-
-NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
-{
-  switch (changeType) {
-    case _ASHierarchyChangeTypeInsert:
-      return @"Insert";
-    case _ASHierarchyChangeTypeDelete:
-      return @"Delete";
-    case _ASHierarchyChangeTypeReload:
-      return @"Reload";
-    default:
-      return @"(invalid)";
-  }
-}
 
 @interface _ASHierarchySectionChange ()
 - (instancetype)initWithChangeType:(_ASHierarchyChangeType)changeType indexSet:(NSIndexSet *)indexSet animationOptions:(ASDataControllerAnimationOptions)animationOptions;
@@ -39,7 +23,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 + (void)sortAndCoalesceChanges:(NSMutableArray *)changes;
 
 /// Returns all the indexes from all the `indexSet`s of the given `_ASHierarchySectionChange` objects.
-+ (NSMutableIndexSet *)allIndexesInSectionChanges:(NSArray *)changes;
++ (NSMutableIndexSet *)allIndexesInChanges:(NSArray *)changes;
 @end
 
 @interface _ASHierarchyItemChange ()
@@ -54,12 +38,12 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 @interface _ASHierarchyChangeSet ()
 
-@property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *insertItemChanges;
-@property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *deleteItemChanges;
-@property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *reloadItemChanges;
-@property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchySectionChange *> *insertSectionChanges;
-@property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchySectionChange *> *deleteSectionChanges;
-@property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchySectionChange *> *reloadSectionChanges;
+@property (nonatomic, strong, readonly) NSMutableArray *insertItemChanges;
+@property (nonatomic, strong, readonly) NSMutableArray *deleteItemChanges;
+@property (nonatomic, strong, readonly) NSMutableArray *reloadItemChanges;
+@property (nonatomic, strong, readonly) NSMutableArray *insertSectionChanges;
+@property (nonatomic, strong, readonly) NSMutableArray *deleteSectionChanges;
+@property (nonatomic, strong, readonly) NSMutableArray *reloadSectionChanges;
 
 @end
 
@@ -119,27 +103,21 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   }
 }
 
-- (NSIndexSet *)indexesForItemChangesOfType:(_ASHierarchyChangeType)changeType inSection:(NSUInteger)section
+- (NSInteger)newSectionForOldSection:(NSInteger)oldSection
 {
-  [self _ensureCompleted];
-  NSMutableIndexSet *result = [NSMutableIndexSet indexSet];
-  for (_ASHierarchyItemChange *change in [self itemChangesOfType:changeType]) {
-    [result addIndexes:[NSIndexSet as_indexSetFromIndexPaths:change.indexPaths inSection:section]];
-  }
-  return result;
-}
-
-- (NSUInteger)newSectionForOldSection:(NSUInteger)oldSection
-{
-  ASDisplayNodeAssertNotNil(_deletedSections, @"Cannot call %@ before `markCompleted` returns.", NSStringFromSelector(_cmd));
-  ASDisplayNodeAssertNotNil(_insertedSections, @"Cannot call %@ before `markCompleted` returns.", NSStringFromSelector(_cmd));
   [self _ensureCompleted];
   if ([_deletedSections containsIndex:oldSection]) {
     return NSNotFound;
   }
 
-  NSUInteger newIndex = oldSection - [_deletedSections countOfIndexesInRange:NSMakeRange(0, oldSection)];
-  newIndex += [_insertedSections as_indexChangeByInsertingItemsBelowIndex:newIndex];
+  __block NSInteger newIndex = oldSection - [_deletedSections countOfIndexesInRange:NSMakeRange(0, oldSection)];
+  [_insertedSections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+    if (idx <= newIndex) {
+      newIndex += 1;
+    } else {
+      *stop = YES;
+    }
+  }];
   return newIndex;
 }
 
@@ -202,42 +180,42 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 - (void)_sortAndCoalesceChangeArrays
 {
   @autoreleasepool {
-
-    // Split reloaded sections into [delete(oldIndex), insert(newIndex)]
-    
-    // Give these their "pre-reloads" values. Once we add in the reloads we'll re-process them.
-    _deletedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_deleteSectionChanges];
-    _insertedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_insertSectionChanges];
-    
-    for (_ASHierarchySectionChange *change in _reloadSectionChanges) {
-      NSIndexSet *newSections = [change.indexSet as_indexesByMapping:^(NSUInteger idx) {
-        NSUInteger newSec = [self newSectionForOldSection:idx];
-        NSAssert(newSec != NSNotFound, @"Request to reload deleted section %lu", (unsigned long)idx);
-        return newSec;
-      }];
-      
-      _ASHierarchySectionChange *deleteChange = [[_ASHierarchySectionChange alloc] initWithChangeType:_ASHierarchyChangeTypeDelete indexSet:change.indexSet animationOptions:change.animationOptions];
-      [_deleteSectionChanges addObject:deleteChange];
-      
-      _ASHierarchySectionChange *insertChange = [[_ASHierarchySectionChange alloc] initWithChangeType:_ASHierarchyChangeTypeInsert indexSet:newSections animationOptions:change.animationOptions];
-      [_insertSectionChanges addObject:insertChange];
-    }
-
-    _reloadSectionChanges = nil;
-    
     [_ASHierarchySectionChange sortAndCoalesceChanges:_deleteSectionChanges];
     [_ASHierarchySectionChange sortAndCoalesceChanges:_insertSectionChanges];
-    _deletedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_deleteSectionChanges];
-    _insertedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_insertSectionChanges];
+    [_ASHierarchySectionChange sortAndCoalesceChanges:_reloadSectionChanges];
 
-    // Split reloaded items into [delete(oldIndexPath), insert(newIndexPath)]
-    
+    _deletedSections = [[_ASHierarchySectionChange allIndexesInChanges:_deleteSectionChanges] copy];
+    _insertedSections = [[_ASHierarchySectionChange allIndexesInChanges:_insertSectionChanges] copy];
+    _reloadedSections = [[_ASHierarchySectionChange allIndexesInChanges:_reloadSectionChanges] copy];
+
+    // These are invalid old section indexes.
+    NSMutableIndexSet *deletedOrReloaded = [_deletedSections mutableCopy];
+    [deletedOrReloaded addIndexes:_reloadedSections];
+
+    // These are invalid new section indexes.
+    NSMutableIndexSet *insertedOrReloaded = [_insertedSections mutableCopy];
+
+    // Get the new section that each reloaded section index corresponds to.
+    // Coalesce reload sections' indexes into deletes and inserts
+    [_reloadedSections enumerateIndexesUsingBlock:^(NSUInteger oldIndex, __unused BOOL * stop) {
+      NSUInteger newIndex = [self newSectionForOldSection:oldIndex];
+      if (newIndex != NSNotFound) {
+        [insertedOrReloaded addIndex:newIndex];
+      }
+      [deletedOrReloaded addIndex:oldIndex];
+    }];
+
+    _deletedSections = deletedOrReloaded;
+    _insertedSections = insertedOrReloaded;
+    _reloadedSections = nil;
+
+    // reload items changes need to be adjusted so that we access the correct indexPaths in the datasource
     NSDictionary *insertedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_insertItemChanges ofType:_ASHierarchyChangeTypeInsert];
     NSDictionary *deletedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_deleteItemChanges ofType:_ASHierarchyChangeTypeDelete];
     
     for (_ASHierarchyItemChange *change in _reloadItemChanges) {
       NSAssert(change.changeType == _ASHierarchyChangeTypeReload, @"It must be a reload change to be in here");
-      NSMutableArray *newIndexPaths = [NSMutableArray arrayWithCapacity:change.indexPaths.count];
+      NSMutableArray *newIndexPaths = [NSMutableArray array];
       
       // Every indexPaths in the change need to update its section and/or row
       // depending on all the deletions and insertions
@@ -245,21 +223,39 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
       // - delete/reload indexPaths that are passed in should all be their current indexPaths
       // - insert indexPaths that are passed in should all be their future indexPaths after deletions
       for (NSIndexPath *indexPath in change.indexPaths) {
-        NSUInteger section = [self newSectionForOldSection:indexPath.section];
-        NSUInteger item = indexPath.item;
+        __block NSUInteger section = indexPath.section;
+        __block NSUInteger row = indexPath.row;
+        
+        
+        // Update section number based on section insertions/deletions that are above the current section
+        section -= [_deletedSections countOfIndexesInRange:NSMakeRange(0, section)];
+        [_insertedSections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+          if (idx <= section) {
+            section += 1;
+          } else {
+            *stop = YES;
+          }
+        }];
         
         // Update row number based on deletions that are above the current row in the current section
         NSIndexSet *indicesDeletedInSection = deletedIndexPathsMap[@(indexPath.section)];
-        item -= [indicesDeletedInSection countOfIndexesInRange:NSMakeRange(0, item)];
+        row -= [indicesDeletedInSection countOfIndexesInRange:NSMakeRange(0, row)];
         // Update row number based on insertions that are above the current row in the future section
         NSIndexSet *indicesInsertedInSection = insertedIndexPathsMap[@(section)];
-        item += [indicesInsertedInSection as_indexChangeByInsertingItemsBelowIndex:item];
+        [indicesInsertedInSection enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+          if (idx <= row) {
+            row += 1;
+          } else {
+            *stop = YES;
+          }
+        }];
         
-        NSIndexPath *newIndexPath = [NSIndexPath indexPathForItem:item inSection:section];
+        //TODO: reuse the old indexPath object if section and row aren't changed
+        NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:row inSection:section];
         [newIndexPaths addObject:newIndexPath];
       }
       
-      // All reload changes are translated into deletes and inserts
+      // All reload changes are coalesced into deletes and inserts
       // We delete the items that needs reload together with other deleted items, at their original index
       _ASHierarchyItemChange *deleteItemChangeFromReloadChange = [[_ASHierarchyItemChange alloc] initWithChangeType:_ASHierarchyChangeTypeDelete indexPaths:change.indexPaths animationOptions:change.animationOptions presorted:NO];
       [_deleteItemChanges addObject:deleteItemChangeFromReloadChange];
@@ -267,20 +263,16 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
       _ASHierarchyItemChange *insertItemChangeFromReloadChange = [[_ASHierarchyItemChange alloc] initWithChangeType:_ASHierarchyChangeTypeInsert indexPaths:newIndexPaths animationOptions:change.animationOptions presorted:NO];
       [_insertItemChanges addObject:insertItemChangeFromReloadChange];
     }
-    _reloadItemChanges = nil;
+    [_reloadItemChanges removeAllObjects];
     
     // Ignore item deletes in reloaded/deleted sections.
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:_deletedSections];
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_deleteItemChanges ignoringChangesInSections:deletedOrReloaded];
 
     // Ignore item inserts in reloaded(new)/inserted sections.
-    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:_insertedSections];
+    [_ASHierarchyItemChange sortAndCoalesceChanges:_insertItemChanges ignoringChangesInSections:insertedOrReloaded];
   }
 }
 
-- (NSString *)description
-{
-  return [NSString stringWithFormat:@"<%@ %p: deletedSections=%@, insertedSections=%@, deletedItems=%@, insertedItems=%@>", NSStringFromClass(self.class), self, _deletedSections, _insertedSections, _deleteItemChanges, _insertItemChanges];
-}
 
 
 @end
@@ -291,7 +283,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 {
   self = [super init];
   if (self) {
-    ASDisplayNodeAssert(indexSet.count > 0, @"Request to create _ASHierarchySectionChange with no sections!");
     _changeType = changeType;
     _indexSet = indexSet;
     _animationOptions = animationOptions;
@@ -355,18 +346,13 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   [changes setArray:result];
 }
 
-+ (NSMutableIndexSet *)allIndexesInSectionChanges:(NSArray<_ASHierarchySectionChange *> *)changes
++ (NSMutableIndexSet *)allIndexesInChanges:(NSArray *)changes
 {
   NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
   for (_ASHierarchySectionChange *change in changes) {
     [indexes addIndexes:change.indexSet];
   }
   return indexes;
-}
-
-- (NSString *)description
-{
-  return [NSString stringWithFormat:@"<%@: anim=%lu, type=%@, indexes=%@>", NSStringFromClass(self.class), (unsigned long)_animationOptions, NSStringFromASHierarchyChangeType(_changeType), [self.indexSet as_smallDescription]];
 }
 
 @end
@@ -377,7 +363,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 {
   self = [super init];
   if (self) {
-    ASDisplayNodeAssert(indexPaths.count > 0, @"Request to create _ASHierarchyItemChange with no items!");
     _changeType = changeType;
     if (presorted) {
       _indexPaths = indexPaths;
@@ -402,9 +387,9 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
       NSNumber *sectionKey = @(indexPath.section);
       NSMutableIndexSet *indexSet = sectionToIndexSetMap[sectionKey];
       if (indexSet) {
-        [indexSet addIndex:indexPath.item];
+        [indexSet addIndex:indexPath.row];
       } else {
-        indexSet = [NSMutableIndexSet indexSetWithIndex:indexPath.item];
+        indexSet = [NSMutableIndexSet indexSetWithIndex:indexPath.row];
         sectionToIndexSetMap[sectionKey] = indexSet;
       }
     }
@@ -412,7 +397,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   return sectionToIndexSetMap;
 }
 
-+ (void)sortAndCoalesceChanges:(NSMutableArray *)changes ignoringChangesInSections:(NSIndexSet *)ignoredSections
++ (void)sortAndCoalesceChanges:(NSMutableArray *)changes ignoringChangesInSections:(NSIndexSet *)sections
 {
   if (changes.count < 1) {
     return;
@@ -426,9 +411,12 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   // All changed index paths, sorted
   NSMutableArray *allIndexPaths = [NSMutableArray new];
   
+  NSPredicate *indexPathInValidSection = [NSPredicate predicateWithBlock:^BOOL(NSIndexPath *indexPath, __unused NSDictionary *_) {
+    return ![sections containsIndex:indexPath.section];
+  }];
   for (_ASHierarchyItemChange *change in changes) {
     for (NSIndexPath *indexPath in change.indexPaths) {
-      if (![ignoredSections containsIndex:indexPath.section]) {
+      if ([indexPathInValidSection evaluateWithObject:indexPath]) {
         animationOptions[indexPath] = @(change.animationOptions);
         [allIndexPaths addObject:indexPath];
       }
@@ -469,11 +457,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   }
 
   [changes setArray:result];
-}
-
-- (NSString *)description
-{
-  return [NSString stringWithFormat:@"<%@: anim=%lu, type=%@, indexPaths=%@>", NSStringFromClass(self.class), (unsigned long)_animationOptions, NSStringFromASHierarchyChangeType(_changeType), self.indexPaths];
 }
 
 @end

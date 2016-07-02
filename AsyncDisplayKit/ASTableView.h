@@ -434,18 +434,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView;
 
 /**
- * Provides the constrained size range for measuring the row at the index path.
- * Note: the widths in the returned size range are ignored!
- * 
- * @param tableView The sender.
- *
- * @param indexPath The index path of the node.
- *
- * @returns A constrained size range for layout the node at this index path.
- */
-- (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath;
-
-/**
  * Informs the delegate that the table view did remove the node which was previously
  * at the given index path from the view hierarchy.
  *

@@ -98,11 +98,6 @@
   [self.view scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionLeft animated:animated];
 }
 
-- (ASCellNode *)nodeForPageAtIndex:(NSInteger)index
-{
-  return [self.view nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
-}
-
 #pragma mark - ASCollectionViewDataSource
 
 - (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath

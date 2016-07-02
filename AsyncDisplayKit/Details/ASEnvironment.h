@@ -157,10 +157,6 @@ ASDISPLAYNODE_EXTERN_C_END
   ASDN::MutexLocker l(lock);\
   ASEnvironmentTraitCollection oldTraits = self.environmentState.environmentTraitCollection;\
   [super setEnvironmentState:environmentState];\
-\
-   /* Extra Trait Collection Handling */\
-  /* If the node is not loaded  yet don't do anything as otherwise the access of the view will trigger a load*/\
-  if (!self.isNodeLoaded) { return; } \
   ASEnvironmentTraitCollection currentTraits = environmentState.environmentTraitCollection;\
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
     /* Must dispatch to main for self.view && [self.view.dataController completedNodes]*/ \
