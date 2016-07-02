@@ -151,7 +151,7 @@ static NSString * const kStatus = @"status";
     self.player = [AVPlayer playerWithPlayerItem:playerItem];
   }
   
-  if (self.image == nil) {
+  if (self.image == nil && self.URL == nil) {
     [self generatePlaceholderImage];
   }
 
@@ -164,6 +164,10 @@ static NSString * const kStatus = @"status";
 
 - (void)addPlayerItemObservers:(AVPlayerItem *)playerItem
 {
+  if (playerItem == nil) {
+    return;
+  }
+  
   [playerItem addObserver:self forKeyPath:kStatus options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:ASVideoNodeContext];
   [playerItem addObserver:self forKeyPath:kPlaybackLikelyToKeepUpKey options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
   [playerItem addObserver:self forKeyPath:kplaybackBufferEmpty options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
@@ -284,7 +288,7 @@ static NSString * const kStatus = @"status";
     if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
       self.playerState = ASVideoNodePlayerStateReadyToPlay;
       // If we don't yet have a placeholder image update it now that we should have data available for it
-      if (self.image == nil) {
+      if (self.image == nil && self.URL == nil) {
         [self generatePlaceholderImage];
       }
     }
@@ -641,7 +645,9 @@ static NSString * const kStatus = @"status";
 
   _currentPlayerItem = currentItem;
 
-  [self addPlayerItemObservers:currentItem];
+  if (currentItem != nil) {
+    [self addPlayerItemObservers:currentItem];
+  }
 }
 
 - (ASDisplayNode *)playerNode

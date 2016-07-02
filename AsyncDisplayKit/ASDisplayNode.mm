@@ -1100,7 +1100,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // measureWithSizeRange: on subnodes to assert.
     return;
   }
+
+  // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
+  // was created
+  if ([self _shouldHavePlaceholderLayer]) {
+    [self _setupPlaceholderLayerIfNeeded];
+  }
   _placeholderLayer.frame = bounds;
+
   [self layout];
   [self layoutDidFinish];
 }
@@ -1536,27 +1543,20 @@ static NSInteger incrementIfFound(NSInteger i) {
     __weak UIView *view = _view;
     __weak CALayer *layer = _layer;
     BOOL layerBacked = _flags.layerBacked;
+    BOOL isNodeLoaded = (layer != nil || view != nil);
   _propertyLock.unlock();
-  
-  if (supernode == nil) {
-    return;
-  }
 
+  // Clear supernode's reference to us before removing the view from the hierarchy, as _ASDisplayView
+  // will trigger us to clear our _supernode pointer in willMoveToSuperview:nil.
+  // This may result in removing the last strong reference, triggering deallocation after this method.
   [supernode _removeSubnode:self];
 
-  if (self.nodeLoaded && supernode.nodeLoaded) {
-    // Check to ensure that our view or layer is actually inside of our supernode; otherwise, don't remove it.
-    // Though _ASDisplayView decouples the supernode if it is inserted inside another view hierarchy, this is
-    // more difficult to guarantee with _ASDisplayLayer because CoreAnimation doesn't have a -didMoveToSuperlayer.
+  if (isNodeLoaded && (supernode == nil || supernode.isNodeLoaded)) {
     ASPerformBlockOnMainThread(^{
       if (layerBacked || supernode.layerBacked) {
-        if (layer.superlayer == supernode.layer) {
-          [layer removeFromSuperlayer];
-        }
+        [layer removeFromSuperlayer];
       } else {
-        if (view.superview == supernode.view) {
-          [view removeFromSuperview];
-        }
+        [view removeFromSuperview];
       }
     });
   }
@@ -2755,7 +2755,12 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState
 {
+  ASEnvironmentTraitCollection oldTraitCollection = _environmentState.environmentTraitCollection;
   _environmentState = environmentState;
+  
+  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(oldTraitCollection, _environmentState.environmentTraitCollection) == NO) {
+    [self asyncTraitCollectionDidChange];
+  }
 }
 
 - (ASDisplayNode *)parent
@@ -2785,7 +2790,10 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 - (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  _environmentState.environmentTraitCollection = environmentTraitCollection;
+  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, _environmentState.environmentTraitCollection) == NO) {
+    _environmentState.environmentTraitCollection = environmentTraitCollection;
+    [self asyncTraitCollectionDidChange];
+  }
 }
 
 ASEnvironmentLayoutOptionsForwarding
@@ -2795,6 +2803,11 @@ ASEnvironmentLayoutExtensibilityForwarding
 {
   ASDN::MutexLocker l(_propertyLock);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+}
+
+- (void)asyncTraitCollectionDidChange
+{
+
 }
 
 #if TARGET_OS_TV

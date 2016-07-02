@@ -46,6 +46,9 @@
   ASVideoNode *simonVideoNode = self.simonVideoNode;
   [_rootNode addSubnode:simonVideoNode];
   
+  ASVideoNode *hlsVideoNode = self.hlsVideoNode;
+  [_rootNode addSubnode:hlsVideoNode];
+  
   _rootNode.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
     guitarVideoNode.layoutPosition = CGPointMake(0, 0);
     guitarVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height/3);
@@ -55,8 +58,13 @@
     
     simonVideoNode.layoutPosition = CGPointMake(0, [UIScreen mainScreen].bounds.size.height - ([UIScreen mainScreen].bounds.size.height/3));
     simonVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode]];
+    
+    hlsVideoNode.layoutPosition = CGPointMake(0, [UIScreen mainScreen].bounds.size.height/3);
+    hlsVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+    
+    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode, hlsVideoNode]];
   };
+  
   [self.view addSubnode:_rootNode];
 }
 
@@ -115,6 +123,24 @@
   simonVideoNode.muted = YES;
   
   return simonVideoNode;
+}
+
+- (ASVideoNode *)hlsVideoNode;
+{
+  ASVideoNode *hlsVideoNode = [[ASVideoNode alloc] init];
+  
+  hlsVideoNode.delegate = self;
+  hlsVideoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"]];
+  hlsVideoNode.gravity = AVLayerVideoGravityResize;
+  hlsVideoNode.backgroundColor = [UIColor lightGrayColor];
+  hlsVideoNode.shouldAutorepeat = YES;
+  hlsVideoNode.shouldAutoplay = YES;
+  hlsVideoNode.muted = YES;
+ 
+  // Placeholder image
+  hlsVideoNode.URL = [NSURL URLWithString:@"https://upload.wikimedia.org/wikipedia/en/5/52/Testcard_F.jpg"];
+  
+  return hlsVideoNode;
 }
 
 - (ASButtonNode *)playButton;
