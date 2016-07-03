@@ -36,7 +36,7 @@
 /**
  * Returns if the layout transition can happen asynchronously
  */
-@property (nonatomic, readonly, assign) BOOL canTransitionAsynchronous;
+@property (nonatomic, readonly, assign, getter=isSynchronous) BOOL synchronous;
 
 /**
  * Returns a newly initialized layout transition

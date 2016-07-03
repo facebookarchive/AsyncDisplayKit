@@ -27,7 +27,7 @@
  * Search the whole layout stack if at least one layout has a layoutable object that can not be layed out asynchronous.
  * This can be the case for example if a node was already loaded
  */
-static BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
+static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   // Queue used to keep track of sublayouts while traversing this layout in a BFS fashion.
   std::queue<ASLayout *> queue;
   queue.push(layout);
@@ -71,7 +71,7 @@ static BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   return self;
 }
 
-- (BOOL)canTransitionAsynchronous
+- (BOOL)isSynchronous
 {
   ASDN::MutexLocker l(_propertyLock);
   return ASLayoutCanTransitionAsynchronous(_pendingLayout);

@@ -718,7 +718,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   int32_t transitionID = [self _startNewTransition];
   
   ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
-    ASDisplayNodeAssert([node _hasTransitionInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
+    ASDisplayNodeAssert([node _isTransitionInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
     node.hierarchyState |= ASHierarchyStateLayoutPending;
     node.pendingTransitionID = transitionID;
   });
@@ -821,7 +821,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)cancelLayoutTransitionsInProgress
 {
   ASDN::MutexLocker l(_propertyLock);
-  if ([self _hasTransitionInProgress]) {
+  if ([self _isTransitionInProgress]) {
     // Cancel transition in progress
     [self _finishOrCancelTransition];
       
@@ -844,7 +844,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _usesImplicitHierarchyManagement = value;
 }
 
-- (BOOL)_hasTransitionInProgress
+- (BOOL)_isTransitionInProgress
 {
   ASDN::MutexLocker l(_propertyLock);
   return _transitionInProgress;
@@ -2445,7 +2445,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   }
 
   // Trampoline to the main thread if necessary
-  if (ASDisplayNodeThreadIsMain() == NO && layoutTransition.canTransitionAsynchronous == NO) {
+  if (ASDisplayNodeThreadIsMain() == NO && layoutTransition.isSynchronous == NO) {
 
     // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
     ASPerformBlockOnMainThread(^{
