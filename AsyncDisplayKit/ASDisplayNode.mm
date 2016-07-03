@@ -2449,13 +2449,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
     // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
     ASPerformBlockOnMainThread(^{
-      [layoutTransition applySubnodeTransition];
+      [layoutTransition startTransition];
     });
     
     return;
   }
   
-  [layoutTransition applySubnodeTransition];
+  [layoutTransition startTransition];
 }
 
 - (void)layout

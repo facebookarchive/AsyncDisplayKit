@@ -36,7 +36,7 @@
 /**
  * Returns if the layout transition can happen asynchronously
  */
-@property (nonatomic, readonly, assign, getter=isSynchronous) BOOL synchronous;
+@property (nonatomic, readonly, assign) BOOL isSynchronous;
 
 /**
  * Returns a newly initialized layout transition
@@ -47,7 +47,7 @@
 /**
  * Insert and remove subnodes that where added or removed between the previousLayout and the pendingLayout
  */
-- (void)applySubnodeTransition;
+- (void)startTransition;
 
 /**
  * Insert all new subnodes that where added between the previous layout and the pending layout
