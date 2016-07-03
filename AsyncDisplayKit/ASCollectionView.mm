@@ -9,6 +9,7 @@
 //
 
 #import "ASAssert.h"
+#import "ASAvailability.h"
 #import "ASBatchFetching.h"
 #import "ASDelegateProxy.h"
 #import "ASCellNode+Internal.h"
@@ -592,7 +593,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   cell.node = node;
   [_rangeController configureContentView:cell.contentView forCellNode:node];
   
-  if (ASRunningOnOS7()) {
+  if (!AS_AT_LEAST_IOS8) {
     // Even though UICV was introduced in iOS 6, and UITableView has always had the equivalent method,
     // -willDisplayCell: was not introduced until iOS 8 for UICV.  didEndDisplayingCell, however, is available.
     [self collectionView:collectionView willDisplayCell:cell forItemAtIndexPath:indexPath];
