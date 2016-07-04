@@ -1,5 +1,5 @@
 //
-//  AsyncDisplayKit+Utilties.m
+//  UIImage+ASConvenience.m
 //  AsyncDisplayKit
 //
 //  Created by Hannah Troisi on 6/24/16.
@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "AsyncDisplayKit+Utilities.h"
+#import "UIImage+ASConvenience.h"
 #import <UIKit/UIKit.h>
 
 @implementation UIImage (ASDKAdditions)

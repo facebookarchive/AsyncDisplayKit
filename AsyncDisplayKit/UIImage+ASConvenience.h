@@ -1,5 +1,5 @@
 //
-//  AsyncDisplayKit+Utilties.h
+//  UIImage+ASConvenience.h
 //  AsyncDisplayKit
 //
 //  Created by Hannah Troisi on 6/24/16.
