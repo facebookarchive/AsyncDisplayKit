@@ -10,15 +10,62 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <UIKit/UIKit.h>
+#import <UIKit/UIImage.h>
+#import <UIKit/UIBezierPath.h>
+
+// High-performance flat-colored, rounded-corner resizable images
+//
+// For "Baked-in Opaque" corners, set cornerColor equal to the color behind the rounded image object, e.g. the background color.
+// For "Baked-in Alpha" corners, set cornerColor = [UIColor clearColor]
+//
+// See http://asyncdisplaykit.org/docs/corner-rounding.html for an explanation.
 
 @interface UIImage (ASDKAdditions)
 
-// A performance-focused flat color stretchable-image
-+ (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius scale:(CGFloat)scale backgroundColor:(UIColor *)backgroundColor fillColor:(UIColor *)fillColor borderColor:(UIColor *)borderColor;
+/**
+ * This generates a flat-color, rounded-corner resizeable image
+ *
+ * @param cornerRadius The radius of the rounded-corner
+ * @param cornerColor  The fill color of the corners (For Alpha corners use clearColor)
+ * @param fillColor    The fill color of the rounded-corner image
+ */
++ (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
+                                          cornerColor:(UIColor *)cornerColor
+                                            fillColor:(UIColor *)fillColor;
 
-// A performance-focused flat color stretchable-image with rounded corners
-+ (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius scale:(CGFloat)scale backgroundColor:(UIColor *)backgroundColor fillColor:(UIColor *)fillColor borderColor:(UIColor *)borderColor roundedCorner:(UIRectCorner)corners;
+/**
+ * This generates a flat-color, rounded-corner resizeable image with a border
+ *
+ * @param cornerRadius The radius of the rounded-corner
+ * @param cornerColor  The fill color of the corners (For Alpha corners use clearColor)
+ * @param fillColor    The fill color of the rounded-corner image
+ * @param borderColor  The border color
+ * @param borderWidth  The border width
+ */
++ (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
+                                          cornerColor:(UIColor *)cornerColor
+                                            fillColor:(UIColor *)fillColor
+                                          borderColor:(UIColor *)borderColor
+                                          borderWidth:(CGFloat)borderWidth;
+
+/**
+ * This generates a flat-color, rounded-corner resizeable image with a border
+ *
+ * @param cornerRadius    The radius of the rounded-corner
+ * @param cornerColor     The fill color of the corners (For Alpha corners use clearColor)
+ * @param fillColor       The fill color of the rounded-corner image
+ * @param borderColor     The border color
+ * @param borderWidth     The border width
+ * @param roundedCorners  Select individual or multiple corners to round
+ * @param scale           The number of pixels per point. Provide 0.0 to use the screen scale.
+ */
++ (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
+                                          cornerColor:(UIColor *)cornerColor
+                                            fillColor:(UIColor *)fillColor
+                                          borderColor:(UIColor *)borderColor
+                                          borderWidth:(CGFloat)borderWidth
+                                       roundedCorners:(UIRectCorner)roundedCorners
+                                                scale:(CGFloat)scale;
 
 @end
 
