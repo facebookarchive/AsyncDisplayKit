@@ -12,7 +12,7 @@
 #import "ViewController.h"
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-#define NUMBER_ELEMENTS 5
+#define NUMBER_ELEMENTS 2
 
 @interface ViewController ()
 {
@@ -26,22 +26,14 @@
 
 @implementation ViewController
 
-- (instancetype)init
-{
-  if (!(self = [super init]))
-    return nil;
-  
-  _scrollView = [[UIScrollView alloc] init];
-  _textNodes = [NSMutableArray array];
-  _textLabels = [NSMutableArray array];
-
-  return self;
-}
-
 - (void)viewDidLoad
 {
   [super viewDidLoad];
   
+  _textNodes = [NSMutableArray array];
+  _textLabels = [NSMutableArray array];
+  
+  _scrollView = [[UIScrollView alloc] init];
   [self.view addSubview:_scrollView];
   
   for (int i = 0; i < NUMBER_ELEMENTS; i++) {
@@ -66,7 +58,6 @@
   CGRect frame = CGRectMake(50, 50, 0, 0);
   
   for (int i = 0; i < NUMBER_ELEMENTS; i++) {
-    
     frame.size = [self sizeForIndex:i];
     [[_textNodes objectAtIndex:i] setFrame:frame];
     
@@ -109,18 +100,7 @@
                      range:NSMakeRange(0, [string length])];
       node.attributedText = string;
       return node;
-      
-    case 2:
-      node.maximumNumberOfLines = 3;
-      return node;
-      
-    case 3:
-      node.maximumNumberOfLines = 3;
-      return node;
-      
-    case 4:
-      node.maximumNumberOfLines = 3;
-      return node;
+  
     default:
       return nil;
   }
@@ -146,18 +126,7 @@
                      range:NSMakeRange(0, [string length])];
       label.attributedText = string;
       return label;
-      
-    case 2:
-      label.numberOfLines = 3;
-      return label;
-      
-    case 3:
-      label.numberOfLines = 3;
-      return label;
-      
-    case 4:
-      label.numberOfLines = 3;
-      return label;
+    
     default:
       return nil;
   }
@@ -174,15 +143,6 @@
     case 1:
       return [[NSAttributedString alloc] initWithString:@"1\n2\n3\n4\n5" attributes:attrs];
       
-    case 2:
-      return [[NSAttributedString alloc] initWithString:@"1\n2\n3\n4\n5" attributes:attrs];
-      
-    case 3:
-      return [[NSAttributedString alloc] initWithString:@"1\n2\n3\n4\n5" attributes:attrs];
-      
-    case 4:
-      return [[NSAttributedString alloc] initWithString:@"1\n2\n3\n4\n5" attributes:attrs];
-      
     default:
       return nil;
   }
@@ -195,15 +155,6 @@
       return CGSizeMake(40, 100);
       
     case 1:
-      return CGSizeMake(40, 100);
-      
-    case 2:
-      return CGSizeMake(40, 100);
-      
-    case 3:
-      return CGSizeMake(40, 100);
-      
-    case 4:
       return CGSizeMake(40, 100);
       
     default:
