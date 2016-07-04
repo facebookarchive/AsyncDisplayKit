@@ -39,8 +39,8 @@
  * @param cornerRadius The radius of the rounded-corner
  * @param cornerColor  The fill color of the corners (For Alpha corners use clearColor)
  * @param fillColor    The fill color of the rounded-corner image
- * @param borderColor  The border color
- * @param borderWidth  The border width
+ * @param borderColor  The border color. Set to nil for no border.
+ * @param borderWidth  The border width. Dummy value if borderColor = nil.
  */
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
                                           cornerColor:(UIColor *)cornerColor
@@ -54,9 +54,9 @@
  * @param cornerRadius    The radius of the rounded-corner
  * @param cornerColor     The fill color of the corners (For Alpha corners use clearColor)
  * @param fillColor       The fill color of the rounded-corner image
- * @param borderColor     The border color
- * @param borderWidth     The border width
- * @param roundedCorners  Select individual or multiple corners to round
+ * @param borderColor     The border color. Set to nil for no border.
+ * @param borderWidth     The border width. Dummy value if borderColor = nil.
+ * @param roundedCorners  Select individual or multiple corners to round. Set to UIRectCornerAllCorners to round all 4 corners.
  * @param scale           The number of pixels per point. Provide 0.0 to use the screen scale.
  */
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
