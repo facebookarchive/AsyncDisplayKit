@@ -89,16 +89,6 @@ CGFloat ASRoundPixelValue(CGFloat f)
   return roundf(f * ASScreenScale()) / ASScreenScale();
 }
 
-BOOL ASRunningOnOS7()
-{
-  static BOOL isOS7 = NO;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    isOS7 = ([[UIDevice currentDevice].systemVersion floatValue] < 8.0);
-  });
-  return isOS7;
-}
-
 @implementation NSIndexPath (ASInverseComparison)
 
 - (NSComparisonResult)asdk_inverseCompare:(NSIndexPath *)otherIndexPath
