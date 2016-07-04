@@ -686,6 +686,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(void(^)())completion
 {
+  if (_layout == nil) {
+    // constrainedSizeRange returns a struct and is invalid to call on nil.
+    // Defaulting to CGSizeZero can cause negative values in client layout code.
+    return;
+  }
   [self invalidateCalculatedLayout];
   [self transitionLayoutWithSizeRange:_layout.constrainedSizeRange
                              animated:animated
