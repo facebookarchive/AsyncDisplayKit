@@ -480,10 +480,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
             id<ASAnimatedImageProtocol> animatedImage = nil;
             if (_downloaderFlags.downloaderImplementsAnimatedImage) {
               NSData *data = [NSData dataWithContentsOfURL:_URL];
-              animatedImage = [_downloader animatedImageWithData:data];
+              if (data != nil) {
+                animatedImage = [_downloader animatedImageWithData:data];
 
-              if ([animatedImage respondsToSelector:@selector(isDataSupported:)] && [animatedImage isDataSupported:data] == NO) {
-                animatedImage = nil;
+                if ([animatedImage respondsToSelector:@selector(isDataSupported:)] && [animatedImage isDataSupported:data] == NO) {
+                  animatedImage = nil;
+                }
               }
             }
 
