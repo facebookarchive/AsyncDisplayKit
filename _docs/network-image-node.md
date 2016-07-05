@@ -84,14 +84,29 @@ override func layoutSpecThatFits(constrainedSize: ASSizeRange) -> ASLayoutSpec {
 </div>
 </div>
 
-
 ### Under the Hood
 
 <div class = "note">If you choose not to include the PINRemoteImage and PINCache dependencies you will lose progressive jpeg support and be required to include your own custom cache that conforms to ASImageCacheProtocol.</div>
 
 #### Progressive JPEG Support
 
-Thanks to the inclusion of <a href = "https://github.com/pinterest/PINRemoteImage">PINRemoteImage</a>, network image nodes now offer full support for loading </a href = "#">progressive JPEGs</a>.  This means that if your server provides them, your images will display quickly at a lower quality that will scale up as more data is loaded.  
+Thanks to the inclusion of <a href = "https://github.com/pinterest/PINRemoteImage">PINRemoteImage</a>, network image nodes now offer full support for loading </a href = "#">progressive JPEGs</a>.  This means that if your server provides them, your images will display quickly at a lower quality that will scale up as more data is loaded. 
+
+To enable progressive loading, just set `shouldRenderProgressImages` to YES like so:
+
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+
+<div class = "code">
+<pre lang="objc" class="objcCode">
+networkImageNode.shouldRenderProgressImages = YES;
+</pre>
+
+<pre lang="swift" class = "swiftCode hidden">
+networkImageNode.shouldRenderProgressImages = true
+</pre>
+</div>
+</div>
 
 It's important to remember that this is using one image that is progressively loaded.  If your server is constrained to using regular JPEGs, but provides you with multiple versions of increasing quality, you should check out <a href = "/docs/multiplex-image-node.html">ASMultiplexImageNode</a> instead. 
 
