@@ -595,9 +595,9 @@ static NSString * const kStatus = @"status";
     [_delegate videoPlaybackDidFinish:self];
 #pragma clang diagnostic pop
   }
-  [_player seekToTime:kCMTimeZero];
 
   if (_shouldAutorepeat) {
+    [_player seekToTime:kCMTimeZero];
     [self play];
   } else {
     [self pause];
