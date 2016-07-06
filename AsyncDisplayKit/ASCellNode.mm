@@ -31,6 +31,7 @@
   ASDisplayNodeDidLoadBlock _viewControllerDidLoadBlock;
   ASDisplayNode *_viewControllerNode;
   UIViewController *_viewController;
+  BOOL _suspendInteractionDelegate;
 }
 
 @end
@@ -182,16 +183,38 @@
 {
   if (_selected != selected) {
     _selected = selected;
-    [_interactionDelegate nodeSelectedStateDidChange:self];
+    if (!_suspendInteractionDelegate) {
+      [_interactionDelegate nodeSelectedStateDidChange:self];
+    }
   }
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
   if (_highlighted != highlighted) {
-      _highlighted = highlighted;
+    _highlighted = highlighted;
+    if (!_suspendInteractionDelegate) {
       [_interactionDelegate nodeHighlightedStateDidChange:self];
     }
+  }
+}
+
+- (void)__setSelectedFromUIKit:(BOOL)selected;
+{
+  if (selected != _selected) {
+    _suspendInteractionDelegate = YES;
+    self.selected = selected;
+    _suspendInteractionDelegate = NO;
+  }
+}
+
+- (void)__setHighlightedFromUIKit:(BOOL)highlighted;
+{
+  if (highlighted != _highlighted) {
+    _suspendInteractionDelegate = YES;
+    self.highlighted = highlighted;
+    _suspendInteractionDelegate = NO;
+  }
 }
 
 - (BOOL)selected

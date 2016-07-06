@@ -68,31 +68,23 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   _node = node;
   if (node.selected != self.selected) {
-    node.selected = self.selected;
+    [node __setSelectedFromUIKit:self.selected];
   }
   if (node.highlighted != self.highlighted) {
-    node.highlighted = self.highlighted;
+    [node __setHighlightedFromUIKit:self.highlighted];
   }
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
 {
-  if (selected != self.selected) {
-    [super setSelected:selected animated:animated];
-  }
-  if (selected != _node.selected) {
-    _node.selected = selected;
-  }
+  [super setSelected:selected animated:animated];
+  [_node __setSelectedFromUIKit:selected];
 }
 
 - (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated
 {
-  if (highlighted != self.highlighted) {
-    [super setHighlighted:highlighted animated:animated];
-  }
-  if (highlighted != _node.highlighted) {
-    _node.highlighted = highlighted;
-  }
+  [super setHighlighted:highlighted animated:animated];
+  [_node __setHighlightedFromUIKit:highlighted];
 }
 
 - (void)prepareForReuse

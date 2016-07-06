@@ -46,4 +46,7 @@
  */
 @property (nonatomic, weak) UIScrollView *scrollView;
 
+- (void)__setSelectedFromUIKit:(BOOL)selected;
+- (void)__setHighlightedFromUIKit:(BOOL)highlighted;
+
 @end
