@@ -126,6 +126,10 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 
 @interface ASCellNode (Deprecated)
 
+/**
+ * Previous versions of ASDK did not include "is" in the name of the getter for these properties.
+ * These older accessor methods don't match UIKit naming, and will be removed in a future version.
+ */
 - (BOOL)selected ASDISPLAYNODE_DEPRECATED;
 - (BOOL)highlighted ASDISPLAYNODE_DEPRECATED;
 

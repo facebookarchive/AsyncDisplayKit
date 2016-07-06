@@ -67,12 +67,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)setNode:(ASCellNode *)node
 {
   _node = node;
-  if (node.selected != self.selected) {
-    [node __setSelectedFromUIKit:self.selected];
-  }
-  if (node.highlighted != self.highlighted) {
-    [node __setHighlightedFromUIKit:self.highlighted];
-  }
+  [node __setSelectedFromUIKit:self.selected];
+  [node __setHighlightedFromUIKit:self.highlighted];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
