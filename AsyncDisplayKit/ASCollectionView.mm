@@ -25,6 +25,12 @@
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "_ASDisplayLayer.h"
 
+typedef NS_ENUM(NSUInteger, ASCollectionViewInvalidationAction) {
+  ASCollectionViewInvalidationActionNone,
+  ASCollectionViewInvalidationActionInvalidateWithoutAnimation,
+  ASCollectionViewInvalidationActionInvalidateWithAnimation,
+};
+
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
@@ -97,12 +103,7 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
   
   CGPoint _deceleratingVelocity;
   
-  // Used if a set of cell nodes with `shouldAnimateSizeChanges = YES` has changed size and we have
-  // invalidated the layout. See `requeryNodeSizes` and `nodeDidRelayout:sizeChanged:`.
-  // If YES we will wrap the next [super layoutSubviews] in an animation block.
-  BOOL _shouldAnimateNextLayout;
-  
-  BOOL _didInvalidateCollectionViewLayoutDueToCellNodeResize;
+  ASCollectionViewInvalidationAction _nextLayoutInvalidationAction;
   
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
@@ -777,16 +778,22 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
     }
   }
   
-  // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
-  _didInvalidateCollectionViewLayoutDueToCellNodeResize = NO;
-  if (_shouldAnimateNextLayout) {
-    _shouldAnimateNextLayout = NO;
-    [UIView animateWithDuration:kASCollectionViewAnimationDuration animations:^{
-      [super layoutSubviews];
-    }];
-  } else {
-    [super layoutSubviews];
+  // Flush any pending invalidation action if needed.
+  ASCollectionViewInvalidationAction action = _nextLayoutInvalidationAction;
+  _nextLayoutInvalidationAction = ASCollectionViewInvalidationActionNone;
+  switch (action) {
+    case ASCollectionViewInvalidationActionInvalidateWithAnimation:
+      [super performBatchUpdates:^{ } completion:nil];
+      break;
+    case ASCollectionViewInvalidationActionInvalidateWithoutAnimation:
+      [self.collectionViewLayout invalidateLayout];
+      break;
+    default:
+      break;
   }
+  
+  // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
+  [super layoutSubviews];
 }
 
 
@@ -1139,31 +1146,25 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
 
   [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[ indexPath ] batched:NO];
   
-  BOOL isFirstInvalidation = !_didInvalidateCollectionViewLayoutDueToCellNodeResize;
-  if (isFirstInvalidation) {
-    UICollectionViewLayout *layout = self.collectionViewLayout;
-    UICollectionViewLayoutInvalidationContext *inval = [[[[layout class] invalidationContextClass] alloc] init];
-
-    // NOTE: We don't invalidate specific items here because the layout
-    // will not move other items to account for the change. This is almost
-    // never good, so we intentionally don't do it. Plus this allows us to
-    // only invalidate once even if multiple cell nodes resize.
-
-    [layout invalidateLayoutWithContext:inval];
-    
-    _didInvalidateCollectionViewLayoutDueToCellNodeResize = YES;
-    _shouldAnimateNextLayout = YES;
+  ASCollectionViewInvalidationAction previousAction = _nextLayoutInvalidationAction;
+  ASCollectionViewInvalidationAction action = previousAction;
+  if (previousAction == ASCollectionViewInvalidationActionNone) {
+    [self setNeedsLayout];
+    action = ASCollectionViewInvalidationActionInvalidateWithAnimation;
   }
 
-  if (_shouldAnimateNextLayout) {
+  // If we think we're going to animate, check if this node will prevent it.
+  if (action == ASCollectionViewInvalidationActionInvalidateWithAnimation) {
     BOOL (^shouldNotAnimateBlock)(ASDisplayNode *) = ^BOOL(ASDisplayNode * _Nonnull node) {
       return node.shouldAnimateSizeChanges == NO;
     };
     if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
       // One single non-animated node causes the whole layout update to be non-animated
-      _shouldAnimateNextLayout = NO;
+      action = ASCollectionViewInvalidationActionInvalidateWithoutAnimation;
     }
   }
+  
+  _nextLayoutInvalidationAction = action;
 }
 
 #pragma mark - Memory Management
