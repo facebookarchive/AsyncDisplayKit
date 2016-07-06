@@ -32,8 +32,6 @@ const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
 
 NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
-static void *kASSizingQueueContext = &kASSizingQueueContext;
-
 @interface ASDataController () {
   NSMutableArray *_externalCompletedNodes;    // Main thread only.  External data access can immediately query this if available.
   NSMutableDictionary *_completedNodes;       // Main thread only.  External data access can immediately query this if _externalCompletedNodes is unavailable.
