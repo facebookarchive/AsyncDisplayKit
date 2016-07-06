@@ -70,36 +70,6 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
 @end
 
 #pragma mark -
-#pragma mark _ASCollectionViewNodeSizeUpdateContext
-
-/** 
- * This class contains all the nodes that have a new size and UICollectionView should requery them all at once.
- * It is intended to be used strictly on main thread and is not thread safe.
- */
-@interface _ASCollectionViewNodeSizeInvalidationContext : NSObject
-/**
- * It's possible that a node triggered multiple size changes before main thread has a chance to execute `requeryNodeSizes`. 
- * Therefore, a set is preferred here, to avoid asking ASDataController to search for index path of the same node multiple times.
- */
-@property (nonatomic, strong) NSMutableSet<ASCellNode *> *invalidatedNodes;
-@property (nonatomic, assign) BOOL shouldAnimate;
-@end
-
-@implementation _ASCollectionViewNodeSizeInvalidationContext
-
-- (instancetype)init
-{
-  self = [super init];
-  if (self) {
-    _invalidatedNodes = [NSMutableSet set];
-    _shouldAnimate = YES;
-  }
-  return self;
-}
-
-@end
-
-#pragma mark -
 #pragma mark ASCollectionView.
 
 @interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
@@ -115,8 +85,7 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
   
   BOOL _performingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
-  
-  _ASCollectionViewNodeSizeInvalidationContext *_queuedNodeSizeInvalidationContext; // Main thread only
+
   BOOL _isDeallocating;
   
   ASBatchContext *_batchContext;
@@ -132,6 +101,8 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
   // invalidated the layout. See `requeryNodeSizes` and `nodeDidRelayout:sizeChanged:`.
   // If YES we will wrap the next [super layoutSubviews] in an animation block.
   BOOL _shouldAnimateNextLayout;
+  
+  BOOL _didInvalidateCollectionViewLayoutDueToCellNodeResize;
   
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
@@ -805,6 +776,7 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
   }
   
   // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
+  _didInvalidateCollectionViewLayoutDueToCellNodeResize = NO;
   if (_shouldAnimateNextLayout) {
     _shouldAnimateNextLayout = NO;
     [UIView animateWithDuration:kASCollectionViewAnimationDuration animations:^{
@@ -1158,63 +1130,37 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
     return;
   }
   
-  BOOL queued = (_queuedNodeSizeInvalidationContext != nil);
-  if (!queued) {
-    _queuedNodeSizeInvalidationContext = [[_ASCollectionViewNodeSizeInvalidationContext alloc] init];
-    
-    __weak __typeof__(self) weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-      __typeof__(self) strongSelf = weakSelf;
-      if (strongSelf) {
-        [strongSelf requeryNodeSizes];
-      }
-    });
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath == nil) {
+    return;
   }
-  
-  [_queuedNodeSizeInvalidationContext.invalidatedNodes addObject:node];
 
-  // Check if this node or one of its subnodes can be animated.
-  // If the context is already non-animated, don't bother checking this node.
-  if (_queuedNodeSizeInvalidationContext.shouldAnimate) {
+  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[ indexPath ] batched:NO];
+  
+  BOOL isFirstInvalidation = !_didInvalidateCollectionViewLayoutDueToCellNodeResize;
+  if (isFirstInvalidation) {
+    UICollectionViewLayoutInvalidationContext *inval = [[[[self.collectionViewLayout class] invalidationContextClass] alloc] init];
+
+    // NOTE: We don't invalidate specific items here because the layout
+    // will not move other items to account for the change. This is almost
+    // never good, so we intentionally don't do it. Plus this allows us to
+    // only invalidate once even if multiple cell nodes resize.
+
+    [self.collectionViewLayout invalidateLayoutWithContext:inval];
+    
+    _didInvalidateCollectionViewLayoutDueToCellNodeResize = YES;
+    _shouldAnimateNextLayout = YES;
+  }
+
+  if (_shouldAnimateNextLayout) {
     BOOL (^shouldNotAnimateBlock)(ASDisplayNode *) = ^BOOL(ASDisplayNode * _Nonnull node) {
       return node.shouldAnimateSizeChanges == NO;
     };
     if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
-      // One single non-animated cell node causes the whole context to be non-animated
-      _queuedNodeSizeInvalidationContext.shouldAnimate = NO;
+      // One single non-animated node causes the whole layout update to be non-animated
+      _shouldAnimateNextLayout = NO;
     }
   }
-}
-
-// Cause UICollectionView to requery for the new size of all nodes
-- (void)requeryNodeSizes
-{
-  ASDisplayNodeAssertMainThread();
-  NSSet<ASCellNode *> *nodes = _queuedNodeSizeInvalidationContext.invalidatedNodes;
-  NSMutableArray<NSIndexPath *> *indexPaths = [NSMutableArray arrayWithCapacity:nodes.count];
-  for (ASCellNode *node in nodes) {
-    NSIndexPath *indexPath = [self indexPathForNode:node];
-    if (indexPath != nil) {
-      [indexPaths addObject:indexPath];
-    }
-  }
-  
-  if (indexPaths.count > 0) {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
-    UICollectionViewLayoutInvalidationContext *inval = [[[[self.collectionViewLayout class] invalidationContextClass] alloc] init];
-    
-    // NOTE: We don't invalidate specific items here because the layout
-    // will not move other items to account for the change. This is almost
-    // never good, so we intentionally don't do it.
-    
-    [self.collectionViewLayout invalidateLayoutWithContext:inval];
-    
-    if (_queuedNodeSizeInvalidationContext.shouldAnimate) {
-      _shouldAnimateNextLayout = YES;
-    }
-  }
-  
-  _queuedNodeSizeInvalidationContext = nil;
 }
 
 #pragma mark - Memory Management
