@@ -85,7 +85,7 @@ The `constrainedSize` that is passed as an input to `layoutSpecThatFits:` is an 
 
 #### ASRelativeSizeRange
 <br>
-`ASRelativeSizeRange` is essentially **a minimum and maximum size pair, that are used to constrain the size of a layout object.**  The minimum and maximum sizes must support both point and relative sizes, which is where our friend the ASRelativeSize comes in.  Hence, an ASRelativeSizeRange consists of a minimum and maximum `ASRelativeSize`. 
+`ASRelativeSizeRange` is essentially **a minimum and maximum size pair, that are used to constrain the size of a layout object.**  The minimum and maximum sizes must **support both point and relative sizes**, which is where our friend the ASRelativeSize comes in.  Hence, an ASRelativeSizeRange consists of a minimum and maximum `ASRelativeSize`. 
 
 ASRelativeSizeRange is used to set the `sizeRange` property on a child of an `ASStaticLayoutSpec`.  If specified, the child's size is restricted according to this size.  
 
@@ -95,7 +95,7 @@ Note that .sizeRange can be set on any &ltASLayoutable&gt (a node, or a layout s
 
 #### ASSizeRange vs. ASRelativeSizeRange
 <br>
-Why do we pass a `ASSizeRange *constrainedSize` to a node's `layoutSpecThatFits:` function, but a `ASRelativeSizeRange` for the `.sizeRange` property on an element provided as a child of the layout spec?
+Why do we pass a `ASSizeRange *constrainedSize` to a node's `layoutSpecThatFits:` function, but a `ASRelativeSizeRange` for the `.sizeRange` property on an element provided as a child of a layout spec?
 
  It’s pretty rare that you need the percent feature for a .sizeRange feature, but it’s there to make the API as flexible as possible. The input value of the constrainedSize that comes into the argument, has already been resolved by the parent’s size. It may have been influenced by a percent type, but has always be converted by that point into points. 
 
