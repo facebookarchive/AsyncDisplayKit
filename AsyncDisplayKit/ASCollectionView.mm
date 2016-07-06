@@ -91,6 +91,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
   BOOL _performingBatchUpdates;
+  BOOL _superPerformingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
 
   BOOL _isDeallocating;
@@ -447,6 +448,24 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return visibleNodes;
 }
 
+#pragma mark Internal
+
+/**
+ Performing nested batch updates with super (e.g. resizing a cell node & updating collection view during same frame)
+ can cause super to throw data integrity exceptions because it checks the data source counts before
+ the update is complete.
+ 
+ Always call [self _superPerform:] rather than [super performBatch:] so that we can keep our `superPerformingBatchUpdates` flag updated.
+*/
+- (void)_superPerformBatchUpdates:(void(^)())updates completion:(void(^)(BOOL finished))completion
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(_superPerformingBatchUpdates == NO, @"Nested batch updates being sent to UICollectionView. This is not expected.");
+  
+  _superPerformingBatchUpdates = YES;
+  [super performBatchUpdates:updates completion:completion];
+  _superPerformingBatchUpdates = NO;
+}
 
 #pragma mark Assertions.
 
@@ -784,7 +803,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _nextLayoutInvalidationStyle = ASCollectionViewInvalidationStyleNone;
   switch (invalidationStyle) {
     case ASCollectionViewInvalidationStyleWithAnimation:
-      [super performBatchUpdates:^{ } completion:nil];
+      if (!_superPerformingBatchUpdates) {
+        [self _superPerformBatchUpdates:^{ } completion:nil];
+      }
       break;
     case ASCollectionViewInvalidationStyleWithoutAnimation:
       [self.collectionViewLayout invalidateLayout];
@@ -1031,7 +1052,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   ASPerformBlockWithoutAnimation(!animated, ^{
     [_layoutFacilitator collectionViewWillPerformBatchUpdates];
-    [super performBatchUpdates:^{
+    [self _superPerformBatchUpdates:^{
       for (dispatch_block_t block in _batchUpdateBlocks) {
         block();
       }
