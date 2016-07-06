@@ -45,7 +45,7 @@ Note that .flexBasis can be set on any &ltASLayoutable&gt (a node, or a layout s
     [horizontalStack setChildren:@[leftSideStack, self.detailLabel]];
 ```
 
-<img src="/static/flexbasis.PNG" width="40%" height="40%">
+<img src="/static/flexbasis.png" width="40%" height="40%">
 
 ## Sizes (CGSize,  ASRelativeSize)
 <br>
