@@ -25,10 +25,14 @@
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "_ASDisplayLayer.h"
 
-typedef NS_ENUM(NSUInteger, ASCollectionViewInvalidationAction) {
-  ASCollectionViewInvalidationActionNone,
-  ASCollectionViewInvalidationActionInvalidateWithoutAnimation,
-  ASCollectionViewInvalidationActionInvalidateWithAnimation,
+/// What, if any, invalidation should we perform during the next -layoutSubviews.
+typedef NS_ENUM(NSUInteger, ASCollectionViewInvalidationStyle) {
+  /// Perform no invalidation.
+  ASCollectionViewInvalidationStyleNone,
+  /// Perform invalidation with animation (use an empty batch update).
+  ASCollectionViewInvalidationStyleWithoutAnimation,
+  /// Perform invalidation without animation (use -invalidateLayout).
+  ASCollectionViewInvalidationStyleWithAnimation,
 };
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
@@ -100,7 +104,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   CGPoint _deceleratingVelocity;
   
-  ASCollectionViewInvalidationAction _nextLayoutInvalidationAction;
+  ASCollectionViewInvalidationStyle _nextLayoutInvalidationStyle;
   
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
@@ -776,13 +780,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   // Flush any pending invalidation action if needed.
-  ASCollectionViewInvalidationAction action = _nextLayoutInvalidationAction;
-  _nextLayoutInvalidationAction = ASCollectionViewInvalidationActionNone;
-  switch (action) {
-    case ASCollectionViewInvalidationActionInvalidateWithAnimation:
+  ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
+  _nextLayoutInvalidationStyle = ASCollectionViewInvalidationStyleNone;
+  switch (invalidationStyle) {
+    case ASCollectionViewInvalidationStyleWithAnimation:
       [super performBatchUpdates:^{ } completion:nil];
       break;
-    case ASCollectionViewInvalidationActionInvalidateWithoutAnimation:
+    case ASCollectionViewInvalidationStyleWithoutAnimation:
       [self.collectionViewLayout invalidateLayout];
       break;
     default:
@@ -1143,25 +1147,29 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
   [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[ indexPath ] batched:NO];
   
-  ASCollectionViewInvalidationAction previousAction = _nextLayoutInvalidationAction;
-  ASCollectionViewInvalidationAction action = previousAction;
-  if (previousAction == ASCollectionViewInvalidationActionNone) {
+  ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
+  if (invalidationStyle == ASCollectionViewInvalidationStyleNone) {
     [self setNeedsLayout];
-    action = ASCollectionViewInvalidationActionInvalidateWithAnimation;
+    invalidationStyle = ASCollectionViewInvalidationStyleWithAnimation;
   }
 
   // If we think we're going to animate, check if this node will prevent it.
-  if (action == ASCollectionViewInvalidationActionInvalidateWithAnimation) {
-    BOOL (^shouldNotAnimateBlock)(ASDisplayNode *) = ^BOOL(ASDisplayNode * _Nonnull node) {
-      return node.shouldAnimateSizeChanges == NO;
-    };
+  if (invalidationStyle == ASCollectionViewInvalidationStyleWithAnimation) {
+    // TODO: Incorporate `shouldAnimateSizeChanges` into ASEnvironmentState for performance benefit.
+    static dispatch_once_t onceToken;
+    static BOOL (^shouldNotAnimateBlock)(ASDisplayNode *);
+    dispatch_once(&onceToken, ^{
+      shouldNotAnimateBlock = ^(ASDisplayNode * _Nonnull node) {
+        return node.shouldAnimateSizeChanges == NO;
+      };
+    });
     if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
       // One single non-animated node causes the whole layout update to be non-animated
-      action = ASCollectionViewInvalidationActionInvalidateWithoutAnimation;
+      invalidationStyle = ASCollectionViewInvalidationStyleWithoutAnimation;
     }
   }
   
-  _nextLayoutInvalidationAction = action;
+  _nextLayoutInvalidationStyle = invalidationStyle;
 }
 
 #pragma mark - Memory Management
