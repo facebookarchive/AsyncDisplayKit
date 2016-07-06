@@ -81,17 +81,19 @@ p, ul, ol {
 
 code {
     letter-spacing: 0.02em;
-    font-weight: 700;
+    padding: 2px 4px;
+    border-radius: 3px;
+    /*font-weight: 700;
     color: #008ED4;
     font-size: 14px;
     vertical-align: baseline;
-    font-family: 'Droid Sans Mono',sans-serif;
+    font-family: 'Droid Sans Mono',sans-serif;*/
 }
-/*
+
 p code, span code, li code {
     border: 1px solid rgb(220, 220, 220);
     background-color: rgba(90, 140, 140, 0.1);
-}*/
+}
 
 .highlight pre, .redhighlight pre {
     font-size: 13px;
