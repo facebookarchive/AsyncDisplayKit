@@ -12,7 +12,7 @@ permalink: /docs/layout-api-sizing.html
 
 To best understand the compound dimension system in the Layout API, it is easiest to see all the units in relation to one another.
 
-<img src="/static/faq/layout-api-sizing-1.png">
+<img src="/static/layout-api-sizing-1.png">
 
 ## Values  (CGFloat, ASRelativeDimension)
 <br>
@@ -45,7 +45,7 @@ Note that .flexBasis can be set on any &ltASLayoutable&gt (a node, or a layout s
     [horizontalStack setChildren:@[leftSideStack, self.detailLabel]];
 ```
 
-<img src="/static/faq/flexbasis.PNG" width="40%" height="40%">
+<img src="/static/flexbasis.PNG" width="40%" height="40%">
 
 ## Sizes (CGSize,  ASRelativeSize)
 <br>
@@ -115,7 +115,7 @@ Why do we use an `ASSizeRange` as a `constrainedSize` to pass to a node's `layou
 <br>
 Here we have our original table, which has been annotated to show the uses of the various units in the Layout API.
 
-<img src="/static/faq/layout-api-sizing-2.png">
+<img src="/static/layout-api-sizing-2.png">
 
 It’s worth noting that that there’s a certain flexibility to be able to use so many powerful options with a single API - flexBasis and sizeRange can be used to set points and percentages in different directions. However, since the majority of do not use the full set of options, we should adjust the API so that the powerful capabilities are a slightly more hidden.
 
