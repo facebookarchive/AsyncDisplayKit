@@ -40,7 +40,10 @@ ASVisibilityDepthImplementation;
 - (NSInteger)visibilityDepthOfChildViewController:(UIViewController *)childViewController
 {
   NSUInteger viewControllerIndex = [self.viewControllers indexOfObject:childViewController];
-  NSAssert(viewControllerIndex != NSNotFound, @"childViewController is not in the navigation stack.");
+  if (viewControllerIndex == NSNotFound) {
+    //If childViewController is not actually a child, return NSNotFound which is also a really large number.
+    return NSNotFound;
+  }
   
   if (viewControllerIndex == self.viewControllers.count - 1) {
     //view controller is at the top, just return our own visibility depth.
