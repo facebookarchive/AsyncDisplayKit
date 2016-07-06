@@ -35,9 +35,6 @@ static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimation
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
-/// The duration used when animating to new layout attributes
-static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
-
 #pragma mark -
 #pragma mark ASCellNode<->UICollectionViewCell bridging.
 
