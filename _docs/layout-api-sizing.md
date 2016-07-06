@@ -81,7 +81,7 @@ In the Pinterest code base, the **minimum size seems to be only necessary for st
 Note that .sizeRange can be set on any &ltASLayoutable&gt (a node, or a layout spec), but will only take effect if that element is added as a child of a <i>static</i> layout spec. This container-dependence of layoutable properties is a key area we’re working on clarifying.
 </div>
 
-#### Constructing ASRelativeDimensions
+#### Constructing ASRelativeSizeRange
 <br>
 `ASRelativeSize.h` contains 4 convenience functions to construct an `ASRelativeSizeRange` from the various smaller units.  
 
