@@ -10,7 +10,7 @@ permalink: /docs/layout-api-sizing.html
 
 ##Answer
 
-To best understand the compound dimension system in the Layout API, it is easiest to see all the units in relation to one another.
+The easiest way to understand the compound dimension types in the Layout API is to see all the units in relation to one another.
 
 <img src="/static/layout-api-sizing-1.png">
 
