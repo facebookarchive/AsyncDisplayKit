@@ -128,6 +128,11 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
   
   CGPoint _deceleratingVelocity;
   
+  // Used if a set of cell nodes with `shouldAnimateSizeChanges = YES` has changed size and we have
+  // invalidated the layout. See `requeryNodeSizes` and `nodeDidRelayout:sizeChanged:`.
+  // If YES we will wrap the next [super layoutSubviews] in an animation block.
+  BOOL _shouldAnimateNextLayout;
+  
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
    
@@ -800,7 +805,14 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
   }
   
   // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
-  [super layoutSubviews];
+  if (_shouldAnimateNextLayout) {
+    _shouldAnimateNextLayout = NO;
+    [UIView animateWithDuration:kASCollectionViewAnimationDuration animations:^{
+      [super layoutSubviews];
+    }];
+  } else {
+    [super layoutSubviews];
+  }
 }
 
 
@@ -1198,9 +1210,7 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
     [self.collectionViewLayout invalidateLayoutWithContext:inval];
     
     if (_queuedNodeSizeInvalidationContext.shouldAnimate) {
-      [UIView animateWithDuration:kASCollectionViewAnimationDuration animations:^{
-          [self layoutIfNeeded];
-      }];
+      _shouldAnimateNextLayout = YES;
     }
   }
   
