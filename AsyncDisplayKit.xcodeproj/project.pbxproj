@@ -598,6 +598,7 @@
 		F7CE6CA21D2CDB5800BE4C15 /* ASDefaultPlaybackButton.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */; };
 		F7CE6CA31D2CDB5800BE4C15 /* ASLayoutValidation.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 697C0DE11CF38F28001DE0D4 /* ASLayoutValidation.h */; };
 		F7CE6CA41D2CDB5800BE4C15 /* ASLayoutManager.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = B30BF6501C5964B0004FCD53 /* ASLayoutManager.h */; };
+		F7CE6CB71D2CE2D000BE4C15 /* ASLayoutableExtensibility.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 698C8B601CAB49FC0052DC3F /* ASLayoutableExtensibility.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -631,6 +632,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				F7CE6CB71D2CE2D000BE4C15 /* ASLayoutableExtensibility.h in CopyFiles */,
 				F7CE6C131D2CDB3E00BE4C15 /* ASPagerFlowLayout.h in CopyFiles */,
 				F7CE6C141D2CDB3E00BE4C15 /* ASMapNode.h in CopyFiles */,
 				F7CE6C151D2CDB3E00BE4C15 /* ASVideoNode.h in CopyFiles */,

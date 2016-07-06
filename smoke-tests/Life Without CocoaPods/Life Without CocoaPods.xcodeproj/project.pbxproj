@@ -13,11 +13,49 @@
 		0589691B1ABCE0E80059CE2A /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 058969181ABCE0E80059CE2A /* Default-568h@2x.png */; };
 		0589691C1ABCE0E80059CE2A /* Default-667h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 058969191ABCE0E80059CE2A /* Default-667h@2x.png */; };
 		0589691D1ABCE0E80059CE2A /* Default-736h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0589691A1ABCE0E80059CE2A /* Default-736h@3x.png */; };
-		058969281ABCE1750059CE2A /* libAsyncDisplayKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 058969271ABCE1750059CE2A /* libAsyncDisplayKit.a */; };
 		0589692A1ABCE17C0059CE2A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058969291ABCE17C0059CE2A /* AssetsLibrary.framework */; };
 		0589692C1ABCE1820059CE2A /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0589692B1ABCE1820059CE2A /* Photos.framework */; };
 		92DD2FEC1BF4D8BB0074C9DD /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92DD2FEB1BF4D8BB0074C9DD /* MapKit.framework */; };
+		F7CE6CB61D2CE00800BE4C15 /* libAsyncDisplayKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CE6CAD1D2CDFFB00BE4C15 /* libAsyncDisplayKit.a */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F7CE6CAC1D2CDFFB00BE4C15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 058D09AC195D04C000B7D73C;
+			remoteInfo = AsyncDisplayKit;
+		};
+		F7CE6CAE1D2CDFFB00BE4C15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 058D09BC195D04C000B7D73C;
+			remoteInfo = AsyncDisplayKitTests;
+		};
+		F7CE6CB01D2CDFFB00BE4C15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 057D02BF1AC0A66700C7AC3C;
+			remoteInfo = AsyncDisplayKitTestHost;
+		};
+		F7CE6CB21D2CDFFB00BE4C15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B35061DA1B010EDF0018CF92;
+			remoteInfo = "AsyncDisplayKit-iOS";
+		};
+		F7CE6CB41D2CE00300BE4C15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 058D09AB195D04C000B7D73C;
+			remoteInfo = AsyncDisplayKit;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		058968EF1ABCE06E0059CE2A /* Life Without CocoaPods.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Life Without CocoaPods.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -30,10 +68,10 @@
 		058969181ABCE0E80059CE2A /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		058969191ABCE0E80059CE2A /* Default-667h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-667h@2x.png"; sourceTree = "<group>"; };
 		0589691A1ABCE0E80059CE2A /* Default-736h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-736h@3x.png"; sourceTree = "<group>"; };
-		058969271ABCE1750059CE2A /* libAsyncDisplayKit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libAsyncDisplayKit.a; path = "../../build/Debug-iphoneos/libAsyncDisplayKit.a"; sourceTree = "<group>"; };
 		058969291ABCE17C0059CE2A /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		0589692B1ABCE1820059CE2A /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		92DD2FEB1BF4D8BB0074C9DD /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AsyncDisplayKit.xcodeproj; path = ../../AsyncDisplayKit.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,10 +79,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F7CE6CB61D2CE00800BE4C15 /* libAsyncDisplayKit.a in Frameworks */,
 				92DD2FEC1BF4D8BB0074C9DD /* MapKit.framework in Frameworks */,
 				0589692C1ABCE1820059CE2A /* Photos.framework in Frameworks */,
 				0589692A1ABCE17C0059CE2A /* AssetsLibrary.framework in Frameworks */,
-				058969281ABCE1750059CE2A /* libAsyncDisplayKit.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,7 +95,7 @@
 				92DD2FEB1BF4D8BB0074C9DD /* MapKit.framework */,
 				0589692B1ABCE1820059CE2A /* Photos.framework */,
 				058969291ABCE17C0059CE2A /* AssetsLibrary.framework */,
-				058969271ABCE1750059CE2A /* libAsyncDisplayKit.a */,
+				F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */,
 				058968F11ABCE06E0059CE2A /* Life Without CocoaPods */,
 				058968F01ABCE06E0059CE2A /* Products */,
 			);
@@ -98,6 +136,17 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		F7CE6CA61D2CDFFB00BE4C15 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F7CE6CAD1D2CDFFB00BE4C15 /* libAsyncDisplayKit.a */,
+				F7CE6CAF1D2CDFFB00BE4C15 /* AsyncDisplayKitTests.xctest */,
+				F7CE6CB11D2CDFFB00BE4C15 /* AsyncDisplayKitTestHost.app */,
+				F7CE6CB31D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -112,6 +161,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				F7CE6CB51D2CE00300BE4C15 /* PBXTargetDependency */,
 			);
 			name = "Life Without CocoaPods";
 			productName = "Life Without CocoaPods";
@@ -143,12 +193,49 @@
 			mainGroup = 058968E61ABCE06E0059CE2A;
 			productRefGroup = 058968F01ABCE06E0059CE2A /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = F7CE6CA61D2CDFFB00BE4C15 /* Products */;
+					ProjectRef = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				058968EE1ABCE06E0059CE2A /* Life Without CocoaPods */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		F7CE6CAD1D2CDFFB00BE4C15 /* libAsyncDisplayKit.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libAsyncDisplayKit.a;
+			remoteRef = F7CE6CAC1D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F7CE6CAF1D2CDFFB00BE4C15 /* AsyncDisplayKitTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = AsyncDisplayKitTests.xctest;
+			remoteRef = F7CE6CAE1D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F7CE6CB11D2CDFFB00BE4C15 /* AsyncDisplayKitTestHost.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = AsyncDisplayKitTestHost.app;
+			remoteRef = F7CE6CB01D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F7CE6CB31D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = AsyncDisplayKit.framework;
+			remoteRef = F7CE6CB21D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		058968ED1ABCE06E0059CE2A /* Resources */ = {
@@ -175,6 +262,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F7CE6CB51D2CE00300BE4C15 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = AsyncDisplayKit;
+			targetProxy = F7CE6CB41D2CE00300BE4C15 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		058969101ABCE06E0059CE2A /* Debug */ = {
