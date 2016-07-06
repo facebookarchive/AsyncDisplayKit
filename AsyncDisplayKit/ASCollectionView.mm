@@ -1139,14 +1139,15 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
   
   BOOL isFirstInvalidation = !_didInvalidateCollectionViewLayoutDueToCellNodeResize;
   if (isFirstInvalidation) {
-    UICollectionViewLayoutInvalidationContext *inval = [[[[self.collectionViewLayout class] invalidationContextClass] alloc] init];
+    UICollectionViewLayout *layout = self.collectionViewLayout;
+    UICollectionViewLayoutInvalidationContext *inval = [[[[layout class] invalidationContextClass] alloc] init];
 
     // NOTE: We don't invalidate specific items here because the layout
     // will not move other items to account for the change. This is almost
     // never good, so we intentionally don't do it. Plus this allows us to
     // only invalidate once even if multiple cell nodes resize.
 
-    [self.collectionViewLayout invalidateLayoutWithContext:inval];
+    [layout invalidateLayoutWithContext:inval];
     
     _didInvalidateCollectionViewLayoutDueToCellNodeResize = YES;
     _shouldAnimateNextLayout = YES;
