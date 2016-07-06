@@ -772,6 +772,8 @@ static const NSTimeInterval kASCollectionViewAnimationDuration = 0.3;
       [self performBatchAnimated:YES updates:^{
         [_dataController relayoutAllNodes];
       } completion:nil];
+      // We need to ensure the size requery is done before we update our layout.
+      [self waitUntilAllUpdatesAreCommitted];
     }
   }
   
