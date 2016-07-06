@@ -65,6 +65,14 @@ Note that .flexBasis can be set on any &ltASLayoutable&gt (a node, or a layout s
 ```
 ## Size Ranges (ASSizeRange, ASRelativeSizeRange)
 
+Because the layout spec system allows flexibility with elements growing and shrinking, we sometimes need to provide limits / boundaries to its flexibility.
+
+There are two size range types, but in essence, both contain a minimum and maximum size and that are used to influence the result of layout measurements.
+
+In the Pinterest code base, the **minimum size seems to be only necessary for stack specs in order to determine how much space to fill in between the children.**  For example, with buttons in a nav bar, we don’t want them to stack as closely together as they can fit — rather a minimum width, as wide as the screen, is specified and causes the stack to add spacing to satisfy that constraint.
+
+**It’s much more common that the “max” constraint is what matters, though.**  This is the case when text is wrapping or truncating - it’s encountering the maximum allowed width.  Setting a minimum width for text doesn’t actually do anything—the text can’t be made longer—unless it’s in a stack, and spacing is added around it.
+
 #### ASSizeRange
 <br>
 UIKit doesn't provide a structure to bundle a minimum and maximum CGSize.  So `ASSizeRange` was created to support **a minimum and maximum CGSize pair**. 
@@ -77,15 +85,9 @@ The `constrainedSize` that is passed as an input to `layoutSpecThatFits:` is an 
 
 #### ASRelativeSizeRange
 <br>
-Because the layout spec system allows flexibility with elements growing and shrinking, we sometimes need to provide limits / boundaries to its flexibility.  
-
 `ASRelativeSizeRange` is essentially **a minimum and maximum size pair, that are used to constrain the size of a layout object.**  The minimum and maximum sizes must support both point and relative sizes, which is where our friend the ASRelativeSize comes in.  Hence, an ASRelativeSizeRange consists of a minimum and maximum `ASRelativeSize`. 
 
 ASRelativeSizeRange is used to set the `sizeRange` property on a child of an `ASStaticLayoutSpec`.  If specified, the child's size is restricted according to this size.  
-
-In the Pinterest code base, the **minimum size seems to be only necessary for stack specs in order to determine how much space to fill in between the children.**  For example, with buttons in a nav bar, we don’t want them to stack as closely together as they can fit — rather a minimum width, as wide as the screen, is specified and causes the stack to add spacing to satisfy that constraint.
-
-**It’s much more common that the “max” constraint is what matters, though.**  This is the case when text is wrapping or truncating - it’s encountering the maximum allowed width.  Setting a minimum width for text doesn’t actually do anything—the text can’t be made longer—unless it’s in a stack, and spacing is added around it.
 
 <div class = "note">
 Note that .sizeRange can be set on any &ltASLayoutable&gt (a node, or a layout spec), but will only take effect if that element is added as a child of a <i>static</i> layout spec. This container-dependence of layoutable properties is a key area we’re working on clarifying.
@@ -93,7 +95,7 @@ Note that .sizeRange can be set on any &ltASLayoutable&gt (a node, or a layout s
 
 #### ASSizeRange vs. ASRelativeSizeRange
 <br>
-Why do we use an `ASSizeRange` as a `constrainedSize` to pass to a node's `layoutSpecThatFits:` function, but an `ASRelativeSizeRange` to constrain the size of an element within the layoutSpecThatFits: function?
+Why do we pass a `ASSizeRange *constrainedSize` to a node's `layoutSpecThatFits:` function, but a `ASRelativeSizeRange` for the `.sizeRange` property on an element provided as a child of the layout spec?
 
  It’s pretty rare that you need the percent feature for a .sizeRange feature, but it’s there to make the API as flexible as possible. The input value of the constrainedSize that comes into the argument, has already been resolved by the parent’s size. It may have been influenced by a percent type, but has always be converted by that point into points. 
 
