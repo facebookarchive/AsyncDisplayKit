@@ -49,15 +49,15 @@ Note that .flexBasis can be set on any &ltASLayoutable&gt (a node, or a layout s
 
 ## Sizes (CGSize,  ASRelativeSize)
 <br>
-`ASRelativeSize` is essentially a normal **CGSize with support for representing either a point size or a % size**.  ASRelativeSize doesn't have a direct use in the Layout API, except to construct an ASRelativeSizeRange.
+`ASRelativeSize` is **similar to a CGSize, but its width and height may represent either a point or percent value.**  In fact, their unit type may even be different from one another. ASRelativeSize doesn't have a direct use in the Layout API, except to construct an ASRelativeSizeRange.
 
-- an ASRelativeSize consists of a width and height that are each `ASRelativeDimensions`. 
+- an ASRelativeSize consists of a `.width` and `.height` that are each `ASRelativeDimensions`. 
 
-- percentage and point values can be combined (e.g. you could specify that an ASRelativeSize that has a height in points, but a variable % width)
+- the type of the width and height are independent; either one individually, or both, may be a point or percent value. (e.g. you could specify that an ASRelativeSize that has a height in points, but a variable % width)
 
 #### Constructing ASRelativeSizes
 <br>
-`ASRelativeSize.h` contains 2 convenience functions to construct an `ASRelativeSize`.  If you don't need to support relative (%) values, you can construct a ASRelativeSize from a CGSize.
+`ASRelativeSize.h` contains 2 convenience functions to construct an `ASRelativeSize`.  **If you don't need to support relative (%) values, you can construct an ASRelativeSize with just a CGSize.**
 
 ``` 
     ASRelativeSizeMake(ASRelativeDimension width, ASRelativeDimension height);
