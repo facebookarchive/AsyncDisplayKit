@@ -65,6 +65,16 @@ Note that .flexBasis can be set on any &ltASLayoutable&gt (a node, or a layout s
 ```
 ## Size Ranges (ASSizeRange, ASRelativeSizeRange)
 
+#### ASSizeRange
+<br>
+UIKit doesn't provide a structure to bundle a minimum and maximum CGSize.  So `ASSizeRange` was created to support **a minimum and maximum CGSize pair**. 
+
+The `constrainedSize` that is passed as an input to `layoutSpecThatFits:` is an ASSizeRange. 
+
+```
+    - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize;
+```
+
 #### ASRelativeSizeRange
 <br>
 Because the layout spec system allows flexibility with elements growing and shrinking, we sometimes need to provide limits / boundaries to its flexibility.  
@@ -81,6 +91,12 @@ In the Pinterest code base, the **minimum size seems to be only necessary for st
 Note that .sizeRange can be set on any &ltASLayoutable&gt (a node, or a layout spec), but will only take effect if that element is added as a child of a <i>static</i> layout spec. This container-dependence of layoutable properties is a key area we’re working on clarifying.
 </div>
 
+#### ASSizeRange vs. ASRelativeSizeRange
+<br>
+Why do we use an `ASSizeRange` as a `constrainedSize` to pass to a node's `layoutSpecThatFits:` function, but an `ASRelativeSizeRange` to constrain the size of an element within the layoutSpecThatFits: function?
+
+ It’s pretty rare that you need the percent feature for a .sizeRange feature, but it’s there to make the API as flexible as possible. The input value of the constrainedSize that comes into the argument, has already been resolved by the parent’s size. It may have been influenced by a percent type, but has always be converted by that point into points. 
+
 #### Constructing ASRelativeSizeRange
 <br>
 `ASRelativeSize.h` contains 4 convenience functions to construct an `ASRelativeSizeRange` from the various smaller units.  
@@ -94,22 +110,6 @@ Most of the time, relative values are not needed for a size range _and_ the desi
 ```
     ASRelativeSizeRangeMakeWithExactCGSize(CGSize exact);
 ```
-
-#### ASSizeRange
-<br>
-UIKit doesn't provide a structure to bundle a minimum and maximum CGSize.  So `ASSizeRange` was created to support **a minimum and maximum CGSize pair**. 
-
-The `constrainedSize` that is passed as an input to `layoutSpecThatFits:` is an ASSizeRange. 
-
-```
-    - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize;
-```
-
-#### ASSizeRange vs. ASRelativeSizeRange
-<br>
-Why do we use an `ASSizeRange` as a `constrainedSize` to pass to a node's `layoutSpecThatFits:` function, but an `ASRelativeSizeRange` to constrain the size of an element within the layoutSpecThatFits: function?
-
- It’s pretty rare that you need the percent feature for a .sizeRange feature, but it’s there to make the API as flexible as possible. The input value of the constrainedSize that comes into the argument, has already been resolved by the parent’s size. It may have been influenced by a percent type, but has always be converted by that point into points. 
 
 ### Sizing Conclusion
 <br>
