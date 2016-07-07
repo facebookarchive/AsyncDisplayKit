@@ -30,7 +30,7 @@ ASEnvironmentTraitCollection _ASEnvironmentTraitCollectionMakeDefault()
 {
   return (ASEnvironmentTraitCollection) {
     // Default values can be defined in here
-    .containerWindowSize = CGSizeZero,
+    .containerSize = CGSizeZero,
   };
 }
 
@@ -57,7 +57,7 @@ BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnviron
     lhs.displayScale == rhs.displayScale &&
     lhs.userInterfaceIdiom == rhs.userInterfaceIdiom &&
     lhs.forceTouchCapability == rhs.forceTouchCapability &&
-    CGSizeEqualToSize(lhs.containerWindowSize, rhs.containerWindowSize);
+    CGSizeEqualToSize(lhs.containerSize, rhs.containerSize);
 }
 
 ASEnvironmentState ASEnvironmentStateMakeDefault()

@@ -21,7 +21,7 @@
                  horizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
                    verticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
                 forceTouchCapability:(UIForceTouchCapability)forceTouchCapability
-                 containerWindowSize:(CGSize)windowSize
+                 containerSize:(CGSize)windowSize
 {
     self = [super init];
     if (self) {
@@ -30,7 +30,7 @@
       _horizontalSizeClass = horizontalSizeClass;
       _verticalSizeClass = verticalSizeClass;
       _forceTouchCapability = forceTouchCapability;
-      _containerWindowSize = windowSize;
+      _containerSize = windowSize;
     }
     return self;
 }
@@ -40,14 +40,14 @@
                                    horizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
                                      verticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
                                   forceTouchCapability:(UIForceTouchCapability)forceTouchCapability
-                                   containerWindowSize:(CGSize)windowSize
+                                   containerSize:(CGSize)windowSize
 {
   return [[[self class] alloc] initWithDisplayScale:displayScale
                                  userInterfaceIdiom:userInterfaceIdiom
                                 horizontalSizeClass:horizontalSizeClass
                                   verticalSizeClass:verticalSizeClass
                                forceTouchCapability:forceTouchCapability
-                             containerWindowSize:windowSize];
+                             containerSize:windowSize];
 }
 
 + (ASTraitCollection *)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits
@@ -57,12 +57,12 @@
                                   horizontalSizeClass:traits.horizontalSizeClass
                                     verticalSizeClass:traits.verticalSizeClass
                                  forceTouchCapability:traits.forceTouchCapability
-                            containerWindowSize:traits.containerWindowSize];
+                            containerSize:traits.containerSize];
 
 }
 
 + (ASTraitCollection *)traitCollectionWithUITraitCollection:(UITraitCollection *)traitCollection
-                                        containerWindowSize:(CGSize)windowSize
+                                        containerSize:(CGSize)windowSize
 {
   ASTraitCollection *asyncTraitCollection = nil;
   if (AS_AT_LEAST_IOS9) {
@@ -71,7 +71,7 @@
                                                   horizontalSizeClass:traitCollection.horizontalSizeClass
                                                     verticalSizeClass:traitCollection.verticalSizeClass
                                                  forceTouchCapability:traitCollection.forceTouchCapability
-                                                  containerWindowSize:windowSize];
+                                                  containerSize:windowSize];
   }
   else if (AS_AT_LEAST_IOS8) {
     asyncTraitCollection = [[[self class] alloc] initWithDisplayScale:traitCollection.displayScale
@@ -79,7 +79,7 @@
                                                   horizontalSizeClass:traitCollection.horizontalSizeClass
                                                     verticalSizeClass:traitCollection.verticalSizeClass
                                                  forceTouchCapability:0
-                                                  containerWindowSize:windowSize];
+                                                  containerSize:windowSize];
   } else {
     asyncTraitCollection = [[[self class] alloc] init];
   }
@@ -95,7 +95,7 @@
     .userInterfaceIdiom = self.userInterfaceIdiom,
     .verticalSizeClass = self.verticalSizeClass,
     .forceTouchCapability = self.forceTouchCapability,
-    .containerWindowSize = self.containerWindowSize,
+    .containerSize = self.containerSize,
   };
 }
 
@@ -105,7 +105,7 @@
   self.horizontalSizeClass == traitCollection.horizontalSizeClass &&
   self.verticalSizeClass == traitCollection.verticalSizeClass &&
   self.userInterfaceIdiom == traitCollection.userInterfaceIdiom &&
-  CGSizeEqualToSize(self.containerWindowSize, traitCollection.containerWindowSize) &&
+  CGSizeEqualToSize(self.containerSize, traitCollection.containerSize) &&
   self.forceTouchCapability == traitCollection.forceTouchCapability;
 }
 

@@ -197,7 +197,7 @@ ASVisibilityDepthImplementation;
   
   ASDisplayNodeAssertMainThread();
   ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(traitCollection);
-  asyncTraitCollection.containerWindowSize = self.view.frame.size;
+  asyncTraitCollection.containerSize = self.view.frame.size;
   return asyncTraitCollection;
 }
 
@@ -207,7 +207,7 @@ ASVisibilityDepthImplementation;
     ASTraitCollection *traitCollection = self.overrideDisplayTraitsWithWindowSize(windowSize);
     return [traitCollection environmentTraitCollection];
   }
-  self.node.environmentTraitCollection.containerWindowSize = windowSize;
+  self.node.environmentTraitCollection.containerSize = windowSize;
   return self.node.environmentTraitCollection;
 }
 
@@ -233,7 +233,7 @@ ASVisibilityDepthImplementation;
   [super traitCollectionDidChange:previousTraitCollection];
   
   ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-  environmentTraitCollection.containerWindowSize = self.view.bounds.size;
+  environmentTraitCollection.containerSize = self.view.bounds.size;
   [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 

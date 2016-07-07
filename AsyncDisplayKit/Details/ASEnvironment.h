@@ -70,7 +70,7 @@ typedef struct ASEnvironmentTraitCollection {
   UIUserInterfaceSizeClass verticalSizeClass;
   UIForceTouchCapability forceTouchCapability;
 
-  CGSize containerWindowSize;
+  CGSize containerSize;
 } ASEnvironmentTraitCollection;
 
 extern ASEnvironmentTraitCollection ASEnvironmentTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection);

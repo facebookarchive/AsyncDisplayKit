@@ -18,13 +18,13 @@
 @property (nonatomic, assign, readonly) UIUserInterfaceIdiom userInterfaceIdiom;
 @property (nonatomic, assign, readonly) UIUserInterfaceSizeClass verticalSizeClass;
 @property (nonatomic, assign, readonly) UIForceTouchCapability forceTouchCapability;
-@property (nonatomic, assign, readonly) CGSize containerWindowSize;
+@property (nonatomic, assign, readonly) CGSize containerSize;
 
 
 + (ASTraitCollection *)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits;
 
 + (ASTraitCollection *)traitCollectionWithUITraitCollection:(UITraitCollection *)traitCollection
-                                        containerWindowSize:(CGSize)windowSize;
+                                        containerSize:(CGSize)windowSize;
 
 
 + (ASTraitCollection *)traitCollectionWithDisplayScale:(CGFloat)displayScale
@@ -32,7 +32,7 @@
                                    horizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
                                      verticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
                                   forceTouchCapability:(UIForceTouchCapability)forceTouchCapability
-                                   containerWindowSize:(CGSize)windowSize;
+                                   containerSize:(CGSize)windowSize;
 
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection;

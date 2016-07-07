@@ -207,7 +207,7 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState childEnvi
     childTraitCollection.userInterfaceIdiom = parentTraitCollection.userInterfaceIdiom;
     childTraitCollection.forceTouchCapability = parentTraitCollection.forceTouchCapability;
     childTraitCollection.displayScale = parentTraitCollection.displayScale;
-    childTraitCollection.containerWindowSize = parentTraitCollection.containerWindowSize;
+    childTraitCollection.containerSize = parentTraitCollection.containerSize;
     childEnvironmentState.environmentTraitCollection = childTraitCollection;
 
   }
