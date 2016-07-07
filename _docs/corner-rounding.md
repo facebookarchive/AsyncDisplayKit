@@ -35,7 +35,7 @@ Movement **underneath the corner** is any movement behind the corner.  For examp
 
 To describe movement **through the corner,** imagine a small rounded-corner scroll view containing a much larger photo.  As you zoom and pan the photo inside of the scroll view, the photo will move through the corners of the of the scroll view. 
 
-<img src="/static/corner-rounding-movement.PNG" width="60%" height="60%">
+<img src="/static/corner-rounding-movement.png" width="60%" height="60%">
 
 The above image shows movement underneath the corner highlighted in blue and movement thruogh the corner highlighted in orange. 
 
@@ -43,7 +43,7 @@ The above image shows movement underneath the corner highlighted in blue and mov
 Note: There can be movement <i>inside</i> of the rounded-corner object, without moving <i>through</i> the corner.  The following image shows content, highlighted in green, inset from the edge with a margin equal to the size of the corner radius.  When the content scrolls, it will <i>not</i> move through the corners.
 </div>
 
-<img src="/static/corner-rounding-scrolling.PNG">
+<img src="/static/corner-rounding-scrolling.png">
 
 Using the above method to adjust your design to eliminate one source of corner movement can make the difference between being able to use a fast rounding technique, or resorting to `.cornerRadius.`. 
 
@@ -94,4 +94,4 @@ CALayer's `.shouldRasterize` is unrelated to AsyncDisplayKit `node.shouldRasteri
 
 Use this flowchart to select the most performant strategy to round a set of corners.
 
-<img src="/static/corner-rounding-flowchart-v2.PNG" alt="corner rounding strategy flowchart">
+<img src="/static/corner-rounding-flowchart-v2.png" alt="corner rounding strategy flowchart">
