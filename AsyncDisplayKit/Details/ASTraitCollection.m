@@ -57,7 +57,7 @@
                                   horizontalSizeClass:traits.horizontalSizeClass
                                     verticalSizeClass:traits.verticalSizeClass
                                  forceTouchCapability:traits.forceTouchCapability
-                            containerSize:traits.containerSize];
+                                        containerSize:traits.containerSize];
 
 }
 
