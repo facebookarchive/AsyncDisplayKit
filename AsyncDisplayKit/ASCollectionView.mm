@@ -9,6 +9,7 @@
 //
 
 #import "ASAssert.h"
+#import "ASAvailability.h"
 #import "ASBatchFetching.h"
 #import "ASDelegateProxy.h"
 #import "ASCellNode+Internal.h"
@@ -23,6 +24,16 @@
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "_ASDisplayLayer.h"
+
+/// What, if any, invalidation should we perform during the next -layoutSubviews.
+typedef NS_ENUM(NSUInteger, ASCollectionViewInvalidationStyle) {
+  /// Perform no invalidation.
+  ASCollectionViewInvalidationStyleNone,
+  /// Perform invalidation with animation (use an empty batch update).
+  ASCollectionViewInvalidationStyleWithoutAnimation,
+  /// Perform invalidation without animation (use -invalidateLayout).
+  ASCollectionViewInvalidationStyleWithAnimation,
+};
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
@@ -66,36 +77,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 @end
 
 #pragma mark -
-#pragma mark _ASCollectionViewNodeSizeUpdateContext
-
-/** 
- * This class contains all the nodes that have a new size and UICollectionView should requery them all at once.
- * It is intended to be used strictly on main thread and is not thread safe.
- */
-@interface _ASCollectionViewNodeSizeInvalidationContext : NSObject
-/**
- * It's possible that a node triggered multiple size changes before main thread has a chance to execute `requeryNodeSizes`. 
- * Therefore, a set is preferred here, to avoid asking ASDataController to search for index path of the same node multiple times.
- */
-@property (nonatomic, strong) NSMutableSet<ASCellNode *> *invalidatedNodes;
-@property (nonatomic, assign) BOOL shouldAnimate;
-@end
-
-@implementation _ASCollectionViewNodeSizeInvalidationContext
-
-- (instancetype)init
-{
-  self = [super init];
-  if (self) {
-    _invalidatedNodes = [NSMutableSet set];
-    _shouldAnimate = YES;
-  }
-  return self;
-}
-
-@end
-
-#pragma mark -
 #pragma mark ASCollectionView.
 
 @interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
@@ -110,9 +91,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
   BOOL _performingBatchUpdates;
+  BOOL _superPerformingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
-  
-  _ASCollectionViewNodeSizeInvalidationContext *_queuedNodeSizeInvalidationContext; // Main thread only
+
   BOOL _isDeallocating;
   
   ASBatchContext *_batchContext;
@@ -123,6 +104,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSMutableSet *_registeredSupplementaryKinds;
   
   CGPoint _deceleratingVelocity;
+  
+  ASCollectionViewInvalidationStyle _nextLayoutInvalidationStyle;
   
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
@@ -465,6 +448,24 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return visibleNodes;
 }
 
+#pragma mark Internal
+
+/**
+ Performing nested batch updates with super (e.g. resizing a cell node & updating collection view during same frame)
+ can cause super to throw data integrity exceptions because it checks the data source counts before
+ the update is complete.
+ 
+ Always call [self _superPerform:] rather than [super performBatch:] so that we can keep our `superPerformingBatchUpdates` flag updated.
+*/
+- (void)_superPerformBatchUpdates:(void(^)())updates completion:(void(^)(BOOL finished))completion
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(_superPerformingBatchUpdates == NO, @"Nested batch updates being sent to UICollectionView. This is not expected.");
+  
+  _superPerformingBatchUpdates = YES;
+  [super performBatchUpdates:updates completion:completion];
+  _superPerformingBatchUpdates = NO;
+}
 
 #pragma mark Assertions.
 
@@ -592,7 +593,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   cell.node = node;
   [_rangeController configureContentView:cell.contentView forCellNode:node];
   
-  if (ASRunningOnOS7()) {
+  if (!AS_AT_LEAST_IOS8) {
     // Even though UICV was introduced in iOS 6, and UITableView has always had the equivalent method,
     // -willDisplayCell: was not introduced until iOS 8 for UICV.  didEndDisplayingCell, however, is available.
     [self collectionView:collectionView willDisplayCell:cell forItemAtIndexPath:indexPath];
@@ -792,7 +793,25 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
       [self performBatchAnimated:YES updates:^{
         [_dataController relayoutAllNodes];
       } completion:nil];
+      // We need to ensure the size requery is done before we update our layout.
+      [self waitUntilAllUpdatesAreCommitted];
     }
+  }
+  
+  // Flush any pending invalidation action if needed.
+  ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
+  _nextLayoutInvalidationStyle = ASCollectionViewInvalidationStyleNone;
+  switch (invalidationStyle) {
+    case ASCollectionViewInvalidationStyleWithAnimation:
+      if (!_superPerformingBatchUpdates) {
+        [self _superPerformBatchUpdates:^{ } completion:nil];
+      }
+      break;
+    case ASCollectionViewInvalidationStyleWithoutAnimation:
+      [self.collectionViewLayout invalidateLayout];
+      break;
+    default:
+      break;
   }
   
   // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
@@ -1022,18 +1041,18 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)rangeController:(ASRangeController *)rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
-
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
+  NSUInteger numberOfUpdateBlocks = _batchUpdateBlocks.count;
+  if (numberOfUpdateBlocks == 0 || !self.asyncDataSource || _superIsPendingDataLoad) {
     if (completion) {
       completion(NO);
     }
+    _performingBatchUpdates = NO;
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
-  NSUInteger numberOfUpdateBlocks = _batchUpdateBlocks.count;
   ASPerformBlockWithoutAnimation(!animated, ^{
     [_layoutFacilitator collectionViewWillPerformBatchUpdates];
-    [super performBatchUpdates:^{
+    [self _superPerformBatchUpdates:^{
       for (dispatch_block_t block in _batchUpdateBlocks) {
         block();
       }
@@ -1142,57 +1161,36 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return;
   }
   
-  BOOL queued = (_queuedNodeSizeInvalidationContext != nil);
-  if (!queued) {
-    _queuedNodeSizeInvalidationContext = [[_ASCollectionViewNodeSizeInvalidationContext alloc] init];
-    
-    __weak __typeof__(self) weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-      __typeof__(self) strongSelf = weakSelf;
-      if (strongSelf) {
-        [strongSelf requeryNodeSizes];
-      }
-    });
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath == nil) {
+    return;
   }
-  
-  [_queuedNodeSizeInvalidationContext.invalidatedNodes addObject:node];
 
-  // Check if this node or one of its subnodes can be animated.
-  // If the context is already non-animated, don't bother checking this node.
-  if (_queuedNodeSizeInvalidationContext.shouldAnimate) {
-    BOOL (^shouldNotAnimateBlock)(ASDisplayNode *) = ^BOOL(ASDisplayNode * _Nonnull node) {
-      return node.shouldAnimateSizeChanges == NO;
-    };
+  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[ indexPath ] batched:NO];
+  
+  ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
+  if (invalidationStyle == ASCollectionViewInvalidationStyleNone) {
+    [self setNeedsLayout];
+    invalidationStyle = ASCollectionViewInvalidationStyleWithAnimation;
+  }
+
+  // If we think we're going to animate, check if this node will prevent it.
+  if (invalidationStyle == ASCollectionViewInvalidationStyleWithAnimation) {
+    // TODO: Incorporate `shouldAnimateSizeChanges` into ASEnvironmentState for performance benefit.
+    static dispatch_once_t onceToken;
+    static BOOL (^shouldNotAnimateBlock)(ASDisplayNode *);
+    dispatch_once(&onceToken, ^{
+      shouldNotAnimateBlock = ^(ASDisplayNode * _Nonnull node) {
+        return node.shouldAnimateSizeChanges == NO;
+      };
+    });
     if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
-      // One single non-animated cell node causes the whole context to be non-animated
-      _queuedNodeSizeInvalidationContext.shouldAnimate = NO;
-    }
-  }
-}
-
-// Cause UICollectionView to requery for the new size of all nodes
-- (void)requeryNodeSizes
-{
-  ASDisplayNodeAssertMainThread();
-  NSSet<ASCellNode *> *nodes = _queuedNodeSizeInvalidationContext.invalidatedNodes;
-  NSMutableArray<NSIndexPath *> *indexPaths = [NSMutableArray arrayWithCapacity:nodes.count];
-  for (ASCellNode *node in nodes) {
-    NSIndexPath *indexPath = [self indexPathForNode:node];
-    if (indexPath != nil) {
-      [indexPaths addObject:indexPath];
+      // One single non-animated node causes the whole layout update to be non-animated
+      invalidationStyle = ASCollectionViewInvalidationStyleWithoutAnimation;
     }
   }
   
-  if (indexPaths.count > 0) {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
-    
-    ASPerformBlockWithoutAnimation(!_queuedNodeSizeInvalidationContext.shouldAnimate, ^{
-      // Perform an empty update transaction here to trigger UICollectionView to requery row sizes and layout its subviews again
-      [super performBatchUpdates:^{} completion:nil];
-    });
-  }
-  
-  _queuedNodeSizeInvalidationContext = nil;
+  _nextLayoutInvalidationStyle = invalidationStyle;
 }
 
 #pragma mark - Memory Management

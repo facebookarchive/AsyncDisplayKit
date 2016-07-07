@@ -314,6 +314,10 @@
 		7AB338661C55B3420055FDE8 /* ASRelativeLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7A06A7381C35F08800FE8DAA /* ASRelativeLayoutSpec.mm */; };
 		7AB338671C55B3460055FDE8 /* ASRelativeLayoutSpec.h in Headers */ = {isa = PBXBuildFile; fileRef = 7A06A7391C35F08800FE8DAA /* ASRelativeLayoutSpec.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7AB338691C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7AB338681C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm */; };
+		8021EC1C1D2B00B100799119 /* UIImage+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 8021EC1A1D2B00B100799119 /* UIImage+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8021EC1D1D2B00B100799119 /* UIImage+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 8021EC1A1D2B00B100799119 /* UIImage+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8021EC1E1D2B00B100799119 /* UIImage+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */; };
+		8021EC1F1D2B00B100799119 /* UIImage+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */; };
 		81EE384F1C8E94F000456208 /* ASRunLoopQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		81EE38501C8E94F000456208 /* ASRunLoopQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */; };
 		8B0768B31CE752EC002E1453 /* ASDefaultPlaybackButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */; };
@@ -840,6 +844,8 @@
 		7A06A7381C35F08800FE8DAA /* ASRelativeLayoutSpec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASRelativeLayoutSpec.mm; path = AsyncDisplayKit/Layout/ASRelativeLayoutSpec.mm; sourceTree = "<group>"; };
 		7A06A7391C35F08800FE8DAA /* ASRelativeLayoutSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASRelativeLayoutSpec.h; path = AsyncDisplayKit/Layout/ASRelativeLayoutSpec.h; sourceTree = "<group>"; };
 		7AB338681C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRelativeLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
+		8021EC1A1D2B00B100799119 /* UIImage+ASConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ASConvenience.h"; sourceTree = "<group>"; };
+		8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ASConvenience.m"; sourceTree = "<group>"; };
 		81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASRunLoopQueue.h; path = ../ASRunLoopQueue.h; sourceTree = "<group>"; };
 		81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASRunLoopQueue.mm; path = ../ASRunLoopQueue.mm; sourceTree = "<group>"; };
 		8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDefaultPlaybackButton.h; sourceTree = "<group>"; };
@@ -1124,6 +1130,8 @@
 				058D09DD195D050800B7D73C /* ASImageNode.h */,
 				058D09DE195D050800B7D73C /* ASImageNode.mm */,
 				68355B2E1CB5799E001D4E68 /* ASImageNode+AnimatedImage.mm */,
+				8021EC1A1D2B00B100799119 /* UIImage+ASConvenience.h */,
+				8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */,
 				0516FA3E1A1563D200B4EBED /* ASMultiplexImageNode.h */,
 				0516FA3F1A1563D200B4EBED /* ASMultiplexImageNode.mm */,
 				68FC85DC1CE29AB700EDD713 /* ASNavigationController.h */,
@@ -1594,6 +1602,7 @@
 				AC7A2C171BDE11DF0093FE1A /* ASTableViewInternal.h in Headers */,
 				058D0A4D195D05CB00B7D73C /* ASDisplayNodeExtras.h in Headers */,
 				92074A671CC8BADA00918F75 /* ASControlNode+tvOS.h in Headers */,
+				8021EC1C1D2B00B100799119 /* UIImage+ASConvenience.h in Headers */,
 				697C0DE31CF38F28001DE0D4 /* ASLayoutValidation.h in Headers */,
 				68355B3B1CB57A5A001D4E68 /* ASImageContainerProtocolCategories.h in Headers */,
 				68B0277A1C1A79CC0041016B /* ASDisplayNode+Beta.h in Headers */,
@@ -1753,6 +1762,7 @@
 				A37320101C571B740011FC94 /* ASTextNode+Beta.h in Headers */,
 				DBABFAFC1C6A8D2F0039EA4A /* _ASTransitionContext.h in Headers */,
 				9C70F2061CDA4F0C007D6C76 /* ASTraitCollection.h in Headers */,
+				8021EC1D1D2B00B100799119 /* UIImage+ASConvenience.h in Headers */,
 				254C6B801BF94DF4003EC431 /* ASEqualityHashHelpers.h in Headers */,
 				B350624F1B010EFD0018CF92 /* ASDisplayNode+DebugTiming.h in Headers */,
 				B35061FD1B010EFD0018CF92 /* ASDisplayNode+Subclasses.h in Headers */,
@@ -2093,6 +2103,7 @@
 				B30BF6531C5964B0004FCD53 /* ASLayoutManager.m in Sources */,
 				05A6D05B19D0EB64002DD95E /* ASDealloc2MainObject.m in Sources */,
 				ACF6ED211B17843500DA7C62 /* ASDimension.mm in Sources */,
+				8021EC1E1D2B00B100799119 /* UIImage+ASConvenience.m in Sources */,
 				058D0A28195D050800B7D73C /* ASDisplayNode+AsyncDisplay.mm in Sources */,
 				058D0A29195D050800B7D73C /* ASDisplayNode+DebugTiming.mm in Sources */,
 				764D83D61C8EA515009B4FB8 /* AsyncDisplayKit+Debug.m in Sources */,
@@ -2260,6 +2271,7 @@
 				B35061F61B010EFD0018CF92 /* ASCollectionView.mm in Sources */,
 				509E68641B3AEDB7009B9150 /* ASCollectionViewLayoutController.mm in Sources */,
 				B35061F91B010EFD0018CF92 /* ASControlNode.mm in Sources */,
+				8021EC1F1D2B00B100799119 /* UIImage+ASConvenience.m in Sources */,
 				B35062181B010EFD0018CF92 /* ASDataController.mm in Sources */,
 				B350621A1B010EFD0018CF92 /* ASDealloc2MainObject.m in Sources */,
 				767E7F8E1C90191D0066C000 /* AsyncDisplayKit+Debug.m in Sources */,
