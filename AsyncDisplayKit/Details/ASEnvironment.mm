@@ -26,23 +26,11 @@ ASEnvironmentHierarchyState _ASEnvironmentHierarchyStateMakeDefault()
   };
 }
 
-extern void ASEnvironmentTraitCollectionUpdateDisplayContext(id<ASEnvironment> rootEnvironment, id context)
-{
-  ASEnvironmentState envState = [rootEnvironment environmentState];
-  ASEnvironmentTraitCollection environmentTraitCollection = envState.environmentTraitCollection;
-  environmentTraitCollection.displayContext = context;
-  envState.environmentTraitCollection = environmentTraitCollection;
-  [rootEnvironment setEnvironmentState:envState];
-  
-  for (id<ASEnvironment> child in [rootEnvironment children]) {
-    ASEnvironmentStatePropagateDown(child, environmentTraitCollection);
-  }
-}
-
 ASEnvironmentTraitCollection _ASEnvironmentTraitCollectionMakeDefault()
 {
   return (ASEnvironmentTraitCollection) {
     // Default values can be defined in here
+    .containerWindowSize = CGSizeZero,
   };
 }
 
@@ -69,7 +57,7 @@ BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnviron
     lhs.displayScale == rhs.displayScale &&
     lhs.userInterfaceIdiom == rhs.userInterfaceIdiom &&
     lhs.forceTouchCapability == rhs.forceTouchCapability &&
-    lhs.displayContext == rhs.displayContext;
+    CGSizeEqualToSize(lhs.containerWindowSize, rhs.containerWindowSize);
 }
 
 ASEnvironmentState ASEnvironmentStateMakeDefault()
