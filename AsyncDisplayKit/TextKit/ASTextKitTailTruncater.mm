@@ -152,9 +152,14 @@
 
 - (void)truncate
 {
-  [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
-    NSUInteger originalStringLength = textStorage.length;
+  // Reset the text storage to start always with the full string
+  [_context resetTextStorage];
 
+  // Start truncation
+  [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
+    
+    NSUInteger originalStringLength = textStorage.length;
+    
     [layoutManager ensureLayoutForTextContainer:textContainer];
 
     NSRange visibleGlyphRange = [layoutManager glyphRangeForBoundingRect:{ .size = textContainer.size }

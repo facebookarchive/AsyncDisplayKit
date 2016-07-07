@@ -21,7 +21,11 @@
   NSLayoutManager *_layoutManager;
   NSTextStorage *_textStorage;
   NSTextContainer *_textContainer;
+  
+  NSAttributedString *_attributedString;
 }
+
+#pragma mark - Lifecycle
 
 - (instancetype)initWithAttributedString:(NSAttributedString *)attributedString
                            lineBreakMode:(NSLineBreakMode)lineBreakMode
@@ -37,16 +41,23 @@
     // Concurrently initialising TextKit components crashes (rdar://18448377) so we use a global lock.
     static std::mutex __static_mutex;
     std::lock_guard<std::mutex> l(__static_mutex);
+    
+    _attributedString = [attributedString copy];
+    
     // Create the TextKit component stack with our default configuration.
     if (textStorageCreationBlock) {
       _textStorage = textStorageCreationBlock(attributedString);
     } else {
-      _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
+      _textStorage = [[NSTextStorage alloc] init];
+      [self _resetTextStorage];
     }
+    
+    
     _layoutManager = layoutCreationBlock ? layoutCreationBlock() : [[ASLayoutManager alloc] init];
     _layoutManager.usesFontLeading = NO;
     _layoutManager.delegate = layoutManagerDelegate;
     [_textStorage addLayoutManager:_layoutManager];
+
     _textContainer = [[NSTextContainer alloc] initWithSize:constrainedSize];
     // We want the text laid out up to the very edges of the container.
     _textContainer.lineFragmentPadding = 0;
@@ -57,6 +68,21 @@
   }
   return self;
 }
+
+#pragma mark - Text Storage
+
+- (void)resetTextStorage
+{
+  std::lock_guard<std::mutex> l(_textKitMutex);
+  [self _resetTextStorage];
+}
+
+- (void)_resetTextStorage
+{
+  [_textStorage setAttributedString:_attributedString];
+}
+
+#pragma mark - Setter / Getter
 
 - (CGSize)constrainedSize
 {
@@ -69,6 +95,8 @@
   std::lock_guard<std::mutex> l(_textKitMutex);
   _textContainer.size = constrainedSize;
 }
+
+#pragma mark - Locking
 
 - (void)performBlockWithLockedTextKitComponents:(void (^)(NSLayoutManager *,
                                                           NSTextStorage *,
