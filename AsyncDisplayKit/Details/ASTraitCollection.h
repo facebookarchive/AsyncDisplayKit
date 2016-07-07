@@ -24,7 +24,7 @@
 + (ASTraitCollection *)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits;
 
 + (ASTraitCollection *)traitCollectionWithUITraitCollection:(UITraitCollection *)traitCollection
-                                     traitCollectionContext:(id)traitCollectionContext;
+                                        containerWindowSize:(CGSize)windowSize;
 
 
 + (ASTraitCollection *)traitCollectionWithDisplayScale:(CGFloat)displayScale
@@ -32,7 +32,7 @@
                                    horizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
                                      verticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
                                   forceTouchCapability:(UIForceTouchCapability)forceTouchCapability
-                                traitCollectionContext:(id)traitCollectionContext;
+                                   containerWindowSize:(CGSize)windowSize;
 
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection;
