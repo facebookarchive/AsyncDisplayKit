@@ -195,6 +195,7 @@ ASVisibilityDepthImplementation;
     return [asyncTraitCollection environmentTraitCollection];
   }
   
+  ASDisplayNodeAssertMainThread();
   ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(traitCollection);
   asyncTraitCollection.containerWindowSize = self.view.frame.size;
   return asyncTraitCollection;
