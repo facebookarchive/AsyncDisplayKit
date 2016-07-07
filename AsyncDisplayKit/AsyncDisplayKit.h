@@ -20,6 +20,7 @@
 #import <AsyncDisplayKit/ASEditableTextNode.h>
 
 #import <AsyncDisplayKit/ASBasicImageDownloader.h>
+#import <AsyncDisplayKit/ASPINRemoteImageDownloader.h>
 #import <AsyncDisplayKit/ASMultiplexImageNode.h>
 #import <AsyncDisplayKit/ASNetworkImageNode.h>
 #import <AsyncDisplayKit/ASPhotosFrameworkImageRequest.h>
@@ -28,6 +29,8 @@
 #import <AsyncDisplayKit/ASTableNode.h>
 #import <AsyncDisplayKit/ASCollectionView.h>
 #import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
+#import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
 #import <AsyncDisplayKit/ASCellNode.h>
 
 #import <AsyncDisplayKit/ASScrollNode.h>

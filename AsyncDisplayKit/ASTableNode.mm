@@ -16,6 +16,8 @@
 #import "ASInternalHelpers.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "ASTableViewInternal.h"
+#import "ASCellNode+Internal.h"
+#import "ASTableNode.h"
 
 @interface _ASTablePendingState : NSObject
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;

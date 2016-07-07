@@ -580,7 +580,6 @@
 		F7CE6C901D2CDB5800BE4C15 /* _ASTransitionContext.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = DB55C25F1C6408D6004EDCF5 /* _ASTransitionContext.h */; };
 		F7CE6C911D2CDB5800BE4C15 /* _ASTransitionContext.m in CopyFiles */ = {isa = PBXBuildFile; fileRef = DB55C2601C6408D6004EDCF5 /* _ASTransitionContext.m */; };
 		F7CE6C921D2CDB5800BE4C15 /* ASBatchFetching.m in CopyFiles */ = {isa = PBXBuildFile; fileRef = 044285061BAA63FE00D16268 /* ASBatchFetching.m */; };
-		F7CE6C931D2CDB5800BE4C15 /* ASDisplayNode+FrameworkPrivate.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */; };
 		F7CE6C941D2CDB5800BE4C15 /* ASDisplayNodeInternal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 058D0A0C195D050800B7D73C /* ASDisplayNodeInternal.h */; };
 		F7CE6C951D2CDB5800BE4C15 /* ASLayoutTransition.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E52405B41C8FEF16004DC8E7 /* ASLayoutTransition.h */; };
 		F7CE6C961D2CDB5800BE4C15 /* ASEnvironmentInternal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 69E100691CA89CB600D88C1B /* ASEnvironmentInternal.h */; };
@@ -632,6 +631,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				F7CE6C981D2CDB5800BE4C15 /* ASInternalHelpers.h in CopyFiles */,
 				F7CE6CB71D2CE2D000BE4C15 /* ASLayoutableExtensibility.h in CopyFiles */,
 				F7CE6C131D2CDB3E00BE4C15 /* ASPagerFlowLayout.h in CopyFiles */,
 				F7CE6C141D2CDB3E00BE4C15 /* ASMapNode.h in CopyFiles */,
@@ -761,12 +761,10 @@
 				F7CE6C901D2CDB5800BE4C15 /* _ASTransitionContext.h in CopyFiles */,
 				F7CE6C911D2CDB5800BE4C15 /* _ASTransitionContext.m in CopyFiles */,
 				F7CE6C921D2CDB5800BE4C15 /* ASBatchFetching.m in CopyFiles */,
-				F7CE6C931D2CDB5800BE4C15 /* ASDisplayNode+FrameworkPrivate.h in CopyFiles */,
 				F7CE6C941D2CDB5800BE4C15 /* ASDisplayNodeInternal.h in CopyFiles */,
 				F7CE6C951D2CDB5800BE4C15 /* ASLayoutTransition.h in CopyFiles */,
 				F7CE6C961D2CDB5800BE4C15 /* ASEnvironmentInternal.h in CopyFiles */,
 				F7CE6C971D2CDB5800BE4C15 /* ASImageNode+CGExtras.h in CopyFiles */,
-				F7CE6C981D2CDB5800BE4C15 /* ASInternalHelpers.h in CopyFiles */,
 				F7CE6C991D2CDB5800BE4C15 /* ASLayoutSpecUtilities.h in CopyFiles */,
 				F7CE6C9A1D2CDB5800BE4C15 /* ASMultidimensionalArrayUtils.h in CopyFiles */,
 				F7CE6C9B1D2CDB5800BE4C15 /* ASPendingStateController.h in CopyFiles */,

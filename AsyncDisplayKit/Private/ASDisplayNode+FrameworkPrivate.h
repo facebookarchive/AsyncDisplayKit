@@ -17,7 +17,6 @@
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
-#import "_ASDisplayLayer.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

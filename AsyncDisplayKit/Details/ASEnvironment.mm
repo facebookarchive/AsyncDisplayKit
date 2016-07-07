@@ -8,9 +8,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASEnvironment.h"
 #import "ASEnvironmentInternal.h"
-#import <AsyncDisplayKit/ASAvailability.h>
+#import "ASAvailability.h"
 
 ASEnvironmentLayoutOptionsState _ASEnvironmentLayoutOptionsStateMakeDefault()
 {

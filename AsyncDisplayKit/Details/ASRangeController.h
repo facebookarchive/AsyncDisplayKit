@@ -9,11 +9,11 @@
 //
 
 #import <Foundation/Foundation.h>
-
-#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASLayoutController.h>
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
+#import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
 
 #define ASRangeControllerLoggingEnabled 0
 
@@ -200,6 +200,25 @@ NS_ASSUME_NONNULL_BEGIN
  * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
  */
 - (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+@end
+
+@interface ASRangeController (ASRangeControllerUpdateRangeProtocol) <ASRangeControllerUpdateRangeProtocol>
+
+/**
+ * Update the range mode for a range controller to a explicitly set mode until the node that contains the range
+ * controller becomes visible again
+ *
+ * Logic for the automatic range mode:
+ * 1. If there are no visible node paths available nothing is to be done and no range update will happen
+ * 2. The initial range update if the range controller is visible always will be ASLayoutRangeModeCount
+ *    (ASLayoutRangeModeMinimum) as it's the initial fetch
+ * 3. The range mode set explicitly via updateCurrentRangeWithMode: will last at least one range update. After that it
+ the range controller will use the explicit set range mode until it becomes visible and a new range update was
+ triggered or a new range mode via updateCurrentRangeWithMode: is set
+ * 4. If range mode is not explicitly set the range mode is variying based if the range controller is visible or not
+ */
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
 
 @end
 

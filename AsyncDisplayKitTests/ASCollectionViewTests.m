@@ -12,6 +12,7 @@
 #import "ASCollectionView.h"
 #import "ASCollectionDataController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
+#import "ASCellNode.h"
 
 @interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate>
 

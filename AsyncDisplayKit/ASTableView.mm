@@ -25,6 +25,7 @@
 #import "ASRangeController.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "_ASDisplayLayer.h"
+#import "ASTableNode.h"
 
 #import <CoreFoundation/CoreFoundation.h>
 

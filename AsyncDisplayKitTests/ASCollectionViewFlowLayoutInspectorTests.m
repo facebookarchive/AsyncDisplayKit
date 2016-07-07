@@ -13,6 +13,7 @@
 
 #import "ASCollectionView.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
+#import "ASCellNode.h"
 
 /**
  * Test Data Source
