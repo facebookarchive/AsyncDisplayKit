@@ -1180,8 +1180,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     static dispatch_once_t onceToken;
     static BOOL (^shouldNotAnimateBlock)(ASDisplayNode *);
     dispatch_once(&onceToken, ^{
-      shouldNotAnimateBlock = ^(ASDisplayNode * _Nonnull node) {
-        return node.shouldAnimateSizeChanges == NO;
+      shouldNotAnimateBlock = ^BOOL(ASDisplayNode * _Nonnull node) {
+        return (node.shouldAnimateSizeChanges == NO);
       };
     });
     if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
