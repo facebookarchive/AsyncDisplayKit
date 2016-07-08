@@ -233,7 +233,11 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
   return frameIndex;
 }
 
-- (void)dealloc
+@end
+
+@implementation ASImageNode(AnimatedImageInvalidation)
+
+- (void)invalidateAnimatedImage
 {
   ASDN::MutexLocker l(_displayLinkLock);
 #if ASAnimatedImageDebug

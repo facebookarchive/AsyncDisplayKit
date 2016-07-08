@@ -110,6 +110,12 @@ struct ASImageNodeDrawParameters {
   return nil;
 }
 
+- (void)dealloc
+{
+  // Invalidate all components around animated images
+  [self invalidateAnimatedImage];
+}
+
 #pragma mark - Layout and Sizing
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
