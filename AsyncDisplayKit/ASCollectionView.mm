@@ -440,6 +440,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return [_dataController nodeAtIndexPath:indexPath];
 }
 
+- (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController supplementaryNodeOfKind:elementKind atIndexPath:indexPath];
+}
+
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
   return [_dataController indexPathForNode:cellNode];
@@ -592,6 +597,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSString *identifier = [self __reuseIdentifierForKind:kind];
   UICollectionReusableView *view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:identifier forIndexPath:indexPath];
   ASCellNode *node = [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
+  ASDisplayNodeAssert(node != nil, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self);
   [_rangeController configureContentView:view forCellNode:node];
   return view;
 }
