@@ -160,7 +160,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @end
 
 @interface UIResponderNodeTestView : _ASDisplayView
-@property(nonatomic) BOOL isFirstResponder;
+@property(nonatomic) BOOL testIsFirstResponder;
 @end
 
 @implementation UIDisplayNodeTestView
@@ -192,7 +192,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @implementation UIResponderNodeTestView
 
 - (BOOL)becomeFirstResponder {
-  self.isFirstResponder = YES;
+  self.testIsFirstResponder = YES;
   return YES;
 }
 
@@ -202,8 +202,8 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
 - (BOOL)resignFirstResponder {
   [super resignFirstResponder];
-  if (self.isFirstResponder) {
-    self.isFirstResponder = NO;
+  if (self.testIsFirstResponder) {
+    self.testIsFirstResponder = NO;
     return YES;
   }
   return NO;
