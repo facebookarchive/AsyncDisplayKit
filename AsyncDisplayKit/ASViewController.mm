@@ -89,6 +89,20 @@
 {
   [super viewWillLayoutSubviews];
   [_node measureWithSizeRange:[self nodeConstrainedSize]];
+  
+  if (!AS_AT_LEAST_IOS9) {
+    [self _legacyHandleViewDidLayoutSubviews];
+  }
+}
+
+- (void)_legacyHandleViewDidLayoutSubviews
+{
+  // In modal presentation the view does not automatic resize in iOS7 and iOS8. As workaround we adjust the frame of the
+  // view manually
+  if (self.presentingViewController != nil) {
+    CGSize maxConstrainedSize = [self nodeConstrainedSize].max;
+    _node.frame = (CGRect){.origin = CGPointZero, .size = maxConstrainedSize};
+  }
 }
 
 - (void)viewDidLayoutSubviews
@@ -177,7 +191,26 @@ ASVisibilityDepthImplementation;
 
 - (ASSizeRange)nodeConstrainedSize
 {
-  CGSize viewSize = self.view.bounds.size;
+  if (AS_AT_LEAST_IOS9) {
+    CGSize viewSize = self.view.bounds.size;
+    return ASSizeRangeMake(viewSize, viewSize);
+  } else {
+    return [self _legacyConstrainedSize];
+  }
+}
+
+- (ASSizeRange)_legacyConstrainedSize
+{
+  // In modal presentation the view does not have the right bounds in iOS7 and iOS8. As workaround using the superviews
+  // view bounds
+  UIView *view = self.view;
+  CGSize viewSize = view.bounds.size;
+  if (self.presentingViewController != nil) {
+    UIView *superview = view.superview;
+    if (superview != nil) {
+      viewSize = superview.bounds.size;
+    }
+  }
   return ASSizeRangeMake(viewSize, viewSize);
 }
 
