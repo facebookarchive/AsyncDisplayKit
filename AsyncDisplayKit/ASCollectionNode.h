@@ -25,10 +25,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
 
+@property (strong, nonatomic, readonly) ASCollectionView *view;
+
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
-
-@property (nonatomic, readonly) ASCollectionView *view;
 
 /**
  * Tuning parameters for a range type in full mode.
