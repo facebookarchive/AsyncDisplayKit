@@ -19,7 +19,7 @@
 
 // Returns a constrained size to let the cells layout itself as far as possible based on the scrollable direction
 // of the collection view
-static inline ASSizeRange NodeConstrainedSizeWithCollectionView(ASCollectionView *collectionView) {
+static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView *collectionView) {
   CGSize maxSize = collectionView.bounds.size;
   if (ASScrollDirectionContainsHorizontalDirection(collectionView.scrollableDirections)) {
     maxSize.width = FLT_MAX;
@@ -65,7 +65,7 @@ static inline ASSizeRange NodeConstrainedSizeWithCollectionView(ASCollectionView
     return [collectionView.asyncDataSource collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
   }
   
-  return NodeConstrainedSizeWithCollectionView(collectionView);
+  return NodeConstrainedSizeForScrollDirection(collectionView);
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -156,7 +156,7 @@ static inline ASSizeRange NodeConstrainedSizeWithCollectionView(ASCollectionView
     return ASSizeRangeMake(itemSize, itemSize);
   }
   
-  return NodeConstrainedSizeWithCollectionView(collectionView);
+  return NodeConstrainedSizeForScrollDirection(collectionView);
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
