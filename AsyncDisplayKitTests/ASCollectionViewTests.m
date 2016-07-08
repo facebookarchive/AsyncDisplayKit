@@ -13,6 +13,22 @@
 #import "ASCollectionDataController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
 
+@interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
+
+@property (nonatomic, assign) NSUInteger setSelectedCounter;
+
+@end
+
+@implementation ASTextCellNodeWithSetSelectedCounter
+
+- (void)setSelected:(BOOL)selected
+{
+  [super setSelected:selected];
+  _setSelectedCounter++;
+}
+
+@end
+
 @interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate>
 
 @property (nonatomic, assign) NSInteger numberOfSections;
@@ -32,7 +48,7 @@
 }
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath {
-  ASTextCellNode *textCellNode = [ASTextCellNode new];
+  ASTextCellNodeWithSetSelectedCounter *textCellNode = [ASTextCellNodeWithSetSelectedCounter new];
   textCellNode.text = indexPath.description;
 
   return textCellNode;
@@ -41,7 +57,7 @@
 
 - (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath {
   return ^{
-    ASTextCellNode *textCellNode = [ASTextCellNode new];
+    ASTextCellNodeWithSetSelectedCounter *textCellNode = [ASTextCellNodeWithSetSelectedCounter new];
     textCellNode.text = indexPath.description;
     return textCellNode;
   };
@@ -134,6 +150,55 @@
   [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
 }
 
+- (void)testSelection
+{
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+  [window setRootViewController:testController];
+  [window makeKeyAndVisible];
+  
+  [testController.collectionView reloadDataImmediately];
+  [testController.collectionView layoutIfNeeded];
+  
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  ASCellNode *node = [testController.collectionView nodeForItemAtIndexPath:indexPath];
+  
+  // selecting node should select cell
+  node.selected = YES;
+  XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath], @"Selecting node should update cell selection.");
+  
+  // deselecting node should deselect cell
+  node.selected = NO;
+  XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] isEqualToArray:@[]], @"Deselecting node should update cell selection.");
+
+  // selecting cell via collectionView should select node
+  [testController.collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  XCTAssertTrue(node.isSelected == YES, @"Selecting cell should update node selection.");
+  
+  // deselecting cell via collectionView should deselect node
+  [testController.collectionView deselectItemAtIndexPath:indexPath animated:NO];
+  XCTAssertTrue(node.isSelected == NO, @"Deselecting cell should update node selection.");
+  
+  // select the cell again, scroll down and back up, and check that the state persisted
+  [testController.collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  XCTAssertTrue(node.isSelected == YES, @"Selecting cell should update node selection.");
+  
+  // reload cell (-prepareForReuse is called) & check that selected state is preserved
+  [testController.collectionView setContentOffset:CGPointMake(0,testController.collectionView.bounds.size.height)];
+  [testController.collectionView layoutIfNeeded];
+  [testController.collectionView setContentOffset:CGPointMake(0,0)];
+  [testController.collectionView layoutIfNeeded];
+  XCTAssertTrue(node.isSelected == YES, @"Reloaded cell should preserve state.");
+  
+  // deselecting cell should deselect node
+  UICollectionViewCell *cell = [testController.collectionView cellForItemAtIndexPath:indexPath];
+  cell.selected = NO;
+  XCTAssertTrue(node.isSelected == NO, @"Deselecting cell should update node selection.");
+  
+  // check setSelected not called extra times
+  XCTAssertTrue([(ASTextCellNodeWithSetSelectedCounter *)node setSelectedCounter] == 6, @"setSelected: should not be called on node multiple times.");
+}
+
 - (void)testTuningParametersWithExplicitRangeMode
 {
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
@@ -173,6 +238,5 @@
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(renderParams, [collectionView tuningParametersForRangeType:ASLayoutRangeTypeDisplay]));
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(preloadParams, [collectionView tuningParametersForRangeType:ASLayoutRangeTypeFetchData]));
 }
-
 
 @end

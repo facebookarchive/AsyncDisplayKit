@@ -53,20 +53,27 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)setNode:(ASCellNode *)node
 {
   _node = node;
-  node.selected = self.selected;
-  node.highlighted = self.highlighted;
+  [node __setSelectedFromUIKit:self.selected];
+  [node __setHighlightedFromUIKit:self.highlighted];
 }
 
 - (void)setSelected:(BOOL)selected
 {
   [super setSelected:selected];
-  _node.selected = selected;
+  [_node __setSelectedFromUIKit:selected];
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
   [super setHighlighted:highlighted];
-  _node.highlighted = highlighted;
+  [_node __setHighlightedFromUIKit:highlighted];
+}
+
+- (void)prepareForReuse
+{
+  // Need to clear node pointer before UIKit calls setSelected:NO / setHighlighted:NO on its cells
+  self.node = nil;
+  [super prepareForReuse];
 }
 
 - (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
@@ -79,7 +86,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
@@ -908,8 +915,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return ^{
       __typeof__(self) strongSelf = weakSelf;
       [node enterHierarchyState:ASHierarchyStateRangeManaged];
-      if (node.layoutDelegate == nil) {
-        node.layoutDelegate = strongSelf;
+      if (node.interactionDelegate == nil) {
+        node.interactionDelegate = strongSelf;
       }
       return node;
     };
@@ -923,8 +930,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
     ASCellNode *node = block();
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
-    if (node.layoutDelegate == nil) {
-      node.layoutDelegate = strongSelf;
+    if (node.interactionDelegate == nil) {
+      node.interactionDelegate = strongSelf;
     }
     return node;
   };
@@ -1171,6 +1178,25 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 }
 
 #pragma mark - ASCellNodeDelegate
+- (void)nodeSelectedStateDidChange:(ASCellNode *)node
+{
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath) {
+    if (node.isSelected) {
+      [self selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+    } else {
+      [self deselectItemAtIndexPath:indexPath animated:NO];
+    }
+  }
+}
+
+- (void)nodeHighlightedStateDidChange:(ASCellNode *)node
+{
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath) {
+    [self cellForItemAtIndexPath:indexPath].highlighted = node.isHighlighted;
+  }
+}
 
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
