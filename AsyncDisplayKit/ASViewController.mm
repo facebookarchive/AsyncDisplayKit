@@ -240,8 +240,9 @@ ASVisibilityDepthImplementation;
     ASTraitCollection *traitCollection = self.overrideDisplayTraitsWithWindowSize(windowSize);
     return [traitCollection environmentTraitCollection];
   }
-  self.node.environmentTraitCollection.containerSize = windowSize;
-  return self.node.environmentTraitCollection;
+  ASEnvironmentTraitCollection traitCollection = self.node.environmentTraitCollection;
+  traitCollection.containerSize = windowSize;
+  return traitCollection;
 }
 
 - (void)progagateNewEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
@@ -270,9 +271,18 @@ ASVisibilityDepthImplementation;
   [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
-// Note: We don't override willTransitionToTraitCollection:withTransitionCoordinator: because viewWillTransitionToSize:withTransitionCoordinator: will also called
-// called in all these cases. However, there are cases where viewWillTransitionToSize:withTransitionCoordinator: but willTransitionToTraitCollection:withTransitionCoordinator:
-// is not.
+- (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+  [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
+  
+  // here we take the new UITraitCollection and use it to create a new ASEnvironmentTraitCollection on self.node
+  // We will propagate when the corresponding viewWillTransitionToSize:withTransitionCoordinator: is called and we have the
+  // new windowSize. There are cases when viewWillTransitionToSize: is called when willTransitionToTraitCollection: is not.
+  // Since we do the propagation on viewWillTransitionToSize: our subnodes should always get the proper trait collection.
+  ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(newCollection);
+  self.node.environmentTraitCollection = asyncTraitCollection;
+}
+
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
   [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
