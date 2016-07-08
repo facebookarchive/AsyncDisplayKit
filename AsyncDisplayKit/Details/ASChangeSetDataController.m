@@ -27,7 +27,8 @@
 
 - (void)beginUpdates
 {
-  ASDisplayNodeAssertMainThread();
+  // NOTE: This assertion is failing in some apps and will be enabled soon.
+//  ASDisplayNodeAssertMainThread();
   if (_changeSetBatchUpdateCounter <= 0) {
     _changeSet = [_ASHierarchyChangeSet new];
     _changeSetBatchUpdateCounter = 0;
@@ -37,11 +38,13 @@
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
-  ASDisplayNodeAssertMainThread();
+  // NOTE: This assertion is failing in some apps and will be enabled soon.
+//  ASDisplayNodeAssertMainThread();
   _changeSetBatchUpdateCounter--;
   
   // Prevent calling endUpdatesAnimated:completion: in an unbalanced way
-  NSAssert(_changeSetBatchUpdateCounter >= 0, @"endUpdatesAnimated:completion: called without having a balanced beginUpdates call");
+  // NOTE: This assertion is failing in some apps and will be enabled soon.
+//  NSAssert(_changeSetBatchUpdateCounter >= 0, @"endUpdatesAnimated:completion: called without having a balanced beginUpdates call");
   
   if (_changeSetBatchUpdateCounter == 0) {
     [_changeSet markCompleted];
