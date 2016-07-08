@@ -203,7 +203,14 @@ ASVisibilityDepthImplementation;
 {
   // In modal presentation the view does not have the right bounds in iOS7 and iOS8. As workaround using the superviews
   // view bounds
-  CGSize viewSize = (self.presentingViewController != nil) ? self.view.superview.bounds.size : self.view.bounds.size;
+  UIView *view = self.view;
+  CGSize viewSize = view.bounds.size;
+  if (self.presentingViewController != nil) {
+    UIView *superview = view.superview;
+    if (superview != nil) {
+      viewSize = superview.bounds.size;
+    }
+  }
   return ASSizeRangeMake(viewSize, viewSize);
 }
 
