@@ -135,6 +135,11 @@ inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState
  */
 @property (nonatomic, assign) BOOL shouldBypassEnsureDisplay;
 
+/**
+ * @abstract Checks whether a node should be scheduled for display, considering its current and new interface states.
+ */
+- (BOOL)shouldScheduleDisplayWithNewInterfaceState:(ASInterfaceState)newInterfaceState;
+
 @end
 
 @interface UIView (ASDisplayNodeInternal)
