@@ -58,17 +58,6 @@
   return self;
 }
 
-- (void)dealloc
-{
-  if (_traitCollectionContext != nil) {
-    // The setter will iterate through the VC's subnodes and replace the traitCollectionContext in their ASEnvironmentTraitCollection with nil.
-    // Since the VC holds the only strong reference to this context and we are in the process of destroying
-    // the VC, all the references in the subnodes will be unsafe unless we nil them out. More than likely all the subnodes will be dealloc'ed
-    // as part of the VC being dealloc'ed, but this is just to make extra sure.
-    self.traitCollectionContext = nil;
-  }
-}
-
 - (void)loadView
 {
   ASDisplayNodeAssertTrue(!_node.layerBacked);
@@ -199,27 +188,16 @@ ASVisibilityDepthImplementation;
 
 #pragma mark - ASEnvironmentTraitCollection
 
-- (void)setTraitCollectionContext:(id)traitCollectionContext
-{
-  if (_traitCollectionContext != traitCollectionContext) {
-    // nil out the displayContext in the subnodes so they aren't hanging around with a dealloc'ed pointer don't set
-    // the new context yet as this will cause ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection to fail
-    ASEnvironmentTraitCollectionUpdateDisplayContext(self.node, nil);
-    
-    _traitCollectionContext = traitCollectionContext;
-  }
-}
-
 - (ASEnvironmentTraitCollection)environmentTraitCollectionForUITraitCollection:(UITraitCollection *)traitCollection
 {
   if (self.overrideDisplayTraitsWithTraitCollection) {
     ASTraitCollection *asyncTraitCollection = self.overrideDisplayTraitsWithTraitCollection(traitCollection);
-    self.traitCollectionContext = asyncTraitCollection.traitCollectionContext;
     return [asyncTraitCollection environmentTraitCollection];
   }
   
+  ASDisplayNodeAssertMainThread();
   ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(traitCollection);
-  asyncTraitCollection.displayContext = self.traitCollectionContext;
+  asyncTraitCollection.containerSize = self.view.frame.size;
   return asyncTraitCollection;
 }
 
@@ -227,9 +205,9 @@ ASVisibilityDepthImplementation;
 {
   if (self.overrideDisplayTraitsWithWindowSize) {
     ASTraitCollection *traitCollection = self.overrideDisplayTraitsWithWindowSize(windowSize);
-    self.traitCollectionContext = traitCollection.traitCollectionContext;
     return [traitCollection environmentTraitCollection];
   }
+  self.node.environmentTraitCollection.containerSize = windowSize;
   return self.node.environmentTraitCollection;
 }
 
@@ -255,17 +233,13 @@ ASVisibilityDepthImplementation;
   [super traitCollectionDidChange:previousTraitCollection];
   
   ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
+  environmentTraitCollection.containerSize = self.view.bounds.size;
   [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
-- (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
-{
-  [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
-  
-  ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:newCollection];
-  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
-}
-
+// Note: We don't override willTransitionToTraitCollection:withTransitionCoordinator: because viewWillTransitionToSize:withTransitionCoordinator: will also called
+// called in all these cases. However, there are cases where viewWillTransitionToSize:withTransitionCoordinator: but willTransitionToTraitCollection:withTransitionCoordinator:
+// is not.
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
   [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
