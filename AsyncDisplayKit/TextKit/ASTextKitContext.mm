@@ -23,6 +23,7 @@
   NSTextContainer *_textContainer;
   
   NSAttributedString *_attributedString;
+  ASTextKitContextTextStorageCreationBlock _textStorageCreationBlock;
 }
 
 #pragma mark - Lifecycle
@@ -34,7 +35,7 @@
                          constrainedSize:(CGSize)constrainedSize
               layoutManagerCreationBlock:(NSLayoutManager * (^)(void))layoutCreationBlock
                    layoutManagerDelegate:(id<NSLayoutManagerDelegate>)layoutManagerDelegate
-                textStorageCreationBlock:(NSTextStorage * (^)(NSAttributedString *attributedString))textStorageCreationBlock
+                textStorageCreationBlock:(ASTextKitContextTextStorageCreationBlock)textStorageCreationBlock
 
 {
   if (self = [super init]) {
@@ -43,6 +44,7 @@
     std::lock_guard<std::mutex> l(__static_mutex);
     
     _attributedString = [attributedString copy];
+    _textStorageCreationBlock = [textStorageCreationBlock copy];
     
     // Create the TextKit component stack with our default configuration.
     if (textStorageCreationBlock) {
@@ -79,7 +81,11 @@
 
 - (void)_resetTextStorage
 {
-  [_textStorage setAttributedString:_attributedString];
+  if (_textStorageCreationBlock) {
+    [_textStorage setAttributedString:_textStorageCreationBlock(_attributedString)];
+  } else {
+    [_textStorage setAttributedString:_attributedString];
+  }
 }
 
 #pragma mark - Setter / Getter
