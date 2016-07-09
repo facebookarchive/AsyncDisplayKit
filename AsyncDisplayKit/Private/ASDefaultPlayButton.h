@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASButtonNode.h>
 
 @interface ASDefaultPlayButton : ASButtonNode
 

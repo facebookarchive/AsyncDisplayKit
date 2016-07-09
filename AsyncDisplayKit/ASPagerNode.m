@@ -14,6 +14,8 @@
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASPagerFlowLayout.h"
+#import "ASCollectionView.h"
+#import "ASCollectionViewProtocols.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>

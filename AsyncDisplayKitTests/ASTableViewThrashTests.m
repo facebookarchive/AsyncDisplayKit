@@ -31,7 +31,7 @@ static NSString *ASThrashArrayDescription(NSArray *array) {
   NSMutableString *str = [NSMutableString stringWithString:@"(\n"];
   NSInteger i = 0;
   for (id obj in array) {
-    [str appendFormat:@"\t[%ld]: \"%@\",\n", i, obj];
+    [str appendFormat:@"\t[%ld]: \"%@\",\n", (long)i, obj];
     i += 1;
   }
   [str appendString:@")"];

@@ -10,7 +10,13 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/ASTableView.h>
+#import <UIKit/UITableView.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
+
+@protocol ASTableDataSource;
+@protocol ASTableDelegate;
+@class ASTableView;
 
 /**
  * ASTableNode is a node based class that wraps an ASTableView. It can be used
@@ -26,5 +32,9 @@
 // These properties can be set without triggering the view to be created, so it's fine to set them in -init.
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
 @property (weak, nonatomic) id <ASTableDataSource> dataSource;
+
+@end
+
+@interface ASTableNode (ASRangeControllerUpdateRangeProtocol) <ASRangeControllerUpdateRangeProtocol>
 
 @end

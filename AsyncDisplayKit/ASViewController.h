@@ -62,4 +62,11 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
 
 @end
 
+@interface ASViewController (ASRangeControllerUpdateRangeProtocol)
+
+/// Automatically adjust range mode based on view events if the containing node confirms to the ASRangeControllerUpdateRangeProtocol
+@property (nonatomic, assign) BOOL automaticallyAdjustRangeModeBasedOnViewEvents;
+
+@end
+
 NS_ASSUME_NONNULL_END
