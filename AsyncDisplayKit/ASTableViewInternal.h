@@ -10,9 +10,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTableNode.h"
+#import <AsyncDisplayKit/ASTableView.h>
 
 @class ASDataController;
+@class ASTableNode;
+@class ASRangeController;
 
 @interface ASTableView (Internal)
 

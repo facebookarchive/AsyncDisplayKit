@@ -11,6 +11,7 @@
 //
 
 #import "ASDefaultPlayButton.h"
+#import "_ASDisplayLayer.h"
 
 @implementation ASDefaultPlayButton
 

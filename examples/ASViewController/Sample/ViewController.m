@@ -16,7 +16,7 @@
 //
 
 #import "ViewController.h"
-#import "ASTableNode.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 #import "DetailViewController.h"
 

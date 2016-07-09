@@ -12,21 +12,19 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface ViewController () {
-  ASTextNode *_textNode;
-}
-
+@interface ViewController ()
+@property (nonatomic, strong) ASTextNode *textNode;
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad
 {
-  _textNode = [[ASTextNode alloc] init];
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:@"Testing, testing."];
-  [_textNode measure:self.view.bounds.size];
-  _textNode.frame = (CGRect){ .origin = CGPointZero, .size = _textNode.calculatedSize };
-  [self.view addSubnode:_textNode];
+  self.textNode = [[ASTextNode alloc] init];
+  self.textNode.attributedString = [[NSAttributedString alloc] initWithString:@"Testing, testing." attributes:@{ NSForegroundColorAttributeName: [UIColor redColor] }];
+  [self.textNode measure:self.view.bounds.size];
+  self.textNode.frame = (CGRect){ .origin = CGPointZero, .size = self.textNode.calculatedSize };
+  [self.view addSubnode:self.textNode];
 }
 
 @end

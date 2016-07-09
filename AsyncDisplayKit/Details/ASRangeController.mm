@@ -17,6 +17,7 @@
 #import "ASMultiDimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASCellNode.h"
 
 @interface ASRangeController ()
 {

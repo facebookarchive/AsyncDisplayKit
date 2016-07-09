@@ -11,6 +11,7 @@
 //
 
 #import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/ASDataController.h>
 
 @class ASPagerNode;
 @class ASPagerFlowLayout;

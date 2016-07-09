@@ -14,6 +14,7 @@
 #import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASChangeSetDataController.h"
+#import "ASCellNode.h"
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
