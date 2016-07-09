@@ -12,8 +12,6 @@
 
 #import <objc/runtime.h>
 
-#import <UIKit/UIKit.h>
-
 #import "ASBasicImageDownloaderInternal.h"
 #import "ASThread.h"
 

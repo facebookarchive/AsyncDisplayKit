@@ -23,8 +23,6 @@
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "ASRangeController.h"
 #import "ASCollectionNode.h"
-#import "ASCollectionView.h"
-#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "_ASDisplayLayer.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 

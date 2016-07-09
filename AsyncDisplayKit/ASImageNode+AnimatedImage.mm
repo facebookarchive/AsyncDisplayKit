@@ -13,11 +13,9 @@
 #import "ASImageNode.h"
 
 #import "ASAssert.h"
-#import "ASImageProtocols.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASEqualityHelpers.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASImageNode+AnimatedImagePrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASWeakProxy.h"

@@ -14,8 +14,6 @@
 #import "ASDisplayNode+Beta.h"
 
 #import <objc/runtime.h>
-#import <deque>
-#import <queue>
 
 #import "_ASAsyncTransaction.h"
 #import "_ASAsyncTransactionContainer+Private.h"
@@ -23,7 +21,6 @@
 #import "_ASDisplayView.h"
 #import "_ASScopeTimer.h"
 #import "_ASCoreAnimationExtras.h"
-#import "ASLayoutTransition.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASTraitCollection.h"
 #import "ASEqualityHelpers.h"
