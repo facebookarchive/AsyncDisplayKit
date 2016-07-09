@@ -221,8 +221,8 @@ struct ASImageNodeDrawParameters {
   CGRect cropRect               = CGRectZero;
   asimagenode_modification_block_t imageModificationBlock;
 
-  ASDN::MutexLocker l(_imageLock);
   {
+    ASDN::MutexLocker l(_imageLock);
     ASImageNodeDrawParameters drawParameter = _drawParameter;
     
     drawParameterBounds       = drawParameter.bounds;
