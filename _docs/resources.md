@@ -8,18 +8,18 @@ nextPage: installation.html
 
 ###Slack
 
-Join 60+ AsyncDisplayKit developers for real-time debugging, the latest updates, and asynchronous banter. Email AsyncDisplayKit(at)gmail.com for an invite.
+Join 200+ AsyncDisplayKit developers and the ASDK team on Slack for real-time debugging, the latest updates, and asynchronous banter.  <a href="http://asdk-slack-auto-invite.herokuapp.com">Sign up</a> or email AsyncDisplayKit(at)gmail.com for an invite.
 
-###Sample Projects
-Scroll through the examples/README.md to see screenshots / gifs of the numerous <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">sample projects</a>.
+###Example Projects
+Browse through our many <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">example projects</a>.  If you are new to AsyncDisplayKit, we reccomend that you start with the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a> example app. 
 
 ###Videos
 <ul>
-  <li><a href = "https://www.youtube.com/watch?v=8ngXakpE2x8">AsyncDisplayKit State of the Code [WWDC 2016]</a>
-  <li><a href = "https://www.youtube.com/watch?v=RY_X7l1g79Q">AsyncDisplayKit 2.0: Intelligent User Interfaces [NSSpain 2015]</a>
-  <li><a href = "https://www.youtube.com/watch?v=ZPL4Nse76oY">Effortless Responsiveness with AsyncDisplayKit [MCE 2015]</a>
-  <li><a href = "https://www.youtube.com/watch?v=h4QDbgB7RLo">Asynchronous UI [NSLondon 2014]</a>
-</ul>
+  <li><a href = "https://www.youtube.com/watch?v=8ngXakpE2x8">AsyncDisplayKit State of the Code</a> [WWDC 2016]
+  <li><a href = "https://www.youtube.com/watch?v=RY_X7l1g79Q">AsyncDisplayKit 2.0: Intelligent User Interfaces</a> [NSSpain 2015]
+  <li><a href = "https://www.youtube.com/watch?v=ZPL4Nse76oY">Effortless Responsiveness with AsyncDisplayKit</a> [MCE 2015]
+  <li><a href = "https://www.youtube.com/watch?v=h4QDbgB7RLo">Asynchronous UI</a> [NSLondon 2014]
+</ul> 
 
 ###Layout Resources
 AsyncDisplayKit's powerful layout system is based on the CSS FlexBox model. These sites are useful for learning the basics of this system. 
