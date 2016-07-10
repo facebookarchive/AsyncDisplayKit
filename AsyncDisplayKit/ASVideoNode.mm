@@ -9,6 +9,7 @@
 //
 #if TARGET_OS_IOS
 #import <AVFoundation/AVFoundation.h>
+#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASVideoNode.h"
 #import "ASDefaultPlayButton.h"
