@@ -10,15 +10,15 @@
 
 #import "ASImageNode.h"
 
-#import "_ASCoreAnimationExtras.h"
-#import "_ASDisplayLayer.h"
-#import "ASAssert.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeInternal.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNode+Beta.h"
-#import "ASTextNode.h"
-#import "ASImageNode+AnimatedImagePrivate.h"
+#import <AsyncDisplayKit/_ASCoreAnimationExtras.h>
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
 
 #import "ASImageNode+CGExtras.h"
 #import "AsyncDisplayKit+Debug.h"
@@ -45,7 +45,6 @@ struct ASImageNodeDrawParameters {
   UIImage *_image;
 
   void (^_displayCompletionBlock)(BOOL canceled);
-  ASDN::RecursiveMutex _imageLock;
   
   // Drawing
   ASImageNodeDrawParameters _drawParameter;
@@ -110,17 +109,11 @@ struct ASImageNodeDrawParameters {
   return nil;
 }
 
-- (void)dealloc
-{
-  // Invalidate all components around animated images
-  [self invalidateAnimatedImage];
-}
-
 #pragma mark - Layout and Sizing
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   // if a preferredFrameSize is set, call the superclass to return that instead of using the image size.
   if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO)
     return [super calculateSizeThatFits:constrainedSize];
@@ -134,11 +127,11 @@ struct ASImageNodeDrawParameters {
 
 - (void)setImage:(UIImage *)image
 {
-  _imageLock.lock();
+  _propertyLock.lock();
   if (!ASObjectIsEqual(_image, image)) {
     _image = image;
 
-    _imageLock.unlock();
+    _propertyLock.unlock();
     
     [self invalidateCalculatedLayout];
     if (image) {
@@ -155,13 +148,13 @@ struct ASImageNodeDrawParameters {
       self.contents = nil;
     }
   } else {
-    _imageLock.unlock(); // We avoid using MutexUnlocker as it needlessly re-locks at the end of the scope.
+    _propertyLock.unlock(); // We avoid using MutexUnlocker as it needlessly re-locks at the end of the scope.
   }
 }
 
 - (UIImage *)image
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   return _image;
 }
 
@@ -177,7 +170,7 @@ struct ASImageNodeDrawParameters {
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   
   _drawParameter = {
     .bounds = self.bounds,
@@ -221,8 +214,8 @@ struct ASImageNodeDrawParameters {
   CGRect cropRect               = CGRectZero;
   asimagenode_modification_block_t imageModificationBlock;
 
+  ASDN::MutexLocker l(_propertyLock);
   {
-    ASDN::MutexLocker l(_imageLock);
     ASImageNodeDrawParameters drawParameter = _drawParameter;
     
     drawParameterBounds       = drawParameter.bounds;
@@ -357,19 +350,19 @@ struct ASImageNodeDrawParameters {
 {
   [super displayDidFinish];
 
-  _imageLock.lock();
+  _propertyLock.lock();
     void (^displayCompletionBlock)(BOOL canceled) = _displayCompletionBlock;
     UIImage *image = _image;
-  _imageLock.unlock();
+  _propertyLock.unlock();
   
   // If we've got a block to perform after displaying, do it.
   if (image && displayCompletionBlock) {
 
     displayCompletionBlock(NO);
 
-    _imageLock.lock();
+    _propertyLock.lock();
       _displayCompletionBlock = nil;
-    _imageLock.unlock();
+    _propertyLock.unlock();
   }
 }
 
@@ -382,7 +375,7 @@ struct ASImageNodeDrawParameters {
   }
 
   // Stash the block and call-site queue. We'll invoke it in -displayDidFinish.
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   if (_displayCompletionBlock != displayCompletionBlock) {
     _displayCompletionBlock = [displayCompletionBlock copy];
   }
@@ -394,7 +387,7 @@ struct ASImageNodeDrawParameters {
 
 - (BOOL)isCropEnabled
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   return _cropEnabled;
 }
 
@@ -405,7 +398,7 @@ struct ASImageNodeDrawParameters {
 
 - (void)setCropEnabled:(BOOL)cropEnabled recropImmediately:(BOOL)recropImmediately inBounds:(CGRect)cropBounds
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   if (_cropEnabled == cropEnabled)
     return;
 
@@ -426,13 +419,13 @@ struct ASImageNodeDrawParameters {
 
 - (CGRect)cropRect
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   return _cropRect;
 }
 
 - (void)setCropRect:(CGRect)cropRect
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   if (CGRectEqualToRect(_cropRect, cropRect))
     return;
 
@@ -453,25 +446,25 @@ struct ASImageNodeDrawParameters {
 
 - (BOOL)forceUpscaling
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   return _forceUpscaling;
 }
 
 - (void)setForceUpscaling:(BOOL)forceUpscaling
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   _forceUpscaling = forceUpscaling;
 }
 
 - (asimagenode_modification_block_t)imageModificationBlock
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   return _imageModificationBlock;
 }
 
 - (void)setImageModificationBlock:(asimagenode_modification_block_t)imageModificationBlock
 {
-  ASDN::MutexLocker l(_imageLock);
+  ASDN::MutexLocker l(_propertyLock);
   _imageModificationBlock = imageModificationBlock;
 }
 
