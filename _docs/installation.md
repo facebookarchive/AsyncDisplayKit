@@ -2,7 +2,7 @@
 title: Installation
 layout: docs
 permalink: /docs/installation.html
-prevPage: philosophy.html
+prevPage: resources.html
 nextPage: intelligent-preloading.html
 ---
 
