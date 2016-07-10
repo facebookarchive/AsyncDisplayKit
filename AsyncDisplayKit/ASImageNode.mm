@@ -109,6 +109,12 @@ struct ASImageNodeDrawParameters {
   return nil;
 }
 
+- (void)dealloc
+{
+  // Invalidate all components around animated images
+  [self invalidateAnimatedImage];
+}
+
 #pragma mark - Layout and Sizing
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
@@ -127,11 +133,9 @@ struct ASImageNodeDrawParameters {
 
 - (void)setImage:(UIImage *)image
 {
-  _propertyLock.lock();
+  ASDN::MutexLocker l(_propertyLock);
   if (!ASObjectIsEqual(_image, image)) {
     _image = image;
-
-    _propertyLock.unlock();
     
     [self invalidateCalculatedLayout];
     if (image) {
@@ -147,8 +151,6 @@ struct ASImageNodeDrawParameters {
     } else {
       self.contents = nil;
     }
-  } else {
-    _propertyLock.unlock(); // We avoid using MutexUnlocker as it needlessly re-locks at the end of the scope.
   }
 }
 
@@ -214,8 +216,8 @@ struct ASImageNodeDrawParameters {
   CGRect cropRect               = CGRectZero;
   asimagenode_modification_block_t imageModificationBlock;
 
-  ASDN::MutexLocker l(_propertyLock);
   {
+    ASDN::MutexLocker l(_propertyLock);
     ASImageNodeDrawParameters drawParameter = _drawParameter;
     
     drawParameterBounds       = drawParameter.bounds;
