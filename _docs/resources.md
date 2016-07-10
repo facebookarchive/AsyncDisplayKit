@@ -2,7 +2,7 @@
 title: Resources
 layout: docs
 permalink: /docs/resources.html
-prevPage: philosophy.html
+prevPage: getting-started.html
 nextPage: installation.html
 ---
 
