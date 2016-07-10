@@ -10,6 +10,7 @@
 
 #if TARGET_OS_IOS
 #import "ASMapNode.h"
+#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASInsetLayoutSpec.h"
@@ -18,7 +19,6 @@
 
 @interface ASMapNode()
 {
-  ASDN::RecursiveMutex _propertyLock;
   MKMapSnapshotter *_snapshotter;
   BOOL _snapshotAfterLayout;
   NSArray *_annotations;
