@@ -172,7 +172,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     dispatch_async(dispatch_get_main_queue(), ^{
       self.currentImageQuality = hasURL ? 0.0 : 1.0;
     });
-    // -[ASNetworkImageNode displayWillStart] (which is called on a different thread / main, at an unpredictable time due to ASMainRunloopQueue).
     self.image = defaultImage;
   }
 }
