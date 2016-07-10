@@ -297,7 +297,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     }
   }
 
-  // This method has to be called without _propertyLock held
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
 
@@ -328,17 +327,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 #pragma mark - Private methods -- only call with lock.
 
-/**
- @note: This should be called without _propertyLock held. We will lock
- super to read our interface state and it's best to avoid acquiring both locks.
- */
 - (void)_updateProgressImageBlockOnDownloaderIfNeeded
 {
-  BOOL shouldRenderProgressImages = self.shouldRenderProgressImages;
-  
-  // Read our interface state before locking so that we don't lock super while holding our lock.
-  ASInterfaceState interfaceState = self.interfaceState;
   ASDN::MutexLocker l(_propertyLock);
+  
+  BOOL shouldRenderProgressImages = _shouldRenderProgressImages;
+  ASInterfaceState interfaceState = self.interfaceState;
 
   if (!_downloaderFlags.downloaderImplementsSetProgress || _downloadIdentifier == nil) {
     return;
@@ -360,7 +354,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       }
       strongSelf.image = progressImage;
       dispatch_async(dispatch_get_main_queue(), ^{
-        strongSelf->_currentImageQuality = progress;
+        // See comment in -displayDidFinish for why this must be dispatched to main
+        strongSelf.currentImageQuality = progress;
       });
     };
   }
@@ -384,6 +379,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   self.animatedImage = nil;
   self.image = _defaultImage;
   _imageLoaded = NO;
+  // See comment in -displayDidFinish for why this must be dispatched to main
   dispatch_async(dispatch_get_main_queue(), ^{
     self.currentImageQuality = 0.0;
   });
@@ -406,32 +402,31 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)_downloadImageWithCompletion:(void (^)(id <ASImageContainerProtocol> imageContainer, NSError*, id downloadIdentifier))finished
 {
   ASPerformBlockOnBackgroundThread(^{
-    {
+    
     ASDN::MutexLocker l(_propertyLock);
-      if (_downloaderFlags.downloaderSupportsNewProtocol) {
-        _downloadIdentifier = [_downloader downloadImageWithURL:_URL
-                                                  callbackQueue:dispatch_get_main_queue()
-                                               downloadProgress:NULL
-                                                     completion:^(id <ASImageContainerProtocol> _Nullable imageContainer, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
-                                                       if (finished != NULL) {
-                                                         finished(imageContainer, error, downloadIdentifier);
-                                                       }
-                                                     }];
-      } else {
-      #pragma clang diagnostic push
-      #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        _downloadIdentifier = [_downloader downloadImageWithURL:_URL
-                                                  callbackQueue:dispatch_get_main_queue()
-                                          downloadProgressBlock:NULL
-                                                     completion:^(CGImageRef responseImage, NSError *error) {
-                                                       if (finished != NULL) {
-                                                         finished([UIImage imageWithCGImage:responseImage], error, nil);
-                                                       }
-                                                     }];
-      #pragma clang diagnostic pop
-      }
+    if (_downloaderFlags.downloaderSupportsNewProtocol) {
+      _downloadIdentifier = [_downloader downloadImageWithURL:_URL
+                                                callbackQueue:dispatch_get_main_queue()
+                                             downloadProgress:NULL
+                                                   completion:^(id <ASImageContainerProtocol> _Nullable imageContainer, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
+                                                     if (finished != NULL) {
+                                                       finished(imageContainer, error, downloadIdentifier);
+                                                     }
+                                                   }];
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+      _downloadIdentifier = [_downloader downloadImageWithURL:_URL
+                                                callbackQueue:dispatch_get_main_queue()
+                                        downloadProgressBlock:NULL
+                                                   completion:^(CGImageRef responseImage, NSError *error) {
+                                                     if (finished != NULL) {
+                                                       finished([UIImage imageWithCGImage:responseImage], error, nil);
+                                                     }
+                                                   }];
+#pragma clang diagnostic pop
     }
-    // This method has to be called without _propertyLock held
+  
     [self _updateProgressImageBlockOnDownloaderIfNeeded];
       
   });
