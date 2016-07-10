@@ -273,12 +273,16 @@
   [super visibleStateDidChange:isVisible];
   
   CGRect cellFrame = CGRectZero;
-  if (_scrollView) {
-    // It is not safe to message nil with a structure return value, so ensure our _scrollView has not died.
+  // Ensure our _scrollView is still valid before converting.  It's also possible that we have already been removed from the _scrollView,
+  // in which case it is not valid to perform a convertRect (this actually crashes on iOS 7 and 8).
+  UIScrollView *scrollView = (_scrollView && self.isNodeLoaded && [self.view isDescendantOfView:_scrollView]) ? _scrollView : nil;
+  if (scrollView) {
     cellFrame = [self.view convertRect:self.bounds toView:_scrollView];
   }
+  // If we did not convert, we'll pass along CGRectZero and a nil scrollView.  The EventInvisible call is thus equivalent to
+  // visibleStateDidChange:NO, but is more convenient for the developer than implementing multiple methods.
   [self cellNodeVisibilityEvent:isVisible ? ASCellNodeVisibilityEventVisible : ASCellNodeVisibilityEventInvisible
-                   inScrollView:_scrollView
+                   inScrollView:scrollView
                   withCellFrame:cellFrame];
 }
 
