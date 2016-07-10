@@ -81,14 +81,16 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
 /**
- * A Boolean value that indicates whether the node is selected.
+ * A Boolean value that is synchronized with the underlying collection or tableView cell property.
+ * Setting this value is equivalent to calling selectItem / deselectItem on the collection or table.
  */
-@property (nonatomic, assign) BOOL selected;
+@property (nonatomic, assign, getter=isSelected) BOOL selected;
 
 /**
- * A Boolean value that indicates whether the node is highlighted.
+ * A Boolean value that is synchronized with the underlying collection or tableView cell property.
+ * Setting this value is equivalent to calling highlightItem / unHighlightItem on the collection or table.
  */
-@property (nonatomic, assign) BOOL highlighted;
+@property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
 
 /*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
@@ -122,6 +124,16 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 
 @end
 
+@interface ASCellNode (Deprecated)
+
+/**
+ * Previous versions of ASDK did not include "is" in the name of the getter for these properties.
+ * These older accessor methods don't match UIKit naming, and will be removed in a future version.
+ */
+- (BOOL)selected ASDISPLAYNODE_DEPRECATED;
+- (BOOL)highlighted ASDISPLAYNODE_DEPRECATED;
+
+@end
 
 /**
  * Simple label-style cell node.  Read its source for an example of custom <ASCellNode>s.

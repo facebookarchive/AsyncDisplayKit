@@ -11,13 +11,10 @@
 #import <numeric>
 #import <vector>
 
-#import "ASBaseDefines.h"
 #import "ASInternalHelpers.h"
 
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackBaselinePositionedLayout.h"
-#import "ASStackLayoutSpecUtilities.h"
-#import "ASStackUnpositionedLayout.h"
 #import "ASThread.h"
 
 @implementation ASStackLayoutSpec

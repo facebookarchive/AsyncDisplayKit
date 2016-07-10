@@ -10,14 +10,9 @@
 
 #import "ASDataController.h"
 
-#import <Foundation/NSProcessInfo.h>
-
 #import "ASAssert.h"
 #import "ASCellNode.h"
-#import "ASDisplayNode.h"
 #import "ASEnvironmentInternal.h"
-#import "ASFlowLayoutController.h"
-#import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASMainSerialQueue.h"
 #import "ASMultidimensionalArrayUtils.h"
@@ -31,8 +26,6 @@
 const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
 
 NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
-
-static void *kASSizingQueueContext = &kASSizingQueueContext;
 
 @interface ASDataController () {
   NSMutableArray *_externalCompletedNodes;    // Main thread only.  External data access can immediately query this if available.

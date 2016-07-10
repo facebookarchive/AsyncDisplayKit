@@ -16,7 +16,6 @@
 
 #include <map>
 #include <vector>
-#include <cassert>
 
 @interface ASFlowLayoutController()
 {

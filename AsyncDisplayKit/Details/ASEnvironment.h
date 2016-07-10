@@ -10,9 +10,9 @@
 
 #import <Foundation/Foundation.h>
 
-#import "ASDimension.h"
-#import "ASStackLayoutDefines.h"
-#import "ASRelativeSize.h"
+#import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASStackLayoutDefines.h>
+#import <AsyncDisplayKit/ASRelativeSize.h>
 
 @protocol ASEnvironment;
 @class UITraitCollection;
@@ -69,25 +69,9 @@ typedef struct ASEnvironmentTraitCollection {
   UIUserInterfaceIdiom userInterfaceIdiom;
   UIUserInterfaceSizeClass verticalSizeClass;
   UIForceTouchCapability forceTouchCapability;
-  
-  // WARNING:
-  // This pointer is in a C struct and therefore not managed by ARC. It is
-  // an unsafe unretained pointer, so when you dereference it you better be
-  // sure that it is valid.
-  //
-  // Use displayContext when you wish to pass view context specific data along with the
-  // display traits to subnodes. This should be a piece of data owned by an
-  // ASViewController, which will ensure that the data is still valid when laying out
-  // its subviews. When the VC is dealloc'ed, the displayContext it created will also
-  // be dealloced but any subnodes that are hanging around (why would they be?) will now
-  // have a displayContext that points to a bad pointer.
-  //
-  // As an added precaution ASDisplayTraitsClearDisplayContext is called from ASVC's desctructor
-  // which will propagate a nil displayContext to its subnodes.
-  id __unsafe_unretained displayContext;
-} ASEnvironmentTraitCollection;
 
-extern void ASEnvironmentTraitCollectionUpdateDisplayContext(id<ASEnvironment> rootEnvironment, id _Nullable context);
+  CGSize containerSize;
+} ASEnvironmentTraitCollection;
 
 extern ASEnvironmentTraitCollection ASEnvironmentTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection);
 extern BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnvironmentTraitCollection lhs, ASEnvironmentTraitCollection rhs);
@@ -165,14 +149,11 @@ ASDISPLAYNODE_EXTERN_C_END
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
     /* Must dispatch to main for self.view && [self.view.dataController completedNodes]*/ \
     ASPerformBlockOnMainThread(^{\
-      BOOL needsLayout = (oldTraits.displayContext == currentTraits.displayContext) || currentTraits.displayContext != nil;\
       NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
       for (NSArray *sectionArray in completedNodes) {\
         for (ASCellNode *cellNode in sectionArray) {\
           ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
-          if (needsLayout) {\
-            [cellNode setNeedsLayout];\
-          }\
+          [cellNode setNeedsLayout];\
         }\
       }\
     });\

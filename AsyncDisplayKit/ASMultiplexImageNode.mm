@@ -13,11 +13,7 @@
 #import "ASMultiplexImageNode.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 
-#import <Photos/Photos.h>
-#import <libkern/OSAtomic.h>
-
 #import "ASAvailability.h"
-#import "ASBaseDefines.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASLog.h"

@@ -13,7 +13,6 @@
 #import "ASPendingStateController.h"
 #import "ASThread.h"
 #import "ASWeakSet.h"
-#import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
 
 @interface ASPendingStateController()

@@ -11,10 +11,8 @@
 #import "ASLayoutSpec.h"
 
 #import "ASAssert.h"
-#import "ASBaseDefines.h"
 #import "ASEnvironmentInternal.h"
 
-#import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASThread.h"
 #import "ASTraitCollection.h"
@@ -52,6 +50,11 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 - (ASLayoutableType)layoutableType
 {
   return ASLayoutableTypeLayoutSpec;
+}
+
+- (BOOL)canLayoutAsynchronous
+{
+  return YES;
 }
 
 #pragma mark - Layout

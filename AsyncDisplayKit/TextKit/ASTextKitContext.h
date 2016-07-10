@@ -10,6 +10,8 @@
 
 #import <UIKit/UIKit.h>
 
+typedef NSTextStorage *(^ASTextKitContextTextStorageCreationBlock)(NSAttributedString *attributedString);
+
 /**
  A threadsafe container for the TextKit components that ASTextKit uses to lay out and truncate its text.
 
@@ -30,9 +32,18 @@
                          constrainedSize:(CGSize)constrainedSize
               layoutManagerCreationBlock:(NSLayoutManager * (^)(void))layoutCreationBlock
                    layoutManagerDelegate:(id<NSLayoutManagerDelegate>)layoutManagerDelegate
-                textStorageCreationBlock:(NSTextStorage * (^)(NSAttributedString *attributedString))textStorageCreationBlock;
+                textStorageCreationBlock:(ASTextKitContextTextStorageCreationBlock)textStorageCreationBlock;
 
+/**
+ Set the constrained size for the text context.
+ */
 @property (nonatomic, assign, readwrite) CGSize constrainedSize;
+
+/**
+ Resets the text storage to the original value in case it was truncated before. This method is called within
+ a locked context.
+ */
+- (void)resetTextStorage;
 
 /**
  All operations on TextKit values MUST occur within this locked context.  Simultaneous access (even non-mutative) to

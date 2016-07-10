@@ -13,7 +13,6 @@
 #import "ASAssert.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASCellNode.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASDataController+Subclasses.h"
 #import "ASIndexedNodeContext.h"
 
@@ -257,8 +256,7 @@
       return nodesOfKindInSection[itemIndex];
     }
   }
-  ASDisplayNodeAssert(NO, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self.collectionDataSource);
-  return [[ASCellNode alloc] init];
+  return nil;
 }
 
 #pragma mark - Private Helpers

@@ -10,7 +10,6 @@
 
 #import "ASCellNode+Internal.h"
 
-#import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
 #import "ASDisplayNodeInternal.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
@@ -20,7 +19,6 @@
 
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
-#import <AsyncDisplayKit/ASLayout.h>
 
 #pragma mark -
 #pragma mark ASCellNode
@@ -31,12 +29,13 @@
   ASDisplayNodeDidLoadBlock _viewControllerDidLoadBlock;
   ASDisplayNode *_viewControllerNode;
   UIViewController *_viewController;
+  BOOL _suspendInteractionDelegate;
 }
 
 @end
 
 @implementation ASCellNode
-@synthesize layoutDelegate = _layoutDelegate;
+@synthesize interactionDelegate = _interactionDelegate;
 
 - (instancetype)init
 {
@@ -170,12 +169,60 @@
 
 - (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize
 {
-  if (_layoutDelegate != nil) {
+  if (_interactionDelegate != nil) {
     ASPerformBlockOnMainThread(^{
       BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
-      [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
+      [_interactionDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }
+}
+
+- (void)setSelected:(BOOL)selected
+{
+  if (_selected != selected) {
+    _selected = selected;
+    if (!_suspendInteractionDelegate) {
+      [_interactionDelegate nodeSelectedStateDidChange:self];
+    }
+  }
+}
+
+- (void)setHighlighted:(BOOL)highlighted
+{
+  if (_highlighted != highlighted) {
+    _highlighted = highlighted;
+    if (!_suspendInteractionDelegate) {
+      [_interactionDelegate nodeHighlightedStateDidChange:self];
+    }
+  }
+}
+
+- (void)__setSelectedFromUIKit:(BOOL)selected;
+{
+  if (selected != _selected) {
+    _suspendInteractionDelegate = YES;
+    self.selected = selected;
+    _suspendInteractionDelegate = NO;
+  }
+}
+
+- (void)__setHighlightedFromUIKit:(BOOL)highlighted;
+{
+  if (highlighted != _highlighted) {
+    _suspendInteractionDelegate = YES;
+    self.highlighted = highlighted;
+    _suspendInteractionDelegate = NO;
+  }
+}
+
+- (BOOL)selected
+{
+  return self.isSelected;
+}
+
+- (BOOL)highlighted
+{
+  return self.isSelected;
 }
 
 #pragma clang diagnostic push

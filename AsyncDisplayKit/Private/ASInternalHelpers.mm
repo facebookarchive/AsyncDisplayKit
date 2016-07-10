@@ -10,11 +10,9 @@
 
 #import "ASInternalHelpers.h"
 
-#import <functional>
 #import <objc/runtime.h>
 
 #import "ASThread.h"
-#import "ASLayout.h"
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector)
 {
@@ -87,16 +85,6 @@ CGFloat ASCeilPixelValue(CGFloat f)
 CGFloat ASRoundPixelValue(CGFloat f)
 {
   return roundf(f * ASScreenScale()) / ASScreenScale();
-}
-
-BOOL ASRunningOnOS7()
-{
-  static BOOL isOS7 = NO;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    isOS7 = ([[UIDevice currentDevice].systemVersion floatValue] < 8.0);
-  });
-  return isOS7;
 }
 
 @implementation NSIndexPath (ASInverseComparison)

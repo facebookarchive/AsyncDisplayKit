@@ -11,7 +11,6 @@
 #import "ASStaticLayoutSpec.h"
 
 #import "ASLayoutSpecUtilities.h"
-#import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
 @implementation ASStaticLayoutSpec
