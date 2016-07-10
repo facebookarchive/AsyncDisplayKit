@@ -10,7 +10,6 @@
 
 #import "ASTextKitRenderer+TextChecking.h"
 
-#import "ASTextKitAttributes.h"
 #import "ASTextKitEntityAttribute.h"
 #import "ASTextKitRenderer+Positioning.h"
 #import "ASTextKitTailTruncater.h"

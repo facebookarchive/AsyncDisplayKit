@@ -10,11 +10,9 @@
 
 #import "ASInternalHelpers.h"
 
-#import <functional>
 #import <objc/runtime.h>
 
 #import "ASThread.h"
-#import "ASLayout.h"
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector)
 {

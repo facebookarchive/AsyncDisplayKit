@@ -13,7 +13,6 @@
 #import "ASAssert.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASCellNode.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASDataController+Subclasses.h"
 #import "ASIndexedNodeContext.h"
 
@@ -155,11 +154,32 @@
   }
 }
 
+- (void)prepareForDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  for (NSString *kind in [self supplementaryKinds]) {
+    NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
+    [self _populateSupplementaryNodesOfKind:kind atIndexPaths:indexPaths mutableContexts:contexts];
+    _pendingContexts[kind] = contexts;
+  }
+}
+
 - (void)willDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
   for (NSString *kind in [self supplementaryKinds]) {
     NSArray<NSIndexPath *> *deletedIndexPaths = ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths([self editingNodesOfKind:kind], indexPaths);
+
     [self deleteNodesOfKind:kind atIndexPaths:deletedIndexPaths completion:nil];
+
+    // If any of the contexts remain after the deletion, re-insert them, e.g.
+    // UICollectionElementKindSectionHeader remains even if item 0 is deleted.
+    NSArray<ASIndexedNodeContext *> *contexts = [_pendingContexts[kind] filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^(ASIndexedNodeContext *context, NSDictionary *_) {
+      return [deletedIndexPaths containsObject:context.indexPath];
+    }]];
+
+    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
+      [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
+    }];
+    [_pendingContexts removeObjectForKey:kind];
   }
 }
 

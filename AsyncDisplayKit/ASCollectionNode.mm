@@ -16,9 +16,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASEnvironmentInternal.h"
 #import "ASInternalHelpers.h"
-#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "ASCellNode+Internal.h"
-#include <vector>
 
 #pragma mark - _ASCollectionPendingState
 
