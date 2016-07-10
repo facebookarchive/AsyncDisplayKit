@@ -11,7 +11,7 @@ nextPage: installation.html
 Join 200+ AsyncDisplayKit developers and the ASDK team on Slack for real-time debugging, the latest updates, and asynchronous banter.  <a href="http://asdk-slack-auto-invite.herokuapp.com">Sign up</a> or email AsyncDisplayKit(at)gmail.com for an invite.
 
 ###Examples
-Browse through our many <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">example projects</a>.  If you are new to AsyncDisplayKit, we reccomend that you start with the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a> example app. 
+Browse through our many <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">example projects</a>.  If you are new to AsyncDisplayKit, we recommend that you start with the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a> example app. 
 
 ###Videos
 <ul>
