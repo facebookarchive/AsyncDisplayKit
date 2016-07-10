@@ -125,7 +125,7 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   for (NSInteger i = 10; i < 500; i += 50) {
     CGSize constrainedSize = CGSizeMake(i, i);
     CGSize calculatedSize = [_textNode measure:constrainedSize];
-    CGSize recalculatedSize = [_textNode measure:calculatedSize];
+    CGSize recalculatedSize = [_textNode measure:constrainedSize];
     
     XCTAssertTrue(CGSizeEqualToSizeWithIn(calculatedSize, recalculatedSize, 4.0), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
   }
@@ -136,7 +136,7 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   for (CGFloat i = 10; i < 500; i *= 1.3) {
     CGSize constrainedSize = CGSizeMake(i, i);
     CGSize calculatedSize = [_textNode measure:constrainedSize];
-    CGSize recalculatedSize = [_textNode measure:calculatedSize];
+    CGSize recalculatedSize = [_textNode measure:constrainedSize];
 
     XCTAssertTrue(CGSizeEqualToSizeWithIn(calculatedSize, recalculatedSize, 11.0), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
   }

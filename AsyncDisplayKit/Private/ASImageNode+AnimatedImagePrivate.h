@@ -31,3 +31,10 @@ extern NSString *const ASAnimatedImageDefaultRunLoopMode;
 @property (atomic, assign) CFTimeInterval lastDisplayLinkFire;
 
 @end
+
+
+@interface ASImageNode (AnimatedImageInvalidation)
+
+- (void)invalidateAnimatedImage;
+
+@end

@@ -18,9 +18,36 @@
 #import "ASLayout.h"
 
 #import <vector>
+#import <queue>
 
 #import "NSArray+Diffing.h"
 #import "ASEqualityHelpers.h"
+
+/**
+ * Search the whole layout stack if at least one layout has a layoutable object that can not be layed out asynchronous.
+ * This can be the case for example if a node was already loaded
+ */
+static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
+  // Queue used to keep track of sublayouts while traversing this layout in a BFS fashion.
+  std::queue<ASLayout *> queue;
+  queue.push(layout);
+  
+  while (!queue.empty()) {
+    layout = queue.front();
+    queue.pop();
+    
+    if (layout.layoutableObject.canLayoutAsynchronous == NO) {
+      return NO;
+    }
+    
+    // Add all sublayouts to process in next step
+    for (int i = 0; i < layout.sublayouts.count; i++) {
+      queue.push(layout.sublayouts[0]);
+    }
+  }
+  
+  return YES;
+}
 
 @implementation ASLayoutTransition {
   ASDN::RecursiveMutex _propertyLock;
@@ -42,6 +69,18 @@
     _previousLayout = previousLayout;
   }
   return self;
+}
+
+- (BOOL)isSynchronous
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return ASLayoutCanTransitionAsynchronous(_pendingLayout);
+}
+
+- (void)startTransition
+{
+  [self applySubnodeInsertions];
+  [self applySubnodeRemovals];
 }
 
 - (void)applySubnodeInsertions

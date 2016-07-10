@@ -13,11 +13,77 @@
 		0589691B1ABCE0E80059CE2A /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 058969181ABCE0E80059CE2A /* Default-568h@2x.png */; };
 		0589691C1ABCE0E80059CE2A /* Default-667h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 058969191ABCE0E80059CE2A /* Default-667h@2x.png */; };
 		0589691D1ABCE0E80059CE2A /* Default-736h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0589691A1ABCE0E80059CE2A /* Default-736h@3x.png */; };
-		058969281ABCE1750059CE2A /* libAsyncDisplayKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 058969271ABCE1750059CE2A /* libAsyncDisplayKit.a */; };
 		0589692A1ABCE17C0059CE2A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058969291ABCE17C0059CE2A /* AssetsLibrary.framework */; };
 		0589692C1ABCE1820059CE2A /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0589692B1ABCE1820059CE2A /* Photos.framework */; };
 		92DD2FEC1BF4D8BB0074C9DD /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92DD2FEB1BF4D8BB0074C9DD /* MapKit.framework */; };
+		F729B8BB1D2E176700C9EDBC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F729B8BA1D2E176700C9EDBC /* main.m */; };
+		F729B8C61D2E176700C9EDBC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F729B8C51D2E176700C9EDBC /* Assets.xcassets */; };
+		F729B8C91D2E176700C9EDBC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F729B8C71D2E176700C9EDBC /* LaunchScreen.storyboard */; };
+		F729B8D11D2E17A300C9EDBC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 058968F71ABCE06E0059CE2A /* AppDelegate.m */; };
+		F729B8D21D2E17A300C9EDBC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 058968FA1ABCE06E0059CE2A /* ViewController.m */; };
+		F729B8D31D2E17C800C9EDBC /* AsyncDisplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CE6CB31D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */; };
+		F729B8D41D2E17C800C9EDBC /* AsyncDisplayKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F7CE6CB31D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F7CE6CB61D2CE00800BE4C15 /* libAsyncDisplayKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CE6CAD1D2CDFFB00BE4C15 /* libAsyncDisplayKit.a */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F729B8D51D2E17C800C9EDBC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = B35061D91B010EDF0018CF92;
+			remoteInfo = "AsyncDisplayKit-iOS";
+		};
+		F7CE6CAC1D2CDFFB00BE4C15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 058D09AC195D04C000B7D73C;
+			remoteInfo = AsyncDisplayKit;
+		};
+		F7CE6CAE1D2CDFFB00BE4C15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 058D09BC195D04C000B7D73C;
+			remoteInfo = AsyncDisplayKitTests;
+		};
+		F7CE6CB01D2CDFFB00BE4C15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 057D02BF1AC0A66700C7AC3C;
+			remoteInfo = AsyncDisplayKitTestHost;
+		};
+		F7CE6CB21D2CDFFB00BE4C15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B35061DA1B010EDF0018CF92;
+			remoteInfo = "AsyncDisplayKit-iOS";
+		};
+		F7CE6CB41D2CE00300BE4C15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 058D09AB195D04C000B7D73C;
+			remoteInfo = AsyncDisplayKit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F729B8D71D2E17C800C9EDBC /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F729B8D41D2E17C800C9EDBC /* AsyncDisplayKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		058968EF1ABCE06E0059CE2A /* Life Without CocoaPods.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Life Without CocoaPods.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -30,10 +96,15 @@
 		058969181ABCE0E80059CE2A /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		058969191ABCE0E80059CE2A /* Default-667h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-667h@2x.png"; sourceTree = "<group>"; };
 		0589691A1ABCE0E80059CE2A /* Default-736h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-736h@3x.png"; sourceTree = "<group>"; };
-		058969271ABCE1750059CE2A /* libAsyncDisplayKit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libAsyncDisplayKit.a; path = "../../build/Debug-iphoneos/libAsyncDisplayKit.a"; sourceTree = "<group>"; };
 		058969291ABCE17C0059CE2A /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		0589692B1ABCE1820059CE2A /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		92DD2FEB1BF4D8BB0074C9DD /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		F729B8B71D2E176700C9EDBC /* Life With Frameworks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Life With Frameworks.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F729B8BA1D2E176700C9EDBC /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		F729B8C51D2E176700C9EDBC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F729B8C81D2E176700C9EDBC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		F729B8CA1D2E176700C9EDBC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AsyncDisplayKit.xcodeproj; path = ../../AsyncDisplayKit.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,10 +112,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F7CE6CB61D2CE00800BE4C15 /* libAsyncDisplayKit.a in Frameworks */,
 				92DD2FEC1BF4D8BB0074C9DD /* MapKit.framework in Frameworks */,
 				0589692C1ABCE1820059CE2A /* Photos.framework in Frameworks */,
 				0589692A1ABCE17C0059CE2A /* AssetsLibrary.framework in Frameworks */,
-				058969281ABCE1750059CE2A /* libAsyncDisplayKit.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F729B8B41D2E176700C9EDBC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F729B8D31D2E17C800C9EDBC /* AsyncDisplayKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,8 +136,9 @@
 				92DD2FEB1BF4D8BB0074C9DD /* MapKit.framework */,
 				0589692B1ABCE1820059CE2A /* Photos.framework */,
 				058969291ABCE17C0059CE2A /* AssetsLibrary.framework */,
-				058969271ABCE1750059CE2A /* libAsyncDisplayKit.a */,
+				F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */,
 				058968F11ABCE06E0059CE2A /* Life Without CocoaPods */,
+				F729B8B81D2E176700C9EDBC /* Life With Frameworks */,
 				058968F01ABCE06E0059CE2A /* Products */,
 			);
 			indentWidth = 2;
@@ -70,6 +150,7 @@
 			isa = PBXGroup;
 			children = (
 				058968EF1ABCE06E0059CE2A /* Life Without CocoaPods.app */,
+				F729B8B71D2E176700C9EDBC /* Life With Frameworks.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -98,6 +179,36 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		F729B8B81D2E176700C9EDBC /* Life With Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F729B8C51D2E176700C9EDBC /* Assets.xcassets */,
+				F729B8C71D2E176700C9EDBC /* LaunchScreen.storyboard */,
+				F729B8CA1D2E176700C9EDBC /* Info.plist */,
+				F729B8B91D2E176700C9EDBC /* Supporting Files */,
+			);
+			path = "Life With Frameworks";
+			sourceTree = "<group>";
+		};
+		F729B8B91D2E176700C9EDBC /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				F729B8BA1D2E176700C9EDBC /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		F7CE6CA61D2CDFFB00BE4C15 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F7CE6CAD1D2CDFFB00BE4C15 /* libAsyncDisplayKit.a */,
+				F7CE6CAF1D2CDFFB00BE4C15 /* AsyncDisplayKitTests.xctest */,
+				F7CE6CB11D2CDFFB00BE4C15 /* AsyncDisplayKitTestHost.app */,
+				F7CE6CB31D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -112,10 +223,30 @@
 			buildRules = (
 			);
 			dependencies = (
+				F7CE6CB51D2CE00300BE4C15 /* PBXTargetDependency */,
 			);
 			name = "Life Without CocoaPods";
 			productName = "Life Without CocoaPods";
 			productReference = 058968EF1ABCE06E0059CE2A /* Life Without CocoaPods.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F729B8B61D2E176700C9EDBC /* Life With Frameworks */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F729B8D01D2E176700C9EDBC /* Build configuration list for PBXNativeTarget "Life With Frameworks" */;
+			buildPhases = (
+				F729B8B31D2E176700C9EDBC /* Sources */,
+				F729B8B41D2E176700C9EDBC /* Frameworks */,
+				F729B8B51D2E176700C9EDBC /* Resources */,
+				F729B8D71D2E17C800C9EDBC /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F729B8D61D2E17C800C9EDBC /* PBXTargetDependency */,
+			);
+			name = "Life With Frameworks";
+			productName = "Life With Frameworks";
+			productReference = F729B8B71D2E176700C9EDBC /* Life With Frameworks.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -124,11 +255,14 @@
 		058968E71ABCE06E0059CE2A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0620;
+				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
 					058968EE1ABCE06E0059CE2A = {
 						CreatedOnToolsVersion = 6.2;
+					};
+					F729B8B61D2E176700C9EDBC = {
+						CreatedOnToolsVersion = 7.3.1;
 					};
 				};
 			};
@@ -143,12 +277,50 @@
 			mainGroup = 058968E61ABCE06E0059CE2A;
 			productRefGroup = 058968F01ABCE06E0059CE2A /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = F7CE6CA61D2CDFFB00BE4C15 /* Products */;
+					ProjectRef = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				058968EE1ABCE06E0059CE2A /* Life Without CocoaPods */,
+				F729B8B61D2E176700C9EDBC /* Life With Frameworks */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		F7CE6CAD1D2CDFFB00BE4C15 /* libAsyncDisplayKit.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libAsyncDisplayKit.a;
+			remoteRef = F7CE6CAC1D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F7CE6CAF1D2CDFFB00BE4C15 /* AsyncDisplayKitTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = AsyncDisplayKitTests.xctest;
+			remoteRef = F7CE6CAE1D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F7CE6CB11D2CDFFB00BE4C15 /* AsyncDisplayKitTestHost.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = AsyncDisplayKitTestHost.app;
+			remoteRef = F7CE6CB01D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F7CE6CB31D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = AsyncDisplayKit.framework;
+			remoteRef = F7CE6CB21D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		058968ED1ABCE06E0059CE2A /* Resources */ = {
@@ -158,6 +330,15 @@
 				0589691B1ABCE0E80059CE2A /* Default-568h@2x.png in Resources */,
 				0589691C1ABCE0E80059CE2A /* Default-667h@2x.png in Resources */,
 				0589691D1ABCE0E80059CE2A /* Default-736h@3x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F729B8B51D2E176700C9EDBC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F729B8C91D2E176700C9EDBC /* LaunchScreen.storyboard in Resources */,
+				F729B8C61D2E176700C9EDBC /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,7 +355,41 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F729B8B31D2E176700C9EDBC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F729B8D21D2E17A300C9EDBC /* ViewController.m in Sources */,
+				F729B8D11D2E17A300C9EDBC /* AppDelegate.m in Sources */,
+				F729B8BB1D2E176700C9EDBC /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F729B8D61D2E17C800C9EDBC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "AsyncDisplayKit-iOS";
+			targetProxy = F729B8D51D2E17C800C9EDBC /* PBXContainerItemProxy */;
+		};
+		F7CE6CB51D2CE00300BE4C15 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = AsyncDisplayKit;
+			targetProxy = F7CE6CB41D2CE00300BE4C15 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		F729B8C71D2E176700C9EDBC /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F729B8C81D2E176700C9EDBC /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		058969101ABCE06E0059CE2A /* Debug */ = {
@@ -197,6 +412,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_TEST_COVERAGE_FILES = YES;
@@ -264,14 +480,12 @@
 				INFOPLIST_FILE = "Life Without CocoaPods/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"/Users/nadi/src/AsyncDisplayKit/build/Debug-iphoneos",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -283,15 +497,46 @@
 				INFOPLIST_FILE = "Life Without CocoaPods/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"/Users/nadi/src/AsyncDisplayKit/build/Debug-iphoneos",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		F729B8CB1D2E176700C9EDBC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = "Life With Frameworks/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.Life-With-Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F729B8CC1D2E176700C9EDBC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = "Life With Frameworks/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.Life-With-Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -315,6 +560,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		F729B8D01D2E176700C9EDBC /* Build configuration list for PBXNativeTarget "Life With Frameworks" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F729B8CB1D2E176700C9EDBC /* Debug */,
+				F729B8CC1D2E176700C9EDBC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};

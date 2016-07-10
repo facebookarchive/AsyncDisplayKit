@@ -8,8 +8,14 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 #if TARGET_OS_IOS
+#import <AVFoundation/AVFoundation.h>
+#import "ASDisplayNode+Subclasses.h"
 #import "ASVideoNode.h"
 #import "ASDefaultPlayButton.h"
+#import "ASEqualityHelpers.h"
+#import "ASInternalHelpers.h"
+#import "ASDisplayNodeExtras.h"
+#import "ASThread.h"
 
 static BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
   return ASObjectIsEqual(asset1, asset2)
@@ -595,9 +601,9 @@ static NSString * const kStatus = @"status";
     [_delegate videoPlaybackDidFinish:self];
 #pragma clang diagnostic pop
   }
-  [_player seekToTime:kCMTimeZero];
 
   if (_shouldAutorepeat) {
+    [_player seekToTime:kCMTimeZero];
     [self play];
   } else {
     [self pause];

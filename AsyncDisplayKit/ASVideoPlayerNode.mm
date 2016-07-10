@@ -502,6 +502,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       return spinnnerView;
     }];
     _spinnerNode.preferredFrameSize = CGSizeMake(44.0, 44.0);
+    _spinnerNode.backgroundColor = [UIColor clearColor];
 
     [self addSubnode:_spinnerNode];
     [self setNeedsLayout];

@@ -54,6 +54,11 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   return ASLayoutableTypeLayoutSpec;
 }
 
+- (BOOL)canLayoutAsynchronous
+{
+  return YES;
+}
+
 #pragma mark - Layout
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize

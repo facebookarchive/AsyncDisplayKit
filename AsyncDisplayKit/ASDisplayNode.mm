@@ -15,6 +15,7 @@
 
 #import <objc/runtime.h>
 #import <deque>
+#import <queue>
 
 #import "_ASAsyncTransaction.h"
 #import "_ASAsyncTransactionContainer+Private.h"
@@ -38,6 +39,10 @@
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
 NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
+
+// Forward declare CALayerDelegate protocol as the iOS 10 SDK moves CALayerDelegate from a formal delegate to a protocol.
+// We have to forward declare the protocol as this place otherwise it will not compile compiling with an Base SDK < iOS 10
+@protocol CALayerDelegate;
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate, _ASDisplayLayerDelegate, _ASTransitionContextCompletionDelegate>
 
@@ -493,7 +498,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (isLayerBacked) {
     TIME_SCOPED(_debugTimeToCreateView);
     _layer = [self _layerToLoad];
-    _layer.delegate = self;
+    // Surpress warning for Base SDK > 10.0
+    _layer.delegate = (id<CALayerDelegate>)self;
   } else {
     TIME_SCOPED(_debugTimeToCreateView);
     _view = [self _viewToLoad];
@@ -626,7 +632,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (! [self shouldMeasureWithSizeRange:constrainedSize]) {
     return _layout;
   }
-
+  
   [self cancelLayoutTransitionsInProgress];
 
   ASLayout *previousLayout = _layout;
@@ -637,13 +643,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                                                           pendingLayout:newLayout
                                                          previousLayout:previousLayout];
   } else {
-    ASLayoutTransition *layoutContext;
+    ASLayoutTransition *layoutTransition = nil;
     if (self.usesImplicitHierarchyManagement) {
-      layoutContext = [[ASLayoutTransition alloc] initWithNode:self
-                                                 pendingLayout:newLayout
-                                                previousLayout:previousLayout];
+      layoutTransition = [[ASLayoutTransition alloc] initWithNode:self
+                                                    pendingLayout:newLayout
+                                                   previousLayout:previousLayout];
     }
-    [self applyLayout:newLayout layoutContext:layoutContext];
+    
+    [self _applyLayout:newLayout layoutTransition:layoutTransition];
     [self _completeLayoutCalculation];
   }
 
@@ -680,6 +687,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return ASLayoutableTypeDisplayNode;
 }
 
+- (BOOL)canLayoutAsynchronous
+{
+  return !self.isNodeLoaded;
+}
+
 #pragma mark - Layout Transition
 
 - (void)transitionLayoutWithAnimation:(BOOL)animated
@@ -711,7 +723,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   int32_t transitionID = [self _startNewTransition];
   
   ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
-    ASDisplayNodeAssert([node _hasTransitionInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
+    ASDisplayNodeAssert([node _isTransitionInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
     node.hierarchyState |= ASHierarchyStateLayoutPending;
     node.pendingTransitionID = transitionID;
   });
@@ -750,10 +762,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       }
       
       ASLayout *previousLayout = _layout;
-      [self applyLayout:newLayout layoutContext:nil];
+      [self _applyLayout:newLayout layoutTransition:nil];
       
       ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
-        [node applyPendingLayoutContext];
+        [node _applyPendingLayoutContext];
         [node _completeLayoutCalculation];
         node.hierarchyState &= (~ASHierarchyStateLayoutPending);
       });
@@ -776,6 +788,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     });
   };
 
+  // TODO ihm: Can we always push the measure to the background thread and remove the parameter from the API?
   if (shouldMeasureAsync) {
     ASPerformBlockOnBackgroundThread(transitionBlock);
   } else {
@@ -813,7 +826,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)cancelLayoutTransitionsInProgress
 {
   ASDN::MutexLocker l(_propertyLock);
-  if ([self _hasTransitionInProgress]) {
+  if ([self _isTransitionInProgress]) {
     // Cancel transition in progress
     [self _finishOrCancelTransition];
       
@@ -836,10 +849,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _usesImplicitHierarchyManagement = value;
 }
 
-- (BOOL)_hasTransitionInProgress
+- (BOOL)_isTransitionInProgress
 {
-    ASDN::MutexLocker l(_propertyLock);
-    return _transitionInProgress;
+  ASDN::MutexLocker l(_propertyLock);
+  return _transitionInProgress;
 }
 
 /// Starts a new transition and returns the transition id
@@ -2407,16 +2420,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   });
 }
 
-- (void)applyPendingLayoutContext
+- (void)_applyPendingLayoutContext
 {
   ASDN::MutexLocker l(_propertyLock);
   if (_pendingLayoutTransition) {
-    [self applyLayout:_pendingLayoutTransition.pendingLayout layoutContext:_pendingLayoutTransition];
+    [self _applyLayout:_pendingLayoutTransition.pendingLayout layoutTransition:_pendingLayoutTransition];
     _pendingLayoutTransition = nil;
   }
 }
 
-- (void)applyLayout:(ASLayout *)layout layoutContext:(ASLayoutTransition *)layoutContext
+- (void)_applyLayout:(ASLayout *)layout layoutTransition:(ASLayoutTransition *)layoutTransition
 {
   ASDN::MutexLocker l(_propertyLock);
   _layout = layout;
@@ -2425,10 +2438,22 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
   
-  if (self.usesImplicitHierarchyManagement && layoutContext != nil) {
-    [layoutContext applySubnodeInsertions];
-    [layoutContext applySubnodeRemovals];
+  if (layoutTransition == nil || self.usesImplicitHierarchyManagement == NO) {
+    return;
   }
+
+  // Trampoline to the main thread if necessary
+  if (ASDisplayNodeThreadIsMain() == NO && layoutTransition.isSynchronous == NO) {
+
+    // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
+    ASPerformBlockOnMainThread(^{
+      [layoutTransition startTransition];
+    });
+    
+    return;
+  }
+  
+  [layoutTransition startTransition];
 }
 
 - (void)layout

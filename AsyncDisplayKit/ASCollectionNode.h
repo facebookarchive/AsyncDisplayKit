@@ -10,9 +10,16 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <UIKit/UICollectionView.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASLayoutController.h>
+#import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
 #import <AsyncDisplayKit/ASCollectionView.h>
 
 @protocol ASCollectionViewLayoutFacilitatorProtocol;
+@protocol ASCollectionDelegate;
+@protocol ASCollectionDataSource;
+@class ASCollectionView;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -101,6 +108,10 @@ NS_ASSUME_NONNULL_BEGIN
  * while all the cells load.
  */
 - (void)reloadDataImmediately;
+
+@end
+
+@interface ASCollectionNode (ASRangeControllerUpdateRangeProtocol) <ASRangeControllerUpdateRangeProtocol>
 
 @end
 

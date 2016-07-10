@@ -10,9 +10,9 @@
 
 #import <Foundation/Foundation.h>
 
-#import "ASDimension.h"
-#import "ASStackLayoutDefines.h"
-#import "ASRelativeSize.h"
+#import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASStackLayoutDefines.h>
+#import <AsyncDisplayKit/ASRelativeSize.h>
 
 @protocol ASEnvironment;
 @class UITraitCollection;
