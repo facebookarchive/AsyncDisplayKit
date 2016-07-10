@@ -9,8 +9,6 @@
 //
 
 #import "CGRect+ASConvenience.h"
-#import "ASScrollDirection.h"
-#import "ASLayoutController.h"
 
 ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferHorizontal(ASScrollDirection scrollDirection,
                                                                     ASRangeTuningParameters rangeTuningParameters)

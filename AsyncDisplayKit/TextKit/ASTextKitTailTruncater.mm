@@ -8,8 +8,6 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASAssert.h"
-
 #import "ASTextKitContext.h"
 #import "ASTextKitTailTruncater.h"
 

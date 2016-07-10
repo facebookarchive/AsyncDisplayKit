@@ -10,7 +10,6 @@
 
 #import "ASImageNode.h"
 
-#import "_ASCoreAnimationExtras.h"
 #import "_ASDisplayLayer.h"
 #import "ASAssert.h"
 #import "ASDisplayNode+Subclasses.h"

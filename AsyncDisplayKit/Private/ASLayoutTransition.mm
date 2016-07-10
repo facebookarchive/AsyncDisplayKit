@@ -12,12 +12,9 @@
 
 #import "ASLayoutTransition.h"
 
-#import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+Subclasses.h"
 #import "ASLayout.h"
 
-#import <vector>
 #import <queue>
 
 #import "NSArray+Diffing.h"

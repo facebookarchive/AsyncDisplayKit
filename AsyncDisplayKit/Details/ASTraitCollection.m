@@ -11,7 +11,6 @@
 //
 
 #import "ASTraitCollection.h"
-#import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASAvailability.h>
 
 @implementation ASTraitCollection

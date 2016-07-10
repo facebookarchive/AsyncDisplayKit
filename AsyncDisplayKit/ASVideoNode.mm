@@ -11,11 +11,9 @@
 #import <AVFoundation/AVFoundation.h>
 #import "ASDisplayNode+Subclasses.h"
 #import "ASVideoNode.h"
-#import "ASDefaultPlayButton.h"
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNodeExtras.h"
-#import "ASThread.h"
 
 static BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
   return ASObjectIsEqual(asset1, asset2)

@@ -14,7 +14,6 @@
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASDisplayNode+Beta.h"
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
 @end
