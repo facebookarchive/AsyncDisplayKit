@@ -650,22 +650,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASLayout *previousLayout = _layout;
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
   
-  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
-    _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                          pendingLayout:newLayout
-                                                         previousLayout:previousLayout];
-  } else {
-    ASLayoutTransition *layoutTransition = nil;
-    if (self.usesImplicitHierarchyManagement) {
-      layoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                    pendingLayout:newLayout
-                                                   previousLayout:previousLayout];
-    }
-    
-    [self _applyLayout:newLayout layoutTransition:layoutTransition];
-    [self _completeLayoutCalculation];
+  _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
+                                                        pendingLayout:newLayout
+                                                       previousLayout:previousLayout];
+  
+  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState) == NO) {
+    [self _applyPendingLayoutTransition];
   }
-
+  
   return newLayout;
 }
 
@@ -779,11 +771,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       }
       
       ASLayout *previousLayout = _layout;
-      [self _applyLayout:newLayout layoutTransition:nil];
+      [self _applyLayout:newLayout];
       
       ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
-        [node _applyPendingLayoutContext];
-        [node _completeLayoutCalculation];
+        [node _applyPendingLayoutTransition];
         node.hierarchyState &= (~ASHierarchyStateLayoutPending);
       });
         
@@ -795,7 +786,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       
       _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                             pendingLayout:newLayout
-                                                          previousLayout:previousLayout];
+                                                           previousLayout:previousLayout];
       [_pendingLayoutTransition applySubnodeInsertions];
 
       _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
@@ -907,6 +898,51 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   [self didCompleteLayoutTransition:context];
   _transitionContext = nil;
+}
+
+#pragma mark - Layout
+
+- (void)_applyPendingLayoutTransition
+{
+  ASDN::MutexLocker l(_propertyLock);
+  if (_pendingLayoutTransition) {
+    [self _applyLayout:_pendingLayoutTransition.pendingLayout];
+    [self _applyLayoutTransition:_pendingLayoutTransition];
+    _pendingLayoutTransition = nil;
+  }
+  [self _completeLayoutCalculation];
+}
+
+- (void)_applyLayout:(ASLayout *)layout
+{
+  ASDN::MutexLocker l(_propertyLock);
+  
+  ASDisplayNodeAssertTrue(layout.layoutableObject == self);
+  ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
+  ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
+  
+  _layout = layout;
+}
+
+- (void)_applyLayoutTransition:(ASLayoutTransition *)layoutTransition
+{
+  // Layout transition is not supported for non implicit hierarchy managed nodes
+  if (layoutTransition == nil || self.usesImplicitHierarchyManagement == NO) {
+    return;
+  }
+
+  // Trampoline to the main thread if necessary
+  if (ASDisplayNodeThreadIsMain() == NO && layoutTransition.isSynchronous == NO) {
+
+    // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
+    ASPerformBlockOnMainThread(^{
+      [layoutTransition applyTransition];
+    });
+    
+    return;
+  }
+  
+  [layoutTransition applyTransition];
 }
 
 #pragma mark - Asynchronous display
@@ -1165,24 +1201,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     } else {
       [self measureWithSizeRange:ASSizeRangeMake(bounds.size, bounds.size)];
     }
-  }
-}
-
-- (void)layout
-{
-  ASDisplayNodeAssertMainThread();
-  
-  if ([self _hasDirtyLayout]) {
-    return;
-  }
-  
-  [self __layoutSubnodes];
-}
-
-- (void)__layoutSubnodes
-{
-  for (ASLayout *subnodeLayout in _layout.sublayouts) {
-    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
   }
 }
 
@@ -2537,6 +2555,26 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   [layoutTransition startTransition];
 }
 
+- (void)layout
+{
+  ASDisplayNodeAssertMainThread();
+
+  if ([self _hasDirtyLayout]) {
+    return;
+  }
+  
+  [self __layoutSublayouts];
+}
+
+- (void)__layoutSublayouts
+{
+  for (ASLayout *subnodeLayout in _layout.sublayouts) {
+    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
+  }
+}
+#pragma mark - Display
+
+>>>>>>> Simplify applying layout transition in preparation for bigger layout transition API work
 - (void)displayWillStart
 {
   ASDisplayNodeAssertMainThread();

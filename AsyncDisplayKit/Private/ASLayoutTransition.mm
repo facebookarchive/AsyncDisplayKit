@@ -74,7 +74,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   return ASLayoutCanTransitionAsynchronous(_pendingLayout);
 }
 
-- (void)startTransition
+- (void)applyTransition
 {
   [self applySubnodeInsertions];
   [self applySubnodeRemovals];
