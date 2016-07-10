@@ -1,7 +1,9 @@
 ---
 title: Resources
-layout: resources
-permalink: /resources.html
+layout: docs
+permalink: /docs/resources.html
+prevPage: philosophy.html
+nextPage: installation.html
 ---
 
 ###Slack
