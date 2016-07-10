@@ -13,7 +13,7 @@ Join 200+ AsyncDisplayKit developers and the ASDK team on Slack for real-time de
 ###Examples
 Browse through our many <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">example projects</a>.  
 
-If you are new to AsyncDisplayKit, we recommend that you start with the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a> example app. This social app example directly compares a photo feed implemented with UIKit to an identical feed implmented with AsyncDisplayKit. The app features an infinitely scrolling home feed that demonstrates ASDK's smoother scrolling performance. It also has a significantly sized code base to demonstrate how much less code it takes to design apps using AsyncDisplayKit.
+If you are new to AsyncDisplayKit, we recommend that you start with the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a> example app. This social app example directly compares a photo feed implemented with UIKit to an identical feed implemented with AsyncDisplayKit. The app features an infinitely scrolling home feed that demonstrates ASDK's smoother scrolling performance. It also has a significantly sized code base to demonstrate how much less code it takes to design apps using AsyncDisplayKit.
 
 ###Videos
 <ul>
