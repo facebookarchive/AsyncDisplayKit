@@ -42,6 +42,7 @@
   }
   self.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
   self.clipsToBounds = YES;
+  self.userInteractionEnabled = YES;
   
   _needsMapReloadOnBoundsChange = YES;
   _liveMap = NO;
@@ -257,7 +258,6 @@
 - (void)addLiveMap
 {
   ASDisplayNodeAssertMainThread();
-  self.userInteractionEnabled = YES;
   if (!_mapView) {
     __weak ASMapNode *weakSelf = self;
     _mapView = [[MKMapView alloc] initWithFrame:CGRectZero];
@@ -276,7 +276,6 @@
 
 - (void)removeLiveMap
 {
-  self.userInteractionEnabled = NO;
   [_mapView removeFromSuperview];
   _mapView = nil;
 }
