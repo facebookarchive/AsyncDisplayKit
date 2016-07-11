@@ -118,22 +118,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   return _calculatedSize;
 }
 
-- (void)setConstrainedSize:(CGSize)constrainedSize
-{
-  if (!CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
-    _sizeIsCalculated = NO;
-    _constrainedSize = constrainedSize;
-    // If the context isn't created yet, it will be initialized with the appropriate size when next accessed.
-    if (_context || _fontSizeAdjuster) {
-      // If we're updating an existing context, make sure to use the same inset logic used during initialization.
-      // This codepath allows us to reuse the
-      CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:constrainedSize];
-      if (_context) _context.constrainedSize = shadowConstrainedSize;
-      if (_fontSizeAdjuster) _fontSizeAdjuster.constrainedSize = shadowConstrainedSize;
-    }
-  }
-}
-
 - (void)_calculateSize
 {
   // if we have no scale factors or an unconstrained width, there is no reason to try to adjust the font size

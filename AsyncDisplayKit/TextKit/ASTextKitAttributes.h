@@ -127,7 +127,8 @@ struct ASTextKitAttributes {
     && maximumNumberOfLines == other.maximumNumberOfLines
     && shadowOpacity == other.shadowOpacity
     && shadowRadius == other.shadowRadius
-    && [pointSizeScaleFactors isEqualToArray:other.pointSizeScaleFactors]
+    && (pointSizeScaleFactors == other.pointSizeScaleFactors
+        || [pointSizeScaleFactors isEqualToArray:other.pointSizeScaleFactors])
     && layoutManagerCreationBlock == other.layoutManagerCreationBlock
     && textStorageCreationBlock == other.textStorageCreationBlock
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)

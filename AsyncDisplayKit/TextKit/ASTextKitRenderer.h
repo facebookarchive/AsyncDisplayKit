@@ -53,7 +53,7 @@
 
 @property (nonatomic, assign, readonly) ASTextKitAttributes attributes;
 
-@property (nonatomic, assign, readwrite) CGSize constrainedSize;
+@property (nonatomic, assign, readonly) CGSize constrainedSize;
 
 @property (nonatomic, assign, readonly) CGFloat currentScaleFactor;
 
@@ -90,8 +90,7 @@
 @interface ASTextKitRenderer (ASTextKitRendererConvenience)
 
 /**
- Returns the first visible range or an NSRange with location of NSNotFound and size of 0 if no first visible
- range exists
+ Returns the first visible range or an NSRange with location of 0 and size of 0 if no first visible range exists.
  */
 @property (nonatomic, assign, readonly) NSRange firstVisibleRange;
 
