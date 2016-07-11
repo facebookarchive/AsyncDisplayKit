@@ -78,7 +78,7 @@ When an imageNode's `contentMode` property is set to `UIViewContentModeScaleAspe
 
 By default, the expanded image will be centered within the bounds of the view. Take the following cat image.  His face gets cut off by default.
 
-<img width = "300" src = "/static/catsMiddle.png"/>
+<img width = "300" src = "/static/images/catsMiddle.png"/>
 
 That's messed up.  To fix it, you can set the `cropRect` property to move the image over.  By default it is set to CGRectMake(0.5, 0.5, 0.0, 0.0).
 
@@ -100,11 +100,11 @@ animalImageNode.cropRect = CGRect(x: 0, y: 0, width: 0.0, height: 0.0)
 
 Leaving the width and height values at 0.0 means the image won't be stretched.
 
-<img width = "300" src = "/static/catsFace.png"/>
+<img width = "300" src = "/static/images/catsFace.png"/>
 
 Alternatively, you can set the x value of the origin to 1.0 to right align the image.
 
-<img width = "300" src = "/static/catsButt.png"/>
+<img width = "300" src = "/static/images/catsButt.png"/>
 
 ### Forced  Upscaling
 

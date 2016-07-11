@@ -40,7 +40,7 @@ mapNode.region = MKCoordinateRegionMakeWithDistance(coord, 20000, 20000)
 </div>
 </div>
 
-<img width = "300" src = "/static/basicMap.png"/>
+<img width = "300" src = "/static/images/basicMap.png"/>
 
 The region value is actually just one piece of a property called `options` of type `MKMapSnapshotOptions`.
 
@@ -81,7 +81,7 @@ mapNode.options = options
 
 Results in:
 
-<img width = "300" src = "/static/satelliteMap.png"/>
+<img width = "300" src = "/static/images/satelliteMap.png"/>
 
 One thing to note is that setting the options value will overwrite a previously set region.
 
@@ -110,7 +110,7 @@ mapNode.annotations = [annotation]
 </div>
 </div>
 
-<img width = "300" src = "/static/mapWithAnnotation.png"/>
+<img width = "300" src = "/static/images/mapWithAnnotation.png"/>
 
 No problem.
 
@@ -133,7 +133,7 @@ mapNode.liveMap = true
 
 This enables "live map mode" in which the node will use an <a href = "https://developer.apple.com/library/mac/documentation/MapKit/Reference/MKMapView_Class/">MKMapView</a> to render an interactive version of your map.
 
-<img width = "300" src = "/static/liveMap.gif"/>
+<img width = "300" src = "/static/images/liveMap.gif"/>
 
 As with UIKit views, the MKMapView used in live map mode is not thread-safe.
 

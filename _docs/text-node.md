@@ -61,7 +61,7 @@ textNode.truncationAttributedString = NSAttributedString(string: "¶¶¶")
 
 This results in something like: 
 
-<img width = "300" src = "/static/textNodeTruncation.png"/>
+<img width = "300" src = "/static/images/textNodeTruncation.png"/>
 
 By default, the truncation string will be "…" so you don't need to set it if that's all you need.
 
@@ -106,7 +106,7 @@ textNode.attributedString = attributedString
 
 Which results in a light gray link with a dash-dot style underline!
 
-<img width = "300" src = "/static/kittenLink.png"/>
+<img width = "300" src = "/static/images/kittenLink.png"/>
 
 As you can see, it's relatively convenient to apply various styles to each link given its range in the attributed string.
 

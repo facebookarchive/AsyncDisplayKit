@@ -8,7 +8,7 @@ id: home
             <div class="wrapper">
                 <div class="post">
 <article class="post-content">
-    <p><img src="/static/logo.png" alt="logo"></p>
+    <p><img src="/static/images/logo.png" alt="logo"></p>
 
     <p>AsyncDisplayKit is an iOS framework that keeps even the most complex user
     interfaces smooth and responsive.  It was originally built to make Facebook&#39;s Paper possible, and goes hand-in-hand with
