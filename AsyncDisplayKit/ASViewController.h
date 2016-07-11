@@ -3,19 +3,39 @@
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 16/09/15.
-//  Copyright (c) 2015 Facebook. All rights reserved.
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
 //
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASVisibilityProtocols.h>
+
+@class ASTraitCollection;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController
+typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitCollectionBlock)(UITraitCollection *traitCollection);
+typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(CGSize windowSize);
+
+@interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController <ASVisibilityDepth>
 
 - (instancetype)initWithNode:(DisplayNodeType)node NS_DESIGNATED_INITIALIZER;
 
 @property (nonatomic, strong, readonly) DisplayNodeType node;
+
+/**
+ * Set this block to customize the ASDisplayTraits returned when the VC transitions to the given traitCollection.
+ */
+@property (nonatomic, copy) ASDisplayTraitsForTraitCollectionBlock overrideDisplayTraitsWithTraitCollection;
+
+/**
+ * Set this block to customize the ASDisplayTraits returned when the VC transitions to the given window size.
+ */
+@property (nonatomic, copy) ASDisplayTraitsForTraitWindowSizeBlock overrideDisplayTraitsWithWindowSize;
 
 /**
  * @abstract Passthrough property to the the .interfaceState of the node.
@@ -39,6 +59,13 @@ NS_ASSUME_NONNULL_BEGIN
  * backing node.
  */
 - (ASSizeRange)nodeConstrainedSize;
+
+@end
+
+@interface ASViewController (ASRangeControllerUpdateRangeProtocol)
+
+/// Automatically adjust range mode based on view events if the containing node confirms to the ASRangeControllerUpdateRangeProtocol
+@property (nonatomic, assign) BOOL automaticallyAdjustRangeModeBasedOnViewEvents;
 
 @end
 

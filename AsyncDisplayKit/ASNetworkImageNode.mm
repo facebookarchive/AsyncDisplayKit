@@ -1,20 +1,23 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASNetworkImageNode.mm
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import "ASNetworkImageNode.h"
 
 #import "ASBasicImageDownloader.h"
+#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEqualityHelpers.h"
-#import "ASThread.h"
 #import "ASInternalHelpers.h"
 #import "ASImageContainerProtocolCategories.h"
+#import "ASDisplayNodeExtras.h"
 
 #if PIN_REMOTE_IMAGE
 #import "ASPINRemoteImageDownloader.h"
@@ -24,11 +27,10 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 @interface ASNetworkImageNode ()
 {
-  ASDN::RecursiveMutex _lock;
   __weak id<ASImageCacheProtocol, ASImageCacheProtocolDeprecated> _cache;
   __weak id<ASImageDownloaderProtocol, ASImageDownloaderProtocolDeprecated> _downloader;
 
-  // Only access any of these with _lock.
+  // Only access any of these with _propertyLock.
   __weak id<ASNetworkImageNodeDelegate> _delegate;
 
   NSURL *_URL;
@@ -38,20 +40,30 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   id _downloadIdentifier;
 
   BOOL _imageLoaded;
-  
-  BOOL _delegateSupportsDidStartFetchingData;
-  BOOL _delegateSupportsDidFailWithError;
-  BOOL _delegateSupportsImageNodeDidFinishDecoding;
-  
+  CGFloat _currentImageQuality;
+  CGFloat _renderedImageQuality;
+  BOOL _shouldRenderProgressImages;
+
+  struct {
+    unsigned int delegateDidStartFetchingData:1;
+    unsigned int delegateDidFailWithError:1;
+    unsigned int delegateDidFinishDecoding:1;
+    unsigned int delegateDidLoadImage:1;
+  } _delegateFlags;
+
   //set on init only
-  BOOL _downloaderSupportsNewProtocol;
-  BOOL _downloaderImplementsSetProgress;
-  BOOL _downloaderImplementsSetPriority;
-  BOOL _downloaderImplementsAnimatedImage;
-  
-  BOOL _cacheSupportsNewProtocol;
-  BOOL _cacheSupportsClearing;
-  BOOL _cacheSupportsSynchronousFetch;
+  struct {
+    unsigned int downloaderSupportsNewProtocol:1;
+    unsigned int downloaderImplementsSetProgress:1;
+    unsigned int downloaderImplementsSetPriority:1;
+    unsigned int downloaderImplementsAnimatedImage:1;
+  } _downloaderFlags;
+
+  struct {
+    unsigned int cacheSupportsNewProtocol:1;
+    unsigned int cacheSupportsClearing:1;
+    unsigned int cacheSupportsSynchronousFetch:1;
+  } _cacheFlags;
 }
 @end
 
@@ -67,19 +79,20 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   
   ASDisplayNodeAssert([downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)] || [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:)], @"downloader must respond to either downloadImageWithURL:callbackQueue:downloadProgress:completion: or downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:.");
   
-  _downloaderSupportsNewProtocol = [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)];
+  _downloaderFlags.downloaderSupportsNewProtocol = [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)];
   
   ASDisplayNodeAssert(cache == nil || [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] || [cache respondsToSelector:@selector(fetchCachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion: or fetchCachedImageWithURL:callbackQueue:completion:");
   
-  _downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)];
-  _downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)];
-  _downloaderImplementsAnimatedImage = [downloader respondsToSelector:@selector(animatedImageWithData:)];
+  _downloaderFlags.downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)];
+  _downloaderFlags.downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)];
+  _downloaderFlags.downloaderImplementsAnimatedImage = [downloader respondsToSelector:@selector(animatedImageWithData:)];
   
-  _cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
-  _cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
-  _cacheSupportsSynchronousFetch = [cache respondsToSelector:@selector(synchronouslyFetchedCachedImageWithURL:)];
+  _cacheFlags.cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
+  _cacheFlags.cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
+  _cacheFlags.cacheSupportsSynchronousFetch = [cache respondsToSelector:@selector(synchronouslyFetchedCachedImageWithURL:)];
   
   _shouldCacheImage = YES;
+  _shouldRenderProgressImages = YES;
   self.shouldBypassEnsureDisplay = YES;
 
   return self;
@@ -108,7 +121,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)setURL:(NSURL *)URL resetToDefault:(BOOL)reset
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_propertyLock);
 
   if (ASObjectIsEqual(URL, _URL)) {
     return;
@@ -119,9 +132,17 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   _URL = URL;
 
-  if (reset || _URL == nil)
+  BOOL hasURL = _URL == nil;
+  if (reset || hasURL) {
     self.image = _defaultImage;
-  
+    /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
+     so always use a dispatch_async to ensure that we queue the operations in the correct order.
+     (see comment in displayDidFinish) */
+    dispatch_async(dispatch_get_main_queue(), ^{
+      self.currentImageQuality = hasURL ? 0.0 : 1.0;
+    });
+  }
+
   if (self.interfaceState & ASInterfaceStateFetchData) {
     [self fetchData];
   }
@@ -129,56 +150,101 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (NSURL *)URL
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_propertyLock);
   return _URL;
 }
 
 - (void)setDefaultImage:(UIImage *)defaultImage
 {
-  _lock.lock();
+  ASDN::MutexLocker l(_propertyLock);
 
   if (ASObjectIsEqual(defaultImage, _defaultImage)) {
-    _lock.unlock();
     return;
   }
   _defaultImage = defaultImage;
 
   if (!_imageLoaded) {
-    _lock.unlock();
-    // Locking: it is important to release _lock before entering setImage:, as it needs to release the lock before -invalidateCalculatedLayout.
-    // If we continue to hold the lock here, it will still be locked until the next unlock() call, causing a possible deadlock with
-    // -[ASNetworkImageNode displayWillStart] (which is called on a different thread / main, at an unpredictable time due to ASMainRunloopQueue).
+    BOOL hasURL = _URL == nil;
+    /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
+     so always use a dispatch_async to ensure that we queue the operations in the correct order.
+     (see comment in displayDidFinish) */
+    dispatch_async(dispatch_get_main_queue(), ^{
+      self.currentImageQuality = hasURL ? 0.0 : 1.0;
+    });
     self.image = defaultImage;
-  } else {
-    _lock.unlock();
   }
 }
 
 - (UIImage *)defaultImage
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_propertyLock);
   return _defaultImage;
+}
+
+- (void)setCurrentImageQuality:(CGFloat)currentImageQuality
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _currentImageQuality = currentImageQuality;
+}
+
+- (CGFloat)currentImageQuality
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _currentImageQuality;
+}
+
+- (void)setRenderedImageQuality:(CGFloat)renderedImageQuality
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _renderedImageQuality = renderedImageQuality;
+}
+
+- (CGFloat)renderedImageQuality
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _renderedImageQuality;
 }
 
 - (void)setDelegate:(id<ASNetworkImageNodeDelegate>)delegate
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_propertyLock);
   _delegate = delegate;
   
-  _delegateSupportsDidStartFetchingData = [delegate respondsToSelector:@selector(imageNodeDidStartFetchingData:)];
-  _delegateSupportsDidFailWithError = [delegate respondsToSelector:@selector(imageNode:didFailWithError:)];
-  _delegateSupportsImageNodeDidFinishDecoding = [delegate respondsToSelector:@selector(imageNodeDidFinishDecoding:)];
+  _delegateFlags.delegateDidStartFetchingData = [delegate respondsToSelector:@selector(imageNodeDidStartFetchingData:)];
+  _delegateFlags.delegateDidFailWithError = [delegate respondsToSelector:@selector(imageNode:didFailWithError:)];
+  _delegateFlags.delegateDidFinishDecoding = [delegate respondsToSelector:@selector(imageNodeDidFinishDecoding:)];
+  _delegateFlags.delegateDidLoadImage = [delegate respondsToSelector:@selector(imageNode:didLoadImage:)];
 }
 
 - (id<ASNetworkImageNodeDelegate>)delegate
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_propertyLock);
   return _delegate;
+}
+
+- (void)setShouldRenderProgressImages:(BOOL)shouldRenderProgressImages
+{
+  ASDN::MutexLocker l(_propertyLock);
+  if (shouldRenderProgressImages == _shouldRenderProgressImages) {
+    return;
+  }
+  
+  _shouldRenderProgressImages = shouldRenderProgressImages;
+  
+  
+  ASDN::MutexUnlocker u(_propertyLock);
+  [self _updateProgressImageBlockOnDownloaderIfNeeded];
+}
+
+- (BOOL)shouldRenderProgressImages
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _shouldRenderProgressImages;
 }
 
 - (BOOL)placeholderShouldPersist
 {
-  ASDN::MutexLocker l(_lock);
+  ASDN::MutexLocker l(_propertyLock);
   return (self.image == nil && _URL != nil);
 }
 
@@ -188,35 +254,39 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 {
   [super displayWillStart];
   
-  if (_cacheSupportsSynchronousFetch) {
-    ASDN::MutexLocker l(_lock);
+  if (_cacheFlags.cacheSupportsSynchronousFetch) {
+    ASDN::MutexLocker l(_propertyLock);
     if (_imageLoaded == NO && _URL && _downloadIdentifier == nil) {
       UIImage *result = [[_cache synchronouslyFetchedCachedImageWithURL:_URL] asdk_image];
       if (result) {
         self.image = result;
         _imageLoaded = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+          _currentImageQuality = 1.0;
+        });
       }
     }
   }
 
+  // TODO: Consider removing this; it predates ASInterfaceState, which now ensures that even non-range-managed nodes get a -fetchData call.
   [self fetchData];
   
-  if (self.image == nil && _downloaderImplementsSetPriority) {
-    ASDN::MutexLocker l(_lock);
+  if (self.image == nil && _downloaderFlags.downloaderImplementsSetPriority) {
+    ASDN::MutexLocker l(_propertyLock);
     if (_downloadIdentifier != nil) {
       [_downloader setPriority:ASImageDownloaderPriorityImminent withDownloadIdentifier:_downloadIdentifier];
     }
   }
 }
 
-/* visibilityDidChange in ASMultiplexImageNode has a very similar implementation. Changes here are likely necessary
+/* visibileStateDidChange in ASMultiplexImageNode has a very similar implementation. Changes here are likely necessary
  in ASMultiplexImageNode as well. */
-- (void)visibilityDidChange:(BOOL)isVisible
+- (void)visibleStateDidChange:(BOOL)isVisible
 {
-  [super visibilityDidChange:isVisible];
-  
-  if (_downloaderImplementsSetPriority) {
-    ASDN::MutexLocker l(_lock);
+  [super visibleStateDidChange:isVisible];
+
+  if (_downloaderFlags.downloaderImplementsSetPriority) {
+    ASDN::MutexLocker l(_propertyLock);
     if (_downloadIdentifier != nil) {
       if (isVisible) {
         [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:_downloadIdentifier];
@@ -225,32 +295,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       }
     }
   }
-  
-  if (_downloaderImplementsSetProgress) {
-    ASDN::MutexLocker l(_lock);
-    
-    if (_downloadIdentifier != nil) {
-      __weak __typeof__(self) weakSelf = self;
-      ASImageDownloaderProgressImage progress = nil;
-      if (isVisible) {
-        progress = ^(UIImage * _Nonnull progressImage, id _Nullable downloadIdentifier) {
-          __typeof__(self) strongSelf = weakSelf;
-          if (strongSelf == nil) {
-            return;
-          }
-          
-          ASDN::MutexLocker l(_lock);
-          //Getting a result back for a different download identifier, download must not have been successfully canceled
-          if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
-            return;
-          }
-          
-          strongSelf.image = progressImage;
-        };
-      }
-      [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
-    }
-  }
+
+  [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
 
 - (void)clearFetchedData
@@ -258,11 +304,11 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   [super clearFetchedData];
 
   {
-    ASDN::MutexLocker l(_lock);
+    ASDN::MutexLocker l(_propertyLock);
 
     [self _cancelImageDownload];
     [self _clearImage];
-    if (_cacheSupportsClearing) {
+    if (_cacheFlags.cacheSupportsClearing) {
       [_cache clearFetchedImageFromCacheWithURL:_URL];
     }
   }
@@ -273,12 +319,47 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   [super fetchData];
   
   {
-    ASDN::MutexLocker l(_lock);
+    ASDN::MutexLocker l(_propertyLock);
     [self _lazilyLoadImageIfNecessary];
   }
 }
 
 #pragma mark - Private methods -- only call with lock.
+
+- (void)_updateProgressImageBlockOnDownloaderIfNeeded
+{
+  ASDN::MutexLocker l(_propertyLock);
+  
+  BOOL shouldRenderProgressImages = _shouldRenderProgressImages;
+  ASInterfaceState interfaceState = self.interfaceState;
+
+  if (!_downloaderFlags.downloaderImplementsSetProgress || _downloadIdentifier == nil) {
+    return;
+  }
+
+  ASImageDownloaderProgressImage progress = nil;
+  if (shouldRenderProgressImages && ASInterfaceStateIncludesVisible(interfaceState)) {
+    __weak __typeof__(self) weakSelf = self;
+    progress = ^(UIImage * _Nonnull progressImage, CGFloat progress, id _Nullable downloadIdentifier) {
+      __typeof__(self) strongSelf = weakSelf;
+      if (strongSelf == nil) {
+        return;
+      }
+
+      ASDN::MutexLocker l(strongSelf->_propertyLock);
+      //Getting a result back for a different download identifier, download must not have been successfully canceled
+      if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+        return;
+      }
+      strongSelf.image = progressImage;
+      dispatch_async(dispatch_get_main_queue(), ^{
+        // See comment in -displayDidFinish for why this must be dispatched to main
+        strongSelf.currentImageQuality = progress;
+      });
+    };
+  }
+  [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
+}
 
 - (void)_clearImage
 {
@@ -290,13 +371,17 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   BOOL shouldReleaseImageOnBackgroundThread = imageSize.width > kMinReleaseImageOnBackgroundSize.width ||
                                               imageSize.height > kMinReleaseImageOnBackgroundSize.height;
   if (shouldReleaseImageOnBackgroundThread) {
-    ASPerformBlockOnBackgroundThread(^{
+    ASPerformBlockOnDeallocationQueue(^{
       image = nil;
     });
   }
   self.animatedImage = nil;
   self.image = _defaultImage;
   _imageLoaded = NO;
+  // See comment in -displayDidFinish for why this must be dispatched to main
+  dispatch_async(dispatch_get_main_queue(), ^{
+    self.currentImageQuality = 0.0;
+  });
 }
 
 - (void)_cancelImageDownload
@@ -316,8 +401,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)_downloadImageWithCompletion:(void (^)(id <ASImageContainerProtocol> imageContainer, NSError*, id downloadIdentifier))finished
 {
   ASPerformBlockOnBackgroundThread(^{
-    ASDN::MutexLocker l(_lock);
-    if (_downloaderSupportsNewProtocol) {
+    
+    ASDN::MutexLocker l(_propertyLock);
+    if (_downloaderFlags.downloaderSupportsNewProtocol) {
       _downloadIdentifier = [_downloader downloadImageWithURL:_URL
                                                 callbackQueue:dispatch_get_main_queue()
                                              downloadProgress:NULL
@@ -339,6 +425,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
                                                    }];
 #pragma clang diagnostic pop
     }
+  
+    [self _updateProgressImageBlockOnDownloaderIfNeeded];
+      
   });
 }
 
@@ -347,15 +436,15 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   // FIXME: We should revisit locking in this method (e.g. to access the instance variables at the top, and holding lock while calling delegate)
   if (!_imageLoaded && _URL != nil && _downloadIdentifier == nil) {
     {
-      ASDN::MutexLocker l(_lock);
-      if (_delegateSupportsDidStartFetchingData) {
+      ASDN::MutexLocker l(_propertyLock);
+      if (_delegateFlags.delegateDidStartFetchingData) {
         [_delegate imageNodeDidStartFetchingData:self];
       }
     }
     
     if (_URL.isFileURL) {
       {
-        ASDN::MutexLocker l(_lock);
+        ASDN::MutexLocker l(_propertyLock);
 
         dispatch_async(dispatch_get_main_queue(), ^{
           if (self.shouldCacheImage) {
@@ -363,19 +452,46 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           } else {
             // First try to load the path directly, for efficiency assuming a developer who
             // doesn't want caching is trying to be as minimal as possible.
-            self.image = [UIImage imageWithContentsOfFile:_URL.path];
-            if (!self.image) {
+            UIImage *nonAnimatedImage = [UIImage imageWithContentsOfFile:_URL.path];
+            if (nonAnimatedImage == nil) {
               // If we couldn't find it, execute an -imageNamed:-like search so we can find resources even if the
               // extension is not provided in the path.  This allows the same path to work regardless of shouldCacheImage.
               NSString *filename = [[NSBundle mainBundle] pathForResource:_URL.path.lastPathComponent ofType:nil];
-              if (filename) {
-                self.image = [UIImage imageWithContentsOfFile:filename];
+              if (filename != nil) {
+                nonAnimatedImage = [UIImage imageWithContentsOfFile:filename];
               }
             }
+
+            // If the file may be an animated gif and then created an animated image.
+            id<ASAnimatedImageProtocol> animatedImage = nil;
+            if (_downloaderFlags.downloaderImplementsAnimatedImage) {
+              NSData *data = [NSData dataWithContentsOfURL:_URL];
+              if (data != nil) {
+                animatedImage = [_downloader animatedImageWithData:data];
+
+                if ([animatedImage respondsToSelector:@selector(isDataSupported:)] && [animatedImage isDataSupported:data] == NO) {
+                  animatedImage = nil;
+                }
+              }
+            }
+
+            if (animatedImage != nil) {
+              self.animatedImage = animatedImage;
+            } else {
+              self.image = nonAnimatedImage;
+            }
           }
-          
+
           _imageLoaded = YES;
-          [_delegate imageNode:self didLoadImage:self.image];
+          /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
+           so always use a dispatch_async to ensure that we queue the operations in the correct order.
+           (see comment in displayDidFinish) */
+          dispatch_async(dispatch_get_main_queue(), ^{
+            self.currentImageQuality = 1.0;
+          });
+          if (_delegateFlags.delegateDidLoadImage) {
+            [_delegate imageNode:self didLoadImage:self.image];
+          }
         });
       }
     } else {
@@ -386,36 +502,36 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           return;
         }
 
-        {
-          ASDN::MutexLocker l(strongSelf->_lock);
-          
-          //Getting a result back for a different download identifier, download must not have been successfully canceled
-          if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
-              return;
-          }
-
-          if (imageContainer != nil) {
-            strongSelf->_imageLoaded = YES;
-            if ([imageContainer asdk_animatedImageData] && _downloaderImplementsAnimatedImage) {
-              strongSelf.animatedImage = [_downloader animatedImageWithData:[imageContainer asdk_animatedImageData]];
-            } else {
-              strongSelf.image = [imageContainer asdk_image];
-            }
-          }
-
-          strongSelf->_downloadIdentifier = nil;
-
-          strongSelf->_cacheUUID = nil;
+        ASDN::MutexLocker l(strongSelf->_propertyLock);
+        
+        //Getting a result back for a different download identifier, download must not have been successfully canceled
+        if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+            return;
         }
 
-        {
-          ASDN::MutexLocker l(strongSelf->_lock);
-          if (imageContainer != nil) {
+        if (imageContainer != nil) {
+          strongSelf->_imageLoaded = YES;
+          if ([imageContainer asdk_animatedImageData] && _downloaderFlags.downloaderImplementsAnimatedImage) {
+            strongSelf.animatedImage = [_downloader animatedImageWithData:[imageContainer asdk_animatedImageData]];
+          } else {
+            strongSelf.image = [imageContainer asdk_image];
+          }
+          dispatch_async(dispatch_get_main_queue(), ^{
+            strongSelf->_currentImageQuality = 1.0;
+          });
+        }
+
+        strongSelf->_downloadIdentifier = nil;
+
+        strongSelf->_cacheUUID = nil;
+
+        if (imageContainer != nil) {
+          if (strongSelf->_delegateFlags.delegateDidLoadImage) {
             [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
           }
-          else if (error && _delegateSupportsDidFailWithError) {
-            [strongSelf->_delegate imageNode:strongSelf didFailWithError:error];
-          }
+        }
+        else if (error && strongSelf->_delegateFlags.delegateDidFailWithError) {
+          [strongSelf->_delegate imageNode:strongSelf didFailWithError:error];
         }
       };
 
@@ -425,18 +541,18 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
         void (^cacheCompletion)(id <ASImageContainerProtocol>) = ^(id <ASImageContainerProtocol> imageContainer) {
           // If the cache UUID changed, that means this request was cancelled.
-          if (![_cacheUUID isEqual:cacheUUID]) {
+          if (!ASObjectIsEqual(_cacheUUID, cacheUUID)) {
             return;
           }
           
-          if ([imageContainer asdk_image] == NULL && _downloader != nil) {
+          if ([imageContainer asdk_image] == nil && _downloader != nil) {
             [self _downloadImageWithCompletion:finished];
           } else {
-            finished(imageContainer, NULL, nil);
+            finished(imageContainer, nil, nil);
           }
         };
         
-        if (_cacheSupportsNewProtocol) {
+        if (_cacheFlags.cacheSupportsNewProtocol) {
           [_cache cachedImageWithURL:_URL
                        callbackQueue:dispatch_get_main_queue()
                           completion:cacheCompletion];
@@ -459,13 +575,22 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 #pragma mark - ASDisplayNode+Subclasses
 
-- (void)asyncdisplaykit_asyncTransactionContainerStateDidChange
+- (void)displayDidFinish
 {
-  if (self.asyncdisplaykit_asyncTransactionContainerState == ASAsyncTransactionContainerStateNoTransactions) {
-    ASDN::MutexLocker l(_lock);
-    if (self.layer.contents != nil && _delegateSupportsImageNodeDidFinishDecoding) {
-      [self.delegate imageNodeDidFinishDecoding:self];
-    }
+  [super displayDidFinish];
+
+  ASDN::MutexLocker l(_propertyLock);
+  if (_delegateFlags.delegateDidFinishDecoding && self.layer.contents != nil) {
+    /* We store the image quality in _currentImageQuality whenever _image is set. On the following displayDidFinish, we'll know that
+     _currentImageQuality is the quality of the image that has just finished rendering. In order for this to be accurate, we
+     need to be sure we are on main thread when we set _currentImageQuality. Otherwise, it is possible for _currentImageQuality
+     to be modified at a point where it is too late to cancel the main thread's previous display (the final sentinel check has passed), 
+     but before the displayDidFinish of the previous display pass is called. In this situation, displayDidFinish would be called and we
+     would set _renderedImageQuality to the new _currentImageQuality, but the actual quality of the rendered image should be the previous 
+     value stored in _currentImageQuality. */
+
+    _renderedImageQuality = _currentImageQuality;
+    [self.delegate imageNodeDidFinishDecoding:self];
   }
 }
 

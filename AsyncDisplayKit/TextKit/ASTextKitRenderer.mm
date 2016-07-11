@@ -1,12 +1,12 @@
-/*
- *  Copyright (c) 2014-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the BSD-style license found in the
- *  LICENSE file in the root directory of this source tree. An additional grant
- *  of patent rights can be found in the PATENTS file in the same directory.
- *
- */
+//
+//  ASTextKitRenderer.mm
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import "ASTextKitRenderer.h"
 
@@ -16,7 +16,6 @@
 #import "ASTextKitShadower.h"
 #import "ASTextKitTailTruncater.h"
 #import "ASTextKitFontSizeAdjuster.h"
-#import "ASTextKitTruncating.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -137,25 +136,30 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (void)_calculateSize
 {
-  [self truncater];
   // if we have no scale factors or an unconstrained width, there is no reason to try to adjust the font size
   if (isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
     _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
   }
   
-  // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
-  // -usedRectForTextContainer:).
   __block NSTextStorage *scaledTextStorage = nil;
   BOOL isScaled = [self isScaled];
-  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
-    if (isScaled) {
+  if (isScaled) {
+    // apply the string scale before truncating or else we may truncate the string after we've done the work to shrink it.
+    [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
       NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
       [ASTextKitFontSizeAdjuster adjustFontSizeForAttributeString:scaledString withScaleFactor:_currentScaleFactor];
       scaledTextStorage = [[NSTextStorage alloc] initWithAttributedString:scaledString];
       
       [textStorage removeLayoutManager:layoutManager];
       [scaledTextStorage addLayoutManager:layoutManager];
-    }
+    }];
+  }
+  
+  [[self truncater] truncate];
+  
+  // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
+  // -usedRectForTextContainer:).
+  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     [layoutManager ensureLayoutForTextContainer:textContainer];
   }];
   
@@ -251,7 +255,23 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (std::vector<NSRange>)visibleRanges
 {
-  return [self truncater].visibleRanges;
+  ASTextKitTailTruncater *truncater = [self truncater];
+  [truncater truncate];
+  return truncater.visibleRanges;
+}
+
+@end
+
+@implementation ASTextKitRenderer (ASTextKitRendererConvenience)
+
+- (NSRange)firstVisibleRange
+{
+  std::vector<NSRange> visibleRanges = self.visibleRanges;
+  if (visibleRanges.size() > 0) {
+    return visibleRanges[0];
+  }
+  
+  return NSMakeRange(0, 0);
 }
 
 @end

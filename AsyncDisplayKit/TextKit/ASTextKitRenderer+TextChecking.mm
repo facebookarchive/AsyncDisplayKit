@@ -1,16 +1,15 @@
-/*
- *  Copyright (c) 2014-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the BSD-style license found in the
- *  LICENSE file in the root directory of this source tree. An additional grant
- *  of patent rights can be found in the PATENTS file in the same directory.
- *
- */
+//
+//  ASTextKitRenderer+TextChecking.mm
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import "ASTextKitRenderer+TextChecking.h"
 
-#import "ASTextKitAttributes.h"
 #import "ASTextKitEntityAttribute.h"
 #import "ASTextKitRenderer+Positioning.h"
 #import "ASTextKitTailTruncater.h"
@@ -59,7 +58,6 @@
   NSAttributedString *truncationAttributedString = self.attributes.truncationAttributedString;
 
   // get the index of the last character, so we can handle text in the truncation token
-  NSRange visibleRange = self.truncater.visibleRanges[0];
   __block NSRange truncationTokenRange = { NSNotFound, 0 };
 
   [truncationAttributedString enumerateAttribute:ASTextKitTruncationAttributeName inRange:NSMakeRange(0, truncationAttributedString.length)
@@ -75,6 +73,7 @@
     truncationTokenRange = { 0, truncationAttributedString.length };
   }
 
+  NSRange visibleRange = self.truncater.firstVisibleRange;
   truncationTokenRange.location += NSMaxRange(visibleRange);
   
   __block CGFloat minDistance = CGFLOAT_MAX;

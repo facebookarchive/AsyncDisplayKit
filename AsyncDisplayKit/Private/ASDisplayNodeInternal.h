@@ -1,10 +1,12 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASDisplayNodeInternal.h
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 //
 // The following methods are ONLY for use by _ASDisplayLayer, _ASDisplayView, and ASDisplayNode.
@@ -16,7 +18,7 @@
 #import "ASSentinel.h"
 #import "ASThread.h"
 #import "_ASTransitionContext.h"
-#import "ASDisplayNodeLayoutContext.h"
+#import "ASLayoutTransition.h"
 #import "ASEnvironment.h"
 
 #include <vector>
@@ -73,6 +75,20 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
     unsigned displaySuspended:1;
     unsigned shouldAnimateSizeChanges:1;
     unsigned hasCustomDrawingPriority:1;
+    
+    // Wrapped view handling
+    
+    // The layer contents should not be cleared in case the node is wrapping a UIImageView.UIImageView is specifically
+    // optimized for performance and does not use the usual way to provide the contents of the CALayer via the
+    // CALayerDelegate method that backs the UIImageView.
+    unsigned canClearContentsOfLayer:1;
+    
+    // Prevent calling setNeedsDisplay on a layer that backs a UIImageView. Usually calling setNeedsDisplay on a CALayer
+    // triggers a recreation of the contents of layer unfortunately calling it on a CALayer that backs a UIImageView
+    // it goes trough the normal flow to assign the contents to a layer via the CALayerDelegate methods. Unfortunately
+    // UIImageView does not do recreate the layer contents the usual way, it actually does not implement some of the
+    // methods at all instead it throws away the contents of the layer and nothing will show up.
+    unsigned canCallNeedsDisplayOfLayer:1;
 
     // whether custom drawing is enabled
     unsigned implementsInstanceDrawRect:1;
@@ -82,7 +98,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
     unsigned implementsDrawParameters:1;
 
     // internal state
-    unsigned isMeasured:1;
     unsigned isEnteringHierarchy:1;
     unsigned isExitingHierarchy:1;
     unsigned isInHierarchy:1;
@@ -93,7 +108,9 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASDisplayNode * __weak _supernode;
 
   ASSentinel *_displaySentinel;
-  ASSentinel *_transitionSentinel;
+
+  int32_t _transitionID;
+  BOOL _transitionInProgress;
 
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
@@ -101,7 +118,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASEnvironmentState _environmentState;
   ASLayout *_layout;
 
-  ASSizeRange _constrainedSize;
 
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
@@ -111,7 +127,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   BOOL _usesImplicitHierarchyManagement;
 
   int32_t _pendingTransitionID;
-  ASDisplayNodeLayoutContext *_pendingLayoutContext;
+  ASLayoutTransition *_pendingLayoutTransition;
   
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
@@ -225,5 +241,11 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  * If YES, this method must be called on the main thread and the node must not be layer-backed.
  */
 - (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy;
+
+/**
+ *  Convenience method to access this node's trait collection struct. Externally, users should interact
+ *  with the trait collection via ASTraitCollection
+ */
+- (ASEnvironmentTraitCollection)environmentTraitCollection;
 
 @end

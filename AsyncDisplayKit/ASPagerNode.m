@@ -3,14 +3,17 @@
 //  AsyncDisplayKit
 //
 //  Created by Levi McCallum on 12/7/15.
-//  Copyright © 2015 Facebook. All rights reserved.
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
 //
 
 #import "ASPagerNode.h"
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASPagerFlowLayout.h"
-#import "UICollectionViewLayout+ASConvenience.h"
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
@@ -25,6 +28,8 @@
 
 @implementation ASPagerNode
 @dynamic view, delegate, dataSource;
+
+#pragma mark - Lifecycle
 
 - (instancetype)init
 {
@@ -45,6 +50,8 @@
   }
   return self;
 }
+
+#pragma mark - ASDisplayNode
 
 - (void)didLoad
 {
@@ -75,12 +82,24 @@
   [self setTuningParameters:fullPreloadParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeFetchData];
 }
 
+#pragma mark - Getters / Setters
+
+- (NSInteger)currentPageIndex
+{
+  return (self.view.contentOffset.x / CGRectGetWidth(self.view.bounds));
+}
+
 #pragma mark - Helpers
 
 - (void)scrollToPageAtIndex:(NSInteger)index animated:(BOOL)animated
 {
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
   [self.view scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionLeft animated:animated];
+}
+
+- (ASCellNode *)nodeForPageAtIndex:(NSInteger)index
+{
+  return [self.view nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
 }
 
 #pragma mark - ASCollectionViewDataSource
@@ -111,12 +130,12 @@
 
 #pragma mark - Data Source Proxy
 
-- (id <ASPagerNodeDataSource>)dataSource
+- (id <ASPagerDataSource>)dataSource
 {
   return _pagerDataSource;
 }
 
-- (void)setDataSource:(id <ASPagerNodeDataSource>)pagerDataSource
+- (void)setDataSource:(id <ASPagerDataSource>)pagerDataSource
 {
   if (pagerDataSource != _pagerDataSource) {
     _pagerDataSource = pagerDataSource;

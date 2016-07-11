@@ -1,20 +1,20 @@
-/*
- *  Copyright (c) 2014-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the BSD-style license found in the
- *  LICENSE file in the root directory of this source tree. An additional grant
- *  of patent rights can be found in the PATENTS file in the same directory.
- *
- */
+//
+//  ASOverlayLayoutSpec.mm
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import "ASOverlayLayoutSpec.h"
 
 #import "ASAssert.h"
-#import "ASBaseDefines.h"
 #import "ASLayout.h"
 
-static NSString * const kOverlayChildKey = @"kOverlayChildKey";
+static NSUInteger const kUnderlayChildIndex = 0;
+static NSUInteger const kOverlayChildIndex = 1;
 
 @implementation ASOverlayLayoutSpec
 
@@ -25,7 +25,7 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
   }
   ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
   self.overlay = overlay;
-  [self setChild:child];
+  [self setChild:child forIndex:kUnderlayChildIndex];
   return self;
 }
 
@@ -36,12 +36,12 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
 
 - (void)setOverlay:(id<ASLayoutable>)overlay
 {
-  [super setChild:overlay forIdentifier:kOverlayChildKey];
+  [super setChild:overlay forIndex:kOverlayChildIndex];
 }
 
 - (id<ASLayoutable>)overlay
 {
-  return [super childForIdentifier:kOverlayChildKey];
+  return [super childForIndex:kOverlayChildIndex];
 }
 
 /**
@@ -58,18 +58,10 @@ static NSString * const kOverlayChildKey = @"kOverlayChildKey";
     [sublayouts addObject:overlayLayout];
   }
   
-  return [ASLayout layoutWithLayoutableObject:self size:contentsLayout.size sublayouts:sublayouts];
-}
-
-- (void)setChildren:(NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-}
-
-- (NSArray *)children
-{
-  ASDisplayNodeAssert(NO, @"not supported by this layout spec");
-  return nil;
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:contentsLayout.size
+                                   sublayouts:sublayouts];
 }
 
 @end

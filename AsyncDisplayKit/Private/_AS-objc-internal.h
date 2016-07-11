@@ -1,15 +1,25 @@
+//
+//  _AS-objc-internal.h
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
+
 /*
  * Copyright (c) 2009 Apple Inc.  All Rights Reserved.
- * 
+ *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,7 +27,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 
@@ -432,7 +442,7 @@ typedef enum {
     -(BOOL)_tryRetain {                                                         \
         __typeof__(_rc_ivar) _prev;                                             \
         do {                                                                    \
-            _prev = _rc_ivar;                                                   \
+            _prev = __atomic_load_n(&_rc_ivar, __ATOMIC_SEQ_CST);;              \
             if (_prev & 1) {                                                    \
                 return 0;                                                       \
             } else if (_prev == -2) {                                           \
@@ -444,12 +454,13 @@ typedef enum {
         return 1;                                                               \
     }                                                                           \
     -(BOOL)_isDeallocating {                                                    \
-        if (_rc_ivar == -2) {                                                   \
+        __typeof__(_rc_ivar) _prev = __atomic_load_n(&_rc_ivar, __ATOMIC_SEQ_CST); \
+        if (_prev == -2) {                                                      \
             return 1;                                                           \
-        } else if (_rc_ivar < -2) {                                             \
+        } else if (_prev < -2) {                                                \
             __builtin_trap(); /* BUG: over-release elsewhere */                 \
         }                                                                       \
-        return _rc_ivar & 1;                                                    \
+        return _prev & 1;                                                       \
     }
 
 #define _OBJC_SUPPORTED_INLINE_REFCNT_LOGIC(_rc_ivar, _dealloc2main)            \

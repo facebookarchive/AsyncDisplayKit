@@ -1,24 +1,31 @@
-/*
- *  Copyright (c) 2014-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the BSD-style license found in the
- *  LICENSE file in the root directory of this source tree. An additional grant
- *  of patent rights can be found in the PATENTS file in the same directory.
- *
- */
+//
+//  ASInternalHelpers.h
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
-#include <CoreGraphics/CGBase.h>
-#import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "ASBaseDefines.h"
+#import <CoreGraphics/CGBase.h>
+
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector);
 BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL selector);
+
+/// Dispatches the given block to the main queue if not already running on the main thread
 void ASPerformBlockOnMainThread(void (^block)());
-void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT 
+
+/// Dispatches the given block to a background queue with priority of DISPATCH_QUEUE_PRIORITY_DEFAULT if not already run on a background queue
+void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
+
+/// Dispatches a block on to a serial queue that's main purpose is for deallocation of objects on a background thread
+void ASPerformBlockOnDeallocationQueue(void (^block)());
 
 CGFloat ASScreenScale();
 
@@ -27,8 +34,6 @@ CGFloat ASFloorPixelValue(CGFloat f);
 CGFloat ASCeilPixelValue(CGFloat f);
 
 CGFloat ASRoundPixelValue(CGFloat f);
-
-BOOL ASRunningOnOS7();
 
 ASDISPLAYNODE_EXTERN_C_END
 

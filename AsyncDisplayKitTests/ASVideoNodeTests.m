@@ -1,37 +1,50 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASVideoNodeTests.m
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
+
+#import <OCMock/OCMock.h>
 
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface ASVideoNodeTests : XCTestCase
+@interface ASVideoNodeTests : XCTestCase <ASVideoNodeDelegate>
 {
   ASVideoNode *_videoNode;
   AVURLAsset *_firstAsset;
   AVAsset *_secondAsset;
   NSURL *_url;
+  NSArray *_requestedKeys;
 }
 @end
+
+@interface ASNetworkImageNode () {
+  @public __weak id<ASNetworkImageNodeDelegate> _delegate;
+}
+@end
+
 
 @interface ASVideoNode () {
   ASDisplayNode *_playerNode;
   AVPlayer *_player;
 }
+
+
 @property (atomic, readwrite) ASInterfaceState interfaceState;
 @property (atomic, readonly) ASDisplayNode *spinner;
-@property (atomic, readonly) ASImageNode *placeholderImageNode;
 @property (atomic, readwrite) ASDisplayNode *playerNode;
 @property (atomic, readwrite) AVPlayer *player;
 @property (atomic, readwrite) BOOL shouldBePlaying;
 
 - (void)setVideoPlaceholderImage:(UIImage *)image;
+- (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray *)requestedKeys;
 
 @end
 
@@ -43,14 +56,8 @@
   _firstAsset = [AVURLAsset assetWithURL:[NSURL URLWithString:@"firstURL"]];
   _secondAsset = [AVAsset assetWithURL:[NSURL URLWithString:@"secondURL"]];
   _url = [NSURL URLWithString:@"testURL"];
+  _requestedKeys = @[ @"playable" ];
 }
-
-
-- (void)testSpinnerDefaultsToNil
-{
-  XCTAssertNil(_videoNode.spinner);
-}
-
 
 - (void)testOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnode
 {
@@ -68,8 +75,6 @@
 {
   _videoNode.interfaceState = ASInterfaceStateFetchData;
   [_videoNode play];
-  
-  XCTAssertNotNil(_videoNode.spinner);
 }
 
 
@@ -91,8 +96,7 @@
   
   [_videoNode play];
   [_videoNode pause];
-  
-  XCTAssertFalse(((UIActivityIndicatorView *)_videoNode.spinner.view).isAnimating);
+
 }
 
 
@@ -114,8 +118,6 @@
   
   [_videoNode play];
   [_videoNode observeValueForKeyPath:@"status" ofObject:[_videoNode currentItem] change:@{NSKeyValueChangeNewKey : @(AVPlayerItemStatusReadyToPlay)} context:NULL];
-  
-  XCTAssertFalse(((UIActivityIndicatorView *)_videoNode.spinner.view).isAnimating);
 }
 
 
@@ -131,22 +133,41 @@
   XCTAssertNil(_videoNode.player);
 }
 
-- (void)testPlayerIsCreatedInFetchData
+- (void)testPlayerIsCreatedAsynchronouslyInFetchData
 {
-  _videoNode.asset = _firstAsset;
+  AVAsset *asset = _firstAsset;
+  
+  id assetMock = [OCMockObject partialMockForObject:asset];
+  id videoNodeMock = [OCMockObject partialMockForObject:_videoNode];
+  
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  [[[videoNodeMock expect] andForwardToRealObject] prepareToPlayAsset:assetMock withKeys:_requestedKeys];
+  
+  _videoNode.asset = assetMock;
   _videoNode.interfaceState = ASInterfaceStateFetchData;
+  
+  [videoNodeMock verifyWithDelay:1.0f];
   
   XCTAssertNotNil(_videoNode.player);
 }
 
-- (void)testPlayerIsCreatedInFetchDataWithURL
+- (void)testPlayerIsCreatedAsynchronouslyInFetchDataWithURL
 {
-  _videoNode.asset = [AVAsset assetWithURL:_url];
+  AVAsset *asset = [AVAsset assetWithURL:_url];
+  
+  id assetMock = [OCMockObject partialMockForObject:asset];
+  id videoNodeMock = [OCMockObject partialMockForObject:_videoNode];
+  
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  [[[videoNodeMock expect] andForwardToRealObject] prepareToPlayAsset:assetMock withKeys:_requestedKeys];
+  
+  _videoNode.asset = assetMock;
   _videoNode.interfaceState = ASInterfaceStateFetchData;
+  
+  [videoNodeMock verifyWithDelay:1.0f];
   
   XCTAssertNotNil(_videoNode.player);
 }
-
 
 - (void)testPlayerLayerNodeIsAddedOnDidLoadIfVisibleAndAutoPlaying
 {
@@ -212,11 +233,10 @@
   }];
   _videoNode.playerNode.layer.frame = CGRectZero;
   
-  [_videoNode visibilityDidChange:YES];
+  [_videoNode visibleStateDidChange:YES];
 
   XCTAssertTrue(_videoNode.shouldBePlaying);
 }
-
 
 - (void)testVideoShouldPauseWhenItLeavesVisibleButShouldKnowPlayingShouldRestartLater
 {
@@ -284,13 +304,17 @@
 
 - (void)testVideoThatDoesNotAutorepeatsShouldPauseOnPlaybackEnd
 {
-  _videoNode.asset = _firstAsset;
+  id assetMock = [OCMockObject partialMockForObject:_firstAsset];
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  
+  _videoNode.asset = assetMock;
   _videoNode.shouldAutorepeat = NO;
 
   [_videoNode didLoad];
   [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   [_videoNode play];
-
+  
   XCTAssertTrue(_videoNode.isPlaying);
 
   [[NSNotificationCenter defaultCenter] postNotificationName:AVPlayerItemDidPlayToEndTimeNotification object:_videoNode.currentItem];
@@ -301,11 +325,15 @@
 
 - (void)testVideoThatAutorepeatsShouldRepeatOnPlaybackEnd
 {
-  _videoNode.asset = _firstAsset;
+  id assetMock = [OCMockObject partialMockForObject:_firstAsset];
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  
+  _videoNode.asset = assetMock;
   _videoNode.shouldAutorepeat = YES;
 
   [_videoNode didLoad];
   [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   [_videoNode play];
 
   [[NSNotificationCenter defaultCenter] postNotificationName:AVPlayerItemDidPlayToEndTimeNotification object:_videoNode.currentItem];
@@ -315,9 +343,13 @@
 
 - (void)testVideoResumedWhenBufferIsLikelyToKeepUp
 {
-  _videoNode.asset = _firstAsset;
+  id assetMock = [OCMockObject partialMockForObject:_firstAsset];
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  
+  _videoNode.asset = assetMock;
 
   [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   [_videoNode pause];
   _videoNode.shouldBePlaying = YES;
 
@@ -331,31 +363,16 @@
 - (void)testSettingVideoGravityChangesPlaceholderContentMode
 {
   [_videoNode setVideoPlaceholderImage:[[UIImage alloc] init]];
-  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.placeholderImageNode.contentMode);
+  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.contentMode);
 
   _videoNode.gravity = AVLayerVideoGravityResize;
-  XCTAssertEqual(UIViewContentModeScaleToFill, _videoNode.placeholderImageNode.contentMode);
+  XCTAssertEqual(UIViewContentModeScaleToFill, _videoNode.contentMode);
 
   _videoNode.gravity = AVLayerVideoGravityResizeAspect;
-  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.placeholderImageNode.contentMode);
+  XCTAssertEqual(UIViewContentModeScaleAspectFit, _videoNode.contentMode);
 
   _videoNode.gravity = AVLayerVideoGravityResizeAspectFill;
-  XCTAssertEqual(UIViewContentModeScaleAspectFill, _videoNode.placeholderImageNode.contentMode);
-}
-
-- (void)testChangingPlayButtonPerformsProperCleanup
-{
-  ASButtonNode *firstButton = _videoNode.playButton;
-  XCTAssertTrue([firstButton.allTargets containsObject:_videoNode]);
-
-  ASButtonNode *secondButton = [[ASButtonNode alloc] init];
-  _videoNode.playButton = secondButton;
-
-  XCTAssertTrue([secondButton.allTargets containsObject:_videoNode]);
-  XCTAssertEqual(_videoNode, secondButton.supernode);
-
-  XCTAssertFalse([firstButton.allTargets containsObject:_videoNode]);
-  XCTAssertNotEqual(_videoNode, firstButton.supernode);
+  XCTAssertEqual(UIViewContentModeScaleAspectFill, _videoNode.contentMode);
 }
 
 - (void)testChangingAssetsChangesPlaceholderImage
@@ -364,25 +381,50 @@
 
   _videoNode.asset = _firstAsset;
   [_videoNode setVideoPlaceholderImage:firstImage];
-  XCTAssertEqual(firstImage, _videoNode.placeholderImageNode.image);
+  XCTAssertEqual(firstImage, _videoNode.image);
 
   _videoNode.asset = _secondAsset;
-  XCTAssertNotEqual(firstImage, _videoNode.placeholderImageNode.image);
+  XCTAssertNotEqual(firstImage, _videoNode.image);
 }
 
 - (void)testClearingFetchedContentShouldClearAssetData
 {
-  _videoNode.asset = _firstAsset;
+  AVAsset *asset = _firstAsset;
+  
+  id assetMock = [OCMockObject partialMockForObject:asset];
+  id videoNodeMock = [OCMockObject partialMockForObject:_videoNode];
+  
+  [[[assetMock stub] andReturnValue:@YES] isPlayable];
+  [[[videoNodeMock expect] andForwardToRealObject] prepareToPlayAsset:assetMock withKeys:_requestedKeys];
+  
+  _videoNode.asset = assetMock;
   [_videoNode fetchData];
   [_videoNode setVideoPlaceholderImage:[[UIImage alloc] init]];
+  
+  [videoNodeMock verifyWithDelay:1.0f];
+  
   XCTAssertNotNil(_videoNode.player);
   XCTAssertNotNil(_videoNode.currentItem);
-  XCTAssertNotNil(_videoNode.placeholderImageNode.image);
+  XCTAssertNotNil(_videoNode.image);
 
   [_videoNode clearFetchedData];
   XCTAssertNil(_videoNode.player);
   XCTAssertNil(_videoNode.currentItem);
-  XCTAssertNil(_videoNode.placeholderImageNode.image);
+  XCTAssertNil(_videoNode.image);
+}
+
+- (void)testDelegateProperlySetForClassHierarchy
+{
+  _videoNode.delegate = self;
+  
+  XCTAssertTrue([_videoNode.delegate conformsToProtocol:@protocol(ASVideoNodeDelegate)]);
+  XCTAssertTrue([_videoNode.delegate conformsToProtocol:@protocol(ASNetworkImageNodeDelegate)]);
+  XCTAssertTrue([((ASNetworkImageNode*)_videoNode).delegate conformsToProtocol:@protocol(ASNetworkImageNodeDelegate)]);
+  XCTAssertTrue([((ASNetworkImageNode*)_videoNode)->_delegate conformsToProtocol:@protocol(ASNetworkImageNodeDelegate)]);
+  
+  XCTAssertEqual(_videoNode.delegate, self);
+  XCTAssertEqual(((ASNetworkImageNode*)_videoNode).delegate, self);
+  XCTAssertEqual(((ASNetworkImageNode*)_videoNode)->_delegate, self);
 }
 
 @end

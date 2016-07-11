@@ -1,23 +1,20 @@
-/*
- *  Copyright (c) 2014-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the BSD-style license found in the
- *  LICENSE file in the root directory of this source tree. An additional grant
- *  of patent rights can be found in the PATENTS file in the same directory.
- *
- */
+//
+//  ASStackLayoutSpec.mm
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import <numeric>
 #import <vector>
 
-#import "ASBaseDefines.h"
 #import "ASInternalHelpers.h"
 
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackBaselinePositionedLayout.h"
-#import "ASStackLayoutSpecUtilities.h"
-#import "ASStackUnpositionedLayout.h"
 #import "ASThread.h"
 
 @implementation ASStackLayoutSpec
@@ -121,21 +118,12 @@
   _baselineRelativeArrangement = baselineRelativeArrangement;
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
-{
-  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports setChildren");
-}
-
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
-{
-  ASDisplayNodeAssert(NO, @"ASStackLayoutSpec only supports children");
-  return nil;
-}
-
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   if (self.children.count == 0) {
-    return [ASLayout layoutWithLayoutableObject:self size:constrainedSize.min];
+    return [ASLayout layoutWithLayoutableObject:self
+                           constrainedSizeRange:constrainedSize
+                                           size:constrainedSize.min];
   }
   
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
@@ -174,6 +162,7 @@
   }
   
   return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
                                          size:ASSizeRangeClamp(constrainedSize, finalSize)
                                    sublayouts:sublayouts];
 }

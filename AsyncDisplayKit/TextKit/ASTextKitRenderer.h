@@ -1,12 +1,12 @@
-/*
- *  Copyright (c) 2014-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the BSD-style license found in the
- *  LICENSE file in the root directory of this source tree. An additional grant
- *  of patent rights can be found in the PATENTS file in the same directory.
- *
- */
+//
+//  ASTextKitRenderer.h
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import <vector>
 
@@ -78,11 +78,21 @@
  The character range from the original attributedString that is displayed by the renderer given the parameters in the
  initializer.
  */
-- (std::vector<NSRange>)visibleRanges;
+@property (nonatomic, assign, readonly) std::vector<NSRange> visibleRanges;
 
 /**
  The number of lines shown in the string.
  */
 - (NSUInteger)lineCount;
+
+@end
+
+@interface ASTextKitRenderer (ASTextKitRendererConvenience)
+
+/**
+ Returns the first visible range or an NSRange with location of NSNotFound and size of 0 if no first visible
+ range exists
+ */
+@property (nonatomic, assign, readonly) NSRange firstVisibleRange;
 
 @end

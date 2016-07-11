@@ -3,11 +3,14 @@
 //  AsyncDisplayKit
 //
 //  Created by Adlai Holler on 1/7/16.
-//  Copyright © 2016 Facebook. All rights reserved.
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
 //
 
 #import "ASWeakSet.h"
-#import <Foundation/NSMapTable.h>
 
 @interface ASWeakSet<__covariant ObjectType> ()
 @property (nonatomic, strong, readonly) NSMapTable<ObjectType, NSNull *> *mapTable;

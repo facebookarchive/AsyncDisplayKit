@@ -1,10 +1,12 @@
- /* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  _ASAsyncTransactionGroup.m
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import "ASAssert.h"
 
@@ -82,8 +84,8 @@ static void _transactionGroupRunLoopObserverCallback(CFRunLoopObserverRef observ
   ASDisplayNodeAssertMainThread();
 
   if ([_containerLayers count]) {
-    NSHashTable *containerLayersToCommit = [_containerLayers copy];
-    [_containerLayers removeAllObjects];
+    NSHashTable *containerLayersToCommit = _containerLayers;
+    _containerLayers = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
 
     for (CALayer *containerLayer in containerLayersToCommit) {
       // Note that the act of committing a transaction may open a new transaction,

@@ -3,10 +3,14 @@
 //  AsyncDisplayKit
 //
 //  Created by Garrett Moon on 2/5/16.
-//  Copyright © 2016 Facebook. All rights reserved.
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#ifdef PIN_REMOTE_IMAGE
+#if PIN_REMOTE_IMAGE
 #import "ASPINRemoteImageDownloader.h"
 
 #import "ASAssert.h"
@@ -56,6 +60,11 @@
   return self.fileReady;
 }
 
+- (BOOL)isDataSupported:(NSData *)data
+{
+  return [data pin_isGIF];
+}
+
 @end
 #endif
 
@@ -76,7 +85,23 @@
   static PINRemoteImageManager *sharedPINRemoteImageManager = nil;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
+  
 #if PIN_ANIMATED_AVAILABLE
+    // Check that Carthage users have linked both PINRemoteImage & PINCache by testing for one file each
+    if (!(NSClassFromString(@"PINRemoteImageManager"))) {
+        NSException *e = [NSException
+                          exceptionWithName:@"FrameworkSetupException"
+                          reason:@"Missing the path to the PINRemoteImage framework."
+                          userInfo:nil];
+        @throw e;
+    }
+    if (!(NSClassFromString(@"PINCache"))) {
+        NSException *e = [NSException
+                          exceptionWithName:@"FrameworkSetupException"
+                          reason:@"Missing the path to the PINCache framework."
+                          userInfo:nil];
+        @throw e;
+    }
     sharedPINRemoteImageManager = [[PINRemoteImageManager alloc] initWithSessionConfiguration:nil alternativeRepresentationProvider:self];
 #else
     sharedPINRemoteImageManager = [[PINRemoteImageManager alloc] initWithSessionConfiguration:nil];
@@ -96,8 +121,9 @@
 
 - (id <ASImageContainerProtocol>)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
 {
-  NSString *key = [[self sharedPINRemoteImageManager] cacheKeyForURL:URL processorKey:nil];
-  PINRemoteImageManagerResult *result = [[self sharedPINRemoteImageManager] synchronousImageFromCacheWithCacheKey:key options:PINRemoteImageManagerDownloadOptionsSkipDecode];
+  PINRemoteImageManager *manager = [self sharedPINRemoteImageManager];
+  NSString *key = [manager cacheKeyForURL:URL processorKey:nil];
+  PINRemoteImageManagerResult *result = [manager synchronousImageFromCacheWithCacheKey:key options:PINRemoteImageManagerDownloadOptionsSkipDecode];
 #if PIN_ANIMATED_AVAILABLE
   if (result.alternativeRepresentation) {
     return result.alternativeRepresentation;
@@ -133,7 +159,18 @@
                    downloadProgress:(ASImageDownloaderProgress)downloadProgress
                          completion:(ASImageDownloaderCompletion)completion;
 {
-  return [[self sharedPINRemoteImageManager] downloadImageWithURL:URL options:PINRemoteImageManagerDownloadOptionsSkipDecode completion:^(PINRemoteImageManagerResult *result) {
+  return [[self sharedPINRemoteImageManager] downloadImageWithURL:URL options:PINRemoteImageManagerDownloadOptionsSkipDecode progressDownload:^(int64_t completedBytes, int64_t totalBytes) {
+    if (downloadProgress == nil) { return; }
+    
+    /// If we're targeting the main queue and we're on the main thread, call immediately.
+    if (ASDisplayNodeThreadIsMain() && callbackQueue == dispatch_get_main_queue()) {
+      downloadProgress(totalBytes / (CGFloat)completedBytes);
+    } else {
+      dispatch_async(callbackQueue, ^{
+        downloadProgress(totalBytes / (CGFloat)completedBytes);
+      });
+    }
+  } completion:^(PINRemoteImageManagerResult * _Nonnull result) {
     /// If we're targeting the main queue and we're on the main thread, complete immediately.
     if (ASDisplayNodeThreadIsMain() && callbackQueue == dispatch_get_main_queue()) {
 #if PIN_ANIMATED_AVAILABLE
@@ -174,7 +211,7 @@
   if (progressBlock) {
     [[self sharedPINRemoteImageManager] setProgressImageCallback:^(PINRemoteImageManagerResult * _Nonnull result) {
       dispatch_async(callbackQueue, ^{
-        progressBlock(result.image, result.UUID);
+        progressBlock(result.image, result.renderedImageQuality, result.UUID);
       });
     } ofTaskWithUUID:downloadIdentifier];
   } else {

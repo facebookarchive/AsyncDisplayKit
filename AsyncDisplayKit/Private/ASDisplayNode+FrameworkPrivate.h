@@ -1,10 +1,12 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASDisplayNode+FrameworkPrivate.h
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 //
 // The following methods are ONLY for use by _ASDisplayLayer, _ASDisplayView, and ASDisplayNode.
@@ -15,7 +17,6 @@
 #import "ASDisplayNode.h"
 #import "ASSentinel.h"
 #import "ASThread.h"
-#import "_ASDisplayLayer.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -138,6 +139,11 @@ inline BOOL ASHierarchyStateIncludesVisualizeLayout(ASHierarchyState hierarchySt
  * and are expected to support a placeholder state given that display is often blocked on slow data fetching.
  */
 @property (nonatomic, assign) BOOL shouldBypassEnsureDisplay;
+
+/**
+ * @abstract Checks whether a node should be scheduled for display, considering its current and new interface states.
+ */
+- (BOOL)shouldScheduleDisplayWithNewInterfaceState:(ASInterfaceState)newInterfaceState;
 
 @end
 

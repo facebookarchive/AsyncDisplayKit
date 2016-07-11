@@ -1,10 +1,12 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASRangeController.mm
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import "ASRangeController.h"
 
@@ -15,6 +17,7 @@
 #import "ASMultiDimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASCellNode.h"
 
 @interface ASRangeController ()
 {
@@ -25,7 +28,7 @@
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
   ASLayoutRangeMode _currentRangeMode;
   BOOL _didUpdateCurrentRange;
-  BOOL _didRegisterForNotifications;
+  BOOL _didRegisterForNodeDisplayNotifications;
   CFAbsoluteTime _pendingDisplayNodesTimestamp;
 }
 
@@ -54,7 +57,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 - (void)dealloc
 {
-  if (_didRegisterForNotifications) {
+  if (_didRegisterForNodeDisplayNotifications) {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];
   }
 }
@@ -95,7 +98,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 {
   _scrollDirection = scrollDirection;
 
-  // Perform update immediately, so that cells receive a visibilityDidChange: call before their first pixel is visible.
+  // Perform update immediately, so that cells receive a visibleStateDidChange: call before their first pixel is visible.
   [self scheduleRangeUpdate];
 }
 
@@ -240,10 +243,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     [allIndexPaths addObjectsFromArray:ASIndexPathsForTwoDimensionalArray(allNodes)];
   }
   
-  // TODO Don't register for notifications if this range update doesn't cause any node to enter rendering pipeline.
-  // This can be done once there is an API to observe to (or be notified upon) interface state changes or pipeline enterings
-  [self registerForNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
-  
 #if ASRangeControllerLoggingEnabled
   ASDisplayNodeAssertTrue([visibleIndexPaths isSubsetOfSet:displayIndexPaths]);
   NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (ASRangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
@@ -307,14 +306,19 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 #if ASRangeControllerLoggingEnabled
           [modifiedIndexPaths addObject:indexPath];
 #endif
+          
+          BOOL nodeShouldScheduleDisplay = [node shouldScheduleDisplayWithNewInterfaceState:interfaceState];
           [node recursivelySetInterfaceState:interfaceState];
+          
+          if (nodeShouldScheduleDisplay) {
+            [self registerForNodeDisplayNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
+            if (_didRegisterForNodeDisplayNotifications) {
+              _pendingDisplayNodesTimestamp = CFAbsoluteTimeGetCurrent();
+            }
+          }
         }
       }
     }
-  }
-  
-  if (_didRegisterForNotifications) {
-    _pendingDisplayNodesTimestamp = CFAbsoluteTimeGetCurrent();
   }
   
   _rangeIsValid = YES;
@@ -331,13 +335,14 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [modifiedIndexPaths sortUsingSelector:@selector(compare:)];
   NSLog(@"Range update complete; modifiedIndexPaths: %@", [self descriptionWithIndexPaths:modifiedIndexPaths]);
 #endif
+  [_delegate didCompleteUpdatesInRangeController:self];
 }
 
 #pragma mark - Notification observers
 
-- (void)registerForNotificationsForInterfaceStateIfNeeded:(ASInterfaceState)interfaceState
+- (void)registerForNodeDisplayNotificationsForInterfaceStateIfNeeded:(ASInterfaceState)interfaceState
 {
-  if (!_didRegisterForNotifications) {
+  if (!_didRegisterForNodeDisplayNotifications) {
     ASLayoutRangeMode nextRangeMode = [ASRangeController rangeModeForInterfaceState:interfaceState
                                                                    currentRangeMode:_currentRangeMode];
     if (_currentRangeMode != nextRangeMode) {
@@ -345,7 +350,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
                                                selector:@selector(scheduledNodesDidDisplay:)
                                                    name:ASRenderingEngineDidDisplayScheduledNodesNotification
                                                  object:nil];
-      _didRegisterForNotifications = YES;
+      _didRegisterForNodeDisplayNotifications = YES;
     }
   }
 }
@@ -356,7 +361,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (_pendingDisplayNodesTimestamp < notificationTimestamp) {
     // The rendering engine has processed all the nodes this range controller scheduled. Let's schedule a range update
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ASRenderingEngineDidDisplayScheduledNodesNotification object:nil];
-    _didRegisterForNotifications = NO;
+    _didRegisterForNodeDisplayNotifications = NO;
     
     [self scheduleRangeUpdate];
   }

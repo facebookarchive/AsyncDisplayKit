@@ -1,12 +1,16 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASDisplayNode+Beta.h
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import "ASContextTransitioning.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 void ASPerformBlockOnMainThread(void (^block)());
@@ -35,12 +39,12 @@ ASDISPLAYNODE_EXTERN_C_END
  * restoring context if necessary. Restoring can be done in contextDidDisplayNodeContent
  * This block can be called from *any* thread and it is unsafe to access any UIKit main thread properties from it.
  */
-@property (nonatomic, strong) ASDisplayNodeContextModifier willDisplayNodeContentWithRenderingContext;
+@property (nonatomic, copy, nullable) ASDisplayNodeContextModifier willDisplayNodeContentWithRenderingContext;
 
 /**
  * @abstract allow modification of a context after the node's content is drawn
  */
-@property (nonatomic, strong) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
+@property (nonatomic, copy, nullable) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
 
 /** @name Layout Transitioning */
 
@@ -73,7 +77,7 @@ ASDISPLAYNODE_EXTERN_C_END
 - (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
                              animated:(BOOL)animated
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(void(^)())completion;
+                measurementCompletion:(nullable void(^)())completion;
 
 /**
  * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
@@ -88,8 +92,8 @@ ASDISPLAYNODE_EXTERN_C_END
  * @see animateLayoutTransition:
  */
 - (void)transitionLayoutWithAnimation:(BOOL)animated
-                         shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                      measurementCompletion:(void(^)())completion;
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(nullable void(^)())completion;
 
 
 /**
@@ -103,4 +107,15 @@ ASDISPLAYNODE_EXTERN_C_END
  */
 - (void)cancelLayoutTransitionsInProgress;
 
+/**
+ * @abstract Indicates that the receiver and all subnodes have finished displaying. May be called more than once, for example if the receiver has
+ * a network image node. This is called after the first display pass even if network image nodes have not downloaded anything (text would be done,
+ * and other nodes that are ready to do their final display). Each render of every progressive jpeg network node would cause this to be called, so
+ * this hook could be called up to 1 + (pJPEGcount * pJPEGrenderCount) times. The render count depends on how many times the downloader calls the
+ * progressImage block.
+ */
+- (void)hierarchyDisplayDidFinish;
+
 @end
+
+NS_ASSUME_NONNULL_END

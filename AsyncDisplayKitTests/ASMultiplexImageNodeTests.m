@@ -1,10 +1,12 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASMultiplexImageNodeTests.m
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import <OCMock/OCMock.h>
 
@@ -88,8 +90,22 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
 {
   [super setUp];
 
-  _mockCache = [OCMockObject mockForProtocol:@protocol(ASImageCacheProtocol)];
-  _mockDownloader = [OCMockObject mockForProtocol:@protocol(ASImageDownloaderProtocol)];
+  _mockCache = [[OCMockObject mockForProtocol:@protocol(ASImageCacheProtocol)] retain];
+  _mockDownloader = [[OCMockObject mockForProtocol:@protocol(ASImageDownloaderProtocol)] retain];
+}
+
+- (void)tearDown
+{
+  if(_mockCache) {
+    [_mockCache release];
+    _mockCache = nil;
+  }
+  if(_mockDownloader) {
+    [_mockDownloader release];
+    _mockDownloader = nil;
+  }
+
+  [super tearDown];
 }
 
 - (void)testDataSourceImageMethod

@@ -1,10 +1,12 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASTextNodeTests.m
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import <CoreText/CoreText.h>
 
@@ -44,7 +46,7 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
 @interface ASTextNodeTests : XCTestCase
 
 @property (nonatomic, readwrite, strong) ASTextNode *textNode;
-@property (nonatomic, readwrite, copy) NSAttributedString *attributedString;
+@property (nonatomic, readwrite, copy) NSAttributedString *attributedText;
 
 @end
 
@@ -80,8 +82,8 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   [mas addAttribute:NSParagraphStyleAttributeName value:lastLinePara
               range:NSMakeRange(mas.length - 1, 1)];
   
-  _attributedString = mas;
-  _textNode.attributedString = _attributedString;
+  _attributedText = mas;
+  _textNode.attributedText = _attributedText;
 }
 
 #pragma mark - ASTextNode
@@ -97,8 +99,8 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
 - (void)testSettingTruncationMessage
 {
   NSAttributedString *truncation = [[NSAttributedString alloc] initWithString:@"..." attributes:nil];
-  _textNode.truncationAttributedString = truncation;
-  XCTAssertTrue([_textNode.truncationAttributedString isEqualToAttributedString:truncation], @"Failed to set truncation message");
+  _textNode.truncationAttributedText = truncation;
+  XCTAssertTrue([_textNode.truncationAttributedText isEqualToAttributedString:truncation], @"Failed to set truncation message");
 }
 
 - (void)testSettingAdditionalTruncationMessage
@@ -140,13 +142,22 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   }
 }
 
+- (void)testMeasureWithZeroSizeAndPlaceholder
+{
+  _textNode.placeholderEnabled = YES;
+  
+  XCTAssertNoThrow([_textNode measure:CGSizeZero], @"Measure with zero size and placeholder enabled should not throw an exception");
+  XCTAssertNoThrow([_textNode measure:CGSizeMake(0, 100)], @"Measure with zero width and placeholder enabled should not throw an exception");
+  XCTAssertNoThrow([_textNode measure:CGSizeMake(100, 0)], @"Measure with zero height and placeholder enabled should not throw an exception");
+}
+
 - (void)testAccessibility
 {
-  _textNode.attributedString = _attributedString;
+  _textNode.attributedText = _attributedText;
   XCTAssertTrue(_textNode.isAccessibilityElement, @"Should be an accessibility element");
   XCTAssertTrue(_textNode.accessibilityTraits == UIAccessibilityTraitStaticText, @"Should have static text accessibility trait, instead has %llu", _textNode.accessibilityTraits);
 
-  XCTAssertTrue([_textNode.accessibilityLabel isEqualToString:_attributedString.string], @"Accessibility label is incorrectly set to \n%@\n when it should be \n%@\n", _textNode.accessibilityLabel, _attributedString.string);
+  XCTAssertTrue([_textNode.accessibilityLabel isEqualToString:_attributedText.string], @"Accessibility label is incorrectly set to \n%@\n when it should be \n%@\n", _textNode.accessibilityLabel, _attributedText.string);
 }
 
 - (void)testLinkAttribute
@@ -156,7 +167,7 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   NSString *linkString = @"Link";
   NSRange linkRange = NSMakeRange(0, linkString.length);
   NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:linkString attributes:@{ linkAttributeName : linkAttributeValue}];
-  _textNode.attributedString = attributedString;
+  _textNode.attributedText = attributedString;
   _textNode.linkAttributeNames = @[linkAttributeName];
 
   ASTextNodeTestDelegate *delegate = [ASTextNodeTestDelegate new];
@@ -178,7 +189,7 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   NSString *linkString = @"Link notalink";
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:linkString];
   [attributedString addAttribute:linkAttributeName value:linkAttributeValue range:NSMakeRange(0, 4)];
-  _textNode.attributedString = attributedString;
+  _textNode.attributedText = attributedString;
   _textNode.linkAttributeNames = @[linkAttributeName];
 
   ASTextNodeTestDelegate *delegate = [ASTextNodeTestDelegate new];

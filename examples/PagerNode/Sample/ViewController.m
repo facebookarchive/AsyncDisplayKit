@@ -1,13 +1,19 @@
-/* This file provided by Facebook is for non-commercial testing and evaluation
- * purposes only.  Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
- * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+//
+//  ViewController.m
+//  Sample
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+//  FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+//  ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+//  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 
 #import "ViewController.h"
 
@@ -15,9 +21,14 @@
 
 #import "PageNode.h"
 
-@interface ViewController () <ASPagerNodeDataSource>
+static UIColor *randomColor() {
+  CGFloat hue = ( arc4random() % 256 / 256.0 );  //  0.0 to 1.0
+  CGFloat saturation = ( arc4random() % 128 / 256.0 ) + 0.5;  //  0.5 to 1.0, away from white
+  CGFloat brightness = ( arc4random() % 128 / 256.0 ) + 0.5;  //  0.5 to 1.0, away from black
+  return [UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:1];
+}
 
-- (ASPagerNode *)node;
+@interface ViewController () <ASPagerNodeDataSource>
 
 @end
 
@@ -25,19 +36,30 @@
 
 - (instancetype)init
 {
-  if (!(self = [super initWithNode:[[ASPagerNode alloc] init]]))
-    return nil;
+  self = [super initWithNode:[[ASPagerNode alloc] init]];
+  if (self == nil) {
+    return self;
+  }
 
-  [self node].dataSource = self;
-  
   self.title = @"Pages";
+  self.node.dataSource = self;
+  
+  self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Next" style:UIBarButtonItemStylePlain target:self action:@selector(scrollToNextPage:)];
+  self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Previous" style:UIBarButtonItemStylePlain target:self action:@selector(scrollToPreviousPage:)];
 
   return self;
 }
 
-- (ASPagerNode *)node
+#pragma mark - Actions
+
+- (void)scrollToNextPage:(id)sender
 {
-  return (ASPagerNode *)[super node];
+  [self.node scrollToPageAtIndex:self.node.currentPageIndex+1 animated:YES];
+}
+
+- (void)scrollToPreviousPage:(id)sender
+{
+  [self.node scrollToPageAtIndex:self.node.currentPageIndex-1 animated:YES];
 }
 
 #pragma mark - ASPagerNodeDataSource
@@ -47,11 +69,13 @@
   return 5;
 }
 
-- (ASCellNode *)pagerNode:(ASPagerNode *)pagerNode nodeAtIndex:(NSInteger)index
+- (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index
 {
-  PageNode *page = [[PageNode alloc] init];
-  page.backgroundColor = [UIColor blueColor];
-  return page;
+  return ^{
+    PageNode *page = [[PageNode alloc] init];
+    page.backgroundColor = randomColor();
+    return page;
+  };
 }
 
 @end

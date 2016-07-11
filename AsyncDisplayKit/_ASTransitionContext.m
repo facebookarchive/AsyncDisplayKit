@@ -3,7 +3,11 @@
 //  AsyncDisplayKit
 //
 //  Created by Levi McCallum on 2/4/16.
-//  Copyright © 2016 Facebook. All rights reserved.
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
 //
 
 #import "_ASTransitionContext.h"
@@ -71,7 +75,7 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
 - (NSArray<ASDisplayNode *> *)subnodesForKey:(NSString *)key
 {
   NSMutableArray<ASDisplayNode *> *subnodes = [NSMutableArray array];
-  for (ASLayout *sublayout in [self layoutForKey:key].immediateSublayouts) {
+  for (ASLayout *sublayout in [self layoutForKey:key].sublayouts) {
     [subnodes addObject:(ASDisplayNode *)sublayout.layoutableObject];
   }
   return subnodes;

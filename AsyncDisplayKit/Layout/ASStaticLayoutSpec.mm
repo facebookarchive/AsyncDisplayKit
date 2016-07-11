@@ -1,17 +1,16 @@
-/*
- *  Copyright (c) 2014-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the BSD-style license found in the
- *  LICENSE file in the root directory of this source tree. An additional grant
- *  of patent rights can be found in the PATENTS file in the same directory.
- *
- */
+//
+//  ASStaticLayoutSpec.mm
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import "ASStaticLayoutSpec.h"
 
 #import "ASLayoutSpecUtilities.h"
-#import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
 @implementation ASStaticLayoutSpec
@@ -68,19 +67,9 @@
   }
 
   return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
                                          size:ASSizeRangeClamp(constrainedSize, size)
                                    sublayouts:sublayouts];
-}
-
-- (void)setChild:(id<ASLayoutable>)child forIdentifier:(NSString *)identifier
-{
-  [self setChildren:child ? @[child] : nil];
-}
-
-- (id<ASLayoutable>)childForIdentifier:(NSString *)identifier
-{
-  ASDisplayNodeAssert(NO, @"ASStaticLayoutSpec only supports children");
-  return nil;
 }
 
 @end

@@ -1,10 +1,12 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASTableViewTests.m
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import <XCTest/XCTest.h>
 
@@ -12,6 +14,7 @@
 #import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASChangeSetDataController.h"
+#import "ASCellNode.h"
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
@@ -126,7 +129,6 @@
   return textCellNode;
 }
 
-
 - (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   return ^{
@@ -138,11 +140,51 @@
 
 @end
 
+@interface ASTableViewFilledDelegate : NSObject <ASTableViewDelegate>
+@end
+
+@implementation ASTableViewFilledDelegate
+
+- (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  return ASSizeRangeMakeExactSize(CGSizeMake(10, 42));
+}
+
+@end
+
 @interface ASTableViewTests : XCTestCase
 @property (atomic, retain) ASTableView *testTableView;
 @end
 
 @implementation ASTableViewTests
+
+- (void)testConstrainedSizeForRowAtIndexPath
+{
+  // Initial width of the table view is non-zero and all nodes are measured with this size.
+  // Any subsequence size change must trigger a relayout.
+  // Width and height are swapped so that a later size change will simulate a rotation
+  ASTestTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectMake(0, 0, 100, 400)
+                                                                  style:UITableViewStylePlain];
+  
+  ASTableViewFilledDelegate *delegate = [ASTableViewFilledDelegate new];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+
+  tableView.asyncDelegate = delegate;
+  tableView.asyncDataSource = dataSource;
+  
+  [tableView reloadDataImmediately];
+  [tableView setNeedsLayout];
+  [tableView layoutIfNeeded];
+  
+  for (int section = 0; section < NumberOfSections; section++) {
+      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        CGRect rect = [tableView rectForRowAtIndexPath:indexPath];
+        XCTAssertEqual(rect.size.width, 100);  // specified width should be ignored for table
+        XCTAssertEqual(rect.size.height, 42);
+      }
+  }
+}
 
 // TODO: Convert this to ARC.
 - (void)DISABLED_testTableViewDoesNotRetainItselfAndDelegate
@@ -406,8 +448,7 @@
 {
   CGSize tableViewSize = CGSizeMake(100, 500);
   ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
-                                                                style:UITableViewStylePlain
-                                                    asyncDataFetching:YES];
+                                                                style:UITableViewStylePlain];
   ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
 
   tableView.asyncDelegate = dataSource;

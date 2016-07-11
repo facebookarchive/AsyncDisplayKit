@@ -1,10 +1,12 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASFlowLayoutController.mm
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import "ASFlowLayoutController.h"
 #import "ASAssert.h"
@@ -14,7 +16,6 @@
 
 #include <map>
 #include <vector>
-#include <cassert>
 
 @interface ASFlowLayoutController()
 {
@@ -90,12 +91,12 @@
     currPath.row++;
 
     // Once we reach the end of the section, advance to the next one.  Keep advancing if the next section is zero-sized.
-    while (currPath.row >= [(NSArray *)completedNodes[currPath.section] count] && currPath.section < completedNodes.count - 1) {
+    while (currPath.row >= [(NSArray *)completedNodes[currPath.section] count] && currPath.section < endPath.section) {
       currPath.row = 0;
       currPath.section++;
-      ASDisplayNodeAssert(currPath.section <= endPath.section, @"currPath should never reach a further section than endPath");
     }
   }
+  ASDisplayNodeAssert(currPath.section <= endPath.section, @"currPath should never reach a further section than endPath");
 
   [indexPathSet addObject:[NSIndexPath indexPathWithASIndexPath:endPath]];
   

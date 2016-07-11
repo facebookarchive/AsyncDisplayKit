@@ -1,10 +1,12 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASButtonNode.mm
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import "ASButtonNode.h"
 #import "ASStackLayoutSpec.h"
@@ -13,6 +15,7 @@
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASStaticLayoutSpec.h"
 
 @interface ASButtonNode ()
 {
@@ -69,7 +72,11 @@
 {
   if (!_titleNode) {
     _titleNode = [[ASTextNode alloc] init];
+#if TARGET_OS_IOS 
+      // tvOS needs access to the underlying view
+      // of the button node to add a touch handler.
     [_titleNode setLayerBacked:YES];
+#endif
     [_titleNode setFlexShrink:YES];
   }
   return _titleNode;
@@ -241,40 +248,42 @@
 
 - (ASVerticalAlignment)contentVerticalAlignment
 {
-    ASDN::MutexLocker l(_propertyLock);
-    return _contentVerticalAlignment;
+  ASDN::MutexLocker l(_propertyLock);
+  return _contentVerticalAlignment;
 }
 
 - (void)setContentVerticalAlignment:(ASVerticalAlignment)contentVerticalAlignment
 {
-    ASDN::MutexLocker l(_propertyLock);
-    _contentVerticalAlignment = contentVerticalAlignment;
+  ASDN::MutexLocker l(_propertyLock);
+  _contentVerticalAlignment = contentVerticalAlignment;
 }
 
 - (ASHorizontalAlignment)contentHorizontalAlignment
 {
-    ASDN::MutexLocker l(_propertyLock);
-    return _contentHorizontalAlignment;
+  ASDN::MutexLocker l(_propertyLock);
+  return _contentHorizontalAlignment;
 }
 
 - (void)setContentHorizontalAlignment:(ASHorizontalAlignment)contentHorizontalAlignment
 {
-    ASDN::MutexLocker l(_propertyLock);
-    _contentHorizontalAlignment = contentHorizontalAlignment;
+  ASDN::MutexLocker l(_propertyLock);
+  _contentHorizontalAlignment = contentHorizontalAlignment;
 }
 
 - (UIEdgeInsets)contentEdgeInsets
 {
-    ASDN::MutexLocker l(_propertyLock);
-    return _contentEdgeInsets;
+  ASDN::MutexLocker l(_propertyLock);
+  return _contentEdgeInsets;
 }
 
 - (void)setContentEdgeInsets:(UIEdgeInsets)contentEdgeInsets
 {
-    ASDN::MutexLocker l(_propertyLock);
-    _contentEdgeInsets = contentEdgeInsets;
+  ASDN::MutexLocker l(_propertyLock);
+  _contentEdgeInsets = contentEdgeInsets;
 }
 
+
+#if TARGET_OS_IOS
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
 {
   NSDictionary *attributes = @{
@@ -286,6 +295,7 @@
                                                                attributes:attributes];
   [self setAttributedTitle:string forState:state];
 }
+#endif
 
 - (NSAttributedString *)attributedTitleForState:(ASControlState)state
 {
@@ -482,9 +492,13 @@
     spec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentEdgeInsets child:spec];
   }
   
+  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
+    stack.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(self.preferredFrameSize);
+    spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
+  }
+  
   if (_backgroundImageNode.image) {
-    spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec
-                                                      background:_backgroundImageNode];
+    spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec background:_backgroundImageNode];
   }
   
   return spec;

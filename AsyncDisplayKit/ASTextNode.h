@@ -1,10 +1,12 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASTextNode.h
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #import <AsyncDisplayKit/ASControlNode.h>
 
@@ -34,19 +36,19 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 @interface ASTextNode : ASControlNode
 
 /**
- @abstract The attributed string to show.
+ @abstract The styled text displayed by the node.
  @discussion Defaults to nil, no text is shown.
  For inline image attachments, add an attribute of key NSAttachmentAttributeName, with a value of an NSTextAttachment.
  */
-@property (nullable, nonatomic, copy) NSAttributedString *attributedString;
+@property (nullable, nonatomic, copy) NSAttributedString *attributedText;
 
 #pragma mark - Truncation
 
 /**
- @abstract The attributedString to use when the text must be truncated.
+ @abstract The attributedText to use when the text must be truncated.
  @discussion Defaults to a localized ellipsis character.
  */
-@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedString;
+@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedText;
 
 /**
  @summary The second attributed string appended for truncation.
@@ -267,6 +269,30 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @return YES if the entity attribute should be treated as a long-press target, NO otherwise.
  */
 - (BOOL)textNode:(ASTextNode *)textNode shouldLongPressLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;
+
+@end
+
+/**
+ * @abstract Text node deprecated properties
+ */
+@interface ASTextNode (Deprecated)
+
+/**
+ The attributedString and attributedText properties are equivalent, but attributedText is now the standard API
+ name in order to match UILabel and ASEditableTextNode.
+ 
+ @see attributedText
+ */
+@property (nullable, nonatomic, copy) NSAttributedString *attributedString;
+
+
+/**
+ The truncationAttributedString and truncationAttributedText properties are equivalent, but attributedText is now the
+ standard API name in order to match UILabel and ASEditableTextNode.
+ 
+ @see truncationAttributedText
+ */
+@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedString;
 
 @end
 

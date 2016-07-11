@@ -1,10 +1,12 @@
-/* Copyright (c) 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+//
+//  ASMultiplexImageNode.h
+//  AsyncDisplayKit
+//
+//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under the BSD-style license found in the
+//  LICENSE file in the root directory of this source tree. An additional grant
+//  of patent rights can be found in the PATENTS file in the same directory.
+//
 
 #if TARGET_OS_IOS
 
@@ -117,13 +119,20 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  */
 @property (nullable, nonatomic, readonly) ASImageIdentifier displayedImageIdentifier;
 
+/**
+ * @abstract If the downloader implements progressive image rendering and this value is YES progressive renders of the
+ * image will be displayed as the image downloads. Regardless of this properties value, progress renders will
+ * only occur when the node is visible. Defaults to YES.
+ */
+@property (nonatomic, assign, readwrite) BOOL shouldRenderProgressImages;
+
 #if TARGET_OS_IOS
 /**
  * @abstract The image manager that this image node should use when requesting images from the Photos framework. If this is `nil` (the default), then `PHImageManager.defaultManager` is used.
  
  * @see `+[NSURL URLWithAssetLocalIdentifier:targetSize:contentMode:options:]` below.
  */
-@property (nonatomic, strong) PHImageManager *imageManager;
+@property (nullable, nonatomic, strong) PHImageManager *imageManager;
 #endif
 @end
 
