@@ -1,4 +1,4 @@
-![AsyncDisplayKit](https://github.com/facebook/AsyncDisplayKit/blob/master/docs/assets/logo.png)
+![AsyncDisplayKit](https://github.com/facebook/AsyncDisplayKit/blob/gh-pages/static/images/logo.png)
 
 [![Apps Using](https://img.shields.io/badge/Apps%20Using%20ASDK-%3E4,646-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
 [![Downloads](https://img.shields.io/badge/Total%20Downloads-%3E475,500-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
@@ -42,7 +42,7 @@ if you're using Swift:
 AsyncDisplayKit Nodes are a thread-safe abstraction layer over UIViews and
 CALayers:
 
-![node-view-layer diagram](https://github.com/facebook/AsyncDisplayKit/blob/master/docs/assets/node-view-layer.png)
+![node-view-layer diagram](https://github.com/facebook/AsyncDisplayKit/blob/gh-pages/static/images/node-view-layer.png)
 
 You can construct entire node hierarchies in parallel, or instantiate and size
 a single node on a background thread &mdash; for example, you could do
