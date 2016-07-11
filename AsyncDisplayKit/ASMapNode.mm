@@ -24,7 +24,6 @@
   MKMapSnapshotter *_snapshotter;
   BOOL _snapshotAfterLayout;
   NSArray *_annotations;
-//  CLLocationCoordinate2D _centerCoordinateOfMap;
 }
 @end
 
@@ -46,7 +45,6 @@
   
   _needsMapReloadOnBoundsChange = YES;
   _liveMap = NO;
-//  _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
   _annotations = @[];
   _showAnnotationsOptions = ASMapNodeShowAnnotationsOptionsIgnored;
   return self;
@@ -161,18 +159,9 @@
 
 - (void)setRegion:(MKCoordinateRegion)region
 {
-  MKMapSnapshotOptions * __weak oldOptions = self.options;
-  MKMapSnapshotOptions * options = [[MKMapSnapshotOptions alloc] init];
-  options.camera = oldOptions.camera;
-  options.mapRect = oldOptions.mapRect;
-  options.mapType = oldOptions.mapType;
-  options.showsPointsOfInterest = oldOptions.showsPointsOfInterest;
-  options.showsBuildings = oldOptions.showsBuildings;
-  options.size = oldOptions.size;
-  options.scale = oldOptions.scale;
+  MKMapSnapshotOptions * options = [self.options copy];
   options.region = region;
   self.options = options;
-//  self.options.region = region;
 }
 
 #pragma mark - Snapshotter
@@ -282,18 +271,12 @@
       BOOL const animated = self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
       [_mapView showAnnotations:_mapView.annotations animated:animated];
     }
-    
-//    if (CLLocationCoordinate2DIsValid(_centerCoordinateOfMap)) {
-//      [_mapView setCenterCoordinate:_centerCoordinateOfMap];
-//    }
   }
 }
 
 - (void)removeLiveMap
 {
-  self.userInteractionEnabled = false;
-  // FIXME: With MKCoordinateRegion, isn't the center coordinate fully specified?  Do we need this?
-//  _centerCoordinateOfMap = _mapView.centerCoordinate;
+  self.userInteractionEnabled = NO;
   [_mapView removeFromSuperview];
   _mapView = nil;
 }
@@ -336,7 +319,7 @@
   CLLocationCoordinate2D topLeftCoord = CLLocationCoordinate2DMake(-90, 180);
   CLLocationCoordinate2D bottomRightCoord = CLLocationCoordinate2DMake(90, -180);
 
-  for (id<MKAnnotation> annotation in _annotations) {
+  for (id<MKAnnotation> annotation in annotations) {
     topLeftCoord = CLLocationCoordinate2DMake(fmax(topLeftCoord.latitude, annotation.coordinate.latitude),
                                               fmin(topLeftCoord.longitude, annotation.coordinate.longitude));
     bottomRightCoord = CLLocationCoordinate2DMake(fmin(bottomRightCoord.latitude, annotation.coordinate.latitude),
