@@ -8,7 +8,7 @@ nextPage: automatic-layout-examples.html
 
 AsyncDisplayKit includes a library of `layoutSpec` components that can be composed to declaratively specify a layout. The **child(ren) of a layoutSpec may be a node, a layoutSpec or a combination of the two types.**  
 
-Both nodes and layoutSpecs conform to the `<ASLayoutable>` protocol.  Any `ASLayoutable` object may be the child of a layoutSpec. <a href = "automatic-layout-containers.html#layoutable-properties">ASLayoutable properties</a> may be applied to ASLayoutable objects to create complex UIs. 
+Both nodes and layoutSpecs conform to the `<ASLayoutable>` protocol.  Any `ASLayoutable` object may be the child of a layoutSpec. <a href = "automatic-layout-containers.html#aslayoutable-properties">ASLayoutable properties</a> may be applied to ASLayoutable objects to create complex UI designs. 
 
 
 ### Single Child layoutSpecs
@@ -20,31 +20,31 @@ Both nodes and layoutSpecs conform to the `<ASLayoutable>` protocol.  Any `ASLay
   </tr>
   <tr>
     <td><b><code>ASInsetLayoutSpec</code></b></td>
-    <td>applies an inset margin around a component. </td> 
+    <td><p>Applies an inset margin around a component.</p> <p><i>The object that is being inset must have an intrinsic size.</i></p></td> 
   </tr>
-  <tr>
-    <td><b><code>ASRatioLayoutSpec</code></b></td>
-    <td>lays out a component at a fixed aspect ratio (which can be scaled). Great for images, gifs and videos. </td> 
-  </tr>
-  <tr>
+    <tr>
     <td><b><code>ASOverlayLayoutSpec</code></b></td>
-    <td>lays out a component, stretching another component on top of it as an overlay. <b>The order in which subnodes are added matter for this layoutSpec</b>.</td> 
+    <td><p>Lays out a component, stretching another component on top of it as an overlay.</p> <p><i>The underlay object must have an intrinsic size. Additionally, the order in which subnodes are added matters for this layoutSpec; the overlay object must be added as a subnode to the parent node after the underlay object.</i></p></td> 
   </tr>
   <tr>
     <td><b><code>ASBackgroundLayoutSpec</code></b></td>
-    <td>lays out a component, stretching another component behind it as a backdrop. <b>The order in which subnodes are added matter for this layoutSpec</b>.</td> 
+    <td><p>Lays out a component, stretching another component behind it as a backdrop.</p> <p><i>The foreground object must have an intrinsic size. The order in which subnodes are added matters for this layoutSpec; the background object must be added as a subnode to the parent node before the foreground object.</i></p></td> 
   </tr>
   <tr>
     <td><b><code>ASCenterLayoutSpec</code></b></td>
-    <td>centers a component in the available space. </td> 
+    <td><p>Centers a component in the available space.</p> <p><i>The ASCenterLayoutSpec must have an intrinisic size.</i></p></td> 
+  </tr>
+  <tr>
+    <td><b><code>ASRatioLayoutSpec</code></b></td>
+    <td><p>Lays out a component at a fixed aspect ratio (which can be scaled).</p> <p><i>This spec is great for objects that do not have an intrinisic size, such as ASNetworkImageNodes and ASVideoNodes.</p> </td> 
   </tr>
   <tr>
     <td><b><code>ASRelativeLayoutSpec</code></b></td>
-    <td>lays out a component and positions it within the layout bounds according to vertical and horizontal positional specifiers. Similar to the “9-part” image areas, a child can be positioned at any of the 4 corners, or the middle of any of the 4 edges, as well as the center. </td> 
+    <td><p>Lays out a component and positions it within the layout bounds according to vertical and horizontal positional specifiers. Similar to the “9-part” image areas, a child can be positioned at any of the 4 corners, or the middle of any of the 4 edges, as well as the center.</p> </td> 
   </tr>
   <tr>
     <td><b><code>ASLayoutSpec</code></b></td>
-    <td>can be used as a spacer if it contains no child.</td> 
+    <td><p>Can be used as a spacer in a stack spec with other children, when .flexGrow and/or .flexShrink is applied.</p> <p><i>This class can also be subclassed to create custom layout specs - advanced ASDK only!</i></p></td> 
   </tr>
 </table> 
 
@@ -59,15 +59,11 @@ The following layoutSpecs may contain one or more children.
   </tr>
   <tr>
     <td><b><code>ASStackLayoutSpec</code></b></td>
-    <td>is based on a simplified version of CSS flexbox. It allows you to stack components vertically or horizontally and specify how they should be flexed and aligned to fit in the available space.</td> 
-  </tr>
-  <tr>
-    <td><b><code>ASStackLayoutSpec</code></b></td>
-    <td>is based on a simplified version of CSS flexbox. It allows you to stack components vertically or horizontally and specify how they should be flexed and aligned to fit in the available space. </td> 
+    <td><p>Allows you to stack components vertically or horizontally and specify how they should be flexed and aligned to fit in the available space.</p> <p><b><i>This is the most common layoutSpec</i></b>.</p></td> 
   </tr>
   <tr>
     <td><b><code>ASStaticLayoutSpec</code></b></td>
-    <td>allows positioning children at fixed offsets. </td> 
+    <td>Allows positioning children at fixed offsets using the <code>.sizeRange</code> and <code>.layoutPosition</code> ASLayoutable properties. </td> 
   </tr>
 </table>
 
@@ -77,7 +73,7 @@ The following properties can be applied to both nodes _and_ layoutSpecs; both co
 
 ### ASStackLayoutable Properties
 
-The following properties will only apply to a child wrapped in an **stack** layoutSpec.
+The following properties may be set on any node or layoutSpecs, but will only apply to those who are a **child of a stack** layoutSpec.
 
 <table style="width:100%"  class = "paddingBetweenCols">
   <tr>
@@ -120,7 +116,7 @@ The following properties will only apply to a child wrapped in an **stack** layo
 
 ### ASStaticLayoutable Properties
 
-The following properties will only apply to a child wrapped in an **static** layoutSpec.
+The following properties may be set on any node or layoutSpecs, but will only apply to those who are a **child of a static** layoutSpec.
 
 <table style="width:100%"  class = "paddingBetweenCols">
   <tr>
@@ -137,10 +133,61 @@ The following properties will only apply to a child wrapped in an **static** lay
   </tr>
 </table>
 
-### Best Practices
+### Providing Intrinsic Sizes for Leaf Nodes
+
+AsyncDisplayKit's layout is recursive, starting at the layoutSpec returned from `layoutSpecThatFits:` and proceeding down until it reaches the leaf nodes included in any nested layoutSpecs. 
+
+Some leaf nodes provide their own intrinsic size, such as ASTextNode or ASImageNode. An attributed string or an image have their own sizes. Other leaf nodes require an intrinsic size to be set.
+
+**Nodes that require the developer to provide an intrinsic size:**
+<ul>
+  <li>`ASDisplayNode` custom subclasses may provide their intrinisc size by implementing `calculateSizeThatFits:`.</li>
+  <li>`ASNetworkImageNode` or `ASMultiplexImageNode` have no intrinsic size until the image is downloaded.</li>
+  <li>`ASVideoNode` or `ASVideoNodePlayer` have no intrinsic size until the video is downloaded.</li>
+</ul>
+
+To provide an intrinisc size for these nodes, you can set one of the following:
+<ol>
+  <li>implement `calculateSizeThatFits:` for **custom ASDisplayNode subclasses** only.</li>
+  <li>set `.preferredFrameSize`</li>
+  <li>set `.sizeRange` for children of **static** nodes only.</li>
+</ol>
+
+Note that `.preferredFrameSize` is not considered by `ASTextNodes`. Also, setting .sizeRange on a node will override the node's intrinisic size provided by `calculateSizeThatFits:`. 
+
+### Common Confusions
+
+There are two main confusions that developers have when using layoutSpecs
+<ol>
+  <li>Certain ASLayoutable properties only apply to children of stack nodes, while other properties only apply to children of static nodes. All ASLayoutable properties can be applied to any node or layoutSpec, however certain properties will only take effect depending on the type of the parent layoutSpec they are wrapped in. These differences are highlighted above in the ASStackLayoutable Properties and ASStaticLayoutable Properties sections. </li>
+  <li>Have I set an intrinsic size for all of my leaf nodes?</li>
+</ol>
+
+#### I set `.flexGrow` on my node, but it doesn't grow?
+
+Upward propogation of ASLayoutable properties is currently disabled. Thus, in certain situations, the `.flexGrow` property must be manually applied to the containers. Two common examples of this that we see include:
 
 <ul>
-  <li>don't wrap everything in a staticLayoutSpec</li>
-  <li>avoid using preferred frame size for everything - won't respond nicely to device rotation or device sizing differences</li>
+  <li>a node (with flexGrow enabled) is wrapped in a static layoutSpec, wrapped in a stack layoutSpec. <b>solution</b>: enable flexGrow on the static layotuSpec as well.<li>
+  <li>a node (with flexGrow enabled) is wrapped in an inset spec. <b>solution</b>: enable flexGrow on the inset spec as well.</li>
+</ul>
+
+#### I want to provide a size for my image, but I don't want to hard code the size.
+
+#### Why won't my stack spec span the full width? 
+
+#### Difference between `ASInsetLayoutSpec` and `ASOverlayLayoutSpec`
+
+An overlay spec requires the underlay object (object to which the overlay item will be applied) to have an intrinsic size. It will center the overlay object in the middle of this area. 
+
+An inset spec requires its object to have an intrinsic size. It adds the inset padding to this size to calculate the final size of the inset spec. 
+
+<img src="/static/images/overlay-vs-inset-spec.png">
+
+### Best Practices
+<ul>
+  <li>AsyncDisplayKit layout is called on a background thread. Do not access the device screen bounds, or any other UIKit methods in `layoutSpecThatFits:`.</li>
+  <li>don't wrap everything in a staticLayoutSpec?</li>
+  <li>avoid using preferred frame size for everything - won't respond nicely to device rotation or device sizing differences?</li>
 </ul>
 
