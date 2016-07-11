@@ -2,7 +2,6 @@
 url: http://asyncdisplaykit.org
 name: AsyncDisplayKit
 relative_permalinks: false
-markdown: redcarpet
 description: Smooth asynchronous user interfaces for iOS apps. 
 timezone: America/Los_Angeles
 
