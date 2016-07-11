@@ -253,9 +253,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   _layoutFacilitator = layoutFacilitator;
   
-  // Trigger creating the layout inspector
-  [self layoutInspector];
-  
   _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
@@ -371,7 +368,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
   
   if (_layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDataSource) {
-    [_layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
+    [self.layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
   }
 }
 
@@ -406,7 +403,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
   if (_layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDelegate) {
-    [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
+    [self.layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
   }
 }
 
@@ -977,7 +974,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [_layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
+  return [self.layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section
@@ -1017,17 +1014,17 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  return [_layoutInspector collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+  return [self.layoutInspector collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
 }
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
-  return [_layoutInspector collectionView:self supplementaryNodesOfKind:kind inSection:section];
+  return [self.layoutInspector collectionView:self supplementaryNodesOfKind:kind inSection:section];
 }
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind;
 {
-  return [_layoutInspector collectionView:self numberOfSectionsForSupplementaryNodeOfKind:kind];
+  return [self.layoutInspector collectionView:self numberOfSectionsForSupplementaryNodeOfKind:kind];
 }
 
 #pragma mark - ASRangeControllerDataSource
