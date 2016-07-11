@@ -2,6 +2,7 @@
 url: http://asyncdisplaykit.org
 name: AsyncDisplayKit
 relative_permalinks: false
+markdown: kramdown
 timezone: America/Los_Angeles
 
 safe: true
