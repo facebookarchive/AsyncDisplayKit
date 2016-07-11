@@ -1,10 +1,6 @@
-# ComponentKit Documentation 
+# AsyncDisplayKit Documentation 
 
 We use [Jekyll](http://jekyllrb.com/) to build the site using Markdown and host it on [Github Pages](https://pages.github.com/).
-
-## Installation
-
-To contribute to the site or add to the documentation, you will have to set up a local copy of the site on your development machine.
 
 ### Dependencies
 
@@ -19,17 +15,15 @@ Otherwise, [RVM](https://rvm.io/) and [rbenv](https://github.com/sstephenson/rbe
 Once you have RubyGems and installed Bundler (via `gem install bundler`), use it to install the dependencies:
 
 ```sh
-$ cd componentkit # Go to folder
+$ cd gh-pages # Go to folder
 $ bundle install # Might need sudo.
 ```
 
-### Instructions
+### Run Jekyll Locally
 
 Use Jekyll to serve the website locally (by default, at `http://localhost:4000`):
 
 ```sh
-$ cd componentkit # Go to folder
-$ git checkout docs
 $ bundle exec jekyll serve -w
 $ open http://localhost:4000/
 ```
