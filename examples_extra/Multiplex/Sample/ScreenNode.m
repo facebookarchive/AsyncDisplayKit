@@ -95,15 +95,15 @@
 - (NSURL *)multiplexImageNode:(ASMultiplexImageNode *)imageNode URLForImageIdentifier:(id)imageIdentifier
 {
   if ([imageIdentifier isEqualToString:@"worst"]) {
-    return [NSURL URLWithString:@"https://raw.githubusercontent.com/facebook/AsyncDisplayKit/master/examples/Multiplex/worst.png"];
+    return [NSURL URLWithString:@"https://raw.githubusercontent.com/facebook/AsyncDisplayKit/master/examples_extra/Multiplex/worst.png"];
   }
   
   if ([imageIdentifier isEqualToString:@"medium"]) {
-    return [NSURL URLWithString:@"https://raw.githubusercontent.com/facebook/AsyncDisplayKit/master/examples/Multiplex/medium.png"];
+    return [NSURL URLWithString:@"https://raw.githubusercontent.com/facebook/AsyncDisplayKit/master/examples_extra/Multiplex/medium.png"];
   }
   
   if ([imageIdentifier isEqualToString:@"best"]) {
-    return [NSURL URLWithString:@"https://raw.githubusercontent.com/facebook/AsyncDisplayKit/master/examples/Multiplex/best.png"];
+    return [NSURL URLWithString:@"https://raw.githubusercontent.com/facebook/AsyncDisplayKit/master/examples_extra/Multiplex/best.png"];
   }
   
   // unexpected identifier
