@@ -39,7 +39,6 @@
   - layer-backing
   - synchronous-concurrency
   - subtree-rasterization
-  - drawing-priority
 - title: Conveniences
   items:
   - hit-test-slop
