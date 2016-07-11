@@ -6,11 +6,12 @@ prevPage: synchronous-concurrency.html
 nextPage: drawing-priority.html
 ---
 
-Precompositing. Flattening an entire view hierarchy into a single layer also improves performance, but comes with a hit to maintainability and hierarchy-based reasoning. Nodes can do this for you too!
+Flattening an entire view hierarchy into a single layer improves performance, but with UIKit, comes with a hit to maintainability and hierarchy-based reasoning. 
+
+With all AsyncDisplayKit nodes, enabling precompositing is as simple as:
 
 ```
 rootNode.shouldRasterizeDescendants = YES;
 ```
 
-...will cause the entire node hierarchy from that point on to be rendered into one layer.
-
+This line will cause the entire node hierarchy from that point on to be rendered into one layer.
