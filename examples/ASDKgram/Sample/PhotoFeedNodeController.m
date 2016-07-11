@@ -38,6 +38,8 @@
 
 #pragma mark - Lifecycle
 
+// -init is often called off the main thread in ASDK. Therefore it is imperative that no UIKit objects are accessed.
+// Examples of common errors include accessing the node’s view or creating a gesture recognizer.
 - (instancetype)init
 {
   _tableNode = [[ASTableNode alloc] init];
@@ -50,16 +52,18 @@
     _tableNode.dataSource = self;
     _tableNode.delegate = self;
     
-    _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
   }
   
   return self;
 }
 
-// do any ASDK view stuff in loadView
+// -loadView is guaranteed to be called on the main thread and is the appropriate place to
+// set up an UIKit objects you may be using.
 - (void)loadView
 {
   [super loadView];
+  
+  _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
   
   _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular imageSize:[self imageSizeForScreenWidth]];
   [self refreshFeed];

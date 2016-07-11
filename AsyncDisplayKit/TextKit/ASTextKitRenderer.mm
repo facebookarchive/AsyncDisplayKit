@@ -128,12 +128,8 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
       // If we're updating an existing context, make sure to use the same inset logic used during initialization.
       // This codepath allows us to reuse the
       CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:constrainedSize];
-      if (_context) {
-        _context.constrainedSize = shadowConstrainedSize;
-      }
-      if (_fontSizeAdjuster) {
-        _fontSizeAdjuster.constrainedSize = shadowConstrainedSize;
-      }
+      if (_context) _context.constrainedSize = shadowConstrainedSize;
+      if (_fontSizeAdjuster) _fontSizeAdjuster.constrainedSize = shadowConstrainedSize;
     }
   }
 }

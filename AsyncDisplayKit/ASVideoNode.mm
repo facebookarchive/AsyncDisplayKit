@@ -49,6 +49,7 @@ static NSString * const kStatus = @"status";
     unsigned int delegateVideoNodeDidPlayToTimeInterval:1;
     unsigned int delegateVideoNodeDidStartInitialLoading:1;
     unsigned int delegateVideoNodeDidFinishInitialLoading:1;
+    unsigned int delegateVideoNodeDidSetCurrentItem:1;
     unsigned int delegateVideoNodeDidStallAtTimeInterval:1;
     unsigned int delegateVideoNodeDidRecoverFromStall:1;
     
@@ -68,6 +69,8 @@ static NSString * const kStatus = @"status";
   ASVideoNodePlayerState _playerState;
   
   AVAsset *_asset;
+  AVVideoComposition *_videoComposition;
+  AVAudioMix *_audioMix;
   
   AVPlayerItem *_currentPlayerItem;
   AVPlayer *_player;
@@ -124,7 +127,10 @@ static NSString * const kStatus = @"status";
   ASDN::MutexLocker l(_propertyLock);
 
   if (_asset != nil) {
-    return [[AVPlayerItem alloc] initWithAsset:_asset];
+    AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
+    playerItem.videoComposition = _videoComposition;
+    playerItem.audioMix = _audioMix;
+    return playerItem;
   }
 
   return nil;
@@ -153,7 +159,11 @@ static NSString * const kStatus = @"status";
   } else {
     self.player = [AVPlayer playerWithPlayerItem:playerItem];
   }
-  
+
+  if (_delegateFlags.delegateVideoNodeDidSetCurrentItem) {
+    [_delegate videoNode:self didSetCurrentItem:playerItem];
+  }
+
   if (self.image == nil && self.URL == nil) {
     [self generatePlaceholderImage];
   }
@@ -448,6 +458,34 @@ static NSString * const kStatus = @"status";
   return _asset;
 }
 
+- (void)setVideoComposition:(AVVideoComposition *)videoComposition
+{
+  ASDN::MutexLocker l(_propertyLock);
+
+  _videoComposition = videoComposition;
+  _currentPlayerItem.videoComposition = videoComposition;
+}
+
+- (AVVideoComposition *)videoComposition
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _videoComposition;
+}
+
+- (void)setAudioMix:(AVAudioMix *)audioMix
+{
+  ASDN::MutexLocker l(_propertyLock);
+
+  _audioMix = audioMix;
+  _currentPlayerItem.audioMix = audioMix;
+}
+
+- (AVAudioMix *)audioMix
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _audioMix;
+}
+
 - (AVPlayer *)player
 {
   ASDN::MutexLocker l(_propertyLock);
@@ -473,6 +511,7 @@ static NSString * const kStatus = @"status";
     _delegateFlags.delegateVideoNodeDidPlayToTimeInterval = [_delegate respondsToSelector:@selector(videoNode:didPlayToTimeInterval:)];
     _delegateFlags.delegateVideoNodeDidStartInitialLoading = [_delegate respondsToSelector:@selector(videoNodeDidStartInitialLoading:)];
     _delegateFlags.delegateVideoNodeDidFinishInitialLoading = [_delegate respondsToSelector:@selector(videoNodeDidFinishInitialLoading:)];
+    _delegateFlags.delegateVideoNodeDidSetCurrentItem = [_delegate respondsToSelector:@selector(videoNode:didSetCurrentItem:)];
     _delegateFlags.delegateVideoNodeDidStallAtTimeInterval = [_delegate respondsToSelector:@selector(videoNode:didStallAtTimeInterval:)];
     _delegateFlags.delegateVideoNodeDidRecoverFromStall = [_delegate respondsToSelector:@selector(videoNodeDidRecoverFromStall:)];
       
