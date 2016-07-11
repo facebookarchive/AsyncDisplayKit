@@ -155,13 +155,14 @@ static const CGFloat kInnerPadding = 10.0f;
 {
   OverrideViewController *overrideVC = [[OverrideViewController alloc] init];
   
+  __weak OverrideViewController *weakOverrideVC = overrideVC;
   overrideVC.overrideDisplayTraitsWithTraitCollection = ^(UITraitCollection *traitCollection) {
     ASTraitCollection *asyncTraitCollection = [ASTraitCollection traitCollectionWithDisplayScale:traitCollection.displayScale
                                                                               userInterfaceIdiom:traitCollection.userInterfaceIdiom
                                                                              horizontalSizeClass:UIUserInterfaceSizeClassCompact
                                                                                verticalSizeClass:UIUserInterfaceSizeClassCompact
                                                                             forceTouchCapability:traitCollection.forceTouchCapability
-                                                                          traitCollectionContext:nil];
+                                                                                   containerSize:weakOverrideVC.view.bounds.size];
     return asyncTraitCollection;
   };
   
