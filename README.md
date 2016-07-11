@@ -12,7 +12,7 @@ Github Pages uses Jekyll to host a site and Jekyll has the following dependencie
 
 Mac OS X comes pre-installed with Ruby, but you may need to update RubyGems (via `gem update --system`).
 Otherwise, [RVM](https://rvm.io/) and [rbenv](https://github.com/sstephenson/rbenv) are popular ways to install Ruby.
-Once you have RubyGems and installed Bundler (via `gem install bundler`), use it to install the dependencies:
+Once you have RubyGems and installed Bundler (via `gem install bundler`), use it to install the dependencies.
 
 ```sh
 $ cd gh-pages # Go to folder
@@ -24,6 +24,6 @@ $ bundle install # Might need sudo.
 Use Jekyll to serve the website locally (by default, at `http://localhost:4000`):
 
 ```sh
-$ bundle exec jekyll serve -w
+$ bundle exec jekyll serve
 $ open http://localhost:4000/
 ```
