@@ -2,7 +2,7 @@
 title: Hit Test Slop
 layout: docs
 permalink: /docs/hit-test-slop.html
-prevPage: drawing-priority.html
+prevPage: layoutSpecs.html
 nextPage: batch-fetching-api.html
 ---
 

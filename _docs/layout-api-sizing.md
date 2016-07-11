@@ -4,12 +4,6 @@ layout: docs
 permalink: /docs/layout-api-sizing.html
 ---
 
-##Question
-
-"I don't think I have a clear understanding of `ASRelativeDimension` / `ASRelativeSizeRange`, and I often see many similar methods to create these structures."
-
-##Answer
-
 The easiest way to understand the compound dimension types in the Layout API is to see all the units in relation to one another.
 
 <img src="/static/images/layout-api-sizing-1.png">
