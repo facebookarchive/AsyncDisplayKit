@@ -171,20 +171,6 @@
                                                      MKCoordinateSpanMake(deltaLat, deltaLon));
 
   _mapNode.region = region;
-
-//  MKMapSnapshotOptions * __weak oldOptions = _mapNode.options;
-//  MKMapSnapshotOptions * options = [[MKMapSnapshotOptions alloc] init];
-//  options.camera = oldOptions.camera;
-//  options.mapRect = oldOptions.mapRect;
-//  options.mapType = oldOptions.mapType;
-//  options.showsPointsOfInterest = oldOptions.showsPointsOfInterest;
-//  options.showsBuildings = oldOptions.showsBuildings;
-//  options.size = oldOptions.size;
-//  options.scale = oldOptions.scale;
-//  options.region = region;
-//  _mapNode.options = options;
-
-  NSLog(@"Region updated");
 }
 
 -(void)toggleLiveMap
@@ -193,7 +179,6 @@
   NSString * const liveMapStr = [self liveMapStr];
   [_liveMapToggleButton setTitle:liveMapStr withFont:nil withColor:[UIColor blueColor] forState:ASControlStateNormal];
   [_liveMapToggleButton setTitle:liveMapStr withFont:[UIFont systemFontOfSize:14] withColor:[UIColor blueColor] forState:ASControlStateHighlighted];
-  NSLog(@"UserInteractionEnabled: %i", _mapNode.userInteractionEnabled);
 }
 
 #pragma mark - Helpers
