@@ -65,7 +65,9 @@ A key limitation of precomposited corners is that the corners must only touch on
 
 Note that AsyncDisplayKit nodes have a special optimization of `.cornerRadius` that automatically implements precomposited corners **only when using** `.shouldRasterizeDescendants`.  It's important to think carefully before you enable rasterization, so don't use this option without first reading all about the <a href = "subtree-rasterization.html">concept</a>.
 
-Finally, if you're looking for a simple, flat-color rounded rectangle or circle, AsyncDisplayKit offers a variety of conveniences to provide this.  See `UIImage+ASConveniences.h` for methods to create flat-colored, rounded-corner resizable images using precomposited corners (both alpha and opaque are supported). 
+<div class = "note">
+If you're looking for a simple, flat-color rounded rectangle or circle, AsyncDisplayKit offers a variety of conveniences to provide this.  See `UIImage+ASConveniences.h` for methods to create flat-colored, rounded-corner resizable images using precomposited corners (both alpha and opaque are supported). These are great for use as placeholders for image nodes or backgrounds for ASButtonNode. <b>More precomposited corner methods will be released with AsyncDisplayKit 2.0 release</b>.
+</div>
 
 ### Clip Corner
 
@@ -79,6 +81,10 @@ Clip corners applies to two main types of corner rounding situations:
 <li>Rounded corners in situations in which the corners touch more than one node or intersect with any subnodes.</li>
 <li>Rounded corners on top of a stationary texture or photo background.  The photo clip corner method is tricky, but useful!</li>
 </ul>
+
+<div class = "note">
+<b>Check back soon! Clip corner methods may be released in AsyncDisplayKit 2.0 release</b>.
+</div>
 
 ##Is it ever okay to use CALayer's .cornerRadius property?
 

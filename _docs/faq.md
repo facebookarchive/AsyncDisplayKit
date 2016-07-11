@@ -9,22 +9,24 @@ nextPage: containers-overview.html
 ###Common Developer Mistakes
 
 <ul>
-<li><a href = "top-misunderstandings.html#accessing-the-node-s-view-before-it-is-loaded">Do not access a node's view in `-init:`.</a></li>
-<li><a href = "top-misunderstandings.html#thread-safety-in-nodeblocks">Make sure you access your data source outside of a node block.</a></li>
-<li><a href = "top-misunderstandings.html#thread-safety-in-viewBlocks">Take steps to avoid a retain cycle in viewBlocks.</a></li>
+<li><a href = "faq.html#accessing-the-node-s-view-before-it-is-loaded">Do not access a node's view in `-init:`.</a></li>
+<li><a href = "faq.html#make-sure-you-access-your-data-source-outside-the-node-block">Make sure you access your data source outside of a node block.</a></li>
+<li><a href = "faq.html#take-steps-to-avoid-a-retain-cycle-in-viewblocks">Take steps to avoid a retain cycle in viewBlocks.</a></li>
 </ul>
 
 ###Common Conceptual Misunderstandings
 
 <ul>
-<li><a href = "top-misunderstandings.html#cell-node-reusability">ASCellNodes are not reusable.</a></li>
-<li><a href = "top-misunderstandings.html#layoutspecs-are-regenerated">LayoutSpecs are regenerated each time layout is called.</a></li>
+<li><a href = "faq.html#ascellnode-reusability">ASCellNodes are not reusable.</a></li>
+<li><a href = "faq.html#layoutspecs-are-regenerated">LayoutSpecs are regenerated each time layout is called.</a></li>
+<li><a href = "faq.html#layout-api-sizing">The difference between all of the sizes used in our powerful Layout API.</a></li>
+
 </ul>
 
 ###Common Performance Questions
 <ul>
-<li><a href = "top-misunderstandings.html#calayer-s-cornerradius-property-kills-performance">If you care about performance, do not use CALayer's .cornerRadius property (or .shadowPath, border or mask).</a></li>
-<li><a href = "top-misunderstandings.html#asyncdisplaykit-does-not-support-uikit-auto-layout">ASDK does not support UIKit Auto Layout.</a></li>
+<li><a href = "faq.html#calayer-s-cornerradius-property-kills-performance">If you care about performance, do not use CALayer's .cornerRadius property (or .shadowPath, border or mask).</a></li>
+<li><a href = "faq.html#asyncdisplaykit-does-not-support-uikit-auto-layout-or-interfacebuilder">ASDK does not support UIKit Auto Layout.</a></li>
 </ul>
 
 
@@ -61,6 +63,11 @@ AsyncDisplayKit does not use cell reuse, for a number of specific reasons, one s
 ### LayoutSpecs Are Regenerated
 <br>
 A node's layoutSpec gets regenerated every time its `layoutThatFits:` method is called. 
+<br>
+
+### Layout API Sizing
+<br>
+If you're confused by `ASRelativeDimension`, `ASRelativeSize`, `ASRelativeSizeRange` and `ASSizeRange`, check out our <a href = "layout-api-sizing.html">Layout API Sizing guide</a>.
 <br>
 
 ### CALayer's .cornerRadius Property Kills Performance

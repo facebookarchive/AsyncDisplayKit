@@ -140,4 +140,3 @@ With this property set to `YES`, the main thread will be blocked until display h
 <div class = "note">
 Using this option does not eliminate all of the performance advantages of AsyncDisplayKit. Normally, a cell has been preloading and is almost done when it reaches the screen, so the blocking time is very short.  Even if the rangeTuningParameters are set to 0 this option outperforms UIKit.  While the main thread is waiting, subnode display executes concurrently.
 </div>
-

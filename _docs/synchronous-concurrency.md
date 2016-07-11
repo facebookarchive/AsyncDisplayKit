@@ -2,8 +2,8 @@
 title: Synchronous Concurrency
 layout: docs
 permalink: /docs/synchronous-concurrency.html
-prevPage: layer-backing.html
-nextPage: subtree-rasterization.html
+prevPage: subtree-rasterization.html
+nextPage: debug-tool-hit-test-visualization.html
 ---
 
 Both `ASViewController` and `ASCellNode` have a property called `neverShowPlaceholders`.  
@@ -23,5 +23,6 @@ node.neverShowPlaceholders = true
 </pre>
 </div>
 </div>
+<br>
 
 Usually, if a cell hasn't finished its display pass before it has reached the screen it will show placeholders until it has drawing its content.  Setting this option to YES makes your scrolling node or ASViewController act more like UIKit, and in fact makes AsyncDisplayKit scrolling visually indistinguishable from UIKit's, except that it's faster.

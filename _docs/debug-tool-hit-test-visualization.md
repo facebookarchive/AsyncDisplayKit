@@ -2,7 +2,7 @@
 title: Hit Test Visualization
 layout: docs
 permalink: /docs/debug-tool-hit-test-visualization.html
-prevPage: placeholder-fade-duration.html
+prevPage: synchronous-concurrency.html
 nextPage: debug-tool-pixel-scaling.html
 ---
 

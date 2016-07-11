@@ -763,7 +763,7 @@ body {
     margin-top: 1em;
     font-family: BodyFontFamily,"Georgia Pro",Georgia,Times;
     margin: 0;
-    border-top: 3px #008ED4 solid;
+    border-top: 3px #1C9BC7 solid;
     background: #f8f7f5;
     border-radius: 4px;
 }
@@ -780,4 +780,18 @@ pre {
     font-family: 'Inconsolata' !important;
     font-weight: 500;
     color: #333333;
+}
+
+.paddingBetweenCols th {
+    text-align: left;
+    padding: 15px 15px 15px 15px;
+}
+
+.paddingBetweenCols td {
+    padding: 15px 15px 15px 15px;
+/*    border: 1 px solid black;*/
+}
+
+.paddingBetweenCols tr:nth-child(even){
+    background-color: #f2f2f2
 }

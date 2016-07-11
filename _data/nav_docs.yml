@@ -21,7 +21,6 @@
   items:
   - display-node
   - cell-node
-  - text-cell-node
   - control-node
   - button-node
   - text-node
@@ -34,17 +33,22 @@
   - scroll-node
 - title: Layout
   items:
-- title: Optimizations
+  - automatic-layout-containers
+- title: Advanced Layout
   items:
-  - layer-backing
-  - synchronous-concurrency
-  - subtree-rasterization
+  - layout-api-sizing
 - title: Conveniences
   items:
   - hit-test-slop
   - batch-fetching-api
   - image-modification-block
   - placeholder-fade-duration
+- title: Optimizations
+  items:
+  - layer-backing
+  - subtree-rasterization
+  - synchronous-concurrency
+  - corner-rounding
 - title: Tools
   items:
   - debug-tool-hit-test-visualization
