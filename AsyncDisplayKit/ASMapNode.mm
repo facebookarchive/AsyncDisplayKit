@@ -167,6 +167,14 @@
   self.options = options;
 }
 
+- (void)setMapDelegate:(id<MKMapViewDelegate>)mapDelegate {
+  _mapDelegate = mapDelegate;
+  
+  if (_mapView) {
+    _mapView.delegate = mapDelegate;
+  }
+}
+
 #pragma mark - Snapshotter
 
 - (void)takeSnapshot
@@ -209,12 +217,29 @@
                     UIGraphicsBeginImageContextWithOptions(image.size, YES, image.scale);
                     [image drawAtPoint:CGPointZero];
                     
-                    // Get a standard annotation view pin. Future implementations should use a custom annotation image property.
-                    MKAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
-                    UIImage *pinImage = pin.image;
-                    CGSize pinSize = pin.bounds.size;
+                    MKAnnotationView *pin;
+                    UIImage *pinImage;
+                    CGSize pinSize;
+                    
+                    // Get a standard annotation view pin if there is no delegate.
+                    id<MKMapViewDelegate> usedMapDelegate = self.mapDelegate;
+                    if (!usedMapDelegate) {
+                      pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+                      pinImage = pin.image;
+                      pinSize = pin.bounds.size;
+                    }
                     
                     for (id<MKAnnotation> annotation in annotations) {
+                      if (usedMapDelegate) {
+                        // Get custom annotation view pin from delegate.
+                        pin = [usedMapDelegate mapView:self.mapView viewForAnnotation:annotation];
+                        UIGraphicsBeginImageContextWithOptions(pin.bounds.size, pin.opaque, 0.0);
+                        [pin.layer renderInContext:UIGraphicsGetCurrentContext()];
+                        pinImage = UIGraphicsGetImageFromCurrentImageContext();
+                        UIGraphicsEndImageContext();
+                        pinSize = pin.bounds.size;
+                      }
+                      
                       CGPoint point = [snapshot pointForCoordinate:annotation.coordinate];
                       if (CGRectContainsPoint(finalImageRect, point)) {
                         CGPoint pinCenterOffset = pin.centerOffset;
