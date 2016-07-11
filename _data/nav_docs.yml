@@ -49,8 +49,10 @@
   - batch-fetching-api
   - image-modification-block
   - placeholder-fade-duration
+- title: Tools
+  items:
   - debug-tool-hit-test-visualization
-  - debug-tool-pixel-scaling
+  - debug-tool-pixel-scaling 
 - title: Beta
   items:
   - implicit-hierarchy-mgmt
