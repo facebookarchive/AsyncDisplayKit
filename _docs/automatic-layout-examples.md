@@ -11,8 +11,11 @@ Three examples in increasing order of complexity.
 
 <img src="/static/layout-example-1.png">
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
 
+<div class = "code">
+<pre lang="objc" class="objcCode">
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constraint
 {
   ASStackLayoutSpec *vStack = [[ASStackLayoutSpec alloc] init];
@@ -29,7 +32,12 @@ Three examples in increasing order of complexity.
 
   return insetSpec;
 }
-```
+</pre>
+<pre lang="swift" class = "swiftCode hidden">
+
+</pre>
+</div>
+</div>
 
 ###Discussion
 
@@ -37,7 +45,11 @@ Three examples in increasing order of complexity.
 
 <img src="/static/layout-example-2.png">
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+
+<div class = "code">
+<pre lang="objc" class="objcCode">
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   // header stack
@@ -71,8 +83,12 @@ Three examples in increasing order of complexity.
 
   return verticalStack;
 }
+</pre>
+<pre lang="swift" class = "swiftCode hidden">
 
-```
+</pre>
+</div>
+</div>
 
 ###Discussion
 
@@ -82,7 +98,11 @@ Get the full ASDK project at examples/ASDKgram.
 
 <img src="/static/layout-example-3.png">
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+
+<div class = "code">
+<pre lang="objc" class="objcCode">
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize {
 
   ASLayoutSpec *textSpec  = [self textSpec];
@@ -172,7 +192,13 @@ Get the full ASDK project at examples/ASDKgram.
   ASBackgroundLayoutSpec *soldOutLabelOverBackground = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:centerSoldOutLabel background:centerSoldOut];
   return soldOutLabelOverBackground;
 }
-```
+</pre>
+<pre lang="swift" class = "swiftCode hidden">
+
+</pre>
+</div>
+</div>
 
 ###Discussion
+
 Get the full ASDK project at examples/CatDealsCollectionView.
