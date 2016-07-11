@@ -30,7 +30,7 @@ A node will be in one of following ranges:
 
 The size of each of these ranges is measured in "screenfuls".  While the default sizes will work well for many use cases, they can be tweaked quite easily by setting the tuning parameters for range type on your scrolling node.
 
-<img src="/static/intelligent-preloading.png">
+<img src="/static/images/intelligent-preloading.png">
 
 In the above visualization of the Pinterest home feed, the user is scrolling down.  As you can see, the sizes of the ranges in the leading direction are quite a bit larger than the content the user is moving away from (the trailing direction).  If the user were to change directions, the leading and trailing sides would dynamically swap in order to keep memory usage optimal.  This allows you to worry about defining the leading and trailing sizes without having to worry about reacting to the changing scroll directions of your user. 
 

@@ -63,7 +63,7 @@ videoNode.muted = true
 
 Since video nodes inherit from ASNetworkImageNode, you can use the URL property to assign a placeholder image.  If you decide not to, the first frame of your video will automatically decoded and used as the placeholder instead.
 
-<img width = "300" src = "/static/video.gif"/>
+<img width = "300" src = "/static/images/video.gif"/>
 
 
 ### ASVideoNode Delegate
