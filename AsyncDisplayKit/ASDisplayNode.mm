@@ -1164,6 +1164,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return;
   }
   
+  if (_transitionContext != nil) {
+    return;
+  }
+  
   [self __layoutSubnodes];
 }
 
