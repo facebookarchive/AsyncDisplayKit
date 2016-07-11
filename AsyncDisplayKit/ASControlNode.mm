@@ -13,6 +13,8 @@
 #import "ASImageNode.h"
 #import "AsyncDisplayKit+Debug.h"
 #import "ASInternalHelpers.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASLayoutableInspectorNode.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
