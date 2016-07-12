@@ -14,6 +14,7 @@
 #import "ASInternalHelpers.h"
 #import "NSIndexSet+ASHelpers.h"
 #import "ASAssert.h"
+#import <unordered_map>
 
 NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 {
@@ -308,18 +309,20 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   _ASHierarchyChangeType type = [changes.firstObject changeType];
   
   // Lookup table [Int: AnimationOptions]
-  NSMutableDictionary *animationOptions = [NSMutableDictionary new];
+  __block std::unordered_map<NSUInteger, ASDataControllerAnimationOptions> animationOptions;
   
-  // All changed indexes, sorted
+  // All changed indexes
   NSMutableIndexSet *allIndexes = [NSMutableIndexSet new];
   
   for (_ASHierarchySectionChange *change in changes) {
-    [change.indexSet enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
+    ASDataControllerAnimationOptions options = change.animationOptions;
+    NSIndexSet *indexes = change.indexSet;
+    [indexes enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
       for (NSUInteger i = range.location; i < NSMaxRange(range); i++) {
-        animationOptions[@(i)] = @(change.animationOptions);
+        animationOptions[i] = options;
       }
     }];
-    [allIndexes addIndexes:change.indexSet];
+    [allIndexes addIndexes:indexes];
   }
   
   // Create new changes by grouping sorted changes by animation option
@@ -336,7 +339,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
     NSUInteger start = reverse ? NSMaxRange(range) - 1 : range.location;
     NSInteger limit = reverse ? range.location - 1 : NSMaxRange(range);
     for (NSInteger i = start; i != limit; i += increment) {
-      ASDataControllerAnimationOptions options = [animationOptions[@(i)] integerValue];
+      ASDataControllerAnimationOptions options = animationOptions[i];
       
       // End the previous group if needed.
       if (options != currentOptions && currentIndexes.count > 0) {
