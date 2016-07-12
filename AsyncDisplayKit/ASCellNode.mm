@@ -272,6 +272,10 @@
 {
   [super visibleStateDidChange:isVisible];
   
+  if (isVisible && self.neverShowPlaceholders) {
+    [self recursivelyEnsureDisplaySynchronously:YES];
+  }
+  
   // NOTE: This assertion is failing in some apps and will be enabled soon.
   // ASDisplayNodeAssert(self.isNodeLoaded, @"Node should be loaded in order for it to become visible or invisible.  If not in this situation, we shouldn't trigger creating the view.");
   UIView *view = self.view;
