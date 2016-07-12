@@ -11,6 +11,7 @@
 #import "ASTableViewInternal.h"
 
 #import "ASAssert.h"
+#import "ASAvailability.h"
 #import "ASBatchFetching.h"
 #import "ASCellNode+Internal.h"
 #import "ASChangeSetDataController.h"
@@ -111,6 +112,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   CGFloat _contentOffsetAdjustment;
   
   CGPoint _deceleratingVelocity;
+  
+  /**
+   * Our layer, retained. Under iOS < 9, when table views are removed from the hierarchy,
+   * their layers may be deallocated and become dangling pointers. This puts the table view
+   * into a very dangerous state where pretty much any call will crash it. So we manually retain our layer.
+   *
+   * You should never access this, and it will be nil under iOS >= 9.
+   */
+  CALayer *_retainedLayer;
 
   CGFloat _nodesConstrainedWidth;
   BOOL _ignoreNodesConstrainedWidthChange;
@@ -233,6 +243,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     // logic to ASTableNode (required to have a shared superclass with ASCollection*).
     ASTableNode *tableNode = nil; //[[ASTableNode alloc] _initWithTableView:self];
     self.strongTableNode = tableNode;
+  }
+  
+  if (!AS_AT_LEAST_IOS9) {
+    _retainedLayer = self.layer;
   }
   
   return self;
