@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASCellNodeVisibilityEvent Constants Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">AsyncDisplayKit </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Facebook</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+
+	
+
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASCellNodeVisibilityEvent Constants Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Declared in</th>
+	<td>ASCellNode.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+
+					
+
+                    
+                    <h3 class="subsubtitle method-title">ASCellNodeVisibilityEvent</h3>
+                    
+                    <div class="section">
+                        <!-- display enum values -->
+                        
+                        <h4 class="method-subtitle">Definition</h4>
+                        <code>typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent ) {<br>
+                            
+                            &nbsp;&nbsp; <a href="">ASCellNodeVisibilityEventVisible</a>,<br>
+                            
+                            &nbsp;&nbsp; <a href="">ASCellNodeVisibilityEventVisibleRectChanged</a>,<br>
+                            
+                            &nbsp;&nbsp; <a href="">ASCellNodeVisibilityEventInvisible</a>,<br>
+                            
+                            &nbsp;&nbsp; <a href="">ASCellNodeVisibilityEventWillBeginDragging</a>,<br>
+                            
+                            &nbsp;&nbsp; <a href="">ASCellNodeVisibilityEventDidEndDragging</a>,<br>
+                            
+                            };</code>
+                    
+                    </div>
+                    
+                    <div class="section section-methods">
+                        <h4 class="method-subtitle">Constants</h4>
+                        <dl class="termdef">
+                            
+                            <dt><a name="" title="ASCellNodeVisibilityEventVisible"></a><code>ASCellNodeVisibilityEventVisible</code></dt>
+<dd>
+
+
+<p>Indicates a cell has just became visible</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASCellNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASCellNodeVisibilityEventVisibleRectChanged"></a><code>ASCellNodeVisibilityEventVisibleRectChanged</code></dt>
+<dd>
+
+
+<p>Its position (determined by scrollView.contentOffset) has changed while at least 1px remains visible.
+It is possible that 100% of the cell is visible both before and after and only its position has changed,
+or that the position change has resulted in more or less of the cell being visible.
+Use CGRectIntersect between cellFrame and scrollView.bounds to get this rectangle</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASCellNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASCellNodeVisibilityEventInvisible"></a><code>ASCellNodeVisibilityEventInvisible</code></dt>
+<dd>
+
+
+<p>Indicates a cell is no longer visible</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASCellNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASCellNodeVisibilityEventWillBeginDragging"></a><code>ASCellNodeVisibilityEventWillBeginDragging</code></dt>
+<dd>
+
+
+<p>Indicates user has started dragging the visible cell</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASCellNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASCellNodeVisibilityEventDidEndDragging"></a><code>ASCellNodeVisibilityEventDidEndDragging</code></dt>
+<dd>
+
+
+<p>Indicates user has ended dragging the visible cell</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASCellNode.h</code>.
+	</p>
+	
+</dd>
+                            
+                        </dl>
+                    </div>
+                    
+
+                    
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

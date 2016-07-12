@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -60,6 +60,8 @@
 		
 		<option value="//api/name/highlighted">highlighted</option>
 		
+		<option value="//api/name/selected">selected</option>
+		
 		<option value="//api/name/touchInside">touchInside</option>
 		
 		<option value="//api/name/tracking">tracking</option>
@@ -81,6 +83,8 @@
 		<option value="//api/name/removeTarget:action:forControlEvents:">- removeTarget:action:forControlEvents:</option>
 		
 		<option value="//api/name/sendActionsForControlEvents:withEvent:">- sendActionsForControlEvents:withEvent:</option>
+		
+		<option value="//api/name/setDefaultFocusAppearance">- setDefaultFocusAppearance</option>
 		
 	</optgroup>
 	
@@ -194,7 +198,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign, getter=isHighlighted) BOOL highlighted</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, getter=isHighlighted) BOOL highlighted</code></div>
 
 		    
 			
@@ -207,6 +211,52 @@
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
 				<p>This is set automatically when the there is a touch inside the control and removed on exit or touch up. This is different from touchInside in that it includes an area around the control, rather than just for touches inside the control.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/selected" title="selected"></a>
+	<h3 class="method-title"><code><a href="#//api/name/selected">&nbsp;&nbsp;selected</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates whether or not the receiver is highlighted.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, getter=isSelected) BOOL selected</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This is set automatically when the receiver is tapped.</p>
 			</div>
 			
 
@@ -332,7 +382,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)addTarget:(id)<em>target</em> action:(SEL)<em>action</em> forControlEvents:(ASControlNodeEvent)<em>controlEvents</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)addTarget:(nullable id)<em>target</em> action:(SEL)<em>action</em> forControlEvents:(ASControlNodeEvent)<em>controlEvents</em></code></div>
 
 		    
 			
@@ -400,7 +450,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (NSArray *)actionsForTarget:(id)<em>target</em> forControlEvent:(ASControlNodeEvent)<em>controlEvent</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (nullable NSArray&lt;NSString*&gt; *)actionsForTarget:(id)<em>target</em> forControlEvent:(ASControlNodeEvent)<em>controlEvent</em></code></div>
 
 		    
 			
@@ -509,7 +559,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)removeTarget:(id)<em>target</em> action:(SEL)<em>action</em> forControlEvents:(ASControlNodeEvent)<em>controlEvents</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)removeTarget:(nullable id)<em>target</em> action:(nullable SEL)<em>action</em> forControlEvents:(ASControlNodeEvent)<em>controlEvents</em></code></div>
 
 		    
 			
@@ -572,7 +622,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)sendActionsForControlEvents:(ASControlNodeEvent)<em>controlEvents</em> withEvent:(UIEvent *)<em>event</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)sendActionsForControlEvents:(ASControlNodeEvent)<em>controlEvents</em> withEvent:(nullable UIEvent *)<em>event</em></code></div>
 
 		    
 			
@@ -613,6 +663,47 @@
 			
 		</div>
 	</div>
+</div><div class="section-method">
+	<a name="//api/name/setDefaultFocusAppearance" title="setDefaultFocusAppearance"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setDefaultFocusAppearance">&ndash;&nbsp;setDefaultFocusAppearance</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>How the node looks when it isn&rsquo;t focused. Exposed here so that subclasses can override.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setDefaultFocusAppearance</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASControlNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
 </div>
 						</div>
 						
@@ -628,10 +719,10 @@
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

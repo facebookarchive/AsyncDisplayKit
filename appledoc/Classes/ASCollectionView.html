@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -56,7 +56,11 @@
 	
 	<optgroup label="Properties">
 		
+		<option value="//api/name/layoutInspector">layoutInspector</option>
+		
 		<option value="//api/name/leadingScreensForBatching">leadingScreensForBatching</option>
+		
+		<option value="//api/name/zeroContentInsets">zeroContentInsets</option>
 		
 	</optgroup>
 	
@@ -68,11 +72,17 @@
 		
 		<option value="//api/name/calculatedSizeForNodeAtIndexPath:">- calculatedSizeForNodeAtIndexPath:</option>
 		
+		<option value="//api/name/clearContents">- clearContents</option>
+		
+		<option value="//api/name/clearFetchedData">- clearFetchedData</option>
+		
 		<option value="//api/name/deleteItemsAtIndexPaths:">- deleteItemsAtIndexPaths:</option>
 		
 		<option value="//api/name/deleteSections:">- deleteSections:</option>
 		
-		<option value="//api/name/initWithFrame:collectionViewLayout:asyncDataFetching:">- initWithFrame:collectionViewLayout:asyncDataFetching:</option>
+		<option value="//api/name/indexPathForNode:">- indexPathForNode:</option>
+		
+		<option value="//api/name/initWithCollectionViewLayout:">- initWithCollectionViewLayout:</option>
 		
 		<option value="//api/name/insertItemsAtIndexPaths:">- insertItemsAtIndexPaths:</option>
 		
@@ -88,7 +98,13 @@
 		
 		<option value="//api/name/performBatchUpdates:completion:">- performBatchUpdates:completion:</option>
 		
+		<option value="//api/name/registerSupplementaryNodeOfKind:">- registerSupplementaryNodeOfKind:</option>
+		
+		<option value="//api/name/relayoutItems">- relayoutItems</option>
+		
 		<option value="//api/name/reloadData">- reloadData</option>
+		
+		<option value="//api/name/reloadDataImmediately">- reloadDataImmediately</option>
 		
 		<option value="//api/name/reloadDataWithCompletion:">- reloadDataWithCompletion:</option>
 		
@@ -100,11 +116,19 @@
 		
 		<option value="//api/name/scrollableDirections">- scrollableDirections</option>
 		
+		<option value="//api/name/setTuningParameters:forRangeMode:rangeType:">- setTuningParameters:forRangeMode:rangeType:</option>
+		
 		<option value="//api/name/setTuningParameters:forRangeType:">- setTuningParameters:forRangeType:</option>
+		
+		<option value="//api/name/supplementaryNodeForElementKind:atIndexPath:">- supplementaryNodeForElementKind:atIndexPath:</option>
+		
+		<option value="//api/name/tuningParametersForRangeMode:rangeType:">- tuningParametersForRangeMode:rangeType:</option>
 		
 		<option value="//api/name/tuningParametersForRangeType:">- tuningParametersForRangeType:</option>
 		
 		<option value="//api/name/visibleNodes">- visibleNodes</option>
+		
+		<option value="//api/name/waitUntilAllUpdatesAreCommitted">- waitUntilAllUpdatesAreCommitted</option>
 		
 	</optgroup>
 	
@@ -140,10 +164,16 @@
 					<div class="section section-overview">
 						<a title="Overview" name="overview"></a>
 						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p>Node-based collection view.</p>
+						<p>Asynchronous UICollectionView with Intelligent Preloading capabilities.</p>
 
-<p>ASCollectionView is a version of UICollectionView that uses nodes &ndash; specifically, ASCellNode subclasses &ndash; with asynchronous
-pre-rendering instead of synchronously loading UICollectionViewCells.</p>
+<p>ASCollectionNode is recommended over ASCollectionView.  This class exists for adoption convenience.</p>
+
+<p>ASCollectionView is a true subclass of UICollectionView, meaning it is pointer-compatible
+with code that currently uses UICollectionView.</p>
+
+<p>The main difference is that asyncDataSource expects -nodeForItemAtIndexPath, an ASCellNode, and
+the sizeForItemAtIndexPath: method is eliminated (as are the performance problems caused by it).
+This is made possible because ASCellNodes can calculate their own size, and preload ahead of time.</p>
 					</div>
 					
 					
@@ -159,6 +189,59 @@ pre-rendering instead of synchronously loading UICollectionViewCells.</p>
 
 						<div class="task-list">
 							<div class="section-method">
+	<a name="//api/name/initWithCollectionViewLayout:" title="initWithCollectionViewLayout:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithCollectionViewLayout:">&ndash;&nbsp;initWithCollectionViewLayout:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initializer.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)<em>layout</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>layout</code></th>
+						<td><p>The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/tuningParametersForRangeType:" title="tuningParametersForRangeType:"></a>
 	<h3 class="method-title"><code><a href="#//api/name/tuningParametersForRangeType:">&ndash;&nbsp;tuningParametersForRangeType:</a></code>
 </h3>
@@ -170,7 +253,7 @@ pre-rendering instead of synchronously loading UICollectionViewCells.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Tuning parameters for a range type.</p>
+				<p>Tuning parameters for a range type in full mode.</p>
 			</div>
 			
 		    
@@ -195,10 +278,7 @@ pre-rendering instead of synchronously loading UICollectionViewCells.</p>
 			
 			<div class="method-subsection return">
 				<h4 class="method-subtitle parameter-title">Return Value</h4>
-				<p>A tuning parameter value for the given range type.</p>
-
-<p>Defaults to the render range having one sceenful both leading and trailing and the preload range having two
-screenfuls in both directions.</p>
+				<p>A tuning parameter value for the given range type in full mode.</p>
 			</div>
 			
 
@@ -231,7 +311,7 @@ screenfuls in both directions.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Set the tuning parameters for a range type.</p>
+				<p>Set the tuning parameters for a range type in full mode.</p>
 			</div>
 			
 		    
@@ -278,8 +358,8 @@ screenfuls in both directions.</p>
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/initWithFrame:collectionViewLayout:asyncDataFetching:" title="initWithFrame:collectionViewLayout:asyncDataFetching:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/initWithFrame:collectionViewLayout:asyncDataFetching:">&ndash;&nbsp;initWithFrame:collectionViewLayout:asyncDataFetching:</a></code>
+	<a name="//api/name/tuningParametersForRangeMode:rangeType:" title="tuningParametersForRangeMode:rangeType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tuningParametersForRangeMode:rangeType:">&ndash;&nbsp;tuningParametersForRangeMode:rangeType:</a></code>
 </h3>
 
 	<div class="method-info">
@@ -289,12 +369,12 @@ screenfuls in both directions.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Initializer.</p>
+				<p>Tuning parameters for a range type in the specified mode.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (instancetype)initWithFrame:(CGRect)<em>frame</em> collectionViewLayout:(UICollectionViewLayout *)<em>layout</em> asyncDataFetching:(BOOL)<em>asyncDataFetchingEnabled</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)<em>rangeMode</em> rangeType:(ASLayoutRangeType)<em>rangeType</em></code></div>
 
 		    
 			
@@ -303,20 +383,81 @@ screenfuls in both directions.</p>
 				<table class="argument-def parameter-def">
 				
 					<tr>
-						<th scope="row" class="argument-name"><code>frame</code></th>
-						<td><p>The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview
-in which you plan to add it. This frame is passed to the superclass during initialization.</p></td>
+						<th scope="row" class="argument-name"><code>rangeMode</code></th>
+						<td><p>The range mode to get the running parameters for.</p></td>
 					</tr>
 				
 					<tr>
-						<th scope="row" class="argument-name"><code>layout</code></th>
-						<td><p>The layout object to use for organizing items. The collection view stores a strong reference to the specified object.
-Must not be nil.</p></td>
+						<th scope="row" class="argument-name"><code>rangeType</code></th>
+						<td><p>The range type to get the tuning parameters for.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A tuning parameter value for the given range type in the given mode.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/setTuningParameters:forRangeMode:rangeType:" title="setTuningParameters:forRangeMode:rangeType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setTuningParameters:forRangeMode:rangeType:">&ndash;&nbsp;setTuningParameters:forRangeMode:rangeType:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Set the tuning parameters for a range type in the specified mode.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setTuningParameters:(ASRangeTuningParameters)<em>tuningParameters</em> forRangeMode:(ASLayoutRangeMode)<em>rangeMode</em> rangeType:(ASLayoutRangeType)<em>rangeType</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>tuningParameters</code></th>
+						<td><p>The tuning parameters to store for a range type.</p></td>
 					</tr>
 				
 					<tr>
-						<th scope="row" class="argument-name"><code>asyncDataFetchingEnabled</code></th>
-						<td><p>Enable the data fetching in async mode.</p></td>
+						<th scope="row" class="argument-name"><code>rangeMode</code></th>
+						<td><p>The range mode to set the running parameters for.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeType</code></th>
+						<td><p>The range type to set the tuning parameters for.</p></td>
 					</tr>
 				
 				</table>
@@ -327,17 +468,6 @@ Must not be nil.</p></td>
 
 			
 
-			
-			<div class="method-subsection discussion-section">
-				<h4 class="method-subtitle">Discussion</h4>
-				<p>If asyncDataFetching is enabled, the <code>AScollectionView</code> will fetch data through <code>collectionView:numberOfRowsInSection:</code> and
-<code>collectionView:nodeForRowAtIndexPath:</code> in async mode from background thread. Otherwise, the methods will be invoked synchronically
-from calling thread.
-Enabling asyncDataFetching could avoid blocking main thread for <code>ASCellNode</code> allocation, which is frequently reported issue for
-large scale data. On another hand, the application code need take the responsibility to avoid data inconsistence. Specifically,
-we will lock the data source through <code>collectionViewLockDataSource</code>, and unlock it by <code>collectionViewUnlockDataSource</code> after the data fetching.
-The application should not update the data source while the data source is locked, to keep data consistence.</p>
-			</div>
 			
 
 			
@@ -382,7 +512,58 @@ The application should not update the data source while the data source is locke
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>Defaults to one screenful.</p>
+				<p>Defaults to two screenfuls.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutInspector" title="layoutInspector"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutInspector">&nbsp;&nbsp;layoutInspector</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Optional introspection object for the collection view&rsquo;s layout.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, weak) id&lt;ASCollectionViewLayoutInspecting&gt; layoutInspector</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Since supplementary and decoration views are controlled by the collection view&rsquo;s layout, this object
+is used as a bridge to provide information to the internal data controller about the existence of these views and
+their associated index paths. For collection views using <code>UICollectionViewFlowLayout</code>, a default inspector
+implementation <code>ASCollectionViewFlowLayoutInspector</code> is created and set on this property by default. Custom
+collection view layout subclasses will need to provide their own implementation of an inspector object for their
+supplementary views to be compatible with <code>ASCollectionView</code>&rsquo;s supplementary node support.</p>
 			</div>
 			
 
@@ -417,7 +598,7 @@ The asyncDataSource must be updated to reflect the changes before the update blo
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)performBatchAnimated:(BOOL)<em>animated</em> updates:(void ( ^ ) ( ))<em>updates</em> completion:(void ( ^ ) ( BOOL ))<em>completion</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)performBatchAnimated:(BOOL)<em>animated</em> updates:(void ( ^ _Nullable ) ( ))<em>updates</em> completion:(void ( ^ _Nullable ) ( BOOL ))<em>completion</em></code></div>
 
 		    
 			
@@ -483,7 +664,7 @@ The asyncDataSource must be updated to reflect the changes before update block c
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)performBatchUpdates:(void ( ^ ) ( ))<em>updates</em> completion:(void ( ^ ) ( BOOL ))<em>completion</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)performBatchUpdates:(void ( ^ _Nullable ) ( ))<em>updates</em> completion:(void ( ^ _Nullable ) ( BOOL ))<em>completion</em></code></div>
 
 		    
 			
@@ -543,7 +724,7 @@ NO if they were interrupted. This parameter may be nil. If supplied, the block i
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)reloadDataWithCompletion:(void ( ^ ) ( ))<em>completion</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)reloadDataWithCompletion:(void ( ^ _Nullable ) ( ))<em>completion</em></code></div>
 
 		    
 			
@@ -615,6 +796,196 @@ the main thread.</p></td>
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
 				<div class="warning"><p><strong>Warning:</strong> This method is substantially more expensive than UICollectionView&rsquo;s version.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/reloadDataImmediately" title="reloadDataImmediately"></a>
+	<h3 class="method-title"><code><a href="#//api/name/reloadDataImmediately">&ndash;&nbsp;reloadDataImmediately</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)reloadDataImmediately</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> This method is substantially more expensive than UICollectionView&rsquo;s version and will block the main thread
+while all the cells load.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/relayoutItems" title="relayoutItems"></a>
+	<h3 class="method-title"><code><a href="#//api/name/relayoutItems">&ndash;&nbsp;relayoutItems</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Triggers a relayout of all nodes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)relayoutItems</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/waitUntilAllUpdatesAreCommitted" title="waitUntilAllUpdatesAreCommitted"></a>
+	<h3 class="method-title"><code><a href="#//api/name/waitUntilAllUpdatesAreCommitted">&ndash;&nbsp;waitUntilAllUpdatesAreCommitted</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)waitUntilAllUpdatesAreCommitted</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/registerSupplementaryNodeOfKind:" title="registerSupplementaryNodeOfKind:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/registerSupplementaryNodeOfKind:">&ndash;&nbsp;registerSupplementaryNodeOfKind:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Registers the given kind of supplementary node for use in creating node-backed supplementary views.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)registerSupplementaryNodeOfKind:(NSString *)<em>elementKind</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>elementKind</code></th>
+						<td><p>The kind of supplementary node that will be requested through the data source.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Use this method to register support for the use of supplementary nodes in place of the default
+<code>registerClass:forSupplementaryViewOfKind:withReuseIdentifier:</code> and <code>registerNib:forSupplementaryViewOfKind:withReuseIdentifier:</code>
+methods. This method will register an internal backing view that will host the contents of the supplementary nodes
+returned from the data source.</p>
 			</div>
 			
 
@@ -889,7 +1260,7 @@ before this method is called.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)insertItemsAtIndexPaths:(NSArray *)<em>indexPaths</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)insertItemsAtIndexPaths:(NSArray&lt;NSIndexPath*&gt; *)<em>indexPaths</em></code></div>
 
 		    
 			
@@ -948,7 +1319,7 @@ before this method is called.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)deleteItemsAtIndexPaths:(NSArray *)<em>indexPaths</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)deleteItemsAtIndexPaths:(NSArray&lt;NSIndexPath*&gt; *)<em>indexPaths</em></code></div>
 
 		    
 			
@@ -1007,7 +1378,7 @@ before this method is called.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)reloadItemsAtIndexPaths:(NSArray *)<em>indexPaths</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)reloadItemsAtIndexPaths:(NSArray&lt;NSIndexPath*&gt; *)<em>indexPaths</em></code></div>
 
 		    
 			
@@ -1130,7 +1501,7 @@ before this method is called.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
 
 		    
 			
@@ -1150,7 +1521,128 @@ before this method is called.</p>
 			
 			<div class="method-subsection return">
 				<h4 class="method-subtitle parameter-title">Return Value</h4>
-				<p>a node for display at this indexpath.</p>
+				<p>a node for display at this indexpath or nil</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/supplementaryNodeForElementKind:atIndexPath:" title="supplementaryNodeForElementKind:atIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/supplementaryNodeForElementKind:atIndexPath:">&ndash;&nbsp;supplementaryNodeForElementKind:atIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Similar to -supplementaryViewForElementKind:atIndexPath:</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable ASCellNode *)supplementaryNodeForElementKind:(NSString *)<em>elementKind</em> atIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>elementKind</code></th>
+						<td><p>The kind of supplementary node to locate.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the requested supplementary node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>The specified supplementary node or nil</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/indexPathForNode:" title="indexPathForNode:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/indexPathForNode:">&ndash;&nbsp;indexPathForNode:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Similar to -indexPathForCell:.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (NSIndexPath *)indexPathForNode:(ASCellNode *)<em>cellNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>cellNode</code></th>
+						<td><p>a cellNode part of the table view</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>an indexPath for this cellNode</p>
 			</div>
 			
 
@@ -1188,7 +1680,7 @@ before this method is called.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (NSArray *)visibleNodes</code></div>
+			<div class="method-subsection method-declaration"><code>- (NSArray&lt;ASCellNode*&gt; *)visibleNodes</code></div>
 
 		    
 			
@@ -1362,6 +1854,147 @@ before this method is called.</p>
 			
 		</div>
 	</div>
+</div><div class="section-method">
+	<a name="//api/name/clearContents" title="clearContents"></a>
+	<h3 class="method-title"><code><a href="#//api/name/clearContents">&ndash;&nbsp;clearContents</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Triggers all loaded ASCellNodes to destroy displayed contents (freeing a lot of memory).</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)clearContents</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method should only be called by ASCollectionNode.  To be removed in a later release.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/clearFetchedData" title="clearFetchedData"></a>
+	<h3 class="method-title"><code><a href="#//api/name/clearFetchedData">&ndash;&nbsp;clearFetchedData</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Triggers all loaded ASCellNodes to purge any data fetched from the network or disk (freeing memory).</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)clearFetchedData</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method should only be called by ASCollectionNode.  To be removed in a later release.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/zeroContentInsets" title="zeroContentInsets"></a>
+	<h3 class="method-title"><code><a href="#//api/name/zeroContentInsets">&nbsp;&nbsp;zeroContentInsets</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Forces the .contentInset to be UIEdgeInsetsZero.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic) BOOL zeroContentInsets</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>By default, UIKit sets the top inset to the navigation bar height, even for horizontally
+scrolling views.  This can only be disabled by setting a property on the containing UIViewController,
+automaticallyAdjustsScrollViewInsets, which may not be accessible.  ASPagerNode uses this to ensure
+its flow layout behaves predictably and does not log undefined layout warnings.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
 </div>
 						</div>
 						
@@ -1377,10 +2010,10 @@ before this method is called.</p>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

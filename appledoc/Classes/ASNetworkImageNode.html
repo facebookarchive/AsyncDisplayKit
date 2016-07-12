@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -58,11 +58,17 @@
 		
 		<option value="//api/name/URL">URL</option>
 		
+		<option value="//api/name/currentImageQuality">currentImageQuality</option>
+		
 		<option value="//api/name/defaultImage">defaultImage</option>
 		
 		<option value="//api/name/delegate">delegate</option>
 		
+		<option value="//api/name/renderedImageQuality">renderedImageQuality</option>
+		
 		<option value="//api/name/shouldCacheImage">shouldCacheImage</option>
+		
+		<option value="//api/name/shouldRenderProgressImages">shouldRenderProgressImages</option>
 		
 	</optgroup>
 	
@@ -141,12 +147,12 @@ placeholder image (<a href="#//api/name/defaultImage">defaultImage</a>).  The cu
 			
 			
 			<div class="method-subsection brief-description">
-				<p>The designated initializer.</p>
+				<p>The designated initializer.  Cache and Downloader are WEAK references.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (instancetype)initWithCache:(id&lt;ASImageCacheProtocol&gt;)<em>cache</em> downloader:(id&lt;ASImageDownloaderProtocol&gt;)<em>downloader</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithCache:(nullable id&lt;ASImageCacheProtocol&gt;)<em>cache</em> downloader:(id&lt;ASImageDownloaderProtocol&gt;)<em>downloader</em></code></div>
 
 		    
 			
@@ -156,12 +162,12 @@ placeholder image (<a href="#//api/name/defaultImage">defaultImage</a>).  The cu
 				
 					<tr>
 						<th scope="row" class="argument-name"><code>cache</code></th>
-						<td><p>The object that implements a cache of images for the image node.</p></td>
+						<td><p>The object that implements a cache of images for the image node.  Weak reference.</p></td>
 					</tr>
 				
 					<tr>
 						<th scope="row" class="argument-name"><code>downloader</code></th>
-						<td><p>The object that implements image downloading for the image node.  Must not be nil.</p></td>
+						<td><p>The object that implements image downloading for the image node.  Must not be nil.  Weak reference.</p></td>
 					</tr>
 				
 				</table>
@@ -260,7 +266,7 @@ placeholder image (<a href="#//api/name/defaultImage">defaultImage</a>).  The cu
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (atomic, weak, readwrite) id&lt;ASNetworkImageNodeDelegate&gt; delegate</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, atomic, weak, readwrite) id&lt;ASNetworkImageNodeDelegate&gt; delegate</code></div>
 
 		    
 			
@@ -301,7 +307,7 @@ placeholder image (<a href="#//api/name/defaultImage">defaultImage</a>).  The cu
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (atomic, strong, readwrite) UIImage *defaultImage</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, atomic, strong, readwrite) UIImage *defaultImage</code></div>
 
 		    
 			
@@ -342,7 +348,7 @@ placeholder image (<a href="#//api/name/defaultImage">defaultImage</a>).  The cu
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (atomic, strong, readwrite) NSURL *URL</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, atomic, strong, readwrite) NSURL *URL</code></div>
 
 		    
 			
@@ -388,7 +394,7 @@ placeholder image (<a href="#//api/name/defaultImage">defaultImage</a>).  The cu
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)setURL:(NSURL *)<em>URL</em> resetToDefault:(BOOL)<em>reset</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)setURL:(nullable NSURL *)<em>URL</em> resetToDefault:(BOOL)<em>reset</em></code></div>
 
 		    
 			
@@ -441,12 +447,138 @@ placeholder image (<a href="#//api/name/defaultImage">defaultImage</a>).  The cu
 			
 			
 			<div class="method-subsection brief-description">
-				<p>If <a href="#//api/name/URL">URL</a> is a local file, set this property to YES to take advantage of UIKit&rsquo;s image cacheing.  Defaults to YES.</p>
+				<p>If <a href="#//api/name/URL">URL</a> is a local file, set this property to YES to take advantage of UIKit&rsquo;s image caching.  Defaults to YES.</p>
 			</div>
 			
 		    
 
 			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, readwrite) BOOL shouldCacheImage</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASNetworkImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/shouldRenderProgressImages" title="shouldRenderProgressImages"></a>
+	<h3 class="method-title"><code><a href="#//api/name/shouldRenderProgressImages">&nbsp;&nbsp;shouldRenderProgressImages</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>If the downloader implements progressive image rendering and this value is YES progressive renders of the
+image will be displayed as the image downloads. Regardless of this properties value, progress renders will
+only occur when the node is visible. Defaults to YES.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, readwrite) BOOL shouldRenderProgressImages</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASNetworkImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/currentImageQuality" title="currentImageQuality"></a>
+	<h3 class="method-title"><code><a href="#//api/name/currentImageQuality">&nbsp;&nbsp;currentImageQuality</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The image quality of the current image. This is a number between 0 and 1 and can be used to track
+progressive progress. Calculated by dividing number of bytes / expected number of total bytes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, readonly) CGFloat currentImageQuality</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASNetworkImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/renderedImageQuality" title="renderedImageQuality"></a>
+	<h3 class="method-title"><code><a href="#//api/name/renderedImageQuality">&nbsp;&nbsp;renderedImageQuality</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The image quality (value between 0 and 1) of the last image that completed displaying.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, readonly) CGFloat renderedImageQuality</code></div>
 
 		    
 			
@@ -485,10 +617,10 @@ placeholder image (<a href="#//api/name/defaultImage">defaultImage</a>).  The cu
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

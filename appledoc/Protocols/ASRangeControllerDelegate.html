@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -60,23 +60,19 @@
 	
 	<optgroup label="Instance Methods">
 		
+		<option value="//api/name/didBeginUpdatesInRangeController:">- didBeginUpdatesInRangeController:</option>
+		
+		<option value="//api/name/didCompleteUpdatesInRangeController:">- didCompleteUpdatesInRangeController:</option>
+		
 		<option value="//api/name/rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:">- rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:</option>
 		
 		<option value="//api/name/rangeController:didDeleteSectionsAtIndexSet:withAnimationOptions:">- rangeController:didDeleteSectionsAtIndexSet:withAnimationOptions:</option>
 		
+		<option value="//api/name/rangeController:didEndUpdatesAnimated:completion:">- rangeController:didEndUpdatesAnimated:completion:</option>
+		
 		<option value="//api/name/rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:">- rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:</option>
 		
 		<option value="//api/name/rangeController:didInsertSectionsAtIndexSet:withAnimationOptions:">- rangeController:didInsertSectionsAtIndexSet:withAnimationOptions:</option>
-		
-		<option value="//api/name/rangeController:endUpdatesAnimated:completion:">- rangeController:endUpdatesAnimated:completion:</option>
-		
-		<option value="//api/name/rangeController:nodesAtIndexPaths:">- rangeController:nodesAtIndexPaths:</option>
-		
-		<option value="//api/name/rangeControllerBeginUpdates:">- rangeControllerBeginUpdates:</option>
-		
-		<option value="//api/name/rangeControllerViewportSize:">- rangeControllerViewportSize:</option>
-		
-		<option value="//api/name/rangeControllerVisibleNodeIndexPaths:">- rangeControllerVisibleNodeIndexPaths:</option>
 		
 	</optgroup>
 	
@@ -112,7 +108,7 @@
 					<div class="section section-overview">
 						<a title="Overview" name="overview"></a>
 						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p><a href="../Classes/ASRangeController.html">ASRangeController</a> delegate.  For example, <a href="../Classes/ASTableView.html">ASTableView</a>.</p>
+						<p>Delegate for ASRangeController.</p>
 					</div>
 					
 					
@@ -128,124 +124,8 @@
 
 						<div class="task-list">
 							<div class="section-method">
-	<a name="//api/name/rangeControllerVisibleNodeIndexPaths:" title="rangeControllerVisibleNodeIndexPaths:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/rangeControllerVisibleNodeIndexPaths:">&ndash;&nbsp;rangeControllerVisibleNodeIndexPaths:</a></code>
-<span class="task-item-suffix">required method</span></h3>
-
-	<div class="method-info">
-		<div class="pointy-thing"></div>
-
-		<div class="method-info-container">
-			
-			
-			<div class="method-subsection brief-description">
-				<p>Sender.</p>
-			</div>
-			
-		    
-
-			<div class="method-subsection method-declaration"><code>- (NSArray *)rangeControllerVisibleNodeIndexPaths:(ASRangeController *)<em>rangeController</em></code></div>
-
-		    
-			
-			<div class="method-subsection arguments-section parameters">
-				<h4 class="method-subtitle parameter-title">Parameters</h4>
-				<table class="argument-def parameter-def">
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>rangeController</code></th>
-						<td><p>Sender.</p></td>
-					</tr>
-				
-				</table>
-			</div>
-			
-
-			
-			<div class="method-subsection return">
-				<h4 class="method-subtitle parameter-title">Return Value</h4>
-				<p>an array of index paths corresponding to the nodes currently visible onscreen (i.e., the visible range).</p>
-			</div>
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-			<div class="method-subsection declared-in-section">
-				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASRangeController.h</code></p>
-			</div>
-			
-			
-		</div>
-	</div>
-</div><div class="section-method">
-	<a name="//api/name/rangeControllerViewportSize:" title="rangeControllerViewportSize:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/rangeControllerViewportSize:">&ndash;&nbsp;rangeControllerViewportSize:</a></code>
-<span class="task-item-suffix">required method</span></h3>
-
-	<div class="method-info">
-		<div class="pointy-thing"></div>
-
-		<div class="method-info-container">
-			
-			
-			<div class="method-subsection brief-description">
-				<p>Sender.</p>
-			</div>
-			
-		    
-
-			<div class="method-subsection method-declaration"><code>- (CGSize)rangeControllerViewportSize:(ASRangeController *)<em>rangeController</em></code></div>
-
-		    
-			
-			<div class="method-subsection arguments-section parameters">
-				<h4 class="method-subtitle parameter-title">Parameters</h4>
-				<table class="argument-def parameter-def">
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>rangeController</code></th>
-						<td><p>Sender.</p></td>
-					</tr>
-				
-				</table>
-			</div>
-			
-
-			
-			<div class="method-subsection return">
-				<h4 class="method-subtitle parameter-title">Return Value</h4>
-				<p>the receiver&rsquo;s viewport size (i.e., the screen space occupied by the visible range).</p>
-			</div>
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-			<div class="method-subsection declared-in-section">
-				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASRangeController.h</code></p>
-			</div>
-			
-			
-		</div>
-	</div>
-</div><div class="section-method">
-	<a name="//api/name/rangeControllerBeginUpdates:" title="rangeControllerBeginUpdates:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/rangeControllerBeginUpdates:">&ndash;&nbsp;rangeControllerBeginUpdates:</a></code>
+	<a name="//api/name/didBeginUpdatesInRangeController:" title="didBeginUpdatesInRangeController:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didBeginUpdatesInRangeController:">&ndash;&nbsp;didBeginUpdatesInRangeController:</a></code>
 <span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
@@ -260,7 +140,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)rangeControllerBeginUpdates:(ASRangeController *)<em>rangeController</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)didBeginUpdatesInRangeController:(ASRangeController *)<em>rangeController</em></code></div>
 
 		    
 			
@@ -297,8 +177,8 @@
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/rangeController:endUpdatesAnimated:completion:" title="rangeController:endUpdatesAnimated:completion:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/rangeController:endUpdatesAnimated:completion:">&ndash;&nbsp;rangeController:endUpdatesAnimated:completion:</a></code>
+	<a name="//api/name/rangeController:didEndUpdatesAnimated:completion:" title="rangeController:didEndUpdatesAnimated:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/rangeController:didEndUpdatesAnimated:completion:">&ndash;&nbsp;rangeController:didEndUpdatesAnimated:completion:</a></code>
 <span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
@@ -313,7 +193,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> endUpdatesAnimated:(BOOL)<em>animated</em> completion:(void ( ^ ) ( BOOL ))<em>completion</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didEndUpdatesAnimated:(BOOL)<em>animated</em> completion:(void ( ^ ) ( BOOL ))<em>completion</em></code></div>
 
 		    
 			
@@ -360,8 +240,8 @@
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/rangeController:nodesAtIndexPaths:" title="rangeController:nodesAtIndexPaths:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/rangeController:nodesAtIndexPaths:">&ndash;&nbsp;rangeController:nodesAtIndexPaths:</a></code>
+	<a name="//api/name/didCompleteUpdatesInRangeController:" title="didCompleteUpdatesInRangeController:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didCompleteUpdatesInRangeController:">&ndash;&nbsp;didCompleteUpdatesInRangeController:</a></code>
 <span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
@@ -371,12 +251,12 @@
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Fetch nodes at specific index paths.</p>
+				<p>Completed updates to cell node addition and removal.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (NSArray *)rangeController:(ASRangeController *)<em>rangeController</em> nodesAtIndexPaths:(NSArray *)<em>indexPaths</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)didCompleteUpdatesInRangeController:(ASRangeController *)<em>rangeController</em></code></div>
 
 		    
 			
@@ -387,11 +267,6 @@
 					<tr>
 						<th scope="row" class="argument-name"><code>rangeController</code></th>
 						<td><p>Sender.</p></td>
-					</tr>
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>indexPaths</code></th>
-						<td><p>Index paths.</p></td>
 					</tr>
 				
 				</table>
@@ -434,7 +309,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didInsertNodes:(NSArray *)<em>nodes</em> atIndexPaths:(NSArray *)<em>indexPaths</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didInsertNodes:(NSArray&lt;ASCellNode*&gt; *)<em>nodes</em> atIndexPaths:(NSArray&lt;NSIndexPath*&gt; *)<em>indexPaths</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
 
 		    
 			
@@ -502,7 +377,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didDeleteNodes:(NSArray *)<em>nodes</em> atIndexPaths:(NSArray *)<em>indexPaths</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didDeleteNodes:(NSArray&lt;ASCellNode*&gt; *)<em>nodes</em> atIndexPaths:(NSArray&lt;NSIndexPath*&gt; *)<em>indexPaths</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
 
 		    
 			
@@ -694,10 +569,10 @@
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

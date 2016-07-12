@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASVideoNodeDelegate Protocol Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">AsyncDisplayKit </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Facebook</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/didTapVideoNode:">- didTapVideoNode:</option>
+		
+		<option value="//api/name/videoDidPlayToEnd:">- videoDidPlayToEnd:</option>
+		
+		<option value="//api/name/videoNode:didPlayToTimeInterval:">- videoNode:didPlayToTimeInterval:</option>
+		
+		<option value="//api/name/videoNode:didSetCurrentItem:">- videoNode:didSetCurrentItem:</option>
+		
+		<option value="//api/name/videoNode:didStallAtTimeInterval:">- videoNode:didStallAtTimeInterval:</option>
+		
+		<option value="//api/name/videoNode:shouldChangePlayerStateTo:">- videoNode:shouldChangePlayerStateTo:</option>
+		
+		<option value="//api/name/videoNode:willChangePlayerState:toState:">- videoNode:willChangePlayerState:toState:</option>
+		
+		<option value="//api/name/videoNodeDidFinishInitialLoading:">- videoNodeDidFinishInitialLoading:</option>
+		
+		<option value="//api/name/videoNodeDidRecoverFromStall:">- videoNodeDidRecoverFromStall:</option>
+		
+		<option value="//api/name/videoNodeDidStartInitialLoading:">- videoNodeDidStartInitialLoading:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASVideoNodeDelegate Protocol Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Conforms to</th>
+	<td><a href="../Protocols/ASNetworkImageNodeDelegate.html">ASNetworkImageNodeDelegate</a></td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASVideoNode.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/videoDidPlayToEnd:" title="videoDidPlayToEnd:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/videoDidPlayToEnd:">&ndash;&nbsp;videoDidPlayToEnd:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Delegate method invoked when the node&rsquo;s video has played to its end time.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)videoDidPlayToEnd:(ASVideoNode *)<em>videoNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>videoNode</code></th>
+						<td><p>The video node has played to its end time.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASVideoNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/didTapVideoNode:" title="didTapVideoNode:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didTapVideoNode:">&ndash;&nbsp;didTapVideoNode:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Delegate method invoked the node is tapped.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didTapVideoNode:(ASVideoNode *)<em>videoNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>videoNode</code></th>
+						<td><p>The video node that was tapped.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The video&rsquo;s play state is toggled if this method is not implemented.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASVideoNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/videoNode:willChangePlayerState:toState:" title="videoNode:willChangePlayerState:toState:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/videoNode:willChangePlayerState:toState:">&ndash;&nbsp;videoNode:willChangePlayerState:toState:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Delegate method invoked when player changes state.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)videoNode:(ASVideoNode *)<em>videoNode</em> willChangePlayerState:(ASVideoNodePlayerState)<em>state</em> toState:(ASVideoNodePlayerState)<em>toState</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>videoNode</code></th>
+						<td><p>The video node.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>state</code></th>
+						<td><p>player state before this change.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>toState</code></th>
+						<td><p>player new state.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method is called after each state change</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASVideoNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/videoNode:shouldChangePlayerStateTo:" title="videoNode:shouldChangePlayerStateTo:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/videoNode:shouldChangePlayerStateTo:">&ndash;&nbsp;videoNode:shouldChangePlayerStateTo:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Ssks delegate if state change is allowed
+ASVideoNodePlayerStatePlaying or ASVideoNodePlayerStatePaused.
+asks delegate if state change is allowed.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)videoNode:(ASVideoNode *)<em>videoNode</em> shouldChangePlayerStateTo:(ASVideoNodePlayerState)<em>state</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>videoNode</code></th>
+						<td><p>The video node.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>state</code></th>
+						<td><p>player state that is going to be set.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Delegate method invoked when player changes it&rsquo;s state to
+ASVideoNodePlayerStatePlaying or ASVideoNodePlayerStatePaused
+and asks delegate if state change is valid</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASVideoNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/videoNode:didPlayToTimeInterval:" title="videoNode:didPlayToTimeInterval:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/videoNode:didPlayToTimeInterval:">&ndash;&nbsp;videoNode:didPlayToTimeInterval:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Delegate method invoked when player playback time is updated.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)videoNode:(ASVideoNode *)<em>videoNode</em> didPlayToTimeInterval:(NSTimeInterval)<em>timeInterval</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>videoNode</code></th>
+						<td><p>The video node.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>second</code></th>
+						<td><p>current playback time in seconds.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASVideoNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/videoNode:didStallAtTimeInterval:" title="videoNode:didStallAtTimeInterval:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/videoNode:didStallAtTimeInterval:">&ndash;&nbsp;videoNode:didStallAtTimeInterval:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Delegate method invoked when the video player stalls.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)videoNode:(ASVideoNode *)<em>videoNode</em> didStallAtTimeInterval:(NSTimeInterval)<em>timeInterval</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>videoNode</code></th>
+						<td><p>The video node that has experienced the stall</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>second</code></th>
+						<td><p>Current playback time when the stall happens</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASVideoNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/videoNodeDidStartInitialLoading:" title="videoNodeDidStartInitialLoading:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/videoNodeDidStartInitialLoading:">&ndash;&nbsp;videoNodeDidStartInitialLoading:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Delegate method invoked when the video player starts the inital asset loading</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)videoNodeDidStartInitialLoading:(ASVideoNode *)<em>videoNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>videoNode</code></th>
+						<td><p>The videoNode</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASVideoNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/videoNodeDidFinishInitialLoading:" title="videoNodeDidFinishInitialLoading:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/videoNodeDidFinishInitialLoading:">&ndash;&nbsp;videoNodeDidFinishInitialLoading:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Delegate method invoked when the video is done loading the asset and can start the playback</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)videoNodeDidFinishInitialLoading:(ASVideoNode *)<em>videoNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>videoNode</code></th>
+						<td><p>The videoNode</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASVideoNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/videoNode:didSetCurrentItem:" title="videoNode:didSetCurrentItem:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/videoNode:didSetCurrentItem:">&ndash;&nbsp;videoNode:didSetCurrentItem:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Delegate method invoked when the AVPlayerItem for the asset has been set up and can be accessed throught currentItem.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)videoNode:(ASVideoNode *)<em>videoNode</em> didSetCurrentItem:(AVPlayerItem *)<em>currentItem</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>videoNode</code></th>
+						<td><p>The videoNode.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>currentItem</code></th>
+						<td><p>The AVPlayerItem that was constructed from the asset.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASVideoNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/videoNodeDidRecoverFromStall:" title="videoNodeDidRecoverFromStall:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/videoNodeDidRecoverFromStall:">&ndash;&nbsp;videoNodeDidRecoverFromStall:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Delegate method invoked when the video node has recovered from the stall</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)videoNodeDidRecoverFromStall:(ASVideoNode *)<em>videoNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>videoNode</code></th>
+						<td><p>The videoNode</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASVideoNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

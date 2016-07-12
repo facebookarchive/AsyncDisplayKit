@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -63,6 +63,24 @@
 
 	
 
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/reloadData">- reloadData</option>
+		
+		<option value="//api/name/reloadDataImmediately">- reloadDataImmediately</option>
+		
+		<option value="//api/name/reloadDataWithCompletion:">- reloadDataWithCompletion:</option>
+		
+		<option value="//api/name/setTuningParameters:forRangeMode:rangeType:">- setTuningParameters:forRangeMode:rangeType:</option>
+		
+		<option value="//api/name/setTuningParameters:forRangeType:">- setTuningParameters:forRangeType:</option>
+		
+		<option value="//api/name/tuningParametersForRangeMode:rangeType:">- tuningParametersForRangeMode:rangeType:</option>
+		
+		<option value="//api/name/tuningParametersForRangeType:">- tuningParametersForRangeType:</option>
+		
+	</optgroup>
 	
 	
 </select>
@@ -129,7 +147,7 @@ as a subnode of another node, and provide room for many (great) features and imp
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly) ASCollectionView *view</code></div>
+			<div class="method-subsection method-declaration"><code>@property (strong, nonatomic, readonly) ASCollectionView *view</code></div>
 
 		    
 			
@@ -160,6 +178,400 @@ well.</p></div>
 			
 		</div>
 	</div>
+</div><div class="section-method">
+	<a name="//api/name/tuningParametersForRangeType:" title="tuningParametersForRangeType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tuningParametersForRangeType:">&ndash;&nbsp;tuningParametersForRangeType:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Tuning parameters for a range type in full mode.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)<em>rangeType</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeType</code></th>
+						<td><p>The range type to get the tuning parameters for.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A tuning parameter value for the given range type in full mode.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/setTuningParameters:forRangeType:" title="setTuningParameters:forRangeType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setTuningParameters:forRangeType:">&ndash;&nbsp;setTuningParameters:forRangeType:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Set the tuning parameters for a range type in full mode.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setTuningParameters:(ASRangeTuningParameters)<em>tuningParameters</em> forRangeType:(ASLayoutRangeType)<em>rangeType</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>tuningParameters</code></th>
+						<td><p>The tuning parameters to store for a range type.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeType</code></th>
+						<td><p>The range type to set the tuning parameters for.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/tuningParametersForRangeMode:rangeType:" title="tuningParametersForRangeMode:rangeType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tuningParametersForRangeMode:rangeType:">&ndash;&nbsp;tuningParametersForRangeMode:rangeType:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Tuning parameters for a range type in the specified mode.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)<em>rangeMode</em> rangeType:(ASLayoutRangeType)<em>rangeType</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeMode</code></th>
+						<td><p>The range mode to get the running parameters for.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeType</code></th>
+						<td><p>The range type to get the tuning parameters for.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A tuning parameter value for the given range type in the given mode.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/setTuningParameters:forRangeMode:rangeType:" title="setTuningParameters:forRangeMode:rangeType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setTuningParameters:forRangeMode:rangeType:">&ndash;&nbsp;setTuningParameters:forRangeMode:rangeType:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Set the tuning parameters for a range type in the specified mode.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setTuningParameters:(ASRangeTuningParameters)<em>tuningParameters</em> forRangeMode:(ASLayoutRangeMode)<em>rangeMode</em> rangeType:(ASLayoutRangeType)<em>rangeType</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>tuningParameters</code></th>
+						<td><p>The tuning parameters to store for a range type.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeMode</code></th>
+						<td><p>The range mode to set the running parameters for.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeType</code></th>
+						<td><p>The range type to set the tuning parameters for.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/reloadDataWithCompletion:" title="reloadDataWithCompletion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/reloadDataWithCompletion:">&ndash;&nbsp;reloadDataWithCompletion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Reload everything from scratch, destroying the working range and all cached nodes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)reloadDataWithCompletion:(void ( ^ ) ( ))<em>completion</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>completion</code></th>
+						<td><p>block to run on completion of asynchronous loading or nil. If supplied, the block is run on
+the main thread.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> This method is substantially more expensive than UICollectionView&rsquo;s version.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/reloadData" title="reloadData"></a>
+	<h3 class="method-title"><code><a href="#//api/name/reloadData">&ndash;&nbsp;reloadData</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Reload everything from scratch, destroying the working range and all cached nodes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)reloadData</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> This method is substantially more expensive than UICollectionView&rsquo;s version.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/reloadDataImmediately" title="reloadDataImmediately"></a>
+	<h3 class="method-title"><code><a href="#//api/name/reloadDataImmediately">&ndash;&nbsp;reloadDataImmediately</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)reloadDataImmediately</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> This method is substantially more expensive than UICollectionView&rsquo;s version and will block the main thread
+while all the cells load.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
 </div>
 						</div>
 						
@@ -175,10 +587,10 @@ well.</p></div>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

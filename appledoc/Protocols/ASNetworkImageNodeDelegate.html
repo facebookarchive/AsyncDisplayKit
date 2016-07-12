@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -60,9 +60,13 @@
 	
 	<optgroup label="Instance Methods">
 		
+		<option value="//api/name/imageNode:didFailWithError:">- imageNode:didFailWithError:</option>
+		
 		<option value="//api/name/imageNode:didLoadImage:">- imageNode:didLoadImage:</option>
 		
 		<option value="//api/name/imageNodeDidFinishDecoding:">- imageNodeDidFinishDecoding:</option>
+		
+		<option value="//api/name/imageNodeDidStartFetchingData:">- imageNodeDidStartFetchingData:</option>
 		
 	</optgroup>
 	
@@ -99,7 +103,7 @@
 						<a title="Overview" name="overview"></a>
 						<h2 class="subtitle subtitle-overview">Overview</h2>
 						<p>The methods declared by the ASNetworkImageNodeDelegate protocol allow the adopting delegate to respond to
-notifications such as fininished decoding and downloading an image.</p>
+notifications such as finished decoding and downloading an image.</p>
 					</div>
 					
 					
@@ -117,7 +121,7 @@ notifications such as fininished decoding and downloading an image.</p>
 							<div class="section-method">
 	<a name="//api/name/imageNode:didLoadImage:" title="imageNode:didLoadImage:"></a>
 	<h3 class="method-title"><code><a href="#//api/name/imageNode:didLoadImage:">&ndash;&nbsp;imageNode:didLoadImage:</a></code>
-<span class="task-item-suffix">required method</span></h3>
+</h3>
 
 	<div class="method-info">
 		<div class="pointy-thing"></div>
@@ -147,6 +151,127 @@ notifications such as fininished decoding and downloading an image.</p>
 					<tr>
 						<th scope="row" class="argument-name"><code>image</code></th>
 						<td><p>The newly-loaded image.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Called on a background queue.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASNetworkImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/imageNodeDidStartFetchingData:" title="imageNodeDidStartFetchingData:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/imageNodeDidStartFetchingData:">&ndash;&nbsp;imageNodeDidStartFetchingData:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Notification that the image node started to load</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)imageNodeDidStartFetchingData:(ASNetworkImageNode *)<em>imageNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>imageNode</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Called on a background queue.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASNetworkImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/imageNode:didFailWithError:" title="imageNode:didFailWithError:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/imageNode:didFailWithError:">&ndash;&nbsp;imageNode:didFailWithError:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Notification that the image node failed to download the image.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)imageNode:(ASNetworkImageNode *)<em>imageNode</em> didFailWithError:(NSError *)<em>error</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>imageNode</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>error</code></th>
+						<td><p>The error with details.</p></td>
 					</tr>
 				
 				</table>
@@ -245,10 +370,10 @@ notifications such as fininished decoding and downloading an image.</p>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

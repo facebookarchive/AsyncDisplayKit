@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -64,11 +64,19 @@
 		
 		<option value="//api/name/displaysAsynchronously">displaysAsynchronously</option>
 		
+		<option value="//api/name/drawingPriority">drawingPriority</option>
+		
 		<option value="//api/name/hitTestSlop">hitTestSlop</option>
+		
+		<option value="//api/name/interfaceState">interfaceState</option>
 		
 		<option value="//api/name/layer">layer</option>
 		
 		<option value="//api/name/layerBacked">layerBacked</option>
+		
+		<option value="//api/name/layoutSpecBlock">layoutSpecBlock</option>
+		
+		<option value="//api/name/name">name</option>
 		
 		<option value="//api/name/nodeLoaded">nodeLoaded</option>
 		
@@ -77,6 +85,8 @@
 		<option value="//api/name/placeholderFadeDuration">placeholderFadeDuration</option>
 		
 		<option value="//api/name/preferredFrameSize">preferredFrameSize</option>
+		
+		<option value="//api/name/shouldAnimateSizeChanges">shouldAnimateSizeChanges</option>
 		
 		<option value="//api/name/shouldRasterizeDescendants">shouldRasterizeDescendants</option>
 		
@@ -139,6 +149,8 @@
 		<option value="//api/name/removeFromSupernode">- removeFromSupernode</option>
 		
 		<option value="//api/name/replaceSubnode:withSubnode:">- replaceSubnode:withSubnode:</option>
+		
+		<option value="//api/name/setNeedsDataFetch">- setNeedsDataFetch</option>
 		
 	</optgroup>
 	
@@ -220,7 +232,7 @@ display.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (id)init</code></div>
+			<div class="method-subsection method-declaration"><code>- (instancetype)init</code></div>
 
 		    
 			
@@ -267,7 +279,7 @@ through -layout and touch handling methods.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (id)initWithViewBlock:(ASDisplayNodeViewBlock)<em>viewBlock</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)<em>viewBlock</em></code></div>
 
 		    
 			
@@ -326,7 +338,7 @@ queue. The view will render synchronously and -layout and touch handling methods
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (id)initWithViewBlock:(ASDisplayNodeViewBlock)<em>viewBlock</em> didLoadBlock:(ASDisplayNodeDidLoadBlock)<em>didLoadBlock</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)<em>viewBlock</em> didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)<em>didLoadBlock</em></code></div>
 
 		    
 			
@@ -390,7 +402,7 @@ queue. The view will render synchronously and -layout and touch handling methods
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)<em>layerBlock</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)<em>layerBlock</em></code></div>
 
 		    
 			
@@ -449,7 +461,7 @@ queue. The layer will render synchronously and -layout and touch handling method
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (id)initWithLayerBlock:(ASDisplayNodeLayerBlock)<em>layerBlock</em> didLoadBlock:(ASDisplayNodeDidLoadBlock)<em>didLoadBlock</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)<em>layerBlock</em> didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)<em>didLoadBlock</em></code></div>
 
 		    
 			
@@ -505,6 +517,47 @@ queue. The layer will render synchronously and -layout and touch handling method
 
 						<div class="task-list">
 							<div class="section-method">
+	<a name="//api/name/name" title="name"></a>
+	<h3 class="method-title"><code><a href="#//api/name/name">&nbsp;&nbsp;name</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The name of this node, which will be displayed in <code>description</code>. The default value is nil.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, atomic, copy) NSString *name</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/synchronous" title="synchronous"></a>
 	<h3 class="method-title"><code><a href="#//api/name/synchronous">&nbsp;&nbsp;synchronous</a></code>
 </h3>
@@ -575,7 +628,7 @@ queue. The layer will render synchronously and -layout and touch handling method
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, retain) UIView *view</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, strong) UIView *view</code></div>
 
 		    
 			
@@ -715,7 +768,7 @@ well.</p></div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, retain) CALayer *layer</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, strong) CALayer *layer</code></div>
 
 		    
 			
@@ -735,6 +788,61 @@ well.</p></div>
 
 			
 
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/interfaceState" title="interfaceState"></a>
+	<h3 class="method-title"><code><a href="#//api/name/interfaceState">&nbsp;&nbsp;interfaceState</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns the Interface State of the node.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly) ASInterfaceState interfaceState</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>The current ASInterfaceState of the node, indicating whether it is visible and other situational properties.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection see-also-section">
+				<h4 class="method-subtitle">See Also</h4>
+				<ul>
+					
+					<li><code><p><a href="../Constants/ASInterfaceState.html">ASInterfaceState</a></p></code></li>
+					
+				</ul>
+			</div>
 			
 
 			
@@ -894,6 +1002,62 @@ be expensive if result is not cached.</p></div>
 					
 				</ul>
 			</div>
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutSpecBlock" title="layoutSpecBlock"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutSpecBlock">&nbsp;&nbsp;layoutSpecBlock</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Provides a way to declare a block to provide an ASLayoutSpec without having to subclass ASDisplayNode and
+implement layoutSpecThatFits:</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, copy, nullable) ASLayoutSpecBlock layoutSpecBlock</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A block that takes a constrainedSize ASSizeRange argument, and must return an ASLayoutSpec that includes all
+of the subnodes to position in the layout. This input-output relationship is identical to the subclass override
+method -layoutSpecThatFits:</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> Subclasses that implement -layoutSpecThatFits: must not also use .layoutSpecBlock. Doing so will trigger
+an exception. A future version of the framework may support using both, calling them serially, with the
+.layoutSpecBlock superseding any values set by the method override.</p></div>
+			</div>
+			
+
+			
+
 			
 
 			
@@ -1441,7 +1605,7 @@ If replacementSubnode is nil, this method will throw an exception</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, retain) NSArray *subnodes</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, copy) NSArray&lt;ASDisplayNode*&gt; *subnodes</code></div>
 
 		    
 			
@@ -1665,6 +1829,47 @@ progress.</p>
 <p>If a setNeedsDisplay occurs while displaySuspended is YES, and displaySuspended is set to NO, then the
 layer will be automatically displayed.</p>
 			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/shouldAnimateSizeChanges" title="shouldAnimateSizeChanges"></a>
+	<h3 class="method-title"><code><a href="#//api/name/shouldAnimateSizeChanges">&nbsp;&nbsp;shouldAnimateSizeChanges</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Whether size changes should be animated. Default to YES.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL shouldAnimateSizeChanges</code></div>
+
+		    
+			
+
+			
+
+			
+
 			
 
 			
@@ -1913,6 +2118,47 @@ retain in memory.</p>
 		</div>
 	</div>
 </div><div class="section-method">
+	<a name="//api/name/setNeedsDataFetch" title="setNeedsDataFetch"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setNeedsDataFetch">&ndash;&nbsp;setNeedsDataFetch</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStateFetchData</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setNeedsDataFetch</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/placeholderEnabled" title="placeholderEnabled"></a>
 	<h3 class="method-title"><code><a href="#//api/name/placeholderEnabled">&nbsp;&nbsp;placeholderEnabled</a></code>
 </h3>
@@ -2005,6 +2251,53 @@ displayed.</p>
 			
 		</div>
 	</div>
+</div><div class="section-method">
+	<a name="//api/name/drawingPriority" title="drawingPriority"></a>
+	<h3 class="method-title"><code><a href="#//api/name/drawingPriority">&nbsp;&nbsp;drawingPriority</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Determines drawing priority of the node. Nodes with higher priority will be drawn earlier.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) NSInteger drawingPriority</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to ASDefaultDrawingPriority. There may be multiple drawing threads, and some of them may
+decide to perform operations in queued order (regardless of drawingPriority)</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
 </div>
 						</div>
 						
@@ -2080,7 +2373,7 @@ it and want hitTestSlop applied.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (BOOL)pointInside:(CGPoint)<em>point</em> withEvent:(UIEvent *)<em>event</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (BOOL)pointInside:(CGPoint)<em>point</em> withEvent:(nullable UIEvent *)<em>event</em></code></div>
 
 		    
 			
@@ -2156,7 +2449,7 @@ it and want hitTestSlop applied.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (CGPoint)convertPoint:(CGPoint)<em>point</em> toNode:(ASDisplayNode *)<em>node</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (CGPoint)convertPoint:(CGPoint)<em>point</em> toNode:(nullable ASDisplayNode *)<em>node</em></code></div>
 
 		    
 			
@@ -2219,7 +2512,7 @@ it and want hitTestSlop applied.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (CGPoint)convertPoint:(CGPoint)<em>point</em> fromNode:(ASDisplayNode *)<em>node</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (CGPoint)convertPoint:(CGPoint)<em>point</em> fromNode:(nullable ASDisplayNode *)<em>node</em></code></div>
 
 		    
 			
@@ -2282,7 +2575,7 @@ it and want hitTestSlop applied.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (CGRect)convertRect:(CGRect)<em>rect</em> toNode:(ASDisplayNode *)<em>node</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (CGRect)convertRect:(CGRect)<em>rect</em> toNode:(nullable ASDisplayNode *)<em>node</em></code></div>
 
 		    
 			
@@ -2345,7 +2638,7 @@ it and want hitTestSlop applied.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (CGRect)convertRect:(CGRect)<em>rect</em> fromNode:(ASDisplayNode *)<em>node</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (CGRect)convertRect:(CGRect)<em>rect</em> fromNode:(nullable ASDisplayNode *)<em>node</em></code></div>
 
 		    
 			
@@ -2406,10 +2699,10 @@ it and want hitTestSlop applied.</p>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

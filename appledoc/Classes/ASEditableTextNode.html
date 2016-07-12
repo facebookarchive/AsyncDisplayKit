@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -60,6 +60,12 @@
 		
 		<option value="//api/name/attributedText">attributedText</option>
 		
+		<option value="//api/name/autocapitalizationType">autocapitalizationType</option>
+		
+		<option value="//api/name/scrollEnabled">scrollEnabled</option>
+		
+		<option value="//api/name/textContainerInset">textContainerInset</option>
+		
 		<option value="//api/name/textView">textView</option>
 		
 	</optgroup>
@@ -71,6 +77,10 @@
 	<optgroup label="Instance Methods">
 		
 		<option value="//api/name/frameForTextRange:">- frameForTextRange:</option>
+		
+		<option value="//api/name/init">- init</option>
+		
+		<option value="//api/name/initWithTextKitComponents:placeholderTextKitComponents:">- initWithTextKitComponents:placeholderTextKitComponents:</option>
 		
 		<option value="//api/name/isDisplayingPlaceholder">- isDisplayingPlaceholder</option>
 		
@@ -99,6 +109,9 @@
 	<th>Inherits from</th>
 	<td><a href="../Classes/ASDisplayNode.html">ASDisplayNode</a> : ASDealloc2MainObject</td>
 </tr><tr>
+	<th>Conforms to</th>
+	<td>UITextInputTraits</td>
+</tr><tr>
 	<th>Declared in</th>
 	<td>ASEditableTextNode.h</td>
 </tr>
@@ -106,6 +119,12 @@
 					
 
                     
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>Does not support layer backing.</p>
+					</div>
 					
 					
 
@@ -120,6 +139,157 @@
 
 						<div class="task-list">
 							<div class="section-method">
+	<a name="//api/name/init" title="init"></a>
+	<h3 class="method-title"><code><a href="#//api/name/init">&ndash;&nbsp;init</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initializes an editable text node using default TextKit components.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (instancetype)init</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>An initialized ASEditableTextNode.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASEditableTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/initWithTextKitComponents:placeholderTextKitComponents:" title="initWithTextKitComponents:placeholderTextKitComponents:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithTextKitComponents:placeholderTextKitComponents:">&ndash;&nbsp;initWithTextKitComponents:placeholderTextKitComponents:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initializes an editable text node using the provided TextKit components.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithTextKitComponents:(ASTextKitComponents *)<em>textKitComponents</em> placeholderTextKitComponents:(ASTextKitComponents *)<em>placeholderTextKitComponents</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>textKitComponents</code></th>
+						<td><p>The TextKit stack used to render text.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>placeholderTextKitComponents</code></th>
+						<td><p>The TextKit stack used to render placeholder text.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>An initialized ASEditableTextNode.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASEditableTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/scrollEnabled" title="scrollEnabled"></a>
+	<h3 class="method-title"><code><a href="#//api/name/scrollEnabled">&nbsp;&nbsp;scrollEnabled</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Enable scrolling on the textView
+@default true</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic) BOOL scrollEnabled</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASEditableTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/textView" title="textView"></a>
 	<h3 class="method-title"><code><a href="#//api/name/textView">&nbsp;&nbsp;textView</a></code>
 </h3>
@@ -233,7 +403,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, strong) NSAttributedString *attributedPlaceholderText</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, strong, nullable) NSAttributedString *attributedPlaceholderText</code></div>
 
 		    
 			
@@ -279,7 +449,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, copy) NSAttributedString *attributedText</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, copy, nullable) NSAttributedString *attributedText</code></div>
 
 		    
 			
@@ -293,6 +463,88 @@
 				<h4 class="method-subtitle">Discussion</h4>
 				<p>When the placeholder is displayed (as indicated by -isDisplayingPlaceholder), this value is nil. Otherwise, this value is the attributed text the user has entered. This value can be modified regardless of whether the receiver is the first responder (and thus, editing) or not. Changing this value from nil to non-nil will result in the placeholder being hidden, and the new value being displayed.</p>
 			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASEditableTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/textContainerInset" title="textContainerInset"></a>
+	<h3 class="method-title"><code><a href="#//api/name/textContainerInset">&nbsp;&nbsp;textContainerInset</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The textContainerInset of both the placeholder and typed textView. This value defaults to UIEdgeInsetsZero.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite) UIEdgeInsets textContainerInset</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASEditableTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/autocapitalizationType" title="autocapitalizationType"></a>
+	<h3 class="method-title"><code><a href="#//api/name/autocapitalizationType">&nbsp;&nbsp;autocapitalizationType</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p><UITextInputTraits> properties.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, assign) UITextAutocapitalizationType autocapitalizationType</code></div>
+
+		    
+			
+
+			
+
+			
+
 			
 
 			
@@ -432,10 +684,10 @@
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

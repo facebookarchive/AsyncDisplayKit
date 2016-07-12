@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -60,9 +60,13 @@
 		
 		<option value="//api/name/cropRect">cropRect</option>
 		
+		<option value="//api/name/forceUpscaling">forceUpscaling</option>
+		
 		<option value="//api/name/image">image</option>
 		
 		<option value="//api/name/imageModificationBlock">imageModificationBlock</option>
+		
+		<option value="//api/name/isDefaultFocusAppearance">isDefaultFocusAppearance</option>
 		
 		<option value="//api/name/placeholderColor">placeholderColor</option>
 		
@@ -144,7 +148,7 @@
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (atomic, retain) UIImage *image</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, atomic, strong) UIImage *image</code></div>
 
 		    
 			
@@ -192,7 +196,7 @@ course.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, strong) UIColor *placeholderColor</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, strong) UIColor *placeholderColor</code></div>
 
 		    
 			
@@ -246,6 +250,53 @@ course.</p>
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
 				<p>Defaults to YES. See -setCropEnabled:recropImmediately:inBounds: for more
+information.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/forceUpscaling" title="forceUpscaling"></a>
+	<h3 class="method-title"><code><a href="#//api/name/forceUpscaling">&nbsp;&nbsp;forceUpscaling</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates that efficient downsizing of backing store should <em>not</em> be enabled.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL forceUpscaling</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to NO. @see ASCroppedImageBackingSizeAndDrawRectInBounds for more
 information.</p>
 			</div>
 			
@@ -406,7 +457,7 @@ during the display phase.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, copy) asimagenode_modification_block_t imageModificationBlock</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, readwrite, copy) asimagenode_modification_block_t imageModificationBlock</code></div>
 
 		    
 			
@@ -454,7 +505,7 @@ display has finished.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)setNeedsDisplayWithCompletion:(void ( ^ ) ( BOOL canceled ))<em>displayCompletionBlock</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)setNeedsDisplayWithCompletion:(void ( ^ _Nullable ) ( BOOL canceled ))<em>displayCompletionBlock</em></code></div>
 
 		    
 			
@@ -499,6 +550,49 @@ performed immediately and <code>YES</code> will be passed for <code>canceled</co
 			
 		</div>
 	</div>
+</div><div class="section-method">
+	<a name="//api/name/isDefaultFocusAppearance" title="isDefaultFocusAppearance"></a>
+	<h3 class="method-title"><code><a href="#//api/name/isDefaultFocusAppearance">&nbsp;&nbsp;isDefaultFocusAppearance</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A bool to track if the current appearance of the node
+is the default focus appearance.
+Exposed here so the category methods can set it.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL isDefaultFocusAppearance</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
 </div>
 						</div>
 						
@@ -514,10 +608,10 @@ performed immediately and <code>YES</code> will be passed for <code>canceled</co
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

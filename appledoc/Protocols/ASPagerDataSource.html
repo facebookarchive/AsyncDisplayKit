@@ -3,11 +3,11 @@
 <head>
 	<meta charset="utf-8">
 
-	<title>ASTableViewDataSource Protocol Reference</title>
+	<title>ASPagerDataSource Protocol Reference</title>
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -43,8 +43,6 @@
 							<select id="jump-to">
 	<option value="top">Jump To&#133;</option>
 	
-	<option value="overview">Overview</option>
-	
 
 	
 	
@@ -60,13 +58,13 @@
 	
 	<optgroup label="Instance Methods">
 		
-		<option value="//api/name/tableView:constrainedSizeForNodeAtIndexPath:">- tableView:constrainedSizeForNodeAtIndexPath:</option>
+		<option value="//api/name/numberOfPagesInPagerNode:">- numberOfPagesInPagerNode:</option>
 		
-		<option value="//api/name/tableView:nodeForRowAtIndexPath:">- tableView:nodeForRowAtIndexPath:</option>
+		<option value="//api/name/pagerNode:constrainedSizeForNodeAtIndexPath:">- pagerNode:constrainedSizeForNodeAtIndexPath:</option>
 		
-		<option value="//api/name/tableViewLockDataSource:">- tableViewLockDataSource:</option>
+		<option value="//api/name/pagerNode:nodeAtIndex:">- pagerNode:nodeAtIndex:</option>
 		
-		<option value="//api/name/tableViewUnlockDataSource:">- tableViewUnlockDataSource:</option>
+		<option value="//api/name/pagerNode:nodeBlockAtIndex:">- pagerNode:nodeBlockAtIndex:</option>
 		
 	</optgroup>
 	
@@ -83,29 +81,21 @@
 		<div id="overview_contents" class="container">
 			<div id="content">
 				<main role="main">
-					<h1 class="title">ASTableViewDataSource Protocol Reference</h1>
+					<h1 class="title">ASPagerDataSource Protocol Reference</h1>
 
 					
 					<div class="section section-specification"><table cellspacing="0"><tbody>
 						<tr>
 	<th>Conforms to</th>
-	<td><a href="../Protocols/ASCommonTableViewDataSource.html">ASCommonTableViewDataSource</a><br />NSObject</td>
+	<td>NSObject</td>
 </tr><tr>
 	<th>Declared in</th>
-	<td>ASTableView.h</td>
+	<td>ASPagerNode.h</td>
 </tr>
 						</tbody></table></div>
 					
 
                     
-					
-					<div class="section section-overview">
-						<a title="Overview" name="overview"></a>
-						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p>This is a node-based UITableViewDataSource.</p>
-					</div>
-					
-					
 
 					
 					
@@ -118,8 +108,8 @@
 
 						<div class="task-list">
 							<div class="section-method">
-	<a name="//api/name/tableView:nodeForRowAtIndexPath:" title="tableView:nodeForRowAtIndexPath:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/tableView:nodeForRowAtIndexPath:">&ndash;&nbsp;tableView:nodeForRowAtIndexPath:</a></code>
+	<a name="//api/name/numberOfPagesInPagerNode:" title="numberOfPagesInPagerNode:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/numberOfPagesInPagerNode:">&ndash;&nbsp;numberOfPagesInPagerNode:</a></code>
 <span class="task-item-suffix">required method</span></h3>
 
 	<div class="method-info">
@@ -129,12 +119,12 @@
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Similar to -tableView:cellForRowAtIndexPath:.</p>
+				<p>This method replaces -collectionView:numberOfItemsInSection:</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (ASCellNode *)tableView:(ASTableView *)<em>tableView</em> nodeForRowAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)<em>pagerNode</em></code></div>
 
 		    
 			
@@ -143,13 +133,8 @@
 				<table class="argument-def parameter-def">
 				
 					<tr>
-						<th scope="row" class="argument-name"><code>tableView</code></th>
+						<th scope="row" class="argument-name"><code>pagerNode</code></th>
 						<td><p>The sender.</p></td>
-					</tr>
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>indexPath</code></th>
-						<td><p>The index path of the requested node.</p></td>
 					</tr>
 				
 				</table>
@@ -159,9 +144,7 @@
 			
 			<div class="method-subsection return">
 				<h4 class="method-subtitle parameter-title">Return Value</h4>
-				<p>a node for display at this indexpath.  Must be thread-safe (can be called on the main thread or a background
-queue) and should not implement reuse (it will be called once per row).  Unlike UITableView&rsquo;s version, this method
-is not called when the row is about to display.</p>
+				<p>The total number of pages that can display in the pagerNode.</p>
 			</div>
 			
 
@@ -176,15 +159,146 @@ is not called when the row is about to display.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASTableView.h</code></p>
+				<p><code class="declared-in-ref">ASPagerNode.h</code></p>
 			</div>
 			
 			
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/tableView:constrainedSizeForNodeAtIndexPath:" title="tableView:constrainedSizeForNodeAtIndexPath:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/tableView:constrainedSizeForNodeAtIndexPath:">&ndash;&nbsp;tableView:constrainedSizeForNodeAtIndexPath:</a></code>
+	<a name="//api/name/pagerNode:nodeAtIndex:" title="pagerNode:nodeAtIndex:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/pagerNode:nodeAtIndex:">&ndash;&nbsp;pagerNode:nodeAtIndex:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>This method replaces -collectionView:nodeForItemAtIndexPath:</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASCellNode *)pagerNode:(ASPagerNode *)<em>pagerNode</em> nodeAtIndex:(NSInteger)<em>index</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>pagerNode</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>index</code></th>
+						<td><p>The index of the requested node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>a node for display at this index. This will be called on the main thread and should
+not implement reuse (it will be called once per row).  Unlike UICollectionView&rsquo;s version,
+this method is not called when the row is about to display.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASPagerNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/pagerNode:nodeBlockAtIndex:" title="pagerNode:nodeBlockAtIndex:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/pagerNode:nodeBlockAtIndex:">&ndash;&nbsp;pagerNode:nodeBlockAtIndex:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>This method replaces -collectionView:nodeBlockForItemAtIndexPath:
+This method takes precedence over pagerNode:nodeAtIndex: if implemented.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASCellNodeBlock)pagerNode:(ASPagerNode *)<em>pagerNode</em> nodeBlockAtIndex:(NSInteger)<em>index</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>pagerNode</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>index</code></th>
+						<td><p>The index of the requested node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>a block that creates the node for display at this index.
+Must be thread-safe (can be called on the main thread or a background
+queue) and should not implement reuse (it will be called once per row).</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASPagerNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/pagerNode:constrainedSizeForNodeAtIndexPath:" title="pagerNode:constrainedSizeForNodeAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/pagerNode:constrainedSizeForNodeAtIndexPath:">&ndash;&nbsp;pagerNode:constrainedSizeForNodeAtIndexPath:</a></code>
 </h3>
 
 	<div class="method-info">
@@ -199,7 +313,7 @@ is not called when the row is about to display.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (ASSizeRange)tableView:(ASTableView *)<em>tableView</em> constrainedSizeForNodeAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (ASSizeRange)pagerNode:(ASPagerNode *)<em>pagerNode</em> constrainedSizeForNodeAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
 
 		    
 			
@@ -208,7 +322,7 @@ is not called when the row is about to display.</p>
 				<table class="argument-def parameter-def">
 				
 					<tr>
-						<th scope="row" class="argument-name"><code>tableView</code></th>
+						<th scope="row" class="argument-name"><code>pagerNode</code></th>
 						<td><p>The sender.</p></td>
 					</tr>
 				
@@ -239,117 +353,7 @@ is not called when the row is about to display.</p>
 			
 			<div class="method-subsection declared-in-section">
 				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASTableView.h</code></p>
-			</div>
-			
-			
-		</div>
-	</div>
-</div><div class="section-method">
-	<a name="//api/name/tableViewLockDataSource:" title="tableViewLockDataSource:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/tableViewLockDataSource:">&ndash;&nbsp;tableViewLockDataSource:</a></code>
-</h3>
-
-	<div class="method-info">
-		<div class="pointy-thing"></div>
-
-		<div class="method-info-container">
-			
-			
-			<div class="method-subsection brief-description">
-				<p>Indicator to lock the data source for data fetching in async mode.
-We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistence or exception
-due to the data access in async mode.</p>
-			</div>
-			
-		    
-
-			<div class="method-subsection method-declaration"><code>- (void)tableViewLockDataSource:(ASTableView *)<em>tableView</em></code></div>
-
-		    
-			
-			<div class="method-subsection arguments-section parameters">
-				<h4 class="method-subtitle parameter-title">Parameters</h4>
-				<table class="argument-def parameter-def">
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>tableView</code></th>
-						<td><p>The sender.</p></td>
-					</tr>
-				
-				</table>
-			</div>
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-			<div class="method-subsection declared-in-section">
-				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASTableView.h</code></p>
-			</div>
-			
-			
-		</div>
-	</div>
-</div><div class="section-method">
-	<a name="//api/name/tableViewUnlockDataSource:" title="tableViewUnlockDataSource:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/tableViewUnlockDataSource:">&ndash;&nbsp;tableViewUnlockDataSource:</a></code>
-</h3>
-
-	<div class="method-info">
-		<div class="pointy-thing"></div>
-
-		<div class="method-info-container">
-			
-			
-			<div class="method-subsection brief-description">
-				<p>Indicator to unlock the data source for data fetching in asyn mode.
-We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistence or exception
-due to the data access in async mode.</p>
-			</div>
-			
-		    
-
-			<div class="method-subsection method-declaration"><code>- (void)tableViewUnlockDataSource:(ASTableView *)<em>tableView</em></code></div>
-
-		    
-			
-			<div class="method-subsection arguments-section parameters">
-				<h4 class="method-subtitle parameter-title">Parameters</h4>
-				<table class="argument-def parameter-def">
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>tableView</code></th>
-						<td><p>The sender.</p></td>
-					</tr>
-				
-				</table>
-			</div>
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-
-			
-			<div class="method-subsection declared-in-section">
-				<h4 class="method-subtitle">Declared In</h4>
-				<p><code class="declared-in-ref">ASTableView.h</code></p>
+				<p><code class="declared-in-ref">ASPagerNode.h</code></p>
 			</div>
 			
 			
@@ -370,10 +374,10 @@ due to the data access in async mode.</p>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

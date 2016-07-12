@@ -3,11 +3,11 @@
 <head>
 	<meta charset="utf-8">
 
-	<title>ASCollectionViewDelegate Protocol Reference</title>
+	<title>ASCollectionDelegate Protocol Reference</title>
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -60,9 +60,13 @@
 	
 	<optgroup label="Instance Methods">
 		
-		<option value="//api/name/collectionView:layout:insetForSectionAtIndex:">- collectionView:layout:insetForSectionAtIndex:</option>
+		<option value="//api/name/collectionView:didEndDisplayingNode:forItemAtIndexPath:">- collectionView:didEndDisplayingNode:forItemAtIndexPath:</option>
+		
+		<option value="//api/name/collectionView:didEndDisplayingNodeForItemAtIndexPath:">- collectionView:didEndDisplayingNodeForItemAtIndexPath:</option>
 		
 		<option value="//api/name/collectionView:willBeginBatchFetchWithContext:">- collectionView:willBeginBatchFetchWithContext:</option>
+		
+		<option value="//api/name/collectionView:willDisplayNodeForItemAtIndexPath:">- collectionView:willDisplayNodeForItemAtIndexPath:</option>
 		
 		<option value="//api/name/shouldBatchFetchForCollectionView:">- shouldBatchFetchForCollectionView:</option>
 		
@@ -81,7 +85,7 @@
 		<div id="overview_contents" class="container">
 			<div id="content">
 				<main role="main">
-					<h1 class="title">ASCollectionViewDelegate Protocol Reference</h1>
+					<h1 class="title">ASCollectionDelegate Protocol Reference</h1>
 
 					
 					<div class="section section-specification"><table cellspacing="0"><tbody>
@@ -116,6 +120,144 @@
 
 						<div class="task-list">
 							<div class="section-method">
+	<a name="//api/name/collectionView:willDisplayNodeForItemAtIndexPath:" title="collectionView:willDisplayNodeForItemAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionView:willDisplayNodeForItemAtIndexPath:">&ndash;&nbsp;collectionView:willDisplayNodeForItemAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Informs the delegate that the collection view will add the node
+at the given index path to the view hierarchy.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)collectionView:(ASCollectionView *)<em>collectionView</em> willDisplayNodeForItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the item that will be displayed.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> AsyncDisplayKit processes collection view edits asynchronously. The index path
+passed into this method may not correspond to the same item in your data source
+if your data source has been updated since the last edit was processed.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/collectionView:didEndDisplayingNode:forItemAtIndexPath:" title="collectionView:didEndDisplayingNode:forItemAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionView:didEndDisplayingNode:forItemAtIndexPath:">&ndash;&nbsp;collectionView:didEndDisplayingNode:forItemAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Informs the delegate that the collection view did remove the provided node from the view hierarchy.
+This may be caused by the node scrolling out of view, or by deleting the item
+or its containing section with @c deleteItemsAtIndexPaths: or @c deleteSections: .</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)collectionView:(ASCollectionView *)<em>collectionView</em> didEndDisplayingNode:(ASCellNode *)<em>node</em> forItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>node</code></th>
+						<td><p>The node which was removed from the view hierarchy.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path at which the node was located before it was removed.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> AsyncDisplayKit processes collection view edits asynchronously. The index path
+passed into this method may not correspond to the same item in your data source
+if your data source has been updated since the last edit was processed.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/collectionView:willBeginBatchFetchWithContext:" title="collectionView:willBeginBatchFetchWithContext:"></a>
 	<h3 class="method-title"><code><a href="#//api/name/collectionView:willBeginBatchFetchWithContext:">&ndash;&nbsp;collectionView:willBeginBatchFetchWithContext:</a></code>
 </h3>
@@ -246,8 +388,8 @@ should occur.</p>
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/collectionView:layout:insetForSectionAtIndex:" title="collectionView:layout:insetForSectionAtIndex:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/collectionView:layout:insetForSectionAtIndex:">&ndash;&nbsp;collectionView:layout:insetForSectionAtIndex:</a></code>
+	<a name="//api/name/collectionView:didEndDisplayingNodeForItemAtIndexPath:" title="collectionView:didEndDisplayingNodeForItemAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionView:didEndDisplayingNodeForItemAtIndexPath:">&ndash;&nbsp;collectionView:didEndDisplayingNodeForItemAtIndexPath:</a></code>
 </h3>
 
 	<div class="method-info">
@@ -257,36 +399,15 @@ should occur.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Passthrough support to UICollectionViewDelegateFlowLayout sectionInset behavior.</p>
+				<p>Informs the delegate that the collection view did remove the node which was previously
+at the given index path from the view hierarchy.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (UIEdgeInsets)collectionView:(UICollectionView *)<em>collectionView</em> layout:(UICollectionViewLayout *)<em>collectionViewLayout</em> insetForSectionAtIndex:(NSInteger)<em>section</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)collectionView:(ASCollectionView *)<em>collectionView</em> didEndDisplayingNodeForItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
 
 		    
-			
-			<div class="method-subsection arguments-section parameters">
-				<h4 class="method-subtitle parameter-title">Parameters</h4>
-				<table class="argument-def parameter-def">
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>collectionView</code></th>
-						<td><p>The sender.</p></td>
-					</tr>
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>collectionViewLayout</code></th>
-						<td><p>The layout object requesting the information.</p></td>
-					</tr>
-				
-					<tr>
-						<th scope="row" class="argument-name"><code>section</code></th>
-						<td><p>The index number of the section whose insets are needed.</p></td>
-					</tr>
-				
-				</table>
-			</div>
 			
 
 			
@@ -296,8 +417,11 @@ should occur.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>The same rules apply as the UICollectionView implementation, but this can also be used without a UICollectionViewFlowLayout.
-https://developer.apple.com/library/ios/documentation/UIKit/Reference/UICollectionViewDelegateFlowLayout_protocol/index.html#//apple_ref/occ/intfm/UICollectionViewDelegateFlowLayout/collectionView:layout:insetForSectionAtIndex:</p>
+				<div class="warning"><p><strong>Warning:</strong> AsyncDisplayKit processes collection view edits asynchronously. The index path
+passed into this method may not correspond to the same item in your data source
+if your data source has been updated since the last edit was processed.</p>
+
+<p>This method is deprecated. Use @c collectionView:didEndDisplayingNode:forItemAtIndexPath: instead.</p></div>
 			</div>
 			
 
@@ -329,10 +453,10 @@ https://developer.apple.com/library/ios/documentation/UIKit/Reference/UICollecti
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

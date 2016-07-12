@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -66,7 +66,11 @@
 		
 		<option value="//api/name/imageIdentifiers">imageIdentifiers</option>
 		
+		<option value="//api/name/imageManager">imageManager</option>
+		
 		<option value="//api/name/loadedImageIdentifier">loadedImageIdentifier</option>
+		
+		<option value="//api/name/shouldRenderProgressImages">shouldRenderProgressImages</option>
 		
 	</optgroup>
 	
@@ -114,8 +118,7 @@
 					<div class="section section-overview">
 						<a title="Overview" name="overview"></a>
 						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p>ASMultiplexImageNode begins loading images when its <a href="#//api/name/imageIdentifiers">imageIdentifiers</a> property  is set.  For each image
-identifier, the data source can either return a UIImage directly, or a URL the image node should load.</p>
+						<p>ASMultiplexImageNode begins loading images when its resource can either return a UIImage directly, or a URL the image node should load.</p>
 					</div>
 					
 					
@@ -147,7 +150,7 @@ identifier, the data source can either return a UIImage directly, or a URL the i
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (instancetype)initWithCache:(id&lt;ASImageCacheProtocol&gt;)<em>cache</em> downloader:(id&lt;ASImageDownloaderProtocol&gt;)<em>downloader</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithCache:(nullable id&lt;ASImageCacheProtocol&gt;)<em>cache</em> downloader:(nullable id&lt;ASImageDownloaderProtocol&gt;)<em>downloader</em></code></div>
 
 		    
 			
@@ -350,7 +353,7 @@ lesser-quality images.  Set <code>downloadsIntermediateImages</code> to YES to e
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, copy) NSArray *imageIdentifiers</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, copy) NSArray&lt;ASImageIdentifier&gt; *imageIdentifiers</code></div>
 
 		    
 			
@@ -401,7 +404,7 @@ decreasing order of image quality &ndash; that is, the first identifier in the a
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Notify the receiver that its data source has new UIImages or NSURLs available for <a href="#//api/name/imageIdentifiers">imageIdentifiers</a>.</p>
+				<p>Notify the receiver SSAA that its data source has new UIImages or NSURLs available for <a href="#//api/name/imageIdentifiers">imageIdentifiers</a>.</p>
 			</div>
 			
 		    
@@ -452,7 +455,7 @@ decreasing order of image quality &ndash; that is, the first identifier in the a
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly) id loadedImageIdentifier</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, readonly) ASImageIdentifier loadedImageIdentifier</code></div>
 
 		    
 			
@@ -498,7 +501,7 @@ decreasing order of image quality &ndash; that is, the first identifier in the a
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly) id displayedImageIdentifier</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, readonly) ASImageIdentifier displayedImageIdentifier</code></div>
 
 		    
 			
@@ -507,6 +510,101 @@ decreasing order of image quality &ndash; that is, the first identifier in the a
 
 			
 
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASMultiplexImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/shouldRenderProgressImages" title="shouldRenderProgressImages"></a>
+	<h3 class="method-title"><code><a href="#//api/name/shouldRenderProgressImages">&nbsp;&nbsp;shouldRenderProgressImages</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>If the downloader implements progressive image rendering and this value is YES progressive renders of the
+image will be displayed as the image downloads. Regardless of this properties value, progress renders will
+only occur when the node is visible. Defaults to YES.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, readwrite) BOOL shouldRenderProgressImages</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASMultiplexImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/imageManager" title="imageManager"></a>
+	<h3 class="method-title"><code><a href="#//api/name/imageManager">&nbsp;&nbsp;imageManager</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<ul>
+<li>@abstract The image manager that this image node should use when requesting images from the Photos framework. If this is <code>nil</code> (the default), then <code>PHImageManager.defaultManager</code> is used.</li>
+</ul>
+
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, strong) PHImageManager *imageManager</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<ul>
+<li>@see <code>+[NSURL URLWithAssetLocalIdentifier:targetSize:contentMode:options:]</code> below.</li>
+</ul>
+
+			</div>
 			
 
 			
@@ -537,10 +635,10 @@ decreasing order of image quality &ndash; that is, the first identifier in the a
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

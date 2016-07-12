@@ -3,11 +3,11 @@
 <head>
 	<meta charset="utf-8">
 
-	<title>ASCollectionViewDataSource Protocol Reference</title>
+	<title>ASCollectionDataSource Protocol Reference</title>
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -62,7 +62,11 @@
 		
 		<option value="//api/name/collectionView:constrainedSizeForNodeAtIndexPath:">- collectionView:constrainedSizeForNodeAtIndexPath:</option>
 		
+		<option value="//api/name/collectionView:nodeBlockForItemAtIndexPath:">- collectionView:nodeBlockForItemAtIndexPath:</option>
+		
 		<option value="//api/name/collectionView:nodeForItemAtIndexPath:">- collectionView:nodeForItemAtIndexPath:</option>
+		
+		<option value="//api/name/collectionView:nodeForSupplementaryElementOfKind:atIndexPath:">- collectionView:nodeForSupplementaryElementOfKind:atIndexPath:</option>
 		
 		<option value="//api/name/collectionViewLockDataSource:">- collectionViewLockDataSource:</option>
 		
@@ -83,13 +87,13 @@
 		<div id="overview_contents" class="container">
 			<div id="content">
 				<main role="main">
-					<h1 class="title">ASCollectionViewDataSource Protocol Reference</h1>
+					<h1 class="title">ASCollectionDataSource Protocol Reference</h1>
 
 					
 					<div class="section section-specification"><table cellspacing="0"><tbody>
 						<tr>
 	<th>Conforms to</th>
-	<td><a href="../Protocols/ASCommonCollectionViewDataSource.html">ASCommonCollectionViewDataSource</a><br />NSObject</td>
+	<td><a href="../Protocols/ASCommonCollectionViewDataSource.html">ASCommonCollectionViewDataSource</a></td>
 </tr><tr>
 	<th>Declared in</th>
 	<td>ASCollectionView.h</td>
@@ -120,7 +124,7 @@
 							<div class="section-method">
 	<a name="//api/name/collectionView:nodeForItemAtIndexPath:" title="collectionView:nodeForItemAtIndexPath:"></a>
 	<h3 class="method-title"><code><a href="#//api/name/collectionView:nodeForItemAtIndexPath:">&ndash;&nbsp;collectionView:nodeForItemAtIndexPath:</a></code>
-<span class="task-item-suffix">required method</span></h3>
+</h3>
 
 	<div class="method-info">
 		<div class="pointy-thing"></div>
@@ -159,10 +163,139 @@
 			
 			<div class="method-subsection return">
 				<h4 class="method-subtitle parameter-title">Return Value</h4>
-				<p>a node for display at this indexpath.  Must be thread-safe (can be called on the main thread or a background
-queue) and should not implement reuse (it will be called once per row).  Unlike UICollectionView&rsquo;s version, this method
-is not called when the row is about to display.</p>
+				<p>a node for display at this indexpath. This will be called on the main thread and should
+not implement reuse (it will be called once per row).  Unlike UICollectionView&rsquo;s version,
+this method is not called when the row is about to display.</p>
 			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/collectionView:nodeBlockForItemAtIndexPath:" title="collectionView:nodeBlockForItemAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionView:nodeBlockForItemAtIndexPath:">&ndash;&nbsp;collectionView:nodeBlockForItemAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Similar to -collectionView:nodeForItemAtIndexPath:
+This method takes precedence over collectionView:nodeForItemAtIndexPath: if implemented.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASCellNodeBlock)collectionView:(ASCollectionView *)<em>collectionView</em> nodeBlockForItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the requested node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>a block that creates the node for display at this indexpath.
+Must be thread-safe (can be called on the main thread or a background
+queue) and should not implement reuse (it will be called once per row).</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/collectionView:nodeForSupplementaryElementOfKind:atIndexPath:" title="collectionView:nodeForSupplementaryElementOfKind:atIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionView:nodeForSupplementaryElementOfKind:atIndexPath:">&ndash;&nbsp;collectionView:nodeForSupplementaryElementOfKind:atIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Asks the collection view to provide a supplementary node to display in the collection view.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASCellNode *)collectionView:(ASCollectionView *)<em>collectionView</em> nodeForSupplementaryElementOfKind:(NSString *)<em>kind</em> atIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionView</code></th>
+						<td><p>An object representing the collection view requesting this information.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>kind</code></th>
+						<td><p>The kind of supplementary node to provide.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path that specifies the location of the new supplementary node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
 			
 
 			
@@ -258,8 +391,8 @@ is not called when the row is about to display.</p>
 			
 			<div class="method-subsection brief-description">
 				<p>Indicator to lock the data source for data fetching in async mode.
-We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistence or exception
-due to the data access in async mode.</p>
+We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
+due to the data access in async mode. (<b class="deprecated">Deprecated:</b><span class="deprecated"> The data source is always accessed on the main thread, and this method will not be called.</span>)</p>
 			</div>
 			
 		    
@@ -313,8 +446,8 @@ due to the data access in async mode.</p>
 			
 			<div class="method-subsection brief-description">
 				<p>Indicator to unlock the data source for data fetching in async mode.
-We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistence or exception
-due to the data access in async mode.</p>
+We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
+due to the data access in async mode. (<b class="deprecated">Deprecated:</b><span class="deprecated"> The data source is always accessed on the main thread, and this method will not be called.</span>)</p>
 			</div>
 			
 		    
@@ -370,10 +503,10 @@ due to the data access in async mode.</p>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

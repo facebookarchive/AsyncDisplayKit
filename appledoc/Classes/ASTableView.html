@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -70,6 +70,10 @@
 		
 		<option value="//api/name/beginUpdates">- beginUpdates</option>
 		
+		<option value="//api/name/clearContents">- clearContents</option>
+		
+		<option value="//api/name/clearFetchedData">- clearFetchedData</option>
+		
 		<option value="//api/name/deleteRowsAtIndexPaths:withRowAnimation:">- deleteRowsAtIndexPaths:withRowAnimation:</option>
 		
 		<option value="//api/name/deleteSections:withRowAnimation:">- deleteSections:withRowAnimation:</option>
@@ -78,7 +82,9 @@
 		
 		<option value="//api/name/endUpdatesAnimated:completion:">- endUpdatesAnimated:completion:</option>
 		
-		<option value="//api/name/initWithFrame:style:asyncDataFetching:">- initWithFrame:style:asyncDataFetching:</option>
+		<option value="//api/name/indexPathForNode:">- indexPathForNode:</option>
+		
+		<option value="//api/name/initWithFrame:style:">- initWithFrame:style:</option>
 		
 		<option value="//api/name/insertRowsAtIndexPaths:withRowAnimation:">- insertRowsAtIndexPaths:withRowAnimation:</option>
 		
@@ -90,7 +96,11 @@
 		
 		<option value="//api/name/nodeForRowAtIndexPath:">- nodeForRowAtIndexPath:</option>
 		
+		<option value="//api/name/relayoutItems">- relayoutItems</option>
+		
 		<option value="//api/name/reloadData">- reloadData</option>
+		
+		<option value="//api/name/reloadDataImmediately">- reloadDataImmediately</option>
 		
 		<option value="//api/name/reloadDataWithCompletion:">- reloadDataWithCompletion:</option>
 		
@@ -98,11 +108,17 @@
 		
 		<option value="//api/name/reloadSections:withRowAnimation:">- reloadSections:withRowAnimation:</option>
 		
+		<option value="//api/name/setTuningParameters:forRangeMode:rangeType:">- setTuningParameters:forRangeMode:rangeType:</option>
+		
 		<option value="//api/name/setTuningParameters:forRangeType:">- setTuningParameters:forRangeType:</option>
+		
+		<option value="//api/name/tuningParametersForRangeMode:rangeType:">- tuningParametersForRangeMode:rangeType:</option>
 		
 		<option value="//api/name/tuningParametersForRangeType:">- tuningParametersForRangeType:</option>
 		
 		<option value="//api/name/visibleNodes">- visibleNodes</option>
+		
+		<option value="//api/name/waitUntilAllUpdatesAreCommitted">- waitUntilAllUpdatesAreCommitted</option>
 		
 	</optgroup>
 	
@@ -138,10 +154,16 @@
 					<div class="section section-overview">
 						<a title="Overview" name="overview"></a>
 						<h2 class="subtitle subtitle-overview">Overview</h2>
-						<p>Node-based table view.</p>
+						<p>Asynchronous UITableView with Intelligent Preloading capabilities.</p>
 
-<p>ASTableView is a version of UITableView that uses nodes &ndash; specifically, ASCellNode subclasses &ndash; with asynchronous
-pre-rendering instead of synchronously loading UITableViewCells.</p>
+<p>ASTableNode is recommended over ASTableView.  This class is provided for adoption convenience.</p>
+
+<p>ASTableView is a true subclass of UITableView, meaning it is pointer-compatible with code that
+currently uses UITableView</p>
+
+<p>The main difference is that asyncDataSource expects -nodeForRowAtIndexPath, an ASCellNode, and
+the heightForRowAtIndexPath: method is eliminated (as are the performance problems caused by it).
+This is made possible because ASCellNodes can calculate their own size, and preload ahead of time.</p>
 					</div>
 					
 					
@@ -157,6 +179,65 @@ pre-rendering instead of synchronously loading UITableViewCells.</p>
 
 						<div class="task-list">
 							<div class="section-method">
+	<a name="//api/name/initWithFrame:style:" title="initWithFrame:style:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithFrame:style:">&ndash;&nbsp;initWithFrame:style:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initializer.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithFrame:(CGRect)<em>frame</em> style:(UITableViewStyle)<em>style</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>frame</code></th>
+						<td><p>A rectangle specifying the initial location and size of the table view in its superview’s coordinates.
+The frame of the table view changes as table cells are added and deleted.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>style</code></th>
+						<td><p>A constant that specifies the style of the table view. See UITableViewStyle for descriptions of valid constants.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/tuningParametersForRangeType:" title="tuningParametersForRangeType:"></a>
 	<h3 class="method-title"><code><a href="#//api/name/tuningParametersForRangeType:">&ndash;&nbsp;tuningParametersForRangeType:</a></code>
 </h3>
@@ -168,7 +249,7 @@ pre-rendering instead of synchronously loading UITableViewCells.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Tuning parameters for a range.</p>
+				<p>Tuning parameters for a range type in full mode.</p>
 			</div>
 			
 		    
@@ -183,7 +264,7 @@ pre-rendering instead of synchronously loading UITableViewCells.</p>
 				
 					<tr>
 						<th scope="row" class="argument-name"><code>rangeType</code></th>
-						<td><p>The range to get the tuning parameters for.</p></td>
+						<td><p>The range type to get the tuning parameters for.</p></td>
 					</tr>
 				
 				</table>
@@ -193,10 +274,7 @@ pre-rendering instead of synchronously loading UITableViewCells.</p>
 			
 			<div class="method-subsection return">
 				<h4 class="method-subtitle parameter-title">Return Value</h4>
-				<p>A tuning parameter value for the given range.</p>
-
-<p>Defaults to the render range having one sceenful both leading and trailing and the preload range having two
-screenfuls in both directions.</p>
+				<p>A tuning parameter value for the given range type in full mode.</p>
 			</div>
 			
 
@@ -229,7 +307,7 @@ screenfuls in both directions.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Set the tuning parameters for a range.</p>
+				<p>Set the tuning parameters for a range type in full mode.</p>
 			</div>
 			
 		    
@@ -244,12 +322,12 @@ screenfuls in both directions.</p>
 				
 					<tr>
 						<th scope="row" class="argument-name"><code>tuningParameters</code></th>
-						<td><p>The tuning parameters to store for a range.</p></td>
+						<td><p>The tuning parameters to store for a range type.</p></td>
 					</tr>
 				
 					<tr>
 						<th scope="row" class="argument-name"><code>rangeType</code></th>
-						<td><p>The range to set the tuning parameters for.</p></td>
+						<td><p>The range type to set the tuning parameters for.</p></td>
 					</tr>
 				
 				</table>
@@ -276,8 +354,8 @@ screenfuls in both directions.</p>
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/initWithFrame:style:asyncDataFetching:" title="initWithFrame:style:asyncDataFetching:"></a>
-	<h3 class="method-title"><code><a href="#//api/name/initWithFrame:style:asyncDataFetching:">&ndash;&nbsp;initWithFrame:style:asyncDataFetching:</a></code>
+	<a name="//api/name/tuningParametersForRangeMode:rangeType:" title="tuningParametersForRangeMode:rangeType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tuningParametersForRangeMode:rangeType:">&ndash;&nbsp;tuningParametersForRangeMode:rangeType:</a></code>
 </h3>
 
 	<div class="method-info">
@@ -287,12 +365,12 @@ screenfuls in both directions.</p>
 			
 			
 			<div class="method-subsection brief-description">
-				<p>Initializer.</p>
+				<p>Tuning parameters for a range type in the specified mode.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (instancetype)initWithFrame:(CGRect)<em>frame</em> style:(UITableViewStyle)<em>style</em> asyncDataFetching:(BOOL)<em>asyncDataFetchingEnabled</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)<em>rangeMode</em> rangeType:(ASLayoutRangeType)<em>rangeType</em></code></div>
 
 		    
 			
@@ -301,19 +379,81 @@ screenfuls in both directions.</p>
 				<table class="argument-def parameter-def">
 				
 					<tr>
-						<th scope="row" class="argument-name"><code>frame</code></th>
-						<td><p>A rectangle specifying the initial location and size of the table view in its superview’s coordinates.
-The frame of the table view changes as table cells are added and deleted.</p></td>
+						<th scope="row" class="argument-name"><code>rangeMode</code></th>
+						<td><p>The range mode to get the running parameters for.</p></td>
 					</tr>
 				
 					<tr>
-						<th scope="row" class="argument-name"><code>style</code></th>
-						<td><p>A constant that specifies the style of the table view. See UITableViewStyle for descriptions of valid constants.</p></td>
+						<th scope="row" class="argument-name"><code>rangeType</code></th>
+						<td><p>The range type to get the tuning parameters for.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A tuning parameter value for the given range type in the given mode.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/setTuningParameters:forRangeMode:rangeType:" title="setTuningParameters:forRangeMode:rangeType:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setTuningParameters:forRangeMode:rangeType:">&ndash;&nbsp;setTuningParameters:forRangeMode:rangeType:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Set the tuning parameters for a range type in the specified mode.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setTuningParameters:(ASRangeTuningParameters)<em>tuningParameters</em> forRangeMode:(ASLayoutRangeMode)<em>rangeMode</em> rangeType:(ASLayoutRangeType)<em>rangeType</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>tuningParameters</code></th>
+						<td><p>The tuning parameters to store for a range type.</p></td>
 					</tr>
 				
 					<tr>
-						<th scope="row" class="argument-name"><code>asyncDataFetchingEnabled</code></th>
-						<td><p>Enable the data fetching in async mode.</p></td>
+						<th scope="row" class="argument-name"><code>rangeMode</code></th>
+						<td><p>The range mode to set the running parameters for.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeType</code></th>
+						<td><p>The range type to set the tuning parameters for.</p></td>
 					</tr>
 				
 				</table>
@@ -324,17 +464,6 @@ The frame of the table view changes as table cells are added and deleted.</p></t
 
 			
 
-			
-			<div class="method-subsection discussion-section">
-				<h4 class="method-subtitle">Discussion</h4>
-				<p>If asyncDataFetching is enabled, the <code>ASTableView</code> will fetch data through <code>tableView:numberOfRowsInSection:</code> and
-<code>tableView:nodeForRowAtIndexPath:</code> in async mode from background thread. Otherwise, the methods will be invoked synchronically
-from calling thread.
-Enabling asyncDataFetching could avoid blocking main thread for <code>ASCellNode</code> allocation, which is frequently reported issue for
-large scale data. On another hand, the application code need take the responsibility to avoid data inconsistence. Specifically,
-we will lock the data source through <code>tableViewLockDataSource</code>, and unlock it by <code>tableViewUnlockDataSource</code> after the data fetching.
-The application should not update the data source while the data source is locked, to keep data consistence.</p>
-			</div>
 			
 
 			
@@ -379,7 +508,7 @@ The application should not update the data source while the data source is locke
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>Defaults to one screenful.</p>
+				<p>Defaults to two screenfuls.</p>
 			</div>
 			
 
@@ -413,7 +542,7 @@ The application should not update the data source while the data source is locke
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)reloadDataWithCompletion:(void ( ^ ) ( ))<em>completion</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)reloadDataWithCompletion:(void ( ^ _Nullable ) ( ))<em>completion</em></code></div>
 
 		    
 			
@@ -502,6 +631,94 @@ the main thread.</p></td>
 		</div>
 	</div>
 </div><div class="section-method">
+	<a name="//api/name/reloadDataImmediately" title="reloadDataImmediately"></a>
+	<h3 class="method-title"><code><a href="#//api/name/reloadDataImmediately">&ndash;&nbsp;reloadDataImmediately</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)reloadDataImmediately</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> This method is substantially more expensive than UITableView&rsquo;s version and will block the main thread while
+all the cells load.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/relayoutItems" title="relayoutItems"></a>
+	<h3 class="method-title"><code><a href="#//api/name/relayoutItems">&ndash;&nbsp;relayoutItems</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Triggers a relayout of all nodes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)relayoutItems</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/beginUpdates" title="beginUpdates"></a>
 	<h3 class="method-title"><code><a href="#//api/name/beginUpdates">&ndash;&nbsp;beginUpdates</a></code>
 </h3>
@@ -557,7 +774,7 @@ the main thread.</p></td>
 				<p>Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
 You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations
 to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
-the operations simultaneously. This method is must be called from the main thread. It&rsquo;s important to remeber that the ASTableView will
+the operations simultaneously. This method is must be called from the main thread. It&rsquo;s important to remember that the ASTableView will
 be processing the updates asynchronously after this call is completed.</p>
 			</div>
 			
@@ -602,14 +819,14 @@ be processing the updates asynchronously after this call is completed.</p>
 				<p>Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view.
 You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations
 to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
-the operations simultaneously. This method is must be called from the main thread. It&rsquo;s important to remeber that the ASTableView will
+the operations simultaneously. This method is must be called from the main thread. It&rsquo;s important to remember that the ASTableView will
 be processing the updates asynchronously after this call and are not guaranteed to be reflected in the ASTableView until
 the completion block is executed.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)endUpdatesAnimated:(BOOL)<em>animated</em> completion:(void ( ^ ) ( BOOL completed ))<em>completion</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)endUpdatesAnimated:(BOOL)<em>animated</em> completion:(void ( ^ _Nullable ) ( BOOL completed ))<em>completion</em></code></div>
 
 		    
 			
@@ -631,6 +848,47 @@ NO if they were interrupted. This parameter may be nil. If supplied, the block i
 				
 				</table>
 			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/waitUntilAllUpdatesAreCommitted" title="waitUntilAllUpdatesAreCommitted"></a>
+	<h3 class="method-title"><code><a href="#//api/name/waitUntilAllUpdatesAreCommitted">&ndash;&nbsp;waitUntilAllUpdatesAreCommitted</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)waitUntilAllUpdatesAreCommitted</code></div>
+
+		    
 			
 
 			
@@ -925,7 +1183,7 @@ before this method is called.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)insertRowsAtIndexPaths:(NSArray *)<em>indexPaths</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)insertRowsAtIndexPaths:(NSArray&lt;NSIndexPath*&gt; *)<em>indexPaths</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
 
 		    
 			
@@ -989,7 +1247,7 @@ before this method is called.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)deleteRowsAtIndexPaths:(NSArray *)<em>indexPaths</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)deleteRowsAtIndexPaths:(NSArray&lt;NSIndexPath*&gt; *)<em>indexPaths</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
 
 		    
 			
@@ -1053,7 +1311,7 @@ before this method is called.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (void)reloadRowsAtIndexPaths:(NSArray *)<em>indexPaths</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (void)reloadRowsAtIndexPaths:(NSArray&lt;NSIndexPath*&gt; *)<em>indexPaths</em> withRowAnimation:(UITableViewRowAnimation)<em>animation</em></code></div>
 
 		    
 			
@@ -1223,6 +1481,64 @@ before this method is called.</p>
 		</div>
 	</div>
 </div><div class="section-method">
+	<a name="//api/name/indexPathForNode:" title="indexPathForNode:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/indexPathForNode:">&ndash;&nbsp;indexPathForNode:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Similar to -indexPathForCell:.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)<em>cellNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>cellNode</code></th>
+						<td><p>a cellNode part of the table view</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>an indexPath for this cellNode</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/visibleNodes" title="visibleNodes"></a>
 	<h3 class="method-title"><code><a href="#//api/name/visibleNodes">&ndash;&nbsp;visibleNodes</a></code>
 </h3>
@@ -1239,7 +1555,7 @@ before this method is called.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (NSArray *)visibleNodes</code></div>
+			<div class="method-subsection method-declaration"><code>- (NSArray&lt;ASCellNode*&gt; *)visibleNodes</code></div>
 
 		    
 			
@@ -1247,7 +1563,7 @@ before this method is called.</p>
 			
 			<div class="method-subsection return">
 				<h4 class="method-subtitle parameter-title">Return Value</h4>
-				<p>an array containing the nodes being displayed on screen.</p>
+				<p>an array containing the cell nodes being displayed on screen.</p>
 			</div>
 			
 
@@ -1316,6 +1632,98 @@ cells, but section edits are ignored.</p>
 			
 		</div>
 	</div>
+</div><div class="section-method">
+	<a name="//api/name/clearContents" title="clearContents"></a>
+	<h3 class="method-title"><code><a href="#//api/name/clearContents">&ndash;&nbsp;clearContents</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Triggers all loaded ASCellNodes to destroy displayed contents (freeing a lot of memory).</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)clearContents</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method should only be called by ASTableNode.  To be removed in a later release.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/clearFetchedData" title="clearFetchedData"></a>
+	<h3 class="method-title"><code><a href="#//api/name/clearFetchedData">&ndash;&nbsp;clearFetchedData</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Triggers all loaded ASCellNodes to purge any data fetched from the network or disk (freeing memory).</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)clearFetchedData</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method should only be called by ASTableNode.  To be removed in a later release.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
 </div>
 						</div>
 						
@@ -1331,10 +1739,10 @@ cells, but section edits are ignored.</p>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

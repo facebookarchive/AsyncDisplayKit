@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASTableDelegate Protocol Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">AsyncDisplayKit </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">Facebook</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/shouldBatchFetchForTableView:">- shouldBatchFetchForTableView:</option>
+		
+		<option value="//api/name/tableView:constrainedSizeForRowAtIndexPath:">- tableView:constrainedSizeForRowAtIndexPath:</option>
+		
+		<option value="//api/name/tableView:didEndDisplayingNode:forRowAtIndexPath:">- tableView:didEndDisplayingNode:forRowAtIndexPath:</option>
+		
+		<option value="//api/name/tableView:didEndDisplayingNodeForRowAtIndexPath:">- tableView:didEndDisplayingNodeForRowAtIndexPath:</option>
+		
+		<option value="//api/name/tableView:willBeginBatchFetchWithContext:">- tableView:willBeginBatchFetchWithContext:</option>
+		
+		<option value="//api/name/tableView:willDisplayNodeForRowAtIndexPath:">- tableView:willDisplayNodeForRowAtIndexPath:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASTableDelegate Protocol Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Conforms to</th>
+	<td><a href="../Protocols/ASCommonTableViewDelegate.html">ASCommonTableViewDelegate</a><br />NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASTableView.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>This is a node-based UITableViewDelegate.</p>
+
+<p>Note that -tableView:heightForRowAtIndexPath: has been removed; instead, your custom ASCellNode subclasses are
+responsible for deciding their preferred onscreen height in -calculateSizeThatFits:.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/tableView:willDisplayNodeForRowAtIndexPath:" title="tableView:willDisplayNodeForRowAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tableView:willDisplayNodeForRowAtIndexPath:">&ndash;&nbsp;tableView:willDisplayNodeForRowAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Informs the delegate that the table view will add the node
+at the given index path to the view hierarchy.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)tableView:(ASTableView *)<em>tableView</em> willDisplayNodeForRowAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>tableView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the row that will be displayed.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> AsyncDisplayKit processes table view edits asynchronously. The index path
+passed into this method may not correspond to the same item in your data source
+if your data source has been updated since the last edit was processed.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/tableView:didEndDisplayingNode:forRowAtIndexPath:" title="tableView:didEndDisplayingNode:forRowAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tableView:didEndDisplayingNode:forRowAtIndexPath:">&ndash;&nbsp;tableView:didEndDisplayingNode:forRowAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Informs the delegate that the table view did remove the provided node from the view hierarchy.
+This may be caused by the node scrolling out of view, or by deleting the row
+or its containing section with @c deleteRowsAtIndexPaths:withRowAnimation: or @c deleteSections:withRowAnimation: .</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)tableView:(ASTableView *)<em>tableView</em> didEndDisplayingNode:(ASCellNode *)<em>node</em> forRowAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>tableView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>node</code></th>
+						<td><p>The node which was removed from the view hierarchy.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path at which the node was located before the removal.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/tableView:willBeginBatchFetchWithContext:" title="tableView:willBeginBatchFetchWithContext:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tableView:willBeginBatchFetchWithContext:">&ndash;&nbsp;tableView:willBeginBatchFetchWithContext:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Receive a message that the tableView is near the end of its data set and more data should be fetched if necessary.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)tableView:(ASTableView *)<em>tableView</em> willBeginBatchFetchWithContext:(ASBatchContext *)<em>context</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>tableView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>context</code></th>
+						<td><p>A context object that must be notified when the batch fetch is completed.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>You must eventually call -completeBatchFetching: with an argument of YES in order to receive future
+notifications to do batch fetches. This method is called on a background queue.</p>
+
+<p>ASTableView currently only supports batch events for tail loads. If you require a head load, consider implementing a
+UIRefreshControl.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/shouldBatchFetchForTableView:" title="shouldBatchFetchForTableView:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/shouldBatchFetchForTableView:">&ndash;&nbsp;shouldBatchFetchForTableView:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Tell the tableView if batch fetching should begin.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)shouldBatchFetchForTableView:(ASTableView *)<em>tableView</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>tableView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Use this method to conditionally fetch batches. Example use cases are: limiting the total number of
+objects that can be fetched or no network connection.</p>
+
+<p>If not implemented, the tableView assumes that it should notify its asyncDelegate when batch fetching
+should occur.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/tableView:constrainedSizeForRowAtIndexPath:" title="tableView:constrainedSizeForRowAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tableView:constrainedSizeForRowAtIndexPath:">&ndash;&nbsp;tableView:constrainedSizeForRowAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Provides the constrained size range for measuring the row at the index path.
+Note: the widths in the returned size range are ignored!</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASSizeRange)tableView:(ASTableView *)<em>tableView</em> constrainedSizeForRowAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>tableView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A constrained size range for layout the node at this index path.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/tableView:didEndDisplayingNodeForRowAtIndexPath:" title="tableView:didEndDisplayingNodeForRowAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/tableView:didEndDisplayingNodeForRowAtIndexPath:">&ndash;&nbsp;tableView:didEndDisplayingNodeForRowAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Informs the delegate that the table view did remove the node which was previously
+at the given index path from the view hierarchy.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)tableView:(ASTableView *)<em>tableView</em> didEndDisplayingNodeForRowAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> AsyncDisplayKit processes table view edits asynchronously. The index path
+passed into this method may not correspond to the same item in your data source
+if your data source has been updated since the last edit was processed.</p>
+
+<p>This method is deprecated. Use @c tableView:didEndDisplayingNode:forRowAtIndexPath: instead.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTableView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

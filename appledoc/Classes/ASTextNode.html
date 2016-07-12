@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -58,7 +58,7 @@
 		
 		<option value="//api/name/additionalTruncationMessage">additionalTruncationMessage</option>
 		
-		<option value="//api/name/attributedString">attributedString</option>
+		<option value="//api/name/attributedText">attributedText</option>
 		
 		<option value="//api/name/delegate">delegate</option>
 		
@@ -72,11 +72,13 @@
 		
 		<option value="//api/name/longPressCancelsTouches">longPressCancelsTouches</option>
 		
-		<option value="//api/name/maximumLineCount">maximumLineCount</option>
+		<option value="//api/name/maximumNumberOfLines">maximumNumberOfLines</option>
 		
 		<option value="//api/name/passthroughNonlinkTouches">passthroughNonlinkTouches</option>
 		
 		<option value="//api/name/placeholderColor">placeholderColor</option>
+		
+		<option value="//api/name/placeholderEnabled">placeholderEnabled</option>
 		
 		<option value="//api/name/placeholderInsets">placeholderInsets</option>
 		
@@ -84,7 +86,7 @@
 		
 		<option value="//api/name/truncated">truncated</option>
 		
-		<option value="//api/name/truncationAttributedString">truncationAttributedString</option>
+		<option value="//api/name/truncationAttributedText">truncationAttributedText</option>
 		
 		<option value="//api/name/truncationMode">truncationMode</option>
 		
@@ -158,8 +160,8 @@
 
 						<div class="task-list">
 							<div class="section-method">
-	<a name="//api/name/attributedString" title="attributedString"></a>
-	<h3 class="method-title"><code><a href="#//api/name/attributedString">&nbsp;&nbsp;attributedString</a></code>
+	<a name="//api/name/attributedText" title="attributedText"></a>
+	<h3 class="method-title"><code><a href="#//api/name/attributedText">&nbsp;&nbsp;attributedText</a></code>
 </h3>
 
 	<div class="method-info">
@@ -169,12 +171,12 @@
 			
 			
 			<div class="method-subsection brief-description">
-				<p>The attributed string to show.</p>
+				<p>The styled text displayed by the node.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, copy) NSAttributedString *attributedString</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, copy) NSAttributedString *attributedText</code></div>
 
 		    
 			
@@ -205,8 +207,8 @@ For inline image attachments, add an attribute of key NSAttachmentAttributeName,
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/truncationAttributedString" title="truncationAttributedString"></a>
-	<h3 class="method-title"><code><a href="#//api/name/truncationAttributedString">&nbsp;&nbsp;truncationAttributedString</a></code>
+	<a name="//api/name/truncationAttributedText" title="truncationAttributedText"></a>
+	<h3 class="method-title"><code><a href="#//api/name/truncationAttributedText">&nbsp;&nbsp;truncationAttributedText</a></code>
 </h3>
 
 	<div class="method-info">
@@ -216,12 +218,12 @@ For inline image attachments, add an attribute of key NSAttachmentAttributeName,
 			
 			
 			<div class="method-subsection brief-description">
-				<p>The attributedString to use when the text must be truncated.</p>
+				<p>The attributedText to use when the text must be truncated.</p>
 			</div>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, copy) NSAttributedString *truncationAttributedString</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedText</code></div>
 
 		    
 			
@@ -267,7 +269,7 @@ For inline image attachments, add an attribute of key NSAttachmentAttributeName,
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, copy) NSAttributedString *additionalTruncationMessage</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, copy) NSAttributedString *additionalTruncationMessage</code></div>
 
 		    
 			
@@ -326,7 +328,7 @@ For inline image attachments, add an attribute of key NSAttachmentAttributeName,
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>Defaults to NSLineBreakByWordWrapping.</p>
+				<p>Defaults to NSLineBreakByWordWrapping.</p><div class="note"><p><strong>Note:</strong> Setting a truncationMode in attributedString will override the truncation mode set here.</p></div>
 			</div>
 			
 
@@ -385,8 +387,8 @@ For inline image attachments, add an attribute of key NSAttachmentAttributeName,
 		</div>
 	</div>
 </div><div class="section-method">
-	<a name="//api/name/maximumLineCount" title="maximumLineCount"></a>
-	<h3 class="method-title"><code><a href="#//api/name/maximumLineCount">&nbsp;&nbsp;maximumLineCount</a></code>
+	<a name="//api/name/maximumNumberOfLines" title="maximumNumberOfLines"></a>
+	<h3 class="method-title"><code><a href="#//api/name/maximumNumberOfLines">&nbsp;&nbsp;maximumNumberOfLines</a></code>
 </h3>
 
 	<div class="method-info">
@@ -402,7 +404,7 @@ For inline image attachments, add an attribute of key NSAttachmentAttributeName,
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) NSUInteger maximumLineCount</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) NSUInteger maximumNumberOfLines</code></div>
 
 		    
 			
@@ -468,6 +470,54 @@ For inline image attachments, add an attribute of key NSAttachmentAttributeName,
 		</div>
 	</div>
 </div><div class="section-method">
+	<a name="//api/name/placeholderEnabled" title="placeholderEnabled"></a>
+	<h3 class="method-title"><code><a href="#//api/name/placeholderEnabled">&nbsp;&nbsp;placeholderEnabled</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>ASTextNode has a special placeholder behavior when placeholderEnabled is YES.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL placeholderEnabled</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to NO.  When YES, it draws rectangles for each line of text,
+following the true shape of the text&rsquo;s wrapping.  This visually mirrors the overall
+shape and weight of paragraphs, making the appearance of the finished text less jarring.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
 	<a name="//api/name/placeholderColor" title="placeholderColor"></a>
 	<h3 class="method-title"><code><a href="#//api/name/placeholderColor">&nbsp;&nbsp;placeholderColor</a></code>
 </h3>
@@ -484,7 +534,7 @@ For inline image attachments, add an attribute of key NSAttachmentAttributeName,
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, strong) UIColor *placeholderColor</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, strong) UIColor *placeholderColor</code></div>
 
 		    
 			
@@ -614,7 +664,7 @@ will return a CGRect large enough to fit both the text and the appropriate shado
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (NSArray *)rectsForTextRange:(NSRange)<em>textRange</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (NSArray&lt;NSValue*&gt; *)rectsForTextRange:(NSRange)<em>textRange</em></code></div>
 
 		    
 			
@@ -675,7 +725,7 @@ are in the coordinate system of the receiver.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (NSArray *)highlightRectsForTextRange:(NSRange)<em>textRange</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (NSArray&lt;NSValue*&gt; *)highlightRectsForTextRange:(NSRange)<em>textRange</em></code></div>
 
 		    
 			
@@ -844,7 +894,7 @@ The rect returned is in the coordinate system of the receiver.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>@property (nonatomic, copy) NSArray *linkAttributeNames</code></div>
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, copy) NSArray&lt;NSString*&gt; *linkAttributeNames</code></div>
 
 		    
 			
@@ -885,7 +935,7 @@ The rect returned is in the coordinate system of the receiver.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (id)linkAttributeValueAtPoint:(CGPoint)<em>point</em> attributeName:(out NSString **)<em>attributeNameOut</em> range:(out NSRange *)<em>rangeOut</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (nullable id)linkAttributeValueAtPoint:(CGPoint)<em>point</em> attributeName:(out NSString *_Nullable *_Nullable)<em>attributeNameOut</em> range:(out NSRange *_Nullable)<em>rangeOut</em></code></div>
 
 		    
 			
@@ -1103,6 +1153,13 @@ The rect returned is in the coordinate system of the receiver.</p>
 			
 
 			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The delegate must be set before the node is loaded, and implement
+             textNode:longPressedLinkAttribute:value:atPoint:textRange: in order for
+             the long press gesture recognizer to be installed.</p>
+			</div>
+			
 
 			
 
@@ -1214,10 +1271,10 @@ The rect returned is in the coordinate system of the receiver.</p>
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>

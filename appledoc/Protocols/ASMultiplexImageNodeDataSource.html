@@ -7,7 +7,7 @@
 
 	<link rel="stylesheet" href="../css/style.css">
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
-	<meta name="generator" content="appledoc 2.2.1 (build 1333)">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
 </head>
 <body class="appledoc">
 	<header>
@@ -61,6 +61,8 @@
 	<optgroup label="Instance Methods">
 		
 		<option value="//api/name/multiplexImageNode:URLForImageIdentifier:">- multiplexImageNode:URLForImageIdentifier:</option>
+		
+		<option value="//api/name/multiplexImageNode:assetForLocalIdentifier:">- multiplexImageNode:assetForLocalIdentifier:</option>
 		
 		<option value="//api/name/multiplexImageNode:imageForImageIdentifier:">- multiplexImageNode:imageForImageIdentifier:</option>
 		
@@ -131,7 +133,7 @@ for each image identifier, an image or a URL the image node should load.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (UIImage *)multiplexImageNode:(ASMultiplexImageNode *)<em>imageNode</em> imageForImageIdentifier:(id)<em>imageIdentifier</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (nullable UIImage *)multiplexImageNode:(ASMultiplexImageNode *)<em>imageNode</em> imageForImageIdentifier:(ASImageIdentifier)<em>imageIdentifier</em></code></div>
 
 		    
 			
@@ -200,7 +202,7 @@ URL to the image via -multiplexImageNode:URLForImageIdentifier:.</p>
 			
 		    
 
-			<div class="method-subsection method-declaration"><code>- (NSURL *)multiplexImageNode:(ASMultiplexImageNode *)<em>imageNode</em> URLForImageIdentifier:(id)<em>imageIdentifier</em></code></div>
+			<div class="method-subsection method-declaration"><code>- (nullable NSURL *)multiplexImageNode:(ASMultiplexImageNode *)<em>imageNode</em> URLForImageIdentifier:(ASImageIdentifier)<em>imageIdentifier</em></code></div>
 
 		    
 			
@@ -234,8 +236,87 @@ URL to the image via -multiplexImageNode:URLForImageIdentifier:.</p>
 			
 			<div class="method-subsection discussion-section">
 				<h4 class="method-subtitle">Discussion</h4>
-				<p>Supported URLs include assets-library, Photo framework URLs (ph://), HTTP, HTTPS, and FTP URLs.  If the
-image is already available to the data source, it should be provided via <a href="#//api/name/multiplexImageNode:imageForImageIdentifier:">[ASMultiplexImageNodeDataSource multiplexImageNode:imageForImageIdentifier:]</a> instead.</p>
+				<p>Supported URLs include HTTP, HTTPS, AssetsLibrary, and FTP URLs as well as Photos framework URLs (see note).</p>
+
+<p>If the image is already available to the data source, it should be provided via <a href="#//api/name/multiplexImageNode:imageForImageIdentifier:">[ASMultiplexImageNodeDataSource multiplexImageNode:imageForImageIdentifier:]</a> instead.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection see-also-section">
+				<h4 class="method-subtitle">See Also</h4>
+				<ul>
+					
+					<li><code><p><code>[NSURL URLWithAssetLocalIdentifier:targetSize:contentMode:options:]</code> below.</p></code></li>
+					
+				</ul>
+			</div>
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASMultiplexImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/multiplexImageNode:assetForLocalIdentifier:" title="multiplexImageNode:assetForLocalIdentifier:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/multiplexImageNode:assetForLocalIdentifier:">&ndash;&nbsp;multiplexImageNode:assetForLocalIdentifier:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A PHAsset for the specific asset local identifier</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable PHAsset *)multiplexImageNode:(ASMultiplexImageNode *)<em>imageNode</em> assetForLocalIdentifier:(NSString *)<em>assetLocalIdentifier</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>imageNode</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>assetLocalIdentifier</code></th>
+						<td><p>The local identifier for a PHAsset that this image node is loading.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A PHAsset corresponding to <code>assetLocalIdentifier</code>, or nil if none is available.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This optional method can improve image performance if your data source already has the PHAsset available.
+If this method is not implemented, or returns nil, the image node will request the asset from the Photos framework.</p><div class="note"><p><strong>Note:</strong> This method may be called from any thread.</p></div>
 			</div>
 			
 
@@ -267,10 +348,10 @@ image is already available to the data source, it should be provided via <a href
 				<footer>
 					<div class="footer-copyright">
 						
-						<p class="copyright">Copyright &copy; 2015 Facebook. All rights reserved. Updated: 2015-09-16</p>
+						<p class="copyright">Copyright &copy; 2016 Facebook. All rights reserved. Updated: 2016-07-11</p>
 						
 						
-						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1333)</a>.</p>
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
 						
 					</div>
 				</footer>
