@@ -88,8 +88,7 @@
 
 - (void)willInsertSections:(NSIndexSet *)sections
 {
-  for (NSString *kind in _pendingContexts) {
-    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
+  [_pendingContexts enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, NSMutableArray<ASIndexedNodeContext *> * _Nonnull contexts, BOOL * _Nonnull stop) {
     NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:sections.count];
     for (NSUInteger i = 0; i < sections.count; i++) {
       [sectionArray addObject:[NSMutableArray array]];
@@ -99,7 +98,7 @@
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-  }
+  }];
   [_pendingContexts removeAllObjects];
 }
 
@@ -145,13 +144,12 @@
 
 - (void)willInsertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
-  for (NSString *kind in _pendingContexts) {
-    NSMutableArray<ASIndexedNodeContext *> *contexts = _pendingContexts[kind];
-
+  [_pendingContexts enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, NSMutableArray<ASIndexedNodeContext *> * _Nonnull contexts, BOOL * _Nonnull stop) {
     [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
-  }
+  }];
+
   [_pendingContexts removeAllObjects];
 }
 
