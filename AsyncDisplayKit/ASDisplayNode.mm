@@ -1055,13 +1055,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)__setNeedsLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  
   _propertyLock.lock();
   
-  if ([self _hasDirtyLayout]) {
+  if (_layout == nil) {
+    // Can't proceed without a layout as no constrained size would be available
     _propertyLock.unlock();
     return;
   }
-  
+    
   [self invalidateCalculatedLayout];
   
   if (_supernode) {
@@ -1091,6 +1093,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
     self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
   }
+  
   _propertyLock.unlock();
 }
 
