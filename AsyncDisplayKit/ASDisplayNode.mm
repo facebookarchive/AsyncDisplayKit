@@ -1055,9 +1055,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)__setNeedsLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(_propertyLock);
+  _propertyLock.lock();
   
   if ([self _hasDirtyLayout]) {
+    _propertyLock.unlock();
     return;
   }
   
@@ -1065,7 +1066,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   if (_supernode) {
     ASDisplayNode *supernode = _supernode;
-    ASDN::MutexUnlocker u(_propertyLock);
+    _propertyLock.unlock();
     // Cause supernode's layout to be invalidated
     // We need to release the lock to prevent a deadlock
     [supernode setNeedsLayout];
@@ -1090,6 +1091,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
     self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
   }
+  _propertyLock.unlock();
 }
 
 - (void)__setNeedsDisplay
