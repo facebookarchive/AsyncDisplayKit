@@ -47,16 +47,16 @@
 /**
  * Insert and remove subnodes that where added or removed between the previousLayout and the pendingLayout
  */
-- (void)applyTransition;
+- (void)completeTransition;
 
 /**
  * Insert all new subnodes that where added between the previous layout and the pending layout
  */
-- (void)applySubnodeInsertions;
+- (void)completeSubnodeInsertions;
 
 /**
  * Remove all subnodes that are removed between the previous layout and the pending layout
  */
-- (void)applySubnodeRemovals;
+- (void)completeSubnodeRemovals;
 
 @end

@@ -655,7 +655,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                                                        previousLayout:previousLayout];
   
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState) == NO) {
-    [self _applyPendingLayoutTransition];
+    [self _completePendingLayoutTransition];
   }
   
   return newLayout;
@@ -771,10 +771,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       }
       
       ASLayout *previousLayout = _layout;
-      [self _applyLayout:newLayout];
+      [self _setCalculatedLayout:newLayout];
       
       ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
-        [node _applyPendingLayoutTransition];
+        [node _completePendingLayoutTransition];
         node.hierarchyState &= (~ASHierarchyStateLayoutPending);
       });
         
@@ -787,7 +787,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                             pendingLayout:newLayout
                                                            previousLayout:previousLayout];
-      [_pendingLayoutTransition applySubnodeInsertions];
+      [_pendingLayoutTransition completeSubnodeInsertions];
 
       _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
                                                             layoutDelegate:_pendingLayoutTransition
@@ -887,7 +887,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context
 {
-  [_pendingLayoutTransition applySubnodeRemovals];
+  [_pendingLayoutTransition completeSubnodeRemovals];
   [self _completeLayoutCalculation];
   _pendingLayoutTransition = nil;
 }
@@ -902,18 +902,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Layout
 
-- (void)_applyPendingLayoutTransition
+- (void)_completePendingLayoutTransition
 {
   ASDN::MutexLocker l(_propertyLock);
   if (_pendingLayoutTransition) {
-    [self _applyLayout:_pendingLayoutTransition.pendingLayout];
-    [self _applyLayoutTransition:_pendingLayoutTransition];
+    [self _setCalculatedLayout:_pendingLayoutTransition.pendingLayout];
+    [self _completeTransition:_pendingLayoutTransition];
     _pendingLayoutTransition = nil;
   }
   [self _completeLayoutCalculation];
 }
 
-- (void)_applyLayout:(ASLayout *)layout
+- (void)_setCalculatedLayout:(ASLayout *)layout
 {
   ASDN::MutexLocker l(_propertyLock);
   
@@ -924,7 +924,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _layout = layout;
 }
 
-- (void)_applyLayoutTransition:(ASLayoutTransition *)layoutTransition
+- (void)_completeTransition:(ASLayoutTransition *)layoutTransition
 {
   // Layout transition is not supported for non implicit hierarchy managed nodes
   if (layoutTransition == nil || self.usesImplicitHierarchyManagement == NO) {
@@ -936,13 +936,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
     // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
     ASPerformBlockOnMainThread(^{
-      [layoutTransition applyTransition];
+      [layoutTransition completeTransition];
     });
     
     return;
   }
   
-  [layoutTransition applyTransition];
+  [layoutTransition completeTransition];
 }
 
 #pragma mark - Asynchronous display
@@ -2572,6 +2572,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
   }
 }
+
 #pragma mark - Display
 
 >>>>>>> Simplify applying layout transition in preparation for bigger layout transition API work

@@ -74,13 +74,13 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   return ASLayoutCanTransitionAsynchronous(_pendingLayout);
 }
 
-- (void)applyTransition
+- (void)completeTransition
 {
-  [self applySubnodeInsertions];
-  [self applySubnodeRemovals];
+  [self completeSubnodeInsertions];
+  [self completeSubnodeRemovals];
 }
 
-- (void)applySubnodeInsertions
+- (void)completeSubnodeInsertions
 {
   ASDN::MutexLocker l(__instanceLock__);
   [self calculateSubnodeOperationsIfNeeded];
@@ -93,7 +93,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   }
 }
 
-- (void)applySubnodeRemovals
+- (void)completeSubnodeRemovals
 {
   ASDN::MutexLocker l(__instanceLock__);
   [self calculateSubnodeOperationsIfNeeded];
