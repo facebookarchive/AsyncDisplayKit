@@ -117,16 +117,18 @@
 - (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   for (NSString *kind in [self supplementaryKinds]) {
-    NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], [NSIndexSet indexSetWithIndex:section]);
-    NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths([self editingNodesOfKind:kind], indexPaths);
+    NSMutableArray *editingNodes = [self editingNodesOfKind:kind];
+    NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(editingNodes, [NSIndexSet indexSetWithIndex:section]);
+    NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(editingNodes, indexPaths);
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
     
     // update the section of indexpaths
-    NSIndexPath *sectionIndexPath = [[NSIndexPath alloc] initWithIndex:newSection];
     NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-    [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
-      [updatedIndexPaths addObject:[sectionIndexPath indexPathByAddingIndex:[indexPath indexAtPosition:indexPath.length - 1]]];
-    }];
+    for (NSIndexPath *indexPath in indexPaths) {
+      NSUInteger newItem = [indexPath indexAtPosition:indexPath.length - 1];
+      NSIndexPath *mappedIndexPath = [NSIndexPath indexPathForItem:newItem inSection:newSection];
+      [updatedIndexPaths addObject:mappedIndexPath];
+    }
     [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
   }
 }
@@ -204,12 +206,13 @@
   id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
   
-  [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    NSUInteger rowNum = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:idx];
-    NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
-    for (NSUInteger i = 0; i < rowNum; i++) {
-      NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
-      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
+  [sections enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
+    for (NSUInteger sec = range.location; sec < NSMaxRange(range); sec++) {
+      NSUInteger itemCount = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:sec];
+      for (NSUInteger i = 0; i < itemCount; i++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sec];
+        [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
+      }
     }
   }];
 }
@@ -224,12 +227,13 @@
     [sections addIndex:indexPath.section];
   }
 
-  [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    NSUInteger rowNum = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:idx];
-    NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
-    for (NSUInteger i = 0; i < rowNum; i++) {
-      NSIndexPath *indexPath = [sectionIndex indexPathByAddingIndex:i];
-      [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
+  [sections enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
+    for (NSUInteger sec = range.location; sec < NSMaxRange(range); sec++) {
+      NSUInteger itemCount = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:sec];
+      for (NSUInteger i = 0; i < itemCount; i++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sec];
+        [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
+      }
     }
   }];
 }

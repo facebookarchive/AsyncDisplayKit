@@ -303,9 +303,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)removeControls
 {
   NSArray *controls = [_cachedControls allValues];
-  [controls enumerateObjectsUsingBlock:^(ASDisplayNode   *_Nonnull node, NSUInteger idx, BOOL * _Nonnull stop) {
+  for (ASDisplayNode *node in controls) {
     [node removeFromSupernode];
-  }];
+  }
 
   [self cleanCachedControls];
 }
