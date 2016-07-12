@@ -33,6 +33,7 @@
 @synthesize mapDelegate = _mapDelegate;
 @synthesize options = _options;
 @synthesize liveMap = _liveMap;
+@synthesize showAnnotationsOptions = _showAnnotationsOptions;
 
 #pragma mark - Lifecycle
 - (instancetype)init
@@ -267,8 +268,9 @@
     [weakSelf setNeedsLayout];
     [weakSelf.view addSubview:_mapView];
 
-    if (self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
-      BOOL const animated = self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
+    ASMapNodeShowAnnotationsOptions showAnnotationsOptions = self.showAnnotationsOptions;
+    if (showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
+      BOOL const animated = showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
       [_mapView showAnnotations:_mapView.annotations animated:animated];
     }
   }
@@ -292,16 +294,17 @@
 
   ASDN::MutexLocker l(_propertyLock);
   _annotations = annotations;
+  ASMapNodeShowAnnotationsOptions showAnnotationsOptions = self.showAnnotationsOptions;
   if (self.isLiveMap) {
     [_mapView removeAnnotations:_mapView.annotations];
     [_mapView addAnnotations:annotations];
 
-    if (self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
-      BOOL const animated = self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
+    if (showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
+      BOOL const animated = showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
       [_mapView showAnnotations:_mapView.annotations animated:animated];
     }
   } else {
-    if (self.showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
+    if (showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
       self.region = [self regionToFitAnnotations:annotations];
     }
     else {
@@ -331,6 +334,16 @@
                                                                           fabs(bottomRightCoord.longitude - topLeftCoord.longitude) * 2));
 
   return region;
+}
+
+-(ASMapNodeShowAnnotationsOptions)showAnnotationsOptions {
+  ASDN::MutexLocker l(_propertyLock);
+  return _showAnnotationsOptions;
+}
+
+-(void)setShowAnnotationsOptions:(ASMapNodeShowAnnotationsOptions)showAnnotationsOptions {
+  ASDN::MutexLocker l(_propertyLock);
+  _showAnnotationsOptions = showAnnotationsOptions;
 }
 
 #pragma mark - Layout
