@@ -330,7 +330,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSMutableSet *targets = [[NSMutableSet alloc] init];
 
   // Look at each event...
-  for (NSMapTable *eventDispatchTable in [_controlEventDispatchTable allValues])
+  for (NSMapTable *eventDispatchTable in [_controlEventDispatchTable objectEnumerator])
   {
     // and each event's targets...
     for (id target in eventDispatchTable)
