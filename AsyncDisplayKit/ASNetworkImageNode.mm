@@ -195,7 +195,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     if (!_needsToApplyPendingContentMode && ASObjectIsEqual(image, _defaultImage)) {
       _pendingContentModeState = self.contentMode;
       _needsToApplyPendingContentMode = YES;
-    } else if (_needsToApplyPendingContentMode) {
+    } else if (_needsToApplyPendingContentMode && !ASObjectIsEqual(image, _defaultImage)) {
       _needsToApplyPendingContentMode = NO;
       self.contentMode = _pendingContentModeState;
     }
