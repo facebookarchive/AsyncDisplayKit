@@ -46,7 +46,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @protocol ASLayoutable <ASEnvironment, ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate, ASLayoutableExtensibility>
 
+/**
+ * @abstract Returns type of layoutable
+ */
 @property (nonatomic, readonly) ASLayoutableType layoutableType;
+
+/**
+ * @abstract Returns if the layoutable can be used to layout in an asynchronous way on a background thread.
+ */
+@property (nonatomic, readonly) BOOL canLayoutAsynchronous;
 
 /**
  * @abstract Calculate a layout based on given size range.

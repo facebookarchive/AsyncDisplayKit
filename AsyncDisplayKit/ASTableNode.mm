@@ -10,20 +10,34 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import "ASTableNode.h"
+#import "ASTableViewInternal.h"
 #import "ASEnvironmentInternal.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASFlowLayoutController.h"
 #import "ASInternalHelpers.h"
-#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
-#import "ASTableViewInternal.h"
+#import "ASCellNode+Internal.h"
+
+#pragma mark - _ASTablePendingState
 
 @interface _ASTablePendingState : NSObject
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
 @property (weak, nonatomic) id <ASTableDataSource> dataSource;
+@property (assign, nonatomic) ASLayoutRangeMode rangeMode;
 @end
 
 @implementation _ASTablePendingState
+- (instancetype)init
+{
+  self = [super init];
+  if (self) {
+    _rangeMode = ASLayoutRangeModeCount;
+  }
+  return self;
+}
+
 @end
+
+#pragma mark - ASTableView
 
 @interface ASTableNode ()
 {
@@ -38,6 +52,8 @@
 @end
 
 @implementation ASTableNode
+
+#pragma mark Lifecycle
 
 - (instancetype)_initWithTableView:(ASTableView *)tableView
 {
@@ -72,6 +88,8 @@
   return [self _initWithFrame:CGRectZero style:UITableViewStylePlain dataControllerClass:nil];
 }
 
+#pragma mark ASDisplayNode
+
 - (void)didLoad
 {
   [super didLoad];
@@ -84,22 +102,43 @@
     self.pendingState    = nil;
     view.asyncDelegate   = pendingState.delegate;
     view.asyncDataSource = pendingState.dataSource;
+    if (pendingState.rangeMode != ASLayoutRangeModeCount) {
+      [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
+    }
   }
 }
 
-- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
+- (ASTableView *)view
 {
-    if (!self.isNodeLoaded) {
-        return;
-    }
-    
-    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+  return (ASTableView *)[super view];
 }
+
+- (void)clearContents
+{
+  [super clearContents];
+  [self.view clearContents];
+}
+
+- (void)clearFetchedData
+{
+  [super clearFetchedData];
+  [self.view clearFetchedData];
+}
+
+#if ASRangeControllerLoggingEnabled
+- (void)visibleStateDidChange:(BOOL)isVisible
+{
+  [super visibleStateDidChange:isVisible];
+  NSLog(@"%@ - visible: %d", self, isVisible);
+}
+#endif
+
+#pragma mark Setter / Getter
 
 - (_ASTablePendingState *)pendingState
 {
   if (!_pendingState && ![self isNodeLoaded]) {
-    self.pendingState = [[_ASTablePendingState alloc] init];
+    _pendingState = [[_ASTablePendingState alloc] init];
   }
   ASDisplayNodeAssert(![self isNodeLoaded] || !_pendingState, @"ASTableNode should not have a pendingState once it is loaded");
   return _pendingState;
@@ -143,30 +182,19 @@
   }
 }
 
-- (ASTableView *)view
+#pragma mark ASRangeControllerUpdateRangeProtocol
+
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
 {
-  return (ASTableView *)[super view];
+  if ([self pendingState]) {
+    _pendingState.rangeMode = rangeMode;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
+    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+  }
 }
 
-#if ASRangeControllerLoggingEnabled
-- (void)visibleStateDidChange:(BOOL)isVisible
-{
-  [super visibleStateDidChange:isVisible];
-  NSLog(@"%@ - visible: %d", self, isVisible);
-}
-#endif
-
-- (void)clearContents
-{
-  [super clearContents];
-  [self.view clearContents];
-}
-
-- (void)clearFetchedData
-{
-  [super clearFetchedData];
-  [self.view clearFetchedData];
-}
+#pragma mark ASEnvironment
 
 ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 

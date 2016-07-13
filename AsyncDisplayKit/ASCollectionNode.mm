@@ -10,53 +10,76 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASCollectionNode.h"
 #import "ASCollectionInternal.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
+#import "ASCollectionNode.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASEnvironmentInternal.h"
 #import "ASInternalHelpers.h"
-#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
-#include <vector>
+#import "ASCellNode+Internal.h"
+
+#pragma mark - _ASCollectionPendingState
 
 @interface _ASCollectionPendingState : NSObject
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
+@property (assign, nonatomic) ASLayoutRangeMode rangeMode;
 @end
 
 @implementation _ASCollectionPendingState
-@end
 
-#if 0  // This is not used yet, but will provide a way to avoid creating the view to set range values.
-@implementation _ASCollectionPendingState
+- (instancetype)init
 {
-  std::vector<ASRangeTuningParameters> _tuningParameters;
+  self = [super init];
+  if (self) {
+    _rangeMode = ASLayoutRangeModeCount;
+  }
+  return self;
+}
+@end
+
+// TODO: Add support for tuning parameters in the pending state
+#if 0  // This is not used yet, but will provide a way to avoid creating the view to set range values.
+@implementation _ASCollectionPendingState {
+  std::vector<std::vector<ASRangeTuningParameters>> _tuningParameters;
 }
 
 - (instancetype)init
 {
-  if (!(self = [super init])) {
-    return nil;
+  self = [super init];
+  if (self) {
+    _tuningParameters = std::vector<std::vector<ASRangeTuningParameters>> (ASLayoutRangeModeCount, std::vector<ASRangeTuningParameters> (ASLayoutRangeTypeCount));
+    _rangeMode = ASLayoutRangeModeCount;
   }
-  _tuningParameters = std::vector<ASRangeTuningParameters>(ASLayoutRangeTypeCount);
   return self;
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  return _tuningParameters[rangeType];
+  return [self tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType < _tuningParameters.size(), @"Requesting a range that is OOB for the configured tuning parameters");
-  ASDisplayNodeAssert(rangeType != ASLayoutRangeTypeVisible, @"Must not set Visible range tuning parameters (always 0, 0)");
-  _tuningParameters[rangeType] = tuningParameters;
+  return [self setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+}
+
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+{
+  ASDisplayNodeAssert(rangeMode < _tuningParameters.size() && rangeType < _tuningParameters[rangeMode].size(), @"Requesting a range that is OOB for the configured tuning parameters");
+  return _tuningParameters[rangeMode][rangeType];
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+{
+  ASDisplayNodeAssert(rangeMode < _tuningParameters.size() && rangeType < _tuningParameters[rangeMode].size(), @"Setting a range that is OOB for the configured tuning parameters");
+  _tuningParameters[rangeMode][rangeType] = tuningParameters;
 }
 
 @end
 #endif
+
+#pragma mark - ASCollectionNode
 
 @interface ASCollectionNode ()
 {
@@ -66,6 +89,8 @@
 @end
 
 @implementation ASCollectionNode
+
+#pragma mark Lifecycle
 
 - (instancetype)init
 {
@@ -109,6 +134,8 @@
   return nil;
 }
 
+#pragma mark ASDisplayNode
+
 - (void)didLoad
 {
   [super didLoad];
@@ -121,8 +148,38 @@
     self.pendingState      = nil;
     view.asyncDelegate     = pendingState.delegate;
     view.asyncDataSource   = pendingState.dataSource;
+    if (pendingState.rangeMode != ASLayoutRangeModeCount) {
+      [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
+    }
   }
 }
+
+- (ASCollectionView *)view
+{
+  return (ASCollectionView *)[super view];
+}
+
+- (void)clearContents
+{
+  [super clearContents];
+  [self.view clearContents];
+}
+
+- (void)clearFetchedData
+{
+  [super clearFetchedData];
+  [self.view clearFetchedData];
+}
+
+#if ASRangeControllerLoggingEnabled
+- (void)visibleStateDidChange:(BOOL)isVisible
+{
+  [super visibleStateDidChange:isVisible];
+  NSLog(@"%@ - visible: %d", self, isVisible);
+}
+#endif
+
+#pragma mark Setter / Getter
 
 - (_ASCollectionPendingState *)pendingState
 {
@@ -171,47 +228,7 @@
   }
 }
 
-- (ASCollectionView *)view
-{
-  return (ASCollectionView *)[super view];
-}
-
-#if ASRangeControllerLoggingEnabled
-- (void)visibleStateDidChange:(BOOL)isVisible
-{
-  [super visibleStateDidChange:isVisible];
-  NSLog(@"%@ - visible: %d", self, isVisible);
-}
-#endif
-
-- (void)clearContents
-{
-  [super clearContents];
-  [self.view clearContents];
-}
-
-- (void)clearFetchedData
-{
-  [super clearFetchedData];
-  [self.view clearFetchedData];
-}
-
-- (void)beginUpdates
-{
-  [self.view.dataController beginUpdates];
-}
-
-- (void)endUpdatesAnimated:(BOOL)animated
-{
-  [self endUpdatesAnimated:animated completion:nil];
-}
-
-- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
-{
-  [self.view.dataController endUpdatesAnimated:animated completion:completion];
-}
-
-#pragma mark - ASCollectionView Forwards
+#pragma mark ASCollectionView Forwards
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
@@ -233,11 +250,6 @@
   return [self.view.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
-- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
-{
-  [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
-}
-
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   [self.view reloadDataWithCompletion:completion];
@@ -252,6 +264,34 @@
 {
   [self.view reloadDataImmediately];
 }
+
+- (void)beginUpdates
+{
+  [self.view.dataController beginUpdates];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated
+{
+  [self endUpdatesAnimated:animated completion:nil];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+{
+  [self.view.dataController endUpdatesAnimated:animated completion:completion];
+}
+
+#pragma mark - ASRangeControllerUpdateRangeProtocol
+
+- (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
+{
+  if ([self pendingState]) {
+    _pendingState.rangeMode = rangeMode;
+  } else {
+    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+  }
+}
+
+#pragma mark ASEnvironment
 
 ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 

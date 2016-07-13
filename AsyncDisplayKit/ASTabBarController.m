@@ -39,6 +39,12 @@ ASVisibilityDepthImplementation;
 
 - (NSInteger)visibilityDepthOfChildViewController:(UIViewController *)childViewController
 {
+  NSUInteger viewControllerIndex = [self.viewControllers indexOfObjectIdenticalTo:childViewController];
+  if (viewControllerIndex == NSNotFound) {
+    //If childViewController is not actually a child, return NSNotFound which is also a really large number.
+    return NSNotFound;
+  }
+  
   if (self.selectedViewController == childViewController) {
     return [self visibilityDepth];
   }

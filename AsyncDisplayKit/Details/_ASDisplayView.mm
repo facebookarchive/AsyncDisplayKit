@@ -86,8 +86,7 @@
   UIView *currentSuperview = self.superview;
   if (!currentSuperview && newSuperview) {
     self.keepalive_node = _node;
-  }
-  else if (currentSuperview && !newSuperview) {
+  } else if (currentSuperview && !newSuperview) {
     // Clearing keepalive_node may cause deallocation of the node.  In this case, __exitHierarchy may not have an opportunity (e.g. _node will be cleared
     // by the time -didMoveToWindow occurs after this) to clear the Visible interfaceState, which we need to do before deallocation to meet an API guarantee.
     if (_node.inHierarchy) {
@@ -95,6 +94,8 @@
     }
     self.keepalive_node = nil;
   }
+    
+  ASDisplayNodeAssert(self.keepalive_node == nil || newSuperview != nil, @"Keepalive reference should not exist if there is no superview.");
   
   if (newSuperview) {
     ASDisplayNode *supernode = _node.supernode;

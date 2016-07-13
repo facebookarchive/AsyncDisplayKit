@@ -16,7 +16,6 @@
 #import "ASTextKitShadower.h"
 #import "ASTextKitTailTruncater.h"
 #import "ASTextKitFontSizeAdjuster.h"
-#import "ASTextKitTruncating.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)

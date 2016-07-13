@@ -15,7 +15,6 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASEqualityHelpers.h"
 #import "ASTextNodeWordKerner.h"
-#import "ASThread.h"
 
 /**
  @abstract Object to hold UITextView's pending UITextInputTraits

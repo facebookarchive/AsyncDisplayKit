@@ -11,7 +11,6 @@
 //
 
 #import "ASWeakSet.h"
-#import <Foundation/NSMapTable.h>
 
 @interface ASWeakSet<__covariant ObjectType> ()
 @property (nonatomic, strong, readonly) NSMapTable<ObjectType, NSNull *> *mapTable;

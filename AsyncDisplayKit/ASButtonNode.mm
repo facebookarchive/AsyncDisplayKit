@@ -15,6 +15,7 @@
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASStaticLayoutSpec.h"
 
 @interface ASButtonNode ()
 {
@@ -183,7 +184,7 @@
     newTitle = _normalAttributedTitle;
   }
 
-  if ((_titleNode != nil || newTitle.length > 0) && newTitle != self.titleNode.attributedString) {
+  if ((_titleNode != nil || newTitle.length > 0) && [self.titleNode.attributedString isEqualToAttributedString:newTitle] == NO) {
     _titleNode.attributedString = newTitle;
     self.accessibilityLabel = _titleNode.accessibilityLabel;
     [self setNeedsLayout];
@@ -491,9 +492,13 @@
     spec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentEdgeInsets child:spec];
   }
   
+  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
+    stack.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(self.preferredFrameSize);
+    spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
+  }
+  
   if (_backgroundImageNode.image) {
-    spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec
-                                                      background:_backgroundImageNode];
+    spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec background:_backgroundImageNode];
   }
   
   return spec;

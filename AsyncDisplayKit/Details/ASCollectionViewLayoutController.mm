@@ -10,13 +10,10 @@
 
 #import "ASCollectionViewLayoutController.h"
 
-#include <vector>
-
 #import "ASAssert.h"
 #import "ASCollectionView.h"
 #import "CGRect+ASConvenience.h"
 #import "UICollectionViewLayout+ASConvenience.h"
-#import "ASDisplayNodeExtras.h"
 
 struct ASRangeGeometry {
   CGRect rangeBounds;

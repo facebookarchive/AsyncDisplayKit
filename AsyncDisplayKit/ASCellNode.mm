@@ -10,7 +10,6 @@
 
 #import "ASCellNode+Internal.h"
 
-#import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
 #import "ASDisplayNodeInternal.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
@@ -20,7 +19,6 @@
 
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
-#import <AsyncDisplayKit/ASLayout.h>
 
 #pragma mark -
 #pragma mark ASCellNode
@@ -31,12 +29,13 @@
   ASDisplayNodeDidLoadBlock _viewControllerDidLoadBlock;
   ASDisplayNode *_viewControllerNode;
   UIViewController *_viewController;
+  BOOL _suspendInteractionDelegate;
 }
 
 @end
 
 @implementation ASCellNode
-@synthesize layoutDelegate = _layoutDelegate;
+@synthesize interactionDelegate = _interactionDelegate;
 
 - (instancetype)init
 {
@@ -170,11 +169,49 @@
 
 - (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize
 {
-  if (_layoutDelegate != nil) {
+  if (_interactionDelegate != nil) {
     ASPerformBlockOnMainThread(^{
       BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
-      [_layoutDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
+      [_interactionDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
+  }
+}
+
+- (void)setSelected:(BOOL)selected
+{
+  if (_selected != selected) {
+    _selected = selected;
+    if (!_suspendInteractionDelegate) {
+      [_interactionDelegate nodeSelectedStateDidChange:self];
+    }
+  }
+}
+
+- (void)setHighlighted:(BOOL)highlighted
+{
+  if (_highlighted != highlighted) {
+    _highlighted = highlighted;
+    if (!_suspendInteractionDelegate) {
+      [_interactionDelegate nodeHighlightedStateDidChange:self];
+    }
+  }
+}
+
+- (void)__setSelectedFromUIKit:(BOOL)selected;
+{
+  if (selected != _selected) {
+    _suspendInteractionDelegate = YES;
+    self.selected = selected;
+    _suspendInteractionDelegate = NO;
+  }
+}
+
+- (void)__setHighlightedFromUIKit:(BOOL)highlighted;
+{
+  if (highlighted != _highlighted) {
+    _suspendInteractionDelegate = YES;
+    self.highlighted = highlighted;
+    _suspendInteractionDelegate = NO;
   }
 }
 
@@ -225,13 +262,26 @@
 {
   [super visibleStateDidChange:isVisible];
   
-  CGRect cellFrame = CGRectZero;
-  if (_scrollView) {
-    // It is not safe to message nil with a structure return value, so ensure our _scrollView has not died.
-    cellFrame = [self.view convertRect:self.bounds toView:_scrollView];
+  if (isVisible && self.neverShowPlaceholders) {
+    [self recursivelyEnsureDisplaySynchronously:YES];
   }
+  
+  // NOTE: This assertion is failing in some apps and will be enabled soon.
+  // ASDisplayNodeAssert(self.isNodeLoaded, @"Node should be loaded in order for it to become visible or invisible.  If not in this situation, we shouldn't trigger creating the view.");
+  UIView *view = self.view;
+  CGRect cellFrame = CGRectZero;
+  
+  // Ensure our _scrollView is still valid before converting.  It's also possible that we have already been removed from the _scrollView,
+  // in which case it is not valid to perform a convertRect (this actually crashes on iOS 7 and 8).
+  UIScrollView *scrollView = (_scrollView != nil && view.superview != nil && [view isDescendantOfView:_scrollView]) ? _scrollView : nil;
+  if (scrollView) {
+    cellFrame = [view convertRect:view.bounds toView:_scrollView];
+  }
+  
+  // If we did not convert, we'll pass along CGRectZero and a nil scrollView.  The EventInvisible call is thus equivalent to
+  // visibleStateDidChange:NO, but is more convenient for the developer than implementing multiple methods.
   [self cellNodeVisibilityEvent:isVisible ? ASCellNodeVisibilityEventVisible : ASCellNodeVisibilityEventInvisible
-                   inScrollView:_scrollView
+                   inScrollView:scrollView
                   withCellFrame:cellFrame];
 }
 

@@ -9,10 +9,10 @@
 //
 
 #import "ASAssert.h"
+#import "ASAvailability.h"
 #import "ASBatchFetching.h"
 #import "ASDelegateProxy.h"
 #import "ASCellNode+Internal.h"
-#import "ASCollectionNode.h"
 #import "ASCollectionDataController.h"
 #import "ASCollectionViewLayoutController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
@@ -21,8 +21,21 @@
 #import "ASDisplayNode+Beta.h"
 #import "ASInternalHelpers.h"
 #import "UICollectionViewLayout+ASConvenience.h"
-#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
+#import "ASRangeController.h"
+#import "ASCollectionNode.h"
 #import "_ASDisplayLayer.h"
+#import "ASCollectionViewLayoutFacilitatorProtocol.h"
+
+
+/// What, if any, invalidation should we perform during the next -layoutSubviews.
+typedef NS_ENUM(NSUInteger, ASCollectionViewInvalidationStyle) {
+  /// Perform no invalidation.
+  ASCollectionViewInvalidationStyleNone,
+  /// Perform invalidation with animation (use an empty batch update).
+  ASCollectionViewInvalidationStyleWithoutAnimation,
+  /// Perform invalidation without animation (use -invalidateLayout).
+  ASCollectionViewInvalidationStyleWithAnimation,
+};
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
@@ -42,20 +55,27 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)setNode:(ASCellNode *)node
 {
   _node = node;
-  node.selected = self.selected;
-  node.highlighted = self.highlighted;
+  [node __setSelectedFromUIKit:self.selected];
+  [node __setHighlightedFromUIKit:self.highlighted];
 }
 
 - (void)setSelected:(BOOL)selected
 {
   [super setSelected:selected];
-  _node.selected = selected;
+  [_node __setSelectedFromUIKit:selected];
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
   [super setHighlighted:highlighted];
-  _node.highlighted = highlighted;
+  [_node __setHighlightedFromUIKit:highlighted];
+}
+
+- (void)prepareForReuse
+{
+  // Need to clear node pointer before UIKit calls setSelected:NO / setHighlighted:NO on its cells
+  self.node = nil;
+  [super prepareForReuse];
 }
 
 - (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
@@ -66,39 +86,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 @end
 
 #pragma mark -
-#pragma mark _ASCollectionViewNodeSizeUpdateContext
-
-/** 
- * This class contains all the nodes that have a new size and UICollectionView should requery them all at once.
- * It is intended to be used strictly on main thread and is not thread safe.
- */
-@interface _ASCollectionViewNodeSizeInvalidationContext : NSObject
-/**
- * It's possible that a node triggered multiple size changes before main thread has a chance to execute `requeryNodeSizes`. 
- * Therefore, a set is preferred here, to avoid asking ASDataController to search for index path of the same node multiple times.
- */
-@property (nonatomic, strong) NSMutableSet<ASCellNode *> *invalidatedNodes;
-@property (nonatomic, assign) BOOL shouldAnimate;
-@end
-
-@implementation _ASCollectionViewNodeSizeInvalidationContext
-
-- (instancetype)init
-{
-  self = [super init];
-  if (self) {
-    _invalidatedNodes = [NSMutableSet set];
-    _shouldAnimate = YES;
-  }
-  return self;
-}
-
-@end
-
-#pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeLayoutDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
@@ -110,9 +100,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
   BOOL _performingBatchUpdates;
+  BOOL _superPerformingBatchUpdates;
   NSMutableArray *_batchUpdateBlocks;
-  
-  _ASCollectionViewNodeSizeInvalidationContext *_queuedNodeSizeInvalidationContext; // Main thread only
+
   BOOL _isDeallocating;
   
   ASBatchContext *_batchContext;
@@ -123,6 +113,17 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSMutableSet *_registeredSupplementaryKinds;
   
   CGPoint _deceleratingVelocity;
+  
+  ASCollectionViewInvalidationStyle _nextLayoutInvalidationStyle;
+  
+  /**
+   * Our layer, retained. Under iOS < 9, when collection views are removed from the hierarchy,
+   * their layers may be deallocated and become dangling pointers. This puts the collection view
+   * into a very dangerous state where pretty much any call will crash it. So we manually retain our layer.
+   *
+   * You should never access this, and it will be nil under iOS >= 9.
+   */
+  CALayer *_retainedLayer;
   
   /**
    * If YES, the `UICollectionView` will reload its data on next layout pass so we should not forward any updates to it.
@@ -264,6 +265,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
+  
+  if (!AS_AT_LEAST_IOS9) {
+    _retainedLayer = self.layer;
+  }
   
   return self;
 }
@@ -411,22 +416,22 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  [_collectionNode setTuningParameters:tuningParameters forRangeType:rangeType];
+  [_rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [_collectionNode tuningParametersForRangeType:rangeType];
+  return [_rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  [_collectionNode setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+  [_rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [_collectionNode tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+  return [_rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
 }
 
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
@@ -442,6 +447,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   return [_dataController nodeAtIndexPath:indexPath];
+}
+
+- (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
+{
+  return [_dataController supplementaryNodeOfKind:elementKind atIndexPath:indexPath];
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
@@ -465,6 +475,24 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return visibleNodes;
 }
 
+#pragma mark Internal
+
+/**
+ Performing nested batch updates with super (e.g. resizing a cell node & updating collection view during same frame)
+ can cause super to throw data integrity exceptions because it checks the data source counts before
+ the update is complete.
+ 
+ Always call [self _superPerform:] rather than [super performBatch:] so that we can keep our `superPerformingBatchUpdates` flag updated.
+*/
+- (void)_superPerformBatchUpdates:(void(^)())updates completion:(void(^)(BOOL finished))completion
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(_superPerformingBatchUpdates == NO, @"Nested batch updates being sent to UICollectionView. This is not expected.");
+  
+  _superPerformingBatchUpdates = YES;
+  [super performBatchUpdates:updates completion:completion];
+  _superPerformingBatchUpdates = NO;
+}
 
 #pragma mark Assertions.
 
@@ -498,18 +526,21 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)insertSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController insertSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController deleteSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
+  if (sections.count == 0) { return; }
   [_dataController reloadSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
@@ -522,18 +553,21 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPaths.count == 0) { return; }
   [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
@@ -572,6 +606,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSString *identifier = [self __reuseIdentifierForKind:kind];
   UICollectionReusableView *view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:identifier forIndexPath:indexPath];
   ASCellNode *node = [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
+  ASDisplayNodeAssert(node != nil, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self);
   [_rangeController configureContentView:view forCellNode:node];
   return view;
 }
@@ -586,7 +621,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   cell.node = node;
   [_rangeController configureContentView:cell.contentView forCellNode:node];
   
-  if (ASRunningOnOS7()) {
+  if (!AS_AT_LEAST_IOS8) {
     // Even though UICV was introduced in iOS 6, and UITableView has always had the equivalent method,
     // -willDisplayCell: was not introduced until iOS 8 for UICV.  didEndDisplayingCell, however, is available.
     [self collectionView:collectionView willDisplayCell:cell forItemAtIndexPath:indexPath];
@@ -604,11 +639,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
   }
   
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+  [_rangeController setNeedsUpdate];
   
-  if (cellNode.neverShowPlaceholders) {
-    [cellNode recursivelyEnsureDisplaySynchronously:YES];
-  }
   if (ASSubclassOverridesSelector([ASCellNode class], [cellNode class], @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
     [_cellsForVisibilityUpdates addObject:cell];
   }
@@ -616,8 +648,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
-  
   ASCellNode *cellNode = [cell node];
 
   if (_asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPath) {
@@ -625,9 +655,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [_asyncDelegate collectionView:self didEndDisplayingNode:cellNode forItemAtIndexPath:indexPath];
   }
   
-  if ([_cellsForVisibilityUpdates containsObject:cell]) {
-    [_cellsForVisibilityUpdates removeObject:cell];
-  }
+  [_rangeController setNeedsUpdate];
+  
+  [_cellsForVisibilityUpdates removeObject:cell];
   
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -786,11 +816,36 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
       [self performBatchAnimated:YES updates:^{
         [_dataController relayoutAllNodes];
       } completion:nil];
+      // We need to ensure the size requery is done before we update our layout.
+      [self waitUntilAllUpdatesAreCommitted];
     }
+  }
+  
+  // Flush any pending invalidation action if needed.
+  ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
+  _nextLayoutInvalidationStyle = ASCollectionViewInvalidationStyleNone;
+  switch (invalidationStyle) {
+    case ASCollectionViewInvalidationStyleWithAnimation:
+      if (!_superPerformingBatchUpdates) {
+        [self _superPerformBatchUpdates:^{ } completion:nil];
+      }
+      break;
+    case ASCollectionViewInvalidationStyleWithoutAnimation:
+      [self.collectionViewLayout invalidateLayout];
+      break;
+    default:
+      break;
   }
   
   // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
   [super layoutSubviews];
+  
+  // Update range controller immediately if possible & needed.
+  // Calling -updateIfNeeded in here with self.window == nil (early in the collection view's life)
+  // may cause UICollectionView data related crashes. We'll update in -didMoveToWindow anyway.
+  if (self.window != nil) {
+    [_rangeController updateIfNeeded];
+  }
 }
 
 
@@ -864,8 +919,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return ^{
       __typeof__(self) strongSelf = weakSelf;
       [node enterHierarchyState:ASHierarchyStateRangeManaged];
-      if (node.layoutDelegate == nil) {
-        node.layoutDelegate = strongSelf;
+      if (node.interactionDelegate == nil) {
+        node.interactionDelegate = strongSelf;
       }
       return node;
     };
@@ -879,8 +934,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
     ASCellNode *node = block();
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
-    if (node.layoutDelegate == nil) {
-      node.layoutDelegate = strongSelf;
+    if (node.interactionDelegate == nil) {
+      node.interactionDelegate = strongSelf;
     }
     return node;
   };
@@ -977,11 +1032,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
-  
-  // Calling visibleNodeIndexPathsForRangeController: will trigger UIKit to call reloadData if it never has, which can result
+  // Calling -indexPathsForVisibleItems will trigger UIKit to call reloadData if it never has, which can result
   // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
   BOOL isZeroSized = CGRectEqualToRect(self.bounds, CGRectZero);
   return isZeroSized ? @[] : [self indexPathsForVisibleItems];
+}
+
+- (ASScrollDirection)scrollDirectionForRangeController:(ASRangeController *)rangeController
+{
+  return self.scrollDirection;
 }
 
 - (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController
@@ -1016,25 +1075,29 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)rangeController:(ASRangeController *)rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
-
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
+  NSUInteger numberOfUpdateBlocks = _batchUpdateBlocks.count;
+  if (numberOfUpdateBlocks == 0 || !self.asyncDataSource || _superIsPendingDataLoad) {
     if (completion) {
       completion(NO);
     }
+    _performingBatchUpdates = NO;
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
-  NSUInteger numberOfUpdateBlocks = _batchUpdateBlocks.count;
   ASPerformBlockWithoutAnimation(!animated, ^{
     [_layoutFacilitator collectionViewWillPerformBatchUpdates];
-    [super performBatchUpdates:^{
+    [self _superPerformBatchUpdates:^{
       for (dispatch_block_t block in _batchUpdateBlocks) {
         block();
       }
     } completion:^(BOOL finished){
+      // Flush any range changes that happened as part of the update animations ending.
+      [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:numberOfUpdateBlocks];
       if (completion) { completion(finished); }
     }];
+    // Flush any range changes that happened as part of submitting the update.
+    [_rangeController updateIfNeeded];
   });
   
   [_batchUpdateBlocks removeAllObjects];
@@ -1061,6 +1124,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } else {
     [UIView performWithoutAnimation:^{
       [super insertItemsAtIndexPaths:indexPaths];
+      // Flush any range changes that happened as part of submitting the update.
+      [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
     }];
   }
@@ -1081,6 +1146,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } else {
     [UIView performWithoutAnimation:^{
       [super deleteItemsAtIndexPaths:indexPaths];
+      // Flush any range changes that happened as part of submitting the update.
+      [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
     }];
   }
@@ -1101,6 +1168,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } else {
     [UIView performWithoutAnimation:^{
       [super insertSections:indexSet];
+      // Flush any range changes that happened as part of submitting the update.
+      [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
     }];
   }
@@ -1121,12 +1190,33 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } else {
     [UIView performWithoutAnimation:^{
       [super deleteSections:indexSet];
+      // Flush any range changes that happened as part of submitting the update.
+      [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
     }];
   }
 }
 
 #pragma mark - ASCellNodeDelegate
+- (void)nodeSelectedStateDidChange:(ASCellNode *)node
+{
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath) {
+    if (node.isSelected) {
+      [self selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+    } else {
+      [self deselectItemAtIndexPath:indexPath animated:NO];
+    }
+  }
+}
+
+- (void)nodeHighlightedStateDidChange:(ASCellNode *)node
+{
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath) {
+    [self cellForItemAtIndexPath:indexPath].highlighted = node.isHighlighted;
+  }
+}
 
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
@@ -1136,57 +1226,36 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return;
   }
   
-  BOOL queued = (_queuedNodeSizeInvalidationContext != nil);
-  if (!queued) {
-    _queuedNodeSizeInvalidationContext = [[_ASCollectionViewNodeSizeInvalidationContext alloc] init];
-    
-    __weak __typeof__(self) weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-      __typeof__(self) strongSelf = weakSelf;
-      if (strongSelf) {
-        [strongSelf requeryNodeSizes];
-      }
-    });
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (indexPath == nil) {
+    return;
   }
-  
-  [_queuedNodeSizeInvalidationContext.invalidatedNodes addObject:node];
 
-  // Check if this node or one of its subnodes can be animated.
-  // If the context is already non-animated, don't bother checking this node.
-  if (_queuedNodeSizeInvalidationContext.shouldAnimate) {
-    BOOL (^shouldNotAnimateBlock)(ASDisplayNode *) = ^BOOL(ASDisplayNode * _Nonnull node) {
-      return node.shouldAnimateSizeChanges == NO;
-    };
+  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[ indexPath ] batched:NO];
+  
+  ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
+  if (invalidationStyle == ASCollectionViewInvalidationStyleNone) {
+    [self setNeedsLayout];
+    invalidationStyle = ASCollectionViewInvalidationStyleWithAnimation;
+  }
+
+  // If we think we're going to animate, check if this node will prevent it.
+  if (invalidationStyle == ASCollectionViewInvalidationStyleWithAnimation) {
+    // TODO: Incorporate `shouldAnimateSizeChanges` into ASEnvironmentState for performance benefit.
+    static dispatch_once_t onceToken;
+    static BOOL (^shouldNotAnimateBlock)(ASDisplayNode *);
+    dispatch_once(&onceToken, ^{
+      shouldNotAnimateBlock = ^BOOL(ASDisplayNode * _Nonnull node) {
+        return (node.shouldAnimateSizeChanges == NO);
+      };
+    });
     if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
-      // One single non-animated cell node causes the whole context to be non-animated
-      _queuedNodeSizeInvalidationContext.shouldAnimate = NO;
-    }
-  }
-}
-
-// Cause UICollectionView to requery for the new size of all nodes
-- (void)requeryNodeSizes
-{
-  ASDisplayNodeAssertMainThread();
-  NSSet<ASCellNode *> *nodes = _queuedNodeSizeInvalidationContext.invalidatedNodes;
-  NSMutableArray<NSIndexPath *> *indexPaths = [NSMutableArray arrayWithCapacity:nodes.count];
-  for (ASCellNode *node in nodes) {
-    NSIndexPath *indexPath = [self indexPathForNode:node];
-    if (indexPath != nil) {
-      [indexPaths addObject:indexPath];
+      // One single non-animated node causes the whole layout update to be non-animated
+      invalidationStyle = ASCollectionViewInvalidationStyleWithoutAnimation;
     }
   }
   
-  if (indexPaths.count > 0) {
-    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:NO];
-    
-    ASPerformBlockWithoutAnimation(!_queuedNodeSizeInvalidationContext.shouldAnimate, ^{
-      // Perform an empty update transaction here to trigger UICollectionView to requery row sizes and layout its subviews again
-      [super performBatchUpdates:^{} completion:nil];
-    });
-  }
-  
-  _queuedNodeSizeInvalidationContext = nil;
+  _nextLayoutInvalidationStyle = invalidationStyle;
 }
 
 #pragma mark - Memory Management
@@ -1224,7 +1293,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   // Updating the visible node index paths only for not range managed nodes. Range managed nodes will get their
   // their update in the layout pass
   if (![node supportsRangeManagedInterfaceState]) {
-    [_rangeController visibleNodeIndexPathsDidChangeWithScrollDirection:self.scrollDirection];
+    [_rangeController setNeedsUpdate];
+    [_rangeController updateIfNeeded];
   }
 }
 

@@ -465,6 +465,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (NSString *)descriptionForRecursiveDescription;
 
+/**
+ * @abstract Called when the node's ASTraitCollection changes
+ *
+ * @discussion Subclasses can override this method to react to a trait collection change.
+ */
+- (void)asyncTraitCollectionDidChange;
+
 @end
 
 #define ASDisplayNodeAssertThreadAffinity(viewNode)   ASDisplayNodeAssert(!viewNode || ASDisplayNodeThreadIsMain() || !(viewNode).nodeLoaded, @"Incorrect display node thread affinity - this method should not be called off the main thread after the ASDisplayNode's view or layer have been created")

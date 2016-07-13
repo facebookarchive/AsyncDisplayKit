@@ -10,10 +10,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASCollectionView.h"
-#import "ASCollectionNode.h"
-#import "ASDataController.h"
-#import "ASRangeController.h"
+#import <AsyncDisplayKit/ASCollectionView.h>
+
+@protocol ASCollectionViewLayoutFacilitatorProtocol;
+@class ASCollectionNode;
+@class ASDataController;
+@class ASRangeController;
 
 @interface ASCollectionView ()
 - (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator ownedByNode:(BOOL)ownedByNode;

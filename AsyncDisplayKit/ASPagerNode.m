@@ -14,7 +14,6 @@
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASPagerFlowLayout.h"
-#import "UICollectionViewLayout+ASConvenience.h"
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
@@ -96,6 +95,11 @@
 {
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
   [self.view scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionLeft animated:animated];
+}
+
+- (ASCellNode *)nodeForPageAtIndex:(NSInteger)index
+{
+  return [self.view nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
 }
 
 #pragma mark - ASCollectionViewDataSource

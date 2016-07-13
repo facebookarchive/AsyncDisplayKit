@@ -14,7 +14,6 @@
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASDisplayNode+Beta.h"
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
 @end
@@ -183,7 +182,11 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 - (asyncdisplaykit_async_transaction_operation_block_t)_displayBlockWithAsynchronous:(BOOL)asynchronous isCancelledBlock:(asdisplaynode_iscancelled_block_t)isCancelledBlock rasterizing:(BOOL)rasterizing
 {
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = nil;
-
+  ASDisplayNodeFlags flags;
+  _propertyLock.lock();
+  flags = _flags;
+  _propertyLock.unlock();
+  
   ASDisplayNodeAssert(rasterizing || !(_hierarchyState & ASHierarchyStateRasterized), @"Rasterized descendants should never display unless being drawn into the rasterized container.");
 
   if (!rasterizing && self.shouldRasterizeDescendants) {
@@ -227,7 +230,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
       return image;
     };
-  } else if (_flags.implementsInstanceImageDisplay || _flags.implementsImageDisplay) {
+  } else if (flags.implementsInstanceImageDisplay || flags.implementsImageDisplay) {
     // Capture drawParameters from delegate on main thread
     id drawParameters = [self drawParameters];
     
@@ -243,7 +246,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       UIImage *result = nil;
       //We can't call _willDisplayNodeContentWithRenderingContext or _didDisplayNodeContentWithRenderingContext because we don't
       //have a context. We rely on implementors of displayWithParameters:isCancelled: to call
-      if (_flags.implementsInstanceImageDisplay) {
+      if (flags.implementsInstanceImageDisplay) {
         result = [self displayWithParameters:drawParameters isCancelled:isCancelledBlock];
       } else {
         result = [[self class] displayWithParameters:drawParameters isCancelled:isCancelledBlock];
@@ -252,7 +255,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       return result;
     };
     
-  } else if (_flags.implementsInstanceDrawRect || _flags.implementsDrawRect) {
+  } else if (flags.implementsInstanceDrawRect || flags.implementsDrawRect) {
 
     CGRect bounds = self.bounds;
     if (CGRectIsEmpty(bounds)) {
@@ -282,7 +285,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
         _willDisplayNodeContentWithRenderingContext(currentContext);
       }
       
-      if (_flags.implementsInstanceDrawRect) {
+      if (flags.implementsInstanceDrawRect) {
         [self drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];
       } else {
         [[self class] drawRect:bounds withParameters:drawParameters isCancelled:isCancelledBlock isRasterizing:rasterizing];

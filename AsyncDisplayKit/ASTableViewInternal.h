@@ -10,9 +10,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTableNode.h"
+#import <AsyncDisplayKit/ASTableView.h>
 
 @class ASDataController;
+@class ASTableNode;
+@class ASRangeController;
 
 @interface ASTableView (Internal)
 
@@ -33,5 +35,8 @@
  * @param ownedByNode Indicates whether the tableView is owned by an ASTableNode.
  */
 - (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass ownedByNode:(BOOL)ownedByNode;
+
+/// Set YES and we'll log every time we call [super insertRows…] etc
+@property (nonatomic) BOOL test_enableSuperUpdateCallLogging;
 
 @end

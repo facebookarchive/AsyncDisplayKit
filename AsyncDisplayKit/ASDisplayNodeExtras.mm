@@ -144,7 +144,7 @@ static void _ASDisplayNodeFindAllSubnodes(NSMutableArray *array, ASDisplayNode *
 
   for (ASDisplayNode *subnode in node.subnodes) {
     if (block(subnode)) {
-      [array addObject:node];
+      [array addObject:subnode];
     }
 
     _ASDisplayNodeFindAllSubnodes(array, subnode, block);

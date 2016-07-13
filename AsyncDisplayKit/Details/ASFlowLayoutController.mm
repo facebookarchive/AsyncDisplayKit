@@ -16,7 +16,6 @@
 
 #include <map>
 #include <vector>
-#include <cassert>
 
 @interface ASFlowLayoutController()
 {
@@ -92,12 +91,12 @@
     currPath.row++;
 
     // Once we reach the end of the section, advance to the next one.  Keep advancing if the next section is zero-sized.
-    while (currPath.row >= [(NSArray *)completedNodes[currPath.section] count] && currPath.section < completedNodes.count - 1) {
+    while (currPath.row >= [(NSArray *)completedNodes[currPath.section] count] && currPath.section < endPath.section) {
       currPath.row = 0;
       currPath.section++;
-      ASDisplayNodeAssert(currPath.section <= endPath.section, @"currPath should never reach a further section than endPath");
     }
   }
+  ASDisplayNodeAssert(currPath.section <= endPath.section, @"currPath should never reach a further section than endPath");
 
   [indexPathSet addObject:[NSIndexPath indexPathWithASIndexPath:endPath]];
   

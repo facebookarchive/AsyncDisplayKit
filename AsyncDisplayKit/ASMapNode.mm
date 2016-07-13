@@ -10,21 +10,18 @@
 
 #if TARGET_OS_IOS
 #import "ASMapNode.h"
-#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
-#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
-#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
-#import <AsyncDisplayKit/ASCenterLayoutSpec.h>
-#import <AsyncDisplayKit/ASThread.h>
-#import <AsyncDisplayKit/ASInternalHelpers.h>
-#import <AsyncDisplayKit/ASLayout.h>
+#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNodeExtras.h"
+#import "ASInsetLayoutSpec.h"
+#import "ASInternalHelpers.h"
+#import "ASLayout.h"
 
 @interface ASMapNode()
 {
-  ASDN::RecursiveMutex _propertyLock;
   MKMapSnapshotter *_snapshotter;
   BOOL _snapshotAfterLayout;
   NSArray *_annotations;
-  CLLocationCoordinate2D _centerCoordinateOfMap;
 }
 @end
 
@@ -34,6 +31,7 @@
 @synthesize mapDelegate = _mapDelegate;
 @synthesize options = _options;
 @synthesize liveMap = _liveMap;
+@synthesize showAnnotationsOptions = _showAnnotationsOptions;
 
 #pragma mark - Lifecycle
 - (instancetype)init
@@ -43,11 +41,12 @@
   }
   self.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
   self.clipsToBounds = YES;
+  self.userInteractionEnabled = YES;
   
   _needsMapReloadOnBoundsChange = YES;
   _liveMap = NO;
-  _centerCoordinateOfMap = kCLLocationCoordinate2DInvalid;
   _annotations = @[];
+  _showAnnotationsOptions = ASMapNodeShowAnnotationsOptionsIgnored;
   return self;
 }
 
@@ -55,7 +54,6 @@
 {
   [super didLoad];
   if (self.isLiveMap) {
-    self.userInteractionEnabled = YES;
     [self addLiveMap];
   }
 }
@@ -161,7 +159,9 @@
 
 - (void)setRegion:(MKCoordinateRegion)region
 {
-  self.options.region = region;
+  MKMapSnapshotOptions * options = [self.options copy];
+  options.region = region;
+  self.options = options;
 }
 
 #pragma mark - Snapshotter
@@ -265,17 +265,17 @@
     [_mapView addAnnotations:_annotations];
     [weakSelf setNeedsLayout];
     [weakSelf.view addSubview:_mapView];
-    
-    if (CLLocationCoordinate2DIsValid(_centerCoordinateOfMap)) {
-      [_mapView setCenterCoordinate:_centerCoordinateOfMap];
+
+    ASMapNodeShowAnnotationsOptions showAnnotationsOptions = self.showAnnotationsOptions;
+    if (showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
+      BOOL const animated = showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
+      [_mapView showAnnotations:_mapView.annotations animated:animated];
     }
   }
 }
 
 - (void)removeLiveMap
 {
-  // FIXME: With MKCoordinateRegion, isn't the center coordinate fully specified?  Do we need this?
-  _centerCoordinateOfMap = _mapView.centerCoordinate;
   [_mapView removeFromSuperview];
   _mapView = nil;
 }
@@ -292,12 +292,56 @@
 
   ASDN::MutexLocker l(_propertyLock);
   _annotations = annotations;
+  ASMapNodeShowAnnotationsOptions showAnnotationsOptions = self.showAnnotationsOptions;
   if (self.isLiveMap) {
     [_mapView removeAnnotations:_mapView.annotations];
     [_mapView addAnnotations:annotations];
+
+    if (showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
+      BOOL const animated = showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
+      [_mapView showAnnotations:_mapView.annotations animated:animated];
+    }
   } else {
-    [self takeSnapshot];
+    if (showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
+      self.region = [self regionToFitAnnotations:annotations];
+    }
+    else {
+      [self takeSnapshot];
+    }
   }
+}
+
+-(MKCoordinateRegion)regionToFitAnnotations:(NSArray<id<MKAnnotation>> *)annotations
+{
+  if([annotations count] == 0)
+    return MKCoordinateRegionForMapRect(MKMapRectWorld);
+
+  CLLocationCoordinate2D topLeftCoord = CLLocationCoordinate2DMake(-90, 180);
+  CLLocationCoordinate2D bottomRightCoord = CLLocationCoordinate2DMake(90, -180);
+
+  for (id<MKAnnotation> annotation in annotations) {
+    topLeftCoord = CLLocationCoordinate2DMake(fmax(topLeftCoord.latitude, annotation.coordinate.latitude),
+                                              fmin(topLeftCoord.longitude, annotation.coordinate.longitude));
+    bottomRightCoord = CLLocationCoordinate2DMake(fmin(bottomRightCoord.latitude, annotation.coordinate.latitude),
+                                                  fmax(bottomRightCoord.longitude, annotation.coordinate.longitude));
+  }
+
+  MKCoordinateRegion region = MKCoordinateRegionMake(CLLocationCoordinate2DMake(topLeftCoord.latitude - (topLeftCoord.latitude - bottomRightCoord.latitude) * 0.5,
+                                                                                topLeftCoord.longitude + (bottomRightCoord.longitude - topLeftCoord.longitude) * 0.5),
+                                                     MKCoordinateSpanMake(fabs(topLeftCoord.latitude - bottomRightCoord.latitude) * 2,
+                                                                          fabs(bottomRightCoord.longitude - topLeftCoord.longitude) * 2));
+
+  return region;
+}
+
+-(ASMapNodeShowAnnotationsOptions)showAnnotationsOptions {
+  ASDN::MutexLocker l(_propertyLock);
+  return _showAnnotationsOptions;
+}
+
+-(void)setShowAnnotationsOptions:(ASMapNodeShowAnnotationsOptions)showAnnotationsOptions {
+  ASDN::MutexLocker l(_propertyLock);
+  _showAnnotationsOptions = showAnnotationsOptions;
 }
 
 #pragma mark - Layout

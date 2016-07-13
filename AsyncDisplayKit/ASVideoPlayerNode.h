@@ -49,6 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readwrite) BOOL muted;
 @property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
 @property (nonatomic, assign, readwrite) BOOL shouldAggressivelyRecoverFromStall;
+@property (nullable, atomic, strong, readwrite) NSURL *placeholderImageURL;
 
 //! Defaults to 100
 @property (nonatomic, assign) int32_t periodicTimeObserverTimescale;
@@ -57,8 +58,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithUrl:(NSURL*)url;
 - (instancetype)initWithAsset:(AVAsset*)asset;
+- (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix;
 - (instancetype)initWithUrl:(NSURL *)url loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
 - (instancetype)initWithAsset:(AVAsset *)asset loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
+- (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
 
 #pragma mark - Public API
 - (void)seekToTime:(CGFloat)percentComplete;
@@ -155,9 +158,42 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * @abstract Delegate method invoked when the ASVideoNode has played to its end time.
- * @param videoPlayerNode The video node has played to its end time.
+ * @param videoPlayer The video node has played to its end time.
  */
 - (void)videoPlayerNodeDidPlayToEnd:(ASVideoPlayerNode *)videoPlayer;
+
+/**
+ * @abstract Delegate method invoked when the ASVideoNode has constructed its AVPlayerItem for the asset.
+ * @param videoPlayer The video player node.
+ * @param currentItem The AVPlayerItem that was constructed from the asset.
+ */
+- (void)videoPlayerNode:(ASVideoPlayerNode *)videoPlayer didSetCurrentItem:(AVPlayerItem *)currentItem;
+
+/**
+ * @abstract Delegate method invoked when the ASVideoNode stalls.
+ * @param videoPlayer The video player node that has experienced the stall
+ * @param second Current playback time when the stall happens
+ */
+- (void)videoPlayerNode:(ASVideoPlayerNode *)videoPlayer didStallAtTimeInterval:(NSTimeInterval)timeInterval;
+
+/**
+ * @abstract Delegate method invoked when the ASVideoNode starts the inital asset loading
+ * @param videoPlayer The videoPlayer
+ */
+- (void)videoPlayerNodeDidStartInitialLoading:(ASVideoPlayerNode *)videoPlayer;
+
+/**
+ * @abstract Delegate method invoked when the ASVideoNode is done loading the asset and can start the playback
+ * @param videoPlayer The videoPlayer
+ */
+- (void)videoPlayerNodeDidFinishInitialLoading:(ASVideoPlayerNode *)videoPlayer;
+
+/**
+ * @abstract Delegate method invoked when the ASVideoNode has recovered from the stall
+ * @param videoPlayer The videoplayer
+ */
+- (void)videoPlayerNodeDidRecoverFromStall:(ASVideoPlayerNode *)videoPlayer;
+
 
 @end
 NS_ASSUME_NONNULL_END

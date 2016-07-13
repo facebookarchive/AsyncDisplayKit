@@ -8,10 +8,10 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#include <CoreGraphics/CGBase.h>
-#import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "ASBaseDefines.h"
+#import <CoreGraphics/CGBase.h>
+
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
@@ -34,8 +34,6 @@ CGFloat ASFloorPixelValue(CGFloat f);
 CGFloat ASCeilPixelValue(CGFloat f);
 
 CGFloat ASRoundPixelValue(CGFloat f);
-
-BOOL ASRunningOnOS7();
 
 ASDISPLAYNODE_EXTERN_C_END
 
