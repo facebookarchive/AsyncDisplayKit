@@ -17,7 +17,11 @@ namespace ASDK {
   template<class T>
   struct DescribeFunctor {
     NSString *operator()(const T &t) const {
-      return [NSString stringWithFormat:@"%d", static_cast<int>(t)];
+      char *buffer;
+      asprintf(&buffer, "%d", static_cast<int>(t));
+      NSString *s = [NSString stringWithUTF8String:buffer];
+      free(buffer);
+      return s;
     }
   };
   
