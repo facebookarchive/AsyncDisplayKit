@@ -44,9 +44,16 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 static ASDK::TextKit::Renderer::Cache *sharedRendererCache()
 {
-  // This cache is sized arbitrarily
+  // 500 renders cache that evicts 20% of the least recelty used renderers when it hits 500
   static ASDK::TextKit::Renderer::Cache *__rendererCache (new ASDK::TextKit::Renderer::Cache("ASTextKitRendererCache", 500, 0.2));
   return __rendererCache;
+}
+
+static ASDK::TextKit::Renderer::Cache *rasterContentsCache()
+{
+  // 6MB raster contents cache that evicts 20% of the least recently used bitmaps it contains when it hits 6MB
+  static ASDK::TextKit::Renderer::Cache *__rasterContentsCache (new ASDK::TextKit::Renderer::Cache("ASTextKitRasterContentsCache", 6 * 1024 * 1025, 0.2));
+  return __rasterContentsCache;
 }
 
 /**
@@ -366,7 +373,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 - (void)drawRect:(CGRect)bounds withParameters:(id <NSObject>)p isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock isRasterizing:(BOOL)isRasterizing;
 {
   ASDN::MutexLocker l(_propertyLock);
-
+  
   ASTextNodeDrawParameter drawParameter = _drawParameter;
   CGRect drawParameterBounds = drawParameter.bounds;
   UIColor *backgroundColor = isRasterizing ? nil : drawParameter.backgroundColor;
@@ -377,6 +384,14 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   CGContextSaveGState(context);
   
   ASTextKitRenderer *renderer = [self _rendererWithBounds:drawParameterBounds];
+  CGImageRef contents = (__bridge CGImageRef)rasterContentsCache()->objectForKey({renderer.attributes, drawParameterBounds.size});
+  if (contents) {
+    // Draw cached contents and return
+    CGContextDrawImage(context, drawParameterBounds, contents);
+    CGContextRestoreGState(context);
+    return;
+  }
+  
   UIEdgeInsets shadowPadding = [self shadowPaddingWithRenderer:renderer];
   CGPoint boundsOrigin = drawParameterBounds.origin;
   CGPoint textOrigin = CGPointMake(boundsOrigin.x - shadowPadding.left, boundsOrigin.y - shadowPadding.top);
@@ -393,6 +408,13 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   // Draw text
   bounds.origin = textOrigin;
   [renderer drawInContext:context bounds:bounds];
+  
+  // Cache drawed context
+  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+  id newContents = (id)image.CGImage;
+  CGImageRef imageRef = (__bridge CGImageRef)newContents;
+  NSUInteger bytes = CGImageGetBytesPerRow(imageRef) * CGImageGetHeight(imageRef);
+  rasterContentsCache()->cacheObject({renderer.attributes, drawParameterBounds.size}, newContents, bytes);
   
   CGContextRestoreGState(context);
 }
