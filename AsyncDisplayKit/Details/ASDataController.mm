@@ -184,13 +184,13 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
   NSUInteger nodeCount = contexts.count;
   NSMutableArray<ASCellNode *> *allocatedNodes = [NSMutableArray<ASCellNode *> arrayWithCapacity:nodeCount];
+  NSMutableArray<NSIndexPath *> *indexPaths = nil;
+  if (completionBlock) {
+    indexPaths = [NSMutableArray arrayWithCapacity:nodeCount];
+  }
 
   for (NSUInteger j = 0; j < nodeCount; j += kASDataControllerSizingCountPerProcessor) {
     NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, nodeCount - j);
-    
-    // Allocate nodes concurrently.
-    __block NSArray *subarrayOfContexts;
-    __block NSArray *subarrayOfNodes;
 
     __strong ASIndexedNodeContext **allocatedContextBuffer = (__strong ASIndexedNodeContext **)calloc(batchCount, sizeof(ASIndexedNodeContext *));
     __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(batchCount, sizeof(ASCellNode *));
@@ -208,25 +208,22 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
       
       [self _layoutNode:node withConstrainedSize:context.constrainedSize];
     });
-    subarrayOfNodes = [NSArray arrayWithObjects:allocatedNodeBuffer count:batchCount];
-    subarrayOfContexts = [NSArray arrayWithObjects:allocatedContextBuffer count:batchCount];
+
     // Nil out buffer indexes to allow arc to free the stored cells.
     for (int i = 0; i < batchCount; i++) {
+      [allocatedNodes addObject:allocatedNodeBuffer[i]];
+      if (indexPaths) {
+        [indexPaths addObject:[allocatedContextBuffer[i] indexPath]];
+      }
+      
       allocatedContextBuffer[i] = nil;
       allocatedNodeBuffer[i] = nil;
     }
     free(allocatedContextBuffer);
     free(allocatedNodeBuffer);
-    
-    [allocatedNodes addObjectsFromArray:subarrayOfNodes];
   }
 
   if (completionBlock) {
-    NSMutableArray *indexPaths = [NSMutableArray arrayWithCapacity:nodeCount];
-    for (ASIndexedNodeContext *context in contexts) {
-      [indexPaths addObject:context.indexPath];
-    }
-
     completionBlock(allocatedNodes, indexPaths);
   }
 }
