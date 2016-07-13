@@ -44,6 +44,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   CGFloat _currentImageQuality;
   CGFloat _renderedImageQuality;
 
+  BOOL _hasStretchableDefaultImage;
   BOOL _needsToApplyPendingContentMode;
   UIViewContentMode _pendingContentModeState;
     
@@ -163,7 +164,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     return;
   }
   _defaultImage = defaultImage;
-
+  _hasStretchableDefaultImage = !UIEdgeInsetsEqualToEdgeInsets(defaultImage.capInsets, UIEdgeInsetsZero);
+  
   if (!_imageLoaded) {
     BOOL hasURL = _URL == nil;
     /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
@@ -176,11 +178,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     // Locking: it is important to release _lock before entering setImage:, as it needs to release the lock before -invalidateCalculatedLayout.
     // If we continue to hold the lock here, it will still be locked until the next unlock() call, causing a possible deadlock with
     // -[ASNetworkImageNode displayWillStart] (which is called on a different thread / main, at an unpredictable time due to ASMainRunloopQueue).
-    BOOL stretchable = !UIEdgeInsetsEqualToEdgeInsets(defaultImage.capInsets, UIEdgeInsetsZero);
-    if (stretchable) {
-      _pendingContentModeState = self.contentMode;
-      _needsToApplyPendingContentMode = YES;
-    }
     self.image = defaultImage;
   } else {
     _lock.unlock();
@@ -195,11 +192,27 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)setImage:(UIImage *)image
 {
-  if (_needsToApplyPendingContentMode && !ASObjectIsEqual(image, _defaultImage)) {
+  // when the defaultImage is stretchable, the layer's contentsGravity is set to kCAGravityResize
+  // this will ensure the contentMode is properly set when the final image is loaded
+  if (_hasStretchableDefaultImage) {
+    if (ASObjectIsEqual(image, _defaultImage)) {
+      _pendingContentModeState = self.contentMode;
+      _needsToApplyPendingContentMode = YES;
+    } else if (_needsToApplyPendingContentMode) {
+      _needsToApplyPendingContentMode = NO;
+      self.contentMode = _pendingContentModeState;
+    }
+  }
+  [super setImage:image];
+}
+
+- (void)setAnimatedImage:(id<ASAnimatedImageProtocol>)animatedImage
+{
+  if (_needsToApplyPendingContentMode) {
     _needsToApplyPendingContentMode = NO;
     self.contentMode = _pendingContentModeState;
   }
-  [super setImage:image];
+  [super setAnimatedImage:animatedImage];
 }
 
 - (void)setContentMode:(UIViewContentMode)contentMode
