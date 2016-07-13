@@ -215,16 +215,6 @@
   }
 }
 
-- (BOOL)selected
-{
-  return self.isSelected;
-}
-
-- (BOOL)highlighted
-{
-  return self.isSelected;
-}
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 
