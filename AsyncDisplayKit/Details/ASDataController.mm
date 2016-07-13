@@ -165,16 +165,12 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     return;
   }
   
-  // For any given layout pass that occurs, this method will be called at least twice, once on the main thread and
-  // the background, to result in complete coverage of both loaded and unloaded nodes
-  BOOL isMainThread = ASDisplayNodeThreadIsMain();
+  // Layout node on whatever thread we are on. We handle the trampoline to the main thread in case the node is
+  // already loaded
   for (NSUInteger k = range.location; k < NSMaxRange(range); k++) {
     ASCellNode *node = nodes[k];
-    // Only nodes that are loaded should be layout on the main thread
-    if (node.isNodeLoaded == isMainThread) {
-      ASIndexedNodeContext *context = contexts[k];
-      [self _layoutNode:node withConstrainedSize:context.constrainedSize];
-    }
+    ASIndexedNodeContext *context = contexts[k];
+    [self _layoutNode:node withConstrainedSize:context.constrainedSize];
   }
 }
 
@@ -225,29 +221,16 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     // Run the allocation block to concurrently create the cell nodes.  Then, handle layout for nodes that are already loaded
     // (e.g. the dataSource may have provided cells that have been used before), which must do layout on the main thread.
     NSRange batchRange = NSMakeRange(0, batchCount);
-    if (ASDisplayNodeThreadIsMain()) {
-      dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-      dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        allocationBlock();
-        dispatch_semaphore_signal(sema);
-      });
-      dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-      
-      [self _layoutNodes:subarrayOfNodes fromContexts:subarrayOfContexts atIndexesOfRange:batchRange ofKind:kind];
-    } else {
+    // TODO: Remove semaphore as this has thread explosion potential
+    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       allocationBlock();
-      [_mainSerialQueue performBlockOnMainThread:^{
-        [self _layoutNodes:subarrayOfNodes fromContexts:subarrayOfContexts atIndexesOfRange:batchRange ofKind:kind];
-      }];
-    }
+      [self _layoutNodes:subarrayOfNodes fromContexts:subarrayOfContexts atIndexesOfRange:batchRange ofKind:kind];
+      dispatch_semaphore_signal(sema);
+    });
+    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
 
     [allocatedNodes addObjectsFromArray:subarrayOfNodes];
-
-    dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      // We should already have measured loaded nodes before we left the main thread. Layout the remaining ones on a background thread.
-      NSRange asyncBatchRange = NSMakeRange(j, batchCount);
-      [self _layoutNodes:allocatedNodes fromContexts:contexts atIndexesOfRange:asyncBatchRange ofKind:kind];
-    });
   }
 
   // Block the _editingTransactionQueue from executing a new edit transaction until layout is done & _editingNodes array is updated.
