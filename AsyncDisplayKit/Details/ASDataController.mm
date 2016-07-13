@@ -192,50 +192,36 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     // Allocate nodes concurrently.
     __block NSArray *subarrayOfContexts;
     __block NSArray *subarrayOfNodes;
-    dispatch_block_t allocationBlock = ^{
-      __strong ASIndexedNodeContext **allocatedContextBuffer = (__strong ASIndexedNodeContext **)calloc(batchCount, sizeof(ASIndexedNodeContext *));
-      __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(batchCount, sizeof(ASCellNode *));
-      dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-      dispatch_apply(batchCount, queue, ^(size_t i) {
-        unsigned long k = j + i;
-        ASIndexedNodeContext *context = contexts[k];
-        ASCellNode *node = [context allocateNode];
-        if (node == nil) {
-          ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
-          node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
-        }
-        allocatedNodeBuffer[i] = node;
-        allocatedContextBuffer[i] = context;
-      });
-      subarrayOfNodes = [NSArray arrayWithObjects:allocatedNodeBuffer count:batchCount];
-      subarrayOfContexts = [NSArray arrayWithObjects:allocatedContextBuffer count:batchCount];
-      // Nil out buffer indexes to allow arc to free the stored cells.
-      for (int i = 0; i < batchCount; i++) {
-        allocatedContextBuffer[i] = nil;
-        allocatedNodeBuffer[i] = nil;
-      }
-      free(allocatedContextBuffer);
-      free(allocatedNodeBuffer);
-    };
-    
-    // Run the allocation block to concurrently create the cell nodes.  Then, handle layout for nodes that are already loaded
-    // (e.g. the dataSource may have provided cells that have been used before), which must do layout on the main thread.
-    NSRange batchRange = NSMakeRange(0, batchCount);
-    // TODO: Remove semaphore as this has thread explosion potential
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      allocationBlock();
-      [self _layoutNodes:subarrayOfNodes fromContexts:subarrayOfContexts atIndexesOfRange:batchRange ofKind:kind];
-      dispatch_semaphore_signal(sema);
-    });
-    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
 
+    __strong ASIndexedNodeContext **allocatedContextBuffer = (__strong ASIndexedNodeContext **)calloc(batchCount, sizeof(ASIndexedNodeContext *));
+    __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(batchCount, sizeof(ASCellNode *));
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_apply(batchCount, queue, ^(size_t i) {
+      unsigned long k = j + i;
+      ASIndexedNodeContext *context = contexts[k];
+      ASCellNode *node = [context allocateNode];
+      if (node == nil) {
+        ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
+        node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
+      }
+      allocatedNodeBuffer[i] = node;
+      allocatedContextBuffer[i] = context;
+      
+      [self _layoutNode:node withConstrainedSize:context.constrainedSize];
+    });
+    subarrayOfNodes = [NSArray arrayWithObjects:allocatedNodeBuffer count:batchCount];
+    subarrayOfContexts = [NSArray arrayWithObjects:allocatedContextBuffer count:batchCount];
+    // Nil out buffer indexes to allow arc to free the stored cells.
+    for (int i = 0; i < batchCount; i++) {
+      allocatedContextBuffer[i] = nil;
+      allocatedNodeBuffer[i] = nil;
+    }
+    free(allocatedContextBuffer);
+    free(allocatedNodeBuffer);
+    
     [allocatedNodes addObjectsFromArray:subarrayOfNodes];
   }
 
-  // Block the _editingTransactionQueue from executing a new edit transaction until layout is done & _editingNodes array is updated.
-  dispatch_group_wait(layoutGroup, DISPATCH_TIME_FOREVER);
-  
   if (completionBlock) {
     NSMutableArray *indexPaths = [NSMutableArray arrayWithCapacity:nodeCount];
     for (ASIndexedNodeContext *context in contexts) {
