@@ -67,4 +67,20 @@
   block(_layoutManager, _textStorage, _textContainer);
 }
 
+#ifndef ASTextNodeBetaVersion
+
+- (CGSize)constrainedSize
+{
+  std::lock_guard<std::mutex> l(_textKitMutex);
+  return _textContainer.size;
+}
+
+- (void)setConstrainedSize:(CGSize)constrainedSize
+{
+  std::lock_guard<std::mutex> l(_textKitMutex);
+  _textContainer.size = constrainedSize;
+}
+
+#endif
+
 @end

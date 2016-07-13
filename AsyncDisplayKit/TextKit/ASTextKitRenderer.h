@@ -53,7 +53,8 @@
 
 @property (nonatomic, assign, readonly) ASTextKitAttributes attributes;
 
-@property (nonatomic, assign, readonly) CGSize constrainedSize;
+// TODO: Change to readonly if ASTextNode beta is ready
+@property (nonatomic, assign, readwrite) CGSize constrainedSize;
 
 @property (nonatomic, assign, readonly) CGFloat currentScaleFactor;
 
