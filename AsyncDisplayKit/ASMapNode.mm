@@ -221,18 +221,21 @@
                     UIImage *pinImage;
                     CGSize pinSize;
                     
-                    // Get a standard annotation view pin if there is no delegate.
-                    id<MKMapViewDelegate> usedMapDelegate = self.mapDelegate;
-                    if (!usedMapDelegate) {
+                    // Get a standard annotation view pin if there is no custom annotation block.
+                    if (!self.annotationViewInStaticMap) {
                       pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
                       pinImage = pin.image;
                       pinSize = pin.bounds.size;
                     }
                     
                     for (id<MKAnnotation> annotation in annotations) {
-                      if (usedMapDelegate) {
-                        // Get custom annotation view pin from delegate.
-                        pin = [usedMapDelegate mapView:self.mapView viewForAnnotation:annotation];
+                      if (self.annotationViewInStaticMap) {
+                        // Get custom annotation view pin from custom annotation block.
+                        pin = self.annotationViewInStaticMap(annotation);
+                        if (!pin) {
+                          // just for case block returned nil, which can happen
+                          pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+                        }
                         UIGraphicsBeginImageContextWithOptions(pin.bounds.size, pin.opaque, 0.0);
                         [pin.layer renderInContext:UIGraphicsGetCurrentContext()];
                         pinImage = UIGraphicsGetImageFromCurrentImageContext();

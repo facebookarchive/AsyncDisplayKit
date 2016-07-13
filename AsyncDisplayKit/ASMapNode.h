@@ -70,6 +70,12 @@ typedef NS_OPTIONS(NSUInteger, ASMapNodeShowAnnotationsOptions)
  */
 @property (nonatomic, assign) ASMapNodeShowAnnotationsOptions showAnnotationsOptions;
 
+/**
+ * @abstract The block which should return annotation view for static map based on provided annotation.
+ * @discussion If this is nil, standard pin is used.
+ */
+@property (nonatomic, copy, nullable) MKAnnotationView * _Nullable (^annotationViewInStaticMap)(id<MKAnnotation> annotation);
+
 @end
 
 NS_ASSUME_NONNULL_END

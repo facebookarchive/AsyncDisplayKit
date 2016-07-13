@@ -91,7 +91,18 @@
   [_liveMapToggleButton setTitle:[self liveMapStr] withFont:nil withColor:[UIColor blueColor] forState:ASControlStateNormal];
   [_liveMapToggleButton setTitle:[self liveMapStr] withFont:[UIFont systemFontOfSize:14] withColor:[UIColor blueColor] forState:ASControlStateHighlighted];
   [_liveMapToggleButton addTarget:self action:@selector(toggleLiveMap) forControlEvents:ASControlNodeEventTouchUpInside];
-    
+  
+  // avoiding retain cycles
+  __weak MapHandlerNode *weakSelf = self;
+  
+  self.mapNode.annotationViewInStaticMap = ^MKAnnotationView *(id<MKAnnotation> annotation){
+    MapHandlerNode *grabbedSelf = weakSelf;
+    if (grabbedSelf) {
+      return [grabbedSelf annotationViewForAnnotation:annotation];
+    }
+    return nil;
+  };
+  
   [self addAnnotations];
 }
 
@@ -262,6 +273,21 @@
   return YES;
 }
 
+- (MKAnnotationView *)annotationViewForAnnotation:(id<MKAnnotation>)annotation
+{
+  MKAnnotationView *av;
+  if ([annotation isKindOfClass:[CustomMapAnnotation class]]) {
+    av = [[MKAnnotationView alloc] init];
+    av.center = CGPointMake(21, 21);
+    av.image = [(CustomMapAnnotation *)annotation image];
+  } else {
+    av = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+  }
+  
+  av.opaque = NO;
+  return av;
+}
+
 #pragma mark - MKMapViewDelegate
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
@@ -273,17 +299,7 @@
 
 - (MKAnnotationView *)mapView:(MKMapView *)__unused mapView viewForAnnotation:(id<MKAnnotation>)annotation
 {
-    MKAnnotationView *av;
-    if ([annotation isKindOfClass:[CustomMapAnnotation class]]) {
-        av = [[MKAnnotationView alloc] init];
-        av.center = CGPointMake(21, 21);
-        av.image = [(CustomMapAnnotation *)annotation image];
-    } else {
-        av = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
-    }
-    
-    av.opaque = NO;
-    return av;
+  return [self annotationViewForAnnotation:annotation];
 }
 
 @end
