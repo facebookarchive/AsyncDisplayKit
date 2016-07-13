@@ -119,6 +119,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Spinner delegate methods
 - (UIColor *)videoPlayerNodeSpinnerTint:(ASVideoPlayerNode *)videoPlayer;
+- (UIActivityIndicatorViewStyle)videoPlayerNodeSpinnerStyle:(ASVideoPlayerNode *)videoPlayer;
 
 #pragma mark - Playback button delegate methods
 - (UIColor *)videoPlayerNodePlaybackButtonTint:(ASVideoPlayerNode *)videoPlayer;
