@@ -192,7 +192,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   // when the defaultImage is stretchable, the layer's contentsGravity is set to kCAGravityResize
   // this will ensure the contentMode is properly set when the final image is loaded
   if (_hasStretchableDefaultImage) {
-    if (ASObjectIsEqual(image, _defaultImage)) {
+    if (!_needsToApplyPendingContentMode && ASObjectIsEqual(image, _defaultImage)) {
       _pendingContentModeState = self.contentMode;
       _needsToApplyPendingContentMode = YES;
     } else if (_needsToApplyPendingContentMode) {
