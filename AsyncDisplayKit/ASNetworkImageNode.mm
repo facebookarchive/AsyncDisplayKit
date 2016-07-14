@@ -42,6 +42,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   CGFloat _currentImageQuality;
   CGFloat _renderedImageQuality;
 
+  BOOL _delegateSupportsDidLoadImage;
   BOOL _delegateSupportsDidStartFetchingData;
   BOOL _delegateSupportsDidFailWithError;
   BOOL _delegateSupportsImageNodeDidFinishDecoding;
@@ -210,6 +211,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   ASDN::MutexLocker l(_lock);
   _delegate = delegate;
   
+  _delegateSupportsDidLoadImage = [delegate respondsToSelector:@selector(imageNode:didLoadImage:)];
   _delegateSupportsDidStartFetchingData = [delegate respondsToSelector:@selector(imageNodeDidStartFetchingData:)];
   _delegateSupportsDidFailWithError = [delegate respondsToSelector:@selector(imageNode:didFailWithError:)];
   _delegateSupportsImageNodeDidFinishDecoding = [delegate respondsToSelector:@selector(imageNodeDidFinishDecoding:)];
@@ -492,7 +494,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           dispatch_async(dispatch_get_main_queue(), ^{
             self.currentImageQuality = 1.0;
           });
-          [_delegate imageNode:self didLoadImage:self.image];
+          if (_delegateSupportsDidLoadImage) {
+            [_delegate imageNode:self didLoadImage:self.image];
+          }
         });
       }
     } else {
@@ -526,7 +530,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
         strongSelf->_cacheUUID = nil;
 
-        if (imageContainer != nil) {
+        if (imageContainer != nil && strongSelf->_delegateSupportsDidLoadImage) {
           [strongSelf->_delegate imageNode:strongSelf didLoadImage:strongSelf.image];
         }
         else if (error && strongSelf->_delegateSupportsDidFailWithError) {
