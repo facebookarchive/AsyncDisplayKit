@@ -76,11 +76,11 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 
 - (void)completeTransition
 {
-  [self completeSubnodeInsertions];
-  [self completeSubnodeRemovals];
+  [self applySubnodeInsertions];
+  [self applySubnodeRemovals];
 }
 
-- (void)completeSubnodeInsertions
+- (void)applySubnodeInsertions
 {
   ASDN::MutexLocker l(__instanceLock__);
   [self calculateSubnodeOperationsIfNeeded];
@@ -93,7 +93,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   }
 }
 
-- (void)completeSubnodeRemovals
+- (void)applySubnodeRemovals
 {
   ASDN::MutexLocker l(__instanceLock__);
   [self calculateSubnodeOperationsIfNeeded];

@@ -787,7 +787,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                             pendingLayout:newLayout
                                                            previousLayout:previousLayout];
-      [_pendingLayoutTransition completeSubnodeInsertions];
+      [_pendingLayoutTransition applySubnodeInsertions];
 
       _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
                                                             layoutDelegate:_pendingLayoutTransition
@@ -887,7 +887,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context
 {
-  [_pendingLayoutTransition completeSubnodeRemovals];
+  [_pendingLayoutTransition applySubnodeRemovals];
   [self _completeLayoutCalculation];
   _pendingLayoutTransition = nil;
 }

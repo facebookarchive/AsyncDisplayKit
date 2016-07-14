@@ -52,11 +52,11 @@
 /**
  * Insert all new subnodes that where added between the previous layout and the pending layout
  */
-- (void)completeSubnodeInsertions;
+- (void)applySubnodeInsertions;
 
 /**
  * Remove all subnodes that are removed between the previous layout and the pending layout
  */
-- (void)completeSubnodeRemovals;
+- (void)applySubnodeRemovals;
 
 @end
