@@ -123,14 +123,14 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   if (!CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
     _sizeIsCalculated = NO;
     _constrainedSize = constrainedSize;
-    // If the context isn't created yet, it will be initialized with the appropriate size when next accessed.
-    if (_context || _fontSizeAdjuster) {
-      // If we're updating an existing context, make sure to use the same inset logic used during initialization.
-      // This codepath allows us to reuse the
-      CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:constrainedSize];
-      if (_context) _context.constrainedSize = shadowConstrainedSize;
-      if (_fontSizeAdjuster) _fontSizeAdjuster.constrainedSize = shadowConstrainedSize;
-    }
+    
+    // Throw away the all subcomponents to create them with the new constrained size new as well as let the
+    // truncater do it's job again for the new constrained size. This is necessary as after a truncation did happen
+    // the context would use the truncated string and not the original string to truncate based on the new
+    // constrained size
+    _context = nil;
+    _truncater = nil;
+    _fontSizeAdjuster = nil;
   }
 }
 
