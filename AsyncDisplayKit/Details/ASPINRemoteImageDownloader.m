@@ -30,18 +30,6 @@
 #import <PINCache/PINCache.h>
 
 #if PIN_ANIMATED_AVAILABLE
-@interface ASPINRemoteImageManager : PINRemoteImageManager
-@end
-
-@implementation ASPINRemoteImageManager
-
-//Share image cache with sharedImageManager image cache.
-- (PINCache *)defaultImageCache
-{
-    return [[PINRemoteImageManager sharedImageManager] cache];
-}
-
-@end
 
 @interface ASPINRemoteImageDownloader () <PINRemoteImageManagerAlternateRepresentationProvider>
 
@@ -80,6 +68,19 @@
 
 @end
 #endif
+
+@interface ASPINRemoteImageManager : PINRemoteImageManager
+@end
+
+@implementation ASPINRemoteImageManager
+
+//Share image cache with sharedImageManager image cache.
+- (PINCache *)defaultImageCache
+{
+    return [[PINRemoteImageManager sharedImageManager] cache];
+}
+
+@end
 
 @implementation ASPINRemoteImageDownloader
 
