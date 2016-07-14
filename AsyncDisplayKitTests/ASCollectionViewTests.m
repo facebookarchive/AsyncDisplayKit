@@ -13,6 +13,7 @@
 #import "ASCollectionDataController.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASCellNode.h"
+#import "ASCollectionNode.h"
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
@@ -238,6 +239,16 @@
   
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(renderParams, [collectionView tuningParametersForRangeType:ASLayoutRangeTypeDisplay]));
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(preloadParams, [collectionView tuningParametersForRangeType:ASLayoutRangeTypeFetchData]));
+}
+
+/**
+ * This may seem silly, but we had issues where the runtime sometimes wouldn't correctly report
+ * conformances declared on categories.
+ */
+- (void)testThatCollectionNodeConformsToExpectedProtocols
+{
+  ASCollectionNode *node = [[ASCollectionNode alloc] initWithFrame:CGRectZero collectionViewLayout:[[UICollectionViewFlowLayout alloc] init]];
+  XCTAssert([node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]);
 }
 
 @end

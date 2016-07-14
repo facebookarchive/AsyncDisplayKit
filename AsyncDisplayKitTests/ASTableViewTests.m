@@ -15,6 +15,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASChangeSetDataController.h"
 #import "ASCellNode.h"
+#import "ASTableNode.h"
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
@@ -516,6 +517,16 @@
       XCTFail(@"Expectation failed: %@", error);
     }
   }];
+}
+
+/**
+ * This may seem silly, but we had issues where the runtime sometimes wouldn't correctly report
+ * conformances declared on categories.
+ */
+- (void)testThatTableNodeConformsToExpectedProtocols
+{
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+  XCTAssert([node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]);
 }
 
 @end
