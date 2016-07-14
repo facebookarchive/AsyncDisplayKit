@@ -38,7 +38,6 @@ typedef NS_ENUM(NSUInteger, ASCollectionViewInvalidationStyle) {
 };
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
-static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 #pragma mark -
@@ -95,7 +94,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASCollectionDataController *_dataController;
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
-  ASCollectionViewFlowLayoutInspector *_flowLayoutInspector;
+  id<ASCollectionViewLayoutInspecting> _defaultLayoutInspector;
+  id<ASCollectionViewLayoutInspecting> _layoutInspector;
   NSMutableSet *_cellsForVisibilityUpdates;
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
@@ -157,6 +157,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     unsigned int asyncDataSourceNumberOfSectionsInCollectionView:1;
     unsigned int asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath:1;
   } _asyncDataSourceFlags;
+  
+  struct {
+    unsigned int layoutInspectorDidChangeCollectionViewDataSource:1;
+    unsigned int layoutInspectorDidChangeCollectionViewDelegate:1;
+  } _layoutInspectorFlags;
 }
 
 // Used only when ASCollectionView is created directly rather than through ASCollectionNode.
@@ -246,11 +251,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   // and should not trigger a relayout.
   _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
   
-  // Register the default layout inspector delegate for flow layouts only, custom layouts
-  // will need to roll their own ASCollectionViewLayoutInspecting implementation and set a layout delegate
-  if ([layout asdk_isFlowLayout]) {
-    _layoutInspector = [self flowLayoutInspector];
-  }
   _layoutFacilitator = layoutFacilitator;
   
   _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:nil interceptor:self];
@@ -279,19 +279,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _isDeallocating = YES;
   [self setAsyncDelegate:nil];
   [self setAsyncDataSource:nil];
-}
-
-/**
- * A layout inspector implementation specific for the sizing behavior of UICollectionViewFlowLayouts
- */
-- (ASCollectionViewFlowLayoutInspector *)flowLayoutInspector
-{
-  if (_flowLayoutInspector == nil) {
-    UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
-    ASDisplayNodeAssertNotNil(layout, @"Collection view layout must be a flow layout to use the built-in inspector");
-    _flowLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
-  }
-  return _flowLayoutInspector;
 }
 
 #pragma mark -
@@ -379,6 +366,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
+  
+  if (_layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDataSource) {
+    [self.layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
+  }
 }
 
 - (void)setAsyncDelegate:(id<ASCollectionViewDelegate>)asyncDelegate
@@ -411,7 +402,47 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
-  [_layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
+  if (_layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDelegate) {
+    [self.layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
+  }
+}
+
+- (void)setCollectionViewLayout:(UICollectionViewLayout *)collectionViewLayout
+{
+  [super setCollectionViewLayout:collectionViewLayout];
+  
+  // Trigger recreation of layout inspector with new collection view layout
+  if (_layoutInspector != nil) {
+    _layoutInspector = nil;
+    [self layoutInspector];
+  }
+}
+
+- (id<ASCollectionViewLayoutInspecting>)layoutInspector
+{
+  if (_layoutInspector == nil) {
+    UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
+    if ([layout asdk_isFlowLayout]) {
+      // Register the default layout inspector delegate for flow layouts only
+      _defaultLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
+    } else {
+      // Register the default layout inspector delegate for custom collection view layouts
+      _defaultLayoutInspector = [[ASCollectionViewLayoutInspector alloc] initWithCollectionView:self];
+    }
+    
+    // Explicitly call the setter to wire up the _layoutInspectorFlags
+    self.layoutInspector = _defaultLayoutInspector;
+  }
+
+  return _layoutInspector;
+}
+
+- (void)setLayoutInspector:(id<ASCollectionViewLayoutInspecting>)layoutInspector
+{
+  _layoutInspector = layoutInspector;
+  
+  _layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDataSource = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDataSource:)];
+  _layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDelegate = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDelegate:)];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
@@ -943,30 +974,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASSizeRange constrainedSize = kInvalidSizeRange;
-  if (_layoutInspector) {
-    constrainedSize = [_layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
-  }
-  
-  if (!ASSizeRangeEqualToSizeRange(constrainedSize, kInvalidSizeRange)) {
-    return constrainedSize;
-  }
-  
-  // TODO: Move this logic into the flow layout inspector. Create a simple inspector for non-flow layouts that don't
-  // implement a custom inspector.
-  if (_asyncDataSourceFlags.asyncDataSourceConstrainedSizeForNode) {
-    constrainedSize = [_asyncDataSource collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
-  } else {
-    CGSize maxSize = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero) ? self.bounds.size : _maxSizeForNodesConstrainedSize;
-    if (ASScrollDirectionContainsHorizontalDirection([self scrollableDirections])) {
-      maxSize.width = FLT_MAX;
-    } else {
-      maxSize.height = FLT_MAX;
-    }
-    constrainedSize = ASSizeRangeMake(CGSizeZero, maxSize);
-  }
-  
-  return constrainedSize;
+  return [self.layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section
@@ -1006,20 +1014,17 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayNodeAssert(_layoutInspector != nil, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
-  return [_layoutInspector collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+  return [self.layoutInspector collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
 }
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
-  ASDisplayNodeAssert(_layoutInspector != nil, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
-  return [_layoutInspector collectionView:self supplementaryNodesOfKind:kind inSection:section];
+  return [self.layoutInspector collectionView:self supplementaryNodesOfKind:kind inSection:section];
 }
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind;
 {
-  ASDisplayNodeAssert(_layoutInspector != nil, @"To support supplementary nodes in ASCollectionView, it must have a layoutDelegate for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
-  return [_layoutInspector collectionView:self numberOfSectionsForSupplementaryNodeOfKind:kind];
+  return [self.layoutInspector collectionView:self numberOfSectionsForSupplementaryNodeOfKind:kind];
 }
 
 #pragma mark - ASRangeControllerDataSource
