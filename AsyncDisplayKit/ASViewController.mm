@@ -88,7 +88,9 @@
   [super viewWillLayoutSubviews];
   [_node measureWithSizeRange:[self nodeConstrainedSize]];
   
-  [self _legacyHandleViewDidLayoutSubviewsIfNecessary];
+  if (!AS_AT_LEAST_IOS9) {
+    [self _legacyHandleViewDidLayoutSubviews];
+  }
 }
 
 - (void)viewDidLayoutSubviews
@@ -214,12 +216,8 @@ ASVisibilityDepthImplementation;
   return ASSizeRangeMake(viewSize, viewSize);
 }
 
-- (void)_legacyHandleViewDidLayoutSubviewsIfNecessary
+- (void)_legacyHandleViewDidLayoutSubviews
 {
-  if (AS_AT_LEAST_IOS9) {
-    return;
-  }
-  
   // In modal presentation or as root viw controller the view does not automatic resize in iOS7 and iOS8.
   // As workaround we adjust the frame of the view manually
   if ([self _shouldLayoutTheLegacyWay]) {
