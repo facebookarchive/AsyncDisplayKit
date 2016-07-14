@@ -80,8 +80,9 @@ extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^b
     block(node);
 
     // Add all subnodes to process in next step
-    for (int i = 0; i < node.subnodes.count; i++)
-      queue.push(node.subnodes[i]);
+    for (ASDisplayNode *subnode in node.subnodes) {
+      queue.push(subnode);
+    }
   }
 }
 

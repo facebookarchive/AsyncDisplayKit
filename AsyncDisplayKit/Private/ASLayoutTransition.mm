@@ -38,8 +38,8 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
     }
     
     // Add all sublayouts to process in next step
-    for (int i = 0; i < layout.sublayouts.count; i++) {
-      queue.push(layout.sublayouts[0]);
+    for (ASLayout *sublayout in layout.sublayouts) {
+      queue.push(sublayout);
     }
   }
   
