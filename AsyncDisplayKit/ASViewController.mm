@@ -175,7 +175,13 @@ ASVisibilityDepthImplementation;
 - (void)setAutomaticallyAdjustRangeModeBasedOnViewEvents:(BOOL)automaticallyAdjustRangeModeBasedOnViewEvents
 {
   _automaticallyAdjustRangeModeBasedOnViewEvents = automaticallyAdjustRangeModeBasedOnViewEvents;
-  if (automaticallyAdjustRangeModeBasedOnViewEvents && !_didCheckRangeModeProtocolConformance) {
+}
+
+- (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
+{
+  if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
+  
+  if (!_didCheckRangeModeProtocolConformance) {
     _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
     _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
     _didCheckRangeModeProtocolConformance = YES;
@@ -183,11 +189,6 @@ ASVisibilityDepthImplementation;
       NSLog(@"Warning: automaticallyAdjustRangeModeBasedOnViewEvents set to YES in %@, but range mode updating is not possible because neither view controller nor node %@ conform to ASRangeControllerUpdateRangeProtocol.", self, _node);
     }
   }
-}
-
-- (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
-{
-  if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
   
   if (_selfConformsToRangeModeProtocol) {
     id<ASRangeControllerUpdateRangeProtocol> rangeUpdater = (id<ASRangeControllerUpdateRangeProtocol>)self;
