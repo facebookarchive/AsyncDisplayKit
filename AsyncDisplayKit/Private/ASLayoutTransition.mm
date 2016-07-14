@@ -199,21 +199,27 @@ static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
                                                                NSArray<ASDisplayNode *> * __strong *storedNodes,
                                                                std::vector<NSUInteger> *storedPositions)
 {
-  NSMutableArray<ASDisplayNode *> *nodes = [NSMutableArray array];
+  NSMutableArray<ASDisplayNode *> *nodes = [NSMutableArray arrayWithCapacity:indexes.count];
   std::vector<NSUInteger> positions = std::vector<NSUInteger>();
-  NSUInteger idx = [indexes firstIndex];
-  while (idx != NSNotFound) {
-    ASDisplayNode *node = (ASDisplayNode *)layout.sublayouts[idx].layoutableObject;
-    ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
-    // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
-    if (node != nil) {
-      BOOL notFiltered = (filteredNodes == nil || [filteredNodes indexOfObjectIdenticalTo:node] == NSNotFound);
-      if (notFiltered) {
-        [nodes addObject:node];
-        positions.push_back(idx);
+  // From inspection, this is how enumerateObjectsAtIndexes: works under the hood
+  NSUInteger firstIndex = indexes.firstIndex;
+  NSUInteger lastIndex = indexes.lastIndex;
+  NSUInteger idx = 0;
+  for (ASLayout *sublayout in layout.sublayouts) {
+    if (idx > lastIndex) { break; }
+    if (idx >= firstIndex && [indexes containsIndex:idx]) {
+      ASDisplayNode *node = (ASDisplayNode *)sublayout.layoutableObject;
+      ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
+      // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
+      if (node != nil) {
+        BOOL notFiltered = (filteredNodes == nil || [filteredNodes indexOfObjectIdenticalTo:node] == NSNotFound);
+        if (notFiltered) {
+          [nodes addObject:node];
+          positions.push_back(idx);
+        }
       }
     }
-    idx = [indexes indexGreaterThanIndex:idx];
+    idx += 1;
   }
   *storedNodes = nodes;
   *storedPositions = positions;
