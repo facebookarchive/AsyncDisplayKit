@@ -30,6 +30,19 @@
 #import <PINCache/PINCache.h>
 
 #if PIN_ANIMATED_AVAILABLE
+@interface ASPINRemoteImageManager : PINRemoteImageManager
+@end
+
+@implementation ASPINRemoteImageManager
+
+//Share image cache with sharedImageManager image cache.
+- (PINCache *)defaultImageCache
+{
+    return [[PINRemoteImageManager sharedImageManager] cache];
+}
+
+@end
+
 @interface ASPINRemoteImageDownloader () <PINRemoteImageManagerAlternateRepresentationProvider>
 
 @end
@@ -82,7 +95,7 @@
 
 - (PINRemoteImageManager *)sharedPINRemoteImageManager
 {
-  static PINRemoteImageManager *sharedPINRemoteImageManager = nil;
+  static ASPINRemoteImageManager *sharedPINRemoteImageManager = nil;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
   
@@ -102,9 +115,9 @@
                           userInfo:nil];
         @throw e;
     }
-    sharedPINRemoteImageManager = [[PINRemoteImageManager alloc] initWithSessionConfiguration:nil alternativeRepresentationProvider:self];
+    sharedPINRemoteImageManager = [[ASPINRemoteImageManager alloc] initWithSessionConfiguration:nil alternativeRepresentationProvider:self];
 #else
-    sharedPINRemoteImageManager = [[PINRemoteImageManager alloc] initWithSessionConfiguration:nil];
+    sharedPINRemoteImageManager = [[ASPINRemoteImageManager alloc] initWithSessionConfiguration:nil];
 #endif
   });
   return sharedPINRemoteImageManager;
