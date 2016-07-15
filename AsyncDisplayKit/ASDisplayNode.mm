@@ -932,17 +932,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   // Trampoline to the main thread if necessary
-  if (ASDisplayNodeThreadIsMain() == NO && layoutTransition.isSynchronous == NO) {
-
+  if (ASDisplayNodeThreadIsMain() || layoutTransition.isSynchronous == NO) {
+    [layoutTransition commitTransition];
+  } else {
     // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
     ASPerformBlockOnMainThread(^{
-      [layoutTransition completeTransition];
+      [layoutTransition commitTransition];
     });
-    
-    return;
   }
-  
-  [layoutTransition completeTransition];
 }
 
 #pragma mark - Asynchronous display
