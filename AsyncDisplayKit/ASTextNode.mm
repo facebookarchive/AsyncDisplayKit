@@ -326,8 +326,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   if (layout != nil) {
     ASDN::MutexLocker l(_propertyLock);
-    _constrainedSize = layout.size;
-    _renderer.constrainedSize = layout.size;
+    if (CGSizeEqualToSize(_constrainedSize, layout.size) == NO) {
+      _constrainedSize = layout.size;
+      _renderer.constrainedSize = layout.size;
+    }
   }
 }
 
@@ -397,6 +399,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   // Tell the display node superclasses that the cached layout is incorrect now
   [self invalidateCalculatedLayout];
 
+  // Force display to create renderer with new size and redisplay with new string
   [self setNeedsDisplay];
   
   
