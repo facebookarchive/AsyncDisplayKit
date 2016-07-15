@@ -41,7 +41,8 @@
     if (textStorageCreationBlock) {
       _textStorage = textStorageCreationBlock(attributedString);
     } else {
-      _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
+      _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString]
+                                       : [[NSTextStorage alloc] init]);
     }
     _layoutManager = layoutCreationBlock ? layoutCreationBlock() : [[ASLayoutManager alloc] init];
     _layoutManager.usesFontLeading = NO;
@@ -58,6 +59,16 @@
   return self;
 }
 
+- (void)performBlockWithLockedTextKitComponents:(void (^)(NSLayoutManager *,
+                                                          NSTextStorage *,
+                                                          NSTextContainer *))block
+{
+  std::lock_guard<std::mutex> l(_textKitMutex);
+  block(_layoutManager, _textStorage, _textContainer);
+}
+
+#ifndef ASTextNodeBetaVersion
+
 - (CGSize)constrainedSize
 {
   std::lock_guard<std::mutex> l(_textKitMutex);
@@ -70,12 +81,6 @@
   _textContainer.size = constrainedSize;
 }
 
-- (void)performBlockWithLockedTextKitComponents:(void (^)(NSLayoutManager *,
-                                                          NSTextStorage *,
-                                                          NSTextContainer *))block
-{
-  std::lock_guard<std::mutex> l(_textKitMutex);
-  block(_layoutManager, _textStorage, _textContainer);
-}
+#endif
 
 @end

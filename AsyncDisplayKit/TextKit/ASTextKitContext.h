@@ -10,6 +10,8 @@
 
 #import <UIKit/UIKit.h>
 
+#define ASTextNodeBetaVersion
+
 /**
  A threadsafe container for the TextKit components that ASTextKit uses to lay out and truncate its text.
 
@@ -32,8 +34,6 @@
                    layoutManagerDelegate:(id<NSLayoutManagerDelegate>)layoutManagerDelegate
                 textStorageCreationBlock:(NSTextStorage * (^)(NSAttributedString *attributedString))textStorageCreationBlock;
 
-@property (nonatomic, assign, readwrite) CGSize constrainedSize;
-
 /**
  All operations on TextKit values MUST occur within this locked context.  Simultaneous access (even non-mutative) to
  TextKit components may cause crashes.
@@ -46,5 +46,12 @@
 - (void)performBlockWithLockedTextKitComponents:(void (^)(NSLayoutManager *layoutManager,
                                                           NSTextStorage *textStorage,
                                                           NSTextContainer *textContainer))block;
+
+
+#ifndef ASTextNodeBetaVersion
+
+@property (nonatomic, assign, readwrite) CGSize constrainedSize;
+
+#endif
 
 @end
