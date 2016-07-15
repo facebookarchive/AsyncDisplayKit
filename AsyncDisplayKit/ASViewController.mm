@@ -27,6 +27,9 @@
   BOOL _automaticallyAdjustRangeModeBasedOnViewEvents;
   BOOL _parentManagesVisibilityDepth;
   NSInteger _visibilityDepth;
+  BOOL _selfConformsToRangeModeProtocol;
+  BOOL _nodeConformsToRangeModeProtocol;
+  BOOL _didCheckRangeModeProtocolConformance;
 }
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -167,12 +170,25 @@ ASVisibilityDepthImplementation;
 - (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
 {
   if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
-  if (![_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]) {
-    return;
+  
+  if (!_didCheckRangeModeProtocolConformance) {
+    _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
+    _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
+    _didCheckRangeModeProtocolConformance = YES;
+    if (!_selfConformsToRangeModeProtocol && !_nodeConformsToRangeModeProtocol) {
+      NSLog(@"Warning: automaticallyAdjustRangeModeBasedOnViewEvents set to YES in %@, but range mode updating is not possible because neither view controller nor node %@ conform to ASRangeControllerUpdateRangeProtocol.", self, _node);
+    }
   }
-
-  id<ASRangeControllerUpdateRangeProtocol> updateRangeNode = (id<ASRangeControllerUpdateRangeProtocol>)_node;
-  [updateRangeNode updateCurrentRangeWithMode:rangeMode];
+  
+  if (_selfConformsToRangeModeProtocol) {
+    id<ASRangeControllerUpdateRangeProtocol> rangeUpdater = (id<ASRangeControllerUpdateRangeProtocol>)self;
+    [rangeUpdater updateCurrentRangeWithMode:rangeMode];
+  }
+  
+  if (_nodeConformsToRangeModeProtocol) {
+    id<ASRangeControllerUpdateRangeProtocol> rangeUpdater = (id<ASRangeControllerUpdateRangeProtocol>)_node;
+    [rangeUpdater updateCurrentRangeWithMode:rangeMode];
+  }
 }
 
 #pragma mark - Layout Helpers

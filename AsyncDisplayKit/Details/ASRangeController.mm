@@ -599,3 +599,12 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisible
 }
 
 @end
+
+@implementation ASDisplayNode (RangeModeConfiguring)
+
++ (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode
+{
+  [ASRangeController setRangeModeForMemoryWarnings:rangeMode];
+}
+
+@end
