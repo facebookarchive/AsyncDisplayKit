@@ -793,12 +793,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     });
   };
 
-  // TODO ihm: Can we always push the measure to the background thread and remove the parameter from the API?
-  if (ASDisplayNodeThreadIsMain()) {
-    ASPerformBlockOnBackgroundThread(transitionBlock);
-  } else {
-    transitionBlock();
-  }
+  ASPerformBlockOnBackgroundThread(transitionBlock);
 }
 
 - (void)_completeLayoutCalculation
@@ -1140,9 +1135,19 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)measureNodeWithBoundsIfNecessary:(CGRect)bounds
 {
+  BOOL supportsRangedManagedInterfaceState = NO;
+  BOOL hasDirtyLayout = NO;
+  BOOL hasSupernode = NO;
+  {
+    ASDN::MutexLocker l(_propertyLock);
+    supportsRangedManagedInterfaceState = [self supportsRangeManagedInterfaceState];
+    hasDirtyLayout = [self _hasDirtyLayout];
+    hasSupernode = (self.supernode != nil);
+  }
+  
   // Normally measure will be called before layout occurs. If this doesn't happen, nothing is going to call it at all.
   // We simply call measureWithSizeRange: using a size range equal to whatever bounds were provided to that element
-  if (self.supernode == nil && !self.supportsRangeManagedInterfaceState && [self _hasDirtyLayout]) {
+  if (!hasSupernode && !supportsRangedManagedInterfaceState && hasDirtyLayout) {
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
@@ -2744,7 +2749,7 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   return _flags.shouldAnimateSizeChanges;
 }
 
--(void)setShouldAnimateSizeChanges:(BOOL)shouldAnimateSizeChanges
+- (void)setShouldAnimateSizeChanges:(BOOL)shouldAnimateSizeChanges
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
@@ -2766,7 +2771,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   }
 }
 
--(NSInteger)drawingPriority
+- (NSInteger)drawingPriority
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);

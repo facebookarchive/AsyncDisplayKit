@@ -165,8 +165,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     return;
   }
   
-  // Layout node on whatever thread we are on. We handle the trampoline to the main thread in case the node is
-  // already loaded
+  // Layout nodes based on the given context constrained size
   for (NSUInteger k = range.location; k < NSMaxRange(range); k++) {
     ASCellNode *node = nodes[k];
     ASIndexedNodeContext *context = contexts[k];
