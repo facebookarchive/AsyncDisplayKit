@@ -12,9 +12,7 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
-/**
- A dimension relative to constraints to be provided in the future.
- */
+/** A dimension relative to constraints to be provided in the future. */
 typedef NS_ENUM(NSInteger, ASRelativeDimensionType) {
   /** Just a number. It will always resolve to exactly this amount. This is the default type. */
   ASRelativeDimensionTypePoints,
@@ -40,7 +38,7 @@ extern ASRelativeDimension const ASRelativeDimensionUnconstrained;
 ASDISPLAYNODE_EXTERN_C_BEGIN
 NS_ASSUME_NONNULL_BEGIN
 
-#pragma mark ASRelativeDimension
+#pragma mark - ASRelativeDimension
 
 extern ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value);
 
@@ -56,8 +54,7 @@ extern NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension);
 
 extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat parent);
 
-#pragma mark -
-#pragma mark ASSizeRange
+#pragma mark - ASSizeRange
 
 extern ASSizeRange ASSizeRangeMake(CGSize min, CGSize max);
 
@@ -68,8 +65,8 @@ extern ASSizeRange ASSizeRangeMakeExactSize(CGSize size);
 extern CGSize ASSizeRangeClamp(ASSizeRange sizeRange, CGSize size);
 
 /**
- Intersects another size range. If the other size range does not overlap in either dimension, this size range
- "wins" by returning a single point within its own range that is closest to the non-overlapping range.
+ * Intersects another size range. If the other size range does not overlap in either dimension, this size range
+ * "wins" by returning a single point within its own range that is closest to the non-overlapping range.
  */
 extern ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange otherSizeRange);
 
