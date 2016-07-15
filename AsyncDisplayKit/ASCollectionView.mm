@@ -100,7 +100,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
   BOOL _performingBatchUpdates;
-  BOOL _superPerformingBatchUpdates;
+  NSUInteger _superBatchUpdateCount;
   NSMutableArray *_batchUpdateBlocks;
 
   BOOL _isDeallocating;
@@ -487,11 +487,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)_superPerformBatchUpdates:(void(^)())updates completion:(void(^)(BOOL finished))completion
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(_superPerformingBatchUpdates == NO, @"Nested batch updates being sent to UICollectionView. This is not expected.");
   
-  _superPerformingBatchUpdates = YES;
+  _superBatchUpdateCount++;
   [super performBatchUpdates:updates completion:completion];
-  _superPerformingBatchUpdates = NO;
+  _superBatchUpdateCount--;
 }
 
 #pragma mark Assertions.
@@ -823,6 +822,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
       } completion:nil];
       // We need to ensure the size requery is done before we update our layout.
       [self waitUntilAllUpdatesAreCommitted];
+      [self.collectionViewLayout invalidateLayout];
     }
   }
   
@@ -831,7 +831,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _nextLayoutInvalidationStyle = ASCollectionViewInvalidationStyleNone;
   switch (invalidationStyle) {
     case ASCollectionViewInvalidationStyleWithAnimation:
-      if (!_superPerformingBatchUpdates) {
+      if (0 == _superBatchUpdateCount) {
         [self _superPerformBatchUpdates:^{ } completion:nil];
       }
       break;

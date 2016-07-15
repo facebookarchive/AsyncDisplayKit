@@ -153,7 +153,6 @@ ASDISPLAYNODE_EXTERN_C_END
       for (NSArray *sectionArray in completedNodes) {\
         for (ASCellNode *cellNode in sectionArray) {\
           ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
-          [cellNode setNeedsLayout];\
         }\
       }\
     });\
